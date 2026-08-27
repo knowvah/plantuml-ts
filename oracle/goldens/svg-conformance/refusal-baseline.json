@@ -9159,10 +9159,10 @@
       "slug": "kokebo-27-vafi688",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "description",
+      "engine": "class",
       "status": "ok",
-      "measuredAt": "2026-08-24",
-      "measuredAgainstCommit": "1aec6731"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12854,12 +12854,11 @@
       "type": "sequence",
       "slug": "bomino-39-tipo216",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "state",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 1: `<style src=strictuml.skin>`. Unported: CommonCommands' <style> block (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14329,12 +14328,11 @@
       "type": "sequence",
       "slug": "dolice-60-copi767",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "state",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.google.fr]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15078,12 +15076,11 @@
       "type": "sequence",
       "slug": "fojomu-60-cuda302",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "state",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 3: `{start} [-> Bob : start doing things during duration`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15123,12 +15120,11 @@
       "type": "sequence",
       "slug": "fonudu-70-coma124",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "state",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 2: `author: foo`. Unported: ReadLineWithYamlHeader -- the `---` YAML front-matter block, stripped in the PREPROCESSOR before any command runs (ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16357,11 +16353,11 @@
       "slug": "jiliba-03-lapi286",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "sequence",
+      "engine": "class",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 1: `IT++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 2: `IT++`. Unported: CommandActivate2, the bare `NAME++` / `NAME--` life-line shorthand (CommandActivate2.java:29-37; SequenceDiagramFactory.java:128). NOT a CommandArrow gap: CommandArrow's ACTIVATION group needs an arrow, and this line has none."
     },
     {
       "tree": "dot-cache",
@@ -16613,9 +16609,9 @@
       "weErrored": true,
       "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 4: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 5: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154)."
     },
     {
       "tree": "dot-cache",
@@ -17524,12 +17520,11 @@
       "type": "sequence",
       "slug": "ladiro-50-gume805",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 4: `Note`. Unported: FactorySequenceNoteCommand's multiline form with UrlBuilder.OPTIONAL on the OPENER -- `note left of Alice [[url]]` (FactorySequenceNoteCommand.java:78-85; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17779,11 +17774,11 @@
       "slug": "licole-34-vejo527",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "sequence",
+      "engine": "class",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 4: `+ XXX`. Unported: the `%newline()` preprocessor builtin (tim/builtin/Newline.java:51) -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- preprocessed line 4: ` + XXX`. NOT an unported command and NOT an unported `%newline()` (Newline.ts:31 ports it). Measured mechanism: `%newline()` written INSIDE a TIM double-quoted literal (`!$mixed0 = \"XXX + %newline() + XXX\"`) yields a real U+000A, where the same call outside a literal (`\"XXX\" + %newline() + \"XXX\"`) correctly yields the U+E100 sentinel. applyFunctionsAndVariablesInternal then splits the substituted message on \\n (TContext.ts:362, mirroring tim/TContext.java:512-517 whose gate Pragma.legacyReplaceBackslashNByNewline() is hardcoded true, skin/Pragma.java:95-97), so the label becomes two source lines and the continuation matches no Command. Upstream never splits because Newline#executeReturnFunction returns the sentinel in BOTH positions (tim/builtin/Newline.java:63-67 under JawsFlags.java:40)."
     },
     {
       "tree": "dot-cache",
@@ -18002,9 +17997,9 @@
       "weErrored": true,
       "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 9: `/ note right of Alice: NOTE2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 22: `& return Hello44`. Unported: CommandReturn's PARALLEL group `(&[%s]*)?` (CommandReturn.java:68; SequenceDiagramFactory.java:129). The `/ note` VMERGE form its previous pin named now parses (line 10 is accepted)."
     },
     {
       "tree": "dot-cache",
@@ -19400,9 +19395,9 @@
       "weErrored": true,
       "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 6: `  a note with a link`, the BODY of the multi-line opener `note left [[http://plantuml.com/start]]` on line 5. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). The `[[url]]` on the ARROW at line 4 now parses."
     },
     {
       "tree": "dot-cache",
@@ -19533,9 +19528,9 @@
       "weErrored": true,
       "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 4: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 10: `{start} <-> {end} : This is not plotted`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not."
     },
     {
       "tree": "dot-cache",
@@ -20612,9 +20607,9 @@
       "weErrored": true,
       "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 1: `-> A`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted)."
     },
     {
       "tree": "dot-cache",
@@ -21787,12 +21782,11 @@
       "type": "sequence",
       "slug": "soxata-16-kafi688",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 1: `skinParam CaptionFontSize 10`. Unported: CommonCommands' skinparam single-line form (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22163,11 +22157,11 @@
       "slug": "tegasu-93-fima016",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "sequence",
+      "engine": "class",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 2: `hide << new >> stereotype`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 3: `hide << new >> stereotype`. Unported: the GENDER group of CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java:72-83, the `\\<\\<.*\\>\\>` alternative at :76), registered by CommonCommands.addCommonHides (CommonCommands.java:106). This port's hideStereotypeCommand is `^hide\\s+stereotype\\s*$` (command-common.ts:71). NOT a CommandArrow STEREOTYPE gap."
     },
     {
       "tree": "dot-cache",
@@ -23341,11 +23335,11 @@
       "slug": "vubato-50-gebu534",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "sequence",
+      "engine": "class",
       "status": "known-gap",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "5c3cbd31",
-      "reason": "line 2: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Batch 4/T13 residual: the command is named and cited, so this is D7's bar for an excused refusal, not a count-lowering re-pin."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 3: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). The exo arrows on lines 4 and 11 now parse."
     },
     {
       "tree": "dot-cache",
@@ -24771,12 +24765,11 @@
       "type": "sequence",
       "slug": "zoturo-25-jima978",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "sequence",
-      "status": "known-gap",
+      "weErrored": false,
+      "engine": "state",
+      "status": "ok",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "refuses to parse -- line 3: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",

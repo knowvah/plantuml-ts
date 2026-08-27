@@ -8329,10 +8329,10 @@
       "type": "component",
       "slug": "kokebo-27-vafi688",
       "jarType": "CLASS",
-      "ourType": "DESCRIPTION",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "0315454c"
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11282,8 +11282,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `[o-> Alice: OK2`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11323,8 +11322,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `/ note over Bob : initial sdkfljsdfl sdf sdmf`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11524,8 +11522,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `[-> B : label1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11565,8 +11562,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11576,8 +11572,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `H1 -> C1 & C2 : Blabla`, so STATE claimed it instead. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11607,8 +11602,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 11: `note over Alice #yellow/blue`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11678,8 +11672,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `autonumber inc`, so nothing claimed it — every engine refused. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11698,9 +11691,9 @@
       "jarType": "SEQUENCE",
       "ourType": "STATE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `<style src=strictuml.skin>`, so STATE claimed it instead. Unported: CommonCommands' <style> block (CommonCommands.java:58) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so STATE claimed it instead. refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -11720,8 +11713,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `autonumber inc B`, so nothing claimed it — every engine refused. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11771,8 +11763,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `hide empty description`, so nothing claimed it — every engine refused. Unported: a `hide` variant beyond CommandHideUnlinked (SequenceDiagramFactory.java:101) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11792,8 +11783,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `Alice x->] : hop2`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11913,8 +11903,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 12: `hnote left Alice: hnote\\n left \\n Alice`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11924,8 +11913,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Alice -> \"Castor doo()\" as Castor : hello`, so STATE claimed it instead. Unported: CommandArrow's PART1LONGCODE / PART1CODELONG -- declaring a participant inline in the arrow that first names it (CommandArrow.java:95-96,121-122) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11945,8 +11933,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `/ note over P1 : note 2`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -11996,8 +11983,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `& opt`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12047,8 +12033,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 14: `?->o main`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12058,8 +12043,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 12: `hnote left Alice: hnote\\n left \\n Alice`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12079,8 +12063,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `& opt`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12220,8 +12203,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `A ->(40) B++: text 1`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12411,8 +12393,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `& opt`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12422,8 +12403,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `/ note over A: A2 this line throws an error`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12463,8 +12443,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `bill -> bob ++ #005500 : hello from thread 2`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12614,8 +12593,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12635,8 +12613,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 17: `& loop forever`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12646,8 +12623,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[/-o b : \"\"   [/-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12677,8 +12653,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 7: `note <<red>> left`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12718,8 +12693,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> SbcMXdCtrl: startThread`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -12899,8 +12873,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice ->]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13010,8 +12983,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o<-o b : \"\" [o<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13041,8 +13013,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 11: `......`, so nothing claimed it — every engine refused. Unported: CommandDelay -- the `...` / `…` delay row (SequenceDiagramFactory.java:152) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13061,9 +13032,9 @@
       "jarType": "SEQUENCE",
       "ourType": "STATE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice -> Bob [[http://www.google.fr]] : ok`, so STATE claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so STATE claimed it instead. refuses to parse -- source line 8: `  test`, the BODY of the multi-line opener `note left [[http://www.google.es]]` on line 7. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). This port registers only the single-line form (:132) and it carries no UrlBuilder.OPTIONAL, so the opener never matches and its body is orphaned. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -13073,8 +13044,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[\\\\-o b : \"\"  [\\\\-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13104,8 +13074,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `deactivate`, so nothing claimed it — every engine refused. Unported: CommandDeactivateShort -- bare `deactivate` with no participant (SequenceDiagramFactory.java:103) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13225,8 +13194,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[x<- b : \"\"  [x<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13236,8 +13204,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 33: `note over A, C#tomato: A upload le fichier telque decrit sur le lien ci-dessus : Upload_successfull\\nA recupere les infos à envoyer a B, C`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13297,8 +13264,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13348,8 +13314,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice -> Bob [[http://www.yahoo.com{Jason: {\"firstName\":\"Bob\", \"lastName\":\"Smith\"}}]] : hello`, so CLASS claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13529,8 +13494,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `A ->(1) B: text 1`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13749,9 +13713,9 @@
       "jarType": "SEQUENCE",
       "ourType": "STATE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `{start} [-> Bob : start doing things during duration`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so STATE claimed it instead. refuses to parse -- source line 9: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor, the anchor-to-anchor duration link (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The exo arrows on lines 4 and 7 now parse; only the anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -13761,8 +13725,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2, so nothing claimed it — every engine refused. Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13782,8 +13745,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `Alice x->] : hop2`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13792,9 +13754,9 @@
       "jarType": "SEQUENCE",
       "ourType": "STATE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `---`, so STATE claimed it instead. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so STATE claimed it instead. refuses to parse -- source line 2: `---`. Unported: ReadLineWithYamlHeader's `---` front-matter block, stripped in the PREPROCESSOR before any command runs (preproc/ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -13814,8 +13776,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `||0||`, so nothing claimed it — every engine refused. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -13995,8 +13956,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 13: `user -[#navy]-> som: Selects a \\nkitchen drawing\\nfor import`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14106,8 +14066,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `[o<-x b : \"\" [o<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14197,8 +14156,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice -> Bob [[http://www.yahoo.com{{\"Jason\": {\"firstName\":\"Bob\", \"lastName\":\"Smith\"},\\n \"Carl\": {\"firstName\":\"Alice\", \"lastName\":\"Brown\"}}}]] : Hello`, so CLASS claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14408,8 +14366,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<-> b : \"\"  [<->\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14429,8 +14386,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Bob -> Alice [[http://www.google.com]] : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14470,8 +14426,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice \\\\-: \"\\\\\\\\-\" Should be down1`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14541,8 +14496,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob --_> Alice : hi`, so CLASS claimed it instead. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14642,8 +14596,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `[o<-x Alice : hop`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14733,8 +14686,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `A ->(10) B: text 10`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14754,8 +14706,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `deactivate \"actor 1\"`, so nothing claimed it — every engine refused. Unported: CommandActivate's WHO group `([%pLN_.@]+|[%g][^%g]+[%g])` -- its QUOTED alternative, for a participant name containing a space (CommandActivate.java:65) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14835,8 +14786,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o<- b : \"\"  [o<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -14925,9 +14875,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `IT++`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 2: `IT++`. Unported: CommandActivate2, the bare `NAME++` / `NAME--` life-line shorthand (CommandActivate2.java:29-37; SequenceDiagramFactory.java:128). NOT a CommandArrow gap: CommandArrow's ACTIVATION group needs an arrow, and this line has none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -14947,8 +14897,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[\\- b : \"\"   [\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15068,8 +15017,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `[o-> Alice: OK2`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15099,8 +15047,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `=MyTitle`, so nothing claimed it — every engine refused. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15159,9 +15106,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `url of APP is [[http://tomcat.apache.org/]]`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 5: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -15241,8 +15188,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<-o b : \"\"   [<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15272,8 +15218,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o/- b : \"\"  [o/-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15323,8 +15268,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 21: `a o/-    a`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15404,8 +15348,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[x<->x b : \"\"[x<->x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15435,8 +15378,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 7: `/ note over B: \"State: Initial\"`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15566,8 +15508,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[\\\\- b : \"\"  [\\\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15747,8 +15688,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `& opt`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15758,8 +15698,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[\\-o b : \"\"   [\\-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15849,8 +15788,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o<<- b : \"\" [o<<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15870,8 +15808,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 11: `Bob -> Alice ++ #blue : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15881,8 +15818,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 20: `b o/-    b : \"\"o/-\"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15952,8 +15888,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `[->Alice : external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -15983,8 +15918,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16003,9 +15937,9 @@
       "jarType": "SEQUENCE",
       "ourType": "CLASS",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Note`, so CLASS claimed it instead. Unported: FactorySequenceNoteCommand's multiline form with UrlBuilder.OPTIONAL on the OPENER -- `note left of Alice [[url]]` (FactorySequenceNoteCommand.java:78-85; SequenceDiagramFactory.java:134) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so CLASS claimed it instead. refuses to parse -- source line 5: `  Note`, the BODY of the multi-line opener `note left of Alice [[http://www.google.fr]]` on line 4. Unported: the UrlBuilder.OPTIONAL tail of factorySequenceNoteCommand.createMultiLine (FactorySequenceNoteCommand.java:76-90, the OPTIONAL at :89; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -16015,8 +15949,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `=MyTitle`, so nothing claimed it — every engine refused. Unported: CommandParticipantMultilines -- the `participant X [ ... ]` block form, whose body is creole (here a `=heading`) (SequenceDiagramFactory.java:110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16106,8 +16039,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16127,8 +16059,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16138,8 +16069,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 10: `& opt message received`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16189,8 +16119,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `A ->(60) B: text 10`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16200,8 +16129,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `}}`, so nothing claimed it — every engine refused. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16240,9 +16168,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `+ XXX`, so nothing claimed it — every engine refused. Unported: the `%newline()` preprocessor builtin (tim/builtin/Newline.java:51) -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- preprocessed line 4: ` + XXX`. NOT an unported command and NOT an unported `%newline()` (Newline.ts:31 ports it). Measured mechanism: `%newline()` written INSIDE a TIM double-quoted literal (`!$mixed0 = \"XXX + %newline() + XXX\"`) yields a real U+000A, where the same call outside a literal (`\"XXX\" + %newline() + \"XXX\"`) correctly yields the U+E100 sentinel. applyFunctionsAndVariablesInternal then splits the substituted message on \\n (TContext.ts:362, mirroring tim/TContext.java:512-517 whose gate Pragma.legacyReplaceBackslashNByNewline() is hardcoded true, skin/Pragma.java:95-97), so the label becomes two source lines and the continuation matches no Command. Upstream never splits because Newline#executeReturnFunction returns the sentinel in BOTH positions (tim/builtin/Newline.java:63-67 under JawsFlags.java:40). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -16252,8 +16180,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `-\\ Bob`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16283,8 +16210,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `sprite $mySprite data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII=`, so nothing claimed it — every engine refused. Unported: CommonCommands' CommandCreoleSprite / inline sprite data (CommonCommands.java:58) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16304,8 +16230,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `autonumber stop`, so nothing claimed it — every engine refused. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16315,8 +16240,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `A ->] : this goes to the very right of the diagram`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16326,8 +16250,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `[o-> B : This text extends the arrow length\\nright edge arrow`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16357,8 +16280,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `…`, so nothing claimed it — every engine refused. Unported: CommandDelay -- the `...` / `…` delay row (SequenceDiagramFactory.java:152) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16388,8 +16310,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 9: `?o-> B : Pre`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16448,9 +16369,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 9: `/ note right of Alice: NOTE2`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 22: `& return Hello44`. Unported: CommandReturn's PARALLEL group `(&[%s]*)?` (CommandReturn.java:68; SequenceDiagramFactory.java:129). The `/ note` VMERGE form its previous pin named now parses (line 10 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -16470,8 +16391,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o\\\\- b : \"\" [o\\\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16521,8 +16441,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `?o-> B : word`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16602,8 +16521,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `?o->Alice : \"[o->\" external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16643,8 +16561,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `[-> SerialManager: purgeRx()`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16654,8 +16571,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Alice -> Bob [[http://www.google.com]] : ok`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16745,8 +16661,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `A <[#red]-o? ++`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16796,8 +16711,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 12: `hnote left Alice: hnote\\n left \\n Alice`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's STYLE group `(note|hnote|rnote)` -- only `note` is ported (FactorySequenceNoteCommand.java:81,98) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16827,8 +16741,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16878,8 +16791,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 12: `}}`, so nothing claimed it — every engine refused. Unported: EmbeddedDiagram's `{{` / `}}` block -- a nested diagram inside a note body (EmbeddedDiagram.java:77-78); unconsumed, its inner `end note` closes the OUTER note and the `}}` is left dangling Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -16949,8 +16861,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob -> Alice ++ #blue : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17050,8 +16961,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `note right FMSSrv: Not decided how to send no data.`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17061,8 +16971,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[//- b : \"\"  [//-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17082,8 +16991,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `autonumber stop`, so nothing claimed it — every engine refused. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17143,8 +17051,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `foo ->o]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17184,8 +17091,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o//- b : \"\" [o//-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17215,8 +17121,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `note over A #green;line:lightblue : text1`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17256,8 +17161,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `/ note over Alice: //italics//`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17327,8 +17231,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 26: `[-> ssl_server.exe : browser list arg = {b1, b2, ...}`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17338,8 +17241,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[/- b : \"\"   [/-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17499,8 +17401,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o\\- b : \"\"  [o\\-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17550,8 +17451,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob <-] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17651,8 +17551,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 7: `/ note over b: b`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17741,9 +17640,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 6: `  a note with a link`, the BODY of the multi-line opener `note left [[http://plantuml.com/start]]` on line 5. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). The `[[url]]` on the ARROW at line 4 now parses. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -17783,8 +17682,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `& note right of David : Should be same level as \"1\"`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17794,8 +17692,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<<- b : \"\"  [<<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17825,8 +17722,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `{start} Alice -> Bob : start`, so STATE claimed it instead. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17846,8 +17742,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice -> Bob [[http://www.yahoo.com {this\\nthat}]] : hello`, so CLASS claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -17866,9 +17761,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `{start} Alice -> Bob : start doing things during duration`, so nothing claimed it — every engine refused. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 10: `{start} <-> {end} : This is not plotted`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -17908,8 +17803,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `bill -> bob #005500 : hello from thread 2`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18029,8 +17923,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<<-o b : \"\"  [<<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18040,8 +17933,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `Charlie -> Alice & Bob & Dave : Alice & Bob & Dave`, so nothing claimed it — every engine refused. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18071,8 +17963,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `[<--1: SomeOutgoingOperation`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18282,8 +18173,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `note right FMSSrv: Not decided how to send no data.`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18363,8 +18253,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `Alice -> Bob & Dave: Bob & Dave`, so nothing claimed it — every engine refused. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18424,8 +18313,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `A ->]: ok`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18465,8 +18353,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Bob ->] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18496,8 +18383,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 19: `/ note left of user1`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18677,8 +18563,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `Alice -> Bob & Dave & Charlie : Bob & Dave & Charlie`, so nothing claimed it — every engine refused. Unported: CommandArrow's MULTICAST group `((?:\\s&\\s[%pLN_.@]+)*)` -- one message to several targets (CommandArrow.java:123) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -18857,9 +18742,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `-> A`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -18939,8 +18824,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Node: Start TC`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19040,8 +18924,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19191,8 +19074,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 7: `[->Alice : external event`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19262,8 +19144,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `&opt test`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19273,8 +19154,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Bob -> Alice[[{test data test data test data test data  \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data \\ntest data test data test data test data}]] : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19364,8 +19244,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 7: `note left <<red>>`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19415,8 +19294,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `B -->? : log`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19436,8 +19314,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `autonumber inc B`, so nothing claimed it — every engine refused. Unported: CommandAutonumberIncrement, whose `([A-Za-z])` names the digit group to bump (CommandAutonumberIncrement.java; SequenceDiagramFactory.java:149) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19467,8 +19344,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob ->] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19558,8 +19434,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `note right A #palegreen: a link (without tooltip and label) works for all the ref area`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19609,8 +19484,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `foo o->o]`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19630,8 +19504,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19661,8 +19534,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 22: `a -\\o    b : \"\"-\\o  \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19672,8 +19544,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 28: `a -\\o    b : \"\"-\\o  \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19693,8 +19564,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Bob -> Alice [[http://www.google.com foo]]`, so CLASS claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19734,8 +19604,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> A: DoWork`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19775,8 +19644,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `a ->(50)     b : \"\"->   \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19876,8 +19744,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Alice <[#green]- Bob: Positive Response`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -19946,9 +19813,9 @@
       "jarType": "SEQUENCE",
       "ourType": "CLASS",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `skinParam CaptionFontSize 10`, so CLASS claimed it instead. Unported: CommonCommands' skinparam single-line form (CommonCommands.java:58) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so CLASS claimed it instead. refuses to parse -- source line 2: `skinParam CaptionFontSize 10`. The preprocessor strip RE_SKINPARAM_LINE (preprocessor.ts:107) has no `i` flag, so the camel-case spelling survives to the command list, where this port registers only skinParamMessageAlignCommand. Upstream matches every skinparam name in any case: CommandSkinParam is a SingleLineCommand2 (command/CommandSkinParam.java:57-63; CommonCommands.java:66). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -19998,8 +19865,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 9: `Bob o\\\\-- Alice ++:`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20288,9 +20154,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `hide << new >> stereotype`, so nothing claimed it — every engine refused. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 3: `hide << new >> stereotype`. Unported: the GENDER group of CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java:72-83, the `\\<\\<.*\\>\\>` alternative at :76), registered by CommonCommands.addCommonHides (CommonCommands.java:106). This port's hideStereotypeCommand is `^hide\\s+stereotype\\s*$` (command-common.ts:71). NOT a CommandArrow STEREOTYPE gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -20320,8 +20186,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `||0||`, so nothing claimed it — every engine refused. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20331,8 +20196,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 9: `& note right of Ken: txt`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20372,8 +20236,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `b -> a --++ #red : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20383,8 +20246,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `& note right of Alice: ok`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARALLEL group `(&[%s]*)?` (FactorySequenceNoteCommand.java:78,95) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20414,8 +20276,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `A <[#red]-o? ++`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20435,8 +20296,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `alice -> bob <<a>> : red`, so nothing claimed it — every engine refused. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20466,8 +20326,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 17: `[<- d: Msg`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20477,8 +20336,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o<->o b : \"\"[o<->o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20508,8 +20366,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `[-> A ++ #ff0000 : No lifeline color with\\n<b>!pragma teoz true</b>`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20589,8 +20446,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `note <<myStyle>> left`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's StereotypePattern -- `note <<stereo>> left` (FactorySequenceNoteCommand.java:81-83) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20640,8 +20496,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5, so nothing claimed it — every engine refused. Unported: CommandActivate calls getOrCreateParticipant, so a bare `activate X` DECLARES X (CommandActivate.java:109); this port requires a prior participant and refuses the whole diagram as having none Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20681,8 +20536,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `-> R : messageX`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20702,8 +20556,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 11: `a <-X    a : \"\"<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING `[ox]` -- matched CASE-INSENSITIVELY, because every command regex is compiled with Pattern.CASE_INSENSITIVE (Pattern2.java:114), so `<-X` is the same arrow as `<-x` (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20823,8 +20676,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 16: `[-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20904,8 +20756,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `& opt`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20915,8 +20766,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `====`, so nothing claimed it — every engine refused. Unported: CommandDivider `==(.*)==`, which accepts an EMPTY label (CommandDivider.java:57-62) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -20986,8 +20836,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `a <->(50)    b : \"\"<->  \"\"`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING inclination `\\(\\d+\\)` -- the slanted-arrow form (CommandArrow.java:101,113) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21047,8 +20896,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Bob ->] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21178,8 +21026,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<-x b : \"\"  [<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21229,8 +21076,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> P1 : F`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21270,8 +21116,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `note left \"Long Alice\" : hello`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21321,8 +21166,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `Model <[hidden]- Management : Provides possible funding scenarios`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_STYLE1/2 `(?:\\[(LINE_STYLE)\\])?` -- the inline `-[#color]->` / `<[hidden]-` run (CommandArrow.java:85,105,110) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21381,9 +21225,9 @@
       "jarType": "SEQUENCE",
       "ourType": "NONE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `url of RepoxServer is [[http://www.google.com]]`, so nothing claimed it — every engine refused. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 3: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). The exo arrows on lines 4 and 11 now parse. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -21413,8 +21257,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `note right FMSSrv: Not decided how to send no data.`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21464,8 +21307,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `note right FMSSrv: <b>Not</b> decided how to send no data.`, so nothing claimed it — every engine refused. Unported: FactorySequenceNoteCommand's PARTICIPANT group `(?:of[%s]+)?(...)`, whose `of` is OPTIONAL, and its trailing color/stereotype run (FactorySequenceNoteCommand.java:83-85,102) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21545,8 +21387,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `[-> Bob : message1`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21596,8 +21437,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[//-o b : \"\"  [//-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21847,8 +21687,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<-o b : \"\"  [<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -21968,8 +21807,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 5: `A ->]: error`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22019,8 +21857,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[x<-o b : \"\"  [x<-o\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22070,8 +21907,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 6: `||50||`, so nothing claimed it — every engine refused. Unported: CommandHSpace `\\|\\|(\\d+)?\\|+` -- explicit vertical spacing (CommandHSpace.java; SequenceDiagramFactory.java:143) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22091,8 +21927,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob <-] : message1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22182,8 +22017,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `Bob X-- Tom : hello`, so DESCRIPTION claimed it instead. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22273,8 +22107,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `Bob ->] : message1`, so STATE claimed it instead. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22414,8 +22247,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 2: `[-> Bob`, so STATE claimed it instead. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22455,8 +22287,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 1: `Alice -> Bob [[http://www.yahoo.com{{\"Jason\": {\"firstName\":\"Bob\", \"lastName\":\"Smith\", [foo] },\\n \"Carl\": {\"firstName\":\"Alice\", \"lastName\":\"Brown\"}}}]] : Hello`, so STATE claimed it instead. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22556,8 +22387,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 9: `autonumber stop`, so nothing claimed it — every engine refused. Unported: CommandAutonumberStop (SequenceDiagramFactory.java:147) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22597,8 +22427,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 13: `& loop 1 to n`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22608,8 +22437,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[o<-x b : \"\" [o<-x\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22639,8 +22467,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `?o-> B : Pre`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22690,8 +22517,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `[<- b : \"\"   [<-\"\"`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22700,9 +22526,9 @@
       "jarType": "SEQUENCE",
       "ourType": "STATE",
       "status": "known-misroute",
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "27a6d3ad",
-      "reason": "the SEQUENCE engine refuses this source at line 3: `{start} Alice -> Bob : start doing things during duration`, so STATE claimed it instead. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "the SEQUENCE engine refuses this source, so STATE claimed it instead. refuses to parse -- source line 10: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "tree": "dot-cache",
@@ -22742,8 +22568,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 33: `[o-> System : control.start()`, so nothing claimed it — every engine refused. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22763,8 +22588,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "15acd5d9",
-      "reason": "the SEQUENCE engine refuses this source at line 8: `A->? : M1`, so nothing claimed it — every engine refused. Unported: CommandExoArrowRight -- an arrow whose TARGET is off-diagram, its ARROW_SUPPCIRCLE2 suffix (CommandExoArrowRight.java:75) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22844,8 +22668,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 10: `& opt message received`, so nothing claimed it — every engine refused. Unported: CommandGrouping's PARALLEL group `(&[%s]*)?` -- the teoz `&` prefix that runs a group on the same row as the previous message (CommandGrouping.java:66) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",
@@ -22875,8 +22698,7 @@
       "ourType": "SEQUENCE",
       "status": "agree",
       "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "86459c3f",
-      "reason": "the SEQUENCE engine refuses this source at line 4: `Alice -\\o Bob : hello`, so nothing claimed it — every engine refused. Unported: CommandArrow's ARROW_DRESSING1/2 -- the `o`/`x` circle-and-cross heads and the `/` `\\` half-heads (CommandArrow.java:99-116) Not a routing defect in itself: registration order is upstream's own (PSystemBuilder: Sequence, Class, Activity, Description, State), and the jar's sequence factory parses this line. Closing the command gap closes this entry."
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "tree": "dot-cache",

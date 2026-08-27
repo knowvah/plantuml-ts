@@ -88,9 +88,8 @@
       "status": "baseline",
       "weightedScore": 681,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -467,9 +466,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 1: `<style src=strictuml.skin>`. Unported: CommonCommands' <style> block (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -522,9 +521,8 @@
       "status": "baseline",
       "weightedScore": 443,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -829,9 +827,8 @@
       "status": "baseline",
       "weightedScore": 384,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -1010,9 +1007,8 @@
       "status": "baseline",
       "weightedScore": 559,
       "diffCount": 74,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -1038,9 +1034,8 @@
       "status": "baseline",
       "weightedScore": 356,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -1678,9 +1673,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 1: `Alice -> Bob [[http://www.google.fr]] : ok`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 8: `  test`, the BODY of the multi-line opener `note left [[http://www.google.es]]` on line 7. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). This port registers only the single-line form (:132) and it carries no UrlBuilder.OPTIONAL, so the opener never matches and its body is orphaned. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -1751,9 +1746,8 @@
       "status": "baseline",
       "weightedScore": 206,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -1806,9 +1800,8 @@
       "status": "baseline",
       "weightedScore": 318,
       "diffCount": 82,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -1951,9 +1944,8 @@
       "status": "baseline",
       "weightedScore": 493,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -2258,9 +2250,8 @@
       "status": "baseline",
       "weightedScore": 307,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -2295,9 +2286,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 3: `{start} [-> Bob : start doing things during duration`. Unported: CommandExoArrowLeft -- an arrow whose SOURCE is off-diagram, the ARROW_SUPPCIRCLE2 `([?\\[\\]][ox]?)?` prefix (CommandExoArrowLeft.java:60). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 9: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor, the anchor-to-anchor duration link (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The exo arrows on lines 4 and 7 now parse; only the anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2332,9 +2323,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 2: `author: foo`. Unported: ReadLineWithYamlHeader -- the `---` YAML front-matter block, stripped in the PREPROCESSOR before any command runs (ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 2: `---`. Unported: ReadLineWithYamlHeader's `---` front-matter block, stripped in the PREPROCESSOR before any command runs (preproc/ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -2594,9 +2585,8 @@
       "status": "baseline",
       "weightedScore": 307,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -2757,9 +2747,8 @@
       "status": "baseline",
       "weightedScore": 345,
       "diffCount": 7,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -3073,9 +3062,8 @@
       "status": "baseline",
       "weightedScore": 532,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -3281,9 +3269,8 @@
       "status": "baseline",
       "weightedScore": 467,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -3327,9 +3314,8 @@
       "status": "baseline",
       "weightedScore": 767,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -3346,9 +3332,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 1: `IT++`. Unported: CommandArrow's ACTIVATION `(\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--)?` and LIFECOLOR `(#\\w+)?` groups (CommandArrow.java:126,128). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 2: `IT++`. Unported: CommandActivate2, the bare `NAME++` / `NAME--` life-line shorthand (CommandActivate2.java:29-37; SequenceDiagramFactory.java:128). NOT a CommandArrow gap: CommandArrow's ACTIVATION group needs an arrow, and this line has none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3554,9 +3540,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 4: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 5: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -3825,9 +3811,8 @@
       "status": "baseline",
       "weightedScore": 352,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -3835,9 +3820,8 @@
       "status": "baseline",
       "weightedScore": 387,
       "diffCount": 46,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -4304,9 +4288,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 4: `Note`. Unported: FactorySequenceNoteCommand's multiline form with UrlBuilder.OPTIONAL on the OPENER -- `note left of Alice [[url]]` (FactorySequenceNoteCommand.java:78-85; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 5: `  Note`, the BODY of the multi-line opener `note left of Alice [[http://www.google.fr]]` on line 4. Unported: the UrlBuilder.OPTIONAL tail of factorySequenceNoteCommand.createMultiLine (FactorySequenceNoteCommand.java:76-90, the OPTIONAL at :89; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4512,9 +4496,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 4: `+ XXX`. Unported: the `%newline()` preprocessor builtin -- its expansion splits the message into lines this port then cannot parse. A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- preprocessed line 4: ` + XXX`. NOT an unported command and NOT an unported `%newline()` (Newline.ts:31 ports it). Measured mechanism: `%newline()` written INSIDE a TIM double-quoted literal (`!$mixed0 = \"XXX + %newline() + XXX\"`) yields a real U+000A, where the same call outside a literal (`\"XXX\" + %newline() + \"XXX\"`) correctly yields the U+E100 sentinel. applyFunctionsAndVariablesInternal then splits the substituted message on \\n (TContext.ts:362, mirroring tim/TContext.java:512-517 whose gate Pragma.legacyReplaceBackslashNByNewline() is hardcoded true, skin/Pragma.java:95-97), so the label becomes two source lines and the continuation matches no Command. Upstream never splits because Newline#executeReturnFunction returns the sentinel in BOTH positions (tim/builtin/Newline.java:63-67 under JawsFlags.java:40). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -4594,9 +4578,8 @@
       "status": "baseline",
       "weightedScore": 791,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -4694,9 +4677,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 9: `/ note right of Alice: NOTE2`. Unported: FactorySequenceNoteCommand's VMERGE group `(/)?` -- the `/` that merges a note vertically with the one above (FactorySequenceNoteCommand.java:79,96). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 22: `& return Hello44`. Unported: CommandReturn's PARALLEL group `(&[%s]*)?` (CommandReturn.java:68; SequenceDiagramFactory.java:129). The `/ note` VMERGE form its previous pin named now parses (line 10 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5145,9 +5128,8 @@
       "status": "baseline",
       "weightedScore": 446,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "promoted from status \"error\" by T20 defect 5: the ACTIVATION group (\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--) now applies on the left/decorated arrow path too, as upstream has ONE CommandArrow for both directions (CommandArrow.java:126,443-456). This line no longer refuses; first measurement pinned here."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -5299,9 +5281,8 @@
       "status": "baseline",
       "weightedScore": 536,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -5543,9 +5524,8 @@
       "status": "baseline",
       "weightedScore": 198,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 8/13 -> 12/13 (closer) while weightedScore rose 171 -> 198; see $comment"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -5823,9 +5803,8 @@
       "status": "baseline",
       "weightedScore": 350,
       "diffCount": 52,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "promoted from status \"error\" by T20 defect 5: the ACTIVATION group (\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--) now applies on the left/decorated arrow path too, as upstream has ONE CommandArrow for both directions (CommandArrow.java:126,443-456). This line no longer refuses; first measurement pinned here."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -5842,9 +5821,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 3: `Bob -> Alice [[http://plantuml.com/start]] : hello`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 6: `  a note with a link`, the BODY of the multi-line opener `note left [[http://plantuml.com/start]]` on line 5. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). The `[[url]]` on the ARROW at line 4 now parses. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -5870,9 +5849,8 @@
       "status": "baseline",
       "weightedScore": 414,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -5952,9 +5930,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 4: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 10: `{start} <-> {end} : This is not plotted`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6016,9 +5994,8 @@
       "status": "baseline",
       "weightedScore": 5027,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6080,9 +6057,8 @@
       "status": "baseline",
       "weightedScore": 1688,
       "diffCount": 331,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6161,9 +6137,9 @@
       "slug": "nuvoja-46-dezu541",
       "status": "error",
       "diffCount": null,
-      "reason": "Cannot resolve !includedef 'macro': it is not in the IncludeStore. Includes are resolved synchronously from a pre-populated store. Either call render() (which prefetches includes for you), or pass options.includeStore with an entry for 'mac",
-      "measuredAt": "2026-08-23",
-      "measuredAgainstCommit": "7d3361c7"
+      "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports.",
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6432,9 +6408,8 @@
       "status": "baseline",
       "weightedScore": 305,
       "diffCount": 35,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6568,9 +6543,8 @@
       "status": "baseline",
       "weightedScore": 240,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6650,9 +6624,8 @@
       "status": "baseline",
       "weightedScore": 262,
       "diffCount": 31,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6768,9 +6741,8 @@
       "status": "baseline",
       "weightedScore": 198,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: top-level child count vs the golden moved 8/13 -> 12/13 (closer) while weightedScore rose 171 -> 198; see $comment"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6823,9 +6795,8 @@
       "status": "baseline",
       "weightedScore": 371,
       "diffCount": 6,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -6842,9 +6813,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 1: `-> A`. Unported: CommandExoArrowLeft -- its PART1 is absent entirely, so a leading bare arrow (`-> Bob`) is an exo arrow, not a CommandArrow (CommandExoArrowLeft.java:57-75). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -6924,9 +6895,8 @@
       "status": "baseline",
       "weightedScore": 976,
       "diffCount": 6,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "promoted from status \"error\" by T20 defect 5: the ACTIVATION group (\\+\\+|\\*\\*|!!|--|--\\+\\+|\\+\\+--) now applies on the left/decorated arrow path too, as upstream has ONE CommandArrow for both directions (CommandArrow.java:126,443-456). This line no longer refuses; first measurement pinned here."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -7060,9 +7030,8 @@
       "status": "baseline",
       "weightedScore": 362,
       "diffCount": 110,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -7115,9 +7084,8 @@
       "status": "baseline",
       "weightedScore": 170,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "compensating-error re-pin: the note fold was drawn as TWO <line>s where the jar draws ONE closed <path> (Opale.java:134-147), so every note cost three top-level children instead of two. That extra child had been making this fixture's total coincidentally EQUAL the golden's, so the comparator descended. With the fold corrected -- verified element-for-element against this fixture's own golden -- the count is honestly short by a pre-existing MISSING element the extra child had masked (an <image> for an <img:> in note text; a separate autonumber <text>; and others). The note now matches upstream; see $comment"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -7197,9 +7165,8 @@
       "status": "baseline",
       "weightedScore": 322,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -7540,9 +7507,8 @@
       "status": "baseline",
       "weightedScore": 463,
       "diffCount": 50,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -7784,9 +7750,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 1: `skinParam CaptionFontSize 10`. Unported: CommonCommands' skinparam single-line form (CommonCommands.java). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 2: `skinParam CaptionFontSize 10`. The preprocessor strip RE_SKINPARAM_LINE (preprocessor.ts:107) has no `i` flag, so the camel-case spelling survives to the command list, where this port registers only skinParamMessageAlignCommand. Upstream matches every skinparam name in any case: CommandSkinParam is a SingleLineCommand2 (command/CommandSkinParam.java:57-63; CommonCommands.java:66). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -7911,9 +7877,8 @@
       "status": "baseline",
       "weightedScore": 622,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8038,9 +8003,8 @@
       "status": "baseline",
       "weightedScore": 17993,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8093,9 +8057,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 2: `hide << new >> stereotype`. Unported: CommandArrow's StereotypePattern.optional(\"STEREOTYPE\") (CommandArrow.java:129). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 3: `hide << new >> stereotype`. Unported: the GENDER group of CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java:72-83, the `\\<\\<.*\\>\\>` alternative at :76), registered by CommonCommands.addCommonHides (CommonCommands.java:106). This port's hideStereotypeCommand is `^hide\\s+stereotype\\s*$` (command-common.ts:71). NOT a CommandArrow STEREOTYPE gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -8166,9 +8130,8 @@
       "status": "baseline",
       "weightedScore": 302,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8311,9 +8274,8 @@
       "status": "baseline",
       "weightedScore": 304,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8456,9 +8418,8 @@
       "status": "baseline",
       "weightedScore": 304,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8520,9 +8481,8 @@
       "status": "baseline",
       "weightedScore": 261,
       "diffCount": 58,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -8998,9 +8958,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 2: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandArrow's UrlBuilder.OPTIONAL / CommandUrl -- a `[[link]]` on a message or participant (CommandArrow.java:130; SequenceDiagramFactory.java:155). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 3: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). The exo arrows on lines 4 and 11 now parse. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
@@ -9161,9 +9121,8 @@
       "status": "baseline",
       "weightedScore": 284,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -9405,9 +9364,8 @@
       "status": "baseline",
       "weightedScore": 681,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -9586,9 +9544,8 @@
       "status": "baseline",
       "weightedScore": 346,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: T20 defects 4-5 (participant identity + the activation suffix) make this document BIGGER -- correctly drawn activation boxes and stereotype runs it previously omitted -- and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Every one of these moved CLOSER to the golden on top-level child count, or matched its text content exactly. Mechanism: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -9785,9 +9742,8 @@
       "status": "baseline",
       "weightedScore": 893,
       "diffCount": 5,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "e9c44c11",
-      "reason": "metric-artefact re-pin: the message-label port (empty label -> no <text>; one <text> per line; the autonumber as its own run) makes this document BIGGER, and weightedScore charges a structural short-circuit sumUnits(actual) + sumUnits(expected) (compare.ts:404), so the charge grows with it. Mechanism and the per-fixture evidence: plans/dispatch-by-parse-attempt/diagnosis-24-score-rises.md"
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d"
     },
     {
       "type": "sequence",
@@ -10173,9 +10129,9 @@
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
-      "measuredAt": "2026-08-25",
-      "measuredAgainstCommit": "3e8a8af6",
-      "reason": "refuses to parse -- line 3: `{start} Alice -> Bob : start doing things during duration`. Unported: CommandArrow's ANCHOR group `(\\{([%pLN_]+)\\}[%s]+)?` -- the teoz `{name}` row anchor (CommandArrow.java:78,91). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this fixture used to render a PARTIAL diagram with the line dropped, and now declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-08-26",
+      "measuredAgainstCommit": "c3a24c9d",
+      "reason": "refuses to parse -- source line 10: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "type": "sequence",
