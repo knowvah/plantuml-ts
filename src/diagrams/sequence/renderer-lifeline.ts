@@ -112,20 +112,72 @@ export function renderLifeline(
 }
 
 /**
- * The activation (livebox) bar.
+ * Upstream: `ComponentRoseActiveLine#drawInternalU` (`:71-105`).
  *
- * Upstream is `ComponentRoseActiveLine#drawInternalU` (`:71-105`), which
- * wraps this rect in its own `<g><title></title>` and returns before opening
- * that group when the height is zero. Neither behaviour is mirrored yet --
- * see T2 of `plans/sequence-participant-g-wrapper`. Moved here unchanged so
- * it sits beside the sibling component it belongs with.
+ * ```java
+ * if (dimensionToUse.getHeight() == 0)
+ *     return;
+ * ug.startGroup(UGroup.singletonMap(UGroupType.TITLE, stringsToDisplay.toTooltipText()));
+ * ```
+ *
+ * The early return sits ABOVE `startGroup`, so a zero-height activation emits
+ * nothing whatsoever -- not an empty group. That is the one behavioural
+ * difference from `renderLifeline`, whose own guard sits INSIDE its already-
+ * opened group. Two components, two guard positions; upstream's distinction,
+ * kept rather than unified.
+ *
+ * The title is empty because the `Display` handed to this component is empty,
+ * and the jar emits `<title></title>` rather than omitting the element.
  */
 export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
+  if (act.height === 0) return '';
+
   const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
   const x = act.lifelineX - half;
   const fill = act.color ?? theme.colors.activation;
-  return rect(x, act.y, half * 2, act.height, {
+  const bar = rect(x, act.y, half * 2, act.height, {
     fill,
     stroke: theme.colors.border,
   });
+
+  return `${openTitledGroup('')}${bar}</g>`;
+}
+
+/**
+ * The lifeline pass: `LivingSpaces#drawLifeLines`
+ * (`teoz/LivingSpaces.java:157-168`), which loops the living spaces and calls
+ * `LivingSpace#drawLineAndLiveboxes` (`teoz/LivingSpace.java:150-167`) on
+ * each:
+ *
+ * ```java
+ * if (alive)
+ *     mutingLine.drawLine(ug, context, aliveSince, height);
+ * liveboxes.drawBoxes(ug, context, getFirstCreateY(), height);
+ * ```
+ *
+ * So the interleave is PER PARTICIPANT -- each one's line, then that same
+ * one's boxes -- not every line followed by every box. Confirmed against the
+ * jar on `kejoke-76-curu931`, whose golden emits `Particpant_A`'s line and
+ * then all seven of A's untitled livebox groups before `Particpant_B`'s line
+ * appears at all.
+ *
+ * This whole pass runs BEFORE the participant heads and before the foreground
+ * tiles (`teoz/PlayingSpaceWithParticipants.java:218-227`), which is why
+ * activations do not belong in the renderer's event loop.
+ */
+export function renderLifelinePass(
+  participants: readonly ParticipantGeo[],
+  activations: readonly ActivationGeo[],
+  lifelineEndY: number,
+  theme: ScaledTheme,
+): string {
+  return participants
+    .map((p) => {
+      const boxes = activations
+        .filter((a) => a.participantId === p.id)
+        .map((a) => renderActivation(a, theme))
+        .join('');
+      return renderLifeline(p, lifelineEndY, theme) + boxes;
+    })
+    .join('');
 }

@@ -24,6 +24,7 @@ import type {
   ParticipantBadge,
   ParticipantGeo,
   EventGeo,
+  ActivationGeo,
   NoteGeo,
   FrameGeo,
   DividerGeo,
@@ -34,7 +35,7 @@ import { rect, line, text, noteBox, image, ellipse } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { renderMessage } from './renderer-message.js';
 import { renderActorShape, renderDatabaseShape } from './renderer-participant-shapes.js';
-import { renderLifeline, renderActivation } from './renderer-lifeline.js';
+import { renderLifelinePass } from './renderer-lifeline.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 
@@ -374,7 +375,9 @@ function renderEvent(event: EventGeo, theme: ScaledTheme): string {
     case 'message':
       return renderMessage(event, theme);
     case 'activation':
-      return renderActivation(event, theme);
+      // Drawn in the lifeline pass (step 1), not here -- see the comment
+      // there and `LivingSpace#drawLineAndLiveboxes`.
+      return '';
     case 'note':
       return renderNote(event, theme);
     case 'frame':
@@ -443,10 +446,20 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     children.push(renderBoxBackground(box, scaledTheme));
   }
 
-  // 1. Lifelines (behind everything else)
-  for (const p of scaledGeo.participants) {
-    children.push(renderLifeline(p, scaledGeo.lifelineEndY, scaledTheme));
-  }
+  // 1. Lifelines AND liveboxes -- one pass, per participant.
+  //    `PlayingSpaceWithParticipants#drawU:221` calls
+  //    `livingSpaces.drawLifeLines(...)` here, and `LivingSpace
+  //    #drawLineAndLiveboxes` draws each participant's line followed by that
+  //    participant's own activation boxes. Activations are therefore NOT part
+  //    of the event pass below, however naturally they read as events.
+  children.push(
+    renderLifelinePass(
+      scaledGeo.participants,
+      scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
+      scaledGeo.lifelineEndY,
+      scaledTheme,
+    ),
+  );
 
   // 2. Participant header boxes
   for (const p of scaledGeo.participants) {

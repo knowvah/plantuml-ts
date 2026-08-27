@@ -1,4 +1,5 @@
 import { shortenColor } from '../../../src/core/svg-format.js';
+import { ROOT_GROUP_OPEN } from '../../../src/core/svg.js';
 import { describe, it, expect } from 'vitest';
 import type {
   SequenceGeometry,
@@ -501,7 +502,14 @@ describe('renderSequence -- fragment shape (T3 AC4)', () => {
   it('tags the fragment SEQUENCE and leaves the body unwrapped', () => {
     const fragment = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);
     expect(fragment.diagramType).toBe('SEQUENCE');
-    expect(fragment.body.startsWith('<g')).toBe(false);
+    // `assembleSvg` owns the ROOT content group; the fragment must not carry
+    // one of its own. Asserted against `ROOT_GROUP_OPEN` itself rather than a
+    // bare `<g` prefix -- since T1 the body legitimately STARTS with a group,
+    // the participant lifeline's `<g><title>` wrapper
+    // (`skin/rose/ComponentRoseLine.java:82`), and a `<g`-prefix check reads
+    // that as a root wrap.
+    expect(fragment.body.startsWith(ROOT_GROUP_OPEN)).toBe(false);
+    expect(fragment.body.startsWith('<g><title>')).toBe(true);
     expect(fragment.bodyWrapped).toBeUndefined();
   });
 

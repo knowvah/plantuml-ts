@@ -10,8 +10,12 @@
  * on output the comparator still cannot descend into.
  */
 import { describe, it, expect } from 'vitest';
-import { renderLifeline } from '../../../src/diagrams/sequence/renderer-lifeline.js';
-import type { ParticipantGeo } from '../../../src/diagrams/sequence/ast.js';
+import {
+  renderLifeline,
+  renderActivation,
+  renderLifelinePass,
+} from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import type { ParticipantGeo, ActivationGeo } from '../../../src/diagrams/sequence/ast.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
@@ -96,5 +100,82 @@ describe('renderLifeline', () => {
     const svg = renderLifeline(participant({ display: 'a<b&c' }), 178, theme);
 
     expect(svg).toContain('<title>a&lt;b&amp;c</title>');
+  });
+});
+
+describe('renderActivation', () => {
+  const activation = (over: Partial<ActivationGeo> = {}): ActivationGeo => ({
+    kind: 'activation',
+    participantId: 'A',
+    lifelineX: 22,
+    y: 50,
+    height: 34,
+    ...over,
+  });
+
+  it('wraps the bar in a group with an EMPTY title element', () => {
+    const svg = renderActivation(activation(), theme);
+
+    expect(svg.startsWith('<g><title></title><rect ')).toBe(true);
+    expect(svg.endsWith('</g>')).toBe(true);
+  });
+
+  it('centres a 10-wide bar on the lifeline', () => {
+    // `getPreferredWidth` is 10 (`ComponentRoseActiveLine.java:114-116`).
+    expect(renderActivation(activation(), theme)).toContain(
+      '<rect x="17" y="50" width="10" height="34"',
+    );
+  });
+
+  it('emits NOTHING at zero height -- not an empty group', () => {
+    // `if (dimensionToUse.getHeight() == 0) return;` sits ABOVE `startGroup`
+    // (`:76-79`), so unlike the lifeline there is no group left behind. This
+    // branch is invisible in a golden diff -- absence looks like absence --
+    // which is why it is asserted directly.
+    expect(renderActivation(activation({ height: 0 }), theme)).toBe('');
+  });
+});
+
+describe('renderLifelinePass', () => {
+  const p = (id: string, centerX: number): ParticipantGeo =>
+    participant({ id, display: id, centerX, x: centerX - 12 });
+  const act = (participantId: string, lifelineX: number, y: number): ActivationGeo => ({
+    kind: 'activation',
+    participantId,
+    lifelineX,
+    y,
+    height: 20,
+  });
+
+  it('interleaves per participant: each line, then that participant only', () => {
+    // `LivingSpace#drawLineAndLiveboxes` (`teoz/LivingSpace.java:150-167`)
+    // draws one participant's line and then ITS boxes before moving on --
+    // not every line followed by every box. Confirmed against the jar on
+    // `kejoke-76-curu931`.
+    const svg = renderLifelinePass(
+      [p('A', 22), p('B', 122)],
+      [act('B', 122, 50), act('A', 22, 60)],
+      178,
+      theme,
+    );
+
+    const titles = [...svg.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1]);
+    expect(titles).toEqual(['A', '', 'B', '']);
+  });
+
+  it('keeps multiple boxes on one participant in source order', () => {
+    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], 178, theme);
+
+    expect([...svg.matchAll(/<rect [^>]*?y="(\d+)"/g)].map((m) => m[1])).toEqual([
+      '38', // the hover target, which spans the whole lifeline
+      '60',
+      '10',
+    ]);
+  });
+
+  it('emits a bare lifeline for a participant with no activations', () => {
+    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], 178, theme);
+
+    expect([...svg.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual(['A']);
   });
 });
