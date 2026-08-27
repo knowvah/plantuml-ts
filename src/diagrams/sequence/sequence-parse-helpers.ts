@@ -2,23 +2,28 @@
  * Mutable parse state and shared helpers for the sequence diagram parser.
  *
  * Split out of `parser.ts` (the `COMMANDS` dispatch table lives in
- * `sequence-commands.ts`) purely to stay under the project's 500-line file
+ * the `command-*.ts` family modules) purely to stay under the 500-line file
  * cap; this file owns `ParseState`, the `Command` dispatch-entry shape, and
  * the mutation helpers (`ensureParticipant`, `emit`, `applyAutonumber`, …)
- * that both `parser.ts` and `sequence-commands.ts` depend on.
+ * that both `parser.ts` and the `command-*.ts` modules depend on.
  */
 
+import { UrlBuilder } from '../../core/url/UrlBuilder.js';
+import { UrlMode } from '../../core/url/UrlMode.js';
 import type {
   BoxGroup,
   FrameEvent,
   MessageEvent,
-  MessageStyle,
   NoteEvent,
   Participant,
   ParticipantType,
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
+import type {
+  ArrowConfiguration,
+  ArrowHeadKind,
+} from './sequence-arrowhead.js';
 import type { Command as CoreCommand } from '../../core/command/Command.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
@@ -156,42 +161,66 @@ export function formatAutonumber(format: string, num: number, prefix: string): s
 }
 
 // ---------------------------------------------------------------------------
-// Arrow pattern → MessageStyle
+// Arrow dressings → ArrowConfiguration (D1)
 // ---------------------------------------------------------------------------
 
-/** Map raw arrow tokens to MessageStyle values. */
-export const ARROW_STYLE_MAP: Readonly<Record<string, MessageStyle>> = {
-  '->': 'sync',
-  '->>': 'async',
-  '-->': 'reply',
-  '-->>': 'replyAsync',
-  '->?': 'lost',
-  '?->': 'found',
-};
-
 /**
- * T13: reverse arrows (`<-`, `<--`, `<<-`, `<<--`). Upstream's `CommandArrow`
- * parses these through the SAME regex as `->` and derives `reverseDefine`
- * from an `<`/`\`/`/` in the LEFT dressing (`hasDressing1butx`,
- * `CommandArrow.java:302,306-314`), then swaps `p1`/`p2` so the message is
- * still constructed sender-to-receiver ("keep the order",
- * `CommandArrow.java:322-325`, citing
- * https://github.com/plantuml/plantuml/issues/1819#issuecomment-2158524871).
- * This port has no unified dressing grammar (see the `MessageEvent` doc
- * comment on `headCircle`/`headCross`), so reverse tokens are a second,
- * dedicated table read by a dedicated command rather than a generalisation
- * of `ARROW_STYLE_MAP`'s forward one. `async` here means "the arrow carries
- * an open (`>>`-style) head", mirrored onto the LEFT `<<` for a reverse
- * token exactly as `sync2 = dressing1.contains("<<")` does at
- * `CommandArrow.java:329-330`.
+ * `CommandArrow.executeArg`'s locals, in the arrow's OWN orientation: index 1
+ * is the tail (`circleAtStart`, `sync1`, `dressing1`) and index 2 the head
+ * (`circleAtEnd`, `sync2`, `dressing2`), i.e. AFTER the `reverseDefine` swap
+ * a caller performs on `p1`/`p2` and on the two dressings
+ * (`CommandArrow.java:315-338`). Every member defaults to false, which is
+ * exactly the state `withDirectionNormal()` starts from.
  * @see sequencediagram/command/CommandArrow.java:296-338
  */
-export const REVERSE_ARROW_STYLE_MAP: Readonly<Record<string, MessageStyle>> = {
-  '<-': 'sync',
-  '<<-': 'async',
-  '<--': 'reply',
-  '<<--': 'replyAsync',
-};
+export interface ArrowSpec {
+  /** `dotted = getLength(arg) > 1` — a `--` shaft rather than `-`
+   *  (`CommandArrow.java:340`, applied at `:352-353`). */
+  readonly dashed?: boolean;
+  /** `sync1` — the tail carries an open `<<`/`\\`/`//` head (`:329,336`). */
+  readonly async1?: boolean;
+  /** `sync2` — the head carries an open `>>`/`\\`/`//` head (`:330,337`). */
+  readonly async2?: boolean;
+  /** `circleAtStart` (`:327,334`). */
+  readonly circle1?: boolean;
+  /** `circleAtEnd` (`:328,335`). */
+  readonly circle2?: boolean;
+  /** `xInDressing1` after the reverse remap (`:373-387`). */
+  readonly cross1?: boolean;
+  /** `xInDressing2` after the reverse remap (`:373-387`). */
+  readonly cross2?: boolean;
+  /** `hasDressing1butx && hasDressing2butx`, which selects
+   *  `withDirectionBoth()` over `withDirectionNormal()` (`:351`). */
+  readonly both?: boolean;
+}
+
+/**
+ * Build the message's `ArrowConfiguration`, in `executeArg`'s own order:
+ * direction first, then body, then the ASYNC heads, then the circles, then
+ * the CROSSX heads — each later `withHeadN` overwriting the earlier one,
+ * which is why `cross` wins over `async` here (`CommandArrow.java:351-390`).
+ *
+ * `withDirectionNormal()` starts from an empty `dressing1` and a
+ * NORMAL-headed `dressing2`; `withDirectionBoth()` gives both dressings a
+ * NORMAL head (`ArrowConfiguration.java:96-105`). `ArrowPart` and
+ * `inclination` are left at their defaults: no caller feeds them yet.
+ * @see sequencediagram/command/CommandArrow.java:351-393
+ */
+export function arrowConfigurationOf(spec: ArrowSpec): ArrowConfiguration {
+  const head1: ArrowHeadKind =
+    spec.cross1 === true ? 'CROSSX'
+      : spec.async1 === true ? 'ASYNC'
+        : spec.both === true ? 'NORMAL' : 'NONE';
+  const head2: ArrowHeadKind =
+    spec.cross2 === true ? 'CROSSX' : spec.async2 === true ? 'ASYNC' : 'NORMAL';
+  return {
+    dressing1: { head: head1, part: 'FULL' },
+    dressing2: { head: head2, part: 'FULL' },
+    decoration1: spec.circle1 === true ? 'CIRCLE' : 'NONE',
+    decoration2: spec.circle2 === true ? 'CIRCLE' : 'NONE',
+    dashed: spec.dashed === true,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // participant-family declaration parsing
@@ -275,30 +304,77 @@ export function parseParticipantDeclaration(rest: string): ParticipantDeclaratio
  * `manageActivations` -- the life-event an `++`/`--`/`**`/`!!` suffix on a
  * message produces.
  *
- * Upstream switches on the FIRST CHARACTER ONLY (`CommandArrow.java:443-456`),
- * so `--++` is a plain deactivate and `++--` a plain activate; and the two
- * directions are NOT symmetric -- `+` activates p2, the message TARGET, while
- * `-` deactivates p1, the message SOURCE (`:447`, `:450`). `*` (CREATE, at
- * `:396`) and `!` (DESTROY, `:453`) both act on the target; this port has no
- * CREATE/DESTROY variant on `ActivationEvent`, so they collapse onto
- * activate/deactivate as the pre-existing note on the arrow command records.
+ * Upstream switches on `spec.charAt(0)` (`CommandArrow.java:446-456`) and
+ * then, WHEN THE SPEC IS FOUR CHARACTERS LONG, switches a second time on
+ * `spec.charAt(2)` (`:457-466`). So `--++` is TWO life events -- deactivate
+ * p1 and activate p2 -- not one, and `++--` likewise. An earlier version of
+ * this comment claimed upstream "switches on the FIRST CHARACTER ONLY" and
+ * cited `:443-456`, stopping one line short of the code that refutes it; the
+ * jar draws two activation rectangles for `Bob -> Carol --++` where this port
+ * drew one. Found by T12 of `sequence-command-coverage`.
+ *
+ * The two directions are NOT symmetric -- `+` activates p2, the message
+ * TARGET, while `-` deactivates p1, the message SOURCE (`:447`, `:450`).
+ * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target;
+ * this port has no CREATE/DESTROY variant on `ActivationEvent`, so they
+ * collapse onto activate/deactivate as the pre-existing note on the arrow
+ * command records.
+ *
+ * Ordering between the two events is not expressible in this return shape and
+ * does not need to be: `sequence-layout-message.ts:135-148` keys both to the
+ * same `messageGeo.y`, so the closing bar ends and the opening bar starts at
+ * one y -- which is what the jar draws (Bob's bar closes at y 93, Carol's
+ * opens at y 93).
  */
+/**
+ * `new UrlBuilder(skinParam("topurl"), STRICT).getUrl(raw)`, reduced to the
+ * href `Url#getUrl()` returns. `topurl` is `null`: this port's sequence
+ * parser carries no skinparam lookup at command time.
+ *
+ * Shared by the ordinary and exogenous arrow commands because upstream does
+ * the same thing in both -- `msg.setUrl(urlBuilder.getUrl(url))` at
+ * `CommandArrow.java:406-408` and `CommandExoArrowAny.java:140-141`. Both
+ * store the RESOLVED url, never the raw `[[...]]` run.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:48-49,82-88
+ */
+export function urlOf(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  return new UrlBuilder(null, UrlMode.STRICT).getUrl(raw)?.getUrl();
+}
+
 export function activationFlags(
   spec: string,
   from: string,
   to: string,
 ): { activates?: string; deactivates?: string } {
-  switch (spec.trim().charAt(0)) {
+  const trimmed = spec.trim();
+  const flags: { activates?: string; deactivates?: string } = {};
+  switch (trimmed.charAt(0)) {
     case '+':
     case '*':
-      return { activates: to };
+      flags.activates = to;
+      break;
     case '-':
-      return { deactivates: from };
+      flags.deactivates = from;
+      break;
     case '!':
-      return { deactivates: to };
-    default:
-      return {};
+      flags.deactivates = to;
+      break;
   }
+  // `if (spec.length() == 4)` (`CommandArrow.java:457-466`) -- the second
+  // life event of a doubled suffix such as `--++` / `++--`.
+  if (trimmed.length === 4) {
+    switch (trimmed.charAt(2)) {
+      case '+':
+        flags.activates = to;
+        break;
+      case '-':
+        flags.deactivates = from;
+        break;
+    }
+  }
+  return flags;
 }
 
 // ---------------------------------------------------------------------------
@@ -338,6 +414,12 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
   if (event.kind === 'message') {
     linked.add(event.from);
     linked.add(event.to);
+  } else if (event.kind === 'messageExo') {
+    // `isAlone` asks every event `dealWith(p)`, and `MessageExo.dealWith`
+    // answers `participant == someone` (`MessageExo.java:90-92`) — so an exo
+    // message links its ONE endpoint and nothing else.
+    // @see sequencediagram/SequenceDiagram.java:535-541
+    linked.add(event.participant);
   } else if (event.kind === 'note') {
     for (const p of event.participants) linked.add(p);
   } else if (event.kind === 'activate' || event.kind === 'deactivate') {
@@ -352,7 +434,7 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
  *  stereotype so neither the layout nor the renderer sees one. Applied
  *  post-parse for the same reason `applyHideUnlinked` is — the directive can
  *  appear after the declarations it affects. See `hideStereotypeCommand`
- *  (`sequence-commands-2.ts`) for the upstream registration chain. */
+ *  (`command-arrow.ts`) for the upstream registration chain. */
 export function applyHideStereotype(ast: SequenceDiagramAST): void {
   if (ast.options.hideStereotype !== true) return;
   for (const p of ast.participants) delete p.stereotype;

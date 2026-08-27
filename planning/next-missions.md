@@ -592,9 +592,367 @@ keyed on golden size rather than slug — the largest fixture is 47x the second
 and 2,600x the median, so the threshold is unambiguous and a future giant
 capture gets headroom automatically.
 
-## 4. Named, briefed or diagnosed — pick from here after 1
+## 4. `sequence-command-coverage` — DONE 2026-08-26, 20 of 20 tasks
+
+Branch `feat/sequence-command-coverage`, 45 commits, merge commit to `main`.
+Full report: **`plans/sequence-command-coverage/findings/CLOSE-OUT.md`**.
+
+**Scoreboard.** `svg-sequence/diff-baseline` `status:"error"` **195 → 17**;
+`routing-baseline` `known-misroute` **196 → 17** (the 196th was
+`kokebo-27-vafi688`, a non-sequence row, now `agree`); `refusal-baseline`
+`known-gap` **163 → 9**. Reconciled exactly: 178 closures + `nuvoja-46-dezu541`
++ 16 still-refusing = 195. **178/195 = 91.3 %.** Whole-corpus adjudication over
+1141 fixtures: **0 regressions**, 7 artefact, 7 improved, 932 unchanged, 195
+inconclusive (all `baseScore: null` closures, all carrying a mechanism).
+
+**READ THIS BEFORE QUOTING ANY SEQUENCE SCORE.** The sequence comparator
+reaches **zero** of the golden's arrowhead polygons on **984 of 1141 fixtures
+(86.2 %)**; median fraction of the golden's elements reached is **16 %**; on
+**557** the comparison never enters the diagram body at all. Of the mission's
+178 closures, exactly **one** is arrow-measurable. Those scores are real
+measurements of the instrument and are **largely insensitive to arrow
+correctness** — they are not fidelity evidence, and a zero-movement score on a
+blocked fixture is not evidence in either direction. `sequence-participant-g-wrapper`
+below is the repair.
+
+**Every per-bucket estimate in the brief was wrong while the total held**
+(measured, by bisecting the mission's own 15 refs): T7 **40** (est. ~12), T8
+**26** (~24), T9 **19** (~20), T10 **8** (~9), T11 **3** (~6), T12 **0**
+(~45), T13 **82** (~77). One cause for the two big ones — D1's composed named
+groups arrived *with* T7's `CommandArrow` rebuild, so T7 absorbed T12's entire
+bucket. T12's work is what makes those forms *correct*, not what makes them
+*parse*. **Do not size a follow-on from the brief's bucket estimates.**
+
+**Sizing facts, so a follow-on need not re-measure.** Remaining
+`weightedScore` over the 178 closures: min 101, p25 223, median 384, p75 668.
+28 score ≥1000, 115 <500, 67 <300. **One fixture is 86 % of the total** —
+`zudize-61-vomi445` at 799 811; the other 177 sum to 127 043. Any "total
+score" over this population is a statement about `zudize` unless stated
+excluding it. Per-family distributions and the measurability cross-tab are in
+the close-out §4.
+
+**Two census counting traps this mission hit, both worth inheriting.** (a)
+**Any corpus census over sequence events must recurse into `frame.branches`** —
+two bucket counts were wrong because a top-level-only walk over `events`
+missed nested ones. (b) **Pinned `reason` strings drift**; four separate
+confirmations. Re-probe at HEAD, never repeat a pin.
+
+**Tooling defect found and fixed.** `scripts/repin-sequence-baselines.ts:112`
+derived `weErrored` from `renderFixtureSequence` (which forces the sequence
+engine) rather than the dispatched `renderSync` the refusal gate actually
+defines it as, mis-pinning 7 fixtures `ok → known-gap`. Corrected; the script
+now reads the dispatched render, and re-running reports `REPINNED 0`. It also
+never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared.
+
+## 5. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
+
+- **`sequence-fidelity-residuals`** (NEW, unbriefed) — FILED 2026-08-26 as
+  `sequence-command-coverage`'s D6 census. **The work queue is the ten items
+  below plus the ten still-refusing command gaps**; this row exists so the
+  queue has one name. Sequence it strictly after
+  `sequence-participant-g-wrapper` — until that lands the instrument cannot
+  score the difference, and a task told to make blocked fixtures fall is given
+  an unreachable target, which is precisely the pressure that produces a
+  fitted value. Sized: 178 fixtures carry a measured score (median 384), of
+  which 1 is arrow-measurable today.
+  **The ten coverage gaps still refusing, with upstream mechanisms** (close-out
+  §5 has the refusing line for each): `CommandLinkAnchor` `{a} <-> {b}` — 3
+  fixtures, `CommandLinkAnchor.java:55-64`, `SequenceDiagramFactory.java:155`;
+  `factorySequenceNoteOnArrowCommand.createMultiLine` — 3,
+  `FactorySequenceNoteOnArrowCommand.java:77-88`, `:136`; `CommandUrl` — 2,
+  `sequencediagram/command/CommandUrl.java:61-72`, `:154`; `CommandActivate2`
+  (bare `NAME++`) — 1, `CommandActivate2.java:29-37`, `:128`; `CommandReturn`'s
+  PARALLEL group — 1, `CommandReturn.java:68`, `:129`;
+  `CommandHideShowByGender` GENDER — 1,
+  `classdiagram/command/CommandHideShowByGender.java:72-83`,
+  `CommonCommands.java:106`; `CommandStyleImport` — 1,
+  `style/CommandStyleImport.java:68-77`, `CommonCommands.java:90`;
+  `factorySequenceNoteCommand.createMultiLine`'s `UrlBuilder.OPTIONAL` tail — 1,
+  `FactorySequenceNoteCommand.java:76-90`, `:134`; `RE_SKINPARAM_LINE`
+  (`preprocessor.ts:107`) lacks the `i` flag where upstream's
+  `CommandSkinParam` is case-insensitive (`CommandSkinParam.java:57-63`) — 1;
+  YAML front matter, a PREPROCESSOR strip
+  (`preproc/ReadLineWithYamlHeader.java:91`) — 1. The first two groups are
+  three fixtures each and are the cheapest coverage work left.
+
+- **Global participant sizing** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T17, measured. `Bob -> Carol : hello` renders
+  240×147 here against **117×124** in the jar: this port uses fixed 80 px
+  participant boxes at a 30 px margin where upstream text-fits at 5.
+  **Every remaining exo dimension delta reduces to this plus `BORDER1 = 0`
+  hardcoded at `src/diagrams/sequence/sequence-layout-exo.ts:76`**, where
+  upstream computes `min(xOrigin, dolls.getMinX, every tile.getMinX)`
+  (`PlayingSpace.java:75-104,318-320`). Measured knock-on: `[-> Carol` with a
+  Bob to its left starts at x=0, 30 px left of everything else, which makes
+  `Area#textDeltaX` spuriously **positive** (+10.337 where the jar has −6) and
+  pushes the label right. **Stated explicitly because otherwise those numbers
+  read as exo defects: the exo arithmetic is correct against upstream** — the
+  gap is a global sizing divergence that predates that mission. Likely the
+  largest single fidelity item after the `<g>` wrapper.
+
+- **`[hidden]` arrow bodies draw** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T17/T18, measured on 3 fixtures:
+  `vogegu-91-mave762` (2 arrowhead polygons against a golden with **0**),
+  `TeozTimelineIssues_0004_Test` (5 vs 4), `koneju-77-vode355` (9 vs 8).
+  Upstream sets `ArrowBody.HIDDEN` (`CommandArrow.java:495-496`) and **both**
+  `ComponentRoseArrow.drawInternalU` (`:85-86`) **and**
+  `ComponentRoseSelfArrow.drawInternalU` (`:71-73`) `return` before drawing;
+  this port's `applyStyle` (`src/diagrams/sequence/command-arrow.ts:274`) keeps
+  only `dashed`/`dotted` and has no field to carry HIDDEN. **~15 lines across
+  three files plus one `ArrowConfiguration` field.** Good control: the five
+  `[hidden]` lines in `zogane-85-raja214` are all comment-prefixed and it shows
+  no overshoot.
+
+- **Per-message arrow colour is parsed and discarded** (NEW) — FILED
+  2026-08-26 by `sequence-command-coverage` T17. `applyStyle`
+  (`command-arrow.ts:274`) handles only `dashed`/`dotted`; upstream's chain
+  ends `else { config = config.withColor(…) }`
+  (`CommandArrow.java:487-500`). Neither `ArrowConfiguration` nor `MessageGeo`
+  carries a colour, so `-[#red]->` renders `#181818`. **`bold` is a genuine
+  no-op upstream — `CommandArrow.java:492` is an empty branch. Do not "fix"
+  it.** `config.reverseDefine()` (`:389-390`) likewise has no field here.
+
+- **Part-anchored messages draw** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T18, measured: `nivaje-50-tido759` emits 4
+  arrowhead polygons against a golden with **2**.
+  `teoz/CommunicationTile.java:316-319` returns from `drawU` when
+  `PART1ANCHOR` or `PART2ANCHOR` is set; this port stores no such AST field
+  (`command-arrow.ts:455`). **Do not confuse it with the leading
+  `{start}`/`{end}` ANCHOR group** — that is a *different* field
+  (`msg.setAnchor`, `CommandArrow.java:420`) which `drawU` never tests, which
+  is why the golden has exactly 2 polygons for 4 messages, 2 of them
+  part-anchored.
+
+- **`**` / `!!` CREATE/DESTROY semantics** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T12 with a measured cost: **5 corpus fixtures**
+  (`comelo-49-lefi793`, `nepica-26-pali815`, `nofola-68-nobe068`,
+  `pixima-27-nita000`, `telizo-11-pilo439`). All five already parse, route
+  SEQUENCE and render create/destroy as an ordinary activation bar.
+  `ActivationEvent.kind` (`src/diagrams/sequence/ast.ts:186`) is
+  `'activate' | 'deactivate'`, so closing it needs `ast.ts` + layout +
+  renderer.
+
+- **Message STEREOTYPE is a style-lookup key, not drawn text** (NEW) — FILED
+  2026-08-26 by `sequence-command-coverage` T16, verified against goldens.
+  `AbstractMessage.java:60-65,74-77` feeds `getStereotype(stereotype)` only
+  into `getStyleSignature().withTOBECHANGED(stereotype)`; golden
+  `terapo-81-puzi168` turns the arrow LINE `stroke:#F00` while the label stays
+  plain black with no guillemet run. Wiring it to the arrow's line style is
+  real unported behaviour. **Message URL is NOT** — nothing upstream reads
+  `getUrl` on a message and two goldens confirm plain black text; do not
+  file it as a gap.
+
+- **`preprocessor-newline-literal-passthrough`** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T11, **mechanism corrected by T20 after two
+  wrong attributions**. `%newline()` **IS ported and is correct**:
+  `src/core/tim/builtin/Newline.ts:31` returns `BLOCK_E1_NEWLINE` (`U+E100`)
+  under `USE_BLOCK_E1_IN_NEWLINE_FUNCTION = true`
+  (`jaws-constants.ts:36`), mirroring `tim/builtin/Newline.java:63-67` under
+  `JawsFlags.java:40`. **Do not go hunting a builtin that already exists, and
+  do not go hunting a real newline that is never produced.**
+  The defect: inside a TIM double-quoted **string literal** the call is never
+  evaluated — `Eater.eatAndGetQuotedString` (`src/core/tim/Eater.ts:142-150`)
+  copies the interior verbatim — so the literal text `%newline()` survives
+  substitution into the output line, and `flatten` splits that line on
+  `RE_NEWLINE_CALL_ANY_CASE` (`src/core/preprocessor.ts:370`, regex at `:184`),
+  turning one label into two source lines. Measured directly:
+  `context.getResultList()` for `!$mixed0 = "XXX + %newline() + XXX"` holds
+  **one** line containing the literal text and no `U+000A`, so
+  `TContext.ts:362`'s real-newline split never fires; a bare `%newline()` and
+  `"XXX" + %newline() + "XXX"` both correctly yield `U+E100`. This also
+  disproves `preprocessor.ts:350-355`'s own doc comment ("only the case-folded
+  alias reaches this far"). Upstream never post-splits; the jar emits ONE text
+  node. Cost: **1 pinned fixture** (`licole-34-vejo527`); blast radius **18
+  corpus fixtures** across 3 engines plus an explicit preprocessor pin.
+
+- **`sprite-image-raster-kind`** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T11. `CommandSpriteBase64`'s multi-line encoded
+  form parses; registration is deferred because `SpriteImage.asTextBlock`
+  (`SpriteImage.java:70-99`) recolours decoded raster pixels and this port has
+  no such sprite kind — `getSpriteMonochrome`'s unchecked cast
+  (`src/core/sprite-registry.ts:184-190`) means a `{width,height}`-only entry
+  does not degrade, it throws `TypeError` on first reference. Needs a PNG
+  **decoder** (only the fixed-block encoder exists) plus a third resolver
+  branch, both in `src/core/`. Cost: **1 fixture**, corpus-wide.
+
+- **`nested-diagram-renderer`** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T11. `EmbeddedDiagram` `{{ … }}` blocks are
+  swallowed at parse via `PSystemCommandFactory#addOneSingleLineManageEmbedded2`
+  (`:288-307`) — which is precisely why upstream's inner `end note` does not
+  close the outer note — but nothing renders them: no `NestedDiagramRenderer`
+  is wired anywhere in `src/`, and the sequence engine never calls
+  `CreoleParser` (zero hits under `src/diagrams/sequence/`). Cost: **2 pinned
+  fixtures**, corpus reach **47** (22 class, 12 sequence, 8 activity, 5
+  component).
+
+- **`sprite-base64-command-to-core`** (NEW) — FILED 2026-08-26 by
+  `sequence-command-coverage` T11, a **structural** divergence, not a defect.
+  `src/diagrams/sequence/command-sprite.ts` lives under the sequence engine,
+  but upstream's `CommandSpriteBase64` is a `CommonCommands` command shared by
+  every engine (`CommonCommands.java:79`), so class/state/description still
+  lack it. Built move-ready as a pure function with `matchSpriteCommand`'s
+  exact shape. Small.
+
+- **`nuvoja-46-dezu541` is a HARNESS item, not a command gap** (NEW) — FILED
+  2026-08-26 by `sequence-command-coverage` T19/T20. It is the single
+  non-gapped defect the refusal SLI reports (SLI 2 = 1) and it is pinned `ok`
+  deliberately. Its source uses `!includedef macro`, and the macro is **absent
+  from `tests/helpers/fixture-include-store.ts`**; the preprocessor stops at
+  `src/core/tim/IncludeExecutor.ts:127`. **Filing it as a command gap would
+  send a mission hunting a `Command` that does not exist.** Fix is to seed the
+  fixture include store.
+
+- **`hnote` draws a rectangle where upstream draws a hexagon** (NEW) — FILED
+  2026-08-26 by `sequence-command-coverage` T20, **overturning that mission's
+  own working assumption.** T8 measured that `getNoteComponentType()` has call
+  sites only in `NoteStyle.java` and six `teoz/` files, and the mission read
+  that as "teoz-only, therefore not drawn". **That inference is the disproved
+  classic-renderer premise** (see the standing note in this section): teoz is
+  the *only* renderer, so a `teoz/` call site is live code.
+  T20 read the method body: `teoz/NoteTile.java:108-115` maps
+  `NoteStyle.HEXAGONAL → ComponentType.NOTE_HEXAGONAL` and
+  `NoteStyle.BOX → ComponentType.NOTE_BOX`, and `:103` passes that straight to
+  `skin.createComponentNote`. Four more live call sites do the same
+  (`teoz/NotesTile.java:109,114`, `teoz/GroupingTile.java:750`,
+  `teoz/CommunicationTileNoteLeft.java:106`,
+  `teoz/CommunicationTileNoteRight.java:113`). **Upstream draws all three
+  shapes.**
+  Half of it is already right here: `rnote` → BOX → plain rectangle matches,
+  and `src/diagrams/sequence/renderer.ts:226-232` draws
+  `NoteEvent.shape === 'rect'` as a rectangle. **`hnote` is the gap** — it maps
+  to the same `'rect'` (`ast.ts:126-139`, an explicitly documented T13 scope
+  cut) instead of a hexagon path. Cost: **23 corpus fixtures use `hnote`**, 20
+  use `rnote`, 29 use either. Needs a hexagon path in the note renderer plus a
+  third `NoteEvent.shape` value.
+
+
+- **`sequence-parallel-anchor-draw`** — FILED 2026-08-26 by
+  `sequence-command-coverage` batch 5, maintainer-approved as a residual.
+  The `&` (parallel) prefix and `{name}` anchors are parsed and stored on the
+  AST but **not drawn**. That mission's D4 originally justified this as
+  matching upstream; **the justification was disproved** (see below) and D4 is
+  amended. Drawing them is real, unported behaviour.
+  Upstream consumers, all live: `isParallel()` selects
+  `YGauge.createParallel` over `createWithContact`
+  (`teoz/CommunicationTile.java:113-116`), changing vertical position so
+  parallel messages share a contact line; `GroupingTile.java:145` uses it for
+  group chaining; a non-null anchor forces an early `return` from `drawU`
+  (`teoz/CommunicationTile.java:316-319`).
+  13 fixtures (10 grouping-`&`, 3 anchor). They already parse and route
+  SEQUENCE, so this is fidelity, not coverage.
+  **Sequence this AFTER `sequence-participant-g-wrapper`** — until that lands
+  the comparator cannot see the difference, so the work would be
+  unverifiable.
+  **Confirmed at that mission's close (2026-08-26):** no `DIVERGENCES.md`
+  entry was written for `&`/anchor, and none should be. Not because upstream
+  behaves this way — it does not — but because this is tracked, planned work,
+  not a settled product divergence. Two doc comments still asserting the
+  disproved premise were corrected at `c3a24c9d`.
+
+- **`sequence-newpage-pagination`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T14, mechanism measured. This port ignores
+  `newpage` (`src/diagrams/sequence/command-page.ts:26-31`, pre-existing and
+  documented) and renders every page into ONE document; the jar emits page 1
+  only. Invisible until exo arrows started drawing, which made
+  `dolefo-13-kovu702` overshoot: its source splits 8 exo messages across two
+  pages, the golden has 4 polygons, and the port now draws 8 (measured: base
+  0, live 8, golden 4). Re-pinned at the higher score with this mechanism
+  recorded. Any fixture using `newpage` carries the same overshoot.
+
+- **NOTE FOR ANY SEQUENCE MISSION — the `sequencediagram/graphic/` package is
+  DEAD.** Established 2026-08-26 by three independent
+  `sequence-command-coverage` tasks and verified leg by leg:
+  `SequenceDiagram.java:306-309` returns `SequenceDiagramFileMakerTeoz`
+  unconditionally (both the `modeTeoz()` guard and the `Puma2` line are
+  commented out); `Step1MessageExo.java` and `DrawableSet.java` do not exist;
+  and nothing constructs `MessageExoArrow`, `MessageArrow` or
+  `MessageSelfArrow`. **Sequence pixels come from
+  `net/sourceforge/plantuml/sequencediagram/teoz/`.** Reading `graphic/` to
+  answer "what does upstream draw?" gives confidently wrong answers — it cost
+  one mission a wrong constant (caught), one throwaway commit (caught by the
+  ratchet), and one locked decision's premise.
+  **The corollary is the trap that outlived the correction, so state it
+  directly: "every call site is under `teoz/`" means "every call site is LIVE",
+  never "this is optional/teoz-only behaviour".** That inference survived the
+  D4 amendment inside the same mission and produced a second wrong conclusion
+  (`hnote` shapes, above) which T20 caught only by opening
+  `teoz/NoteTile.java` and reading the method. **A call-site census is not
+  evidence about what upstream draws. Only the method body is.**
+
+- **`sequence-participant-g-wrapper`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T15, mechanism measured and verified twice.
+  **The sequence comparator cannot measure arrow fidelity at all today.** The
+  jar wraps each participant in `<g><title>A</title><rect/><line/></g>`; this
+  port emits the bare primitives, so child 0 under `svg/g[1]` is a TAG
+  mismatch and `compare.ts:222-231` returns — `// structural mismatch — stop
+  here`. The wrapper also shifts every following child index, so the whole
+  sibling run mismatches by tag.
+  Verified by dumping all 30 diffs of `celego-19-laji937`: 4 root dimensions,
+  the rest tag mismatches (`line vs g`, `rect vs g`, `text vs rect`, `polygon
+  vs text`), and **not one `polygon/@points` record**.
+  **Why it matters beyond tidiness**: correct arrow work produces no ratchet
+  movement — and neither does incorrect arrow work. The whole dressing bucket
+  is invisible, `diff-census.json`'s sequence buckets describe the tag cascade
+  rather than arrow quality, and any task told to "make the dressing fixtures
+  fall" is given an unreachable target, which is precisely the pressure that
+  produces a fitted value.
+  Emitting the wrapper should unblock descent for the entire sequence corpus
+  at once, so this is likely the highest-leverage single change available to
+  sequence fidelity. Size it against the participant renderer before starting.
+  See `.agent-notes/T15-comparator-blocks-arrow-descent.md`, and note it
+  supersedes the conclusion in
+  `.agent-notes/T13-sequence-ratchet-rise-diagnosis.md:167-172`.
+
+- **`sequence-arrow-background-colour`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T15, **NARROWED at that mission's close: the `o`
+  fill half is already FIXED.** T15 diagnosed the `o` circle decoration
+  filling `#FFF` here against `#000` in the jar, and concluded it needed an
+  arrow-background field on `Theme` (`src/core/theme.ts`). T17 found the
+  narrower, correct answer inside the sequence renderer and shipped it
+  (`43b59774`): `paintOf` (`renderer-arrowhead-glyph.ts`) was mapping
+  `getBackgroundColor()` to `theme.colors.background`, where upstream reads
+  `getColorBackGround()` (`skin/rose/AbstractComponentRoseArrow.java:66,84-86`)
+  → `getColor(PName.BackGroundColor)` (`skin/AbstractComponent.java:105-107`)
+  on the **arrow** style. The constant is upstream's own pinned value, not one
+  fitted to goldens: `src/main/resources/skin/plantuml.skin` carries
+  `arrow { … BackGroundColor black }`.
+  **What remains is only the `<style> arrow { BackGroundColor }` hook** — i.e.
+  letting a user stylesheet override that value, which T17 deliberately did not
+  invent. Verified by probe: `<style> arrow { BackGroundColor #00FF00 }`
+  changes the jar's fill to `#0F0`, while `skinparam backgroundColor #FFAA00`
+  does not change it at all. Ruled out at the same time and worth not
+  re-deriving: it is NOT the page colour (51/51 corpus goldens with an `rx="4"`
+  circle are `fill="#000"`, including three on non-white backgrounds) and NOT
+  the line colour (`TeozTimelineIssues_0007_Test` pairs `stroke:#F00` with
+  `fill="#000"`, because `-[#red]->` overrides `PName.LineColor` only —
+  `AbstractMessage.java:69-70`). Small, and it crosses the shared theme seam.
+
+- **`sequence-multiline-command-seam`** — FILED 2026-08-26 by
+  `sequence-command-coverage` T5, with the mechanism already measured.
+  **The port has no equivalent of upstream's `OK_PARTIAL` dispatch seam.**
+  Upstream's `getCandidate` (`PSystemCommandFactory.java:225-246`) lets a
+  command claim a multi-line block by returning `OK_PARTIAL`, after which
+  `isMultilineCommandOk` (`:238`) consumes the whole block **including its
+  closing line** from the iterator — so the closer never re-enters dispatch.
+  This port instead re-dispatches the closer through the flat command list
+  (`parser.ts:44`'s `handlePendingNote`, which takes the FIRST `.find()`
+  match).
+  **Consequence, and why it is worth a mission:** the port's sequence command
+  order *cannot* mirror `SequenceDiagramFactory#initCommandsList:99-155`.
+  Upstream registers `CommandGrouping` at `:126` and the multi-line note
+  closers at `:134-137`; because the port's `endCommand`
+  (`/^end(?:\s+.+)?\s*$/i`, `command-grouping.ts:103`) also matches
+  `end note`, mirroring that order would make a multi-line note pop a
+  grouping frame instead of closing. The port's order is therefore
+  load-bearing compensation, and `sequence-command-registry.ts` diverges from
+  upstream's registration order at **13 seams**, each pinned by
+  `tests/unit/sequence/command-registry-order.test.ts`.
+  Porting the seam would let the registry be re-mirrored exactly and would
+  retire those 13 divergences. Scope is the shared dispatch loop, so it likely
+  touches more than the sequence engine — size it before starting.
+  See `plans/sequence-command-coverage/decisions.md` D2 (amended 2026-08-26).
 
 - **`sequence-participant-badge-glyph`** — DONE 2026-08-25, same day it was
   filed. Both forms draw: the sprite badge as a rasterised `<image>` and the
@@ -840,7 +1198,7 @@ Ordered by how ready they are, not by size.
 - **`plans/future/theme-through-dot.md`** — collapse the layout/style two-pass
   split. Explicitly gated on "the port is faithful first". Not now.
 
-## 5. Mission-index rows still open (no brief yet)
+## 6. Mission-index rows still open (no brief yet)
 
 From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
 

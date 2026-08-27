@@ -1,7 +1,7 @@
 /**
  * T13 (mission dispatch-by-parse-attempt): unit coverage for the commands
- * ported in `sequence-commands.ts` (in-place widenings) and
- * `sequence-commands-2.ts` (net-new commands) to close the sequence
+ *  ported across the `command-*.ts` family modules, registered in
+  * `sequence-command-registry.ts`, to close the sequence
  * engine's refusal-coverage bucket. Each `describe` block cites the
  * upstream `Command` it exercises.
  */
@@ -21,12 +21,6 @@ function parse(lines: string[]): SequenceDiagramAST {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
   return result;
-}
-
-function refusalLine(lines: string[]): number {
-  const result = parseSequence(lines);
-  if (!('refused' in result)) throw new Error('expected a refusal');
-  return result.line;
 }
 
 function messages(events: SequenceEvent[]): MessageEvent[] {
@@ -231,30 +225,37 @@ describe('ref over', () => {
 describe('reverse and decorated arrows', () => {
   it('swaps from/to for a plain reverse arrow', () => {
     const [msg] = messages(parse(['Bob <- Alice : hello']).events);
-    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob', style: 'sync' });
+    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob' });
+    expect(msg?.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
   });
 
   it('a dashed reverse arrow is a reply', () => {
     const [msg] = messages(parse(['Alice <-- Bob : response']).events);
-    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice', style: 'reply' });
+    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice' });
+    expect(msg?.arrow.dashed).toBe(true);
   });
 
   it('places a circle decoration at the arrowhead for ->o', () => {
     const [msg] = messages(parse(['Alice ->o Bob : hello']).events);
-    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob', headCircle: true });
+    expect(msg).toMatchObject({ from: 'Alice', to: 'Bob' });
+    expect(msg?.arrow.decoration2).toBe('CIRCLE');
   });
 
   it('places a cross decoration at the tail for x->', () => {
     const [msg] = messages(parse(['Bob x-> Alice : hop']).events);
-    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice', tailCross: true });
+    expect(msg).toMatchObject({ from: 'Bob', to: 'Alice' });
+    expect(msg?.arrow.dressing1.head).toBe('CROSSX');
   });
 
   it('does not mis-parse an exo-arrow bracket form as a participant', () => {
-    // `[o<-x b` is CommandExoArrowAny's syntax (unported, T13 residual);
-    // this asserts the bracketed token is REFUSED, not swallowed as a
+    // `[o<-x b` is CommandExoArrowAny's syntax. T13 ported it, so this now
+    // PARSES rather than refusing -- but the pin's intent is unchanged and
+    // still worth holding: the bracketed token must not be swallowed as a
     // literal participant named "[o<-x".
-    const line = refusalLine(['participant b', '[o<-x b : hop']);
-    expect(line).toBe(1);
+    const ast = parse(['participant b', '[o<-x b : hop']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['b']);
+    const exo = ast.events.find((e) => e.kind === 'messageExo');
+    expect(exo).toMatchObject({ participant: 'b', exoType: 'TO_LEFT' });
   });
 });
 

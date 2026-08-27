@@ -114,6 +114,15 @@ function scanMessageLabels(
         const w = measurer.measure(ev.label, fontSpec).width;
         adjMaxLabelW[pairIdx] = Math.max(adjMaxLabelW[pairIdx]!, w);
       }
+    } else if (ev.kind === 'messageExo') {
+      // Deliberately skipped, not overlooked (D3). This scan widens the gap
+      // between an ADJACENT PAIR of lifelines; an exo message has one
+      // endpoint and the diagram border for the other, so there is no pair
+      // to widen. Its extent reaches the diagram through
+      // `MessageExoArrow#getRightEndInternal`'s `Math.max(maxX, ...)`, i.e.
+      // total width, which is a different quantity from this one.
+      // @see sequencediagram/graphic/MessageExoArrow.java
+      continue;
     } else if (ev.kind === 'frame') {
       for (const branch of ev.branches) {
         scanMessageLabels(branch, sortedParticipants, theme, measurer, adjMaxLabelW);

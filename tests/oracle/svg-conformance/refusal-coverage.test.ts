@@ -553,17 +553,34 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3158 fixtures, 8 of them jar errors, 169 of them erroring here', () => {
-    // The 8 jar-error fixtures are the same 8 the routing gate pins. The 169
-    // we error on are 5 of those 8, plus nuvoja, plus the 163 pinned
-    // known-gap below — the 10 exo-arrow fixtures T13 found, then batch 4's
-    // full sequence residual censused 2026-08-25. It was 6 erroring / 3152
-    // rendering when T0 took the baseline, before any engine could refuse
-    // anything at all.
+  it('the manifest is 3158 fixtures, 8 of them jar errors, 15 of them erroring here', () => {
+    // DERIVATION, re-measured at T19 rather than carried forward. The 8
+    // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
+    // on are exactly:
+    //
+    //     5  of those 8 jar-error fixtures (four `state/` banner pages plus
+    //        `svg-class/class-actor-bare-no-allowmixing`) -- the jar errored
+    //        too, so they are not defects;
+    //   + 1  `nuvoja-46-dezu541`, the include-store gap (below);
+    //   + 9  the `known-gap` pins asserted in the next block;
+    //   = 15, and 3158 - 15 = 3143 rendering.
+    //
+    // It was 6 erroring / 3152 rendering when T0 took the baseline, before any
+    // engine could refuse anything at all; 169 at the start of this mission.
+    //
+    // 169 -> 104 at `sequence-command-coverage` batch 3, then 104 -> 22 at
+    // batch 4 (the exogenous arrow family, the mission's largest bucket).
+    // 22 -> 15 at T19, which is NOT new coverage: seven pins were written by
+    // `scripts/repin-sequence-baselines.ts:112` from `score === null`, the
+    // SEQUENCE-ENGINE measurement (`sequence-ratchet-adjudicate.ts:317` calls
+    // `renderFixtureSequence`), where this gate's `weErrored` means the
+    // DISPATCHED `renderSync` produced a `PSystemError` page. For a source the
+    // sequence engine refuses but STATE or CLASS draws, those differ. T19
+    // re-measured all 3158 through `renderSync` and re-pinned the seven falls.
     expect(manifest.fixtures.length).toBe(3158);
     expect(pinnedJarErrors.length).toBe(8);
-    expect(pinnedErroring.length).toBe(169);
-    expect(pinnedRendering.length).toBe(2989);
+    expect(pinnedErroring.length).toBe(15);
+    expect(pinnedRendering.length).toBe(3143);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -578,7 +595,31 @@ describe('refusal coverage — baseline shape', () => {
     // the upstream Command that explains it, which is what keeps a growing
     // count from becoming the dumping ground D7 warns about. The number is
     // pinned exactly so growth stays deliberate.
-    expect(gaps.length).toBe(163);
+    //
+    // 163 -> 98 at `sequence-command-coverage` batch 3. That net figure hides
+    // two opposite movements, and both are real:
+    //
+    //  - 86 of the original 163 closed outright.
+    //  - 21 fixtures BECAME known-gap that were not one before. They were
+    //    misrouted to another engine which rendered them without erroring, so
+    //    `weErrored` was legitimately false. Batch 3 fixed their routing, so
+    //    they now reach the sequence engine and honestly refuse on a command
+    //    it does not yet port. That is an improvement -- a wrong diagram
+    //    silently produced is worse than an honest refusal -- but it is only
+    //    visible as a known-gap once the routing is right.
+    //
+    // `nuvoja-46-dezu541` deliberately stays OUT of this set: its defect is a
+    // fixture-include-store gap (`!includedef macro`), not an unported
+    // Command, so it remains the single non-gapped defect SLI 2 reports.
+    //
+    // 98 -> 16 at batch 4 (the exogenous arrow family), then 16 -> 9 at T19.
+    // The last step closed NOTHING: seven of those sixteen were mis-measured
+    // (see the derivation above), and re-measuring them through `renderSync`
+    // found they render -- as STATE or CLASS, which is a routing defect the
+    // sibling gate still pins, not a refusal. Every one of the surviving nine
+    // was re-probed at HEAD and carries a reason true at HEAD; seven of the
+    // sixteen named a line this port now parses.
+    expect(gaps.length).toBe(9);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

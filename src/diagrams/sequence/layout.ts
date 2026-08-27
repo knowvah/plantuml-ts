@@ -17,6 +17,7 @@ import type {
   BoxGroup,
   DividerGeo,
   EventGeo,
+  MessageGeo,
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceGeometry,
@@ -32,6 +33,7 @@ import {
   type EventProcessingContext,
 } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -78,6 +80,7 @@ function assembleGeometry(
     computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth);
+  anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
   const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
 
   return {
@@ -123,6 +126,12 @@ function runEventLayout(
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/** The gap kept between the rightmost content and the document edge. Upstream
+ *  keeps it outside the drawing space -- `getBorder2()` is the content edge
+ *  and the image margin lies beyond it -- so an exo arrow anchored on the
+ *  border stops here, not at `totalWidth`. */
+const RIGHT_MARGIN = 30;
 
 function emptyGeometry(): SequenceGeometry {
   return {
@@ -209,8 +218,10 @@ function computeTotalWidth(
   const fontSpec = fontSpecOf(theme);
   // Safe: participantGeos is non-empty (guarded by the early return above)
   const lastParticipant = participantGeos[participantGeos.length - 1]!;
-  const RIGHT_MARGIN = 30;
-  let totalWidth = lastParticipant.x + lastParticipant.width + RIGHT_MARGIN;
+  let totalWidth = Math.max(
+    lastParticipant.x + lastParticipant.width + RIGHT_MARGIN,
+    exoContentRight(eventGeos) + RIGHT_MARGIN,
+  );
 
   for (const geo of eventGeos) {
     if (geo.kind !== 'message') continue;
@@ -230,6 +241,27 @@ function computeTotalWidth(
   }
 
   return totalWidth;
+}
+
+/** The message geos, in one place, for the exo passes below. */
+function messageGeosOf(eventGeos: EventGeo[]): MessageGeo[] {
+  return eventGeos.filter((g): g is MessageGeo => g.kind === 'message');
+}
+
+/**
+ * How far right an exo message forces the drawing space. `PlayingSpace` maxes
+ * every tile's `getMaxX` to place the right border
+ * (`teoz/PlayingSpace.java:75-96`), and a right-border exo's is
+ * `posC + preferredWidth` -- so a document holding one is wider than the same
+ * document without it. `0` when there is none, which never lowers the max.
+ */
+function exoContentRight(eventGeos: EventGeo[]): number {
+  let right = 0;
+  for (const geo of messageGeosOf(eventGeos)) {
+    const extent = exoRightExtent(geo);
+    if (extent !== undefined && extent > right) right = extent;
+  }
+  return right;
 }
 
 /** Fill in totalWidth on all DividerGeo entries once it's known (Step 3). */

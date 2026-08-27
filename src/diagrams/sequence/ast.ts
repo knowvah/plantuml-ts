@@ -6,6 +6,7 @@ import type { Paint } from '../../core/paint.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
+import type { ArrowConfiguration } from './sequence-arrowhead.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -36,41 +37,84 @@ export interface Participant {
   stereotype?: string;
 }
 
-export type MessageStyle =
-  | 'sync'
-  | 'async'
-  | 'reply'
-  | 'replyAsync'
-  | 'lost'
-  | 'found';
+/**
+ * Which border an exo message crosses, and which way it points.
+ * `isLeftBorder()` is `FROM_LEFT || TO_LEFT`, `isRightBorder()` is
+ * `FROM_RIGHT || TO_RIGHT`, and `getDirection()` is `+1` for
+ * `FROM_LEFT`/`TO_RIGHT`, `-1` for the other two.
+ * @see sequencediagram/MessageExoType.java:38-64
+ */
+export type MessageExoType = 'FROM_LEFT' | 'TO_LEFT' | 'FROM_RIGHT' | 'TO_RIGHT';
 
-export interface MessageEvent {
-  kind: 'message';
-  from: string; // participant id
-  to: string; // participant id
+/**
+ * What `AbstractMessage` holds for every message kind, exo or not — upstream's
+ * own split, with `Message` and `MessageExo` as its two subclasses.
+ *
+ * `parallel` and `anchor` are parsed, stored and NOT drawn (D4): every
+ * upstream consumer of `isParallel()`/`getAnchor()` lives under
+ * `sequencediagram/teoz/`, and the classic `sequencediagram/graphic/`
+ * renderer reads neither. That is upstream's behavior, not a divergence.
+ *
+ * @see sequencediagram/AbstractMessage.java:81-121
+ */
+export interface AbstractMessageEvent {
   label: string;
-  style: MessageStyle;
-  activates?: string; // participant id to auto-activate (++ shorthand)
-  deactivates?: string; // participant id to auto-deactivate (-- shorthand)
+  /** The whole arrow, as `CommandArrow.executeArg` builds it: a pair of
+   *  `ArrowDressing`s plus a per-side `ArrowDecoration`, a dashed body and an
+   *  inclination. Replaces the spike's flat six-value style enum, which
+   *  could not carry the dressing grammar (D1). */
+  arrow: ArrowConfiguration;
   sequenceNumber?: number;
   /** See `MessageGeo.sequenceLabel`'s doc comment — populated by
    *  `applyAutonumber` from `SequenceDiagramAST.autonumber`'s `prefix`/
    *  `format`. */
   sequenceLabel?: string;
-  /**
-   * T13 (mission dispatch-by-parse-attempt): the `o`/`x` arrow decorations
-   * from `CommandArrow.java:99-116` (`ARROW_DRESSING1`/`ARROW_DRESSING2`),
-   * scoped to the two literal forms the corpus bucket actually carries
-   * (`->o`/`->x` at the head, `o->`/`x->` at the tail) rather than the full
-   * dressing grammar (multi-char `<<`/`\\`/`//` async heads, inclination,
-   * per-side `[style]` brackets — not ported; see T13's report). Fed into
-   * `arrowConfigurationFor`'s override at render time.
-   * @see sequencediagram/command/CommandArrow.java:229-235
-   */
-  headCircle?: boolean;
-  tailCircle?: boolean;
-  headCross?: boolean;
-  tailCross?: boolean;
+  /** `[[http://example.com]]` — `UrlBuilder.OPTIONAL` at
+   *  `CommandArrow.java:130`, applied at `:133-135`. */
+  url?: string;
+  /** The `<<...>>` run as written, guillemets included
+   *  (`StereotypePattern.optional("STEREOTYPE")`, `CommandArrow.java:129`,
+   *  applied at `:137-140`). */
+  stereotype?: string;
+  /** `LIFECOLOR` (`CommandArrow.java:128`) — the colour applied to the
+   *  activation bar this message starts, NOT to the arrow (`:427-430`). */
+  lifeColor?: string;
+  /** The leading `&` PARALLEL marker (`CommandArrow.java:90`,
+   *  `msg.goParallel()` at `:143-145`). Stored, not drawn — see this
+   *  interface's doc comment. */
+  parallel?: boolean;
+  /** `{name}` (`CommandArrow.java:417`). Stored, not drawn. */
+  anchor?: string;
+}
+
+export interface MessageEvent extends AbstractMessageEvent {
+  kind: 'message';
+  from: string; // participant id
+  to: string; // participant id
+  activates?: string; // participant id to auto-activate (++ shorthand)
+  deactivates?: string; // participant id to auto-deactivate (-- shorthand)
+  /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
+   *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
+  multicast?: readonly string[];
+}
+
+/**
+ * `MessageExo` — a message with ONE participant, whose other end is the
+ * diagram border (`[-> Bob`, `Bob ->]`, …). Its own `SequenceEvent` member
+ * rather than a `MessageEvent` with `from === to`, because `isSelfMessage()`
+ * returns FALSE despite `getParticipant1() == getParticipant2()`
+ * (`:72-86,99-101`) — every "not a self message" guard would otherwise skip
+ * it silently (D3).
+ * @see sequencediagram/MessageExo.java:43-101
+ */
+export interface MessageExoEvent extends AbstractMessageEvent {
+  kind: 'messageExo';
+  /** `MessageExo.getParticipant()` (`:82-84`) — the single endpoint. */
+  participant: string;
+  exoType: MessageExoType;
+  /** `MessageExo.isShortArrow()` (`:57-59`) — the short forms, which size
+   *  themselves from `getPreferredWidth` instead of reaching the border. */
+  shortArrow: boolean;
 }
 
 export interface NoteEvent {
@@ -87,6 +131,24 @@ export interface NoteEvent {
    * (T13, dispatch-by-parse-attempt) rather than a full hexagon-path port.
    */
   shape?: 'rect';
+  /** The note keyword as written. `NoteStyle.getNoteStyle` maps `hnote` to
+   *  HEXAGONAL, `rnote` to BOX and anything else to NORMAL
+   *  (`NoteStyle.java:46-54`); the keyword is kept rather than the resolved
+   *  enum so the style-signature lookup (`:70-78`) can be driven from it.
+   *  Distinct from {@link NoteEvent.shape}, which is what this port DRAWS. */
+  style?: 'note' | 'hnote' | 'rnote';
+  /** The leading `/` VMERGE marker (`FactorySequenceNoteCommand.java:79,96`)
+   *  — upstream's `tryMerge` argument to `diagram.addNote(note, tryMerge)`
+   *  (`:230,252`): merge this note vertically with the previous one. */
+  vmerge?: boolean;
+  /** The `&` PARALLEL marker (`FactorySequenceNoteCommand.java:231,249-251`,
+   *  `note.goParallel()`). Stored, not drawn — see
+   *  {@link AbstractMessageEvent}'s doc comment and D4. */
+  parallel?: boolean;
+  /** The `<<...>>` run as written, guillemets included — upstream's
+   *  `STEREO` group, `note.setStereotype(...)` at
+   *  `FactorySequenceNoteCommand.java:234-241`. */
+  stereotype?: string;
 }
 
 export interface FrameEvent {
@@ -101,7 +163,7 @@ export interface FrameEvent {
     | 'critical'
     | 'group'
     /** `ref over A, B : text` (`CommandReferenceOverSeveral.java`) — modelled
-     *  as a one-branch, label-only frame; see `sequence-commands-2.ts`. */
+     *  as a one-branch, label-only frame; see `command-misc.ts`. */
     | 'ref';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
@@ -114,6 +176,10 @@ export interface FrameEvent {
    * survive parsing rather than collapse into `label`.
    */
   branchLabels: string[];
+  /** The `&` PARALLEL marker on a grouping line
+   *  (`CommandGrouping.java`, `GroupingTile.java:145,864` under `teoz/`).
+   *  Stored, not drawn — see {@link AbstractMessageEvent} and D4. */
+  parallel?: boolean;
 }
 
 export interface ActivationEvent {
@@ -139,6 +205,7 @@ export interface SpaceEvent {
 
 export type SequenceEvent =
   | MessageEvent
+  | MessageExoEvent
   | NoteEvent
   | FrameEvent
   | ActivationEvent
@@ -290,7 +357,10 @@ export interface MessageGeo {
   toX: number;
   y: number;
   label: string;
-  style: MessageStyle;
+  /** The message's `ArrowConfiguration`, carried through from
+   *  {@link AbstractMessageEvent.arrow} unchanged — it is drawing vocabulary,
+   *  not geometry, so `scaleSequenceGeometry` passes it through untouched. */
+  arrow: ArrowConfiguration;
   sequenceNumber?: number;
   /** `AutoNumber#getNextMessageNumber`'s formatted text
    *  (`DottedNumber#format`), when the source's `autonumber` carries a dotted
@@ -312,10 +382,18 @@ export interface MessageGeo {
    *  (`Display.java:703-712`). */
   labelNumber?: TextRun;
   arrowDirection: 'right' | 'left' | 'self';
-  headCircle?: boolean;
-  tailCircle?: boolean;
-  headCross?: boolean;
-  tailCross?: boolean;
+  /** {@link AbstractMessageEvent.url}, carried to the renderer. */
+  url?: string;
+  /** {@link AbstractMessageEvent.stereotype}, carried to the renderer. */
+  stereotype?: string;
+  /** {@link AbstractMessageEvent.lifeColor}, carried to the renderer. */
+  lifeColor?: string;
+  /** Exo geometry only: `MessageExoArrow` anchors one end at the border this
+   *  type names (`isLeftBorder`/`isRightBorder`), which the renderer cannot
+   *  re-derive from `fromX`/`toX`. */
+  exoType?: MessageExoType;
+  /** {@link MessageExoEvent.shortArrow}, likewise exo-only. */
+  shortArrow?: boolean;
 }
 
 export interface NoteGeo {

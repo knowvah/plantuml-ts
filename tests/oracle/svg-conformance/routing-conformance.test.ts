@@ -547,25 +547,38 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3148 agree, 2 known-misroute and 8 jar-error', () => {
+  it('the manifest splits into 3133 agree, 17 known-misroute and 8 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
-    // disagreements, so the four `state/` banner pages — which agree at
-    // NONE == NONE and were therefore never disagreements — went unexamined.
+    // disagreements, so the four `state/` banner pages -- which agree at
+    // NONE == NONE and were therefore never disagreements -- went unexamined.
     // 3148/2, not the pre-repair 3075/75: routing-heuristic-repair batches
     // 2-5 re-routed 73 of the 75 known-misroute fixtures to agree (T8
     // re-pin, plans/routing-heuristic-repair/decision-journal.md). The
-    // residual 2 are confirmed structural stop conditions this mission
-    // cannot reach: component/kokebo-27-vafi688 (no line-text discriminator
-    // between ClassDiagramFactory and DescriptionDiagramFactory) and
-    // sequence/nuvoja-46-dezu541 (!includedef preprocessor stop,
+    // residual 2 were confirmed structural stop conditions THAT mission
+    // could not reach: component/kokebo-27-vafi688 (no line-text
+    // discriminator between ClassDiagramFactory and DescriptionDiagramFactory)
+    // and sequence/nuvoja-46-dezu541 (!includedef preprocessor stop,
     // IncludeExecutor.ts:127).
     // 3148/2 until batch 4's sequence residual was censused. The 194 that
     // moved are ALL sequence sources the sequence engine cannot yet parse:
     // 163 where nothing claimed them (it refused and so did everything else)
     // and 31 where a later factory did. Every one carries the refusing LINE
     // and the unported command; see the `known-misroute` reason assertion.
-    expect(pinnedAgree.length).toBe(2954);
-    expect(pinnedMisroutes.length).toBe(196);
+    // 2954 -> 3050 agree and 196 -> 100 misroutes at
+    // `sequence-command-coverage` batch 3, which ported the note factory,
+    // grouping/autonumber/lifeline, misc and sprite command families and
+    // rebuilt CommandArrow compositionally; then 3050 -> 3132 and 100 -> 18
+    // at batch 4, which ported the exogenous arrow family that dominated
+    // the batch-3 remainder.
+    //
+    // DERIVATION of 3133/17/8, re-measured over all 3158 at T19. 3132 -> 3133
+    // and 18 -> 17 is ONE fixture: component/kokebo-27-vafi688, whose pin this
+    // gate had been reporting STALE. It measures CLASS == CLASS and is
+    // re-pinned `agree`. It is a CLASS routing repair, NOT a sequence closure,
+    // and is excluded from this mission's bucket tally. The 17 that remain are
+    // all sequence, and all still measure exactly as pinned.
+    expect(pinnedAgree.length).toBe(3133);
+    expect(pinnedMisroutes.length).toBe(17);
     expect(pinnedJarErrors.length).toBe(8);
     expect(manifest.fixtures.length).toBe(3158);
   });
@@ -579,7 +592,18 @@ describe('routing conformance — jar-error classification', () => {
     // upstream origin. Two pins predate the field (the pair this mission
     // inherited); everything censused since must carry one.
     const censused = pinnedMisroutes.filter((f) => f.reason !== undefined);
-    expect(censused.length).toBe(194);
+    // 194 -> 98 at `sequence-command-coverage` batch 3, then 98 -> 16 at
+    // batch 4. Still 16 after T19, now exactly ONE short of `pinnedMisroutes`
+    // rather than two: kokebo-27-vafi688 left the set by being re-pinned
+    // `agree`, and the one remaining uncensused pin is
+    // sequence/nuvoja-46-dezu541. It stays uncensused deliberately -- this
+    // field means "a locatable UPSTREAM origin", and nuvoja's origin is this
+    // repo's fixture include store (`!includedef macro`), so any `.java:`
+    // citation here would be false. Its mechanism is recorded in the sibling
+    // refusal gate's header and in the T20 close-out instead.
+    // All 16 reasons were re-probed at HEAD by T19; seven named a refusing
+    // line this port now parses and were rewritten.
+    expect(censused.length).toBe(16);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

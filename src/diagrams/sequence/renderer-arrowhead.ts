@@ -45,8 +45,7 @@
  */
 
 import type { Point2D } from '../../core/klimt/UTranslate.js';
-import type { Theme } from '../../core/theme.js';
-import { line, polygon, ellipse } from '../../core/svg.js';
+import { line } from '../../core/svg.js';
 import type { MessageGeo } from './ast.js';
 import {
   ARROW_DELTA_X,
@@ -56,209 +55,48 @@ import {
   headGeometryNormalSide,
   headGeometryReverseSide,
   headGeometrySelf,
+  inclination1Of,
+  inclination2Of,
+  inclinationAngle1,
+  inclinationAngle2,
 } from './sequence-arrowhead.js';
 import type {
-  ArrowCircle,
   ArrowConfiguration,
   ArrowDressing,
-  ArrowHeadKind,
-  ArrowSegment,
   HeadGeometry,
 } from './sequence-arrowhead.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { scaleHeadGeometry, scaledDashPattern } from './scale-geo.js';
+import { scaledDashPattern } from './scale-geo.js';
 
 // ---------------------------------------------------------------------------
 // Paint
 // ---------------------------------------------------------------------------
 
+import {
+  ARROW_THICKNESS,
+  niceArrowOf,
+  paintOf,
+  renderArrowHead,
+} from './renderer-arrowhead-glyph.js';
 /**
- * The two colours `drawDressing1`/`drawDressing2` reach for:
- * `getForegroundColor()` strokes (and, via `.bg()`, FILLS) every head, and
- * `getBackgroundColor()` fills the `o` circle only.
- * @see skin/rose/ComponentRoseArrow.java:201-204,238-241
- */
-interface ArrowPaint {
-  readonly color: string;
-  readonly background: string;
-}
-
-function paintOf(theme: Theme): ArrowPaint {
-  return { color: theme.colors.arrow, background: theme.colors.background };
-}
-
-/**
- * `niceArrow` is the constructor argument `Rose#createComponentArrow` passes
- * as `param.strictUmlStyle() == false` — `:296` for the self component,
- * `:340` for the flat one.
- * @see skin/rose/Rose.java:296,340
- */
-function niceArrowOf(theme: Theme): boolean {
-  return theme.strictUml !== true;
-}
-
-/**
- * Head stroke thickness. `withDirectionNormal()` seeds `thickness = 1` and
- * `AbstractComponentRoseArrow`'s constructor overwrites it with the style's
- * own stroke, which is `UStroke.simple()` — 1 — for every fixture this port
- * can produce.
- * @see skin/ArrowConfiguration.java:88-92
- * @see skin/rose/AbstractComponentRoseArrow.java:66-68
- */
-const ARROW_THICKNESS = 1;
-
-/**
- * The CROSSX saltire is the ONE head kind upstream strokes at 2, on both
- * sides and in the self component. `HeadGeometry.lines` cannot carry a
- * thickness (T1's interface contract), so it is applied here, at the
- * emitter, from the head kind.
- * @see skin/rose/ComponentRoseArrow.java:219,256
- * @see skin/rose/ComponentRoseSelfArrow.java:132,135,153,157
- */
-const CROSSX_THICKNESS = 2;
-
-function lineThicknessOf(kind: ArrowHeadKind): number {
-  return kind === 'CROSSX' ? CROSSX_THICKNESS : ARROW_THICKNESS;
-}
-
-// ---------------------------------------------------------------------------
-// Emission — tip-local geometry to markup
-// ---------------------------------------------------------------------------
-
-/** `ug.apply(getForegroundColor().bg()).draw(polygon)` — filled AND stroked. */
-function headPolygonMarkup(
-  points: readonly Point2D[],
-  tip: Point2D,
-  paint: ArrowPaint,
-  k: number,
-): string {
-  const translated = points.map((p) => ({ x: tip.x + p.x, y: tip.y + p.y }));
-  return polygon(translated, {
-    fill: paint.color,
-    stroke: paint.color,
-    strokeWidth: ARROW_THICKNESS * k,
-  });
-}
-
-/** The ASYNC stroke pair and the CROSSX saltire — stroked, never filled. */
-function headLinesMarkup(
-  segments: readonly ArrowSegment[],
-  kind: ArrowHeadKind,
-  tip: Point2D,
-  paint: ArrowPaint,
-  k: number,
-): string {
-  const thickness = lineThicknessOf(kind) * k;
-  return segments
-    .map(([a, b]) =>
-      line(tip.x + a.x, tip.y + a.y, tip.x + b.x, tip.y + b.y, {
-        stroke: paint.color,
-        strokeWidth: thickness,
-      }),
-    )
-    .join('');
-}
-
-/**
- * The `o` decoration: stroked in the foreground colour at `thinCircle`,
- * filled with the component's background colour.
- * @see skin/rose/ComponentRoseArrow.java:201-204,237-239
- */
-function headCircleMarkup(
-  arrowCircle: ArrowCircle,
-  tip: Point2D,
-  paint: ArrowPaint,
-): string {
-  const radius = arrowCircle.d / 2;
-  return ellipse(tip.x + arrowCircle.cx, tip.y + arrowCircle.cy, radius, radius, {
-    fill: paint.background,
-    stroke: paint.color,
-    'stroke-width': arrowCircle.thickness,
-  });
-}
-
-/**
- * One arrow end, translated from tip-local coordinates to the document. The
- * circle comes FIRST: both `drawDressing1` and `drawDressing2` draw it before
- * they have looked at the head at all.
- * @see skin/rose/ComponentRoseArrow.java:199-233,235-270
- */
-function renderArrowHead(
-  head: HeadGeometry,
-  kind: ArrowHeadKind,
-  tip: Point2D,
-  paint: ArrowPaint,
-  k: number,
-): string {
-  // `head` is `sequence-arrowhead.ts`'s tip-local, unscaled vocabulary —
-  // scaled here, once, before use (see scale-geo.ts's header for why
-  // scaling this OUTPUT is arithmetically identical to threading `k`
-  // through every constant that module builds it from).
-  const scaled = scaleHeadGeometry(head, k);
-  const circleMarkup =
-    scaled.circle === undefined ? '' : headCircleMarkup(scaled.circle, tip, paint);
-  const shapeMarkup =
-    scaled.polygon !== undefined
-      ? headPolygonMarkup(scaled.polygon, tip, paint, k)
-      : scaled.lines !== undefined
-        ? headLinesMarkup(scaled.lines, kind, tip, paint, k)
-        : '';
-  return circleMarkup + shapeMarkup;
-}
-
-// ---------------------------------------------------------------------------
-// Placement — drawInternalU's start / len / pos1 / pos2
-// ---------------------------------------------------------------------------
-
-/**
- * T13 (mission dispatch-by-parse-attempt): overlay the `o`/`x` decorations
- * `decoratedArrowCommand` (`sequence-commands-2.ts`) parsed onto `msg` —
- * `dressing1`/`decoration1` is the TAIL (source) end, `dressing2`/
- * `decoration2` the HEAD (destination) end, matching this module's own
- * "dressing1 is the tail side ... dressing2 is the head side" convention
- * (module doc comment above). Applied BEFORE the `fromX > toX` reverse in
- * {@link renderFlatMessageArrow}, so `headCircle`/`headCross` always mean
- * "at the participant `msg.to` names", independent of which lifeline ends
- * up left of the other on the page.
- * @see sequencediagram/command/CommandArrow.java:367-371,373-387
- */
-export function applyMessageDecorations(
-  configuration: ArrowConfiguration,
-  msg: MessageGeo,
-): ArrowConfiguration {
-  if (
-    msg.headCircle !== true &&
-    msg.tailCircle !== true &&
-    msg.headCross !== true &&
-    msg.tailCross !== true
-  )
-    return configuration;
-
-  return {
-    ...configuration,
-    decoration1: msg.tailCircle === true ? 'CIRCLE' : configuration.decoration1,
-    decoration2: msg.headCircle === true ? 'CIRCLE' : configuration.decoration2,
-    dressing1:
-      msg.tailCross === true ? { ...configuration.dressing1, head: 'CROSSX' } : configuration.dressing1,
-    dressing2:
-      msg.headCross === true ? { ...configuration.dressing2, head: 'CROSSX' } : configuration.dressing2,
-  };
-}
-
-/**
- * `ArrowConfiguration#reverse` — both dressings and both decorations swap.
- * `dashed` (upstream's `body`) is direction-independent and does not.
+ * `ArrowConfiguration#reverse` — both dressings and both decorations swap,
+ * and upstream's constructor call passes EVERY other field straight through:
+ * `body`, `color`, `isSelf`, `thickness`, `reverseDefine` and `inclination`.
+ * Spread-then-override rather than a field list, so a future addition to
+ * `ArrowConfiguration` survives the reverse instead of being silently
+ * dropped — which is exactly what happened to `inclination` while this was a
+ * field list and nothing produced one.
  * @see skin/ArrowConfiguration.java:110-113
  */
 export function reverseArrowConfiguration(
   configuration: ArrowConfiguration,
 ): ArrowConfiguration {
   return {
+    ...configuration,
     dressing1: configuration.dressing2,
     dressing2: configuration.dressing1,
     decoration1: configuration.decoration2,
     decoration2: configuration.decoration1,
-    dashed: configuration.dashed,
   };
 }
 
@@ -314,6 +152,54 @@ interface ArrowExtent {
 }
 
 /**
+ * The `(n)` slope, resolved per side. `incl1`/`incl2` are the y offsets
+ * `drawInternalU` adds to each dressing's translate (`:152-155`); `theta1`/
+ * `theta2` are the rotations the heads at those positions take.
+ *
+ * SCALED HERE. `scale-geo.ts` carries `inclination` through untouched (it
+ * spreads `MessageGeo`), so this is the "renderer scales its own remaining
+ * literals in place, where each is combined with already-scaled geometry"
+ * seam that module's header describes. `incl` and `lenFull` are both
+ * multiplied by `k`, so the ANGLE is unchanged — `atan2(i·k, w·k) ==
+ * atan2(i, w)` — and only the y offsets grow, as upstream's `format()`
+ * would have grown them on the way out.
+ */
+interface ArrowSlope {
+  readonly incl1: number;
+  readonly incl2: number;
+  readonly theta1: number;
+  readonly theta2: number;
+}
+
+function arrowSlope(configuration: ArrowConfiguration, lenFull: number, k: number): ArrowSlope {
+  const incl1 = inclination1Of(configuration) * k;
+  const incl2 = inclination2Of(configuration) * k;
+  return {
+    incl1,
+    incl2,
+    theta1: inclinationAngle1(incl1, lenFull),
+    theta2: inclinationAngle2(incl2, lenFull),
+  };
+}
+
+/**
+ * The body's two ends, in the local frame. Upstream draws the flat
+ * `ULine(len, 0)` only when BOTH inclinations are zero; each sloped branch
+ * has its own ends, and neither is the flat line's — `inclination1` runs the
+ * segment back to local x 0 rather than to `start`, and `inclination2` runs
+ * it out to `pos2` rather than to `start + len`. `inclination1` wins when
+ * both are set, because upstream tests it first.
+ * @see skin/rose/ComponentRoseArrow.java:157-162,182-186
+ */
+function arrowBodyEnds(extent: ArrowExtent, slope: ArrowSlope): readonly [Point2D, Point2D] {
+  const lineEnd = { x: extent.start + extent.len, y: 0 };
+  const lineStart = { x: extent.start, y: 0 };
+  if (slope.incl1 === 0 && slope.incl2 === 0) return [lineStart, lineEnd];
+  if (slope.incl1 !== 0) return [lineEnd, { x: 0, y: slope.incl1 }];
+  return [lineStart, { x: extent.pos2, y: slope.incl2 }];
+}
+
+/**
  * `drawInternalU`'s opening arithmetic, verbatim. `pos1` and `pos2` are read
  * off the UNTRIMMED `start`/`len` (`:100-101` runs before every adjustment at
  * `:103-140`), which is why a head sits at `width - 2` however much the line
@@ -350,11 +236,9 @@ function arrowExtent(
  * cached goldens agree: every one of them writes the `<polygon>` before the
  * `<line>` it belongs to.
  *
- * `inclination1`/`inclination2` are zero for every arrow this port's parser
- * can build (nothing calls `ArrowConfiguration#withInclination`), so `:157`'s
- * first branch is the only reachable one and the two rotated variants at
- * `:159-162` are not ported.
- * @see skin/rose/ComponentRoseArrow.java:151-157
+ * `lenFull` (`:98`) is the FULL component width, untrimmed — it is what the
+ * two head rotations are taken against, and it is not `extent.len`.
+ * @see skin/rose/ComponentRoseArrow.java:151-162
  */
 export function renderFlatMessageArrow(
   msg: MessageGeo,
@@ -367,43 +251,43 @@ export function renderFlatMessageArrow(
   const drawn =
     msg.fromX > msg.toX ? reverseArrowConfiguration(configuration) : configuration;
   const origin = { x: Math.min(msg.fromX, msg.toX), y: msg.y };
-  const extent = arrowExtent(drawn, Math.abs(msg.toX - msg.fromX), k);
-  const body = line(
-    origin.x + extent.start,
-    origin.y,
-    origin.x + extent.start + extent.len,
-    origin.y,
-    {
-      stroke: theme.colors.arrow,
-      strokeWidth: ARROW_THICKNESS * k,
-      ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-    },
-  );
-  return flatArrowHeads(drawn, origin, extent, theme) + body;
+  const lenFull = Math.abs(msg.toX - msg.fromX);
+  const extent = arrowExtent(drawn, lenFull, k);
+  const slope = arrowSlope(drawn, lenFull, k);
+  const [from, to] = arrowBodyEnds(extent, slope);
+  const body = line(origin.x + from.x, origin.y + from.y, origin.x + to.x, origin.y + to.y, {
+    stroke: theme.colors.arrow,
+    strokeWidth: ARROW_THICKNESS * k,
+    ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
+  });
+  return flatArrowHeads(drawn, origin, extent, slope, theme) + body;
 }
 
-/** `drawDressing1` at `pos1` then `drawDressing2` at `pos2`, in that order.
+/** `drawDressing1` at `(pos1, inclination1)` then `drawDressing2` at
+ *  `(pos2, inclination2)`, in that order — the y term is upstream's, at
+ *  `:152` and `:154`, and is read off the UNTRIMMED positions like the x.
  *  @see skin/rose/ComponentRoseArrow.java:151-156 */
 function flatArrowHeads(
   drawn: ArrowConfiguration,
   origin: Point2D,
   extent: ArrowExtent,
+  slope: ArrowSlope,
   theme: ScaledTheme,
 ): string {
   const paint = paintOf(theme);
   const niceArrow = niceArrowOf(theme);
   const k = theme.scaleK;
   const head1 = renderArrowHead(
-    headGeometryReverseSide(drawn.dressing1, drawn.decoration1, niceArrow),
+    headGeometryReverseSide(drawn.dressing1, drawn.decoration1, niceArrow, slope.theta1),
     drawn.dressing1.head,
-    { x: origin.x + extent.pos1, y: origin.y },
+    { x: origin.x + extent.pos1, y: origin.y + slope.incl1 },
     paint,
     k,
   );
   const head2 = renderArrowHead(
-    headGeometryNormalSide(drawn.dressing2, drawn.decoration2, niceArrow),
+    headGeometryNormalSide(drawn.dressing2, drawn.decoration2, niceArrow, slope.theta2),
     drawn.dressing2.head,
-    { x: origin.x + extent.pos2, y: origin.y },
+    { x: origin.x + extent.pos2, y: origin.y + slope.incl2 },
     paint,
     k,
   );
@@ -422,9 +306,7 @@ function flatArrowHeads(
  *
  * The decoration is passed as NONE rather than threaded: a self `o` is drawn
  * by `:104-112` from `textHeight`/`arrowHeight`, geometry this port's self
- * loop does not carry (Gap SQ-5 keeps the spike's own 40 px loop), and no
- * `MessageStyle` can carry a CIRCLE anyway — the spike's grammar has no `o`
- * token (`sequence-parse-helpers.ts#ARROW_STYLE_MAP`).
+ * loop does not carry (Gap SQ-5 keeps the spike's own 40 px loop).
  * @see skin/rose/ComponentRoseSelfArrow.java:152-173
  */
 function selfHeadGeometry(
@@ -435,16 +317,19 @@ function selfHeadGeometry(
   const dressing = configuration.dressing2;
   if (dressing.head === 'NORMAL')
     return headGeometrySelf(configuration, reverseDefine, niceArrow);
-  return headGeometryReverseSide(dressing, 'NONE', niceArrow);
+  // 0, not `slope.theta*`: no self component reads an inclination — the
+  // token appears nowhere under `net/` outside `ArrowConfiguration` and
+  // `ComponentRoseArrow` (verified by grep), so a self `(n)` draws square.
+  return headGeometryReverseSide(dressing, 'NONE', niceArrow, 0);
 }
 
 /**
  * `isReverseDefine()` is set by an arrow whose LEFT dressing carries the
- * `<`/`\`/`/` (`CommandArrow.java:306-314`, `hasDressing1butx`). Every token
- * in the spike's `ARROW_STYLE_MAP` (`sequence-parse-helpers.ts:129-135`)
- * points right, so no `MessageStyle` this renderer can be handed came from
- * one — `drawLeftSide` (`ComponentRoseSelfArrow.java:84,176-273`) is
- * unreachable and `getPolygon`'s `direction` is always +1.
+ * `<`/`\`/`/` (`CommandArrow.java:306-314`, `hasDressing1butx`).
+ * `ArrowConfiguration` does not carry the flag in this port (only the fields
+ * the drawing layer reads are modelled, `sequence-arrowhead.ts:74-94`), so
+ * `drawLeftSide` (`ComponentRoseSelfArrow.java:84,176-273`) stays unreachable
+ * and `getPolygon`'s `direction` is always +1.
  * @see sequencediagram/command/CommandArrow.java:306-314
  */
 const SELF_REVERSE_DEFINE = false;

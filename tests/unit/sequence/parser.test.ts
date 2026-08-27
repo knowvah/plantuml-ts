@@ -169,39 +169,54 @@ describe('participant declarations', () => {
 // Message events — arrow styles
 // ---------------------------------------------------------------------------
 
+// T6: `MessageEvent.style` is gone; the parser builds an
+// `ArrowConfiguration` (D1). These pin the shape each token produces; the
+// EXHAUSTIVE parity proof against the deleted adapter is in
+// `sequence-arrowhead.test.ts`.
 describe('message arrow styles', () => {
-  it('-> produces sync style', () => {
+  it('-> produces a solid NORMAL head on dressing2', () => {
     const ev = firstMessage(['Alice -> Bob: hello']);
-    expect(ev.style).toBe('sync');
+    expect(ev.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
+    expect(ev.arrow.dressing1).toEqual({ head: 'NONE', part: 'FULL' });
+    expect(ev.arrow.dashed).toBe(false);
     expect(ev.from).toBe('Alice');
     expect(ev.to).toBe('Bob');
     expect(ev.label).toBe('hello');
   });
 
-  it('->> produces async style', () => {
+  it('->> produces an ASYNC head, still solid', () => {
     const ev = firstMessage(['Alice ->> Bob: go']);
-    expect(ev.style).toBe('async');
+    expect(ev.arrow.dressing2).toEqual({ head: 'ASYNC', part: 'FULL' });
+    expect(ev.arrow.dashed).toBe(false);
   });
 
-  it('--> produces reply style', () => {
+  it('--> produces a dashed body with a NORMAL head', () => {
     const ev = firstMessage(['Alice --> Bob: ok']);
-    expect(ev.style).toBe('reply');
+    expect(ev.arrow.dashed).toBe(true);
+    expect(ev.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
   });
 
-  it('-->> produces replyAsync style', () => {
+  it('-->> produces a dashed body with an ASYNC head', () => {
     const ev = firstMessage(['Alice -->> Bob: ok']);
-    expect(ev.style).toBe('replyAsync');
+    expect(ev.arrow.dashed).toBe(true);
+    expect(ev.arrow.dressing2).toEqual({ head: 'ASYNC', part: 'FULL' });
   });
 
-  it('->? produces lost style', () => {
-    const ev = firstMessage(['Alice ->? Bob: lost']);
-    expect(ev.style).toBe('lost');
-  });
-
-  it('?-> produces found style', () => {
-    const ev = firstMessage(['Alice ?-> Bob: found']);
-    expect(ev.style).toBe('found');
-  });
+  // `->?`/`?->` were the spike's lost/found shorthand. Neither is a dressing
+  // upstream recognises: `?` is `CommandExoArrowLeft`'s ARROW_SUPPCIRCLE2
+  // marker `([?\[\]][ox]?)?` (`CommandExoArrowLeft.java:60`) for an arrow
+  // whose other end is OFF-DIAGRAM, and `PART1CODE`/`PART2CODE`
+  // (`CommandArrow.java:93,119`) cannot absorb it. The jar answers `Error
+  // line 2` for both (measured with `scripts/oracle-render.sh`, T7), so once
+  // T7 rebuilt this command from upstream's own groups they became refusals
+  // -- and the exo family that owns them is still unported.
+  it.each(['Alice ->? Bob: lost', 'Alice ?-> Bob: found'])(
+    'refuses %s, which is the exo family, not an arrow dressing',
+    (line) => {
+      const result = parseSequence([line]);
+      expect('refused' in result).toBe(true);
+    },
+  );
 
   it('self-message: from === to', () => {
     const ev = firstMessage(['Alice -> Alice: think']);
@@ -234,15 +249,20 @@ describe('message arrow styles', () => {
     expect(ev.deactivates).toBeUndefined();
   });
 
-  // `spec.charAt(0)` -- only the FIRST character is read
-  // (`CommandArrow.java:445`), so a combined suffix is one life event, not two.
-  it('reads only the first character of a combined suffix', () => {
+  // A four-character suffix carries TWO life events: upstream switches on
+  // `spec.charAt(0)` (`CommandArrow.java:446-456`) and then again on
+  // `spec.charAt(2)` when `spec.length() == 4` (`:457-466`).
+  //
+  // This previously pinned the opposite -- "reads only the first character"
+  // -- on a reading that stopped one line short of `:457`. The jar draws two
+  // activation rectangles for `Alice -> Bob --++`, this port drew one.
+  it('reads both life events of a four-character suffix', () => {
     const minusPlus = firstMessage(['Alice -> Bob --++: x']);
     expect(minusPlus.deactivates).toBe('Alice');
-    expect(minusPlus.activates).toBeUndefined();
+    expect(minusPlus.activates).toBe('Bob');
     const plusMinus = firstMessage(['Alice -> Bob ++--: x']);
     expect(plusMinus.activates).toBe('Bob');
-    expect(plusMinus.deactivates).toBeUndefined();
+    expect(plusMinus.deactivates).toBe('Alice');
   });
 
   // Upstream has ONE `CommandArrow` for both directions, so the suffix
@@ -306,7 +326,7 @@ describe('autonumber', () => {
 // participant via `getOrCreateParticipant` (`CommandActivate.java:107-108`),
 // so a bare `activate Alice` is a COMPLETE document upstream. This port's
 // `activate`/`deactivate`/`destroy` commands do not yet call
-// `ensureParticipant` (a pre-existing gap in `sequence-commands.ts`, out of
+// `ensureParticipant` (a pre-existing gap in `command-participant.ts`, out of
 // T4's additive-only scope -- fixing it would change successful-parse AST
 // shape, which acceptance criterion 2 forbids); without the prefix these
 // fixtures have zero registered participants and trip the new `isIncomplete`
@@ -663,7 +683,8 @@ describe('return command', () => {
     expect(returnMsg?.kind).toBe('message');
     expect(returnMsg?.from).toBe('Bob');
     expect(returnMsg?.to).toBe('Alice');
-    expect(returnMsg?.style).toBe('reply');
+    expect(returnMsg?.arrow.dashed).toBe(true);
+    expect(returnMsg?.arrow.dressing2).toEqual({ head: 'NORMAL', part: 'FULL' });
     expect(returnMsg?.label).toBe('result');
   });
 

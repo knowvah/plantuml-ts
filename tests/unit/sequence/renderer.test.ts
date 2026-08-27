@@ -19,6 +19,8 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
@@ -67,6 +69,20 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   };
 }
 
+/** The six shapes the DELETED `MessageStyle` enum named, as the
+ *  `ArrowConfiguration` the parser now builds for each. Kept as a naming
+ *  convenience for the fixtures below; the exhaustive proof that these ARE
+ *  the configurations the deleted adapter produced lives in
+ *  `sequence-arrowhead.test.ts`. */
+function arrowOf(style: RenderStyle): ArrowConfiguration {
+  return arrowConfigurationOf({
+    dashed: style === 'reply' || style === 'replyAsync',
+    async2: style === 'async' || style === 'replyAsync',
+  });
+}
+
+type RenderStyle = 'sync' | 'async' | 'reply' | 'replyAsync' | 'lost' | 'found';
+
 function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
   const base = {
     kind: 'message' as const,
@@ -74,7 +90,7 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
     toX: 220,
     y: 80,
     label: 'hello',
-    style: 'sync' as const,
+    arrow: arrowOf('sync'),
     arrowDirection: 'right' as const,
     ...overrides,
   };
@@ -136,7 +152,7 @@ describe('renderSequence — messages', () => {
 
   it('reply message uses dashed line style', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'reply', arrowDirection: 'left', fromX: 220, toX: 80 })],
+      events: [makeSyncMessage({ arrow: arrowOf('reply'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('stroke-dasharray');
@@ -144,7 +160,7 @@ describe('renderSequence — messages', () => {
 
   it('replyAsync message uses dashed line style', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'replyAsync', arrowDirection: 'left', fromX: 220, toX: 80 })],
+      events: [makeSyncMessage({ arrow: arrowOf('replyAsync'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('stroke-dasharray');
@@ -214,7 +230,7 @@ describe('renderSequence — messages', () => {
 
   it('lost message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'lost' })],
+      events: [makeSyncMessage({ arrow: arrowOf('lost') })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // `lost` is a MessageExoType, which governs where the LINE terminates,
@@ -228,7 +244,7 @@ describe('renderSequence — messages', () => {
 
   it('found message draws an inline head, never a marker reference', () => {
     const geo = makeGeo({
-      events: [makeSyncMessage({ style: 'found' })],
+      events: [makeSyncMessage({ arrow: arrowOf('found') })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('<polygon points="208,76,218,80,208,84,212,80"');
@@ -237,12 +253,96 @@ describe('renderSequence — messages', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T16 (sequence-command-coverage batch 5): lifecolor, url, stereotype
+// ---------------------------------------------------------------------------
+
+describe('renderSequence — message lifecolor, url and stereotype', () => {
+  it('++ #red wraps a fresh activation bar in the LIFECOLOR fill', () => {
+    // `CommandArrow.java:427-439`: `s = arg.get("LIFECOLOR", 0)` resolves to
+    // an `HColor` that only reaches `diagram.activate` on the `+` leg. The
+    // bar itself is only ever emitted on close (no end-of-diagram sweep for
+    // dangling activations in this port), so the fixture must close it.
+    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const activation = geo.events.find((e): e is ActivationGeo => e.kind === 'activation');
+    expect(activation?.color).toBe('#red');
+    // `renderActivation` -> `rect()` -> `resolvePaint` -> `HColorSet`
+    // resolves the NAMED token to its hex, then `shortenColor` collapses
+    // `#FF0000` to `#F00` -- the SAME generic pipeline every other fill
+    // goes through (`core/svg.ts:223-232`), reused here for free.
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).toContain('fill="#F00"');
+  });
+
+  it('-- never carries a LIFECOLOR onto the closing bar', () => {
+    // `manageActivations`'s `-`/`!` legs always pass `null`
+    // (`CommandArrow.java:445-450`) -- a deactivate is never colored, even
+    // when the opening `++` supplied one.
+    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const activations = geo.events.filter((e): e is ActivationGeo => e.kind === 'activation');
+    expect(activations).toHaveLength(1);
+    expect(activations[0]?.color).toBe('#red');
+  });
+
+  // `[[url]]` is parsed and carried onto `MessageGeo.url` (T12/T16) but
+  // deliberately NOT drawn as an `<a>` wrap -- verified against the golden
+  // jar, not inferred from `MessageArrow.java`'s `startUrl`/`endUrl` alone:
+  // that class is DEAD CODE in the shipped jar (`SequenceDiagram.java`
+  // imports only `teoz.SequenceDiagramFileMakerTeoz`, and no
+  // `new MessageArrow(`/`new MessageSelfArrow(` call exists anywhere), and
+  // `teoz/CommunicationTile.java` -- what actually draws a message -- never
+  // reads `AbstractMessage#getUrl()`. Confirmed on `fajixi-56-dete708`
+  // (`Alice -> Bob [[http://www.yahoo.com{...}]] : hello` renders `hello`
+  // as plain `fill="#000"` text, no `<a>` anywhere) and the self-message
+  // case `sefako-72-jono850`.
+  it('carries [[url]] onto the geometry but draws no anchor', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ url: 'http://example.com' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.url).toBe('http://example.com');
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('<a ');
+    expect(svg).not.toContain('http://example.com');
+  });
+
+  // `<<stereotype>>` is, per the Java, ONLY a style-signature lookup key
+  // (`AbstractMessage.java:60-65,74-77`) -- never drawn as text by any
+  // component. Confirmed on `terapo-81-puzi168`: `<style>.a{Linecolor red}`
+  // + `alice -> bob <<a>> : red` turns the ARROW LINE `stroke:#F00` in the
+  // golden, but the label stays plain `fill="#000"` -- no guillemet run
+  // anywhere. Wiring the stereotype to the arrow's line style is real work
+  // (a `<style>`-bucket lookup touching `sequence-arrowhead.ts`/
+  // `renderer-arrowhead.ts`) out of this task's write-set this batch (T15).
+  it('carries <<stereotype>> onto the geometry but draws no guillemet text', () => {
+    const geo = makeGeo({ events: [makeSyncMessage({ stereotype: '<<stereo>>' })] });
+    const msg = geo.events[0] as MessageGeo;
+    expect(msg.stereotype).toBe('<<stereo>>');
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('&lt;&lt;');
+  });
+
+  it('end-to-end: url and stereotype parse and lay out onto MessageGeo', () => {
+    const ast = parseSequence(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']);
+    if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
+    const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
+    const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
+    expect(msg?.url).toBe('http://example.com');
+    expect(msg?.stereotype).toBe('<<stereo>>');
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('<a ');
+    expect(svg).not.toContain('&lt;&lt;');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // T3 (sequence-root-chrome): inline arrowheads + the document shell
 // ---------------------------------------------------------------------------
 
-/** Every `MessageStyle` the spike's grammar can produce
- *  (`sequence-parse-helpers.ts#ARROW_STYLE_MAP`). */
-const ALL_MESSAGE_STYLES: readonly MessageGeo['style'][] = [
+/** Every arrow the spike's enumerated token table could produce, by its
+ *  pre-T6 `MessageStyle` name. */
+const ALL_MESSAGE_STYLES: readonly RenderStyle[] = [
   'sync', 'async', 'reply', 'replyAsync', 'lost', 'found',
 ];
 
@@ -250,7 +350,7 @@ describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
   it.each(ALL_MESSAGE_STYLES)(
     'a %s message emits no <marker, markerEnd or markerStart token',
     (style) => {
-      const geo = makeGeo({ events: [makeSyncMessage({ style })] });
+      const geo = makeGeo({ events: [makeSyncMessage({ arrow: arrowOf(style) })] });
       const svg = assembleSvg(renderSequence(geo, defaultTheme));
       expect(svg).not.toContain('<marker');
       expect(svg).not.toContain('markerEnd');
@@ -264,7 +364,7 @@ describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
     'a self %s message emits no marker reference either',
     (style) => {
       const geo = makeGeo({
-        events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: 80, toX: 110 })],
+        events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: 80, toX: 110 })],
       });
       const svg = assembleSvg(renderSequence(geo, defaultTheme));
       expect(svg).not.toContain('<marker');
@@ -321,7 +421,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   });
 
   it('draws an async head as two open strokes, not a polygon', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
     // `asyncLinesNormal` at pos2 = 131.231: two ULines to (-10, -+4).
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="62"');
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="70"');
@@ -329,7 +429,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   });
 
   it('leaves an async line untrimmed -- only FULL+NORMAL trims', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ style: 'async' }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
     // len = width - 1 only (`ComponentRoseArrow.java:97`; `:126` needs NORMAL)
     expect(svg).toContain('<line x1="81.538" y1="66" x2="132.231" y2="66"');
   });
@@ -360,9 +460,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // `:172` puts the polygon's tip at that same x2).
   const LOOP_BOTTOM_Y = SELF_Y + 20;
 
-  function selfGeo(style: MessageGeo['style']): SequenceGeometry {
+  function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
-      events: [makeSyncMessage({ style, arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
+      events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
     });
   }
 
@@ -1081,5 +1181,145 @@ describe('renderSequence — participant colours', () => {
         'participant A #pink\nA -> B: x\n@enduml',
     );
     expect(svg).toContain('#FFC0CB');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Exogenous arrows — the render path (T17, sequence-command-coverage)
+// ---------------------------------------------------------------------------
+
+/** The horizontal `<line>`s that are message bodies: `y1 === y2` (a lifeline
+ *  is vertical, `x1 === x2`). Returned as `[x1, x2]` in document order. */
+function messageBodies(svg: string): Array<[number, number]> {
+  const out: Array<[number, number]> = [];
+  for (const tag of svg.match(/<line[^>]*>/g) ?? []) {
+    const n = (a: string): number =>
+      Number(new RegExp(`${a}="([-\\d.]+)"`).exec(tag)?.[1]);
+    if (n('y1') === n('y2') && n('x1') !== n('x2')) out.push([n('x1'), n('x2')]);
+  }
+  return out;
+}
+
+/** Every arrow-head polygon's TIP — the second point, which upstream always
+ *  emits as `(0, 0)` in tip-local coordinates
+ *  (`ComponentRoseArrow.java#getPolygonNormal/getPolygonReverse`). */
+function headTips(svg: string): number[] {
+  return (svg.match(/<polygon[^>]*points="([^"]+)"/g) ?? []).map((tag) => {
+    const pts = /points="([^"]+)"/.exec(tag)?.[1] ?? '';
+    return Number(pts.split(',')[2]);
+  });
+}
+
+/** The dashed lifeline x of every participant, in document order. */
+function lifelines(svg: string): number[] {
+  return (svg.match(/<line[^>]*stroke-dasharray[^>]*>/g) ?? []).map((tag) =>
+    Number(/x1="([-\d.]+)"/.exec(tag)?.[1]),
+  );
+}
+
+function docWidth(svg: string): number {
+  return Number(/viewBox="0 0 ([\d.]+) /.exec(svg)?.[1]);
+}
+
+describe('renderSequence — exogenous arrows', () => {
+  const render = (src: string): string =>
+    renderFixtureSequence(src, new DeterministicMeasurer());
+
+  // `CommunicationExoTile#getPoint1Value` returns `tileArguments.getBorder1()`
+  // for a non-short left-border message (`:213-217`), and the component then
+  // puts its head at `pos2 = width - 2` (`ComponentRoseArrow.java:99-101`),
+  // i.e. two pixels short of the participant's lifeline. Verified against the
+  // jar on `[-> Bob : hello`: body `x1="10" x2="55.544"`, polygon tip
+  // `59.544`, lifeline `61.544` -- the same two relations this asserts.
+  it('anchors a FROM_LEFT body at the left edge and ends it on the lifeline', () => {
+    const svg = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
+    const [body] = messageBodies(svg);
+    expect(body?.[0]).toBe(0);
+    expect(headTips(svg)).toEqual([lifelines(svg)[0]! - 2]);
+  });
+
+  // The mirror: `getPoint2Value` reads `getBorder2()` (`:219-226`), which
+  // `PlayingSpace` maxes over every tile AND every participant's own box
+  // (`PlayingSpace.java:75-96,322-324`). With a second participant to the
+  // right, that box wins, so the arrow stops two pixels short of ITS right
+  // edge rather than of the document's.
+  it('anchors a TO_RIGHT head two pixels short of the right content edge', () => {
+    const svg = render('@startuml\nparticipant Bob\nparticipant Carol\nBob ->] : hello\n@enduml');
+    const rights = (svg.match(/<rect[^>]*>/g) ?? []).map(
+      (t) => Number(/x="([-\d.]+)"/.exec(t)?.[1]) + Number(/width="([-\d.]+)"/.exec(t)?.[1]),
+    );
+    expect(headTips(svg)).toEqual([Math.max(...rights) - 2]);
+  });
+
+  // `CommunicationExoTile#getMaxX` is `getPoint2()` = `posC + preferredWidth`
+  // (`:207-212,230-232`), so a right-border exo whose stretch exceeds every
+  // box widens the document.
+  it('widens the document when a TO_RIGHT exo out-reaches every participant', () => {
+    const without = render('@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\n@enduml');
+    const withExo = render(
+      '@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\nCarol ->] : bye\n@enduml',
+    );
+    expect(docWidth(without)).toBe(240);
+    expect(docWidth(withExo)).toBe(246);
+  });
+
+  // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
+  // decoration is a circle (`CommunicationExoTile.java:137-147`), and each
+  // `drawDressing` draws its own (`ComponentRoseArrow.java:199-205,235-242`).
+  // Jar on `[o->o Bob : hello`: circles at `cx="15.5"` and `cx="61.044"`
+  // against a body of `x1="20" x2="50.044"` and a lifeline of `61.544` --
+  // one 4.5 left of the body start, one half a pixel left of the lifeline.
+  it('draws both circles when an exo is decorated on both sides', () => {
+    const svg = render('@startuml\nparticipant Bob\n[o->o Bob : hello\n@enduml');
+    const centres = (svg.match(/<ellipse[^>]*>/g) ?? []).map((t) =>
+      Number(/cx="([-\d.]+)"/.exec(t)?.[1]),
+    );
+    const [body] = messageBodies(svg);
+    expect(centres).toEqual([body![0] - 4.5, lifelines(svg)[0]! - 0.5]);
+  });
+
+  // Upstream fills the `o` with the ARROW STYLE's `BackGroundColor`, which
+  // `plantuml.skin:306-310` pins to `black` -- NOT the document background.
+  // All 51 sequence corpus goldens carrying an `rx="4"` decoration circle
+  // emit `fill="#000"`, including three whose page background is red or grey.
+  it('fills the o decoration black, not with the document background', () => {
+    const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
+    expect(svg).toContain('<ellipse cx="5.5" cy="53.25" rx="4" ry="4" fill="#000"');
+    expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
+  });
+
+  // A CROSSX end draws the saltire and no polygon at all
+  // (`ComponentRoseArrow.java:216-222,253-259`); the exo path reaches it
+  // through the same component, so `[x-> Bob` must emit four stroked lines
+  // beyond the body and the lifeline, and zero heads.
+  it('draws a CROSSX exo end as a saltire and no polygon', () => {
+    const svg = render('@startuml\nparticipant Bob\n[x-> Bob : hello\n@enduml');
+    expect(headTips(svg)).toHaveLength(1); // the participant-side head only
+    const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
+    expect(saltire).toHaveLength(2);
+    // Two crossing diagonals, `spaceCrossX` right of the border end.
+    expect(messageBodies(svg)[0]).toEqual([12, 64]);
+    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([7, 7]);
+  });
+
+  // `getComponent` reverses the configuration when `getDirection() == -1`
+  // (`:96-104`), so a TO_LEFT exo's head lands on the BORDER end. Jar on
+  // `[<- Bob : hello`: polygon tip `11`, body `x1="15" x2="60.544"` -- the
+  // head is to the LEFT of the body, at `pos1 = 1` off the border.
+  it('puts a TO_LEFT head on the border end, left of the body', () => {
+    const svg = render('@startuml\nparticipant Bob\n[<- Bob : hello\n@enduml');
+    const [body] = messageBodies(svg);
+    expect(headTips(svg)).toEqual([1]);
+    expect(body).toEqual([5, 69]);
+  });
+
+  // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
+  // (`:249-255`), so `?-> Bob` keeps `getPoint1()` = `posC - preferredWidth`
+  // instead of stretching to the border.
+  it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
+    const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
+    const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
+    expect(messageBodies(long)[0]).toEqual([0, 64]);
+    expect(messageBodies(short)[0]).toEqual([16.337, 64]);
   });
 });
