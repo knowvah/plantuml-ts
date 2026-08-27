@@ -43,7 +43,7 @@ the source of truth, never the compacted summary.
 | 4 | [Dressing + exo parse](./batch-4/overview.md) | T12–T13 | 2 ∥ | [x] |
 | 5 | [Layout + arrow render](./batch-5/overview.md) | T14–T16 | 3 ∥ | [x] |
 | 6 | [Exo render](./batch-6/overview.md) | T17 | alone | [x] |
-| 7 | [Adjudicate, re-pin, close out](./batch-7/overview.md) | T18–T20 | sequential | [ ] |
+| 7 | [Adjudicate, re-pin, close out](./batch-7/overview.md) | T18–T20 | sequential | [x] |
 
 Exo arrows are **strictly sequential** across batches 4 → 5 → 6 (parse →
 layout → render), by ruling.
@@ -118,3 +118,38 @@ that the gaps are closed.
 One commit per task, referencing the ID: `feat(T7): rebuild CommandArrow
 compositionally`. Quality-gate fixes are separate: `fix(T7): …`. Never commit
 work in progress.
+
+## Close-out — CLOSED 2026-08-26, 20 of 20 tasks
+
+**Full report: [`findings/CLOSE-OUT.md`](./findings/CLOSE-OUT.md).** It carries
+the per-bucket residual census D6 requires, every unclosed residual with a
+`file:line` mechanism, and the six claims this mission had to correct.
+
+**Scoreboard as published.** `svg-sequence/diff-baseline` `status:"error"`
+**195 → 17**; `routing-baseline` `known-misroute` **196 → 17** (the 196th,
+`kokebo-27-vafi688`, is now `agree`); `refusal-baseline` `known-gap`
+**163 → 9**; refusal SLI 2 **1** (`nuvoja-46-dezu541` only). Reconciled
+exactly: **178 closures + `nuvoja` + 16 still-refusing = 195**, i.e.
+**178/195 = 91.3 %**. Whole-corpus adjudication: **0 regressions**, 7 artefact,
+7 improved, 932 unchanged, 195 inconclusive (all `baseScore: null` closures,
+each with a mechanism).
+
+**Do not quote those scores as fidelity evidence.** The comparator reaches
+**zero** of the golden's arrowhead polygons on **984 of 1141 fixtures
+(86.2 %)**; median fraction of the golden's elements reached is **16 %**; on
+**557** it never enters the diagram body. Of the 178 closures exactly **one**
+is arrow-measurable. The scores are real measurements of the instrument and
+are largely insensitive to arrow correctness — a zero-movement score on a
+blocked fixture is not evidence in either direction. `sequence-participant-g-wrapper`
+is the repair, and it gates the fidelity follow-on.
+
+**Every per-bucket estimate in the objective above was wrong while the total
+held.** Measured: T7 **40** (est. ~12), T8 **26** (~24), T9 **19** (~20), T10
+**8** (~9), T11 **3** (~6), T12 **0** (~45), T13 **82** (~77). T7 absorbed
+T12's entire bucket because D1's composed named groups arrived with T7's
+rebuild. Do not size a follow-on from this brief's bucket table.
+
+Follow-ons are filed in [`planning/next-missions.md`](../../planning/next-missions.md)
+§4–§5. No `DIVERGENCES.md` entry was written for `&`/anchor, and no
+`@knowvah/dot-engine` finding surfaced — the sequence engine emits no DOT,
+checked rather than assumed.
