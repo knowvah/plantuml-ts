@@ -1102,3 +1102,38 @@ page; the pair is not a fidelity measurement and is not pinned as one. Those
 fixtures are recorded in `refusal-baseline.json` as `known-gap`, each naming
 the unported upstream mechanism with its `File.java:line`, and in
 `routing-baseline.json` as `known-misroute` with the same citation.
+
+## Sequence activations are drawn at zero height
+
+`sequence-participant-g-wrapper` / T2, 2026-08-27.
+
+`ComponentRoseActiveLine#drawInternalU` returns before it opens its group
+when the bar has no height (`skin/rose/ComponentRoseActiveLine.java:76-79`):
+
+```java
+if (dimensionToUse.getHeight() == 0)
+    return;
+ug.startGroup(UGroup.singletonMap(UGroupType.TITLE, stringsToDisplay.toTooltipText()));
+```
+
+This port emits the bar regardless. The guard is understood and was
+implemented, then **deliberately withdrawn**, because this port's *layout*
+disagrees with the jar's about which activations are zero-height: **32 of the
+121 activation-bearing corpus fixtures** lay out at least one activation with
+`height === 0` where the jar gives it height — `autoactivate on` followed by a
+bare `deactivate` (`donuli-07-peje262`) is the smallest case, and 12 fixtures
+have *all* of theirs at zero.
+
+Porting the guard on top of that input deletes boxes the jar draws. Measured:
+it moved 24 fixtures' root-group child count **away** from the golden's, the
+distance growing by exactly the number of boxes suppressed on every one of the
+24 — so the correct guard produced strictly worse output than no guard.
+
+The defect is upstream of the guard, in layout, and is tracked as
+`sequence-zero-height-activation`. The guard lands **with** that fix, not
+before it; `tests/unit/sequence/renderer-lifeline.test.ts` pins the current
+behaviour as a divergence and inverts when the fix lands.
+
+Nothing visible to a reader changes either way — a zero-height rect paints no
+ink. What changes is whether the SVG carries a child at that index, which is
+what the conformance comparator walks.

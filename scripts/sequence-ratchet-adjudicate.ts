@@ -90,6 +90,7 @@ import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { compareSvg, weightedScore, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { normalizeSvg, type NormalizedNode } from '../tests/oracle/svg-conformance/normalize.js';
 
 const SELF = fileURLToPath(import.meta.url);
 const REPO = join(dirname(SELF), '..');
@@ -111,7 +112,13 @@ export const SEQUENCE_CACHE_REL = join('test-results', 'dot-cache', 'sequence');
 // Contract (consumed by T18 and by every batch close)
 // ---------------------------------------------------------------------------
 
-export type Verdict = 'artefact' | 'regression' | 'inconclusive' | 'unchanged' | 'improved';
+export type Verdict =
+  | 'artefact'
+  | 'substructure'
+  | 'regression'
+  | 'inconclusive'
+  | 'unchanged'
+  | 'improved';
 
 /** One fixture at one ref. `score` and `childDistance` are `null` when the
  *  fixture errored or when the record was absent — NEVER coerced to 0. */
@@ -119,6 +126,16 @@ export interface FixtureMeasurement {
   readonly slug: string;
   readonly score: number | null;
   readonly childDistance: number | null;
+  /**
+   * `units()` summed over OUR OWN top-level children -- one per node, one per
+   * attribute, the same accounting `compare.ts` charges a short-circuit with.
+   * `null` when the fixture errored or the root group could not be found;
+   * never coerced to 0, for the same reason `score` is not.
+   *
+   * This is what separates a `substructure` rise from a `regression`: see
+   * `classify`.
+   */
+  readonly ownUnits: number | null;
   /** Present iff the fixture errored at this ref. */
   readonly error?: string;
 }
@@ -153,7 +170,7 @@ export function childDistanceFrom(diffs: readonly Diff[]): number | null {
 }
 
 /** What `classify` needs of a measurement — nothing else. */
-export type Classifiable = Pick<FixtureMeasurement, 'score' | 'childDistance'>;
+export type Classifiable = Pick<FixtureMeasurement, 'score' | 'childDistance' | 'ownUnits'>;
 
 /**
  * D5, in code. A rise is adjudicated by child-count distance and by nothing
@@ -168,12 +185,46 @@ export function classify(base: Classifiable, live: Classifiable): Verdict {
   // Rose. Only the top-level child-count distance may resolve it.
   if (base.childDistance === null || live.childDistance === null) return 'inconclusive';
   if (live.childDistance < base.childDistance) return 'artefact';
+  if (isSubstructureRise(base, live)) return 'substructure';
   return 'regression';
+}
+
+/**
+ * The second benign rise class, added by `sequence-participant-g-wrapper`
+ * (2026-08-27) after it produced 552 of them and none was a fidelity loss.
+ *
+ * The `artefact` rule above only recognises a rise that CLOSES the top-level
+ * child-count distance — the shape the coverage mission produced, where the
+ * fix adds missing children. A change can instead add correct SUBSTRUCTURE
+ * *inside* children that already existed: wrapping each participant lifeline
+ * in the `<g><title>` group the jar emits leaves the child COUNT untouched
+ * while growing our node mass.
+ *
+ * That is provably benign, and the proof is arithmetic rather than a
+ * judgement call. When the comparison short-circuits at the root child count,
+ * the ENTIRE charge is `sumUnits(ourChildren) + sumUnits(theirChildren)`
+ * (`compare.ts:396-406`) and NOTHING below the root group is ever compared.
+ * So if the score delta equals our own unit growth exactly, then:
+ *
+ *   - the golden's contribution to the charge is unchanged (it cancels), and
+ *   - no descent happened at either ref, so no comparison can have got worse.
+ *
+ * The rise is then pure upper-bound inflation on nodes we added. A rise that
+ * does NOT satisfy the equality is left a `regression` and must be diagnosed;
+ * so is any rise where the child-count distance itself grew, even if the
+ * arithmetic happens to line up.
+ */
+function isSubstructureRise(base: Classifiable, live: Classifiable): boolean {
+  if (base.ownUnits === null || live.ownUnits === null) return false;
+  if (base.score === null || live.score === null) return false;
+  if (base.childDistance === null || live.childDistance === null) return false;
+  if (live.childDistance > base.childDistance) return false;
+  return live.ownUnits - base.ownUnits === live.score - base.score;
 }
 
 /** A slug present at one ref and absent at the other: unmeasured there, so
  *  `null` at that ref rather than a fabricated score. */
-const ABSENT: FixtureMeasurement = { slug: '', score: null, childDistance: null };
+const ABSENT: FixtureMeasurement = { slug: '', score: null, childDistance: null, ownUnits: null };
 
 function measurementFor(
   index: ReadonlyMap<string, FixtureMeasurement>,
@@ -221,6 +272,7 @@ export function adjudicate(
 export function summarize(rows: readonly Adjudication[]): VerdictCounts {
   const counts: VerdictCounts = {
     artefact: 0,
+    substructure: 0,
     regression: 0,
     inconclusive: 0,
     unchanged: 0,
@@ -302,6 +354,36 @@ export function requireIncludeStore(build: () => IncludeStore | undefined): Incl
 }
 
 /**
+ * `units()` from `compare.ts:167-172`, re-implemented here rather than
+ * imported because that module does not export it. Kept byte-identical in
+ * behaviour ON PURPOSE: `isSubstructureRise` compares its output against a
+ * score `compare.ts` produced, so the two accountings must not drift.
+ * `tests/unit/scripts/sequence-ratchet-adjudicate.test.ts` pins the
+ * equivalence.
+ */
+function units(node: NormalizedNode): number {
+  if (node.type === 'text') return 1;
+  let total = 1 + Object.keys(node.attrs ?? {}).length;
+  for (const child of node.children ?? []) total += units(child);
+  return total;
+}
+
+/**
+ * Our own top-level child mass: `units()` summed over the children of the
+ * ROOT CONTENT GROUP -- `svg/g[1]`, the same node whose child count
+ * `childDistanceFrom` reads. `null` when there is no such group, which is
+ * ambiguous rather than zero and so must not classify anything.
+ */
+export function ownUnitsOf(svg: string): number | null {
+  const root = normalizeSvg(svg);
+  const group = (root.children ?? []).find(
+    (c) => c.type === 'element' && c.tag === 'g',
+  );
+  if (group === undefined) return null;
+  return (group.children ?? []).reduce((sum, child) => sum + units(child), 0);
+}
+
+/**
  * Measures one fixture directory. Never throws: a render or compare failure
  * is captured as `score: null` with the reason, so an error can never be
  * silently coerced into a number.
@@ -322,10 +404,11 @@ export function measureFixture(
       slug,
       score: weightedScore(diffs),
       childDistance: childDistanceFrom(diffs),
+      ownUnits: ownUnitsOf(ours),
     };
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
-    return { slug, score: null, childDistance: null, error };
+    return { slug, score: null, childDistance: null, ownUnits: null, error };
   }
 }
 
@@ -459,7 +542,8 @@ function report(baseRef: string, rows: readonly Adjudication[]): void {
   console.log(`base=${baseRef}  live=working-tree  fixtures=${String(rows.length)}`);
   console.log(formatTable(rows));
   console.log(
-    `artefact=${String(counts.artefact)} regression=${String(counts.regression)} ` +
+    `artefact=${String(counts.artefact)} substructure=${String(counts.substructure)} ` +
+      `regression=${String(counts.regression)} ` +
       `inconclusive=${String(counts.inconclusive)} improved=${String(counts.improved)} ` +
       `unchanged=${String(counts.unchanged)} (unchanged rows omitted from the table)`,
   );

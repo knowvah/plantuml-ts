@@ -127,12 +127,20 @@ describe('renderActivation', () => {
     );
   });
 
-  it('emits NOTHING at zero height -- not an empty group', () => {
-    // `if (dimensionToUse.getHeight() == 0) return;` sits ABOVE `startGroup`
-    // (`:76-79`), so unlike the lifeline there is no group left behind. This
-    // branch is invisible in a golden diff -- absence looks like absence --
-    // which is why it is asserted directly.
-    expect(renderActivation(activation({ height: 0 }), theme)).toBe('');
+  it('still emits a zero-height bar -- the documented partial port', () => {
+    // Upstream returns BEFORE `startGroup` at zero height
+    // (`ComponentRoseActiveLine.java:76-79`), so the jar emits nothing at all.
+    // This port deliberately does not mirror that yet: its LAYOUT produces
+    // `height === 0` on 32 activation-bearing fixtures where the jar produces
+    // height, so the faithful guard would delete boxes the jar draws and move
+    // 24 fixtures' root child counts AWAY from the golden's.
+    //
+    // Pinned as a DIVERGENCE, not as desired behaviour: when
+    // `sequence-zero-height-activation` lands the layout fix, this test
+    // inverts to assert `''` and the guard goes in beside it. See
+    // `DIVERGENCES.md`.
+    expect(renderActivation(activation({ height: 0 }), theme)).toContain('<rect');
+    expect(renderActivation(activation({ height: 0 }), theme)).toContain('<title></title>');
   });
 });
 

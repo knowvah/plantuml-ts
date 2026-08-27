@@ -130,8 +130,19 @@ export function renderLifeline(
  * and the jar emits `<title></title>` rather than omitting the element.
  */
 export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
-  if (act.height === 0) return '';
-
+  // DELIBERATE PARTIAL PORT -- the zero-height early return above is NOT
+  // mirrored yet, and that is a decision rather than an oversight. See
+  // `DIVERGENCES.md` "Sequence activations are drawn at zero height".
+  //
+  // This port's LAYOUT gives some activations `height === 0` where the jar's
+  // gives them height -- 32 of the 121 activation-bearing corpus fixtures,
+  // `autoactivate on` + a bare `deactivate` among them. Suppressing those
+  // faithfully would delete a box the jar draws, moving our root child count
+  // AWAY from the golden's on 24 fixtures (measured: the distance grows by
+  // exactly the number of boxes suppressed, every row). Porting the guard
+  // correctly on top of wrong input is strictly worse output than not porting
+  // it, so it lands WITH the layout fix, not before it:
+  // `sequence-zero-height-activation`.
   const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
   const x = act.lifelineX - half;
   const fill = act.color ?? theme.colors.activation;
