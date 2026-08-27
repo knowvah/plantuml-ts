@@ -498,6 +498,62 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   });
 });
 
+describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () => {
+  // `PlayingSpaceWithParticipants#drawU` (`teoz/...java:218-227`) runs five
+  // passes in this order: backgrounds, lifelines+liveboxes, heads, footbox,
+  // foreground tiles. The comparator walks the root group's children BY
+  // INDEX, so this order is not cosmetic -- a pass in the wrong place shifts
+  // every following sibling and costs the whole run its alignment.
+  it('emits the footbox row BEFORE the foreground tiles', () => {
+    // Upstream draws the footbox at `:224-225` and only then calls
+    // `playingSpace.drawForeground(ugBody)` at `:227` -- so an arrow paints
+    // OVER a footbox, not under it. This renderer used to emit the footbox
+    // last.
+    const { body } = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);
+
+    const firstPolygon = body.indexOf('<polygon');
+    const lastRect = body.lastIndexOf('<rect');
+    expect(firstPolygon).toBeGreaterThan(-1);
+    expect(lastRect).toBeLessThan(firstPolygon);
+  });
+
+  it('emits lifelines and liveboxes first, then heads, then footbox', () => {
+    const { body } = renderSequence(
+      makeGeo({
+        events: [
+          { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40 },
+          makeSyncMessage(),
+        ],
+      }),
+      defaultTheme,
+    );
+
+    // Three titled groups lead: Alice's lifeline, Alice's livebox (empty
+    // title, per `ComponentRoseActiveLine`), then Bob's lifeline.
+    expect([...body.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual([
+      'Alice',
+      '',
+      'Bob',
+    ]);
+
+    // Four head/footbox rects (two participants x head + foot) all precede
+    // the first arrow.
+    const upToArrow = body.slice(0, body.indexOf('<polygon'));
+    expect((upToArrow.match(/<rect/g) ?? []).length).toBe(2 + 1 + 2 + 2);
+  });
+
+  it('suppresses the footbox row without disturbing the other passes', () => {
+    const { body } = renderSequence(
+      makeGeo({ showFootbox: false, events: [makeSyncMessage()] }),
+      defaultTheme,
+    );
+
+    const upToArrow = body.slice(0, body.indexOf('<polygon'));
+    // Two lifeline hover rects + two head rects, and no footbox row.
+    expect((upToArrow.match(/<rect/g) ?? []).length).toBe(2 + 2);
+  });
+});
+
 describe('renderSequence -- fragment shape (T3 AC4)', () => {
   it('tags the fragment SEQUENCE and leaves the body unwrapped', () => {
     const fragment = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);

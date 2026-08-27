@@ -466,19 +466,26 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     children.push(renderParticipantBox(p, scaledTheme));
   }
 
-  // 3. Events (messages, activations, notes, frames, dividers)
-  for (const event of scaledGeo.events) {
-    children.push(renderEvent(event, scaledTheme));
-  }
-
-  // 4. Footer boxes, unless suppressed. `SequenceDiagram#isShowFootbox`
-  //    (`SequenceDiagram.java:474-486`) is resolved once at layout, which is
-  //    also where the space for this row is (not) reserved -- see
-  //    `layout.ts#isShowFootbox`.
+  // 3. Footer boxes, unless suppressed -- BEFORE the foreground tiles.
+  //    `PlayingSpaceWithParticipants#drawU:223-227` draws the footbox row
+  //    immediately after the heads and only then calls
+  //    `playingSpace.drawForeground(ugBody)`, so upstream lets an arrow paint
+  //    OVER a footbox. Emitting it last, as this renderer used to, inverts
+  //    that z-order as well as shifting every following child index.
+  //    `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`) is
+  //    resolved once at layout, which is also where the space for this row is
+  //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
       children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
     }
+  }
+
+  // 4. Foreground tiles -- messages, notes, frames, dividers.
+  //    `playingSpace.drawForeground(ugBody)` (`:227`), the LAST of the five
+  //    passes. Activations are absent here by design; see step 1.
+  for (const event of scaledGeo.events) {
+    children.push(renderEvent(event, scaledTheme));
   }
 
   return {
