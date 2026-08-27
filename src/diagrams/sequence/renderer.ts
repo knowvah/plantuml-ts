@@ -25,7 +25,6 @@ import type {
   ParticipantGeo,
   EventGeo,
   NoteGeo,
-  ActivationGeo,
   FrameGeo,
   DividerGeo,
 } from './ast.js';
@@ -35,14 +34,9 @@ import { rect, line, text, noteBox, image, ellipse } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { renderMessage } from './renderer-message.js';
 import { renderActorShape, renderDatabaseShape } from './renderer-participant-shapes.js';
+import { renderLifeline, renderActivation } from './renderer-lifeline.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
-
-// ---------------------------------------------------------------------------
-// Activation constants
-// ---------------------------------------------------------------------------
-
-const ACTIVATION_HALF_WIDTH = 5; // activationWidth / 2
 
 /** `TextBlockSprited`'s badge-to-label gap (`:65-67`) -- see
  *  `sequence-layout-participants.ts`'s own `BADGE_GAP`, which sizes the box
@@ -187,32 +181,6 @@ function renderFooterBox(
     stroke: p.border,
   });
   return box + renderNameBlock(p, lifelineEndY + p.height / 2, theme);
-}
-
-function renderLifeline(
-  p: ParticipantGeo,
-  lifelineEndY: number,
-  theme: ScaledTheme,
-): string {
-  const startY = p.y + p.height;
-  return line(p.centerX, startY, p.centerX, lifelineEndY, {
-    stroke: theme.colors.lifeline,
-    strokeDasharray: scaledDashPattern(theme.scaleK),
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Activation helpers
-// ---------------------------------------------------------------------------
-
-function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
-  const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
-  const x = act.lifelineX - half;
-  const fill = act.color ?? theme.colors.activation;
-  return rect(x, act.y, half * 2, act.height, {
-    fill,
-    stroke: theme.colors.border,
-  });
 }
 
 // ---------------------------------------------------------------------------

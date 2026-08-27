@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1037 modules · 3671 exported names.
+1038 modules · 3673 exported names.
 
 ## `src/`
 
@@ -1267,6 +1267,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
 | `renderer-arrowhead-glyph.ts` | `paintOf`, `niceArrowOf`, `ARROW_THICKNESS`, `renderArrowHead` | Arrow-head GLYPH drawing: the paint, the polygon, the async lines and the decoration circle that one arrow END draws. |
 | `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
+| `renderer-lifeline.ts` | `renderLifeline`, `renderActivation` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderActorShape`, `renderDatabaseShape` | renderer-participant-shapes.ts — the `actor`/`database` participant ICONS, split out of `renderer.ts` (which was already at 493 of the repo's 500-line cap — the same reason `renderer-arrowhead.ts` split off its own file, see that module's h |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
