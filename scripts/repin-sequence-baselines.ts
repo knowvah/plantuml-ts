@@ -22,6 +22,7 @@ import { join } from 'node:path';
 import { renderSync } from '../src/index.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
+import { fullDescription } from '../src/core/version.js';
 
 const DIR = 'test-results/dot-cache/sequence';
 const TYPE_RE = /data-diagram-type="([A-Z]+)"/;
@@ -45,6 +46,23 @@ const measured = new Map(snap.map((r) => [r.slug, r]));
 
 const store = fixtureIncludeStore();
 const routed = new Map<string, string>();
+// `weErrored` as the GATE defines it: the DISPATCHED render is a PSystemError
+// page. NOT "the sequence engine could not render it" -- a fixture that
+// misroutes to STATE and draws fine there has `weErrored: false`, and reading
+// it off `renderFixtureSequence` (which forces the sequence engine) records
+// the opposite. That bug mis-pinned 7 fixtures at this mission's batch-3
+// close; found by T19.
+const dispatchErrored = new Map<string, boolean>();
+
+/** `weErroredIn` from `refusal-coverage.test.ts`, duplicated rather than
+ *  imported for the reason that file states about its own sibling: importing
+ *  a `.test.ts` executes its module body. Built from `fullDescription()`
+ *  itself, never spelled out, so a version bump cannot silently blind it.
+ *  Scans the WHOLE document deliberately -- the banner's offset moves with
+ *  source length. */
+function weErroredIn(ours: string): boolean {
+  return ours.includes(`>${fullDescription()}</text>`);
+}
 for (const slug of readdirSync(DIR)) {
   const p = join(DIR, slug, 'in.puml');
   if (!existsSync(p)) continue;
@@ -56,9 +74,11 @@ for (const slug of readdirSync(DIR)) {
     });
   } catch {
     routed.set(slug, 'NONE');
+    dispatchErrored.set(slug, true);
     continue;
   }
   routed.set(slug, TYPE_RE.exec(svg)?.[1] ?? 'NONE');
+  dispatchErrored.set(slug, weErroredIn(svg));
 }
 
 let n = 0;
@@ -107,9 +127,9 @@ writeFileSync(rtPath, JSON.stringify(rt, null, 2) + '\n');
 const rfPath = 'oracle/goldens/svg-conformance/refusal-baseline.json';
 const rf = JSON.parse(readFileSync(rfPath, 'utf8'));
 for (const f of rf.fixtures) {
-  const m = measured.get(f.slug);
-  if (m === undefined || f.type !== 'sequence') continue;
-  const errors = m.score === null;
+  if (f.type !== 'sequence') continue;
+  const errors = dispatchErrored.get(f.slug);
+  if (errors === undefined) continue;
   if (f.weErrored !== errors) {
     delete f.reason;
     f.weErrored = errors;
