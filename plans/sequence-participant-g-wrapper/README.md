@@ -65,8 +65,8 @@ the source of truth, never the compacted summary.
 
 | # | Batch | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| 1 | [Re-mirror the child sequence](./batch-1/overview.md) | T1–T3 | sequential — one writer on `renderer.ts` | [ ] |
-| 2 | [Adjudicate, re-pin, close out](./batch-2/overview.md) | T4–T5 | sequential | [ ] |
+| 1 | [Re-mirror the child sequence](./batch-1/overview.md) | T1–T3 | sequential — one writer on `renderer.ts` | [x] |
+| 2 | [Adjudicate, re-pin, close out](./batch-2/overview.md) | T4–T5 | sequential | **HALTED** — adjudicated, re-pin blocked, closed out |
 
 Batch 1 is **strictly sequential**: all three tasks write
 `src/diagrams/sequence/renderer.ts`, so they are one write-set and cannot be
@@ -128,3 +128,25 @@ Halt and wait for human input if any of these occur:
 - Naming, helper extraction, and comment wording inside the write-set.
 - A fixture whose score does not move: record it, do not chase it. Not every
   fixture has an activation or a footbox.
+
+
+---
+
+## Outcome (2026-08-27)
+
+**HALTED before merge; code complete, measured, gates green except the
+ratchet.** Read [`findings/CLOSE-OUT.md`](./findings/CLOSE-OUT.md).
+
+- Objective **met**: fixtures reporting arrow geometry went **42 -> 487**,
+  records **721 -> 7 922**. `celego-19-laji937` matches the golden's root-group
+  child sequence tag for tag.
+- Σ weightedScore **1 291 577 -> 1 241 546**.
+- Adjudicated vs `main`: artefact=0 **substructure=557 regression=0**
+  improved=557 inconclusive=27.
+- **Blocked on 10 fixtures** by a fourth, unscoped pass divergence (grouping
+  tiles draw in the background pass). 5 of the 10 are measured structural
+  regressions, so the re-pin was deliberately not run.
+- Gates: `npm run build`, `npm run typecheck`, `npm run lint` **green**;
+  `npm test` fails 567 sequence-ratchet assertions (557 re-pinnable, 10 not).
+
+**Next**: `sequence-frame-background-pass`, then re-adjudicate, re-pin, merge.

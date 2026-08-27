@@ -881,7 +881,77 @@ Ordered by how ready they are, not by size.
   `teoz/NoteTile.java` and reading the method. **A call-site census is not
   evidence about what upstream draws. Only the method body is.**
 
-- **`sequence-participant-g-wrapper`** — FILED 2026-08-26 by
+- **`sequence-frame-background-pass`** — FILED 2026-08-27 by
+  `sequence-participant-g-wrapper` T3, mechanism verified byte-for-byte
+  against two goldens. **Grouping tiles draw in the BACKGROUND pass, and this
+  port emits them only in the foreground.** `PlayingSpace#drawBackground`
+  (`teoz/PlayingSpace.java:109-117`) walks the whole tile tree, so each group
+  emits, before the lifelines: (1) a **Blotter** colour band
+  (`GroupingTile#drawCompBackground`), and (2) its **outline rect** — which is
+  then emitted AGAIN in the foreground, because `GroupingTile#drawU:267` calls
+  `comp.drawU` OUTSIDE the `isBackground()` guard at `:262`.
+  Verified, not inferred: `pixopo-04-zitu732`'s golden carries the identical
+  `<rect x="13.469" y="78" width="90.775" height="52" fill="none"
+  style="stroke:#000;stroke-width:1.5;"/>` at top-level index 0 AND index 15;
+  `kejoke-76-curu931` shows band+outline pairs for all twelve of its groups.
+  **This BLOCKS `sequence-participant-g-wrapper` from merging** — 10 fixtures
+  rise on it and 5 are measured structural regressions.
+  Three parts, and the first is why this is a mission not a task:
+  `FrameGeo` (`src/diagrams/sequence/ast.ts`) carries **no background
+  colour**, so the Blotter needs parser → AST → layout work; the outline
+  duplication is small; and frames must be emitted in TILE order (their header
+  sits between the messages they contain), where this port's `events` array is
+  flat.
+  A partial attempt (outline only) was made and reverted inside that mission:
+  it raised `improved` 557→600 but traded 0 regressions for 5, and
+  `luzapi-49-rati107` shows a further layer — a bare `stroke-dasharray:1,4`
+  delay line emitted BETWEEN lifeline groups, unwrapped, per `Rose.java:210`'s
+  `PARTICIPANT_LINE`-only branch.
+  See `plans/sequence-participant-g-wrapper/findings/CLOSE-OUT.md`.
+
+- **`sequence-zero-height-activation`** — FILED 2026-08-27 by
+  `sequence-participant-g-wrapper` T2, sized. **32 of the 121
+  activation-bearing corpus fixtures lay out at least one activation with
+  `height === 0` where the jar gives it height**; 12 have ALL of theirs at
+  zero. `autoactivate on` + a bare `deactivate` (`donuli-07-peje262`) is the
+  smallest case.
+  Consequence, and why it is filed rather than fixed there: it makes the
+  correct port of `ComponentRoseActiveLine.java:76-79` — which returns BEFORE
+  `startGroup` at zero height — produce strictly WORSE output than not porting
+  it, because suppressing the box deletes a child the jar draws. Measured: 24
+  fixtures' root child-count distance grew by exactly the number of boxes
+  suppressed, every row. The guard is therefore withdrawn and documented in
+  `DIVERGENCES.md`; it lands WITH this fix.
+  `tests/unit/sequence/renderer-lifeline.test.ts` pins the divergence and
+  inverts when this lands.
+
+- **`sequence-participant-g-wrapper`** — EXECUTED 2026-08-27, **HALTED before
+  merge** on `feat/sequence-participant-g-wrapper` (5 commits, unmerged).
+  **Objective met**: fixtures reporting `polygon/@points` diffs went **42 →
+  487**, records **721 → 7 922** (same 1124 measured fixtures, same 17 skips).
+  `celego-19-laji937` matches the golden's root-group child sequence tag for
+  tag. Σ weightedScore 1 291 577 → 1 241 546. Adjudicated vs `main`:
+  artefact=0 **substructure=557 regression=0** improved=557 inconclusive=27.
+  Three divergences fixed, all from `teoz/PlayingSpaceWithParticipants
+  #drawU:218-227`: the lifeline `<g><title>` + hover-rect group
+  (`ComponentRoseLine.java:74-108`), activations wrapped and moved into the
+  lifeline pass interleaved per participant
+  (`LivingSpace#drawLineAndLiveboxes`), and the footbox drawn before the
+  foreground tiles. **T3 carries essentially all the value** — reverting it
+  alone drops the win to 45 fixtures / 857 records, so this does not split.
+  Blocked on `sequence-frame-background-pass` (above). The re-pin was
+  deliberately NOT run: `repin-sequence-baselines.ts` requires zero
+  unadjudicated rises and 10 remain, 5 of them measured regressions.
+  **Correction to the filing below**: T15's "not one `polygon/@points` record
+  exists" was true of `celego`, not of the corpus — 42 fixtures already
+  reported arrow geometry on main. The gain is 11.6x, not zero-to-some.
+  Also delivered: a `substructure` verdict for
+  `scripts/sequence-ratchet-adjudicate.ts`. Its `artefact` rule only
+  recognised a rise that CLOSES the child-count distance; a change that adds
+  correct substructure INSIDE existing children grows our node mass without
+  touching the count, and all 552 such rises were mis-called `regression`.
+
+- **`sequence-participant-g-wrapper` (original filing)** — FILED 2026-08-26 by
   `sequence-command-coverage` T15, mechanism measured and verified twice.
   **The sequence comparator cannot measure arrow fidelity at all today.** The
   jar wraps each participant in `<g><title>A</title><rect/><line/></g>`; this
