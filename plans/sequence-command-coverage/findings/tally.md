@@ -266,19 +266,40 @@ date to `291dfcfd` / `0315454c`. Both gates exclude it (its golden is one of
 the jar's own error pages), so nothing fails. **Deliberately not re-pinned**: no
 T18 verdict covers it and it is not a sequence fixture. Handed to T20.
 
-### FINDING 4 — one unreproduced gate failure, mechanism NOT established
+### FINDING 4 — two aborted runs, one mechanism: worker-pool starvation
 
-One run of the three gates reported 2 failures, both
-`corpus completeness > every fixture on disk is pinned, and every pin is on
-disk`. At the identical tree state the same three files then passed twice in
-combination and once in isolation, and the failing run's own preamble printed
-the final pinned counts. Ruled out: stale baseline content (counts printed
-correctly in that very run); a stray file under a walked root (`git status` is
-clean apart from the write-set); a genuine pin/disk mismatch (four subsequent
-passes). **The mechanism is not known** — recorded rather than declared
-resolved. Suspected but unproven: contention with a concurrently finishing
-`npm test`, the class of hazard `stdlib-run-isolation` and `stdlib-lock-sharing`
-document. T20 should treat this as an open flake, not a closed item.
+Two runs during T19 reported failure without a single failing assertion.
+
+1. Three gates run together reported 2 failures, both
+   `corpus completeness > every fixture on disk is pinned, and every pin is on
+   disk`.
+2. A full `npm test` exited 1 with **645** of 653 files run, 16704 passed,
+   **0 failed**, and `Errors 7`.
+
+**Mechanism.** Run 2's seven errors are all
+`Error: [vitest-pool]: Failed to start forks worker for test files … Caused by:
+Error: [vitest-pool-runner]: Timeout waiting for worker to respond`. No test
+failed; seven files never started, and vitest exits non-zero on an unhandled
+error. The seven are unrelated to this write-set
+(`class-member-creole`, `CreoleParser`, `class-usecase-actor-routing`,
+`svek/cluster`, `creole-text-lines`, …). Both aborted runs were launched while
+a previous `npm test` was still winding down — one of them had just been
+SIGTERMed at a 10-minute harness timeout (exit 143) — so two vitest fork pools
+were competing for the box. This is the hazard `stdlib-run-isolation` and
+`stdlib-lock-sharing` already document for this repo.
+
+**Ruled out.**
+- *Not a defect in the pins or the code.* A clean run with nothing else
+  competing: 653 files, **16876 passed, 0 failed, exit 0**, on the committed
+  tree. The three gates also pass in isolation and in combination.
+- *Not a leftover process at the time of measurement.* `pgrep -f vitest`
+  returns 0 after the aborted run.
+- *Not a coverage-threshold failure.* The aborted run still reported
+  95.34 / 90.37 / 96.89 / 96.40, all above the 90/90/90 floor.
+
+**Consequence for T20:** do not run `npm test` concurrently with another vitest
+invocation in this repo, and treat a non-zero exit with `0 failed` and a file
+count below 653 as this, not as a regression.
 
 ---
 
@@ -293,7 +314,8 @@ document. T20 should treat this as an open flake, not a closed item.
    The three-fixture `CommandLinkAnchor` group and the three-fixture
    `note…OnArrow.createMultiLine` group are the two largest.
 4. **`class/sadamo-18-siva346`** — a pre-existing stale pin (Finding 3).
-5. **The completeness-gate flake** (Finding 4).
+5. **Worker-pool starvation under concurrent vitest runs** (Finding 4) —
+   a harness constraint, not a defect.
 6. **`scripts/repin-sequence-baselines.ts`** measures the wrong quantity for
    `weErrored` (`:112`) and never clears `reason` on a routing fall (`:93-99`).
    Both produced real bad pins this mission; fix before the script is reused.
