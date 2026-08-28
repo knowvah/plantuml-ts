@@ -866,6 +866,64 @@ Ordered by how ready they are, not by size.
   lifeline groups per `Rose.java:210`'s `PARTICIPANT_LINE`-only branch); see
   `DIVERGENCES.md` "Background-pass rollout".
 
+- **`sequence-participant-symbols`** — SCOPED 2026-08-28, mechanisms
+  measured, not inherited. The sequence engine hand-rolls its participant
+  head/tail glyphs instead of using the USymbol renderers this repo already
+  ports. `renderDatabaseShape`
+  (`src/diagrams/sequence/renderer-participant-shapes.ts:209-212`) emits
+  `rect + line + line + ellipse` — four primitives — where upstream's
+  `ComponentRoseDatabase:70` builds the glyph from
+  `USymbols.DATABASE.asSmall(...)` and `USymbolDatabase.java:62-79` draws it
+  as two `UPath`s. **We already have the faithful version**:
+  `src/core/usymbol-shapes.ts#renderDatabaseIcon:91` emits body + mouth as two
+  paths and is used by the description and class engines. Only the sequence
+  engine diverges, so this is a re-mirroring, not a port.
+
+  Measured effect: closes `junaxa-14-biko373` (surplus 6 = +2 rect, +4 line,
+  +2 ellipse, -2 path across two head glyphs; ours 47 vs golden 41). Corpus
+  reach **34** `database` fixtures. **Correction to `DIVERGENCES.md`'s
+  "Background-pass rollout" and to `sequence-frame-background-pass` T7's
+  adjudication:** both attribute `junaxa`'s surplus to "actor/database head
+  glyphs ... and the jar emits the diagram title as a top-level `<text>` we
+  place elsewhere". The title is NOT a count difference — `text` is 13 in
+  both, measured; and the actor stick man was already fixed
+  (`sequence-command-coverage` T13, 2026-08-25). It is the **database** glyph
+  alone.
+
+  **Adjacent gap found while scoping, larger than the fixture that surfaced
+  it:** `renderer.ts:141-180` special-cases only `actor` and `database`.
+  `collections`, `queue`, `entity`, `boundary` and `control` have no sequence
+  shape at all and fall through to the default participant box — **43**
+  further fixtures. `USymbolCollections.ts`, `USymbolQueue.ts`,
+  `USymbolControl.ts`, `USymbolBoundary.ts` and `USymbolEntityDomain.ts` are
+  all already ported under `src/core/decoration/symbol/`. Prior art to read
+  first: `planning/usymbol-composition.md` (all 36 symbols, though it audits
+  description-leaf SIZING, not sequence drawing).
+
+- **`sequence-activation-double-box`** — SCOPED 2026-08-28. Closes
+  `rugeco-70-muro754`, whose surplus is exactly ONE node: participant `a`
+  gets two activation `<g>` where the jar gives one (ours 32 vs golden 31;
+  histograms otherwise identical, `g` 7 vs 6). Source is `&opt test` with
+  `activate a` then `a ->> b --++`, i.e. a `--` that deactivates `a` at the
+  message followed by a trailing `deactivate a` after `end` on an
+  already-inactive lifeline. **Candidate mechanism, NOT yet confirmed — the
+  mission must diagnose it against the Java before changing anything.**
+  Corpus reach: 8 fixtures use `--++`, 59 use a `&` parallel marker.
+
+- **`fobube-11-nifo424` is NOT its own mission** — its surplus 7 is the
+  `newpage` pagination gap already filed above (`command-page.ts:19-31`: "no
+  engine in this port implements pagination"; upstream clips per page via
+  `UClip`, `PlayingSpaceWithParticipants:213-216`, `PlayingSpace
+  #getNbPages:348`). Implementing multi-page output to clear one ratchet row
+  is not proportionate. **Note for whoever decides:** the sequence ratchet
+  has no parking mechanism — `checkNoRise`
+  (`tests/oracle/svg-conformance/sequence.diff-baseline.ratchet.test.ts:206-232`)
+  compares `live <= baseline` and nothing else, with no known-gap status like
+  the refusal baseline has. So `fobube` passes only by being fixed or
+  re-pinned, and `dolefo-13-kovu702` (above) already set the precedent of
+  re-pinning this exact cause with the mechanism recorded. Until one of those
+  happens, `main`'s CI stays red on it.
+
 - **NOTE FOR ANY SEQUENCE MISSION — the `sequencediagram/graphic/` package is
   DEAD.** Established 2026-08-26 by three independent
   `sequence-command-coverage` tasks and verified leg by leg:
