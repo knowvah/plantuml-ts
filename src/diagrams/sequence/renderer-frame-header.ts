@@ -143,8 +143,17 @@ export function frameHeaderCornerPath(
  * "group" style block (`plantuml.skin:116-121`), not `styleHeader`.
  * `rect.setDeltaShadow(...)` (`:131`) is deliberately NOT ported -- see
  * decisions.md and `DIVERGENCES.md` (T8).
+ *
+ * A `ref` frame draws NOTHING here. Upstream builds it as a `ReferenceTile`
+ * (`TileBuilder.java:174-176`), not a `GroupingTile`, and its component
+ * `ComponentRoseReference` declares only `drawInternalU`
+ * (`ComponentRoseReference.java:83`), so `AbstractComponent#drawU:143-147`
+ * dispatches the EMPTY inherited `drawBackgroundInternalU` (`:139-140`) for
+ * it. See {@link renderGroupingHeaderForeground} for why the two components
+ * share this module today.
  */
 export function renderGroupingHeaderBackground(frame: FrameGeo, theme: ScaledTheme): string {
+  if (frame.frameType === 'ref') return '';
   const k = theme.scaleK;
   return rect(frame.x, frame.y, frame.width, frame.height, {
     fill: 'none',
@@ -213,6 +222,15 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
  * full-area rect the background pass drew (`:144-147`, using `symbolContext`
  * = `style`'s own group symbol context, not `styleHeader`'s), then the tab
  * text and its optional comment.
+ *
+ * A `ref` frame is a DIFFERENT component -- `ComponentRoseReference`
+ * (`ReferenceTile.java:117-124`) -- whose `drawInternalU` (`:83-136`) emits
+ * the body rect FIRST (`:99`) and the corner path SECOND (`:118`), the
+ * reverse of this one, and no `[comment]` at all (its display is split into
+ * a header at index 0 and body lines from index 1, `:67-78`). Only that
+ * ordering differs at this level, so the two share a module rather than
+ * duplicating the corner and rect; a faithful `ComponentRoseReference` port
+ * with its own `xMargin`/`heightFooter` geometry is filed for T8.
  */
 export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
@@ -224,5 +242,7 @@ export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledThe
     rx: ROUND_CORNER * k,
     ry: ROUND_CORNER * k,
   });
-  return cornerEl + bodyRectEl + renderHeaderText(frame, theme);
+  const textEl = renderHeaderText(frame, theme);
+  if (frame.frameType === 'ref') return bodyRectEl + cornerEl + textEl;
+  return cornerEl + bodyRectEl + textEl;
 }

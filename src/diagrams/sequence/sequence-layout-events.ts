@@ -179,12 +179,19 @@ function computeFrameBody(
  *  only stage holding a measurer, hence resolved here.
  *  An empty `branchLabels[0]` is treated as "no comment" (`undefined`),
  *  matching how `groupingCommand` defaults a conditionless frame's label to
- *  `''` -- there is no separate "absent" state to distinguish it from. */
+ *  `''` -- there is no separate "absent" state to distinguish it from.
+ *
+ *  A `ref` NEVER has a comment. `ReferenceTile#getComponent:117-124` builds
+ *  `Display("ref") + reference.getStrings()`, and `ComponentRoseReference`
+ *  splits that display at index 1: `subList(0, 1)` is the header ("ref"),
+ *  `subList(1, ...)` is the BODY (`ComponentRoseReference.java:67-78`). The
+ *  label is therefore body text -- this port already routes it there via
+ *  `refBodyLines` -- and there is no second box beside the tab for it. */
 function computeHeaderTab(
   event: FrameEvent,
   ctx: EventProcessingContext,
 ): { tabText: string; tabComment?: string; tabTextWidth: number; tabWidth: number; tabHeight: number } {
-  const rawComment = event.branchLabels[0];
+  const rawComment = event.frameType === 'ref' ? undefined : event.branchLabels[0];
   const comment = rawComment === undefined || rawComment === '' ? undefined : rawComment;
   const { tabText, tabComment } = groupingHeaderDisplay(event.frameType, comment);
 
