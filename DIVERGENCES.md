@@ -1137,3 +1137,75 @@ behaviour as a divergence and inverts when the fix lands.
 Nothing visible to a reader changes either way — a zero-height rect paints no
 ink. What changes is whether the SVG carries a child at that index, which is
 what the conformance comparator walks.
+
+## Grouping-frame background shadow is not ported
+
+`sequence-frame-background-pass` T1/D4, 2026-08-28.
+
+`ComponentRoseGroupingHeader.java:131` calls `rect.setDeltaShadow(symbolContext
+.getDeltaShadow())` inside `drawBackgroundInternalU` (`:126-133`), before
+filling the frame's background rect with the resolved fill colour. This
+port's background half (`src/diagrams/sequence/renderer-frame-header.ts`)
+omits the call.
+
+**Why left out:** every `Shadowing` default in `plantuml.skin` is 0, so
+`getDeltaShadow()` evaluates to 0 on every corpus fixture today and the
+omission has zero corpus reach — no fixture sets `skinparam shadowing true`
+or `Shadowing 1` on a `sequenceDiagram.group`/`groupHeader` element, and this
+port's own SName style cascade has no bucket for those two elements at all
+(see `sequence-group-style-cascade`, `planning/next-missions.md`), so there
+is currently no grammar path that would even reach the branch. Recorded as a
+gap rather than ported speculatively.
+
+**Affects:** any `group`/`loop`/`alt`/`opt`/`par`/`break`/`critical` frame
+under a skin/style that turns shadowing on. No corpus fixture currently
+does.
+
+**Category:** limitation.
+
+## Background-pass rollout: three fixtures read as a rise the ratchet cannot mechanically clear
+
+`sequence-frame-background-pass` T7, 2026-08-28.
+
+Adding the missing `PlayingSpace#drawBackground` pass
+(`teoz/PlayingSpace.java:109-117`) makes each grouping frame's outline
+`<rect>` appear before its lifelines, matching the golden's position. On
+three fixtures — `fobube-11-nifo424`, `junaxa-14-biko373`,
+`rugeco-70-muro754` — `scripts/sequence-ratchet-adjudicate.ts` reports the
+change as `regression`/`inconclusive` even though the added node is correct
+and sits at the golden's own top-level index in all three (LCP/LCS both rise
+to match; full measurement in
+`plans/sequence-frame-background-pass/findings/adjudication.md` §3b/§4).
+
+**Mechanism.** `classify` (`scripts/sequence-ratchet-adjudicate.ts:181-190`)
+and its substructure exception `isSubstructureRise` (`:217-223`) both require
+the top-level child-count distance to fall, or — for `isSubstructureRise` — to
+hold while the score delta exactly equals the added nodes' own unit cost
+(`:221` short-circuits to `false` the moment `live.childDistance >
+base.childDistance`). On these three fixtures the document was already ABOVE
+the golden's count for a pre-existing, unrelated reason, so adding one more
+CORRECT node makes the distance rise, not fall or hold — neither classifier
+rule can fire, and `classify` falls through to `regression` (or
+`inconclusive` when a base score is `null`). The tool has no rule that can
+distinguish "a correct node added to an already-oversized document" from a
+real regression, because this mission's entire purpose was to add nodes to
+documents that were already too large.
+
+Pre-existing surplus per fixture, unrelated to this mission and left
+untouched by it:
+
+- `fobube-11-nifo424` — `newpage` inside an `opt`; the golden's page 1 stops
+  at the newpage boundary and this port renders every page into one
+  document. Same mechanism as `sequence-newpage-pagination`
+  (`planning/next-missions.md`).
+- `junaxa-14-biko373` — the `actor`/`database` head glyph decomposes
+  differently from the jar's, and the jar places the diagram title as a
+  top-level `<text>` this port places elsewhere. Narrow (one fixture
+  measured), not separately filed.
+- `rugeco-70-muro754` — this port emits seven top-level `<g>` for three
+  participants where the jar emits six. Narrow (one fixture measured), not
+  separately filed.
+
+**Category:** limitation, of the adjudication instrument rather than the
+renderer — recorded so a future reader re-running the adjudicator does not
+mistake these three for a real regression introduced by this port.

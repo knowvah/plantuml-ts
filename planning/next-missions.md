@@ -860,6 +860,11 @@ Ordered by how ready they are, not by size.
   pages, the golden has 4 polygons, and the port now draws 8 (measured: base
   0, live 8, golden 4). Re-pinned at the higher score with this mechanism
   recorded. Any fixture using `newpage` carries the same overshoot.
+  **Also the mechanism behind two of `sequence-frame-background-pass`'s
+  adjudicated-benign rises** (`fobube-11-nifo424`, and — a further layer,
+  `luzapi-49-rati107`'s bare `stroke-dasharray:1,4` delay line between
+  lifeline groups per `Rose.java:210`'s `PARTICIPANT_LINE`-only branch); see
+  `DIVERGENCES.md` "Background-pass rollout".
 
 - **NOTE FOR ANY SEQUENCE MISSION — the `sequencediagram/graphic/` package is
   DEAD.** Established 2026-08-26 by three independent
@@ -881,99 +886,178 @@ Ordered by how ready they are, not by size.
   `teoz/NoteTile.java` and reading the method. **A call-site census is not
   evidence about what upstream draws. Only the method body is.**
 
-- **`sequence-frame-background-pass`** — FILED 2026-08-27 by
-  `sequence-participant-g-wrapper` T3, mechanism verified byte-for-byte
-  against two goldens. **Grouping tiles draw in the BACKGROUND pass, and this
-  port emits them only in the foreground.** `PlayingSpace#drawBackground`
-  (`teoz/PlayingSpace.java:109-117`) walks the whole tile tree, so each group
-  emits, before the lifelines: (1) a **Blotter** colour band
-  (`GroupingTile#drawCompBackground`), and (2) its **outline rect** — which is
-  then emitted AGAIN in the foreground, because `GroupingTile#drawU:267` calls
-  `comp.drawU` OUTSIDE the `isBackground()` guard at `:262`.
-  Verified, not inferred: `pixopo-04-zitu732`'s golden carries the identical
-  `<rect x="13.469" y="78" width="90.775" height="52" fill="none"
-  style="stroke:#000;stroke-width:1.5;"/>` at top-level index 0 AND index 15;
-  `kejoke-76-curu931` shows band+outline pairs for all twelve of its groups.
-  **This BLOCKS `sequence-participant-g-wrapper` from merging** — 10 fixtures
-  rise on it and 5 are measured structural regressions.
-  Three parts, and the first is why this is a mission not a task:
-  `FrameGeo` (`src/diagrams/sequence/ast.ts`) carries **no background
-  colour**, so the Blotter needs parser → AST → layout work; the outline
-  duplication is small; and frames must be emitted in TILE order (their header
-  sits between the messages they contain), where this port's `events` array is
-  flat.
-  A partial attempt (outline only) was made and reverted inside that mission:
-  it raised `improved` 557→600 but traded 0 regressions for 5, and
-  `luzapi-49-rati107` shows a further layer — a bare `stroke-dasharray:1,4`
-  delay line emitted BETWEEN lifeline groups, unwrapped, per `Rose.java:210`'s
-  `PARTICIPANT_LINE`-only branch.
-  See `plans/sequence-participant-g-wrapper/findings/CLOSE-OUT.md`.
+- **`sequence-frame-background-pass`** — DONE 2026-08-28, branch
+  `feat/sequence-frame-background-pass`, 8 tasks (T1–T8). Ported the missing
+  first of teoz's five passes, `PlayingSpace#drawBackground`
+  (`teoz/PlayingSpace.java:109-117`). T9 (merge to
+  `feat/sequence-participant-g-wrapper`, then to `main`) is the orchestrator's,
+  not yet run as of this entry.
 
-- **`sequence-zero-height-activation`** — FILED 2026-08-27 by
-  `sequence-participant-g-wrapper` T2, sized. **32 of the 121
-  activation-bearing corpus fixtures lay out at least one activation with
-  `height === 0` where the jar gives it height**; 12 have ALL of theirs at
-  zero. `autoactivate on` + a bare `deactivate` (`donuli-07-peje262`) is the
-  smallest case.
-  Consequence, and why it is filed rather than fixed there: it makes the
-  correct port of `ComponentRoseActiveLine.java:76-79` — which returns BEFORE
-  `startGroup` at zero height — produce strictly WORSE output than not porting
-  it, because suppressing the box deletes a child the jar draws. Measured: 24
-  fixtures' root child-count distance grew by exactly the number of boxes
-  suppressed, every row. The guard is therefore withdrawn and documented in
-  `DIVERGENCES.md`; it lands WITH this fix.
-  `tests/unit/sequence/renderer-lifeline.test.ts` pins the divergence and
-  inverts when this lands.
+  **Correction to this entry's own original mechanism claim.** The filing
+  below said the outline duplicates because `GroupingTile#drawU:267` calls
+  `comp.drawU` OUTSIDE the `isBackground()` guard at `:262` — true, but not
+  why a duplicate rect appears rather than nothing. Verified against the Java
+  at T8 close-out: **`AbstractComponent#drawU:142-149`** dispatches to
+  exactly ONE of two halves per call — `drawBackgroundInternalU` when
+  `context.isBackground()`, `drawInternalU` otherwise, never both, with an
+  EMPTY default at `:139-140`. `GroupingTile:267`'s unconditional
+  `comp.drawU` call is therefore safe on its own — every other component
+  silently no-ops on its off-pass through that empty default. What makes a
+  grouping frame draw twice is that `ComponentRoseGroupingHeader` OVERRIDES
+  BOTH halves (`:126-133` background, `:135-159` foreground) and draws the
+  same `URectangle` in each. The fix this mission built is therefore a
+  two-half component (D4), not a guard removed from one call site.
 
-- **`sequence-participant-g-wrapper`** — EXECUTED 2026-08-27, **HALTED before
-  merge** on `feat/sequence-participant-g-wrapper` (5 commits, unmerged).
-  **Objective met**: fixtures reporting `polygon/@points` diffs went **42 →
-  487**, records **721 → 7 922** (same 1124 measured fixtures, same 17 skips).
-  `celego-19-laji937` matches the golden's root-group child sequence tag for
-  tag. Σ weightedScore 1 291 577 → 1 241 546. Adjudicated vs `main`:
-  artefact=0 **substructure=557 regression=0** improved=557 inconclusive=27.
-  Three divergences fixed, all from `teoz/PlayingSpaceWithParticipants
-  #drawU:218-227`: the lifeline `<g><title>` + hover-rect group
-  (`ComponentRoseLine.java:74-108`), activations wrapped and moved into the
-  lifeline pass interleaved per participant
-  (`LivingSpace#drawLineAndLiveboxes`), and the footbox drawn before the
-  foreground tiles. **T3 carries essentially all the value** — reverting it
-  alone drops the win to 45 fixtures / 857 records, so this does not split.
-  Blocked on `sequence-frame-background-pass` (above). The re-pin was
-  deliberately NOT run: `repin-sequence-baselines.ts` requires zero
-  unadjudicated rises and 10 remain, 5 of them measured regressions.
-  **Correction to the filing below**: T15's "not one `polygon/@points` record
-  exists" was true of `celego`, not of the corpus — 42 fixtures already
-  reported arrow geometry on main. The gain is 11.6x, not zero-to-some.
-  Also delivered: a `substructure` verdict for
-  `scripts/sequence-ratchet-adjudicate.ts`. Its `artefact` rule only
-  recognised a rise that CLOSES the child-count distance; a change that adds
-  correct substructure INSIDE existing children grows our node mass without
-  touching the count, and all 552 such rises were mis-called `regression`.
+  **Verdict, measured** (`sequence-ratchet-adjudicate.ts`, 1141 fixtures,
+  skip 17 — identical parser-refusal set at every ref, see below): vs
+  `1aa15960` (the predecessor's tip) — artefact=63 substructure=13
+  regression=2 inconclusive=18 improved=97 unchanged=948, Σ weightedScore
+  1 241 626 → 1 219 837 (−21 789). Vs `main` (`e10c88e9`): Σ 1 291 577 →
+  1 219 837 (−71 740). The 2 `regression` and the 1 score-rising
+  `inconclusive` that survive the classifier are all three adjudicated
+  **benign** — correct nodes added to documents already larger than their
+  goldens, a shape the classifier's own rules cannot recognise as anything
+  but a rise. See `DIVERGENCES.md` "Background-pass rollout" for the
+  mechanism. No unadjudicated rise remains anywhere in the 1141.
 
-- **`sequence-participant-g-wrapper` (original filing)** — FILED 2026-08-26 by
-  `sequence-command-coverage` T15, mechanism measured and verified twice.
-  **The sequence comparator cannot measure arrow fidelity at all today.** The
-  jar wraps each participant in `<g><title>A</title><rect/><line/></g>`; this
-  port emits the bare primitives, so child 0 under `svg/g[1]` is a TAG
-  mismatch and `compare.ts:222-231` returns — `// structural mismatch — stop
-  here`. The wrapper also shifts every following child index, so the whole
-  sibling run mismatches by tag.
-  Verified by dumping all 30 diffs of `celego-19-laji937`: 4 root dimensions,
-  the rest tag mismatches (`line vs g`, `rect vs g`, `text vs rect`, `polygon
-  vs text`), and **not one `polygon/@points` record**.
-  **Why it matters beyond tidiness**: correct arrow work produces no ratchet
-  movement — and neither does incorrect arrow work. The whole dressing bucket
-  is invisible, `diff-census.json`'s sequence buckets describe the tag cascade
-  rather than arrow quality, and any task told to "make the dressing fixtures
-  fall" is given an unreachable target, which is precisely the pressure that
-  produces a fitted value.
-  Emitting the wrapper should unblock descent for the entire sequence corpus
-  at once, so this is likely the highest-leverage single change available to
-  sequence fidelity. Size it against the participant renderer before starting.
-  See `.agent-notes/T15-comparator-blocks-arrow-descent.md`, and note it
-  supersedes the conclusion in
-  `.agent-notes/T13-sequence-ratchet-rise-diagnosis.md:167-172`.
+  **All 10 of the predecessor's blocking fixtures are now `improved`**:
+  `bifuzu-54-gefo004` 549→254, `murori-42-pabo946` 333→150, `panopa-36-
+  muti317` 792→385, `pixopo-04-zitu732` 305→133, `rotila-89-juri637`
+  256→116, `tusoga-11-gabe405` 615→292, `vesaze-51-ceji187` 381→194,
+  `xegufe-25-paji965` 305→133, `xujoga-62-lacu610` 289→135, `xupozu-13-
+  numi050` 305→133. `pixopo-04-zitu732` matches its golden 20/20 and
+  `kejoke-76-curu931` matches 102/102, closing the mission's own README
+  scope measurement exactly.
+
+  **What the mission itself found and fixed before close-out.** The first
+  cut routed `ref` frames through the same `ComponentRoseGroupingHeader`
+  two-half port as `group`/`alt`/…, drawing a background outline and a
+  `[label]` comment box the jar never draws for a `ref`. Wrong: upstream
+  builds a `ref` as a `ReferenceTile` (`TileBuilder.java:174-176`), not a
+  `GroupingTile`, whose component is `ComponentRoseReference` — a different
+  class with no background half at all. `fix(T7)` corrected the 8 fixtures
+  this caused and 11 of 12 score-rising `inconclusive`s. Full diagnosis:
+  `plans/sequence-frame-background-pass/findings/adjudication.md` §3a/§4.
+
+  **The 17 permanent skips — corrected, not `!include` failures.** Measured:
+  every one is a parser refusal (`sequence refused this source at line N
+  (syntax)`), identical at `main`, `1aa15960` and here; only
+  `nuvoja-46-dezu541` contains an `!include` (already filed above as the
+  harness item). Example: `dolice-60-copi767`'s
+  `Alice -> Bob [[http://www.google.fr]] : ok` — an inline link on a
+  message, unported sequence syntax, filed below as part of
+  `sequence-fidelity-residuals`'s command-gap queue, not a preprocessor
+  defect.
+
+  **Spin-offs filed, each verified against the Java at T8 close-out (not
+  carried over from the original filing unverified):**
+  - **`sequence-reference-tile`** (NEW, highest value). `ReferenceTile`
+    (`teoz/ReferenceTile.java:70-136`) draws through `ComponentRoseReference`
+    (`skin/rose/ComponentRoseReference.java:57`), a distinct class with its
+    own `xMargin = 2` / `heightFooter = 5` geometry (`:61-62`) and exactly
+    one draw method — `drawInternalU` (`:82-138`) — no
+    `drawBackgroundInternalU` override anywhere in the class, and
+    `ReferenceTile.drawU:127-136` calls `comp.drawU` unguarded, with no
+    `isBackground()` test and no `Blotter`. `fix(T7)` routes
+    `frameType === 'ref'` through a branch inside the shared
+    `renderer-frame-header.ts` port instead of a separate module; the
+    faithful structure is its own `renderer-frame-reference.ts` mirroring
+    the separate Java class. Deferred as a structural cleanup, not a
+    fidelity gap — T7's branch is already measured correct on every
+    affected fixture.
+  - **`sequence-group-bracket-comment`** (NEW). `group Alpha [beta]` stores
+    the title, drops the comment. `TRAILING_BRACKET_CONTENT_PATTERN`
+    (`CommandGrouping.java:76-77`, applied `:144-148`) captures the header
+    into `m.group(1)` and the bracket body into `m.group(2)`; this port's own
+    mirror (`command-grouping.ts:52-55`, applied `:78-79`) already documents
+    the gap in its own comment — the bracket body "has nowhere to go"
+    (`:72`) — because `FrameEvent` (`ast.ts:154-194`) has one `label` slot
+    and no title/comment pair. Measured: **2 of 1427** corpus fixtures use
+    the bracket form (`durapi-97-jupo864`, `pizupi-41-logi068`).
+  - **`sequence-partition-keyword`** — `partition` is in upstream's
+    `CommandGrouping` TYPE alternation (`CommandGrouping.java:67`) and
+    absent from this port's grouping regex (`command-grouping.ts:103`,
+    `(loop|alt|opt|par2|par|break|critical|group)`).
+  - **`sequence-partition-tile`** — `PartitionTile extends GroupingTile`
+    (`teoz/PartitionTile.java:58`) overrides `getComponent()` with an
+    anonymous `Component` (not `AbstractComponent`) whose
+    `drawU(ug, area, context)` never reads `context` (`:66-114`) — so it
+    draws its full body on every call, background and foreground alike,
+    since `GroupingTile:267`'s call is unconditional and this component
+    bypasses `AbstractComponent`'s `isBackground()` dispatch entirely. It
+    also overrides `drawCompBackground` (`:206-209`) to span the whole
+    diagram width rather than the group's own frame.
+  - **`sequence-group-style-cascade`** — `sequenceDiagram.group` /
+    `groupHeader` have no SName style bucket: confirmed absent from
+    `ELEMENT_BUCKET_SNAMES`
+    (`src/core/skinparam-element-buckets.ts:26-*`), so `skinparam`/`<style>`
+    cannot override the constants D3 hard-codes in
+    `src/diagrams/sequence/frame-style.ts` (whose own doc comment already
+    flags the gap, `:6-7`).
+  - **`sequence-frame-geometry`** — unchanged from this mission's own D6
+    non-goal, restated for the record: frame `x`/`width` derive from
+    participant centres plus a flat 20/40; this port's participant heads are
+    80px wide against the jar's 38.9 — already filed above as "Global
+    participant sizing" (`sequence-command-coverage` T17).
+
+## `sequence-participant-g-wrapper` — EXECUTED 2026-08-27, MERGED via T9 pending
+
+Branch `feat/sequence-participant-g-wrapper` (5 commits).
+**Objective met**: fixtures reporting `polygon/@points` diffs went **42 →
+487**, records **721 → 7 922** (same 1124 measured fixtures, same 17 skips).
+`celego-19-laji937` matches the golden's root-group child sequence tag for
+tag. Σ weightedScore 1 291 577 → 1 241 546. Adjudicated vs `main`:
+artefact=0 **substructure=557 regression=0** improved=557 inconclusive=27.
+Three divergences fixed, all from `teoz/PlayingSpaceWithParticipants
+#drawU:218-227`: the lifeline `<g><title>` + hover-rect group
+(`ComponentRoseLine.java:74-108`), activations wrapped and moved into the
+lifeline pass interleaved per participant
+(`LivingSpace#drawLineAndLiveboxes`), and the footbox drawn before the
+foreground tiles. **T3 carries essentially all the value** — reverting it
+alone drops the win to 45 fixtures / 857 records, so this does not split.
+
+**UNBLOCKED 2026-08-28** — `sequence-frame-background-pass` (above) closed
+the gap that halted this mission before merge: all 10 blocking fixtures are
+now `improved` and the classifier's remaining 2 `regression` + 1 rising
+`inconclusive` are adjudicated benign (`DIVERGENCES.md` "Background-pass
+rollout"). The re-pin (`repin-sequence-baselines.ts`) is still not run as of
+this entry — it is orchestrator-only (D8) and is T9's job, not either
+mission's own.
+
+**Correction to the filing below**: T15's "not one `polygon/@points` record
+exists" was true of `celego`, not of the corpus — 42 fixtures already
+reported arrow geometry on main. The gain is 11.6x, not zero-to-some.
+Also delivered: a `substructure` verdict for
+`scripts/sequence-ratchet-adjudicate.ts`. Its `artefact` rule only
+recognised a rise that CLOSES the child-count distance; a change that adds
+correct substructure INSIDE existing children grows our node mass without
+touching the count, and all 552 such rises were mis-called `regression`.
+
+### `sequence-participant-g-wrapper` (original filing)
+
+FILED 2026-08-26 by
+`sequence-command-coverage` T15, mechanism measured and verified twice.
+**The sequence comparator cannot measure arrow fidelity at all today.** The
+jar wraps each participant in `<g><title>A</title><rect/><line/></g>`; this
+port emits the bare primitives, so child 0 under `svg/g[1]` is a TAG
+mismatch and `compare.ts:222-231` returns — `// structural mismatch — stop
+here`. The wrapper also shifts every following child index, so the whole
+sibling run mismatches by tag.
+Verified by dumping all 30 diffs of `celego-19-laji937`: 4 root dimensions,
+the rest tag mismatches (`line vs g`, `rect vs g`, `text vs rect`, `polygon
+vs text`), and **not one `polygon/@points` record**.
+**Why it matters beyond tidiness**: correct arrow work produces no ratchet
+movement — and neither does incorrect arrow work. The whole dressing bucket
+is invisible, `diff-census.json`'s sequence buckets describe the tag cascade
+rather than arrow quality, and any task told to "make the dressing fixtures
+fall" is given an unreachable target, which is precisely the pressure that
+produces a fitted value.
+Emitting the wrapper should unblock descent for the entire sequence corpus
+at once, so this is likely the highest-leverage single change available to
+sequence fidelity. Size it against the participant renderer before starting.
+See `.agent-notes/T15-comparator-blocks-arrow-descent.md`, and note it
+supersedes the conclusion in
+`.agent-notes/T13-sequence-ratchet-rise-diagnosis.md:167-172`.
 
 - **`sequence-arrow-background-colour`** — FILED 2026-08-26 by
   `sequence-command-coverage` T15, **NARROWED at that mission's close: the `o`

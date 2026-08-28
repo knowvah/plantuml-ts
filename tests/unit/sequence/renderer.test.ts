@@ -713,6 +713,8 @@ describe('renderSequence — notes', () => {
 
 describe('renderSequence — frames', () => {
   it('loop frame produces a rect containing "loop"', () => {
+    // Tab geometry (tabText/tabTextWidth/tabWidth/tabHeight) is a T5-only
+    // fixture value (D9) — not exercised by this test's assertions.
     const frame: FrameGeo = {
       kind: 'frame',
       frameType: 'loop',
@@ -723,6 +725,10 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabText: 'loop',
+      tabTextWidth: 32,
+      tabWidth: 77,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -730,7 +736,11 @@ describe('renderSequence — frames', () => {
     expect(svg).toContain('loop');
   });
 
-  it('frame uses dashed border', () => {
+  it('an else branch separator uses a dashed rule (GroupingTile / ElseTile)', () => {
+    // The frame's own outer border is a SOLID rect
+    // (`ComponentRoseGroupingHeader#drawInternalU`, no dash anywhere in that
+    // component) -- dashing lives on the `else` divider only (`ElseTile
+    // .java:104`: "its OWN divider (dashed line + label strip)").
     const frame: FrameGeo = {
       kind: 'frame',
       frameType: 'alt',
@@ -739,15 +749,23 @@ describe('renderSequence — frames', () => {
       y: 60,
       width: 300,
       height: 100,
-      branchSeparators: [],
+      branchSeparators: [{ y: 110, label: 'x <= 0' }],
       refBody: [],
+      tabText: 'alt',
+      tabTextWidth: 24,
+      tabWidth: 69,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('stroke-dasharray');
   });
 
-  it('frame label includes frameType + label text', () => {
+  it('frame label includes frameType + comment text', () => {
+    // `groupingHeaderDisplay` (T1, `frame-style.ts`) resolves the header's
+    // `tabText`/`tabComment` at LAYOUT, not from `frame.label` -- see
+    // `GroupingTile.java:126-127`. `renderGroupingHeaderForeground` draws
+    // `tabComment` bracketed.
     const frame: FrameGeo = {
       kind: 'frame',
       frameType: 'opt',
@@ -758,11 +776,114 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabText: 'opt',
+      tabComment: 'condition',
+      tabTextWidth: 24,
+      tabWidth: 69,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('opt');
-    expect(svg).toContain('condition');
+    expect(svg).toContain('[condition]');
+  });
+});
+
+describe('renderSequence — background pass (T6)', () => {
+  // `PlayingSpaceWithParticipants#drawU:218` runs `playingSpace
+  // .drawBackground(ugBody)` FIRST, over the same event list pass 5
+  // (foreground) later walks (`PlayingSpace.java:109-117`). Every event kind
+  // but `frame` inherits `AbstractComponent#drawBackgroundInternalU`'s empty
+  // default (`AbstractComponent.java:139-140`), so a frame-less diagram's
+  // background pass contributes nothing and this render is unchanged from
+  // the four-pass renderer T6 replaces.
+  it('emits nothing extra for messages, notes, activations and dividers', () => {
+    const geo = makeGeo({
+      events: [
+        { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40 },
+        makeSyncMessage(),
+        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi' },
+        { kind: 'divider', text: 'step', y: 200, totalWidth: 400 },
+      ],
+    });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    // One message arrowhead, one note text run, one divider text run --
+    // none doubled by a background-pass echo.
+    expect((svg.match(/<polygon/g) ?? []).length).toBe(1);
+    expect((svg.match(/>hi</g) ?? []).length).toBe(1);
+    expect((svg.match(/>step</g) ?? []).length).toBe(1);
+  });
+
+  it('draws a frame band and outline in the background pass, before the lifelines', () => {
+    // `GroupingTile#drawU`'s background half (`:262-263`): `drawBackground`
+    // (the Blotter band) THEN `drawBackgroundInternalU` (the outline) --
+    // both land before pass 2 (lifelines), which is where the OLD
+    // (pre-T6) inline border used to be the first frame-related output.
+    const frame: FrameGeo = {
+      kind: 'frame',
+      frameType: 'group',
+      label: '',
+      x: 30,
+      y: 60,
+      width: 300,
+      height: 100,
+      backColorGeneral: '#FF0000',
+      branchSeparators: [],
+      refBody: [],
+      tabText: 'g',
+      tabTextWidth: 12,
+      tabWidth: 40,
+      tabHeight: 17,
+    };
+    const geo = makeGeo({ events: [frame] });
+    const { body } = renderSequence(geo, defaultTheme);
+    const firstLifelineTitle = body.indexOf('<title>Alice</title>');
+    const firstRect = body.indexOf('<rect');
+    expect(firstRect).toBeGreaterThan(-1);
+    expect(firstRect).toBeLessThan(firstLifelineTitle);
+  });
+
+  it('nested groups emit outer band, outer outline, inner band, inner outline', () => {
+    const outer: FrameGeo = {
+      kind: 'frame',
+      frameType: 'group',
+      label: '',
+      x: 20,
+      y: 40,
+      width: 320,
+      height: 200,
+      backColorGeneral: '#FF0000',
+      branchSeparators: [],
+      refBody: [],
+      tabText: 'outer',
+      tabTextWidth: 30,
+      tabWidth: 50,
+      tabHeight: 17,
+    };
+    const inner: FrameGeo = {
+      kind: 'frame',
+      frameType: 'group',
+      label: '',
+      x: 40,
+      y: 80,
+      width: 260,
+      height: 100,
+      backColorGeneral: '#00FF00',
+      branchSeparators: [],
+      refBody: [],
+      tabText: 'inner',
+      tabTextWidth: 30,
+      tabWidth: 50,
+      tabHeight: 17,
+    };
+    const geo = makeGeo({ events: [outer, inner] });
+    const { body } = renderSequence(geo, defaultTheme);
+    // Two frames -> exactly 4 background-pass rects (band + outline each),
+    // before any other renderSequence content: the outer band/outline are
+    // opaque colour fills, so they must precede the inner ones to avoid
+    // painting over the inner group.
+    const rects = [...body.matchAll(/<rect[^>]*fill="([^"]*)"[^>]*stroke="([^"]*)"/g)].slice(0, 4);
+    expect(rects.map((m) => m[1])).toEqual(['#F00', 'none', '#0F0', 'none']);
   });
 });
 

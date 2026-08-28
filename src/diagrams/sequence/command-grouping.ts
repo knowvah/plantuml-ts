@@ -47,13 +47,44 @@ export const boxEndCommand: Command = {
   },
 };
 
+// `CommandGrouping.java:76-77`, applied at `:140-149`. For the `group`
+// keyword only: matches a trailing `[...]` run (the `[[url]]` alternative
+// guards against eating a creole link's own brackets first). Group 1 is
+// everything before the final bracket run (the custom header text), group 2
+// is the bracket's own content.
+const TRAILING_BRACKET_CONTENT_PATTERN = /^(.*\[\[.*\]\].*?|.*?)\[(.*)\]$/;
+
+// T2: `group`'s header-rewrite (`CommandGrouping.java:139-149`). `type` at
+// `:139` -- our `frameType` -- is read BEFORE this runs and this function
+// never touches it, mirroring `GroupingType.getType(type)`'s original-token
+// ordering. `:140-142`: an empty comment on `group` becomes the literal
+// `"group"`. `:143-148`: a non-empty comment matching
+// TRAILING_BRACKET_CONTENT_PATTERN reassigns upstream's local `type` to
+// group 1 (the custom header, e.g. "Alpha" from `group Alpha [beta]`) and
+// `comment` to group 2 ("beta").
+//
+// GAP (flagged in the T2 report): `FrameEvent` (`ast.ts:154-194`) has one
+// label slot, not upstream's independent title/comment pair, and T5's
+// `computeHeaderTab` (`sequence-layout-events.ts`) feeds this slot straight
+// through as `groupingHeaderDisplay`'s COMMENT argument against the FIXED
+// `frameType` -- never a rewritten title. Returning the header text here is
+// the higher-fidelity of the two lossy choices: it is what a reader
+// actually sees on the tab. The bracket body ("beta") has nowhere to go and
+// is dropped -- unlike the else-color gap this port's D10 amendment does
+// NOT cover, since there is no per-branch analogue here to widen into.
+function resolveGroupLabel(frameType: FrameEvent['frameType'], comment: string): string {
+  if (frameType !== 'group') return comment;
+  if (comment === '') return 'group';
+  const bracketMatch = TRAILING_BRACKET_CONTENT_PATTERN.exec(comment);
+  return bracketMatch ? bracketMatch[1]!.trim() : comment;
+}
+
 // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
 //     T13: added `par2` (`GroupingType.getType`, a same-visual-class START
-//     alongside `par`) and an optional COLORS pair mirroring
-//     `CommandGrouping`'s `#header[ #body]` -- captured so the label group
-//     doesn't absorb them, but not modelled on `FrameGeo` (no colored-frame
-//     rendering in this engine yet), same documented scope cut as `ref`'s
-//     `REF` color group below.
+//     alongside `par`) and a COLORS pair mirroring `CommandGrouping`'s
+//     `#header[ #body]` -- T2: now modelled on `FrameEvent.backColorElement`
+//     / `.backColorGeneral` (`CommandGrouping.java:134-135`: COLORS index 0
+//     is the header/element color, index 1 is the general/body color).
 //
 //     T9: leading `(&\s*)?` mirrors the PARALLEL group upstream's single
 //     `CommandGrouping` regex carries ahead of TYPE (`&[%s]*`, zero-or-more
@@ -66,20 +97,25 @@ export const boxEndCommand: Command = {
 //     `elseCommand`/`endCommand` split off the same upstream regex's
 //     ELSE/ALSO/END arm, but no corpus fixture exercises `& else`/`& end`,
 //     so that combination is left unported rather than guessed at.
-// @see sequencediagram/command/CommandGrouping.java:64-73,66,151-152
+// @see sequencediagram/command/CommandGrouping.java:64-73,66,134-135,151-152
 export const groupingCommand: Command = {
   pattern:
     /^(&\s*)?(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
-    const label = match[5]?.trim() ?? '';
+    const backColorElement = match[3];
+    const backColorGeneral = match[4];
+    const label = resolveGroupLabel(frameType, match[5]?.trim() ?? '');
     const frame: FrameEvent = {
       kind: 'frame',
       frameType,
       label,
       branches: [[]],
       branchLabels: [label],
+      branchColors: [backColorGeneral],
       ...(match[1] !== undefined ? { parallel: true } : {}),
+      ...(backColorElement !== undefined ? { backColorElement } : {}),
+      ...(backColorGeneral !== undefined ? { backColorGeneral } : {}),
     };
     state.frameStack.push(frame);
   },
@@ -91,14 +127,31 @@ export const groupingCommand: Command = {
 // The condition was captured but DISCARDED before SI-alt: `execute(state)`
 // ignored `match`, so `else other case` lost "other case" at parse time and
 // no downstream stage could draw it.
-// @see sequencediagram/GroupingType.java:52-53
+//
+// T2: added an optional COLORS-index-1 group ahead of the condition text,
+// pushed onto `FrameEvent.branchColors` index-aligned with `branchLabels`
+// (D10, `ast.ts` doc comment on that field) -- index 0 there is the frame's
+// own COLORS-index-1 value, seeded by `groupingCommand`, so this branch's
+// push always lands at the SAME index as the `branchLabels` push two lines
+// below. `sequence-layout-events.ts#handleFrameEvent` carries it onto each
+// `FrameGeo.branchSeparators` entry for `renderer-frame-blotter.ts` to read.
+//
+// Upstream's single shared regex guards the color with `(?<!else)(?<!also)`
+// negative lookaheads so `else` can only ever carry the SPACE-separated
+// COLORS group, never the one that attaches directly to TYPE
+// (`CommandGrouping.java:68`) -- this port's split-per-keyword regexes make
+// that lookahead structurally unnecessary (there is no shared TYPE
+// alternative to disambiguate against), so it is not ported; the effect
+// (`else#eee` is not a color, `else #eee cond` is) falls out of requiring
+// `\s+` ahead of the color group below.
 export const elseCommand: Command = {
-  pattern: /^(?:else|also)(?:\s+(.+))?\s*$/i,
+  pattern: /^(?:else|also)(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
     const top = state.frameStack[state.frameStack.length - 1];
     if (top !== undefined) {
       top.branches.push([]);
-      top.branchLabels.push(match[1]?.trim() ?? '');
+      top.branchLabels.push(match[2]?.trim() ?? '');
+      top.branchColors?.push(match[1]);
     }
   },
 };
