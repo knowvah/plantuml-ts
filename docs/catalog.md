@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1038 modules · 3673 exported names.
+1041 modules · 3691 exported names.
 
 ## `src/`
 
@@ -1262,12 +1262,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-page.ts` | `newpageCommand`, `minwidthOrPagingCommand` | The pagination block: `CommandNewpage` (`:139`), `CommandIgnoreNewpage` (`:140`) and `CommandAutoNewpage` (`:141`), the three commands that open `initCommandsList`'s trailing run. |
 | `command-participant.ts` | `participantCommand`, `createCommand`, `matchParticipantMultilineCommand` | The participant-declaration family: `CommandParticipantA` (`:106`), `CommandParticipantA2` (`:107`), `CommandParticipantA3` (`:108`), `CommandParticipantA4` (`:109`) and `CommandParticipantMultilines` (`:110`) — four single-line arities of |
 | `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
+| `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
 | `renderer-arrowhead-glyph.ts` | `paintOf`, `niceArrowOf`, `ARROW_THICKNESS`, `renderArrowHead` | Arrow-head GLYPH drawing: the paint, the polygon, the async lines and the decoration circle that one arrow END draws. |
 | `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
-| `renderer-lifeline.ts` | `renderLifeline`, `renderActivation` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
+| `renderer-frame-blotter.ts` | `renderFrameBlotter` | The grouping-frame BACKGROUND pass -- the coloured band(s) a `loop`/`alt`/ `opt`/`par`/`break`/`critical`/`group`/`ref` frame paints behind its body, split at each `else` branch boundary so each branch can carry its own fill. |
+| `renderer-frame-header.ts` | `frameHeaderCornerPath`, `renderGroupingHeaderBackground`, `renderGroupingHeaderForeground` | A grouping frame's type tab -- background pass (the plain outline) and foreground pass (the clipped-corner tab + its text). |
+| `renderer-lifeline.ts` | `renderLifeline`, `renderActivation`, `renderLifelinePass` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderActorShape`, `renderDatabaseShape` | renderer-participant-shapes.ts — the `actor`/`database` participant ICONS, split out of `renderer.ts` (which was already at 493 of the repo's 500-line cap — the same reason `renderer-arrowhead.ts` split off its own file, see that module's h |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
