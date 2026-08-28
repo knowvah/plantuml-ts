@@ -152,8 +152,12 @@ const COLLECTIONS_ROUND_CORNER = 0;
 
 /** `ComponentRoseParticipant#getDeltaCollection` — the offset of the second,
  *  "stacked" rectangle, and the term added to both preferred dimensions.
+ *  Exported because all three sides of this feature need the SAME number and a
+ *  cited constant should exist once: the seam offsets the back rectangle by
+ *  it, `renderer-participant-shapes.ts` offsets the front one, and
+ *  `sequence-layout-participants.ts` adds it to both preferred dimensions.
  *  @see ~/git/plantuml/.../skin/rose/ComponentRoseParticipant.java:107-112 */
-const COLLECTIONS_DELTA = 4;
+export const COLLECTIONS_DELTA = 4;
 
 /** The two empty blocks `ComponentRoseDatabase.java:70` passes as the
  *  cylinder's label and stereotype. The `16,17` is that line's own literal. */

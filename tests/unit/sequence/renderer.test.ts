@@ -1073,6 +1073,55 @@ describe('renderSequence — actor participant shape', () => {
   });
 });
 
+describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
+  function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
+    return { id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+  }
+  /** The bare body, not `assembleSvg`'s document: the shell adds a background
+   *  `<rect>` of its own that would inflate every rectangle count here. */
+  function svgFor(type: Parameters<typeof participantOf>[0]): string {
+    return renderSequence(makeGeo({ showFootbox: false, participants: [participantOf(type)] }), defaultTheme).body;
+  }
+
+  it('gives each kind its own symbol geometry', () => {
+    // `Rose.java:157-190` -- BOUNDARY_HEAD -> `new Boundary(biColor)` (a bar
+    // plus a circle), CONTROL_HEAD -> `new Control(...)` (a circle plus an
+    // arrow wing), ENTITY_HEAD -> `new EntityDomain(...)` (a circle plus its
+    // underline), QUEUE_HEAD -> `USymbols.QUEUE.asSmall` (a cylinder lying on
+    // its side), COLLECTIONS_HEAD -> `ComponentRoseParticipant(collections)`
+    // (a second, offset rectangle).
+    expect(svgFor('boundary')).toMatch(/<path[\s\S]*<ellipse/);
+    expect(svgFor('control')).toMatch(/<ellipse[\s\S]*<polygon/);
+    expect(svgFor('entity')).toMatch(/<ellipse[\s\S]*<line/);
+    expect(svgFor('queue').match(/<path/g) ?? []).toHaveLength(2);
+    // 2 stacked boxes + the lifeline's own transparent hit rect, which every
+    // participant gets (`renderLifelinePass`).
+    expect(svgFor('collections').match(/<rect/g) ?? []).toHaveLength(3);
+  });
+
+  it('draws no two kinds the same', () => {
+    const kinds = ['collections', 'queue', 'entity', 'boundary', 'control', 'participant'] as const;
+    const bodies = kinds.map(svgFor);
+    expect(new Set(bodies).size).toBe(kinds.length);
+  });
+
+  it('leaves the plain participant a single rectangle', () => {
+    // `PARTICIPANT_HEAD` -> `ComponentRoseParticipant` with collections=false.
+    expect(svgFor('participant').match(/<rect/g) ?? []).toHaveLength(2); // box + lifeline hit rect
+    expect(svgFor('participant')).not.toMatch(/<path|<ellipse|<polygon/);
+  });
+
+  it('flips the glyph and the text for a footer row', () => {
+    const p = participantOf('boundary');
+    const svg = assembleSvg(renderSequence(makeGeo({ participants: [p], showFootbox: true }), defaultTheme));
+    // The head glyph's circle sits above the footer glyph's; the two rows are
+    // the `*_HEAD` / `*_TAIL` pair of `Rose.java:177-178`.
+    const cys = [...svg.matchAll(/<ellipse[^>]*cy="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(cys).toHaveLength(2);
+    expect(cys[1]).toBeGreaterThan(cys[0]!);
+  });
+});
+
 describe('renderSequence — database participant shape', () => {
   it('renders the two USymbolDatabase paths and no ellipse', () => {
     const geo = makeGeo({
