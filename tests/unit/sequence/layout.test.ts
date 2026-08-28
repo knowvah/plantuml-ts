@@ -19,6 +19,7 @@ import type {
   SpaceGeo,
   EventGeo,
 } from '../../../src/diagrams/sequence/ast.js';
+import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -242,6 +243,164 @@ describe('layoutSequence — frame (AC 5)', () => {
     const messages = geo.events.filter(isMessage);
     expect(messages).toHaveLength(2);
     expect(frame!.y + frame!.height).toBeGreaterThanOrEqual(messages[1]!.y);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T5 (mission sequence-frame-background-pass, D2): pre-order tile emission
+// and the frame colour / header-tab carry-through.
+//
+// `GroupingTile#drawU:254-275` draws its own component, then recurses into
+// `tiles` -- upstream's depth-first PRE-ORDER. `handleFrameEvent` now pushes
+// its `FrameGeo` before walking `event.branches`, so these assert the events
+// array reflects that order, nesting included.
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — frame tile order (D2, pre-order emission)', () => {
+  it('a frame is emitted before its own messages', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      {
+        kind: 'frame',
+        frameType: 'loop',
+        label: 'n times',
+        branches: [[msg('Alice', 'Bob', 'a'), msg('Bob', 'Alice', 'b')]],
+        branchLabels: ['n times'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const frameIdx = geo.events.findIndex(isFrame);
+    const firstMsgIdx = geo.events.findIndex(isMessage);
+    expect(frameIdx).toBeGreaterThanOrEqual(0);
+    expect(frameIdx).toBeLessThan(firstMsgIdx);
+  });
+
+  it('nested frames emit depth-first pre-order: outer, inner, inner children, outer remainder', () => {
+    const inner: SequenceEvent = {
+      kind: 'frame',
+      frameType: 'opt',
+      label: 'maybe',
+      branches: [[msg('Alice', 'Bob', 'inner-msg')]],
+      branchLabels: ['maybe'],
+    };
+    const ast = makeAst(['Alice', 'Bob'], [
+      {
+        kind: 'frame',
+        frameType: 'loop',
+        label: 'outer',
+        branches: [[inner, msg('Bob', 'Alice', 'outer-tail')]],
+        branchLabels: ['outer'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const seq = geo.events.map((e) => {
+      if (isFrame(e)) return `frame:${e.label}`;
+      if (isMessage(e)) return `msg:${e.label}`;
+      return e.kind;
+    });
+    expect(seq).toEqual(['frame:outer', 'frame:maybe', 'msg:inner-msg', 'msg:outer-tail']);
+  });
+});
+
+describe('layoutSequence — frame header tab (D2/T5)', () => {
+  it('group foo sizes tabWidth from HEADER_PADDING + measured tab text', () => {
+    const ast = makeAst(['Alice'], [
+      {
+        kind: 'frame',
+        frameType: 'group',
+        label: 'foo',
+        branches: [[msg('Alice', 'Alice', 'x')]],
+        branchLabels: ['foo'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const frame = geo.events.find(isFrame)!;
+    // FixedMeasurer(8, 16): width = text.length * 8, so 'foo' -> 24.
+    expect(frame.tabText).toBe('foo');
+    expect(frame.tabTextWidth).toBe(24);
+    expect(frame.tabWidth).toBe(HEADER_PADDING.left + 24 + HEADER_PADDING.right);
+  });
+});
+
+describe('layoutSequence — frame colour carry-through (T5)', () => {
+  it('carries backColorElement/backColorGeneral from FrameEvent to FrameGeo', () => {
+    const ast = makeAst(['Alice'], [
+      {
+        kind: 'frame',
+        frameType: 'group',
+        label: 'g',
+        branches: [[msg('Alice', 'Alice', 'x')]],
+        branchLabels: ['g'],
+        backColorElement: '#ffa',
+        backColorGeneral: '#eee',
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const frame = geo.events.find(isFrame)!;
+    expect(frame.backColorElement).toBe('#ffa');
+    expect(frame.backColorGeneral).toBe('#eee');
+  });
+
+  it('omits backColorElement/backColorGeneral when the source gives none', () => {
+    const ast = makeAst(['Alice'], [
+      {
+        kind: 'frame',
+        frameType: 'group',
+        label: 'g',
+        branches: [[msg('Alice', 'Alice', 'x')]],
+        branchLabels: ['g'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const frame = geo.events.find(isFrame)!;
+    expect(frame.backColorElement).toBeUndefined();
+    expect(frame.backColorGeneral).toBeUndefined();
+  });
+
+  // AC4: each branchSeparators entry carries its own backColorGeneral, or
+  // undefined where the source gave none. `FrameEvent` currently carries
+  // only the FRAME-level backColorElement/backColorGeneral (T1's contract,
+  // ast.ts:180-183) -- there is no per-branch colour source yet, so every
+  // separator is undefined. That is what "or undefined where the source
+  // gave none" covers; see this task's report for the T2 doc/contract gap.
+  it('each else separator carries its own backColorGeneral, or undefined where none is given', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      {
+        kind: 'frame',
+        frameType: 'alt',
+        label: 'first',
+        branches: [
+          [msg('Alice', 'Bob', 'a')],
+          [msg('Bob', 'Alice', 'b')],
+          [msg('Alice', 'Bob', 'c')],
+        ],
+        branchLabels: ['first', 'second', 'third'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const frame = geo.events.find(isFrame)!;
+    expect(frame.branchSeparators).toHaveLength(2);
+    expect(frame.branchSeparators[0]?.label).toBe('second');
+    expect(frame.branchSeparators[0]?.backColorGeneral).toBeUndefined();
+    expect(frame.branchSeparators[1]?.label).toBe('third');
+    expect(frame.branchSeparators[1]?.backColorGeneral).toBeUndefined();
+  });
+});
+
+describe('layoutSequence — no frames leaves other events unaffected (T5)', () => {
+  it('a diagram with no frame events keeps its event kinds/order unchanged', () => {
+    const events: SequenceEvent[] = [
+      msg('Alice', 'Bob', 'a'),
+      {
+        kind: 'note',
+        position: 'over',
+        participants: ['Alice'],
+        text: 'n',
+      } satisfies SequenceEvent,
+      msg('Bob', 'Alice', 'b'),
+    ];
+    const ast = makeAst(['Alice', 'Bob'], events);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    expect(geo.events.map((e) => e.kind)).toEqual(['message', 'note', 'message']);
   });
 });
 

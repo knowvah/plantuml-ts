@@ -713,6 +713,8 @@ describe('renderSequence — notes', () => {
 
 describe('renderSequence — frames', () => {
   it('loop frame produces a rect containing "loop"', () => {
+    // Tab geometry (tabText/tabTextWidth/tabWidth/tabHeight) is a T5-only
+    // fixture value (D9) — not exercised by this test's assertions.
     const frame: FrameGeo = {
       kind: 'frame',
       frameType: 'loop',
@@ -723,6 +725,10 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabText: 'loop',
+      tabTextWidth: 32,
+      tabWidth: 77,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -741,6 +747,10 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabText: 'alt',
+      tabTextWidth: 24,
+      tabWidth: 69,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -758,6 +768,10 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabText: 'opt',
+      tabTextWidth: 24,
+      tabWidth: 69,
+      tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
