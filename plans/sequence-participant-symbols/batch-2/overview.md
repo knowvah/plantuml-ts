@@ -11,8 +11,8 @@ batch gate is what keeps them honest.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Draw the database head through the seam | `typescript-pro` | `src/diagrams/sequence/renderer-participant-shapes.ts`, `src/diagrams/sequence/renderer.ts`, `tests/unit/sequence/renderer.test.ts` | T1 | [ ] |
-| T3 | Size the database head from upstream's rule | `typescript-pro` | `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/layout.test.ts` | T1 | [ ] |
+| T2 | Draw the database head through the seam | `typescript-pro` | `src/diagrams/sequence/renderer-participant-shapes.ts`, `src/diagrams/sequence/renderer.ts`, `tests/unit/sequence/renderer.test.ts` | T1 | [x] |
+| T3 | Size the database head from upstream's rule | `typescript-pro` | `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/layout.test.ts` | T1 | [x] |
 
 Batch gate: the four per-task gates, then
 `npx jiti scripts/sequence-ratchet-adjudicate.ts --base <batch parent>`.

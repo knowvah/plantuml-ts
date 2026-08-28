@@ -67,7 +67,7 @@ defect `planning/sizer-renderer-parity.md` exists to name — read it.
 ## Batches
 
 - [x] **Batch 1** — [the seam](./batch-1/overview.md) (T1)
-- [ ] **Batch 2** — [database: draw + size](./batch-2/overview.md) (T2, T3)
+- [x] **Batch 2** — [database: draw + size](./batch-2/overview.md) (T2, T3)
 - [ ] **Batch 3** — [the five missing types](./batch-3/overview.md) (T4, T5)
 - [ ] **Batch 4** — [actor, then close out](./batch-4/overview.md) (T6, T7)
 
