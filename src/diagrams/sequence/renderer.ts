@@ -24,8 +24,8 @@ import type {
   ParticipantBadge,
   ParticipantGeo,
   EventGeo,
-  NoteGeo,
   ActivationGeo,
+  NoteGeo,
   FrameGeo,
   DividerGeo,
 } from './ast.js';
@@ -35,14 +35,12 @@ import { rect, line, text, noteBox, image, ellipse } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { renderMessage } from './renderer-message.js';
 import { renderActorShape, renderDatabaseShape } from './renderer-participant-shapes.js';
+import { renderLifelinePass } from './renderer-lifeline.js';
+import { renderFrameBlotter } from './renderer-frame-blotter.js';
+import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
+import { GROUP_FONT_SIZE } from './frame-style.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
-
-// ---------------------------------------------------------------------------
-// Activation constants
-// ---------------------------------------------------------------------------
-
-const ACTIVATION_HALF_WIDTH = 5; // activationWidth / 2
 
 /** `TextBlockSprited`'s badge-to-label gap (`:65-67`) -- see
  *  `sequence-layout-participants.ts`'s own `BADGE_GAP`, which sizes the box
@@ -189,32 +187,6 @@ function renderFooterBox(
   return box + renderNameBlock(p, lifelineEndY + p.height / 2, theme);
 }
 
-function renderLifeline(
-  p: ParticipantGeo,
-  lifelineEndY: number,
-  theme: ScaledTheme,
-): string {
-  const startY = p.y + p.height;
-  return line(p.centerX, startY, p.centerX, lifelineEndY, {
-    stroke: theme.colors.lifeline,
-    strokeDasharray: scaledDashPattern(theme.scaleK),
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Activation helpers
-// ---------------------------------------------------------------------------
-
-function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
-  const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
-  const x = act.lifelineX - half;
-  const fill = act.color ?? theme.colors.activation;
-  return rect(x, act.y, half * 2, act.height, {
-    fill,
-    stroke: theme.colors.border,
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Note helpers
 // ---------------------------------------------------------------------------
@@ -250,52 +222,11 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
 // Frame helpers
 // ---------------------------------------------------------------------------
 
-/** The tab's own geometry -- factored out so {@link renderFrame} stays
- *  under the 30-NLOC function cap. */
-interface FrameTabGeo {
-  readonly tabWidth: number;
-  readonly tabHeight: number;
-  readonly labelFontSize: number;
-}
-
-function computeFrameTabGeo(frame: FrameGeo, theme: ScaledTheme): FrameTabGeo {
-  const k = theme.scaleK;
-  return {
-    tabWidth: Math.min(80 * k, frame.width),
-    tabHeight: 20 * k,
-    labelFontSize: theme.fontSize - 2 * k,
-  };
-}
-
-/** The tab rectangle + its TYPE label + the first branch's `[condition]`. */
-function renderFrameTab(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const rectEl = rect(frame.x, frame.y, tab.tabWidth, tab.tabHeight, {
-    fill: theme.colors.frame,
-    stroke: theme.colors.frame,
-  });
-  // Upstream keeps the frame TYPE in the tab and draws the branch condition
-  // beside it as a bracketed `[condition]` -- two separate runs, not one
-  // `alt first case` string. Each subsequent `else` repeats that condition
-  // form against a dashed separator (`GroupingTile`).
-  const typeEl = text(frame.x + 4 * k, frame.y + tab.tabHeight - 4 * k, frame.frameType, {
-    fontFamily: theme.fontFamily,
-    fontSize: tab.labelFontSize,
-    fill: theme.colors.background,
-  });
-  // A `ref` frame's label is BODY CONTENT, not a condition -- it is drawn
-  // inside the box by `renderRefBody`, so no bracketed run belongs here.
-  const condition = frame.frameType === 'ref' ? '' : frame.label.trim();
-  const conditionEl =
-    condition === ''
-      ? ''
-      : text(frame.x + tab.tabWidth + 6 * k, frame.y + tab.tabHeight - 4 * k, `[${condition}]`, {
-          fontFamily: theme.fontFamily,
-          fontSize: tab.labelFontSize,
-          fill: theme.colors.text,
-        });
-  return rectEl + typeEl + conditionEl;
-}
+/** `ComponentRoseGroupingHeader.java:79`'s `style.value(PName.RoundCorner)`,
+ *  cascading to `root`'s default of `0` (`plantuml.skin:12`) -- the SAME
+ *  style read `GroupingTile#drawBackground` makes for its own `Blotter`
+ *  construction (`GroupingTile.java:303-304`). */
+const FRAME_ROUND_CORNER = 0;
 
 /**
  * A `ref over` frame's body: its source lines, ONE `<text>` each, centred in
@@ -316,18 +247,18 @@ function renderFrameTab(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): 
  * The `y` here is upstream's `getOldPaddingY() + textHeaderHeight` with two
  * deliberate substitutions: `+ theme.fontSize` because an SVG `<text>` y is a
  * BASELINE where upstream's translate is the block's top-left, and
- * `tab.tabHeight` in place of the measured `textHeaderHeight` because that is
- * the band this port actually draws -- one shared `20 * k` across every frame
- * type, not `ComponentRoseReference`'s own header. Keying the body to the
- * drawn tab is what keeps the two from colliding; the `x` needs no such
- * substitution, so it comes straight from layout.
+ * `frame.tabHeight` in place of the measured `textHeaderHeight` because that
+ * is the band this port actually draws -- resolved in LAYOUT (T1/T5), where
+ * the measurer lives, not `ComponentRoseReference`'s own header. Keying the
+ * body to the drawn tab is what keeps the two from colliding; the `x` needs
+ * no such substitution, so it comes straight from layout.
  *
  * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
  */
-function renderRefBody(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
+function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
   const lineHeight = theme.fontSize + 2 * k;
-  const top = frame.y + tab.tabHeight + theme.fontSize;
+  const top = frame.y + frame.tabHeight + theme.fontSize;
   return frame.refBody
     .map((line, i) =>
       text(line.x, top + i * lineHeight, line.text, {
@@ -339,24 +270,37 @@ function renderRefBody(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): s
     .join('');
 }
 
+/**
+ * `GroupingTile#drawU`'s foreground half (`:267`): `comp.drawU(...)`,
+ * dispatched with `isBackground()` false, reaches `drawInternalU` --
+ * `renderGroupingHeaderForeground` (T4). `drawNotes` + child tiles
+ * (`:268-274`) are `renderRefBody`/`renderBranchSeparators`, same order.
+ */
 function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
-  const border = rect(frame.x, frame.y, frame.width, frame.height, {
-    fill: 'none',
-    stroke: theme.colors.frame,
-    strokeDasharray: scaledDashPattern(theme.scaleK),
-  });
-  const tab = computeFrameTabGeo(frame, theme);
   return (
-    border +
-    renderFrameTab(frame, tab, theme) +
-    renderRefBody(frame, tab, theme) +
-    renderBranchSeparators(frame, tab, theme)
+    renderGroupingHeaderForeground(frame, theme) +
+    renderRefBody(frame, theme) +
+    renderBranchSeparators(frame, theme)
+  );
+}
+
+/**
+ * `GroupingTile#drawU`'s background half (`:262-263, :301-309`): the
+ * `Blotter` bands (`renderFrameBlotter`, T3), THEN `drawBackgroundInternalU`
+ * -- the plain outline (`renderGroupingHeaderBackground`, T4), upstream's
+ * own order.
+ */
+function renderFrameBackground(frame: FrameGeo, theme: ScaledTheme): string {
+  return (
+    renderFrameBlotter(frame, FRAME_ROUND_CORNER * theme.scaleK) +
+    renderGroupingHeaderBackground(frame, theme)
   );
 }
 
 /** The dashed rule + bracketed condition each `else` branch opens with. */
-function renderBranchSeparators(frame: FrameGeo, tab: FrameTabGeo, theme: ScaledTheme): string {
+function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
+  const labelFontSize = GROUP_FONT_SIZE * k;
   return frame.branchSeparators
     .map((sep) => {
       const rule = line(frame.x, sep.y, frame.x + frame.width, sep.y, {
@@ -369,7 +313,7 @@ function renderBranchSeparators(frame: FrameGeo, tab: FrameTabGeo, theme: Scaled
         rule +
         text(frame.x + 6 * k, sep.y + theme.fontSize, `[${condition}]`, {
           fontFamily: theme.fontFamily,
-          fontSize: tab.labelFontSize,
+          fontSize: labelFontSize,
           fill: theme.colors.text,
         })
       );
@@ -401,22 +345,41 @@ function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
 // Event dispatcher
 // ---------------------------------------------------------------------------
 
-function renderEvent(event: EventGeo, theme: ScaledTheme): string {
+/**
+ * `PlayingSpace#drawBackground`/`#drawForeground` share `drawUInternal`
+ * (`PlayingSpace.java:109-117`); only the `UGraphicInterceptorTile
+ * #isBackground` flag they wrap `ug` in differs (that class suppresses
+ * nothing itself, it only carries the flag). `frame` is the one event kind
+ * whose component overrides `drawBackgroundInternalU`; every other kind
+ * inherits `AbstractComponent`'s empty default (`:139-140`), so messages,
+ * notes, activations, dividers and spaces draw nothing here.
+ */
+function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean): string {
+  if (event.kind === 'frame') {
+    return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
+  }
+  if (isBackground) return '';
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
     case 'activation':
-      return renderActivation(event, theme);
+      // Drawn in the lifeline pass (step 2), not here -- see the comment
+      // there and `LivingSpace#drawLineAndLiveboxes`.
+      return '';
     case 'note':
       return renderNote(event, theme);
-    case 'frame':
-      return renderFrame(event, theme);
     case 'divider':
       return renderDivider(event, theme);
     case 'space':
       // Space geos add no visible elements
       return '';
   }
+}
+
+/** One event-walk pass -- see {@link renderEvent}; mirrors the one
+ *  `drawUInternal` both drawBackground/drawForeground share. */
+function renderEventPass(events: readonly EventGeo[], theme: ScaledTheme, isBackground: boolean): string[] {
+  return events.map((event) => renderEvent(event, theme, isBackground));
 }
 
 // ---------------------------------------------------------------------------
@@ -475,30 +438,54 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
     children.push(renderBoxBackground(box, scaledTheme));
   }
 
-  // 1. Lifelines (behind everything else)
-  for (const p of scaledGeo.participants) {
-    children.push(renderLifeline(p, scaledGeo.lifelineEndY, scaledTheme));
-  }
+  // 1. Background pass -- `playingSpace.drawBackground(ugBody)`
+  //    (`PlayingSpaceWithParticipants.java:218`), the FIRST of the five
+  //    passes. Walks the SAME `scaledGeo.events` array, in the same order,
+  //    as step 5 below -- `PlayingSpace#drawBackground`/`#drawForeground`
+  //    both delegate to the identical `drawUInternal` (`PlayingSpace.java:
+  //    109-117`), differing only in the `isBackground` flag `renderEvent`
+  //    now takes. Everything but a frame's own band+outline is silent here.
+  children.push(...renderEventPass(scaledGeo.events, scaledTheme, true));
 
-  // 2. Participant header boxes
+  // 2. Lifelines AND liveboxes -- one pass, per participant.
+  //    `PlayingSpaceWithParticipants#drawU:221` calls
+  //    `livingSpaces.drawLifeLines(...)` here, and `LivingSpace
+  //    #drawLineAndLiveboxes` draws each participant's line followed by that
+  //    participant's own activation boxes. Activations are therefore NOT part
+  //    of the event pass below, however naturally they read as events.
+  children.push(
+    renderLifelinePass(
+      scaledGeo.participants,
+      scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
+      scaledGeo.lifelineEndY,
+      scaledTheme,
+    ),
+  );
+
+  // 3. Participant header boxes
   for (const p of scaledGeo.participants) {
     children.push(renderParticipantBox(p, scaledTheme));
   }
 
-  // 3. Events (messages, activations, notes, frames, dividers)
-  for (const event of scaledGeo.events) {
-    children.push(renderEvent(event, scaledTheme));
-  }
-
-  // 4. Footer boxes, unless suppressed. `SequenceDiagram#isShowFootbox`
-  //    (`SequenceDiagram.java:474-486`) is resolved once at layout, which is
-  //    also where the space for this row is (not) reserved -- see
-  //    `layout.ts#isShowFootbox`.
+  // 4. Footer boxes, unless suppressed -- BEFORE the foreground tiles.
+  //    `PlayingSpaceWithParticipants#drawU:223-227` draws the footbox row
+  //    immediately after the heads and only then calls
+  //    `playingSpace.drawForeground(ugBody)`, so upstream lets an arrow paint
+  //    OVER a footbox. Emitting it last, as this renderer used to, inverts
+  //    that z-order as well as shifting every following child index.
+  //    `SequenceDiagram#isShowFootbox` (`SequenceDiagram.java:474-486`) is
+  //    resolved once at layout, which is also where the space for this row is
+  //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
       children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
     }
   }
+
+  // 5. Foreground tiles -- messages, notes, frames, dividers.
+  //    `playingSpace.drawForeground(ugBody)` (`:227`), the LAST of the five
+  //    passes. Activations are absent here by design; see step 2.
+  children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
 
   return {
     body: children.join(''),

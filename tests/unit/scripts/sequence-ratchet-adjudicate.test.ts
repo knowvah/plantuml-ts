@@ -24,7 +24,7 @@ import { describe, it, expect } from 'vitest';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { Diff } from '../../oracle/svg-conformance/compare.js';
+import { compareSvg, weightedScore, type Diff } from '../../oracle/svg-conformance/compare.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import {
   TOP_LEVEL_CHILD_COUNT_PATH,
@@ -39,6 +39,7 @@ import {
   summarize,
   type Adjudication,
   type Classifiable,
+  ownUnitsOf,
 } from '../../../scripts/sequence-ratchet-adjudicate.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -54,8 +55,12 @@ const BEXOCE = {
   liveChildDistance: 1,
 };
 
-function at(score: number | null, childDistance: number | null): Classifiable {
-  return { score, childDistance };
+function at(
+  score: number | null,
+  childDistance: number | null,
+  ownUnits: number | null = null,
+): Classifiable {
+  return { score, childDistance, ownUnits };
 }
 
 function childCountDiff(actual: string, expected: string): Diff {
@@ -154,14 +159,109 @@ describe('classify', () => {
 });
 
 // ---------------------------------------------------------------------------
+// substructure -- the second benign rise class
+// ---------------------------------------------------------------------------
+
+describe('classify -- substructure rises', () => {
+  // `sequence-participant-g-wrapper` (2026-08-27) produced 552 rises, none of
+  // them a fidelity loss: wrapping each lifeline in the jar's `<g><title>`
+  // group grows OUR node mass without changing the root child COUNT, and a
+  // root child-count short-circuit charges `sumUnits(ours) + sumUnits(theirs)`
+  // without comparing anything below it. Measured on that mission's branch,
+  // `zuravu-52-mike252` went 466 -> 486 across two participants: exactly the
+  // 20 units the two lifeline groups added.
+  const ZURAVU_BASE = at(466, 10, 300);
+  const ZURAVU_LIVE = at(486, 10, 320);
+
+  it('classifies a rise our own unit growth accounts for EXACTLY', () => {
+    expect(classify(ZURAVU_BASE, ZURAVU_LIVE)).toBe('substructure');
+  });
+
+  it('stays a regression when the growth does not account for the rise', () => {
+    // One unit more rise than we added: something that WAS compared got
+    // worse, and that is not this class.
+    expect(classify(at(466, 10, 300), at(487, 10, 320))).toBe('regression');
+  });
+
+  it('stays a regression when the child-count distance itself grew', () => {
+    // Arithmetic alone is not enough: if our structure moved AWAY from the
+    // golden's child count, the rise is adjudicated as a regression even
+    // when the units happen to line up.
+    expect(classify(at(466, 10, 300), at(486, 11, 320))).toBe('regression');
+  });
+
+  it('still prefers artefact when the distance FELL', () => {
+    // The original rule wins; a distance that closed is the stronger signal.
+    expect(classify(at(466, 45, 300), at(486, 1, 320))).toBe('artefact');
+  });
+
+  it('never fires on a null ownUnits -- absent is not zero', () => {
+    expect(classify(at(466, 10, null), at(486, 10, 320))).toBe('regression');
+    expect(classify(at(466, 10, 300), at(486, 10, null))).toBe('regression');
+  });
+
+  it('does not fire on a FALL -- that is already improved', () => {
+    expect(classify(at(486, 10, 320), at(466, 10, 300))).toBe('improved');
+  });
+});
+
+describe('ownUnitsOf', () => {
+  const wrap = (body: string): string =>
+    `<svg xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif">${body}</g></svg>`;
+
+  it('counts one unit per node and one per attribute, over the ROOT group', () => {
+    // `<rect x y>` is 1 node + 2 attrs = 3.
+    expect(ownUnitsOf(wrap('<rect x="1" y="2"/>'))).toBe(3);
+  });
+
+  it('descends into children', () => {
+    // `<g>`(1) + `<title>`(1) + its text node(1) + `<rect x>`(2) = 5.
+    expect(ownUnitsOf(wrap('<g><title>A</title><rect x="1"/></g>'))).toBe(5);
+  });
+
+  it('charges the lifeline wrapper exactly 10 units more than a bare line', () => {
+    // The arithmetic the 552-rise adjudication rests on:
+    // `<g>`(1) + `<title>`(1) + text(1) + `<rect>` with 6 attrs(7) = 10.
+    const bare = ownUnitsOf(wrap('<line x1="1" y1="2" x2="1" y2="3"/>'));
+    const wrapped = ownUnitsOf(
+      wrap(
+        '<g><title>A</title>' +
+          '<rect x="1" y="2" width="8" height="1" fill="#000" fill-opacity="0"/>' +
+          '<line x1="1" y1="2" x2="1" y2="3"/></g>',
+      ),
+    );
+    expect(bare).not.toBeNull();
+    expect(wrapped).not.toBeNull();
+    expect((wrapped ?? 0) - (bare ?? 0)).toBe(10);
+  });
+
+  it('returns null when there is no root content group -- not 0', () => {
+    expect(ownUnitsOf('<svg xmlns="http://www.w3.org/2000/svg"><rect x="1"/></svg>')).toBeNull();
+  });
+
+  it('agrees with the charge compare.ts actually levies for a root short-circuit', () => {
+    // The equivalence `isSubstructureRise` depends on, pinned rather than
+    // asserted in a comment: when the root child COUNTS differ, the whole
+    // charge is sumUnits(ours) + sumUnits(theirs), so the weighted score
+    // equals `ownUnitsOf(ours) + ownUnitsOf(theirs)`.
+    const ours = wrap('<rect x="1"/>');
+    const theirs = wrap('<rect x="1"/><rect x="2"/>');
+    const { diffs } = compareSvg(ours, theirs, 'deterministic');
+
+    expect(diffs.map((d) => d.path)).toContain(TOP_LEVEL_CHILD_COUNT_PATH);
+    expect(weightedScore(diffs)).toBe((ownUnitsOf(ours) ?? 0) + (ownUnitsOf(theirs) ?? 0));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // adjudicate + summarize
 // ---------------------------------------------------------------------------
 
 describe('adjudicate', () => {
   it('joins two snapshots on slug and emits the full contract per fixture', () => {
     const rows = adjudicate(
-      [{ slug: BEXOCE.slug, score: 622, childDistance: 45 }],
-      [{ slug: BEXOCE.slug, score: 950, childDistance: 1 }],
+      [{ slug: BEXOCE.slug, score: 622, childDistance: 45, ownUnits: null }],
+      [{ slug: BEXOCE.slug, score: 950, childDistance: 1, ownUnits: null }],
     );
     expect(rows).toEqual([
       {
@@ -177,8 +277,8 @@ describe('adjudicate', () => {
 
   it('reports a fixture that errored at one ref as null, not as zero', () => {
     const rows = adjudicate(
-      [{ slug: 'a', score: null, childDistance: null, error: 'boom' }],
-      [{ slug: 'a', score: 300, childDistance: 2 }],
+      [{ slug: 'a', score: null, childDistance: null, ownUnits: null, error: 'boom' }],
+      [{ slug: 'a', score: 300, childDistance: 2, ownUnits: null }],
     );
     expect(rows[0]?.baseScore).toBeNull();
     expect(rows[0]?.liveScore).toBe(300);
@@ -188,12 +288,12 @@ describe('adjudicate', () => {
   it('walks the UNION of slugs, sorted, so a one-ref-only fixture is not dropped', () => {
     const rows = adjudicate(
       [
-        { slug: 'zeta', score: 10, childDistance: 1 },
-        { slug: 'alpha', score: 10, childDistance: 1 },
+        { slug: 'zeta', score: 10, childDistance: 1, ownUnits: null },
+        { slug: 'alpha', score: 10, childDistance: 1, ownUnits: null },
       ],
       [
-        { slug: 'alpha', score: 10, childDistance: 1 },
-        { slug: 'mid', score: 7, childDistance: 0 },
+        { slug: 'alpha', score: 10, childDistance: 1, ownUnits: null },
+        { slug: 'mid', score: 7, childDistance: 0, ownUnits: null },
       ],
     );
     expect(rows.map((r) => r.slug)).toEqual(['alpha', 'mid', 'zeta']);
@@ -228,6 +328,7 @@ describe('summarize', () => {
   it('counts every verdict, reporting zeros for the absent ones', () => {
     expect(summarize([row('artefact'), row('artefact'), row('regression')])).toEqual({
       artefact: 2,
+      substructure: 0,
       regression: 1,
       inconclusive: 0,
       unchanged: 0,
@@ -238,6 +339,7 @@ describe('summarize', () => {
   it('counts an empty report as all zeros', () => {
     expect(summarize([])).toEqual({
       artefact: 0,
+      substructure: 0,
       regression: 0,
       inconclusive: 0,
       unchanged: 0,

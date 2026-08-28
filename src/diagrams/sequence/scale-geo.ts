@@ -141,6 +141,13 @@ function scaleActivation(a: ActivationGeo, k: number): ActivationGeo {
   return { ...a, lifelineX: a.lifelineX * k, y: a.y * k, height: a.height * k };
 }
 
+/**
+ * A frame's geometry, scaled. `backColorElement`/`backColorGeneral` and each
+ * separator's `backColorGeneral` are RAW colour tokens (`ast.ts`'s "stored
+ * verbatim, interpreted late") and `tabText`/`tabComment` are DATA, not
+ * geometry — all five pass through unchanged, same rule as `label` below.
+ * `tabWidth`/`tabHeight`/`tabTextWidth` are lengths and scale like the rest.
+ */
 function scaleFrame(f: FrameGeo, k: number): FrameGeo {
   return {
     ...f,
@@ -150,6 +157,9 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     height: f.height * k,
     branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
     refBody: f.refBody.map((b) => ({ ...b, x: b.x * k })),
+    tabTextWidth: f.tabTextWidth * k,
+    tabWidth: f.tabWidth * k,
+    tabHeight: f.tabHeight * k,
   };
 }
 

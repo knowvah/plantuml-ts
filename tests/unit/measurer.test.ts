@@ -58,7 +58,8 @@ describe('defaultTheme', () => {
   });
 
   it('has correct frame color', () => {
-    expect(defaultTheme.colors.frame).toBe('#999999');
+    // plantuml.skin:117 -- frame default corrected to black (D3 amended)
+    expect(defaultTheme.colors.frame).toBe('#000000');
   });
 
   it('has correct divider color', () => {
@@ -133,7 +134,8 @@ describe('darkTheme', () => {
   });
 
   it('has correct frame color', () => {
-    expect(darkTheme.colors.frame).toBe('#666666');
+    // plantuml.skin:117 -- frame default corrected to black (D3 amended)
+    expect(darkTheme.colors.frame).toBe('#000000');
   });
 
   it('has correct divider color', () => {

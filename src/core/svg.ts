@@ -40,6 +40,12 @@ export interface BoxStyle {
   rx?: number;
   ry?: number;
   opacity?: number;
+  /** `fill-opacity` -- same formatting as `opacity` (see {@link LineStyle}'s
+   *  own field). Needed by upstream's transparent hit-target rects, which
+   *  carry a fill AND a zero fill-opacity rather than `fill="none"`:
+   *  `HColors.transparent(WITH_FILL_OPACITY).bg()`, reached from
+   *  `skin/rose/ComponentRoseLine.java#drawTitleHoverTargetRect`. */
+  fillOpacity?: number;
   filter?: string;
 }
 

@@ -24,11 +24,17 @@ import type {
   SpaceGeo,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
 import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
+import {
+  groupingHeaderDisplay,
+  HEADER_PADDING,
+  HEADER_FONT_SIZE,
+  HEADER_FONT_BOLD,
+} from './frame-style.js';
 
 /** Pending activation-bar start record, keyed by participant id. */
 type ActivationRecord = { y: number; color?: string };
@@ -144,6 +150,93 @@ function handleDeactivateEvent(
  *  occupies before the branch's own first event. */
 const SEPARATOR_HEIGHT = 20;
 
+/** Everything a frame's x/width/refBody needs that does NOT depend on
+ *  where its branches leave the cursor: participant column bounds are
+ *  fixed, and `refBodyLines` reads only `frameType`/`label`. Split out so
+ *  `handleFrameEvent` can resolve these BEFORE the branch walk -- see the
+ *  mutation-contract doc on `handleFrameEvent` (D2). */
+function computeFrameBody(
+  event: FrameEvent,
+  ctx: EventProcessingContext,
+): { x: number; width: number; refBody: { text: string; x: number }[]; body: readonly string[] } {
+  const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
+  const body = refBodyLines(event.frameType, event.label);
+  const x = minCx - 20;
+  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx.theme, ctx.measurer));
+  const refBody = body.map((line) => ({
+    text: line,
+    x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,
+  }));
+  return { x, width, refBody, body };
+}
+
+/** The header tab's `Display`, split by `groupingHeaderDisplay`
+ *  (`GroupingTile.java:126-127`), then measured at `HEADER_FONT_SIZE` bold
+ *  -- `ComponentRoseGroupingHeader.java:107-123` / `AbstractTextualComponent
+ *  .java:106-114`, with `getSuppHeightForComment` and `commentMargin * 2`
+ *  both 0 since this port draws no separate comment box measurement (the
+ *  comment box itself is T4's, `renderer-frame-header.ts`). Layout is the
+ *  only stage holding a measurer, hence resolved here.
+ *  An empty `branchLabels[0]` is treated as "no comment" (`undefined`),
+ *  matching how `groupingCommand` defaults a conditionless frame's label to
+ *  `''` -- there is no separate "absent" state to distinguish it from.
+ *
+ *  A `ref` NEVER has a comment. `ReferenceTile#getComponent:117-124` builds
+ *  `Display("ref") + reference.getStrings()`, and `ComponentRoseReference`
+ *  splits that display at index 1: `subList(0, 1)` is the header ("ref"),
+ *  `subList(1, ...)` is the BODY (`ComponentRoseReference.java:67-78`). The
+ *  label is therefore body text -- this port already routes it there via
+ *  `refBodyLines` -- and there is no second box beside the tab for it. */
+function computeHeaderTab(
+  event: FrameEvent,
+  ctx: EventProcessingContext,
+): { tabText: string; tabComment?: string; tabTextWidth: number; tabWidth: number; tabHeight: number } {
+  const rawComment = event.frameType === 'ref' ? undefined : event.branchLabels[0];
+  const comment = rawComment === undefined || rawComment === '' ? undefined : rawComment;
+  const { tabText, tabComment } = groupingHeaderDisplay(event.frameType, comment);
+
+  const fontSpec: FontSpec = {
+    family: ctx.theme.fontFamily,
+    size: HEADER_FONT_SIZE,
+    weight: HEADER_FONT_BOLD ? 'bold' : 'normal',
+  };
+  const measured = ctx.measurer.measure(tabText, fontSpec);
+  const tabTextWidth = measured.width;
+  const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
+  const tabHeight = measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
+
+  return {
+    tabText,
+    ...(tabComment !== undefined ? { tabComment } : {}),
+    tabTextWidth,
+    tabWidth,
+    tabHeight,
+  };
+}
+
+/**
+ * MUTATION CONTRACT (D2 -- reserve the slot, then fill it).
+ *
+ * `frameGeo` is pushed into `ctx.eventGeos` BEFORE `event.branches` is
+ * walked, so upstream's depth-first PRE-ORDER emission falls out for free,
+ * nested groups included: `GroupingTile#drawU:254-275` draws its own
+ * component, then recurses into `tiles`, and a nested `handleFrameEvent`
+ * call pushes ITS OWN FrameGeo mid-walk -- landing between this frame's
+ * push and its post-walk field fill, exactly where upstream's recursive
+ * `drawU` would land it.
+ *
+ * `x`, `width`, `refBody` (via `computeFrameBody`), the tab* fields (via
+ * `computeHeaderTab`) and `y` are all resolved BEFORE the push: each comes
+ * only from `ctx.participantMap` and `event`'s own `frameType`/`label`/
+ * `branchLabels`, none of which the branch walk can change -- `y` in
+ * particular is `frameStartY`, `cursor.y` at entry, fixed before any branch
+ * advances it. Only `height` and `branchSeparators` depend on where the
+ * branches leave the cursor, so those two start as placeholders (`0` and
+ * `[]`) at push time and are overwritten by direct mutation on `frameGeo`
+ * once `event.branches` has been walked -- mirroring upstream's own
+ * construct-then-resolve-gauge split (the `Real`/`YGauge` chain is built at
+ * construction, then read once solved).
+ */
 function handleFrameEvent(
   event: FrameEvent,
   cursor: EventCursor,
@@ -153,26 +246,7 @@ function handleFrameEvent(
   const frameHeaderHeight = 30;
   cursor.y += frameHeaderHeight;
 
-  // Process each branch in sequence (alt frames have multiple branches).
-  // Every branch after the first opens with an `else`, which upstream draws
-  // as a dashed separator carrying that branch's own bracketed condition --
-  // record the y it falls at, before the branch's own events advance the
-  // cursor past it.
-  const branchSeparators: { y: number; label: string }[] = [];
-  event.branches.forEach((branch, i) => {
-    if (i > 0) {
-      branchSeparators.push({ y: cursor.y, label: event.branchLabels[i] ?? '' });
-      cursor.y += SEPARATOR_HEIGHT;
-    }
-    cursor.y = processEvents(branch, cursor.y, ctx);
-  });
-
-  const frameEndY = cursor.y;
-  const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
-
-  const body = refBodyLines(event.frameType, event.label);
-  const x = minCx - 20;
-  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx.theme, ctx.measurer));
+  const { x, width, refBody, body } = computeFrameBody(event, ctx);
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
@@ -180,14 +254,39 @@ function handleFrameEvent(
     x,
     y: frameStartY,
     width,
-    height: Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer)),
-    branchSeparators,
-    refBody: body.map((line) => ({
-      text: line,
-      x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,
-    })),
+    height: 0, // placeholder -- filled below once the branch walk resolves frameEndY
+    ...(event.backColorElement !== undefined ? { backColorElement: event.backColorElement } : {}),
+    ...(event.backColorGeneral !== undefined ? { backColorGeneral: event.backColorGeneral } : {}),
+    branchSeparators: [], // placeholder -- populated by mutation in the loop below
+    refBody,
+    ...computeHeaderTab(event, ctx),
   };
   ctx.eventGeos.push(frameGeo);
+
+  // Process each branch in sequence (alt frames have multiple branches).
+  // Every branch after the first opens with an `else`, which upstream draws
+  // as a dashed separator carrying that branch's own bracketed condition --
+  // record the y it falls at, before the branch's own events advance the
+  // cursor past it. `event.branchColors` (T2, D10) is index-aligned with
+  // `branchLabels`, so `[i]` is this branch's own `else #color`, or
+  // `undefined` where none was given -- `renderer-frame-blotter.ts` falls
+  // back to the group colour itself when a band has none
+  // (`GroupingTile.java:326-332`).
+  event.branches.forEach((branch, i) => {
+    if (i > 0) {
+      const branchColor = event.branchColors?.[i];
+      frameGeo.branchSeparators.push({
+        y: cursor.y,
+        label: event.branchLabels[i] ?? '',
+        ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
+      });
+      cursor.y += SEPARATOR_HEIGHT;
+    }
+    cursor.y = processEvents(branch, cursor.y, ctx);
+  });
+
+  const frameEndY = cursor.y;
+  frameGeo.height = Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer));
   cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
 }
 

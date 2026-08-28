@@ -26,12 +26,17 @@ export function rect(
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
   const opacity = style.opacity === undefined ? undefined : formatOpacity(style.opacity, DEFAULT_SVG_DECIMALS);
+  const fillOpacity =
+    style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS);
   const a = attrs([
     ['x', x],
     ['y', y],
     ['width', w],
     ['height', h],
     ['fill', fillR.value],
+    // Directly after `fill`, matching the jar's own emission order for a
+    // transparent hit target: `<rect ... fill="#000" fill-opacity="0"/>`.
+    ['fill-opacity', fillOpacity],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
