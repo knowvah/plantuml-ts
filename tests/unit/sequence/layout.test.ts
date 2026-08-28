@@ -809,3 +809,60 @@ describe('layoutSequence — database participant sizing', () => {
     expect(alice.height).toBe(16 + 20);
   });
 });
+
+// ---------------------------------------------------------------------------
+// The five glyph kinds' own getPreferredWidth / getPreferredHeight (T5)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — the five glyph participant kinds', () => {
+  type Kind = 'collections' | 'queue' | 'entity' | 'boundary' | 'control';
+
+  function kindGeo(kind: Kind, display: string) {
+    const ast = makeAst(['P', 'Other'], [msg('P', 'Other')]);
+    ast.participants[0] = { id: 'P', display, type: kind, order: 0 };
+    return layoutSequence(ast, defaultTheme, measurer).participants.find((p) => p.id === 'P')!;
+  }
+
+  it('floors boundary, control and entity at their own drawing width', () => {
+    // `ComponentRoseBoundary`/`Control`/`Entity#getPreferredWidth` are
+    // `max(stickman.getWidth(), getTextWidth())`, verbatim copies of
+    // `ComponentRoseDatabase.java:102-105`. `Boundary.java:97-98` is
+    // `radius*2 + left + 2*margin` = 24 + 17 + 8; `Control.java:87-88` and
+    // `EntityDomain.java:74-75` are `radius*2 + 2*margin` = 32.
+    expect(kindGeo('boundary', 'ab').width).toBe(49);
+    expect(kindGeo('control', 'ab').width).toBe(32);
+    expect(kindGeo('entity', 'ab').width).toBe(32);
+  });
+
+  it('uses getTextWidth = label + 3 + 3 once the label is wider', () => {
+    expect(kindGeo('control', 'abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('stacks the glyph above the text for boundary, control and entity', () => {
+    // `getPreferredHeight` = `dimStickman.getHeight() + getTextHeight()`.
+    expect(kindGeo('boundary', 'ab').height).toBe(32 + 16);
+    expect(kindGeo('control', 'ab').height).toBe(32 + 16);
+    expect(kindGeo('entity', 'ab').height).toBe(32 + 16);
+  });
+
+  it('adds the queue margin around the raw text block, with no 3+3 padding', () => {
+    // `ComponentRoseQueue#getPreferredWidth` returns the GLYPH's dimension,
+    // and the glyph is `USymbols.QUEUE.asSmall(empty(0,0), getTextBlock(),
+    // empty(0,0), ...)` -- `USymbolQueue#getMargin()` = `Margin(5,15,5,5)`
+    // around the RAW block. `SheetBlock1`'s marginX1/marginX2 never reach
+    // `calculateDimension` (`SheetBlock1.java:196-199,:225-229`), so the
+    // component's own 3+3 padding does NOT apply here.
+    expect(kindGeo('queue', 'ab').width).toBe(2 * 8 + 5 + 15);
+    expect(kindGeo('queue', 'ab').height).toBe(16 + 5 + 5);
+  });
+
+  it('adds getDeltaCollection() to the plain participant rule for collections', () => {
+    // `ComponentRoseParticipant#getPreferredWidth/Height:114-124` differ from
+    // the plain participant case by exactly `getDeltaCollection() = 4`.
+    const plain = layoutSequence(makeAst(['P', 'Other'], [msg('P', 'Other')]), defaultTheme, measurer)
+      .participants.find((p) => p.id === 'P')!;
+    const collections = kindGeo('collections', 'P');
+    expect(collections.width).toBe(plain.width + 4);
+    expect(collections.height).toBe(plain.height + 4);
+  });
+});
