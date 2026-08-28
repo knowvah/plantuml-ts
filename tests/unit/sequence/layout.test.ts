@@ -762,3 +762,50 @@ describe('exo messages in the participant walkers', () => {
     expect(gap(withExo)).toBe(gap(plain));
   });
 });
+
+// ---------------------------------------------------------------------------
+// Database participant sizing — ComponentRoseDatabase's own rule (T3)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — database participant sizing', () => {
+  /** `FixedMeasurer(8, 16)`: a label of N characters measures 8N wide, 16 tall. */
+  function dbAst(display: string): SequenceDiagramAST {
+    const ast = makeAst(['DB', 'Other'], [msg('DB', 'Other')]);
+    ast.participants[0] = { id: 'DB', display, type: 'database', order: 0 };
+    return ast;
+  }
+
+  function dbGeo(display: string) {
+    const geo = layoutSequence(dbAst(display), defaultTheme, measurer);
+    return geo.participants.find((p) => p.id === 'DB')!;
+  }
+
+  it('falls back to the glyph width when the label is narrower', () => {
+    // `ComponentRoseDatabase#getPreferredWidth:102-105` --
+    // `max(stickman.getWidth(), getTextWidth())`. The stickman is
+    // `asSmall(null, empty(16,17), empty(0,0), ...)` (`:70`) through
+    // `Margin(10,10,24,5)` (`USymbolDatabase.java:117`), so 16 + 10 + 10 = 36.
+    // A 2-char label is 16 + 3 + 3 = 22 wide, well under it.
+    expect(dbGeo('ab').width).toBe(36);
+  });
+
+  it('uses getTextWidth = label + 3 + 3 when the label is wider', () => {
+    // `topRightBottomLeft(0, 3, 0, 3)` (`ComponentRoseDatabase.java:62-63`)
+    // added by `AbstractTextualComponent#getTextWidth:106-108`.
+    expect(dbGeo('abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('sizes the height as the glyph plus the text block, with no floor', () => {
+    // `getPreferredHeight:96-99` -- `dimStickman.getHeight() +
+    // getTextHeight()`, i.e. (17 + 24 + 5) + 16. The retired `DB_HEIGHT = 80`
+    // floor would have swallowed this.
+    expect(dbGeo('ab').height).toBe(46 + 16);
+  });
+
+  it('leaves non-database participants untouched', () => {
+    const plain = layoutSequence(makeAst(['Alice', 'Bob'], [msg('Alice', 'Bob')]), defaultTheme, measurer);
+    const alice = plain.participants.find((p) => p.id === 'Alice')!;
+    expect(alice.width).toBe(defaultTheme.sequence.participantMinWidth);
+    expect(alice.height).toBe(16 + 20);
+  });
+});

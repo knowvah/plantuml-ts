@@ -29,6 +29,7 @@ import {
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
+import { measureParticipantSymbol } from './renderer-participant-symbol.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import {
@@ -38,10 +39,23 @@ import {
 
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
-// Actors and database cylinders are taller than plain boxes.
+// Actors are taller than plain boxes.
 const SEQUENCE_ACTOR_HEIGHT = 90;
-const DB_HEIGHT = 80;
-const DB_MIN_WIDTH = 40; // cylinders are narrower than plain boxes
+
+/**
+ * `ComponentRoseDatabase`'s constructor passes
+ * `ClockwiseTopRightBottomLeft.topRightBottomLeft(0, 3, 0, 3)` as its padding
+ * (`ComponentRoseDatabase.java:62-63`) — 3px right and left, 0 top and bottom
+ * — and `AbstractTextualComponent#getTextWidth` adds exactly
+ * `padding.getLeft() + padding.getRight()` to the raw text block
+ * (`AbstractTextualComponent.java:106-108`). `getTextHeight` adds
+ * `padding.getTop() + padding.getBottom()`, which is 0 here (`:110-114`).
+ *
+ * This is NOT `theme.sequence.participantPadding`: that knob is this port's
+ * own plain-participant-box padding, and upstream's database component has a
+ * padding of its own that no skinparam feeds.
+ */
+const DB_TEXT_PADDING_X = 3;
 
 export interface ParticipantLayoutResult {
   sortedParticipants: Participant[];
@@ -132,9 +146,20 @@ function scanMessageLabels(
 }
 
 /**
- * Pre-compute each participant's column width. Database cylinders use a
- * smaller minimum and tighter padding so they appear narrower relative to
- * plain participant boxes.
+ * Pre-compute each participant's column width.
+ *
+ * A `database` participant is sized by upstream's own rule,
+ * `ComponentRoseDatabase#getPreferredWidth` (`:102-105`):
+ * `max(stickman.getWidth(), getTextWidth())`, where the stickman is
+ * `USymbols.DATABASE.asSmall(null, empty(16,17), empty(0,0), …)` (`:70`) and
+ * therefore a fixed 36 wide. This replaces a `DB_MIN_WIDTH = 40` whose only
+ * justification was the comment "cylinders are narrower than plain boxes" —
+ * a fitted constant with no upstream `file:line`, which `CLAUDE.md` forbids.
+ *
+ * The two halves of this change must land together: `renderer-participant-
+ * shapes.ts` draws the glyph and this function reserves the column for it.
+ * See `planning/sizer-renderer-parity.md` for why splitting them is the
+ * recurring defect this mission exists to avoid.
  */
 function computeParticipantWidths(
   sortedParticipants: Participant[],
@@ -152,7 +177,10 @@ function computeParticipantWidths(
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
     if (p.type === 'database') {
-      return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
+      return Math.max(
+        measureParticipantSymbol('database', theme).width,
+        lw + DB_TEXT_PADDING_X * 2,
+      );
     }
     return Math.max(
       theme.sequence.participantMinWidth,
@@ -406,9 +434,16 @@ function buildParticipantGeo(
   // height and the text block's (`:57-63`).
   const textHeight = measured.height * (1 + stereoLines.length);
   const boxHeight = Math.max(textHeight, badge?.height ?? 0) + 20;
+  // `ComponentRoseDatabase#getPreferredHeight` (`:96-99`):
+  // `dimStickman.getHeight() + getTextHeight()`. `getTextHeight` is the text
+  // block plus a zero vertical padding (see DB_TEXT_PADDING_X's note), and the
+  // block itself is `TextBlockSprited`'s max(sprite, text)
+  // (`TextBlockSprited.java:57-63`) — i.e. `boxHeight` without its `+ 20`
+  // plain-box allowance. Replaces a fitted `DB_HEIGHT = 80` floor.
+  const dbTextHeight = Math.max(textHeight, badge?.height ?? 0);
   const pHeight =
     p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
-    p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
+    p.type === 'database' ? measureParticipantSymbol('database', theme).height + dbTextHeight :
     boxHeight;
   const centerX = currentX + width / 2;
 
