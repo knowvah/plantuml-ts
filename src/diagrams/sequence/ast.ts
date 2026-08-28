@@ -180,6 +180,17 @@ export interface FrameEvent {
    *  @see CommandGrouping.java:134-135 */
   backColorElement?: string;
   backColorGeneral?: string;
+  /** Per-branch `else #color` background, raw and resolved late (same rule
+   *  as {@link backColorGeneral} above) — index-aligned with
+   *  {@link branchLabels}: entry 0 is the frame's own COLORS-index-1 value
+   *  (mirrors `backColorGeneral`, kept separately since a bare `group`/`alt`
+   *  line and its first branch are the same COLORS capture), 1..n are each
+   *  `else`'s own captured color, or `undefined` where none was given.
+   *  `Blotter#getBackColorGeneral` falls back to the group color when a
+   *  band has none (`GroupingTile.java:326-332`) — `sequence-layout-events
+   *  .ts#handleFrameEvent` carries this array onto `FrameGeo
+   *  .branchSeparators` for `renderer-frame-blotter.ts` to read (D10). */
+  branchColors?: (string | undefined)[];
 }
 
 export interface ActivationEvent {

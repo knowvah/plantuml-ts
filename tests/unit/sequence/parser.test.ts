@@ -537,6 +537,37 @@ describe('frame events', () => {
     expect(ev?.label).toBe('success');
   });
 
+  // T2: `CommandGrouping`'s `COLORS` group (`:64-73,134-135`) -- index 0
+  // (no space) is `backColorElement`, index 1 (space-separated) is
+  // `backColorGeneral`.
+  it('captures a space-separated COLORS token as backColorGeneral', () => {
+    const ast = parse(['group #ffa G1', 'Alice -> Bob: msg', 'end']);
+    const ev = ast.events[0] as FrameEvent | undefined;
+    expect(ev?.backColorGeneral).toBe('#ffa');
+    expect(ev?.backColorElement).toBeUndefined();
+  });
+
+  it('captures a directly-attached COLORS token as backColorElement', () => {
+    const ast = parse(['group#ffa G1', 'Alice -> Bob: msg', 'end']);
+    const ev = ast.events[0] as FrameEvent | undefined;
+    expect(ev?.backColorElement).toBe('#ffa');
+  });
+
+  // T2/D10: `elseCommand`'s own COLORS-index-1 capture, index-aligned with
+  // `branchLabels` via `FrameEvent.branchColors`.
+  it('captures an else branch color without absorbing it into the label', () => {
+    const ast = parse([
+      'alt first case',
+      'Alice -> Bob: ok',
+      'else #eee other case',
+      'Alice -> Bob: fail',
+      'end',
+    ]);
+    const ev = ast.events[0] as FrameEvent | undefined;
+    expect(ev?.branchLabels).toEqual(['first case', 'other case']);
+    expect(ev?.branchColors).toEqual([undefined, '#eee']);
+  });
+
   it('par creates FrameEvent with frameType par', () => {
     const ast = parse(['par thread', 'Alice -> Bob: msg', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
@@ -548,6 +579,22 @@ describe('frame events', () => {
     const ev = ast.events[0] as FrameEvent | undefined;
     expect(ev?.frameType).toBe('group');
     expect(ev?.label).toBe('My Group');
+  });
+
+  // T2: `group`'s header-rewrite (`CommandGrouping.java:139-149`).
+  it('a bare group with no comment gets the literal "group" label', () => {
+    const ast = parse(['group', 'Alice -> Bob: msg', 'end']);
+    const ev = ast.events[0] as FrameEvent | undefined;
+    expect(ev?.label).toBe('group');
+  });
+
+  it('`group Title [comment]` rewrites the label to the bracketed header', () => {
+    const ast = parse(['group Alpha [beta]', 'Alice -> Bob: msg', 'end']);
+    const ev = ast.events[0] as FrameEvent | undefined;
+    // frameType stays the ORIGINAL "group" token -- never the rewritten
+    // header (CommandGrouping.java:139, computed before the reassignment).
+    expect(ev?.frameType).toBe('group');
+    expect(ev?.label).toBe('Alpha');
   });
 
   it('nested frames: inner frame appears inside outer branch', () => {

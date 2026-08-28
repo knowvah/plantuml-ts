@@ -260,13 +260,19 @@ function handleFrameEvent(
   // Every branch after the first opens with an `else`, which upstream draws
   // as a dashed separator carrying that branch's own bracketed condition --
   // record the y it falls at, before the branch's own events advance the
-  // cursor past it. No per-branch colour source exists on `FrameEvent` yet
-  // (only the frame-level `backColorElement`/`backColorGeneral` above), so
-  // every entry's `backColorGeneral` is `undefined` until a later task adds
-  // one -- see this task's report for the discovered contract gap.
+  // cursor past it. `event.branchColors` (T2, D10) is index-aligned with
+  // `branchLabels`, so `[i]` is this branch's own `else #color`, or
+  // `undefined` where none was given -- `renderer-frame-blotter.ts` falls
+  // back to the group colour itself when a band has none
+  // (`GroupingTile.java:326-332`).
   event.branches.forEach((branch, i) => {
     if (i > 0) {
-      frameGeo.branchSeparators.push({ y: cursor.y, label: event.branchLabels[i] ?? '' });
+      const branchColor = event.branchColors?.[i];
+      frameGeo.branchSeparators.push({
+        y: cursor.y,
+        label: event.branchLabels[i] ?? '',
+        ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
+      });
       cursor.y += SEPARATOR_HEIGHT;
     }
     cursor.y = processEvents(branch, cursor.y, ctx);
