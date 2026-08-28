@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1041 modules · 3691 exported names.
+1042 modules · 3696 exported names.
 
 ## `src/`
 
@@ -1273,6 +1273,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-lifeline.ts` | `renderLifeline`, `renderActivation`, `renderLifelinePass` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderActorShape`, `renderDatabaseShape` | renderer-participant-shapes.ts — the `actor`/`database` participant ICONS, split out of `renderer.ts` (which was already at 493 of the repo's 500-line cap — the same reason `renderer-arrowhead.ts` split off its own file, see that module's h |
+| `renderer-participant-symbol.ts` | `SymbolParticipantType`, `ParticipantSymbolGeo`, `ParticipantSymbolOpts`, `measureParticipantSymbol`, `renderParticipantSymbol` | renderer-participant-symbol.ts — the sequence engine's participant GLYPH seam: a sequence-local mirror of upstream's `ComponentRose*` family (`skin/rose/Rose.java#createComponentParticipant`, `:137-190`) that drives the SHARED, already-port |
 | `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
 | `scale-geo.ts` | `scaleSequenceGeometry`, `ScaledTheme`, `scaleSequenceTheme`, `scaleHeadGeometry`, `scaledDashPattern` | The `scale …` directive for the sequence engine, applied at the layout→render boundary — mirrors `json/scale-geo.ts` exactly (same rationale, same "why scaling inputs equals scaling outputs" argument); see that file's header for the full de |
 | `sequence-arrow-regex.ts` | `ANCHOR`, `anchor`, `COLOR_OR_STYLE_PATTERN`, `colorOrStylePattern`, `ARROW_DRESSING1`, `ARROW_DRESSING2`, `ARROW_BODY_OR`, `PART1`, `PART2`, `ARROW_SUPPCIRCLE2_LEFT`, `ARROW_SUPPCIRCLE1_LEFT`, `ARROW_SUPPCIRCLE1_RIGHT`, `ARROW_SUPPCIRCLE2_RIGHT`, `MULTICAST`, `ACTIVATION`, `LIFECOLOR`, `ARROW_SKELETON_SOURCE`, `ARROW_SKELETON_RE` | Shared regex fragments behind the sequence-diagram arrow commands. |
