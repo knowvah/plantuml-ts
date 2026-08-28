@@ -5,19 +5,28 @@
  * its own file, see that module's header) so this iteration's scale
  * threading (T13, dispatch-by-parse-attempt) had room to land.
  *
- * Every pixel-literal constant here (`headR`, `armSpan`, `legSpan`, the
- * `1.5` stroke widths, the `+2`/`-8`/`+14`/`-4`/`-2` offsets, …) is scaled
- * by `theme.scaleK` at its point of use: none of it flows through
- * `SequenceGeometry` (these shapes are computed fresh from an
- * already-positioned point, not looked up), so `scale-geo.ts`'s geometry
- * scaling never reaches it — see that module's header, "Exhaustiveness".
- * Upstream's `SvgGraphics#format` would scale these same numbers
- * regardless of their origin, so this port must too.
+ * `database` no longer lives here in any real sense: T2 replaced its
+ * hand-rolled `rect + line + line + ellipse` cylinder with a call into
+ * `renderer-participant-symbol.ts`, which drives the ported
+ * `USymbolDatabase` through klimt. Only the thin dispatch remains, so the
+ * call sites in `renderer.ts` keep their shape. `actor` is still hand-rolled
+ * and is the subject of T6 (`skinparam actorStyle`, D4).
+ *
+ * Every pixel-literal constant left here (`headR`, `armSpan`, `legSpan`, the
+ * `1.5` stroke width, the `+2`/`-8` offsets, …) is scaled by `theme.scaleK`
+ * at its point of use: none of it flows through `SequenceGeometry` (these
+ * shapes are computed fresh from an already-positioned point, not looked
+ * up), so `scale-geo.ts`'s geometry scaling never reaches it — see that
+ * module's header, "Exhaustiveness". Upstream's `SvgGraphics#format` would
+ * scale these same numbers regardless of their origin, so this port must
+ * too. The database seam handles the same problem differently, through
+ * klimt's own `SvgOption.scale` — see that module's header.
  */
 
 import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantGeo } from './ast.js';
-import { rect, line, ellipse, path } from '../../core/svg.js';
+import { ellipse, path } from '../../core/svg.js';
+import { renderParticipantSymbol } from './renderer-participant-symbol.js';
 import { fmt } from '../../core/svg-format.js';
 
 /** Pure geometry for {@link renderActorShape}, computed once and shared by
@@ -126,87 +135,31 @@ export function renderActorShape(p: ParticipantGeo, topY: number, theme: ScaledT
   return head + body;
 }
 
-/** Pure geometry for {@link renderDatabaseShape}, computed once and shared
- *  by its three drawing helpers (kept separate to stay under the 30-NLOC
- *  function cap). */
-interface DatabaseGeo {
-  readonly x: number;
-  readonly bodyTop: number;
-  readonly bodyBot: number;
-  readonly cx: number;
-  readonly rx: number;
-  readonly capRy: number;
-  readonly bodyH: number;
-  readonly width: number;
-  readonly inset: number;
-  readonly strokeWidth: number;
-}
-
-/** `theme.fontSize` is already scaled (`scaleSequenceTheme`); every OTHER
- *  literal below is scaled here via `theme.scaleK`. */
-function computeDatabaseGeo(
-  x: number,
-  topY: number,
-  width: number,
-  height: number,
+/**
+ * The `database` head/tail glyph, drawn through T1's faithful seam.
+ *
+ * This used to hand-roll the cylinder as `rect + line + line + ellipse` —
+ * four top-level children where `USymbolDatabase#drawDatabase`
+ * (`USymbolDatabase.java:62-79`) draws exactly two `UPath`s, a body and a
+ * `getClosingPath` lid. The excess is per-database and per-diagram (header and
+ * footer rows both draw one), which is the whole `+2 rect, +4 line,
+ * +2 ellipse, −2 path` delta measured on `junaxa-14-biko373`.
+ *
+ * `blockTopY` is the top of the participant BLOCK, not of the glyph:
+ * `ComponentRoseDatabase#drawInternalU` (`:81-87`) places the glyph inside
+ * that block itself, at the top when `head` and below the text when not.
+ *
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseDatabase.java:75-89
+ */
+export function renderDatabaseShape(
+  p: ParticipantGeo,
+  blockTopY: number,
+  head: boolean,
   theme: ScaledTheme,
-): DatabaseGeo {
-  const k = theme.scaleK;
-  // With sweep=1 the arc nadir sits capRy below bodyBot. labelH must satisfy
-  // labelH > 1.15*(capRy_fraction*height) + fontSize + 4 to keep the label
-  // top clear of the arc. fontSize+12 gives ~3 px of clearance at fontSize=14.
-  const labelH = theme.fontSize + 14 * k;
-  const bodyH = height - labelH;
-  const capRy = Math.max(4 * k, bodyH * 0.15);
-  return {
-    x,
-    bodyTop: topY + capRy,
-    bodyBot: topY + bodyH,
-    cx: x + width / 2,
-    rx: width / 2 - 2 * k,
-    capRy,
-    bodyH,
-    width,
-    inset: 2 * k,
-    strokeWidth: 1.5 * k,
-  };
-}
-
-/** Body rect + side lines. */
-function renderDatabaseBody(geo: DatabaseGeo, p: ParticipantGeo): string {
-  const { x, width, inset, bodyTop, bodyBot, bodyH, capRy, strokeWidth } = geo;
-  const bodyRect = rect(x + inset, bodyTop, width - 2 * inset, bodyH - capRy, {
-    fill: p.background,
-    stroke: 'none',
-  });
-  const leftLine = line(x + inset, bodyTop, x + inset, bodyBot, { stroke: p.border, strokeWidth });
-  const rightLine = line(x + width - inset, bodyTop, x + width - inset, bodyBot, {
-    stroke: p.border,
-    strokeWidth,
-  });
-  return bodyRect + leftLine + rightLine;
-}
-
-/** Top ellipse (full, visible). */
-function renderDatabaseCap(geo: DatabaseGeo, p: ParticipantGeo): string {
-  return ellipse(geo.cx, geo.bodyTop, geo.rx, geo.capRy, {
-    fill: p.background,
-    stroke: p.border,
-    'stroke-width': fmt(geo.strokeWidth),
-  });
-}
-
-/** Bottom arc — sweep=0 (counter-clockwise from left to right) routes
- *  through (cx, bodyBot+capRy), bowing the arc downward for a convex
- *  cylinder bottom. */
-function renderDatabaseArc(geo: DatabaseGeo, p: ParticipantGeo): string {
-  const { x, width, inset, bodyBot, rx, capRy, strokeWidth } = geo;
-  const d =
-    `M ${fmt(x + inset)},${fmt(bodyBot)} A ${fmt(rx)},${fmt(capRy)} 0 0,0 ${fmt(x + width - inset)},${fmt(bodyBot)}`;
-  return path(d, { fill: p.background, stroke: p.border, strokeWidth });
-}
-
-export function renderDatabaseShape(p: ParticipantGeo, topY: number, theme: ScaledTheme): string {
-  const geo = computeDatabaseGeo(p.x, topY, p.width, p.height, theme);
-  return renderDatabaseBody(geo, p) + renderDatabaseCap(geo, p) + renderDatabaseArc(geo, p);
+): string {
+  return renderParticipantSymbol(
+    'database',
+    { x: p.x, y: blockTopY, width: p.width, height: p.height, background: p.background, border: p.border },
+    { head, display: p.display, theme },
+  );
 }

@@ -1074,14 +1074,32 @@ describe('renderSequence — actor participant shape', () => {
 });
 
 describe('renderSequence — database participant shape', () => {
-  it('renders an ellipse (cylinder cap) for database participants', () => {
+  it('renders the two USymbolDatabase paths and no ellipse', () => {
     const geo = makeGeo({
+      showFootbox: false,
       participants: [
         { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<ellipse');
+    // `USymbolDatabase#drawDatabase` (`USymbolDatabase.java:62-79`) draws a
+    // body `UPath` and a `getClosingPath` lid -- two elements. This used to be
+    // a hand-rolled `rect + line + line + ellipse`, and that four-vs-two
+    // excess is the whole `junaxa-14-biko373` child-count delta.
+    expect(svg).not.toContain('<ellipse');
+    expect(svg.match(/<path/g) ?? []).toHaveLength(2);
+  });
+
+  it('places the head glyph at the top of the block and the tail glyph at its bottom', () => {
+    const participant = { id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
+    const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
+    // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
+    // (`ComponentRoseDatabase.java:81-83`).
+    expect(starts[0]).toBe(10);
+    // tail: the glyph is pushed down by getTextHeight = blockHeight - 46
+    // (`:84-87`), so it starts 46 above the block bottom, never at the top.
+    expect(starts[2]).toBeGreaterThan(starts[0]!);
   });
 
   it('renders display name for database participant', () => {

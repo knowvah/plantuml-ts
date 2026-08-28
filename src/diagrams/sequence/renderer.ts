@@ -144,7 +144,7 @@ function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
   }
   if (p.type === 'database') {
     return (
-      renderDatabaseShape(p, p.y, theme) +
+      renderDatabaseShape(p, p.y, true, theme) +
       renderNameBlock(p, p.y + p.height - labelYOffset, theme)
     );
   }
@@ -165,8 +165,11 @@ function renderFooterBox(
   theme: ScaledTheme,
 ): string {
   // Rectangular participants: box starts at lifelineEndY, label inside.
-  // Non-rectangular (actor, database): label above the shape at lifelineEndY,
-  // shape starts at footerShapeY (= lifelineEndY + label-zone height).
+  // `actor`: label above the shape at lifelineEndY, shape at footerShapeY
+  // (= lifelineEndY + label-zone height).
+  // `database`: the whole block starts at lifelineEndY and the seam places the
+  // glyph inside it, below the text, per `ComponentRoseDatabase.java:84-87`
+  // -- so it needs the block top, not the pre-computed shape top.
   const labelY = lifelineEndY + theme.fontSize / 2 + 4 * theme.scaleK;
   if (p.type === 'actor') {
     return (
@@ -177,7 +180,7 @@ function renderFooterBox(
   if (p.type === 'database') {
     return (
       renderNameBlock(p, labelY, theme) +
-      renderDatabaseShape(p, footerShapeY, theme)
+      renderDatabaseShape(p, lifelineEndY, false, theme)
     );
   }
   const box = rect(p.x, lifelineEndY, p.width, p.height, {
