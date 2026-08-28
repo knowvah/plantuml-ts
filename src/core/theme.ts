@@ -269,7 +269,7 @@ export const defaultTheme: Theme = {
     noteBackground: '#FEFECE',
     lifeline: '#181818',
     activation: '#DDDDDD',
-    frame: '#999999',
+    frame: '#000000', // plantuml.skin:117 (sequenceDiagram.group LineColor)
     divider: '#999999',
     error: '#CC0000',
     graph: {
@@ -344,7 +344,7 @@ export const darkTheme: Theme = {
     noteBackground: '#2D2D2D',
     lifeline: '#888888',
     activation: '#444444',
-    frame: '#666666',
+    frame: '#000000', // plantuml.skin:117 (sequenceDiagram.group LineColor)
     divider: '#555555',
     error: defaultTheme.colors.error,
     graph: {

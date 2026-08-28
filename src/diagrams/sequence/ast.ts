@@ -167,19 +167,19 @@ export interface FrameEvent {
     | 'ref';
   label: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
-  /**
-   * Condition text per branch, index-aligned with `branches`.
-   * `branchLabels[0]` is the frame's own `label`; entries 1..n are the
-   * `else <condition>` labels. Upstream draws each as a bracketed
-   * `[condition]`, the first beside the frame's type tab and the rest beside
-   * a dashed separator (`Displayable`/`GroupingTile`), which is why they must
-   * survive parsing rather than collapse into `label`.
-   */
+  /** Condition text per branch, index-aligned with `branches`: entry 0 is
+   *  the frame's own `label`, 1..n are `else <condition>` labels, drawn
+   *  bracketed beside the tab (0) or a dashed separator (1..n,
+   *  `Displayable`/`GroupingTile`) — why they survive parsing separately. */
   branchLabels: string[];
   /** The `&` PARALLEL marker on a grouping line
    *  (`CommandGrouping.java`, `GroupingTile.java:145,864` under `teoz/`).
    *  Stored, not drawn — see {@link AbstractMessageEvent} and D4. */
   parallel?: boolean;
+  /** `COLORS` 0/1, raw, resolved late — see `frame-style.ts`.
+   *  @see CommandGrouping.java:134-135 */
+  backColorElement?: string;
+  backColorGeneral?: string;
 }
 
 export interface ActivationEvent {
@@ -424,20 +424,22 @@ export interface FrameGeo {
   y: number;
   width: number;
   height: number;
-  /** `else` branch boundaries: the y of each dashed separator and the
-   *  bracketed condition drawn beside it. Empty for single-branch frames
-   *  (`loop`, `opt`, `group`, …). */
-  branchSeparators: { y: number; label: string }[];
-  /**
-   * A `ref over` frame's body, one entry per source line, each with its own
-   * pre-centred `x`. Positioned HERE rather than with `text-anchor="middle"`
-   * at render time because that is what the jar emits: its body lines carry a
-   * computed `x` and no anchor (`x="74.3"` / `x="76.962"` for a box centred on
-   * 108.7), and the anchor attribute would be one more attribute per line than
-   * upstream has. Centring needs the measurer, which layout has and the
-   * renderer does not. Empty for every other frame type.
-   */
+  /** `COLORS` 0/1, raw, resolved late — see `FrameEvent` above. */
+  backColorElement?: string;
+  backColorGeneral?: string;
+  /** `else` branch boundaries: y + bracketed condition. Each MAY carry its
+   *  own resolved BODY-band fill. Empty for single-branch frames. */
+  branchSeparators: { y: number; label: string; backColorGeneral?: string }[];
+  /** `ref over` body lines, pre-centred `x` (needs the measurer, layout-only,
+   *  same rationale as `x`/`y` above). Empty for every other frame type. */
   refBody: { text: string; x: number }[];
+  /** Header Display, resolved in LAYOUT (no measurer at render time).
+   *  @see GroupingTile.java:126-127, `frame-style.ts#groupingHeaderDisplay` */
+  tabText: string;
+  tabComment?: string;
+  tabTextWidth: number;
+  tabWidth: number;
+  tabHeight: number;
 }
 
 export interface DividerGeo {
