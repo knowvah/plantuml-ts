@@ -1084,7 +1084,7 @@ the way the jar does — and two things about that page diverge.
 
 **1. The attributed diagram type can differ.** The page prints
 `(Assumed diagram type: X)`, and `X` comes from the MERGED refusal, which
-[D2](plans/dispatch-by-parse-attempt/decisions.md) resolves by keeping the
+`plans/dispatch-by-parse-attempt/decisions.md`'s D2 resolves by keeping the
 highest-SCORING refusal (`PSystemError#score`: `trace.size() * 10 +
 singleError.score()`, first-wins on a tie). That is upstream's own arithmetic,
 but the scores are only equal to the jar's where the command tables are, so a
