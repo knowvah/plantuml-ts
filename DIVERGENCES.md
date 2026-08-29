@@ -1198,10 +1198,16 @@ untouched by it:
   at the newpage boundary and this port renders every page into one
   document. Same mechanism as `sequence-newpage-pagination`
   (`planning/next-missions.md`).
-- `junaxa-14-biko373` — the `actor`/`database` head glyph decomposes
-  differently from the jar's, and the jar places the diagram title as a
-  top-level `<text>` this port places elsewhere. Narrow (one fixture
-  measured), not separately filed.
+- `junaxa-14-biko373` — **CLOSED 2026-08-29 by
+  `sequence-participant-symbols`, and the description above was wrong on
+  both halves.** The title is NOT a count difference (`text` is 13 on both
+  sides, measured), and the actor stick man's own count had already been
+  fixed by `sequence-command-coverage` T13. The surplus was the DATABASE
+  glyph alone: a hand-rolled `rect + line + line + ellipse` cylinder, five
+  top-level elements per glyph where `USymbolDatabase#drawDatabase`
+  (`USymbolDatabase.java:62-79`) draws two `UPath`s, twice over (head and
+  footer). Body-group child count is now 41 with the golden's histogram, and
+  its tag sequence matches at all 41 positions.
 - `rugeco-70-muro754` — this port emits seven top-level `<g>` for three
   participants where the jar emits six. Narrow (one fixture measured), not
   separately filed.
@@ -1209,3 +1215,45 @@ untouched by it:
 **Category:** limitation, of the adjudication instrument rather than the
 renderer — recorded so a future reader re-running the adjudicator does not
 mistake these three for a real regression introduced by this port.
+
+## Sequence participant labels precede their glyph, and `weightedScore` reads that as a rise
+
+`sequence-participant-symbols` T7, 2026-08-29.
+
+Routing the seven glyph-bearing participant kinds through their
+`ComponentRose*` composition also corrected the DRAW ORDER: every stacked
+`ComponentRose*#drawInternalU` calls `textBlock.drawU(...)` in BOTH arms of
+its `head` branch and `stickman.drawU(ug)` only afterwards
+(`ComponentRoseDatabase.java:81-88`, `ComponentRoseActor.java:73-80`, and the
+identical bodies in Boundary/Control/Entity), so the label precedes the glyph
+in document order whether it sits above it or below. `queue` and `collections`
+keep glyph-then-label, and they are upstream's own two exceptions.
+
+**This is not a divergence — the divergence was the previous order.** What is
+recorded here is the measurement artefact it produces, so a future reader
+re-running the ratchet does not mistake it for a regression.
+
+**Mechanism.** `weightedScore` rose on ~73 fixtures across the same change
+that made them structurally closer. `compareNodes` charges a tag-mismatch
+short-circuit `units(actual) + units(expected)` — 12–15 for a text-vs-path
+pair — and skips the subtree. Aligning the order removes those charges
+(`junaxa-14-biko373` had 8 weighted diffs, it now has 0) and the subtrees they
+skipped are then compared attribute by attribute, reporting their real
+coordinate diffs. Those coordinates are dominated by two pre-existing
+divergences outside that mission: a sequence `LEFT_MARGIN` of 30 against the
+jar's 10, and `text-anchor="middle"` labels against the jar's left-anchored
+`textLength` runs.
+
+`scripts/sequence-ratchet-adjudicate.ts` cannot classify this class at all —
+its `svg/g[1][childCount]` proxy is absent whenever the child COUNT already
+matched, which is exactly when a pure re-ordering happens — so it returns
+`inconclusive`. The complementary measurement, body-group child tag sequence
+against the golden, moves the other way and monotonically: exact sequences
+**506 → 511 → 576** of ~1122 rendered fixtures across `main` → batches 1–3 →
+T6, and matched tag positions 48159 → 48327 → 49014 of ~105.9k. Full census in
+`plans/sequence-participant-symbols/findings/adjudication.md` §4.
+
+**Category:** limitation, of the adjudication instrument rather than the
+renderer — the same shape as "Background-pass rollout" above, from the
+opposite direction: there a correct node was ADDED to an oversized document,
+here correct nodes were RE-ORDERED in a document whose count already matched.
