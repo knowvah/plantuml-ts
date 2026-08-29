@@ -66,10 +66,10 @@ defect `planning/sizer-renderer-parity.md` exists to name — read it.
 
 ## Batches
 
-- [ ] **Batch 1** — [the seam](./batch-1/overview.md) (T1)
-- [ ] **Batch 2** — [database: draw + size](./batch-2/overview.md) (T2, T3)
-- [ ] **Batch 3** — [the five missing types](./batch-3/overview.md) (T4, T5)
-- [ ] **Batch 4** — [actor, then close out](./batch-4/overview.md) (T6, T7)
+- [x] **Batch 1** — [the seam](./batch-1/overview.md) (T1)
+- [x] **Batch 2** — [database: draw + size](./batch-2/overview.md) (T2, T3)
+- [x] **Batch 3** — [the five missing types](./batch-3/overview.md) (T4, T5)
+- [x] **Batch 4** — [actor, then close out](./batch-4/overview.md) (T6, T7)
 
 ## Quality gates
 
@@ -130,3 +130,65 @@ the gated quantity.
 `newpage` pagination (`fobube`); the activation double-box (`rugeco`); frame
 geometry; the `sequenceDiagram.group` style cascade. All filed separately in
 `planning/next-missions.md`.
+
+---
+
+## Close-out — 2026-08-29
+
+**7 of 7 tasks, plus one `fix(T4)` a gate required. All four quality gates
+green at head** (`npm run typecheck`, `npm run lint`, `npm run build`,
+`npx vitest run tests/unit` — 584 files / 11719 tests). `npm test` overall:
+656 files pass, 14 failures, all of them sequence-ratchet rows accounted for
+below.
+
+| commit | task |
+|---|---|
+| `a885f9da` | `feat(T1)` the participant-symbol seam |
+| `58745fe3` | `feat(T2)` database drawn through `USymbolDatabase` |
+| `4ed7ef4c` | `feat(T3)` database sized from `ComponentRoseDatabase` |
+| `a0c37e50` | `docs(T3)` batch-2 gate |
+| `edee8cca` | `feat(T4)` collections/queue/entity/boundary/control drawn |
+| `8dd9aa23` | `feat(T5)` …and sized |
+| `74bc5c93` | `docs(T5)` batch-3 gate |
+| `6a2bf472` | `feat(T6)` actors through `ActorStyle` |
+| `bce135dc` | `fix(T4)` label before glyph |
+| `be3c1653` | `docs(T7)` adjudication |
+
+**Merge with a merge commit, never squash** — the journal cites these ids.
+
+### Results
+
+- **`junaxa-14-biko373` CLOSED**: 725 → **333**, body-group child count 41
+  with the golden's histogram and its tag sequence at all 41 positions.
+- `fobube-11-nifo424` (402) and `rugeco-70-muro754` (543) **untouched**.
+- Adjudicated vs `main`, 1141 fixtures, **skipped 0**: **regression 0**,
+  artefact 10, improved **80**, inconclusive 19, unchanged 1032.
+- Structural census: body-group child tag sequences matching the golden
+  exactly **506 → 576**; matched positions **48159 → 49014** of ~105.9k.
+- `skinparam actorStyle awesome|hollow` now works in sequence diagrams. It
+  was silently ignored.
+- Four uncited constants retired: `DB_MIN_WIDTH = 40`, `DB_HEIGHT = 80`,
+  `SEQUENCE_ACTOR_HEIGHT = 90`, and the actor's local head radius / stroke
+  width (10 / 1.5, both now the golden's 8 / 0.5).
+
+### Decisions amended mid-mission (all journaled, none silent)
+
+1. **D1/D2** — only TWO of the six contracted kinds are USymbol-backed.
+   `boundary`/`control`/`entity` use the `svek/` drawing classes directly and
+   `collections` has no symbol at all. Read from `Rose.java:137-190` and all
+   five `ComponentRose*` bodies.
+2. **A defect the brief did not know about** — this port drew every
+   participant's glyph BEFORE its label; upstream draws the label first
+   (`ComponentRoseDatabase.java:81-88`). `fix(T4)`.
+
+### Open, and why
+
+- **`tukobo-89-zebi935` stays red.** Its rise is the sequence `==` divider
+  gap — `ComponentRoseDivider#drawInternalU` draws five elements to our two —
+  which this mission neither caused nor fixed. Filed as
+  `sequence-divider-separator` in `planning/next-missions.md`.
+- **Re-pinning not done, decision required.** 10 `artefact` rows plus
+  `gucare-93-petu502` qualify; `tukobo` does not. No baseline JSON was edited.
+- The three write-set expansions (`docs/catalog.md`, the seam's actor branch
+  and `COLLECTIONS_DELTA` export, and a new
+  `sequence-layout-participant-sizing.ts`) are journaled with their reasons.

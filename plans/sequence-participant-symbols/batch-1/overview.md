@@ -11,7 +11,7 @@ recurs.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | The participant-symbol seam | `typescript-pro` | `src/diagrams/sequence/renderer-participant-symbol.ts` (new), `tests/unit/sequence/renderer-participant-symbol.test.ts` (new) | — | [ ] |
+| T1 | The participant-symbol seam | `typescript-pro` | `src/diagrams/sequence/renderer-participant-symbol.ts` (new), `tests/unit/sequence/renderer-participant-symbol.test.ts` (new) | — | [x] |
 
 Batch gate: the four per-task gates. **No adjudicator run — T1 changes no
 rendered output**, because nothing calls it until T2/T3. (Verify that claim

@@ -1073,15 +1073,145 @@ describe('renderSequence — actor participant shape', () => {
   });
 });
 
+describe('renderSequence — skinparam actorStyle', () => {
+  function actorGeo() {
+    return makeGeo({
+      showFootbox: false,
+      participants: [
+        { id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      ],
+    });
+  }
+  function bodyFor(actorStyle?: 'AWESOME' | 'HOLLOW' | 'STICKMAN'): string {
+    const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
+    return renderSequence(actorGeo(), theme).body;
+  }
+
+  it('draws ActorStickMan by default', () => {
+    // `SkinParam#actorStyle` falls back to `ActorStyle.STICKMAN` for absent or
+    // unrecognized values (`SkinParam.java:1209-1218`). The stick man is one
+    // `<ellipse>` head and ONE four-segment `<path>` (`ActorStickMan.java:73,
+    // 77-85`) -- the shape T13 already pinned, so a change here is a
+    // regression, not progress.
+    const body = bodyFor();
+    expect(body).toContain('<ellipse');
+    const d = /<path d="([^"]*)"/.exec(body)?.[1] ?? '';
+    expect(d.match(/M/g) ?? [], 'body, arms, left leg, right leg').toHaveLength(4);
+    expect(bodyFor('STICKMAN')).toBe(body);
+  });
+
+  it('honours awesome and hollow, which were silently ignored before', () => {
+    // `ActorStyle#getTextBlock` (`ActorStyle.java:60-71`) dispatches to
+    // `ActorAwesome` / `ActorHollow`; both draw a CLOSED silhouette path
+    // instead of the stick figure's open segments.
+    const stickman = bodyFor('STICKMAN');
+    const awesome = bodyFor('AWESOME');
+    const hollow = bodyFor('HOLLOW');
+    expect(awesome).not.toBe(stickman);
+    expect(hollow).not.toBe(stickman);
+    expect(awesome).not.toBe(hollow);
+    // Structure, not just inequality: the stick man is FOUR open subpaths
+    // (body, arms, left leg, right leg -- `ActorStickMan.java:77-85`), while
+    // `ActorAwesome` and `ActorHollow` are each ONE closed silhouette
+    // (`ActorAwesome.java`'s six cubics, `ActorHollow.java`'s 13 lineTos).
+    const subpaths = (svg: string): number =>
+      ((/<path d="([^"]*)"/.exec(svg)?.[1] ?? '').match(/M/g) ?? []).length;
+    expect(subpaths(stickman)).toBe(4);
+    expect(subpaths(awesome)).toBe(1);
+    expect(subpaths(hollow)).toBe(1);
+  });
+});
+
+describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
+  function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
+    return { id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+  }
+  /** The bare body, not `assembleSvg`'s document: the shell adds a background
+   *  `<rect>` of its own that would inflate every rectangle count here. */
+  function svgFor(type: Parameters<typeof participantOf>[0]): string {
+    return renderSequence(makeGeo({ showFootbox: false, participants: [participantOf(type)] }), defaultTheme).body;
+  }
+
+  it('gives each kind its own symbol geometry', () => {
+    // `Rose.java:157-190` -- BOUNDARY_HEAD -> `new Boundary(biColor)` (a bar
+    // plus a circle), CONTROL_HEAD -> `new Control(...)` (a circle plus an
+    // arrow wing), ENTITY_HEAD -> `new EntityDomain(...)` (a circle plus its
+    // underline), QUEUE_HEAD -> `USymbols.QUEUE.asSmall` (a cylinder lying on
+    // its side), COLLECTIONS_HEAD -> `ComponentRoseParticipant(collections)`
+    // (a second, offset rectangle).
+    expect(svgFor('boundary')).toMatch(/<path[\s\S]*<ellipse/);
+    expect(svgFor('control')).toMatch(/<ellipse[\s\S]*<polygon/);
+    expect(svgFor('entity')).toMatch(/<ellipse[\s\S]*<line/);
+    expect(svgFor('queue').match(/<path/g) ?? []).toHaveLength(2);
+    // 2 stacked boxes + the lifeline's own transparent hit rect, which every
+    // participant gets (`renderLifelinePass`).
+    expect(svgFor('collections').match(/<rect/g) ?? []).toHaveLength(3);
+  });
+
+  it('draws no two kinds the same', () => {
+    const kinds = ['collections', 'queue', 'entity', 'boundary', 'control', 'participant'] as const;
+    const bodies = kinds.map(svgFor);
+    expect(new Set(bodies).size).toBe(kinds.length);
+  });
+
+  it('leaves the plain participant a single rectangle', () => {
+    // `PARTICIPANT_HEAD` -> `ComponentRoseParticipant` with collections=false.
+    expect(svgFor('participant').match(/<rect/g) ?? []).toHaveLength(2); // box + lifeline hit rect
+    expect(svgFor('participant')).not.toMatch(/<path|<ellipse|<polygon/);
+  });
+
+  it('draws the label BEFORE the glyph, at the head and at the tail', () => {
+    // `ComponentRoseDatabase#drawInternalU:81-88` calls `textBlock.drawU(...)`
+    // in BOTH arms of its `head` branch and `stickman.drawU(ug)` only after,
+    // so the label precedes the glyph in document order whether it sits above
+    // or below. `queue` (text inside the glyph) and `collections` (both
+    // rectangles before the text) are upstream's own two exceptions.
+    for (const kind of ['boundary', 'control', 'entity'] as const) {
+      const body = svgFor(kind);
+      expect(body.indexOf('<text'), kind).toBeLessThan(body.indexOf('<ellipse'));
+    }
+    const queue = svgFor('queue');
+    expect(queue.indexOf('<path')).toBeLessThan(queue.indexOf('<text'));
+  });
+
+  it('flips the glyph and the text for a footer row', () => {
+    const p = participantOf('boundary');
+    const svg = assembleSvg(renderSequence(makeGeo({ participants: [p], showFootbox: true }), defaultTheme));
+    // The head glyph's circle sits above the footer glyph's; the two rows are
+    // the `*_HEAD` / `*_TAIL` pair of `Rose.java:177-178`.
+    const cys = [...svg.matchAll(/<ellipse[^>]*cy="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(cys).toHaveLength(2);
+    expect(cys[1]).toBeGreaterThan(cys[0]!);
+  });
+});
+
 describe('renderSequence — database participant shape', () => {
-  it('renders an ellipse (cylinder cap) for database participants', () => {
+  it('renders the two USymbolDatabase paths and no ellipse', () => {
     const geo = makeGeo({
+      showFootbox: false,
       participants: [
         { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<ellipse');
+    // `USymbolDatabase#drawDatabase` (`USymbolDatabase.java:62-79`) draws a
+    // body `UPath` and a `getClosingPath` lid -- two elements. This used to be
+    // a hand-rolled `rect + line + line + ellipse`, and that four-vs-two
+    // excess is the whole `junaxa-14-biko373` child-count delta.
+    expect(svg).not.toContain('<ellipse');
+    expect(svg.match(/<path/g) ?? []).toHaveLength(2);
+  });
+
+  it('places the head glyph at the top of the block and the tail glyph at its bottom', () => {
+    const participant = { id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
+    const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
+    // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
+    // (`ComponentRoseDatabase.java:81-83`).
+    expect(starts[0]).toBe(10);
+    // tail: the glyph is pushed down by getTextHeight = blockHeight - 46
+    // (`:84-87`), so it starts 46 above the block bottom, never at the top.
+    expect(starts[2]).toBeGreaterThan(starts[0]!);
   });
 
   it('renders display name for database participant', () => {

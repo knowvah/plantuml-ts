@@ -866,39 +866,82 @@ Ordered by how ready they are, not by size.
   lifeline groups per `Rose.java:210`'s `PARTICIPANT_LINE`-only branch); see
   `DIVERGENCES.md` "Background-pass rollout".
 
-- **`sequence-participant-symbols`** — SCOPED 2026-08-28, mechanisms
-  measured, not inherited. The sequence engine hand-rolls its participant
-  head/tail glyphs instead of using the USymbol renderers this repo already
-  ports. `renderDatabaseShape`
-  (`src/diagrams/sequence/renderer-participant-shapes.ts:209-212`) emits
-  `rect + line + line + ellipse` — four primitives — where upstream's
-  `ComponentRoseDatabase:70` builds the glyph from
-  `USymbols.DATABASE.asSmall(...)` and `USymbolDatabase.java:62-79` draws it
-  as two `UPath`s. **We already have the faithful version**:
-  `src/core/usymbol-shapes.ts#renderDatabaseIcon:91` emits body + mouth as two
-  paths and is used by the description and class engines. Only the sequence
-  engine diverges, so this is a re-mirroring, not a port.
+- **`sequence-participant-symbols`** — **DONE 2026-08-29**, branch
+  `feat/sequence-participant-symbols`, 7 tasks (T1–T7) plus one `fix(T4)`.
+  **Merge with a merge commit** — the journal cites per-task commit ids.
+  Full close-out in `plans/sequence-participant-symbols/findings/
+  adjudication.md`; the numbers below are from that run, not carried forward.
 
-  Measured effect: closes `junaxa-14-biko373` (surplus 6 = +2 rect, +4 line,
-  +2 ellipse, -2 path across two head glyphs; ours 47 vs golden 41). Corpus
-  reach **34** `database` fixtures. **Correction to `DIVERGENCES.md`'s
-  "Background-pass rollout" and to `sequence-frame-background-pass` T7's
-  adjudication:** both attribute `junaxa`'s surplus to "actor/database head
-  glyphs ... and the jar emits the diagram title as a top-level `<text>` we
-  place elsewhere". The title is NOT a count difference — `text` is 13 in
-  both, measured; and the actor stick man was already fixed
-  (`sequence-command-coverage` T13, 2026-08-25). It is the **database** glyph
-  alone.
+  **`junaxa-14-biko373` CLOSED**: 725 → **333**, body-group child count 41
+  with the golden's histogram (`g 7, rect 6, ellipse 2, path 7, text 13,
+  line 3, polygon 3`) and its tag sequence matching at all 41 positions.
+  `fobube-11-nifo424` (402) and `rugeco-70-muro754` (543) untouched.
 
-  **Adjacent gap found while scoping, larger than the fixture that surfaced
-  it:** `renderer.ts:141-180` special-cases only `actor` and `database`.
-  `collections`, `queue`, `entity`, `boundary` and `control` have no sequence
-  shape at all and fall through to the default participant box — **43**
-  further fixtures. `USymbolCollections.ts`, `USymbolQueue.ts`,
-  `USymbolControl.ts`, `USymbolBoundary.ts` and `USymbolEntityDomain.ts` are
-  all already ported under `src/core/decoration/symbol/`. Prior art to read
-  first: `planning/usymbol-composition.md` (all 36 symbols, though it audits
-  description-leaf SIZING, not sequence drawing).
+  Adjudicated against `main` over all 1141 fixtures, **skipped 0**:
+  **regression 0**, artefact 10, improved **80**, inconclusive 19 (17 of them
+  NULL at both refs — fixtures that do not render, unchanged), unchanged 1032.
+  Complementary structural census, body-group child tag sequence against the
+  golden: exact sequences **506 → 576**, matched positions **48159 → 49014**
+  of ~105.9k.
+
+  What landed, and what the scoping above got wrong:
+
+  1. **database** — the hand-rolled `rect + line + line + ellipse` cylinder is
+     gone, replaced by `USymbolDatabase#drawDatabase`'s two `UPath`s through a
+     new sequence-local seam (`renderer-participant-symbol.ts`). The fitted
+     `DB_MIN_WIDTH = 40` and `DB_HEIGHT = 80` are gone with it, replaced by
+     `ComponentRoseDatabase#getPreferredWidth/Height` (:96-105).
+     **Correction to the scoping:** it proposed reusing
+     `src/core/usymbol-shapes.ts#renderDatabaseIcon` as "the faithful
+     version". That is the SIMPLIFIED emitter the class engine already
+     migrated AWAY from (SI14 T4); D1 routes through
+     `USymbol.asSmall(...).drawU(ug)` and `UGraphicSvg` instead.
+  2. **the five missing kinds** — `collections`, `queue`, `entity`,
+     `boundary`, `control` now dispatch. **Correction to the scoping, and to
+     this file's claim that "all five are already ported under
+     `src/core/decoration/symbol/`": only TWO of the six kinds are
+     USymbol-backed.** Read from `Rose.java:137-190` and all five
+     `ComponentRose*` bodies: `database` and `queue` use
+     `USymbols.*.asSmall`; `boundary`/`control`/`entity` construct the
+     `svek/` drawing classes DIRECTLY (`new Boundary(biColor)` and siblings,
+     ported at `src/core/svek/`); and `collections` has no symbol at all — it
+     is `ComponentRoseParticipant(collections=true)`, a second `URectangle`
+     offset by `getDeltaCollection() = 4`.
+  3. **actor** — routed through `ActorStyle.getTextBlock` (D4: an
+     `ActorStyle` case, not a `USymbol` one). `skinparam actorStyle
+     awesome|hollow` now works in sequence diagrams; it was silently ignored.
+     Head radius 10 → 8 and `stroke-width` 1.5 → 0.5, both now the golden's.
+     The uncited `SEQUENCE_ACTOR_HEIGHT = 90` floor is gone.
+  4. **`fix(T4)`, found at the Batch-4 gate** — the label is drawn BEFORE its
+     glyph, at head and tail, per `ComponentRoseDatabase.java:81-88`. This
+     port had it backwards for every kind. That single change is most of the
+     `+65` exact tag sequences.
+
+  **Open, filed by this mission (see below): the sequence `==` divider emits
+  nothing.**
+
+  **Re-pinning is NOT done and is left to the maintainer**: 10 `artefact` rows
+  plus `gucare-93-petu502` are re-pinnable on the adjudicator's own rule, but
+  `tukobo-89-zebi935` (457 → 734) is not — its rise is the divider gap below,
+  which this mission neither caused nor fixed, and which was invisible at
+  `main` only because the database glyph's over-emission cancelled it.
+
+- **`sequence-divider-separator` — NEW, filed 2026-08-29 by
+  `sequence-participant-symbols` T7.** The `== label ==` divider is drawn as
+  ONE `<line>` plus its `<text>` (`renderer.ts#renderDivider`). Upstream's
+  `ComponentRoseDivider#drawInternalU` draws **five** elements, read from the
+  method body: `drawRectLong` emits a full-width `URectangle(width, 3)` — the
+  3px band; `drawDoubleLine` emits **two** `ULine.hline(width)`, at `dy -1`
+  and `dy +2`; then a `URectangle(textWidth + 6, textHeight)` label box with
+  `roundCorner`/shadow; then the text. So the port is short a 3px band rect,
+  a label-box rect, and one of the two rules. Confirmed against
+  `tukobo-89-zebi935`, whose golden carries `<rect ... height="3">` at
+  `y=150.5` and a `91.188 x 21` box at `x=163.658`, and whose histogram
+  deficit is exactly `rect 8 vs 10, line 7 vs 8`. Skin defaults:
+  `sequenceDiagram { separator { LineColor black, LineThickness 2.0,
+  BackGroundColor #e, FontSize 13 } }` (`skin/plantuml.skin`). This is the
+  sole remaining cause of `tukobo`'s ratchet row and the only thing blocking
+  a clean re-pin of the sequence baseline. Corpus reach not measured.
 
 - **`sequence-activation-double-box`** — SCOPED 2026-08-28. Closes
   `rugeco-70-muro754`, whose surplus is exactly ONE node: participant `a`

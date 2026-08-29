@@ -14,8 +14,8 @@ box**, because `renderer.ts:137-185` dispatches only `actor` and `database`.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Dispatch the five types to the seam | `typescript-pro` | `src/diagrams/sequence/renderer.ts`, `src/diagrams/sequence/renderer-participant-shapes.ts`, `tests/unit/sequence/renderer.test.ts` | T1, T2 | [ ] |
-| T5 | Size the five types | `typescript-pro` | `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/layout.test.ts` | T1, T3 | [ ] |
+| T4 | Dispatch the five types to the seam | `typescript-pro` | `src/diagrams/sequence/renderer.ts`, `src/diagrams/sequence/renderer-participant-shapes.ts`, `tests/unit/sequence/renderer.test.ts` | T1, T2 | [x] |
+| T5 | Size the five types | `typescript-pro` | `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/layout.test.ts` | T1, T3 | [x] |
 
 Batch gate: the four per-task gates, then the adjudicator against this batch's
 parent. **Invariant: zero `regression`.** These 43 fixtures currently draw a

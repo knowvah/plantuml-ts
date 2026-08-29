@@ -762,3 +762,140 @@ describe('exo messages in the participant walkers', () => {
     expect(gap(withExo)).toBe(gap(plain));
   });
 });
+
+// ---------------------------------------------------------------------------
+// Database participant sizing — ComponentRoseDatabase's own rule (T3)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — database participant sizing', () => {
+  /** `FixedMeasurer(8, 16)`: a label of N characters measures 8N wide, 16 tall. */
+  function dbAst(display: string): SequenceDiagramAST {
+    const ast = makeAst(['DB', 'Other'], [msg('DB', 'Other')]);
+    ast.participants[0] = { id: 'DB', display, type: 'database', order: 0 };
+    return ast;
+  }
+
+  function dbGeo(display: string) {
+    const geo = layoutSequence(dbAst(display), defaultTheme, measurer);
+    return geo.participants.find((p) => p.id === 'DB')!;
+  }
+
+  it('falls back to the glyph width when the label is narrower', () => {
+    // `ComponentRoseDatabase#getPreferredWidth:102-105` --
+    // `max(stickman.getWidth(), getTextWidth())`. The stickman is
+    // `asSmall(null, empty(16,17), empty(0,0), ...)` (`:70`) through
+    // `Margin(10,10,24,5)` (`USymbolDatabase.java:117`), so 16 + 10 + 10 = 36.
+    // A 2-char label is 16 + 3 + 3 = 22 wide, well under it.
+    expect(dbGeo('ab').width).toBe(36);
+  });
+
+  it('uses getTextWidth = label + 3 + 3 when the label is wider', () => {
+    // `topRightBottomLeft(0, 3, 0, 3)` (`ComponentRoseDatabase.java:62-63`)
+    // added by `AbstractTextualComponent#getTextWidth:106-108`.
+    expect(dbGeo('abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('sizes the height as the glyph plus the text block, with no floor', () => {
+    // `getPreferredHeight:96-99` -- `dimStickman.getHeight() +
+    // getTextHeight()`, i.e. (17 + 24 + 5) + 16. The retired `DB_HEIGHT = 80`
+    // floor would have swallowed this.
+    expect(dbGeo('ab').height).toBe(46 + 16);
+  });
+
+  it('leaves non-database participants untouched', () => {
+    const plain = layoutSequence(makeAst(['Alice', 'Bob'], [msg('Alice', 'Bob')]), defaultTheme, measurer);
+    const alice = plain.participants.find((p) => p.id === 'Alice')!;
+    expect(alice.width).toBe(defaultTheme.sequence.participantMinWidth);
+    expect(alice.height).toBe(16 + 20);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The five glyph kinds' own getPreferredWidth / getPreferredHeight (T5)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — the five glyph participant kinds', () => {
+  type Kind = 'collections' | 'queue' | 'entity' | 'boundary' | 'control';
+
+  function kindGeo(kind: Kind, display: string) {
+    const ast = makeAst(['P', 'Other'], [msg('P', 'Other')]);
+    ast.participants[0] = { id: 'P', display, type: kind, order: 0 };
+    return layoutSequence(ast, defaultTheme, measurer).participants.find((p) => p.id === 'P')!;
+  }
+
+  it('floors boundary, control and entity at their own drawing width', () => {
+    // `ComponentRoseBoundary`/`Control`/`Entity#getPreferredWidth` are
+    // `max(stickman.getWidth(), getTextWidth())`, verbatim copies of
+    // `ComponentRoseDatabase.java:102-105`. `Boundary.java:97-98` is
+    // `radius*2 + left + 2*margin` = 24 + 17 + 8; `Control.java:87-88` and
+    // `EntityDomain.java:74-75` are `radius*2 + 2*margin` = 32.
+    expect(kindGeo('boundary', 'ab').width).toBe(49);
+    expect(kindGeo('control', 'ab').width).toBe(32);
+    expect(kindGeo('entity', 'ab').width).toBe(32);
+  });
+
+  it('uses getTextWidth = label + 3 + 3 once the label is wider', () => {
+    expect(kindGeo('control', 'abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('stacks the glyph above the text for boundary, control and entity', () => {
+    // `getPreferredHeight` = `dimStickman.getHeight() + getTextHeight()`.
+    expect(kindGeo('boundary', 'ab').height).toBe(32 + 16);
+    expect(kindGeo('control', 'ab').height).toBe(32 + 16);
+    expect(kindGeo('entity', 'ab').height).toBe(32 + 16);
+  });
+
+  it('adds the queue margin around the raw text block, with no 3+3 padding', () => {
+    // `ComponentRoseQueue#getPreferredWidth` returns the GLYPH's dimension,
+    // and the glyph is `USymbols.QUEUE.asSmall(empty(0,0), getTextBlock(),
+    // empty(0,0), ...)` -- `USymbolQueue#getMargin()` = `Margin(5,15,5,5)`
+    // around the RAW block. `SheetBlock1`'s marginX1/marginX2 never reach
+    // `calculateDimension` (`SheetBlock1.java:196-199,:225-229`), so the
+    // component's own 3+3 padding does NOT apply here.
+    expect(kindGeo('queue', 'ab').width).toBe(2 * 8 + 5 + 15);
+    expect(kindGeo('queue', 'ab').height).toBe(16 + 5 + 5);
+  });
+
+  it('adds getDeltaCollection() to the plain participant rule for collections', () => {
+    // `ComponentRoseParticipant#getPreferredWidth/Height:114-124` differ from
+    // the plain participant case by exactly `getDeltaCollection() = 4`.
+    const plain = layoutSequence(makeAst(['P', 'Other'], [msg('P', 'Other')]), defaultTheme, measurer)
+      .participants.find((p) => p.id === 'P')!;
+    const collections = kindGeo('collections', 'P');
+    expect(collections.width).toBe(plain.width + 4);
+    expect(collections.height).toBe(plain.height + 4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Actor sizing — ComponentRoseActor + skinparam actorStyle (T6)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — actor participant sizing', () => {
+  function actorGeo(display: string, actorStyle?: 'AWESOME' | 'HOLLOW') {
+    const ast = makeAst(['A', 'Other'], [msg('A', 'Other')]);
+    ast.participants[0] = { id: 'A', display, type: 'actor', order: 0 };
+    const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
+    return layoutSequence(ast, theme, measurer).participants.find((p) => p.id === 'A')!;
+  }
+
+  it('sizes the default stick man from ComponentRoseActor, not a fitted floor', () => {
+    // `ComponentRoseActor.java:73-84` is `max(stickman.getWidth(),
+    // getTextWidth())` and `stickman.getHeight() + getTextHeight()`, the same
+    // pair as `ComponentRoseDatabase`. `ActorStickMan` is 27x60. This replaced
+    // an uncited `SEQUENCE_ACTOR_HEIGHT = 90` floor.
+    expect(actorGeo('ab').width).toBe(27);
+    expect(actorGeo('ab').height).toBe(60 + 16);
+    expect(actorGeo('abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('follows skinparam actorStyle, which the sequence engine used to ignore', () => {
+    // `ActorAwesome` 55x61 and `ActorHollow` 26x33 (`ActorAwesome.java:98-104`,
+    // `ActorHollow.java:105-111`) -- the same numbers
+    // `planning/sizer-renderer-parity.md` measured against the jar.
+    expect(actorGeo('ab', 'AWESOME').width).toBe(55);
+    expect(actorGeo('ab', 'AWESOME').height).toBe(61 + 16);
+    expect(actorGeo('ab', 'HOLLOW').width).toBe(26);
+    expect(actorGeo('ab', 'HOLLOW').height).toBe(33 + 16);
+  });
+});

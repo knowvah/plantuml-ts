@@ -17,8 +17,8 @@ currently failing. That is why it is isolated.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | Route sequence actors through `ActorStyle` | `typescript-pro` | `src/diagrams/sequence/renderer-participant-shapes.ts`, `src/diagrams/sequence/renderer.ts`, `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/renderer.test.ts` | T1–T5 | [ ] |
-| T7 | Adjudicate and close out | `debugger` | `plans/sequence-participant-symbols/findings/adjudication.md`, `plans/sequence-participant-symbols/decision-journal.md`, `DIVERGENCES.md`, `planning/next-missions.md` | T6 | [ ] |
+| T6 | Route sequence actors through `ActorStyle` | `typescript-pro` | `src/diagrams/sequence/renderer-participant-shapes.ts`, `src/diagrams/sequence/renderer.ts`, `src/diagrams/sequence/sequence-layout-participants.ts`, `tests/unit/sequence/renderer.test.ts` | T1–T5 | [x] |
+| T7 | Adjudicate and close out | `debugger` | `plans/sequence-participant-symbols/findings/adjudication.md`, `plans/sequence-participant-symbols/decision-journal.md`, `DIVERGENCES.md`, `planning/next-missions.md` | T6 | [x] |
 
 Batch gate: the four per-task gates, then the adjudicator against this batch's
 parent **and** against `main`. Invariant: zero `regression`; `junaxa` stays

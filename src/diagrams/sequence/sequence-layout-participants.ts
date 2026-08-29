@@ -29,6 +29,11 @@ import {
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
+import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import {
+  symbolPreferredHeight,
+  symbolPreferredWidth,
+} from './sequence-layout-participant-sizing.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import {
@@ -38,10 +43,6 @@ import {
 
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
-// Actors and database cylinders are taller than plain boxes.
-const SEQUENCE_ACTOR_HEIGHT = 90;
-const DB_HEIGHT = 80;
-const DB_MIN_WIDTH = 40; // cylinders are narrower than plain boxes
 
 export interface ParticipantLayoutResult {
   sortedParticipants: Participant[];
@@ -132,9 +133,20 @@ function scanMessageLabels(
 }
 
 /**
- * Pre-compute each participant's column width. Database cylinders use a
- * smaller minimum and tighter padding so they appear narrower relative to
- * plain participant boxes.
+ * Pre-compute each participant's column width.
+ *
+ * A `database` participant is sized by upstream's own rule,
+ * `ComponentRoseDatabase#getPreferredWidth` (`:102-105`):
+ * `max(stickman.getWidth(), getTextWidth())`, where the stickman is
+ * `USymbols.DATABASE.asSmall(null, empty(16,17), empty(0,0), …)` (`:70`) and
+ * therefore a fixed 36 wide. This replaces a `DB_MIN_WIDTH = 40` whose only
+ * justification was the comment "cylinders are narrower than plain boxes" —
+ * a fitted constant with no upstream `file:line`, which `CLAUDE.md` forbids.
+ *
+ * The two halves of this change must land together: `renderer-participant-
+ * shapes.ts` draws the glyph and this function reserves the column for it.
+ * See `planning/sizer-renderer-parity.md` for why splitting them is the
+ * recurring defect this mission exists to avoid.
  */
 function computeParticipantWidths(
   sortedParticipants: Participant[],
@@ -151,13 +163,16 @@ function computeParticipantWidths(
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
-    if (p.type === 'database') {
-      return Math.max(DB_MIN_WIDTH, lw + theme.sequence.participantPadding);
-    }
-    return Math.max(
+    const symbolW = symbolPreferredWidth(p.type, lw, theme);
+    if (symbolW !== undefined) return symbolW;
+    // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
+    // `ComponentRoseParticipant`; the only difference between them is
+    // `getDeltaCollection()` (`:114-124`).
+    const plain = Math.max(
       theme.sequence.participantMinWidth,
       lw + theme.sequence.participantPadding * 2,
     );
+    return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
 }
 
@@ -406,10 +421,16 @@ function buildParticipantGeo(
   // height and the text block's (`:57-63`).
   const textHeight = measured.height * (1 + stereoLines.length);
   const boxHeight = Math.max(textHeight, badge?.height ?? 0) + 20;
+  // `getTextHeight()` is the text block plus a vertical padding (see
+  // `sequence-layout-participant-sizing.ts`'s DB_TEXT_PADDING_X note), and the
+  // block itself is `TextBlockSprited`'s
+  // max(sprite, text) (`TextBlockSprited.java:57-63`) — i.e. `boxHeight`
+  // without its `+ 20` plain-box allowance. This replaced a fitted
+  // `DB_HEIGHT = 80` floor.
+  const blockHeight = Math.max(textHeight, badge?.height ?? 0);
   const pHeight =
-    p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
-    p.type === 'database' ? Math.max(boxHeight, DB_HEIGHT) :
-    boxHeight;
+    symbolPreferredHeight(p.type, blockHeight, theme) ??
+    (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight);
   const centerX = currentX + width / 2;
 
   return {
