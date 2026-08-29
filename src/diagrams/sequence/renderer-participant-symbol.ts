@@ -23,6 +23,7 @@
  * | `control` | `ComponentRoseControl` | `new Control(biColor)` — likewise |
  * | `entity` | `ComponentRoseEntity` | `new EntityDomain(biColor)` — likewise |
  * | `collections` | `ComponentRoseParticipant(collections=true)` | no symbol at all: a SECOND `URectangle` offset by `getDeltaCollection() = 4` (`ComponentRoseParticipant.java:93-96, :107-112`) |
+ * | `actor` | `ComponentRoseActor` | `actorStyle.getTextBlock(biColor)` → `ActorStickMan` / `ActorAwesome` / `ActorHollow` (`ActorStyle.java:60-71`) — an `ActorStyle` case, NOT a `USymbol` one (D4) |
  *
  * ## Composition rules — which arithmetic each kind's SIZER must use
  *
@@ -93,6 +94,8 @@ import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { SymbolContext } from '../../core/decoration/symbol/SymbolContext.js';
 import { USymbolDatabase, getMargin as databaseMargin } from '../../core/decoration/symbol/USymbolDatabase.js';
 import { USymbolQueue, getMargin as queueMargin } from '../../core/decoration/symbol/USymbolQueue.js';
+import { actorStyleGetTextBlock } from '../../core/skin/ActorStyle.js';
+import { resolveActorStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { Boundary } from '../../core/svek/Boundary.js';
 import { Control } from '../../core/svek/Control.js';
 import { EntityDomain } from '../../core/svek/EntityDomain.js';
@@ -102,10 +105,21 @@ import { seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
 import { extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 
-/** The glyph-bearing participant types. `actor` is deliberately absent — it is
- *  an `ActorStyle` case, not a symbol one (D4), and lands in T6. `participant`
- *  is absent because its component draws a bare box with no glyph at all. */
+/** The SYMBOL-backed participant types — those whose glyph comes from a
+ *  `USymbol` or a `svek/` drawing class. `actor` is deliberately absent: it is
+ *  an `ActorStyle` case, not a symbol one (D4), and `participant` is absent
+ *  because its component draws a bare box with no glyph at all. */
 export type SymbolParticipantType = 'database' | 'collections' | 'queue' | 'entity' | 'boundary' | 'control';
+
+/** Every kind this seam can draw. `actor` joins the symbol types here and only
+ *  here: `ComponentRoseActor` is byte-for-byte the same component as
+ *  `ComponentRoseDatabase` — same `topRightBottomLeft(0, 3, 0, 3)` padding,
+ *  same `drawInternalU`, same `getPreferredWidth`/`Height`
+ *  (`ComponentRoseActor.java:44-84`) — differing ONLY in where the glyph comes
+ *  from, `actorStyle.getTextBlock(biColor)` instead of `USymbols.*.asSmall`
+ *  (`:50`). Keeping the two type names distinct preserves D4's correction;
+ *  sharing one composition avoids re-deriving it. */
+export type GlyphParticipantType = SymbolParticipantType | 'actor';
 
 /** The already-laid-out participant box, in RENDER (post-`scale-geo`)
  *  coordinates. `background`/`border` are optional so a caller may pass a bare
@@ -175,6 +189,10 @@ const EMPTY = TextBlockUtils.empty(0, 0);
  *  number the pinned dimensions in `renderer-participant-symbol.test.ts`
  *  reject rather than to a silently plausible one. */
 const NO_PAINT = new SymbolContext(null, null);
+/** Measure-only geometry: no `Actor*` reads it (their `calculateDimension`s
+ *  are field arithmetic), and the seam's own glyphs that DO read geo
+ *  (`queue`, `collections`) never take this path. */
+const ZERO_GEO: ParticipantSymbolGeo = { x: 0, y: 0, width: 0, height: 0 };
 const MEASURER = new WidthTableMeasurer();
 const NO_BOUNDER: StringBounder = new MeasurerStringBounder(MEASURER);
 
@@ -194,7 +212,7 @@ const DRIVER_BOUNDER: DriverStringBounder = {
  * for `getSymbolContext()`'s style lookup.
  */
 function symbolContextFor(
-  type: SymbolParticipantType,
+  type: GlyphParticipantType,
   geo: ParticipantSymbolGeo,
   theme: Theme,
   roundCorner = 0,
@@ -254,7 +272,9 @@ function simpleGlyph(type: 'boundary' | 'control' | 'entity', ctx: SymbolContext
 }
 
 /** The `ComponentRose*` dispatch of `Rose.java:157-190`, one arm per kind. */
-function glyphFor(type: SymbolParticipantType, geo: ParticipantSymbolGeo, theme: Theme): TextBlock {
+function glyphFor(type: GlyphParticipantType, geo: ParticipantSymbolGeo, theme: Theme): TextBlock {
+  if (type === 'actor')
+    return actorStyleGetTextBlock(resolveActorStyle(theme.actorStyle), symbolContextFor(type, geo, theme));
   if (type === 'collections')
     return collectionsGlyph(geo, symbolContextFor(type, geo, theme, COLLECTIONS_ROUND_CORNER));
   const ctx = symbolContextFor(type, geo, theme);
@@ -284,7 +304,7 @@ function glyphFor(type: SymbolParticipantType, geo: ParticipantSymbolGeo, theme:
  * `ComponentRoseParticipant` draws both rectangles at fixed offsets.
  */
 function glyphOffset(
-  type: SymbolParticipantType,
+  type: GlyphParticipantType,
   geo: ParticipantSymbolGeo,
   glyph: XDimension2D,
   head: boolean,
@@ -303,9 +323,16 @@ function glyphOffset(
  * delta for the sixth, so no `Theme` lookup reaches it.
  */
 export function measureParticipantSymbol(
-  type: SymbolParticipantType,
-  _theme: Theme,
+  type: GlyphParticipantType,
+  theme: Theme,
 ): { width: number; height: number } {
+  if (type === 'actor') {
+    // The ONE kind whose glyph dimension is theme-dependent:
+    // `ActorStickMan` 27x60 (or 26x33 hollow, 55x61 awesome) per
+    // `skinparam actorStyle` (`ActorStyle.java:60-71`).
+    const probe = glyphFor('actor', ZERO_GEO, theme).calculateDimension(NO_BOUNDER);
+    return { width: probe.getWidth(), height: probe.getHeight() };
+  }
   if (type === 'collections') return { width: COLLECTIONS_DELTA, height: COLLECTIONS_DELTA };
   if (type === 'queue') {
     const margin = queueMargin();
@@ -330,7 +357,7 @@ export function measureParticipantSymbol(
  * module header's Scale section; that helper hard-codes scale 1).
  */
 export function renderParticipantSymbol(
-  type: SymbolParticipantType,
+  type: GlyphParticipantType,
   geo: ParticipantSymbolGeo,
   opts: ParticipantSymbolOpts,
 ): string {

@@ -1073,6 +1073,55 @@ describe('renderSequence — actor participant shape', () => {
   });
 });
 
+describe('renderSequence — skinparam actorStyle', () => {
+  function actorGeo() {
+    return makeGeo({
+      showFootbox: false,
+      participants: [
+        { id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      ],
+    });
+  }
+  function bodyFor(actorStyle?: 'AWESOME' | 'HOLLOW' | 'STICKMAN'): string {
+    const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
+    return renderSequence(actorGeo(), theme).body;
+  }
+
+  it('draws ActorStickMan by default', () => {
+    // `SkinParam#actorStyle` falls back to `ActorStyle.STICKMAN` for absent or
+    // unrecognized values (`SkinParam.java:1209-1218`). The stick man is one
+    // `<ellipse>` head and ONE four-segment `<path>` (`ActorStickMan.java:73,
+    // 77-85`) -- the shape T13 already pinned, so a change here is a
+    // regression, not progress.
+    const body = bodyFor();
+    expect(body).toContain('<ellipse');
+    const d = /<path d="([^"]*)"/.exec(body)?.[1] ?? '';
+    expect(d.match(/M/g) ?? [], 'body, arms, left leg, right leg').toHaveLength(4);
+    expect(bodyFor('STICKMAN')).toBe(body);
+  });
+
+  it('honours awesome and hollow, which were silently ignored before', () => {
+    // `ActorStyle#getTextBlock` (`ActorStyle.java:60-71`) dispatches to
+    // `ActorAwesome` / `ActorHollow`; both draw a CLOSED silhouette path
+    // instead of the stick figure's open segments.
+    const stickman = bodyFor('STICKMAN');
+    const awesome = bodyFor('AWESOME');
+    const hollow = bodyFor('HOLLOW');
+    expect(awesome).not.toBe(stickman);
+    expect(hollow).not.toBe(stickman);
+    expect(awesome).not.toBe(hollow);
+    // Structure, not just inequality: the stick man is FOUR open subpaths
+    // (body, arms, left leg, right leg -- `ActorStickMan.java:77-85`), while
+    // `ActorAwesome` and `ActorHollow` are each ONE closed silhouette
+    // (`ActorAwesome.java`'s six cubics, `ActorHollow.java`'s 13 lineTos).
+    const subpaths = (svg: string): number =>
+      ((/<path d="([^"]*)"/.exec(svg)?.[1] ?? '').match(/M/g) ?? []).length;
+    expect(subpaths(stickman)).toBe(4);
+    expect(subpaths(awesome)).toBe(1);
+    expect(subpaths(hollow)).toBe(1);
+  });
+});
+
 describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
   function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
     return { id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };

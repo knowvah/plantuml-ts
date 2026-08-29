@@ -30,124 +30,18 @@
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantBadge, ParticipantGeo, ParticipantType } from './ast.js';
-import { ellipse, image, path, rect, text } from '../../core/svg.js';
+import { ellipse, image, rect, text } from '../../core/svg.js';
 import {
   COLLECTIONS_DELTA,
   renderParticipantSymbol,
-  type SymbolParticipantType,
+  type GlyphParticipantType,
 } from './renderer-participant-symbol.js';
-import { fmt } from '../../core/svg-format.js';
 
-/** Pure geometry for {@link renderActorShape}, computed once and shared by
- *  its two drawing helpers (kept separate to stay under the 30-NLOC
- *  function cap). */
-interface ActorGeo {
-  readonly cx: number;
-  readonly headR: number;
-  readonly headCy: number;
-  readonly bodyTop: number;
-  readonly bodyBot: number;
-  readonly armY: number;
-  readonly armSpan: number;
-  readonly legSpan: number;
-  readonly legY: number;
-  readonly strokeWidth: number;
-}
-
-/** `theme.fontSize` is already scaled (`scaleSequenceTheme`); every OTHER
- *  literal below is scaled here via `theme.scaleK`. */
-function computeActorGeo(cx: number, topY: number, height: number, theme: ScaledTheme): ActorGeo {
-  const k = theme.scaleK;
-  const headR = 10 * k;
-  const bodyTop = topY + headR * 2 + 2 * k;
-  const bodyLen = height * 0.35; // ratio of an already-scaled height: self-scaling
-  const bodyBot = bodyTop + bodyLen;
-  const armY = bodyTop + bodyLen * 0.3; // ratio: self-scaling
-  return {
-    cx,
-    headR,
-    headCy: topY + headR,
-    bodyTop,
-    bodyBot,
-    armY,
-    armSpan: 14 * k,
-    legSpan: 12 * k,
-    // Legs — end 8px (scaled) above the label zone so the label has clear
-    // breathing room.
-    legY: topY + height - theme.fontSize - 8 * k,
-    strokeWidth: 1.5 * k,
-  };
-}
-
-/**
- * The stick man's four strokes as ONE path, in upstream's own order and with
- * upstream's own `moveTo`/`lineTo` sequence:
- *
- *   moveTo(0, 0)                 lineTo(0, bodyLenght)
- *   moveTo(-armsLenght, armsY)   lineTo(armsLenght, armsY)
- *   moveTo(0, bodyLenght)        lineTo(-legsX, bodyLenght + legsY)
- *   moveTo(0, bodyLenght)        lineTo(legsX, bodyLenght + legsY)
- *
- * — body, arms, left leg, right leg (`ActorStickMan.java:76-85`). It is one
- * `UPath`, drawn once, so it reaches SVG as a single `<path>`; the jar's own
- * output for `actor 春` is
- * `d="M80,26.5 L80,53.5 M67,34.5 L93,34.5 M80,53.5 L67,68.5 M80,53.5 L93,68.5"`.
- *
- * @see ~/git/plantuml/.../skin/ActorStickMan.java#drawU
- */
-function actorPathD(geo: ActorGeo): string {
-  const { cx, bodyTop, bodyBot, armY, armSpan, legSpan, legY } = geo;
-  return (
-    `M${fmt(cx)},${fmt(bodyTop)} L${fmt(cx)},${fmt(bodyBot)}` +
-    ` M${fmt(cx - armSpan)},${fmt(armY)} L${fmt(cx + armSpan)},${fmt(armY)}` +
-    ` M${fmt(cx)},${fmt(bodyBot)} L${fmt(cx - legSpan)},${fmt(legY)}` +
-    ` M${fmt(cx)},${fmt(bodyBot)} L${fmt(cx + legSpan)},${fmt(legY)}`
-  );
-}
-
-/**
- * Head + body, as the jar draws them: ONE `<ellipse>` and ONE `<path>`.
- *
- * `ActorStickMan#drawU` builds `UEllipse.build(headDiam, headDiam)` and a
- * single `UPath`, and draws each exactly once (`:73`, `:77-85`, `:91`, `:95`).
- * This used to emit a `<circle>` and FOUR `<line>`s — five top-level children
- * where the jar has two. The excess is per-actor and per-diagram (header and
- * footer rows both draw one), so it scaled with how much of a diagram this
- * port managed to render, and it is what pushed 14 fixtures' top-level child
- * count past the golden's once T13 stopped dropping their content.
- *
- * The path carries no fill: upstream applies `HColors.none().bg()` before
- * drawing it (`:95`).
- */
-function renderActorShape(p: ParticipantGeo, topY: number, theme: ScaledTheme): string {
-  const geo = computeActorGeo(p.centerX, topY, p.height, theme);
-  // `ellipse` takes a RAW attribute record (unlike `circle`, which has a typed
-  // `BoxStyle`), so the stroke width is spelled kebab-case here -- see
-  // `state/renderer-pseudostate.ts:58` for the same call shape.
-  //
-  // `svg-shapes.ts#circle`'s own doc says rewriting a `circle` call site as an
-  // equal-radii `ellipse` "would change the emitted element for no benefit".
-  // Here there IS a benefit and it is the whole point: the jar emits
-  // `<ellipse cx=... rx=8 ry=8>` for an actor head (`ActorStickMan.java:73`,
-  // `UEllipse.build`), so matching the element is matching upstream.
-  // `Participant#getUsedStyles` -- the `actor {}` bucket and any inline
-  // colour, resolved in layout onto the geo.
-  const head = ellipse(geo.cx, geo.headCy, geo.headR, geo.headR, {
-    fill: p.background,
-    stroke: p.border,
-    'stroke-width': geo.strokeWidth,
-  });
-  const body = path(actorPathD(geo), {
-    stroke: p.border,
-    strokeWidth: geo.strokeWidth,
-  });
-  return head + body;
-}
-
-/** The participant kinds `Rose.java#createComponentParticipant` gives a glyph
- *  to. `actor` is excluded on purpose: it is an `ActorStyle` case, not a
- *  symbol one (D4), and `participant` draws a bare box. */
-const SYMBOL_TYPES: ReadonlySet<string> = new Set<SymbolParticipantType>([
+/** The seven participant kinds `Rose.java#createComponentParticipant` gives a
+ *  glyph to. `participant` is the only one left out: `ComponentRoseParticipant`
+ *  with `collections=false` draws a bare rectangle and nothing else. */
+const GLYPH_TYPES: ReadonlySet<string> = new Set<GlyphParticipantType>([
+  'actor',
   'database',
   'collections',
   'queue',
@@ -156,17 +50,19 @@ const SYMBOL_TYPES: ReadonlySet<string> = new Set<SymbolParticipantType>([
   'control',
 ]);
 
-function hasParticipantSymbol(type: ParticipantType): type is SymbolParticipantType {
-  return SYMBOL_TYPES.has(type);
+function hasParticipantGlyph(type: ParticipantType): type is GlyphParticipantType {
+  return GLYPH_TYPES.has(type);
 }
 
 /**
- * A participant's glyph, drawn through T1's faithful seam.
+ * A participant's glyph, drawn through the seam.
  *
- * `database` used to be hand-rolled here as `rect + line + line + ellipse` —
- * five top-level elements per glyph where `USymbolDatabase#drawDatabase`
- * (`USymbolDatabase.java:62-79`) draws two `UPath`s. The other five kinds were
- * not drawn at all: they fell through to the plain participant rectangle.
+ * `database` and `actor` used to be hand-rolled here — the cylinder as
+ * `rect + line + line + ellipse` (five top-level elements per glyph where
+ * `USymbolDatabase#drawDatabase`, `USymbolDatabase.java:62-79`, draws two
+ * `UPath`s) and the stick man as an `ellipse` plus a four-segment `path` with
+ * `skinparam actorStyle` ignored entirely. The other five kinds were not drawn
+ * at all: they fell through to the plain participant rectangle.
  *
  * `blockTopY` is the top of the participant BLOCK, not of the glyph: every
  * `ComponentRose*` in this family places the glyph inside that block itself
@@ -181,7 +77,7 @@ function renderSymbolShape(
   head: boolean,
   theme: ScaledTheme,
 ): string {
-  if (!hasParticipantSymbol(p.type)) return '';
+  if (!hasParticipantGlyph(p.type)) return '';
   return renderParticipantSymbol(
     p.type,
     { x: p.x, y: blockTopY, width: p.width, height: p.height, background: p.background, border: p.border },
@@ -330,18 +226,10 @@ function renderParticipantBlock(
   p: ParticipantGeo,
   blockTopY: number,
   head: boolean,
-  actorShapeY: number,
   theme: ScaledTheme,
 ): string {
   const label = renderNameBlock(p, labelCy(p, blockTopY, head, theme), theme);
-  if (p.type === 'actor') {
-    // T6 owns actor: it is an `ActorStyle` case, not a symbol one (D4). Its
-    // shape Y still comes from the caller's own pre-computed `footerShapeY`,
-    // unchanged by this task.
-    const shape = renderActorShape(p, actorShapeY, theme);
-    return head ? shape + label : label + shape;
-  }
-  if (hasParticipantSymbol(p.type)) {
+  if (hasParticipantGlyph(p.type)) {
     return renderSymbolShape(p, blockTopY, head, theme) + collectionsFrontBox(p, blockTopY) + label;
   }
   // `PARTICIPANT_HEAD` -> `ComponentRoseParticipant` with `collections=false`:
@@ -356,17 +244,12 @@ function renderParticipantBlock(
 
 /** The header row. */
 export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
-  return renderParticipantBlock(p, p.y, true, p.y, theme);
+  return renderParticipantBlock(p, p.y, true, theme);
 }
 
-/** The footer row (`isShowFootbox`), drawn from `lifelineEndY` down.
- *  `footerShapeY` is the layout's pre-computed actor shape top; every other
- *  kind derives its own offset from the block. */
-export function renderFooterBox(
-  p: ParticipantGeo,
-  lifelineEndY: number,
-  footerShapeY: number,
-  theme: ScaledTheme,
-): string {
-  return renderParticipantBlock(p, lifelineEndY, false, footerShapeY, theme);
+/** The footer row (`isShowFootbox`), drawn from `lifelineEndY` down. Every
+ *  kind derives its own glyph offset from the block, so the layout's
+ *  pre-computed `footerShapeY` is no longer threaded here. */
+export function renderFooterBox(p: ParticipantGeo, lifelineEndY: number, theme: ScaledTheme): string {
+  return renderParticipantBlock(p, lifelineEndY, false, theme);
 }

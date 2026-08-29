@@ -11,7 +11,6 @@ import type {
   Participant,
   ParticipantBadge,
   ParticipantGeo,
-  ParticipantType,
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
@@ -30,7 +29,11 @@ import {
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
-import { COLLECTIONS_DELTA, measureParticipantSymbol } from './renderer-participant-symbol.js';
+import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import {
+  symbolPreferredHeight,
+  symbolPreferredWidth,
+} from './sequence-layout-participant-sizing.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import {
@@ -40,89 +43,6 @@ import {
 
 const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
-// Actors are taller than plain boxes.
-const SEQUENCE_ACTOR_HEIGHT = 90;
-
-/**
- * `ComponentRoseDatabase`'s constructor passes
- * `ClockwiseTopRightBottomLeft.topRightBottomLeft(0, 3, 0, 3)` as its padding
- * (`ComponentRoseDatabase.java:62-63`) — 3px right and left, 0 top and bottom
- * — and `AbstractTextualComponent#getTextWidth` adds exactly
- * `padding.getLeft() + padding.getRight()` to the raw text block
- * (`AbstractTextualComponent.java:106-108`). `getTextHeight` adds
- * `padding.getTop() + padding.getBottom()`, which is 0 here (`:110-114`).
- *
- * This is NOT `theme.sequence.participantPadding`: that knob is this port's
- * own plain-participant-box padding, and upstream's database component has a
- * padding of its own that no skinparam feeds.
- */
-const DB_TEXT_PADDING_X = 3;
-
-/**
- * Each glyph-bearing kind's own `getPreferredWidth`, or `undefined` when the
- * kind is sized by the plain participant rule.
- *
- * Read one class at a time (D3, T5): they do NOT all share
- * `ComponentRoseDatabase`'s rule.
- *
- * - `database`, `boundary`, `control`, `entity` —
- *   `max(stickman.getWidth(), getTextWidth())`, and each of the four passes
- *   the same `topRightBottomLeft(0, 3, 0, 3)` padding to
- *   `AbstractTextualComponent`, so `getTextWidth` is the text block plus 6
- *   (`ComponentRoseDatabase.java:62-63,:102-105` and the identical bodies in
- *   `ComponentRoseBoundary`, `ComponentRoseControl`, `ComponentRoseEntity`).
- * - `queue` — `ComponentRoseQueue#getPreferredWidth:71-74` returns the GLYPH's
- *   own width, and that glyph is `USymbols.QUEUE.asSmall(empty(0,0),
- *   getTextBlock(), empty(0,0), …)` (`:63-64`), i.e.
- *   `USymbolQueue#getMargin()` = `Margin(5,15,5,5)` around the RAW text block.
- *   So it is `+20`, not `max(…)`, and it takes NO 3+3 padding —
- *   `SheetBlock1`'s `marginX1`/`marginX2` reach `getStartingX`/`getEndingX`
- *   only, never `calculateDimension` (`SheetBlock1.java:196-199, :225-229`).
- * - `collections` — not here: it is the plain participant rule plus
- *   `getDeltaCollection()`, applied by the caller.
- */
-function symbolPreferredWidth(
-  type: ParticipantType,
-  blockWidth: number,
-  theme: Theme,
-): number | undefined {
-  switch (type) {
-    case 'database':
-    case 'boundary':
-    case 'control':
-    case 'entity':
-      return Math.max(
-        measureParticipantSymbol(type, theme).width,
-        blockWidth + DB_TEXT_PADDING_X * 2,
-      );
-    case 'queue':
-      return measureParticipantSymbol('queue', theme).width + blockWidth;
-    default:
-      return undefined;
-  }
-}
-
-/** The matching `getPreferredHeight`. Every kind above adds the glyph's own
- *  height to `getTextHeight()`, which is the text block plus a vertical
- *  padding of 0 for the four stacked kinds
- *  (`ComponentRoseDatabase.java:62-63,:96-99`) and the queue margin's own
- *  5 + 5 for `queue` (`USymbolQueue.java:131`). */
-function symbolPreferredHeight(
-  type: ParticipantType,
-  blockHeight: number,
-  theme: Theme,
-): number | undefined {
-  switch (type) {
-    case 'database':
-    case 'boundary':
-    case 'control':
-    case 'entity':
-    case 'queue':
-      return measureParticipantSymbol(type, theme).height + blockHeight;
-    default:
-      return undefined;
-  }
-}
 
 export interface ParticipantLayoutResult {
   sortedParticipants: Participant[];
@@ -502,13 +422,13 @@ function buildParticipantGeo(
   const textHeight = measured.height * (1 + stereoLines.length);
   const boxHeight = Math.max(textHeight, badge?.height ?? 0) + 20;
   // `getTextHeight()` is the text block plus a vertical padding (see
-  // DB_TEXT_PADDING_X's note), and the block itself is `TextBlockSprited`'s
+  // `sequence-layout-participant-sizing.ts`'s DB_TEXT_PADDING_X note), and the
+  // block itself is `TextBlockSprited`'s
   // max(sprite, text) (`TextBlockSprited.java:57-63`) — i.e. `boxHeight`
   // without its `+ 20` plain-box allowance. This replaced a fitted
   // `DB_HEIGHT = 80` floor.
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
   const pHeight =
-    p.type === 'actor' ? Math.max(boxHeight, SEQUENCE_ACTOR_HEIGHT) :
     symbolPreferredHeight(p.type, blockHeight, theme) ??
     (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight);
   const centerX = currentX + width / 2;

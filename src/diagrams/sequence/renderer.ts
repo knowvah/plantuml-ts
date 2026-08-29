@@ -331,7 +331,7 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragm
   //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
-      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledGeo.footerShapeY, scaledTheme));
+      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledTheme));
     }
   }
 

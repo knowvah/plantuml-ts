@@ -866,3 +866,36 @@ describe('layoutSequence — the five glyph participant kinds', () => {
     expect(collections.height).toBe(plain.height + 4);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Actor sizing — ComponentRoseActor + skinparam actorStyle (T6)
+// ---------------------------------------------------------------------------
+
+describe('layoutSequence — actor participant sizing', () => {
+  function actorGeo(display: string, actorStyle?: 'AWESOME' | 'HOLLOW') {
+    const ast = makeAst(['A', 'Other'], [msg('A', 'Other')]);
+    ast.participants[0] = { id: 'A', display, type: 'actor', order: 0 };
+    const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
+    return layoutSequence(ast, theme, measurer).participants.find((p) => p.id === 'A')!;
+  }
+
+  it('sizes the default stick man from ComponentRoseActor, not a fitted floor', () => {
+    // `ComponentRoseActor.java:73-84` is `max(stickman.getWidth(),
+    // getTextWidth())` and `stickman.getHeight() + getTextHeight()`, the same
+    // pair as `ComponentRoseDatabase`. `ActorStickMan` is 27x60. This replaced
+    // an uncited `SEQUENCE_ACTOR_HEIGHT = 90` floor.
+    expect(actorGeo('ab').width).toBe(27);
+    expect(actorGeo('ab').height).toBe(60 + 16);
+    expect(actorGeo('abcdefghij').width).toBe(10 * 8 + 3 + 3);
+  });
+
+  it('follows skinparam actorStyle, which the sequence engine used to ignore', () => {
+    // `ActorAwesome` 55x61 and `ActorHollow` 26x33 (`ActorAwesome.java:98-104`,
+    // `ActorHollow.java:105-111`) -- the same numbers
+    // `planning/sizer-renderer-parity.md` measured against the jar.
+    expect(actorGeo('ab', 'AWESOME').width).toBe(55);
+    expect(actorGeo('ab', 'AWESOME').height).toBe(61 + 16);
+    expect(actorGeo('ab', 'HOLLOW').width).toBe(26);
+    expect(actorGeo('ab', 'HOLLOW').height).toBe(33 + 16);
+  });
+});
