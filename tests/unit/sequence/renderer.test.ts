@@ -1160,6 +1160,20 @@ describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
     expect(svgFor('participant')).not.toMatch(/<path|<ellipse|<polygon/);
   });
 
+  it('draws the label BEFORE the glyph, at the head and at the tail', () => {
+    // `ComponentRoseDatabase#drawInternalU:81-88` calls `textBlock.drawU(...)`
+    // in BOTH arms of its `head` branch and `stickman.drawU(ug)` only after,
+    // so the label precedes the glyph in document order whether it sits above
+    // or below. `queue` (text inside the glyph) and `collections` (both
+    // rectangles before the text) are upstream's own two exceptions.
+    for (const kind of ['boundary', 'control', 'entity'] as const) {
+      const body = svgFor(kind);
+      expect(body.indexOf('<text'), kind).toBeLessThan(body.indexOf('<ellipse'));
+    }
+    const queue = svgFor('queue');
+    expect(queue.indexOf('<path')).toBeLessThan(queue.indexOf('<text'));
+  });
+
   it('flips the glyph and the text for a footer row', () => {
     const p = participantOf('boundary');
     const svg = assembleSvg(renderSequence(makeGeo({ participants: [p], showFootbox: true }), defaultTheme));

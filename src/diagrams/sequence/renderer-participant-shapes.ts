@@ -230,7 +230,20 @@ function renderParticipantBlock(
 ): string {
   const label = renderNameBlock(p, labelCy(p, blockTopY, head, theme), theme);
   if (hasParticipantGlyph(p.type)) {
-    return renderSymbolShape(p, blockTopY, head, theme) + collectionsFrontBox(p, blockTopY) + label;
+    const glyph = renderSymbolShape(p, blockTopY, head, theme);
+    // DRAW ORDER, and it is not the obvious one. Every stacked
+    // `ComponentRose*#drawInternalU` calls `textBlock.drawU(...)` in BOTH arms
+    // of its `head` branch and `stickman.drawU(ug)` only afterwards
+    // (`ComponentRoseDatabase.java:81-88`, `ComponentRoseActor.java:73-80`,
+    // and the identical bodies in Boundary/Control/Entity) -- so the label
+    // precedes the glyph in document order whether it sits above it or below.
+    // `queue` and `collections` are the two exceptions, and they are
+    // exceptions in upstream too: `ComponentRoseQueue#drawInternalU` draws
+    // only the glyph (its text is `asSmall`'s own label, drawn inside it), and
+    // `ComponentRoseParticipant` draws both rectangles before its text.
+    if (p.type === 'queue') return glyph + label;
+    if (p.type === 'collections') return glyph + collectionsFrontBox(p, blockTopY) + label;
+    return label + glyph;
   }
   // `PARTICIPANT_HEAD` -> `ComponentRoseParticipant` with `collections=false`:
   // one plain rectangle with the text inside it.
