@@ -920,11 +920,15 @@ Ordered by how ready they are, not by size.
   **Open, filed by this mission (see below): the sequence `==` divider emits
   nothing.**
 
-  **Re-pinning is NOT done and is left to the maintainer**: 10 `artefact` rows
-  plus `gucare-93-petu502` are re-pinnable on the adjudicator's own rule, but
-  `tukobo-89-zebi935` (457 → 734) is not — its rise is the divider gap below,
-  which this mission neither caused nor fixed, and which was invisible at
-  `main` only because the database glyph's over-emission cancelled it.
+  **Re-pinned 2026-08-29 at `f8ad4386`**: the 10 `artefact` rows plus
+  `gucare-93-petu502`, 11 entries in
+  `oracle/goldens/svg-sequence/diff-baseline.json`. `tukobo-89-zebi935`
+  (457 → 734) deliberately excluded — its rise is the divider gap below, which
+  this mission neither caused nor fixed, and which was invisible at `main`
+  only because the database glyph's over-emission cancelled it. **Sequence
+  ratchet is 3 red: `fobube`, `rugeco`, `tukobo`** — the same count as before
+  this mission, `junaxa` closed and `tukobo` opened. The 80 IMPROVED fixtures
+  keep their old looser pins; tightening them is a separate pass.
 
 - **`sequence-divider-separator` — NEW, filed 2026-08-29 by
   `sequence-participant-symbols` T7.** The `== label ==` divider is drawn as

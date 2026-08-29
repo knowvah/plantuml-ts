@@ -139,22 +139,54 @@ golden, which is the alignment the weighting is trying to proxy:
 `main` (`nereka-67-deco609`, `tuzaga-87-gene496`) render now; that is reported
 as measured and was not investigated.
 
-## 5. Bottom line — can the orchestrator re-pin?
+## 5. Bottom line — re-pinned, 11 of 12
 
-**Partially, and not by running the re-pin script wholesale.**
+**Done 2026-08-29 at `f8ad4386`, on the maintainer's instruction.**
 
 - Zero `regression` verdicts at both refs, and zero unadjudicated rises: every
   one of the 12 risers has a verdict (10 `artefact`, plus §3a and §3b).
-- The 10 `artefact` rows and `gucare-93-petu502` are re-pinnable on the
-  adjudicator's own rule.
-- **`tukobo-89-zebi935` is not.** Its rise is a real, diagnosed structural gap
-  (§3a) that this mission did not cause and did not fix, and re-pinning it
-  would bake a known-unfixed deficit into the baseline. It was green at `main`
-  only because two errors cancelled.
-- `fobube-11-nifo424` and `rugeco-70-muro754` are untouched and stay red; both
-  are filed as separate missions.
+- **Re-pinned: the 10 `artefact` rows plus `gucare-93-petu502`** — 11 entries
+  in `oracle/goldens/svg-sequence/diff-baseline.json`, each with a fresh
+  `weightedScore`, `diffCount`, `measuredAt` and `measuredAgainstCommit`.
+- **`tukobo-89-zebi935` deliberately NOT re-pinned.** Its rise is the divider
+  gap of §3a — a real structural deficit this mission neither caused nor
+  fixed, invisible at `main` only because the database glyph's over-emission
+  cancelled it. Re-pinning it would bake a known-unfixed gap into the
+  baseline. Filed as `sequence-divider-separator`.
+- `fobube-11-nifo424` and `rugeco-70-muro754` untouched and still red; both
+  are separate missions.
 
-So: re-pin the 11, leave `tukobo` red with §3a as its record, or leave all 12
-and carry the note. **That is a baseline write, so it is left to the
-maintainer** rather than taken here — `repin-sequence-baselines.ts` was not
-run, and no baseline JSON was edited by any task in this mission.
+Sequence ratchet after the re-pin: **3 red — `fobube`, `rugeco`, `tukobo`.**
+Same count as before this mission, different membership: `junaxa` closed,
+`tukobo` opened for a diagnosed and filed reason.
+
+### How it was scoped
+
+`scripts/repin-sequence-baselines.ts` re-pins every fixture in the snapshot it
+is given, and `git diff` was checked to confirm the write matched. Scoping it
+to 11 slugs needed no code change: the script skips any baseline entry absent
+from the snapshot (`if (m === undefined) continue;`), so the snapshot was
+filtered to the 11 before the run. Two details worth knowing next time:
+
+1. The adjudicator's `--snapshot` rows carry `score` but **no `diffCount`**,
+   and the re-pin script falls back to the STALE pinned value when the field
+   is absent — which would have left a fresh `weightedScore` beside a
+   `diffCount` measured against a different commit. A fresh `diffCount` was
+   measured through the same seams (`renderFixtureSequence` +
+   `DeterministicMeasurer` + `fixtureIncludeStore()`) and merged into the
+   snapshot first. `gucare-93-petu502`'s moved 310 → 365, so the stale value
+   would have been visibly wrong.
+2. The script also writes `routing-baseline.json` and `refusal-baseline.json`
+   from a full-corpus scan that the snapshot does NOT scope. Both were
+   no-ops here (this mission changed neither routing nor refusals) — verified
+   by `git status`, which showed `diff-baseline.json` alone — but a future
+   scoped re-pin must check that rather than assume it.
+
+### Still loose: the 80 improved fixtures
+
+`weightedScore` FELL on 80 fixtures and their pins were left at the old,
+higher values. The ratchet only fails on a rise, so they pass — but their
+gains are not locked in, and a future regression on any of them would have to
+climb back above the pre-mission number before the gate noticed. Tightening
+them is a separate, low-risk pass over the same script with a snapshot
+filtered to those 80; not done here because it was not asked for.
