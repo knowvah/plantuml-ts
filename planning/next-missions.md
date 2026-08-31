@@ -964,8 +964,9 @@ Ordered by how ready they are, not by size.
   three `regression` rows are deliberately left red: `digula`/`xedomi` would
   pin over the unfixed `newpage` gap and `vogegu` over an arrowhead-emission
   gap nobody owns. **Sequence ratchet is 5 red** — `fobube`, `rugeco`,
-  `digula`, `vogegu`, `xedomi`. The 14 IMPROVED fixtures keep their looser
-  pins, `tukobo` (369 against a 457 pin) among them.
+  `digula`, `vogegu`, `xedomi`. **The 14 IMPROVED pins were tightened the same
+  day** (14 down, 0 up, guarded strictly-below-pin), so `tukobo` is now pinned
+  at **369** and this mission's result is held by the gate.
 
 - **`sequence-frame-header-newlines` — NEW, filed 2026-08-31.** A frame
   header's label does not split on `\n`. `pigifu-13-kele137`'s

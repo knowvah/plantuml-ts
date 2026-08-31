@@ -121,12 +121,31 @@ That re-measurement reproduced all 19 `weightedScore`s exactly
 `xedomi`. Was 3 before this work; `tukobo` left the list and three
 `newpage`/arrowhead-blocked rows joined it, each with a stated cause.
 
-### Still loose: the 14 improved fixtures
+### The 14 improved fixtures — tightened 2026-08-31 at `29435046`
 
-`weightedScore` FELL on 14 fixtures, `tukobo-89-zebi935` among them (369
-against a 457 pin), and their pins were left at the old higher values. They
-pass, but their gains are not held. Tightening them is the same script with a
-snapshot filtered to those 14; not done here because it was not asked for.
+`weightedScore` FELL on 14 fixtures and their pins were initially left at the
+old higher values. All 14 are now re-pinned to their measured value, guarded
+the same way as the last mission's tightening pass: each row admitted only if
+its live score was **strictly below** its current pin, and the resulting write
+verified against `HEAD` as **14 down, 0 up, 0 outside the improved set**.
+
+The falls are large — `ruxuxu-75-jilu612` 1174 → 472, `lenoki-81-nofo984`
+933 → 358, `degire-21-dujo330` and `vujiba-78-foga414` 756 → 287 each — which
+is what a divider going from two drawn elements to five does to a document
+that is mostly divider.
+
+**`tukobo-89-zebi935` is now pinned at 369**, down from the 457 it carried
+while red. The result this whole mission exists for is held by the gate, not
+merely reported.
+
+Exactness checks, as before: the `diffCount` re-measurement recomputed
+`weightedScore` for all 14 and reproduced the snapshot exactly
+(`scoreMismatch=0`), and the ratchet re-measures independently through the
+real gate and all 14 pass. The three `regression` rows, `fobube` and `rugeco`
+keep their original pins and measurement stamps.
+
+Sequence ratchet after both re-pin passes: **5 red** — `fobube`, `rugeco`,
+`digula`, `vogegu`, `xedomi` — with 1146 of 1151 rows green.
 
 ## 7. Filed by this work
 
