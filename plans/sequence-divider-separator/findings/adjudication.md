@@ -92,26 +92,41 @@ whenever a short-circuit is replaced by real per-attribute comparison:
 `+15` fixtures whose child tag sequence now matches the golden exactly, and
 `+922` matched positions.
 
-## 6. Bottom line — can the orchestrator re-pin?
+## 6. Bottom line — re-pinned, 19 of 22
 
-**Not without a decision, and not wholesale.**
-
-The sequence ratchet goes from **3 red to 24**. `tukobo` is fixed and drops
-off; 21 rows are added — the 19 `artefact`s plus `digula` and `xedomi`, with
-`vogegu` among them.
+**Done 2026-08-31 at `58dc5092`, on the maintainer's instruction.**
 
 - Zero rises are unadjudicated: 19 carry the tool's own `artefact` verdict and
   3 carry §3's diagnosis.
-- The 19 `artefact` rows are re-pinnable on the adjudicator's own rule.
-- **`digula-66-dipe776` and `xedomi-77-libu804` should NOT be re-pinned**:
-  their surplus is the `newpage` pagination gap, a real unfixed deficit, and
-  re-pinning would bake it in — the same call made for `tukobo` last mission.
-- `vogegu-91-mave762` is the genuinely awkward one. Its divider is exact and
-  its residual surplus is the arrowhead-emission gap, which no mission owns
-  yet. Re-pinning it records a number dominated by an unfiled gap; leaving it
-  red keeps a row whose stated cause is not the divider.
+- **Re-pinned: the 19 `artefact` rows**, each with a fresh `weightedScore`,
+  `diffCount`, `measuredAt` and `measuredAgainstCommit`. Unlike the last
+  mission's re-pin these move UP — the sanctioned case, since every one of
+  them has a FALLING child distance (§4).
+- **The three `regression` rows are deliberately left red**:
+  `digula-66-dipe776` and `xedomi-77-libu804` would pin over the unfixed
+  `newpage` pagination gap, and `vogegu-91-mave762` over an arrowhead-emission
+  gap no mission owns yet. Their pins and measurement stamps are unchanged.
+- `fobube-11-nifo424` and `rugeco-70-muro754` untouched.
 
-No baseline JSON was edited and `repin-sequence-baselines.ts` was not run.
+Verified by diffing the JSON against `HEAD`: **19 entries changed, 0 outside
+the artefact set**, and the six excluded slugs read back with their original
+stamps. The re-pin was scoped by filtering the adjudicator's `--snapshot` to
+19 rows — the script skips any baseline entry the snapshot does not name — and
+a fresh `diffCount` was measured through the same seams first, because the
+snapshot carries none and the script silently falls back to the stale value.
+That re-measurement reproduced all 19 `weightedScore`s exactly
+(`scoreMismatch=0`).
+
+**Sequence ratchet: 5 red** — `fobube`, `rugeco`, `digula`, `vogegu`,
+`xedomi`. Was 3 before this work; `tukobo` left the list and three
+`newpage`/arrowhead-blocked rows joined it, each with a stated cause.
+
+### Still loose: the 14 improved fixtures
+
+`weightedScore` FELL on 14 fixtures, `tukobo-89-zebi935` among them (369
+against a 457 pin), and their pins were left at the old higher values. They
+pass, but their gains are not held. Tightening them is the same script with a
+snapshot filtered to those 14; not done here because it was not asked for.
 
 ## 7. Filed by this work
 

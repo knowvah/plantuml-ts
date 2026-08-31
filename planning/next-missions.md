@@ -959,9 +959,13 @@ Ordered by how ready they are, not by size.
   `newpage` fixtures (the gap below); `vogegu-91-mave762`'s residual is
   arrowhead emission, unfiled.
 
-  **Ratchet goes 3 red → 24, and re-pinning is an open decision** (findings
-  §6): the 19 `artefact` rows qualify, `digula`/`xedomi` should not be pinned
-  over the `newpage` gap, and `vogegu` is genuinely awkward.
+  **Re-pinned 2026-08-31 at `58dc5092`: the 19 `artefact` rows** (they move
+  UP — the sanctioned case, every one with a falling child distance). The
+  three `regression` rows are deliberately left red: `digula`/`xedomi` would
+  pin over the unfixed `newpage` gap and `vogegu` over an arrowhead-emission
+  gap nobody owns. **Sequence ratchet is 5 red** — `fobube`, `rugeco`,
+  `digula`, `vogegu`, `xedomi`. The 14 IMPROVED fixtures keep their looser
+  pins, `tukobo` (369 against a 457 pin) among them.
 
 - **`sequence-frame-header-newlines` — NEW, filed 2026-08-31.** A frame
   header's label does not split on `\n`. `pigifu-13-kele137`'s
