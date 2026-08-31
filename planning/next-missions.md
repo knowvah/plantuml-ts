@@ -931,22 +931,51 @@ Ordered by how ready they are, not by size.
   were tightened 2026-08-31**, each guarded to be strictly below its previous
   value (80 down, 0 up); `junaxa` is now pinned at **333**, down from 673.
 
-- **`sequence-divider-separator` — NEW, filed 2026-08-29 by
-  `sequence-participant-symbols` T7.** The `== label ==` divider is drawn as
-  ONE `<line>` plus its `<text>` (`renderer.ts#renderDivider`). Upstream's
-  `ComponentRoseDivider#drawInternalU` draws **five** elements, read from the
-  method body: `drawRectLong` emits a full-width `URectangle(width, 3)` — the
-  3px band; `drawDoubleLine` emits **two** `ULine.hline(width)`, at `dy -1`
-  and `dy +2`; then a `URectangle(textWidth + 6, textHeight)` label box with
-  `roundCorner`/shadow; then the text. So the port is short a 3px band rect,
-  a label-box rect, and one of the two rules. Confirmed against
-  `tukobo-89-zebi935`, whose golden carries `<rect ... height="3">` at
-  `y=150.5` and a `91.188 x 21` box at `x=163.658`, and whose histogram
-  deficit is exactly `rect 8 vs 10, line 7 vs 8`. Skin defaults:
-  `sequenceDiagram { separator { LineColor black, LineThickness 2.0,
-  BackGroundColor #e, FontSize 13 } }` (`skin/plantuml.skin`). This is the
-  sole remaining cause of `tukobo`'s ratchet row and the only thing blocking
-  a clean re-pin of the sequence baseline. Corpus reach not measured.
+- **`sequence-divider-separator` — DONE 2026-08-31**, branch
+  `feat/sequence-divider-separator`, executed directly (three tasks against
+  one upstream component, no `plans/` brief). Close-out:
+  `plans/sequence-divider-separator/findings/adjudication.md`.
+
+  `renderDivider` drew TWO elements where `ComponentRoseDivider
+  #drawInternalU` draws five, and sized itself with a fitted `cursor.y += 30`.
+  Now: `drawSep`'s 3px band plus its two rules, the label box and the text,
+  with the empty `====` form drawing the band alone; height from
+  `getPreferredHeight = getTextHeight + 20`; and
+  `getPreferredWidth = getTextWidth + 30` widening the diagram through
+  `DividerTile#getMaxX`. Label-box dimensions are EXACT against three separate
+  goldens.
+
+  **`tukobo-89-zebi935` closed**: 734 → 369, and its histogram is the
+  golden's (44 children, `rect 10`, `line 8`). Adjudicated vs `main` over 1141
+  fixtures, skipped 0: regression 3, artefact 19, improved 14, inconclusive 17
+  (all NULL at both refs), unchanged 1088. Exact body-group tag sequences
+  **574 → 589**, matched positions 48987 → **49909**.
+
+  **The three `regression` verdicts are the adjudicator's known blind spot,
+  diagnosed in §3 of the findings**: all three documents were already larger
+  than their golden before this change, so adding correct nodes raises the
+  child distance and `classify` has no rule that can fire. Δ is exactly
+  `+3 × dividers` in each. `digula-66-dipe776` and `xedomi-77-libu804` are
+  `newpage` fixtures (the gap below); `vogegu-91-mave762`'s residual is
+  arrowhead emission, unfiled.
+
+  **Ratchet goes 3 red → 24, and re-pinning is an open decision** (findings
+  §6): the 19 `artefact` rows qualify, `digula`/`xedomi` should not be pinned
+  over the `newpage` gap, and `vogegu` is genuinely awkward.
+
+- **`sequence-frame-header-newlines` — NEW, filed 2026-08-31.** A frame
+  header's label does not split on `\n`. `pigifu-13-kele137`'s
+  `group foo\ndummy` draws ONE `<text>` in this port and TWO in the jar. Same
+  `Display.getWithNewlines` mechanism the divider now honours
+  (`CommandDivider.java:83`), in `ComponentRoseGroupingHeader`. Narrow;
+  corpus reach not measured.
+
+- **Sequence text escapes `\t`, `\\`, `\r`, `\l` are unhandled** in every
+  label in the engine. `Display.getWithNewlines` (`Display.java:288-313`) maps
+  `\t` to a tab, `\\` to a backslash, and `\r`/`\l` to a break that also sets
+  the block's natural horizontal alignment. Only `\n` is unescaped here, and
+  only in notes and dividers. Engine-wide; deliberately not made a
+  divider-only special case.
 
 - **`sequence-activation-double-box`** — SCOPED 2026-08-28. Closes
   `rugeco-70-muro754`, whose surplus is exactly ONE node: participant `a`
