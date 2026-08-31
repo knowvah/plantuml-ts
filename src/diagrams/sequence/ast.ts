@@ -456,9 +456,27 @@ export interface FrameGeo {
 export interface DividerGeo {
   kind: 'divider';
   text: string;
+  /** `text` split on `\n` (`Display.getWithNewlines`). The empty `====` form
+   *  is `['']`, which still occupies one line box upstream. */
+  lines: readonly string[];
+  /** The tile's TOP, as with every other geo here — not the band's own y,
+   *  which sits at `y + height / 2` (`ComponentRoseDivider.java:68,79`). */
   y: number;
-  totalWidth: number;
+  /** The band's span: `[border1, border2]`, not `[0, totalWidth]`. */
+  bandX: number;
+  bandWidth: number;
+  /** `#getPreferredHeight` (`:127-129`). */
+  height: number;
+  /** `AbstractTextualComponent#getTextWidth`/`#getTextHeight` — the text
+   *  block plus the component's `topRightBottomLeft(4, 4, 4, 4)`. */
+  textWidth: number;
+  textHeight: number;
 }
+// Every field above is resolved in LAYOUT and only read by the renderer; see
+// `divider-style.ts` for each one's derivation and the jar measurements
+// behind it. That split is the point -- a divider's drawn box and the space
+// reserved for it must come from one measurement, which is the defect class
+// `planning/sizer-renderer-parity.md` names.
 
 export interface SpaceGeo {
   kind: 'space';

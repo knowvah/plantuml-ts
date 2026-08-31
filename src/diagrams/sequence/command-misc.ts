@@ -74,7 +74,19 @@ export const dividerCommand: Command = {
   execute(state, match) {
     const ev: DividerEvent = {
       kind: 'divider',
-      text: match[1]!,
+      // `CommandDivider#executeArg` runs the label through
+      // `Display.getWithNewlines`, so a literal `\n` is a LINE BREAK, not two
+      // characters -- `pigifu-13-kele137`'s `== divi\nlines ==` draws a
+      // two-line label box in the jar. Unescaped here, at parse time, exactly
+      // as `command-note-factory.ts:119` already does for note bodies.
+      //
+      // `getWithNewlines` also maps `\t` to a tab, `\\` to a backslash, and
+      // `\r`/`\l` to a break that additionally sets the block's natural
+      // horizontal alignment (`Display.java:288-313`). None of those is
+      // handled here: no sequence label in this port handles them, and making
+      // the divider the sole exception would be a worse divergence than the
+      // shared gap. Engine-wide, filed with the other sequence text gaps.
+      text: match[1]!.replace(/\\n/g, '\n'),
     };
     emit(state, ev);
   },

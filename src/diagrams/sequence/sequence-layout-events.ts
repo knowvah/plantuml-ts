@@ -26,6 +26,11 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  DIVIDER_PADDING,
+  dividerFontSpecOf,
+  dividerPreferredHeight,
+} from './divider-style.js';
 import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
@@ -290,20 +295,48 @@ function handleFrameEvent(
   cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
 }
 
+/**
+ * `DividerTile` (`teoz/DividerTile.java`) reserves exactly its component's own
+ * `getPreferredHeight` and nothing more — tiles stack on `YGauge` with no gap
+ * between them — so the cursor advances by that height, not by a spacing.
+ *
+ * This replaced a fitted `cursor.y += 30` that carried no upstream citation.
+ * The label's own box is sized here too, from the SAME measurement, and the
+ * renderer only reads it: see `DividerGeo`'s own doc comment.
+ *
+ * The divider's font is `sequenceDiagram { separator { FontSize 13,
+ * FontStyle bold } }` (`plantuml.skin:174-175`), not the diagram font, so it
+ * is measured with its own spec.
+ */
 function handleDividerEvent(
   event: DividerEvent,
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
+  const font = dividerFontSpecOf(ctx.theme);
+  // `\n` splits the label into a multi-line text block, exactly as it does for
+  // a `ref` body (`text-block-geo.ts#refBodyLines`): the widest line drives the
+  // width and the line COUNT drives the height. Jar-verified on
+  // `pigifu-13-kele137`, whose `== divi\ndummy ==` golden carries a 34-tall
+  // label box (two 13px lines plus the 4+4 padding), not a 21-tall one.
+  const lines = event.text.split('\n');
+  const lineHeight = ctx.measurer.measure('M', font).height;
+  const blockWidth = Math.max(...lines.map((l) => ctx.measurer.measure(l, font).width));
+  const blockHeight = lines.length * lineHeight;
   const dividerGeo: DividerGeo = {
     kind: 'divider',
     text: event.text,
+    lines,
     y: cursor.y,
-    totalWidth: 0, // back-filled after totalWidth is computed in Step 3
+    bandX: 0, // both back-filled once totalWidth is known (Step 3)
+    bandWidth: 0,
+    height: dividerPreferredHeight(blockHeight),
+    textWidth: blockWidth + DIVIDER_PADDING * 2,
+    textHeight: blockHeight + DIVIDER_PADDING * 2,
   };
   ctx.eventGeos.push(dividerGeo);
   ctx.dividerGeos.push(dividerGeo);
-  cursor.y += 30;
+  cursor.y += dividerGeo.height;
 }
 
 function handleDelayEvent(

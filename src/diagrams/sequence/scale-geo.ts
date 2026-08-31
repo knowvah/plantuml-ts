@@ -164,7 +164,15 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
 }
 
 function scaleDivider(d: DividerGeo, k: number): DividerGeo {
-  return { ...d, y: d.y * k, totalWidth: d.totalWidth * k };
+  return {
+    ...d,
+    y: d.y * k,
+    bandX: d.bandX * k,
+    bandWidth: d.bandWidth * k,
+    height: d.height * k,
+    textWidth: d.textWidth * k,
+    textHeight: d.textHeight * k,
+  };
 }
 
 function scaleSpace(s: SpaceGeo, k: number): SpaceGeo {
