@@ -190,9 +190,12 @@ below.
 - **Re-pinned 2026-08-29 at `f8ad4386`: the 10 `artefact` rows plus
   `gucare-93-petu502`, 11 entries.** `tukobo` deliberately excluded. Sequence
   ratchet is now 3 red — `fobube`, `rugeco`, `tukobo` — the same count as
-  before this mission with `junaxa` closed and `tukobo` opened. The 80
-  IMPROVED fixtures keep their old, looser pins; tightening them is a
-  separate pass (see `findings/adjudication.md` §5).
+  before this mission with `junaxa` closed and `tukobo` opened.
+- **The 80 IMPROVED pins were tightened 2026-08-31 at `fc455a00`**, each
+  guarded to be strictly below its previous value (80 down, 0 up).
+  `junaxa-14-biko373` is now pinned at **333**, down from 673, so the
+  mission's headline result is held by the gate rather than only reported.
+  See `findings/adjudication.md` §5.
 - The three write-set expansions (`docs/catalog.md`, the seam's actor branch
   and `COLLECTIONS_DELTA` export, and a new
   `sequence-layout-participant-sizing.ts`) are journaled with their reasons.

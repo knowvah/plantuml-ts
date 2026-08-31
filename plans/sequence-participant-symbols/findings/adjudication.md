@@ -182,11 +182,35 @@ filtered to the 11 before the run. Two details worth knowing next time:
    by `git status`, which showed `diff-baseline.json` alone — but a future
    scoped re-pin must check that rather than assume it.
 
-### Still loose: the 80 improved fixtures
+### The 80 improved fixtures — tightened 2026-08-31 at `fc455a00`
 
-`weightedScore` FELL on 80 fixtures and their pins were left at the old,
-higher values. The ratchet only fails on a rise, so they pass — but their
-gains are not locked in, and a future regression on any of them would have to
-climb back above the pre-mission number before the gate noticed. Tightening
-them is a separate, low-risk pass over the same script with a snapshot
-filtered to those 80; not done here because it was not asked for.
+`weightedScore` FELL on 80 fixtures and their pins were initially left at the
+old, higher values. They passed, but their gains were not locked in: a future
+regression on any of them would have had to climb back above the pre-mission
+number before the gate noticed. All 80 are now re-pinned to their measured
+value.
+
+Guarded, not assumed. The tightening set was built by intersecting the
+`improved` verdicts from an adjudication against pre-mission `main`
+(`ee576982`) with a live snapshot, and each row was admitted only if its live
+score was **strictly below** its current pin. All 80 passed that guard — 0
+had no pin entry, 0 measured null, 0 failed to be lower — and the resulting
+write moved 80 scores DOWN and 0 up, verified by diffing the JSON against
+`HEAD` rather than by reading the script's own count.
+
+Two independent checks that the tightened numbers are exact rather than
+approximate:
+
+1. Re-measuring each fixture to obtain its `diffCount` also recomputed its
+   `weightedScore`, and all 80 reproduced the snapshot exactly
+   (`scoreMismatch=0`). The measurement is deterministic.
+2. The ratchet itself re-measures through the real gate, and all 80 pass
+   against their new pins. A pin off by one would fail.
+
+`junaxa-14-biko373` is now pinned at **333**, down from the 673 it carried
+while red — the mission's headline result is held by the gate, not just
+reported. `tukobo-89-zebi935`, `fobube-11-nifo424` and `rugeco-70-muro754`
+keep their original pins and measurement stamps.
+
+Sequence ratchet after both re-pin passes: **3 red — `fobube`, `rugeco`,
+`tukobo`**, with 1148 of 1151 rows green.

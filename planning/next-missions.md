@@ -927,8 +927,9 @@ Ordered by how ready they are, not by size.
   this mission neither caused nor fixed, and which was invisible at `main`
   only because the database glyph's over-emission cancelled it. **Sequence
   ratchet is 3 red: `fobube`, `rugeco`, `tukobo`** — the same count as before
-  this mission, `junaxa` closed and `tukobo` opened. The 80 IMPROVED fixtures
-  keep their old looser pins; tightening them is a separate pass.
+  this mission, `junaxa` closed and `tukobo` opened. **The 80 IMPROVED pins
+  were tightened 2026-08-31**, each guarded to be strictly below its previous
+  value (80 down, 0 up); `junaxa` is now pinned at **333**, down from 673.
 
 - **`sequence-divider-separator` — NEW, filed 2026-08-29 by
   `sequence-participant-symbols` T7.** The `== label ==` divider is drawn as
