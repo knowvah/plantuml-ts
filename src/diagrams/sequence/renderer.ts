@@ -37,6 +37,16 @@ import { renderLifelinePass } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
 import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
 import { GROUP_FONT_SIZE } from './frame-style.js';
+import {
+  DIVIDER_BACKGROUND,
+  DIVIDER_BAND_HEIGHT,
+  DIVIDER_FONT_BOLD,
+  DIVIDER_FONT_SIZE,
+  DIVIDER_LABEL_DELTA_X,
+  DIVIDER_LINE_COLOR,
+  DIVIDER_LINE_THICKNESS,
+  DIVIDER_PADDING,
+} from './divider-style.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 
@@ -178,20 +188,92 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
 // Divider helpers
 // ---------------------------------------------------------------------------
 
-function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
+/**
+ * `ComponentRoseDivider#drawSep` (`:91-95`) — the full-width band every
+ * divider draws, labelled or not: a 3px `URectangle` at `dy - 1` under
+ * `UStroke.simple()`, then TWO `ULine.hline` at `dy - 1` and `dy + 2` at half
+ * the style's thickness. `dy` is the component's own vertical midpoint.
+ *
+ * The band spans the tile's `Area` width, not `getPreferredWidth`
+ * (`:67`, `DividerTile.java`'s `Area.create(border2 - border1 - xorigin, …)`),
+ * which is `totalWidth` here.
+ */
+function renderDividerBand(divider: DividerGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  const lineEl = line(0, divider.y, divider.totalWidth, divider.y, {
-    stroke: theme.colors.divider,
+  const midY = divider.y + divider.height / 2;
+  const { bandX: x, bandWidth: w } = divider;
+  const band = rect(x, midY - 1 * k, w, DIVIDER_BAND_HEIGHT * k, {
+    fill: DIVIDER_BACKGROUND,
+    stroke: DIVIDER_BACKGROUND,
     strokeWidth: 1 * k,
   });
-  const midX = divider.totalWidth / 2;
-  const textEl = text(midX, divider.y - 4 * k, divider.text, {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-    textAnchor: 'middle',
+  const ruleStyle = {
+    stroke: DIVIDER_LINE_COLOR,
+    strokeWidth: (DIVIDER_LINE_THICKNESS / 2) * k,
+  };
+  return (
+    band +
+    line(x, midY - 1 * k, x + w, midY - 1 * k, ruleStyle) +
+    line(x, midY + 2 * k, x + w, midY + 2 * k, ruleStyle)
+  );
+}
+
+/**
+ * The label box and its text (`:73-87`). Absent for the empty `====` form,
+ * which upstream branches away from at `:69-70` on
+ * `stringsToDisplay.get(0).length() == 0`.
+ *
+ * `xpos = (width - textWidth - deltaX) / 2` and `ypos = (height - textHeight)
+ * / 2`; the box is `textWidth + deltaX` wide and the text starts `deltaX`
+ * inside it, with `getOldPaddingY()` of vertical inset.
+ */
+function renderDividerLabel(divider: DividerGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const deltaX = DIVIDER_LABEL_DELTA_X * k;
+  const xpos = divider.bandX + (divider.bandWidth - divider.textWidth - deltaX) / 2;
+  const ypos = divider.y + (divider.height - divider.textHeight) / 2;
+  const box = rect(xpos, ypos, divider.textWidth + deltaX, divider.textHeight, {
+    fill: DIVIDER_BACKGROUND,
+    stroke: DIVIDER_LINE_COLOR,
+    strokeWidth: DIVIDER_LINE_THICKNESS * k,
   });
-  return lineEl + textEl;
+  // One `<text>` per line, as the jar's own multi-line text block emits.
+  // `textBlock.drawU` places the block's TOP-LEFT and `text()` takes a
+  // baseline, hence `dominantBaseline: 'hanging'` -- the same adaptation
+  // `renderNote` makes for its body lines.
+  const lineHeight = (divider.textHeight - DIVIDER_PADDING * 2 * k) / divider.lines.length;
+  const top = ypos + DIVIDER_PADDING * k;
+  const label = divider.lines
+    .map((l, i) =>
+      text(xpos + deltaX, top + i * lineHeight, l, {
+        fontFamily: theme.fontFamily,
+        fontSize: DIVIDER_FONT_SIZE * k,
+        // `'700'`, not `'bold'` -- the jar emits the numeric form, and
+        // `renderer-frame-header.ts#boldFontWeight` already set that convention.
+        fontWeight: DIVIDER_FONT_BOLD ? ('700' as const) : ('normal' as const),
+        fill: theme.colors.text,
+        dominantBaseline: 'hanging',
+      }),
+    )
+    .join('');
+  return box + label;
+}
+
+/**
+ * `== label ==` and the empty `====`.
+ *
+ * This used to emit ONE `<line>` and one `<text>` where
+ * `ComponentRoseDivider#drawInternalU` emits five elements -- a band rect, two
+ * rules, a label box and the text -- and to stroke the rule with
+ * `theme.colors.divider` (`#999999`, this port's own invention) where upstream
+ * is `LineColor black` (`plantuml.skin:170`). `theme.colors.divider` had no
+ * other reader.
+ *
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseDivider.java:64-95
+ */
+function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
+  const band = renderDividerBand(divider, theme);
+  return divider.text.length === 0 ? band : band + renderDividerLabel(divider, theme);
 }
 
 // ---------------------------------------------------------------------------

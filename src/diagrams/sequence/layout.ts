@@ -33,6 +33,8 @@ import {
   type EventProcessingContext,
 } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
+import { DIVIDER_WIDTH_ALLOWANCE } from './divider-style.js';
+import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
 
 // ---------------------------------------------------------------------------
@@ -240,7 +242,34 @@ function computeTotalWidth(
     }
   }
 
-  return totalWidth;
+  return Math.max(totalWidth, dividerContentRight(eventGeos));
+}
+
+/**
+ * How far right a divider forces the drawing space.
+ *
+ * `DividerTile#getMaxX` is `xorigin.addFixed(dim.getWidth())` where `dim` is
+ * the component's `getPreferredDimension`, i.e.
+ * `ComponentRoseDivider#getPreferredWidth = getTextWidth + 30` (`:131-133`) --
+ * so a divider whose label is wider than the participant row widens the whole
+ * diagram, exactly as an exo message does above. `PlayingSpace` maxes every
+ * tile's `getMaxX` to place the right border
+ * (`teoz/PlayingSpace.java:75-96`).
+ *
+ * `geo.textWidth` IS `getTextWidth`, resolved in layout from the divider's
+ * OWN font (`separator { FontSize 13, FontStyle bold }`) -- re-measuring it
+ * here with the diagram font would reintroduce the sizer/renderer split this
+ * feature was built to avoid. `0` when there is no divider, which never
+ * lowers the max.
+ */
+function dividerContentRight(eventGeos: EventGeo[]): number {
+  let right = 0;
+  for (const geo of eventGeos) {
+    if (geo.kind !== 'divider') continue;
+    const extent = geo.textWidth + DIVIDER_WIDTH_ALLOWANCE + RIGHT_MARGIN;
+    if (extent > right) right = extent;
+  }
+  return right;
 }
 
 /** The message geos, in one place, for the exo passes below. */
@@ -264,10 +293,19 @@ function exoContentRight(eventGeos: EventGeo[]): number {
   return right;
 }
 
-/** Fill in totalWidth on all DividerGeo entries once it's known (Step 3). */
+/**
+ * Fill in each divider's band span once `totalWidth` is known (Step 3).
+ *
+ * `DividerTile#drawU` spans `border1 … border2` (`teoz/DividerTile.java`), the
+ * playing space's own borders — so this port uses its own equivalents,
+ * `LEFT_MARGIN` and `RIGHT_MARGIN`, rather than 0 and the document width. The
+ * band used to run edge to edge, which is wider than the jar's on every
+ * fixture.
+ */
 function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number): void {
   for (const d of dividerGeos) {
-    d.totalWidth = totalWidth;
+    d.bandX = LEFT_MARGIN;
+    d.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
   }
 }
 

@@ -1257,3 +1257,47 @@ T6, and matched tag positions 48159 → 48327 → 49014 of ~105.9k. Full census 
 renderer — the same shape as "Background-pass rollout" above, from the
 opposite direction: there a correct node was ADDED to an oversized document,
 here correct nodes were RE-ORDERED in a document whose count already matched.
+
+## Divider rollout: three fixtures the adjudicator must call a regression
+
+`sequence-divider-separator`, 2026-08-31.
+
+Porting `ComponentRoseDivider` takes the `== label ==` divider from two drawn
+elements to five (a 3px band, its two rules, a label box and the text). On
+`digula-66-dipe776`, `vogegu-91-mave762` and `xedomi-77-libu804`,
+`scripts/sequence-ratchet-adjudicate.ts` reports that as `regression` even
+though the added nodes are correct — the label box matches the golden's
+dimensions exactly on all three.
+
+**Mechanism.** Identical to "Background-pass rollout" above, and for the same
+structural reason: `classify` (`:181-190`) can only clear a rise whose
+top-level child-count distance FALLS, and all three documents were already
+LARGER than their golden before this change. Adding a correct node therefore
+raises the distance and no classifier rule can fire. Measured at both refs —
+the delta is exactly `+3 × (number of dividers)` in each, the 2→5 element
+swap:
+
+| fixture | ours before | ours after | golden | dividers |
+|---|---|---|---|---|
+| `digula-66-dipe776` | 66 | 75 | 50 | 3 |
+| `vogegu-91-mave762` | 31 | 34 | 28 | 1 |
+| `xedomi-77-libu804` | 52 | 64 | 48 | 4 |
+
+Pre-existing surplus per fixture, untouched by this work: `digula` and
+`xedomi` both carry `newpage`, where the jar renders page 1 alone and this
+port renders every page into one document (`sequence-newpage-pagination`, the
+same mechanism as `fobube-11-nifo424`); `vogegu` has no `newpage` and its
+surplus is 2 `line`, 2 `polygon` and 2 `text` from this port's arrowhead
+emission — the jar draws no `polygon` in that fixture at all.
+
+The complementary structural measurement moves the other way: body-group child
+tag sequences matching the golden exactly go **574 → 589** across this change,
+and matched tag positions 48987 → 49909 of ~105.9k. Full census in
+`plans/sequence-divider-separator/findings/adjudication.md` §5.
+
+**Category:** limitation, of the adjudication instrument rather than the
+renderer. Two entries above now record the same blind spot from three
+directions — nodes ADDED to an oversized document (background pass, and this
+one) and nodes RE-ORDERED in one whose count already matched (participant
+labels). The tool has no rule for any of them.
+

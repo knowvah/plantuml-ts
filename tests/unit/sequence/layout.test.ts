@@ -506,15 +506,58 @@ describe('layoutSequence — lifelineEndY (AC 9)', () => {
 });
 
 describe('layoutSequence — divider', () => {
-  it('emits DividerGeo with totalWidth filled in', () => {
+  it('spans the band between the playing-space borders', () => {
+    // `DividerTile#drawU` sizes the band `border2 - border1 - xorigin` and
+    // translates by `border1`, so it is inset by this port's own
+    // LEFT_MARGIN/RIGHT_MARGIN (30 each) rather than running edge to edge.
     const ast = makeAst(['Alice', 'Bob'], [
       { kind: 'divider', text: '====' } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const divider = geo.events.find(isDivider)!;
-    expect(divider).toBeDefined();
-    expect(divider.totalWidth).toBeGreaterThan(0);
+    expect(divider.bandX).toBe(30);
+    expect(divider.bandWidth).toBe(geo.totalWidth - 60);
     expect(divider.text).toBe('====');
+  });
+
+  it('sizes the divider from ComponentRoseDivider, not a fitted 30', () => {
+    // `getPreferredHeight = getTextHeight + 20` and `getTextHeight` is the
+    // block plus `topRightBottomLeft(4,4,4,4)` top+bottom
+    // (`ComponentRoseDivider.java:52-53, 127-129`). FixedMeasurer(8, 16) makes
+    // a one-line block 16 tall, so 16 + 8 + 20 = 44 -- the retired constant
+    // was 30.
+    const ast = makeAst(['Alice', 'Bob'], [
+      { kind: 'divider', text: 'phase' } satisfies SequenceEvent,
+    ]);
+    const divider = layoutSequence(ast, defaultTheme, measurer).events.find(isDivider)!;
+    expect(divider.height).toBe(16 + 8 + 20);
+    expect(divider.textHeight).toBe(16 + 8);
+    expect(divider.textWidth).toBe(5 * 8 + 8);
+    expect(divider.lines).toEqual(['phase']);
+  });
+
+  it('takes the widest line and the line count of a multi-line label', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      { kind: 'divider', text: 'a\nbbbb' } satisfies SequenceEvent,
+    ]);
+    const divider = layoutSequence(ast, defaultTheme, measurer).events.find(isDivider)!;
+    expect(divider.lines).toEqual(['a', 'bbbb']);
+    expect(divider.textWidth).toBe(4 * 8 + 8);
+    expect(divider.height).toBe(2 * 16 + 8 + 20);
+  });
+
+  it('widens the diagram for a divider label wider than the participants', () => {
+    // `DividerTile#getMaxX` is `xorigin + getPreferredWidth`, and
+    // `getPreferredWidth = getTextWidth + 30` (`:131-133`).
+    const wide = 'x'.repeat(60);
+    const narrow = layoutSequence(makeAst(['A', 'B'], []), defaultTheme, measurer).totalWidth;
+    const widened = layoutSequence(
+      makeAst(['A', 'B'], [{ kind: 'divider', text: wide } satisfies SequenceEvent]),
+      defaultTheme,
+      measurer,
+    ).totalWidth;
+    expect(widened).toBeGreaterThan(narrow);
+    expect(widened).toBe(60 * 8 + 8 + 30 + 30);
   });
 });
 

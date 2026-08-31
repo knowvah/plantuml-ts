@@ -41,7 +41,11 @@ import {
   spriteMonochromeAsLike,
 } from '../../core/klimt/sprite/sprite-raster.js';
 
-const LEFT_MARGIN = 30;
+/** The playing space's left border — where the participant row starts, and
+ *  what `DividerTile#drawU` calls `border1`. Exported because `layout.ts`
+ *  needs the SAME value to span a divider's band; upstream reads one
+ *  `tileArguments.getBorder1()` for both. */
+export const LEFT_MARGIN = 30;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
 
 export interface ParticipantLayoutResult {

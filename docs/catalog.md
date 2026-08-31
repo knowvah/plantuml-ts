@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1043 modules · 3700 exported names.
+1044 modules · 3714 exported names.
 
 ## `src/`
 
@@ -1262,6 +1262,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-page.ts` | `newpageCommand`, `minwidthOrPagingCommand` | The pagination block: `CommandNewpage` (`:139`), `CommandIgnoreNewpage` (`:140`) and `CommandAutoNewpage` (`:141`), the three commands that open `initCommandsList`'s trailing run. |
 | `command-participant.ts` | `participantCommand`, `createCommand`, `matchParticipantMultilineCommand` | The participant-declaration family: `CommandParticipantA` (`:106`), `CommandParticipantA2` (`:107`), `CommandParticipantA3` (`:108`), `CommandParticipantA4` (`:109`) and `CommandParticipantMultilines` (`:110`) — four single-line arities of |
 | `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
+| `divider-style.ts` | `DIVIDER_LINE_COLOR`, `DIVIDER_LINE_THICKNESS`, `DIVIDER_BACKGROUND`, `DIVIDER_FONT_SIZE`, `DIVIDER_FONT_BOLD`, `DIVIDER_PADDING`, `DIVIDER_HEIGHT_ALLOWANCE`, `DIVIDER_WIDTH_ALLOWANCE`, `DIVIDER_LABEL_DELTA_X`, `DIVIDER_BAND_HEIGHT`, `dividerFontSpecOf`, `dividerPreferredHeight`, `dividerPreferredWidth` | Style constants for the sequence-diagram divider (`== label ==`, and the empty `====` form). |
 | `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
@@ -1283,7 +1284,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-exo.ts` | `handleMessageExoEvent`, `exoRightExtent`, `anchorExoBorders` | Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …). |
 | `sequence-layout-message.ts` | `handleMessageEvent` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
-| `sequence-layout-participants.ts` | `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
+| `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `urlOf`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |

@@ -803,7 +803,17 @@ describe('renderSequence — background pass (T6)', () => {
         { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40 },
         makeSyncMessage(),
         { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi' },
-        { kind: 'divider', text: 'step', y: 200, totalWidth: 400 },
+        {
+          kind: 'divider',
+          text: 'step',
+          lines: ['step'],
+          y: 200,
+          bandX: 30,
+          bandWidth: 340,
+          height: 41,
+          textWidth: 40,
+          textHeight: 21,
+        },
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -925,17 +935,77 @@ describe('renderSequence — SVG structure', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — dividers', () => {
-  it('divider emits a line and centered text', () => {
-    const divider: DividerGeo = {
+  /** A divider as layout resolves it: `getTextHeight` = block + 4 + 4 and
+   *  `getPreferredHeight` = that + 20 (`ComponentRoseDivider.java:127-129`). */
+  function dividerGeo(text: string, lines = [text]): DividerGeo {
+    const textHeight = lines.length * 13 + 8;
+    return {
       kind: 'divider',
-      text: 'init phase',
+      text,
+      lines,
       y: 100,
-      totalWidth: 400,
+      bandX: 30,
+      bandWidth: 340,
+      height: textHeight + 20,
+      textWidth: 60,
+      textHeight,
     };
-    const geo = makeGeo({ events: [divider] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<line');
-    expect(svg).toContain('init phase');
+  }
+  /** Only the divider's own output: `makeGeo`'s default participants and
+   *  footbox contribute rects and texts of their own. */
+  function bodyFor(d: DividerGeo): string {
+    return renderSequence(
+      makeGeo({ events: [d], participants: [], showFootbox: false }),
+      defaultTheme,
+    ).body;
+  }
+
+  it('emits the band, its two rules, the label box and the text', () => {
+    // `drawSep` is a 3px `URectangle` plus TWO `ULine.hline`
+    // (`ComponentRoseDivider.java:91-95, 113, 120-127`); the labelled branch
+    // adds a box and the text (`:73-87`). Five elements, where this port used
+    // to emit one line and one text.
+    const body = bodyFor(dividerGeo('init phase'));
+    expect(body.match(/<rect/g) ?? []).toHaveLength(2); // band + label box
+    expect(body.match(/<line/g) ?? []).toHaveLength(2); // the double rule
+    expect(body).toContain('init phase');
+  });
+
+  it('strokes the band at half the label box thickness', () => {
+    // `drawRectLong` applies `UStroke.simple()` (`:116`) while the label box
+    // keeps the style's own `LineThickness 2.0` and `drawDoubleLine` halves it
+    // (`:120`) -- the jar's `tukobo-89-zebi935` golden shows exactly this 1/2
+    // split.
+    const body = bodyFor(dividerGeo('init phase'));
+    expect(body).toContain('stroke-width="1"');
+    expect(body).toContain('stroke-width="2"');
+    expect(body).toContain('fill="#EEE"');
+  });
+
+  it('draws the band alone for the empty ==== form', () => {
+    // `ComponentRoseDivider.java:69-70` branches on
+    // `stringsToDisplay.get(0).length() == 0`.
+    const body = bodyFor(dividerGeo('', ['']));
+    expect(body.match(/<rect/g) ?? []).toHaveLength(1);
+    expect(body.match(/<line/g) ?? []).toHaveLength(2);
+    expect(body).not.toContain('<text');
+  });
+
+  it('emits one text per line of a multi-line label', () => {
+    // `Display.getWithNewlines` splits the label on `\n`, and the jar draws a
+    // two-line label box for `pigifu-13-kele137`'s `== divi\nlines ==`.
+    const body = bodyFor(dividerGeo('divi\nlines', ['divi', 'lines']));
+    expect(body.match(/<text/g) ?? []).toHaveLength(2);
+    expect(body).toContain('>divi</text>');
+    expect(body).toContain('>lines</text>');
+  });
+
+  it('spans the playing space, not the whole document', () => {
+    // `DividerTile#drawU` translates by `border1` and sizes the area
+    // `border2 - border1 - xorigin`; the band used to run 0 -> totalWidth.
+    const body = bodyFor(dividerGeo('init phase'));
+    expect(body).toContain('x="30"');
+    expect(body).toContain('width="340"');
   });
 });
 
