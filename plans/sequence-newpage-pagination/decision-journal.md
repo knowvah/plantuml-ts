@@ -182,3 +182,26 @@ Numbers in the README's Outcome section. Two measurement findings filed in
 `.agent-notes/sequence-newpage-repin-hazard.md`; the first — the re-pin script
 raising a pre-existing red row's pin — is the one that matters, and it was
 caught only because the README named `rugeco` in advance.
+
+### The cause census, regenerated (T5)
+
+`oracle/goldens/svg-sequence/diff-census.json` is gated on being reproducible,
+so it had to be re-run. Its buckets move in two directions and both are
+expected:
+
+| bucket | before | after |
+|---|---|---|
+| `extra-element` | 68 | 34 |
+| `missing-element` | 463 | 447 |
+| `geometry` | 65453 | 74102 |
+| `text-metrics` | 12898 | 14474 |
+| `other` | 14725 | 15834 |
+
+The first two are the mission: half the extra elements are gone. The last
+three RISE for the reason the ratchet's own header names -- `compareSvg` now
+DESCENDS into subtrees it used to short-circuit at, because 18 of these
+documents now agree with their golden on the top-level child count, so a
+subtree that cost one unexamined record now reports its real per-attribute
+diffs. That is the "risen diffCount beside a fallen weightedScore" artefact,
+and `weightedScore` -- the gated quantity, and the monotone one -- fell 8028
+over the same population.
