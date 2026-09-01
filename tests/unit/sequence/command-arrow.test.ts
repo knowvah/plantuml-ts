@@ -664,3 +664,33 @@ describe('returnCommand', () => {
     expect(returnCommand.pattern.test('return')).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// `-[hidden]->` — ArrowBody.HIDDEN
+// ---------------------------------------------------------------------------
+
+describe('CommandArrow — [hidden]', () => {
+  const arrowOf = (line: string) => firstMessage(line).arrow;
+
+  it('records hidden, and leaves a plain arrow alone', () => {
+    // `CommandArrow.java:495-496` -- `hidden` sets `ArrowBody.HIDDEN`, read
+    // back as `ArrowConfiguration#isHidden` (`:202-203`). Absent, not `false`,
+    // where upstream carries `ArrowBody.NORMAL`.
+    expect(arrowOf('Alice -[hidden]-> Bob').hidden).toBe(true);
+    expect(arrowOf('Alice -> Bob').hidden).toBeUndefined();
+  });
+
+  it('combines with dashed, and is case-insensitive', () => {
+    // `applyStyle` walks a comma-separated token list, lowercasing each
+    // (`CommandArrow.java:488-500`).
+    const both = arrowOf('Alice -[dashed,hidden]-> Bob');
+    expect(both.hidden).toBe(true);
+    expect(both.dashed).toBe(true);
+    expect(arrowOf('Alice -[HIDDEN]-> Bob').hidden).toBe(true);
+  });
+
+  it('applies to a self arrow too', () => {
+    // `ComponentRoseSelfArrow#drawInternalU:71-73` has the same guard.
+    expect(arrowOf('Alice -[hidden]-> Alice').hidden).toBe(true);
+  });
+});

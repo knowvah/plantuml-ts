@@ -257,10 +257,15 @@ function getLength(g: Groups): number {
 }
 
 /**
- * `applyStyle` — `dashed`/`dotted` dot the body and `bold` is a deliberate
- * no-op upstream. `hidden` (`ArrowBody.HIDDEN`) and the colour fallback have
- * no field on this port's `ArrowConfiguration`, so they are parsed and
- * dropped rather than approximated.
+ * `applyStyle` — `dashed`/`dotted` dot the body, `hidden` sets
+ * `ArrowBody.HIDDEN`, and `bold` is a deliberate no-op upstream.
+ *
+ * The COLOUR fallback (`config.withColor(...)`, `CommandArrow.java:497-498`)
+ * still has no field on this port's `ArrowConfiguration`, so it alone is
+ * parsed and dropped rather than approximated. That is a colour gap and moves
+ * no geometry; `hidden` was in the same sentence until it turned out to be
+ * suppressing a whole arrow's worth of elements on `vogegu-91-mave762`.
+ *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:480-505
  */
 function applyStyle(
@@ -268,10 +273,14 @@ function applyStyle(
   config: ArrowConfiguration,
 ): ArrowConfiguration {
   if (arrowStyle === undefined) return config;
-  const dotted = arrowStyle
-    .split(',')
-    .some((s) => s.toLowerCase() === 'dashed' || s.toLowerCase() === 'dotted');
-  return dotted ? { ...config, dashed: true } : config;
+  const tokens = arrowStyle.split(',').map((s) => s.trim().toLowerCase());
+  const dotted = tokens.some((s) => s === 'dashed' || s === 'dotted');
+  const hidden = tokens.includes('hidden');
+  return {
+    ...config,
+    ...(dotted ? { dashed: true } : {}),
+    ...(hidden ? { hidden: true } : {}),
+  };
 }
 
 /**

@@ -968,45 +968,38 @@ Ordered by how ready they are, not by size.
   day** (14 down, 0 up, guarded strictly-below-pin), so `tukobo` is now pinned
   at **369** and this mission's result is held by the gate.
 
-- **`sequence-hidden-arrow` — NEW, filed 2026-08-31 by
-  `sequence-divider-separator`'s close-out.** A `[hidden]` arrow draws
-  nothing upstream; this port draws it in full.
+- **`sequence-hidden-arrow` — DONE 2026-08-31**, branch
+  `feat/sequence-hidden-arrow`, executed directly (one behaviour, three
+  files). Close-out:
+  `plans/sequence-hidden-arrow/findings/adjudication.md`.
 
-  **Mechanism, read from the method bodies.**
+  `-[hidden]->` drew a full arrow; upstream draws nothing.
   `ComponentRoseArrow#drawInternalU:85-87` and
-  `ComponentRoseSelfArrow#drawInternalU:71-73` both `return` immediately on
-  `arrowConfiguration.isHidden()` — so the line, BOTH arrowheads and the
-  LABEL are all suppressed, because the label is drawn after that guard.
-  `CommandArrow.java:495-496` sets `ArrowBody.HIDDEN`;
-  `ArrowConfiguration.java:202-203` is `body == ArrowBody.HIDDEN`.
+  `ComponentRoseSelfArrow#drawInternalU:71-73` both return on `isHidden()`
+  BEFORE the line, both arrowheads and the label. `ArrowConfiguration` gained
+  an optional `hidden`, `applyStyle` sets it, and `renderMessage` returns
+  `''`. **Layout is untouched on purpose** — only `drawInternalU` is guarded
+  upstream, so a hidden arrow still reserves its full tile
+  (`ComponentRoseArrow.java:342-349`).
 
-  **What is missing here.** `ArrowConfiguration`
-  (`src/diagrams/sequence/sequence-arrowhead.ts:86-97`) has no `hidden`
-  field, so `applyStyle` (`command-arrow.ts:266-275`) parses the token and
-  drops it — its own doc comment already says so: "parsed and dropped rather
-  than approximated". The renderer then draws a normal arrow.
+  Adjudicated vs `main` over 1141 fixtures, skipped 0: **regression 0,
+  artefact 0, improved 3, inconclusive 17 (all NULL at both refs), unchanged
+  1121. No rises at all.** `vogegu-91-mave762` 553 → **193** and
+  `TeozTimelineIssues_0004_Test` 590 → **240**, both now matching their
+  goldens' histograms EXACTLY. **Sequence ratchet 5 red → 4**: `fobube`,
+  `rugeco`, `digula`, `xedomi`.
 
-  **The nuance that will bite whoever takes this.** Only `drawInternalU` is
-  guarded. `getPreferredHeight`/`getPreferredWidth`
-  (`ComponentRoseArrow.java:342-349`) are NOT — a hidden arrow still reserves
-  its full tile height and width. So this suppresses DRAWING, never layout,
-  and a fix that skips the event in `sequence-layout-events.ts` would be
-  wrong. `[hidden]` exists precisely to reserve space without ink.
+  **Correction to this entry's own filing:** it claimed 7 fixtures use
+  `[hidden]`. Grep over-counted — `zogane-85-raja214`'s five are all inside
+  `'` comments. Three of the remaining six do not render at all, leaving three
+  measurable, two of which closed completely (the filing predicted one).
+  `koneju-77-vode355` improved 1165 → 1144 but its child distance rose 1 → 4:
+  it was already SHORT, and removing its hidden arrow exposes a six-line
+  shortfall that is present at both refs and unrelated.
 
-  **Measured reach: 7 fixtures use `[hidden]`; 3 of them do not render at all
-  (pre-existing), so 4 are measurable.** Only ONE is dominated by this gap:
-  `vogegu-91-mave762`, ours 34 children against the golden's 28, and the
-  surplus is exactly its 2 hidden arrows' 2 `line` + 2 `polygon` + 2 `text`.
-  `TeozTimelineIssues_0004_Test` is +2. The other two are NET SHORT
-  (`koneju-77-vode355` -1, `zogane-85-raja214` -2), i.e. they carry larger
-  unrelated gaps in the other direction and this fix alone will not close
-  them. **`vogegu-91-mave762` is one of the five red sequence ratchet rows,
-  and this is its whole stated cause.**
-
-  **Adjacent, same function, do not conflate:** `applyStyle`'s `else` branch
-  also drops the arrow COLOUR (`config.withColor(...)`,
-  `CommandArrow.java:497-498`), for the same reason — no field on this port's
-  `ArrowConfiguration`. That is a colour gap, not a suppression gap, and it
+  Not re-pinned — nothing rose. Three fixtures now sit below their pins and
+  would be tightened by the usual guarded pass. The arrow COLOUR fallback
+  (`CommandArrow.java:497-498`) is still parsed and dropped: a colour gap that
   moves no child counts.
 
 - **`sequence-frame-header-newlines` — NEW, filed 2026-08-31.** A frame
