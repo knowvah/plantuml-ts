@@ -183,3 +183,125 @@ jar-oracle coverage… no `test-results/dot-cache/sequence/` and no
 `oracle/goldens/svg-sequence/`". Both have existed since
 `sequence-oracle-harness` (2026-08-20). Correcting it is not in this
 mission's write-set; it is worth a one-line chore.
+
+---
+
+# Outcome
+
+**Executed and closed 2026-09-01** on `feat/sequence-coordinate-convergence`,
+cut from `main` @ `ebbd1f41`. Nine batches, all gates met. The objective —
+make this port's sequence X coordinates converge on the jar's, so geometry
+work becomes measurable at all — is met.
+
+## The headline
+
+| | baseline (`ebbd1f41`) | close | change |
+|---|---:|---:|---:|
+| total geometry distance | 4 175 357.109 | **2 578 916.759** | **−1 596 440.350 (−38.2%)** |
+| numeric diffs | 72 266 | **51 890** | −20 376 |
+| fixtures with EVERY lifeline centre exact | — | **482** of 1039 | — |
+| fixtures with the first lifeline centre exact | — | 747 | — |
+| leftmost participant box exact | ≈0 | **707** of 1044 | — |
+| census `geometry` diffs | 78 786 | **58 410** | −25.9% |
+| census total | 111 021 | **89 338** | −19.5% |
+
+Not one fixture changed descent status across the whole mission, so none of
+that fall is short-circuit artefact.
+
+Adjudication against the parent commit:
+`improved=712  unchanged=407  inconclusive=17  regression=5`, and **no
+regression survives diagnosis** (`findings/adjudication.md`).
+
+## Per batch
+
+| batch | what it was | distance after | gate |
+|---|---|---:|---|
+| 1 | the instrument | 4 175 357.109 | two runs byte-identical ✓ |
+| 2 | participant box WIDTH: `text + 14`, no floor | 3 114 547.085 | `@width` and `@x` both fell ✓ |
+| 3 | participant box HEIGHT: `text + 14`, plus the reserved `+ 1` | 3 076 534.997 | `@height` and `@y` both fell ✓ |
+| 4 | the seven glyph heads — audited, all already exact | 3 076 534.997 | every kind exact on its golden ✓ |
+| 5 | the document origin: 10 a side, and SOLVED | 2 661 116.421 | first box exact on 707 ✓ |
+| 6 | inter-participant spacing: 10, not 20 | 2 603 787.547 | lifeline `x1` exact on the pins ✓ |
+| 7 | D6 decided; the constraint set, solved exactly | 2 578 916.759 | centres exact on 4 wide-label goldens ✓ |
+| 8 | the three activation commits, re-verified absolutely | 2 578 916.759 | all three exact ✓ |
+| 9 | adjudicate, re-pin once, close out | — | zero surviving regressions ✓ |
+
+## What was actually wrong
+
+Eight constants and one structure, every replacement carrying an upstream
+`file:line`:
+
+| | was | is | source |
+|---|---|---|---|
+| participant min width | 80 | **removed** | `Rose#getMinClassWidth` → `ValueNull#asDouble()` = 0 |
+| participant padding | 10 | **7** | `plantuml.skin:186-190` |
+| head reserved height | = box | **box + 1** | `ComponentRoseParticipant#getPreferredHeight:129-132` |
+| box height term | `+ 20` | **`+ 2 × 7`** | `AbstractTextualComponent#getTextHeight:110-114` |
+| left/right margin | 30 | **10** | `getDefaultMargins:624-628` + `getTextBlock`'s `UTranslate(5,5)` |
+| `BORDER1` | 0 | **`LEFT_MARGIN`** | `PlayingSpace.java:318-320` |
+| group frame margin | 20 | **16** | `GroupingTile.MARGINX:89` |
+| group footprint | — | **+ 3 left** | `GroupingTile.EXTERNAL_MARGINX1:82` |
+| participant gap | 20 | **10** | `LivingSpaces#addConstraints:61-71` |
+| message label font | 14 | **13** | `plantuml.skin:306-308` |
+| `SELF_LOOP_WIDTH` | 40 | **42** | `ComponentRoseSelfArrow.java:59-60` |
+| origin | fixed | **solved** | `dx(-min1)`, `SequenceDiagramFileMakerTeoz:82,135-136` |
+| label widening | adjacent-only pre-scan | **exact constraint solve** | D6 |
+
+## The three commits Batch 8 re-verified
+
+All three hold, now absolutely rather than relatively:
+
+- `bbcc90ae` — 14 of 14 activation bars on `kejoke-76-curu931` exact;
+- `5dfa0982` — 24 of 24 message endpoints on the same fixture exact;
+- `ebbd1f41` — the whole self-loop x geometry on `jobadi-87-jegi648` exact.
+
+Gap SQ-5 is closed, and its recorded numbers corrected: the gap was 40 vs
+**42**, not 40 vs 45.
+
+## Residuals, each with a mechanism
+
+None is an effort excuse; each names the term and where it comes from.
+
+1. **The unmodelled `LIVE_DELTA_SIZE` family** — `addConstraints`' endpoint
+   adjustments (`:405-413`), `isCreate()`'s `posB`/`posD` (`:423-431`), and
+   the self loop's `deltaX1` (`drawRightSide:93`). Signature: spans involving
+   a live participant are 5px short each.
+   `TeozTimelineIssues_0003_Test`'s second lifeline is 79.669 against 84.669.
+   Blocked on ordering — the span scan runs before the walk that computes
+   levels, where upstream's `Real` defers the arithmetic.
+2. **The vertical document margin** — 10 top and bottom, derived in Batch 5
+   and applied only on x. It is why the five adjudicated rises exist. Y-axis
+   work, an explicit non-goal here.
+3. **`SELF_LOOP_HEIGHT` 20 vs upstream's 13** (`getArrowOnlyHeight:321-323`).
+   Same reason; now cited in the code.
+4. **Self loops are one `<path>` where the jar emits three `<line>`s.** A
+   structural divergence, and it makes every self-message geometry invisible
+   to the comparator — which is why Batch 8's fix moved the metric by zero.
+5. **33 fixtures still render content at a negative x**, because message
+   label extents are deliberately out of the origin walker. Measured both
+   ways; including them fixes 26 but costs 20 fixtures their origin and 6236
+   of distance, and the choice is D6's domain.
+6. **Per-element font resolution.** `arrow` is now 13; `groupHeader` (11) and
+   `box` (13) remain on the ambient size.
+7. **Englober and self-overflow margins** in `posA`/`posE`
+   (`Doll.java:220-221`, `CommunicationTileSelf.java:208-213`), unmodelled.
+8. **`ActorBorderColor` is dropped** on the actor stickman's stroke — a
+   colour, found in Batch 4, invisible to this mission's gate.
+
+## Non-goals, honoured
+
+The 410 fixtures short-circuiting at the top-level child count were not
+touched, y-convergence beyond Batch 3's side effects was not pursued, `Real`
+was not ported, and reverse self messages were left alone.
+
+## For whoever plans the next one
+
+`planning/mission-guide.md`'s G-1 entry is still stale — it says sequence has
+no jar-oracle coverage, and both `test-results/dot-cache/sequence/` and
+`oracle/goldens/svg-sequence/` have existed since 2026-08-20. Still worth a
+one-line chore; still outside this mission's write-set.
+
+The obvious next mission is **the Y axis**: the vertical document margin,
+`SELF_LOOP_HEIGHT`, and whatever else the `@y` / `@y1` / `@y2` totals
+(455 072 + 117 022 + 195 029 = 767 123, now 30% of all remaining distance)
+turn out to be. The instrument and the cohort discipline are in place for it.
