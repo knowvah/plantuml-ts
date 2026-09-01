@@ -235,11 +235,39 @@ export interface Theme {
     graph: ThemeGraphColors;
   };
   sequence: {
-    /** Horizontal padding inside a participant box */
+    /**
+     * Padding inside a participant box, on every side.
+     *
+     * `plantuml.skin:186-190` sets `Padding 7` for
+     * `participant,actor,boundary,control,entity,queue,database,collections`,
+     * and `ClockwiseTopRightBottomLeft.read` expands a scalar to all four
+     * sides. `AbstractTextualComponent#getTextWidth` adds
+     * `padding.getLeft() + padding.getRight()` to the raw text block
+     * (`:106-108`) and `getTextHeight` adds top + bottom (`:110-114`), and
+     * `ComponentRoseParticipant#drawInternalU:100-104` draws a rectangle of
+     * exactly those two. So the drawn box is `text + 2 * this` on both axes.
+     *
+     * There is deliberately NO minimum-width companion to this. Upstream's
+     * floor is `Rose#getMinClassWidth` = `style.value(PName.MinimumWidth)`
+     * (`Rose.java:275-278`), `MinimumWidth` is declared in no skin file, and
+     * `ValueNull#asDouble()` returns 0 (`ValueNull.java:57-59`) — so
+     * upstream's floor is zero. See
+     * `plans/sequence-coordinate-convergence/findings/participant-width.md`.
+     */
     participantPadding: number;
-    /** Minimum participant box width */
-    participantMinWidth: number;
-    /** Horizontal gap between adjacent participant boxes */
+    /**
+     * Horizontal gap between adjacent participant boxes.
+     *
+     * `LivingSpaces#addConstraints:61-71` is the whole rule:
+     * `current.getPosA().ensureBiggerThan(previous.getPosE().addFixed(10))`.
+     * `posA` is `posB - marginBefore` and `posE` is `posD + marginAfter`
+     * (`LivingSpace.java:292-298`), with `posB`/`posD` the box's left and
+     * right edges (`:238-248`) and the two margins zero unless an englober
+     * or a self-message overflow widened them
+     * (`Doll.java:220-221`, `CommunicationTileSelf.java:208-213`). So for
+     * ordinary participants the constraint is `nextLeft >= prevRight + 10`:
+     * a ten-pixel gap between box EDGES.
+     */
     participantGap: number;
     /** Vertical gap between messages */
     messageSpacing: number;
@@ -318,9 +346,8 @@ export const defaultTheme: Theme = {
     },
   },
   sequence: {
-    participantPadding: 10,
-    participantMinWidth: 80,
-    participantGap: 20,
+    participantPadding: 7,
+    participantGap: 10,
     messageSpacing: 20,
     activationWidth: 10,
     noteMargin: 5,

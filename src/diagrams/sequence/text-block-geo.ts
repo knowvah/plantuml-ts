@@ -18,7 +18,7 @@
 
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import { arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
 
 /** One `<text>` the renderer will emit, already placed. */
 export interface TextRun {
@@ -170,10 +170,15 @@ export function messageLabelBlock(
   const lines = label === '' ? [] : label.split('\n');
   if (lines.length === 0 && numberText === undefined) return { lines: [] };
 
-  const lineHeight = lineHeightOf(theme, measurer);
-  const numberWidth = numberText === undefined ? 0 : widthOf(numberText, theme, measurer);
+  // The ARROW font, not the ambient one: `arrow { FontSize 13 }`
+  // (`plantuml.skin:306-308`), and every golden with a message label emits
+  // `font-size="13"` for it beside `font-size="14"` participant text.
+  const spec = arrowFontSpecOf(theme);
+  const lineHeight = measurer.measure('M', spec).height;
+  const numberWidth = numberText === undefined ? 0 : measurer.measure(numberText, spec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
-  const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => widthOf(l, theme, measurer)));
+  const labelWidth =
+    lines.length === 0 ? 0 : Math.max(...lines.map((l) => measurer.measure(l, spec).width));
 
   const blockLeft = centerX - (numberWidth + gap + labelWidth) / 2;
   const labelLeft = blockLeft + numberWidth + gap;

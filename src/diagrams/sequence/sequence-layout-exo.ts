@@ -41,19 +41,15 @@ import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
-import { fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
+import { LEFT_MARGIN } from './sequence-layout-participants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-/** The arrow component's horizontal text padding, both sides:
- *  `topRightBottomLeft(1, 7, 1, 7)` (`skin/rose/AbstractComponentRoseArrow
- *  .java:62`), read back by `getTextWidth` (`skin/AbstractTextualComponent
- *  .java:106-108`). */
-const ARROW_PADDING_X = 7;
 
 /** The right margin between a leading `MessageNumber` and the label beside it
  *  — `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`). Same
@@ -65,11 +61,19 @@ const MESSAGE_NUMBER_MARGIN = 4;
  *  @see teoz/CommunicationExoTile.java:138-147 */
 const CIRCLE_INSET = DIAM_CIRCLE / 2 + 2;
 
-/** `tileArguments.getBorder1()` — the left edge of the drawing space
- *  (`teoz/PlayingSpace.java:318-320`, the min of the x origin and every
- *  tile's own `getMinX`). This port lays participants out from a fixed
- *  `LEFT_MARGIN` with no negative content, so the origin IS the left edge. */
-const BORDER1 = 0;
+/**
+ * `tileArguments.getBorder1()` — the left edge of the DRAWING SPACE
+ * (`teoz/PlayingSpace.java:318-320`, the min of the x origin and every tile's
+ * own `getMinX`).
+ *
+ * `LEFT_MARGIN`, not 0. Upstream draws the body shifted by `dx(-min1)` inside
+ * a 10px document margin (`SequenceDiagramFileMakerTeoz.java:132,135-136`),
+ * so `border1` lands ON that margin in image coordinates — it is the left
+ * edge of the CONTENT, not of the image. The jar on `[<- Bob : hello` puts
+ * the border-end head at x=11, one pixel off a border at 10; anchoring at 0
+ * put it at 1 and made every left-border exo arrow overhang the page.
+ */
+const BORDER1 = LEFT_MARGIN;
 
 // ---------------------------------------------------------------------------
 // Type predicates — MessageExoType.java:55-61
@@ -124,7 +128,9 @@ function numberTextOf(event: MessageExoEvent): string | undefined {
 /** The label block's own width — the number, its margin and the widest label
  *  line, exactly as `messageLabelBlock` lays them out. */
 function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): number {
-  const fontSpec = fontSpecOf(ctx.theme);
+  // Same font `messageLabelBlock` lays the block out with — `arrow
+  // { FontSize 13 }` (`plantuml.skin:306-308`).
+  const fontSpec = arrowFontSpecOf(ctx.theme);
   const numberText = numberTextOf(event);
   const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;

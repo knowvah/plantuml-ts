@@ -101,12 +101,16 @@ describe('layoutSequence — participant columns (AC 1)', () => {
     }
   });
 
-  it('participant width >= participantMinWidth', () => {
+  it('participant width is the text plus twice the padding, with no floor under it', () => {
+    // `AbstractTextualComponent#getTextWidth:106-108` — box = pure text +
+    // padding.left + padding.right, and `Rose#getMinClassWidth`'s
+    // `PName.MinimumWidth` resolves to `ValueNull#asDouble()` = 0
+    // (`ValueNull.java:57-59`), so nothing props a narrow box up. `X` is one
+    // glyph, 8px under `FixedMeasurer(8, 16)`, and 8 + 14 is well under the
+    // 80px floor this port used to apply.
     const ast = makeAst(['X'], []);
     const geo = layoutSequence(ast, defaultTheme, measurer);
-    expect(geo.participants[0]?.width).toBeGreaterThanOrEqual(
-      defaultTheme.sequence.participantMinWidth,
-    );
+    expect(geo.participants[0]?.width).toBe(8 + 2 * defaultTheme.sequence.participantPadding);
   });
 
   it('centerX == x + width/2', () => {
@@ -700,14 +704,15 @@ describe('layoutSequence — divider', () => {
   it('spans the band between the playing-space borders', () => {
     // `DividerTile#drawU` sizes the band `border2 - border1 - xorigin` and
     // translates by `border1`, so it is inset by this port's own
-    // LEFT_MARGIN/RIGHT_MARGIN (30 each) rather than running edge to edge.
+    // LEFT_MARGIN/RIGHT_MARGIN (10 each, the jar's document margin) rather
+    // than running edge to edge.
     const ast = makeAst(['Alice', 'Bob'], [
       { kind: 'divider', text: '====' } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const divider = geo.events.find(isDivider)!;
-    expect(divider.bandX).toBe(30);
-    expect(divider.bandWidth).toBe(geo.totalWidth - 60);
+    expect(divider.bandX).toBe(10);
+    expect(divider.bandWidth).toBe(geo.totalWidth - 20);
     expect(divider.text).toBe('====');
   });
 
@@ -748,7 +753,7 @@ describe('layoutSequence — divider', () => {
       measurer,
     ).totalWidth;
     expect(widened).toBeGreaterThan(narrow);
-    expect(widened).toBe(60 * 8 + 8 + 30 + 30);
+    expect(widened).toBe(60 * 8 + 8 + 10 + 30);
   });
 });
 
@@ -1038,8 +1043,12 @@ describe('layoutSequence — database participant sizing', () => {
   it('leaves non-database participants untouched', () => {
     const plain = layoutSequence(makeAst(['Alice', 'Bob'], [msg('Alice', 'Bob')]), defaultTheme, measurer);
     const alice = plain.participants.find((p) => p.id === 'Alice')!;
-    expect(alice.width).toBe(defaultTheme.sequence.participantMinWidth);
-    expect(alice.height).toBe(16 + 20);
+    // 5 glyphs at 8px under `FixedMeasurer`, plus 7 of padding either side.
+    expect(alice.width).toBe(5 * 8 + 2 * defaultTheme.sequence.participantPadding);
+    // `getTextHeight` = text + padding.top + padding.bottom
+    // (`AbstractTextualComponent.java:110-114`), with `Padding 7` on all four
+    // sides. 16 from `FixedMeasurer(8, 16)`, plus 7 above and 7 below.
+    expect(alice.height).toBe(16 + 2 * defaultTheme.sequence.participantPadding);
   });
 });
 

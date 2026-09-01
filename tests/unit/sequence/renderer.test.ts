@@ -23,6 +23,7 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
+import { arrowFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -198,10 +199,10 @@ describe('renderSequence — messages', () => {
     const msg = geo.events[0] as MessageGeo;
     const numberRun = msg.labelNumber;
     expect(numberRun).toBeDefined();
-    const numberWidth = new FormulaMeasurer().measure('3', {
-      family: defaultTheme.fontFamily,
-      size: defaultTheme.fontSize,
-    }).width;
+    // Measured at the ARROW font, which is what `messageLabelBlock` lays the
+    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:306-308`), not
+    // the ambient 14 every other sequence element uses.
+    const numberWidth = new FormulaMeasurer().measure('3', arrowFontSpecOf(defaultTheme)).width;
     // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
     expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
     // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
@@ -461,6 +462,10 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // (`ComponentRoseSelfArrow.java:126` draws the bottom hline from x2 and
   // `:172` puts the polygon's tip at that same x2).
   const LOOP_BOTTOM_Y = SELF_Y + 20;
+  /** `xRight = arrowWidth - 3` = 42 (`ComponentRoseSelfArrow.java:59-60`),
+   *  which is where `drawRightSide:125` puts the vertical stroke. Verified
+   *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
+  const LOOP_RIGHT_X = SELF_X + 42;
 
   function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
@@ -478,7 +483,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
 
   it('still draws the loop path itself', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
-    expect(svg).toContain(`<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`);
+    expect(svg).toContain(
+      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`,
+    );
   });
 
   it('draws a self async head as two open strokes', () => {
@@ -492,7 +499,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   it('dashes a self reply loop', () => {
     const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
     expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
+      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
         `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
         'stroke-dasharray="5,5"',
     );
@@ -1651,7 +1658,10 @@ describe('renderSequence — exogenous arrows', () => {
   it('anchors a FROM_LEFT body at the left edge and ends it on the lifeline', () => {
     const svg = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const [body] = messageBodies(svg);
-    expect(body?.[0]).toBe(0);
+    // `LEFT_MARGIN`, not 0: `border1` is the left edge of the DRAWING SPACE,
+    // which upstream places on the 10px document margin
+    // (`SequenceDiagramFileMakerTeoz.java:132`), not on the image edge.
+    expect(body?.[0]).toBe(10);
     expect(headTips(svg)).toEqual([lifelines(svg)[0]! - 2]);
   });
 
@@ -1665,7 +1675,14 @@ describe('renderSequence — exogenous arrows', () => {
     const rights = (svg.match(/<rect[^>]*>/g) ?? []).map(
       (t) => Number(/x="([-\d.]+)"/.exec(t)?.[1]) + Number(/width="([-\d.]+)"/.exec(t)?.[1]),
     );
-    expect(headTips(svg)).toEqual([Math.max(...rights) - 2]);
+    // Compared with a tolerance, not exactly, because the right edge here is
+    // the SUM OF TWO ROUNDED ATTRIBUTES. `Carol`'s box is x=88.9375
+    // w=47.5125, serialised as 88.938 and 47.513, and each half rounds up by
+    // half a thousandth -- so the sum reads 136.451 where the true edge is
+    // 136.450. The head tip is emitted from the unrounded value and is right.
+    // This only became visible once the box stopped being pinned to an
+    // integer 80px floor.
+    expect(headTips(svg)[0]).toBeCloseTo(Math.max(...rights) - 2, 2);
   });
 
   // `CommunicationExoTile#getMaxX` is `getPoint2()` = `posC + preferredWidth`
@@ -1676,8 +1693,22 @@ describe('renderSequence — exogenous arrows', () => {
     const withExo = render(
       '@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\nCarol ->] : bye\n@enduml',
     );
-    expect(docWidth(without)).toBe(240);
-    expect(docWidth(withExo)).toBe(246);
+    // 166/189, not 240/246: both boxes lost the 80px minimum-width floor
+    // this port used to apply, which upstream does not have
+    // (`Rose#getMinClassWidth` resolves to `ValueNull#asDouble()` = 0).
+    // `Bob` is 38.938 wide and `Carol` 47.513, so the document narrows by
+    // 74px and the exo's own stretch is what remains visible.
+    // 126/149: both boxes lost the 80px minimum-width floor this port used to
+    // apply, and the document margins came down from 30 a side to the jar's
+    // 10 (`SequenceDiagram#getDefaultMargins:624-628` plus the text block's
+    // own `UTranslate(5, 5)`).
+    // 116/139: the gap between the two boxes came down from 20 to the jar's
+    // 10 (`LivingSpaces#addConstraints:61-71`), and the exo's reach is
+    // measured from the now-nearer second lifeline, so both narrow by it.
+    // 137, not 139: the exo's label is now measured at 13 rather than 14, so
+    // its reach is 2px shorter.
+    expect(docWidth(without)).toBe(116);
+    expect(docWidth(withExo)).toBe(137);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1701,7 +1732,9 @@ describe('renderSequence — exogenous arrows', () => {
   // emit `fill="#000"`, including three whose page background is red or grey.
   it('fills the o decoration black, not with the document background', () => {
     const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
-    expect(svg).toContain('<ellipse cx="5.5" cy="53.25" rx="4" ry="4" fill="#000"');
+    // cy 48.25, not 53.25: the head row lost 5px when the box height became
+    // `text + 2 * 7` instead of `text + 20`, and the body starts below it.
+    expect(svg).toContain('<ellipse cx="15.5" cy="48.25" rx="4" ry="4" fill="#000"');
     expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
   });
 
@@ -1715,8 +1748,10 @@ describe('renderSequence — exogenous arrows', () => {
     const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
     expect(saltire).toHaveLength(2);
     // Two crossing diagonals, `spaceCrossX` right of the border end.
-    expect(messageBodies(svg)[0]).toEqual([12, 64]);
-    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([7, 7]);
+    // x2 is the lifeline, which moved from 70 to 49.469 when the box lost
+    // its 80px floor; the arrow is still `spaceCrossX` = 12 off the border.
+    expect(messageBodies(svg)[0]).toEqual([22, 23.469]);
+    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([17, 17]);
   });
 
   // `getComponent` reverses the configuration when `getDirection() == -1`
@@ -1726,8 +1761,13 @@ describe('renderSequence — exogenous arrows', () => {
   it('puts a TO_LEFT head on the border end, left of the body', () => {
     const svg = render('@startuml\nparticipant Bob\n[<- Bob : hello\n@enduml');
     const [body] = messageBodies(svg);
-    expect(headTips(svg)).toEqual([1]);
-    expect(body).toEqual([5, 69]);
+    // 11 -- the jar's own number, quoted in this test's comment above. It was
+    // 1 while `border1` was pinned to the image edge instead of the margin.
+    expect(headTips(svg)).toEqual([11]);
+    // Same 20.531px leftward shift of the lifeline as every other row here.
+    // x1 = 15 is the jar's own number for this source: `border1` at 10 plus
+    // the head's `pos1 = 1` and its own width.
+    expect(body).toEqual([15, 28.469]);
   });
 
   // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
@@ -1736,7 +1776,18 @@ describe('renderSequence — exogenous arrows', () => {
   it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
     const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
-    expect(messageBodies(long)[0]).toEqual([0, 64]);
-    expect(messageBodies(short)[0]).toEqual([16.337, 64]);
+    expect(messageBodies(long)[0]).toEqual([10, 23.469]);
+    // NEGATIVE, and correctly so for this port as it stands: `getPoint1()` is
+    // `posC - preferredWidth` = 49.469 - 53.663, and nothing clamps it. The
+    // arrow's own width did not change; the lifeline moved left by 20.531
+    // when the box lost its floor, and the 30px `LEFT_MARGIN` that used to
+    // absorb the overhang is a constant where upstream solves
+    // `xorigin.addAtLeast(0)` over every tile
+    // (`SequenceDiagramFileMakerTeoz.java:89-110`). That is Batch 5's T5.1,
+    // recorded here so the number is not mistaken for arbitrary.
+    // No longer negative. The origin is now solved rather than fixed: the
+    // row is pushed right by however far the leftmost content overhangs, which
+    // is upstream's `dx(-min1)` (`SequenceDiagramFileMakerTeoz.java:135-136`).
+    expect(messageBodies(short)[0]).toEqual([10, 55.544]);
   });
 });

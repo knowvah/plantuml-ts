@@ -53,10 +53,33 @@ export function layoutSequence(
     return emptyGeometry();
   }
 
-  const participantLayout = computeParticipantLayout(ast, theme, measurer);
-  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout);
+  const first = layoutFrom(ast, theme, measurer, LEFT_MARGIN);
+  // Upstream does not lay out from a fixed left edge: it solves an origin and
+  // then draws the body shifted by `dx(-min1)`, where `min1` is
+  // `body.getMinX()` (`SequenceDiagramFileMakerTeoz.java:82,135-136`). Whatever
+  // reaches furthest left -- an exo arrow anchored on the border, a note left
+  // of the first participant -- lands ON the margin, and the participant row
+  // starts to the right of it by however much it overhangs.
+  //
+  // Two passes rather than a constraint solve: the overhang is measured from a
+  // finished layout and the layout is redone with the row pushed right by it.
+  // 87 of 1124 corpus fixtures overhang, and without this they render with
+  // negative coordinates -- content off the left of the canvas.
+  const overhang = LEFT_MARGIN - minContentX(first);
+  if (overhang <= 0) return first;
+  return layoutFrom(ast, theme, measurer, LEFT_MARGIN + overhang);
+}
 
-  return assembleGeometry(ast, participantLayout, eventLayout, theme, measurer);
+/** One layout pass with the participant row starting at `originX`. */
+function layoutFrom(
+  ast: SequenceDiagramAST,
+  theme: Theme,
+  measurer: StringMeasurer,
+  originX: number,
+): SequenceGeometry {
+  const participantLayout = computeParticipantLayout(ast, theme, measurer, originX);
+  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout);
+  return assembleGeometry(ast, participantLayout, eventLayout, theme, measurer, originX);
 }
 
 interface EventLayoutResult {
@@ -83,6 +106,7 @@ function assembleGeometry(
   eventLayout: EventLayoutResult,
   theme: Theme,
   measurer: StringMeasurer,
+  originX: number,
 ): SequenceGeometry {
   const { participantGeos, maxParticipantHeight } = participantLayout;
   const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
@@ -94,8 +118,8 @@ function assembleGeometry(
     eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos,
   );
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
-  backfillDividerWidth(dividerGeos, totalWidth);
-  backfillNewpageWidth(newpageGeos, totalWidth);
+  backfillDividerWidth(dividerGeos, totalWidth, originX);
+  backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
   const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
 
@@ -154,11 +178,70 @@ function runEventLayout(
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/** The gap kept between the rightmost content and the document edge. Upstream
- *  keeps it outside the drawing space -- `getBorder2()` is the content edge
- *  and the image margin lies beyond it -- so an exo arrow anchored on the
- *  border stops here, not at `totalWidth`. */
-const RIGHT_MARGIN = 30;
+/** `GroupingTile.EXTERNAL_MARGINX1` (`teoz/GroupingTile.java:82`) — the slack
+ *  a group's footprint keeps outside its own drawn frame, on the left. */
+const FRAME_EXTERNAL_MARGIN_X1 = 3;
+
+/**
+ * The leftmost x any content in a finished layout reaches — this port's
+ * `body.getMinX()` (`SequenceDiagramFileMakerTeoz.java:82`).
+ *
+ * Only the fields that can reach left of the participant row are consulted,
+ * and every geo kind that has one is here: a message's two endpoints (an exo
+ * arrow anchored on the left border starts at `posC - preferredWidth`, which
+ * is what goes negative), a note's box, a frame's box, an activation bar, and
+ * a divider's or separator's band. Heights and y-coordinates cannot move the
+ * left edge and are not read.
+ *
+ * The participant row itself is included, which makes this total rather than a
+ * correction: on a diagram with nothing overhanging, the minimum IS the first
+ * box and the second pass is skipped.
+ */
+function minContentX(geo: SequenceGeometry): number {
+  let min = Number.POSITIVE_INFINITY;
+  for (const p of geo.participants) min = Math.min(min, p.x);
+  for (const e of geo.events) min = Math.min(min, minEventX(e));
+  return Number.isFinite(min) ? min : LEFT_MARGIN;
+}
+
+/** One event's leftmost x, or `+Infinity` for a kind that has none. */
+function minEventX(event: EventGeo): number {
+  switch (event.kind) {
+    case 'message':
+      return Math.min(event.fromX, event.toX);
+    case 'note':
+      return event.x;
+    case 'frame':
+      // A group reserves `EXTERNAL_MARGINX1` beyond its own frame:
+      // `GroupingTile#getMinX:697-698` is
+      // `min.addFixed(-EXTERNAL_MARGINX1 - notesWidth(LEFT))` with
+      // `EXTERNAL_MARGINX1 = 3` (`:82`). The frame's `x` is the border it
+      // draws; the tile's footprint starts 3 further left. (The left-note term
+      // is not modelled here -- see `findings/document-margins.md`.)
+      return event.x - FRAME_EXTERNAL_MARGIN_X1;
+    case 'activation':
+      return event.lifelineX;
+    case 'divider':
+    case 'newpage':
+      return event.bandX;
+    default:
+      return Number.POSITIVE_INFINITY;
+  }
+}
+
+/**
+ * The gap kept between the rightmost content and the document edge. Upstream
+ * keeps it outside the drawing space -- `getBorder2()` is the content edge
+ * and the image margin lies beyond it -- so an exo arrow anchored on the
+ * border stops here, not at `totalWidth`.
+ *
+ * 10, and symmetric with `LEFT_MARGIN` because both halves are:
+ * `TextBlockExporter:201-202` grows the image by `margin.left + margin.right`
+ * = 5 + 5, and `SequenceDiagramFileMakerTeoz#getTextBlock`'s
+ * `calculateDimension` returns `body + 10` (`:157`) for its own inner 5 each
+ * side. So the image is the content span plus 20, 10 on each side.
+ */
+const RIGHT_MARGIN = 10;
 
 function emptyGeometry(): SequenceGeometry {
   return {
@@ -328,10 +411,18 @@ function exoContentRight(eventGeos: EventGeo[]): number {
  * band used to run edge to edge, which is wider than the jar's on every
  * fixture.
  */
-function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number): void {
+function backfillDividerWidth(
+  dividerGeos: DividerGeo[],
+  totalWidth: number,
+  originX: number,
+): void {
   for (const d of dividerGeos) {
-    d.bandX = LEFT_MARGIN;
-    d.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
+    // `originX`, not `LEFT_MARGIN`: `border1` is the playing space's own left
+    // border, which upstream shifts along with everything else when the body
+    // is translated by `dx(-min1)`. On a diagram with nothing overhanging to
+    // the left the two are the same number.
+    d.bandX = originX;
+    d.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
   }
 }
 
@@ -346,10 +437,14 @@ function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number): vo
  * `x1="44.959" x2="190.003"`, the same left edge as its own participant row
  * and the same right edge its widest message reaches.
  */
-function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number): void {
+function backfillNewpageWidth(
+  newpageGeos: NewpageGeo[],
+  totalWidth: number,
+  originX: number,
+): void {
   for (const n of newpageGeos) {
-    n.bandX = LEFT_MARGIN;
-    n.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
+    n.bandX = originX;
+    n.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
   }
 }
 

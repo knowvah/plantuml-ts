@@ -52,7 +52,6 @@ const stubTheme: Theme = {
   },
   sequence: {
     participantPadding: 10,
-    participantMinWidth: 80,
     participantGap: 20,
     messageSpacing: 20,
     activationWidth: 10,

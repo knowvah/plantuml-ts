@@ -457,6 +457,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     renderLifelinePass(
       scaledGeo.participants,
       scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
+      scaledGeo.headHeight,
       scaledGeo.lifelineEndY,
       scaledTheme,
     ),
