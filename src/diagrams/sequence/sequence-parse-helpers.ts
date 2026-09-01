@@ -343,6 +343,51 @@ export function urlOf(raw: string | undefined): string | undefined {
   return new UrlBuilder(null, UrlMode.STRICT).getUrl(raw)?.getUrl();
 }
 
+/**
+ * `autoactivate`'s implicit life event, for an arrow that carried no explicit
+ * `++`/`--`/`!` of its own.
+ *
+ * ```java
+ * if (diagram.isAutoactivate() && (config.getHead() == ArrowHead.NORMAL
+ *         || config.getHead() == ArrowHead.ASYNC))
+ *     if (config.isDotted())
+ *         diagram.activate(p1, LifeEventType.DEACTIVATE, null);
+ *     else
+ *         diagram.activate(p2, LifeEventType.ACTIVATE, activationColor);
+ * ```
+ *
+ * Three conditions, all load-bearing and none of them dropped:
+ *
+ *  - it is an ELSE of `activationSpec != null` (`CommandArrow.java:432-433`
+ *    returns before reaching it), so an explicit suffix always wins — which
+ *    is why this returns `{}` for a non-empty `spec`;
+ *  - only a `NORMAL` or `ASYNC` head qualifies. `ArrowConfiguration#getHead`
+ *    (`:206-211`) prefers `dressing2`'s head and falls back to `dressing1`'s,
+ *    so an arrow with no head at all (`->x`, `-[hidden]->`) auto-activates
+ *    nothing;
+ *  - DOTTED reverses the sense: a dotted arrow is a return, so it
+ *    DEACTIVATES its sender rather than activating its receiver.
+ *
+ * `activationColor` is `LIFECOLOR`, which rides along on the activate leg
+ * only — the same asymmetry {@link activationFlags} already carries.
+ *
+ * @see sequencediagram/command/CommandArrow.java:432-441
+ * @see sequencediagram/command/CommandExoArrowAny.java:174-180
+ */
+export function autoActivationFlags(
+  state: ParseState,
+  spec: string,
+  arrow: ArrowConfiguration,
+  from: string,
+  to: string,
+): { activates?: string; deactivates?: string } {
+  if (state.ast.options.autoactivate !== true || spec.trim() !== '') return {};
+  const head =
+    arrow.dressing2.head !== 'NONE' ? arrow.dressing2.head : arrow.dressing1.head;
+  if (head !== 'NORMAL' && head !== 'ASYNC') return {};
+  return arrow.dashed ? { deactivates: from } : { activates: to };
+}
+
 export function activationFlags(
   spec: string,
   from: string,
@@ -352,9 +397,19 @@ export function activationFlags(
   const flags: { activates?: string; deactivates?: string } = {};
   switch (trimmed.charAt(0)) {
     case '+':
-    case '*':
       flags.activates = to;
       break;
+    // NO `case '*'`. `**` is CREATE, and `manageActivations`'s switch has no
+    // `*` arm at all (`CommandArrow.java:444-456`): the create is handled
+    // BEFORE the message is built (`:397-398`,
+    // `diagram.activate(p2, LifeEventType.CREATE, null)`), and
+    // `SequenceDiagram#activate` returns immediately for CREATE without
+    // touching the life level (`:369-372`). So `A -> B **` draws no
+    // activation bar -- `nepica-26-pali815`'s golden is `dummy -> a **` and
+    // carries none. Treating `*` as `+` here used to be invisible because the
+    // bar it opened was never closed and this port dropped unclosed bars; it
+    // stopped being invisible when `flushOpenActivations` started closing
+    // them.
     case '-':
       flags.deactivates = from;
       break;

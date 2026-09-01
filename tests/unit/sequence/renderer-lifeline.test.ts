@@ -127,20 +127,22 @@ describe('renderActivation', () => {
     );
   });
 
-  it('still emits a zero-height bar -- the documented partial port', () => {
+  it('emits NOTHING for a zero-height bar, not an empty group', () => {
     // Upstream returns BEFORE `startGroup` at zero height
-    // (`ComponentRoseActiveLine.java:76-79`), so the jar emits nothing at all.
-    // This port deliberately does not mirror that yet: its LAYOUT produces
-    // `height === 0` on 32 activation-bearing fixtures where the jar produces
-    // height, so the faithful guard would delete boxes the jar draws and move
-    // 24 fixtures' root child counts AWAY from the golden's.
+    // (`ComponentRoseActiveLine.java:76-79`), so the jar emits nothing at
+    // all -- not even the wrapping `<g>`. That is the one behavioural
+    // difference from `renderLifeline`, whose own guard sits INSIDE its
+    // already-opened group.
     //
-    // Pinned as a DIVERGENCE, not as desired behaviour: when
-    // `sequence-zero-height-activation` lands the layout fix, this test
-    // inverts to assert `''` and the guard goes in beside it. See
-    // `DIVERGENCES.md`.
-    expect(renderActivation(activation({ height: 0 }), theme)).toContain('<rect');
-    expect(renderActivation(activation({ height: 0 }), theme)).toContain('<title></title>');
+    // This assertion is the INVERSION the previous version of this test
+    // asked for by name. It was pinned the other way while this port's
+    // LAYOUT still produced `height === 0` on 32 activation-bearing fixtures
+    // the jar gives height to, because the faithful guard would then have
+    // deleted boxes the golden carries. The activation STACK and its
+    // `Math.max(0, level - 1)` clamp fixed that input, and the census now
+    // reports zero zero-height bars across all 157 activation-bearing
+    // fixtures.
+    expect(renderActivation(activation({ height: 0 }), theme)).toBe('');
   });
 });
 

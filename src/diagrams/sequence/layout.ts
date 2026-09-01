@@ -30,7 +30,9 @@ import {
   type ParticipantLayoutResult,
 } from './sequence-layout-participants.js';
 import {
+  flushOpenActivations,
   processEvents,
+  type ActivationStack,
   type EventProcessingContext,
 } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
@@ -61,6 +63,12 @@ interface EventLayoutResult {
   eventGeos: EventGeo[];
   dividerGeos: DividerGeo[];
   newpageGeos: NewpageGeo[];
+  /** Activations the event walk left open — closed at `lifelineEndY` by
+   *  {@link flushOpenActivations}, which needs a total the walk does not
+   *  have yet. */
+  openActivations: ActivationStack;
+  /** The participant geometry that flush needs to place those bars. */
+  participantMap: Map<string, ParticipantGeo>;
   currentY: number;
 }
 
@@ -82,6 +90,9 @@ function assembleGeometry(
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } =
     computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
+  flushOpenActivations(
+    eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos,
+  );
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth);
   backfillNewpageWidth(newpageGeos, totalWidth);
@@ -115,12 +126,13 @@ function runEventLayout(
   const eventGeos: EventGeo[] = [];
   const dividerGeos: DividerGeo[] = [];
   const newpageGeos: NewpageGeo[] = [];
+  const activationStart: ActivationStack = new Map();
   const ctx: EventProcessingContext = {
     theme,
     measurer,
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
-    activationStart: new Map(),
+    activationStart,
     eventGeos,
     dividerGeos,
     newpageGeos,
@@ -128,7 +140,14 @@ function runEventLayout(
   const startY = participantLayout.maxParticipantHeight + theme.sequence.messageSpacing;
   const currentY = processEvents(ast.events, startY, ctx);
 
-  return { eventGeos, dividerGeos, newpageGeos, currentY };
+  return {
+    eventGeos,
+    dividerGeos,
+    newpageGeos,
+    openActivations: activationStart,
+    participantMap: participantLayout.participantMap,
+    currentY,
+  };
 }
 
 // ---------------------------------------------------------------------------

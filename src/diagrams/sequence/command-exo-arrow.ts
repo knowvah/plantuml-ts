@@ -58,6 +58,7 @@ import {
 import {
   applyAutonumber,
   arrowConfigurationOf,
+  autoActivationFlags,
   emit,
   ensureParticipant,
   type ArrowSpec,
@@ -318,6 +319,27 @@ function activationEventOf(
 }
 
 /**
+ * The `autoactivate` arm of the same `if`/`else`
+ * (`CommandExoArrowAny.java:174-180`): with no explicit `+`/`-`/`!` written,
+ * a solid `NORMAL`/`ASYNC`-headed arrow activates the exo message's ONE
+ * participant and a dotted one deactivates it. Both arms name `p` — an exo
+ * message has no second participant to hand the event to, which is the only
+ * way this differs from `autoActivationFlags`'s p1/p2 split.
+ */
+function autoActivationEventOf(
+  state: ParseState,
+  spec: string | undefined,
+  arrow: ArrowConfiguration,
+  participant: string,
+  color: string | undefined,
+): ActivationEvent | undefined {
+  const flags = autoActivationFlags(state, spec ?? '', arrow, participant, participant);
+  if (flags.deactivates !== undefined) return { kind: 'deactivate', participantId: participant };
+  if (flags.activates === undefined) return undefined;
+  return { kind: 'activate', participantId: participant, ...(color !== undefined ? { color } : {}) };
+}
+
+/**
  * `diagram.getNextMessageNumber()` (`:137`): take the current autonumber and
  * advance the counter. `applyAutonumber` is declared over `MessageEvent`, and
  * `sequence-parse-helpers.ts` is outside this task's write-set, so the number
@@ -451,9 +473,12 @@ function executeExoArrow(
   if (activation?.startsWith('*') === true)
     emit(state, { kind: 'activate', participantId: participant });
 
-  emit(state, messageExoOf(state, g, type, participant));
+  const msg = messageExoOf(state, g, type, participant);
+  emit(state, msg);
 
-  const post = activationEventOf(activation, participant, g['LIFECOLOR']);
+  const post =
+    activationEventOf(activation, participant, g['LIFECOLOR']) ??
+    autoActivationEventOf(state, activation, msg.arrow, participant, g['LIFECOLOR']);
   if (post !== undefined) emit(state, post);
 }
 

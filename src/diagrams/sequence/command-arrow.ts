@@ -68,6 +68,7 @@ import {
 } from './sequence-arrow-regex.js';
 import {
   activationFlags,
+  autoActivationFlags,
   urlOf,
   applyAutonumber,
   arrowConfigurationOf,
@@ -519,14 +520,21 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
 
   const from = facts.reverseDefine ? part2.code : part1.code;
   const to = facts.reverseDefine ? part1.code : part2.code;
+  const arrow = arrowOf(g, facts);
+  const activation = g['ACTIVATION'] ?? '';
   const msg = applyAutonumber(state, {
     kind: 'message',
     from,
     to,
     label: g['MESSAGE'] ?? '',
-    arrow: arrowOf(g, facts),
+    arrow,
     ...optionalFields(state, g),
-    ...activationFlags(g['ACTIVATION'] ?? '', from, to),
+    // `manageActivations` and the `autoactivate` branch are the two arms of
+    // one `if`/`else` (`CommandArrow.java:432-441`); `autoActivationFlags`
+    // declines whenever an explicit spec was written, so the two never both
+    // fire and the spread order below is not what separates them.
+    ...activationFlags(activation, from, to),
+    ...autoActivationFlags(state, activation, arrow, from, to),
   });
 
   state.lastMessageFrom = from;

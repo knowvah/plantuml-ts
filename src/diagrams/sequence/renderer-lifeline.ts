@@ -130,19 +130,18 @@ export function renderLifeline(
  * and the jar emits `<title></title>` rather than omitting the element.
  */
 export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
-  // DELIBERATE PARTIAL PORT -- the zero-height early return above is NOT
-  // mirrored yet, and that is a decision rather than an oversight. See
-  // `DIVERGENCES.md` "Sequence activations are drawn at zero height".
-  //
-  // This port's LAYOUT gives some activations `height === 0` where the jar's
-  // gives them height -- 32 of the 121 activation-bearing corpus fixtures,
-  // `autoactivate on` + a bare `deactivate` among them. Suppressing those
-  // faithfully would delete a box the jar draws, moving our root child count
-  // AWAY from the golden's on 24 fixtures (measured: the distance grows by
-  // exactly the number of boxes suppressed, every row). Porting the guard
-  // correctly on top of wrong input is strictly worse output than not porting
-  // it, so it lands WITH the layout fix, not before it:
-  // `sequence-zero-height-activation`.
+  // The early return, now mirrored. It was deliberately withheld while this
+  // port's LAYOUT still produced zero-height bars the jar gives height to --
+  // 32 of the 121 activation-bearing fixtures at the time -- because
+  // suppressing those would have deleted boxes the golden carries. That
+  // input defect is fixed (the activation STACK and its `Math.max(0, level
+  // - 1)` clamp, `sequence-layout-events.ts`), and the census now reports
+  // ZERO zero-height bars across all 157 activation-bearing fixtures, so the
+  // guard is faithful and no longer costly. It is dead on today's corpus by
+  // construction; it is here because upstream has it, and because a
+  // hand-authored `activate X` / `deactivate X` pair at one y can still
+  // reach it.
+  if (act.height === 0) return '';
   const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
   const x = act.lifelineX - half;
   const fill = act.color ?? theme.colors.activation;

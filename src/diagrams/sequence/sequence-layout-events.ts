@@ -44,8 +44,25 @@ import {
   HEADER_FONT_BOLD,
 } from './frame-style.js';
 
-/** Pending activation-bar start record, keyed by participant id. */
+/** Pending activation-bar start record. */
 type ActivationRecord = { y: number; color?: string };
+
+/**
+ * The open activation bars for one participant, innermost LAST.
+ *
+ * A STACK, not a single record, because upstream's activation state is a
+ * nesting LEVEL: `LiveBoxes#getLevelAtInternal` replays the event list
+ * counting `level++` on every activate and `level = Math.max(0, level - 1)`
+ * on every deactivate (`:100-108`), and `getStairs` emits one step per level
+ * change. `A -> B++` four deep is four boxes, each with its own extent, which
+ * one record per participant cannot hold: the inner activate would overwrite
+ * the outer one's start.
+ *
+ * `Math.max(0, ...)` is the other half, and it is why {@link emitActivation}
+ * returns on an empty stack instead of inventing a start: a deactivate that
+ * arrives at level 0 leaves the level at 0 and draws nothing at all.
+ */
+export type ActivationStack = Map<string, ActivationRecord[]>;
 
 /**
  * Shared, mutable context threaded through event processing. Grouping these
@@ -58,7 +75,7 @@ export interface EventProcessingContext {
   measurer: StringMeasurer;
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
-  activationStart: Map<string, ActivationRecord>;
+  activationStart: ActivationStack;
   eventGeos: EventGeo[];
   dividerGeos: DividerGeo[];
   /** The newpage tiles, in layout order — `PlayingSpace#getNewpageTiles`
@@ -136,7 +153,7 @@ function handleActivateEvent(
 ): void {
   // Use the last message arrow y when available so the bar top aligns
   // with its triggering arrow, not with the post-arrow spacing position.
-  ctx.activationStart.set(event.participantId, {
+  pushActivation(ctx.activationStart, event.participantId, {
     y: cursor.lastMessageY ?? cursor.y,
     ...(event.color !== undefined ? { color: event.color } : {}),
   });
@@ -151,7 +168,7 @@ function handleDeactivateEvent(
   // End at the last message arrow y. If that would give zero/negative
   // height (activate and deactivate at the same y), fall back to
   // post-spacing cursor.y so the bar is always visible.
-  const deactStartY = ctx.activationStart.get(event.participantId)?.y;
+  const deactStartY = openActivation(ctx.activationStart, event.participantId)?.y;
   const rawEndY = cursor.lastMessageY ?? cursor.y;
   const deactEndY =
     deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
@@ -504,23 +521,99 @@ function buildNoteGeo(
  * start record. When no record exists, height is 0 (deactivate without prior
  * activate).
  */
+/** Open one activation bar for `participantId`, nested inside any already
+ *  open — `level++` in `LiveBoxes#getLevelAtInternal` (`:102-103`). */
+export function pushActivation(
+  activationStart: ActivationStack,
+  participantId: string,
+  record: ActivationRecord,
+): void {
+  const stack = activationStart.get(participantId);
+  if (stack === undefined) activationStart.set(participantId, [record]);
+  else stack.push(record);
+}
+
+/** The INNERMOST open activation for `participantId`, or `undefined` at
+ *  level 0. */
+export function openActivation(
+  activationStart: ActivationStack,
+  participantId: string,
+): ActivationRecord | undefined {
+  const stack = activationStart.get(participantId);
+  return stack === undefined ? undefined : stack[stack.length - 1];
+}
+
+/** How deep `participantId` is currently activated — upstream's own `level`
+ *  (`LiveBoxes#getLevelAt`). 0 when nothing is open. */
+export function activationLevel(
+  activationStart: ActivationStack,
+  participantId: string,
+): number {
+  return activationStart.get(participantId)?.length ?? 0;
+}
+
+/**
+ * Close every activation still open when the diagram ends, at the body's
+ * bottom.
+ *
+ * Upstream has nothing to close: the level simply never returns to 0, so
+ * `getStairs` (`LiveBoxes.java:245-300`) records its last step at that level
+ * and `LiveBoxesDrawer` draws the bar on to the end of the lifeline. This
+ * port materialises each bar at its deactivate, so an activation with no
+ * deactivate needs the equivalent flush -- without it the bar vanishes.
+ *
+ * Jar-verified on `micaki-01-rexa741`, whose third `alt` branch opens an
+ * activation that is never closed: the golden's second bar ends at `y=190`,
+ * exactly where its lifelines do.
+ *
+ * Innermost first, then outward, then participant by participant in
+ * declaration order -- deterministic, and the reverse of the order the walk
+ * opened them in.
+ */
+export function flushOpenActivations(
+  activationStart: ActivationStack,
+  endY: number,
+  participantMap: Map<string, ParticipantGeo>,
+  eventGeos: EventGeo[],
+): void {
+  for (const participantId of [...activationStart.keys()])
+    while (activationLevel(activationStart, participantId) > 0)
+      emitActivation(participantId, endY, participantMap, activationStart, eventGeos);
+}
+
 export function emitActivation(
   participantId: string,
   currentY: number,
   participantMap: Map<string, ParticipantGeo>,
-  activationStart: Map<string, ActivationRecord>,
+  activationStart: ActivationStack,
   eventGeos: EventGeo[],
 ): void {
-  const record = activationStart.get(participantId);
-  const startY = record?.y ?? currentY;
+  const record = activationStart.get(participantId)?.pop();
+  // A deactivate with nothing open draws NOTHING -- not a zero-height box.
+  //
+  // Upstream never tracks "the open activation": it recomputes a nesting
+  // LEVEL per participant by replaying the event list, and every deactivate
+  // is clamped -- `level = Math.max(0, level - 1)`
+  // (`LiveBoxes#getLevelAtInternal:104-108`, and again at `:136-141` for the
+  // future-deactivate lookahead). A deactivate that arrives at level 0 leaves
+  // it at 0, so `getStairs` records no step and `LiveBoxesDrawer` draws no
+  // box. This port models that level as one open record per participant, and
+  // "no record" IS level 0.
+  //
+  // Without this, `rugeco-70-muro754` emitted a fourth activation -- `a`
+  // deactivated twice, once by `a ->> b --++`'s own `--` and once by the
+  // standalone `deactivate a` after the group -- as a `height: 0` bar that
+  // the renderer then wrapped in a `<g>`, one surplus top-level child
+  // against a golden this port otherwise matched element for element.
+  if (record === undefined) return;
+  const startY = record.y;
   const activationGeo: ActivationGeo = {
     kind: 'activation',
     participantId,
     lifelineX: centerXOf(participantMap, participantId),
     y: startY,
     height: currentY - startY,
-    ...(record?.color !== undefined ? { color: record.color } : {}),
+    ...(record.color !== undefined ? { color: record.color } : {}),
   };
   eventGeos.push(activationGeo);
-  activationStart.delete(participantId);
 }
