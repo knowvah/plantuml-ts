@@ -704,14 +704,15 @@ describe('layoutSequence — divider', () => {
   it('spans the band between the playing-space borders', () => {
     // `DividerTile#drawU` sizes the band `border2 - border1 - xorigin` and
     // translates by `border1`, so it is inset by this port's own
-    // LEFT_MARGIN/RIGHT_MARGIN (30 each) rather than running edge to edge.
+    // LEFT_MARGIN/RIGHT_MARGIN (10 each, the jar's document margin) rather
+    // than running edge to edge.
     const ast = makeAst(['Alice', 'Bob'], [
       { kind: 'divider', text: '====' } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const divider = geo.events.find(isDivider)!;
-    expect(divider.bandX).toBe(30);
-    expect(divider.bandWidth).toBe(geo.totalWidth - 60);
+    expect(divider.bandX).toBe(10);
+    expect(divider.bandWidth).toBe(geo.totalWidth - 20);
     expect(divider.text).toBe('====');
   });
 
@@ -752,7 +753,7 @@ describe('layoutSequence — divider', () => {
       measurer,
     ).totalWidth;
     expect(widened).toBeGreaterThan(narrow);
-    expect(widened).toBe(60 * 8 + 8 + 30 + 30);
+    expect(widened).toBe(60 * 8 + 8 + 10 + 30);
   });
 });
 

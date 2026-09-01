@@ -1651,7 +1651,10 @@ describe('renderSequence — exogenous arrows', () => {
   it('anchors a FROM_LEFT body at the left edge and ends it on the lifeline', () => {
     const svg = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const [body] = messageBodies(svg);
-    expect(body?.[0]).toBe(0);
+    // `LEFT_MARGIN`, not 0: `border1` is the left edge of the DRAWING SPACE,
+    // which upstream places on the 10px document margin
+    // (`SequenceDiagramFileMakerTeoz.java:132`), not on the image edge.
+    expect(body?.[0]).toBe(10);
     expect(headTips(svg)).toEqual([lifelines(svg)[0]! - 2]);
   });
 
@@ -1688,8 +1691,12 @@ describe('renderSequence — exogenous arrows', () => {
     // (`Rose#getMinClassWidth` resolves to `ValueNull#asDouble()` = 0).
     // `Bob` is 38.938 wide and `Carol` 47.513, so the document narrows by
     // 74px and the exo's own stretch is what remains visible.
-    expect(docWidth(without)).toBe(166);
-    expect(docWidth(withExo)).toBe(189);
+    // 126/149: both boxes lost the 80px minimum-width floor this port used to
+    // apply, and the document margins came down from 30 a side to the jar's
+    // 10 (`SequenceDiagram#getDefaultMargins:624-628` plus the text block's
+    // own `UTranslate(5, 5)`).
+    expect(docWidth(without)).toBe(126);
+    expect(docWidth(withExo)).toBe(149);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1715,7 +1722,7 @@ describe('renderSequence — exogenous arrows', () => {
     const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
     // cy 48.25, not 53.25: the head row lost 5px when the box height became
     // `text + 2 * 7` instead of `text + 20`, and the body starts below it.
-    expect(svg).toContain('<ellipse cx="5.5" cy="48.25" rx="4" ry="4" fill="#000"');
+    expect(svg).toContain('<ellipse cx="15.5" cy="48.25" rx="4" ry="4" fill="#000"');
     expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
   });
 
@@ -1731,8 +1738,8 @@ describe('renderSequence — exogenous arrows', () => {
     // Two crossing diagonals, `spaceCrossX` right of the border end.
     // x2 is the lifeline, which moved from 70 to 49.469 when the box lost
     // its 80px floor; the arrow is still `spaceCrossX` = 12 off the border.
-    expect(messageBodies(svg)[0]).toEqual([12, 43.469]);
-    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([7, 7]);
+    expect(messageBodies(svg)[0]).toEqual([22, 23.469]);
+    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([17, 17]);
   });
 
   // `getComponent` reverses the configuration when `getDirection() == -1`
@@ -1742,9 +1749,13 @@ describe('renderSequence — exogenous arrows', () => {
   it('puts a TO_LEFT head on the border end, left of the body', () => {
     const svg = render('@startuml\nparticipant Bob\n[<- Bob : hello\n@enduml');
     const [body] = messageBodies(svg);
-    expect(headTips(svg)).toEqual([1]);
+    // 11 -- the jar's own number, quoted in this test's comment above. It was
+    // 1 while `border1` was pinned to the image edge instead of the margin.
+    expect(headTips(svg)).toEqual([11]);
     // Same 20.531px leftward shift of the lifeline as every other row here.
-    expect(body).toEqual([5, 48.469]);
+    // x1 = 15 is the jar's own number for this source: `border1` at 10 plus
+    // the head's `pos1 = 1` and its own width.
+    expect(body).toEqual([15, 28.469]);
   });
 
   // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
@@ -1753,7 +1764,7 @@ describe('renderSequence — exogenous arrows', () => {
   it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
     const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
-    expect(messageBodies(long)[0]).toEqual([0, 43.469]);
+    expect(messageBodies(long)[0]).toEqual([10, 23.469]);
     // NEGATIVE, and correctly so for this port as it stands: `getPoint1()` is
     // `posC - preferredWidth` = 49.469 - 53.663, and nothing clamps it. The
     // arrow's own width did not change; the lifeline moved left by 20.531
@@ -1762,6 +1773,9 @@ describe('renderSequence — exogenous arrows', () => {
     // `xorigin.addAtLeast(0)` over every tile
     // (`SequenceDiagramFileMakerTeoz.java:89-110`). That is Batch 5's T5.1,
     // recorded here so the number is not mistaken for arbitrary.
-    expect(messageBodies(short)[0]).toEqual([-4.194, 43.469]);
+    // No longer negative. The origin is now solved rather than fixed: the
+    // row is pushed right by however far the leftmost content overhangs, which
+    // is upstream's `dx(-min1)` (`SequenceDiagramFileMakerTeoz.java:135-136`).
+    expect(messageBodies(short)[0]).toEqual([10, 57.663]);
   });
 });

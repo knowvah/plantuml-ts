@@ -236,3 +236,49 @@ describe('the plain participant box — height, against the jar', () => {
     }
   });
 });
+
+describe('the document origin — where the first box sits', () => {
+  /** `LEFT_MARGIN`, which the derivation says is 5 + 5. */
+  const ORIGIN = 10;
+
+  // Fixtures whose LEFTMOST participant is a plain box, so the box itself is
+  // the leftmost ink. A glyph-first diagram would put a stickman there and the
+  // first rect would be somewhere else entirely.
+  it.each([
+    'jobadi-87-jegi648',
+    'bujuma-55-rupu730',
+    'covuco-47-sotu151',
+    'bacupi-77-fuke586',
+  ])('%s: the leftmost participant box starts on the jar\'s left margin', (slug) => {
+    // `TextBlockExporter:173` translates by `margin.left`, which for a Teoz
+    // sequence is 5 (`SequenceDiagram#getDefaultMargins:624-628`), and
+    // `SequenceDiagramFileMakerTeoz#getTextBlock`'s `drawU` applies its own
+    // `UTranslate(5, 5)` (`:132`) before `dx(-min1)` lands the body's leftmost
+    // extent at 0. 5 + 5 = 10.
+    const leftmost = (svg: string): number => Math.min(...participantBoxes(svg).map((b) => b.x));
+    expect(leftmost(goldenOf(slug))).toBeCloseTo(ORIGIN, 3);
+    expect(leftmost(oursFor(slug))).toBeCloseTo(ORIGIN, 3);
+  });
+
+  it('a left-border exo arrow starts on that margin, not on the image edge', () => {
+    // `border1` is the DRAWING SPACE's left edge. The jar on `[<- Bob : hello`
+    // puts the border-end head at 11 -- one pixel off a border at 10, not at 1.
+    const svg = oursFor('jobadi-87-jegi648');
+    expect(svg).not.toMatch(/\s(?:x|x1|x2|cx)="-/);
+  });
+
+  it('pushes the row right when something overhangs, rather than going negative', () => {
+    // Upstream solves an origin and draws the body at `dx(-min1)`
+    // (`SequenceDiagramFileMakerTeoz.java:82,135-136`): whatever reaches
+    // furthest left lands ON the margin. `?-> Bob` is the case -- its body
+    // starts at `posC - preferredWidth`, which is left of the box.
+    const svg = renderFixtureSequence(
+      '@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    expect(svg).not.toMatch(/\s(?:x|x1|x2|cx)="-/);
+    // and the leftmost thing IS on the margin
+    const xs = [...svg.matchAll(/\s(?:x|x1|x2)="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(Math.min(...xs.filter((n) => n > 0 || n === 0))).toBeCloseTo(ORIGIN, 3);
+  });
+});

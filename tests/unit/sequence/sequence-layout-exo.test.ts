@@ -3,6 +3,7 @@ import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { LEFT_MARGIN } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 import type {
   MessageExoEvent,
   MessageExoType,
@@ -31,8 +32,11 @@ const measurer = new FixedMeasurer(CHAR_W, LINE_H);
 const WIDTH_OVERHEAD = 2 * 7 + 10;
 /** `ComponentRoseArrow.diamCircle / 2 + 2`. */
 const CIRCLE_INSET = 6;
-/** `layout.ts`'s gap between the rightmost content and the document edge. */
-const RIGHT_MARGIN = 30;
+/** `layout.ts`'s gap between the rightmost content and the document edge.
+ *  10, the mirror of `LEFT_MARGIN`: `TextBlockExporter:201-202` grows the
+ *  image by `margin.left + margin.right` and the Teoz text block's own
+ *  `calculateDimension` adds 10 (`SequenceDiagramFileMakerTeoz.java:157`). */
+const RIGHT_MARGIN = 10;
 /** One activation-bar half-width (`teoz/CommunicationTile.java:172`). */
 const LIVE_DELTA_SIZE = 5;
 
@@ -96,9 +100,14 @@ function preferredWidthOf(label: string): number {
 // ---------------------------------------------------------------------------
 
 describe('exo layout: left-border messages', () => {
-  it('starts a FROM_LEFT arrow on the diagram border, at x = 0', () => {
+  // `BORDER1` is `LEFT_MARGIN`, not 0. `border1` is the left edge of the
+  // DRAWING SPACE, and upstream draws the body inside a 10px document margin
+  // (`SequenceDiagramFileMakerTeoz.java:132,135-136`), so it lands on that
+  // margin in image coordinates. The jar on `[<- Bob : hello` puts the
+  // border-end head at x=11, one pixel off a border at 10.
+  it('starts a FROM_LEFT arrow on the diagram border, at the left margin', () => {
     const geo = layoutWith([exo('FROM_LEFT')]);
-    expect(span(onlyMessage(geo)).left).toBe(0);
+    expect(span(onlyMessage(geo)).left).toBe(LEFT_MARGIN);
   });
 
   it('ends a FROM_LEFT arrow on its participant lifeline', () => {
@@ -112,29 +121,29 @@ describe('exo layout: left-border messages', () => {
   // `graphic/MessageExoArrow.java:90-94`).
   it('insets a FROM_LEFT arrow by the circle when DECORATION1 is CIRCLE', () => {
     const geo = layoutWith([exo('FROM_LEFT', { arrow: CIRCLE_1 })]);
-    expect(span(onlyMessage(geo)).left).toBe(CIRCLE_INSET);
+    expect(span(onlyMessage(geo)).left).toBe(LEFT_MARGIN + CIRCLE_INSET);
   });
 
   it('leaves a FROM_LEFT arrow alone when only DECORATION2 is CIRCLE', () => {
     const geo = layoutWith([exo('FROM_LEFT', { arrow: CIRCLE_2 })]);
-    expect(span(onlyMessage(geo)).left).toBe(0);
+    expect(span(onlyMessage(geo)).left).toBe(LEFT_MARGIN);
   });
 
   it('insets a TO_LEFT arrow by the circle when DECORATION2 is CIRCLE', () => {
     const geo = layoutWith([exo('TO_LEFT', { arrow: CIRCLE_2 })]);
-    expect(span(onlyMessage(geo)).left).toBe(CIRCLE_INSET);
+    expect(span(onlyMessage(geo)).left).toBe(LEFT_MARGIN + CIRCLE_INSET);
   });
 
   it('leaves a TO_LEFT arrow alone when only DECORATION1 is CIRCLE', () => {
     const geo = layoutWith([exo('TO_LEFT', { arrow: CIRCLE_1 })]);
-    expect(span(onlyMessage(geo)).left).toBe(0);
+    expect(span(onlyMessage(geo)).left).toBe(LEFT_MARGIN);
   });
 
   it('points a TO_LEFT arrow at the border, not at the lifeline', () => {
     const msg = onlyMessage(layoutWith([exo('TO_LEFT')]));
     expect(msg.arrowDirection).toBe('left');
     expect(msg.fromX).toBeGreaterThan(msg.toX);
-    expect(msg.toX).toBe(0);
+    expect(msg.toX).toBe(LEFT_MARGIN);
   });
 
   it('never routes an exo message through the self-message path', () => {

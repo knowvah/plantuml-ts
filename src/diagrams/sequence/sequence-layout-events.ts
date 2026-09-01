@@ -218,6 +218,10 @@ function handleDeactivateEvent(
  *  occupies before the branch's own first event. */
 const SEPARATOR_HEIGHT = 20;
 
+/** `GroupingTile.MARGINX` (`teoz/GroupingTile.java:89`) — how far a group's
+ *  frame reaches beyond the tiles it contains, on each side. */
+const FRAME_MARGIN_X = 16;
+
 /** Everything a frame's x/width/refBody needs that does NOT depend on
  *  where its branches leave the cursor: participant column bounds are
  *  fixed, and `refBodyLines` reads only `frameType`/`label`. Split out so
@@ -229,8 +233,17 @@ function computeFrameBody(
 ): { x: number; width: number; refBody: { text: string; x: number }[]; body: readonly string[] } {
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
   const body = refBodyLines(event.frameType, event.label);
-  const x = minCx - 20;
-  const width = Math.max(maxCx - minCx + 40, refBodyWidth(body, ctx.theme, ctx.measurer));
+  // `GroupingTile.MARGINX = 16` (`:89`), applied as
+  // `tile.getMinX().addFixed(-MARGINX)` and `m.addFixed(MARGINX)` (`:204,207`).
+  // Jar-verified on `bovugo-63-lazo401`: its `opt` frame is `x="13.469"`
+  // against a leftmost lifeline centre of 29.469 -- 16, not the 20 this port
+  // used, which was uncited and made the frame overhang the participant row
+  // far enough to shift the whole document's origin.
+  const x = minCx - FRAME_MARGIN_X;
+  const width = Math.max(
+    maxCx - minCx + 2 * FRAME_MARGIN_X,
+    refBodyWidth(body, ctx.theme, ctx.measurer),
+  );
   const refBody = body.map((line) => ({
     text: line,
     x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,

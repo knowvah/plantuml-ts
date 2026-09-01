@@ -42,11 +42,22 @@ import {
   spriteMonochromeAsLike,
 } from '../../core/klimt/sprite/sprite-raster.js';
 
-/** The playing space's left border — where the participant row starts, and
- *  what `DividerTile#drawU` calls `border1`. Exported because `layout.ts`
- *  needs the SAME value to span a divider's band; upstream reads one
- *  `tileArguments.getBorder1()` for both. */
-export const LEFT_MARGIN = 30;
+/**
+ * The playing space's left border — where the participant row starts, and
+ * what `DividerTile#drawU` calls `border1`. Exported because `layout.ts`
+ * needs the SAME value to span a divider's band; upstream reads one
+ * `tileArguments.getBorder1()` for both.
+ *
+ * 10, and it is two fives. `TextBlockExporter:173` translates the whole
+ * diagram by `(margin.left, margin.top)`, and for a Teoz sequence that margin
+ * is `ClockwiseTopRightBottomLeft.same(5)`
+ * (`SequenceDiagram#getDefaultMargins:624-628`). Inside that,
+ * `SequenceDiagramFileMakerTeoz#getTextBlock`'s `drawU` applies its own
+ * `new UTranslate(5, 5)` (`:132`) before shifting by `dx(-min1)`, which lands
+ * the body's leftmost extent at 0 in block coordinates. 5 + 5 = 10, which is
+ * where `jobadi-87-jegi648`'s first box sits, and every other golden's.
+ */
+export const LEFT_MARGIN = 10;
 const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
 
 export interface ParticipantLayoutResult {
@@ -74,6 +85,7 @@ export function computeParticipantLayout(
   ast: SequenceDiagramAST,
   theme: Theme,
   measurer: StringMeasurer,
+  originX: number = LEFT_MARGIN,
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort(
     (a, b) => a.order - b.order,
@@ -87,7 +99,7 @@ export function computeParticipantLayout(
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
   const { participantGeos, participantMap, participantIndex, maxParticipantHeight } =
-    positionParticipants(sortedParticipants, participantWidths, adjMaxLabelW, ctx);
+    positionParticipants(sortedParticipants, participantWidths, adjMaxLabelW, ctx, originX);
 
   return {
     sortedParticipants,
@@ -224,12 +236,13 @@ function positionParticipants(
   participantWidths: number[],
   adjMaxLabelW: number[],
   ctx: ParticipantLayoutCtx,
+  originX: number,
 ): ParticipantColumnResult {
   const { theme } = ctx;
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
-  let currentX = LEFT_MARGIN;
+  let currentX = originX;
 
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
