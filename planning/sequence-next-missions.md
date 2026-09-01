@@ -81,21 +81,41 @@ CLAUDE.md: a structural divergence IS the bug.
 
 ## Finding 2 — 410 of 1124 are invisible below their own root group
 
+> **Corrected 2026-09-01, same day.** The first version of this section
+> reported the element deficit from corpus-wide totals. One fixture wrote
+> almost all of them: `zudize-61-vomi445` is **45 512 lines** long, it
+> short-circuits, and it alone supplied 24 464 of a reported 25 933 missing
+> `<text>` — 94%. The real deficit is an order of magnitude smaller and the
+> mission-2 framing below is revised accordingly. `scripts/sequence-distance-
+> concentration.ts` now guards against repeating this.
+>
+> The DISTANCE figures elsewhere in this document are unaffected and were
+> checked: the heaviest single fixture holds 8.7% of total distance and the
+> heaviest ten hold 28.2%, both under the alarm threshold.
+
 `compareSvg` short-circuits on a child-count mismatch, so nothing inside the
 body is compared. **380 of the 410 emit FEWER children than the jar.**
 
+Element census **excluding `zudize-61-vomi445`**:
+
 | element | ours | jar | delta |
 |---|---:|---:|---:|
-| `text` | 44 689 | 70 622 | **−25 933** (37%) |
-| `line` | 10 622 | 16 425 | −5 803 |
-| `g` | 4 831 | 6 830 | −1 999 |
-| `title` | 3 535 | 5 534 | −1 999 |
-| `polygon` | 3 712 | 5 707 | −1 995 |
-| `rect` | 15 149 | 15 399 | −250 |
-| `a` | 0 | 89 | −89 (every hyperlink) |
+| `line` | 7 083 | 9 406 | **−2 323** |
+| `text` | 11 424 | 12 893 | −1 469 |
+| `g` | 4 828 | 5 087 | −259 |
+| `title` | 3 534 | 3 793 | −259 |
+| `rect` | 9 919 | 10 177 | −258 |
+| `polygon` | 3 654 | 3 901 | −247 |
+| `ellipse` | 722 | 824 | −102 |
+| `a` | 0 | 89 | **−89** (every hyperlink) |
 | `path` | 2 079 | 1 859 | +220 (self loops) |
 
-How far from a matching child count:
+**Text is not the element gap.** The descended cohort's total text deficit is
+**5 elements**, and 862 fixtures have none at all. The gap is `<line>` first,
+then a scatter of ~250 each across groups, rects and polygons, plus every
+hyperlink.
+
+How far the short-circuit cohort is from a matching child count:
 
 | off by | fixtures | cumulative | share |
 |---:|---:|---:|---:|
@@ -104,13 +124,9 @@ How far from a matching child count:
 | ≤ 4 | 81 | 250 | 61.0% |
 | ≤ 12 | 101 | 351 | 85.6% |
 
-One outlier is off by **27 944** — find its class, not its slug.
-
-Getting the first two rows across the line lifts the instrument's visible
-cohort from 714 to roughly 880, a 23% increase in what any future geometry
-mission can see.
-
----
+250 fixtures are within four elements of becoming measurable. Getting them
+across lifts the instrument's visible cohort from 714 to roughly 880 — a 23%
+increase in what any geometry mission can see.
 
 ## Finding 3 — the obvious Y lever backfires alone
 
@@ -160,17 +176,18 @@ Left-edge `x`, baseline `y`, `textLength`, no `text-anchor`, no
 - Cost: every text emitter in the engine, plus a baseline metric from the
   measurer seam.
 
-### 2. Close the element deficit, starting with text
+### 2. Close the element deficit
 
-- The missing 25 933 `<text>` almost certainly share a mechanism with (1) —
-  the jar splits a styled label into one `<text>` per run, this port emits one
-  per label. Cheaper done together.
+- **Not a text mission** — that was the outlier talking. The gap is `<line>`
+  (−2 323), then ~250 each of `<g>`/`<title>`/`<rect>`/`<polygon>`, plus all
+  89 `<a>` hyperlinks. It needs a discovery pass to attribute those counts to
+  features before it can be decomposed.
 - Payoff is measurement capacity: what Batch 1 bought for coordinates and
-  nothing has yet bought for elements.
+  nothing has yet bought for elements. 250 fixtures sit within four elements.
 - Take the cheap structural wins in the same pass: self loops as three
-  `<line>`s rather than one `<path>` (79 fixtures, and it makes self-message
-  geometry comparable for the first time — Batch 8's correct fix measured zero
-  because of it), and the 89 missing `<a>` hyperlinks.
+  `<line>`s rather than one `<path>` (79 fixtures — and it is very likely a
+  chunk of the −2 323, since each self loop the jar draws is three lines to
+  our one path), and the 89 missing `<a>` hyperlinks.
 
 ### 3. The Y axis, as a batch structure
 

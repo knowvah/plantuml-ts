@@ -59,6 +59,7 @@ import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { formatConcentration } from './sequence-distance-concentration.js';
 
 const SELF = fileURLToPath(import.meta.url);
 const REPO = join(dirname(SELF), '..');
@@ -468,6 +469,7 @@ function emit(snapshot: DistanceSnapshot): void {
   console.log(JSON_END);
   console.log('');
   console.log(formatCohort(snapshot));
+  console.log(formatConcentration(snapshot));
   console.log('');
   console.log(formatAttributeTable(snapshot.byAttribute));
 }
