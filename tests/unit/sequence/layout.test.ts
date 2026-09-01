@@ -213,6 +213,23 @@ describe('layoutSequence — activation (AC 4)', () => {
     expect(bars[0]!.y + bars[0]!.height).toBeLessThan(bars[1]!.y + bars[1]!.height);
   });
 
+  /** `Step#getIndent`, 1-based: the depth the bar was OPENED at, which is
+   *  what `LiveBoxes#drawBoxes` loops `for (int i = 1; i <= max; i++)` over
+   *  and hands to `drawOneLevel` as its x offset. */
+  it('records each nested bar`s level, innermost highest', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      msg('Alice', 'Bob', 'a', { activates: 'Bob' }),
+      msg('Alice', 'Bob', 'b', { activates: 'Bob' }),
+      msg('Alice', 'Bob', 'c', { activates: 'Bob' }),
+      msg('Bob', 'Alice', 'd', { deactivates: 'Bob' }),
+      msg('Bob', 'Alice', 'e', { deactivates: 'Bob' }),
+      msg('Bob', 'Alice', 'f', { deactivates: 'Bob' }),
+    ]);
+    const bars = layoutSequence(ast, defaultTheme, measurer).events.filter(isActivation);
+    // Closed innermost first, so the emitted order is 3, 2, 1.
+    expect(bars.map((b) => b.level)).toEqual([3, 2, 1]);
+  });
+
   /** An activation never deactivated runs to the end of the lifeline:
    *  upstream's level never returns to 0, so its last `Stairs` step carries
    *  on to the body's bottom. Jar-verified on `micaki-01-rexa741`. */

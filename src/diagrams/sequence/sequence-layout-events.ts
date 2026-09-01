@@ -44,8 +44,9 @@ import {
   HEADER_FONT_BOLD,
 } from './frame-style.js';
 
-/** Pending activation-bar start record. */
-type ActivationRecord = { y: number; color?: string };
+/** Pending activation-bar start record. `level` is 1-based and fixed when
+ *  the bar OPENS — upstream's `Step#getIndent` for this bar's steps. */
+type ActivationRecord = { y: number; level: number; color?: string };
 
 /**
  * The open activation bars for one participant, innermost LAST.
@@ -526,11 +527,11 @@ function buildNoteGeo(
 export function pushActivation(
   activationStart: ActivationStack,
   participantId: string,
-  record: ActivationRecord,
+  record: Omit<ActivationRecord, 'level'>,
 ): void {
   const stack = activationStart.get(participantId);
-  if (stack === undefined) activationStart.set(participantId, [record]);
-  else stack.push(record);
+  if (stack === undefined) activationStart.set(participantId, [{ ...record, level: 1 }]);
+  else stack.push({ ...record, level: stack.length + 1 });
 }
 
 /** The INNERMOST open activation for `participantId`, or `undefined` at
@@ -613,6 +614,7 @@ export function emitActivation(
     lifelineX: centerXOf(participantMap, participantId),
     y: startY,
     height: currentY - startY,
+    level: record.level,
     ...(record.color !== undefined ? { color: record.color } : {}),
   };
   eventGeos.push(activationGeo);

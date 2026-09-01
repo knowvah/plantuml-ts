@@ -110,6 +110,7 @@ describe('renderActivation', () => {
     lifelineX: 22,
     y: 50,
     height: 34,
+    level: 1,
     ...over,
   });
 
@@ -125,6 +126,35 @@ describe('renderActivation', () => {
     expect(renderActivation(activation(), theme)).toContain(
       '<rect x="17" y="50" width="10" height="34"',
     );
+  });
+
+  /**
+   * `LiveBoxes#drawOneLevel` draws every bar of one level from a `ug` moved
+   * right by `(levelToDraw - 1) * drawer.getWidth() / 2` (`:365-368`). The
+   * offset is HALF THE BOX'S OWN WIDTH per level, not a standalone constant:
+   * `CommunicationTile.LIVE_DELTA_SIZE` happens to be 5 too, and the two
+   * coincide only because `ComponentRoseActiveLine#getPreferredWidth` is 10.
+   *
+   * Jar-verified on `kejoke-76-curu931`, whose `Particpant_A -> Particpant_B++`
+   * nests four deep on a lifeline at cx=57.075: its golden's four bars run
+   * x=52.075, 57.075, 62.075, 67.075, all still `width="10"`.
+   */
+  it.each([
+    [1, 17],
+    [2, 22],
+    [3, 27],
+    [4, 32],
+  ])('steps level %i right by half a box, to x=%i', (level, x) => {
+    // lifelineX 22, half-width 5: level 1 is CENTRED on the lifeline.
+    expect(renderActivation(activation({ level }), theme)).toContain(
+      `<rect x="${String(x)}" y="50" width="10" height="34"`,
+    );
+  });
+
+  it('scales the per-level step with the box', () => {
+    const scaled = { ...theme, scaleK: 2, fontSize: theme.fontSize * 2 };
+    // half = 10, so level 3 sits at lifelineX - 10 + 2 * 10 = 32.
+    expect(renderActivation(activation({ level: 3 }), scaled)).toContain('<rect x="32"');
   });
 
   it('emits NOTHING for a zero-height bar, not an empty group', () => {
@@ -151,6 +181,7 @@ describe('renderLifelinePass', () => {
     participant({ id, display: id, centerX, x: centerX - 12 });
   const act = (participantId: string, lifelineX: number, y: number): ActivationGeo => ({
     kind: 'activation',
+    level: 1,
     participantId,
     lifelineX,
     y,

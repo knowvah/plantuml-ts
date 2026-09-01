@@ -75,7 +75,7 @@ function message(y: number, labelY?: number): MessageGeo {
 const note = (y: number, height: number): NoteGeo =>
   ({ kind: 'note', x: 10, y, width: 80, height, text: 'n' });
 const activation = (y: number, height: number): ActivationGeo =>
-  ({ kind: 'activation', participantId: 'A', lifelineX: 40, y, height });
+  ({ kind: 'activation', participantId: 'A', lifelineX: 40, y, height, level: 1 });
 const divider = (y: number, height: number): DividerGeo =>
   ({ kind: 'divider', text: 'd', lines: ['d'], y, bandX: 10, bandWidth: 360,
      height, textWidth: 40, textHeight: 20 });

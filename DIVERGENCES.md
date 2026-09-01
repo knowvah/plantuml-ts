@@ -1139,12 +1139,19 @@ fixtures, down from 32 of 121. The guard is in, and
 `tests/unit/sequence/renderer-lifeline.test.ts` asserts `''` — the inversion
 the old test asked for by name.
 
-Left as a divergence, and separately: nested activation bars are NOT indented.
-Upstream offsets each level by `LIVE_DELTA_SIZE` (5px) — `kejoke-76-curu931`'s
-golden runs `x=52.075, 57.075, 62.075, 67.075` down four levels — and this
-port draws all four on the lifeline's centre. The `Stairs`/`indent` half of
-`LiveBoxes` is not ported; `activationLevel` is in place for whoever does it.
-That is geometry, not element count.
+The nested-bar INDENT went in straight after, on the level the stack now
+carries: `LiveBoxes#drawOneLevel` moves each level right by
+`(levelToDraw - 1) * drawer.getWidth() / 2` (`:365-368`), half the box's own
+width per level. `kejoke-76-curu931`'s golden runs `x=52.075, 57.075, 62.075,
+67.075` down four levels on a lifeline at `cx=57.075`, and this port now steps
+the same way.
+
+Still NOT ported, and adjacent: `CommunicationTile` also shifts a MESSAGE's
+endpoints by the live level (`:333-350`), so an arrow to or from an activated
+participant starts at the bar's edge rather than the lifeline's centre — the
+jar's `rugeco-70-muro754` draws `x1="39"` from a lifeline at `x=34`. This port
+still anchors every arrow on the centre. `activationLevel` is in place for
+whoever ports it.
 
 ## Grouping-frame background shadow is not ported
 
