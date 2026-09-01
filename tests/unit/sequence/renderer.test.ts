@@ -1713,7 +1713,9 @@ describe('renderSequence — exogenous arrows', () => {
   // emit `fill="#000"`, including three whose page background is red or grey.
   it('fills the o decoration black, not with the document background', () => {
     const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
-    expect(svg).toContain('<ellipse cx="5.5" cy="53.25" rx="4" ry="4" fill="#000"');
+    // cy 48.25, not 53.25: the head row lost 5px when the box height became
+    // `text + 2 * 7` instead of `text + 20`, and the body starts below it.
+    expect(svg).toContain('<ellipse cx="5.5" cy="48.25" rx="4" ry="4" fill="#000"');
     expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
   });
 

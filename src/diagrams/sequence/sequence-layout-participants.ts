@@ -11,6 +11,7 @@ import type {
   Participant,
   ParticipantBadge,
   ParticipantGeo,
+  ParticipantType,
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
@@ -188,6 +189,28 @@ function computeParticipantWidths(
   });
 }
 
+/**
+ * The gap between a head's painted shape and the bottom of the AREA it
+ * reserves — one pixel, and only for the two kinds that reach
+ * `ComponentRoseParticipant`.
+ *
+ * `ComponentRoseParticipant#getPreferredHeight:129-132` is
+ * `getTextHeight + margin.top + margin.bottom + deltaShadow + 1 +
+ * getDeltaCollection()`, and margin and shadow are both zero for a
+ * participant (see `findings/participant-width.md` §6). So its reserved area
+ * is exactly one pixel taller than the rectangle it paints.
+ *
+ * Every other head component's `getPreferredHeight` is its glyph plus
+ * `getTextHeight`, with no constant term at all — read, one at a time:
+ * `ComponentRoseActor:89-92`, `ComponentRoseDatabase:96-99`,
+ * `ComponentRoseBoundary:90-93`, `ComponentRoseControl:91-94`,
+ * `ComponentRoseEntity:91-94`, `ComponentRoseQueue:82-85` (glyph only).
+ * Hence 0 for those, and this is not an approximation awaiting Batch 4.
+ */
+export function headSlackOf(type: ParticipantType): number {
+  return type === 'participant' || type === 'collections' ? 1 : 0;
+}
+
 interface ParticipantColumnResult {
   participantGeos: ParticipantGeo[];
   participantMap: Map<string, ParticipantGeo>;
@@ -220,13 +243,20 @@ function positionParticipants(
     currentX = advancePastParticipant(currentX, i, participantWidths, adjMaxLabelW, theme);
   }
 
-  // Use the tallest participant height so all lifelines start at the same Y.
-  const maxParticipantHeight = Math.max(...participantGeos.map((g) => g.height));
-  // Bottom-align headers: shift each participant's y so its bottom sits at
-  // maxParticipantHeight. This preserves natural box proportions while
-  // keeping all lifelines starting at the same Y coordinate.
+  // Use the tallest reserved head AREA so all lifelines start at the same Y.
+  // `LivingSpace#drawHeadOrTail:191-214` draws each head into an `Area` sized
+  // by `comp.getPreferredDimension` — `(getPreferredWidth,
+  // getPreferredHeight)` (`AbstractComponent.java:163-167`) — which for a
+  // plain participant is one pixel taller than the rectangle
+  // `drawInternalU:100-104` actually paints inside it (`headSlackOf`).
+  const areaOf = (g: ParticipantGeo): number => g.height + headSlackOf(g.type);
+  const maxParticipantHeight = Math.max(...participantGeos.map(areaOf));
+  // Bottom-align the head AREAS, not the boxes: each participant's area ends
+  // at `maxParticipantHeight`, so every lifeline starts there, and the box is
+  // painted at the TOP of its own area with the slack falling below it. That
+  // is what puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
   for (const g of participantGeos) {
-    g.y = maxParticipantHeight - g.height;
+    g.y = maxParticipantHeight - areaOf(g);
   }
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
@@ -432,7 +462,14 @@ function buildParticipantGeo(
   // `TextBlockSprited#calculateDimension` takes the MAX of the badge's own
   // height and the text block's (`:57-63`).
   const textHeight = measured.height * (1 + stereoLines.length);
-  const boxHeight = Math.max(textHeight, badge?.height ?? 0) + 20;
+  // `getTextHeight = textBlock.height + padding.top + padding.bottom`
+  // (`AbstractTextualComponent.java:110-114`), and that IS the painted
+  // rectangle (`ComponentRoseParticipant#drawInternalU:100-104`). `Padding 7`
+  // expands to all four sides (`plantuml.skin:186-190`), so this is the same
+  // 14 the width gets, on the other axis. Verified on 2304 corpus boxes, all
+  // 28 tall for a one-line label (`findings/participant-height.md`).
+  const boxHeight =
+    Math.max(textHeight, badge?.height ?? 0) + 2 * theme.sequence.participantPadding;
   // `getTextHeight()` is the text block plus a vertical padding (see
   // `sequence-layout-participant-sizing.ts`'s DB_TEXT_PADDING_X note), and the
   // block itself is `TextBlockSprited`'s

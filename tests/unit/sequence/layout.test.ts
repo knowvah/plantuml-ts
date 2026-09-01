@@ -1044,7 +1044,10 @@ describe('layoutSequence — database participant sizing', () => {
     const alice = plain.participants.find((p) => p.id === 'Alice')!;
     // 5 glyphs at 8px under `FixedMeasurer`, plus 7 of padding either side.
     expect(alice.width).toBe(5 * 8 + 2 * defaultTheme.sequence.participantPadding);
-    expect(alice.height).toBe(16 + 20);
+    // `getTextHeight` = text + padding.top + padding.bottom
+    // (`AbstractTextualComponent.java:110-114`), with `Padding 7` on all four
+    // sides. 16 from `FixedMeasurer(8, 16)`, plus 7 above and 7 below.
+    expect(alice.height).toBe(16 + 2 * defaultTheme.sequence.participantPadding);
   });
 });
 

@@ -630,9 +630,12 @@ export interface SequenceGeometry {
    * (upstream's body starts at 0 and the heads are drawn above it, un-
    * translated). `PlayingSpaceWithParticipants#drawU` reads it three times:
    * to translate the body, to place the footbox row, and to size the image
-   * (`:213,217,225`, `:80-86`). Equal to `max(p.y + p.height)` over the
-   * participants — they are bottom-aligned in this row, which is upstream's
-   * `VerticalAlignment.BOTTOM` at `:224` — but stored rather than re-derived
+   * (`:213,217,225`, `:80-86`). Equal to `max(p.y + p.height + headSlack)`
+   * over the participants — their reserved AREAS are bottom-aligned in this
+   * row, which is upstream's `VerticalAlignment.BOTTOM` at `:224`, and a
+   * plain participant's area is one pixel taller than its painted box
+   * (`sequence-layout-participants.ts#headSlackOf`) — but stored rather than
+   * re-derived
    * because the page transform is the one reader that must not disagree with
    * layout about where the body begins.
    */

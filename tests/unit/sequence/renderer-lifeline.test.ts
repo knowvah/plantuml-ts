@@ -21,6 +21,14 @@ import { defaultTheme } from '../../../src/core/theme.js';
 
 const theme: ScaledTheme = { ...defaultTheme, scaleK: 1 };
 
+/**
+ * The head ROW's bottom for these fixtures: a plain participant at `y=10`
+ * with a 28-tall box reserves 29 (`ComponentRoseParticipant
+ * #getPreferredHeight:129-132` adds 1 to the painted height), so the row ends
+ * at 39 and every lifeline starts there — one pixel below the box.
+ */
+const HEAD_HEIGHT = 39;
+
 function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
   const base: ParticipantGeo = {
     id: 'A',
@@ -39,7 +47,7 @@ function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
 
 describe('renderLifeline', () => {
   it('emits title, hover rect and line as the group children, in that order', () => {
-    const svg = renderLifeline(participant(), 178, theme);
+    const svg = renderLifeline(participant(), HEAD_HEIGHT, 178, theme);
 
     // The exact child sequence the jar emits:
     // `<g><title>A</title><rect .../><line .../></g>`.
@@ -53,17 +61,17 @@ describe('renderLifeline', () => {
     // `(componentWidth - 8) / 2` with `componentWidth` = 1
     // (`getPreferredWidth`, `:96-98`) -> centre - 3.5. Participant centre is
     // 22 here, so x = 18.5; the lifeline itself stays at 22.
-    const svg = renderLifeline(participant(), 178, theme);
+    const svg = renderLifeline(participant(), HEAD_HEIGHT, 178, theme);
 
-    expect(svg).toContain('<rect x="18.5" y="38" width="8" height="140"');
-    expect(svg).toContain('<line x1="22" y1="38" x2="22" y2="178"');
+    expect(svg).toContain('<rect x="18.5" y="39" width="8" height="139"');
+    expect(svg).toContain('<line x1="22" y1="39" x2="22" y2="178"');
   });
 
   it('marks the hover rect as a transparent hit target, not ink', () => {
     // `UStroke.withThickness(0)` + `HColors.transparent()` leave NO stroke,
     // and `HColors.transparent(WITH_FILL_OPACITY).bg()` serialises as
     // `fill="#000" fill-opacity="0"` -- not `fill="none"`.
-    const rect = /<rect [^>]*>/.exec(renderLifeline(participant(), 178, theme))?.[0] ?? '';
+    const rect = /<rect [^>]*>/.exec(renderLifeline(participant(), HEAD_HEIGHT, 178, theme))?.[0] ?? '';
 
     expect(rect).toContain('fill="#000"');
     expect(rect).toContain('fill-opacity="0"');
@@ -74,7 +82,7 @@ describe('renderLifeline', () => {
     // `drawTitleHoverTargetRect` guards its whole body on `height > 0`
     // (`:100`), and that guard sits INSIDE the already-opened group -- unlike
     // `ComponentRoseActiveLine`, whose guard precedes `startGroup`.
-    const svg = renderLifeline(participant({ y: 10, height: 28 }), 38, theme);
+    const svg = renderLifeline(participant({ y: 10, height: 28 }), HEAD_HEIGHT, HEAD_HEIGHT, theme);
 
     expect(svg).toContain('<g><title>A</title>');
     expect(svg).not.toContain('<rect');
@@ -84,20 +92,20 @@ describe('renderLifeline', () => {
   it('titles the group with the display first line only', () => {
     // `Display#toTooltipText` (`Display.java:601-605`) returns `get(0)`, not
     // the joined lines.
-    const svg = renderLifeline(participant({ display: 'first\nsecond' }), 178, theme);
+    const svg = renderLifeline(participant({ display: 'first\nsecond' }), HEAD_HEIGHT, 178, theme);
 
     expect(svg).toContain('<title>first</title>');
     expect(svg).not.toContain('second');
   });
 
   it('emits an empty title element for an empty display', () => {
-    const svg = renderLifeline(participant({ display: '' }), 178, theme);
+    const svg = renderLifeline(participant({ display: '' }), HEAD_HEIGHT, 178, theme);
 
     expect(svg).toContain('<title></title>');
   });
 
   it('escapes XML metacharacters in the title', () => {
-    const svg = renderLifeline(participant({ display: 'a<b&c' }), 178, theme);
+    const svg = renderLifeline(participant({ display: 'a<b&c' }), HEAD_HEIGHT, 178, theme);
 
     expect(svg).toContain('<title>a&lt;b&amp;c</title>');
   });
@@ -196,6 +204,7 @@ describe('renderLifelinePass', () => {
     const svg = renderLifelinePass(
       [p('A', 22), p('B', 122)],
       [act('B', 122, 50), act('A', 22, 60)],
+      HEAD_HEIGHT,
       178,
       theme,
     );
@@ -205,17 +214,17 @@ describe('renderLifelinePass', () => {
   });
 
   it('keeps multiple boxes on one participant in source order', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], 178, theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], HEAD_HEIGHT, 178, theme);
 
     expect([...svg.matchAll(/<rect [^>]*?y="(\d+)"/g)].map((m) => m[1])).toEqual([
-      '38', // the hover target, which spans the whole lifeline
+      '39', // the hover target, which spans the whole lifeline
       '60',
       '10',
     ]);
   });
 
   it('emits a bare lifeline for a participant with no activations', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], 178, theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], HEAD_HEIGHT, 178, theme);
 
     expect([...svg.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual(['A']);
   });

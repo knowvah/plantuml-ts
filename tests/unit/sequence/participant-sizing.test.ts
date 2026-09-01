@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { headSlackOf } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 
 const CACHE = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -178,5 +179,60 @@ describe('the plain participant box — width, against the jar', () => {
     expect(rect).not.toBeNull();
     expect(text).not.toBeNull();
     expect(17 - 10).toBe(defaultTheme.sequence.participantPadding);
+  });
+});
+
+describe('the plain participant box — height, against the jar', () => {
+  it.each(GOLDENS)('$slug: our box height matches the jar exactly', ({ slug, label }) => {
+    // `getTextHeight = textBlock.height + padding.top + padding.bottom`
+    // (`AbstractTextualComponent.java:110-114`) — the same `Padding 7`, on the
+    // other axis. 28 for a one-line label, and 2304 corpus boxes agree.
+    const golden = participantBoxes(goldenOf(slug)).filter((b) => b.height === 28);
+    const ours = participantBoxes(oursFor(slug));
+    expect(golden.length).toBeGreaterThan(0);
+    for (const want of golden) {
+      if (label !== undefined && want.label !== label) continue;
+      const got = ours.find((b) => b.label === want.label);
+      expect(got?.height).toBeCloseTo(want.height, 2);
+    }
+  });
+
+  it('reserves one pixel below the box before the lifeline starts', () => {
+    // `ComponentRoseParticipant#getPreferredHeight:129-132` adds `+ 1` that
+    // `drawInternalU` does not paint, and `LivingSpace#drawHeadOrTail:191-214`
+    // reserves the PREFERRED dimension. So the head row is one taller than the
+    // box, and the gap shows up between the box bottom and the lifeline top.
+    // The jar puts jobadi's box at [10, 38) and its lifeline at 39; this port
+    // has the same diagram at a different origin (Batch 5), so the RELATIVE
+    // gap is what is pinned here.
+    const svg = oursFor('jobadi-87-jegi648');
+    const [head] = participantBoxes(svg);
+    const lifeline = /<rect x="[\d.]+" y="([\d.]+)"[^>]*fill-opacity="0"/.exec(svg);
+    expect(head).toBeDefined();
+    expect(lifeline).not.toBeNull();
+    expect(Number(lifeline?.[1])).toBeCloseTo((head?.height ?? 0) + 1, 3);
+  });
+
+  it('the jar shows the same one-pixel gap in the golden', () => {
+    const svg = goldenOf('jobadi-87-jegi648');
+    const box = /<rect x="10" y="(\d+)" width="38.938" height="(\d+)"/.exec(svg);
+    const lifeline = /<rect x="[\d.]+" y="(\d+)"[^>]*fill-opacity="0"/.exec(svg);
+    const boxBottom = Number(box?.[1]) + Number(box?.[2]);
+    expect(boxBottom).toBe(38);
+    expect(Number(lifeline?.[1])).toBe(boxBottom + 1);
+  });
+
+  it('no glyph participant kind gets that extra pixel', () => {
+    // Read one at a time rather than generalised: `ComponentRoseActor:89-92`,
+    // `ComponentRoseDatabase:96-99`, `ComponentRoseBoundary:90-93`,
+    // `ComponentRoseControl:91-94`, `ComponentRoseEntity:91-94` are all
+    // `stickman.height + getTextHeight` with no constant, and
+    // `ComponentRoseQueue:82-85` is the glyph height alone. Only
+    // `ComponentRoseParticipant` carries the `+ 1`.
+    expect(headSlackOf('participant')).toBe(1);
+    expect(headSlackOf('collections')).toBe(1);
+    for (const kind of ['actor', 'boundary', 'control', 'entity', 'database', 'queue'] as const) {
+      expect(headSlackOf(kind)).toBe(0);
+    }
   });
 });

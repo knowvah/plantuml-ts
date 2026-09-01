@@ -161,10 +161,14 @@ describe('newpage — layout', () => {
   });
 
   /** `headHeight` is `LivingSpaces#getHeadHeight`: the participant row's
-   *  height, which is where this port's body begins. */
+   *  height, which is where this port's body begins. It is the tallest
+   *  reserved AREA, which for a plain participant is one pixel more than the
+   *  painted box (`ComponentRoseParticipant#getPreferredHeight:129-132`), so
+   *  it sits one above `max(p.y + p.height)` when every head is plain. */
   it('reports headHeight as the participant head row height', () => {
     const geo = layout(['Alice -> Bob : a']);
-    expect(geo.headHeight).toBe(Math.max(...geo.participants.map((p) => p.y + p.height)));
+    const boxBottoms = Math.max(...geo.participants.map((p) => p.y + p.height));
+    expect(geo.headHeight).toBe(boxBottoms + 1);
     expect(geo.headHeight).toBeGreaterThan(0);
   });
 });

@@ -81,10 +81,18 @@ function openTitledGroup(title: string): string {
  */
 export function renderLifeline(
   p: ParticipantGeo,
+  headHeight: number,
   lifelineEndY: number,
   theme: ScaledTheme,
 ): string {
-  const startY = p.y + p.height;
+  // The head ROW's bottom, not this participant's box bottom. Upstream draws
+  // every lifeline from body-coordinate 0 and translates the whole body by
+  // `getHeadHeight()` (`PlayingSpaceWithParticipants#drawU:213`), so all of
+  // them start together however tall each individual head is. For a plain
+  // participant those two differ by exactly one pixel — the `+ 1` in
+  // `ComponentRoseParticipant#getPreferredHeight:129-132` — which is why
+  // `jobadi-87-jegi648`'s box ends at 38 and its lifeline begins at 39.
+  const startY = headHeight;
   const height = lifelineEndY - startY;
 
   // `drawTitleHoverTargetRect` (`:99-108`) guards its whole body on
@@ -188,6 +196,7 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
 export function renderLifelinePass(
   participants: readonly ParticipantGeo[],
   activations: readonly ActivationGeo[],
+  headHeight: number,
   lifelineEndY: number,
   theme: ScaledTheme,
 ): string {
@@ -197,7 +206,7 @@ export function renderLifelinePass(
         .filter((a) => a.participantId === p.id)
         .map((a) => renderActivation(a, theme))
         .join('');
-      return renderLifeline(p, lifelineEndY, theme) + boxes;
+      return renderLifeline(p, headHeight, lifelineEndY, theme) + boxes;
     })
     .join('');
 }
