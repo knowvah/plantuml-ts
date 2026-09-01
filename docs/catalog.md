@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1048 modules · 3744 exported names.
+1052 modules · 3748 exported names.
 
 ## `src/`
 
@@ -1264,7 +1264,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
 | `divider-style.ts` | `DIVIDER_LINE_COLOR`, `DIVIDER_LINE_THICKNESS`, `DIVIDER_BACKGROUND`, `DIVIDER_FONT_SIZE`, `DIVIDER_FONT_BOLD`, `DIVIDER_PADDING`, `DIVIDER_HEIGHT_ALLOWANCE`, `DIVIDER_WIDTH_ALLOWANCE`, `DIVIDER_LABEL_DELTA_X`, `DIVIDER_BAND_HEIGHT`, `dividerFontSpecOf`, `dividerPreferredHeight`, `dividerPreferredWidth` | Style constants for the sequence-diagram divider (`== label ==`, and the empty `====` form). |
 | `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
-| `geo.ts` | `TextRun`, `ParticipantBadge`, `ParticipantGeo`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | GEOMETRY types for PlantUML sequence diagrams — the output of the layout stage and the sole input of the renderer. |
+| `geo-annotation.ts` | `NoteGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `BoxGeo` | The geometry `renderer.ts` draws ITSELF — notes, dividers, the `newpage` separator, explicit vertical space, and the `box` group background. |
+| `geo-frame.ts` | `FrameGeo` | FRAME geometry — `alt`/`opt`/`loop`/`group`/`ref` boxes, their header tab and their `else` branch bands. |
+| `geo-message.ts` | `MessageGeo`, `ActivationGeo` | MESSAGE geometry — an arrow, its label runs, and the activation bars a message opens and closes. |
+| `geo-participant.ts` | `ParticipantBadge`, `ParticipantGeo` | PARTICIPANT geometry — the head/foot boxes and their stereotype badges. |
+| `geo.ts` | `TextRun`, `* from ./geo-participant.js`, `* from ./geo-message.js`, `* from ./geo-frame.js`, `* from ./geo-annotation.js`, `EventGeo`, `SequenceGeometry` | GEOMETRY for PlantUML sequence diagrams — the output of the layout stage and the sole input of the renderer. |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `newpage-style.ts` | `NEWPAGE_MARGIN_Y`, `NEWPAGE_LINE_HEIGHT`, `NEWPAGE_TILE_HEIGHT`, `NEWPAGE_LINE_COLOR`, `NEWPAGE_LINE_THICKNESS`, `NEWPAGE_DASH_UNIT` | Style and size constants for the sequence-diagram page separator (`newpage`). |
