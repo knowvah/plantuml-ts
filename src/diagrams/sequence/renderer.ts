@@ -26,11 +26,13 @@ import type {
   NoteGeo,
   FrameGeo,
   DividerGeo,
+  NewpageGeo,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { rect, line, text, noteBox } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
 import { renderLifelinePass } from './renderer-lifeline.js';
@@ -50,6 +52,12 @@ import {
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
+import {
+  NEWPAGE_DASH_UNIT,
+  NEWPAGE_LINE_COLOR,
+  NEWPAGE_LINE_THICKNESS,
+  NEWPAGE_MARGIN_Y,
+} from './newpage-style.js';
 
 // ---------------------------------------------------------------------------
 // Note helpers
@@ -277,6 +285,31 @@ function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
   return divider.text.length === 0 ? band : band + renderDividerLabel(divider, theme);
 }
 
+/**
+ * The page separator: ONE `ULine.hline(areaWidth)`, and nothing else.
+ *
+ * `ComponentRoseNewpage#drawInternalU` is three statements -- take the
+ * style's stroke and line colour, draw a horizontal line the width of the
+ * `Area` (`:59-64`) -- and `NewpageTile#drawU` hands it an `Area` spanning
+ * `border1 … border2`, translated by `dy(MARGINY)` inside the tile
+ * (`:83-90`). So the line sits 10px below the tile's top, which is what puts
+ * it inside BOTH adjacent page bands.
+ *
+ * It draws nothing in the background pass -- `drawU` returns early on
+ * `isBackground` (`NewpageTile.java:79-81`) -- which `renderEvent`'s
+ * `isBackground` guard already provides.
+ */
+function renderNewpage(newpage: NewpageGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const y = newpage.y + NEWPAGE_MARGIN_Y * k;
+  const unit = fmt(NEWPAGE_DASH_UNIT * k);
+  return line(newpage.bandX, y, newpage.bandX + newpage.bandWidth, y, {
+    stroke: NEWPAGE_LINE_COLOR,
+    strokeWidth: NEWPAGE_LINE_THICKNESS * k,
+    strokeDasharray: `${unit},${unit}`,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Event dispatcher
 // ---------------------------------------------------------------------------
@@ -310,9 +343,7 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
       // Space geos add no visible elements
       return '';
     case 'newpage':
-      // The separator itself is Batch 3; the tile occupies its 21px and
-      // draws nothing until then.
-      return '';
+      return renderNewpage(event, theme);
   }
 }
 

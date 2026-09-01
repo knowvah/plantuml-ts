@@ -13,6 +13,22 @@
  * `ug.draw(ULine.hline(dimensionToUse.getWidth()))`. There is no box, no
  * text and no second rule — unlike a divider, which draws five shapes.
  *
+ * ## The three stroke values, and where each comes from
+ *
+ * `ComponentType.NEWPAGE.getStyleSignature()` is
+ * `root, element, sequenceDiagram, newpage` (`ComponentType.java:95-96`), so
+ * the cascade resolves to `root`'s `LineColor #181818` (`plantuml.skin:16`),
+ * `element`'s `LineThickness 0.5` (`:90-93`) and `newpage`'s own
+ * `LineStyle 2` (`:179-181`). `Style#getStroke` turns a bare `LineStyle 2`
+ * into `new UStroke(2, 2, thickness)` — one token means dash and space are
+ * equal (`Style.java:265-282`) — which `SvgGraphics#setStrokeWidth` writes
+ * as `stroke-dasharray:2,2`.
+ *
+ * All three are exactly what `digula-66-dipe776`'s golden carries:
+ * `style="stroke:#181818;stroke-width:0.5;stroke-dasharray:2,2;"`. The
+ * `2,2` is also what distinguishes a separator from a lifeline, which
+ * dashes `5,5` from `lifeLine { LineStyle 5 }` (`:53-55`).
+ *
  * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:179-181
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseNewpage.java:59-71
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/NewpageTile.java:50,78-96
@@ -43,3 +59,18 @@ export const NEWPAGE_LINE_HEIGHT = 1;
  * @see NewpageTile.java:94-96
  */
 export const NEWPAGE_TILE_HEIGHT = NEWPAGE_LINE_HEIGHT + 2 * NEWPAGE_MARGIN_Y;
+
+/** `root { LineColor #181818 }` — `newpage` overrides neither it nor
+ *  `sequenceDiagram`, so the cascade's top value survives.
+ *  @see plantuml.skin:16 */
+export const NEWPAGE_LINE_COLOR = '#181818';
+
+/** `element { LineThickness 0.5 }` — the signature's second segment, and the
+ *  nearest one to set a thickness.
+ *  @see plantuml.skin:90-93 */
+export const NEWPAGE_LINE_THICKNESS = 0.5;
+
+/** `newpage { LineStyle 2 }`, as `Style#getStroke` expands a single token:
+ *  dash and space both 2 (`Style.java:272-278`).
+ *  @see plantuml.skin:179-181 */
+export const NEWPAGE_DASH_UNIT = 2;
