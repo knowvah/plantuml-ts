@@ -172,10 +172,37 @@ export interface CompleteSvg {
 export type AssembledSvg = RenderFragment | CompleteSvg;
 
 /**
+ * The three members an engine adds when ONE source can produce MORE THAN ONE
+ * image — upstream's `FileMaker#getNbPages` / `#getTextBlock(num, …)` pair,
+ * plus the per-page title swap `TitledDiagram#addChrome(index, …)` performs
+ * (`:469-476`).
+ *
+ * Optional, and all three together or none: only the sequence engine
+ * implements them (`newpage`, `plans/sequence-newpage-pagination`), and every
+ * other engine behaves as a single page. `render()` stays the entry point for
+ * page 0 — upstream's exporter calls `getTextBlock(0)` for it too — so a
+ * caller that never asks for pages sees no change at all.
+ *
+ * `pageAst` exists because chrome is composed OUTSIDE `render()`, from the
+ * AST: `addChrome` takes the page index and substitutes the title for
+ * `index > 0`, leaving caption/legend/header/footer alone. An engine with no
+ * per-page chrome may return its input.
+ *
+ * @see ~/git/plantuml/.../sequencediagram/teoz/SequenceDiagramFileMakerTeoz.java:123-146
+ * @see ~/git/plantuml/.../TitledDiagram.java:469-476
+ */
+export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
+  getNbPages(geo: Geo): number;
+  renderPage(geo: Geo, theme: Theme, pageIndex: number): AssembledSvg;
+  pageAst(ast: AST, pageIndex: number): AST;
+}
+
+/**
  * A plugin that performs layout synchronously.
  * Discriminated from AsyncPlugin by the presence of `layoutSync`.
  */
-export interface SyncPlugin<AST = unknown, Geo = unknown> {
+export interface SyncPlugin<AST = unknown, Geo = unknown>
+  extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
@@ -187,7 +214,8 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> {
  * Discriminated from SyncPlugin by the absence of `layoutSync` and the
  * presence of `layout`.
  */
-export interface AsyncPlugin<AST = unknown, Geo = unknown> {
+export interface AsyncPlugin<AST = unknown, Geo = unknown>
+  extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;

@@ -44,7 +44,10 @@ export const newpageCommand: Command = {
     const label = match[1];
     const event: NewpageEvent = {
       kind: 'newpage',
-      ...(label !== undefined ? { label } : {}),
+      // `Display.getWithNewlines`, as `dividerCommand` (`command-misc.ts`)
+      // already renders it for this engine: a literal `\n` is a LINE BREAK.
+      // The same `\t`/`\\`/`\r`/`\l` gap that comment records applies here.
+      ...(label !== undefined ? { title: label.replace(/\\n/g, '\n').split('\n') } : {}),
     };
     emit(state, event);
   },

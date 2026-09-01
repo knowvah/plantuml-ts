@@ -1,7 +1,7 @@
 import { buildBlockUmls, isBlockEmpty } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
 import { registry } from './core/dispatcher.js';
-import type { AssembledSvg, Resolution } from './core/dispatcher.js';
+import type { AssembledSvg, DiagramPlugin, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
@@ -248,7 +248,64 @@ function astOf(resolution: Resolution, options?: RenderOptions): unknown {
   throw new DiagramRefusal(message, line, resolution.plugin.type);
 }
 
-export function renderSync(source: string, options?: RenderOptions): string {
+/**
+ * Everything one diagram block's pages need in order to be chromed and
+ * assembled. Grouped so {@link assemblePages} stays inside this repo's
+ * parameter budget -- `applyAnnotationChrome` already spends seven.
+ */
+interface PageContext {
+  readonly plugin: DiagramPlugin;
+  readonly theme: Theme;
+  readonly styleMap: StyleMap;
+  readonly preprocessed: PreprocessorResult;
+  readonly measurer: StringMeasurer;
+}
+
+function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown): string {
+  const chromed = applyAnnotationChrome(
+    fragment, ast, ctx.theme, ctx.styleMap, ctx.preprocessed, ctx.measurer, ctx.plugin.type,
+  );
+  return assembleSvg(chromed);
+}
+
+/**
+ * Every image this one geometry produces, in page order.
+ *
+ * Upstream's exporter loops `for (int num = 0; num < getNbPages(); num++)`
+ * and calls `getTextBlock(num, …)`; `TitledDiagram#addChrome(index, …)` then
+ * substitutes the page's own title for `index > 0`. Both halves are here.
+ *
+ * An engine that declares no `getNbPages` -- every engine but sequence --
+ * takes the single-page path, which is byte-for-byte what this function did
+ * before pagination existed: `plugin.render(geo, theme)` and the diagram's
+ * own AST.
+ */
+function assemblePages(ctx: PageContext, geo: unknown, ast: unknown): string[] {
+  const { plugin } = ctx;
+  const count = plugin.getNbPages?.(geo) ?? 1;
+  if (count <= 1 || plugin.renderPage === undefined)
+    return [assembleOnePage(ctx, plugin.render(geo, ctx.theme), ast)];
+
+  const pages: string[] = [];
+  for (let index = 0; index < count; index++)
+    pages.push(
+      assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index), plugin.pageAst?.(ast, index) ?? ast),
+    );
+  return pages;
+}
+
+/**
+ * Every PAGE of the FIRST diagram in `source`, in page order.
+ *
+ * Distinct from {@link renderAll}, which returns one SVG per `@startuml`
+ * BLOCK. This returns one SVG per page of one block, which is what the jar
+ * writes as `f.svg`, `f_001.svg`, `f_002.svg`, … Only `newpage` in a sequence
+ * diagram produces more than one today (`plans/sequence-newpage-pagination`);
+ * every other engine returns a one-element array, and so does any error path.
+ *
+ * {@link renderSync} is this function's first element.
+ */
+export function renderPagesSync(source: string, options?: RenderOptions): string[] {
   try {
     // renderSync cannot fetch. With no store there is nothing to resolve an
     // !include against, so say so here rather than let the interpreter raise a
@@ -261,11 +318,11 @@ export function renderSync(source: string, options?: RenderOptions): string {
       );
     }
     const blocks = buildBlockUmls(source, { includeStore: options?.includeStore });
-    if (blocks.length === 0) return welcomeSvg(options);
+    if (blocks.length === 0) return [welcomeSvg(options)];
 
     const block = blocks[0]!;
-    if (!block.ok) return preprocessorErrorSvg(block.failure, options);
-    if (isBlockEmpty(block)) return emptySvg(block, options);
+    if (!block.ok) return [preprocessorErrorSvg(block.failure, options)];
+    if (isBlockEmpty(block)) return [emptySvg(block, options)];
 
     const umlSource = umlSourceOfBlock(block);
     // skin-reddress-variants Fix 2: thread the block's own raw source lines
@@ -286,18 +343,24 @@ export function renderSync(source: string, options?: RenderOptions): string {
     const ast = astOf(resolution, options);
     surfaceSpriteWarnings(ast, options?.onWarning);
     const geo = plugin.layoutSync(ast, theme, measurer);
-    const fragment = plugin.render(geo, theme);
-    const chromed = applyAnnotationChrome(
-      fragment, ast, theme, styleMap, block.preprocessed, measurer, plugin.type,
-    );
     // #lizard forgives -- pre-existing violation (31 NLOC vs. this repo's 30
     // cap), unrelated to skin-reddress-variants; only surfaced now because
     // buildTheme's move out of this file dropped index.ts under the
     // 500-line gate that previously short-circuited this per-function check.
-    return assembleSvg(chromed);
+    return assemblePages(
+      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast,
+    );
   } catch (err) {
-    return errorSvg(source, err, options);
+    return [errorSvg(source, err, options)];
   }
+}
+
+/** Page 1 of the first diagram in `source` — see {@link renderPagesSync} for
+ *  the rest of a `newpage`-paginated sequence diagram, and {@link renderAll}
+ *  for the other `@startuml` blocks. */
+export function renderSync(source: string, options?: RenderOptions): string {
+  // Non-empty on every path, error paths included.
+  return renderPagesSync(source, options)[0]!;
 }
 
 export async function render(
@@ -312,6 +375,27 @@ export async function render(
     return await renderBlock(blocks[0]!, options);
   } catch (err) {
     return errorSvg(source, err, options);
+  }
+}
+
+/**
+ * Every PAGE of the FIRST diagram in `source` — the async sibling of
+ * {@link renderPagesSync}, and the one to use when the source has
+ * `!include` directives to fetch.
+ */
+export async function renderPages(
+  source: string,
+  options?: RenderOptions,
+): Promise<string[]> {
+  try {
+    const includeStore = await prepareIncludeStore(source, options);
+    const blocks = buildBlockUmls(source, { includeStore });
+    const first = blocks[0];
+    if (first === undefined) return [welcomeSvg(options)];
+
+    return await renderBlockPages(first, options);
+  } catch (err) {
+    return [errorSvg(source, err, options)];
   }
 }
 
@@ -334,8 +418,15 @@ export async function renderAll(
  * scopes them to it (each `BlockUml` runs its own `TimLoader`).
  */
 async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<string> {
-  if (!block.ok) return preprocessorErrorSvg(block.failure, options);
-  if (isBlockEmpty(block)) return emptySvg(block, options);
+  // Non-empty on every path, error paths included.
+  return (await renderBlockPages(block, options))[0]!;
+}
+
+/** {@link renderBlock}, but every page — see {@link renderPagesSync} for what
+ *  a "page" is and why only the sequence engine produces more than one. */
+async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promise<string[]> {
+  if (!block.ok) return [preprocessorErrorSvg(block.failure, options)];
+  if (isBlockEmpty(block)) return [emptySvg(block, options)];
 
   const umlSource = umlSourceOfBlock(block);
   try {
@@ -352,14 +443,12 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
       'layoutSync' in plugin
         ? plugin.layoutSync(ast, theme, measurer)
         : await plugin.layout(ast, theme, measurer);
-    const fragment = plugin.render(geo, theme);
-    const chromed = applyAnnotationChrome(
-      fragment, ast, theme, styleMap, block.preprocessed, measurer, plugin.type,
+    return assemblePages(
+      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast,
     );
-    return assembleSvg(chromed);
   } catch (err) {
     // The block's own lines, so the listing shows the diagram that failed.
-    return errorSvg(umlSource.lines.join('\n'), err, options);
+    return [errorSvg(umlSource.lines.join('\n'), err, options)];
   }
 }
 

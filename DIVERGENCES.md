@@ -1304,3 +1304,44 @@ directions — nodes ADDED to an oversized document (background pass, and this
 one) and nodes RE-ORDERED in one whose count already matched (participant
 labels). The tool has no rule for any of them.
 
+
+## `newpage`: `renderSync` returns page 1, and a new entry point returns all of them
+
+`sequence-newpage-pagination`, 2026-09-01.
+
+**Upstream:** one `@startuml` with `newpage` in it produces one image PER
+PAGE. The jar writes them as `f.svg`, `f_001.svg`, `f_002.svg`, …
+(`getNbPages()` is `countNewpage + 1`, `SequenceDiagram.java:517-519`), and
+every golden in `test-results/dot-cache/sequence/` is therefore page 1.
+
+**This port:** `renderSync`/`render` return **page 1**, matching the golden.
+`renderPagesSync`/`renderPages` return **every page**, in order.
+
+**Reason.** This port's render entry point returns ONE string. Emitting page 1
+and stopping there would silently drop content the user wrote, so the pages
+need a way out; returning them all from `renderSync` would mean concatenating
+images the jar keeps separate. Maintainer decision, 2026-09-01.
+
+**Precedent.** No other engine here paginates, and this is not an oversight:
+`newpage` on a sequence diagram is the only command in the corpus that makes
+one source produce more than one image. `PaginatedPlugin`
+(`core/dispatcher.ts`) is optional for exactly that reason — an engine that
+does not declare it takes a single-page path that is byte-for-byte what the
+pipeline did before pagination existed. Note the axis: `renderAll` splits
+`@startuml` BLOCKS, `renderPages` splits PAGES of one block.
+
+**Category:** limitation of the port's own API shape, filled rather than
+worked around.
+
+### The one pixel this costs
+
+`PlayingSpaceWithParticipants#drawU` clips the body to `pageHeight + 1` and
+places the footbox row at `pageHeight`, so on any page but the last the jar's
+lifelines end exactly one pixel BELOW the footbox top. This port spends one
+field, `SequenceGeometry.lifelineEndY`, on both quantities. It takes the
+footbox/image-height answer — which is what `calculateDimensionSlow` sizes the
+page from — so an inner page's lifelines stop 1px short of the jar's, under
+the footbox that covers them.
+
+**Category:** aesthetic, and unobservable at the element level: no node is
+added, removed or re-ordered by it.

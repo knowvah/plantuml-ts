@@ -223,13 +223,18 @@ export interface SpaceEvent {
  */
 export interface NewpageEvent {
   kind: 'newpage';
-  /** `CommandNewpage`'s optional `LABEL` group (`:80-92`). Upstream files it
-   *  as the TITLE of the page this command STARTS — `titles.add(title)`
-   *  (`SequenceDiagram.java:247`), read back by `getTitle(index)` as
-   *  `titles.get(index - 1)` (`:112-115`), so page 0 keeps the diagram's own
-   *  title and page k>0 takes the k-th newpage's label. Absent when the
-   *  command carried none. */
-  label?: string;
+  /** `CommandNewpage`'s optional `LABEL` group, already through
+   *  `Display.getWithNewlines` (`:80-92`) — hence a line ARRAY, not a raw
+   *  string, matching `DisplayPositioned.display`.
+   *
+   *  Upstream files it as the TITLE of the page this command STARTS:
+   *  `titles.add(title)` (`SequenceDiagram.java:247`), read back by
+   *  `getTitle(index)` as `titles.get(index - 1)` (`:111-115`) and
+   *  substituted by `TitledDiagram#addChrome` for `index > 0` (`:469-476`).
+   *  So page 0 keeps the diagram's own title and page k takes the k-th
+   *  newpage's. Absent when the command carried none, which is upstream's
+   *  `Display.NULL` and draws no title at all. */
+  title?: readonly string[];
 }
 
 export type SequenceEvent =

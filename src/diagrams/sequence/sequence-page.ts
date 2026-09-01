@@ -55,6 +55,9 @@
 
 import type {
   ActivationGeo,
+  NewpageEvent,
+  SequenceDiagramAST,
+  SequenceEvent,
   DividerGeo,
   EventGeo,
   FrameGeo,
@@ -65,6 +68,10 @@ import type {
   SpaceGeo,
 } from './ast.js';
 import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
+import type { DisplayPositioned } from '../../core/annotations/index.js';
+import { noneDisplayPositioned, singleDisplayPositioned } from '../../core/annotations/index.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { VerticalAlignment } from '../../core/klimt/geom/VerticalAlignment.js';
 import { ARROW_DELTA_Y } from './sequence-arrowhead.js';
 
 // ---------------------------------------------------------------------------
@@ -343,4 +350,57 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
     // height -- englobers are drawn outside the clip and re-sized per page.
     boxes: geo.boxes.map((b) => ({ ...b, height: totalHeight })),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Per-page chrome
+// ---------------------------------------------------------------------------
+
+/** One `newpage`'s title, as `CommandNewpage#executeArg` files it:
+ *  `DisplayPositioned.single(location, strings, CENTER, TOP)`, or
+ *  `Display.NULL` when the command carried no LABEL (`:90-92`). */
+function newpageTitle(event: NewpageEvent): DisplayPositioned {
+  if (event.title === undefined)
+    return noneDisplayPositioned(HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+  return singleDisplayPositioned(
+    event.title,
+    HorizontalAlignment.CENTER,
+    VerticalAlignment.TOP,
+  );
+}
+
+/** `SequenceDiagram#titles`, in the order `newpage(...)` appended them —
+ *  source order, including inside a `group`/`alt` branch, which is the same
+ *  recursion `PlayingSpace#getNewpageTiles` performs over the tiles. */
+function newpageTitlesOf(events: readonly SequenceEvent[]): DisplayPositioned[] {
+  const titles: DisplayPositioned[] = [];
+  for (const event of events) {
+    if (event.kind === 'newpage') titles.push(newpageTitle(event));
+    else if (event.kind === 'frame')
+      for (const branch of event.branches) titles.push(...newpageTitlesOf(branch));
+  }
+  return titles;
+}
+
+/**
+ * The AST as page `pageIndex`'s chrome reads it.
+ *
+ * `TitledDiagram#addChrome(index, …)` takes the diagram's own title and then,
+ * for `index > 0` and ONLY on a `SequenceDiagram`, replaces it with
+ * `getTitle(index)` = `titles.get(index - 1)` (`:469-476`,
+ * `SequenceDiagram.java:111-115`). Caption, legend, header and footer are not
+ * touched, so neither are they here.
+ *
+ * Returns the input unchanged for page 0, for a document with no chrome at
+ * all, and for an index past the last `newpage`.
+ */
+export function sequencePageAst(
+  ast: SequenceDiagramAST,
+  pageIndex: number,
+): SequenceDiagramAST {
+  const annotations = ast.annotations;
+  if (pageIndex <= 0 || annotations === undefined) return ast;
+  const title = newpageTitlesOf(ast.events)[pageIndex - 1];
+  if (title === undefined) return ast;
+  return { ...ast, annotations: { ...annotations, title } };
 }

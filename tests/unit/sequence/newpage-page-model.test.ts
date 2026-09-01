@@ -56,20 +56,22 @@ describe('newpage — parse', () => {
 
   /** `CommandNewpage`'s LABEL group, both separators (`:64-68`). */
   it.each([
-    ['newpage Second Page', 'Second Page'],
-    ['newpage : Second Page', 'Second Page'],
-    ['newpage Test of PlantUML, Part 2', 'Test of PlantUML, Part 2'],
-    ['@newpage page 1', 'page 1'],
-  ])('captures the label of %s', (line, label) => {
+    ['newpage Second Page', ['Second Page']],
+    ['newpage : Second Page', ['Second Page']],
+    ['newpage Test of PlantUML, Part 2', ['Test of PlantUML, Part 2']],
+    ['@newpage page 1', ['page 1']],
+    // `Display.getWithNewlines`: a literal `\n` is a LINE BREAK.
+    ['newpage A title for the\\nlast page', ['A title for the', 'last page']],
+  ])('captures the label of %s', (line, title) => {
     const ast = parse(['Alice -> Bob : a', line]);
     const ev = ast.events[1] as NewpageEvent;
     expect(ev.kind).toBe('newpage');
-    expect(ev.label).toBe(label);
+    expect(ev.title).toEqual(title);
   });
 
-  it('carries no label when none was written', () => {
+  it('carries no title when no label was written', () => {
     const ast = parse(['Alice -> Bob : a', 'newpage']);
-    expect((ast.events[1] as NewpageEvent).label).toBeUndefined();
+    expect((ast.events[1] as NewpageEvent).title).toBeUndefined();
   });
 
   /** The LABEL group is `(.*[%pLN_.].*)`, so a label with no letter, digit,
