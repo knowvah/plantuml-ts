@@ -94,6 +94,23 @@ export interface ArrowConfiguration {
    *  dressings. Absent where upstream carries 0.
    *  @see skin/ArrowConfiguration.java:279-283 */
   readonly inclination?: number;
+  /**
+   * `ArrowBody.HIDDEN` — the `-[hidden]->` form
+   * (`CommandArrow.java:495-496`), read back as
+   * `ArrowConfiguration#isHidden` (`:202-203`).
+   *
+   * DRAWING only. `ComponentRoseArrow#drawInternalU:85-87` and
+   * `ComponentRoseSelfArrow#drawInternalU:71-73` return on it before the
+   * line, both arrowheads AND the label — but
+   * `getPreferredHeight`/`getPreferredWidth` (`ComponentRoseArrow.java
+   * :342-349`) are NOT guarded, so a hidden arrow still reserves its full
+   * tile. Reserving space without ink is the whole point of the form, so
+   * nothing in layout may read this field.
+   *
+   * Absent where upstream carries `ArrowBody.NORMAL`, matching
+   * `inclination`'s own optional shape above.
+   */
+  readonly hidden?: boolean;
 }
 
 /** A line segment: an ordered start/end pair in tip-local coordinates. */

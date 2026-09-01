@@ -934,6 +934,34 @@ describe('renderSequence — SVG structure', () => {
 // Divider rendering
 // ---------------------------------------------------------------------------
 
+describe('renderSequence — [hidden] arrows', () => {
+  // Through `makeSyncMessage`'s own overrides, not a spread on its result:
+  // it builds the label RUNS from `label`, so overriding that afterwards
+  // leaves the placed text stale.
+  const msgWith = (extra?: Partial<MessageGeo>): MessageGeo => makeSyncMessage(extra);
+  function bodyFor(m: MessageGeo): string {
+    return renderSequence(
+      makeGeo({ events: [m], participants: [], showFootbox: false }),
+      defaultTheme,
+    ).body;
+  }
+
+  it('draws nothing at all -- not the line, not the heads, not the label', () => {
+    // `ComponentRoseArrow#drawInternalU:85-87` returns on `isHidden()` BEFORE
+    // any of the three, so the label goes with them.
+    expect(bodyFor(msgWith())).toContain('hello');
+    const hidden = bodyFor(msgWith({ arrow: { ...makeSyncMessage().arrow, hidden: true } }));
+    expect(hidden).toBe('');
+  });
+
+  it('suppresses a self arrow too', () => {
+    // `ComponentRoseSelfArrow#drawInternalU:71-73`, the same guard.
+    const self = msgWith({ arrowDirection: 'self' });
+    expect(bodyFor(self)).not.toBe('');
+    expect(bodyFor({ ...self, arrow: { ...self.arrow, hidden: true } })).toBe('');
+  });
+});
+
 describe('renderSequence — dividers', () => {
   /** A divider as layout resolves it: `getTextHeight` = block + 4 + 4 and
    *  `getPreferredHeight` = that + 20 (`ComponentRoseDivider.java:127-129`). */

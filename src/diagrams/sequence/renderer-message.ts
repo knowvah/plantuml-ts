@@ -123,6 +123,13 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
   const configuration = msg.arrow;
+  // `-[hidden]->` draws NOTHING: `ComponentRoseArrow#drawInternalU:85-87` and
+  // `ComponentRoseSelfArrow#drawInternalU:71-73` both return on
+  // `isHidden()` before the line, both arrowheads and the label. The message
+  // still occupies its full height -- neither `getPreferredHeight` nor
+  // `getPreferredWidth` is guarded (`ComponentRoseArrow.java:342-349`) -- so
+  // this suppression belongs here and never in layout.
+  if (configuration.hidden === true) return '';
   const arrow =
     msg.arrowDirection === 'self'
       ? renderSelfMessage(msg, configuration, theme)
