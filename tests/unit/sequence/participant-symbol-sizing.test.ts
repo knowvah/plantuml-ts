@@ -105,8 +105,11 @@ describe('the glyph participant kinds — widths, seen through the spacings', ()
     expect(jar.length).toBeGreaterThanOrEqual(5);
     const deltas = ours.map((s, i) => s - (jar[i] ?? 0));
     for (const d of deltas) expect(d).toBeCloseTo(deltas[0] ?? 0, 3);
-    // And that shared amount is the gap error Batch 6 owns, not a width error.
-    expect(deltas[0]).toBeCloseTo(10, 3);
+    // And that shared amount is now ZERO. It was +10 when this file was
+    // written -- the whole of it was the inter-participant gap, which Batch 6
+    // then corrected from 20 to `LivingSpaces#addConstraints`' 10 (`:61-71`).
+    // Every spacing on this six-kind fixture now lands on the jar's exactly.
+    expect(deltas[0]).toBeCloseTo(0, 3);
   });
 });
 

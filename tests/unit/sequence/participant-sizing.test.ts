@@ -282,3 +282,46 @@ describe('the document origin — where the first box sits', () => {
     expect(Math.min(...xs.filter((n) => n > 0 || n === 0))).toBeCloseTo(ORIGIN, 3);
   });
 });
+
+describe('inter-participant spacing — the lifeline centres', () => {
+  /** Lifeline centres in document order: the `x1` of each dashed line. */
+  function lifelineCentres(svg: string): number[] {
+    return [...svg.matchAll(/<line x1="([\d.]+)"[^>]*dasharray/g)].map((m) => Number(m[1]));
+  }
+
+  // `LivingSpaces#addConstraints:61-71` is
+  // `current.getPosA().ensureBiggerThan(previous.getPosE().addFixed(10))`,
+  // with `posA = posB - marginBefore` and `posE = posD + marginAfter`
+  // (`LivingSpace.java:292-298`) and both margins zero unless an englober or a
+  // self-message overflow widened them. So neighbouring boxes are 10 apart,
+  // edge to edge -- not the 20 this port used.
+  //
+  // Each of these is a fixture where EVERY lifeline centre lands on the jar's,
+  // which is only possible if the widths, the origin and the gap are all right
+  // at once. `degire` and `dicega` carry five participants each, so four
+  // consecutive gaps have to be right for them to pass.
+  it.each([
+    { slug: 'degire-21-dujo330', n: 5 },
+    { slug: 'dicega-90-zubu260', n: 5 },
+    { slug: 'calido-79-kovi606', n: 3 },
+    { slug: 'doleso-00-deme832', n: 2 },
+  ])('$slug: all $n lifeline centres match the jar', ({ slug, n }) => {
+    const jar = lifelineCentres(goldenOf(slug));
+    const ours = lifelineCentres(oursFor(slug));
+    expect(jar).toHaveLength(n);
+    expect(ours).toHaveLength(n);
+    for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
+  });
+
+  it('the natural gap between two plain boxes is 10, edge to edge', () => {
+    const svg = renderFixtureSequence(
+      '@startuml\nparticipant Bob\nparticipant Alice\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    const boxes = participantBoxes(svg).slice(0, 2);
+    expect(boxes).toHaveLength(2);
+    const left = boxes[0]!;
+    const right = boxes[1]!;
+    expect(right.x - (left.x + left.width)).toBeCloseTo(10, 3);
+  });
+});

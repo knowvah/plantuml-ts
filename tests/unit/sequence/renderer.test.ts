@@ -1695,8 +1695,11 @@ describe('renderSequence — exogenous arrows', () => {
     // apply, and the document margins came down from 30 a side to the jar's
     // 10 (`SequenceDiagram#getDefaultMargins:624-628` plus the text block's
     // own `UTranslate(5, 5)`).
-    expect(docWidth(without)).toBe(126);
-    expect(docWidth(withExo)).toBe(149);
+    // 116/139: the gap between the two boxes came down from 20 to the jar's
+    // 10 (`LivingSpaces#addConstraints:61-71`), and the exo's reach is
+    // measured from the now-nearer second lifeline, so both narrow by it.
+    expect(docWidth(without)).toBe(116);
+    expect(docWidth(withExo)).toBe(139);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching

@@ -303,7 +303,7 @@ describe('resolveTheme', () => {
   });
 
   it('merges sequence partial fields', () => {
-    const partial: Partial<Theme> = { sequence: { participantPadding: 99, participantGap: 20, messageSpacing: 20, activationWidth: 10, noteMargin: 5, frameHeaderHeight: 20, lifelineExtension: 20 } };
+    const partial: Partial<Theme> = { sequence: { participantPadding: 99, participantGap: 10, messageSpacing: 20, activationWidth: 10, noteMargin: 5, frameHeaderHeight: 20, lifelineExtension: 20 } };
     const result = resolveTheme(partial);
     expect(result.sequence.participantPadding).toBe(99);
     expect(result.sequence.participantGap).toBe(defaultTheme.sequence.participantGap);

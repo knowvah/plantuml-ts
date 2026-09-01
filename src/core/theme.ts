@@ -255,7 +255,19 @@ export interface Theme {
      * `plans/sequence-coordinate-convergence/findings/participant-width.md`.
      */
     participantPadding: number;
-    /** Horizontal gap between adjacent participant boxes */
+    /**
+     * Horizontal gap between adjacent participant boxes.
+     *
+     * `LivingSpaces#addConstraints:61-71` is the whole rule:
+     * `current.getPosA().ensureBiggerThan(previous.getPosE().addFixed(10))`.
+     * `posA` is `posB - marginBefore` and `posE` is `posD + marginAfter`
+     * (`LivingSpace.java:292-298`), with `posB`/`posD` the box's left and
+     * right edges (`:238-248`) and the two margins zero unless an englober
+     * or a self-message overflow widened them
+     * (`Doll.java:220-221`, `CommunicationTileSelf.java:208-213`). So for
+     * ordinary participants the constraint is `nextLeft >= prevRight + 10`:
+     * a ten-pixel gap between box EDGES.
+     */
     participantGap: number;
     /** Vertical gap between messages */
     messageSpacing: number;
@@ -335,7 +347,7 @@ export const defaultTheme: Theme = {
   },
   sequence: {
     participantPadding: 7,
-    participantGap: 20,
+    participantGap: 10,
     messageSpacing: 20,
     activationWidth: 10,
     noteMargin: 5,

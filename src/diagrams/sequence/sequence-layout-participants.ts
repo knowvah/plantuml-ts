@@ -530,6 +530,10 @@ function advancePastParticipant(
   const nextWidth = participantWidths[i + 1]!;
   // Minimum center-to-center gap so the widest adjacent message label fits.
   const minCenterGap = (adjMaxLabelW[i] ?? 0) + LABEL_H_PADDING * 2;
+  // `nextA >= prevE + 10` (`LivingSpaces#addConstraints:61-71`) -- an EDGE
+  // gap, expressed here through centres. See `theme.ts`'s note on
+  // `participantGap` for why the margins in `posA`/`posE` are zero for an
+  // ordinary participant.
   const naturalCenterGap = width / 2 + theme.sequence.participantGap + nextWidth / 2;
   const centerGap = Math.max(naturalCenterGap, minCenterGap);
   const edgeGap = centerGap - width / 2 - nextWidth / 2;
