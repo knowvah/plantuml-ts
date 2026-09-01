@@ -9,13 +9,13 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1044 modules · 3714 exported names.
+1046 modules · 3730 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `IncludeWarmupOptions`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderSync`, `render`, `renderAll` |  |
+| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `IncludeWarmupOptions`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
 
 ## `src/core/`
 
@@ -39,7 +39,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole.ts` | `CreoleSpan`, `TableCell`, `TableToken`, `measureTable`, `tableTokenToSvg`, `spansToTspan`, `CreoleToken`, `parseCreole`, `parseCreoleTokens`, `creoleToSvg` | Creole markup parser for PlantUML labels. |
 | `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `stripSpriteRegions` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
-| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
+| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `edge-label-box.ts` | `stripCreoleMarkup`, `ReservedLabelBox`, `CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT`, `VisibilityIconAdjustment`, `applyVisibilityIcon`, `applyGuillemet`, `MagicArrowDirection`, `MagicArrowLabel`, `parseMagicArrowLabel`, `computeReservedLabelBox`, `QuantifierBox`, `computeQuantifierBox`, `NoteOnLinkPosition`, `MergedLabelBoxInput`, `computeMergedLabelBox` | The reserved box an edge label occupies in the DOT handed to graphviz. |
 | `EmbeddedDiagram.ts` | `Line`, `NestedDiagramRenderer`, `getEmbeddedType`, `EmbeddedDiagram` | EmbeddedDiagram — a creole `{{ ... |
@@ -1250,7 +1250,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `ParticipantType`, `Participant`, `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantBadge`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
+| `ast.ts` | `ParticipantType`, `Participant`, `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `NewpageEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `ParticipantBadge`, `ParticipantGeo`, `TextRun`, `MessageGeo`, `NoteGeo`, `ActivationGeo`, `FrameGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `EventGeo`, `BoxGeo`, `SequenceGeometry` | AST and Geometry type definitions for PlantUML sequence diagrams. |
 | `command-arrow.ts` | `returnCommand`, `ARROW_SOURCE`, `UNDRESSED_ARROW_SOURCE`, `DRESSED_ARROW_SOURCE`, `getInclination`, `withPart`, `arrowCommand`, `decoratedArrowCommand` | `CommandArrow` (`SequenceDiagramFactory.java:111`) — ONE upstream command, rebuilt here from the composed named groups of `sequence-arrow-regex.ts` rather than from an enumerated token table (`->`, `-->>`, `->>`, `-->`). |
 | `command-autonumber.ts` | `autonumberCommand`, `autonumberStopCommand`, `autonumberResumeCommand`, `autonumberIncrementCommand` | The autonumber block: `CommandAutonumber` (`SequenceDiagramFactory .java:146`), `CommandAutonumberStop` (`:147`), `CommandAutonumberResume` (`:148`) and `CommandAutonumberIncrement` (`:149`), registered as four consecutive entries. |
 | `command-common.ts` | `skinParamMessageAlignCommand`, `pragmaCommand`, `rotateCommand`, `hideStereotypeCommand`, `hideUnlinkedCommand`, `scaleCommand` | The `CommonCommands.addCommonCommands1(cmds)` block — the VERY FIRST thing `SequenceDiagramFactory#initCommandsList` registers (`:100`), ahead of every sequence-specific command — plus `CommandHideUnlinked` (`:101`), the single command regi |
@@ -1266,6 +1266,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
 | `index.ts` | `sequencePlugin` | Sequence diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
+| `newpage-style.ts` | `NEWPAGE_MARGIN_Y`, `NEWPAGE_LINE_HEIGHT`, `NEWPAGE_TILE_HEIGHT`, `NEWPAGE_LINE_COLOR`, `NEWPAGE_LINE_THICKNESS`, `NEWPAGE_DASH_UNIT` | Style and size constants for the sequence-diagram page separator (`newpage`). |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
 | `renderer-arrowhead-glyph.ts` | `paintOf`, `niceArrowOf`, `ARROW_THICKNESS`, `renderArrowHead` | Arrow-head GLYPH drawing: the paint, the polygon, the async lines and the decoration circle that one arrow END draws. |
 | `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
@@ -1275,7 +1276,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderParticipantBox`, `renderFooterBox` | renderer-participant-shapes.ts — one participant's head or footer BLOCK: its glyph, its label, and the dispatch between them. |
 | `renderer-participant-symbol.ts` | `SymbolParticipantType`, `GlyphParticipantType`, `ParticipantSymbolGeo`, `ParticipantSymbolOpts`, `COLLECTIONS_DELTA`, `measureParticipantSymbol`, `renderParticipantSymbol` | renderer-participant-symbol.ts — the sequence engine's participant GLYPH seam: a sequence-local mirror of upstream's `ComponentRose*` family (`skin/rose/Rose.java#createComponentParticipant`, `:137-190`) that drives the SHARED, already-port |
-| `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
+| `renderer.ts` | `renderSequencePage`, `renderSequence` | Sequence diagram SVG renderer. |
 | `scale-geo.ts` | `scaleSequenceGeometry`, `ScaledTheme`, `scaleSequenceTheme`, `scaleHeadGeometry`, `scaledDashPattern` | The `scale …` directive for the sequence engine, applied at the layout→render boundary — mirrors `json/scale-geo.ts` exactly (same rationale, same "why scaling inputs equals scaling outputs" argument); see that file's header for the full de |
 | `sequence-arrow-regex.ts` | `ANCHOR`, `anchor`, `COLOR_OR_STYLE_PATTERN`, `colorOrStylePattern`, `ARROW_DRESSING1`, `ARROW_DRESSING2`, `ARROW_BODY_OR`, `PART1`, `PART2`, `ARROW_SUPPCIRCLE2_LEFT`, `ARROW_SUPPCIRCLE1_LEFT`, `ARROW_SUPPCIRCLE1_RIGHT`, `ARROW_SUPPCIRCLE2_RIGHT`, `MULTICAST`, `ACTIVATION`, `LIFECOLOR`, `ARROW_SKELETON_SOURCE`, `ARROW_SKELETON_RE` | Shared regex fragments behind the sequence-diagram arrow commands. |
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `inclination1Of`, `inclination2Of`, `inclinationAngle1`, `inclinationAngle2`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
@@ -1286,6 +1287,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
+| `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `urlOf`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 

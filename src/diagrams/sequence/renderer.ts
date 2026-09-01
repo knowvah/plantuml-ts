@@ -26,11 +26,13 @@ import type {
   NoteGeo,
   FrameGeo,
   DividerGeo,
+  NewpageGeo,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { rect, line, text, noteBox } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
 import { renderLifelinePass } from './renderer-lifeline.js';
@@ -49,6 +51,13 @@ import {
 } from './divider-style.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
+import { paginateSequence } from './sequence-page.js';
+import {
+  NEWPAGE_DASH_UNIT,
+  NEWPAGE_LINE_COLOR,
+  NEWPAGE_LINE_THICKNESS,
+  NEWPAGE_MARGIN_Y,
+} from './newpage-style.js';
 
 // ---------------------------------------------------------------------------
 // Note helpers
@@ -276,6 +285,31 @@ function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
   return divider.text.length === 0 ? band : band + renderDividerLabel(divider, theme);
 }
 
+/**
+ * The page separator: ONE `ULine.hline(areaWidth)`, and nothing else.
+ *
+ * `ComponentRoseNewpage#drawInternalU` is three statements -- take the
+ * style's stroke and line colour, draw a horizontal line the width of the
+ * `Area` (`:59-64`) -- and `NewpageTile#drawU` hands it an `Area` spanning
+ * `border1 … border2`, translated by `dy(MARGINY)` inside the tile
+ * (`:83-90`). So the line sits 10px below the tile's top, which is what puts
+ * it inside BOTH adjacent page bands.
+ *
+ * It draws nothing in the background pass -- `drawU` returns early on
+ * `isBackground` (`NewpageTile.java:79-81`) -- which `renderEvent`'s
+ * `isBackground` guard already provides.
+ */
+function renderNewpage(newpage: NewpageGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const y = newpage.y + NEWPAGE_MARGIN_Y * k;
+  const unit = fmt(NEWPAGE_DASH_UNIT * k);
+  return line(newpage.bandX, y, newpage.bandX + newpage.bandWidth, y, {
+    stroke: NEWPAGE_LINE_COLOR,
+    strokeWidth: NEWPAGE_LINE_THICKNESS * k,
+    strokeDasharray: `${unit},${unit}`,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Event dispatcher
 // ---------------------------------------------------------------------------
@@ -308,6 +342,8 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
     case 'space':
       // Space geos add no visible elements
       return '';
+    case 'newpage':
+      return renderNewpage(event, theme);
   }
 }
 
@@ -358,9 +394,38 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
 const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
 
 /**
- * Render a sequence diagram geometry into an SVG string.
+ * Render ONE PAGE of a sequence diagram geometry into an SVG string.
+ *
+ * `SequenceDiagramFileMakerTeoz#getTextBlock(num, …)` sets the page index on
+ * the body and only then draws it (`:127-146`), so the page selection sits
+ * exactly here: between layout and render, ahead of the scale multiply,
+ * because upstream paginates in layout space and applies `scale` on the way
+ * out (`SvgGraphics#format`).
+ *
+ * `paginateSequence` returns `geo` by reference when the document has no
+ * `newpage`, which is every document but 35 of the oracle corpus.
+ */
+export function renderSequencePage(
+  geo: SequenceGeometry,
+  theme: Theme,
+  pageIndex: number,
+): RenderFragment {
+  return renderPaginated(paginateSequence(geo, pageIndex), theme);
+}
+
+/**
+ * Render a sequence diagram geometry into an SVG string — PAGE 1 of it.
+ *
+ * The jar writes `f.svg`, `f_001.svg`, … for a multi-page document; this
+ * port's render entry point returns one string, so it returns the first
+ * page and {@link renderSequencePage} reaches the rest. See
+ * `plans/sequence-newpage-pagination/decisions.md` D5.
  */
 export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragment {
+  return renderSequencePage(geo, theme, 0);
+}
+
+function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   // T13: `resolveScaleFactor` needs the UNSCALED document dims -- `geo`
   // itself, before `scaleSequenceGeometry` runs below.
   const k = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight);

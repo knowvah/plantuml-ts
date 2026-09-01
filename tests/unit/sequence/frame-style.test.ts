@@ -108,6 +108,7 @@ function makeGeometry(frame: FrameGeo): SequenceGeometry {
     totalHeight: 300,
     participants: [],
     events: [frame],
+    headHeight: 36,
     lifelineEndY: 200,
     footerShapeY: 210,
     boxes: [],

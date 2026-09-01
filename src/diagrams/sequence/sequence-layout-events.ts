@@ -16,6 +16,8 @@ import type {
   EventGeo,
   FrameEvent,
   FrameGeo,
+  NewpageEvent,
+  NewpageGeo,
   NoteEvent,
   NoteGeo,
   ParticipantGeo,
@@ -31,6 +33,7 @@ import {
   dividerFontSpecOf,
   dividerPreferredHeight,
 } from './divider-style.js';
+import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
@@ -58,6 +61,10 @@ export interface EventProcessingContext {
   activationStart: Map<string, ActivationRecord>;
   eventGeos: EventGeo[];
   dividerGeos: DividerGeo[];
+  /** The newpage tiles, in layout order — `PlayingSpace#getNewpageTiles`
+   *  (`:326-336`). Collected alongside `dividerGeos` for the same reason:
+   *  both need `totalWidth` back-filled once Step 3 knows it. */
+  newpageGeos: NewpageGeo[];
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
@@ -98,6 +105,7 @@ function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProc
     case 'divider': handleDividerEvent(event, cursor, ctx); return;
     case 'delay': handleDelayEvent(event, cursor, ctx); return;
     case 'space': handleSpaceEvent(event, cursor, ctx); return;
+    case 'newpage': handleNewpageEvent(event, cursor, ctx); return;
   }
 }
 
@@ -346,6 +354,34 @@ function handleDelayEvent(
 ): void {
   // Delay events carry no geometry — advance by one message spacing
   cursor.y += ctx.theme.sequence.messageSpacing;
+}
+
+/**
+ * `NewpageTile` (`teoz/NewpageTile.java:63-67`): a tile whose `YGauge` starts
+ * at the running cursor and whose height is a CONSTANT
+ * `getPreferredHeight()` — no measurement, no participant lookup. The cursor
+ * advances by that height like it does past any other tile, which is what
+ * makes `newpage` occupy 21px of the diagram rather than nothing.
+ *
+ * The tile draws nothing in the background pass (`drawU` returns early on
+ * `isBackground`) and one `ULine.hline` in the foreground; the band it spans
+ * is back-filled in Step 3.
+ */
+function handleNewpageEvent(
+  _event: NewpageEvent,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+): void {
+  const newpageGeo: NewpageGeo = {
+    kind: 'newpage',
+    y: cursor.y,
+    height: NEWPAGE_TILE_HEIGHT,
+    bandX: 0, // both back-filled once totalWidth is known (Step 3)
+    bandWidth: 0,
+  };
+  ctx.eventGeos.push(newpageGeo);
+  ctx.newpageGeos.push(newpageGeo);
+  cursor.y += newpageGeo.height;
 }
 
 function handleSpaceEvent(

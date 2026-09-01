@@ -242,6 +242,11 @@ export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledThe
     rx: ROUND_CORNER * k,
     ry: ROUND_CORNER * k,
   });
+  // The page clip took the tab: its `UPath` failed `DriverPathSvg`'s
+  // min/max-corner test and its label `UText` failed `DriverTextSvg`'s
+  // anchor test, so the body outline is all that is left of the header.
+  // See `FrameGeo.headerClipped`.
+  if (frame.headerClipped === true) return bodyRectEl;
   const textEl = renderHeaderText(frame, theme);
   if (frame.frameType === 'ref') return bodyRectEl + cornerEl + textEl;
   return cornerEl + bodyRectEl + textEl;

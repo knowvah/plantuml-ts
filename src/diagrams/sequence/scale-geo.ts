@@ -77,6 +77,7 @@ import type {
   FrameGeo,
   DividerGeo,
   SpaceGeo,
+  NewpageGeo,
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
@@ -179,6 +180,18 @@ function scaleSpace(s: SpaceGeo, k: number): SpaceGeo {
   return { ...s, y: s.y * k, height: s.height * k };
 }
 
+/** A newpage separator's geometry, scaled. Every field is a length; there is
+ *  no data half to leave alone. */
+function scaleNewpage(n: NewpageGeo, k: number): NewpageGeo {
+  return {
+    ...n,
+    y: n.y * k,
+    height: n.height * k,
+    bandX: n.bandX * k,
+    bandWidth: n.bandWidth * k,
+  };
+}
+
 /** One `EventGeo`, scaled by its `kind`. Every member of the union carries
  *  its own positional numerics (see `ast.ts:299-305`); `sequenceNumber`/
  *  `label`/`text` etc. are DATA, not geometry, and are left untouched. */
@@ -196,6 +209,8 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleDivider(event, k);
     case 'space':
       return scaleSpace(event, k);
+    case 'newpage':
+      return scaleNewpage(event, k);
   }
 }
 
@@ -212,6 +227,7 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
     ...geo,
     totalWidth: geo.totalWidth * k,
     totalHeight: geo.totalHeight * k,
+    headHeight: geo.headHeight * k,
     lifelineEndY: geo.lifelineEndY * k,
     footerShapeY: geo.footerShapeY * k,
     participants: geo.participants.map((p) => scaleParticipant(p, k)),
