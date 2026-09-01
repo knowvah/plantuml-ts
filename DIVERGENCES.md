@@ -1146,12 +1146,23 @@ width per level. `kejoke-76-curu931`'s golden runs `x=52.075, 57.075, 62.075,
 67.075` down four levels on a lifeline at `cx=57.075`, and this port now steps
 the same way.
 
-Still NOT ported, and adjacent: `CommunicationTile` also shifts a MESSAGE's
-endpoints by the live level (`:333-350`), so an arrow to or from an activated
-participant starts at the bar's edge rather than the lifeline's centre — the
-jar's `rugeco-70-muro754` draws `x1="39"` from a lifeline at `x=34`. This port
-still anchors every arrow on the centre. `activationLevel` is in place for
-whoever ports it.
+The MESSAGE-endpoint offset followed: `CommunicationTile#drawU` moves an
+arrow's two ends out of the way of the bars they land on (`:328-350`), and
+`CommunicationExoTile` does the same for its one end (`:122-129`). Both are
+in, with upstream's asymmetry between the forward and reverse branches kept
+verbatim — including the reverse branch's `level1 == 2`, which falls between
+its `== 1` and `> 2` arms and gets no adjustment at all. The exo path already
+had the arithmetic and was being fed a 0-or-1 stand-in; it now gets the real
+level.
+
+**Still NOT ported: the SELF-message offset.** `CommunicationTileSelf`
+(`:129-147`) reads TWO history modes at once (`IGNORE_FUTURE_ACTIVATE` and
+`CONSIDER_FUTURE_DEACTIVATE`), offsets by their difference, and then hands
+`Area.setDeltaX1`/`setLevel`/`setLiveDeltaSize` to the self-loop component,
+which reshapes the loop around the bar. That is the component's geometry, not
+just an endpoint, and it is left alone rather than approximated. A self
+message on an activated participant still draws its loop from the lifeline's
+centre.
 
 ## Grouping-frame background shadow is not ported
 

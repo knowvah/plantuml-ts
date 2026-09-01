@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1046 modules · 3736 exported names.
+1046 modules · 3737 exported names.
 
 ## `src/`
 
@@ -1286,7 +1286,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-message.ts` | `handleMessageEvent` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
-| `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
+| `sequence-layout-shared.ts` | `fontSpecOf`, `LIVE_DELTA_SIZE` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |

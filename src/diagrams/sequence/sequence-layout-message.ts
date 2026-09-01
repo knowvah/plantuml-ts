@@ -15,23 +15,34 @@
  * @see .../sequencediagram/graphic/MessageExoArrow.java
  */
 
-import type { MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
+import type { ActivationEvent, MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
-import { emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  activationLevel,
+  emitActivation,
+  openActivation,
+  pushActivation,
+} from './sequence-layout-events.js';
+import { fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 
 export function handleMessageEvent(
   event: MessageEvent,
   cursor: EventCursor,
   ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[] = [],
 ): void {
   const fromGeo = ctx.participantMap.get(event.from);
   const toGeo = ctx.participantMap.get(event.to);
   // Skip gracefully if either participant is unknown
   if (fromGeo === undefined || toGeo === undefined) return;
 
-  const endpoints = resolveMessageEndpoints(event, fromGeo, toGeo, ctx);
+  const endpoints = liveOffsetEndpoints(
+    resolveMessageEndpoints(event, fromGeo, toGeo, ctx),
+    event,
+    ctx,
+    bound,
+  );
   const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
   // A multi-line label grows UPWARD from its arrow (`text-block-geo.ts`), so
   // the extra rows are reserved BEFORE the arrow is placed, not after.
@@ -101,6 +112,96 @@ function buildMessageGeo(
     arrowDirection: endpoints.arrowDirection,
     ...passthroughFields(event),
   };
+}
+
+/**
+ * `livingSpace.getLevelAt(this, EventsHistoryMode.IGNORE_FUTURE_DEACTIVATE)`
+ * for one endpoint of one message.
+ *
+ * IGNORE_FUTURE_DEACTIVATE names both halves: a life event bound to THIS
+ * message counts if it is an ACTIVATE (`mode != IGNORE_FUTURE_ACTIVATE`,
+ * `LiveBoxes.java:130-135`) and does NOT count if it is a DEACTIVATE
+ * (`mode == CONSIDER_FUTURE_DEACTIVATE`, `:137-142`). So an arrow that
+ * activates its target already dodges the bar it is about to open, and one
+ * that deactivates its source still leaves from the bar it is about to
+ * close.
+ *
+ * The port satisfies the second half for free -- `applyMessageActivation`
+ * runs AFTER the geometry, so a `--` has not popped the stack yet. The first
+ * half is what `bound` and `event.activates` add.
+ */
+function liveLevelAt(
+  participantId: string,
+  event: MessageEvent,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[],
+): number {
+  let level = activationLevel(ctx.activationStart, participantId);
+  if (event.activates === participantId) level++;
+  for (const life of bound)
+    if (life.kind === 'activate' && life.participantId === participantId) level++;
+  return level;
+}
+
+/**
+ * `CommunicationTile#drawU`'s two level branches (`:328-350`), which move a
+ * message's endpoints out of the way of the activation bars they land on.
+ *
+ * The two branches are NOT mirror images, and the asymmetry is upstream's,
+ * kept verbatim:
+ *
+ * ```java
+ * if (isReverse) {                              // right-to-left
+ *     if (level1 == 1)      x1 -= LIVE_DELTA_SIZE;
+ *     else if (level1 > 2)  x1 += LIVE_DELTA_SIZE * (level1 - 2);
+ *     x2 += LIVE_DELTA_SIZE * level2;
+ * } else {                                      // left-to-right
+ *     if (level2 > 0) level2 = level2 - 2;
+ *     x1 += LIVE_DELTA_SIZE * level1;
+ *     x2 += LIVE_DELTA_SIZE * level2;
+ * }
+ * ```
+ *
+ * Note what the reverse branch does NOT do: `level1 == 2` gets no adjustment
+ * at all, falling between the `== 1` and `> 2` arms. That reads like an
+ * off-by-one and it is not corrected here -- see this project's rule on
+ * apparent upstream bugs.
+ *
+ * `x1` is participant1, the SENDER, in both branches; `isReverse` is
+ * `point1 > point2` (`:125-132`), i.e. this port's `arrowDirection ===
+ * 'left'`. A SELF message has one lifeline and its own tile
+ * (`CommunicationTileSelf:129-138`, two different history modes plus an
+ * `Area.deltaX1`/`level` the self-loop component reads); it is left alone
+ * here.
+ *
+ * Jar-verified. `rugeco-70-muro754`, forward, `a ->> b --++` with `a`
+ * already activated: `x1 = 34 + 5 = 39`, which is the golden's `x1="39"`
+ * from a lifeline at 34; and `level2 = 1` for the target it activates, so
+ * `x2 = 133.769 - 5 = 128.769`. `kejoke-76-curu931`, reverse,
+ * `Particpant_A <- Particpant_B` into an activated `A`: `level2 = 1` puts
+ * the left end at `57.075 + 5 = 62.075`, which is where the golden's arrow
+ * starts.
+ */
+function liveOffsetEndpoints(
+  endpoints: MessageEndpoints,
+  event: MessageEvent,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[],
+): MessageEndpoints {
+  if (endpoints.arrowDirection === 'self') return endpoints;
+  const level1 = liveLevelAt(event.from, event, ctx, bound);
+  const level2 = liveLevelAt(event.to, event, ctx, bound);
+  let { fromX, toX } = endpoints;
+
+  if (endpoints.arrowDirection === 'left') {
+    if (level1 === 1) fromX -= LIVE_DELTA_SIZE;
+    else if (level1 > 2) fromX += LIVE_DELTA_SIZE * (level1 - 2);
+    toX += LIVE_DELTA_SIZE * level2;
+  } else {
+    fromX += LIVE_DELTA_SIZE * level1;
+    toX += LIVE_DELTA_SIZE * (level2 > 0 ? level2 - 2 : 0);
+  }
+  return { ...endpoints, fromX, toX };
 }
 
 /** Arrow endpoints/direction resolved for a single message. */
