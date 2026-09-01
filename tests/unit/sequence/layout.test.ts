@@ -213,6 +213,92 @@ describe('layoutSequence — activation (AC 4)', () => {
     expect(bars[0]!.y + bars[0]!.height).toBeLessThan(bars[1]!.y + bars[1]!.height);
   });
 
+  /**
+   * `CommunicationTile#drawU:340-350`, the FORWARD branch: the sender's end
+   * steps right by `LIVE_DELTA_SIZE * level1`, and the receiver's by
+   * `LIVE_DELTA_SIZE * (level2 - 2)` when it is live at all.
+   *
+   * `level2` here is 1 because the message's own `++` counts --
+   * IGNORE_FUTURE_DEACTIVATE counts a future ACTIVATE bound to this message
+   * (`LiveBoxes.java:130-135`) -- so the target's end pulls LEFT by 5, into
+   * the bar it is about to open. Jar-verified on `rugeco-70-muro754`.
+   */
+  it('offsets a forward arrow by each end`s live level', () => {
+    const ast = makeAst(['a', 'b'], [
+      { kind: 'activate', participantId: 'a' } satisfies SequenceEvent,
+      msg('a', 'b', 'x', { activates: 'b' }),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const [a, b] = geo.participants;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(a!.centerX + 5);
+    expect(m.toX).toBe(b!.centerX - 5);
+  });
+
+  /** The REVERSE branch (`:329-337`), which is not the mirror image: the
+   *  receiver's end moves right by `5 * level2` while the sender's moves
+   *  LEFT by 5 at level 1. Jar-verified on `kejoke-76-curu931`. */
+  it('offsets a reverse arrow by the other branch`s rule', () => {
+    const ast = makeAst(['a', 'b'], [
+      { kind: 'activate', participantId: 'a' } satisfies SequenceEvent,
+      msg('b', 'a', 'x'),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const [a, b] = geo.participants;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(b!.centerX);
+    expect(m.toX).toBe(a!.centerX + 5);
+  });
+
+  /** `level1 == 2` falls between the reverse branch's `== 1` and `> 2` arms
+   *  and gets NO adjustment. Preserved rather than smoothed -- see
+   *  `liveOffsetEndpoints`. */
+  it('leaves a reverse arrow`s sender alone at level 2, as upstream does', () => {
+    const ast = makeAst(['a', 'b'], [
+      { kind: 'activate', participantId: 'b' } satisfies SequenceEvent,
+      { kind: 'activate', participantId: 'b' } satisfies SequenceEvent,
+      msg('b', 'a', 'x'),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const b = geo.participants[1]!;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(b.centerX);
+  });
+
+  /** A standalone `activate X` FOLLOWING a message is bound to it
+   *  (`SequenceDiagram#activate:396-399`) and counts toward that message's
+   *  own level, which is why the port looks ahead. `kejoke-76-curu931`'s
+   *  first group is exactly this shape. */
+  it('counts an activate bound to the message that precedes it', () => {
+    const ast = makeAst(['a', 'b'], [
+      msg('a', 'b', 'x'),
+      { kind: 'activate', participantId: 'a' } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const a = geo.participants[0]!;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(a.centerX + 5);
+  });
+
+  /** A frame boundary breaks the bind: upstream's forward walk stops at the
+   *  first non-(LifeEvent|Message), and a GroupingStart is one. */
+  it('does not bind an activate inside a following frame', () => {
+    const ast = makeAst(['a', 'b'], [
+      msg('a', 'b', 'x'),
+      {
+        kind: 'frame',
+        frameType: 'opt',
+        label: 'test',
+        branches: [[{ kind: 'activate', participantId: 'a' } satisfies SequenceEvent]],
+        branchLabels: ['test'],
+      } satisfies SequenceEvent,
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const a = geo.participants[0]!;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(a.centerX);
+  });
+
   /** `Step#getIndent`, 1-based: the depth the bar was OPENED at, which is
    *  what `LiveBoxes#drawBoxes` loops `for (int i = 1; i <= max; i++)` over
    *  and hands to `drawOneLevel` as its x offset. */

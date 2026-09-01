@@ -41,7 +41,7 @@ import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import { fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 
@@ -60,9 +60,6 @@ const ARROW_PADDING_X = 7;
  *  value `text-block-geo.ts` places the number with; duplicated rather than
  *  imported because that module is not this task's to widen. */
 const MESSAGE_NUMBER_MARGIN = 4;
-
-/** One activation-bar half-width. @see teoz/CommunicationTile.java:172 */
-const LIVE_DELTA_SIZE = 5;
 
 /** How far a matching-side `ArrowDecoration.CIRCLE` pulls the border end in.
  *  @see teoz/CommunicationExoTile.java:138-147 */
@@ -185,11 +182,18 @@ function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingConte
   let x1 = right || event.shortArrow ? point1 : BORDER1;
   let x2 = point2;
 
-  // Kept at 0-or-1 rather than the real nesting depth: this is what the
-  // single-record activation model could express, and widening it is an exo
-  // geometry change with its own measurement, not part of the activation
-  // stack's. `activationLevel` is there when that measurement is made.
-  const level = activationLevel(ctx.activationStart, event.participant) > 0 ? 1 : 0;
+  // `livingSpace.getLevelAt(this, IGNORE_FUTURE_DEACTIVATE)`
+  // (`CommunicationExoTile.java:122`) -- the participant's real nesting
+  // depth, which is what the two lines below were always written to
+  // multiply. It was pinned at 0-or-1 while the port's activation model
+  // could not count past one; the stack can, so this is now the number
+  // upstream reads.
+  //
+  // An exo message has ONE participant and no `activates` field of its own
+  // (the `+`/`-` suffix is emitted as a separate `ActivationEvent` AFTER
+  // this message, `command-exo-arrow.ts`), so there is no future-activate
+  // term to add: the stack already holds everything bound before it.
+  const level = activationLevel(ctx.activationStart, event.participant);
   if (level > 0) {
     if (right) x1 += LIVE_DELTA_SIZE * level;
     else x2 += LIVE_DELTA_SIZE * (level - 2);

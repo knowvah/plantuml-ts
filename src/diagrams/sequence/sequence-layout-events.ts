@@ -101,16 +101,53 @@ export function processEvents(
   ctx: EventProcessingContext,
 ): number {
   const cursor: EventCursor = { y: startY, lastMessageY: undefined };
-  for (const event of events) {
-    dispatchEvent(event, cursor, ctx);
+  for (let i = 0; i < events.length; i++) {
+    dispatchEvent(events[i]!, cursor, ctx, boundLifeEvents(events, i));
   }
   return cursor.y;
 }
 
+/**
+ * The life events upstream BINDS to `events[index]`, when that is a message.
+ *
+ * `SequenceDiagram#activate` calls `lifeEvent.setMessage(lastMessage)` for
+ * every activate/deactivate that follows a message (`:396-399`), and
+ * `LiveBoxes#getLevelAtInternal` then walks forward from the message picking
+ * up exactly those (`le.getMessage() == msg`, `:120-125`) to decide the
+ * level AT it.
+ *
+ * Upstream's walk skips notes (`nextButSkippingNotes`) and `continue`s past
+ * a following MESSAGE rather than breaking; this breaks there instead, which
+ * is equivalent — a life event after a later message is bound to THAT
+ * message, so the `le.getMessage() == msg` test would reject it anyway.
+ * It also breaks on anything else, which is upstream's own
+ * `if (!(next instanceof LifeEvent || next instanceof AbstractMessage))
+ * break;` — and that is what keeps a frame boundary from binding an
+ * `activate` inside the frame to the message before it.
+ */
+function boundLifeEvents(
+  events: readonly SequenceEvent[],
+  index: number,
+): ActivationEvent[] {
+  const bound: ActivationEvent[] = [];
+  for (let i = index + 1; i < events.length; i++) {
+    const next = events[i]!;
+    if (next.kind === 'note') continue;
+    if (next.kind !== 'activate' && next.kind !== 'deactivate') break;
+    bound.push(next);
+  }
+  return bound;
+}
+
 /** Route a single event to its kind-specific handler. */
-function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+function dispatchEvent(
+  event: SequenceEvent,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[],
+): void {
   switch (event.kind) {
-    case 'message': handleMessageEvent(event, cursor, ctx); return;
+    case 'message': handleMessageEvent(event, cursor, ctx, bound); return;
     // Exo geometry is its own module, never `handleMessageEvent`'s:
     // `MessageExo.isSelfMessage()` is FALSE (`MessageExo.java:99-101`, D3)
     // although both of its participants are the same, so the `from === to`
