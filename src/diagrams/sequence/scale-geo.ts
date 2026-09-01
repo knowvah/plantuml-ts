@@ -129,6 +129,7 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
     fromX: m.fromX * k,
     toX: m.toX * k,
     y: m.y * k,
+    ...(m.selfReturnX !== undefined ? { selfReturnX: m.selfReturnX * k } : {}),
     labelLines: m.labelLines.map((r) => scaleRun(r, k)),
     ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
   };

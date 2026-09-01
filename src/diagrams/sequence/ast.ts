@@ -444,6 +444,25 @@ export interface MessageGeo {
   exoType?: MessageExoType;
   /** {@link MessageExoEvent.shortArrow}, likewise exo-only. */
   shortArrow?: boolean;
+  /**
+   * SELF messages only: the x the RETURNING (lower) horizontal segment
+   * starts at, where {@link fromX} is the OUTGOING (upper) one's.
+   *
+   * The two differ. `ComponentRoseSelfArrow#drawRightSide` opens with
+   * ```java
+   * double x1 = area.getDeltaX1() < 0 ? area.getDeltaX1() : 0;
+   * double x2 = area.getDeltaX1() > 0 ? -area.getDeltaX1() : 1;
+   * ```
+   * (`:92-93`) — so even with no live participant at all the returning
+   * segment starts ONE pixel right of the outgoing one, and when the message
+   * opens or closes an activation the two split by a whole
+   * `LIVE_DELTA_SIZE`. Jar-verified on `jobadi-87-jegi648`
+   * (`34.469`/`35.469`, the bare +1) and `gesiba-07-rise357`
+   * (`60.044`/`66.044`, a `B -> B ++` straddling its own new bar).
+   *
+   * Absent on every non-self message.
+   */
+  selfReturnX?: number;
 }
 
 export interface NoteGeo {

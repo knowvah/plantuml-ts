@@ -299,6 +299,60 @@ describe('layoutSequence — activation (AC 4)', () => {
     expect(m.fromX).toBe(a.centerX);
   });
 
+  /**
+   * `CommunicationTileSelf#drawU:132-138` plus the two lines of
+   * `ComponentRoseSelfArrow#drawRightSide:92-93` that read what it sets.
+   *
+   * The two horizontal segments of a self loop do not start at the same x,
+   * and they differ even with nothing live: `x2`'s `: 1` fallback. Level 0
+   * therefore reads `cx` and `cx + 1`.
+   */
+  it('splits a self loop`s two segments by one pixel with nothing live', () => {
+    const ast = makeAst(['a'], [msg('a', 'a', 'x')]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const a = geo.participants[0]!;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(a.centerX);
+    expect(m.selfReturnX).toBe(a.centerX + 1);
+  });
+
+  /** Jar-verified on `jobadi-87-jegi648` (`activate Bob` / `Bob -> Bob`):
+   *  its golden's segments are `34.469` and `35.469` off a lifeline at
+   *  `29.469`, i.e. `cx + 5` and `cx + 6`. */
+  it('shifts a self loop right by the live level', () => {
+    const ast = makeAst(['a'], [
+      { kind: 'activate', participantId: 'a' } satisfies SequenceEvent,
+      msg('a', 'a', 'x'),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const a = geo.participants[0]!;
+    const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
+    expect(m.fromX).toBe(a.centerX + 5);
+    expect(m.selfReturnX).toBe(a.centerX + 6);
+  });
+
+  /**
+   * A self message that OPENS a bar straddles it: `levelIgnore` 1,
+   * `levelConsidere` 2, so the base moves twice and `deltaX1 = -5` pulls the
+   * outgoing segment back onto the old bar's edge while the returning one
+   * lands on the new bar's.
+   *
+   * Jar-verified on `gesiba-07-rise357` (`A -> B ++` then `B -> B ++`):
+   * `60.044` and `66.044` off a lifeline at `55.044`, i.e. `cx + 5` and
+   * `cx + 11`.
+   */
+  it('straddles the bar a self message opens', () => {
+    const ast = makeAst(['a', 'b'], [
+      msg('a', 'b', 'x', { activates: 'b' }),
+      msg('b', 'b', 'y', { activates: 'b' }),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const b = geo.participants[1]!;
+    const self = geo.events.filter((e): e is MessageGeo => e.kind === 'message')[1]!;
+    expect(self.fromX).toBe(b.centerX + 5);
+    expect(self.selfReturnX).toBe(b.centerX + 11);
+  });
+
   /** `Step#getIndent`, 1-based: the depth the bar was OPENED at, which is
    *  what `LiveBoxes#drawBoxes` loops `for (int i = 1; i <= max; i++)` over
    *  and hands to `drawOneLevel` as its x offset. */

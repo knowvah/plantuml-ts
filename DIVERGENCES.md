@@ -1155,14 +1155,26 @@ its `== 1` and `> 2` arms and gets no adjustment at all. The exo path already
 had the arithmetic and was being fed a 0-or-1 stand-in; it now gets the real
 level.
 
-**Still NOT ported: the SELF-message offset.** `CommunicationTileSelf`
-(`:129-147`) reads TWO history modes at once (`IGNORE_FUTURE_ACTIVATE` and
-`CONSIDER_FUTURE_DEACTIVATE`), offsets by their difference, and then hands
-`Area.setDeltaX1`/`setLevel`/`setLiveDeltaSize` to the self-loop component,
-which reshapes the loop around the bar. That is the component's geometry, not
-just an endpoint, and it is left alone rather than approximated. A self
-message on an activated participant still draws its loop from the lifeline's
-centre.
+The SELF-message offset went in last, and it is two things rather than one.
+`CommunicationTileSelf#drawU` (`:129-138`) shifts the loop right by
+`levelIgnore`, and again by `levelConsidere - levelIgnore` when the message
+opens a bar; `ComponentRoseSelfArrow#drawRightSide` (`:92-93`) then splits the
+loop's two horizontal segments by the `deltaX1` between those two levels —
+and by ONE PIXEL even when nothing is live, which this port had never drawn.
+`MessageGeo.selfReturnX` carries the second segment's own x.
+
+Both are exact against the jar. `jobadi-87-jegi648` (`activate Bob` then
+`Bob -> Bob`) draws its segments at `cx + 5` and `cx + 6`;
+`gesiba-07-rise357` (`B -> B ++` inside `A -> B ++`) at `cx + 5` and
+`cx + 11`, the loop straddling the bar it opens.
+
+**Still NOT ported: a REVERSE self message, `A <- A`.** Upstream skips the
+`x1` shift entirely for it (`if (!isReverseDefine())`) and hands the job to
+`ComponentRoseSelfArrow#drawLeftSide`, whose three-branch `dx`/`level`
+arithmetic (`:177-190`) mirrors the loop rather than offsetting it. This port
+does not record `reverseDefine` on a self message at all — `arrowConfigurationOf`
+drops it — so the case cannot even be detected in layout yet. Every self loop
+here draws rightward.
 
 ## Grouping-frame background shadow is not ported
 

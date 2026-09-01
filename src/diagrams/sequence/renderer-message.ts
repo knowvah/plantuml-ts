@@ -47,6 +47,12 @@ function renderSelfMessage(
 ): string {
   const k = theme.scaleK;
   const x1 = msg.fromX;
+  // The RETURNING segment does not start where the outgoing one does:
+  // `ComponentRoseSelfArrow#drawRightSide:92-93` splits them by `deltaX1`,
+  // and by one pixel even when nothing is live. Resolved in layout, which is
+  // where the activation level lives -- see `MessageGeo.selfReturnX`. The
+  // fallback covers a hand-authored geometry that predates the field.
+  const xBack = msg.selfReturnX ?? x1;
   const y1 = msg.y;
   const loopWidth = SELF_LOOP_WIDTH * k;
   const loopHeight = SELF_LOOP_HEIGHT * k;
@@ -54,12 +60,13 @@ function renderSelfMessage(
     `M ${x1} ${y1} ` +
     `H ${x1 + loopWidth} ` +
     `V ${y1 + loopHeight} ` +
-    `H ${x1}`;
+    `H ${xBack}`;
   const loop = path(d, {
     stroke: theme.colors.arrow,
     strokeWidth: 1 * k,
     ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
   });
+  // The head sits at the foot of the RETURNING segment, so it moves with it.
   return loop + renderSelfMessageHead(msg, configuration, theme, y1 + loopHeight);
 }
 

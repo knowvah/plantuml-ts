@@ -355,7 +355,9 @@ export function renderSelfMessageHead(
   return renderArrowHead(
     selfHeadGeometry(configuration, SELF_REVERSE_DEFINE, niceArrow),
     configuration.dressing2.head,
-    { x: msg.fromX, y: tipY },
+    // The returning segment's left end, not the outgoing one's -- they
+    // differ by at least a pixel (`MessageGeo.selfReturnX`).
+    { x: msg.selfReturnX ?? msg.fromX, y: tipY },
     paintOf(theme),
     theme.scaleK,
   );
