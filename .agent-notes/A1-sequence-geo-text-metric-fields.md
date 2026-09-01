@@ -58,3 +58,41 @@ optional style fields
 - **Impact**: every A2-A5 caller building a `TextStyle`-adjacent literal from
   optional inputs hits this. It is a compile error, not a silent one.
 - **Confidence**: High — observed as TS2379 and fixed.
+
+## Observation: a participant label's baseline is `cy - lineHeight/2 + ascent`,
+and converting to it moves head and foot labels in OPPOSITE directions
+
+- **Context**: A3, replacing `text-anchor="middle"` + `dominant-baseline="middle"`
+  at a centre with the jar's left edge + baseline.
+- **Finding**: the exact conversion from the centre this port already computed
+  is `baseline = cy - textLineHeight / 2 + textAscent`, i.e. a shift DOWN of
+  `ascent - lineHeight/2` = 3.889 at 14pt. Verified on two oracles rather than
+  derived: `jobadi-87-jegi648` (box y=10 h=28, baseline 27.889) and
+  `birocu-87-xubi808` box 1 (box y=46 h=42, rows at 63.889 and 77.889 from row
+  centres 60 and 74).
+  Corpus-wide that shift IMPROVES every head label and WORSENS every foot
+  label by the identical 3.889, because this port's head boxes sit above the
+  jar's (the 10px vertical document margin is not applied yet) while its foot
+  boxes sit below them (accumulated body-height error). Net `y` distance rose
+  121 while `x` fell 32 612.
+- **Impact**: a `y` rise of this shape after any baseline conversion is
+  expected and is Phase C's vertical terms, not a defect in the conversion.
+  Do not "fix" it by biasing the baseline; the arithmetic is jar-exact at both
+  oracles.
+- **Confidence**: High — both oracles checked digit for digit, and the
+  head/foot cancellation computed explicitly.
+
+## Observation: the jar italicises a participant's stereotype row; this port
+does not
+
+- **Context**: A3, comparing `birocu-87-xubi808` row by row.
+- **Finding**: the jar emits `font-style="italic"` on the `«APIGateway»` run
+  and not on the name run beside it. This port emits neither — the gap
+  pre-dates A3 (the old `renderLabel` set no font style either), so A3 neither
+  introduced nor closed it.
+- **Impact**: a real, separable feature: it needs the style lookup that decides
+  stereotype italics, and `SequenceTextSpec` has no `fontStyle` field yet.
+  Worth its own task; it is NOT a placement bug and will not show up in the
+  distance instrument, which scores numeric attributes only.
+- **Confidence**: High — visible in the cached oracle, absent from our output
+  both before and after A3.

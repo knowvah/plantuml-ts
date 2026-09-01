@@ -41,6 +41,9 @@ function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
     centerX: 22,
     background: '#FFF',
     border: '#181818',
+    // A3 moved label placement into layout. This suite asserts LIFELINE
+    // geometry, never label text, so the head carries no runs.
+    labelRuns: [],
   };
   return { ...base, ...over };
 }

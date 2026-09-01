@@ -47,6 +47,8 @@ function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): Sequenc
         id: 'A', display: 'A', type: 'participant',
         x: 10, y: 0, width: 60, height: HEAD_HEIGHT, centerX: 40,
         background: defaultTheme.colors.background, border: defaultTheme.colors.border,
+        // A3: this suite asserts pagination y-arithmetic, never label text.
+        labelRuns: [],
       },
     ],
     events,

@@ -8,6 +8,8 @@ import type {
   NoteGeo,
   FrameGeo,
   DividerGeo,
+  ParticipantGeo,
+  TextRun,
 } from '../../../src/diagrams/sequence/ast.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
@@ -23,7 +25,8 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
-import { arrowFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -54,14 +57,44 @@ function decodeRgba(png: Buffer): Array<[number, number, number, number]> {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * A participant head's label runs, placed the way
+ * `sequence-layout-participants.ts#buildLabelRuns` places them — A3 moved that
+ * placement into layout, so a hand-built `ParticipantGeo` has to supply it.
+ *
+ * Measured rather than hard-coded: a literal width here would silently stop
+ * matching the measurer and the assertions below check emitted `textLength`.
+ */
+function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const spec = fontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', spec).height;
+  const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  const cy = participantLabelCy(p.type, p.height, p.y, true, defaultTheme);
+  const textWidth = measurer.measure(p.display, spec).width;
+  return [{
+    text: p.display,
+    x: p.centerX - textWidth / 2,
+    y: cy - lineHeight / 2 + ascent,
+    textWidth,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }];
+}
+
+/** A `ParticipantGeo` with its `labelRuns` derived from the rest of it. */
+function participantGeo(base: Omit<ParticipantGeo, 'labelRuns'>): ParticipantGeo {
+  return { ...base, labelRuns: labelRunsFor(base) };
+}
+
 function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   return {
     totalWidth: 400,
     totalHeight: 300,
     showFootbox: true,
     participants: [
-      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
-      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      participantGeo({ id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+      participantGeo({ id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
     ],
     events: [],
     headHeight: 36,
@@ -1156,7 +1189,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1174,7 +1207,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders display name below the stick figure', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1187,7 +1220,7 @@ describe('renderSequence — skinparam actorStyle', () => {
     return makeGeo({
       showFootbox: false,
       participants: [
-        { id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
   }
@@ -1233,7 +1266,7 @@ describe('renderSequence — skinparam actorStyle', () => {
 
 describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
   function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
-    return { id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    return participantGeo({ id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
   }
   /** The bare body, not `assembleSvg`'s document: the shell adds a background
    *  `<rect>` of its own that would inflate every rectangle count here. */
@@ -1299,7 +1332,7 @@ describe('renderSequence — database participant shape', () => {
     const geo = makeGeo({
       showFootbox: false,
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1312,7 +1345,7 @@ describe('renderSequence — database participant shape', () => {
   });
 
   it('places the head glyph at the top of the block and the tail glyph at its bottom', () => {
-    const participant = { id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    const participant = participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
     const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
     const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
     // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
@@ -1326,7 +1359,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders display name for database participant', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));

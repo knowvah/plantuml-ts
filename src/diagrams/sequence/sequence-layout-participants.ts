@@ -14,6 +14,7 @@ import type {
   ParticipantType,
   SequenceDiagramAST,
   SequenceEvent,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
@@ -31,6 +32,7 @@ import {
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import {
   symbolPreferredHeight,
@@ -298,6 +300,9 @@ function positionParticipants(
   // is what puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
   for (const g of participantGeos) {
     g.y = maxParticipantHeight - areaOf(g);
+    // AFTER the bottom-align, never before: the runs carry an absolute
+    // baseline, and `g.y` is what it is measured from.
+    g.labelRuns = buildLabelRuns(g, ctx);
   }
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
@@ -484,6 +489,54 @@ function anyBadgeFor(
   return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
 
+/**
+ * A participant head's label, as placed and measured runs (A3).
+ *
+ * The jar emits one `<text>` per ROW, each centred on the SAME x and each
+ * carrying its own measured `textLength`. `birocu-87-xubi808` box 1 is the
+ * reference: box x=55.575 w=107.363 y=46 h=42, `«APIGateway»` at x=62.575
+ * w=93.363 baseline 63.889, `OnlyLabel` at x=77.713 w=63.087 baseline 77.889.
+ * Both centre on 109.2565, and the baselines are exactly one line apart.
+ *
+ * Three derivations, all of them upstream's:
+ *
+ *   1. The block's vertical CENTRE is `participantLabelCy` (`ComponentRose*
+ *      #drawInternalU`), and the rows stack symmetrically about it — the same
+ *      `top = cy - rows * lineHeight / 2` the renderer used before A3, kept
+ *      identical so that no y moves.
+ *   2. A row's BASELINE is its own line box's top plus the measured ascent.
+ *      Verified against the two numbers above: row centre 60 gives
+ *      `60 - 14/2 + 10.889 = 63.889`, row centre 74 gives 77.889.
+ *   3. A row's LEFT edge is `cx - textWidth / 2` (D4) — the centre stays the
+ *      authoritative anchor and no left edge is stored.
+ *
+ * `hide stereotype` is resolved upstream of here (`visibleStereotypeLines`),
+ * so an absent row is simply an absent entry.
+ */
+function buildLabelRuns(p: ParticipantGeo, ctx: ParticipantLayoutCtx): readonly TextRun[] {
+  const { theme, measurer } = ctx;
+  const spec = fontSpecOf(theme);
+  const rows = [...(p.stereotypeLines ?? []), p.display];
+  const lineHeight = measurer.measure('M', spec).height;
+  const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  const cx = participantBadgeGeo(p.badge, p.x, p.width, theme)?.nameCx ?? p.centerX;
+  // The block is centred on `cy`: N rows, each one line tall, so the first
+  // row's line box begins half a block above it.
+  const cy = participantLabelCy(p.type, p.height, p.y, true, theme);
+  const top = cy - (rows.length * lineHeight) / 2;
+  return rows.map((text, i) => {
+    const textWidth = measurer.measure(text, spec).width;
+    return {
+      text,
+      x: cx - textWidth / 2,
+      y: top + i * lineHeight + ascent,
+      textWidth,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  });
+}
+
 /** Build the geometry for a single participant column at a given x offset. */
 function buildParticipantGeo(
   p: Participant,
@@ -533,6 +586,10 @@ function buildParticipantGeo(
     type: p.type,
     x: currentX,
     y: 0,
+    // Both `y` and `labelRuns` are filled in by the bottom-align pass in
+    // `computeParticipantLayout`: a run carries an ABSOLUTE baseline, and the
+    // head's own y is not known until every column's reserved area is.
+    labelRuns: [],
     width,
     height: pHeight,
     centerX,

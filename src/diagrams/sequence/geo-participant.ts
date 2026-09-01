@@ -12,6 +12,7 @@
 
 import type { Paint } from '../../core/paint.js';
 import type { ParticipantType } from './ast.js';
+import type { TextRun } from './text-block-geo.js';
 
 /**
  * A participant's stereotype BADGE, in `StereotypeDecoration`'s two forms.
@@ -59,4 +60,26 @@ export interface ParticipantGeo {
    *  drawn LEFT of the name block (`TextBlockSprited.java:65-77`). Absent
    *  when there is none, or when the name does not resolve in the registry. */
   badge?: ParticipantBadge;
+  /**
+   * The HEAD block's label, as placed and measured runs: the visible
+   * stereotype rows in order, then the display name.
+   *
+   * One run per ROW, because a participant head is one to N rows and each has
+   * its own width — `birocu-87-xubi808` draws `«APIGateway»` (93.363 wide) and
+   * `BothZWSP` (69.3) as separate `<text>` elements, both centred on the same
+   * 296.6195. A single scalar width could not describe that, which is why the
+   * metrics ride on the run (D8).
+   *
+   * Resolved in LAYOUT, where the measurer is (D1). The x is already the run's
+   * LEFT edge, derived from the name-block centre per D4; `centerX` remains
+   * the model's authoritative anchor and no left edge is stored for it.
+   *
+   * The FOOTER row reuses these runs translated vertically —
+   * `renderer-participant-shapes.ts` shifts them by the difference between the
+   * two rows' `participantLabelCy`, which is not a constant: a glyph-bearing
+   * kind puts its label BELOW the glyph at the head and ABOVE it at the tail
+   * (`ComponentRoseDatabase.java:81-87`). Storing a second array would be a
+   * second source of truth for text that is identical in every respect but y.
+   */
+  labelRuns: readonly TextRun[];
 }

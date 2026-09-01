@@ -17,7 +17,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/Rose.java#createComponentParticipant
  */
 
-import type { ParticipantType } from './ast.js';
+import type { ParticipantBadge, ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
 
@@ -107,3 +107,79 @@ export function symbolPreferredHeight(
       return undefined;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Label placement — shared by the layout that MEASURES the label and the
+// renderer that DRAWS it (A3)
+// ---------------------------------------------------------------------------
+//
+// Both halves need the same two answers, and `planning/sizer-renderer-parity
+// .md` names disagreement between them as this project's recurring defect
+// class. They were the renderer's private helpers until A3 gave layout the job
+// of placing the runs; the footer still needs them at render time, because a
+// foot block's own top is `lifelineEndY`, which is not known when the head is
+// built.
+
+/** `getDeltaCollection()` -- how far the FRONT rectangle of a `collections`
+ *  stack is pushed down and in (`ComponentRoseParticipant.java:114-124`). */
+const COLLECTIONS_LABEL_DELTA = 4;
+
+/**
+ * Where a participant's label block is CENTRED vertically, per the
+ * composition its `ComponentRose*` uses.
+ *
+ * - `queue` puts the text INSIDE the glyph: `ComponentRoseQueue`'s constructor
+ *   passes `getTextBlock()` as `USymbols.QUEUE.asSmall`'s label, and
+ *   `USymbolQueue#getMargin()` is `Margin(5,15,5,5)`, so the text's vertical
+ *   centre is the block's own centre.
+ * - `collections` puts it inside the FRONT rectangle, which
+ *   `ComponentRoseParticipant#drawInternalU:95` has already pushed down by
+ *   `getDeltaCollection() = 4`.
+ * - the glyph-above-text kinds (`database`, `boundary`, `control`, `entity`)
+ *   put it below the glyph at the head and above it at the tail
+ *   (`ComponentRoseDatabase.java:81-87`) -- which is why this is NOT a
+ *   uniform translation between the two rows.
+ */
+export function participantLabelCy(
+  kind: ParticipantType,
+  height: number,
+  blockTopY: number,
+  head: boolean,
+  theme: Theme & { readonly scaleK?: number },
+): number {
+  if (kind === 'queue') return blockTopY + height / 2;
+  if (kind === 'collections') {
+    return blockTopY + COLLECTIONS_LABEL_DELTA + (height - COLLECTIONS_LABEL_DELTA) / 2;
+  }
+  const labelYOffset = theme.fontSize / 2 + 4 * (theme.scaleK ?? 1);
+  return head ? blockTopY + height - labelYOffset : blockTopY + labelYOffset;
+}
+
+/**
+ * `TextBlockSprited#drawU` -- the badge draws at the block origin and the
+ * label block is translated right by `sprite.width + 6.0` (`:70-77`). So the
+ * badge sits at the box's left padding and the name block centres in what is
+ * left, which is exactly the box layout sized it for.
+ *
+ * Jar-verified on `birocu-87-xubi808`: box x=172.938 w=177.363 with a 64-wide
+ * image gives image x=179.938 (`x + 7`) and a name block centred on 296.62 --
+ * `(179.938 + 64 + 6 + (172.938 + 177.363 - 7)) / 2`. The jar's two rows in
+ * that box, `«APIGateway»` at 249.938 w=93.363 and `BothZWSP` at 261.969
+ * w=69.3, both centre on 296.6195, which is what makes this ONE centre for
+ * however many rows the block has.
+ */
+export function participantBadgeGeo(
+  badge: ParticipantBadge | undefined,
+  x: number,
+  width: number,
+  theme: Theme,
+): { readonly x: number; readonly nameCx: number } | undefined {
+  if (badge === undefined) return undefined;
+  const pad = theme.sequence.participantPadding;
+  const badgeX = x + pad;
+  return { x: badgeX, nameCx: (badgeX + badge.width + BADGE_GAP + (x + width - pad)) / 2 };
+}
+
+/** `TextBlockSprited`'s own gap between the sprite and the label block
+ *  (`TextBlockSprited.java:70-77`'s `sprite.width + 6.0`). */
+const BADGE_GAP = 6;
