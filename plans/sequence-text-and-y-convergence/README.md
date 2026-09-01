@@ -48,7 +48,7 @@ below reports against it via `--compare`.
 
 | batch | tasks | what | status |
 |---|---|---|---|
-| [1](batch-1/overview.md) | A1 | the text emitter and the geometry metrics | [ ] |
+| [1](batch-1/overview.md) | A1 | the text emitter, the run metrics, the `ast.ts` split | [x] |
 | [2](batch-2/overview.md) | A2 A3 A4 A5 | the four text kinds, in parallel | [ ] |
 | [3](batch-3/overview.md) | A6 | Phase A sweep, adjudicate, measure | [ ] |
 | [4](batch-4/overview.md) | B1 B2 B3 (+B4..Bn) | the element deficit | [ ] |
@@ -97,9 +97,10 @@ Run the ratchet as an instrument if you like; do not act on it.
 2. Two consecutive gate failures on the same check. The cap bounds EDITS, not
    investigation — keep diagnosing until you can state the mechanism, then
    stop with the artefact `~/.claude/rules/diagnosis.md` defines.
-3. An edit contradicts [`decisions.md`](decisions.md) D1–D7 — in particular
-   recomputing a text metric inside a renderer (D1), or reintroducing
-   `textAscent` arithmetic on the sequence path (D2).
+3. An edit contradicts [`decisions.md`](decisions.md) D1–D8 — in particular
+   recomputing a text metric inside a renderer (D1), reintroducing
+   `textAscent` arithmetic on the sequence path (D2), or putting a scalar text
+   metric back on a geometry type (D8).
 4. A constant arrives without an upstream `file:line`.
 5. A residual coordinate error with no stated mechanism. "Close enough" is not
    a mechanism.
@@ -126,6 +127,9 @@ Run the ratchet as an instrument if you like; do not act on it.
 
 ## Non-goals
 
+- **Newpage titles.** `NewpageGeo` carries no text and neither does upstream:
+  `ComponentRoseNewpage#drawInternalU` draws one `hline` and nothing else. An
+  earlier version of A5 listed one; it was the divider label, misread.
 - **Message-level `[[url]]`.** `A -> B [[url]] : label` emits no `<a>` in the
   jar — verified on `fajixi-56-dete708` and recorded at
   `renderer-message.ts:118-138`. Do not "fix" it.
@@ -139,7 +143,9 @@ Run the ratchet as an instrument if you like; do not act on it.
 
 ## Index
 
-- [`decisions.md`](decisions.md) — D1–D7, confirmed before execution
+- [`decisions.md`](decisions.md) — D1–D7 confirmed before execution; **D8
+  added mid-mission**, moving the metrics onto `TextRun` and splitting
+  `ast.ts`. Batch 2's contract was rewritten against it.
 - [`decision-journal.md`](decision-journal.md) — appended during execution
 - [`diagrams/component-map.md`](diagrams/component-map.md) — what this touches
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — how a text metric travels

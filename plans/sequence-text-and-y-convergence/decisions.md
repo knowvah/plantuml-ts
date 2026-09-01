@@ -40,7 +40,9 @@ and is outside this write-set. Worth a separate chore; noted, not done.
 
 ## D3 — One emitter the whole engine routes through
 
-**Context.** Eight text call sites across five files, five of them anchoring.
+**Context.** Nine `core/svg.ts#text` call sites across five files. (Stated as
+eight before execution; the box group label at `renderer.ts:374` was missed.
+Batch 2's overview carries the verified inventory.)
 
 **Decision.** `src/diagrams/sequence/sequence-text.ts` exports `sequenceText`,
 and every sequence `<text>` goes through it.
@@ -90,3 +92,47 @@ per-attribute table therefore understated Y by roughly 287 000.
 
 **Decision.** C1 splits `points` (exact — points are `x,y` pairs) and reports
 `d` as explicitly mixed, before C3 gates on either.
+
+## D8 — Text metrics live on `TextRun`, and `ast.ts` splits
+
+*Added 2026-09-01, mid-execution, after A1 halted on the original contract.*
+
+**Context.** D1 said "the geometry carries `textWidth`, `textAscent` and
+`textLineHeight`", and A1 read that as three scalar fields on each of six
+geometry types. Adding them and running `tsc` produced 48 errors and four
+distinct defects (`.agent-notes/A1-sequence-geo-text-metric-fields.md`):
+
+1. `DividerGeo.textWidth` **already exists**, as
+   `AbstractTextualComponent#getTextWidth` — the text block PLUS the
+   component's `topRightBottomLeft(4,4,4,4)`. `renderer.ts#renderDividerLabel`
+   sizes the label's background `<rect>` with it. TS reports
+   `Duplicate identifier`. `DividerGeo.textHeight` is the same on the other axis.
+2. `NewpageGeo` carries **no text at all**, and neither does upstream:
+   `ComponentRoseNewpage#drawInternalU` is three statements ending in
+   `ug.draw(ULine.hline(dimensionToUse.getWidth()))`
+   (`skin/rose/ComponentRoseNewpage.java:57-62`). There is nothing to measure.
+3. A note body, a divider label and a stereotyped participant head are
+   **multi-line**. Each line has its own width, and `sequenceText` needs a
+   per-line width for `textLength`. One scalar per geo is only ever correct
+   for the single-line case.
+4. Required fields force edits to A3's and A4's layout files plus six test
+   files, breaking A1's own `git diff --name-only` gate.
+
+**Decision.** The metrics go on **`TextRun`**, required. A run is the thing
+that actually has a width. Each batch-2 task converts its own kind to placed,
+measured runs.
+
+Separately, `ast.ts` was 659 lines against the repo's 500-line cap, so the
+complexity hook blocked any growth of it whatever shape the fields took. It
+splits at the `Geometry Types (consumed by layout stage)` banner it already
+carried: parse-stage AST stays in `ast.ts`, geometry moves to `geo.ts`, and
+`ast.ts` re-exports `geo.ts` in full so no import site changes. Both directions
+are `import type`/`export type` and erase completely — no runtime cycle, and
+none of the temporal-dead-zone hazard a VALUE cycle carries
+(`.agent-notes/si20-object-election-text-and-import-cycle.md`).
+
+**Consequences.** D1's substance is unchanged — layout measures, geometry
+carries, the renderer only formats — but its *carrier* is the run, not the geo.
+Batch 2's tasks are no longer geo-type-disjoint: A3, A4 and A5 each add one
+run-carrier field to `geo.ts`. That is a deliberate relaxation, priced below
+the alternative of four more type modules; see batch-2's overview.

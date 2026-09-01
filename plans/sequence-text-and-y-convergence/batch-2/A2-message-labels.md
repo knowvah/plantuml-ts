@@ -1,5 +1,9 @@
 # A2 — message labels
 
+> **Rewritten 2026-09-01** for D8. A1 already added the three metric fields to
+> `TextRun` and populated them in `messageLabelBlock`, so this task is smaller
+> than it was: what remains is the `y` semantics and the renderer.
+
 ## Context
 
 Message labels are the one sequence text kind already positioned by a left
@@ -15,40 +19,57 @@ The `y` is a block top where the jar's is a baseline, and there is no
 `textLength`. `TextRun.y` therefore changes MEANING in this task — that is the
 subtle part, and `sequence-page.ts` and `scale-geo.ts` both read it.
 
+## Already done by A1 — do not redo
+
+- `TextRun.textWidth` / `.textAscent` / `.textLineHeight` exist, are required,
+  and are populated by `messageLabelBlock` from the ARROW font spec.
+- `scale-geo.ts#scaleRun` scales all three.
+- `sequence-text.ts#sequenceText` exists and is tested.
+
 ## Task
 
-Give `TextRun` a width, change its `y` to a baseline, and route
+Change `TextRun.y` from a block top to a baseline, and route
 `renderMessageLabel` through `sequenceText`.
+
+The ascent A1 already carries is the conversion: a run whose top is `t` has its
+baseline at `t + textAscent`. Make that change in `messageLabelBlock`, where
+the measurer is, and NOT in the renderer (D1).
 
 ## Write-set
 
 - `src/diagrams/sequence/text-block-geo.ts`
 - `src/diagrams/sequence/renderer-message.ts`
-- `tests/unit/sequence/renderer.test.ts` — `messageLabelBlock` has no
-  dedicated test file today; its coverage lives here. Adding
-  `tests/unit/sequence/text-block-geo.test.ts` is welcome but not required.
+- `tests/unit/sequence/text-block-geo-metrics.test.ts` — A1 created this; the
+  `y`-advance assertions in it are the ones your change must keep true.
+- `tests/unit/sequence/renderer.test.ts`, `tests/unit/sequence/sequence-page.test.ts`
+  (and any other this turns red)
+
+`MessageGeo` needs **no** new field: `labelLines` and `labelNumber` are already
+`TextRun`s. A2 does not write `geo.ts`.
 
 ## Read-set
 
-- `src/diagrams/sequence/text-block-geo.ts:159-190` — `messageLabelBlock`,
-  which already computes `blockLeft`, `labelLeft` and a per-line `y`.
-- `src/diagrams/sequence/renderer-message.ts:74-86` — `renderMessageLabel`.
-- `src/diagrams/sequence/sequence-page.ts:310-330` — reads run `y` for
-  pagination. **Check this still holds** once `y` is a baseline.
+- `src/diagrams/sequence/text-block-geo.ts:189-239` — `messageLabelBlock`,
+  which already computes `blockLeft`, `labelLeft`, a per-line `y`, and now the
+  metrics.
+- `src/diagrams/sequence/renderer-message.ts:93-150` — `renderMessageLabel`.
+- `src/diagrams/sequence/sequence-page.ts` — reads run `y` for pagination.
+  **Check this still holds** once `y` is a baseline.
 - `src/diagrams/sequence/sequence-layout-shared.ts` — `arrowFontSpecOf`, the
   13pt arrow font these labels are measured at.
-- `plans/sequence-text-and-y-convergence/decisions.md` — D1, D3.
+- `plans/sequence-text-and-y-convergence/decisions.md` — D1, D3, D8.
 
 ## Architecture decisions in force
 
-**D1** — `messageLabelBlock` already has the measurer; it populates the width
-and the ascent. `renderMessageLabel` must not measure anything.
+**D1** — `messageLabelBlock` has the measurer; it owns the conversion.
+`renderMessageLabel` must not measure or derive anything.
 
 ## Interface contract
 
-Consumes A1's `sequenceText` and the `TextRun` metric fields. `TextRun.y`
-becomes a **baseline**, and its doc comment must say so in those words —
-nothing type-checks the difference.
+Consumes A1's `sequenceText` and `TextRun`. `TextRun.y` becomes a **baseline**,
+and its doc comment must say so in those words, replacing A1's deliberately
+neutral "in whatever convention its producer documents" — nothing type-checks
+the difference.
 
 ## Acceptance criteria
 
@@ -69,12 +90,11 @@ N/A. Gate is the distance instrument's `text@x` / `text@y` rows.
 
 ## Rollback
 
-**Reversible**, but see the mission README: code and `diff-baseline.json` must
-revert together. This task does not re-pin, so reverting it alone is clean.
+**Reversible.** This task does not re-pin (D5), so reverting it alone is clean.
 
 ## Quality bar
 
-All four gates. Write-set exact.
+All four gates — `npm test`, not `npx vitest run tests/unit`. Write-set exact.
 
 ## Commit
 
