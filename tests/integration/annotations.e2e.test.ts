@@ -150,9 +150,21 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     // the title block's own local x (margin.left+padding.left, baked by
     // buildAnnotationBlock BEFORE chrome.ts's shift) -- no longer just
     // xText1 alone, since there is no more `<g transform>` wrapper.
+    //
+    // Compared to within half a pixel, not exactly, and the half-pixel is the
+    // ROUNDING in `titledDims`. Chrome centres the title on the document's
+    // TRUE width; the `width=` attribute this reads it back from is that width
+    // rounded for output. Measured here: the title is centred on 113.3875 and
+    // the attribute says 113, so any expectation recomputed from the attribute
+    // is off by half the difference and no more.
+    //
+    // This only became visible when sequence document widths stopped being
+    // integers -- `plans/sequence-coordinate-convergence` removed an 80px
+    // participant-width floor, so `Alice`'s box is 44.45 wide rather than 80.
+    // The centring itself is unchanged.
     const titleX = chromeSlotX(titled, 'title');
     const xText1 = (titledDims.width - titleBlock.width) / 2;
-    expect(titleX).toBeCloseTo(xText1 + localSlotX(titleBlock.body), 6);
+    expect(Math.abs(titleX - (xText1 + localSlotX(titleBlock.body)))).toBeLessThanOrEqual(0.5);
   });
 
   it("buveco-86-tibo673: TIM cascade collapsing to a bare 'title Test SVG' line renders a CLASS-typed diagram containing the title", () => {
