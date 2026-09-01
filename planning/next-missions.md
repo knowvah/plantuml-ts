@@ -1,5 +1,10 @@
 # Next Missions (in order)
 
+> **Sequence engine, 2026-09-01:** see `planning/sequence-next-missions.md`
+> for the post-`sequence-coordinate-convergence` analysis — freshly measured
+> at `7fd45458`, and it argues for text-convention and element-deficit work
+> BEFORE the Y axis despite Y being 63.9% of the remaining error.
+
 **Refreshed 2026-08-17 (after SI26).** Treat this file as the *ordered, human-readable*
 what-next; `planning/mission-index.md` is the executable grind queue with exit
 bars and measurements, and `plans/<name>/README.md` is the brief for anything
