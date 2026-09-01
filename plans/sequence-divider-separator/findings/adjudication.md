@@ -57,10 +57,13 @@ divider going from two drawn elements to five. Each was over its golden BEFORE
 this change (66 > 50, 31 > 28, 52 > 48). `digula` and `xedomi` both carry
 `newpage`: the jar renders page 1 only and this port renders every page into
 one document, which is the already-filed `sequence-newpage-pagination` gap
-(the same mechanism as `fobube-11-nifo424`). `vogegu` has no `newpage`; its
-surplus is 2 `line`, 2 `polygon` and 2 `text`, all present at both refs, from
-this port's arrowhead emission — the jar draws no `polygon` in that fixture at
-all.
+(the same mechanism as `fobube-11-nifo424`). `vogegu` has no `newpage`. Its surplus is 2 `line`, 2 `polygon` and 2 `text`,
+present at both refs — and it is NOT "arrowhead emission" as this file first
+said. Diagnosed properly afterwards: the fixture's two arrows are `[hidden]`,
+which upstream draws NOTHING for (`ComponentRoseArrow#drawInternalU:85-87`
+returns before the line, both heads and the label), while this port has no
+`hidden` field on `ArrowConfiguration` and draws them in full. Filed as
+`sequence-hidden-arrow`; the 6-element surplus is exactly those two arrows.
 
 **Ruled out — a defect in the divider itself.** `vogegu`'s divider now matches
 its golden's element for element and number for number: band `height="3"`,
@@ -104,8 +107,8 @@ whenever a short-circuit is replaced by real per-attribute comparison:
   them has a FALLING child distance (§4).
 - **The three `regression` rows are deliberately left red**:
   `digula-66-dipe776` and `xedomi-77-libu804` would pin over the unfixed
-  `newpage` pagination gap, and `vogegu-91-mave762` over an arrowhead-emission
-  gap no mission owns yet. Their pins and measurement stamps are unchanged.
+  `newpage` pagination gap, and `vogegu-91-mave762` over the `[hidden]`-arrow gap
+  (now filed as `sequence-hidden-arrow`). Their pins and measurement stamps are unchanged.
 - `fobube-11-nifo424` and `rugeco-70-muro754` untouched.
 
 Verified by diffing the JSON against `HEAD`: **19 entries changed, 0 outside

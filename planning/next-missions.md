@@ -956,17 +956,58 @@ Ordered by how ready they are, not by size.
   than their golden before this change, so adding correct nodes raises the
   child distance and `classify` has no rule that can fire. Δ is exactly
   `+3 × dividers` in each. `digula-66-dipe776` and `xedomi-77-libu804` are
-  `newpage` fixtures (the gap below); `vogegu-91-mave762`'s residual is
-  arrowhead emission, unfiled.
+  `newpage` fixtures (the gap below); `vogegu-91-mave762`'s residual is the
+  `[hidden]`-arrow gap, filed below as `sequence-hidden-arrow`.
 
   **Re-pinned 2026-08-31 at `58dc5092`: the 19 `artefact` rows** (they move
   UP — the sanctioned case, every one with a falling child distance). The
   three `regression` rows are deliberately left red: `digula`/`xedomi` would
-  pin over the unfixed `newpage` gap and `vogegu` over an arrowhead-emission
-  gap nobody owns. **Sequence ratchet is 5 red** — `fobube`, `rugeco`,
+  pin over the unfixed `newpage` gap and `vogegu` over the `[hidden]`-arrow gap
+  (`sequence-hidden-arrow`). **Sequence ratchet is 5 red** — `fobube`, `rugeco`,
   `digula`, `vogegu`, `xedomi`. **The 14 IMPROVED pins were tightened the same
   day** (14 down, 0 up, guarded strictly-below-pin), so `tukobo` is now pinned
   at **369** and this mission's result is held by the gate.
+
+- **`sequence-hidden-arrow` — NEW, filed 2026-08-31 by
+  `sequence-divider-separator`'s close-out.** A `[hidden]` arrow draws
+  nothing upstream; this port draws it in full.
+
+  **Mechanism, read from the method bodies.**
+  `ComponentRoseArrow#drawInternalU:85-87` and
+  `ComponentRoseSelfArrow#drawInternalU:71-73` both `return` immediately on
+  `arrowConfiguration.isHidden()` — so the line, BOTH arrowheads and the
+  LABEL are all suppressed, because the label is drawn after that guard.
+  `CommandArrow.java:495-496` sets `ArrowBody.HIDDEN`;
+  `ArrowConfiguration.java:202-203` is `body == ArrowBody.HIDDEN`.
+
+  **What is missing here.** `ArrowConfiguration`
+  (`src/diagrams/sequence/sequence-arrowhead.ts:86-97`) has no `hidden`
+  field, so `applyStyle` (`command-arrow.ts:266-275`) parses the token and
+  drops it — its own doc comment already says so: "parsed and dropped rather
+  than approximated". The renderer then draws a normal arrow.
+
+  **The nuance that will bite whoever takes this.** Only `drawInternalU` is
+  guarded. `getPreferredHeight`/`getPreferredWidth`
+  (`ComponentRoseArrow.java:342-349`) are NOT — a hidden arrow still reserves
+  its full tile height and width. So this suppresses DRAWING, never layout,
+  and a fix that skips the event in `sequence-layout-events.ts` would be
+  wrong. `[hidden]` exists precisely to reserve space without ink.
+
+  **Measured reach: 7 fixtures use `[hidden]`; 3 of them do not render at all
+  (pre-existing), so 4 are measurable.** Only ONE is dominated by this gap:
+  `vogegu-91-mave762`, ours 34 children against the golden's 28, and the
+  surplus is exactly its 2 hidden arrows' 2 `line` + 2 `polygon` + 2 `text`.
+  `TeozTimelineIssues_0004_Test` is +2. The other two are NET SHORT
+  (`koneju-77-vode355` -1, `zogane-85-raja214` -2), i.e. they carry larger
+  unrelated gaps in the other direction and this fix alone will not close
+  them. **`vogegu-91-mave762` is one of the five red sequence ratchet rows,
+  and this is its whole stated cause.**
+
+  **Adjacent, same function, do not conflate:** `applyStyle`'s `else` branch
+  also drops the arrow COLOUR (`config.withColor(...)`,
+  `CommandArrow.java:497-498`), for the same reason — no field on this port's
+  `ArrowConfiguration`. That is a colour gap, not a suppression gap, and it
+  moves no child counts.
 
 - **`sequence-frame-header-newlines` — NEW, filed 2026-08-31.** A frame
   header's label does not split on `\n`. `pigifu-13-kele137`'s

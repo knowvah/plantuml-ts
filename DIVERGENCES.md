@@ -1286,9 +1286,12 @@ swap:
 Pre-existing surplus per fixture, untouched by this work: `digula` and
 `xedomi` both carry `newpage`, where the jar renders page 1 alone and this
 port renders every page into one document (`sequence-newpage-pagination`, the
-same mechanism as `fobube-11-nifo424`); `vogegu` has no `newpage` and its
-surplus is 2 `line`, 2 `polygon` and 2 `text` from this port's arrowhead
-emission — the jar draws no `polygon` in that fixture at all.
+same mechanism as `fobube-11-nifo424`); `vogegu` has no `newpage`: its two arrows are
+`[hidden]`, which upstream draws nothing for
+(`ComponentRoseArrow#drawInternalU:85-87` returns before the line, both heads
+and the label) and this port draws in full, for want of a `hidden` field on
+its `ArrowConfiguration`. Its 2 `line` + 2 `polygon` + 2 `text` surplus is
+exactly those two arrows. Filed as `sequence-hidden-arrow`.
 
 The complementary structural measurement moves the other way: body-group child
 tag sequences matching the golden exactly go **574 → 589** across this change,
