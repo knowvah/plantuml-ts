@@ -32,6 +32,21 @@ Batch 8 of the previous mission did correct, jar-verified work that moved the
 metric by exactly zero because the comparator could not descend to it.
 Starting with more arithmetic repeats that.
 
+## Where Phase A left it (A6, `d26ad9c7`)
+
+```
+total distance 2 437 185   numeric diffs 48 904      (was 2 578 917 / 51 890)
+cohort         1141 fixtures · 1124 measured · 714 descended · 410 short-circuited · 17 errored
+concentration  heaviest fixture 9.2%, heaviest ten 27.8%  (not outlier-dominated)
+adjudication   improved=1017  substructure=79  regression=0  inconclusive=17  unchanged=28
+```
+
+Phase A removed **141 731.9**, 5.5%. Zero `<text>` elements carry an anchor.
+**The 423 064 was not all phantom** — the x half was and is largely gone, the y
+half never was. [`findings/text-convention.md`](findings/text-convention.md)
+has the correction and the numbers C2 reads; §3 is the one Phase C must not
+skip.
+
 ## Starting condition (measured, not carried forward)
 
 ```
@@ -50,7 +65,7 @@ below reports against it via `--compare`.
 |---|---|---|---|
 | [1](batch-1/overview.md) | A1 | the text emitter, the run metrics, the `ast.ts` split | [x] |
 | [2](batch-2/overview.md) | A2 A3 A4 A5 | the four text kinds, in parallel | [x] |
-| [3](batch-3/overview.md) | A6 | Phase A sweep, adjudicate, measure | [ ] |
+| [3](batch-3/overview.md) | A6 | Phase A sweep, adjudicate, measure | [x] |
 | [4](batch-4/overview.md) | B1 B2 B3 (+B4..Bn) | the element deficit | [ ] |
 | [5](batch-5/overview.md) | C1 C2 C3 C4 | the Y axis, and close-out | [ ] |
 

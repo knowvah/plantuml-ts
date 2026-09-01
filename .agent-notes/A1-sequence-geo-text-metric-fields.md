@@ -190,3 +190,27 @@ quantities
   consistent (its `textLength` matches its own font), so nothing is distorted;
   it is simply the wrong size. A task of its own.
 - **Confidence**: High — skin read, oracle confirmed.
+
+## Observation: the Bash tool's working directory persists, and a base-ref
+worktree makes that silently produce base-vs-base measurements
+
+- **Context**: A6, measuring Phase A at two refs. A `cd <worktree> && npx jiti
+  ...` in one command left the shell in the worktree for every command after
+  it.
+- **Finding**: the three commands that followed all ran against the BASE tree
+  while reading as if they ran against HEAD. Two produced plausible, wrong
+  numbers rather than errors:
+  - a `text@y` delta histogram that was the base's, not HEAD's (its `~10`
+    bucket held 289; HEAD's holds 1573 — the difference is the whole finding);
+  - `sequence-ratchet-adjudicate.ts --base e38e53a3` run from inside the
+    e38e53a3 worktree, which compared that ref against itself and reported
+    `improved=0 unchanged=1124 regression=0`. Re-run from the real repo:
+    `improved=1017 substructure=79 regression=0`.
+- **Impact**: the tell was that `unchanged=1124` contradicted a ratchet that
+  was failing 79 tests — a cross-check, not the number itself, caught it. When
+  measuring at two refs, `cd` into the repo explicitly at the START of every
+  command, and have the script print `process.cwd()` in its own JSON. Prefer
+  the adjudicator's `--base`, which manages its own worktree, over a hand-made
+  one.
+- **Confidence**: High — reproduced both readings, and the stray scratch files
+  were found in the worktree's `scripts/` rather than the repo's.
