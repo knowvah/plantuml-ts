@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1045 modules · 3719 exported names.
+1046 modules · 3723 exported names.
 
 ## `src/`
 
@@ -1276,7 +1276,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderParticipantBox`, `renderFooterBox` | renderer-participant-shapes.ts — one participant's head or footer BLOCK: its glyph, its label, and the dispatch between them. |
 | `renderer-participant-symbol.ts` | `SymbolParticipantType`, `GlyphParticipantType`, `ParticipantSymbolGeo`, `ParticipantSymbolOpts`, `COLLECTIONS_DELTA`, `measureParticipantSymbol`, `renderParticipantSymbol` | renderer-participant-symbol.ts — the sequence engine's participant GLYPH seam: a sequence-local mirror of upstream's `ComponentRose*` family (`skin/rose/Rose.java#createComponentParticipant`, `:137-190`) that drives the SHARED, already-port |
-| `renderer.ts` | `renderSequence` | Sequence diagram SVG renderer. |
+| `renderer.ts` | `renderSequencePage`, `renderSequence` | Sequence diagram SVG renderer. |
 | `scale-geo.ts` | `scaleSequenceGeometry`, `ScaledTheme`, `scaleSequenceTheme`, `scaleHeadGeometry`, `scaledDashPattern` | The `scale …` directive for the sequence engine, applied at the layout→render boundary — mirrors `json/scale-geo.ts` exactly (same rationale, same "why scaling inputs equals scaling outputs" argument); see that file's header for the full de |
 | `sequence-arrow-regex.ts` | `ANCHOR`, `anchor`, `COLOR_OR_STYLE_PATTERN`, `colorOrStylePattern`, `ARROW_DRESSING1`, `ARROW_DRESSING2`, `ARROW_BODY_OR`, `PART1`, `PART2`, `ARROW_SUPPCIRCLE2_LEFT`, `ARROW_SUPPCIRCLE1_LEFT`, `ARROW_SUPPCIRCLE1_RIGHT`, `ARROW_SUPPCIRCLE2_RIGHT`, `MULTICAST`, `ACTIVATION`, `LIFECOLOR`, `ARROW_SKELETON_SOURCE`, `ARROW_SKELETON_RE` | Shared regex fragments behind the sequence-diagram arrow commands. |
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `inclination1Of`, `inclination2Of`, `inclinationAngle1`, `inclinationAngle2`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
@@ -1287,6 +1287,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf` | Small shared leaf utilities for sequence diagram layout. |
+| `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `urlOf`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 

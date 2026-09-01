@@ -470,6 +470,18 @@ export interface FrameGeo {
   /** `ref over` body lines, pre-centred `x` (needs the measurer, layout-only,
    *  same rationale as `x`/`y` above). Empty for every other frame type. */
   refBody: { text: string; x: number }[];
+  /**
+   * The header tab did not survive the page clip, so it is not drawn.
+   *
+   * Set ONLY by `sequence-page.ts`, and only when a frame straddles a
+   * `newpage` boundary such that its body rectangle is still (partly) on
+   * this page but its top is not. The tab is a `UPath` (all-or-nothing on
+   * its bbox corners, `DriverPathSvg:58-60`) while the body it hangs off is
+   * a `URectangle` (clamped, `DriverRectangleSvg:66-74`) -- the one place
+   * upstream's per-shape rules genuinely disagree within one kind. Absent
+   * on every un-paginated geometry.
+   */
+  headerClipped?: boolean;
   /** Header Display, resolved in LAYOUT (no measurer at render time).
    *  @see GroupingTile.java:126-127, `frame-style.ts#groupingHeaderDisplay` */
   tabText: string;
