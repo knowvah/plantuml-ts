@@ -240,12 +240,16 @@ function buildExoGeo(
   ctx: EventProcessingContext,
 ): MessageGeo {
   const rightwards = getDirection(event.exoType) === 1;
-  const blockWidth = labelBlockWidth(event, ctx);
+  // A2 changed `messageLabelBlock`'s third parameter from a centre to the
+  // block's LEFT edge, which is what `exoLabelLeft` already computes — the
+  // `+ blockWidth / 2` here existed only to turn it back into a centre for the
+  // old signature. Exo x placement is `MessageExoArrow`'s, a different upstream
+  // component, and is deliberately unchanged by this task.
   const block = messageLabelBlock(
     event.label,
     numberTextOf(event),
-    exoLabelLeft(event, span) + blockWidth / 2,
-    y - 5,
+    exoLabelLeft(event, span),
+    y,
     ctx.theme,
     ctx.measurer,
   );

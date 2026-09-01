@@ -42,7 +42,13 @@ export interface TextRun {
   readonly text: string;
   /** The run's LEFT edge — `DriverTextSvg`'s `x`, never a centre. */
   readonly x: number;
-  /** The run's y, in whatever convention its producer documents. */
+  /**
+   * The run's BASELINE — `DriverTextSvg`'s `y`, never a block top and never a
+   * vertical centre. A2 changed this: it used to be the top of the line box
+   * for message labels, which is what an SVG `dominant-baseline` was
+   * compensating for. Nothing type-checks the difference, so the word
+   * "baseline" here is the contract.
+   */
   readonly y: number;
   /** `measure(text, font).width` at this run's OWN font. Reaches `textLength`
    *  subject to `svg-shapes.ts#textLengthOf`'s `text.length() > 1` guard. */
@@ -150,6 +156,37 @@ export function refBodyWidth(
  *  (`Display.java:706`). */
 const MESSAGE_NUMBER_MARGIN = 4;
 
+/**
+ * `AbstractComponentRoseArrow`'s own padding:
+ * `ClockwiseTopRightBottomLeft.topRightBottomLeft(1, 7, 1, 7)`
+ * (`AbstractComponentRoseArrow.java:62`), read back as `getOldPaddingX1()` =
+ * `padding.getLeft()` and `getOldPaddingY()` = `padding.getTop()`
+ * (`AbstractTextualComponent.java:116-126`).
+ *
+ * Jar-verified on `TeozTimelineIssues_0003_Test`: all three of its arrows put
+ * the label exactly 7 right of the arrow line's own start —
+ * `25.894 -> 32.894`, `20.894 -> 27.894` twice.
+ */
+export const ARROW_LABEL_PADDING_X1 = 7;
+/** The same padding's top/bottom, which `getTextHeight` adds twice
+ *  (`AbstractTextualComponent.java:110-114`). */
+const ARROW_LABEL_PADDING_Y = 1;
+
+/**
+ * `getArrowDeltaX()` (`AbstractComponentRoseArrow.java:54`), added to the
+ * label's left edge when the arrow carries a head at its LEFT end:
+ *
+ * ```java
+ * textPos = getOldPaddingX1()
+ *     + (direction2 == ArrowDirection.RIGHT_TO_LEFT_REVERSE || direction2 == ArrowDirection.BOTH_DIRECTION
+ *             ? getArrowDeltaX()
+ *             : 0);
+ * ```
+ * (`ComponentRoseArrow.java:174-177`) — the text is pushed clear of the head
+ * it would otherwise overlap.
+ */
+export const ARROW_LABEL_HEAD_CLEARANCE = 10;
+
 /** A message's label as placed text: its lines, plus the autonumber run that
  *  sits beside them when the message carries one. */
 export interface MessageLabelBlock {
@@ -169,28 +206,37 @@ export interface MessageLabelBlock {
  * number is a separate `<text>`, vertically centred against however many
  * lines the label has, and there is NO `": "` joining them.
  *
- * Two DELIBERATE divergences from upstream, both pre-existing and neither in
- * this change's scope:
+ * One DELIBERATE divergence from upstream remains, pre-existing and outside
+ * this function's scope: `number.text` is whatever the autonumber format
+ * produced, creole markup included. Upstream runs it through `getCreole`
+ * (`Display.java:704`), so `<font color=red>[001]</font>` becomes a red
+ * `[001]`; this port emits the markup literally. That is a creole gap, not a
+ * text-block one.
  *
- *   1. The block is centred on the arrow's midpoint. Upstream's default
- *      `messagePosition` is LEFT, placing it at `getOldPaddingX1()` from the
- *      arrow's own origin (`ComponentRoseArrow.java:163-178`). Only the
- *      block's ORIGIN differs: lines are left-aligned WITHIN the block here
- *      exactly as they are upstream, which is why they share one `x`.
- *   2. `number.text` is whatever the autonumber format produced, creole
- *      markup included. Upstream runs it through `getCreole`
- *      (`Display.java:704`), so `<font color=red>[001]</font>` becomes a red
- *      `[001]`; this port emits the markup literally. That is a creole gap,
- *      not a text-block one.
+ * A2 closed the other one. The block used to be CENTRED on the arrow's
+ * midpoint; upstream's default `messagePosition` is LEFT
+ * (`ComponentRoseArrow.java:163-178`), so `leftX` is now the block's left edge
+ * and the caller derives it from the arrow's own start. Lines were always
+ * left-aligned WITHIN the block, which is why they still share one `x`.
  *
- * `baselineY` is the y of the LAST line: a multi-line label grows UPWARD from
- * the arrow, leaving the arrow where the caller put it.
+ * ## The two parameters that changed meaning in A2
+ *
+ * `leftX` is the BLOCK's left edge — where the autonumber starts when there is
+ * one, and where the label starts when there is not.
+ *
+ * `arrowY` is the ARROW's own y, not a text y. Upstream places the component's
+ * origin at the block top and puts the arrow `getTextHeight` below it
+ * (`posArrow = getTextHeight(stringBounder)`, `yText = 0`,
+ * `ComponentRoseArrow.java:141-148`), so the block is derived from the arrow
+ * rather than the other way round. A multi-line label therefore grows UPWARD,
+ * leaving the arrow where the caller put it — the same property the old
+ * `baselineY` had, now expressed the way upstream expresses it.
  */
 export function messageLabelBlock(
   label: string,
   numberText: string | undefined,
-  centerX: number,
-  baselineY: number,
+  leftX: number,
+  arrowY: number,
   theme: Theme,
   measurer: StringMeasurer,
 ): MessageLabelBlock {
@@ -207,17 +253,21 @@ export function messageLabelBlock(
   const lineHeight = measurer.measure('M', spec).height;
   const numberWidth = numberText === undefined ? 0 : measurer.measure(numberText, spec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
-  const labelWidth =
-    lines.length === 0 ? 0 : Math.max(...lines.map((l) => measurer.measure(l, spec).width));
-
-  const blockLeft = centerX - (numberWidth + gap + labelWidth) / 2;
-  const labelLeft = blockLeft + numberWidth + gap;
-  const top = baselineY - Math.max(0, lines.length - 1) * lineHeight;
+  const labelLeft = leftX + numberWidth + gap;
+  // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
+  // (`ComponentRoseArrow.java:141-148`): the block's TOP sits one
+  // `getTextHeight` above the arrow, where `getTextHeight` is the text block
+  // plus the padding on both sides (`AbstractTextualComponent.java:110-114`).
+  const rows = Math.max(1, lines.length);
+  const top = arrowY - (rows * lineHeight + 2 * ARROW_LABEL_PADDING_Y);
 
   // D1: the metrics are resolved HERE, where the measurer is, and travel on
   // the run. `ascent` is measured rather than derived from the font size --
   // see `TextRun.textAscent`.
   const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  // A2: `TextRun.y` is a BASELINE. The block's top is a line-box top, so every
+  // run drops one ascent from wherever its line box begins.
+  const baselineOfRow = (i: number): number => top + ascent + i * lineHeight;
   const runAt = (text: string, x: number, y: number): TextRun => ({
     text,
     x,
@@ -227,11 +277,11 @@ export function messageLabelBlock(
     textLineHeight: lineHeight,
   });
 
-  const placed = lines.map((text, i) => runAt(text, labelLeft, top + i * lineHeight));
+  const placed = lines.map((text, i) => runAt(text, labelLeft, baselineOfRow(i)));
   if (numberText === undefined) return { lines: placed };
   // VerticalAlignment.CENTER against the label block (`Display.java:711`).
-  const numberY = top + (Math.max(1, lines.length) - 1) * lineHeight / 2;
-  return { lines: placed, number: runAt(numberText, blockLeft, numberY) };
+  const numberY = baselineOfRow(0) + ((rows - 1) * lineHeight) / 2;
+  return { lines: placed, number: runAt(numberText, leftX, numberY) };
 }
 
 /** Rows a label block occupies, for the caller's vertical reservation. A

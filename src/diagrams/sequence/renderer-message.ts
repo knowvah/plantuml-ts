@@ -10,7 +10,8 @@
 import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
-import { text, path } from '../../core/svg.js';
+import { path } from '../../core/svg.js';
+import { sequenceText } from './sequence-text.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
@@ -94,7 +95,13 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
   const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
   return runs
     .map((run) =>
-      text(run.x, run.y, run.text, {
+      sequenceText({
+        leftX: run.x,
+        baselineY: run.y,
+        text: run.text,
+        // Measured in layout at this same font and carried on the run (D1);
+        // the renderer has no measurer and must not acquire one.
+        width: run.textWidth,
         fontFamily: theme.fontFamily,
         // `arrow { FontSize 13 }` (`plantuml.skin:306-308`), scaled with the
         // rest of the document. Layout measured the block with the same

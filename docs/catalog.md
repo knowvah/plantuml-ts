@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1052 modules · 3748 exported names.
+1052 modules · 3750 exported names.
 
 ## `src/`
 
@@ -1295,7 +1295,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `parseParticipantDeclaration`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `sequence-text.ts` | `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
-| `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
+| `text-block-geo.ts` | `TextRun`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 
 ## `src/diagrams/state/`
 

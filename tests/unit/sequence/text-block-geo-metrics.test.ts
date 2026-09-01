@@ -23,13 +23,13 @@ import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
 
-const CENTER_X = 100;
-const BASELINE_Y = 50;
+const LEFT_X = 100;
+const ARROW_Y = 50;
 
 describe('TextRun metrics', () => {
   it("takes textWidth from the measurer at the label's own ARROW font", () => {
     const measurer = new DeterministicMeasurer();
-    const block = messageLabelBlock('hello', undefined, CENTER_X, BASELINE_Y, defaultTheme, measurer);
+    const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     const expected = measurer.measure('hello', arrowFontSpecOf(defaultTheme)).width;
     expect(block.lines[0]!.textWidth).toBeCloseTo(expected, 10);
     // The arrow font is 13pt where the ambient one is 14 — measuring at the
@@ -45,7 +45,7 @@ describe('TextRun metrics', () => {
     // `FixedMeasurer(8, 16)` the true ascent is 16 - 16/4.5 = 12.444 and the
     // shorthand says 13 - 13/4.5 = 10.111 (decisions.md D1, D2).
     const measurer = new FixedMeasurer(8, 16);
-    const block = messageLabelBlock('hi', undefined, CENTER_X, BASELINE_Y, defaultTheme, measurer);
+    const block = messageLabelBlock('hi', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     expect(block.lines[0]!.textAscent).toBeCloseTo(16 - 16 / 4.5, 10);
     expect(block.lines[0]!.textAscent).not.toBeCloseTo(13 - 13 / 4.5, 3);
     expect(block.lines[0]!.textLineHeight).toBe(16);
@@ -53,7 +53,7 @@ describe('TextRun metrics', () => {
 
   it('gives the autonumber run its own measured width, not the label’s', () => {
     const measurer = new DeterministicMeasurer();
-    const block = messageLabelBlock('hello', '[1]', CENTER_X, BASELINE_Y, defaultTheme, measurer);
+    const block = messageLabelBlock('hello', '[1]', LEFT_X, ARROW_Y, defaultTheme, measurer);
     const spec = arrowFontSpecOf(defaultTheme);
     expect(block.number!.textWidth).toBeCloseTo(measurer.measure('[1]', spec).width, 10);
     expect(block.number!.textWidth).not.toBeCloseTo(block.lines[0]!.textWidth, 3);
@@ -61,10 +61,66 @@ describe('TextRun metrics', () => {
 
   it('advances each line of a multi-line label by exactly one textLineHeight', () => {
     const measurer = new DeterministicMeasurer();
-    const block = messageLabelBlock('a\nb\nc', undefined, CENTER_X, BASELINE_Y, defaultTheme, measurer);
+    const block = messageLabelBlock('a\nb\nc', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     const h = block.lines[0]!.textLineHeight;
     expect(block.lines[1]!.y - block.lines[0]!.y).toBeCloseTo(h, 10);
     expect(block.lines[2]!.y - block.lines[1]!.y).toBeCloseTo(h, 10);
+  });
+});
+
+describe('messageLabelBlock placement (A2)', () => {
+  const measurer = new DeterministicMeasurer();
+
+  it('puts the block at leftX, not centred on it', () => {
+    const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.lines[0]!.x).toBe(LEFT_X);
+  });
+
+  it("derives every y from the ARROW's y, one getTextHeight above it", () => {
+    // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
+    // (`ComponentRoseArrow.java:141-148`); `getTextHeight` is the block plus
+    // the 1px padding on each side (`AbstractTextualComponent.java:110-114`).
+    const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    const run = block.lines[0]!;
+    const top = ARROW_Y - (run.textLineHeight + 2);
+    expect(run.y).toBeCloseTo(top + run.textAscent, 10);
+  });
+
+  it('grows a multi-line label UPWARD, leaving the arrow where the caller put it', () => {
+    const one = messageLabelBlock('a', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    const three = messageLabelBlock('a\nb\nc', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    const h = one.lines[0]!.textLineHeight;
+    // The LAST line of the three-line block sits where the single line did.
+    expect(three.lines[2]!.y).toBeCloseTo(one.lines[0]!.y, 10);
+    expect(three.lines[0]!.y).toBeCloseTo(one.lines[0]!.y - 2 * h, 10);
+  });
+
+  it('starts the autonumber at leftX and the label after it plus the 4px margin', () => {
+    const block = messageLabelBlock('hello', '[1]', LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.number!.x).toBe(LEFT_X);
+    // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`).
+    expect(block.lines[0]!.x).toBeCloseTo(LEFT_X + block.number!.textWidth + 4, 10);
+  });
+
+  it('centres the autonumber vertically against a multi-line label', () => {
+    // VerticalAlignment.CENTER (`Display.java:711`).
+    const block = messageLabelBlock('a\nb\nc', '[1]', LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.number!.y).toBeCloseTo(block.lines[1]!.y, 10);
+  });
+
+  it('reserves one row for a number-only label', () => {
+    const block = messageLabelBlock('', '[1]', LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.lines).toEqual([]);
+    const n = block.number!;
+    expect(n.y).toBeCloseTo(ARROW_Y - (n.textLineHeight + 2) + n.textAscent, 10);
+  });
+
+  it('emits nothing at all for a message with neither label nor number', () => {
+    // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`
+    // (`AbstractTextualComponent.java:84-85`).
+    const block = messageLabelBlock('', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.lines).toEqual([]);
+    expect(block.number).toBeUndefined();
   });
 });
 
