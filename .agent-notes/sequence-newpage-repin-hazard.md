@@ -34,3 +34,19 @@
   `scripts/sequence-ratchet-adjudicate.ts --base <ref>`, which sets its own
   worktree up correctly.
 - **Confidence**: High — error census 19 -> 17 purely from adding the symlink.
+
+## Observation: a regex character class silently hid a fixture from a ratchet triage
+
+- **Context**: `sequence-activation-level` (2026-09-01), triaging ratchet
+  failures with
+  `grep -oE "sequence/[a-zA-Z0-9-]+: weighted score ROSE"`.
+- **Finding**: several corpus slugs carry UNDERSCORES
+  (`SequenceArrows_0002_Test`, `TeozTimelineIssues_0003_Test`, …). The class
+  above excludes `_`, so those rows were dropped from every triage listing
+  while the test output and the adjudicator both reported them. The count
+  read 38 when it was 39.
+- **Impact**: use `[\w-]` (or the vitest `×` lines verbatim) when filtering
+  fixture slugs; and treat the ADJUDICATOR's own totals as the count, never a
+  hand-rolled grep of the console.
+- **Confidence**: High — the missing row was found by re-reading the
+  adjudicator JSON, which had it all along.
