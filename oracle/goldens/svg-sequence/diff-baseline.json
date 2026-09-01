@@ -50,10 +50,10 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0004_Test",
       "status": "baseline",
-      "weightedScore": 590,
-      "diffCount": null,
-      "measuredAt": "2026-08-28",
-      "measuredAgainstCommit": "5e399239"
+      "weightedScore": 240,
+      "diffCount": 240,
+      "measuredAt": "2026-09-01",
+      "measuredAgainstCommit": "2437b430"
     },
     {
       "type": "sequence",
@@ -4061,10 +4061,10 @@
       "type": "sequence",
       "slug": "koneju-77-vode355",
       "status": "baseline",
-      "weightedScore": 1165,
-      "diffCount": null,
-      "measuredAt": "2026-08-28",
-      "measuredAgainstCommit": "5e399239"
+      "weightedScore": 1144,
+      "diffCount": 5,
+      "measuredAt": "2026-09-01",
+      "measuredAgainstCommit": "2437b430"
     },
     {
       "type": "sequence",
@@ -8902,10 +8902,10 @@
       "type": "sequence",
       "slug": "vogegu-91-mave762",
       "status": "baseline",
-      "weightedScore": 529,
-      "diffCount": null,
-      "measuredAt": "2026-08-28",
-      "measuredAgainstCommit": "5e399239"
+      "weightedScore": 193,
+      "diffCount": 193,
+      "measuredAt": "2026-09-01",
+      "measuredAgainstCommit": "2437b430"
     },
     {
       "type": "sequence",

@@ -997,8 +997,10 @@ Ordered by how ready they are, not by size.
   it was already SHORT, and removing its hidden arrow exposes a six-line
   shortfall that is present at both refs and unrelated.
 
-  Not re-pinned — nothing rose. Three fixtures now sit below their pins and
-  would be tightened by the usual guarded pass. The arrow COLOUR fallback
+  **The three moved fixtures were tightened 2026-09-01** (3 down, 0 up):
+  `vogegu` 529 → 193, `TeozTimelineIssues_0004_Test` 590 → 240, `koneju`
+  1165 → 1144. Nothing rose, so no re-pin was required — this holds the gains.
+  The arrow COLOUR fallback
   (`CommandArrow.java:497-498`) is still parsed and dropped: a colour gap that
   moves no child counts.
 

@@ -77,12 +77,24 @@ live `-[hidden]-`), leaving **three measurable fixtures, two of which closed
 completely**. The filing predicted only `vogegu` would close; it undersold
 `TeozTimelineIssues_0004_Test`.
 
-## 5. Re-pinning
+## 5. Re-pinning — tightened 2026-09-01 at `2437b430`
 
-Not done, and nothing here needs it: there are no rises. Three fixtures now
-sit below their pins (`vogegu` 193/529, `TeozTimelineIssues_0004_Test`
-240/590, `koneju` 1144/1165) and would be tightened by the same guarded pass
-the two previous missions used.
+Nothing rose, so no re-pin was *required*. The three fixtures that moved were
+tightened anyway, so their gains are held: `vogegu-91-mave762` 529 → **193**,
+`TeozTimelineIssues_0004_Test` 590 → **240**, `koneju-77-vode355`
+1165 → **1144**. Guarded strictly-below-pin as in the two previous missions,
+and verified against `HEAD` as **3 down, 0 up, 0 outside the set**; the four
+remaining red rows keep their original pins and stamps.
+
+One caveat on `koneju-77-vode355`, since its case is not the same as the other
+two. Its SCORE fell (which is what the gate reads) but its child distance rose
+1 → 4, for the reason in §3 — it was already short and this change exposed
+that. A tighter pin there is still strictly better than the old one, but it
+sits on a fixture with a known unfixed shortfall, so a future correct fix
+elsewhere could raise its score through the same short-circuit artefact these
+missions keep meeting and trip the gate sooner. That is the gate working; it
+is recorded here so the next reader has the mechanism ready rather than
+starting the diagnosis over.
 
 The arrow COLOUR fallback (`config.withColor(...)`,
 `CommandArrow.java:497-498`) is still parsed and dropped — a colour gap that
