@@ -325,3 +325,66 @@ describe('inter-participant spacing — the lifeline centres', () => {
     expect(right.x - (left.x + left.width)).toBeCloseTo(10, 3);
   });
 });
+
+describe('the D6 constraint solve — labels that need more room than the gap', () => {
+  function lifelineCentres(svg: string): number[] {
+    return [...svg.matchAll(/<line x1="([\d.]+)"[^>]*dasharray/g)].map((m) => Number(m[1]));
+  }
+
+  // The Batch 7 gate: fixtures that DO have wide labels, where the gap between
+  // participants is set by a message rather than by the 10px neighbour rule.
+  // Each of these has every lifeline centre on the jar's, which requires the
+  // span formula (`label + 2*7 + 10`, `ComponentRoseArrow:347-349`), the
+  // label font (13, `plantuml.skin:306-308`) and the solve all to be right.
+  //
+  // All four are activation-free on purpose. The `LIVE_DELTA_SIZE` terms both
+  // branches of `addConstraints` apply to their endpoints (`:405-413`) are
+  // NOT modelled -- the scan runs before the event walk, so it does not know
+  // a participant's level -- and a fixture with a live bar comes out 5px
+  // narrow per affected span. `TeozTimelineIssues_0003_Test` is the measured
+  // example: its second lifeline is 79.669 where the jar's is 84.669, exactly
+  // one `LIVE_DELTA_SIZE`. See `findings/label-widening.md`.
+  it.each([
+    'cebeje-70-bada975',
+    'binegi-05-xere209',
+    'birocu-87-xubi808',
+    'cexeco-21-piga007',
+  ])('%s: every lifeline centre matches the jar', (slug) => {
+    const jar = lifelineCentres(goldenOf(slug));
+    const ours = lifelineCentres(oursFor(slug));
+    expect(jar.length).toBeGreaterThan(1);
+    expect(ours).toHaveLength(jar.length);
+    for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
+  });
+
+  it('constrains a NON-adjacent pair, which the old pairwise pre-scan could not', () => {
+    // `CommunicationTile#addConstraints:392-416` constrains the two
+    // participants a message runs between, adjacent or not. The pre-scan
+    // tested `Math.abs(fi - ti) === 1` and ignored the rest, so a wide label
+    // on `A -> C` asked the layout for nothing.
+    const wide = 'a label far wider than three narrow participants need';
+    const near = renderFixtureSequence(
+      '@startuml\nparticipant A\nparticipant B\nparticipant C\nA -> C : x\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    const far = renderFixtureSequence(
+      `@startuml\nparticipant A\nparticipant B\nparticipant C\nA -> C : ${wide}\n@enduml`,
+      new DeterministicMeasurer(),
+    );
+    const spanOf = (svg: string): number => {
+      const cs = lifelineCentres(svg);
+      return (cs[cs.length - 1] ?? 0) - (cs[0] ?? 0);
+    };
+    expect(spanOf(far)).toBeGreaterThan(spanOf(near));
+  });
+
+  it('measures a message label at the arrow font, not the ambient one', () => {
+    // `arrow { FontSize 13 }` (`plantuml.skin:306-308`). Every golden with a
+    // message label emits `font-size="13"` for it beside `font-size="14"`
+    // participant text -- checked here on both sides.
+    const jar = goldenOf('TeozTimelineIssues_0003_Test');
+    expect(jar).toContain('font-size="13" textLength="27.544">hello</text>');
+    const ours = oursFor('TeozTimelineIssues_0003_Test');
+    expect(ours).toMatch(/<text[^>]*font-size="13"[^>]*>hello<\/text>/);
+  });
+});

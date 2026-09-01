@@ -41,7 +41,7 @@ import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
-import { fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
@@ -50,11 +50,6 @@ import { LEFT_MARGIN } from './sequence-layout-participants.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** The arrow component's horizontal text padding, both sides:
- *  `topRightBottomLeft(1, 7, 1, 7)` (`skin/rose/AbstractComponentRoseArrow
- *  .java:62`), read back by `getTextWidth` (`skin/AbstractTextualComponent
- *  .java:106-108`). */
-const ARROW_PADDING_X = 7;
 
 /** The right margin between a leading `MessageNumber` and the label beside it
  *  — `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`). Same
@@ -133,7 +128,9 @@ function numberTextOf(event: MessageExoEvent): string | undefined {
 /** The label block's own width — the number, its margin and the widest label
  *  line, exactly as `messageLabelBlock` lays them out. */
 function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): number {
-  const fontSpec = fontSpecOf(ctx.theme);
+  // Same font `messageLabelBlock` lays the block out with — `arrow
+  // { FontSize 13 }` (`plantuml.skin:306-308`).
+  const fontSpec = arrowFontSpecOf(ctx.theme);
   const numberText = numberTextOf(event);
   const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;

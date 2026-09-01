@@ -20,7 +20,7 @@ import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
@@ -31,6 +31,7 @@ import {
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import {
   symbolPreferredHeight,
   symbolPreferredWidth,
@@ -58,7 +59,6 @@ import {
  * where `jobadi-87-jegi648`'s first box sits, and every other golden's.
  */
 export const LEFT_MARGIN = 10;
-const LABEL_H_PADDING = 8; // min px between a message label edge and a lifeline
 
 export interface ParticipantLayoutResult {
   sortedParticipants: Participant[];
@@ -90,16 +90,13 @@ export function computeParticipantLayout(
   const sortedParticipants = [...ast.participants].sort(
     (a, b) => a.order - b.order,
   );
-  const adjMaxLabelW: number[] = Array.from(
-    { length: sortedParticipants.length - 1 },
-    () => 0,
-  );
-  scanMessageLabels(ast.events, sortedParticipants, theme, measurer, adjMaxLabelW);
+  const constraints: SpanConstraint[] = [];
+  scanMessageLabels(ast.events, sortedParticipants, theme, measurer, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
   const { participantGeos, participantMap, participantIndex, maxParticipantHeight } =
-    positionParticipants(sortedParticipants, participantWidths, adjMaxLabelW, ctx, originX);
+    positionParticipants(sortedParticipants, participantWidths, constraints, ctx, originX);
 
   return {
     sortedParticipants,
@@ -111,26 +108,60 @@ export function computeParticipantLayout(
 }
 
 /**
- * Pre-scan: find the widest message label between each adjacent participant
- * pair so the gap can be widened enough for labels to fit between lifelines.
- * Mutates adjMaxLabelW in place; recurses into frame branches.
+ * One message's demand on the participant row: the two participant indices it
+ * runs between, and the centre-to-centre distance it needs.
+ *
+ * This IS `CommunicationTile#addConstraints:392-416`, reduced to the part that
+ * bears on x. There, `point2.ensureBiggerThan(point1.addFixed(width))` with
+ * `width = comp.getPreferredDimension(...).getWidth()` and `point1`/`point2`
+ * the two lifeline positions — a constraint between ANY two participants, not
+ * only neighbours (D6).
+ */
+interface SpanConstraint {
+  /** Lower participant index. */
+  readonly from: number;
+  /** Higher participant index. Always `> from`. */
+  readonly to: number;
+  /** Required `centre[to] - centre[from]`. */
+  readonly span: number;
+}
+
+/**
+ * Collect every message's span constraint. Recurses into frame branches.
+ *
+ * Constraints are stored `from < to` regardless of the arrow's direction: the
+ * reverse branch of `addConstraints` (`:402-409`) swaps which endpoint is
+ * bounded, but the distance it demands between the two lifelines is the same.
+ * The `LIVE_DELTA_SIZE` adjustments in both branches are NOT modelled here —
+ * see `findings/label-widening.md`.
  */
 function scanMessageLabels(
   events: readonly SequenceEvent[],
   sortedParticipants: Participant[],
   theme: Theme,
   measurer: StringMeasurer,
-  adjMaxLabelW: number[],
+  out: SpanConstraint[],
 ): void {
-  const fontSpec = fontSpecOf(theme);
+  const arrowSpec = arrowFontSpecOf(theme);
   for (const ev of events) {
     if (ev.kind === 'message' && ev.from !== ev.to) {
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
-      if (fi >= 0 && ti >= 0 && Math.abs(fi - ti) === 1) {
-        const pairIdx = Math.min(fi, ti);
-        const w = measurer.measure(ev.label, fontSpec).width;
-        adjMaxLabelW[pairIdx] = Math.max(adjMaxLabelW[pairIdx]!, w);
+      if (fi >= 0 && ti >= 0 && fi !== ti) {
+        const lines = ev.label === '' ? [] : ev.label.split('\n');
+        const labelWidth =
+          lines.length === 0
+            ? 0
+            : Math.max(...lines.map((l) => measurer.measure(l, arrowSpec).width));
+        out.push({
+          from: Math.min(fi, ti),
+          to: Math.max(fi, ti),
+          // `ComponentRoseArrow#getPreferredWidth:347-349` —
+          // `getTextWidth + getArrowDeltaX`, and `getTextWidth` is the block
+          // plus both paddings. The same formula `sequence-layout-exo.ts`
+          // already uses for an exo message's demand.
+          span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X,
+        });
       }
     } else if (ev.kind === 'messageExo') {
       // Deliberately skipped, not overlooked (D3). This scan widens the gap
@@ -143,7 +174,7 @@ function scanMessageLabels(
       continue;
     } else if (ev.kind === 'frame') {
       for (const branch of ev.branches) {
-        scanMessageLabels(branch, sortedParticipants, theme, measurer, adjMaxLabelW);
+        scanMessageLabels(branch, sortedParticipants, theme, measurer, out);
       }
     }
   }
@@ -234,7 +265,7 @@ interface ParticipantColumnResult {
 function positionParticipants(
   sortedParticipants: Participant[],
   participantWidths: number[],
-  adjMaxLabelW: number[],
+  constraints: readonly SpanConstraint[],
   ctx: ParticipantLayoutCtx,
   originX: number,
 ): ParticipantColumnResult {
@@ -242,18 +273,15 @@ function positionParticipants(
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
-  let currentX = originX;
+  const xs = solveParticipantXs(participantWidths, constraints, theme, originX);
 
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
-    const width = participantWidths[i]!;
-    const geo = buildParticipantGeo(p, width, currentX, ctx);
+    const geo = buildParticipantGeo(p, participantWidths[i]!, xs[i]!, ctx);
 
     participantGeos.push(geo);
     participantMap.set(p.id, geo);
     participantIndex.set(p.id, i);
-
-    currentX = advancePastParticipant(currentX, i, participantWidths, adjMaxLabelW, theme);
   }
 
   // Use the tallest reserved head AREA so all lifelines start at the same Y.
@@ -512,30 +540,59 @@ function buildParticipantGeo(
 }
 
 /**
- * Compute the x offset for the participant after index `i`, widening the
- * natural gap when needed so the widest adjacent message label still fits.
- * Returns `currentX` unchanged for the last participant (matches original:
- * no further column follows it).
+ * Solve every participant's x — the port of `xorigin.compileNow()`
+ * (`SequenceDiagramFileMakerTeoz.java:110`), and the D6 decision in code.
+ *
+ * Upstream builds a `Real` constraint graph and solves it globally. This does
+ * NOT reimplement `Real`; it exploits the shape of the constraint set upstream
+ * actually produces for the participant row, which is entirely
+ *
+ *     x[j] >= x[i] + c     with  i < j  in participant order
+ *
+ * from two sources, and only two:
+ *
+ *   - `LivingSpaces#addConstraints:61-71`, `nextA >= prevE + 10`, always
+ *     between neighbours;
+ *   - `CommunicationTile#addConstraints:392-416`, one per message, between the
+ *     two participants it runs between — adjacent or not. The reverse branch
+ *     (`:402-409`) swaps which endpoint is bounded but demands the same
+ *     distance, so it too is a left-to-right edge.
+ *
+ * A system of difference constraints whose edges all point one way along a
+ * total order is a DAG longest-path, and a single left-to-right sweep taking
+ * the max of the incoming edges gives its EXACT minimal solution. So this is
+ * not an approximation of the solver: for this constraint set it is the
+ * solver, at O(participants + messages).
+ *
+ * What it replaced was a pairwise pre-scan that widened only ADJACENT gaps and
+ * ignored every message spanning three or more participants
+ * (`findings/label-widening.md`).
  */
-function advancePastParticipant(
-  currentX: number,
-  i: number,
-  participantWidths: number[],
-  adjMaxLabelW: number[],
+function solveParticipantXs(
+  widths: readonly number[],
+  constraints: readonly SpanConstraint[],
   theme: Theme,
-): number {
-  if (i >= participantWidths.length - 1) return currentX;
+  originX: number,
+): number[] {
+  const xs: number[] = [];
+  const centre = (i: number): number => xs[i]! + widths[i]! / 2;
+  // Incoming edges, bucketed by their higher endpoint, so the sweep reads each
+  // constraint exactly once and never looks ahead.
+  const incoming = new Map<number, SpanConstraint[]>();
+  for (const c of constraints) {
+    const bucket = incoming.get(c.to);
+    if (bucket === undefined) incoming.set(c.to, [c]);
+    else bucket.push(c);
+  }
 
-  const width = participantWidths[i]!;
-  const nextWidth = participantWidths[i + 1]!;
-  // Minimum center-to-center gap so the widest adjacent message label fits.
-  const minCenterGap = (adjMaxLabelW[i] ?? 0) + LABEL_H_PADDING * 2;
-  // `nextA >= prevE + 10` (`LivingSpaces#addConstraints:61-71`) -- an EDGE
-  // gap, expressed here through centres. See `theme.ts`'s note on
-  // `participantGap` for why the margins in `posA`/`posE` are zero for an
-  // ordinary participant.
-  const naturalCenterGap = width / 2 + theme.sequence.participantGap + nextWidth / 2;
-  const centerGap = Math.max(naturalCenterGap, minCenterGap);
-  const edgeGap = centerGap - width / 2 - nextWidth / 2;
-  return currentX + width + edgeGap;
+  for (let i = 0; i < widths.length; i++) {
+    // `nextA >= prevE + 10`, the neighbour constraint.
+    let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
+    for (const c of incoming.get(i) ?? []) {
+      // `centre[i] >= centre[c.from] + c.span`, expressed as a left edge.
+      x = Math.max(x, centre(c.from) + c.span - widths[i]! / 2);
+    }
+    xs.push(x);
+  }
+  return xs;
 }

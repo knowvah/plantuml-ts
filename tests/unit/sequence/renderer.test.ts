@@ -23,6 +23,7 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
+import { arrowFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -198,10 +199,10 @@ describe('renderSequence — messages', () => {
     const msg = geo.events[0] as MessageGeo;
     const numberRun = msg.labelNumber;
     expect(numberRun).toBeDefined();
-    const numberWidth = new FormulaMeasurer().measure('3', {
-      family: defaultTheme.fontFamily,
-      size: defaultTheme.fontSize,
-    }).width;
+    // Measured at the ARROW font, which is what `messageLabelBlock` lays the
+    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:306-308`), not
+    // the ambient 14 every other sequence element uses.
+    const numberWidth = new FormulaMeasurer().measure('3', arrowFontSpecOf(defaultTheme)).width;
     // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
     expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
     // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
@@ -1698,8 +1699,10 @@ describe('renderSequence — exogenous arrows', () => {
     // 116/139: the gap between the two boxes came down from 20 to the jar's
     // 10 (`LivingSpaces#addConstraints:61-71`), and the exo's reach is
     // measured from the now-nearer second lifeline, so both narrow by it.
+    // 137, not 139: the exo's label is now measured at 13 rather than 14, so
+    // its reach is 2px shorter.
     expect(docWidth(without)).toBe(116);
-    expect(docWidth(withExo)).toBe(139);
+    expect(docWidth(withExo)).toBe(137);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1779,6 +1782,6 @@ describe('renderSequence — exogenous arrows', () => {
     // No longer negative. The origin is now solved rather than fixed: the
     // row is pushed right by however far the leftmost content overhangs, which
     // is upstream's `dx(-min1)` (`SequenceDiagramFileMakerTeoz.java:135-136`).
-    expect(messageBodies(short)[0]).toEqual([10, 57.663]);
+    expect(messageBodies(short)[0]).toEqual([10, 55.544]);
   });
 });

@@ -11,6 +11,7 @@ import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
 import { text, path } from '../../core/svg.js';
+import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
   renderFlatMessageArrow,
@@ -78,7 +79,10 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
     .map((run) =>
       text(run.x, run.y, run.text, {
         fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
+        // `arrow { FontSize 13 }` (`plantuml.skin:306-308`), scaled with the
+        // rest of the document. Layout measured the block with the same
+        // value (`text-block-geo.ts#messageLabelBlock`).
+        fontSize: ARROW_FONT_SIZE * theme.scaleK,
         fill: theme.colors.text,
       }),
     )

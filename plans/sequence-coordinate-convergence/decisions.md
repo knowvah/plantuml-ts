@@ -83,7 +83,70 @@ verdict, because `repin-sequence-baselines.ts` compares each fixture to its
 PIN rather than to the base ref and will happily green-light a row that was
 already red (`.agent-notes/sequence-newpage-repin-hazard.md`).
 
-## D6 — OPEN: the label-widening pre-scan versus upstream's constraint system
+## D6 — DECIDED (Batch 7): port the constraint SET, and solve it exactly with the sweep its own structure permits
+
+Neither of the two options the question was framed with. Keeping the pairwise
+pre-scan was rejected because it is provably wrong on a whole class of
+diagrams; porting `Real` wholesale was unnecessary, because the constraint set
+upstream actually produces for the participant row does not need a general
+solver.
+
+**The observation.** Every constraint that positions a participant is of the
+form
+
+```
+x[j] >= x[i] + c        with  i < j  in participant order
+```
+
+and there are exactly two sources of them:
+
+- `LivingSpaces#addConstraints:61-71` — `nextA >= prevE + 10`, between
+  neighbours.
+- `CommunicationTile#addConstraints:392-416` — one per message,
+  `point2.ensureBiggerThan(point1.addFixed(width))` with
+  `width = comp.getPreferredDimension(...).getWidth()`, between the two
+  participants the message runs between, **adjacent or not**. The reverse
+  branch (`:402-409`) swaps which endpoint is bounded but demands the same
+  distance, so it is still an edge pointing along the order.
+
+A system of difference constraints whose edges all point one way along a total
+order is a DAG longest-path. A single left-to-right sweep taking the max of
+the incoming edges is its **exact minimal solution**. So `solveParticipantXs`
+is not an approximation of `Real.compileNow()` — for this constraint set it is
+`Real.compileNow()`, at O(participants + messages) and with no solver.
+
+**What that fixed.** The pre-scan looked only at `Math.abs(fi - ti) === 1` and
+silently ignored every message spanning three or more participants, which is
+the class of diagram it is known to get wrong. The sweep handles them by
+construction.
+
+**Measured, on the whole corpus.** Fixtures where EVERY lifeline centre lands
+on the jar's:
+
+| | fixtures |
+|---|---:|
+| pairwise pre-scan (Batch 6 close) | 275 of 1039 |
+| exact sweep, message labels still measured at 14pt | 212 |
+| exact sweep, message labels at the jar's 13pt | **482** |
+
+The middle row is the trap this decision nearly fell into. The sweep alone
+scored WORSE than the pre-scan, which reads as a regression and is not one:
+the pre-scan's span formula was 8px too narrow and the label font was 1pt too
+wide, and the two errors were partially cancelling. Removing one exposed the
+other. The mechanism was proved by measurement before the decision was made,
+not asserted after it — see `findings/label-widening.md`.
+
+**Not modelled, and stated rather than left silent.** The `LIVE_DELTA_SIZE`
+adjustments both branches of `addConstraints` apply to their endpoints
+(`:405-413`), and `isCreate()`'s use of `posB`/`posD` instead of `posC`
+(`:423-431`). Both change a span by a few pixels on diagrams with activations
+or `create` messages, and both are additive terms on the same edges this sweep
+already carries — an extension of it, not a challenge to it.
+
+**No `DIVERGENCES.md` entry.** One is owed only if the pre-scan is kept, and
+it is not.
+
+## D6 (original framing) — the label-widening pre-scan versus upstream's constraint system
 
 Upstream positions participants on a `Real` constraint graph: each tile adds
 its own constraints (`Tile#addConstraints`), `LivingSpaces#addConstraints`
