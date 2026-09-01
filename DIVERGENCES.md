@@ -1103,9 +1103,10 @@ fixtures are recorded in `refusal-baseline.json` as `known-gap`, each naming
 the unported upstream mechanism with its `File.java:line`, and in
 `routing-baseline.json` as `known-misroute` with the same citation.
 
-## Sequence activations are drawn at zero height
+## ~~Sequence activations are drawn at zero height~~ — CLOSED 2026-09-01
 
-`sequence-participant-g-wrapper` / T2, 2026-08-27.
+`sequence-participant-g-wrapper` / T2, 2026-08-27. Closed by
+`sequence-activation-level`, 2026-09-01.
 
 `ComponentRoseActiveLine#drawInternalU` returns before it opens its group
 when the bar has no height (`skin/rose/ComponentRoseActiveLine.java:76-79`):
@@ -1116,27 +1117,34 @@ if (dimensionToUse.getHeight() == 0)
 ug.startGroup(UGroup.singletonMap(UGroupType.TITLE, stringsToDisplay.toTooltipText()));
 ```
 
-This port emits the bar regardless. The guard is understood and was
-implemented, then **deliberately withdrawn**, because this port's *layout*
-disagrees with the jar's about which activations are zero-height: **32 of the
-121 activation-bearing corpus fixtures** lay out at least one activation with
-`height === 0` where the jar gives it height — `autoactivate on` followed by a
-bare `deactivate` (`donuli-07-peje262`) is the smallest case, and 12 fixtures
-have *all* of theirs at zero.
+The guard was understood, implemented, and then **deliberately withdrawn**,
+because this port's *layout* disagreed with the jar's about which activations
+are zero-height: 32 of the 121 activation-bearing fixtures laid out at least
+one at `height === 0` where the jar gave it height. Porting the guard on top
+of that input deleted boxes the jar draws — measured, it moved 24 fixtures'
+root child count AWAY from the golden's.
 
-Porting the guard on top of that input deletes boxes the jar draws. Measured:
-it moved 24 fixtures' root-group child count **away** from the golden's, the
-distance growing by exactly the number of boxes suppressed on every one of the
-24 — so the correct guard produced strictly worse output than no guard.
+**That input defect is fixed.** This port modelled activation state as ONE
+open record per participant; upstream recomputes a nesting LEVEL and clamps
+every deactivate with `level = Math.max(0, level - 1)`
+(`LiveBoxes#getLevelAtInternal:100-108`). The single record could neither
+nest (`A -> B++` four deep overwrote its own start) nor decline an unmatched
+deactivate, and the zero-height bars were what those two failures produced.
+`sequence-layout-events.ts` now carries the stack and the clamp, plus the
+flush upstream gets for free (a level that never returns to 0 simply runs to
+the end of the lifeline).
 
-The defect is upstream of the guard, in layout, and is tracked as
-`sequence-zero-height-activation`. The guard lands **with** that fix, not
-before it; `tests/unit/sequence/renderer-lifeline.test.ts` pins the current
-behaviour as a divergence and inverts when the fix lands.
+The census reports **zero** zero-height bars across all 157 activation-bearing
+fixtures, down from 32 of 121. The guard is in, and
+`tests/unit/sequence/renderer-lifeline.test.ts` asserts `''` — the inversion
+the old test asked for by name.
 
-Nothing visible to a reader changes either way — a zero-height rect paints no
-ink. What changes is whether the SVG carries a child at that index, which is
-what the conformance comparator walks.
+Left as a divergence, and separately: nested activation bars are NOT indented.
+Upstream offsets each level by `LIVE_DELTA_SIZE` (5px) — `kejoke-76-curu931`'s
+golden runs `x=52.075, 57.075, 62.075, 67.075` down four levels — and this
+port draws all four on the lifeline's centre. The `Stairs`/`indent` half of
+`LiveBoxes` is not ported; `activationLevel` is in place for whoever does it.
+That is geometry, not element count.
 
 ## Grouping-frame background shadow is not ported
 

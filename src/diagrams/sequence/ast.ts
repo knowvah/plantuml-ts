@@ -290,6 +290,14 @@ export interface SequenceDiagramAST {
      *  participants not referenced by any event are dropped post-parse
      *  (`applyHideUnlinked`, `parser.ts`). */
     hideUnlinked?: boolean;
+    /** `autoactivate on|off` (`CommandAutoactivate`, `SequenceDiagram
+     *  #setAutoactivate:556-563`). While on, an arrow that carries NO
+     *  explicit `++`/`--`/`!` suffix gets one implicitly: a solid arrow
+     *  activates its RECEIVER, a dotted one deactivates its SENDER, and only
+     *  for a `NORMAL` or `ASYNC` head (`CommandArrow.java:435-439`,
+     *  `CommandExoArrowAny.java:174-180`). Positional like
+     *  {@link ignoreNewpage} — it governs the arrows that follow it. */
+    autoactivate?: boolean;
     /** `ignorenewpage` (`CommandIgnoreNewpage`) — once issued, every LATER
      *  `newpage` is dropped on the floor: `SequenceDiagram#newpage` returns
      *  before touching `titles`/`events`/`countNewpage`

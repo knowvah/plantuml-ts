@@ -17,7 +17,7 @@
 
 import type { MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
-import { emitActivation } from './sequence-layout-events.js';
+import { emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 
@@ -153,7 +153,7 @@ function applyMessageActivation(
     // advance. LIFECOLOR rides along on the `+`/`*` activate leg only --
     // `manageActivations`'s `-`/`!` legs always pass `null`
     // (`CommandArrow.java:439,445-450`), so a deactivate never recolors.
-    ctx.activationStart.set(event.activates, {
+    pushActivation(ctx.activationStart, event.activates, {
       y: messageGeo.y,
       ...(event.lifeColor !== undefined ? { color: event.lifeColor } : {}),
     });
@@ -162,7 +162,7 @@ function applyMessageActivation(
     // End at the arrow y. If that would give zero/negative height (the
     // activate and deactivate land at the same y), fall back to the
     // post-spacing cursor.y so the bar is always visible.
-    const deactStartY = ctx.activationStart.get(event.deactivates)?.y;
+    const deactStartY = openActivation(ctx.activationStart, event.deactivates)?.y;
     const deactEndY =
       deactStartY !== undefined && messageGeo.y <= deactStartY
         ? cursor.y

@@ -158,17 +158,15 @@ export const spaceCommand: Command = {
   },
 };
 
-/** `autoactivate on|off` — `CommandAutoactivate`. Recognised and stored;
- *  this port's arrow command does not yet read `diagram.isAutoactivate()`
- *  (`CommandArrow.java:435-439` — the auto-activate-on-plain-arrow branch),
- *  so the flag is currently write-only. Getting the fixture out of the
- *  refusal bucket does not require wiring a reader: the source still
- *  renders (its messages, notes, frames draw normally), just without the
- *  auto-activation bars upstream would additionally draw. */
+/** `autoactivate on|off` — `CommandAutoactivate`, i.e.
+ *  `SequenceDiagram#setAutoactivate` (`:556-563`). Read by
+ *  `command-arrow.ts`/`command-exo-arrow.ts`'s
+ *  {@link autoActivationFlags}: while on, an arrow with no explicit
+ *  `++`/`--`/`!` gets one implicitly (`CommandArrow.java:435-439`). */
 export const autoactivateCommand: Command = {
   pattern: /^autoactivate\s+(on|off)\s*$/i,
-  execute() {
-    /* recognised, write-only — see doc comment above */
+  execute(state, match) {
+    state.ast.options.autoactivate = match[1]!.toLowerCase() === 'on';
   },
 };
 

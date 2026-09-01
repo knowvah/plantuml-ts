@@ -40,6 +40,7 @@
 import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
+import { activationLevel } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
@@ -184,7 +185,11 @@ function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingConte
   let x1 = right || event.shortArrow ? point1 : BORDER1;
   let x2 = point2;
 
-  const level = ctx.activationStart.has(event.participant) ? 1 : 0;
+  // Kept at 0-or-1 rather than the real nesting depth: this is what the
+  // single-record activation model could express, and widening it is an exo
+  // geometry change with its own measurement, not part of the activation
+  // stack's. `activationLevel` is there when that measurement is made.
+  const level = activationLevel(ctx.activationStart, event.participant) > 0 ? 1 : 0;
   if (level > 0) {
     if (right) x1 += LIVE_DELTA_SIZE * level;
     else x2 += LIVE_DELTA_SIZE * (level - 2);

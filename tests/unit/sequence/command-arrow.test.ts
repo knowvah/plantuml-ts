@@ -576,16 +576,25 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
     expect(msg.deactivates).toBe(deact);
   });
 
-  // `**` is LifeEventType.CREATE (`:396`) and `!!` DESTROY (`:453`). This
-  // port's `ActivationEvent.kind` (`ast.ts:186`) has neither, so both
-  // collapse onto the target's activate/deactivate. Measured cost: 5 corpus
-  // fixtures render the create/destroy as an ordinary activation bar --
-  // comelo-49-lefi793, nepica-26-pali815, nofola-68-nobe068,
-  // pixima-27-nita000, telizo-11-pilo439. All five parse and route SEQUENCE.
+  // `**` is LifeEventType.CREATE and `!!` DESTROY, and upstream treats the
+  // two very differently -- which this port used to flatten in the same
+  // direction for both.
+  //
+  // `!!` reaches `manageActivations`' `case '!'` and becomes
+  // `activate(p2, DESTROY, null)` (`CommandArrow.java:453-455`); DESTROY is
+  // one of `isDeactivateOrDestroy`'s two arms, so it DOES lower the life
+  // level and this port's `deactivates` is the right collapse.
+  //
+  // `**` never reaches that switch at all: the create fires earlier, at
+  // `:397-398`, and `SequenceDiagram#activate` returns straight away for
+  // CREATE without touching the level (`:369-372`). `manageActivations` has
+  // no `'*'` arm, so a `**` arrow opens NOTHING. `nepica-26-pali815` is
+  // exactly `dummy -> a **` and its golden carries no activation rect;
+  // reading `*` as `+` here put one there.
   it.each([
-    ['A -> B ** : hi', 'B', undefined],
+    ['A -> B ** : hi', undefined, undefined],
     ['A -> B !! : hi', undefined, 'B'],
-  ])('collapses %s onto activate/deactivate, having no CREATE/DESTROY', (line, act, deact) => {
+  ])('reads the life event of %s, and CREATE is not one', (line, act, deact) => {
     const msg = firstMessage(line);
     expect(msg.activates).toBe(act);
     expect(msg.deactivates).toBe(deact);

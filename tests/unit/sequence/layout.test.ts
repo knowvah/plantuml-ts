@@ -182,14 +182,48 @@ describe('layoutSequence — activation (AC 4)', () => {
     expect(activation!.participantId).toBe('Bob');
   });
 
-  it('deactivate without prior activate uses currentY as start (height=0)', () => {
+  /** `LiveBoxes#getLevelAtInternal` clamps every deactivate with
+   *  `level = Math.max(0, level - 1)` (`:104-108`), so one that arrives at
+   *  level 0 leaves it there and no bar is ever drawn. This used to emit a
+   *  zero-height bar, which the renderer then wrapped in a `<g>` — a surplus
+   *  top-level child on every fixture that writes an unmatched deactivate. */
+  it('draws nothing for a deactivate with no activation open', () => {
     const ast = makeAst(['Alice'], [
       { kind: 'deactivate', participantId: 'Alice' } satisfies SequenceEvent,
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
-    const activation = geo.events.find(isActivation);
-    expect(activation).toBeDefined();
-    expect(activation!.height).toBe(0);
+    expect(geo.events.find(isActivation)).toBeUndefined();
+  });
+
+  /** The stack's other half: `level++` per activate (`:102-103`), so nested
+   *  `++` bars each keep their own extent instead of the inner one
+   *  overwriting the outer's start. */
+  it('nests activations rather than overwriting the outer one', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      msg('Alice', 'Bob', 'a', { activates: 'Bob' }),
+      msg('Alice', 'Bob', 'b', { activates: 'Bob' }),
+      msg('Bob', 'Alice', 'c', { deactivates: 'Bob' }),
+      msg('Bob', 'Alice', 'd', { deactivates: 'Bob' }),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const bars = geo.events.filter(isActivation);
+    expect(bars).toHaveLength(2);
+    // Inner closes first and sits inside the outer.
+    expect(bars[0]!.y).toBeGreaterThan(bars[1]!.y);
+    expect(bars[0]!.y + bars[0]!.height).toBeLessThan(bars[1]!.y + bars[1]!.height);
+  });
+
+  /** An activation never deactivated runs to the end of the lifeline:
+   *  upstream's level never returns to 0, so its last `Stairs` step carries
+   *  on to the body's bottom. Jar-verified on `micaki-01-rexa741`. */
+  it('closes an activation left open at the end of the diagram', () => {
+    const ast = makeAst(['Alice', 'Bob'], [
+      msg('Alice', 'Bob', 'a', { activates: 'Bob' }),
+    ]);
+    const geo = layoutSequence(ast, defaultTheme, measurer);
+    const bar = geo.events.find(isActivation);
+    expect(bar).toBeDefined();
+    expect(bar!.y + bar!.height).toBe(geo.lifelineEndY);
   });
 });
 
@@ -744,15 +778,14 @@ describe('layoutSequence — message from unknown participant', () => {
 });
 
 describe('layoutSequence — auto-deactivate without prior activation record', () => {
-  it('deactivate via message shorthand without matching activate uses height 0', () => {
+  /** Same clamp as the standalone `deactivate` above: a `--` shorthand with
+   *  nothing open leaves the level at 0 and draws no bar. */
+  it('draws nothing for a `--` shorthand with no activation open', () => {
     const ast = makeAst(['Alice', 'Bob'], [
       msg('Bob', 'Alice', 'reply', { deactivates: 'Bob' }),
     ]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
-    const activation = geo.events.find(isActivation);
-    expect(activation).toBeDefined();
-    // No activation start recorded — height should be 0 or very small
-    expect(activation!.height).toBeGreaterThanOrEqual(0);
+    expect(geo.events.find(isActivation)).toBeUndefined();
   });
 });
 
