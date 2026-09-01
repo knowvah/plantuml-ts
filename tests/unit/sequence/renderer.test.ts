@@ -63,6 +63,7 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
       { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
     ],
     events: [],
+    headHeight: 36,
     lifelineEndY: 260,
     footerShapeY: 260,
     boxes: [],

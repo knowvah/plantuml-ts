@@ -14,34 +14,60 @@
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:139-141
  */
 
-import type { Command } from './sequence-parse-helpers.js';
+import type { NewpageEvent } from './ast.js';
+import { emit, type Command } from './sequence-parse-helpers.js';
 
-/** `newpage [label]` / `@newpage` — `CommandNewpage`. Splits the diagram
- *  into multiple images upstream; this port's layout has no multi-page
- *  concept (a single `SequenceGeometry` per source), so — like `rotate` —
- *  it is recognised and otherwise ignored: the diagram renders as one
- *  continuous page, which is what this port already does for every other
- *  multi-page-capable engine (no engine in this port implements pagination).
- *  @see sequencediagram/command/CommandNewpage.java:60-69 */
+/**
+ * `newpage [label]` / `@newpage` — `CommandNewpage`.
+ *
+ * `executeArg` calls `diagram.newpage(...)`, which appends a `Newpage` to the
+ * SAME `events` list a message goes into and bumps `countNewpage`
+ * (`SequenceDiagram.java:243-250`) — so the page split is an event with a
+ * position, not a parser-level marker. It is a NO-OP when `ignorenewpage`
+ * has already been issued (`:244-245`), which is why that flag is read here
+ * rather than only recorded.
+ *
+ * The LABEL group is `(.*[%pLN_.].*)` (`:66-68`) — at least one letter,
+ * digit, underscore or dot — inside a `RegexOptional`, so `newpage` alone is
+ * a match and `newpage :` (an empty label) is NOT, since the optional group
+ * cannot match and `RegexLeaf.end()` then fails on the leftovers. This
+ * pattern used to accept any trailing run and captured nothing; both are
+ * fixed here because the label is now stored.
+ *
+ * @see sequencediagram/command/CommandNewpage.java:60-92
+ * @see sequencediagram/SequenceDiagram.java:243-250
+ */
 export const newpageCommand: Command = {
-  pattern: /^@?newpage(?:(?:\s*:\s*|\s+).*)?\s*$/i,
-  execute() {
-    /* ignored — see doc comment above; no multi-page layout exists */
+  pattern: /^@?newpage(?:(?:[\s\u00A0]*:[\s\u00A0]*|[\s\u00A0]+)(.*[\p{L}\p{N}_.].*))?\s*$/iu,
+  execute(state, match) {
+    if (state.ast.options.ignoreNewpage === true) return;
+    const label = match[1];
+    const event: NewpageEvent = {
+      kind: 'newpage',
+      ...(label !== undefined ? { label } : {}),
+    };
+    emit(state, event);
   },
 };
 
 /** `minwidth N` — `CommandMinwidth`, `ignorenewpage`/`autonewpage N` —
- *  `CommandIgnoreNewpage`/`CommandAutoNewpage`, all no-op-for-this-port
- *  siblings of `newpageCommand`: `minwidth` sets a layout hint this port's
- *  layout does not read, `ignorenewpage`/`autonewpage` govern pagination
- *  this port does not implement (see `newpageCommand`'s doc comment).
+ *  `CommandIgnoreNewpage`/`CommandAutoNewpage`.
+ *
+ *  `minwidth` sets a layout hint this port's layout does not read and
+ *  `autonewpage` inserts a `newpage` every N messages, which this port does
+ *  not implement (a named non-goal of `plans/sequence-newpage-pagination`).
+ *  `ignorenewpage` IS honoured: `CommandIgnoreNewpage#executeArg` calls
+ *  `diagram.ignoreNewpage()`, which sets the flag `SequenceDiagram#newpage`
+ *  tests before adding anything (`SequenceDiagram.java:244-245,255-257`), so
+ *  it is the same mechanism as `newpageCommand` rather than a separate
+ *  feature. Recorded on the AST because it is sequential: only the `newpage`
+ *  commands AFTER it are suppressed.
  *  @see command/CommonCommands.java:71 (minwidth)
  *  @see sequencediagram/command/CommandIgnoreNewpage.java
  *  @see sequencediagram/command/CommandAutoNewpage.java */
 export const minwidthOrPagingCommand: Command = {
-  pattern: /^(?:minwidth\s+\d+|ignorenewpage|autonewpage\s+\d+)\s*$/i,
-  execute() {
-    /* ignored — see doc comment above */
+  pattern: /^(?:minwidth\s+\d+|(ignorenewpage)|autonewpage\s+\d+)\s*$/i,
+  execute(state, match) {
+    if (match[1] !== undefined) state.ast.options.ignoreNewpage = true;
   },
 };
-

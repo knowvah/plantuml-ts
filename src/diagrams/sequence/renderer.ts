@@ -308,6 +308,11 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
     case 'space':
       // Space geos add no visible elements
       return '';
+    case 'newpage':
+      // The page separator. Drawn once the page transform exists -- see
+      // `sequence-page.ts`; until then the tile occupies its 21px and draws
+      // nothing, which is what `newpage` did before it had a tile at all.
+      return '';
   }
 }
 

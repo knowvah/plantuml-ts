@@ -214,6 +214,24 @@ export interface SpaceEvent {
   pixels: number;
 }
 
+/**
+ * `newpage [label]` — `Newpage` (`sequencediagram/Newpage.java:44-63`), an
+ * ordinary `Event`: `SequenceDiagram#newpage` appends one to the same
+ * `events` list a message goes into (`:243-250`). It is NOT a marker the
+ * parser consumes — the page split is a LAYOUT fact, because the split
+ * position is the y its tile lands on.
+ */
+export interface NewpageEvent {
+  kind: 'newpage';
+  /** `CommandNewpage`'s optional `LABEL` group (`:80-92`). Upstream files it
+   *  as the TITLE of the page this command STARTS — `titles.add(title)`
+   *  (`SequenceDiagram.java:247`), read back by `getTitle(index)` as
+   *  `titles.get(index - 1)` (`:112-115`), so page 0 keeps the diagram's own
+   *  title and page k>0 takes the k-th newpage's label. Absent when the
+   *  command carried none. */
+  label?: string;
+}
+
 export type SequenceEvent =
   | MessageEvent
   | MessageExoEvent
@@ -222,7 +240,8 @@ export type SequenceEvent =
   | ActivationEvent
   | DividerEvent
   | DelayEvent
-  | SpaceEvent;
+  | SpaceEvent
+  | NewpageEvent;
 
 /**
  * A named group of participants enclosed by `box` / `end box`.
@@ -266,6 +285,13 @@ export interface SequenceDiagramAST {
      *  participants not referenced by any event are dropped post-parse
      *  (`applyHideUnlinked`, `parser.ts`). */
     hideUnlinked?: boolean;
+    /** `ignorenewpage` (`CommandIgnoreNewpage`) — once issued, every LATER
+     *  `newpage` is dropped on the floor: `SequenceDiagram#newpage` returns
+     *  before touching `titles`/`events`/`countNewpage`
+     *  (`SequenceDiagram.java:243-250,252-257`). Read by `newpageCommand`
+     *  during the parse walk, not post-parse, because the suppression is
+     *  positional. */
+    ignoreNewpage?: boolean;
     /** `hide stereotype` -- registered for sequence diagrams too, via
      *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1`
      *  -> `addCommonHides` (`CommonCommands.java:103-106`) ->
@@ -484,13 +510,45 @@ export interface SpaceGeo {
   height: number;
 }
 
+/**
+ * `NewpageTile` (`teoz/NewpageTile.java`) — the page boundary, as laid out.
+ *
+ * It is a tile like any other: it occupies vertical space, the tiles after it
+ * stack below it, and `PlayingSpace#yNewPages` reads back each one's
+ * `getYGauge().getMin()` to build the page list (`:338-345`). Carrying it as
+ * an `EventGeo` rather than as a bare number on {@link SequenceGeometry} is
+ * what makes that true here too: the y comes out of the same cursor walk
+ * every other tile's does, including inside a `group`/`alt` branch, which is
+ * the recursion `PlayingSpace#getNewpageTiles` performs through
+ * `GroupingTile#addNewpageTiles` (`:326-336`).
+ */
+export interface NewpageGeo {
+  kind: 'newpage';
+  /** The tile's TOP — `getYGauge().getMin()`, the value `yNewPages`
+   *  collects. The separator itself is drawn `MARGINY` (10) below it. */
+  y: number;
+  /** `NewpageTile#getPreferredHeight` — `ComponentRoseNewpage
+   *  #getPreferredHeight`'s `1` plus `2 * MARGINY`
+   *  (`NewpageTile.java:50,94-96`, `ComponentRoseNewpage.java:68-71`), so
+   *  21. This is why page k extends 21px past the newpage's own y and the
+   *  separator belongs to both adjacent pages. */
+  height: number;
+  /** The separator's span: `[border1, border2]`, back-filled once
+   *  `totalWidth` is known, exactly as {@link DividerGeo.bandX} is.
+   *  `NewpageTile#drawU` translates by `border1` and hands the component an
+   *  `Area` of `border2 - border1 - xOrigin` (`:83-90`). */
+  bandX: number;
+  bandWidth: number;
+}
+
 export type EventGeo =
   | MessageGeo
   | NoteGeo
   | ActivationGeo
   | FrameGeo
   | DividerGeo
-  | SpaceGeo;
+  | SpaceGeo
+  | NewpageGeo;
 
 /**
  * Geometry for a single box group background rectangle.
@@ -510,6 +568,19 @@ export interface SequenceGeometry {
   totalHeight: number;
   participants: ParticipantGeo[];
   events: EventGeo[];
+  /**
+   * `LivingSpaces#getHeadHeight(stringBounder)` — the height of the
+   * participant head row, which is where this port's body geometry starts
+   * (upstream's body starts at 0 and the heads are drawn above it, un-
+   * translated). `PlayingSpaceWithParticipants#drawU` reads it three times:
+   * to translate the body, to place the footbox row, and to size the image
+   * (`:213,217,225`, `:80-86`). Equal to `max(p.y + p.height)` over the
+   * participants — they are bottom-aligned in this row, which is upstream's
+   * `VerticalAlignment.BOTTOM` at `:224` — but stored rather than re-derived
+   * because the page transform is the one reader that must not disagree with
+   * layout about where the body begins.
+   */
+  headHeight: number;
   lifelineEndY: number;
   /** Y where non-rectangular footer shapes (actor, database) start.
    *  Equals lifelineEndY + label-zone height so the label appears above the shape. */

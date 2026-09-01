@@ -18,6 +18,7 @@ import type {
   DividerGeo,
   EventGeo,
   MessageGeo,
+  NewpageGeo,
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceGeometry,
@@ -59,6 +60,7 @@ export function layoutSequence(
 interface EventLayoutResult {
   eventGeos: EventGeo[];
   dividerGeos: DividerGeo[];
+  newpageGeos: NewpageGeo[];
   currentY: number;
 }
 
@@ -75,13 +77,14 @@ function assembleGeometry(
   measurer: StringMeasurer,
 ): SequenceGeometry {
   const { participantGeos, maxParticipantHeight } = participantLayout;
-  const { eventGeos, dividerGeos, currentY } = eventLayout;
+  const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } =
     computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth);
+  backfillNewpageWidth(newpageGeos, totalWidth);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
   const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
 
@@ -90,6 +93,7 @@ function assembleGeometry(
     totalHeight,
     participants: participantGeos,
     events: eventGeos,
+    headHeight: maxParticipantHeight,
     lifelineEndY,
     footerShapeY,
     showFootbox,
@@ -110,6 +114,7 @@ function runEventLayout(
 ): EventLayoutResult {
   const eventGeos: EventGeo[] = [];
   const dividerGeos: DividerGeo[] = [];
+  const newpageGeos: NewpageGeo[] = [];
   const ctx: EventProcessingContext = {
     theme,
     measurer,
@@ -118,11 +123,12 @@ function runEventLayout(
     activationStart: new Map(),
     eventGeos,
     dividerGeos,
+    newpageGeos,
   };
   const startY = participantLayout.maxParticipantHeight + theme.sequence.messageSpacing;
   const currentY = processEvents(ast.events, startY, ctx);
 
-  return { eventGeos, dividerGeos, currentY };
+  return { eventGeos, dividerGeos, newpageGeos, currentY };
 }
 
 // ---------------------------------------------------------------------------
@@ -141,6 +147,7 @@ function emptyGeometry(): SequenceGeometry {
     totalHeight: 0,
     participants: [],
     events: [],
+    headHeight: 0,
     lifelineEndY: 0,
     footerShapeY: 0,
     showFootbox: true,
@@ -306,6 +313,24 @@ function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number): vo
   for (const d of dividerGeos) {
     d.bandX = LEFT_MARGIN;
     d.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
+  }
+}
+
+/**
+ * Fill in each newpage separator's span, alongside the dividers above.
+ *
+ * `NewpageTile#drawU` and `DividerTile#drawU` build their `Area` the same
+ * way -- `border2 - border1 - xorigin` wide, translated by `border1`
+ * (`NewpageTile.java:83-90`) -- so the separator spans exactly the band a
+ * divider does, and this port uses the same `LEFT_MARGIN`/`RIGHT_MARGIN`
+ * equivalents. Jar-verified on `digula-66-dipe776`: its separator is
+ * `x1="44.959" x2="190.003"`, the same left edge as its own participant row
+ * and the same right edge its widest message reaches.
+ */
+function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number): void {
+  for (const n of newpageGeos) {
+    n.bandX = LEFT_MARGIN;
+    n.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
   }
 }
 
