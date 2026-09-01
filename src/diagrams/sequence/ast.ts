@@ -463,6 +463,18 @@ export interface ActivationGeo {
   lifelineX: number;
   y: number;
   height: number;
+  /**
+   * How deeply this bar is nested, 1-based — upstream's `Step#getIndent`,
+   * the value `LiveBoxes#drawBoxes` loops `for (int i = 1; i <= max; i++)`
+   * over (`:342-346`). A COUNT, not a length: it is what the renderer
+   * multiplies the half-width by, so it must not be scaled.
+   *
+   * `drawOneLevel` offsets each level by
+   * `(levelToDraw - 1) * drawer.getWidth() / 2` (`:365-368`) — derived from
+   * the box's own width, which is why the renderer computes it from
+   * `ACTIVATION_HALF_WIDTH` rather than from a separate 5.
+   */
+  level: number;
   color?: string;
 }
 

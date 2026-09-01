@@ -522,7 +522,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
     const { body } = renderSequence(
       makeGeo({
         events: [
-          { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40 },
+          { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
           makeSyncMessage(),
         ],
       }),
@@ -621,6 +621,7 @@ describe('renderSequence — activations', () => {
       lifelineX: 80,
       y: 50,
       height: 60,
+      level: 1,
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -636,6 +637,7 @@ describe('renderSequence — activations', () => {
       lifelineX: 80,
       y: 50,
       height: 60,
+      level: 1,
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -650,6 +652,7 @@ describe('renderSequence — activations', () => {
       lifelineX: 80,
       y: 50,
       height: 60,
+      level: 1,
       color: '#F00',
     };
     const geo = makeGeo({ events: [activation] });
@@ -801,7 +804,7 @@ describe('renderSequence — background pass (T6)', () => {
   it('emits nothing extra for messages, notes, activations and dividers', () => {
     const geo = makeGeo({
       events: [
-        { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40 },
+        { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
         makeSyncMessage(),
         { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi' },
         {

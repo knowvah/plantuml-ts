@@ -143,7 +143,17 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
   // reach it.
   if (act.height === 0) return '';
   const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
-  const x = act.lifelineX - half;
+  // `LiveBoxes#drawOneLevel` draws every bar from the same origin and moves
+  // the whole level right by `(levelToDraw - 1) * drawer.getWidth() / 2`
+  // (`:365-368`) -- HALF the box's own width per level, not a standalone
+  // constant, which is why this reuses `half` rather than
+  // `CommunicationTile.LIVE_DELTA_SIZE` (they coincide at 5 only because the
+  // box is 10 wide). Level 1 is centred on the lifeline; each nested level
+  // steps right by half a box, so the stack reads as a staircase.
+  //
+  // Jar-verified on `kejoke-76-curu931`, four levels deep on one lifeline at
+  // cx=57.075: its golden runs x=52.075, 57.075, 62.075, 67.075.
+  const x = act.lifelineX - half + (act.level - 1) * half;
   const fill = act.color ?? theme.colors.activation;
   const bar = rect(x, act.y, half * 2, act.height, {
     fill,
