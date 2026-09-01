@@ -115,7 +115,20 @@ function scaleBox(b: BoxGeo, k: number): BoxGeo {
   return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
 }
 
-const scaleRun = (r: TextRun, k: number): TextRun => ({ ...r, x: r.x * k, y: r.y * k });
+/**
+ * A1: the three `TextRun` metrics scale with `k` exactly as its coordinates do
+ * — they are lengths in the same pixel space, and `textWidth` reaches
+ * `textLength`, so leaving it unscaled would stretch every glyph back to the
+ * unscaled width on a `scale`d diagram.
+ */
+const scaleRun = (r: TextRun, k: number): TextRun => ({
+  ...r,
+  x: r.x * k,
+  y: r.y * k,
+  textWidth: r.textWidth * k,
+  textAscent: r.textAscent * k,
+  textLineHeight: r.textLineHeight * k,
+});
 
 /**
  * A message's geometry, scaled. Covers exo messages too: they emit a

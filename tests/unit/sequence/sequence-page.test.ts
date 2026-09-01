@@ -67,7 +67,12 @@ function message(y: number, labelY?: number): MessageGeo {
   return {
     kind: 'message', fromX: 40, toX: 200, y, label: 'm',
     arrow: arrowConfigurationOf({}),
-    labelLines: labelY === undefined ? [] : [{ text: 'm', x: 50, y: labelY }],
+    // A1: `TextRun` carries required metrics. The values are arbitrary here —
+    // this suite asserts pagination y-arithmetic, never text measurement.
+    labelLines:
+      labelY === undefined
+        ? []
+        : [{ text: 'm', x: 50, y: labelY, textWidth: 9, textAscent: 10, textLineHeight: 13 }],
     arrowDirection: 'right',
   };
 }

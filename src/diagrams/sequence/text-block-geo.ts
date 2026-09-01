@@ -20,11 +20,41 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
 
-/** One `<text>` the renderer will emit, already placed. */
+/**
+ * One `<text>` the renderer will emit, already placed AND already measured.
+ *
+ * The three metric fields exist because the sequence renderers have no
+ * `StringMeasurer` and must not acquire one (decisions.md D1): `sequenceText`
+ * needs a measured width to emit the jar's `textLength`, and a baseline needs
+ * an ascent. Layout has the measurer, so layout resolves all three and the run
+ * carries them.
+ *
+ * They are **required**, not optional. An absent metric that defaulted to zero
+ * would emit `textLength="0"` — a visible text distortion the geometry
+ * comparator barely sees, since it charges the same 1 for a wrong number as
+ * for a near-right one.
+ *
+ * This is the port's answer to `DriverTextSvg#draw`, which resolves exactly
+ * these quantities from its `StringBounder` before emitting
+ * (`~/git/plantuml/.../klimt/drawing/svg/DriverTextSvg.java:125-126,179`).
+ */
 export interface TextRun {
   readonly text: string;
+  /** The run's LEFT edge — `DriverTextSvg`'s `x`, never a centre. */
   readonly x: number;
+  /** The run's y, in whatever convention its producer documents. */
   readonly y: number;
+  /** `measure(text, font).width` at this run's OWN font. Reaches `textLength`
+   *  subject to `svg-shapes.ts#textLengthOf`'s `text.length() > 1` guard. */
+  readonly textWidth: number;
+  /** `measure(text, font).height - getDescent(font, text)` — the distance from
+   *  the line box's top to the baseline. Measured rather than derived: the
+   *  `size - size/4.5` shorthand in `renderer-frame-header.ts` disagrees with
+   *  `FixedMeasurer`, whose descent is `lineHeight/4.5` (D1, D2). */
+  readonly textAscent: number;
+  /** `measure(text, font).height` — one line box, i.e. the baseline-to-baseline
+   *  advance between consecutive runs of the same block. */
+  readonly textLineHeight: number;
 }
 
 const lineHeightOf = (theme: Theme, measurer: StringMeasurer): number =>
@@ -184,11 +214,24 @@ export function messageLabelBlock(
   const labelLeft = blockLeft + numberWidth + gap;
   const top = baselineY - Math.max(0, lines.length - 1) * lineHeight;
 
-  const placed = lines.map((text, i) => ({ text, x: labelLeft, y: top + i * lineHeight }));
+  // D1: the metrics are resolved HERE, where the measurer is, and travel on
+  // the run. `ascent` is measured rather than derived from the font size --
+  // see `TextRun.textAscent`.
+  const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  const runAt = (text: string, x: number, y: number): TextRun => ({
+    text,
+    x,
+    y,
+    textWidth: measurer.measure(text, spec).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  });
+
+  const placed = lines.map((text, i) => runAt(text, labelLeft, top + i * lineHeight));
   if (numberText === undefined) return { lines: placed };
   // VerticalAlignment.CENTER against the label block (`Display.java:711`).
   const numberY = top + (Math.max(1, lines.length) - 1) * lineHeight / 2;
-  return { lines: placed, number: { text: numberText, x: blockLeft, y: numberY } };
+  return { lines: placed, number: runAt(numberText, blockLeft, numberY) };
 }
 
 /** Rows a label block occupies, for the caller's vertical reservation. A
