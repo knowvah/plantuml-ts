@@ -131,7 +131,14 @@ function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
 }
 
 function scaleBox(b: BoxGeo, k: number): BoxGeo {
-  return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
+  return {
+    ...b,
+    x: b.x * k,
+    y: b.y * k,
+    width: b.width * k,
+    height: b.height * k,
+    ...(b.labelRun !== undefined ? { labelRun: scaleRun(b.labelRun, k) } : {}),
+  };
 }
 
 
@@ -154,7 +161,14 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
 }
 
 function scaleNote(n: NoteGeo, k: number): NoteGeo {
-  return { ...n, x: n.x * k, y: n.y * k, width: n.width * k, height: n.height * k };
+  return {
+    ...n,
+    x: n.x * k,
+    y: n.y * k,
+    width: n.width * k,
+    height: n.height * k,
+    textRuns: n.textRuns.map((r) => scaleRun(r, k)),
+  };
 }
 
 function scaleActivation(a: ActivationGeo, k: number): ActivationGeo {
@@ -175,7 +189,11 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     y: f.y * k,
     width: f.width * k,
     height: f.height * k,
-    branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
+    branchSeparators: f.branchSeparators.map((s) => ({
+      ...s,
+      y: s.y * k,
+      ...(s.run !== undefined ? { run: scaleRun(s.run, k) } : {}),
+    })),
     // A4: `refBody` became placed, measured runs, so its `y` and its three
     // metrics scale too — scaling only `x`, as this did while a body entry was
     // `{ text, x }`, left every scaled `ref` drawing its text at the unscaled
@@ -197,6 +215,7 @@ function scaleDivider(d: DividerGeo, k: number): DividerGeo {
     height: d.height * k,
     textWidth: d.textWidth * k,
     textHeight: d.textHeight * k,
+    labelRuns: d.labelRuns.map((r) => scaleRun(r, k)),
   };
 }
 

@@ -28,9 +28,10 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import { noteFontSpecOf } from './sequence-layout-shared.js';
 import {
   DIVIDER_PADDING,
+  DIVIDER_LABEL_DELTA_X,
   dividerFontSpecOf,
   dividerPreferredHeight,
 } from './divider-style.js';
@@ -44,6 +45,7 @@ import {
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
   GROUP_FONT_SIZE,
+  GROUP_FONT_BOLD,
 } from './frame-style.js';
 
 /** Pending activation-bar start record. `level` is 1-based and fixed when
@@ -171,7 +173,9 @@ function handleNoteEvent(
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
-  const fontSpec = fontSpecOf(ctx.theme);
+  // `note { FontSize 13 }` (`plantuml.skin:312-316`), NOT the ambient font —
+  // the box and its text must be sized from one measurement.
+  const fontSpec = noteFontSpecOf(ctx.theme);
   const notePadding = 10;
   const lines = event.text.split('\n');
   const lineHeight = ctx.measurer.measure('M', fontSpec).height;
@@ -182,6 +186,7 @@ function handleNoteEvent(
   const noteHeight = lines.length * lineHeight + notePadding * 2;
 
   const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y, ctx.participantMap);
+  noteGeo.textRuns = noteBodyRuns(lines, noteGeo, notePadding, ctx);
   ctx.eventGeos.push(noteGeo);
   cursor.y += noteHeight + ctx.theme.sequence.messageSpacing;
 }
@@ -399,6 +404,54 @@ function computeHeaderTab(
 }
 
 /**
+ * An `else` branch's bracketed condition, as a placed and measured run (A5).
+ *
+ * `ComponentRoseGroupingElse` is its OWN component, not the header tab beside
+ * it, and it carries its own padding —
+ * `ClockwiseTopRightBottomLeft.topRightBottomLeft(1, 5, 1, 5)` (`:65-67`) —
+ * which `drawInternalU`'s teoz arm applies as
+ * `UTranslate(getOldPaddingX1(), getOldPaddingY() + 2)`, i.e. `(5, 3)`
+ * (`:109-112`). The bracket wrapping is upstream's too: the constructor is
+ * handed `"[" + comment + "]"`.
+ *
+ * Jar-verified on `bovugo-63-lazo401`, whose `else sinon` puts `[sinon]` at
+ * x=18.469 against a frame at x=13.469 — exactly 5, where this port used 6.
+ */
+function branchConditionRun(
+  label: string,
+  frameX: number,
+  separatorY: number,
+  ctx: EventProcessingContext,
+): TextRun | undefined {
+  const condition = label.trim();
+  if (condition === '') return undefined;
+  const text = `[${condition}]`;
+  const font: FontSpec = {
+    family: ctx.theme.fontFamily,
+    size: GROUP_FONT_SIZE,
+    weight: GROUP_FONT_BOLD ? 'bold' : 'normal',
+  };
+  const lineHeight = ctx.measurer.measure('M', font).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
+  return {
+    text,
+    x: frameX + ELSE_PADDING_X1,
+    y: separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY + ascent,
+    textWidth: ctx.measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  };
+}
+
+/** `ComponentRoseGroupingElse`'s own padding, `topRightBottomLeft(1, 5, 1, 5)`
+ *  (`:65-67`) — left and top respectively. */
+const ELSE_PADDING_X1 = 5;
+const ELSE_PADDING_Y = 1;
+/** The teoz arm's extra `+ 2` (`ComponentRoseGroupingElse.java:110`). This
+ *  engine is teoz-only, so the non-teoz arm has no reader here. */
+const ELSE_TEOZ_DY = 2;
+
+/**
  * MUTATION CONTRACT (D2 -- reserve the slot, then fill it).
  *
  * `frameGeo` is pushed into `ctx.eventGeos` BEFORE `event.branches` is
@@ -462,10 +515,13 @@ function handleFrameEvent(
   event.branches.forEach((branch, i) => {
     if (i > 0) {
       const branchColor = event.branchColors?.[i];
+      const branchLabel = event.branchLabels[i] ?? '';
+      const conditionRun = branchConditionRun(branchLabel, x, cursor.y, ctx);
       frameGeo.branchSeparators.push({
         y: cursor.y,
-        label: event.branchLabels[i] ?? '',
+        label: branchLabel,
         ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
+        ...(conditionRun !== undefined ? { run: conditionRun } : {}),
       });
       cursor.y += SEPARATOR_HEIGHT;
     }
@@ -490,6 +546,33 @@ function handleFrameEvent(
  * FontStyle bold } }` (`plantuml.skin:174-175`), not the diagram font, so it
  * is measured with its own spec.
  */
+/**
+ * A divider label's runs, positioned RELATIVE to the label box's own top-left.
+ *
+ * `ComponentRoseDivider#drawInternalU` draws the block at
+ * `(xpos + deltaX, ypos + getOldPaddingY())` (`:75-83,104`), where `deltaX` is
+ * 6 and the padding is `topRightBottomLeft(4, 4, 4, 4)`. Both terms are known
+ * here; `xpos`/`ypos` are not, because they are centred within a band whose
+ * width `backfillDividerWidth` resolves in Step 3 — so these carry the inner
+ * offset and that function adds the outer one.
+ */
+function dividerLabelRuns(
+  lines: readonly string[],
+  font: FontSpec,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  const lineHeight = ctx.measurer.measure('M', font).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
+  return lines.map((text, i) => ({
+    text,
+    x: DIVIDER_LABEL_DELTA_X,
+    y: DIVIDER_PADDING + ascent + i * lineHeight,
+    textWidth: ctx.measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
+
 function handleDividerEvent(
   event: DividerEvent,
   cursor: EventCursor,
@@ -515,6 +598,10 @@ function handleDividerEvent(
     height: dividerPreferredHeight(blockHeight),
     textWidth: blockWidth + DIVIDER_PADDING * 2,
     textHeight: blockHeight + DIVIDER_PADDING * 2,
+    // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
+    // them onto the band once `bandX`/`bandWidth` are known (Step 3), which is
+    // the same construct-then-resolve split `y`/`branchSeparators` use above.
+    labelRuns: dividerLabelRuns(lines, font, ctx),
   };
   ctx.eventGeos.push(dividerGeo);
   ctx.dividerGeos.push(dividerGeo);
@@ -668,9 +755,41 @@ function buildNoteGeo(
     width: finalNoteWidth,
     height: noteHeight,
     text: event.text,
+    // Filled in by the caller, which alone knows the padding it sized the box
+    // with; see `noteBodyRuns`.
+    textRuns: [],
     ...(event.color !== undefined ? { color: event.color } : {}),
     ...(event.shape !== undefined ? { shape: event.shape } : {}),
   };
+}
+
+/**
+ * A note body's lines, as placed and measured runs.
+ *
+ * `ComponentRoseNoteBox#drawInternalU` draws the block at
+ * `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` (`:105`) — LEFT-aligned
+ * inside the box, not centred, which is what this port had been doing with a
+ * `text-anchor="middle"`. `diffX` is the slack when the drawn area is wider
+ * than the component's preferred width; this port sizes the box to the text,
+ * so it is 0 and the block sits at the padding.
+ */
+function noteBodyRuns(
+  lines: readonly string[],
+  note: NoteGeo,
+  padding: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  const font = noteFontSpecOf(ctx.theme);
+  const lineHeight = ctx.measurer.measure('M', font).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
+  return lines.map((text, i) => ({
+    text,
+    x: note.x + padding,
+    y: note.y + padding + ascent + i * lineHeight,
+    textWidth: ctx.measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
 }
 
 /**

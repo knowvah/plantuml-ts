@@ -118,3 +118,75 @@ races the stdlib build
   rather than a diagnosis. Same family as
   `.agent-notes/stdlib-run-isolation`'s findings.
 - **Confidence**: High — 8 failing files chained, 1 standalone, same tree.
+
+## Observation: three sequence text kinds are measured at the wrong font, and
+each one only becomes VISIBLE once `textLength` is emitted
+
+- **Context**: A4 and A5, routing every sequence `<text>` through the emitter.
+- **Finding**: three declared style buckets carry their own `FontSize` and this
+  port used the ambient 14 for all three.
+  - `reference { FontSize 12 }` (`plantuml.skin:145-151`) — the `ref` body.
+    `cekora-30-diso384`: jar `textLength="26.625"`, ours 31.063.
+  - `referenceHeader { FontSize 13, FontStyle bold }` (`:153-160`) — the `ref`
+    keyword, which `refBodyWidth`'s `max(body, header)` also measures.
+  - `note { FontSize 13 }` (`:312-316`) — the note body. `bocusa-16-ciju126`:
+    jar emits `font-size="13" textLength="36.075"`.
+  All three were merely displacing text before; emitting a `textLength`
+  computed at the wrong size turns the same defect into glyph DISTORTION,
+  because the viewer stretches the run to a width the font never produces.
+- **Impact**: whenever a text kind starts carrying `textLength`, check its
+  style bucket's `FontSize` FIRST. The corpus will not tell you: a wrong font
+  shows up as an ordinary coordinate delta in the distance instrument,
+  indistinguishable from a positioning error. Correcting the note font alone
+  moved total distance 90k, most of it in `viewBox` and `height`, because the
+  box was sized from the same wrong measurement.
+- **Confidence**: High — each read from the skin and confirmed against a
+  cached oracle's own emitted `font-size`.
+
+## Observation: `note right` is positioned on the wrong side, and centring was
+hiding it
+
+- **Context**: A5, after left-aligning note bodies per
+  `ComponentRoseNoteBox#drawInternalU:105`.
+- **Finding**: 58 fixtures rose in the distance instrument, every one of them a
+  note fixture. The largest, `xatotu-85-tusi683`, puts its `note right` body at
+  x=70.319 where the jar puts it at 449.319 — the note is on the wrong side of
+  the diagram entirely, not merely mis-padded. The error is in
+  `computeNotePosition`, not in the text: it was there before A5, and centring
+  the lines inside the wrongly-placed box happened to land them nearer the
+  jar's numbers than left-aligning them does.
+- **Impact**: a metric REGRESSION can be the removal of an accidental
+  compensation. Do not revert the alignment; it is jar-verified
+  (`bocusa-16-ciju126`'s box spans 105.9..162.9 around a 36.075-wide line, and
+  the jar draws it at 111.9 where centred would be 116.36). Fix the position.
+- **Confidence**: High — 58/58 risers are note fixtures, and the largest was
+  read line by line against its oracle.
+
+## Observation: a note's BOX padding and its TEXT inset are different upstream
+quantities
+
+- **Context**: Same task, checking the residual note-x delta.
+- **Finding**: on `bocusa-16-ciju126` the jar's note box is 20.925 wider than
+  its text (this port uses 2 x 10, which agrees), but the jar insets the text
+  by only 6 from the box's left edge. Upstream uses `getPaddingX()` for the box
+  and `getOldPaddingX1() + diffX / 2` for the text (`:96-105`), where `diffX`
+  is the slack between the drawn area and the component's preferred width. This
+  port has one `notePadding = 10` doing both jobs.
+- **Impact**: correcting the inset needs `ComponentRoseNoteBox
+  #getPreferredWidth` and its `Area` modelled so `diffX` can be derived.
+  Guessing 6 would be fitting a constant, which this project forbids — the
+  number happens to be 6 on this fixture and is `4 + diffX/2` in general.
+- **Confidence**: High — both numbers read off one oracle.
+
+## Observation: a `box` group label is 13 bold in the jar, 11 plain here
+
+- **Context**: A5, routing `renderBoxBackground`'s label through the emitter.
+- **Finding**: `box { FontSize 13, FontStyle bold }` (`plantuml.skin:162-167`);
+  `binupo-93-begi656` emits `font-size="13" font-weight="700"` for all three of
+  its labels. This port uses `BOX_LABEL_FONT_SIZE = 11`, plain.
+- **Impact**: deliberately NOT fixed in A5. Correcting it moves the label's x
+  and reopens how NESTED boxes lay out, which that same fixture exercises and
+  this engine does not port. The routing change keeps the label internally
+  consistent (its `textLength` matches its own font), so nothing is distorted;
+  it is simply the wrong size. A task of its own.
+- **Confidence**: High — skin read, oracle confirmed.

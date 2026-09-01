@@ -13,6 +13,8 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { TextRun } from './text-block-geo.js';
+
 export interface NoteGeo {
   kind: 'note';
   x: number;
@@ -22,6 +24,9 @@ export interface NoteGeo {
   text: string;
   color?: string;
   shape?: 'rect';
+  /** The body, one placed and measured run per line of {@link text} (A5).
+   *  Measured at `note { FontSize 13 }`, not the ambient font. */
+  textRuns: readonly TextRun[];
 }
 
 export interface DividerGeo {
@@ -39,9 +44,15 @@ export interface DividerGeo {
   /** `#getPreferredHeight` (`:127-129`). */
   height: number;
   /** `AbstractTextualComponent#getTextWidth`/`#getTextHeight` — the text
-   *  block plus the component's `topRightBottomLeft(4, 4, 4, 4)`. */
+   *  block plus the component's `topRightBottomLeft(4, 4, 4, 4)`. These are
+   *  BOX dimensions, not text metrics: `renderDividerLabel` sizes the label's
+   *  background `<rect>` from them, and they are 8 larger than the glyphs.
+   *  Not to be confused with {@link labelRuns}' own `textWidth` (D8). */
   textWidth: number;
   textHeight: number;
+  /** The label, one placed and measured run per entry of {@link lines} (A5).
+   *  Empty for the bare `====` form, which draws a band and no text. */
+  labelRuns: readonly TextRun[];
 }
 // Every field above is resolved in LAYOUT and only read by the renderer; see
 // `divider-style.ts` for each one's derivation and the jar measurements
@@ -97,4 +108,8 @@ export interface BoxGeo {
   height: number;
   label: string;
   color: string;
+  /** The group's label as a placed, measured run (A5). Absent when the box
+   *  carries no label, which is the case `renderBoxBackground` already
+   *  short-circuits on. */
+  labelRun?: TextRun;
 }

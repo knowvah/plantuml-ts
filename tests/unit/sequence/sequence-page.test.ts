@@ -80,11 +80,13 @@ function message(y: number, labelY?: number): MessageGeo {
 }
 
 const note = (y: number, height: number): NoteGeo =>
-  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n' });
+  // A5: `textRuns` is placed in layout. This suite asserts pagination
+  // y-arithmetic, never note text, so an empty body is enough.
+  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n', textRuns: [] });
 const activation = (y: number, height: number): ActivationGeo =>
   ({ kind: 'activation', participantId: 'A', lifelineX: 40, y, height, level: 1 });
 const divider = (y: number, height: number): DividerGeo =>
-  ({ kind: 'divider', text: 'd', lines: ['d'], y, bandX: 10, bandWidth: 360,
+  ({ kind: 'divider', text: 'd', lines: ['d'], labelRuns: [], y, bandX: 10, bandWidth: 360,
      height, textWidth: 40, textHeight: 20 });
 const space = (y: number): SpaceGeo => ({ kind: 'space', y, height: 12 });
 

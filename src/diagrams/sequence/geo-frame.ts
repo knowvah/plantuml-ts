@@ -23,7 +23,16 @@ export interface FrameGeo {
   backColorGeneral?: string;
   /** `else` branch boundaries: y + bracketed condition. Each MAY carry its
    *  own resolved BODY-band fill. Empty for single-branch frames. */
-  branchSeparators: { y: number; label: string; backColorGeneral?: string }[];
+  branchSeparators: {
+    y: number;
+    label: string;
+    backColorGeneral?: string;
+    /** The bracketed condition as a placed, measured run (A5). Absent when the
+     *  branch carries no condition, which draws the rule alone. Measured at
+     *  the group style's own `smallFont2`, bold — `ComponentRoseGroupingElse`
+     *  is a different component from the tab beside it. */
+    run?: TextRun;
+  }[];
   /** `ref over` body lines as placed, measured runs — pre-centred `x` and an
    *  absolute baseline, both resolved in layout because both need the measurer
    *  (D1). Empty for every other frame type. */

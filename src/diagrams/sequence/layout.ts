@@ -22,9 +22,10 @@ import type {
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceGeometry,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
   computeParticipantLayout,
   type ParticipantLayoutResult,
@@ -36,7 +37,7 @@ import {
   type EventProcessingContext,
 } from './sequence-layout-events.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
-import { DIVIDER_WIDTH_ALLOWANCE } from './divider-style.js';
+import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
 
@@ -121,7 +122,7 @@ function assembleGeometry(
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
-  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
+  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight, theme, measurer);
 
   return {
     totalWidth,
@@ -423,6 +424,15 @@ function backfillDividerWidth(
     // the left the two are the same number.
     d.bandX = originX;
     d.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
+    // A5: the label runs were built relative to the label BOX's own top-left
+    // (`sequence-layout-events.ts#dividerLabelRuns`); the box itself is
+    // centred in the band, so its origin is only knowable here.
+    // `ComponentRoseDivider#drawInternalU:76-77`:
+    //   xpos = (width - textWidth - deltaX) / 2
+    //   ypos = (height - textHeight) / 2
+    const boxX = d.bandX + (d.bandWidth - d.textWidth - DIVIDER_LABEL_DELTA_X) / 2;
+    const boxY = d.y + (d.height - d.textHeight) / 2;
+    d.labelRuns = d.labelRuns.map((r) => ({ ...r, x: boxX + r.x, y: boxY + r.y }));
   }
 }
 
@@ -453,10 +463,50 @@ function backfillNewpageWidth(
  * x = leftmost participant edge - 8 to rightmost + 8, y = 0,
  * height = totalHeight (covers the full diagram height).
  */
+/**
+ * A `box` group's label as a placed, measured run (A5).
+ *
+ * The x and the baseline are exactly where `renderBoxBackground` put them
+ * before -- `box.x + padding` and `box.y + fontSize + padding` -- so this
+ * moves nothing; what it adds is the measured width the emitter needs.
+ *
+ * DIVERGENCE, recorded not fixed: the jar draws a box label at `box {
+ * FontSize 13, FontStyle bold }` (`plantuml.skin:162-167`), emitting
+ * `font-size="13" font-weight="700"` -- `binupo-93-begi656` is the reference.
+ * This port uses 11 plain. Correcting it also moves the label's x and reopens
+ * how nested boxes lay out, which that same fixture exercises and this engine
+ * does not yet port, so it is a task of its own rather than a side effect of
+ * routing the text through the emitter.
+ */
+function boxLabelRun(
+  label: string,
+  boxX: number,
+  theme: Theme,
+  measurer: StringMeasurer,
+): TextRun {
+  const font: FontSpec = { family: theme.fontFamily, size: BOX_LABEL_FONT_SIZE };
+  const lineHeight = measurer.measure('M', font).height;
+  return {
+    text: label,
+    x: boxX + BOX_LABEL_PADDING,
+    y: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    textWidth: measurer.measure(label, font).width,
+    textAscent: lineHeight - measurer.getDescent(font, 'M'),
+    textLineHeight: lineHeight,
+  };
+}
+
+/** `renderer.ts`'s own box-label style, mirrored here so the measurement and
+ *  the drawing share one number. See {@link boxLabelRun}'s divergence note. */
+const BOX_LABEL_FONT_SIZE = 11;
+const BOX_LABEL_PADDING = 4;
+
 function computeBoxGeos(
   boxes: BoxGroup[],
   participantGeos: ParticipantGeo[],
   totalHeight: number,
+  theme: Theme,
+  measurer: StringMeasurer,
 ): BoxGeo[] {
   const BOX_PAD = 8;
   const boxGeos: BoxGeo[] = [];
@@ -476,6 +526,9 @@ function computeBoxGeos(
       height: totalHeight,
       label: box.label,
       color: box.color,
+      ...(box.label === ''
+        ? {}
+        : { labelRun: boxLabelRun(box.label, leftEdge - BOX_PAD, theme, measurer) }),
     });
   }
 

@@ -27,6 +27,12 @@ import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence
 import { inflateSync } from 'node:zlib';
 import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
+import { noteFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import {
+  dividerFontSpecOf,
+  DIVIDER_PADDING,
+  DIVIDER_LABEL_DELTA_X,
+} from '../../../src/diagrams/sequence/divider-style.js';
 import {
   HEADER_PADDING,
   HEADER_FONT_SIZE,
@@ -115,6 +121,41 @@ function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'ta
   const title = runAt(f.tabText, left, top, HEADER_FONT_SIZE);
   if (f.tabComment === undefined) return [title];
   return [title, runAt(`[${f.tabComment}]`, left + f.tabWidth, top + 1, GROUP_FONT_SIZE)];
+}
+
+/** A note's body runs, mirroring `sequence-layout-events.ts#noteBodyRuns` —
+ *  A5 moved that placement into layout. Measured at `note { FontSize 13 }`. */
+function noteRunsFor(n: { x: number; y: number; text: string }): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const font = noteFontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', font).height;
+  const ascent = lineHeight - measurer.getDescent(font, 'M');
+  const NOTE_PADDING = 10;
+  return n.text.split('\n').map((text, i) => ({
+    text,
+    x: n.x + NOTE_PADDING,
+    y: n.y + NOTE_PADDING + ascent + i * lineHeight,
+    textWidth: measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
+
+/** A box group's label run, mirroring `layout.ts#boxLabelRun`. */
+function boxRunFor(label: string, boxX: number): TextRun {
+  const measurer = new DeterministicMeasurer();
+  const BOX_LABEL_FONT_SIZE = 11;
+  const BOX_LABEL_PADDING = 4;
+  const font = { family: defaultTheme.fontFamily, size: BOX_LABEL_FONT_SIZE };
+  const lineHeight = measurer.measure('M', font).height;
+  return {
+    text: label,
+    x: boxX + BOX_LABEL_PADDING,
+    y: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    textWidth: measurer.measure(label, font).width,
+    textAscent: lineHeight - measurer.getDescent(font, 'M'),
+    textLineHeight: lineHeight,
+  };
 }
 
 function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
@@ -744,6 +785,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'remember this',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'remember this' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -759,6 +801,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'test note',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'test note' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -773,6 +816,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 60,
       text: 'line one\nline two',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'line one\nline two' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -882,9 +926,10 @@ describe('renderSequence — background pass (T6)', () => {
       events: [
         { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
         makeSyncMessage(),
-        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi' },
+        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi', textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }) },
         {
           kind: 'divider',
+          labelRuns: dividerRunsFor(['step']),
           text: 'step',
           lines: ['step'],
           y: 200,
@@ -1048,12 +1093,34 @@ describe('renderSequence — [hidden] arrows', () => {
   });
 });
 
+/** A divider label's runs, mirroring `sequence-layout-events.ts
+ *  #dividerLabelRuns` plus the band offset `layout.ts#backfillDividerWidth`
+ *  adds. Measured at the divider's own 13pt bold. */
+function dividerRunsFor(lines: readonly string[]): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const font = dividerFontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', font).height;
+  const ascent = lineHeight - measurer.getDescent(font, 'M');
+  return lines.map((text, i) => ({
+    text,
+    x: DIVIDER_LABEL_DELTA_X,
+    y: DIVIDER_PADDING + ascent + i * lineHeight,
+    textWidth: measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
+
 describe('renderSequence — dividers', () => {
   /** A divider as layout resolves it: `getTextHeight` = block + 4 + 4 and
    *  `getPreferredHeight` = that + 20 (`ComponentRoseDivider.java:127-129`). */
   function dividerGeo(text: string, lines = [text]): DividerGeo {
     const textHeight = lines.length * 13 + 8;
     return {
+      // A5: the label runs are placed in layout, relative to the label box and
+      // then dropped onto the band by `layout.ts#backfillDividerWidth`. Built
+      // here from the same measurer so the emitted `textLength` is real.
+      labelRuns: dividerRunsFor(lines),
       kind: 'divider',
       text,
       lines,
@@ -1434,7 +1501,12 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box with label renders a text element', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink' }],
+      // A5: the label is a placed, measured run resolved by
+      // `layout.ts#boxLabelRun`; a hand-built `BoxGeo` supplies it.
+      boxes: [{
+        x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink',
+        labelRun: boxRunFor('Services', 10),
+      }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('Services');

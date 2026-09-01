@@ -30,9 +30,13 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, noteBox } from '../../core/svg.js';
+// No `text` import: D3 -- every `<text>` this file emits goes through
+// `sequenceText`, and dropping the direct import is what makes that
+// structural rather than a convention.
+import { rect, line, noteBox } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { REFERENCE_FONT_SIZE } from './text-block-geo.js';
+import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
@@ -40,7 +44,7 @@ import { renderParticipantBox, renderFooterBox } from './renderer-participant-sh
 import { renderLifelinePass } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
 import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
-import { GROUP_FONT_SIZE } from './frame-style.js';
+import { GROUP_FONT_SIZE, GROUP_FONT_BOLD } from './frame-style.js';
 import {
   DIVIDER_BACKGROUND,
   DIVIDER_BAND_HEIGHT,
@@ -49,7 +53,6 @@ import {
   DIVIDER_LABEL_DELTA_X,
   DIVIDER_LINE_COLOR,
   DIVIDER_LINE_THICKNESS,
-  DIVIDER_PADDING,
 } from './divider-style.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
@@ -76,16 +79,23 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
     note.shape === 'rect'
       ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
       : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth });
-  const lines = note.text.split('\n');
-  const lineHeight = theme.fontSize * 1.4; // ratio of an already-scaled fontSize: self-scaling
-  const textCenterX = x + w / 2;
-  const textEls = lines
-    .map((lineText, i) =>
-      text(textCenterX, y + lineHeight + i * lineHeight, lineText, {
+  // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
+  // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
+  // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
+  // centre it with a `text-anchor`, and its line advance is now the MEASURED
+  // line height where it used to be a `fontSize * 1.4` ratio.
+  const textEls = note.textRuns
+    .map((run) =>
+      sequenceText({
+        leftX: run.x,
+        baselineY: run.y,
+        text: run.text,
+        width: run.textWidth,
         fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
+        // `note { FontSize 13 }` (`plantuml.skin:312-316`), scaled -- the same
+        // spec layout measured the box with.
+        fontSize: NOTE_FONT_SIZE * theme.scaleK,
         fill: theme.colors.text,
-        textAnchor: 'middle',
       }),
     )
     .join('');
@@ -190,13 +200,22 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
         stroke: theme.colors.frame,
         strokeDasharray: scaledDashPattern(k),
       });
-      const condition = sep.label.trim();
-      if (condition === '') return rule;
+      // A5: the run is absent exactly when the branch carries no condition,
+      // which is the case that draws the rule alone.
+      if (sep.run === undefined) return rule;
       return (
         rule +
-        text(frame.x + 6 * k, sep.y + theme.fontSize, `[${condition}]`, {
+        sequenceText({
+          leftX: sep.run.x,
+          baselineY: sep.run.y,
+          text: sep.run.text,
+          width: sep.run.textWidth,
           fontFamily: theme.fontFamily,
           fontSize: labelFontSize,
+          // `ComponentRoseGroupingElse` reads the GROUP style, whose
+          // `FontStyle bold` the jar emits as `font-weight="700"` -- confirmed
+          // on `bovugo-63-lazo401`'s `[sinon]`.
+          fontWeight: GROUP_FONT_BOLD ? '700' : 'normal',
           fill: theme.colors.text,
         })
       );
@@ -258,21 +277,22 @@ function renderDividerLabel(divider: DividerGeo, theme: ScaledTheme): string {
     strokeWidth: DIVIDER_LINE_THICKNESS * k,
   });
   // One `<text>` per line, as the jar's own multi-line text block emits.
-  // `textBlock.drawU` places the block's TOP-LEFT and `text()` takes a
-  // baseline, hence `dominantBaseline: 'hanging'` -- the same adaptation
-  // `renderNote` makes for its body lines.
-  const lineHeight = (divider.textHeight - DIVIDER_PADDING * 2 * k) / divider.lines.length;
-  const top = ypos + DIVIDER_PADDING * k;
-  const label = divider.lines
-    .map((l, i) =>
-      text(xpos + deltaX, top + i * lineHeight, l, {
+  // A5: each run carries a real BASELINE, resolved in layout against the label
+  // box's own top-left; the `dominantBaseline: 'hanging'` that stood in for one
+  // is gone, and with it the last such adaptation in this file.
+  const label = divider.labelRuns
+    .map((run) =>
+      sequenceText({
+        leftX: run.x,
+        baselineY: run.y,
+        text: run.text,
+        width: run.textWidth,
         fontFamily: theme.fontFamily,
         fontSize: DIVIDER_FONT_SIZE * k,
         // `'700'`, not `'bold'` -- the jar emits the numeric form, and
         // `renderer-frame-header.ts#boldFontWeight` already set that convention.
         fontWeight: DIVIDER_FONT_BOLD ? ('700' as const) : ('normal' as const),
         fill: theme.colors.text,
-        dominantBaseline: 'hanging',
       }),
     )
     .join('');
@@ -369,8 +389,9 @@ function renderEventPass(events: readonly EventGeo[], theme: ScaledTheme, isBack
 // ---------------------------------------------------------------------------
 
 const BOX_DEFAULT_COLOR = '#EEEEEE';
+/** See `layout.ts#boxLabelRun`, which measures at this same size and owns
+ *  the divergence note for it. */
 const BOX_LABEL_FONT_SIZE = 11;
-const BOX_LABEL_PADDING = 4;
 
 function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
@@ -379,19 +400,16 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
     fill,
     stroke: theme.colors.border,
   });
-  if (box.label === '') return boxRect;
-  const padding = BOX_LABEL_PADDING * k;
-  const labelFontSize = BOX_LABEL_FONT_SIZE * k;
-  const labelEl = text(
-    box.x + padding,
-    box.y + labelFontSize + padding,
-    box.label,
-    {
-      fontFamily: theme.fontFamily,
-      fontSize: labelFontSize,
-      fill: theme.colors.text,
-    },
-  );
+  if (box.labelRun === undefined) return boxRect;
+  const labelEl = sequenceText({
+    leftX: box.labelRun.x,
+    baselineY: box.labelRun.y,
+    text: box.labelRun.text,
+    width: box.labelRun.textWidth,
+    fontFamily: theme.fontFamily,
+    fontSize: BOX_LABEL_FONT_SIZE * k,
+    fill: theme.colors.text,
+  });
   return boxRect + labelEl;
 }
 

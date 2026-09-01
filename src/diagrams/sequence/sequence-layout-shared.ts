@@ -9,8 +9,10 @@ import type { Theme } from '../../core/theme.js';
 /** Derive the font spec used for sequence-diagram text measurement.
  *
  *  This is the AMBIENT size (`root { FontSize 14 }`, `plantuml.skin:14`),
- *  which is what a participant head, a note and a frame body all use. A
- *  message label does NOT — see {@link arrowFontSpecOf}. */
+ *  which is what a participant head uses. A message label does NOT (see
+ *  {@link arrowFontSpecOf}), nor does a note ({@link noteFontSpecOf}), nor a
+ *  `ref` body (`text-block-geo.ts#refBodyFontSpecOf`) — three declared style
+ *  buckets that each carry their own size. */
 export function fontSpecOf(theme: Theme): FontSpec {
   return { family: theme.fontFamily, size: theme.fontSize };
 }
@@ -31,6 +33,24 @@ export function arrowFontSpecOf(theme: Theme): FontSpec {
   // declared value in the style tree, exactly as `divider-style.ts` treats
   // `plantuml.skin:174`'s 13 — a `root` font-size change does not move it.
   return { family: theme.fontFamily, size: ARROW_FONT_SIZE };
+}
+
+/**
+ * `note { FontSize 13 }` (`plantuml.skin:312-316`) — the root-level note
+ * style, declared in the same block as `arrow { FontSize 13 }` above it.
+ *
+ * A5 found this the way A4 found the `ref` body's: the note body was measured
+ * and drawn at the ambient 14, which merely displaced text while the port
+ * emitted no `textLength`, and became a glyph distortion the moment it emitted
+ * one. Jar-verified on `bocusa-16-ciju126`, whose `1. right` note carries
+ * `font-size="13" textLength="36.075"`.
+ */
+export const NOTE_FONT_SIZE = 13;
+
+/** The font a note body is measured and drawn with — both, or the box and its
+ *  text disagree (`planning/sizer-renderer-parity.md`). */
+export function noteFontSpecOf(theme: Theme): FontSpec {
+  return { family: theme.fontFamily, size: NOTE_FONT_SIZE };
 }
 
 /**
