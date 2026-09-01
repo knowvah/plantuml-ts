@@ -1665,7 +1665,14 @@ describe('renderSequence — exogenous arrows', () => {
     const rights = (svg.match(/<rect[^>]*>/g) ?? []).map(
       (t) => Number(/x="([-\d.]+)"/.exec(t)?.[1]) + Number(/width="([-\d.]+)"/.exec(t)?.[1]),
     );
-    expect(headTips(svg)).toEqual([Math.max(...rights) - 2]);
+    // Compared with a tolerance, not exactly, because the right edge here is
+    // the SUM OF TWO ROUNDED ATTRIBUTES. `Carol`'s box is x=88.9375
+    // w=47.5125, serialised as 88.938 and 47.513, and each half rounds up by
+    // half a thousandth -- so the sum reads 136.451 where the true edge is
+    // 136.450. The head tip is emitted from the unrounded value and is right.
+    // This only became visible once the box stopped being pinned to an
+    // integer 80px floor.
+    expect(headTips(svg)[0]).toBeCloseTo(Math.max(...rights) - 2, 2);
   });
 
   // `CommunicationExoTile#getMaxX` is `getPoint2()` = `posC + preferredWidth`
@@ -1676,8 +1683,13 @@ describe('renderSequence — exogenous arrows', () => {
     const withExo = render(
       '@startuml\nparticipant Bob\nparticipant Carol\nBob -> Carol : hello\nCarol ->] : bye\n@enduml',
     );
-    expect(docWidth(without)).toBe(240);
-    expect(docWidth(withExo)).toBe(246);
+    // 166/189, not 240/246: both boxes lost the 80px minimum-width floor
+    // this port used to apply, which upstream does not have
+    // (`Rose#getMinClassWidth` resolves to `ValueNull#asDouble()` = 0).
+    // `Bob` is 38.938 wide and `Carol` 47.513, so the document narrows by
+    // 74px and the exo's own stretch is what remains visible.
+    expect(docWidth(without)).toBe(166);
+    expect(docWidth(withExo)).toBe(189);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1715,7 +1727,9 @@ describe('renderSequence — exogenous arrows', () => {
     const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
     expect(saltire).toHaveLength(2);
     // Two crossing diagonals, `spaceCrossX` right of the border end.
-    expect(messageBodies(svg)[0]).toEqual([12, 64]);
+    // x2 is the lifeline, which moved from 70 to 49.469 when the box lost
+    // its 80px floor; the arrow is still `spaceCrossX` = 12 off the border.
+    expect(messageBodies(svg)[0]).toEqual([12, 43.469]);
     expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([7, 7]);
   });
 
@@ -1727,7 +1741,8 @@ describe('renderSequence — exogenous arrows', () => {
     const svg = render('@startuml\nparticipant Bob\n[<- Bob : hello\n@enduml');
     const [body] = messageBodies(svg);
     expect(headTips(svg)).toEqual([1]);
-    expect(body).toEqual([5, 69]);
+    // Same 20.531px leftward shift of the lifeline as every other row here.
+    expect(body).toEqual([5, 48.469]);
   });
 
   // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
@@ -1736,7 +1751,15 @@ describe('renderSequence — exogenous arrows', () => {
   it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
     const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
-    expect(messageBodies(long)[0]).toEqual([0, 64]);
-    expect(messageBodies(short)[0]).toEqual([16.337, 64]);
+    expect(messageBodies(long)[0]).toEqual([0, 43.469]);
+    // NEGATIVE, and correctly so for this port as it stands: `getPoint1()` is
+    // `posC - preferredWidth` = 49.469 - 53.663, and nothing clamps it. The
+    // arrow's own width did not change; the lifeline moved left by 20.531
+    // when the box lost its floor, and the 30px `LEFT_MARGIN` that used to
+    // absorb the overhang is a constant where upstream solves
+    // `xorigin.addAtLeast(0)` over every tile
+    // (`SequenceDiagramFileMakerTeoz.java:89-110`). That is Batch 5's T5.1,
+    // recorded here so the number is not mistaken for arbitrary.
+    expect(messageBodies(short)[0]).toEqual([-4.194, 43.469]);
   });
 });

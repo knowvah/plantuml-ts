@@ -235,10 +235,26 @@ export interface Theme {
     graph: ThemeGraphColors;
   };
   sequence: {
-    /** Horizontal padding inside a participant box */
+    /**
+     * Padding inside a participant box, on every side.
+     *
+     * `plantuml.skin:186-190` sets `Padding 7` for
+     * `participant,actor,boundary,control,entity,queue,database,collections`,
+     * and `ClockwiseTopRightBottomLeft.read` expands a scalar to all four
+     * sides. `AbstractTextualComponent#getTextWidth` adds
+     * `padding.getLeft() + padding.getRight()` to the raw text block
+     * (`:106-108`) and `getTextHeight` adds top + bottom (`:110-114`), and
+     * `ComponentRoseParticipant#drawInternalU:100-104` draws a rectangle of
+     * exactly those two. So the drawn box is `text + 2 * this` on both axes.
+     *
+     * There is deliberately NO minimum-width companion to this. Upstream's
+     * floor is `Rose#getMinClassWidth` = `style.value(PName.MinimumWidth)`
+     * (`Rose.java:275-278`), `MinimumWidth` is declared in no skin file, and
+     * `ValueNull#asDouble()` returns 0 (`ValueNull.java:57-59`) — so
+     * upstream's floor is zero. See
+     * `plans/sequence-coordinate-convergence/findings/participant-width.md`.
+     */
     participantPadding: number;
-    /** Minimum participant box width */
-    participantMinWidth: number;
     /** Horizontal gap between adjacent participant boxes */
     participantGap: number;
     /** Vertical gap between messages */
@@ -318,8 +334,7 @@ export const defaultTheme: Theme = {
     },
   },
   sequence: {
-    participantPadding: 10,
-    participantMinWidth: 80,
+    participantPadding: 7,
     participantGap: 20,
     messageSpacing: 20,
     activationWidth: 10,

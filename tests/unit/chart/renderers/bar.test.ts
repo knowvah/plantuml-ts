@@ -46,7 +46,6 @@ const TEST_THEME: Theme = {
   },
   sequence: {
     participantPadding: 5,
-    participantMinWidth: 80,
     participantGap: 10,
     messageSpacing: 25,
     activationWidth: 10,

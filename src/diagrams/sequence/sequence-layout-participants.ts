@@ -172,10 +172,18 @@ function computeParticipantWidths(
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
     // `ComponentRoseParticipant`; the only difference between them is
     // `getDeltaCollection()` (`:114-124`).
-    const plain = Math.max(
-      theme.sequence.participantMinWidth,
-      lw + theme.sequence.participantPadding * 2,
-    );
+    //
+    // `getTextWidth = getPureTextWidth + padding.left + padding.right`
+    // (`AbstractTextualComponent.java:106-108`), and that IS the drawn box
+    // (`ComponentRoseParticipant#drawInternalU:100-104`). There is no floor
+    // underneath it: `getPureTextWidth`'s `max(..., minWidth)` (`:140-142`)
+    // takes `minWidth` from `Rose#getMinClassWidth` (`Rose.java:275-278`),
+    // whose `PName.MinimumWidth` is in no skin file and so resolves to
+    // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified against
+    // 3570 corpus boxes: `measure(label).width + 14` reproduces the jar's box
+    // width to within 0.0005px, worst case
+    // (`findings/participant-width.md`).
+    const plain = lw + theme.sequence.participantPadding * 2;
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
 }

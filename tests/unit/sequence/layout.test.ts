@@ -101,12 +101,16 @@ describe('layoutSequence — participant columns (AC 1)', () => {
     }
   });
 
-  it('participant width >= participantMinWidth', () => {
+  it('participant width is the text plus twice the padding, with no floor under it', () => {
+    // `AbstractTextualComponent#getTextWidth:106-108` — box = pure text +
+    // padding.left + padding.right, and `Rose#getMinClassWidth`'s
+    // `PName.MinimumWidth` resolves to `ValueNull#asDouble()` = 0
+    // (`ValueNull.java:57-59`), so nothing props a narrow box up. `X` is one
+    // glyph, 8px under `FixedMeasurer(8, 16)`, and 8 + 14 is well under the
+    // 80px floor this port used to apply.
     const ast = makeAst(['X'], []);
     const geo = layoutSequence(ast, defaultTheme, measurer);
-    expect(geo.participants[0]?.width).toBeGreaterThanOrEqual(
-      defaultTheme.sequence.participantMinWidth,
-    );
+    expect(geo.participants[0]?.width).toBe(8 + 2 * defaultTheme.sequence.participantPadding);
   });
 
   it('centerX == x + width/2', () => {
@@ -1038,7 +1042,8 @@ describe('layoutSequence — database participant sizing', () => {
   it('leaves non-database participants untouched', () => {
     const plain = layoutSequence(makeAst(['Alice', 'Bob'], [msg('Alice', 'Bob')]), defaultTheme, measurer);
     const alice = plain.participants.find((p) => p.id === 'Alice')!;
-    expect(alice.width).toBe(defaultTheme.sequence.participantMinWidth);
+    // 5 glyphs at 8px under `FixedMeasurer`, plus 7 of padding either side.
+    expect(alice.width).toBe(5 * 8 + 2 * defaultTheme.sequence.participantPadding);
     expect(alice.height).toBe(16 + 20);
   });
 });

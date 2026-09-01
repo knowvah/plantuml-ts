@@ -103,7 +103,6 @@ describe('defaultTheme', () => {
   it('has all required sequence fields', () => {
     const s = defaultTheme.sequence;
     expect(typeof s.participantPadding).toBe('number');
-    expect(typeof s.participantMinWidth).toBe('number');
     expect(typeof s.participantGap).toBe('number');
     expect(typeof s.messageSpacing).toBe('number');
     expect(typeof s.activationWidth).toBe('number');
@@ -304,10 +303,10 @@ describe('resolveTheme', () => {
   });
 
   it('merges sequence partial fields', () => {
-    const partial: Partial<Theme> = { sequence: { participantPadding: 99, participantMinWidth: 80, participantGap: 20, messageSpacing: 20, activationWidth: 10, noteMargin: 5, frameHeaderHeight: 20, lifelineExtension: 20 } };
+    const partial: Partial<Theme> = { sequence: { participantPadding: 99, participantGap: 20, messageSpacing: 20, activationWidth: 10, noteMargin: 5, frameHeaderHeight: 20, lifelineExtension: 20 } };
     const result = resolveTheme(partial);
     expect(result.sequence.participantPadding).toBe(99);
-    expect(result.sequence.participantMinWidth).toBe(defaultTheme.sequence.participantMinWidth);
+    expect(result.sequence.participantGap).toBe(defaultTheme.sequence.participantGap);
   });
 
   it('produces a new object (does not return defaultTheme reference) when merging', () => {
@@ -376,7 +375,6 @@ describe('deepMergeTheme', () => {
     },
     sequence: {
       participantPadding: 5,
-      participantMinWidth: 60,
       participantGap: 15,
       messageSpacing: 10,
       activationWidth: 8,
@@ -417,7 +415,7 @@ describe('deepMergeTheme', () => {
     expect(result.colors.graph.businessActorFill).toBe(customBase.colors.graph.businessActorFill);
     expect(result.colors.graph.businessUsecaseFill).toBe(customBase.colors.graph.businessUsecaseFill);
     expect(result.sequence.participantPadding).toBe(customBase.sequence.participantPadding);
-    expect(result.sequence.participantMinWidth).toBe(customBase.sequence.participantMinWidth);
+    expect(result.sequence.participantGap).toBe(customBase.sequence.participantGap);
   });
 
   it('does not mutate the base theme', () => {
@@ -456,7 +454,6 @@ describe('deepMergeTheme', () => {
     const result = deepMergeTheme(customBase, {
       sequence: {
         participantPadding: 50,
-        participantMinWidth: 60,
         participantGap: 15,
         messageSpacing: 10,
         activationWidth: 8,
@@ -466,7 +463,7 @@ describe('deepMergeTheme', () => {
       },
     });
     expect(result.sequence.participantPadding).toBe(50);
-    expect(result.sequence.participantMinWidth).toBe(customBase.sequence.participantMinWidth);
+    expect(result.sequence.participantGap).toBe(customBase.sequence.participantGap);
   });
 
   it('returns a new object, not the base reference', () => {

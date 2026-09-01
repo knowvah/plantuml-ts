@@ -71,11 +71,8 @@ describe('defaultTheme', () => {
   });
 
   it('has correct participantPadding', () => {
-    expect(defaultTheme.sequence.participantPadding).toBe(10);
-  });
-
-  it('has correct participantMinWidth', () => {
-    expect(defaultTheme.sequence.participantMinWidth).toBe(80);
+    // `plantuml.skin:186-190` -- `Padding 7` on the participant style group.
+    expect(defaultTheme.sequence.participantPadding).toBe(7);
   });
 
   it('has correct messageSpacing', () => {
