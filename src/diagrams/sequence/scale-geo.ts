@@ -97,24 +97,6 @@ const IDENTITY = 1;
 // SequenceGeometry
 // ---------------------------------------------------------------------------
 
-function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
-  return {
-    ...p,
-    x: p.x * k,
-    y: p.y * k,
-    width: p.width * k,
-    height: p.height * k,
-    centerX: p.centerX * k,
-    ...(p.badge !== undefined
-      ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } }
-      : {}),
-  };
-}
-
-function scaleBox(b: BoxGeo, k: number): BoxGeo {
-  return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
-}
-
 /**
  * A1: the three `TextRun` metrics scale with `k` exactly as its coordinates do
  * — they are lengths in the same pixel space, and `textWidth` reaches
@@ -129,6 +111,29 @@ const scaleRun = (r: TextRun, k: number): TextRun => ({
   textAscent: r.textAscent * k,
   textLineHeight: r.textLineHeight * k,
 });
+
+function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
+  return {
+    ...p,
+    x: p.x * k,
+    y: p.y * k,
+    width: p.width * k,
+    height: p.height * k,
+    centerX: p.centerX * k,
+    // A3: the head's label runs carry absolute coordinates AND lengths, so
+    // both scale. Omitting this drew every scaled participant label at its
+    // unscaled left edge and baseline.
+    labelRuns: p.labelRuns.map((r) => scaleRun(r, k)),
+    ...(p.badge !== undefined
+      ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } }
+      : {}),
+  };
+}
+
+function scaleBox(b: BoxGeo, k: number): BoxGeo {
+  return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
+}
+
 
 /**
  * A message's geometry, scaled. Covers exo messages too: they emit a
@@ -171,7 +176,12 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     width: f.width * k,
     height: f.height * k,
     branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
-    refBody: f.refBody.map((b) => ({ ...b, x: b.x * k })),
+    // A4: `refBody` became placed, measured runs, so its `y` and its three
+    // metrics scale too — scaling only `x`, as this did while a body entry was
+    // `{ text, x }`, left every scaled `ref` drawing its text at the unscaled
+    // baseline and stretching it to the unscaled width.
+    refBody: f.refBody.map((r) => scaleRun(r, k)),
+    tabRuns: f.tabRuns.map((r) => scaleRun(r, k)),
     tabTextWidth: f.tabTextWidth * k,
     tabWidth: f.tabWidth * k,
     tabHeight: f.tabHeight * k,

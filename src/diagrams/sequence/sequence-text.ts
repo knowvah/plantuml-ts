@@ -75,9 +75,12 @@ export interface SequenceTextSpec {
    * `bepipo-37-fego336`, and `core/svg.ts#TextStyle.fontWeight` for the
    * class-engine precedent). `'bold'` is accepted because the interface
    * contract this module was specified against names it, and because
-   * `TextStyle` still allows it.
+   * `TextStyle` still allows it. `'normal'` completes the set so a caller
+   * holding a resolved skin weight — `renderer-frame-header.ts
+   * #boldFontWeight` returns `'normal' | '700'` — can pass it straight
+   * through rather than narrowing at every call site.
    */
-  readonly fontWeight?: 'bold' | '700';
+  readonly fontWeight?: 'normal' | 'bold' | '700';
   /** Emitted verbatim, as `TextStyle.textDecoration` is. */
   readonly textDecoration?: string;
 }

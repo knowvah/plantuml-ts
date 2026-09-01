@@ -13,7 +13,8 @@
 
 import type { FrameGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { rect, text, path } from '../../core/svg-shapes.js';
+import { rect, path } from '../../core/svg-shapes.js';
+import { sequenceText } from './sequence-text.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import {
   GROUP_LINE_COLOR,
@@ -24,7 +25,6 @@ import {
   HEADER_LINE_THICKNESS,
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
-  HEADER_PADDING,
   CORNER_SIZE,
 } from './frame-style.js';
 
@@ -57,20 +57,20 @@ const ROUND_CORNER = 0;
  */
 const HEADER_FONT_COLOR = 'black';
 
-/**
- * The content-independent ascent every `StringMeasurer` in this port shares
- * (`descent == fontSize/4.5`), reproduced here since the renderer has no
- * measurer of its own -- same formula `diagrams/state/state-render-colors
- * .ts#textAscent` and `diagrams/class/class-visibility-icon.ts` already use.
- * Jar-verified against the cached oracle: a 13px tab title's baseline sits
- * `10.111` below its block top (`13 - 13/4.5`), and an 11px comment's sits
- * `8.556` below (`11 - 11/4.5`) -- both exact against
- * `test-results/dot-cache/sequence/bepipo-37-fego336/in.svg`.
- * @see ~/plantuml-ts/src/core/measurer.ts:93
+/*
+ * D2: the local `textAscent(fontSize)` that used to sit here — `size -
+ * size/4.5`, jar-verified against `bepipo-37-fego336`'s 13px tab title at
+ * 10.111 below its block top and its 11px comment at 8.556 — is GONE. The
+ * value was exact for the three production measurers and wrong for
+ * `FixedMeasurer`, whose descent is `lineHeight/4.5`, so a renderer computing
+ * it could disagree with the layout that sized the box. The same numbers now
+ * come from `TextRun.textAscent`, measured in `sequence-layout-events.ts
+ * #buildTabRuns` where a real measurer is in scope.
+ *
+ * The state and class copies (`state-render-colors.ts`,
+ * `class-visibility-icon.ts`) are deliberately LEFT ALONE — D2 again.
  */
-function textAscent(fontSize: number): number {
-  return fontSize - fontSize / 4.5;
-}
+
 
 /**
  * `FontStyle bold` -> SVG's numeric `font-weight="700"` (this project's own
@@ -191,29 +191,30 @@ function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
  *  (`ComponentRoseGroupingHeader.java:89`: `"[" + strings.get(1) + "]"`). */
 function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  const paddingLeft = HEADER_PADDING.left * k;
-  const paddingTop = HEADER_PADDING.top * k;
-  const tabFontSize = HEADER_FONT_SIZE * k;
-  const titleEl = text(frame.x + paddingLeft, frame.y + paddingTop + textAscent(tabFontSize), frame.tabText, {
-    fontFamily: theme.fontFamily,
-    fontSize: tabFontSize,
-    fontWeight: boldFontWeight(HEADER_FONT_BOLD),
-    fill: HEADER_FONT_COLOR,
-  });
-  if (frame.tabComment === undefined) return titleEl;
-  const commentFontSize = GROUP_FONT_SIZE * k;
-  const commentEl = text(
-    frame.x + paddingLeft + frame.tabWidth,
-    frame.y + paddingTop + k + textAscent(commentFontSize),
-    `[${frame.tabComment}]`,
-    {
-      fontFamily: theme.fontFamily,
-      fontSize: commentFontSize,
-      fontWeight: boldFontWeight(GROUP_FONT_BOLD),
-      fill: HEADER_FONT_COLOR,
-    },
-  );
-  return titleEl + commentEl;
+  // Position, width and baseline all come off the run (D1). What stays here is
+  // the run's STYLE — its font size and weight are skin values, not
+  // measurements, and the two runs use different ones: index 0 is the title at
+  // `HEADER_FONT_SIZE`, index 1 the `[comment]` at the group style's own
+  // `smallFont2`.
+  const styleOf = (i: number): { size: number; bold: boolean } =>
+    i === 0
+      ? { size: HEADER_FONT_SIZE * k, bold: HEADER_FONT_BOLD }
+      : { size: GROUP_FONT_SIZE * k, bold: GROUP_FONT_BOLD };
+  return frame.tabRuns
+    .map((run, i) => {
+      const style = styleOf(i);
+      return sequenceText({
+        leftX: run.x,
+        baselineY: run.y,
+        text: run.text,
+        width: run.textWidth,
+        fontFamily: theme.fontFamily,
+        fontSize: style.size,
+        fontWeight: boldFontWeight(style.bold),
+        fill: HEADER_FONT_COLOR,
+      });
+    })
+    .join('');
 }
 
 /**

@@ -96,3 +96,25 @@ does not
   distance instrument, which scores numeric attributes only.
 - **Confidence**: High — visible in the cached oracle, absent from our output
   both before and after A3.
+
+## Observation: chaining the diff-census CLI into the same shell as `npm test`
+races the stdlib build
+
+- **Context**: A4 close-out, running
+  `npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts && npm run
+  catalog && npm run lint && npm run typecheck && npm run build && npm test`
+  as one chain.
+- **Finding**: eight test FILES failed, seven of them unrelated to the change
+  (`split-sprite-bundle`, `sprite-split-prefetch`, `stdlib-package-files`,
+  `with-stdlib-build-lock`, `refusal-coverage`, `routing-conformance`,
+  `description-parity.ratchet`). Re-running `npm test` on its own, with no
+  other command in the chain, left exactly ONE failing file — the sequence
+  ratchet, which is red by design this mission. The census CLI renders the
+  whole corpus and touches the same generated `assets/stdlib` that the suite's
+  global setup builds.
+- **Impact**: never read a `npm test` result from a chain that also renders the
+  corpus. The failure set looks alarming and names files the change never
+  touched, which is exactly the signature that should prompt a clean re-run
+  rather than a diagnosis. Same family as
+  `.agent-notes/stdlib-run-isolation`'s findings.
+- **Confidence**: High — 8 failing files chained, 1 standalone, same tree.

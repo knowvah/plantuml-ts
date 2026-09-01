@@ -24,6 +24,7 @@ import type {
   SequenceEvent,
   SpaceEvent,
   SpaceGeo,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
@@ -34,7 +35,7 @@ import {
   dividerPreferredHeight,
 } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
-import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
+import { refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
@@ -42,6 +43,7 @@ import {
   HEADER_PADDING,
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
+  GROUP_FONT_SIZE,
 } from './frame-style.js';
 
 /** Pending activation-bar start record. `level` is 1-based and fixed when
@@ -230,7 +232,7 @@ const FRAME_MARGIN_X = 16;
 function computeFrameBody(
   event: FrameEvent,
   ctx: EventProcessingContext,
-): { x: number; width: number; refBody: { text: string; x: number }[]; body: readonly string[] } {
+): { x: number; width: number; refBody: readonly TextRun[]; body: readonly string[] } {
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
   const body = refBodyLines(event.frameType, event.label);
   // `GroupingTile.MARGINX = 16` (`:89`), applied as
@@ -244,11 +246,112 @@ function computeFrameBody(
     maxCx - minCx + 2 * FRAME_MARGIN_X,
     refBodyWidth(body, ctx.theme, ctx.measurer),
   );
-  const refBody = body.map((line) => ({
-    text: line,
-    x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,
-  }));
-  return { x, width, refBody, body };
+  return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
+}
+
+/**
+ * A `ref over` frame's body lines, as placed and measured runs (A4).
+ *
+ * The `y` arithmetic moved here from `renderer.ts#renderRefBody`, verbatim and
+ * with its reasoning intact, because the renderer may no longer derive a
+ * baseline from a font size (D1). Upstream draws the body at
+ * `(textPos, getOldPaddingY() + textHeaderHeight)`
+ * (`ComponentRoseReference.java:125-136`) with two deliberate substitutions
+ * this port makes:
+ *
+ *   - `+ theme.fontSize`, because an SVG `<text>` y is a BASELINE where
+ *     upstream's translate is the block's top-left;
+ *   - `frame.tabHeight` in place of the measured `textHeaderHeight`, because
+ *     that is the band this port actually draws — keying the body to the DRAWN
+ *     tab is what keeps the two from colliding.
+ *
+ * The `x` is upstream's own centring within the box
+ * (`AbstractTextualComponent.java:106-108`); the jar's two-line `ref` centres
+ * both lines on one x, at 74.3 and 76.962 for a box of x=70.3 w=76.775.
+ */
+function refBodyRuns(
+  body: readonly string[],
+  x: number,
+  width: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  // `reference { FontSize 12 }` (`plantuml.skin:145-151`), NOT the ambient
+  // sequence font — see `text-block-geo.ts#REFERENCE_FONT_SIZE`. The box this
+  // places into is sized from the same spec by `refBodyWidth`/`refBodyHeight`.
+  const spec = refBodyFontSpecOf(ctx.theme);
+  const lineHeight = ctx.measurer.measure('M', spec).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  // `theme.fontSize + 2` is the ref body's own inter-line advance, unchanged
+  // from the renderer it moved out of; it is NOT the measured line height, and
+  // substituting one for the other would move every multi-line `ref`.
+  const advance = ctx.theme.fontSize + 2;
+  return body.map((line, i) => {
+    const textWidth = ctx.measurer.measure(line, spec).width;
+    return {
+      text: line,
+      x: x + (width - textWidth) / 2,
+      // Baseline filled in by the caller, which alone knows `frame.y` and
+      // `tabHeight`; see `placeRefBody`.
+      y: i * advance,
+      textWidth,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  });
+}
+
+/** Drop `refBodyRuns`' relative baselines onto the frame's own top. Separate
+ *  from {@link refBodyRuns} because `tabHeight` is resolved by
+ *  `computeHeaderTab`, after the body's x is. */
+function placeRefBody(
+  runs: readonly TextRun[],
+  frameY: number,
+  tabHeight: number,
+  fontSize: number,
+): readonly TextRun[] {
+  const top = frameY + tabHeight + fontSize;
+  return runs.map((r) => ({ ...r, y: top + r.y }));
+}
+
+/**
+ * The header tab's title and its optional `[comment]`, as placed and measured
+ * runs (A4).
+ *
+ * Two runs at two different fonts — the title at `HEADER_FONT_SIZE` 13 bold,
+ * the comment at the group style's own `smallFont2` 11 bold
+ * (`ComponentRoseGroupingHeader.java:89,151-158`) — which is why each carries
+ * its own metrics rather than sharing one.
+ *
+ * Jar-verified on `bepipo-37-fego336`: `loop` at x=28 width 24.619 and
+ * `[forever]` at x=97.619 width 40.219, the comment starting exactly one
+ * `tabWidth` right of the title.
+ */
+function buildTabRuns(
+  tab: { readonly tabText: string; readonly tabComment?: string; readonly tabWidth: number },
+  x: number,
+  y: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  const runAt = (text: string, leftX: number, top: number, size: number): TextRun => {
+    const spec: FontSpec = { family: ctx.theme.fontFamily, size, weight: 'bold' };
+    const lineHeight = ctx.measurer.measure('M', spec).height;
+    const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+    return {
+      text,
+      x: leftX,
+      y: top + ascent,
+      textWidth: ctx.measurer.measure(text, spec).width,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  };
+  const left = x + HEADER_PADDING.left;
+  const top = y + HEADER_PADDING.top;
+  const title = runAt(tab.tabText, left, top, HEADER_FONT_SIZE);
+  if (tab.tabComment === undefined) return [title];
+  // `+ 1`: `getOldPaddingY()` again, on the comment's own baseline
+  // (`ComponentRoseGroupingHeader.java:151-158`).
+  return [title, runAt(`[${tab.tabComment}]`, left + tab.tabWidth, top + 1, GROUP_FONT_SIZE)];
 }
 
 /** The header tab's `Display`, split by `groupingHeaderDisplay`
@@ -328,6 +431,7 @@ function handleFrameEvent(
   cursor.y += frameHeaderHeight;
 
   const { x, width, refBody, body } = computeFrameBody(event, ctx);
+  const tab = computeHeaderTab(event, ctx);
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
@@ -340,8 +444,10 @@ function handleFrameEvent(
     ...(event.backColorGeneral !== undefined ? { backColorGeneral: event.backColorGeneral } : {}),
     branchSeparators: [], // placeholder -- populated by mutation in the loop below
     refBody,
-    ...computeHeaderTab(event, ctx),
+    ...tab,
+    tabRuns: buildTabRuns(tab, x, frameStartY, ctx),
   };
+  frameGeo.refBody = placeRefBody(refBody, frameStartY, tab.tabHeight, ctx.theme.fontSize);
   ctx.eventGeos.push(frameGeo);
 
   // Process each branch in sequence (alt frames have multiple branches).

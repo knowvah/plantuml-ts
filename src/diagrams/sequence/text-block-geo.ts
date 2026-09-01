@@ -16,9 +16,9 @@
  * `EventProcessingContext`, which also keeps the module graph a DAG.
  */
 
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
-import { arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
+import { arrowFontSpecOf } from './sequence-layout-shared.js';
 
 /**
  * One `<text>` the renderer will emit, already placed AND already measured.
@@ -63,12 +63,6 @@ export interface TextRun {
   readonly textLineHeight: number;
 }
 
-const lineHeightOf = (theme: Theme, measurer: StringMeasurer): number =>
-  measurer.measure('M', fontSpecOf(theme)).height;
-
-const widthOf = (s: string, theme: Theme, measurer: StringMeasurer): number =>
-  measurer.measure(s, fontSpecOf(theme)).width;
-
 // ---------------------------------------------------------------------------
 // `ref` frame body — ComponentRoseReference
 // ---------------------------------------------------------------------------
@@ -91,6 +85,46 @@ const REF_HEADER_EXTRA_WIDTH = 45;
 const REF_HEADER_TEXT = 'ref';
 
 /**
+ * `reference { FontSize 12 }` (`plantuml.skin:145-151`) — a `ref over` body
+ * does NOT use the ambient sequence font.
+ *
+ * A4 found this: the body was measured at `theme.fontSize` (14), which was
+ * invisible while the port emitted no `textLength` and a merely-approximate x,
+ * and became a visible glyph distortion the moment it emitted one. On
+ * `cekora-30-diso384` the jar writes `textLength="26.625"` for `short` and
+ * this port wrote 31.063 — the same string measured at two different sizes.
+ *
+ * The header keyword beside it is `referenceHeader { FontSize 13, FontStyle
+ * bold }` (`:153-160`), which `computeHeaderTab` already applies.
+ */
+export const REFERENCE_FONT_SIZE = 12;
+
+/** The font a `ref over` BODY line is measured and drawn at. */
+export function refBodyFontSpecOf(theme: Theme): FontSpec {
+  return { family: theme.fontFamily, size: REFERENCE_FONT_SIZE };
+}
+
+/**
+ * `referenceHeader { FontSize 13, FontStyle bold }` (`plantuml.skin:153-160`)
+ * — the `ref` KEYWORD's own font, which `ComponentRoseReference`'s constructor
+ * builds `textHeader` with (`fcHeader = styleHeader.getFontConfiguration(...)`,
+ * `:75,79`) and which `getHeaderWidth`/`getHeaderHeight` therefore measure at.
+ *
+ * Same defect as the body's, found the same way: `refBodyWidth` takes
+ * `max(body, header)`, so correcting the body font alone let the header term
+ * — still measured at the ambient 14 — start dominating and win with a wrong
+ * number. `sojufi-84-bexi933` is where that showed.
+ */
+export function refHeaderFontSpecOf(theme: Theme): FontSpec {
+  return { family: theme.fontFamily, size: REFERENCE_HEADER_FONT_SIZE, weight: 'bold' };
+}
+
+/** `referenceHeader { FontSize 13 }` (`plantuml.skin:153-160`). Equal to
+ *  `HEADER_FONT_SIZE`, and deliberately NOT shared with it: they are two
+ *  different style buckets that happen to agree today. */
+const REFERENCE_HEADER_FONT_SIZE = 13;
+
+/**
  * A `ref over` frame's BODY, one entry per source line.
  *
  * `ref` is the one frame type whose label is content rather than a condition:
@@ -110,7 +144,7 @@ export function refBodyLines(frameType: string, label: string): readonly string[
 /** `getHeaderHeight` -- the header text's height plus `2 * 1`
  *  (`ComponentRoseReference.java:140-143`). */
 function refHeaderHeight(theme: Theme, measurer: StringMeasurer): number {
-  return measurer.measure(REF_HEADER_TEXT, fontSpecOf(theme)).height + 2;
+  return measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).height + 2;
 }
 
 /**
@@ -125,7 +159,8 @@ export function refBodyHeight(
   measurer: StringMeasurer,
 ): number {
   if (body.length === 0) return 0;
-  const textHeight = body.length * lineHeightOf(theme, measurer) + 2 * REF_PADDING;
+  const textHeight =
+    body.length * measurer.measure('M', refBodyFontSpecOf(theme)).height + 2 * REF_PADDING;
   return textHeight + refHeaderHeight(theme, measurer) + REF_HEIGHT_FOOTER;
 }
 
@@ -142,8 +177,11 @@ export function refBodyWidth(
   measurer: StringMeasurer,
 ): number {
   if (body.length === 0) return 0;
-  const widest = Math.max(...body.map((l) => widthOf(l, theme, measurer)));
-  const headerWidth = widthOf(REF_HEADER_TEXT, theme, measurer) + REF_HEADER_EXTRA_WIDTH;
+  const widest = Math.max(
+    ...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width),
+  );
+  const headerWidth =
+    measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN;
 }
 

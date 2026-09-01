@@ -8,6 +8,8 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { TextRun } from './text-block-geo.js';
+
 export interface FrameGeo {
   kind: 'frame';
   frameType: string;
@@ -22,9 +24,10 @@ export interface FrameGeo {
   /** `else` branch boundaries: y + bracketed condition. Each MAY carry its
    *  own resolved BODY-band fill. Empty for single-branch frames. */
   branchSeparators: { y: number; label: string; backColorGeneral?: string }[];
-  /** `ref over` body lines, pre-centred `x` (needs the measurer, layout-only,
-   *  same rationale as `x`/`y` above). Empty for every other frame type. */
-  refBody: { text: string; x: number }[];
+  /** `ref over` body lines as placed, measured runs — pre-centred `x` and an
+   *  absolute baseline, both resolved in layout because both need the measurer
+   *  (D1). Empty for every other frame type. */
+  refBody: readonly TextRun[];
   /**
    * The header tab did not survive the page clip, so it is not drawn.
    *
@@ -44,4 +47,17 @@ export interface FrameGeo {
   tabTextWidth: number;
   tabWidth: number;
   tabHeight: number;
+  /**
+   * The header tab's title and its optional `[comment]`, as placed and
+   * measured runs (A4).
+   *
+   * Two runs at two DIFFERENT fonts — the title at `HEADER_FONT_SIZE` 13 bold,
+   * the comment at the group style's own `smallFont2` 11 bold
+   * (`ComponentRoseGroupingHeader.java:89,151-158`) — so each carries its own
+   * width, ascent and line height. `tabTextWidth` above is NOT this: it is the
+   * title's contribution to the tab BOX's width, a box dimension that
+   * `tabWidth` and the corner path are derived from, and it survives alongside
+   * the runs for that reason.
+   */
+  tabRuns: readonly TextRun[];
 }

@@ -27,6 +27,11 @@ import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence
 import { inflateSync } from 'node:zlib';
 import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
+import {
+  HEADER_PADDING,
+  HEADER_FONT_SIZE,
+  GROUP_FONT_SIZE,
+} from '../../../src/diagrams/sequence/frame-style.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -85,6 +90,31 @@ function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
 /** A `ParticipantGeo` with its `labelRuns` derived from the rest of it. */
 function participantGeo(base: Omit<ParticipantGeo, 'labelRuns'>): ParticipantGeo {
   return { ...base, labelRuns: labelRunsFor(base) };
+}
+
+/** A hand-built frame's tab runs, mirroring `sequence-layout-events.ts
+ *  #buildTabRuns` — A4 moved that placement into layout. Measured, so an
+ *  emitted `textLength` cannot drift from the measurer. */
+function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'tabWidth'>): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const runAt = (text: string, leftX: number, top: number, size: number): TextRun => {
+    const spec = { family: defaultTheme.fontFamily, size, weight: 'bold' as const };
+    const lineHeight = measurer.measure('M', spec).height;
+    const ascent = lineHeight - measurer.getDescent(spec, 'M');
+    return {
+      text,
+      x: leftX,
+      y: top + ascent,
+      textWidth: measurer.measure(text, spec).width,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  };
+  const left = f.x + HEADER_PADDING.left;
+  const top = f.y + HEADER_PADDING.top;
+  const title = runAt(f.tabText, left, top, HEADER_FONT_SIZE);
+  if (f.tabComment === undefined) return [title];
+  return [title, runAt(`[${f.tabComment}]`, left + f.tabWidth, top + 1, GROUP_FONT_SIZE)];
 }
 
 function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
@@ -769,6 +799,7 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabRuns: tabRunsFor({ x: 30, y: 60, tabText: 'loop', tabWidth: 77 }),
       tabText: 'loop',
       tabTextWidth: 32,
       tabWidth: 77,
@@ -795,6 +826,8 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [{ y: 110, label: 'x <= 0' }],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'alt',
       tabTextWidth: 24,
       tabWidth: 69,
@@ -820,6 +853,9 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabRuns: tabRunsFor({
+        x: 30, y: 60, tabText: 'opt', tabComment: 'condition', tabWidth: 69,
+      }),
       tabText: 'opt',
       tabComment: 'condition',
       tabTextWidth: 24,
@@ -884,6 +920,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#FF0000',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'g',
       tabTextWidth: 12,
       tabWidth: 40,
@@ -909,6 +947,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#FF0000',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'outer',
       tabTextWidth: 30,
       tabWidth: 50,
@@ -925,6 +965,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#00FF00',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'inner',
       tabTextWidth: 30,
       tabWidth: 50,

@@ -93,6 +93,9 @@ function frame(y: number, height: number, extra?: Partial<FrameGeo>): FrameGeo {
     kind: 'frame', frameType: 'group', label: 'g',
     x: 5, y, width: 300, height,
     branchSeparators: [], refBody: [],
+    // A4 moved tab-text placement into layout; these suites assert box
+    // geometry, never the tab's own text.
+    tabRuns: [],
     tabText: 'group', tabTextWidth: 30, tabWidth: 40, tabHeight: 15,
     ...extra,
   };
@@ -323,7 +326,13 @@ describe('frame — body CLAMPED, header tab all-or-nothing', () => {
   });
 
   it('drops the ref body with the header it hangs off', () => {
-    const f = frame(100, 300, { frameType: 'ref', refBody: [{ text: 'r', x: 20 }] });
+    // A4: `refBody` is a placed, measured `TextRun[]`. The metrics are
+    // arbitrary here — this asserts that the body is DROPPED with its header,
+    // never where it sits.
+    const f = frame(100, 300, {
+      frameType: 'ref',
+      refBody: [{ text: 'r', x: 20, y: 120, textWidth: 6, textAscent: 9, textLineHeight: 12 }],
+    });
     const page = paginateSequence(geo([f, newpage(200)]), 1);
     expect(only<FrameGeo>(page, 'frame')[0]!.refBody).toEqual([]);
   });

@@ -93,6 +93,9 @@ function makeFrameGeo(overrides: Partial<FrameGeo> = {}): FrameGeo {
     backColorGeneral: '#00FF00',
     branchSeparators: [{ y: 40, label: 'else', backColorGeneral: '#0000FF' }],
     refBody: [],
+    // A4 moved tab-text placement into layout; these suites assert box
+    // geometry, never the tab's own text.
+    tabRuns: [],
     tabText: 'alt',
     tabComment: 'x > 0',
     tabTextWidth: 30,

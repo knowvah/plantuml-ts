@@ -23,6 +23,9 @@ function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
     height: 90,
     branchSeparators: [],
     refBody: [],
+    // A4 moved tab-text placement into layout; these suites assert box
+    // geometry, never the tab's own text.
+    tabRuns: [],
     tabText: 'alt',
     tabTextWidth: 20,
     tabWidth: 40,

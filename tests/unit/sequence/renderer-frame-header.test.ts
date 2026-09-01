@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import type { FrameGeo } from '../../../src/diagrams/sequence/ast.js';
+import type { FrameGeo, TextRun } from '../../../src/diagrams/sequence/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import {
+  HEADER_PADDING,
+  HEADER_FONT_SIZE,
+  GROUP_FONT_SIZE,
+} from '../../../src/diagrams/sequence/frame-style.js';
 import { scaleSequenceTheme, type ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import {
   renderGroupingHeaderBackground,
@@ -10,8 +16,36 @@ import {
 
 const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1);
 
+/**
+ * The tab's runs, built the way `sequence-layout-events.ts#buildTabRuns`
+ * builds them — A4 moved that placement into layout, so a hand-built
+ * `FrameGeo` has to supply it. Measured rather than hard-coded, so the
+ * `textLength` these tests assert on cannot drift from the measurer.
+ */
+function tabRunsFor(f: FrameGeo): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const runAt = (text: string, leftX: number, top: number, size: number): TextRun => {
+    const spec = { family: defaultTheme.fontFamily, size, weight: 'bold' as const };
+    const lineHeight = measurer.measure('M', spec).height;
+    const ascent = lineHeight - measurer.getDescent(spec, 'M');
+    return {
+      text,
+      x: leftX,
+      y: top + ascent,
+      textWidth: measurer.measure(text, spec).width,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  };
+  const left = f.x + HEADER_PADDING.left;
+  const top = f.y + HEADER_PADDING.top;
+  const title = runAt(f.tabText, left, top, HEADER_FONT_SIZE);
+  if (f.tabComment === undefined) return [title];
+  return [title, runAt(`[${f.tabComment}]`, left + f.tabWidth, top + 1, GROUP_FONT_SIZE)];
+}
+
 function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
-  return {
+  const base: FrameGeo = {
     kind: 'frame',
     frameType: 'group',
     label: '',
@@ -26,7 +60,9 @@ function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
     tabHeight: 20,
     tabTextWidth: 60,
     ...overrides,
+    tabRuns: [],
   };
+  return { ...base, tabRuns: tabRunsFor(base) };
 }
 
 /** Splits a concatenated markup string into its top-level elements (this

@@ -31,6 +31,8 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { rect, line, text, noteBox } from '../../core/svg.js';
+import { sequenceText } from './sequence-text.js';
+import { REFERENCE_FONT_SIZE } from './text-block-geo.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
@@ -128,14 +130,23 @@ const FRAME_ROUND_CORNER = 0;
  * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
  */
 function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const lineHeight = theme.fontSize + 2 * k;
-  const top = frame.y + frame.tabHeight + theme.fontSize;
+  // A4: the x, the baseline and the width all come off the run now. The
+  // `y` arithmetic this used to do — and the two deliberate substitutions
+  // behind it — moved to `sequence-layout-events.ts#refBodyRuns`, where the
+  // measurer is (D1); see that function for the citations.
   return frame.refBody
-    .map((line, i) =>
-      text(line.x, top + i * lineHeight, line.text, {
+    .map((run) =>
+      sequenceText({
+        leftX: run.x,
+        baselineY: run.y,
+        text: run.text,
+        width: run.textWidth,
         fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
+        // `reference { FontSize 12 }` (`plantuml.skin:145-151`), scaled with
+        // the rest of the document -- NOT `theme.fontSize`. The run beside it
+        // was measured at this same size, and the two must agree or the
+        // emitted `textLength` distorts the glyphs.
+        fontSize: REFERENCE_FONT_SIZE * theme.scaleK,
         fill: theme.colors.text,
       }),
     )
