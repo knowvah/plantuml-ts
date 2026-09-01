@@ -125,3 +125,39 @@ port paginates, so this is the precedent.
 input object unchanged (same reference), mirroring
 `scaleSequenceGeometry`'s `k === 1` fast path. That is what bounds the blast
 radius to the ~35 fixtures that carry a `newpage`.
+
+## D7 — One `lifelineEndY` for two upstream quantities
+
+`PlayingSpaceWithParticipants` clips the body to `pageHeight + 1` and places
+the footbox row at `pageHeight`, so on any page but the last the jar's
+lifelines end exactly one pixel BELOW the footbox top. This port spends ONE
+`SequenceGeometry` field on both: `renderLifelinePass` reads it as the
+lifeline's bottom and `renderFooterBox` reads it as the footbox's top.
+
+`paginateSequence` takes the footbox/image-height answer, `ymax + dy`, because
+that is what `calculateDimensionSlow` sizes the page from (`:80-86`). An inner
+page's lifelines therefore stop 1px short of the jar's, under the footbox that
+covers them. Recorded in `DIVERGENCES.md`; no node is added, removed or
+re-ordered by it.
+
+## D8 — A message maps onto its HEAD's rule, not its shaft's
+
+Amends D4. A message emits a shaft (`ULine`), a head (`UPolygon`/`ULine`s
+spanning `y ± ARROW_DELTA_Y`) and labels (`UText`), and the drivers rule on
+each separately. The kind takes the HEAD's rule because it is the strictest.
+
+This is load-bearing rather than tidy: this port draws a message's arrow at
+the TOP of its own tile, where upstream draws it `getContactPointRelative()`
+lower (`CommunicationTile.java:168-170`), so the port's arrow for the first
+message of the NEXT page lands exactly on `ymax` — one pixel inside a band
+that ends at `ymax + 1`. The shaft's looser test would keep it; the head's
+does not, which is what the jar's own goldens show (`pidadu-86-cuda807` is
+`newpage` followed by one message, and its golden page 1 carries the
+separator and no arrow).
+
+Measured: taking the shaft's rule instead leaves `devamo-31-coji129`,
+`pidadu-86-cuda807` and `sobiga-51-damo304` as the mission's only three
+risers. With the head's rule the corpus has zero.
+
+The label RUNS keep their own anchor test — they are the one component this
+port stores a separate `y` for.
