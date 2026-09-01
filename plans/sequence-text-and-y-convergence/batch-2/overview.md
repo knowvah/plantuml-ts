@@ -10,10 +10,10 @@ Four tasks, **parallel**.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| A2 | message labels | typescript-pro | `text-block-geo.ts`, `renderer-message.ts`, tests | A1 | [ ] |
-| A3 | participant labels and stereotypes | typescript-pro | `sequence-layout-participants.ts`, `renderer-participant-shapes.ts`, `geo.ts`, tests | A1 | [ ] |
-| A4 | frame headers, comments and `ref` bodies | typescript-pro | `renderer-frame-header.ts`, `sequence-layout-events.ts`, `geo.ts`, tests | A1 | [ ] |
-| A5 | notes, dividers, conditions and box labels | typescript-pro | `renderer.ts`, `sequence-layout-events.ts`, `geo.ts`, tests | A1 | [ ] |
+| A2 | message labels | typescript-pro | `text-block-geo.ts`, `renderer-message.ts`, tests | A1 | [x] |
+| A3 | participant labels and stereotypes | typescript-pro | `sequence-layout-participants.ts`, `renderer-participant-shapes.ts`, `geo-participant.ts`, tests | A1 | [x] |
+| A4 | frame headers, comments and `ref` bodies | typescript-pro | `renderer-frame-header.ts`, `sequence-layout-events.ts`, `geo-frame.ts`, tests | A1 | [x] |
+| A5 | notes, dividers, conditions and box labels | typescript-pro | `renderer.ts`, `sequence-layout-events.ts`, `geo-annotation.ts`, tests | A1 | [x] |
 
 ## The shape every one of these has
 
@@ -97,3 +97,34 @@ this engine's history — stop condition 7.
 `exactOptionalPropertyTypes: true` is on. Passing an optional field straight
 through to another optional field does not compile — use a spread-conditional
 (`...(x !== undefined ? { x } : {})`). It is a compile error, not a silent one.
+
+## Result (2026-09-01)
+
+All four landed, sequentially rather than in parallel.
+
+| task | commit | distance after | fall |
+|---|---|---|---|
+| — | `589bc138` | 2 578 916.759 | (batch 1 close) |
+| A2 | `1eb5ea9b` | 2 566 822.374 | 12 094.4 |
+| A3 | `bbb8c1ba` | 2 534 331.542 | 32 490.8 |
+| A4 | `a2bb90dd` | 2 527 196.477 | 7 111.9 |
+| A5 | `ce1dcd07` | 2 437 184.889 | 90 011.6 |
+
+**Phase A total: 141 731.9, or 5.5% of everything remaining.** `descended`
+held at 714 through every task — stop condition 7 never fired. The census's
+`text-metrics` bucket fell 13 770 → 1 194.
+
+Three findings that changed what later batches should look at, all recorded in
+`.agent-notes/A1-sequence-geo-text-metric-fields.md`:
+
+- **Three text kinds were measured at the wrong font** — `ref` body (12),
+  `ref` header (13 bold), note body (13). Each was invisible until its site
+  emitted a `textLength`. The note one alone is 90k, because the box is sized
+  from the same measurement.
+- **`note right` is positioned on the wrong side.** 58 fixtures rose in A5,
+  every one a note fixture; centring was masking a `computeNotePosition`
+  defect. Phase B territory.
+- **Nothing was scaled.** `labelRuns`, `tabRuns` and `refBody` all reached
+  `scale-geo.ts` unscaled; A4's first measurement ROSE 639.3 and led to it.
+  Any future run-carrying field must be added to `scaleRun`'s callers in the
+  same commit.
