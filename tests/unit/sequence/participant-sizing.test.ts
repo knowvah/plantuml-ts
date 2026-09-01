@@ -388,3 +388,61 @@ describe('the D6 constraint solve — labels that need more room than the gap', 
     expect(ours).toMatch(/<text[^>]*font-size="13"[^>]*>hello<\/text>/);
   });
 });
+
+describe('Batch 8 — the three activation commits, absolutely', () => {
+  function attrsAll(svg: string, tag: string): Array<Record<string, string>> {
+    return [...svg.matchAll(new RegExp(`<${tag} ([^>]*?)/>`, 'g'))].map((m) =>
+      Object.fromEntries(
+        [...(m[1] ?? '').matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1] ?? '', a[2] ?? '']),
+      ),
+    );
+  }
+  /** Activation bars: the 10-wide rects on a lifeline. */
+  const bars = (svg: string): number[] =>
+    attrsAll(svg, 'rect')
+      .filter((a) => Number(a['width']) === 10)
+      .map((a) => Number(a['x']))
+      .sort((p, q) => p - q);
+  /** Horizontal message bodies: solid lines with y1 === y2. */
+  const bodies = (svg: string): Array<[number, number]> =>
+    attrsAll(svg, 'line')
+      .filter((a) => a['stroke-dasharray'] === undefined && a['y1'] === a['y2'])
+      .map((a) => [Number(a['x1']), Number(a['x2'])] as [number, number]);
+
+  it('kejoke-76-curu931: every activation bar is on the jar\'s x (T8.1)', () => {
+    // Four nested levels on each of two participants: position, width and the
+    // 5px per-level indent all at once. This is `bbcc90ae` verified
+    // absolutely, which it could not be when it landed.
+    const jar = bars(goldenOf('kejoke-76-curu931'));
+    const ours = bars(oursFor('kejoke-76-curu931'));
+    expect(jar).toHaveLength(14);
+    expect(ours).toHaveLength(jar.length);
+    for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
+  });
+
+  it('kejoke-76-curu931: every message endpoint is on the jar\'s x (T8.2)', () => {
+    // 24 bodies across four levels and both branches of
+    // `CommunicationTile#addConstraints:392-416`. This is `5dfa0982`.
+    const jar = bodies(goldenOf('kejoke-76-curu931'));
+    const ours = bodies(oursFor('kejoke-76-curu931'));
+    expect(jar).toHaveLength(24);
+    expect(ours).toHaveLength(jar.length);
+    for (const [i, want] of jar.entries()) {
+      expect(ours[i]?.[0]).toBeCloseTo(want[0], 3);
+      expect(ours[i]?.[1]).toBeCloseTo(want[1], 3);
+    }
+  });
+
+  it('jobadi-87-jegi648: the self loop\'s x geometry is the jar\'s (T8.3)', () => {
+    // `ebbd1f41`, plus Gap SQ-5 closed: the drawn extent is `xRight = 42`
+    // (`ComponentRoseSelfArrow.java:59-60`), not `arrowWidth = 45`. The jar
+    // emits the loop as three lines and this port as one path, so the three
+    // x values are compared rather than the markup.
+    const jar = [34.469, 76.469, 35.469];
+    const d = /<path d="M ([\d.]+) [\d.]+ H ([\d.]+) V [\d.]+ H ([\d.]+)"/.exec(
+      oursFor('jobadi-87-jegi648'),
+    );
+    expect(d).not.toBeNull();
+    for (const [i, want] of jar.entries()) expect(Number(d?.[i + 1])).toBeCloseTo(want, 3);
+  });
+});

@@ -23,13 +23,30 @@ import {
 // ---------------------------------------------------------------------------
 
 /**
- * The self-message loop's own geometry. Upstream's is `arrowWidth = 45` with
- * the vertical stroke at `xRight = 42` (`ComponentRoseSelfArrow.java:59-60`);
- * this port keeps the spike's 40 (Gap SQ-5, out of this task's scope), so the
- * loop is 5 px narrower than the jar's and the head below is placed against
- * THIS loop's returning segment rather than against upstream's `x2`.
+ * The self-message loop's horizontal reach: where the vertical stroke goes.
+ *
+ * `xRight = arrowWidth - 3` with `arrowWidth = 45`
+ * (`ComponentRoseSelfArrow.java:59-60`), and `drawRightSide:124-126` draws the
+ * three strokes as `hline(xRight - x1)`, `vline(arrowHeight)` at `xRight`, and
+ * `hline(xRight - x2)` — so the drawn extent is **42**, not `arrowWidth`.
+ *
+ * Gap SQ-5 recorded this as "40 vs 45". Measured absolutely against the jar in
+ * Batch 8 of `plans/sequence-coordinate-convergence`, the gap was 40 vs 42:
+ * `jobadi-87-jegi648`'s loop runs `x1="34.469"` to `x2="76.469"`, and 42 puts
+ * this port's on it exactly.
  */
-const SELF_LOOP_WIDTH = 40;
+const SELF_LOOP_WIDTH = 42;
+/**
+ * The loop's vertical drop. Upstream's is `getArrowOnlyHeight()` = **13**
+ * (`ComponentRoseSelfArrow.java:321-323`), drawn as `vline(arrowHeight)`
+ * (`:125`), and `jobadi-87-jegi648`'s golden drops `y1="53"` to `y2="66"`.
+ *
+ * This port's 20 is therefore 7 too tall, and it is left that way
+ * DELIBERATELY: y-coordinate convergence is an explicit non-goal of the
+ * mission that measured it (`plans/sequence-coordinate-convergence`), and
+ * changing it moves every self message's following event. Cited here so the
+ * next mission to touch it does not have to re-derive it.
+ */
 const SELF_LOOP_HEIGHT = 20;
 
 /**

@@ -462,6 +462,10 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // (`ComponentRoseSelfArrow.java:126` draws the bottom hline from x2 and
   // `:172` puts the polygon's tip at that same x2).
   const LOOP_BOTTOM_Y = SELF_Y + 20;
+  /** `xRight = arrowWidth - 3` = 42 (`ComponentRoseSelfArrow.java:59-60`),
+   *  which is where `drawRightSide:125` puts the vertical stroke. Verified
+   *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
+  const LOOP_RIGHT_X = SELF_X + 42;
 
   function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
@@ -479,7 +483,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
 
   it('still draws the loop path itself', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
-    expect(svg).toContain(`<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`);
+    expect(svg).toContain(
+      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`,
+    );
   });
 
   it('draws a self async head as two open strokes', () => {
@@ -493,7 +499,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   it('dashes a self reply loop', () => {
     const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
     expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H 120 V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
+      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
         `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
         'stroke-dasharray="5,5"',
     );
