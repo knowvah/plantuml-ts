@@ -73,7 +73,7 @@ closable element family (75 fixtures whose only root-child difference is
 | [1](batch-1/overview.md) | C1 | the creole seam; gate is that NOTHING moves | [x] |
 | [2](batch-2/overview.md) | C2 | split every display on `\n` | [x] |
 | [3](batch-3/overview.md) | C3 C4 C5 C6 | the four text kinds, in parallel | [x] |
-| [4](batch-4/overview.md) | C7 | sweep, adjudicate, measure | [ ] |
+| [4](batch-4/overview.md) | C7 | sweep, adjudicate, measure | [x] |
 
 ## Quality gates
 
@@ -156,6 +156,12 @@ instrument; never act on it, and never re-pin it here.
 - [`decision-journal.md`](decision-journal.md) — appended during execution
 - [`findings/starting-census.md`](findings/starting-census.md) — the measured
   starting state, with its concentration warnings
+- [`findings/creole-close.md`](findings/creole-close.md) — what the mission
+  bought, what it did not reach, and the twelve follow-ons
+- [`findings/c2-residuals.md`](findings/c2-residuals.md) — the newline split's
+  own residuals
+- [`findings/creole-url-bracket-defect.md`](findings/creole-url-bracket-defect.md)
+  — filed, refused under stop condition 8
 - [`diagrams/component-map.md`](diagrams/component-map.md)
 - [`diagrams/data-flow.md`](diagrams/data-flow.md)
 - Parent mission: [`../sequence-text-and-y-convergence/README.md`](../sequence-text-and-y-convergence/README.md)
