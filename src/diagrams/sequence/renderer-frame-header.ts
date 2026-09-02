@@ -19,8 +19,6 @@ import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import {
   GROUP_LINE_COLOR,
   GROUP_LINE_THICKNESS,
-  GROUP_FONT_SIZE,
-  GROUP_FONT_BOLD,
   HEADER_LINE_COLOR,
   HEADER_LINE_THICKNESS,
   HEADER_FONT_SIZE,
@@ -184,36 +182,49 @@ function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
   });
 }
 
-/** The tab title and its optional `[comment]`, at `getOldPaddingX1()`/
- *  `getOldPaddingY()` (`:151`, `:153-158`) -- the comment uses `style`'s OWN
- *  `smallFont2` (`GROUP_FONT_SIZE` 11), not `styleHeader`'s 13, and is
- *  wrapped in literal brackets by upstream itself
- *  (`ComponentRoseGroupingHeader.java:89`: `"[" + strings.get(1) + "]"`). */
+/**
+ * The tab title and its optional `[comment]`, at `getOldPaddingX1()`/
+ * `getOldPaddingY()` (`:151`, `:153-158`) -- the comment uses `style`'s OWN
+ * `smallFont2` (`frame-style.ts#GROUP_FONT_SIZE` 11), not `styleHeader`'s 13,
+ * and is wrapped in literal brackets by upstream itself
+ * (`ComponentRoseGroupingHeader.java:89`: `"[" + strings.get(1) + "]"`).
+ *
+ * C5: position, width and baseline come off the run (D1) and now so does its
+ * STYLE. The two blocks' skin values no longer arrive here by INDEX -- a title
+ * is as many runs as it has creole atoms, so index 0 stopped meaning "the
+ * title" -- they arrive on the run, because `sequence-layout-events.ts
+ * #buildTabRuns` seeds each block's base `FontConfiguration` from them (D5)
+ * and every atom inherits it. That is `DriverTextSvg#draw` reading one
+ * `FontConfiguration` per `UText` (`:104-160,177-180`), and a markup-free tab
+ * emits byte-identically to the pre-C5 pair.
+ *
+ * The `??` fallbacks are reached only by hand-built geometry. They answer with
+ * the TITLE's 13 bold: the comment's own `smallFont2` cannot be told apart at
+ * this layer any more, and `HEADER_FONT_BOLD`/`GROUP_FONT_BOLD` are both
+ * `true` so the weight does not depend on which block a run came from.
+ *
+ * `url` WRAPS rather than decorates (`SvgGraphics#openLink`/`closeLink`,
+ * `:1105-1150`); `sequence-text.ts` owns that wrap, so there is no second
+ * `<a>` emitter here.
+ */
 function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  // Position, width and baseline all come off the run (D1). What stays here is
-  // the run's STYLE — its font size and weight are skin values, not
-  // measurements, and the two runs use different ones: index 0 is the title at
-  // `HEADER_FONT_SIZE`, index 1 the `[comment]` at the group style's own
-  // `smallFont2`.
-  const styleOf = (i: number): { size: number; bold: boolean } =>
-    i === 0
-      ? { size: HEADER_FONT_SIZE * k, bold: HEADER_FONT_BOLD }
-      : { size: GROUP_FONT_SIZE * k, bold: GROUP_FONT_BOLD };
   return frame.tabRuns
-    .map((run, i) => {
-      const style = styleOf(i);
-      return sequenceText({
+    .map((run) =>
+      sequenceText({
         leftX: run.x,
         baselineY: run.y,
         text: run.text,
         width: run.textWidth,
-        fontFamily: theme.fontFamily,
-        fontSize: style.size,
-        fontWeight: boldFontWeight(style.bold),
-        fill: HEADER_FONT_COLOR,
-      });
-    })
+        fontFamily: run.fontFamily ?? theme.fontFamily,
+        fontSize: run.fontSize ?? HEADER_FONT_SIZE * k,
+        fontWeight: boldFontWeight(run.bold ?? HEADER_FONT_BOLD),
+        fill: run.color ?? HEADER_FONT_COLOR,
+        ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+        ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+        ...(run.url !== undefined ? { url: run.url } : {}),
+      }),
+    )
     .join('');
 }
 

@@ -113,37 +113,34 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
 const FRAME_ROUND_CORNER = 0;
 
 /**
- * A `ref over` frame's body: its source lines, ONE `<text>` each, centred in
- * the box below the header tab.
+ * A `ref over` frame's body: one `<text>` per creole atom, centred in the box
+ * below the header tab.
  *
  * `ComponentRoseReference#drawInternalU` draws the header at `(15, 2)` and
  * then the body as its own text block at `(textPos, oldPaddingY +
- * textHeaderHeight)` (`:125-136`) -- below the header, and horizontally per
- * the component's alignment. The jar's own output for a two-line ref centres
- * them: box x=70.3 w=76.775, lines at x=74.3 and x=76.962, i.e. each centred
- * on 108.7.
+ * textHeaderHeight)` (`:125-136`) -- below the header, per the component's
+ * alignment. The jar's two-line ref centres them: box x=70.3 w=76.775, lines
+ * at x=74.3 and x=76.962, each on 108.7. This used to emit the whole body as
+ * ONE `<text>` holding a literal newline, bracketed like an `alt` condition;
+ * SVG collapses it, so it drew as one run where the jar spends one per line.
  *
- * This used to emit the whole body as ONE `<text>` containing a literal
- * newline, bracketed like an `alt` condition -- `[This can be on\nseveral
- * lines]`. SVG collapses that newline, so it drew as a single run of text
- * beside the tab, and it cost one child where the jar spends one per line.
- *
- * The `y` here is upstream's `getOldPaddingY() + textHeaderHeight` with two
+ * The `y` is upstream's `getOldPaddingY() + textHeaderHeight` with two
  * deliberate substitutions: `+ theme.fontSize` because an SVG `<text>` y is a
  * BASELINE where upstream's translate is the block's top-left, and
- * `frame.tabHeight` in place of the measured `textHeaderHeight` because that
- * is the band this port actually draws -- resolved in LAYOUT (T1/T5), where
- * the measurer lives, not `ComponentRoseReference`'s own header. Keying the
- * body to the drawn tab is what keeps the two from colliding; the `x` needs
- * no such substitution, so it comes straight from layout.
+ * `frame.tabHeight` for the measured `textHeaderHeight` because that is the
+ * band this port draws -- both resolved in LAYOUT (T1/T5), as is the `x`.
  *
  * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
  */
 function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
-  // A4: the x, the baseline and the width all come off the run now. The
-  // `y` arithmetic this used to do — and the two deliberate substitutions
-  // behind it — moved to `sequence-layout-events.ts#refBodyRuns`, where the
-  // measurer is (D1); see that function for the citations.
+  // A4: x, baseline and width come off the run; C5: so does its STYLE, where
+  // creole set one -- one `FontConfiguration` per `UText` (`DriverTextSvg
+  // .java:104-160,177-180`). `cikoca-19-feji527`'s
+  // `[[http://www.google.com]] Foo2` is two runs, the first linked; a
+  // markup-free body is one run at the ambient pair, emitting what it emitted
+  // before. `url` WRAPS rather than decorates (`SvgGraphics#openLink`/
+  // `closeLink`, `:1105-1150`) and `sequence-text.ts` owns that wrap: no
+  // second `<a>` emitter, no measurer (D1, D5).
   return frame.refBody
     .map((run) =>
       sequenceText({
@@ -151,13 +148,16 @@ function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
         baselineY: run.y,
         text: run.text,
         width: run.textWidth,
-        fontFamily: theme.fontFamily,
+        fontFamily: run.fontFamily ?? theme.fontFamily,
         // `reference { FontSize 12 }` (`plantuml.skin:145-151`), scaled with
-        // the rest of the document -- NOT `theme.fontSize`. The run beside it
-        // was measured at this same size, and the two must agree or the
-        // emitted `textLength` distorts the glyphs.
-        fontSize: REFERENCE_FONT_SIZE * theme.scaleK,
-        fill: theme.colors.text,
+        // the document -- NOT `theme.fontSize`. The run beside it was measured
+        // at this size, and the two must agree or `textLength` distorts it.
+        fontSize: run.fontSize ?? REFERENCE_FONT_SIZE * theme.scaleK,
+        fill: run.color ?? theme.colors.text,
+        ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+        ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+        ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+        ...(run.url !== undefined ? { url: run.url } : {}),
       }),
     )
     .join('');

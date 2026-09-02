@@ -21,6 +21,11 @@ const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1);
  * builds them — A4 moved that placement into layout, so a hand-built
  * `FrameGeo` has to supply it. Measured rather than hard-coded, so the
  * `textLength` these tests assert on cannot drift from the measurer.
+ *
+ * C5 added `fontFamily`/`fontSize`/`bold` to what a run supplies. The renderer
+ * used to pick the two blocks' skin values apart by INDEX, which stopped being
+ * possible once a title became one run per creole atom; every run now carries
+ * the font its block was measured at, so a hand-built one must too.
  */
 function tabRunsFor(f: FrameGeo): TextRun[] {
   const measurer = new DeterministicMeasurer();
@@ -35,6 +40,9 @@ function tabRunsFor(f: FrameGeo): TextRun[] {
       textWidth: measurer.measure(text, spec).width,
       textAscent: ascent,
       textLineHeight: lineHeight,
+      fontFamily: spec.family,
+      fontSize: spec.size,
+      bold: true,
     };
   };
   const left = f.x + HEADER_PADDING.left;

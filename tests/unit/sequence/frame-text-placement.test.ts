@@ -131,3 +131,88 @@ describe('ref body text', () => {
     }
   });
 });
+
+/**
+ * C5 — the same three displays, once they are routed through the creole seam.
+ *
+ * Every number below is the JAR's, read off the cached oracle. The absolute
+ * `x` of a frame is NOT asserted: this port's document origin differs from the
+ * jar's by a margin that has nothing to do with creole, so what is pinned is
+ * the SHAPE — one `<text>` per atom, adjacent left to right, each at its own
+ * measured width, and an `<a>` around the one the url produced.
+ */
+function elements(svg: string): string[] {
+  return [...svg.matchAll(/<a\b[^>]*>|<\/a>|<text[^>]*>[^<]*<\/text>/g)].map((m) => m[0]);
+}
+
+function attr(el: string, name: string): string | undefined {
+  return new RegExp(`\\b${name}="([^"]*)"`).exec(el)?.[1];
+}
+
+describe('frame text through creole', () => {
+  it('wraps a ref body url in an <a> and draws the label without markup', () => {
+    // JAR (`cikoca-19-feji527`):
+    //   <a ... href="http://www.google.com"><text ... font-size="12"
+    //      textLength="121.275" ...>http://www.google.com</text></a>
+    //   <text ... font-size="12" textLength="27.375">Foo2</text>
+    // The port drew ONE `<text>` reading `[[http://www.google.com]] Foo2` at
+    // textLength="161.85" before C5 — the markup measured as glyphs.
+    const svg = renderFixtureSequence(source('cikoca-19-feji527'), new DeterministicMeasurer());
+    const els = elements(svg);
+    const i = els.findIndex((e) => e.includes('>http://www.google.com<'));
+    expect(els[i - 1]).toContain('href="http://www.google.com"');
+    expect(els[i + 1]).toBe('</a>');
+    expect(attr(els[i]!, 'textLength')).toBe('121.275');
+    expect(attr(els[i]!, 'font-size')).toBe('12');
+    expect(attr(els[i]!, 'text-decoration')).toBe('underline');
+    const foo2 = els.find((e) => e.includes('>Foo2<'))!;
+    expect(attr(foo2, 'textLength')).toBe('27.375');
+    // Adjacent: the label run starts exactly where the url run ends.
+    expect(Number(attr(foo2, 'x'))).toBeCloseTo(Number(attr(els[i]!, 'x')) + 121.275, 3);
+    // Same baseline — one line, several runs.
+    expect(attr(foo2, 'y')).toBe(attr(els[i]!, 'y'));
+    expect(svg).not.toContain('[[http://www.google.com]]');
+  });
+
+  it("draws a frame comment's url as its own linked run at the group font", () => {
+    // JAR (`cedeti-10-bufu072`), the `alt [[…]]` tab comment as THREE runs:
+    //   <text x="86.731" ... font-size="11" font-weight="700">[</text>
+    //   <a ...><text x="89.756" ... font-size="11" textLength="125.194"
+    //      font-weight="700" text-decoration="underline">https://…</text></a>
+    //   <text x="214.95" ... font-size="11" font-weight="700">]</text>
+    //
+    // What this pins is everything the seam resolves correctly today: the
+    // comment's url is a LINKED run of its OWN, carrying the group style's
+    // `smallFont2` 11 and its bold rather than a default the atom engine
+    // substituted, plus creole's blue and underline. The url STRING is one
+    // `[` too long -- `core/klimt/creole/command/CommandCreoleUrl.ts:39`
+    // admits `[` inside `[[…]]` where upstream's link alternative
+    // (`UrlBuilder.java:77`, `[^%s%g\[\]]+?`) excludes it, so upstream's
+    // `[[[url]]]` (the brackets are `ComponentRoseGroupingHeader.java:89`'s
+    // own) matches at pos 1 and this port's at pos 0. That is a SEAM defect,
+    // out of C5's write-set; see `.agent-notes/C5-frame-creole.md`. Nothing
+    // asserted below changes when it is fixed.
+    const svg = renderFixtureSequence(source('cedeti-10-bufu072'), new DeterministicMeasurer());
+    const els = elements(svg);
+    const i = els.findIndex((e) => e.includes('https://www.plantuml.com<'));
+    expect(els[i - 1]).toContain('<a ');
+    expect(els[i + 1]).toBe('</a>');
+    const url = els[i]!;
+    expect(attr(url, 'font-size')).toBe('11');
+    expect(attr(url, 'font-weight')).toBe('700');
+    expect(attr(url, 'fill')).toBe('#00F');
+    expect(attr(url, 'text-decoration')).toBe('underline');
+  });
+
+  it('leaves a markup-free frame byte-identical', () => {
+    // A frame with no markup must not move: `sequence-creole.ts`'s measurement
+    // identity says one atom carrying the whole line at the whole line's own
+    // measured width, so the tab, its comment and the `ref` body all emit what
+    // they emitted before the seam. Pinned against the JAR's own numbers.
+    const svg = renderFixtureSequence(source('bepipo-37-fego336'), new DeterministicMeasurer());
+    const title = texts(svg).find((t) => t.text === 'loop')!;
+    const comment = texts(svg).find((t) => t.text === '[forever]')!;
+    expect([title.x, title.textLength, title.size]).toEqual(['28', '24.619', '13']);
+    expect([comment.x, comment.textLength, comment.size]).toEqual(['97.619', '40.219', '11']);
+  });
+});

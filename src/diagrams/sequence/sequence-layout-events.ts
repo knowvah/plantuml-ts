@@ -36,7 +36,8 @@ import {
   dividerPreferredHeight,
 } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
-import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf, textBlockRuns } from './text-block-geo.js';
+import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
@@ -254,25 +255,27 @@ function computeFrameBody(
   return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
 }
 
+/** A creole line's total advance: its LAST run's right edge, never a sum of
+ *  widths -- a non-text atom advances x without producing a run. */
+function creoleLineWidth(runs: readonly TextRun[]): number {
+  const last = runs.at(-1);
+  return last === undefined ? 0 : last.x + last.textWidth;
+}
+
 /**
- * A `ref over` frame's body lines, as placed and measured runs (A4).
- *
- * The `y` arithmetic moved here from `renderer.ts#renderRefBody`, verbatim and
- * with its reasoning intact, because the renderer may no longer derive a
- * baseline from a font size (D1). Upstream draws the body at
- * `(textPos, getOldPaddingY() + textHeaderHeight)`
- * (`ComponentRoseReference.java:125-136`) with two deliberate substitutions
- * this port makes:
- *
- *   - `+ theme.fontSize`, because an SVG `<text>` y is a BASELINE where
- *     upstream's translate is the block's top-left;
- *   - `frame.tabHeight` in place of the measured `textHeaderHeight`, because
- *     that is the band this port actually draws — keying the body to the DRAWN
- *     tab is what keeps the two from colliding.
- *
- * The `x` is upstream's own centring within the box
- * (`AbstractTextualComponent.java:106-108`); the jar's two-line `ref` centres
- * both lines on one x, at 74.3 and 76.962 for a box of x=70.3 w=76.775.
+ * A `ref over` frame's body lines, as placed and measured runs (A4), one run
+ * per creole atom (C5). The `y` moved here from `renderer.ts#renderRefBody`
+ * because the renderer may no longer derive a baseline from a font size (D1),
+ * and D5 keeps it there. Upstream draws the body
+ * at `(textPos, getOldPaddingY() + textHeaderHeight)`
+ * (`ComponentRoseReference.java:125-136`); this port substitutes
+ * `+ theme.fontSize` (an SVG `<text>` y is a BASELINE, upstream's translate a
+ * block top-left) and `frame.tabHeight` for `textHeaderHeight` (keying the
+ * body to the DRAWN tab keeps the two from colliding). The `x` is
+ * upstream's centring within the box (`AbstractTextualComponent.java:106-108`),
+ * applied to the whole LINE and not to each run: the jar's two-line `ref` puts
+ * both lines on one x (74.3, 76.962 in a box of x=70.3 w=76.775), and
+ * `cikoca-19-feji527`'s url and `Foo2` sit adjacent at 16 + 121.275.
  */
 function refBodyRuns(
   body: readonly string[],
@@ -281,33 +284,24 @@ function refBodyRuns(
   ctx: EventProcessingContext,
 ): readonly TextRun[] {
   // `reference { FontSize 12 }` (`plantuml.skin:145-151`), NOT the ambient
-  // sequence font — see `text-block-geo.ts#REFERENCE_FONT_SIZE`. The box this
+  // sequence font (`text-block-geo.ts#REFERENCE_FONT_SIZE`); the box this
   // places into is sized from the same spec by `refBodyWidth`/`refBodyHeight`.
-  const spec = refBodyFontSpecOf(ctx.theme);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  // `theme.fontSize + 2` is the ref body's own inter-line advance, unchanged
-  // from the renderer it moved out of; it is NOT the measured line height, and
-  // substituting one for the other would move every multi-line `ref`.
+  const font = sequenceCreoleFont(refBodyFontSpecOf(ctx.theme));
+  // The ref body's own inter-line advance, unchanged from the renderer it
+  // moved out of: NOT the measured line height, and substituting one for the
+  // other would move every multi-line `ref`.
   const advance = ctx.theme.fontSize + 2;
-  return body.map((line, i) => {
-    const textWidth = ctx.measurer.measure(line, spec).width;
-    return {
-      text: line,
-      x: x + (width - textWidth) / 2,
-      // Baseline filled in by the caller, which alone knows `frame.y` and
-      // `tabHeight`; see `placeRefBody`.
-      y: i * advance,
-      textWidth,
-      textAscent: ascent,
-      textLineHeight: lineHeight,
-    };
+  return body.flatMap((line, i) => {
+    // Baselines are relative to the block top; `placeRefBody` drops them on.
+    const runs = sequenceCreoleRuns(line, font, { leftX: 0, baselineY: i * advance }, ctx.measurer);
+    const dx = x + (width - creoleLineWidth(runs)) / 2;
+    return runs.map((r) => ({ ...r, x: r.x + dx }));
   });
 }
 
 /** Drop `refBodyRuns`' relative baselines onto the frame's own top. Separate
- *  from {@link refBodyRuns} because `tabHeight` is resolved by
- *  `computeHeaderTab`, after the body's x is. */
+ *  from it because `tabHeight` is resolved by `computeHeaderTab`, after the
+ *  body's x is. */
 function placeRefBody(
   runs: readonly TextRun[],
   frameY: number,
@@ -320,16 +314,13 @@ function placeRefBody(
 
 /**
  * The header tab's title and its optional `[comment]`, as placed and measured
- * runs (A4).
- *
- * Two runs at two different fonts — the title at `HEADER_FONT_SIZE` 13 bold,
- * the comment at the group style's own `smallFont2` 11 bold
- * (`ComponentRoseGroupingHeader.java:89,151-158`) — which is why each carries
- * its own metrics rather than sharing one.
- *
- * Jar-verified on `bepipo-37-fego336`: `loop` at x=28 width 24.619 and
- * `[forever]` at x=97.619 width 40.219, the comment starting exactly one
- * `tabWidth` right of the title.
+ * runs (A4), one run per creole atom (C5). Two FONTS, not two runs -- the
+ * title at `HEADER_FONT_SIZE` 13 bold, the comment at the group style's own
+ * `smallFont2` 11 bold (`ComponentRoseGroupingHeader.java:89,151-158`) -- and
+ * each line becomes as many runs as it has atoms. Jar-verified on
+ * `bepipo-37-fego336` (`loop` x=28 w=24.619, `[forever]` x=97.619 w=40.219,
+ * one `tabWidth` right of the title) and on `cedeti-10-bufu072`, whose
+ * `alt [[https://www.plantuml.com]]` comment is `[`, the url at 125.194, `]`.
  */
 function buildTabRuns(
   tab: { readonly tabText: string; readonly tabComment?: string; readonly tabWidth: number },
@@ -340,16 +331,23 @@ function buildTabRuns(
   // Both halves are TEXT BLOCKS (`ComponentRoseGroupingHeader.java:76-77,89`;
   // see `text-block-geo.ts#displayLines`), and the comment's brackets wrap the
   // whole block, not each line. Jar: `pigifu-13-kele137`, `zedepi-36-come743`.
-  const bold = (size: number): FontSpec => ({ family: ctx.theme.fontFamily, size, weight: 'bold' });
+  // The loop is `TextBlockSimple#drawU`'s (`klimt/shape/TextBlockSimple.java
+  // :78-89`) = `text-block-geo.ts#textBlockRuns`, replaced here because that
+  // one cannot split a line into atoms.
+  const block = (text: string, size: number, bx: number, by: number): readonly TextRun[] => {
+    const spec: FontSpec = { family: ctx.theme.fontFamily, size, weight: 'bold' };
+    const lh = ctx.measurer.measure('M', spec).height;
+    const first = by + lh - ctx.measurer.getDescent(spec, 'M');
+    return displayLines(text).flatMap((line, i) =>
+      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer));
+  };
   const left = x + HEADER_PADDING.left;
   const top = y + HEADER_PADDING.top;
-  const title = textBlockRuns(tab.tabText, bold(HEADER_FONT_SIZE), left, top, ctx.measurer);
+  const title = block(tab.tabText, HEADER_FONT_SIZE, left, top);
   if (tab.tabComment === undefined) return title;
   // `+ 1`: `getOldPaddingY()` again, on the comment's own baseline
   // (`ComponentRoseGroupingHeader.java:151-158`).
-  const commentX = left + tab.tabWidth;
-  const spec = bold(GROUP_FONT_SIZE);
-  return [...title, ...textBlockRuns(`[${tab.tabComment}]`, spec, commentX, top + 1, ctx.measurer)];
+  return [...title, ...block(`[${tab.tabComment}]`, GROUP_FONT_SIZE, left + tab.tabWidth, top + 1)];
 }
 
 /** The header tab's `Display`, split by `groupingHeaderDisplay`
@@ -358,17 +356,15 @@ function buildTabRuns(
  *  .java:106-114`, with `getSuppHeightForComment` and `commentMargin * 2`
  *  both 0 since this port draws no separate comment box measurement (the
  *  comment box itself is T4's, `renderer-frame-header.ts`). Layout is the
- *  only stage holding a measurer, hence resolved here.
- *  An empty `branchLabels[0]` is treated as "no comment" (`undefined`),
- *  matching how `groupingCommand` defaults a conditionless frame's label to
- *  `''` -- there is no separate "absent" state to distinguish it from.
+ *  only stage holding a measurer, hence resolved here. An empty
+ *  `branchLabels[0]` is "no comment", as `groupingCommand` defaults a
+ *  conditionless frame's label to `''`.
  *
- *  A `ref` NEVER has a comment. `ReferenceTile#getComponent:117-124` builds
- *  `Display("ref") + reference.getStrings()`, and `ComponentRoseReference`
- *  splits that display at index 1: `subList(0, 1)` is the header ("ref"),
- *  `subList(1, ...)` is the BODY (`ComponentRoseReference.java:67-78`). The
- *  label is therefore body text -- this port already routes it there via
- *  `refBodyLines` -- and there is no second box beside the tab for it. */
+ *  A `ref` NEVER has a comment: `ReferenceTile#getComponent:117-124` builds
+ *  `Display("ref") + reference.getStrings()` and `ComponentRoseReference`
+ *  splits it at index 1 -- `subList(0, 1)` the header, `subList(1, ...)` the
+ *  BODY (`ComponentRoseReference.java:67-78`), where `refBodyLines` already
+ *  routes it. */
 function computeHeaderTab(
   event: FrameEvent,
   ctx: EventProcessingContext,
@@ -385,10 +381,14 @@ function computeHeaderTab(
   // `getPureTextWidth`/`getTextHeight` over the title's own text BLOCK
   // (`AbstractTextualComponent.java:106-114`); the corner is drawn at exactly
   // those (`ComponentRoseGroupingHeader.java:141-143,152`), so the tab grows
-  // with the TITLE's escaped newlines and never with the comment beside it.
+  // with the TITLE's escaped newlines, never with the comment beside it. C5:
+  // at the title's own CREOLE width -- `groupingHeaderDisplay` makes a
+  // `group`'s comment its TITLE, so markup reaches here too.
   const titleLines = displayLines(tabText);
   const measured = ctx.measurer.measure(tabText, fontSpec);
-  const tabTextWidth = Math.max(...titleLines.map((l) => ctx.measurer.measure(l, fontSpec).width));
+  const titleFont = sequenceCreoleFont(fontSpec);
+  const tabTextWidth = Math.max(...titleLines.map((l) =>
+    creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer))));
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
   const tabHeight =
     titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
