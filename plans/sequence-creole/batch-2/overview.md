@@ -4,7 +4,7 @@ One task, alone, and deliberately before any styling work (D4).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| C2 | split message labels and participant names on `\n` | typescript-pro | `text-block-geo.ts`, `sequence-layout-participants.ts`, `sequence-layout-events.ts`, tests | C1 | [ ] |
+| C2 | split message labels and participant names on `\n` | typescript-pro | `text-block-geo.ts`, `sequence-layout-participants.ts`, `sequence-layout-events.ts`, tests | C1 | [x] |
 
 ## Why it is alone, and why it is first
 
