@@ -326,6 +326,22 @@ atom in the text flow, positioned and sized like the jar's) is conformant;
 the image bytes and exact glyph metrics never will be, because the two
 typesetting engines rasterize differently.
 
+**Correction, 2026-09-02 — the corpus contains no JLaTeXMath output to
+diverge from.** Decoding the base64 of the jar's own `<image>` payloads shows
+every latex/math oracle in this corpus — all 8, across sequence, state and
+component — is `ScientificEquationSafe#getRollback()`
+(`GraphicStrings.createBlackOnWhiteMonospaced(formula)`,
+`ScientificEquationSafe.java:92-124`): the RAW source drawn in monospace 14pt.
+`sequence/mefeke-43-xotu192`'s image is literally
+`<text font-family="monospace" textLength="111.475">[[a,b],[c,d]]((n),(k))</text>`.
+The oracle-generation host had no JLaTeXMath on its classpath. The conclusion
+above stands, but the comparison it names does not exist here: these oracles
+cannot validate typesetting or its metrics at all, and the only meaningful
+target on a latex-bearing fixture is that the `<image>` is present and
+correctly ordered in the flow. Regenerating the corpus on a host WITH
+JLaTeXMath would change these oracles. Full evidence:
+`plans/sequence-creole/findings/latex-oracles-are-rollbacks.md`.
+
 **Category:** permanent, maintainer-approved (2026-07-15: "100% right on
 the latex decision").
 
@@ -340,9 +356,18 @@ entry in the census accounting).
 `<math>` half has its own instances, named here because they were previously
 carried as undifferentiated work items: `state/corumi-91-mizo869` and
 `state/gupeto-19-mesa256` both label a state with
-`<math>S<=1/(F+(1-F)/N)</math>` and both pin at an identical 1.106597 in
+`<math>S<=1/(F+(1-F)/N)</math>` and both pinned at an identical 1.106597 in
 `oracle/goldens/state/size-backlog.json` — one shared inherent cause, not two
-defects. They are shrink-only pins for non-regression, excluded from that
+defects.
+
+**Correction, 2026-09-02 — that 1.106597 was never this divergence.** When the
+pin was taken, `CommandCreoleMath` did not exist in this port, so
+`<math>S<=1/(F+(1-F)/N)</math>` measured as 33 characters of literal,
+tag-inclusive TEXT: `measure(that string, 14pt).width` = 206.675, `+20`
+margins = 226.675px = 3.148in, less the jar's 2.041667in = **1.106597
+exactly**. The pin recorded a missing creole command, not a typesetting
+divergence. `CommandCreoleMath` is ported now and both entries fell to
+0.305555, whose residual IS this divergence. They are shrink-only pins for non-regression, excluded from that
 suite's conformant denominator.
 
 This is also the one exclusion from the S1L description size-`conformant`
