@@ -165,3 +165,63 @@ instrument; never act on it, and never re-pin it here.
 - [`diagrams/component-map.md`](diagrams/component-map.md)
 - [`diagrams/data-flow.md`](diagrams/data-flow.md)
 - Parent mission: [`../sequence-text-and-y-convergence/README.md`](../sequence-text-and-y-convergence/README.md)
+
+---
+
+## Session summary — closed 2026-09-02 at `235285b9`
+
+**Tasks: 7 planned, 7 completed.** Every batch gate green; the only red file in
+`npm test` is the inherited `sequence.diff-baseline.ratchet.test.ts`, which went
+**93 → 78** and was never re-pinned — it belongs to the parent mission.
+
+**Results.** `descended` **797 → 889** (+92, C2 alone +63). Creole content
+mismatches **445 → 45**, with monospace, escaped `\n`, creole urls, guillemets
+and `**` bold all at zero. Links **42 → 87** of the jar's 98. Adjudication
+against the base: **`regression=0`**, `improved=139`. Zero `text-anchor` and
+zero `dominant-baseline` across the corpus.
+
+Full accounting, including why total distance is not quotable, in
+[`findings/creole-close.md`](findings/creole-close.md).
+
+**Decisions: 38 logged.** Four reversed or corrected something the brief or an
+agent had asserted:
+
+- **#17** reversed C1's own design after measuring it — an undrawable creole
+  atom now leaves its line wholly literal rather than emitting no run, because
+  dropping the run dropped an ELEMENT.
+- **#11** reversed C2's reading of its own two "overshoot" fixtures: they are
+  text-exact and blocked by a background `<rect>`.
+- **#22** checked a zero-movement number instead of trusting it, and found zero
+  was correct by construction.
+- **#38** corrected `starting-census.md`'s denominator rather than adopting it.
+
+**Three seam-level gaps** were found by tasks whose write-sets could not reach
+the file: the `~` tile escape, the guillemet rewrite, and `CommandCreoleUrl`'s
+bracket class. The first two were fixed; the third was **refused and filed**
+under stop condition 8 — it is shared creole with four other families
+downstream. See
+[`findings/creole-url-bracket-defect.md`](findings/creole-url-bracket-defect.md).
+
+**Known issues and follow-ons: twelve**, all in `creole-close.md` §"What creole
+did NOT reach", each with a mechanism rather than a description. The two with
+the widest reach are sequence image geometry for inline atoms (retires the
+literal fallback and its content cost at once) and the filed url defect.
+
+**One process finding.** `scale-geo.ts` blocked two of batch 3's four tasks —
+C5's `branchSeparators[].run` and C6's `BoxGeo.labelRun` each needed a one-line
+companion edit there that no write-set included. A future brief that widens any
+`TextRun`-bearing geo field must put `scale-geo.ts` in the same write-set. Batch
+3 also ran serially rather than in parallel (decision #13): C2's extraction into
+`text-block-geo.ts` dissolved the disjointness C1 was built to buy, and four
+agents share one git index.
+
+**Not done, deliberately:** the sequence ratchet is not re-pinned, document draw
+order is untouched (now the largest content bucket at 394/91, and a stated
+non-goal), and nothing under `core/klimt/creole/` or `core/creole*.ts` was
+modified, forked or re-ported.
+
+**Branch note.** `feat/sequence-creole` was cut from
+`feat/sequence-text-and-y-convergence` (`ebf50d6f`), not from `main` — the
+parent is halted at its batch 4 and unmerged, and this mission's starting
+numbers only exist on that branch (decision #1). Merge back with a merge commit,
+after the parent lands.
