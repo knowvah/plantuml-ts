@@ -200,24 +200,32 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
         stroke: theme.colors.frame,
         strokeDasharray: scaledDashPattern(k),
       });
-      // A5: the run is absent exactly when the branch carries no condition,
-      // which is the case that draws the rule alone.
-      if (sep.run === undefined) return rule;
+      // A5: the runs are empty exactly when the branch carries no condition,
+      // which is the case that draws the rule alone. C5: several runs where
+      // creole styled the condition, each its own `<text>` (D3).
       return (
         rule +
-        sequenceText({
-          leftX: sep.run.x,
-          baselineY: sep.run.y,
-          text: sep.run.text,
-          width: sep.run.textWidth,
-          fontFamily: theme.fontFamily,
-          fontSize: labelFontSize,
-          // `ComponentRoseGroupingElse` reads the GROUP style, whose
-          // `FontStyle bold` the jar emits as `font-weight="700"` -- confirmed
-          // on `bovugo-63-lazo401`'s `[sinon]`.
-          fontWeight: GROUP_FONT_BOLD ? '700' : 'normal',
-          fill: theme.colors.text,
-        })
+        sep.runs
+          .map((run) =>
+            sequenceText({
+              leftX: run.x,
+              baselineY: run.y,
+              text: run.text,
+              width: run.textWidth,
+              fontFamily: run.fontFamily ?? theme.fontFamily,
+              fontSize: run.fontSize ?? labelFontSize,
+              // `ComponentRoseGroupingElse` reads the GROUP style, whose
+              // `FontStyle bold` the jar emits as `font-weight="700"` --
+              // confirmed on `bovugo-63-lazo401`'s `[sinon]`. A creole run
+              // that set its own weight wins over the style default.
+              fontWeight: (run.bold ?? GROUP_FONT_BOLD) ? '700' : 'normal',
+              fill: run.color ?? theme.colors.text,
+              ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+              ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+              ...(run.url !== undefined ? { url: run.url } : {}),
+            }),
+          )
+          .join('')
       );
     })
     .join('');

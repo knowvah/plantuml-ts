@@ -204,6 +204,33 @@ describe('frame text through creole', () => {
     expect(attr(url, 'text-decoration')).toBe('underline');
   });
 
+  it('links the `else` condition the same way it links the `alt` comment', () => {
+    // `cedeti-10-bufu072` writes `else [[https://www.plantuml.com]]`. The
+    // condition is a `Display` like every other component text
+    // (`AbstractTextualComponent.java:86-92`), so it goes through the same seam
+    // -- the jar emits an `<a>` for the `alt` comment AND one for the `else`
+    // condition, four in the document counting the two notes.
+    //
+    // Same caveat as the test above, for the same seam defect: the href and the
+    // run split are distorted by `CommandCreoleUrl`'s character class, so
+    // neither is asserted. What IS asserted is that the condition is linked at
+    // all and carries the group style -- none of which changes when the defect
+    // is fixed.
+    const svg = renderFixtureSequence(source('cedeti-10-bufu072'), new DeterministicMeasurer());
+    // Two `<a>` from the frame: the `alt` comment and the `else` condition.
+    // The jar's other two belong to the notes, which C6 owns.
+    expect((svg.match(/<a /g) ?? []).length).toBe(2);
+    const els = elements(svg);
+    const linked = els
+      .map((e, i) => ({ e, i }))
+      .filter(({ e, i }) => e.startsWith('<text') && els[i - 1]?.includes('<a '));
+    expect(linked).toHaveLength(2);
+    for (const { e } of linked) {
+      expect(attr(e, 'font-weight')).toBe('700');
+      expect(attr(e, 'text-decoration')).toBe('underline');
+    }
+  });
+
   it('leaves a markup-free frame byte-identical', () => {
     // A frame with no markup must not move: `sequence-creole.ts`'s measurement
     // identity says one atom carrying the whole line at the whole line's own

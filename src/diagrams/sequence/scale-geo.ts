@@ -202,7 +202,7 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     branchSeparators: f.branchSeparators.map((s) => ({
       ...s,
       y: s.y * k,
-      ...(s.run !== undefined ? { run: scaleRun(s.run, k) } : {}),
+      runs: s.runs.map((r) => scaleRun(r, k)),
     })),
     // A4: `refBody` became placed, measured runs, so its `y` and its three
     // metrics scale too — scaling only `x`, as this did while a body entry was

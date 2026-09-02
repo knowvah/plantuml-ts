@@ -887,7 +887,7 @@ describe('renderSequence — frames', () => {
       y: 60,
       width: 300,
       height: 100,
-      branchSeparators: [{ y: 110, label: 'x <= 0' }],
+      branchSeparators: [{ y: 110, label: 'x <= 0', runs: [] }],
       refBody: [],
       // A4: tab text is placed in layout; these cases assert frame boxes.
       tabRuns: [],

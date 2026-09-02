@@ -319,12 +319,12 @@ describe('frame — body CLAMPED, header tab all-or-nothing', () => {
   it('drops the else separators that left the band and translates the rest', () => {
     const f = frame(100, 300, {
       branchSeparators: [
-        { y: 150, label: 'a' },
-        { y: 260, label: 'b' },
+        { y: 150, label: 'a', runs: [] },
+        { y: 260, label: 'b', runs: [] },
       ],
     });
     const page = paginateSequence(geo([newpage(200), f]), 0);
-    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a' }]);
+    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a', runs: [] }]);
   });
 
   it('drops the ref body with the header it hangs off', () => {

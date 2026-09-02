@@ -416,14 +416,14 @@ function computeHeaderTab(
  * Jar-verified on `bovugo-63-lazo401`, whose `else sinon` puts `[sinon]` at
  * x=18.469 against a frame at x=13.469 — exactly 5, where this port used 6.
  */
-function branchConditionRun(
+function branchConditionRuns(
   label: string,
   frameX: number,
   separatorY: number,
   ctx: EventProcessingContext,
-): TextRun | undefined {
+): readonly TextRun[] {
   const condition = label.trim();
-  if (condition === '') return undefined;
+  if (condition === '') return [];
   const text = `[${condition}]`;
   const font: FontSpec = {
     family: ctx.theme.fontFamily,
@@ -432,14 +432,19 @@ function branchConditionRun(
   };
   const lineHeight = ctx.measurer.measure('M', font).height;
   const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
-  return {
+  // C5: the condition is a `Display` like every other component text
+  // (`AbstractTextualComponent.java:86-92`), so it goes through the same seam
+  // the tab and the `ref` body do. `cedeti-10-bufu072` writes `else [[url]]`,
+  // whose captured label is a run of its own carrying the href.
+  return sequenceCreoleRuns(
     text,
-    x: frameX + ELSE_PADDING_X1,
-    y: separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY + ascent,
-    textWidth: ctx.measurer.measure(text, font).width,
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  };
+    sequenceCreoleFont(font),
+    {
+      leftX: frameX + ELSE_PADDING_X1,
+      baselineY: separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY + ascent,
+    },
+    ctx.measurer,
+  );
 }
 
 /** `ComponentRoseGroupingElse`'s own padding, `topRightBottomLeft(1, 5, 1, 5)`
@@ -515,12 +520,11 @@ function handleFrameEvent(
     if (i > 0) {
       const branchColor = event.branchColors?.[i];
       const branchLabel = event.branchLabels[i] ?? '';
-      const conditionRun = branchConditionRun(branchLabel, x, cursor.y, ctx);
       frameGeo.branchSeparators.push({
         y: cursor.y,
         label: branchLabel,
         ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
-        ...(conditionRun !== undefined ? { run: conditionRun } : {}),
+        runs: branchConditionRuns(branchLabel, x, cursor.y, ctx),
       });
       cursor.y += SEPARATOR_HEIGHT;
     }

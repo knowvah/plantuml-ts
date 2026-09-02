@@ -27,11 +27,12 @@ export interface FrameGeo {
     y: number;
     label: string;
     backColorGeneral?: string;
-    /** The bracketed condition as a placed, measured run (A5). Absent when the
-     *  branch carries no condition, which draws the rule alone. Measured at
+    /** The bracketed condition as placed, measured runs (A5; an ARRAY since
+     *  C5, because creole makes one condition several styled runs). EMPTY when
+     *  the branch carries no condition, which draws the rule alone. Measured at
      *  the group style's own `smallFont2`, bold — `ComponentRoseGroupingElse`
      *  is a different component from the tab beside it. */
-    run?: TextRun;
+    runs: readonly TextRun[];
   }[];
   /** `ref over` body lines as placed, measured runs — pre-centred `x` and an
    *  absolute baseline, both resolved in layout because both need the measurer
