@@ -61,6 +61,65 @@ export interface TextRun {
   /** `measure(text, font).height` — one line box, i.e. the baseline-to-baseline
    *  advance between consecutive runs of the same block. */
   readonly textLineHeight: number;
+
+  // -------------------------------------------------------------------------
+  // Per-run creole style (mission `sequence-creole`, D3)
+  //
+  // Every field below is OPTIONAL and absent for every run this port built
+  // before creole reached sequence — the fields exist so that ONE display line
+  // can become SEVERAL runs with different fonts, which is all creole is at
+  // the emission layer. `sequence-creole.ts#sequenceCreoleRuns` is their only
+  // producer; a run with none of them set is exactly the plain run
+  // `messageLabelBlock` and friends have always emitted.
+  //
+  // They are flat scalars rather than the creole engine's own
+  // `FontConfiguration` because a run is GEOMETRY: `scale-geo.ts` multiplies
+  // its numerics, and a `ReadonlySet<FontStyle>` travelling through that pass
+  // would be a style object pretending to be a length. The set is resolved
+  // into these scalars once, in layout, per D5.
+  //
+  // Upstream reads exactly these off one `FontConfiguration` before emitting a
+  // `<text>`: `face.isBold()`/`containsStyle(BOLD)` -> `font-weight`,
+  // `containsStyle(ITALIC)` -> `font-style`, `getColor()` -> `fill`, and the
+  // UNDERLINE/STRIKE/WAVE trio concatenated into one `text-decoration`
+  // (`DriverTextSvg.java:104-160,177-180`).
+  // -------------------------------------------------------------------------
+
+  /** `fontConfiguration.containsStyle(FontStyle.BOLD)` — absent, never
+   *  `false`, when the run is not bold. */
+  readonly bold?: boolean;
+  /** `fontConfiguration.containsStyle(FontStyle.ITALIC)`. */
+  readonly italic?: boolean;
+  /** The run's OWN resolved fill (`fontConfiguration.getColor()`), set by a
+   *  `<color:…>`/`[[url]]` run. Absent means "the caller's ambient text
+   *  colour", which is what every pre-creole run relies on. */
+  readonly color?: string;
+  /** The whole `text-decoration` attribute, already assembled from the
+   *  UNDERLINE/STRIKE/WAVE flags (`DriverTextSvg.java:139-160`) — one string,
+   *  because SVG takes one attribute and upstream builds one `StringBuilder`. */
+  readonly decoration?: string;
+  /** The run's own font family, when creole changed it (`""mono""` ->
+   *  `Parser.MONOSPACED`). Absent means the caller's ambient family. The
+   *  `monospaced` -> CSS `monospace` rename is a DRAW-time concern
+   *  (`SvgGraphics.java:720-722`, `core/svg-text-font.ts`), so this carries
+   *  PlantUML's own logical name, not the CSS one. */
+  readonly fontFamily?: string;
+  /**
+   * The run's own EFFECTIVE font size, when creole changed it (`<size:N>`, a
+   * `==` heading cascade, or a `<sup>`/`<sub>` mute). Absent means the
+   * caller's ambient size.
+   *
+   * It is a length, so `scale-geo.ts#scaleRun` multiplies it — upstream's
+   * `SvgGraphics#format` multiplies an emitted `font-size` by the scale
+   * exactly as it does a coordinate (`SvgGraphics.java:693`), which is the
+   * same reason `scaleSequenceTheme` already scales `theme.fontSize`.
+   */
+  readonly fontSize?: number;
+  /** Set when the run came from a `[[url]]` creole command's captured label
+   *  (`core/klimt/creole/atom/Atom.ts#CreoleAtomUrl`) — the renderer wraps its
+   *  `<text>` in `core/svg.ts#linkWrap`. Shaped for that emitter, which is why
+   *  it is `{url, tooltip}` and not a richer link type. */
+  readonly url?: { readonly url: string; readonly tooltip: string };
 }
 
 // ---------------------------------------------------------------------------

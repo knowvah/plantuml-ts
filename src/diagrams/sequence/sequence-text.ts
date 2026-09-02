@@ -43,7 +43,7 @@
  * feature can reintroduce the divergence by accident.
  */
 
-import { text } from '../../core/svg.js';
+import { linkWrap, text } from '../../core/svg.js';
 
 /**
  * One sequence `<text>`, in the jar's own vocabulary.
@@ -81,12 +81,36 @@ export interface SequenceTextSpec {
    * through rather than narrowing at every call site.
    */
   readonly fontWeight?: 'normal' | 'bold' | '700';
+  /**
+   * `DriverTextSvg`'s own `fontStyle` local, which is the literal string
+   * `"italic"` or nothing at all:
+   *
+   * ```java
+   * String fontStyle = null;
+   * if (fontConfiguration.containsStyle(FontStyle.ITALIC) || face.isItalic())
+   *     fontStyle = "italic";
+   * ```
+   * (`DriverTextSvg.java:110-112`) — there is no `'normal'` case upstream, so
+   * this union has one member rather than mirroring `TextStyle.fontStyle`'s
+   * two. Reach: a participant's stereotype row, which the jar italicises and
+   * this port does not (`.agent-notes/A1-sequence-geo-text-metric-fields.md`),
+   * and every `<i>`/`//…//` creole run a `TextRun` now carries.
+   */
+  readonly fontStyle?: 'italic';
   /** Emitted verbatim, as `TextStyle.textDecoration` is. */
   readonly textDecoration?: string;
+  /**
+   * The run's `[[url]]`, when it has one. `SvgGraphics#openLink`/`closeLink`
+   * wrap the drawn shape in an `<a>` rather than putting an attribute on it
+   * (`SvgGraphics.java:1105-1150`), so this is a WRAPPER, not a `<text>`
+   * attribute — which is why it is emitted through `core/svg.ts#linkWrap`,
+   * the repo's single, jar-verified `<a>` emitter, and not rebuilt here.
+   */
+  readonly url?: { readonly url: string; readonly tooltip: string };
 }
 
 /**
- * Emit one sequence `<text>`.
+ * Emit one sequence `<text>`, wrapped in its `<a>` when the run carries a url.
  *
  * The output carries neither `text-anchor` nor `dominant-baseline` — not by
  * assertion, but because {@link SequenceTextSpec} cannot express them.
@@ -95,12 +119,18 @@ export function sequenceText(spec: SequenceTextSpec): string {
   // Spread-conditionals rather than plain assignment: this project compiles
   // with `exactOptionalPropertyTypes`, under which an explicit `undefined` is
   // not assignable to an optional `TextStyle` field.
-  return text(spec.leftX, spec.baselineY, spec.text, {
+  const drawn = text(spec.leftX, spec.baselineY, spec.text, {
     fontFamily: spec.fontFamily,
     fontSize: spec.fontSize,
     fill: spec.fill,
     ...(spec.fontWeight !== undefined ? { fontWeight: spec.fontWeight } : {}),
+    ...(spec.fontStyle !== undefined ? { fontStyle: spec.fontStyle } : {}),
     ...(spec.textDecoration !== undefined ? { textDecoration: spec.textDecoration } : {}),
     textLength: spec.width,
   });
+  // `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and
+  // their order are jar-verified; the same one `renderer-participant-shapes
+  // .ts` already wraps a participant head with. There is deliberately no
+  // second `<a>` builder in this engine.
+  return spec.url === undefined ? drawn : linkWrap(drawn, spec.url);
 }

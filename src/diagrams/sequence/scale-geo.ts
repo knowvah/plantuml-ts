@@ -102,6 +102,15 @@ const IDENTITY = 1;
  * — they are lengths in the same pixel space, and `textWidth` reaches
  * `textLength`, so leaving it unscaled would stretch every glyph back to the
  * unscaled width on a `scale`d diagram.
+ *
+ * C1: `fontSize` is the fourth, and the ONLY new creole field that is a
+ * length. `SvgGraphics#format` multiplies an emitted `font-size` by the scale
+ * exactly as it does a coordinate (`SvgGraphics.java:693`), which is already
+ * why {@link scaleSequenceTheme} scales `theme.fontSize`; a run carrying its
+ * OWN size must agree with the theme it sits beside, or a `<size:N>` run would
+ * draw at 1x amid text at k. The remaining creole fields — `bold`, `italic`,
+ * `color`, `decoration`, `fontFamily`, `url` — are style tokens, not lengths,
+ * and the spread carries them through untouched.
  */
 const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...r,
@@ -110,6 +119,7 @@ const scaleRun = (r: TextRun, k: number): TextRun => ({
   textWidth: r.textWidth * k,
   textAscent: r.textAscent * k,
   textLineHeight: r.textLineHeight * k,
+  ...(r.fontSize !== undefined ? { fontSize: r.fontSize * k } : {}),
 });
 
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
