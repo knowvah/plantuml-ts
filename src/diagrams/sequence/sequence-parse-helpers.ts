@@ -94,7 +94,12 @@ export function ensureParticipant(
   state: ParseState,
   id: string,
   type: ParticipantType = 'participant',
-  decl?: { display?: string; color?: string | undefined; stereotype?: string | undefined },
+  decl?: {
+    display?: string;
+    color?: string | undefined;
+    stereotype?: string | undefined;
+    url?: ParticipantUrl | undefined;
+  },
 ): void {
   if (state.participantIndex.has(id)) return;
   const order = state.ast.participants.length;
@@ -105,6 +110,7 @@ export function ensureParticipant(
     order,
     ...(decl?.color !== undefined ? { color: decl.color } : {}),
     ...(decl?.stereotype !== undefined ? { stereotype: decl.stereotype } : {}),
+    ...(decl?.url !== undefined ? { url: decl.url } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
   };
   state.ast.participants.push(p);
@@ -236,6 +242,18 @@ export interface ParticipantDeclaration {
   /** The `<<...>>` run, guillemets INCLUDED as upstream captures them
    *  (`StereotypePattern.mandatory` = `(\<\<.+?\>\>)`), or undefined. */
   stereotype: string | undefined;
+  /** The participant's `[[url{tooltip}]]`, RESOLVED (B3). Carries the tooltip
+   *  because the jar's `<a title=...>` is `Url#getTooltip()`, which falls back
+   *  to the url itself when none was written (`core/url/Url.ts:35-36`) —
+   *  `sefako-72-jono850` emits both forms side by side. */
+  url: ParticipantUrl | undefined;
+}
+
+/** A resolved participant hyperlink: the href and the tooltip the jar puts in
+ *  both `title` and `xlink:title`. Shaped for `core/svg.ts#linkWrap`. */
+export interface ParticipantUrl {
+  readonly url: string;
+  readonly tooltip: string;
 }
 
 /** `([%pLN_.@]+)` -- upstream's participant CODE class, the same one
@@ -259,19 +277,24 @@ function stripParticipantTail(rest: string): {
   head: string;
   color: string | undefined;
   stereotype: string | undefined;
+  url: string | undefined;
 } {
   let head = rest.trim();
   let color: string | undefined;
   let stereotype: string | undefined;
+  let url: string | undefined;
   const color1 = /^(.*?)\s+(#\w+)$/.exec(head);
   if (color1 !== null) { head = color1[1]!.trim(); color = color1[2]; }
-  const url = /^(.*?)\s*\[\[.*\]\]$/.exec(head);
-  if (url !== null) head = url[1]!.trim();
+  // B3: the `[[...]]` run is CAPTURED now, not just peeled off. It was
+  // discarded here and in both callers, which is why all 89 `<a>` elements in
+  // the corpus were missing.
+  const urlRun = /^(.*?)\s*(\[\[.*\]\])$/.exec(head);
+  if (urlRun !== null) { head = urlRun[1]!.trim(); url = urlRun[2]; }
   const order = /^(.*?)\s+order\s+-?\d{1,7}$/i.exec(head);
   if (order !== null) head = order[1]!.trim();
   const stereo = /^(.*?)\s*(<<.+?>>)$/.exec(head);
   if (stereo !== null) { head = stereo[1]!.trim(); stereotype = stereo[2]; }
-  return { head, color, stereotype };
+  return { head, color, stereotype, url };
 }
 
 /** The NAME part, in upstream's four registered forms. */
@@ -296,8 +319,23 @@ function parseParticipantName(head: string): { id: string; display: string } {
  * {@link stripParticipantTail}.
  */
 export function parseParticipantDeclaration(rest: string): ParticipantDeclaration {
-  const { head, color, stereotype } = stripParticipantTail(rest);
-  return { ...parseParticipantName(head), color, stereotype };
+  const { head, color, stereotype, url } = stripParticipantTail(rest);
+  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url) };
+}
+
+/**
+ * A participant's `[[...]]` run, resolved to href + tooltip (B3).
+ *
+ * `urlOf` above reduces the same `Url` to its href alone, which is all a
+ * MESSAGE needs — a message url is parsed and deliberately not drawn
+ * (`renderer-message.ts`). A participant's reaches the SVG, and the jar puts
+ * the tooltip in `title` and `xlink:title`, so both halves survive here.
+ */
+export function participantUrlOf(raw: string | undefined): ParticipantUrl | undefined {
+  if (raw === undefined) return undefined;
+  const resolved = new UrlBuilder(null, UrlMode.STRICT).getUrl(raw);
+  if (resolved === null || resolved === undefined) return undefined;
+  return { url: resolved.getUrl(), tooltip: resolved.getTooltip() };
 }
 
 /**

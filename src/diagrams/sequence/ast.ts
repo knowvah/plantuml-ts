@@ -12,6 +12,8 @@
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ParticipantUrl } from './sequence-parse-helpers.js';
+export type { ParticipantUrl };
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 
@@ -42,6 +44,15 @@ export interface Participant {
    *  (`CommandParticipant.java:174-181`). Rendered above the name unless
    *  `hide stereotype` is in force. */
   stereotype?: string;
+  /**
+   * The participant's own `[[url{tooltip}]]`, resolved (B3).
+   *
+   * `LivingSpace#drawHeadOrTail:205-212` wraps the head component in
+   * `ug.startUrl(url)` / `ug.closeUrl()`, so the jar emits an `<a>` around the
+   * whole head — label and glyph both. This is NOT the message-level url on
+   * {@link AbstractMessageEvent.url}, which the jar parses and never draws.
+   */
+  url?: ParticipantUrl;
 }
 
 /**

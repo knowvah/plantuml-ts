@@ -11,7 +11,7 @@
  */
 
 import type { Paint } from '../../core/paint.js';
-import type { ParticipantType } from './ast.js';
+import type { ParticipantType, ParticipantUrl } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
 
 /**
@@ -82,4 +82,13 @@ export interface ParticipantGeo {
    * second source of truth for text that is identical in every respect but y.
    */
   labelRuns: readonly TextRun[];
+  /**
+   * {@link Participant.url}, carried to the renderer (B3).
+   *
+   * `LivingSpace#drawHeadOrTail:205-212` wraps the drawn component in
+   * `startUrl`/`closeUrl`, and that method is shared by `drawHead` and
+   * `drawTail` (`:181-189`) — so BOTH rows are wrapped, which is why
+   * `boparo-11-pema294` carries four `<a>` for two participants.
+   */
+  url?: ParticipantUrl;
 }

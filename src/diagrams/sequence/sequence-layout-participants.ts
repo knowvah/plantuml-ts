@@ -582,6 +582,7 @@ function buildParticipantGeo(
     background,
     border: resolveParticipantBorder(p, theme),
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
+    ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,
     x: currentX,

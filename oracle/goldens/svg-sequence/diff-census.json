@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 345,
-    "extra-element": 38,
-    "geometry": 67156,
-    "text-metrics": 1257,
+    "missing-element": 346,
+    "extra-element": 25,
+    "geometry": 67645,
+    "text-metrics": 1261,
     "format-units": 1,
-    "other": 19264
+    "other": 19475
   },
   "fixtures": [
     {
@@ -623,14 +623,14 @@
     },
     {
       "slug": "boparo-11-pema294",
-      "diffCount": 5,
+      "diffCount": 99,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 86,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 13
       }
     },
     {
@@ -2519,14 +2519,14 @@
     },
     {
       "slug": "fadage-04-xoxe727",
-      "diffCount": 6,
+      "diffCount": 53,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 1
+        "other": 18
       }
     },
     {
@@ -3803,14 +3803,14 @@
     },
     {
       "slug": "gojozu-97-xeki128",
-      "diffCount": 5,
+      "diffCount": 58,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 42,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 16
       }
     },
     {
@@ -5219,14 +5219,14 @@
     },
     {
       "slug": "kofixo-02-xoso627",
-      "diffCount": 5,
+      "diffCount": 62,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 42,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 20
       }
     },
     {
@@ -5567,14 +5567,14 @@
     },
     {
       "slug": "kuzoba-85-fabe034",
-      "diffCount": 5,
+      "diffCount": 63,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 50,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 13
       }
     },
     {
@@ -5891,14 +5891,14 @@
     },
     {
       "slug": "libipu-23-femo315",
-      "diffCount": 5,
+      "diffCount": 54,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 19
       }
     },
     {
@@ -6275,14 +6275,14 @@
     },
     {
       "slug": "lunasu-43-reno078",
-      "diffCount": 5,
+      "diffCount": 62,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 49,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 13
       }
     },
     {
@@ -6359,14 +6359,14 @@
     },
     {
       "slug": "maboju-34-soxi895",
-      "diffCount": 5,
+      "diffCount": 74,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
-        "text-metrics": 0,
+        "extra-element": 0,
+        "geometry": 56,
+        "text-metrics": 4,
         "format-units": 0,
-        "other": 0
+        "other": 14
       }
     },
     {
@@ -6947,14 +6947,14 @@
     },
     {
       "slug": "modamu-43-juci519",
-      "diffCount": 5,
+      "diffCount": 59,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 36,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 23
       }
     },
     {
@@ -7139,14 +7139,14 @@
     },
     {
       "slug": "mugidu-43-jizu986",
-      "diffCount": 5,
+      "diffCount": 58,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 23
       }
     },
     {
@@ -7571,14 +7571,14 @@
     },
     {
       "slug": "netuvi-29-jiti924",
-      "diffCount": 6,
+      "diffCount": 53,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 1
+        "other": 18
       }
     },
     {
@@ -9457,8 +9457,8 @@
       "slug": "rulepa-49-pisa733",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
+        "missing-element": 1,
+        "extra-element": 0,
         "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
@@ -12191,14 +12191,14 @@
     },
     {
       "slug": "xepoda-56-xema668",
-      "diffCount": 5,
+      "diffCount": 59,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 4,
+        "extra-element": 0,
+        "geometry": 36,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 0
+        "other": 23
       }
     },
     {

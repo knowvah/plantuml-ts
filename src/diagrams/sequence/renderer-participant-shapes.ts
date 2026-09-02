@@ -30,7 +30,7 @@
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantBadge, ParticipantGeo, ParticipantType, TextRun } from './ast.js';
-import { ellipse, image, rect } from '../../core/svg.js';
+import { ellipse, image, rect, linkWrap } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
 import {
@@ -228,12 +228,40 @@ function renderParticipantBlock(
 
 /** The header row. */
 export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
-  return renderParticipantBlock(p, p.y, true, theme);
+  return withParticipantUrl(p, renderParticipantBlock(p, p.y, true, theme));
+}
+
+/**
+ * B3: the jar's hyperlink around a participant row.
+ *
+ * ```java
+ * final Url url = getParticipant().getUrl();
+ * if (url != null) ug.startUrl(url);
+ * comp.drawU(ug, area, context);
+ * if (url != null) ug.closeUrl();
+ * ```
+ * @see ~/git/plantuml/.../sequencediagram/teoz/LivingSpace.java:205-212
+ *
+ * It wraps `comp.drawU` — the WHOLE component, label and glyph together, not
+ * the label alone. And `drawHeadOrTail` is the shared body of both `drawHead`
+ * and `drawTail` (`:181-189`), so the head row and the footer row each get
+ * their own `<a>`: `boparo-11-pema294` carries four for two participants.
+ *
+ * `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and
+ * their order are already jar-verified against the class engine's goldens. A
+ * second one is not needed here and would be a second thing to keep right.
+ *
+ * A MESSAGE-level url is deliberately not drawn — see
+ * `renderer-message.ts`'s own note, which records that the jar emits no `<a>`
+ * for `A -> B [[url]] : label`.
+ */
+function withParticipantUrl(p: ParticipantGeo, drawn: string): string {
+  return p.url === undefined ? drawn : linkWrap(drawn, p.url);
 }
 
 /** The footer row (`isShowFootbox`), drawn from `lifelineEndY` down. Every
  *  kind derives its own glyph offset from the block, so the layout's
  *  pre-computed `footerShapeY` is no longer threaded here. */
 export function renderFooterBox(p: ParticipantGeo, lifelineEndY: number, theme: ScaledTheme): string {
-  return renderParticipantBlock(p, lifelineEndY, false, theme);
+  return withParticipantUrl(p, renderParticipantBlock(p, lifelineEndY, false, theme));
 }

@@ -33,8 +33,8 @@ export const participantCommand: Command = {
   execute(state, match) {
     const type = match[1]!.toLowerCase() as ParticipantType;
     const rest = match[2]!.trim();
-    const { id, display, color, stereotype } = parseParticipantDeclaration(rest);
-    ensureParticipant(state, id, type, { display, color, stereotype });
+    const { id, display, color, stereotype, url } = parseParticipantDeclaration(rest);
+    ensureParticipant(state, id, type, { display, color, stereotype, url });
   },
 };
 
@@ -54,8 +54,8 @@ export const createCommand: Command = {
     /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
-    const { id, display, color, stereotype } = parseParticipantDeclaration(match[2]!.trim());
-    ensureParticipant(state, id, type, { display, color, stereotype });
+    const { id, display, color, stereotype, url } = parseParticipantDeclaration(match[2]!.trim());
+    ensureParticipant(state, id, type, { display, color, stereotype, url });
   },
 };
 
@@ -71,7 +71,8 @@ export const createCommand: Command = {
  * STEREO/ORDER/URL/COLOR tail (`:78-87`), reused here via
  * {@link parseParticipantDeclaration} — same tail-stripping this port's
  * single-line family already applies (order discarded, matching that
- * existing precedent; URL discarded, ditto).
+ * existing precedent; the URL is CAPTURED as of B3 and reaches the head's
+ * `<a>` wrapper).
  */
 const PARTICIPANT_MULTILINE_OPEN_RE = /^participant\s+(.+?)\s*\[$/i;
 
@@ -144,11 +145,16 @@ export function matchParticipantMultilineCommand(
   }
   if (closeIndex === -1) return null;
 
-  const { id, color, stereotype } = parseParticipantDeclaration(open[1]!.trim());
+  const { id, color, stereotype, url } = parseParticipantDeclaration(open[1]!.trim());
   const bodyLines = trimmedLines.slice(i + 1, closeIndex);
   const display = bodyLines.length > 0 ? bodyLines.join('\n') : id;
 
-  ensureParticipant(state, id, 'participant', { display, color, stereotype });
+  // B3: the multi-line form carries a url too. `CommandParticipantMultilines
+  // .java:163-168` is byte-for-byte the same block as `CommandParticipant
+  // .java:187-192`, so wiring only the single-line form would have left this
+  // one silently url-less -- and no cached oracle would have said so, since
+  // `boparo-11-pema294` uses the single-line form.
+  ensureParticipant(state, id, 'participant', { display, color, stereotype, url });
 
   return closeIndex - i + 1;
 }
