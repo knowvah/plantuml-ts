@@ -417,8 +417,10 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
     fill,
     stroke: theme.colors.border,
   });
-  if (box.labelRun === undefined) return boxRect;
-  return boxRect + creoleRunText(box.labelRun, theme, BOX_LABEL_FONT_SIZE * k);
+  return (
+    boxRect +
+    box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('')
+  );
 }
 
 // ---------------------------------------------------------------------------

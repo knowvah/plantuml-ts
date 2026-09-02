@@ -40,6 +40,7 @@ import { fontSpecOf } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -478,22 +479,29 @@ function backfillNewpageWidth(
  * does not yet port, so it is a task of its own rather than a side effect of
  * routing the text through the emitter.
  */
-function boxLabelRun(
+function boxLabelRuns(
   label: string,
   boxX: number,
   theme: Theme,
   measurer: StringMeasurer,
-): TextRun {
+): readonly TextRun[] {
   const font: FontSpec = { family: theme.fontFamily, size: BOX_LABEL_FONT_SIZE };
-  const lineHeight = measurer.measure('M', font).height;
-  return {
-    text: label,
-    x: boxX + BOX_LABEL_PADDING,
-    y: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
-    textWidth: measurer.measure(label, font).width,
-    textAscent: lineHeight - measurer.getDescent(font, 'M'),
-    textLineHeight: lineHeight,
-  };
+  // C6: `ComponentRoseEnglober` extends `AbstractTextualComponent` and builds
+  // its label through the same `create0` every other sequence text uses
+  // (`~/git/plantuml/.../skin/rose/ComponentRoseEnglober.java:57-60`), so the
+  // label goes through the same seam. Measured reach today is zero -- all 59
+  // `box` declarations in the corpus carry a plain label -- so this closes the
+  // last text kind for CONSISTENCY, not for a number; measurement identity
+  // means every one of those 59 renders byte-identically.
+  return sequenceCreoleRuns(
+    label,
+    sequenceCreoleFont(font),
+    {
+      leftX: boxX + BOX_LABEL_PADDING,
+      baselineY: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    },
+    measurer,
+  );
 }
 
 /** `renderer.ts`'s own box-label style, mirrored here so the measurement and
@@ -526,9 +534,8 @@ function computeBoxGeos(
       height: totalHeight,
       label: box.label,
       color: box.color,
-      ...(box.label === ''
-        ? {}
-        : { labelRun: boxLabelRun(box.label, leftEdge - BOX_PAD, theme, measurer) }),
+      labelRuns:
+        box.label === '' ? [] : boxLabelRuns(box.label, leftEdge - BOX_PAD, theme, measurer),
     });
   }
 

@@ -170,7 +170,7 @@ describe('band and totals', () => {
 
   it('re-sizes box englobers to the page height', () => {
     const g = geo([message(100), newpage(200), message(300)], {
-      boxes: [{ x: 0, y: 0, width: 100, height: 560, label: 'b', color: '#eee' }],
+      boxes: [{ x: 0, y: 0, width: 100, height: 560, label: 'b', color: '#eee', labelRuns: [] }],
     });
     const page = paginateSequence(g, 0);
     expect(page.boxes[0]!.height).toBe(page.totalHeight);

@@ -147,7 +147,7 @@ function scaleBox(b: BoxGeo, k: number): BoxGeo {
     y: b.y * k,
     width: b.width * k,
     height: b.height * k,
-    ...(b.labelRun !== undefined ? { labelRun: scaleRun(b.labelRun, k) } : {}),
+    labelRuns: b.labelRuns.map((r) => scaleRun(r, k)),
   };
 }
 

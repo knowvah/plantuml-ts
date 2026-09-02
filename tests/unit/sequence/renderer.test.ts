@@ -1502,7 +1502,7 @@ describe('renderSequence — database participant shape', () => {
 describe('renderSequence — box backgrounds', () => {
   it('box with color renders a rect with that fill color', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
@@ -1512,7 +1512,7 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box with empty color falls back to #EEE', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('#EEE');
@@ -1521,10 +1521,10 @@ describe('renderSequence — box backgrounds', () => {
   it('box with label renders a text element', () => {
     const geo = makeGeo({
       // A5: the label is a placed, measured run resolved by
-      // `layout.ts#boxLabelRun`; a hand-built `BoxGeo` supplies it.
+      // `layout.ts#boxLabelRuns`; a hand-built `BoxGeo` supplies them.
       boxes: [{
         x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink',
-        labelRun: boxRunFor('Services', 10),
+        labelRuns: [boxRunFor('Services', 10)],
       }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1536,7 +1536,7 @@ describe('renderSequence — box backgrounds', () => {
     // A box with no label should produce only a rect, no extra text
     const geo = makeGeo({
       participants: [],
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).not.toContain('<text');
@@ -1544,7 +1544,7 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box background rect appears before participant header rects (z-order)', () => {
     const geo = makeGeo({
-      boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue' }],
+      boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // After the defs block, box background must precede participant rects.

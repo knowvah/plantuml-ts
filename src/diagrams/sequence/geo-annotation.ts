@@ -108,8 +108,9 @@ export interface BoxGeo {
   height: number;
   label: string;
   color: string;
-  /** The group's label as a placed, measured run (A5). Absent when the box
+  /** The group's label as placed, measured runs (A5; an ARRAY since C6,
+   *  because creole makes one label several styled runs). EMPTY when the box
    *  carries no label, which is the case `renderBoxBackground` already
    *  short-circuits on. */
-  labelRun?: TextRun;
+  labelRuns: readonly TextRun[];
 }

@@ -15,6 +15,10 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import {
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+} from '../../../src/diagrams/sequence/sequence-creole.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const CACHE = join(ROOT, 'test-results/dot-cache/sequence');
@@ -208,5 +212,43 @@ describe('divider labels through creole (C6)', () => {
     const label = textFor(render('degire-21-dujo330'), 'Resource AllocationAllocationX');
     expect(label['textLength']).toBe('177.288');
     expect(label['font-weight']).toBe('700');
+  });
+});
+
+describe('box group labels', () => {
+  /**
+   * `ComponentRoseEnglober` extends `AbstractTextualComponent` and builds its
+   * label through the same `create0` every other sequence text uses
+   * (`~/git/plantuml/.../skin/rose/ComponentRoseEnglober.java:57-60`), so the
+   * box label belongs on the same seam.
+   *
+   * Measured reach is ZERO: all 59 `box` declarations in the corpus carry a
+   * plain label. This closes the last text kind for CONSISTENCY, and the
+   * property that matters is therefore the safety one — measurement identity
+   * says a plain label renders byte-identically.
+   */
+  it('leaves a plain box label byte-identical, one run at the raw width', () => {
+    const measurer = new DeterministicMeasurer();
+    const font = { family: 'sans-serif', size: 11 };
+    const runs = sequenceCreoleRuns(
+      'Services',
+      sequenceCreoleFont(font),
+      { leftX: 14, baselineY: 15 },
+      measurer,
+    );
+    expect(runs).toHaveLength(1);
+    expect(runs[0]?.text).toBe('Services');
+    expect(runs[0]?.textWidth).toBeCloseTo(measurer.measure('Services', font).width, 10);
+  });
+
+  it('splits a marked-up box label into styled sibling runs', () => {
+    const runs = sequenceCreoleRuns(
+      'a <b>bold</b> group',
+      sequenceCreoleFont({ family: 'sans-serif', size: 11 }),
+      { leftX: 14, baselineY: 15 },
+      new DeterministicMeasurer(),
+    );
+    expect(runs.map((r) => r.text)).toEqual(['a ', 'bold', ' group']);
+    expect(runs.map((r) => r.bold)).toEqual([undefined, true, undefined]);
   });
 });
