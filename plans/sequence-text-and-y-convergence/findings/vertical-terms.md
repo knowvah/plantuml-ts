@@ -519,3 +519,42 @@ Two throwaway probes were used and deleted: one printing
 `WidthTableMeasurer.measure` heights (confirming `height === font size`,
 matching `StringBounderFromWidthTable:64-80`), and one rendering all 1141
 fixtures to compare root dimensions (the §1.2 and §2 tables).
+
+---
+
+## ORCHESTRATOR RULING — the `ensureVisible +1` is NOT a shared-shell change
+
+C2's open question 1 asked whether C3 may change
+`src/core/klimt/document-shell.ts:130-131` from `Math.trunc(x)` to
+`Math.trunc(x + 1)`, mirroring `SvgGraphics#ensureVisible:128-135`'s
+`maxX = (int) (x + 1)`. The Java citation is correct and was verified
+independently.
+
+**Measured before ruling**, per fixture across all five families, same
+instrument and method used for the `CommandCreoleUrl` fix:
+
+| family | before | after | delta |
+|---|---:|---:|---:|
+| sequence | 1 314 753 | 1 313 923 | **−830** |
+| class | 101 354 | 103 716 | **+2 362** |
+| state | 37 165 | 38 101 | **+936** |
+| object | 6 246 | 6 506 | **+260** |
+| description | 75 833 | 75 859 | **+26** |
+
+**Ruling: NO.** Reverted; the baseline was confirmed restored to the digit.
+
+**What the measurement means.** It helps sequence and hurts the four cuca
+families — which is only possible if those four are ALREADY correct at
+`trunc(x)`. Their extent is not a raw max coordinate: it comes from a graphviz
+bounding box plus explicit margins, already carrying the rounding upstream
+applies during drawing. Sequence's is a raw max, so sequence alone is short.
+
+**The defect is therefore in the SEQUENCE extent computation, not in the shared
+shell.** C3 applies `ensureVisible`'s semantics on the sequence path, inside its
+own write-set, and leaves `document-shell.ts` alone. The citation stands; only
+its location was wrong.
+
+This also revises C2's claim that "0 of 1101 sequence fixtures can have an
+exact width or height until it lands" — true of sequence, and the fix is
+available to C3 without touching another family.
+
