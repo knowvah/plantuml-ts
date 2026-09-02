@@ -64,11 +64,18 @@ export interface ParticipantGeo {
    * The HEAD block's label, as placed and measured runs: the visible
    * stereotype rows in order, then the display name.
    *
-   * One run per ROW, because a participant head is one to N rows and each has
-   * its own width — `birocu-87-xubi808` draws `«APIGateway»` (93.363 wide) and
-   * `BothZWSP` (69.3) as separate `<text>` elements, both centred on the same
-   * 296.6195. A single scalar width could not describe that, which is why the
-   * metrics ride on the run (D8).
+   * At LEAST one run per ROW, because a participant head is one to N rows and
+   * each has its own width — `birocu-87-xubi808` draws `«APIGateway»` (93.363
+   * wide) and `BothZWSP` (69.3) as separate `<text>` elements, both centred on
+   * the same 296.6195. A single scalar width could not describe that, which is
+   * why the metrics ride on the run (D8).
+   *
+   * C4: a row may now hold SEVERAL runs, one per creole atom, because that is
+   * what the jar emits — `kofuti-29-goti188`'s `The <b>Famous</b> Bob` is
+   * three sibling `<text>` elements of 48.3, 101.15 and 49.875 (D3). The array
+   * stays FLAT: a run knows its own left edge and baseline, so the row it came
+   * from needs no representation here. Rows are centred as BLOCKS on the
+   * name-block centre, never run by run.
    *
    * Resolved in LAYOUT, where the measurer is (D1). The x is already the run's
    * LEFT edge, derived from the name-block centre per D4; `centerX` remains

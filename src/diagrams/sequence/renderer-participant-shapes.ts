@@ -103,6 +103,17 @@ function renderSymbolShape(
  * its 70 622 sequence `<text>` elements. The run already carries its own left
  * edge and baseline, both resolved in layout (D1, D4), so all that is left
  * here is the head/foot translation the run cannot know.
+ *
+ * C4: and its own STYLE, when creole set one. Every field below is the run's
+ * where it has one and the head's ambient value where it has not, which is
+ * `DriverTextSvg#draw` reading one `FontConfiguration` per `UText`
+ * (`:104-160,177-180`) — a markup-free name carries a family and a size equal
+ * to the ambient pair and none of the flags, so it emits byte-identically to
+ * the pre-C4 single run. `url` WRAPS rather than decorates
+ * (`SvgGraphics#openLink`/`closeLink`, `:1105-1150`) and `sequence-text.ts`
+ * owns that wrap, so there is no second `<a>` emitter here. No measurer is
+ * touched: every metric was resolved in layout and scaled with the geometry
+ * (D5).
  */
 function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
   return sequenceText({
@@ -110,9 +121,16 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
     baselineY: run.y + dy,
     text: run.text,
     width: run.textWidth,
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
+    // `""mono""` sets its own family; `=heading`/`<size:N>` its own size.
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? theme.fontSize,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
+    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
+    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
   });
 }
 
