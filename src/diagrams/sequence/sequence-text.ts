@@ -43,7 +43,33 @@
  * feature can reintroduce the divergence by accident.
  */
 
-import { linkWrap, text } from '../../core/svg.js';
+import { image, linkWrap, text } from '../../core/svg.js';
+
+/**
+ * The drawable form of a creole `<math>`/`<latex>` atom on a sequence label:
+ * `AtomMath` measures an image and draws that same image
+ * (`AtomMath.java:64-97`), so one `core/latex.ts#renderLatexAsImage` call in
+ * layout answers both halves and they agree by construction. That is why the
+ * href travels on the geometry rather than being re-derived here — the same
+ * carried-metrics rule (D5) that puts `width` on a text run.
+ *
+ * `y` is the image's own TOP edge, absolute, because an image has no baseline
+ * to hang off: `AtomMath#getStartingAltitude` returns 0
+ * (`AtomMath.java:73-75`) and `SheetBlock1#drawU` translates to the atom's own
+ * box corner before calling `#drawU` (`SheetBlock1.java:212-217`). `x` is the
+ * run's own {@link SequenceTextSpec.leftX}, which the image shares.
+ *
+ * The image BYTES and the exact `width`/`height` are a PERMANENT divergence:
+ * this port renders through KaTeX where the jar renders through JLaTeXMath
+ * (`DIVERGENCES.md`, "LaTeX rendering engine — KaTeX, not JLaTeXMath", which
+ * names `<math>` as well as `<latex>`).
+ */
+export interface SequenceRunImage {
+  readonly href: string;
+  readonly width: number;
+  readonly height: number;
+  readonly y: number;
+}
 
 /**
  * One sequence `<text>`, in the jar's own vocabulary.
@@ -107,6 +133,11 @@ export interface SequenceTextSpec {
    * the repo's single, jar-verified `<a>` emitter, and not rebuilt here.
    */
   readonly url?: { readonly url: string; readonly tooltip: string };
+  /** Set ONLY on a `<math>`/`<latex>` run, which draws an image and NO text
+   *  at all — `AtomMath#drawU` emits one `UImageSvg`/`UImage` and nothing
+   *  else (`AtomMath.java:78-97`). When present, {@link sequenceText} emits
+   *  the `<image>` in place of the `<text>`. */
+  readonly image?: SequenceRunImage;
 }
 
 /**
@@ -116,6 +147,15 @@ export interface SequenceTextSpec {
  * assertion, but because {@link SequenceTextSpec} cannot express them.
  */
 export function sequenceText(spec: SequenceTextSpec): string {
+  // `AtomMath#drawU` draws an image INSTEAD of text, never beside it
+  // (`AtomMath.java:78-97`). `svg-shapes.ts#image` is the repo's one `<image>`
+  // emitter and already writes `SvgGraphics#svgImageDataUri`'s attribute
+  // order, so the link wrap below is all this branch adds.
+  if (spec.image !== undefined) {
+    const img = spec.image;
+    const drawnImage = image(spec.leftX, img.y, img.width, img.height, img.href);
+    return spec.url === undefined ? drawnImage : linkWrap(drawnImage, spec.url);
+  }
   // Spread-conditionals rather than plain assignment: this project compiles
   // with `exactOptionalPropertyTypes`, under which an explicit `undefined` is
   // not assignable to an optional `TextStyle` field.

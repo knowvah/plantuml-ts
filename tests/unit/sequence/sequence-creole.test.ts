@@ -145,8 +145,9 @@ describe('sequenceCreoleRuns — non-text atoms', () => {
     'x<&heart>y',
     // `'emoji'`.
     'x<:smile:>y',
-    // `'latex'`, which this port resolves no dimensions for on a text path.
-    'x<latex>e^x</latex>y',
+    // `'latex'` LEFT this set once `AtomMath`'s image became drawable here --
+    // see `sequence-creole-latex.test.ts`, which pins the replacement
+    // contract and re-pins the two above so they cannot follow it out.
   ])('leaves %s wholly literal, at the raw line width', (line) => {
     const runs = runsOf(line);
     expect(runs.map((r) => r.text)).toEqual([line]);

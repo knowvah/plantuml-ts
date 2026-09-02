@@ -131,6 +131,10 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
     ...(run.url !== undefined ? { url: run.url } : {}),
+    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
+    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`); `dy`
+    // shifts its top exactly as it shifts the baseline beside it.
+    ...(run.image !== undefined ? { image: { ...run.image, y: run.image.y + dy } } : {}),
   });
 }
 

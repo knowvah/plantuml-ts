@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1057 modules · 3786 exported names.
+1058 modules · 3793 exported names.
 
 ## `src/`
 
@@ -1277,6 +1277,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `newpage-style.ts` | `NEWPAGE_MARGIN_Y`, `NEWPAGE_LINE_HEIGHT`, `NEWPAGE_TILE_HEIGHT`, `NEWPAGE_LINE_COLOR`, `NEWPAGE_LINE_THICKNESS`, `NEWPAGE_DASH_UNIT` | Style and size constants for the sequence-diagram page separator (`newpage`). |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
+| `ref-body-geo.ts` | `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth` | ref-body-geo.ts — the `ref over` frame's own geometry (`ComponentRoseReference`), split verbatim out of `text-block-geo.ts` when that file reached the project's 500-line cap. |
 | `renderer-arrowhead-glyph.ts` | `paintOf`, `niceArrowOf`, `ARROW_THICKNESS`, `renderArrowHead` | Arrow-head GLYPH drawing: the paint, the polygon, the async lines and the decoration circle that one arrow END draws. |
 | `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
 | `renderer-frame-blotter.ts` | `renderFrameBlotter` | The grouping-frame BACKGROUND pass -- the coloured band(s) a `loop`/`alt`/ `opt`/`par`/`break`/`critical`/`group`/`ref` frame paints behind its body, split at each `else` branch boundary so each branch can carry its own fill. |
@@ -1299,7 +1300,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-shared.ts` | `fontSpecOf`, `ARROW_FONT_SIZE`, `arrowFontSpecOf`, `NOTE_FONT_SIZE`, `noteFontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
-| `sequence-text.ts` | `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
+| `sequence-text.ts` | `SequenceRunImage`, `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
 | `text-block-geo.ts` | `displayLines`, `textBlockRuns`, `TextRun`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 
 ## `src/diagrams/state/`

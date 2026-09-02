@@ -90,6 +90,9 @@ function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldF
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
     ...(run.url !== undefined ? { url: run.url } : {}),
+    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
+    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
+    ...(run.image !== undefined ? { image: run.image } : {}),
   });
 }
 
@@ -160,25 +163,12 @@ function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
   // before. `url` WRAPS rather than decorates (`SvgGraphics#openLink`/
   // `closeLink`, `:1105-1150`) and `sequence-text.ts` owns that wrap: no
   // second `<a>` emitter, no measurer (D1, D5).
+  // C7: through `creoleRunText`, the helper this very block's shape was
+  // extracted into -- every field it built inline is the one that helper
+  // builds, at `reference { FontSize 12 }` (`plantuml.skin:145-151`), which
+  // is what the run beside it was measured at and must agree with.
   return frame.refBody
-    .map((run) =>
-      sequenceText({
-        leftX: run.x,
-        baselineY: run.y,
-        text: run.text,
-        width: run.textWidth,
-        fontFamily: run.fontFamily ?? theme.fontFamily,
-        // `reference { FontSize 12 }` (`plantuml.skin:145-151`), scaled with
-        // the document -- NOT `theme.fontSize`. The run beside it was measured
-        // at this size, and the two must agree or `textLength` distorts it.
-        fontSize: run.fontSize ?? REFERENCE_FONT_SIZE * theme.scaleK,
-        fill: run.color ?? theme.colors.text,
-        ...(run.bold === true ? { fontWeight: '700' as const } : {}),
-        ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
-        ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-        ...(run.url !== undefined ? { url: run.url } : {}),
-      }),
-    )
+    .map((run) => creoleRunText(run, theme, REFERENCE_FONT_SIZE * theme.scaleK))
     .join('');
 }
 
@@ -242,6 +232,7 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
               ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
               ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
               ...(run.url !== undefined ? { url: run.url } : {}),
+              ...(run.image !== undefined ? { image: run.image } : {}),
             }),
           )
           .join('')

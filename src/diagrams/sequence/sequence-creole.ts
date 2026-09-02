@@ -60,8 +60,9 @@
  *
  * ## Named remainders
  *
- * A line holding a non-`'text'` atom — `<img>`/`<$sprite>`/`<&openiconic>`
- * (`'inline'`), `<:emoji:>`, `<latex>` — is left WHOLLY literal, exactly as
+ * A line holding a non-`'text'`, non-`'latex'` atom —
+ * `<img>`/`<$sprite>`/`<&openiconic>` (`'inline'`), `<:emoji:>` — is left
+ * WHOLLY literal, exactly as
  * this engine rendered it before the seam existed. A `TextRun` is a `<text>`
  * and an image is an `<image>` that sequence geometry has nowhere to put yet;
  * emitting no run for the atom would drop an ELEMENT and short-circuit the
@@ -69,6 +70,17 @@
  * no source string to rebuild a per-atom literal from. See the guard in
  * {@link sequenceCreoleRuns} for the measured case. Giving those atoms real
  * sequence geometry needs a new geo kind and a renderer branch.
+ *
+ * `<math>`/`<latex>` LEFT that set: a `'latex'` atom resolves to a measured,
+ * drawable image through `core/latex.ts#renderLatexAsImage` — the one
+ * renderer `AtomMath.ts` and the description engine already go through — so
+ * {@link latexAtomRun} gives it real geometry and `TextRun.image` carries it
+ * to `sequence-text.ts`. What sequence does NOT yet do is grow the label
+ * block around a taller-than-a-text-line image: `text-block-geo.ts
+ * #messageLabelBlock` reserves `rows * lineHeight`, where upstream reserves
+ * the text block's own `calculateDimension().getHeight()`
+ * (`AbstractTextualComponent.java:110-114`). Recorded as a residual, not a
+ * decision — it is inert for every fixture whose atoms are all text.
  *
  * A `HORIZONTAL_LINE` line (a bare `----`/`====`/`....`) yields no atoms at
  * all upstream — it becomes a `CreoleHorizontalLine` stripe, a drawn rule.
@@ -86,6 +98,7 @@ import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
 import type { TextRun } from './text-block-geo.js';
+import { renderLatexAsImage } from '../../core/latex.js';
 
 /** Where a line's first run starts: `DriverTextSvg`'s own `x` (a LEFT edge)
  *  and `y` (a BASELINE), the same two quantities a `TextRun` carries. Every
@@ -202,6 +215,49 @@ function textAtomRun(
 }
 
 /**
+ * One `'latex'` atom as a placed, measured `TextRun` carrying an image and no
+ * text — `AtomMath#calculateDimensionSlow` measures the rendered image's own
+ * box and `#drawU` draws that same image (`AtomMath.java:64-97`), which
+ * `core/latex.ts#renderLatexAsImage` answers in one call, so the measured and
+ * the drawn box agree by construction.
+ *
+ * `descent` bottom-aligns the image box against the line's text boxes:
+ * `Sea#doAlign` drops every atom to `y = -height + getStartingAltitude`
+ * (`Sea.java:72-80`) and `AtomMath#getStartingAltitude` is 0
+ * (`AtomMath.java:73-75`), so an image shares its BOTTOM edge with the text
+ * beside it — and a text box's bottom is its baseline plus its descent.
+ *
+ * The colour is `XColor.BLACK`, `AtomMath#getColor`'s own default when the
+ * atom's `foreground` is not an `HColorSimple` (`AtomMath.java:88,100-106`);
+ * a `<color:…>` around the formula sets the atom's own.
+ *
+ * `textAscent`/`textLineHeight` report the IMAGE's height: they are the run's
+ * line-box metrics, and this run's box is the image.
+ */
+function latexAtomRun(
+  atom: Extract<CreoleAtom, { kind: 'latex' }>,
+  x: number,
+  baselineY: number,
+  descent: number,
+): TextRun {
+  const drawn = renderLatexAsImage(atom.expr, atom.color ?? ATOM_MATH_DEFAULT_COLOR);
+  return {
+    text: '',
+    x,
+    y: baselineY,
+    textWidth: drawn.width,
+    textAscent: drawn.height,
+    textLineHeight: drawn.height,
+    image: { href: drawn.href, width: drawn.width, height: drawn.height, y: baselineY + descent - drawn.height },
+  };
+}
+
+/** `AtomMath#getColor`'s own `XColor.BLACK` default (`AtomMath.java:88`) --
+ *  this port has no `XColor`, so the equivalent CSS black stands in, exactly
+ *  as `klimt/creole/atom/AtomMath.ts#DEFAULT_FOREGROUND` does. */
+const ATOM_MATH_DEFAULT_COLOR = '#000000';
+
+/**
  * ONE display line -> its placed, measured runs, left to right.
  *
  * `buildLineAtoms` is the shared "line -> visible atoms" lexer: it classifies
@@ -288,18 +344,25 @@ export function sequenceCreoleRuns(
   // This is a REMAINDER, not a design: it retires the day sequence geometry
   // gains a kind that carries an `<image>`, which is the follow-on
   // `.agent-notes/C1-sequence-creole-seam.md` files.
-  if (atoms.some((a) => a.kind !== 'text')) {
+  if (atoms.some((a) => a.kind !== 'text' && a.kind !== 'latex')) {
     const literal = { kind: 'text' as const, text: manageGuillemet(line), font: built.lineFont };
     return [textAtomRun(literal, origin.leftX, origin.baselineY, measurer)];
   }
 
   const runs: TextRun[] = [];
   let x = origin.leftX;
+  // The LINE's own descent, which every atom's box bottom is measured from --
+  // `Sea` aligns the boxes, not the glyphs (`Sea.java:72-80`). Read once, off
+  // the line font, for the same reason `messageLabelBlock` reads it once.
+  const lineDescent = measurer.getDescent(atomFontSpec(built.lineFont), 'M');
   for (const atom of atoms) {
-    // Every atom here is a `'text'` atom: the guard above returned for any
-    // line that held anything else.
-    if (atom.kind !== 'text') continue;
-    const run = textAtomRun(atom, x, origin.baselineY, measurer);
+    // Every atom here is a `'text'` or a `'latex'` atom: the guard above
+    // returned for any line that held anything else.
+    if (atom.kind !== 'text' && atom.kind !== 'latex') continue;
+    const run =
+      atom.kind === 'latex'
+        ? latexAtomRun(atom, x, origin.baselineY, lineDescent)
+        : textAtomRun(atom, x, origin.baselineY, measurer);
     runs.push(run);
     x += run.textWidth;
   }

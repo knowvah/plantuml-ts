@@ -111,6 +111,13 @@ const IDENTITY = 1;
  * draw at 1x amid text at k. The remaining creole fields — `bold`, `italic`,
  * `color`, `decoration`, `fontFamily`, `url` — are style tokens, not lengths,
  * and the spread carries them through untouched.
+ *
+ * A `<math>`/`<latex>` run's `image` is the fifth: its `width`/`height` are
+ * lengths and its `y` is an absolute coordinate, so all three scale exactly as
+ * `x`/`y`/`textWidth` do — `SvgGraphics#format` multiplies an emitted
+ * `<image>`'s geometry by the scale like any other shape's
+ * (`SvgGraphics.java:693`). `href` is the image DOCUMENT, whose own intrinsic
+ * size the `width`/`height` attributes override, so it is carried untouched.
  */
 const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...r,
@@ -120,6 +127,9 @@ const scaleRun = (r: TextRun, k: number): TextRun => ({
   textAscent: r.textAscent * k,
   textLineHeight: r.textLineHeight * k,
   ...(r.fontSize !== undefined ? { fontSize: r.fontSize * k } : {}),
+  ...(r.image !== undefined
+    ? { image: { ...r.image, width: r.image.width * k, height: r.image.height * k, y: r.image.y * k } }
+    : {}),
 });
 
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
