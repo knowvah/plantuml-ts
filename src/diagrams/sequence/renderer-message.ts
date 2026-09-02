@@ -10,7 +10,7 @@
 import type { MessageGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
-import { path } from '../../core/svg.js';
+import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
@@ -56,8 +56,26 @@ const SELF_LOOP_HEIGHT = 20;
  * (`ComponentRoseSelfArrow.java:124-126` then `:131-173`) -- the reverse of
  * the flat component's order, and the order `botoku-28-cupe920` shows.
  *
- * Emitted as one `<path>` where upstream emits three `<line>`s; that is the
- * spike's existing shape, left alone here because this task owns the HEADS.
+ * B2: three `<line>`s, matching upstream's own three `ULine` draws --
+ *
+ * ```java
+ * ug2.apply(new UTranslate(x1, textHeight)).draw(ULine.hline(xRight - x1));
+ * ug2.apply(new UTranslate(xRight, textHeight)).draw(ULine.vline(arrowHeight));
+ * ug2.apply(new UTranslate(x2, textHeight + arrowHeight)).draw(ULine.hline(xRight - x2));
+ * ```
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseSelfArrow.java:124-126
+ *
+ * This was ONE `<path>` until B2, and the difference was not cosmetic:
+ * `compareSvg` short-circuits on a tag mismatch (`compare.ts:229`) and never
+ * descends into a `d` attribute's numbers, so every self-message geometry in
+ * the corpus was invisible to the comparator. Batch 8 of
+ * `plans/sequence-coordinate-convergence` corrected this loop's width from 40
+ * to the jar's 42 -- jar-verified, exact -- and total distance moved by
+ * exactly zero. B1 measured 495 loops across 125 fixtures in that state.
+ *
+ * The third stroke runs `x2 -> xRight`, left to right, not back from the
+ * corner: `hline(xRight - x2)` translated to `x2`, which the jar emits as
+ * `x1="35.469" x2="76.469"` on `jobadi-87-jegi648`.
  */
 function renderSelfMessage(
   msg: MessageGeo,
@@ -75,18 +93,21 @@ function renderSelfMessage(
   const y1 = msg.y;
   const loopWidth = SELF_LOOP_WIDTH * k;
   const loopHeight = SELF_LOOP_HEIGHT * k;
-  const d =
-    `M ${x1} ${y1} ` +
-    `H ${x1 + loopWidth} ` +
-    `V ${y1 + loopHeight} ` +
-    `H ${xBack}`;
-  const loop = path(d, {
+  // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
+  // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
+  const xRight = x1 + loopWidth;
+  const yBottom = y1 + loopHeight;
+  const stroke = {
     stroke: theme.colors.arrow,
     strokeWidth: 1 * k,
     ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-  });
+  };
+  const loop =
+    line(x1, y1, xRight, y1, stroke) +
+    line(xRight, y1, xRight, yBottom, stroke) +
+    line(xBack, yBottom, xRight, yBottom, stroke);
   // The head sits at the foot of the RETURNING segment, so it moves with it.
-  return loop + renderSelfMessageHead(msg, configuration, theme, y1 + loopHeight);
+  return loop + renderSelfMessageHead(msg, configuration, theme, yBottom);
 }
 
 /** The message's label. Upstream draws it last, after the arrow

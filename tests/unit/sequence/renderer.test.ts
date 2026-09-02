@@ -273,12 +273,18 @@ describe('renderSequence — messages', () => {
     expect(svg).toContain('stroke-dasharray');
   });
 
-  it('self message emits a path', () => {
+  it('self message emits three lines, not a path', () => {
+    // B2: upstream draws `hline`, `vline`, `hline`
+    // (`ComponentRoseSelfArrow.java:124-126`). The tag matters more than the
+    // coordinates here -- `compareSvg` short-circuits on a tag mismatch and
+    // never descends into a `d`, so a `<path>` made the whole loop invisible
+    // to the comparator.
     const geo = makeGeo({
       events: [makeSyncMessage({ arrowDirection: 'self', fromX: 80, toX: 110 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<path');
+    expect(svg).not.toContain('<path');
+    expect(svg.match(/<line /g)?.length).toBeGreaterThanOrEqual(3);
   });
 
   // `getLabelNumbered` prepends the number as a `MessageNumber`
@@ -585,10 +591,16 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     expect(svg).not.toContain('arrow-sync');
   });
 
-  it('still draws the loop path itself', () => {
+  it('still draws the loop itself, as upstream\'s three strokes', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    // Out, down, and back -- the third running left-to-right from the
+    // returning x, which is `hline(xRight - x2)` translated to `x2`.
+    expect(svg).toContain(`<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`);
     expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`,
+      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+    );
+    expect(svg).toContain(
+      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
     );
   });
 
@@ -602,11 +614,18 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
 
   it('dashes a self reply loop', () => {
     const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
-    expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
-        `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
-        'stroke-dasharray="5,5"',
-    );
+    // The dash reaches all THREE strokes, not just the first: a reply loop
+    // that dashed only its outgoing segment would look like two arrows.
+    for (const seg of [
+      `<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`,
+      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+    ]) {
+      expect(svg).toContain(
+        `${seg} stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
+          'stroke-dasharray="5,5"',
+      );
+    }
   });
 });
 
