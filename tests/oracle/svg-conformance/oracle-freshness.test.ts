@@ -18,8 +18,22 @@
  * artifacts, not measurements. So the sentinel list below covers every type
  * with a committed cache, not just the one that was caught first.
  *
- * Staleness is a whole-cache property — one capture run writes every file for
- * a type — so ONE sentinel PER TYPE is enough.
+ * Staleness *was* believed to be a whole-cache property — one capture run
+ * writes every file for a type — so ONE sentinel PER TYPE was thought enough.
+ *
+ * **That assumption is false, and it failed exactly as this file warns.** On
+ * 2026-09-02, 244 of 266 `component` oracles were found still in the
+ * pre-SVG-reduction form while 22 were not: the cache had been PARTIALLY
+ * recaptured. The `component` sentinel (`babafi-51-dixi026`) is one of the 22
+ * fresh files, so this suite was green while 91% of that cache was stale and
+ * every description conformance number measured against it was an artifact.
+ * Regenerating it moved description's weighted total by -7.8%.
+ *
+ * So there are now TWO checks. The per-type sentinel above proves the cache is
+ * not WHOLLY stale; {@link EMISSION_FORM_PROBES} below proves it is not
+ * PARTIALLY stale, across every cached file, without rendering 2 500 fixtures.
+ * A gate that cannot detect its own stale input is not a gate — and one that
+ * samples a single file cannot detect a heterogeneous one.
  *
  * **Compares BYTES, deliberately.** Every other suite here goes through
  * `compare.ts`, whose DOM parse is blind by construction to entity form and
@@ -41,7 +55,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -143,6 +157,62 @@ describe('oracle cache freshness (object-close D4, all types per SI16)', () => {
       const fresh = readFileSync(join(out, `${s.type}.svg`));
       const cached = readFileSync(cachedSvg(s));
       expect(fresh.equals(cached), staleMessage(s, fresh, cached)).toBe(true);
+    },
+  );
+
+  /**
+   * A marker of a SUPERSEDED emission form: a coordinate written to four or
+   * more decimals. The jar rounds to three, so a cached file carrying
+   * `x="260.0688"` was written by an older one.
+   *
+   * **Exactly one probe, deliberately.** Three others were tried and are
+   * unsound, each for its own reason, and they are recorded here so nobody
+   * re-adds them:
+   *
+   *  - *per-`<text>` `font-family`* — legitimate today. The common family is
+   *    hoisted to the parent `<g>`, but a run that DIFFERS still carries its
+   *    own; a `""monospace""` creole run is the everyday case. Flagged 79
+   *    sequence and 23 class oracles that are perfectly fresh.
+   *  - *per-`<text>` `lengthAdjust`* — same shape, same failure.
+   *  - *six-digit hex fill* — the jar shortens `#RRGGBB` to `#RGB` only when
+   *    each pair repeats. `#F1F1F1` cannot compress and stays six digits.
+   *    Flagged 87 usecase oracles that are fresh.
+   *
+   * The rule the survivor satisfies and the others do not: it must be
+   * something the current jar can NEVER emit, not merely something it emits
+   * less often. Presence is the only signal — absence proves nothing, since a
+   * fixture may have no fractional coordinate at all.
+   */
+  const SUPERSEDED_FORM = {
+    name: 'coordinate at four or more decimals (the jar rounds to three)',
+    re: /"-?\d+\.\d{4,}"/,
+  } as const;
+
+  it.each(SENTINELS.map((s) => [s.type, s] as const))(
+    'every %s oracle shares the emission form of a fresh render, not just the sentinel',
+    (type, s) => {
+      if (!haveJar) {
+        console.warn(`skipped: no oracle jar at ${JAR} — cannot check ${type} cache homogeneity`);
+        expect(existsSync(cachedSvg(s))).toBe(true);
+        return;
+      }
+      // Only a form the CURRENT jar never produces can convict a cached file.
+      const fresh = readFileSync(join(out, `${type}.svg`), 'utf8');
+      if (SUPERSEDED_FORM.re.test(fresh)) return;
+
+      const dir = join(CACHE, type);
+      const offenders = readdirSync(dir).filter((slug) => {
+        const svg = join(dir, slug, 'in.svg');
+        return existsSync(svg) && SUPERSEDED_FORM.re.test(readFileSync(svg, 'utf8'));
+      });
+      expect(
+        offenders.length,
+        `${String(offenders.length)} of the ${type} oracles carry a ${SUPERSEDED_FORM.name}, `
+          + `which the pinned jar no longer emits — so that cache was captured by MORE THAN ONE `
+          + `jar and is PARTIALLY stale. The per-type sentinel cannot see this: on 2026-09-02 `
+          + `244 of 266 component oracles were stale while its sentinel was fresh. Re-capture `
+          + `the whole type. First few: ${offenders.slice(0, 5).join(', ')}`,
+      ).toBe(0);
     },
   );
 });
