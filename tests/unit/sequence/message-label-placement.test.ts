@@ -174,21 +174,25 @@ describe('creole in a message label (C3)', () => {
 
 /**
  * The safety property. A label with no markup must render EXACTLY as it did
- * before C3 routed message labels through the creole engine — C1's
- * measurement identity (one atom, the original string, the original font) is
- * what makes that hold, and this pins it on real output rather than assuming
- * it.
+ * before the creole seam — measurement identity (one atom, the original
+ * string, the original font) is what makes that hold, and this pins it on
+ * real output rather than assuming it.
  *
- * Captured from `bosedo-77-loge384` at `e9d1b4df`, the commit before C3.
+ * Captured from `bosedo-77-loge384` at `e9d1b4df`, the commit before the
+ * seam landed. The vertical-terms batch moved every baseline ONTO the jar's:
+ * `bosedo`'s golden carries 61.111 / 88.111 / 115.111 for these three runs
+ * and 150x178 for the document, both of which this port now reproduces
+ * exactly. The x, the font, the `textLength` and the element shape are
+ * unchanged, which is what the identity property is about.
  */
 const PLAIN_LABEL_TEXTS = [
-  '<text x="35.681" y="44.111" font-size="13" fill="#181818" textLength="36.156">12345</text>',
-  '<text x="35.681" y="78.111" font-size="13" fill="#181818" textLength="65">こんにちわ</text>',
-  '<text x="45.681" y="112.111" font-size="13" fill="#181818" textLength="65">さようなら</text>',
+  '<text x="35.681" y="61.111" font-size="13" fill="#181818" textLength="36.156">12345</text>',
+  '<text x="35.681" y="88.111" font-size="13" fill="#181818" textLength="65">こんにちわ</text>',
+  '<text x="45.681" y="115.111" font-size="13" fill="#181818" textLength="65">さようなら</text>',
 ];
 
-describe('a markup-free label is byte-identical after C3', () => {
-  it('emits the pre-C3 <text> elements verbatim', () => {
+describe('a markup-free label is byte-identical apart from its baseline', () => {
+  it('emits the pre-seam <text> elements with the jar’s own baselines', () => {
     const plain = renderFixtureSequence(readFileSync(ORACLE, 'utf8'), new DeterministicMeasurer());
     const emitted = [...plain.matchAll(/<text[^>]*font-size="13"[^>]*>[^<]*<\/text>/g)].map((m) => m[0]);
     expect(emitted).toEqual(PLAIN_LABEL_TEXTS);

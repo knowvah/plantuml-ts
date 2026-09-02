@@ -444,6 +444,34 @@ export function renderSequencePage(
 }
 
 /**
+ * `SvgGraphics#ensureVisible:128-135`, called from the constructor with the
+ * computed dimension (`:138-143`):
+ *
+ * ```java
+ * if (x > maxX)  maxX = (int) (x + 1);
+ * if (y > maxY)  maxY = (int) (y + 1);
+ * ```
+ *
+ * The emitted `width`/`height`/`viewBox` are therefore `(int)(dim + 1)`, not
+ * `trunc(dim)`. `assembleDocumentShell` truncates, so the `+ 1` is added here
+ * and the two compose into upstream's own expression.
+ *
+ * IT IS APPLIED ON THE SEQUENCE PATH ONLY, deliberately. Taken in the shared
+ * shell (`core/klimt/document-shell.ts`) it helps sequence by 830 and hurts
+ * class by 2 362, state by 936, object by 260 and description by 26 — measured
+ * per fixture across all five families before the ruling in
+ * `findings/vertical-terms.md`. Those four are already correct at `trunc`:
+ * their extent is a graphviz bounding box plus explicit margins, which already
+ * carries the rounding applied during drawing. Sequence's is a raw max
+ * coordinate, so sequence alone is short. `bidopa-30-jafi560` is the witness —
+ * its width was 115 against the jar's 116.
+ *
+ * `maxX`/`maxY` also start at 10, a floor no sequence document reaches; it is
+ * not modelled.
+ */
+const ENSURE_VISIBLE_DELTA = 1;
+
+/**
  * Render a sequence diagram geometry into an SVG string — PAGE 1 of it.
  *
  * The jar writes `f.svg`, `f_001.svg`, … for a multi-page document; this
@@ -520,8 +548,8 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
 
   return {
     body: children.join(''),
-    width: scaledGeo.totalWidth,
-    height: scaledGeo.totalHeight,
+    width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
+    height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
     background: theme.colors.background,
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.

@@ -571,7 +571,11 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // The loop's returning segment ends at fromX, so the head tip sits there
   // (`ComponentRoseSelfArrow.java:126` draws the bottom hline from x2 and
   // `:172` puts the polygon's tip at that same x2).
-  const LOOP_BOTTOM_Y = SELF_Y + 20;
+  // `getArrowOnlyHeight()` = 13 (`ComponentRoseSelfArrow.java:321-323`), drawn
+  // as `vline(arrowHeight)` at `:125`. `jobadi-87-jegi648`'s golden drops
+  // `y1="53"` to `y2="66"`; this port carried 20 until the vertical terms
+  // landed, because moving the loop moves every event under it.
+  const LOOP_BOTTOM_Y = SELF_Y + 13;
   /** `xRight = arrowWidth - 3` = 42 (`ComponentRoseSelfArrow.java:59-60`),
    *  which is where `drawRightSide:125` puts the vertical stroke. Verified
    *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
@@ -587,7 +591,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
     // direction = +1 (reverseDefine is unreachable from this parser), so
     // (10,-4) (0,0) (10,4) (6,0) about (80, 100).
-    expect(svg).toContain('<polygon points="90,96,80,100,90,104,86,100"');
+    expect(svg).toContain('<polygon points="90,89,80,93,90,97,86,93"');
     expect(svg).not.toContain('arrow-sync');
   });
 
@@ -607,9 +611,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   it('draws a self async head as two open strokes', () => {
     const svg = assembleSvg(renderSequence(selfGeo('async'), defaultTheme));
     // `ComponentRoseSelfArrow.java:161-169` -- ULine(+arrowDeltaX, -+arrowDeltaY)
-    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="96"');
-    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="104"');
-    expect(svg).not.toContain('<polygon points="90,96,80,100,90,104,86,100"');
+    expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="89"');
+    expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="97"');
+    expect(svg).not.toContain('<polygon points="90,89,80,93,90,97,86,93"');
   });
 
   it('dashes a self reply loop', () => {
@@ -1873,8 +1877,12 @@ describe('renderSequence — exogenous arrows', () => {
     // measured from the now-nearer second lifeline, so both narrow by it.
     // 137, not 139: the exo's label is now measured at 13 rather than 14, so
     // its reach is 2px shorter.
-    expect(docWidth(without)).toBe(116);
-    expect(docWidth(withExo)).toBe(137);
+    // 117/138: `SvgGraphics#ensureVisible:128-135` writes `(int)(x + 1)`, not
+    // `trunc(x)`. Applied on the sequence path by C3, so every document is one
+    // wider -- and `bidopa-30-jafi560`, which is this exact two-participant
+    // shape, now emits the jar's own `width="116px"` where it emitted 115.
+    expect(docWidth(without)).toBe(117);
+    expect(docWidth(withExo)).toBe(138);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1900,7 +1908,13 @@ describe('renderSequence — exogenous arrows', () => {
     const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
     // cy 48.25, not 53.25: the head row lost 5px when the box height became
     // `text + 2 * 7` instead of `text + 20`, and the body starts below it.
-    expect(svg).toContain('<ellipse cx="15.5" cy="48.25" rx="4" ry="4" fill="#000"');
+    // cy 65.25 since C3: +10 for the document's top margin and +7 for the
+    // arrow's own place inside its tile (`blockH + 6` below a tile top that
+    // is `startingY` = 8 under the head row, against the 20 this port used).
+    // 65 IS the jar's arrow y for a one-message diagram -- `bidopa`'s golden
+    // draws its line at `y1="66"`, and the circle sits a quarter-pixel under
+    // the body.
+    expect(svg).toContain('<ellipse cx="15.5" cy="65.25" rx="4" ry="4" fill="#000"');
     expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
   });
 

@@ -72,14 +72,22 @@ describe('frame header text', () => {
     expect(comment.size).toBe('11');
   });
 
-  it('does not move the baseline it already had right', () => {
+  it('puts both tab baselines on the jar', () => {
     // 10.111 below the tab's block top and 8.556 for the 11px comment, the two
     // numbers `renderer-frame-header.ts`'s deleted `textAscent` was verified
     // against. They must survive the switch to a measured ascent.
+    //
+    // C3 moved the block top itself, twice and in the same direction: the
+    // document's own `TOP_MARGIN` (+10) and `GroupingTile#getFrameY:240-242`'s
+    // `EXTERNAL_MARGINY` (+4) both push it down, and the tile chain above it
+    // pulls back. The result is the JAR's own pair —
+    // `<text x="28" y="62.111" ...>loop</text>` and
+    // `<text x="97.619" y="61.556" ...>[forever]</text>` — so these are no
+    // longer this port's numbers held steady, they are upstream's, exactly.
     const title = texts(svg).find((t) => t.text === 'loop')!;
     const comment = texts(svg).find((t) => t.text === '[forever]')!;
-    expect(Number(title.y)).toBeCloseTo(60.111, 3);
-    expect(Number(comment.y)).toBeCloseTo(59.556, 3);
+    expect(Number(title.y)).toBeCloseTo(62.111, 3);
+    expect(Number(comment.y)).toBeCloseTo(61.556, 3);
   });
 
   it('takes the ascent from the MEASURER, not from the font size', () => {

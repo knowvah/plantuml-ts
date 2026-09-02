@@ -21,7 +21,9 @@ import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
+import {
+  ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, TOP_MARGIN,
+} from './sequence-layout-shared.js';
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
@@ -284,11 +286,12 @@ function positionParticipants(
   const areaOf = (g: ParticipantGeo): number => g.height + headSlackOf(g.type);
   const maxParticipantHeight = Math.max(...participantGeos.map(areaOf));
   // Bottom-align the head AREAS, not the boxes: each area ends at
-  // `maxParticipantHeight`, so every lifeline starts there and the box is
-  // painted at the TOP of its area with the slack below it -- which puts
-  // `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
+  // `TOP_MARGIN + maxParticipantHeight`, so every lifeline starts there and
+  // the box is painted at the TOP of its area with the slack below it --
+  // which puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
+  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x.
   for (const g of participantGeos) {
-    g.y = maxParticipantHeight - areaOf(g);
+    g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
     g.labelRuns = buildLabelRuns(g, ctx);

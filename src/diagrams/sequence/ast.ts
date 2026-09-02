@@ -215,6 +215,17 @@ export interface ActivationEvent {
   kind: 'activate' | 'deactivate';
   participantId: string;
   color?: string;
+  /**
+   * `LifeEventType.DESTROY` (`CommandActivate.java:63-65`), which this port
+   * otherwise widens into a plain `deactivate`.
+   *
+   * It is kept because the two reserve different heights. A destroy that
+   * upstream could not bind to a message —
+   * `LifeEventTile#isDestroyWithoutMessage:124-126` — reserves the cross's own
+   * `crossSize * 2` = 18 (`:132-136`, `ComponentRoseDestroy:57,68-70`); every
+   * other life event reserves 0 (`:137`). The cross itself is still not drawn.
+   */
+  destroy?: true;
 }
 
 export interface DividerEvent {

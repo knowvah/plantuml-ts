@@ -172,9 +172,11 @@ describe('participant labels through creole', () => {
     const left = row[0]!.x;
     const right = row.at(-1)!.x + row.at(-1)!.textLength!;
     expect(right - left).toBeCloseTo(199.325, 3);
-    // The jar's box is `x=283.594 y=20 w=227.325`; this port is still 10
-    // above the jar on every sequence y, so its own head box sits at y=0.
-    const boxes = [...svg.matchAll(/<rect x="([\d.]+)" y="0" width="([\d.]+)"/g)];
+    // The jar's box is `x=283.594 y=20 w=227.325`. Since C3 landed the
+    // document's top margin this port's head row starts at 10 too; this
+    // fixture's tallest head is taller than Bob's, so Bob's own box is
+    // bottom-aligned 10 lower still. Only the CENTRE is asserted below.
+    const boxes = [...svg.matchAll(/<rect x="([\d.]+)" y="20" width="([\d.]+)"/g)];
     const bob = boxes[1]!;
     expect(left + (right - left) / 2).toBeCloseTo(Number(bob[1]) + Number(bob[2]) / 2, 3);
   });
@@ -189,9 +191,9 @@ describe('participant labels through creole', () => {
     expect(heading.weight).toBe('700');
     expect(heading.textLength).toBe(58.05);
     expect(heading.x).toBeCloseTo(23.019, 3);
-    // The jar's baseline is 31; this port is still 10 above the jar on every
-    // sequence y (the document margin Phase C owns), so 21 IS the jar's.
-    expect(heading.y).toBeCloseTo(21, 3);
+    // The jar's baseline is 31, and C3 landed the document's top margin, so
+    // this port is now ON it rather than 10 above.
+    expect(heading.y).toBeCloseTo(31, 3);
   });
 
   it('measures a `""mono""` row at its own family, and moves the box with it', () => {
@@ -203,15 +205,18 @@ describe('participant labels through creole', () => {
     expect(mono.family).toBe('monospace');
     expect(mono.textLength).toBe(70.087);
     expect(mono.x).toBe(17);
-    expect(svg).toContain('<rect x="10" y="0" width="84.087"');
+    // y=10 since C3: the jar's own head-row origin (`TOP_MARGIN`).
+    expect(svg).toContain('<rect x="10" y="10" width="84.087"');
   });
 
   it('emits a markup-free name byte-for-byte as it did before the seam', () => {
     // Measurement identity: no markup -> one atom -> `measure(line)`, the same
     // raw call this row used to make. Pinned as the whole element, so a stray
     // style attribute or a moved coordinate both fail here.
+    // The baseline is the jar's 27.889 since C3 landed the top margin; the
+    // jar's own golden carries `<text x="17" y="27.889" ... >Bob</text>`.
     expect(render('jobadi-87-jegi648')).toContain(
-      '<text x="17" y="17.889" font-size="14" fill="#181818" textLength="24.938">Bob</text>',
+      '<text x="17" y="27.889" font-size="14" fill="#181818" textLength="24.938">Bob</text>',
     );
   });
 });

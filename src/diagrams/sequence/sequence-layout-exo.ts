@@ -41,7 +41,8 @@ import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { messageTileAdvance } from './sequence-layout-message.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
@@ -293,14 +294,25 @@ export function handleMessageExoEvent(
   // Skip gracefully if the participant is unknown, as `handleMessageEvent` does.
   if (participant === undefined) return;
 
-  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
-  const rows = messageLabelRows(event.label, numberTextOf(event));
-  cursor.y += Math.max(0, rows - 1) * lineHeight;
+  // An exo message is an `AbstractMessage` too, so it is a `destroy`'s binding
+  // target on the same terms (`SequenceDiagram.java:204`).
+  ctx.lastMessageParticipants = [event.participant];
 
-  const messageGeo = buildExoGeo(event, exoSpan(event, participant.centerX, ctx), cursor.y, ctx);
+  // `CommunicationExoTile#getComponent:97-104` builds a `ComponentRoseArrow`,
+  // the same component a between-lifelines message uses, so its tile has the
+  // same height and the same contact point -- `getPreferredHeight:155-159` is
+  // the component's own dimension and `getContactPointRelative:93-95` its
+  // `getYPoint`. `messageTileAdvance` is therefore shared, not duplicated.
+  // The font is the ARROW's 13 for the same reason it is there.
+  const lineHeight = ctx.measurer.measure('M', arrowFontSpecOf(ctx.theme)).height;
+  const rows = messageLabelRows(event.label, numberTextOf(event));
+  const advance = messageTileAdvance(rows * lineHeight, false);
+
+  const geoY = cursor.y + advance.arrowY;
+  const messageGeo = buildExoGeo(event, exoSpan(event, participant.centerX, ctx), geoY, ctx);
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
-  cursor.y += ctx.theme.sequence.messageSpacing + lineHeight;
+  cursor.y += advance.tileHeight;
 }
 
 // ---------------------------------------------------------------------------

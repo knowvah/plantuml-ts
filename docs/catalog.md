@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1058 modules · 3794 exported names.
+1058 modules · 3799 exported names.
 
 ## `src/`
 
@@ -1294,10 +1294,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-creole.ts` | `CreoleOrigin`, `sequenceCreoleFont`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
 | `sequence-layout-events.ts` | `ActivationStack`, `EventProcessingContext`, `EventCursor`, `processEvents`, `pushActivation`, `openActivation`, `activationLevel`, `flushOpenActivations`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
 | `sequence-layout-exo.ts` | `handleMessageExoEvent`, `exoRightExtent`, `anchorExoBorders` | Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …). |
-| `sequence-layout-message.ts` | `handleMessageEvent` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
+| `sequence-layout-message.ts` | `handleMessageEvent`, `messageTileAdvance` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight`, `participantLabelCy`, `participantBadgeGeo` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout`, `headSlackOf` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
-| `sequence-layout-shared.ts` | `fontSpecOf`, `ARROW_FONT_SIZE`, `arrowFontSpecOf`, `NOTE_FONT_SIZE`, `noteFontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X` | Small shared leaf utilities for sequence diagram layout. |
+| `sequence-layout-shared.ts` | `fontSpecOf`, `ARROW_FONT_SIZE`, `arrowFontSpecOf`, `NOTE_FONT_SIZE`, `noteFontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X`, `TOP_MARGIN`, `PLAYING_SPACE_STARTING_Y`, `PLAYING_SPACE_TAIL_Y`, `BOTTOM_MARGIN` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `sequence-text.ts` | `SequenceRunImage`, `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |

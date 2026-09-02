@@ -42,13 +42,14 @@ const SELF_LOOP_WIDTH = 42;
  * (`ComponentRoseSelfArrow.java:321-323`), drawn as `vline(arrowHeight)`
  * (`:125`), and `jobadi-87-jegi648`'s golden drops `y1="53"` to `y2="66"`.
  *
- * This port's 20 is therefore 7 too tall, and it is left that way
- * DELIBERATELY: y-coordinate convergence is an explicit non-goal of the
- * mission that measured it (`plans/sequence-coordinate-convergence`), and
- * changing it moves every self message's following event. Cited here so the
- * next mission to touch it does not have to re-derive it.
+ * This was 20 until C3 — 7 too tall, left that way deliberately because
+ * y-coordinate convergence was an explicit non-goal of the mission that
+ * measured it (`plans/sequence-coordinate-convergence`) and changing it moves
+ * every following event. It lands here with the term that moves those events:
+ * `sequence-layout-message.ts#SELF_ARROW_ONLY_HEIGHT` is the same 13 on the
+ * sizing side, and the two must agree or the loop overhangs its own tile.
  */
-const SELF_LOOP_HEIGHT = 20;
+const SELF_LOOP_HEIGHT = 13;
 
 /**
  * The self branch: three strokes clockwise off the lifeline and back, then

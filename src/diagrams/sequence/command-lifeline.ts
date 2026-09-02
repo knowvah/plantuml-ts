@@ -74,7 +74,10 @@ export const deactivateCommand: Command = {
   },
 };
 
-// 7. destroy → treated as deactivate. Same widening as `deactivateCommand`.
+// 7. destroy → treated as deactivate, but FLAGGED. Same widening as
+//    `deactivateCommand`; the flag is what lets layout reserve the destroy
+//    cross's 18 when upstream would not have bound this life event to a
+//    message (`LifeEventTile#getPreferredHeight:128-138`).
 // @see sequencediagram/command/CommandActivate.java:63-65,109
 export const destroyCommand: Command = {
   pattern: new RegExp(`^destroy\\s+${WHO}\\s*$`, 'i'),
@@ -84,6 +87,7 @@ export const destroyCommand: Command = {
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
+      destroy: true,
     };
     emit(state, ev);
   },

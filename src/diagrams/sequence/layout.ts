@@ -36,7 +36,13 @@ import {
   type ActivationStack,
   type EventProcessingContext,
 } from './sequence-layout-events.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import {
+  BOTTOM_MARGIN,
+  fontSpecOf,
+  PLAYING_SPACE_STARTING_Y,
+  PLAYING_SPACE_TAIL_Y,
+  TOP_MARGIN,
+} from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
@@ -115,7 +121,7 @@ function assembleGeometry(
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } =
-    computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
+    computeVerticalTotals(maxParticipantHeight, currentY, showFootbox);
   flushOpenActivations(
     eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos,
   );
@@ -130,7 +136,12 @@ function assembleGeometry(
     totalHeight,
     participants: participantGeos,
     events: eventGeos,
-    headHeight: maxParticipantHeight,
+    // The ABSOLUTE y the lifelines start at, which is the head BAND's height
+    // dropped by the document's top margin: `10 + headHeight` in
+    // `findings/vertical-terms.md` §0's landmark table. Every consumer
+    // (`renderer-lifeline.ts:95`, `sequence-page.ts:320`) already reads it as
+    // an absolute coordinate.
+    headHeight: TOP_MARGIN + maxParticipantHeight,
     lifelineEndY,
     footerShapeY,
     showFootbox,
@@ -163,7 +174,11 @@ function runEventLayout(
     dividerGeos,
     newpageGeos,
   };
-  const startY = participantLayout.maxParticipantHeight + theme.sequence.messageSpacing;
+  // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
+  // head row, and NOT one `messageSpacing`: teoz has no such term at all
+  // (`findings/vertical-terms.md` §1.4).
+  const startY =
+    TOP_MARGIN + participantLayout.maxParticipantHeight + PLAYING_SPACE_STARTING_Y;
   const currentY = processEvents(ast.events, startY, ctx);
 
   return {
@@ -266,33 +281,45 @@ interface VerticalTotals {
 }
 
 /**
- * Compute the lifeline end, footer shape, and total diagram height.
- * Non-rectangular footer shapes (actor, database) get their label above the
- * shape, so a label-height zone is reserved between the lifeline end and the
- * shape.
+ * The document's vertical close-out — `findings/vertical-terms.md` §0, read
+ * bottom-up:
+ *
+ * ```
+ * pageHeight = max(inkHeight, startingY + SUM(tileHeight)) + 10
+ *                                    PlayingSpace#getPreferredHeight:154-161
+ * pswpHeight = pageHeight + (footbox ? 2 : 1) * headHeight
+ *                        PlayingSpaceWithParticipants#calculateDimension:74-87
+ * svgHeight  = pswpHeight + 10 (block inset) + 10 (exporter margins)
+ *                     SequenceDiagramFileMakerTeoz#getTextBlock:132,150-158;
+ *                     TextBlockExporter:199-203
+ * ```
+ *
+ * `currentY` is the last tile's gauge max, so `currentY + PLAYING_SPACE_TAIL_Y`
+ * is the top of the foot row — and the foot band is the SAME `headHeight` as
+ * the head band, drawn flush at `dy(pageHeight + headHeight)`
+ * (`PlayingSpaceWithParticipants#drawU:224-225`).
+ *
+ * There is NO footer label zone. This port reserved `theme.fontSize + 8`
+ * between the lifeline end and an actor/database foot; upstream's tail
+ * component puts the label above its own stickman INSIDE its own height
+ * (`LivingSpaces#drawHeads:135-141`) and reserves nothing extra, which is why
+ * `footerShapeY` is now just `lifelineEndY`. `renderFooterBox` already draws
+ * from `lifelineEndY` and derives each kind's glyph offset itself, so the
+ * field survives only for `sequence-page.ts`/`scale-geo.ts`.
  */
 function computeVerticalTotals(
-  participantGeos: ParticipantGeo[],
   maxParticipantHeight: number,
   currentY: number,
-  theme: Theme,
   showFootbox: boolean,
 ): VerticalTotals {
-  const lifelineEndY = currentY + theme.sequence.lifelineExtension;
-  const BOTTOM_MARGIN = 5;
-  // No footer row: reserve nothing for it. Upstream does not lay one out
-  // either, so the document ends just past the lifelines.
-  if (!showFootbox)
-    return { lifelineEndY, footerShapeY: lifelineEndY, totalHeight: lifelineEndY + BOTTOM_MARGIN };
-
-  const hasNonRectFooter = participantGeos.some(
-    (p) => p.type === 'actor' || p.type === 'database',
-  );
-  const footerLabelH = hasNonRectFooter ? theme.fontSize + 8 : 0;
-  const footerShapeY = lifelineEndY + footerLabelH;
-  const totalHeight = footerShapeY + maxParticipantHeight + BOTTOM_MARGIN;
-
-  return { lifelineEndY, footerShapeY, totalHeight };
+  const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
+  // `factor` in `calculateDimensionSlow:83-84` — 2 with a footbox, 1 without.
+  const footBand = showFootbox ? maxParticipantHeight : 0;
+  return {
+    lifelineEndY,
+    footerShapeY: lifelineEndY,
+    totalHeight: lifelineEndY + footBand + BOTTOM_MARGIN,
+  };
 }
 
 /**

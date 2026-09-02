@@ -88,6 +88,19 @@ export interface EventProcessingContext {
    *  (`:326-336`). Collected alongside `dividerGeos` for the same reason:
    *  both need `totalWidth` back-filled once Step 3 knows it. */
   newpageGeos: NewpageGeo[];
+  /**
+   * The participants of `SequenceDiagram.lastEventWithDeactivate` when that
+   * event is a MESSAGE, and `undefined` otherwise — a diagram-level field
+   * upstream (`:145`), set by `addMessage` (`:204`) and reset to the
+   * `GroupingLeaf` by a group `end` (`:438`).
+   *
+   * Only one reader: a `destroy` binds to it when it `dealWith`s the same
+   * participant AND it is an `AbstractMessage` (`:387,396-398`), and an
+   * unbound destroy is the one life event that reserves height. `undefined`
+   * therefore covers both "nothing yet" and "the last one was a group end",
+   * which are the same answer.
+   */
+  lastMessageParticipants?: readonly string[] | undefined;
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
@@ -186,14 +199,31 @@ function handleNoteEvent(
   // reserves the width of `bold` (jar: `moxope-92-roco972`).
   const rows = noteBodyRuns(lines, fontSpec, ctx);
   const noteWidth = blockWidthOf(rows) + notePadding * 2;
-  const noteHeight = lines.length * lineHeight + notePadding * 2;
+  // The DRAWN box is `getTextHeight` tall -- the block plus `padding.top` and
+  // `padding.bottom`, both 5 (`ComponentRoseNote:67-70,104-118`). This port
+  // used the x padding (10) on both axes, making every note box 10 too tall.
+  const noteHeight = lines.length * lineHeight + NOTE_PADDING_Y * 2;
 
-  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y, ctx.participantMap);
-  const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + notePadding];
+  // And the box is drawn `getPaddingY` BELOW the tile top -- `Rose.paddingY`
+  // = 5, handed to the component at `Rose:115` and applied by
+  // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
+  // at y=52 against a tile top of 47.
+  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
   noteGeo.textRuns = rows.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
   ctx.eventGeos.push(noteGeo);
-  cursor.y += noteHeight + ctx.theme.sequence.messageSpacing;
+  // `NoteTile#getPreferredHeight:167-171` is the component's height and
+  // nothing else -- no spacing either side -- and that is `getTextHeight +
+  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`.
+  cursor.y += noteHeight + NOTE_PADDING_Y * 2;
 }
+
+/** `ComponentRoseNote`'s own vertical padding, `topRightBottomLeft(5, 15, 5,
+ *  15)` (`:67-70`) — and, separately, `Rose.paddingY` (`Rose.java:66`, passed
+ *  at `:115`), which is the same 5 and is what offsets the box below its tile
+ *  top. The HORIZONTAL padding is 15 upstream against this port's 10; that is
+ *  an x term and `findings/vertical-terms.md` §4 does not claim it. */
+const NOTE_PADDING_Y = 5;
 
 function handleActivateEvent(
   event: ActivationEvent,
@@ -223,11 +253,62 @@ function handleDeactivateEvent(
     deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
   emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   cursor.lastMessageY = undefined;
+  if (isDestroyWithoutMessage(event, ctx)) cursor.y += DESTROY_CROSS_SIZE * 2;
 }
 
-/** Vertical room an `else` separator line plus its bracketed condition
- *  occupies before the branch's own first event. */
-const SEPARATOR_HEIGHT = 20;
+/**
+ * `LifeEventTile#isDestroyWithoutMessage:124-126` — `lifeEvent.getMessage() ==
+ * null && lifeEvent.getType() == DESTROY`.
+ *
+ * `getMessage()` is set only when `SequenceDiagram#activate` reaches its
+ * `setMessage` line (`:396-398`), which two earlier guards can skip: a
+ * `lastEventWithDeactivate` that does not `dealWith(p)` returns at `:387`, and
+ * one that is not an `AbstractMessage` — a group `end`, per `:438` — falls
+ * past the `instanceof` test. Both leave the message null, so both make the
+ * destroy standalone. `X -> X` followed by `destroy Y` is upstream's own
+ * worked example, in the comment above `:387`.
+ */
+function isDestroyWithoutMessage(
+  event: ActivationEvent,
+  ctx: EventProcessingContext,
+): boolean {
+  if (event.destroy !== true) return false;
+  return ctx.lastMessageParticipants?.includes(event.participantId) !== true;
+}
+
+/** `ComponentRoseDestroy.crossSize` (`:57`); the component is `crossSize * 2`
+ *  on both axes (`:68-70,72-74`), and `LifeEventTile:132-136` reserves that
+ *  height for a destroy with no message. The cross itself is not drawn here —
+ *  reserving its space is the vertical term; emitting its two strokes is an
+ *  element-deficit task. */
+const DESTROY_CROSS_SIZE = 9;
+
+/**
+ * Vertical room an `else` separator plus its bracketed condition occupies.
+ * `ElseTile:80` reserves the component's `getPreferredHeight`, whose teoz arm
+ * is `getTextHeight + 4` (`ComponentRoseGroupingElse:115-121`) over padding
+ * `topRightBottomLeft(1, 5, 1, 5)` (`:65-67`) — so `blockH + 6`, 17 for an
+ * 11px condition, where this port used a flat 20. `blockH` is **0** for a bare
+ * `else`: the constructor takes `comment == null ? null : "[" + comment + "]"`,
+ * so a conditionless branch has no display. Jar-verified on
+ * `cazusa-73-masi168`, whose bare rule at 311 chains the next frame at 316 and
+ * whose labelled rule at 496 chains it at 512.
+ */
+function separatorHeight(label: string, ctx: EventProcessingContext): number {
+  const blockH =
+    label.trim() === ''
+      ? 0
+      : ctx.measurer.measure('M', {
+          family: ctx.theme.fontFamily,
+          size: GROUP_FONT_SIZE,
+          weight: GROUP_FONT_BOLD ? 'bold' : 'normal',
+        }).height;
+  return blockH + 2 * ELSE_PADDING_Y + ELSE_TEOZ_DELTA_H;
+}
+
+/** The teoz arm's `+ 4` (`ComponentRoseGroupingElse#getPreferredHeight:
+ *  115-121`), on top of the component's own `getTextHeight`. */
+const ELSE_TEOZ_DELTA_H = 4;
 
 /** `GroupingTile.MARGINX` (`teoz/GroupingTile.java:89`) — how far a group's
  *  frame reaches beyond the tiles it contains, on each side. */
@@ -495,18 +576,27 @@ function handleFrameEvent(
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
+  // `frameStartY` is the GAUGE MIN -- the chaining point, NOT the drawn
+  // frame's top. Those differ by `EXTERNAL_MARGINY`, and GroupingTile keeps
+  // them apart deliberately: a parallel (`&`) sibling chains on the min, so
+  // folding the margin into it would drift 4px per pair (`:145-152`).
   const frameStartY = cursor.y;
-  const frameHeaderHeight = 30;
-  cursor.y += frameHeaderHeight;
-
   const { x, width, refBody, body } = computeFrameBody(event, ctx);
   const tab = computeHeaderTab(event, ctx);
+  // `final double h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY;`
+  // (`GroupingTile.java:156`) -- the body starts below the frame's top margin
+  // AND the header, where `dim1` is the header component's own preferred
+  // dimension. This port used a flat 30 where upstream MEASURES the header.
+  cursor.y = frameStartY + tab.tabHeight + FRAME_MARGINY_MAGIC / 2 + FRAME_EXTERNAL_MARGINY;
+
+  // `getFrameY()` (`:240-242`) -- the drawn border, one top margin below.
+  const frameDrawnY = frameStartY + FRAME_EXTERNAL_MARGINY;
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
     label: event.label,
     x,
-    y: frameStartY,
+    y: frameDrawnY,
     width,
     height: 0, // placeholder -- filled below once the branch walk resolves frameEndY
     ...(event.backColorElement !== undefined ? { backColorElement: event.backColorElement } : {}),
@@ -514,9 +604,9 @@ function handleFrameEvent(
     branchSeparators: [], // placeholder -- populated by mutation in the loop below
     refBody,
     ...tab,
-    tabRuns: buildTabRuns(tab, x, frameStartY, ctx),
+    tabRuns: buildTabRuns(tab, x, frameDrawnY, ctx),
   };
-  frameGeo.refBody = placeRefBody(refBody, frameStartY, tab.tabHeight, ctx.theme.fontSize);
+  frameGeo.refBody = placeRefBody(refBody, frameDrawnY, tab.tabHeight, ctx.theme.fontSize);
   ctx.eventGeos.push(frameGeo);
 
   // Process each branch in sequence (alt frames have multiple branches).
@@ -538,15 +628,39 @@ function handleFrameEvent(
         ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
         runs: branchConditionRuns(branchLabel, x, cursor.y, ctx),
       });
-      cursor.y += SEPARATOR_HEIGHT;
+      cursor.y += separatorHeight(branchLabel, ctx);
     }
     cursor.y = processEvents(branch, cursor.y, ctx);
   });
 
   const frameEndY = cursor.y;
-  frameGeo.height = Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer));
-  cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
+  // `getTotalHeight = bodyHeight + dimIfEmpty.getHeight() + MARGINY_MAGIC / 2`
+  // (`:342-345`), which `frameEndY - frameDrawnY` is exactly: the body offset
+  // put `headerH + MARGINY_MAGIC / 2` between them and the walk added the body.
+  // The `max` is a `ref`'s floor, not a group's -- `ComponentRoseReference`'s
+  // header/body/footer split is deliberately out of C3's set (§1.9).
+  frameGeo.height = Math.max(frameEndY - frameDrawnY, refBodyHeight(body, ctx.theme, ctx.measurer));
+  // `getPreferredHeight = dim1 + bodyHeight + MARGINY_MAGIC + 2 *
+  // EXTERNAL_MARGINY` (`:348-357`), which leaves exactly
+  // `EXTERNAL_MARGINY + MARGINY_MAGIC / 2` of slack below the drawn border.
+  // This port left one `messageSpacing` (20) there.
+  cursor.y = frameEndY + FRAME_EXTERNAL_MARGINY + FRAME_MARGINY_MAGIC / 2;
+  // `grouping(... GroupingType.END ...)` sets `lastEventWithDeactivate` to the
+  // `GroupingLeaf` (`SequenceDiagram.java:438`), which is not an
+  // `AbstractMessage` -- so a `destroy` straight after `end` is standalone.
+  ctx.lastMessageParticipants = undefined;
 }
+
+/** `GroupingTile.EXTERNAL_MARGINY` (`teoz/GroupingTile.java:88`) — vertical
+ *  breathing room around a group frame, on each side. Reserved on both in
+ *  `getPreferredHeight`; the TOP one is additionally materialised at draw time
+ *  through `getFrameY()`. */
+const FRAME_EXTERNAL_MARGINY = 4;
+
+/** `GroupingTile.MARGINY_MAGIC` (`teoz/GroupingTile.java:91`) — always read as
+ *  a half (`MARGINY_MAGIC / 2`) above the body and again below the border, and
+ *  as the whole in the tile's reserved height. */
+const FRAME_MARGINY_MAGIC = 20;
 
 /**
  * `DividerTile` (`teoz/DividerTile.java`) reserves exactly its component's own
@@ -620,14 +734,37 @@ function handleDividerEvent(
   cursor.y += dividerGeo.height;
 }
 
+/**
+ * A delay reserves its component's own height and nothing else
+ * (`DelayTile#getPreferredHeight:114-118`), and there are two components. A
+ * bare `...` is a `ComponentRoseDelayLine`, a constant **20** (`:68-71`) that
+ * this port's `messageSpacing` matched by luck; a `...text...` is a
+ * `ComponentRoseDelayText`, `getTextHeight + 20` (`:72-75`) over padding
+ * `topRightBottomLeft(4, 0, 4, 0)` (`:54`), i.e. `blockH + 28` at
+ * `delay { FontSize 11 }` (`plantuml.skin:290-295`). The text is still not
+ * DRAWN — a pre-existing element gap — but its space is now reserved.
+ */
 function handleDelayEvent(
-  _event: DelayEvent,
+  event: DelayEvent,
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
-  // Delay events carry no geometry — advance by one message spacing
-  cursor.y += ctx.theme.sequence.messageSpacing;
+  if (event.text === undefined) {
+    cursor.y += DELAY_LINE_HEIGHT;
+    return;
+  }
+  const spec: FontSpec = { family: ctx.theme.fontFamily, size: DELAY_FONT_SIZE };
+  const blockH = displayLines(event.text).length * ctx.measurer.measure('M', spec).height;
+  cursor.y += blockH + 2 * DELAY_PADDING_Y + DELAY_LINE_HEIGHT;
 }
+
+/** `ComponentRoseDelayLine#getPreferredHeight:68-71`, and the constant term of
+ *  `ComponentRoseDelayText#getPreferredHeight:72-75`. */
+const DELAY_LINE_HEIGHT = 20;
+/** `ComponentRoseDelayText:54` — `topRightBottomLeft(4, 0, 4, 0)`. */
+const DELAY_PADDING_Y = 4;
+/** `delay { FontSize 11 }` (`plantuml.skin:290-295`). */
+const DELAY_FONT_SIZE = 11;
 
 /**
  * `NewpageTile` (`teoz/NewpageTile.java:63-67`): a tile whose `YGauge` starts
@@ -668,9 +805,11 @@ function handleSpaceEvent(
     height: event.pixels,
   };
   ctx.eventGeos.push(spaceGeo);
-  // Advance by the requested pixels plus one message spacing gap so that
-  // the next element starts clearly after the space region ends
-  cursor.y += event.pixels + ctx.theme.sequence.messageSpacing;
+  // Exactly the requested pixels, and nothing beside them. `HSpaceTile:72-75`
+  // returns the `HSpace`'s own pixel count as its preferred height, and
+  // `ComponentRoseGroupingSpace#getPreferredHeight:66-69` returns the `space
+  // N` argument -- neither adds a gap, because tiles chain flush.
+  cursor.y += event.pixels;
 }
 
 /**

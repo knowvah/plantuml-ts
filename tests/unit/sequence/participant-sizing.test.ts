@@ -202,15 +202,16 @@ describe('the plain participant box — height, against the jar', () => {
     // `drawInternalU` does not paint, and `LivingSpace#drawHeadOrTail:191-214`
     // reserves the PREFERRED dimension. So the head row is one taller than the
     // box, and the gap shows up between the box bottom and the lifeline top.
-    // The jar puts jobadi's box at [10, 38) and its lifeline at 39; this port
-    // has the same diagram at a different origin (Batch 5), so the RELATIVE
-    // gap is what is pinned here.
+    // The jar puts jobadi's box at [10, 38) and its lifeline at 39, and since
+    // C3 landed the document's top margin so does this port — so the ABSOLUTE
+    // numbers are pinned, not just the relative gap.
     const svg = oursFor('jobadi-87-jegi648');
     const [head] = participantBoxes(svg);
     const lifeline = /<rect x="[\d.]+" y="([\d.]+)"[^>]*fill-opacity="0"/.exec(svg);
     expect(head).toBeDefined();
+    expect(/<rect x="10" y="10" width="38.938"/.test(svg)).toBe(true);
     expect(lifeline).not.toBeNull();
-    expect(Number(lifeline?.[1])).toBeCloseTo((head?.height ?? 0) + 1, 3);
+    expect(Number(lifeline?.[1])).toBeCloseTo(10 + (head?.height ?? 0) + 1, 3);
   });
 
   it('the jar shows the same one-pixel gap in the golden', () => {

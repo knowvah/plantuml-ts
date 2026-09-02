@@ -269,15 +269,34 @@ export interface Theme {
      * a ten-pixel gap between box EDGES.
      */
     participantGap: number;
-    /** Vertical gap between messages */
+    /**
+     * INERT since C3 — nothing reads it.
+     *
+     * It was "the vertical gap between messages", and teoz has no such
+     * concept: `YGauge.createWithContact:103-116` sets each tile's `min` to
+     * the previous tile's `max`, so tiles are FLUSH and the whole gap between
+     * two events is the first one's own `getPreferredHeight`. There is no
+     * inter-event spacing constant anywhere in `sequencediagram/teoz/`.
+     *
+     * Kept as a field, not deleted, because `Theme` is public and
+     * `resolveTheme` accepts a partial override of it. A knob documented as
+     * doing nothing is better than one that silently does nothing.
+     */
     messageSpacing: number;
     /** Width of the activation box drawn on a lifeline */
     activationWidth: number;
-    /** Gap between a note and the nearest participant */
+    /** INERT — no reader. A note's own box padding is
+     *  `ComponentRoseNote:67-70`'s, resolved in `sequence-layout-events.ts`. */
     noteMargin: number;
-    /** Height of the frame label area */
+    /** INERT — no reader. A group's header height is MEASURED from its title
+     *  (`ComponentRoseGroupingHeader#getPreferredHeight:120-123`), never a
+     *  constant; see `sequence-layout-events.ts#handleFrameEvent`. */
     frameHeaderHeight: number;
-    /** Extra lifeline length below the last message */
+    /**
+     * INERT since C3 — nothing reads it. The tail below the last tile is
+     * `PlayingSpace#getPreferredHeight:154-161`'s `+ 10`
+     * (`sequence-layout-shared.ts#PLAYING_SPACE_TAIL_Y`), not a themed 20.
+     */
     lifelineExtension: number;
   };
 }

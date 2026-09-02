@@ -162,7 +162,11 @@ describe('note bodies through creole (C6)', () => {
     // — so the assertion is the WIDTH, which is this task's, not the origin.
     const bold = svg.indexOf('>bold</text>');
     expect(bold).toBeGreaterThan(-1);
-    const box = /<path d="M91\.163,102 L125\.781,102 L135\.781,112 L135\.781,135 L91\.163,135 Z"/;
+    // The y pair is the JAR's exactly since the vertical terms landed: its
+    // own box for this note runs 85..108, `blockH + 10` tall
+    // (`ComponentRoseNote:104-118`) and drawn 5 below its tile top
+    // (`Rose.paddingY`, `AbstractComponent#drawU:142-143`).
+    const box = /<path d="M91\.163,85 L125\.781,85 L135\.781,95 L135\.781,108 L91\.163,108 Z"/;
     expect(box.test(svg)).toBe(true);
     // 135.781 - 91.163 = 44.618 = the 24.619-wide run plus 10 of padding each
     // side. Before C6 the same box was sized from `<b>bold</b>`, 20 wider.
