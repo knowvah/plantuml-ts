@@ -72,6 +72,44 @@ below reports against it via `--compare`.
 **Hard checkpoint before batch 5.** Phase C's derivation reads numbers that
 only exist once Phase A has closed. Stop after batch 4, report, and wait.
 
+> **CHECKPOINT SATISFIED, and the batch-5 starting condition is REFRESHED —
+> 2026-09-02.** Batch 4 reported (B1-B3 done, B4..Bn halted under stop
+> condition 9), and an unrelated mission — `plans/sequence-creole/`, executed
+> and closed on the branch above this one — landed in between. Every number
+> this brief was planned against has therefore moved, and batch 5 must be run
+> against the figures below, not the ones in "Starting condition" above.
+>
+> ```
+> fixtures=1141 measured=1124 errored=17 descended=891 shortCircuited=233
+> distance=6267364.645 numericDiffs=69994
+> concentration heaviest vofupo-09-gafe466 = 27.6%, heaviest ten 56.6%
+> ```
+>
+> **Concentration is above the 20% alarm**, so corpus totals are not quotable
+> here — report per-axis subtotals and named fixtures, per D7.
+>
+> **The "63.9%" premise at the top of this file is STALE and must not be
+> quoted.** Re-measured flat per-attribute totals: Y-family (`y`, `y1`, `y2`,
+> `height`, `cy`) **2 031 467**; X-family (`x`, `x1`, `x2`, `width`, `cx`)
+> **1 931 743**; axis-mixed (`points`, `d`) **2 093 695**. Flat, the two axes
+> are now roughly EVEN. That is precisely why C1 exists: `points` alone is
+> 1 676 411 and folds both axes together, so no flat table can settle which
+> axis dominates. **C1 re-derives the split; C2 reads C1's output, not this
+> note.**
+>
+> The Y case does not rest on the flat table anyway. Measured over all 1124
+> comparable fixtures, canvas dimension against the jar's:
+>
+> | | within 1% of the jar |
+> |---|---|
+> | width | 416 (37.0%) |
+> | height | **23 (2.0%)** |
+> | both | **3 (0.3%)** |
+> | median absolute error | width 5.5%, height **15.0%** |
+>
+> Document HEIGHT is wrong on 98% of the corpus against 63% for width. That is
+> the defect this batch exists to close.
+
 ## Quality gates
 
 All four, per `CLAUDE.md`, at every task close — **`npm test`, not
