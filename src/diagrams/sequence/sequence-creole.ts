@@ -83,6 +83,7 @@ import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
 import { emojiBoxDim } from '../../core/klimt/creole/atom/AtomEmoji.js';
+import { CharHidder } from '../../core/utils/CharHidder.js';
 import type { TextRun } from './text-block-geo.js';
 
 /** Where a line's first run starts: `DriverTextSvg`'s own `x` (a LEFT edge)
@@ -175,14 +176,19 @@ function textAtomRun(
   measurer: StringMeasurer,
 ): TextRun {
   const spec = atomFontSpec(atom.font);
-  const dim = measurer.measure(atom.text, spec);
+  // `AtomText.java:79` unhides in the CONSTRUCTOR — i.e. per atom, after the
+  // command scan has already resolved against the hidden text, and BEFORE the
+  // atom is measured or drawn. So the tile-escaped character is restored here
+  // and every metric below is taken from the restored string.
+  const shown = CharHidder.unhide(atom.text);
+  const dim = measurer.measure(shown, spec);
   const decoration = creoleDecoration(atom.font.styles);
   return {
-    text: atom.text,
+    text: shown,
     x,
     y: baselineY,
     textWidth: dim.width,
-    textAscent: dim.height - measurer.getDescent(spec, atom.text),
+    textAscent: dim.height - measurer.getDescent(spec, shown),
     textLineHeight: dim.height,
     fontFamily: spec.family,
     fontSize: spec.size,
@@ -233,7 +239,23 @@ export function sequenceCreoleRuns(
   origin: CreoleOrigin,
   measurer: StringMeasurer,
 ): readonly TextRun[] {
-  const built = buildLineAtoms(line, font, CreoleMode.FULL);
+  // The `~` TILE ESCAPE, which upstream applies inside the engine and this
+  // port makes the caller's job.
+  //
+  // Upstream hides before the command scan and unhides per atom:
+  // `StripeSimple.java:150` is `line = CharHidder.hide(line)` immediately
+  // before `modifyStripe(line)`, and `AtomText.java:79` is
+  // `String s = CharHidder.unhide(text)` in the constructor. This port did not
+  // port the `hide` half into `StripeSimple.ts` — its own doc comment records
+  // the deferral — so every caller of the shared engine performs it, and
+  // `class-object-member-creole.ts:100,122` is the existing caller that does.
+  //
+  // Hiding runs BEFORE classification here, as it does there: `~""mono""`
+  // must keep its quotes UNSTYLED, and classifying the raw line would consume
+  // them before the scan ever saw the tile. Without this, `~[[Double]]` reaches
+  // `CommandCreoleUrl` with a live `[[` and draws a link the jar does not
+  // (`mufomi-43-vaso140`).
+  const built = buildLineAtoms(CharHidder.hide(line), font, CreoleMode.FULL);
   // HORIZONTAL_LINE yields no atoms at all — see the module's named
   // remainders for why the line stays its own literal text here.
   const atoms: readonly CreoleAtom[] =

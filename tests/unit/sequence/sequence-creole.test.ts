@@ -285,3 +285,36 @@ describe('scaleSequenceGeometry on a creole run', () => {
     expect(run.url).toEqual({ url: 'https://example.com', tooltip: 'tip' });
   });
 });
+
+describe('the `~` tile escape', () => {
+  /**
+   * Upstream hides the escaped character before the command scan and restores
+   * it in the atom constructor — `StripeSimple.java:150` (`line =
+   * CharHidder.hide(line)`, immediately before `modifyStripe`) and
+   * `AtomText.java:79` (`String s = CharHidder.unhide(text)`). This port did
+   * NOT port the `hide` half into `StripeSimple.ts`; its own doc comment
+   * records the deferral and makes it the caller's job, which
+   * `class-object-member-creole.ts:100,122` already does. Without it here,
+   * `~[[Double]]` reached `CommandCreoleUrl` with a live `[[` and drew an `<a>`
+   * the jar does not (`mufomi-43-vaso140`).
+   */
+  const runsOf = (line: string): readonly TextRun[] =>
+    sequenceCreoleRuns(line, sequenceCreoleFont(ARROW_FONT), ORIGIN, measurer);
+
+  it('renders a tile-escaped url as literal text, not as a link', () => {
+    const runs = runsOf('Action ~[Single] ~[[Double]] ~[~[[Triple]]]');
+    expect(runs.map((r) => r.text).join('')).toBe('Action [Single] [[Double]] [[[Triple]]]');
+    expect(runs.some((r) => r.url !== undefined)).toBe(false);
+  });
+
+  it('leaves an UNescaped url a link, so the escape is what did the work', () => {
+    const runs = runsOf('Action1 [[http://example.com]]');
+    expect(runs.some((r) => r.url !== undefined)).toBe(true);
+  });
+
+  it('measures the RESTORED text, not the hidden private-use form', () => {
+    const [run] = runsOf('~[Single]');
+    expect(run?.text).toBe('[Single]');
+    expect(run?.textWidth).toBeCloseTo(measurer.measure('[Single]', ARROW_FONT).width, 10);
+  });
+});
