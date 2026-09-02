@@ -122,6 +122,22 @@ is most of the surviving `other angle-bracket` row and part of `HTML-ish tag`.**
 Retires when sequence geometry gains an image kind; that one change closes both
 the element gap and this content residue.
 
+**Sequence is the outlier on `<latex>` specifically, and that is sharper than
+"needs an image kind".** `core/latex.ts#renderLatexAsImage` already exists and
+is already called — from `core/svek/image/*`, i.e. by class, object, state and
+description. Nothing under `src/diagrams/sequence/` references it, so a real
+`<latex>` atom that the cuca families draw as an image is swallowed by the
+literal fallback here. Wiring sequence to the EXISTING renderer is the task;
+building new image geometry is not.
+
+**`<math>` is a different gap and must not be folded into this one.** Upstream
+has `CommandCreoleMath.java` beside `CommandCreoleLatex.java`; this port ported
+only the latex half, so `<math>` yields no atom in ANY family. And per
+`DIVERGENCES.md:317-339` the whole latex/math rendering is a permanent,
+maintainer-approved KaTeX-not-JLaTeXMath divergence: structure conformant,
+bytes and metrics never. Any fixture carrying `<math>` or `<latex>` keeps a
+permanent conformance floor.
+
 **3. The remaining `HTML-ish tag` mismatches are CHROME, not the engine.**
 `funado-58-dene546` and `gupaki-93-vupa807` are `footer <back:red>some footer`.
 `header`/`footer`/`caption`/`title` route through `annotations/blocks.ts`, whose

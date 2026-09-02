@@ -96,9 +96,38 @@ elements are untouched. Not a new error: it renders cleanly at both refs.
 the mission — a coincidental element-count match lost when a wrong element was
 removed. The fix is strictly correct on the axis it governs: a bogus hyperlink
 the jar does not emit is gone, and corpus-wide `<a>` fell 87 → 86 for exactly
-that reason. The residual wrongness is that this port draws no `<image>` for
-`<math>`, which is follow-on 2 of `creole-close.md` and predates this change;
-when sequence gains image geometry the count will match for the right reason.
+that reason.
+
+**Correction — the residual is NOT follow-on 2, and it is partly permanent.**
+An earlier revision of this file attributed the leftover wrongness to "sequence
+has no image geometry", i.e. follow-on 2 of `creole-close.md`. That is wrong on
+two counts, both checked:
+
+1. **`<math>` produces no atom at all in this port, because
+   `CommandCreoleMath` was never ported.** Upstream has
+   `CommandCreoleMath.java` beside `CommandCreoleLatex.java` — same shape, same
+   destination, `stripe.addMath(ScientificEquationSafe.fromAsciiMath(math))`
+   against `…fromLatex(latex)` (`:79`). This port ported only the `<latex>`
+   half: `src/core/klimt/creole/command/CommandCreoleLatex.ts` exists with
+   `starters: ['<l']` and there is no math sibling, so `buildLineAtoms` on
+   `hello <math>…</math> there` returns ONE plain text atom — verified
+   directly. It is a missing creole COMMAND, engine-wide and affecting every
+   family, not a sequence geometry gap.
+2. **`<math>` is the LaTeX family, and that rendering is a permanent,
+   maintainer-approved divergence.** `DIVERGENCES.md:317-339`, "LaTeX rendering
+   engine — KaTeX, not JLaTeXMath (permanent)", names it explicitly:
+   "**Affects:** any diagram using `<latex>` (or `<math>`) creole tags." The
+   element structure — an image atom in the text flow, positioned and sized
+   like the jar's — is conformant; the image bytes and glyph metrics never will
+   be, because the two typesetting engines rasterize differently.
+
+So the honest statement is: porting `CommandCreoleMath` would give this fixture
+the structural shape the jar has, but it can never become byte-conformant, and
+its weighted score keeps a permanent floor. The claim that "the count will match
+for the right reason" once sequence gains image geometry was wrong — sequence
+geometry is not what is missing here.
+
+Neither correction changes the verdict on the rise or on the fix.
 
 ## Tests added
 
