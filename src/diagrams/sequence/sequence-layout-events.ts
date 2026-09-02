@@ -36,7 +36,7 @@ import {
   dividerPreferredHeight,
 } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
-import { refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
+import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf, textBlockRuns } from './text-block-geo.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
@@ -337,26 +337,19 @@ function buildTabRuns(
   y: number,
   ctx: EventProcessingContext,
 ): readonly TextRun[] {
-  const runAt = (text: string, leftX: number, top: number, size: number): TextRun => {
-    const spec: FontSpec = { family: ctx.theme.fontFamily, size, weight: 'bold' };
-    const lineHeight = ctx.measurer.measure('M', spec).height;
-    const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-    return {
-      text,
-      x: leftX,
-      y: top + ascent,
-      textWidth: ctx.measurer.measure(text, spec).width,
-      textAscent: ascent,
-      textLineHeight: lineHeight,
-    };
-  };
+  // Both halves are TEXT BLOCKS (`ComponentRoseGroupingHeader.java:76-77,89`;
+  // see `text-block-geo.ts#displayLines`), and the comment's brackets wrap the
+  // whole block, not each line. Jar: `pigifu-13-kele137`, `zedepi-36-come743`.
+  const bold = (size: number): FontSpec => ({ family: ctx.theme.fontFamily, size, weight: 'bold' });
   const left = x + HEADER_PADDING.left;
   const top = y + HEADER_PADDING.top;
-  const title = runAt(tab.tabText, left, top, HEADER_FONT_SIZE);
-  if (tab.tabComment === undefined) return [title];
+  const title = textBlockRuns(tab.tabText, bold(HEADER_FONT_SIZE), left, top, ctx.measurer);
+  if (tab.tabComment === undefined) return title;
   // `+ 1`: `getOldPaddingY()` again, on the comment's own baseline
   // (`ComponentRoseGroupingHeader.java:151-158`).
-  return [title, runAt(`[${tab.tabComment}]`, left + tab.tabWidth, top + 1, GROUP_FONT_SIZE)];
+  const commentX = left + tab.tabWidth;
+  const spec = bold(GROUP_FONT_SIZE);
+  return [...title, ...textBlockRuns(`[${tab.tabComment}]`, spec, commentX, top + 1, ctx.measurer)];
 }
 
 /** The header tab's `Display`, split by `groupingHeaderDisplay`
@@ -389,10 +382,16 @@ function computeHeaderTab(
     size: HEADER_FONT_SIZE,
     weight: HEADER_FONT_BOLD ? 'bold' : 'normal',
   };
+  // `getPureTextWidth`/`getTextHeight` over the title's own text BLOCK
+  // (`AbstractTextualComponent.java:106-114`); the corner is drawn at exactly
+  // those (`ComponentRoseGroupingHeader.java:141-143,152`), so the tab grows
+  // with the TITLE's escaped newlines and never with the comment beside it.
+  const titleLines = displayLines(tabText);
   const measured = ctx.measurer.measure(tabText, fontSpec);
-  const tabTextWidth = measured.width;
+  const tabTextWidth = Math.max(...titleLines.map((l) => ctx.measurer.measure(l, fontSpec).width));
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
-  const tabHeight = measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
+  const tabHeight =
+    titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
 
   return {
     tabText,

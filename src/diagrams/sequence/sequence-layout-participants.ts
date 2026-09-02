@@ -32,12 +32,11 @@ import {
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
-import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
-import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import {
-  symbolPreferredHeight,
-  symbolPreferredWidth,
+  participantBadgeGeo, participantLabelCy, symbolPreferredHeight, symbolPreferredWidth,
 } from './sequence-layout-participant-sizing.js';
+import { ARROW_DELTA_X } from './sequence-arrowhead.js';
+import { displayLines } from './text-block-geo.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import {
@@ -150,7 +149,7 @@ function scanMessageLabels(
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
-        const lines = ev.label === '' ? [] : ev.label.split('\n');
+        const lines = ev.label === '' ? [] : displayLines(ev.label);
         const labelWidth =
           lines.length === 0
             ? 0
@@ -206,8 +205,10 @@ function computeParticipantWidths(
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
     const badge = anyBadgeFor(p, ctx, resolveParticipantBackground(p, theme));
+    // A head is a text BLOCK: `getPureTextWidth` is its WIDEST LINE
+    // (`AbstractTextualComponent.java:106-108`), never the raw display.
     const textW = Math.max(
-      measurer.measure(p.display, fontSpec).width,
+      ...displayLines(p.display).map((l) => measurer.measure(l, fontSpec).width),
       ...visibleStereotypeLines(p, theme).map((l) => measurer.measure(l, fontSpec).width),
     );
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
@@ -362,8 +363,6 @@ function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[]
   return stereotypeLabels(p.stereotype);
 }
 
-
-
 /**
  * The box's fill, in `Participant#getUsedStyles`' own precedence: the
  * participant's inline `#color` overrides the merged style
@@ -516,7 +515,7 @@ function anyBadgeFor(
 function buildLabelRuns(p: ParticipantGeo, ctx: ParticipantLayoutCtx): readonly TextRun[] {
   const { theme, measurer } = ctx;
   const spec = fontSpecOf(theme);
-  const rows = [...(p.stereotypeLines ?? []), p.display];
+  const rows = [...(p.stereotypeLines ?? []), ...displayLines(p.display)];
   const lineHeight = measurer.measure('M', spec).height;
   const ascent = lineHeight - measurer.getDescent(spec, 'M');
   const cx = participantBadgeGeo(p.badge, p.x, p.width, theme)?.nameCx ?? p.centerX;
@@ -546,16 +545,17 @@ function buildParticipantGeo(
 ): ParticipantGeo {
   const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
-  const measured = measurer.measure(p.display, fontSpec);
-  // A visible stereotype is a SECOND run above the name
-  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
-  // own line in `birocu-87-xubi808`), so the head grows by one line.
   const stereoLines = visibleStereotypeLines(p, theme);
   const background = resolveParticipantBackground(p, theme);
   const badge = anyBadgeFor(p, ctx, background);
-  // `TextBlockSprited#calculateDimension` takes the MAX of the badge's own
-  // height and the text block's (`:57-63`).
-  const textHeight = measured.height * (1 + stereoLines.length);
+  // A visible stereotype is a SECOND run above the name
+  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
+  // own line in `birocu-87-xubi808`), and so is each line the display's own
+  // escaped newlines split it into (`:153`) -- `butali-53-kige134`'s head is
+  // the jar's 42 tall, not 28. `TextBlockSprited#calculateDimension` then
+  // takes the MAX of the badge's own height and this block's (`:57-63`).
+  const rows = displayLines(p.display).length + stereoLines.length;
+  const textHeight = measurer.measure(p.display, fontSpec).height * rows;
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
   // (`AbstractTextualComponent.java:110-114`), and that IS the painted
   // rectangle (`ComponentRoseParticipant#drawInternalU:100-104`). `Padding 7`

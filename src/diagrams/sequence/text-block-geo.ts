@@ -18,7 +18,110 @@
 
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { arrowFontSpecOf } from './sequence-layout-shared.js';
+
+// ---------------------------------------------------------------------------
+// Display -> lines — Display#getWithNewlines
+// ---------------------------------------------------------------------------
+
+/**
+ * A sequence display's LINES.
+ *
+ * `Display#getWithNewlines(Pragma, String)` (`Display.java:262-346`) is what
+ * every sequence display passes through before it can become a text block,
+ * and this is the one place this engine calls it. Upstream's own call sites,
+ * all of them:
+ *
+ *   - `CommandArrow.java:348` — a message label; `:161-170` — a participant
+ *     auto-created by an arrow line;
+ *   - `CommandParticipant.java:153` — a declared participant's `FULL` display,
+ *     and `SequenceDiagram.java:123,168` for one created from its code alone;
+ *   - `CommandReferenceOverSeveral.java:132` — a `ref over` body;
+ *   - `CommandDivider.java:84`, `CommandDelay.java:83`,
+ *     `CommandExoArrowAny.java:86`, `CommandReturn.java:125`,
+ *     `CommandBoxStart.java:128`, `CommandNewpage.java:92`;
+ *   - `AbstractTextualComponent.java:64` — the base every sequence component
+ *     built from a raw `CharSequence` label reaches, and
+ *     `ComponentRoseGroupingHeader.java:89` for a group's `[comment]`.
+ *
+ * A participant's STEREOTYPE is deliberately not on that list:
+ * `CommandParticipant.java:174-180` hands the raw `<<...>>` run to
+ * `Stereotype.build`, which never constructs a `Display` at all, so its rows
+ * do not split however many escapes they carry.
+ *
+ * The escape it splits on is the two-character sequence backslash-n in the
+ * SOURCE, never a real newline: `parseWithNewlines` has no real-newline
+ * branch, because upstream's `Display` is a `List<CharSequence>` long before
+ * anything reads it.
+ *
+ * ## Why a real newline is split here as well
+ *
+ * This port has no `Display` type, so a display arrives at layout as one
+ * string — and its parser already lowers the escape to a REAL newline for the
+ * two surfaces that needed it first (`command-note-factory.ts:119`,
+ * `command-misc.ts:89`), then joins the multi-line `ref`/`note` block forms
+ * with one (`parser.ts:122`). A real newline in a display therefore means
+ * exactly what a second `displayData` entry means upstream, and the outer
+ * split is this port's stand-in for "the display is already several entries"
+ * — NOT a second escape scanner. Removing it would drop the multi-line `ref`
+ * body and the multi-line note back to a single line.
+ *
+ * `splitDisplayLines` returns an `align` alongside the lines, resolved from a
+ * `\l`/`\r` escape (`Display.java:290-295`). It is discarded: no sequence
+ * component in this port consumes a block alignment yet, exactly as
+ * `state-sizing.ts:64-74` discards it for the same reason. The BREAK those
+ * two escapes also cause is honoured, which is upstream's behaviour.
+ *
+ * ## The JAWS deprecation warning: sequence does NOT surface it
+ *
+ * `Display#addWarning` (`Display.java:348-353`) raises a `JawsWarning` for
+ * every escape consumed, and upstream's sequence commands thread the real
+ * `diagram.getPragma()` in, so upstream WOULD raise one here. This port does
+ * not, for two reasons that hold together: the split happens at LAYOUT time
+ * where no `Pragma` is reachable — precisely why `splitDisplayLines` passes
+ * `Pragma.createEmpty()` (`DisplayNewlines.ts:336-359`) — and the emission is
+ * gated on `PragmaKey.SHOW_DEPRECATION`, off unless the source opts in, with
+ * nothing in this port reading `Pragma#getWarnings()` back out. So a live
+ * `Pragma` would render identically today. Recorded rather than left
+ * implicit: an engine that DOES hold a `Pragma` should call
+ * `parseWithNewlines` with it rather than inherit this decision by accident.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Display.java#getWithNewlines
+ */
+export function displayLines(text: string): readonly string[] {
+  return text.split('\n').flatMap((entry) => splitDisplayLines(entry).lines);
+}
+
+/**
+ * One `Display`, one font, one run per line — `TextBlockSimple#drawU`'s own
+ * loop, which advances by the line's height and draws each `Atom` at the
+ * running `y` (`klimt/shape/TextBlockSimple.java:78-89`).
+ *
+ * `top` is the BLOCK's top-left, i.e. upstream's `UTranslate` argument; every
+ * run's own `y` is a baseline, so the first drops one ascent below it and
+ * each later one a further line height. Shared rather than re-derived because
+ * three call sites now need exactly this and a fourth reserves space from the
+ * line COUNT — see {@link messageLabelRows} on why the two must not diverge.
+ */
+export function textBlockRuns(
+  text: string,
+  spec: FontSpec,
+  leftX: number,
+  top: number,
+  measurer: StringMeasurer,
+): readonly TextRun[] {
+  const lineHeight = measurer.measure('M', spec).height;
+  const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  return displayLines(text).map((line, i) => ({
+    text: line,
+    x: leftX,
+    y: top + ascent + i * lineHeight,
+    textWidth: measurer.measure(line, spec).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
 
 /**
  * One `<text>` the renderer will emit, already placed AND already measured.
@@ -197,7 +300,10 @@ const REFERENCE_HEADER_FONT_SIZE = 13;
 export function refBodyLines(frameType: string, label: string): readonly string[] {
   if (frameType !== 'ref') return [];
   const body = label.trim();
-  return body === '' ? [] : body.split('\n').map((l) => l.trim());
+  // `CommandReferenceOverSeveral.java:132` builds `reference.getStrings()`
+  // with `Display.getWithNewlines`, so a single-line `ref over A : a\nb` is a
+  // two-line body exactly as the `ref … end ref` block form is.
+  return body === '' ? [] : displayLines(body).map((l) => l.trim());
 }
 
 /** `getHeaderHeight` -- the header text's height plus `2 * 1`
@@ -340,7 +446,7 @@ export function messageLabelBlock(
   // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
   // which draws nothing (`AbstractTextualComponent.java:84-85`) -- so a
   // message with neither label nor number emits no `<text>` at all.
-  const lines = label === '' ? [] : label.split('\n');
+  const lines = label === '' ? [] : displayLines(label);
   if (lines.length === 0 && numberText === undefined) return { lines: [] };
 
   // The ARROW font, not the ambient one: `arrow { FontSize 13 }`
@@ -382,8 +488,12 @@ export function messageLabelBlock(
 }
 
 /** Rows a label block occupies, for the caller's vertical reservation. A
- *  number-only label still occupies one. */
+ *  number-only label still occupies one.
+ *
+ *  Splits by {@link displayLines}, the SAME function `messageLabelBlock` uses:
+ *  a caller reserves vertical space with this and places runs with that, so a
+ *  disagreement between the two is a label overhanging its own reservation. */
 export function messageLabelRows(label: string, numberText: string | undefined): number {
   if (label === '') return numberText === undefined ? 0 : 1;
-  return label.split('\n').length;
+  return displayLines(label).length;
 }
