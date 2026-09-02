@@ -48,14 +48,26 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.width).toBeCloseTo(measurer.measure('entry', font).width, 10);
   });
 
-  it('<math>x</math> is NOT ported (CommandCreoleBuilder.java:111 registers CommandCreoleMath; this port has not added it, D6) -- measures as literal, tag-inclusive text; <sup> is ported since SI30 T1 and is covered by its own tests below', () => {
+  it('<math>x</math> IS ported now -- it becomes a latex atom, so it contributes NO text run and its width is the rendered image\'s, not the tag-inclusive literal\'s', () => {
     const measurer = new WidthTableMeasurer();
 
+    // This assertion used to pin the OPPOSITE, citing
+    // `CommandCreoleBuilder.java:111` as a registration this port had not
+    // made. `CommandCreoleMath` is ported now (ASCIIMath -> LaTeX via
+    // `math/ASCIIMathTeXImg.ts`), so `<math>x</math>` no longer measures as
+    // 14 literal characters.
+    //
+    // The line therefore holds a `'latex'` atom and no `'text'` run at all --
+    // `creoleTextLines` collects TEXT runs. Its width comes from
+    // `core/latex.ts#measureLatex` (KaTeX), which is a PERMANENT divergence
+    // from the jar's JLaTeXMath metrics (`DIVERGENCES.md`, "LaTeX rendering
+    // engine", which names `<math>` explicitly) -- so the width is asserted to
+    // be the literal's no longer, and is NOT pinned to a number the jar would
+    // have to agree with.
     const mathLines = creoleTextLines('<math>x</math>', font, measurer);
     expect(mathLines).toHaveLength(1);
-    expect(mathLines[0]!.runs).toHaveLength(1);
-    expect(mathLines[0]!.runs[0]!.text).toBe('<math>x</math>');
-    expect(mathLines[0]!.width).toBeCloseTo(measurer.measure('<math>x</math>', font).width, 10);
+    expect(mathLines[0]!.runs).toHaveLength(0);
+    expect(mathLines[0]!.width).not.toBeCloseTo(measurer.measure('<math>x</math>', font).width, 10);
   });
 
   it('[[http://x]] -> one run, visible text defaults to the url itself, hyperlink color+underline, url set (CommandCreoleUrl.java / Url label-defaulting ctor)', () => {

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1056 modules · 3781 exported names.
+1057 modules · 3782 exported names.
 
 ## `src/`
 
@@ -405,6 +405,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleExposantChange.ts` | `createExposantChangeCommand` | CommandCreoleExposantChange — `<sup>text</sup>` (EXPOSANT) and `<sub>text</sub>` (INDICE). |
 | `CommandCreoleFontFamilyChange.ts` | `createFontFamilyChangeCommands` | CommandCreoleFontFamilyChange — `<font:FamilyName>text</font>` / `<font FamilyName>text</font>` and the EOL (no closing tag) form. |
 | `CommandCreoleLatex.ts` | `createLatexCommand` | CommandCreoleLatex — `<latex>expr</latex>`. |
+| `CommandCreoleMath.ts` | `createMathCommand` | CommandCreoleMath — `<math>expr</math>`. |
 | `CommandCreoleMonospaced.ts` | `createMonospacedCommand` | CommandCreoleMonospaced — the creole `""text""` monospace run. |
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |

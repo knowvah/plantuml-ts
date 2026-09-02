@@ -99,6 +99,18 @@ export class ScientificEquationSafe {
     return this.formula;
   }
 
+  /** Upstream's own `equation != null` guard, which every DRAWING path
+   *  tests before touching the equation — `getSvg` (java:118) and `getImage`
+   *  (java:137) both fall back to
+   *  `GraphicStrings.createBlackOnWhiteMonospaced(formula)` when it fails,
+   *  i.e. they draw the RAW formula rather than propagating the failure.
+   *  Exposed as a predicate so a caller can take that same fallback without
+   *  provoking {@link getSource}'s NullPointerException, which upstream only
+   *  ever reaches from `printTrace` (java:132, itself behind this guard). */
+  hasEquation(): boolean {
+    return this.source !== null;
+  }
+
   /** java:167-169. Upstream is a bare `equation.getSource()`, so a
    *  fallback instance (`equation == null`, java:77) throws a
    *  NullPointerException here; this raises the same way rather than

@@ -48,6 +48,7 @@ import { createExposantChangeCommand } from '../command/CommandCreoleExposantCha
 import { createFontFamilyChangeCommands } from '../command/CommandCreoleFontFamilyChange.js';
 import { createEmojiCommand } from '../command/CommandCreoleEmoji.js';
 import { createLatexCommand } from '../command/CommandCreoleLatex.js';
+import { createMathCommand } from '../command/CommandCreoleMath.js';
 import { createMonospacedCommand } from '../command/CommandCreoleMonospaced.js';
 import { createUrlCommand } from '../command/CommandCreoleUrl.js';
 
@@ -119,6 +120,7 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
   // member rows (SIMPLE_LINE) and headers (FULL_BUT_UNDERSCORE) parse it.
   addCommand(map, createEmojiCommand());
   addCommand(map, createLatexCommand());
+  addCommand(map, createMathCommand());
   for (const cmd of createFontFamilyChangeCommands()) addCommand(map, cmd);
   // A2s R2a: upstream ctor position (java :118) — after the font-family
   // pair, before url. `""` is a starter no other command claims.
