@@ -26,6 +26,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { axisOf, axisTotals } from '../../../scripts/sequence-distance-axis.js';
 import type { Diff } from '../../oracle/svg-conformance/compare.js';
 import {
   SEQUENCE_CACHE_REL,
@@ -108,6 +109,44 @@ describe('distanceOf', () => {
     ]);
     expect(byAttribute['x']).toEqual({ distance: 5, count: 2 });
     expect(byAttribute['d']).toEqual({ distance: 2, count: 2 });
+  });
+
+  it('splits `points` by index parity so an axis is never folded away', () => {
+    // C1: `points` was the largest single line item and was axis-blind.
+    // compare.ts indexes a FLAT array of the value's numeric tokens, so even
+    // is X and odd is Y -- see `bucketOf` in `sequence-distance-axis.ts`.
+    const { byAttribute } = distanceOf([
+      numeric('svg/g[1]/polygon/@points[0]', 7),
+      numeric('svg/g[1]/polygon/@points[2]', 3),
+      numeric('svg/g[1]/polygon/@points[1]', 4),
+    ]);
+    expect(byAttribute['points.x']).toEqual({ distance: 10, count: 2 });
+    expect(byAttribute['points.y']).toEqual({ distance: 4, count: 1 });
+    expect(byAttribute['points']).toBeUndefined();
+  });
+
+  it('leaves `d` whole, because no index rule splits a path', () => {
+    // Its commands have varying arities, so a flat argument index has no
+    // fixed parity. It is reported as mixed rather than charged to an axis.
+    const { byAttribute } = distanceOf([
+      numeric('svg/g[1]/path/@d[0]', 2),
+      numeric('svg/g[1]/path/@d[1]', 3),
+    ]);
+    expect(byAttribute['d']).toEqual({ distance: 5, count: 2 });
+    expect(axisOf('d')).toBe('mixed');
+  });
+
+  it('regroups without moving the total, which is the C1 invariant', () => {
+    const diffs = [
+      numeric('svg/g[1]/polygon/@points[0]', 7),
+      numeric('svg/g[1]/polygon/@points[1]', 4),
+      numeric('svg/g[1]/path/@d[3]', 5),
+      numeric('svg/g[1]/rect/@x', 1),
+    ];
+    const { total, byAttribute } = distanceOf(diffs);
+    expect(total).toEqual({ distance: 17, count: 4 });
+    const axes = axisTotals(byAttribute);
+    expect(axes.x.distance + axes.y.distance + axes.mixed.distance + axes.none.distance).toBe(17);
   });
 
   it('files a delta whose path names no attribute under `unattributed`', () => {
