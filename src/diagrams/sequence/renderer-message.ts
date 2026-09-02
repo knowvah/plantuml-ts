@@ -7,7 +7,7 @@
  * scaling rationale this module inherits (`ScaledTheme.scaleK`).
  */
 
-import type { MessageGeo } from './ast.js';
+import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
 import { line } from '../../core/svg.js';
@@ -110,28 +110,50 @@ function renderSelfMessage(
   return loop + renderSelfMessageHead(msg, configuration, theme, yBottom);
 }
 
+/**
+ * ONE label run as its `<text>`.
+ *
+ * C3: every style below is the RUN's own when creole set it and the message's
+ * ambient one when it did not, which is exactly `DriverTextSvg#draw` reading
+ * one `FontConfiguration` per `UText` (`:104-160,177-180`). A markup-free
+ * label carries a family and a size equal to the ambient pair and none of the
+ * flags, so it emits byte-identically to the pre-C3 single run.
+ *
+ * `url` wraps rather than decorates -- `SvgGraphics#openLink`/`closeLink`
+ * (`:1105-1150`) -- and `sequence-text.ts` owns that wrap, so there is no
+ * second `<a>` emitter here. No measurer is touched: `textWidth` and
+ * `fontSize` were resolved in layout and scaled with the geometry (D5).
+ */
+function messageLabelRun(run: TextRun, theme: ScaledTheme): string {
+  return sequenceText({
+    leftX: run.x,
+    baselineY: run.y,
+    text: run.text,
+    width: run.textWidth,
+    // `""mono""` sets its own family; `<size:N>`/`<sup>` its own size. The
+    // ambient fallbacks are the pair layout measured the block at --
+    // `theme.fontFamily` and `arrow { FontSize 13 }` (`plantuml.skin:306-308`),
+    // scaled with the rest of the document.
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? ARROW_FONT_SIZE * theme.scaleK,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
+    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
+    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
+  });
+}
+
 /** The message's label. Upstream draws it last, after the arrow
- *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
+ *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`).
+ *
+ *  The autonumber leads, which is `createMessageNumber` merging `tb1` LEFT of
+ *  `tb2` (`Display.java:703-712`) read left to right. */
 function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
   const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
-  return runs
-    .map((run) =>
-      sequenceText({
-        leftX: run.x,
-        baselineY: run.y,
-        text: run.text,
-        // Measured in layout at this same font and carried on the run (D1);
-        // the renderer has no measurer and must not acquire one.
-        width: run.textWidth,
-        fontFamily: theme.fontFamily,
-        // `arrow { FontSize 13 }` (`plantuml.skin:306-308`), scaled with the
-        // rest of the document. Layout measured the block with the same
-        // value (`text-block-geo.ts#messageLabelBlock`).
-        fontSize: ARROW_FONT_SIZE * theme.scaleK,
-        fill: theme.colors.text,
-      }),
-    )
-    .join('');
+  return runs.map((run) => messageLabelRun(run, theme)).join('');
 }
 
 /**

@@ -184,3 +184,97 @@ describe('scaleSequenceGeometry on TextRun metrics', () => {
     expect(message.labelLines[0]).toEqual(RUN);
   });
 });
+
+/**
+ * C3 — a message label's lines AND its autonumber go through the shared
+ * creole atom engine (`sequence-creole.ts`), so one source line becomes one
+ * `TextRun` per styled atom.
+ *
+ * Every expected number here is the JAR's own, from an oracle render of
+ *
+ * ```
+ * autonumber "<font color=red>[000]</font>"
+ * Alice -> Bob : a <b>bold</b> label
+ * Alice -> Bob : ""x->  ""
+ * ```
+ *
+ * whose label runs the jar emits at `x=39.225` (`[001]`, `textLength
+ * 28.844`), `72.069` (`a`), `79.3` (`bold`, `24.619`, `font-weight="700"`)
+ * and `103.919` (`label`, `27.544`) — i.e. the number's own width plus
+ * `Display.java:706`'s 4px margin, then each run advancing by its own.
+ */
+describe('messageLabelBlock creole (C3)', () => {
+  const measurer = new DeterministicMeasurer();
+  const spec = arrowFontSpecOf(defaultTheme);
+
+  it('splits one line into one run per styled atom, bolding only the <b> run', () => {
+    const block = messageLabelBlock(
+      'a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
+    );
+    expect(block.lines.map((r) => r.text)).toEqual(['a ', 'bold', ' label']);
+    expect(block.lines.map((r) => r.bold)).toEqual([undefined, true, undefined]);
+    // The jar's own three advances: 7.231, 24.619, 27.544.
+    expect(block.lines.map((r) => Number(r.textWidth.toFixed(3)))).toEqual([7.231, 24.619, 27.544]);
+  });
+
+  it('advances each run by the previous run’s own measured width', () => {
+    const block = messageLabelBlock(
+      'a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
+    );
+    const [a, bold, label] = block.lines;
+    expect(bold!.x).toBeCloseTo(a!.x + a!.textWidth, 10);
+    expect(label!.x).toBeCloseTo(bold!.x + bold!.textWidth, 10);
+    // All three share the one baseline — a styled run is a sibling, never a
+    // new line (decisions.md D3).
+    expect(bold!.y).toBe(a!.y);
+    expect(label!.y).toBe(a!.y);
+  });
+
+  it('carries a ""…"" run’s own monospace family, keeping its trailing spaces', () => {
+    const block = messageLabelBlock('""x->  ""', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+    expect(block.lines).toHaveLength(1);
+    // PlantUML's LOGICAL name — the CSS `monospace` rename is a draw-time
+    // concern (`svg-text-font.ts#textFontFamily`), so the run carries the
+    // logical one.
+    expect(block.lines[0]!.fontFamily).toBe('monospaced');
+    expect(block.lines[0]!.text).toBe('x->  ');
+    expect(block.lines[0]!.textWidth).toBeCloseTo(18.444, 3);
+  });
+
+  it('interprets creole in the AUTONUMBER rather than emitting it literally', () => {
+    const block = messageLabelBlock(
+      'plain', '<font color=red>[001]</font>', LEFT_X, ARROW_Y, defaultTheme, measurer,
+    );
+    expect(block.number!.text).toBe('[001]');
+    expect(block.number!.color).toBe('#FF0000');
+    // The width that matters is the RENDERED number's, not the markup's: the
+    // label beside it starts one `MESSAGE_NUMBER_MARGIN` past it
+    // (`Display.java:706`), which is what the jar's 72.069 - 39.225 = 32.844
+    // shows.
+    expect(block.number!.textWidth).toBeCloseTo(28.844, 3);
+    expect(block.lines[0]!.x).toBeCloseTo(LEFT_X + 28.844 + 4, 3);
+  });
+
+  it('leaves a markup-free label exactly one run whose width is the raw measure', () => {
+    // C1's measurement identity, and the whole safety property of this task.
+    for (const label of ['hello', 'a b c', 'こんにちわ']) {
+      const block = messageLabelBlock(label, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
+      expect(block.lines).toHaveLength(1);
+      expect(block.lines[0]!.text).toBe(label);
+      expect(block.lines[0]!.x).toBe(LEFT_X);
+      expect(block.lines[0]!.textWidth).toBeCloseTo(measurer.measure(label, spec).width, 10);
+    }
+  });
+
+  it('keeps a multi-line label’s rows one lineHeight apart when a row splits', () => {
+    const block = messageLabelBlock(
+      'a <b>b</b>\\nc', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
+    );
+    // Row 0 is two runs, row 1 is one — four entries would mean the split
+    // leaked into the row advance.
+    expect(block.lines).toHaveLength(3);
+    const h = block.lines[0]!.textLineHeight;
+    expect(block.lines[1]!.y).toBe(block.lines[0]!.y);
+    expect(block.lines[2]!.y - block.lines[0]!.y).toBeCloseTo(h, 10);
+  });
+});

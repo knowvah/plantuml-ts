@@ -20,6 +20,7 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { arrowFontSpecOf } from './sequence-layout-shared.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Display -> lines — Display#getWithNewlines
@@ -390,8 +391,13 @@ const ARROW_LABEL_PADDING_Y = 1;
  */
 export const ARROW_LABEL_HEAD_CLEARANCE = 10;
 
-/** A message's label as placed text: its lines, plus the autonumber run that
- *  sits beside them when the message carries one. */
+/** A message's label as placed text: its CREOLE runs, plus the autonumber run
+ *  beside them. One source line becomes one entry per styled atom (C3), so
+ *  `lines` is flat left-to-right, NOT one per line -- count lines with
+ *  {@link messageLabelRows}. `number` is the FIRST of the autonumber's own
+ *  runs and any remainder rides at the FRONT of `lines`, upstream's own draw
+ *  order: `createMessageNumber` merges `tb1` LEFT of `tb2` into ONE block
+ *  (`Display.java:703-712`), read back as `[number, ...lines]`. */
 export interface MessageLabelBlock {
   readonly lines: readonly TextRun[];
   readonly number?: TextRun;
@@ -409,12 +415,10 @@ export interface MessageLabelBlock {
  * number is a separate `<text>`, vertically centred against however many
  * lines the label has, and there is NO `": "` joining them.
  *
- * One DELIBERATE divergence from upstream remains, pre-existing and outside
- * this function's scope: `number.text` is whatever the autonumber format
- * produced, creole markup included. Upstream runs it through `getCreole`
- * (`Display.java:704`), so `<font color=red>[001]</font>` becomes a red
- * `[001]`; this port emits the markup literally. That is a creole gap, not a
- * text-block one.
+ * C3 closed the creole divergence this doc used to record: the lines AND the
+ * number now go through `sequence-creole.ts`, which is `create0`'s own two
+ * arms -- `getCreole(display.subList(0, 1))` for the number, the rest for the
+ * label (`Display.java:703-707`).
  *
  * A2 closed the other one. The block used to be CENTRED on the arrow's
  * midpoint; upstream's default `messagePosition` is LEFT
@@ -453,17 +457,17 @@ export function messageLabelBlock(
   // (`plantuml.skin:306-308`), and every golden with a message label emits
   // `font-size="13"` for it beside `font-size="14"` participant text.
   const spec = arrowFontSpecOf(theme);
+  // C3: the base font is rebuilt per call rather than hoisted -- a pure
+  // two-flag mapping over `spec`, and hoisting costs an NLOC this has not got.
+  const runsAt = (text: string, x: number, y: number): readonly TextRun[] =>
+    sequenceCreoleRuns(text, sequenceCreoleFont(spec), { leftX: x, baselineY: y }, measurer);
   const lineHeight = measurer.measure('M', spec).height;
-  const numberWidth = numberText === undefined ? 0 : measurer.measure(numberText, spec).width;
-  const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
-  const labelLeft = leftX + numberWidth + gap;
   // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
   // (`ComponentRoseArrow.java:141-148`): the block's TOP sits one
   // `getTextHeight` above the arrow, where `getTextHeight` is the text block
   // plus the padding on both sides (`AbstractTextualComponent.java:110-114`).
   const rows = Math.max(1, lines.length);
   const top = arrowY - (rows * lineHeight + 2 * ARROW_LABEL_PADDING_Y);
-
   // D1: the metrics are resolved HERE, where the measurer is, and travel on
   // the run. `ascent` is measured rather than derived from the font size --
   // see `TextRun.textAscent`.
@@ -471,20 +475,17 @@ export function messageLabelBlock(
   // A2: `TextRun.y` is a BASELINE. The block's top is a line-box top, so every
   // run drops one ascent from wherever its line box begins.
   const baselineOfRow = (i: number): number => top + ascent + i * lineHeight;
-  const runAt = (text: string, x: number, y: number): TextRun => ({
-    text,
-    x,
-    y,
-    textWidth: measurer.measure(text, spec).width,
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  });
-
-  const placed = lines.map((text, i) => runAt(text, labelLeft, baselineOfRow(i)));
-  if (numberText === undefined) return { lines: placed };
   // VerticalAlignment.CENTER against the label block (`Display.java:711`).
   const numberY = baselineOfRow(0) + ((rows - 1) * lineHeight) / 2;
-  return { lines: placed, number: runAt(numberText, leftX, numberY) };
+  const numberRuns = numberText === undefined ? [] : runsAt(numberText, leftX, numberY);
+  // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`), off the
+  // number's RENDERED width: its LAST run's right edge, never a sum of widths
+  // -- a non-text atom advances x without producing a run (`sequence-creole.ts`).
+  const end = numberRuns.at(-1);
+  const labelLeft = end === undefined ? leftX : end.x + end.textWidth + MESSAGE_NUMBER_MARGIN;
+  const placed = lines.flatMap((text, i) => runsAt(text, labelLeft, baselineOfRow(i)));
+  const [first, ...rest] = numberRuns;
+  return first === undefined ? { lines: placed } : { lines: [...rest, ...placed], number: first };
 }
 
 /** Rows a label block occupies, for the caller's vertical reservation. A
