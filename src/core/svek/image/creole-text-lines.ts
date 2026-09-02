@@ -41,8 +41,9 @@
  *   its `atomTextWidth` hardcodes the upstream-reachable `nb=8` tabString;
  *   this seam's `opts.tabSize` generalizes over `FontConfiguration
  *   .getTabSize()` (`AtomText.java:270-275`, `SkinParam.java:1073` default
- *   8), so `tokenizeOnTabs`/`tabString` are re-derived locally (small, pure,
- *   not exported by that out-of-write-set file — see each helper's own doc).
+ *   8), so `tabStringFor` takes an explicit `nb`. Both it and `tokenizeOnTabs`
+ *   are IMPORTED from `AtomText.ts`, which exports them — one port, never a
+ *   copy (the SI27 shared-seam rule; they used to be re-derived here).
  * - Word-wrap: `klimt/creole/Fission.ts#getSplitted` (`Fission.java`).
  * - Vertical placement: `creole-sea-line.ts` — the real `Sea`
  *   (`SheetBlock1.java:130-152`), which is what gives each line its height
@@ -52,11 +53,12 @@
  * 104-105` registers `CommandCreoleExposantChange`, so the lexer strips the
  * tags and the run carries a `FontPosition` (`FontConfiguration.java:98-104`
  * mutes its size by 3, `AtomText.java:321-323` reports its altitude to
- * `Sea`). `<math>` remains unported (`CommandCreoleBuilder.java:111`
- * registers `CommandCreoleMath`; this port's `CommandCreoleBuilder.ts` never
- * added it — SI30 `decisions.md#D6` names it out of scope), so THAT markup
- * still measures as LITERAL, tag-inclusive text: no command recognizes it,
- * so `StripeSimple.ts#modifyStripe`'s fallthrough accumulates it verbatim.
+ * `Sea`). `<math>` is ported too (`CommandCreoleBuilder.java:111` registers
+ * `CommandCreoleMath` beside `CommandCreoleLatex`), so both tags become a
+ * `'latex'` atom: {@link latexAtomMeasured} sizes it the way
+ * `AtomMath#calculateDimensionSlow` does and its run carries the image
+ * `AtomMath#drawU` paints (`AtomMath.java:64-97`), instead of the tag-
+ * inclusive literal text the un-registered markup used to measure as.
  */
 import type { FontSpec, StringMeasurer } from '../../measurer.js';
 import type { SpriteDimsLookup } from '../../creole-atoms.js';
@@ -70,11 +72,12 @@ import {
   hasTabulation,
   tabStopWidth,
   advanceToTabStop,
-  BLOCK_E1_REAL_TABULATION,
-  TAB_STRING,
+  tabStringFor,
+  tokenizeOnTabs,
 } from '../../klimt/creole/legacy/AtomText.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../decoration/symbol/usymbol-resolve.js';
+import { renderLatexAsImage } from '../../latex.js';
 import { baseFontConfiguration, CREOLE_HR_HEIGHT } from './leaf-sizing-text.js';
 
 // ---------------------------------------------------------------------------
@@ -91,6 +94,31 @@ export interface FontStyleFlags {
   readonly italic: boolean;
   readonly underline: boolean;
   readonly strike: boolean;
+}
+
+/**
+ * The drawable form of a creole `<latex>`/`<math>` atom: `AtomMath` measures
+ * an image and draws that same image (`AtomMath.java:64-97`), so one call to
+ * `core/latex.ts#renderLatexAsImage` answers both halves and they agree by
+ * construction — which is the whole reason the href travels on the run rather
+ * than being re-derived at draw time.
+ *
+ * `top` is the atom's own box top within its line (`SeaLineLayout.top`), i.e.
+ * what `SheetBlock1#drawU` translates to before calling `AtomMath#drawU`
+ * (`SheetBlock1.java:212-217`); a renderer draws the image at
+ * `lineTop + top`, never off a text baseline, because an image has none.
+ *
+ * The IMAGE BYTES and the exact `width`/`height` are a PERMANENT divergence:
+ * this port renders through KaTeX where the jar renders through JLaTeXMath
+ * (`DIVERGENCES.md`, "LaTeX rendering engine — KaTeX, not JLaTeXMath", which
+ * names `<math>` as well as `<latex>`). The STRUCTURE — an image atom in the
+ * text flow, at its own box — is the conformance target; the numbers are not.
+ */
+export interface CreoleRunImage {
+  readonly href: string;
+  readonly width: number;
+  readonly height: number;
+  readonly top: number;
 }
 
 export interface CreoleTextRun {
@@ -110,6 +138,10 @@ export interface CreoleTextRun {
    *  of an all-NORMAL line — see `creole-sea-line.ts`'s doc comment for the
    *  two cases where a NORMAL run's `dy` is legitimately non-zero. */
   readonly dy: number;
+  /** Set ONLY on a `'latex'` atom's run, which carries an image and no text
+   *  at all (`AtomMath#drawU` draws one `UImage`/`UImageSvg` and nothing
+   *  else, `AtomMath.java:78-97`). Absent on every text run. */
+  readonly image?: CreoleRunImage;
 }
 
 export interface CreoleTextLine {
@@ -183,49 +215,19 @@ function tableRowLine(raw: string, ctx: MeasureCtx): CreoleTextLine {
 // own doc comment) and is out of this task's write-set to extend.
 // ---------------------------------------------------------------------------
 
-/** `AtomText#tabString` (`AtomText.java:258-264`): `substring(0, nb)` for
- *  `1 <= nb < 7`, else the full 8 spaces. */
-function tabStringFor(nb: number): string {
-  return nb >= 1 && nb < 7 ? TAB_STRING.slice(0, nb) : TAB_STRING;
-}
-
-interface TabToken {
-  readonly text: string;
-  readonly isTab: boolean;
-}
-
-/** `StringTokenizer(text, "\t" + Jaws.BLOCK_E1_REAL_TABULATION, true)`
- *  (`AtomText.java:242,210`) — a local port of `AtomText.ts`'s own private
- *  `tokenizeOnTabs` (not exported; that file is out of T1's write-set). */
-function splitOnTabChars(text: string): readonly TabToken[] {
-  const tokens: TabToken[] = [];
-  let pending = '';
-  for (const ch of text) {
-    if (ch !== '\t' && ch !== BLOCK_E1_REAL_TABULATION) {
-      pending += ch;
-      continue;
-    }
-    if (pending.length > 0) tokens.push({ text: pending, isTab: false });
-    pending = '';
-    tokens.push({ text: ch, isTab: true });
-  }
-  if (pending.length > 0) tokens.push({ text: pending, isTab: false });
-  return tokens;
-}
-
 /** `AtomText#calculateDimensionSlow`'s tab-free short-circuit
  *  (`AtomText.java:183-184`) + `#getWidth`'s tokenizer/advance loop
  *  (`AtomText.java:239-256`) + `#getTabSize` (`AtomText.java:270-275`, via
  *  the imported {@link tabStopWidth}). Reports only the run's TOTAL width —
  *  matching `getWidth`'s own return contract, not `drawU`'s SEPARATE
  *  per-token positioning walk (`AtomText.java:210-233`); a renderer drawing
- *  a tabbed run must re-tokenize (`splitOnTabChars`) for per-token x, the
+ *  a tabbed run must re-tokenize ({@link tokenizeOnTabs}) for per-token x, the
  *  same two-method split upstream itself has. */
 function runTextWidth(text: string, fontSize: number, tabSizeNb: number, measure: (s: string) => number): number {
   if (!hasTabulation(text)) return measure(text);
   const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), fontSize);
   let x = 0;
-  for (const token of splitOnTabChars(text)) {
+  for (const token of tokenizeOnTabs(text)) {
     x = token.isTab ? advanceToTabStop(x, tabStop) : x + measure(token.text);
   }
   return x;
@@ -285,17 +287,41 @@ function textAtomMeasured(atom: Extract<CreoleAtom, { kind: 'text' }>, ctx: Meas
   return { run, width, height };
 }
 
-/** One `CreoleAtom`'s run (`null` for a non-text atom — see this module's
- *  doc comment: the locked `CreoleTextRun` shape carries no image/sprite/
- *  emoji variant) plus its width/height contribution. `'inline'`
- *  (img/sprite): D9's `measureInlineAtom` (`creole-atoms-measure.ts`).
- *  `'emoji'`: `AtomEmoji#calculateDimensionSlow`/box height
- *  (`AtomEmoji.java:57-64`, via {@link emojiBoxDim}). `'latex'`: measured
- *  through a separate LaTeX-rendering path elsewhere, not this atom stream —
- *  the SAME documented divergence `leaf-sizing-text.ts#creoleVisibleText`
- *  already carries for the description engine; 0/0 here. */
+/**
+ * A `'latex'` atom's run + width/height: `AtomMath#calculateDimensionSlow`
+ * (`AtomMath.java:64-71`), whose dimension is the rendered image's own — here
+ * `core/latex.ts#renderLatexAsImage`, the ONE latex renderer this port has,
+ * bound exactly as `klimt/creole/atom/AtomMath.ts` and
+ * `EntityImageDescriptionDelegates.ts#descAtomOps` already bind it. The run
+ * carries no text: the atom draws an image and nothing else.
+ *
+ * The colour is the atom's own resolved `FontConfiguration.color`, falling
+ * back to `XColor.BLACK` — `AtomMath#getColor`'s own default when `foreground`
+ * is not an `HColorSimple` (`AtomMath.java:88,100-106`).
+ *
+ * `image.top` is filled in by {@link atomsToLine} once `Sea` has placed the
+ * line; an atom cannot know its own top before its neighbours are laid out.
+ */
+function latexAtomMeasured(atom: Extract<CreoleAtom, { kind: 'latex' }>, ctx: MeasureCtx): AtomMeasured {
+  void ctx;
+  const drawn = renderLatexAsImage(atom.expr, atom.color ?? JAR_DEFAULT_TEXT_COLOR);
+  const image: CreoleRunImage = { href: drawn.href, width: drawn.width, height: drawn.height, top: 0 };
+  return {
+    run: { text: '', style: NO_STYLE, size: ctx.font.size, image },
+    width: drawn.width,
+    height: drawn.height,
+  };
+}
+
+/** One `CreoleAtom`'s run (`null` for a non-text, non-latex atom — the
+ *  `CreoleTextRun` shape carries no sprite/emoji variant) plus its
+ *  width/height contribution. `'inline'` (img/sprite): D9's
+ *  `measureInlineAtom` (`creole-atoms-measure.ts`). `'emoji'`:
+ *  `AtomEmoji#calculateDimensionSlow`/box height (`AtomEmoji.java:57-64`).
+ *  `'latex'`: {@link latexAtomMeasured}. */
 function atomMeasured(atom: CreoleAtom, ctx: MeasureCtx): AtomMeasured {
   if (atom.kind === 'text') return textAtomMeasured(atom, ctx);
+  if (atom.kind === 'latex') return latexAtomMeasured(atom, ctx);
   if (atom.kind === 'inline') {
     const dims = measureInlineAtom(atom.atom, ctx.sprites, ctx.font.size);
     return { run: null, width: dims.width, height: dims.height };
@@ -335,7 +361,11 @@ function atomsToLine(atoms: readonly CreoleAtom[], ctx: MeasureCtx): CreoleTextL
   );
   const runs: CreoleTextRun[] = [];
   measured.forEach((m, i) => {
-    if (m.run !== null) runs.push({ ...m.run, dy: layout.dy[i] as number });
+    if (m.run === null) return;
+    // `SheetBlock1#drawU` draws an image atom at its own `Position`
+    // (`SheetBlock1.java:212-217`); only `Sea` knows it, and only now.
+    const placed = m.run.image === undefined ? {} : { image: { ...m.run.image, top: layout.top[i] as number } };
+    runs.push({ ...m.run, ...placed, dy: layout.dy[i] as number });
   });
   return { runs, width: layout.width, height: layout.height, kind: 'text' };
 }
@@ -377,7 +407,7 @@ function buildPhysicalLine(raw: string, ctx: MeasureCtx, wrapWidth: number): rea
  * skinParam, CreoleMode.FULL, wrapWidth)`'s measurement semantics
  * (`EntityImageState.java:98-99`, `EntityImageStateCommon.java:80-81`) as
  * closely as this port's existing primitives allow — see this module's doc
- * comment for what is NOT ported (`<math>`/`<sup>`/`<sub>`).
+ * comment for how `<math>`/`<latex>`/`<sup>`/`<sub>` are handled.
  *
  * An empty `display` reports NO lines (`leaf-sizing-text.ts#lineCount`'s
  * S1L-e precedent: an empty body is zero lines, not one blank one) —

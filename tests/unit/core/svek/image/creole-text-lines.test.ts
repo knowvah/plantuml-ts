@@ -11,6 +11,8 @@ import { creoleTextLines } from '../../../../../src/core/svek/image/creole-text-
 import { WidthTableMeasurer, FixedMeasurer } from '../../../../../src/core/measurer.js';
 import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
 import { parseSimpleColor, toSvgHex } from '../../../../../src/core/klimt/color/HColorSet.js';
+import { renderLatexAsImage } from '../../../../../src/core/latex.js';
+import { JAR_DEFAULT_TEXT_COLOR } from '../../../../../src/core/decoration/symbol/usymbol-resolve.js';
 
 const font: FontSpec = { family: 'Helvetica', size: 14 };
 
@@ -48,7 +50,7 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.width).toBeCloseTo(measurer.measure('entry', font).width, 10);
   });
 
-  it('<math>x</math> IS ported now -- it becomes a latex atom, so it contributes NO text run and its width is the rendered image\'s, not the tag-inclusive literal\'s', () => {
+  it('<math>x</math> IS ported now -- it becomes a latex atom, carried as an IMAGE run whose width/height are core/latex.ts#renderLatexAsImage\'s, not the tag-inclusive literal\'s', () => {
     const measurer = new WidthTableMeasurer();
 
     // This assertion used to pin the OPPOSITE, citing
@@ -57,17 +59,49 @@ describe('creoleTextLines', () => {
     // `math/ASCIIMathTeXImg.ts`), so `<math>x</math>` no longer measures as
     // 14 literal characters.
     //
-    // The line therefore holds a `'latex'` atom and no `'text'` run at all --
-    // `creoleTextLines` collects TEXT runs. Its width comes from
-    // `core/latex.ts#measureLatex` (KaTeX), which is a PERMANENT divergence
-    // from the jar's JLaTeXMath metrics (`DIVERGENCES.md`, "LaTeX rendering
-    // engine", which names `<math>` explicitly) -- so the width is asserted to
-    // be the literal's no longer, and is NOT pinned to a number the jar would
-    // have to agree with.
+    // The line holds a `'latex'` atom, which this seam carries as a run with
+    // an `image` and no text -- `AtomMath#calculateDimensionSlow` measures the
+    // rendered image and `#drawU` draws it (`AtomMath.java:64-97`). The width
+    // comes from `core/latex.ts#renderLatexAsImage` (KaTeX), a PERMANENT
+    // divergence from the jar's JLaTeXMath metrics (`DIVERGENCES.md`, "LaTeX
+    // rendering engine", which names `<math>` explicitly) -- so it is compared
+    // against that function, never against a number the jar would have to
+    // agree with.
     const mathLines = creoleTextLines('<math>x</math>', font, measurer);
+    const drawn = renderLatexAsImage('{x}', JAR_DEFAULT_TEXT_COLOR);
     expect(mathLines).toHaveLength(1);
-    expect(mathLines[0]!.runs).toHaveLength(0);
+    expect(mathLines[0]!.runs).toHaveLength(1);
+    // No `<text>` half at all: `AtomMath#drawU` draws an image and nothing
+    // else (`AtomMath.java:78-97`).
+    expect(mathLines[0]!.runs[0]!.text).toBe('');
+    expect(mathLines[0]!.runs[0]!.image).toEqual({
+      href: drawn.href,
+      width: drawn.width,
+      height: drawn.height,
+      // Alone on its line, so `Sea#translateMinYto(0)` puts its box at the
+      // line's own top (`Sea.java:72-80`).
+      top: 0,
+    });
+    expect(mathLines[0]!.width).toBeCloseTo(drawn.width, 10);
+    expect(mathLines[0]!.height).toBeCloseTo(drawn.height, 10);
     expect(mathLines[0]!.width).not.toBeCloseTo(measurer.measure('<math>x</math>', font).width, 10);
+  });
+
+  it('a <math> atom sharing a line with text: the image box is BOTTOM-aligned against the text box, so its own top is the line height minus its height (Sea.java:72-80, AtomMath.java:73-75 altitude 0)', () => {
+    const measurer = new WidthTableMeasurer();
+    const lines = creoleTextLines('ab<math>x</math>', font, measurer);
+    const drawn = renderLatexAsImage('{x}', JAR_DEFAULT_TEXT_COLOR);
+
+    expect(lines).toHaveLength(1);
+    const [textRun, imageRun] = lines[0]!.runs;
+    expect(textRun!.text).toBe('ab');
+    expect(textRun!.image).toBeUndefined();
+    // `Sea#add` advances x by the previous atom's own width, so the line is
+    // the text plus the image (`Sea.java:60-70`).
+    expect(lines[0]!.width).toBeCloseTo(measurer.measure('ab', font).width + drawn.width, 10);
+    // The taller atom sets the line height; both share `maxY === 0`.
+    expect(lines[0]!.height).toBeCloseTo(drawn.height, 10);
+    expect(imageRun!.image!.top).toBeCloseTo(lines[0]!.height - drawn.height, 10);
   });
 
   it('[[http://x]] -> one run, visible text defaults to the url itself, hyperlink color+underline, url set (CommandCreoleUrl.java / Url label-defaulting ctor)', () => {
@@ -194,14 +228,25 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.height).toBeCloseTo(39 * factor, 10);
   });
 
-  it('<latex>x</latex> -> no run, zero width/height (measured through a separate LaTeX path, not this atom stream -- the same documented divergence leaf-sizing-text.ts#creoleVisibleText carries)', () => {
+  it('<latex>x</latex> -> one image run sized by renderLatexAsImage, the SAME contract <math> gets (both build a latex atom; AtomMath.java:64-97)', () => {
     const measurer = new WidthTableMeasurer();
     const lines = creoleTextLines('<latex>x</latex>', font, measurer);
+    // `<latex>` is passed through verbatim -- only `<math>` goes through the
+    // ASCIIMath -> LaTeX conversion (`CommandCreoleLatex` uses
+    // `fromLatex`, `CommandCreoleMath` uses `fromAsciiMath`,
+    // `ScientificEquationSafe.java:78-88`).
+    const drawn = renderLatexAsImage('x', JAR_DEFAULT_TEXT_COLOR);
 
     expect(lines).toHaveLength(1);
-    expect(lines[0]!.runs).toEqual([]);
-    expect(lines[0]!.width).toBe(0);
-    expect(lines[0]!.height).toBe(0);
+    expect(lines[0]!.runs).toHaveLength(1);
+    expect(lines[0]!.runs[0]!.image).toEqual({
+      href: drawn.href,
+      width: drawn.width,
+      height: drawn.height,
+      top: 0,
+    });
+    expect(lines[0]!.width).toBe(drawn.width);
+    expect(lines[0]!.height).toBe(drawn.height);
   });
 });
 

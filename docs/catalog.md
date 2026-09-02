@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1057 modules · 3782 exported names.
+1057 modules · 3786 exported names.
 
 ## `src/`
 
@@ -415,7 +415,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
+| `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `TabToken`, `tokenizeOnTabs`, `tabStringFor`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
 | `CommandCreoleBuilder.ts` | `CREOLE_COMMANDS`, `CREOLE_COMMANDS_OTHER` | CommandCreoleBuilder — builds the `starter prefix -> Command[]` map `StripeSimple#searchCommand` looks up against. |
 | `CreoleParser.ts` | `CreoleTextStyle`, `CreoleParserAdapters`, `CreoleParser` | CreoleParser — the ONLY upstream implementor of `SheetBuilder`: turns a `Display` into a `Sheet` of `Stripe`s, one physical display line at a time, dispatching each line to a table/tree/code/latex/plain-text classifier. |
 | `CreoleStripeSimpleParser.ts` | `StripeClassification`, `classifyStripeLine` | CreoleStripeSimpleParser — classifies ONE already-`\n`-split display line into a `StripeStyleType` + its content, per upstream's regex cascade. |
@@ -662,7 +662,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Circle.ts` | `Circle` |  |
 | `ContainingEllipse.ts` | `ContainingEllipse` |  |
 | `creole-sea-line.ts` | `ATOM_TEXT_MIN_HEIGHT`, `SeaLineOps`, `SeaLineLayout`, `creoleAtomStartingAltitude`, `layoutLineThroughSea`, `measurerSeaLineOps` | creole-sea-line — the vertical half of one physical (post-word-wrap) creole line: `Sea` placement, the line's own height, and the per-run baseline offset a `<sup>`/`<sub>` run needs (SI30 `decisions.md#D2`). |
-| `creole-text-lines.ts` | `FontStyleFlags`, `CreoleTextRun`, `CreoleTextLine`, `creoleTextLines` | creole-text-lines — the ONE core creole-text seam shared by the state sizer (T6) and the state renderer (T7), per `plans/state-declared-size-fix/ decisions.md#D1`. |
+| `creole-text-lines.ts` | `FontStyleFlags`, `CreoleRunImage`, `CreoleTextRun`, `CreoleTextLine`, `creoleTextLines` | creole-text-lines — the ONE core creole-text seam shared by the state sizer (T6) and the state renderer (T7), per `plans/state-declared-size-fix/ decisions.md#D1`. |
 | `EntityImageDescription.ts` | `ShapeType`, `Margins`, `resolveDescriptionUSymbol`, `HexagonPolygon`, `EntityImageDescriptionEntity`, `EntityImageDescriptionSymbol`, `EntityImageDescriptionLabels`, `EntityImageDescriptionStereotypeSprite`, `EntityImageDescriptionPaint`, `EntityImageDescriptionLinkInfo`, `EntityImageDescriptionParams`, `EntityImageDescription` | EntityImageDescription — draws a descriptive/deployment leaf entity (`component`, `usecase`, `database`, `interface`, `rectangle`, ...): the `<!--entity NAME--><g class="entity" ...>` wrapper, the resolved `USymbol`'s `asSmall` chrome, an o |
 | `EntityImageDescriptionDelegates.ts` | `buildDesc`, `resolveStereotypeSprite`, `buildStereo`, `hasSomeHorizontalLinkVisible`, `isThereADoubleLink`, `hasSomeHorizontalLinkDoubleDecorated`, `computeShieldMargins`, `hideTextOffsets`, `requireGroups` | EntityImageDescriptionDelegates — every private-instance-method body `EntityImageDescription` delegates to (`buildDesc`, `buildStereo`, the three link-scanning helpers, `computeShieldMargins`, `hideTextOffsets`, `requireGroups`). |
 | `EntityImageDescriptionEmoji.ts` | `EmojiAtomLike`, `EmojiArtworkResolver`, `drawEmojiAtom` | The `<:name:>` emoji draw branch of `descAtomOps`, split out of `EntityImageDescriptionDelegates.ts` at the 500-line cap. |

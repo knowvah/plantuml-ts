@@ -37,20 +37,25 @@
  * (baseline offset from the line's own NORMAL baseline, via the real `Sea`,
  * `decisions.md#D2`), both widened onto {@link StateTextRun} below so the
  * renderer draws a `<sup>`/`<sub>` run at its own muted size and raised/
- * lowered baseline instead of the line's single shared font size. `<math>`
- * remains unported (`CommandCreoleBuilder.java:111` registers
- * `CommandCreoleMath`; `decisions.md#D6` names it out of scope), so THAT
- * markup still measures as literal, tag-inclusive text.
+ * lowered baseline instead of the line's single shared font size.
+ *
+ * `<math>`/`<latex>` are ported since `CommandCreoleMath` was registered
+ * beside `CommandCreoleLatex` (`CommandCreoleBuilder.java:111`): the seam's
+ * `CreoleTextRun` now reports an `image` for that atom, widened onto
+ * {@link StateTextRun} below so `renderer-box.ts#renderStateRuns` draws the
+ * `<image>` `AtomMath#drawU` paints instead of dropping the atom on the floor
+ * (`AtomMath.java:64-97`). Sizing and drawing stay in lockstep by
+ * construction: one `renderLatexAsImage` call answers both.
  */
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import type { CreoleTextLine, CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
+import type { CreoleRunImage, CreoleTextLine, CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import {
   hasTabulation,
   tabStopWidth,
   advanceToTabStop,
-  BLOCK_E1_REAL_TABULATION,
-  TAB_STRING,
+  tabStringFor,
+  tokenizeOnTabs,
 } from '../../core/klimt/creole/legacy/AtomText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { Theme } from '../../core/theme.js';
@@ -102,6 +107,14 @@ export interface StateTextRun {
    *  unmuted-size field to reconstruct it exactly). 0 for every run of an
    *  all-NORMAL line. */
   readonly dy: number;
+  /** The seam's own `CreoleTextRun.image` — set ONLY on a `<math>`/`<latex>`
+   *  run, which carries an image and no text at all (`AtomMath#drawU` paints
+   *  one `UImage` and nothing else, `AtomMath.java:78-97`). `renderer-box.ts
+   *  #renderStateRuns` draws it at `lineTop + image.top`, the atom's own
+   *  `Position` (`SheetBlock1.java:212-217`), and advances x by `width` —
+   *  which for this port equals the DRAWN width, since `renderLatexAsImage`
+   *  measures what it draws. */
+  readonly image?: CreoleRunImage;
 }
 
 /** One laid-out creole table cell: its styled runs plus the cell's own
@@ -175,43 +188,6 @@ export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   };
 }
 
-/** `AtomText#tabString` (`AtomText.java:258-264`): `substring(0, nb)` for
- *  `1 <= nb < 7`, else the full 8 spaces. Local port for the same reason
- *  `creole-text-lines.ts` carries its own — `AtomText.ts`'s exported
- *  `atomTextWidth` only ever reaches the port-wide-constant `nb=8` path. */
-function tabStringFor(nb: number): string {
-  return nb >= 1 && nb < 7 ? TAB_STRING.slice(0, nb) : TAB_STRING;
-}
-
-/** One `StringTokenizer` token: a run of ordinary characters, or a single
- *  tab character. A NAMED interface, not an inline object type in the
- *  signature below — an inline `{ ... }` return type desyncs lizard's
- *  brace-depth tracker and makes it merge the following declarations into
- *  one giant "function" (the same trap `creole-text-lines.ts` documents for
- *  regex literals; that file's own `TabToken` exists for this reason). */
-interface TabToken {
-  readonly text: string;
-  readonly isTab: boolean;
-}
-
-/** `StringTokenizer(text, "\t" + Jaws.BLOCK_E1_REAL_TABULATION, true)`
- *  (`AtomText.java:242,210`). */
-function splitOnTabChars(text: string): readonly TabToken[] {
-  const tokens: TabToken[] = [];
-  let pending = '';
-  for (const ch of text) {
-    if (ch !== '\t' && ch !== BLOCK_E1_REAL_TABULATION) {
-      pending += ch;
-      continue;
-    }
-    if (pending.length > 0) tokens.push({ text: pending, isTab: false });
-    pending = '';
-    tokens.push({ text: ch, isTab: true });
-  }
-  if (pending.length > 0) tokens.push({ text: pending, isTab: false });
-  return tokens;
-}
-
 function toRun(run: CreoleTextRun, text: string, width: number, dx: number): StateTextRun {
   return {
     text,
@@ -228,6 +204,7 @@ function toRun(run: CreoleTextRun, text: string, width: number, dx: number): Sta
     // OWN size/dy unchanged (tabs never cross an atom boundary).
     size: run.size,
     dy: run.dy,
+    ...(run.image !== undefined ? { image: run.image } : {}),
   };
 }
 
@@ -249,12 +226,16 @@ function toRun(run: CreoleTextRun, text: string, width: number, dx: number): Sta
 function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer, tabSizeNb: number): StateTextRun[] {
   const runFont: FontSpec = { ...font, size: run.size };
   const measure = (s: string): number => measurer.measure(s, runFont).width;
+  // An image run's advance is its IMAGE's width, never a measurement of its
+  // (empty) text — `AtomMath#calculateDimensionSlow` is the image's own box
+  // (`AtomMath.java:64-71`). It carries no text, so it can carry no tab.
+  if (run.image !== undefined) return [toRun(run, '', run.image.width, 0)];
   if (!hasTabulation(run.text)) return [toRun(run, run.text, measure(run.text), 0)];
   const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), runFont.size);
   const out: StateTextRun[] = [];
   let x = 0;
   let pendingDx = 0;
-  for (const token of splitOnTabChars(run.text)) {
+  for (const token of tokenizeOnTabs(run.text)) {
     if (token.isTab) {
       const next = advanceToTabStop(x, tabStop);
       pendingDx += next - x;
