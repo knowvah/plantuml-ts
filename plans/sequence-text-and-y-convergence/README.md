@@ -66,7 +66,7 @@ below reports against it via `--compare`.
 | [1](batch-1/overview.md) | A1 | the text emitter, the run metrics, the `ast.ts` split | [x] |
 | [2](batch-2/overview.md) | A2 A3 A4 A5 | the four text kinds, in parallel | [x] |
 | [3](batch-3/overview.md) | A6 | Phase A sweep, adjudicate, measure | [x] |
-| [4](batch-4/overview.md) | B1 B2 B3 (+B4..Bn) | the element deficit | **halted — stop condition 9** |
+| [4](batch-4/overview.md) | B1 B2 B3 (+B4..Bn) | the element deficit | B1 B2 B3 [x] · **B4..Bn halted — stop condition 9** |
 | [5](batch-5/overview.md) | C1 C2 C3 C4 | the Y axis, and close-out | [ ] |
 
 **Hard checkpoint before batch 5.** Phase C's derivation reads numbers that
