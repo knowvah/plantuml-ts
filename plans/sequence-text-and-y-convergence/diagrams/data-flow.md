@@ -4,6 +4,10 @@ D1 in one picture: **layout measures, the geometry carries, the renderer
 formats.** The renderer never holds a measurer, so it can never disagree with
 the layout that sized the box.
 
+D8 amends the *carrier* only: the metrics ride on each `TextRun`, not as
+scalars on the geometry type. The flow below is unchanged in every other
+respect.
+
 ```plantuml
 @startuml
 title Phase A — a participant label, from measurement to markup
@@ -24,10 +28,16 @@ note right of L
   against the jar's 27.889 - 17
 end note
 
-L -> G : textWidth, textAscent, textLineHeight
-note right of G : required fields, scaled by scale-geo
+L -> G : TextRun\n(x, y, textWidth,\ntextAscent, textLineHeight)
+note right of G
+  Metrics are required ON THE RUN (D8).
+  A run is the thing that has a width:
+  a stereotyped head is two runs,
+  a note body is N.
+  scale-geo multiplies all three by k.
+end note
 G -> R : ParticipantGeo
-R -> R : leftX = centerX - textWidth / 2
+R -> R : leftX = centerX - run.textWidth / 2
 note right of R : D4 — derived, never stored
 R -> T : leftX, baselineY, width, font
 T --> R : one text element

@@ -132,13 +132,17 @@ export function advanceToTabStop(currentX: number, tabStop: number): number {
 /** One `StringTokenizer(text, TAB_CHARS, true)` token: upstream returns each
  *  delimiter as its own single-character token and never returns an empty
  *  token, so `isTab` is the token's identity, not a re-test of its text. */
-interface TabToken {
+export interface TabToken {
   readonly text: string;
   readonly isTab: boolean;
 }
 
-/** Upstream's `StringTokenizer(text, TAB_CHARS, true)` (java:242, java:210). */
-function tokenizeOnTabs(text: string): TabToken[] {
+/** Upstream's `StringTokenizer(text, TAB_CHARS, true)` (java:242, java:210).
+ *  Exported because `AtomText#drawU` (java:210-233) re-tokenizes the SAME way
+ *  `#getWidth` (java:242) does, and this port's renderer-side seams
+ *  (`creole-text-lines.ts`, `state-sizing-creole.ts`) are that draw half —
+ *  one port, never a copy (the SI27 shared-seam rule). */
+export function tokenizeOnTabs(text: string): TabToken[] {
   const tokens: TabToken[] = [];
   let pending = '';
   for (const ch of text) {
@@ -152,6 +156,15 @@ function tokenizeOnTabs(text: string): TabToken[] {
   }
   if (pending.length > 0) tokens.push({ text: pending, isTab: false });
   return tokens;
+}
+
+/** Upstream `AtomText#tabString` (java:258-264): `substring(0, nb)` for
+ *  `1 <= nb < 7`, else the full 8 spaces. `nb` is
+ *  `FontConfiguration#getTabSize()` (java:270-275, `SkinParam.java:1073`
+ *  default 8); {@link atomTextWidth} below only ever reaches that default,
+ *  which is why it passes {@link TAB_STRING} directly. */
+export function tabStringFor(nb: number): string {
+  return nb >= 1 && nb < 7 ? TAB_STRING.slice(0, nb) : TAB_STRING;
 }
 
 /**

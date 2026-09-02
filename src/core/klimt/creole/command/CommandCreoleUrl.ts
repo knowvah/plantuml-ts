@@ -39,7 +39,23 @@ import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 // `UrlBuilder.getRegexp()`'s shape (bracket-delimited, no nested `]]`
 // inside) — ported as a source string (never a regex literal, the `[`/`]`
 // complexity-hook precedent already established by `creole-atoms.ts`).
-const URL_TAG_SOURCE = '\\[\\[([^\\]]*(?:\\][^\\]]+)*)\\]\\]';
+//
+// BOTH brackets are excluded from the capture, not just `]`. Every one of the
+// five alternatives `getRegexp()` composes excludes the pair — the link arm is
+//
+// ```java
+// private static final String S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL =
+//         START_PART + "([^%s%g\\[\\]]+?)" + ...
+// ```
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:76-80
+//
+// The `[` matters whenever a COMPONENT wraps a display in literal brackets of
+// its own — `ComponentRoseGroupingHeader.java:89` does exactly that to a
+// group's comment, so the drawn string is `[[[url]]]`. Admitting `[` made this
+// port match at position 0 and emit one linked run reading `[https://…`, a
+// broken href; upstream cannot start there and matches at position 1, giving
+// the jar's three runs `[` / linked url / `]` (`cedeti-10-bufu072`).
+const URL_TAG_SOURCE = '\\[\\[([^\\[\\]]*(?:\\][^\\[\\]]+)*)\\]\\]';
 
 const HYPERLINK_COLOR = '#0000FF';
 

@@ -21,6 +21,7 @@ import { FontStyle, getFont } from '../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
 import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 import { encodePng, toBase64DataUri } from '../../../src/core/klimt/sprite/png-encoder.js';
@@ -241,24 +242,36 @@ describe('resolveMemberAtoms — inline OpenIconic <&glyph> atoms (G2 N41)', () 
   });
 });
 
-describe('resolveMemberAtoms — latex atoms are dropped (zero corpus reach)', () => {
-  test('a latex CreoleAtom contributes nothing (measure 0, no render atom)', () => {
-    // No member text in the corpus produces a `latex` atom (buildMemberAtoms
-    // never emits one -- `<latex>` is unreachable from a real class member
-    // line, see this module's own doc comment); constructed directly here
-    // to exercise the drop branch `resolveOneAtom` still needs to handle
-    // defensively (mirrors `MemberRenderAtom`'s own doc comment).
+describe('resolveMemberAtoms — a latex atom draws its image', () => {
+  // Superseded expectation: this suite used to pin the atom as DROPPED, on
+  // the premise that `buildMemberAtoms` could never emit one. Registering
+  // `CommandCreoleMath` (`CommandCreoleBuilder.java:111`) falsified that --
+  // `<math>expr</math>` in a member row or a note body now builds a `latex`
+  // atom -- and a dropped atom is a formula that VANISHES from the page,
+  // where the unregistered markup used to at least render as its own
+  // literal text. `AtomMath` measures and draws one image
+  // (`AtomMath.java:64-97`); see `class-creole-latex.test.ts` for the
+  // full-render pin. Dimensions are never asserted against the jar
+  // (KaTeX-not-JLaTeXMath, `DIVERGENCES.md`).
+  test('a latex CreoleAtom resolves to an image atom, between its text siblings', () => {
     const atoms = [
       { kind: 'text' as const, text: 'before ', font: BASE_FONT },
       { kind: 'latex' as const, expr: 'x^2', color: '#000000' },
       { kind: 'text' as const, text: 'after', font: BASE_FONT },
     ];
+    const drawn = renderLatexAsImage('x^2', '#000000');
     const build = resolveMemberAtoms(atoms, BASE_FONT, measurer);
-    expect(build.atoms).toHaveLength(2);
+    expect(build.atoms).toHaveLength(3);
     expect(build.atoms[0]).toMatchObject({ kind: 'text', text: 'before ' });
-    expect(build.atoms[1]).toMatchObject({ kind: 'text', text: 'after' });
+    expect(build.atoms[1]).toMatchObject({ kind: 'image', href: drawn.href });
+    expect(build.atoms[2]).toMatchObject({ kind: 'text', text: 'after' });
+    // The row's width now reserves the image's own box too --
+    // `AtomMath#calculateDimensionSlow` IS that box (`AtomMath.java:64-71`),
+    // so the term comes from the one renderer, never from a jar golden.
     const expectedWidth =
-      measurer.measure('before ', FONT_SPEC).width + measurer.measure('after', FONT_SPEC).width;
+      measurer.measure('before ', FONT_SPEC).width +
+      drawn.width +
+      measurer.measure('after', FONT_SPEC).width;
     expect(build.width).toBeCloseTo(expectedWidth, 6);
   });
 });

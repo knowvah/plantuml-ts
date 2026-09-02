@@ -86,12 +86,21 @@ export interface SeaLineOps {
   normalDescent(atom: CreoleAtom): number;
 }
 
-/** One line's resolved geometry: `Sea`'s own width/height plus a `dy` per
- *  atom, parallel to the `atoms` array handed in. */
+/** One line's resolved geometry: `Sea`'s own width/height plus a `dy` and a
+ *  `top` per atom, both parallel to the `atoms` array handed in. */
 export interface SeaLineLayout {
   readonly width: number;
   readonly height: number;
   readonly dy: readonly number[];
+  /** Each atom's own box TOP within the line, i.e. `Sea#getPosition(atom)
+   *  .getMinY()` after `translateMinYto(0)` — the very `Position` upstream's
+   *  `SheetBlock1#drawU` translates the `UGraphic` to before calling
+   *  `Atom#drawU` (`SheetBlock1.java:212-217`). A TEXT atom's renderer
+   *  reconstructs its baseline from the line box instead (see `dy` above), so
+   *  this is what an atom whose `drawU` paints from its box CORNER needs —
+   *  `AtomMath#drawU`'s image (`AtomMath.java:78-97`), `AtomImg`'s, and
+   *  `AtomSprite`'s. */
+  readonly top: readonly number[];
 }
 
 /** `Sea` passes its `StringBounder` straight through to `AtomOps`, and this
@@ -153,7 +162,7 @@ function seaOpsFor(ops: SeaLineOps): AtomOps {
  * stripe).
  */
 export function layoutLineThroughSea(atoms: readonly CreoleAtom[], ops: SeaLineOps): SeaLineLayout {
-  if (atoms.length === 0) return { width: 0, height: 0, dy: [] };
+  if (atoms.length === 0) return { width: 0, height: 0, dy: [], top: [] };
 
   const sea = new Sea(UNUSED_STRING_BOUNDER, seaOpsFor(ops));
   for (const atom of atoms) sea.add(atom);
@@ -161,13 +170,13 @@ export function layoutLineThroughSea(atoms: readonly CreoleAtom[], ops: SeaLineO
   sea.translateMinYto(0);
 
   const height = sea.getHeight();
-  const dy = atoms.map((atom) => {
+  const top = atoms.map((atom) => sea.getPosition(atom)?.getMinY() ?? 0);
+  const dy = atoms.map((atom, i) => {
     if (atom.kind !== 'text') return 0;
-    const top = sea.getPosition(atom)?.getMinY() ?? 0;
-    const baseline = top + ops.drawHeight(atom) - ops.descent(atom);
+    const baseline = (top[i] as number) + ops.drawHeight(atom) - ops.descent(atom);
     return baseline - (height - ops.normalDescent(atom));
   });
-  return { width: sea.getWidth(), height, dy };
+  return { width: sea.getWidth(), height, dy, top };
 }
 
 /**

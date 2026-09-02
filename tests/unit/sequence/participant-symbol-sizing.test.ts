@@ -31,14 +31,6 @@ const CACHE = join(
   '..', '..', '..', 'test-results', 'dot-cache', 'sequence',
 );
 
-/**
- * The jar's document margin: `getTextBlock`'s `ug.apply(new UTranslate(5, 5))`
- * plus the frame's own inset (`SequenceDiagramFileMakerTeoz.java:132`), 10 on
- * each axis in every sequence golden. T5.1 owns reproducing it; until then it
- * is subtracted here so the two sides are comparable.
- */
-const JAR_DOCUMENT_MARGIN = 10;
-
 function goldenOf(slug: string): string {
   return readFileSync(join(CACHE, slug, 'in.svg'), 'utf8');
 }
@@ -87,7 +79,12 @@ describe('the glyph participant kinds — head row height', () => {
   it.each(ROWS)('$slug ($kinds): the head row matches the jar exactly', ({ slug }) => {
     // If any kind's `getPreferredHeight` were wrong, the tallest head in the
     // fixture would move this row.
-    expect(headRow(oursFor(slug))).toBeCloseTo(headRow(goldenOf(slug)) - JAR_DOCUMENT_MARGIN, 3);
+    // No document-margin correction any more: C3 landed the vertical half of
+    // `getTextBlock`'s `UTranslate(5, 5)` plus the exporter's `same(5)`
+    // (`SequenceDiagramFileMakerTeoz.java:132`,
+    // `SequenceDiagram#getDefaultMargins:624-628`), so both sides are now in
+    // the same absolute coordinates and the head row is compared directly.
+    expect(headRow(oursFor(slug))).toBeCloseTo(headRow(goldenOf(slug)), 3);
   });
 });
 

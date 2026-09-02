@@ -14,13 +14,17 @@ import type {
   ParticipantType,
   SequenceDiagramAST,
   SequenceEvent,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import type { StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf } from './sequence-layout-shared.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import {
+  ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, TOP_MARGIN,
+} from './sequence-layout-shared.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
@@ -31,11 +35,11 @@ import {
 } from '../../core/stereotype-decoration.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
-import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import {
-  symbolPreferredHeight,
-  symbolPreferredWidth,
+  participantBadgeGeo, participantLabelCy, symbolPreferredHeight, symbolPreferredWidth,
 } from './sequence-layout-participant-sizing.js';
+import { ARROW_DELTA_X } from './sequence-arrowhead.js';
+import { displayLines } from './text-block-geo.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import {
@@ -50,13 +54,13 @@ import {
  * `tileArguments.getBorder1()` for both.
  *
  * 10, and it is two fives. `TextBlockExporter:173` translates the whole
- * diagram by `(margin.left, margin.top)`, and for a Teoz sequence that margin
- * is `ClockwiseTopRightBottomLeft.same(5)`
- * (`SequenceDiagram#getDefaultMargins:624-628`). Inside that,
+ * diagram by `(margin.left, margin.top)`, which for a Teoz sequence is
+ * `ClockwiseTopRightBottomLeft.same(5)`
+ * (`SequenceDiagram#getDefaultMargins:624-628`); inside that,
  * `SequenceDiagramFileMakerTeoz#getTextBlock`'s `drawU` applies its own
- * `new UTranslate(5, 5)` (`:132`) before shifting by `dx(-min1)`, which lands
- * the body's leftmost extent at 0 in block coordinates. 5 + 5 = 10, which is
- * where `jobadi-87-jegi648`'s first box sits, and every other golden's.
+ * `new UTranslate(5, 5)` (`:132`) before shifting by `dx(-min1)`, landing the
+ * body's leftmost extent at 0 in block coordinates. 5 + 5 = 10, where
+ * `jobadi-87-jegi648`'s first box sits, and every other golden's.
  */
 export const LEFT_MARGIN = 10;
 
@@ -68,10 +72,6 @@ export interface ParticipantLayoutResult {
   maxParticipantHeight: number;
 }
 
-/**
- * Compute participant column geometry: x/width/height/centerX for every
- * participant, sorted into first-appearance order.
- */
 /** Theme + measurer + the diagram's sprite registry, bundled so the column
  *  builders stay inside the project's 5-parameter cap. Mirrors
  *  `EventProcessingContext`'s own role in `sequence-layout-events.ts`. */
@@ -81,6 +81,8 @@ interface ParticipantLayoutCtx {
   readonly sprites: SpriteRegistry | undefined;
 }
 
+/** Compute participant column geometry: x/width/height/centerX for every
+ *  participant, sorted into first-appearance order. */
 export function computeParticipantLayout(
   ast: SequenceDiagramAST,
   theme: Theme,
@@ -131,9 +133,8 @@ interface SpanConstraint {
  *
  * Constraints are stored `from < to` regardless of the arrow's direction: the
  * reverse branch of `addConstraints` (`:402-409`) swaps which endpoint is
- * bounded, but the distance it demands between the two lifelines is the same.
- * The `LIVE_DELTA_SIZE` adjustments in both branches are NOT modelled here —
- * see `findings/label-widening.md`.
+ * bounded, but demands the same distance. The `LIVE_DELTA_SIZE` adjustments in
+ * both branches are NOT modelled here — see `findings/label-widening.md`.
  */
 function scanMessageLabels(
   events: readonly SequenceEvent[],
@@ -148,7 +149,7 @@ function scanMessageLabels(
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
-        const lines = ev.label === '' ? [] : ev.label.split('\n');
+        const lines = ev.label === '' ? [] : displayLines(ev.label);
         const labelWidth =
           lines.length === 0
             ? 0
@@ -165,11 +166,10 @@ function scanMessageLabels(
       }
     } else if (ev.kind === 'messageExo') {
       // Deliberately skipped, not overlooked (D3). This scan widens the gap
-      // between an ADJACENT PAIR of lifelines; an exo message has one
-      // endpoint and the diagram border for the other, so there is no pair
-      // to widen. Its extent reaches the diagram through
-      // `MessageExoArrow#getRightEndInternal`'s `Math.max(maxX, ...)`, i.e.
-      // total width, which is a different quantity from this one.
+      // between a PAIR of lifelines; an exo message has one endpoint and the
+      // diagram border for the other, so there is no pair to widen. Its extent
+      // reaches the diagram through `MessageExoArrow#getRightEndInternal`'s
+      // `Math.max(maxX, ...)`, i.e. total width -- a different quantity.
       // @see sequencediagram/graphic/MessageExoArrow.java
       continue;
     } else if (ev.kind === 'frame') {
@@ -187,14 +187,9 @@ function scanMessageLabels(
  * `ComponentRoseDatabase#getPreferredWidth` (`:102-105`):
  * `max(stickman.getWidth(), getTextWidth())`, where the stickman is
  * `USymbols.DATABASE.asSmall(null, empty(16,17), empty(0,0), …)` (`:70`) and
- * therefore a fixed 36 wide. This replaces a `DB_MIN_WIDTH = 40` whose only
- * justification was the comment "cylinders are narrower than plain boxes" —
- * a fitted constant with no upstream `file:line`, which `CLAUDE.md` forbids.
- *
- * The two halves of this change must land together: `renderer-participant-
- * shapes.ts` draws the glyph and this function reserves the column for it.
- * See `planning/sizer-renderer-parity.md` for why splitting them is the
- * recurring defect this mission exists to avoid.
+ * therefore a fixed 36 wide. It replaced a fitted `DB_MIN_WIDTH = 40`. The
+ * two halves must land together: `renderer-participant-shapes.ts` draws the
+ * glyph and this reserves the column (`planning/sizer-renderer-parity.md`).
  */
 function computeParticipantWidths(
   sortedParticipants: Participant[],
@@ -204,29 +199,29 @@ function computeParticipantWidths(
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
     const badge = anyBadgeFor(p, ctx, resolveParticipantBackground(p, theme));
-    const textW = Math.max(
-      measurer.measure(p.display, fontSpec).width,
-      ...visibleStereotypeLines(p, theme).map((l) => measurer.measure(l, fontSpec).width),
-    );
+    // A head is a text BLOCK: `getPureTextWidth` is its WIDEST LINE
+    // (`AbstractTextualComponent.java:106-108`), never the raw display -- and
+    // C4: never the raw LINE either. `SheetBlock1#initMap` maxes `sea
+    // .getWidth()` per stripe (`:145-149`), and a stripe's width is its PARSED
+    // atoms', so `""MySubTitle""` reserves 70.087 and not the 90.038 its four
+    // quotes measure (`jozomu-87-tajo507`, jar box width 84.087).
+    const rows = [...visibleStereotypeLines(p, theme), ...displayLines(p.display)];
+    const textW = Math.max(...labelRows(rows, fontSpec, measurer).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
     const symbolW = symbolPreferredWidth(p.type, lw, theme);
     if (symbolW !== undefined) return symbolW;
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
-    // `ComponentRoseParticipant`; the only difference between them is
-    // `getDeltaCollection()` (`:114-124`).
-    //
-    // `getTextWidth = getPureTextWidth + padding.left + padding.right`
-    // (`AbstractTextualComponent.java:106-108`), and that IS the drawn box
-    // (`ComponentRoseParticipant#drawInternalU:100-104`). There is no floor
-    // underneath it: `getPureTextWidth`'s `max(..., minWidth)` (`:140-142`)
-    // takes `minWidth` from `Rose#getMinClassWidth` (`Rose.java:275-278`),
-    // whose `PName.MinimumWidth` is in no skin file and so resolves to
-    // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified against
-    // 3570 corpus boxes: `measure(label).width + 14` reproduces the jar's box
-    // width to within 0.0005px, worst case
-    // (`findings/participant-width.md`).
+    // `ComponentRoseParticipant`, differing only by `getDeltaCollection()`
+    // (`:114-124`). `getTextWidth = getPureTextWidth + padding.left + padding.right`
+    // (`AbstractTextualComponent.java:106-108`) IS the drawn box
+    // (`ComponentRoseParticipant#drawInternalU:100-104`), with no floor under
+    // it: `getPureTextWidth`'s `max(..., minWidth)` (`:140-142`) takes
+    // `minWidth` from `Rose#getMinClassWidth` (`Rose.java:275-278`), whose
+    // `PName.MinimumWidth` is in no skin file and resolves to
+    // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
+    // corpus boxes to within 0.0005px (`findings/participant-width.md`).
     const plain = lw + theme.sequence.participantPadding * 2;
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
@@ -239,16 +234,15 @@ function computeParticipantWidths(
  *
  * `ComponentRoseParticipant#getPreferredHeight:129-132` is
  * `getTextHeight + margin.top + margin.bottom + deltaShadow + 1 +
- * getDeltaCollection()`, and margin and shadow are both zero for a
- * participant (see `findings/participant-width.md` §6). So its reserved area
- * is exactly one pixel taller than the rectangle it paints.
+ * getDeltaCollection()`, and margin and shadow are both zero for a participant
+ * (`findings/participant-width.md` §6), so its reserved area is exactly one
+ * pixel taller than the rectangle it paints.
  *
  * Every other head component's `getPreferredHeight` is its glyph plus
- * `getTextHeight`, with no constant term at all — read, one at a time:
+ * `getTextHeight`, with no constant term at all — read one at a time:
  * `ComponentRoseActor:89-92`, `ComponentRoseDatabase:96-99`,
  * `ComponentRoseBoundary:90-93`, `ComponentRoseControl:91-94`,
- * `ComponentRoseEntity:91-94`, `ComponentRoseQueue:82-85` (glyph only).
- * Hence 0 for those, and this is not an approximation awaiting Batch 4.
+ * `ComponentRoseEntity:91-94`, `ComponentRoseQueue:82-85`. Hence 0 for those.
  */
 export function headSlackOf(type: ParticipantType): number {
   return type === 'participant' || type === 'collections' ? 1 : 0;
@@ -286,18 +280,21 @@ function positionParticipants(
 
   // Use the tallest reserved head AREA so all lifelines start at the same Y.
   // `LivingSpace#drawHeadOrTail:191-214` draws each head into an `Area` sized
-  // by `comp.getPreferredDimension` — `(getPreferredWidth,
-  // getPreferredHeight)` (`AbstractComponent.java:163-167`) — which for a
-  // plain participant is one pixel taller than the rectangle
-  // `drawInternalU:100-104` actually paints inside it (`headSlackOf`).
+  // by `comp.getPreferredDimension` (`AbstractComponent.java:163-167`), which
+  // for a plain participant is one pixel taller than the rectangle
+  // `drawInternalU:100-104` paints inside it (`headSlackOf`).
   const areaOf = (g: ParticipantGeo): number => g.height + headSlackOf(g.type);
   const maxParticipantHeight = Math.max(...participantGeos.map(areaOf));
-  // Bottom-align the head AREAS, not the boxes: each participant's area ends
-  // at `maxParticipantHeight`, so every lifeline starts there, and the box is
-  // painted at the TOP of its own area with the slack falling below it. That
-  // is what puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
+  // Bottom-align the head AREAS, not the boxes: each area ends at
+  // `TOP_MARGIN + maxParticipantHeight`, so every lifeline starts there and
+  // the box is painted at the TOP of its area with the slack below it --
+  // which puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
+  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x.
   for (const g of participantGeos) {
-    g.y = maxParticipantHeight - areaOf(g);
+    g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
+    // AFTER the bottom-align, never before: the runs carry an absolute
+    // baseline, and `g.y` is what it is measured from.
+    g.labelRuns = buildLabelRuns(g, ctx);
   }
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
@@ -309,13 +306,10 @@ function positionParticipants(
  * `StereotypeDecoration#buildComplex` rewrites each chunk to just its LABEL
  * group, dropping the `(CHAR[,COLOR])` / `($sprite[,COLOR])` badge spec that
  * introduced it (`:143-182`) -- so `<< ($APIGateway, #CC2264) APIGateway >>`
- * displays as `«APIGateway»`, which is exactly what the jar emits for
- * `birocu-87-xubi808`. It also yields ONE label per chunk, so a stacked
- * `<<A>><<B>>` is two rows, and 3-bracket `<<<X>>>` chunks are invisible.
- *
- * `core/stereotype-decoration.ts` is that port, shared rather than
- * duplicated -- see its own header for why it no longer lives in the class
- * engine.
+ * displays as `«APIGateway»`, the jar's own text for `birocu-87-xubi808`. It
+ * yields ONE label per chunk, so a stacked `<<A>><<B>>` is two rows and
+ * 3-bracket `<<<X>>>` chunks are invisible. `core/stereotype-decoration.ts`
+ * is that port, shared rather than duplicated.
  */
 function stereotypeLabels(raw: string): string[] {
   return splitStereotypeLabels(stereotypeInner(raw)).map((l) => wrapGuillemet(l));
@@ -336,11 +330,8 @@ function stereotypeInner(raw: string): string {
  * stereotype only on an explicit `ShowStereotype false` -- an unset value is
  * `ValueNull` and keeps it (`Display.java:127-136`). `theme.colors
  * .showStereotypeByTag` carries exactly the tags that declared the property,
- * so an absent entry is upstream's absent value.
- *
- * `resolveStyleCascade` cleans the token itself, so the raw `<<tag>>` is the
- * lookup key with the guillemets trimmed here and nothing else -- no
- * dependency on the class engine's stereotype splitter.
+ * so an absent entry is upstream's absent value; `resolveStyleCascade` cleans
+ * the token, so the lookup key is the raw `<<tag>>` de-guillemeted here.
  */
 function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[] {
   if (p.stereotype === undefined) return [];
@@ -357,7 +348,48 @@ function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[]
   return stereotypeLabels(p.stereotype);
 }
 
+/**
+ * ONE head row, measured: its creole runs and the box they occupy.
+ *
+ * C4: a row is no longer one string at one width. `AbstractTextualComponent`
+ * builds every label through `display.create0(fc, ..., CreoleMode.FULL, ...)`
+ * (`java:80-92`) -- `Display` -> `Creole` -> `Stripe` -> `Atom` -- and
+ * `DriverTextSvg#draw` emits one `<text>` per atom, so the jar draws
+ * `The <b>Famous</b> Bob` as three (`kofuti-29-goti188`).
+ *
+ * `width` is the LAST run's RIGHT EDGE, never a sum: a non-text atom advances
+ * x without producing a run (`sequence-creole.ts`). `height`/`ascent` are the
+ * tallest run and the deepest ascent -- `Sea#doAlign` baseline-aligning one
+ * stripe's atoms (`SheetBlock1.java:130-137`). All three equal the old
+ * `measure('M')` pair for a row whose runs share the ambient font, which is
+ * what keeps a markup-free head byte-identical. Runs are placed at `(0, 0)`:
+ * a row's width is not known until its runs are, so the caller translates the
+ * whole row by one dx (D4's centring, over the ROW's width, not each run's).
+ */
+interface LabelRow {
+  readonly runs: readonly TextRun[];
+  readonly width: number;
+  readonly height: number;
+  readonly ascent: number;
+}
 
+/** A head's rows, measured. Callers pass them in DRAW order -- the visible
+ *  stereotype labels, then the display's own lines -- and the box's width, its
+ *  height and its placed runs all come from this ONE list: a disagreement
+ *  between any two is text overhanging its own box. */
+function labelRows(rows: readonly string[], spec: FontSpec, measurer: StringMeasurer): readonly LabelRow[] {
+  const font = sequenceCreoleFont(spec);
+  return rows.map((row) => {
+    const runs = sequenceCreoleRuns(row, font, { leftX: 0, baselineY: 0 }, measurer);
+    const last = runs.at(-1);
+    return {
+      runs,
+      width: last === undefined ? 0 : last.x + last.textWidth,
+      height: Math.max(0, ...runs.map((r) => r.textLineHeight)),
+      ascent: Math.max(0, ...runs.map((r) => r.textAscent)),
+    };
+  });
+}
 
 /**
  * The box's fill, in `Participant#getUsedStyles`' own precedence: the
@@ -390,11 +422,10 @@ function resolveParticipantBorder(p: Participant, theme: Theme): Paint {
 
 /**
  * `TextBlockSprited` -- the gap between the badge and the label block beside
- * it. The sprite draws at the block origin and the parent text block is
- * translated right by `sprite.width + 6.0`
- * (`TextBlockSprited.java:65-67,76`). Jar-verified on `birocu-87-xubi808`:
- * a 64-wide image at x=179.938 puts its label at x=249.938, and
- * 249.938 - (179.938 + 64) = 6.
+ * it: the sprite draws at the block origin and the parent text block is
+ * translated right by `sprite.width + 6.0` (`TextBlockSprited.java:65-67,76`).
+ * Jar-verified on `birocu-87-xubi808`: a 64-wide image at x=179.938 puts its
+ * label at x=249.938, and 249.938 - (179.938 + 64) = 6.
  */
 const BADGE_GAP = 6;
 
@@ -404,14 +435,10 @@ const BADGE_GAP = 6;
  * `Participant#getDisplay` folds the `Stereotype` into the display
  * (`:125-136`), and `Display#createStereotype` wraps the text block in a
  * `TextBlockSprited` carrying `stereotype.getSprite(spriteContainer)`
- * (`Display.java:671-689`). `undefined` when the run declares no sprite, or
- * when the name does not resolve in the registry -- upstream's `getSprite`
- * returns null there and the plain text block draws unchanged.
- *
- * The circled-CHARACTER badge (`<<(C,color) Name>>`) takes the other arm of
- * that same `if` and is NOT built here: it needs `CircledCharacter`'s own
- * circle+glyph geometry rather than an image box. Four corpus fixtures use
- * it -- see `planning/next-missions.md`.
+ * (`Display.java:671-689`). `undefined` when the run declares no sprite or the
+ * name does not resolve -- upstream's `getSprite` returns null there and the
+ * plain text block draws unchanged. The circled-CHARACTER badge takes the
+ * other arm of that same `if` and is {@link charBadgeFor}'s.
  */
 function badgeFor(
   p: Participant,
@@ -428,22 +455,16 @@ function badgeFor(
   // `Stereotype#getSprite` passes `asTextBlock(getHtmlColor(), null, ...)`
   // (`:116`) and `asTextBlock#drawU` resolves `color = forcedColor ?? fontColor`
   // (`:215`), so the END is the stereotype's DECLARED colour -- or black when
-  // it declares none, which is `buildComplex`'s own
-  // `htmlColor = col == null ? HColors.BLACK : col` and already
-  // `spriteToRgba`'s default for an absent `fontColor`.
+  // it declares none (`buildComplex`'s `htmlColor = col == null ?
+  // HColors.BLACK : col`, already `spriteToRgba`'s default).
   //
-  // The START is `ug.getParam().getBackcolor()` -- the CURRENT graphics
-  // background, i.e. whatever the participant box is filled with, so the
-  // sprite blends into it. Sourced from the same expression
-  // `renderParticipantBox` paints that box with: where our box fill diverges
-  // from the jar's the badge inherits that one divergence rather than adding
-  // a second (birocu-87-xubi808: the jar fills `#FF0` from
-  // `<style> participant { BackgroundColor }`, which this port does not yet
-  // route to the box either).
-  //
-  // These two were passed the other way round when the badge first landed,
-  // which tinted every sprite from the declared colour toward the theme's
-  // TEXT colour instead of from the box toward the declared colour.
+  // The START is `ug.getParam().getBackcolor()`, i.e. whatever the box is
+  // filled with, so the sprite blends into it. Sourced from the same
+  // expression `renderParticipantBox` paints the box with, so a box-fill
+  // divergence is inherited once rather than doubled (`birocu-87-xubi808`:
+  // the jar fills `#FF0` from `<style> participant { BackgroundColor }`,
+  // which this port routes to neither). Passing these two the other way
+  // round tints every sprite toward the theme's TEXT colour.
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
     deco.color,
@@ -484,6 +505,45 @@ function anyBadgeFor(
   return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
 
+/**
+ * A participant head's label, as placed and measured runs (A3, C4).
+ * `birocu-87-xubi808` box 1 is the reference: box x=55.575 w=107.363 y=46
+ * h=42, `«APIGateway»` at x=62.575 w=93.363 baseline 63.889, `OnlyLabel` at
+ * x=77.713 w=63.087 baseline 77.889 — both centred on 109.2565, one line
+ * apart. Three derivations, all upstream's:
+ *
+ *   1. The block's vertical CENTRE is `participantLabelCy` (`ComponentRose*
+ *      #drawInternalU`), and the rows stack from its top downward,
+ *      `y += height` per stripe (`SheetBlock1.java:139-142`).
+ *   2. A row's BASELINE is its own line box's top plus its measured ascent:
+ *      row centre 60 gives `60 - 14/2 + 10.889 = 63.889`, 74 gives 77.889.
+ *   3. A row's LEFT edge is `cx - width / 2` (D4) — the centre stays the
+ *      authoritative anchor and no left edge is stored. C4: `width` is the
+ *      ROW's, so a row of several runs is centred as one block.
+ *
+ * `hide stereotype` is resolved upstream (`visibleStereotypeLines`), so an
+ * absent row is simply an absent entry.
+ */
+function buildLabelRuns(p: ParticipantGeo, ctx: ParticipantLayoutCtx): readonly TextRun[] {
+  const { theme, measurer } = ctx;
+  const spec = fontSpecOf(theme);
+  const rows = labelRows([...(p.stereotypeLines ?? []), ...displayLines(p.display)], spec, measurer);
+  const cx = participantBadgeGeo(p.badge, p.x, p.width, theme)?.nameCx ?? p.centerX;
+  // The block is centred on `cy`, and the rows stack from its top downward.
+  const cy = participantLabelCy(p.type, p.height, p.y, true, theme);
+  let top = cy - rows.reduce((h, r) => h + r.height, 0) / 2;
+  const placed: TextRun[] = [];
+  for (const row of rows) {
+    // D4, over the ROW: every run of a row shifts by ONE dx, so the row is
+    // centred as a block and the runs keep the spacing the seam gave them.
+    const dx = cx - row.width / 2;
+    const y = top + row.ascent;
+    for (const run of row.runs) placed.push({ ...run, x: run.x + dx, y });
+    top += row.height;
+  }
+  return placed;
+}
+
 /** Build the geometry for a single participant column at a given x offset. */
 function buildParticipantGeo(
   p: Participant,
@@ -493,31 +553,32 @@ function buildParticipantGeo(
 ): ParticipantGeo {
   const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
-  const measured = measurer.measure(p.display, fontSpec);
-  // A visible stereotype is a SECOND run above the name
-  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
-  // own line in `birocu-87-xubi808`), so the head grows by one line.
   const stereoLines = visibleStereotypeLines(p, theme);
   const background = resolveParticipantBackground(p, theme);
   const badge = anyBadgeFor(p, ctx, background);
-  // `TextBlockSprited#calculateDimension` takes the MAX of the badge's own
-  // height and the text block's (`:57-63`).
-  const textHeight = measured.height * (1 + stereoLines.length);
+  // A visible stereotype is a SECOND row above the name
+  // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
+  // own line in `birocu-87-xubi808`), and so is each line the display's own
+  // escaped newlines split it into (`:153`) -- `butali-53-kige134`'s head is
+  // the jar's 42 tall, not 28. C4: the SUM of those rows' own line boxes, not
+  // one line height times a row count -- `SheetBlock1#initMap` accumulates
+  // `y += height` per stripe (`:139-142`), and a `=` heading stripe is 18 tall
+  // beside its 14pt neighbours (`bugabo-85-veki716`, jar baselines 31/55.889).
+  // Identical arithmetic whenever every row shares the ambient font.
+  const rows = [...stereoLines, ...displayLines(p.display)];
+  const textHeight = labelRows(rows, fontSpec, measurer).reduce((h, r) => h + r.height, 0);
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
-  // (`AbstractTextualComponent.java:110-114`), and that IS the painted
-  // rectangle (`ComponentRoseParticipant#drawInternalU:100-104`). `Padding 7`
-  // expands to all four sides (`plantuml.skin:186-190`), so this is the same
-  // 14 the width gets, on the other axis. Verified on 2304 corpus boxes, all
-  // 28 tall for a one-line label (`findings/participant-height.md`).
-  const boxHeight =
-    Math.max(textHeight, badge?.height ?? 0) + 2 * theme.sequence.participantPadding;
-  // `getTextHeight()` is the text block plus a vertical padding (see
-  // `sequence-layout-participant-sizing.ts`'s DB_TEXT_PADDING_X note), and the
-  // block itself is `TextBlockSprited`'s
-  // max(sprite, text) (`TextBlockSprited.java:57-63`) — i.e. `boxHeight`
-  // without its `+ 20` plain-box allowance. This replaced a fitted
-  // `DB_HEIGHT = 80` floor.
+  // (`AbstractTextualComponent.java:110-114`) IS the painted rectangle
+  // (`ComponentRoseParticipant#drawInternalU:100-104`), and `Padding 7`
+  // expands to all four sides (`plantuml.skin:186-190`) -- the same 14 the
+  // width gets, on the other axis. Verified on 2304 corpus boxes, all 28 tall
+  // for a one-line label (`findings/participant-height.md`).
+  // `TextBlockSprited#calculateDimension` maxes the badge's own height against
+  // the block's (`:57-63`); `blockHeight` is that max WITHOUT the plain box's
+  // padding allowance, which is what a glyph kind sizes from (it replaced a
+  // fitted `DB_HEIGHT = 80` floor).
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
+  const boxHeight = blockHeight + 2 * theme.sequence.participantPadding;
   const pHeight =
     symbolPreferredHeight(p.type, blockHeight, theme) ??
     (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight);
@@ -529,10 +590,15 @@ function buildParticipantGeo(
     background,
     border: resolveParticipantBorder(p, theme),
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
+    ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,
     x: currentX,
     y: 0,
+    // Both `y` and `labelRuns` are filled in by the bottom-align pass in
+    // `computeParticipantLayout`: a run carries an ABSOLUTE baseline, and the
+    // head's own y is not known until every column's reserved area is.
+    labelRuns: [],
     width,
     height: pHeight,
     centerX,
@@ -546,10 +612,8 @@ function buildParticipantGeo(
  * Upstream builds a `Real` constraint graph and solves it globally. This does
  * NOT reimplement `Real`; it exploits the shape of the constraint set upstream
  * actually produces for the participant row, which is entirely
- *
- *     x[j] >= x[i] + c     with  i < j  in participant order
- *
- * from two sources, and only two:
+ * `x[j] >= x[i] + c` with `i < j` in participant order, from two sources and
+ * only two:
  *
  *   - `LivingSpaces#addConstraints:61-71`, `nextA >= prevE + 10`, always
  *     between neighbours;
@@ -559,14 +623,11 @@ function buildParticipantGeo(
  *     distance, so it too is a left-to-right edge.
  *
  * A system of difference constraints whose edges all point one way along a
- * total order is a DAG longest-path, and a single left-to-right sweep taking
- * the max of the incoming edges gives its EXACT minimal solution. So this is
- * not an approximation of the solver: for this constraint set it is the
- * solver, at O(participants + messages).
- *
- * What it replaced was a pairwise pre-scan that widened only ADJACENT gaps and
- * ignored every message spanning three or more participants
- * (`findings/label-widening.md`).
+ * total order is a DAG longest-path, so a single left-to-right sweep taking
+ * the max of the incoming edges is its EXACT minimal solution -- not an
+ * approximation of the solver but, for this constraint set, the solver, at
+ * O(participants + messages). It replaced a pairwise pre-scan that widened
+ * only ADJACENT gaps (`findings/label-widening.md`).
  */
 function solveParticipantXs(
   widths: readonly number[],

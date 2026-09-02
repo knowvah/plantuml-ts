@@ -22,9 +22,10 @@ import type {
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceGeometry,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
   computeParticipantLayout,
   type ParticipantLayoutResult,
@@ -35,10 +36,17 @@ import {
   type ActivationStack,
   type EventProcessingContext,
 } from './sequence-layout-events.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
-import { DIVIDER_WIDTH_ALLOWANCE } from './divider-style.js';
+import {
+  BOTTOM_MARGIN,
+  fontSpecOf,
+  PLAYING_SPACE_STARTING_Y,
+  PLAYING_SPACE_TAIL_Y,
+  TOP_MARGIN,
+} from './sequence-layout-shared.js';
+import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -113,7 +121,7 @@ function assembleGeometry(
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } =
-    computeVerticalTotals(participantGeos, maxParticipantHeight, currentY, theme, showFootbox);
+    computeVerticalTotals(maxParticipantHeight, currentY, showFootbox);
   flushOpenActivations(
     eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos,
   );
@@ -121,14 +129,19 @@ function assembleGeometry(
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
-  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight);
+  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight, theme, measurer);
 
   return {
     totalWidth,
     totalHeight,
     participants: participantGeos,
     events: eventGeos,
-    headHeight: maxParticipantHeight,
+    // The ABSOLUTE y the lifelines start at, which is the head BAND's height
+    // dropped by the document's top margin: `10 + headHeight` in
+    // `findings/vertical-terms.md` §0's landmark table. Every consumer
+    // (`renderer-lifeline.ts:95`, `sequence-page.ts:320`) already reads it as
+    // an absolute coordinate.
+    headHeight: TOP_MARGIN + maxParticipantHeight,
     lifelineEndY,
     footerShapeY,
     showFootbox,
@@ -161,7 +174,11 @@ function runEventLayout(
     dividerGeos,
     newpageGeos,
   };
-  const startY = participantLayout.maxParticipantHeight + theme.sequence.messageSpacing;
+  // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
+  // head row, and NOT one `messageSpacing`: teoz has no such term at all
+  // (`findings/vertical-terms.md` §1.4).
+  const startY =
+    TOP_MARGIN + participantLayout.maxParticipantHeight + PLAYING_SPACE_STARTING_Y;
   const currentY = processEvents(ast.events, startY, ctx);
 
   return {
@@ -264,33 +281,45 @@ interface VerticalTotals {
 }
 
 /**
- * Compute the lifeline end, footer shape, and total diagram height.
- * Non-rectangular footer shapes (actor, database) get their label above the
- * shape, so a label-height zone is reserved between the lifeline end and the
- * shape.
+ * The document's vertical close-out — `findings/vertical-terms.md` §0, read
+ * bottom-up:
+ *
+ * ```
+ * pageHeight = max(inkHeight, startingY + SUM(tileHeight)) + 10
+ *                                    PlayingSpace#getPreferredHeight:154-161
+ * pswpHeight = pageHeight + (footbox ? 2 : 1) * headHeight
+ *                        PlayingSpaceWithParticipants#calculateDimension:74-87
+ * svgHeight  = pswpHeight + 10 (block inset) + 10 (exporter margins)
+ *                     SequenceDiagramFileMakerTeoz#getTextBlock:132,150-158;
+ *                     TextBlockExporter:199-203
+ * ```
+ *
+ * `currentY` is the last tile's gauge max, so `currentY + PLAYING_SPACE_TAIL_Y`
+ * is the top of the foot row — and the foot band is the SAME `headHeight` as
+ * the head band, drawn flush at `dy(pageHeight + headHeight)`
+ * (`PlayingSpaceWithParticipants#drawU:224-225`).
+ *
+ * There is NO footer label zone. This port reserved `theme.fontSize + 8`
+ * between the lifeline end and an actor/database foot; upstream's tail
+ * component puts the label above its own stickman INSIDE its own height
+ * (`LivingSpaces#drawHeads:135-141`) and reserves nothing extra, which is why
+ * `footerShapeY` is now just `lifelineEndY`. `renderFooterBox` already draws
+ * from `lifelineEndY` and derives each kind's glyph offset itself, so the
+ * field survives only for `sequence-page.ts`/`scale-geo.ts`.
  */
 function computeVerticalTotals(
-  participantGeos: ParticipantGeo[],
   maxParticipantHeight: number,
   currentY: number,
-  theme: Theme,
   showFootbox: boolean,
 ): VerticalTotals {
-  const lifelineEndY = currentY + theme.sequence.lifelineExtension;
-  const BOTTOM_MARGIN = 5;
-  // No footer row: reserve nothing for it. Upstream does not lay one out
-  // either, so the document ends just past the lifelines.
-  if (!showFootbox)
-    return { lifelineEndY, footerShapeY: lifelineEndY, totalHeight: lifelineEndY + BOTTOM_MARGIN };
-
-  const hasNonRectFooter = participantGeos.some(
-    (p) => p.type === 'actor' || p.type === 'database',
-  );
-  const footerLabelH = hasNonRectFooter ? theme.fontSize + 8 : 0;
-  const footerShapeY = lifelineEndY + footerLabelH;
-  const totalHeight = footerShapeY + maxParticipantHeight + BOTTOM_MARGIN;
-
-  return { lifelineEndY, footerShapeY, totalHeight };
+  const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
+  // `factor` in `calculateDimensionSlow:83-84` — 2 with a footbox, 1 without.
+  const footBand = showFootbox ? maxParticipantHeight : 0;
+  return {
+    lifelineEndY,
+    footerShapeY: lifelineEndY,
+    totalHeight: lifelineEndY + footBand + BOTTOM_MARGIN,
+  };
 }
 
 /**
@@ -423,6 +452,15 @@ function backfillDividerWidth(
     // the left the two are the same number.
     d.bandX = originX;
     d.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
+    // A5: the label runs were built relative to the label BOX's own top-left
+    // (`sequence-layout-events.ts#dividerLabelRuns`); the box itself is
+    // centred in the band, so its origin is only knowable here.
+    // `ComponentRoseDivider#drawInternalU:76-77`:
+    //   xpos = (width - textWidth - deltaX) / 2
+    //   ypos = (height - textHeight) / 2
+    const boxX = d.bandX + (d.bandWidth - d.textWidth - DIVIDER_LABEL_DELTA_X) / 2;
+    const boxY = d.y + (d.height - d.textHeight) / 2;
+    d.labelRuns = d.labelRuns.map((r) => ({ ...r, x: boxX + r.x, y: boxY + r.y }));
   }
 }
 
@@ -453,10 +491,57 @@ function backfillNewpageWidth(
  * x = leftmost participant edge - 8 to rightmost + 8, y = 0,
  * height = totalHeight (covers the full diagram height).
  */
+/**
+ * A `box` group's label as a placed, measured run (A5).
+ *
+ * The x and the baseline are exactly where `renderBoxBackground` put them
+ * before -- `box.x + padding` and `box.y + fontSize + padding` -- so this
+ * moves nothing; what it adds is the measured width the emitter needs.
+ *
+ * DIVERGENCE, recorded not fixed: the jar draws a box label at `box {
+ * FontSize 13, FontStyle bold }` (`plantuml.skin:162-167`), emitting
+ * `font-size="13" font-weight="700"` -- `binupo-93-begi656` is the reference.
+ * This port uses 11 plain. Correcting it also moves the label's x and reopens
+ * how nested boxes lay out, which that same fixture exercises and this engine
+ * does not yet port, so it is a task of its own rather than a side effect of
+ * routing the text through the emitter.
+ */
+function boxLabelRuns(
+  label: string,
+  boxX: number,
+  theme: Theme,
+  measurer: StringMeasurer,
+): readonly TextRun[] {
+  const font: FontSpec = { family: theme.fontFamily, size: BOX_LABEL_FONT_SIZE };
+  // C6: `ComponentRoseEnglober` extends `AbstractTextualComponent` and builds
+  // its label through the same `create0` every other sequence text uses
+  // (`~/git/plantuml/.../skin/rose/ComponentRoseEnglober.java:57-60`), so the
+  // label goes through the same seam. Measured reach today is zero -- all 59
+  // `box` declarations in the corpus carry a plain label -- so this closes the
+  // last text kind for CONSISTENCY, not for a number; measurement identity
+  // means every one of those 59 renders byte-identically.
+  return sequenceCreoleRuns(
+    label,
+    sequenceCreoleFont(font),
+    {
+      leftX: boxX + BOX_LABEL_PADDING,
+      baselineY: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    },
+    measurer,
+  );
+}
+
+/** `renderer.ts`'s own box-label style, mirrored here so the measurement and
+ *  the drawing share one number. See {@link boxLabelRun}'s divergence note. */
+const BOX_LABEL_FONT_SIZE = 11;
+const BOX_LABEL_PADDING = 4;
+
 function computeBoxGeos(
   boxes: BoxGroup[],
   participantGeos: ParticipantGeo[],
   totalHeight: number,
+  theme: Theme,
+  measurer: StringMeasurer,
 ): BoxGeo[] {
   const BOX_PAD = 8;
   const boxGeos: BoxGeo[] = [];
@@ -476,6 +561,8 @@ function computeBoxGeos(
       height: totalHeight,
       label: box.label,
       color: box.color,
+      labelRuns:
+        box.label === '' ? [] : boxLabelRuns(box.label, leftEdge - BOX_PAD, theme, measurer),
     });
   }
 

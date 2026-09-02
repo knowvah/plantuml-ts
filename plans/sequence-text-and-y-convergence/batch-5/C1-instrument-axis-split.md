@@ -15,6 +15,12 @@ points X    90 187   (23.9%)
 by roughly 287 000.** A Y mission gated on that table cannot see three quarters
 of its own largest component (D7).
 
+> **Refreshed 2026-09-02.** The illustrative numbers above are from planning.
+> `points` is now 1 676 411 in total and the flat Y/X split is roughly even
+> (2 031 467 against 1 931 743), which is why the parity split matters MORE
+> now, not less: with `points` and `d` folded in, no flat table can say which
+> axis dominates. Measure, do not match.
+
 ## Task
 
 Report `points` split by axis, and report `d` as explicitly mixed rather than
@@ -37,9 +43,11 @@ silently folded in.
   `@points[1]`, a Y bucket.
 - Given a `@d[i]` diff, when bucketed, then it is labelled explicitly as mixed
   and is NOT counted toward either axis total.
-- Given the corpus at head, when measured, then `points Y` is 287 405 and
-  `points X` is 90 187 — the numbers this brief was planned against, so a
-  mismatch means something else moved.
+- Given the corpus at head, when measured, then the split is RECORDED, not
+  matched against a pin. The planning-time figures (`points Y` 287 405,
+  `points X` 90 187) are **stale** — `plans/sequence-creole/` landed between
+  the checkpoint and this batch and `points` is now 1 676 411 in total. Report
+  the new split and state it as the number C2 derives against.
 - Given the report, then it prints a per-axis subtotal alongside the existing
   per-attribute table.
 

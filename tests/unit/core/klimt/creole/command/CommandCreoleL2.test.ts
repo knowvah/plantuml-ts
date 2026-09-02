@@ -193,4 +193,35 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
     const atoms = buildStripeAtoms('You can click\n[[http://www.google.com]] <$maxime>'.split('\n')[0]!, PLAIN);
     expect(atoms.map(textOf)).toEqual([{ text: 'You can click', size: 14, color: '#000000', family: 'sans-serif', styles: [] }]);
   });
+
+  /**
+   * The captured link excludes BOTH brackets, not just `]`. Every one of the
+   * five alternatives `UrlBuilder.getRegexp()` composes writes the pair into
+   * its character class; the link arm is `([^%s%g\[\]]+?)`
+   * (`~/git/plantuml/.../url/UrlBuilder.java:76-80`).
+   *
+   * It matters whenever a COMPONENT wraps a display in literal brackets of its
+   * own — `ComponentRoseGroupingHeader.java:89` does that to a group's comment,
+   * so the drawn string is `[[[url]]]`. Admitting `[` made this port match at
+   * position 0 and capture the outer bracket into the href.
+   */
+  test('an outer bracket is not swallowed into the link', () => {
+    const atoms = buildStripeAtoms('[[[http://www.google.com]]]', PLAIN);
+    expect(atoms.map((a) => (a.kind === 'text' ? a.text : a.kind))).toEqual([
+      '[',
+      'http://www.google.com',
+      ']',
+    ]);
+    const linked = atoms.filter((a) => a.kind === 'text' && a.url !== undefined);
+    expect(linked).toHaveLength(1);
+    expect(linked[0]?.kind === 'text' ? linked[0].url?.url : undefined).toBe('http://www.google.com');
+  });
+
+  test('a bracketed non-url expression is not mistaken for a link', () => {
+    // `mefeke-43-xotu192`: `<math>[[a,b],[c,d]]((n),(k))</math>` is AsciiMath
+    // matrix notation. The old class let `[[a,b],[c,d]]` match as a url and
+    // drew an `<a>` the jar does not emit.
+    const atoms = buildStripeAtoms('[[a,b],[c,d]]', PLAIN);
+    expect(atoms.some((a) => a.kind === 'text' && a.url !== undefined)).toBe(false);
+  });
 });

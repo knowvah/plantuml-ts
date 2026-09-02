@@ -29,6 +29,10 @@ import { registry } from '../src/core/dispatcher.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const JAR = join(REPO, 'oracle', 'dist', 'plantuml-oracle.jar');
+
+/** The oracle jar plus Batik when it is present — see {@link runOracle}. */
+const BATIK_DIR = join(dirname(JAR), 'batik');
+const CLASSPATH = existsSync(BATIK_DIR) ? `${JAR}:${BATIK_DIR}/*` : JAR;
 const DBHUM = join(process.env.HOME ?? '', 'git', 'pdiff', 'dbhum');
 const CACHE = join(REPO, 'oracle', 'corpus-cache');
 
@@ -73,8 +77,17 @@ function runOracle(pumlPath: string, outDir: string): number {
       [
         '-DPLANTUML_DETERMINISTIC_TEXT=true',
         '-DPLANTUML_DUMP_DOT=' + outDir,
-        '-jar',
-        JAR,
+        // `-cp` rather than `-jar`, so Apache Batik can join the classpath.
+        // `math/ConverterSvg.java:88-99` reaches Batik through `Class.forName`,
+        // so the jar runs without it and `LatexBuilder#getSvg` (java:77) throws
+        // ClassNotFoundException, which `ScientificEquationSafe` swallows into
+        // `getRollback()` -- the raw formula in monospace instead of typeset
+        // maths. That silent fallback is what produced this corpus's original
+        // latex oracles. Batik is oracle-generation only, never shipped.
+        // Keep in sync with `scripts/oracle-render.sh`.
+        '-cp',
+        CLASSPATH,
+        'net.sourceforge.plantuml.Run',
         '-tsvg',
         '-o',
         outDir,

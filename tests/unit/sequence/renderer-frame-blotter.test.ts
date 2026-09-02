@@ -23,6 +23,9 @@ function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
     height: 90,
     branchSeparators: [],
     refBody: [],
+    // A4 moved tab-text placement into layout; these suites assert box
+    // geometry, never the tab's own text.
+    tabRuns: [],
     tabText: 'alt',
     tabTextWidth: 20,
     tabWidth: 40,
@@ -61,8 +64,8 @@ describe('renderFrameBlotter', () => {
     const frame = makeFrame({
       backColorGeneral: '#0000ff',
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#ff0000' },
-        { y: 160, label: 'y', backColorGeneral: '#00ff00' },
+        { y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] },
+        { y: 160, label: 'y', backColorGeneral: '#00ff00', runs: [] },
       ],
     });
     const svg = renderFrameBlotter(frame, 0);
@@ -78,7 +81,7 @@ describe('renderFrameBlotter', () => {
   it('an else with no colour of its own inherits the group colour', () => {
     const inherited = makeFrame({
       backColorGeneral: '#123456',
-      branchSeparators: [{ y: 130, label: 'x' }],
+      branchSeparators: [{ y: 130, label: 'x', runs: [] }],
     });
     const svg = renderFrameBlotter(inherited, 0);
     // If the else had NOT inherited (i.e. fell back to transparent instead
@@ -91,7 +94,7 @@ describe('renderFrameBlotter', () => {
 
   it('skips the band before the first colour change when the default is transparent', () => {
     const frame = makeFrame({
-      branchSeparators: [{ y: 130, label: 'x', backColorGeneral: '#ff0000' }],
+      branchSeparators: [{ y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] }],
     });
     const svg = renderFrameBlotter(frame, 0);
     // Only the second band (from the separator to the frame end) is
@@ -104,8 +107,8 @@ describe('renderFrameBlotter', () => {
     const frame = makeFrame({
       backColorGeneral: '#111111',
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#222222' },
-        { y: 160, label: 'y', backColorGeneral: '#222222' },
+        { y: 130, label: 'x', backColorGeneral: '#222222', runs: [] },
+        { y: 160, label: 'y', backColorGeneral: '#222222', runs: [] },
       ],
     });
     const svg = renderFrameBlotter(frame, 0);
@@ -129,8 +132,8 @@ describe('renderFrameBlotter', () => {
     const frame = makeFrame({
       backColorGeneral: '#0000ff',
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#ff0000' },
-        { y: 160, label: 'y', backColorGeneral: '#00ff00' },
+        { y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] },
+        { y: 160, label: 'y', backColorGeneral: '#00ff00', runs: [] },
       ],
     });
     const svg = renderFrameBlotter(frame, 20);

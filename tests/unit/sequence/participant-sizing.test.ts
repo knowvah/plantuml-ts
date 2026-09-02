@@ -202,15 +202,16 @@ describe('the plain participant box — height, against the jar', () => {
     // `drawInternalU` does not paint, and `LivingSpace#drawHeadOrTail:191-214`
     // reserves the PREFERRED dimension. So the head row is one taller than the
     // box, and the gap shows up between the box bottom and the lifeline top.
-    // The jar puts jobadi's box at [10, 38) and its lifeline at 39; this port
-    // has the same diagram at a different origin (Batch 5), so the RELATIVE
-    // gap is what is pinned here.
+    // The jar puts jobadi's box at [10, 38) and its lifeline at 39, and since
+    // C3 landed the document's top margin so does this port — so the ABSOLUTE
+    // numbers are pinned, not just the relative gap.
     const svg = oursFor('jobadi-87-jegi648');
     const [head] = participantBoxes(svg);
     const lifeline = /<rect x="[\d.]+" y="([\d.]+)"[^>]*fill-opacity="0"/.exec(svg);
     expect(head).toBeDefined();
+    expect(/<rect x="10" y="10" width="38.938"/.test(svg)).toBe(true);
     expect(lifeline).not.toBeNull();
-    expect(Number(lifeline?.[1])).toBeCloseTo((head?.height ?? 0) + 1, 3);
+    expect(Number(lifeline?.[1])).toBeCloseTo(10 + (head?.height ?? 0) + 1, 3);
   });
 
   it('the jar shows the same one-pixel gap in the golden', () => {
@@ -435,14 +436,26 @@ describe('Batch 8 — the three activation commits, absolutely', () => {
 
   it('jobadi-87-jegi648: the self loop\'s x geometry is the jar\'s (T8.3)', () => {
     // `ebbd1f41`, plus Gap SQ-5 closed: the drawn extent is `xRight = 42`
-    // (`ComponentRoseSelfArrow.java:59-60`), not `arrowWidth = 45`. The jar
-    // emits the loop as three lines and this port as one path, so the three
-    // x values are compared rather than the markup.
-    const jar = [34.469, 76.469, 35.469];
-    const d = /<path d="M ([\d.]+) [\d.]+ H ([\d.]+) V [\d.]+ H ([\d.]+)"/.exec(
-      oursFor('jobadi-87-jegi648'),
-    );
-    expect(d).not.toBeNull();
-    for (const [i, want] of jar.entries()) expect(Number(d?.[i + 1])).toBeCloseTo(want, 3);
+    // (`ComponentRoseSelfArrow.java:59-60`), not `arrowWidth = 45`.
+    //
+    // B2 strengthened this. It used to pull three numbers out of a `<path>`'s
+    // `d` because the jar emits three lines and this port emitted one path;
+    // now both emit three lines, so the SHAPE is compared too. The jar's own
+    // markup for this fixture is
+    //   x1="34.469" y1="53" x2="76.469" y2="53"
+    //   x1="76.469" y1="53" x2="76.469" y2="66"
+    //   x1="35.469" y1="66" x2="76.469" y2="66"
+    // Only the x values are asserted: the y span is `SELF_LOOP_HEIGHT`, still
+    // 20 against upstream's 13, and closing that is C3's, not this pin's.
+    const ours = oursFor('jobadi-87-jegi648');
+    const loop = [...ours.matchAll(/<line x1="([\d.]+)" y1="[\d.]+" x2="([\d.]+)"/g)]
+      .map((m) => [Number(m[1]), Number(m[2])] as const)
+      .filter(([a, b]) => Math.abs(b - a) > 0 || a > 70);
+    expect(ours).not.toContain('<path');
+    // out: 34.469 -> 76.469;  down: at 76.469;  back: 35.469 -> 76.469
+    expect(loop[0]?.[0]).toBeCloseTo(34.469, 3);
+    expect(loop[0]?.[1]).toBeCloseTo(76.469, 3);
+    expect(loop[2]?.[0]).toBeCloseTo(35.469, 3);
+    expect(loop[2]?.[1]).toBeCloseTo(76.469, 3);
   });
 });

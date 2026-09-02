@@ -36,10 +36,11 @@
 import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, line, text, path, ellipse, linkWrap } from '../../core/svg.js';
+import { rect, line, text, path, ellipse, linkWrap, image } from '../../core/svg.js';
 // G1/G8/G23 (mission state-declared-size-fix): the renderer draws the SAME
 // styled runs / table the sizer measured -- see `state-sizing-creole.ts`.
 import type { StateTableGeo, StateTextRun } from './state-sizing-creole.js';
+import type { CreoleRunImage } from '../../core/svek/image/creole-text-lines.js';
 import { styledLines } from './state-sizing-creole.js';
 import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
@@ -96,6 +97,22 @@ function runBaseline(lineTop: number, lineHeight: number, run: StateTextRun): nu
 }
 
 /**
+ * A `<math>`/`<latex>` run's image -- `AtomMath#drawU`'s own
+ * `ug.draw(svg)`/`ug.draw(image)` (`AtomMath.java:78-97`), drawn at the
+ * atom's own `Position`, which `SheetBlock1#drawU` translates to before
+ * calling it (`SheetBlock1.java:212-217`). `image.top` is that position's
+ * own y inside the line, so `lineTop + top` is the box corner; there is no
+ * baseline term, because an image has no baseline (`AtomMath
+ * #getStartingAltitude` returns 0, `AtomMath.java:73-75`).
+ *
+ * `svg-shapes.ts#image` is the repo's ONE `<image>` emitter, and its
+ * attribute order is `SvgGraphics#svgImageDataUri`'s.
+ */
+function runImage(img: CreoleRunImage, x: number, lineTop: number): string {
+  return image(x, lineTop + img.top, img.width, img.height, img.href);
+}
+
+/**
  * One creole line's styled runs, left to right, x-advancing by each run's
  * OWN measured width -- the SAME per-`<text>`-element sequence the jar
  * emits (`AtomText#drawU` once per atom; jar-verified `xasoka-58-temi462`
@@ -125,6 +142,11 @@ export function renderStateRuns(
     // `AtomText#drawU`'s tab-stop skip (`AtomText.java:216-221`) -- see
     // `StateTextRun.dx`'s own doc comment.
     x += run.dx ?? 0;
+    if (run.image !== undefined) {
+      out += runImage(run.image, x, lineTop);
+      x += run.image.width;
+      continue;
+    }
     if (run.text === '') continue;
     const decoration = runDecoration(run);
     const y = runBaseline(lineTop, lineHeight, run);

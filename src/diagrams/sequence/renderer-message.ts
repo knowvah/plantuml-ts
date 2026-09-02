@@ -7,10 +7,11 @@
  * scaling rationale this module inherits (`ScaledTheme.scaleK`).
  */
 
-import type { MessageGeo } from './ast.js';
+import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
-import { text, path } from '../../core/svg.js';
+import { line } from '../../core/svg.js';
+import { sequenceText } from './sequence-text.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import {
@@ -41,13 +42,14 @@ const SELF_LOOP_WIDTH = 42;
  * (`ComponentRoseSelfArrow.java:321-323`), drawn as `vline(arrowHeight)`
  * (`:125`), and `jobadi-87-jegi648`'s golden drops `y1="53"` to `y2="66"`.
  *
- * This port's 20 is therefore 7 too tall, and it is left that way
- * DELIBERATELY: y-coordinate convergence is an explicit non-goal of the
- * mission that measured it (`plans/sequence-coordinate-convergence`), and
- * changing it moves every self message's following event. Cited here so the
- * next mission to touch it does not have to re-derive it.
+ * This was 20 until C3 — 7 too tall, left that way deliberately because
+ * y-coordinate convergence was an explicit non-goal of the mission that
+ * measured it (`plans/sequence-coordinate-convergence`) and changing it moves
+ * every following event. It lands here with the term that moves those events:
+ * `sequence-layout-message.ts#SELF_ARROW_ONLY_HEIGHT` is the same 13 on the
+ * sizing side, and the two must agree or the loop overhangs its own tile.
  */
-const SELF_LOOP_HEIGHT = 20;
+const SELF_LOOP_HEIGHT = 13;
 
 /**
  * The self branch: three strokes clockwise off the lifeline and back, then
@@ -55,8 +57,26 @@ const SELF_LOOP_HEIGHT = 20;
  * (`ComponentRoseSelfArrow.java:124-126` then `:131-173`) -- the reverse of
  * the flat component's order, and the order `botoku-28-cupe920` shows.
  *
- * Emitted as one `<path>` where upstream emits three `<line>`s; that is the
- * spike's existing shape, left alone here because this task owns the HEADS.
+ * B2: three `<line>`s, matching upstream's own three `ULine` draws --
+ *
+ * ```java
+ * ug2.apply(new UTranslate(x1, textHeight)).draw(ULine.hline(xRight - x1));
+ * ug2.apply(new UTranslate(xRight, textHeight)).draw(ULine.vline(arrowHeight));
+ * ug2.apply(new UTranslate(x2, textHeight + arrowHeight)).draw(ULine.hline(xRight - x2));
+ * ```
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseSelfArrow.java:124-126
+ *
+ * This was ONE `<path>` until B2, and the difference was not cosmetic:
+ * `compareSvg` short-circuits on a tag mismatch (`compare.ts:229`) and never
+ * descends into a `d` attribute's numbers, so every self-message geometry in
+ * the corpus was invisible to the comparator. Batch 8 of
+ * `plans/sequence-coordinate-convergence` corrected this loop's width from 40
+ * to the jar's 42 -- jar-verified, exact -- and total distance moved by
+ * exactly zero. B1 measured 495 loops across 125 fixtures in that state.
+ *
+ * The third stroke runs `x2 -> xRight`, left to right, not back from the
+ * corner: `hline(xRight - x2)` translated to `x2`, which the jar emits as
+ * `x1="35.469" x2="76.469"` on `jobadi-87-jegi648`.
  */
 function renderSelfMessage(
   msg: MessageGeo,
@@ -74,36 +94,70 @@ function renderSelfMessage(
   const y1 = msg.y;
   const loopWidth = SELF_LOOP_WIDTH * k;
   const loopHeight = SELF_LOOP_HEIGHT * k;
-  const d =
-    `M ${x1} ${y1} ` +
-    `H ${x1 + loopWidth} ` +
-    `V ${y1 + loopHeight} ` +
-    `H ${xBack}`;
-  const loop = path(d, {
+  // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
+  // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
+  const xRight = x1 + loopWidth;
+  const yBottom = y1 + loopHeight;
+  const stroke = {
     stroke: theme.colors.arrow,
     strokeWidth: 1 * k,
     ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-  });
+  };
+  const loop =
+    line(x1, y1, xRight, y1, stroke) +
+    line(xRight, y1, xRight, yBottom, stroke) +
+    line(xBack, yBottom, xRight, yBottom, stroke);
   // The head sits at the foot of the RETURNING segment, so it moves with it.
-  return loop + renderSelfMessageHead(msg, configuration, theme, y1 + loopHeight);
+  return loop + renderSelfMessageHead(msg, configuration, theme, yBottom);
+}
+
+/**
+ * ONE label run as its `<text>`.
+ *
+ * C3: every style below is the RUN's own when creole set it and the message's
+ * ambient one when it did not, which is exactly `DriverTextSvg#draw` reading
+ * one `FontConfiguration` per `UText` (`:104-160,177-180`). A markup-free
+ * label carries a family and a size equal to the ambient pair and none of the
+ * flags, so it emits byte-identically to the pre-C3 single run.
+ *
+ * `url` wraps rather than decorates -- `SvgGraphics#openLink`/`closeLink`
+ * (`:1105-1150`) -- and `sequence-text.ts` owns that wrap, so there is no
+ * second `<a>` emitter here. No measurer is touched: `textWidth` and
+ * `fontSize` were resolved in layout and scaled with the geometry (D5).
+ */
+function messageLabelRun(run: TextRun, theme: ScaledTheme): string {
+  return sequenceText({
+    leftX: run.x,
+    baselineY: run.y,
+    text: run.text,
+    width: run.textWidth,
+    // `""mono""` sets its own family; `<size:N>`/`<sup>` its own size. The
+    // ambient fallbacks are the pair layout measured the block at --
+    // `theme.fontFamily` and `arrow { FontSize 13 }` (`plantuml.skin:306-308`),
+    // scaled with the rest of the document.
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? ARROW_FONT_SIZE * theme.scaleK,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
+    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
+    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
+    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
+    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
+    ...(run.image !== undefined ? { image: run.image } : {}),
+  });
 }
 
 /** The message's label. Upstream draws it last, after the arrow
- *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`). */
+ *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`).
+ *
+ *  The autonumber leads, which is `createMessageNumber` merging `tb1` LEFT of
+ *  `tb2` (`Display.java:703-712`) read left to right. */
 function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
   const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
-  return runs
-    .map((run) =>
-      text(run.x, run.y, run.text, {
-        fontFamily: theme.fontFamily,
-        // `arrow { FontSize 13 }` (`plantuml.skin:306-308`), scaled with the
-        // rest of the document. Layout measured the block with the same
-        // value (`text-block-geo.ts#messageLabelBlock`).
-        fontSize: ARROW_FONT_SIZE * theme.scaleK,
-        fill: theme.colors.text,
-      }),
-    )
-    .join('');
+  return runs.map((run) => messageLabelRun(run, theme)).join('');
 }
 
 /**

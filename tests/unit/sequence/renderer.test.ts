@@ -8,6 +8,8 @@ import type {
   NoteGeo,
   FrameGeo,
   DividerGeo,
+  ParticipantGeo,
+  TextRun,
 } from '../../../src/diagrams/sequence/ast.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
@@ -23,7 +25,19 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
-import { arrowFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
+import { noteFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import {
+  dividerFontSpecOf,
+  DIVIDER_PADDING,
+  DIVIDER_LABEL_DELTA_X,
+} from '../../../src/diagrams/sequence/divider-style.js';
+import {
+  HEADER_PADDING,
+  HEADER_FONT_SIZE,
+  GROUP_FONT_SIZE,
+} from '../../../src/diagrams/sequence/frame-style.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -54,14 +68,104 @@ function decodeRgba(png: Buffer): Array<[number, number, number, number]> {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * A participant head's label runs, placed the way
+ * `sequence-layout-participants.ts#buildLabelRuns` places them — A3 moved that
+ * placement into layout, so a hand-built `ParticipantGeo` has to supply it.
+ *
+ * Measured rather than hard-coded: a literal width here would silently stop
+ * matching the measurer and the assertions below check emitted `textLength`.
+ */
+function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const spec = fontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', spec).height;
+  const ascent = lineHeight - measurer.getDescent(spec, 'M');
+  const cy = participantLabelCy(p.type, p.height, p.y, true, defaultTheme);
+  const textWidth = measurer.measure(p.display, spec).width;
+  return [{
+    text: p.display,
+    x: p.centerX - textWidth / 2,
+    y: cy - lineHeight / 2 + ascent,
+    textWidth,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }];
+}
+
+/** A `ParticipantGeo` with its `labelRuns` derived from the rest of it. */
+function participantGeo(base: Omit<ParticipantGeo, 'labelRuns'>): ParticipantGeo {
+  return { ...base, labelRuns: labelRunsFor(base) };
+}
+
+/** A hand-built frame's tab runs, mirroring `sequence-layout-events.ts
+ *  #buildTabRuns` — A4 moved that placement into layout. Measured, so an
+ *  emitted `textLength` cannot drift from the measurer. */
+function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'tabWidth'>): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const runAt = (text: string, leftX: number, top: number, size: number): TextRun => {
+    const spec = { family: defaultTheme.fontFamily, size, weight: 'bold' as const };
+    const lineHeight = measurer.measure('M', spec).height;
+    const ascent = lineHeight - measurer.getDescent(spec, 'M');
+    return {
+      text,
+      x: leftX,
+      y: top + ascent,
+      textWidth: measurer.measure(text, spec).width,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    };
+  };
+  const left = f.x + HEADER_PADDING.left;
+  const top = f.y + HEADER_PADDING.top;
+  const title = runAt(f.tabText, left, top, HEADER_FONT_SIZE);
+  if (f.tabComment === undefined) return [title];
+  return [title, runAt(`[${f.tabComment}]`, left + f.tabWidth, top + 1, GROUP_FONT_SIZE)];
+}
+
+/** A note's body runs, mirroring `sequence-layout-events.ts#noteBodyRuns` —
+ *  A5 moved that placement into layout. Measured at `note { FontSize 13 }`. */
+function noteRunsFor(n: { x: number; y: number; text: string }): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const font = noteFontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', font).height;
+  const ascent = lineHeight - measurer.getDescent(font, 'M');
+  const NOTE_PADDING = 10;
+  return n.text.split('\n').map((text, i) => ({
+    text,
+    x: n.x + NOTE_PADDING,
+    y: n.y + NOTE_PADDING + ascent + i * lineHeight,
+    textWidth: measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
+
+/** A box group's label run, mirroring `layout.ts#boxLabelRun`. */
+function boxRunFor(label: string, boxX: number): TextRun {
+  const measurer = new DeterministicMeasurer();
+  const BOX_LABEL_FONT_SIZE = 11;
+  const BOX_LABEL_PADDING = 4;
+  const font = { family: defaultTheme.fontFamily, size: BOX_LABEL_FONT_SIZE };
+  const lineHeight = measurer.measure('M', font).height;
+  return {
+    text: label,
+    x: boxX + BOX_LABEL_PADDING,
+    y: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
+    textWidth: measurer.measure(label, font).width,
+    textAscent: lineHeight - measurer.getDescent(font, 'M'),
+    textLineHeight: lineHeight,
+  };
+}
+
 function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
   return {
     totalWidth: 400,
     totalHeight: 300,
     showFootbox: true,
     participants: [
-      { id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
-      { id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+      participantGeo({ id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+      participantGeo({ id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
     ],
     events: [],
     headHeight: 36,
@@ -169,12 +273,18 @@ describe('renderSequence — messages', () => {
     expect(svg).toContain('stroke-dasharray');
   });
 
-  it('self message emits a path', () => {
+  it('self message emits three lines, not a path', () => {
+    // B2: upstream draws `hline`, `vline`, `hline`
+    // (`ComponentRoseSelfArrow.java:124-126`). The tag matters more than the
+    // coordinates here -- `compareSvg` short-circuits on a tag mismatch and
+    // never descends into a `d`, so a `<path>` made the whole loop invisible
+    // to the comparator.
     const geo = makeGeo({
       events: [makeSyncMessage({ arrowDirection: 'self', fromX: 80, toX: 110 })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain('<path');
+    expect(svg).not.toContain('<path');
+    expect(svg.match(/<line /g)?.length).toBeGreaterThanOrEqual(3);
   });
 
   // `getLabelNumbered` prepends the number as a `MessageNumber`
@@ -461,7 +571,11 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   // The loop's returning segment ends at fromX, so the head tip sits there
   // (`ComponentRoseSelfArrow.java:126` draws the bottom hline from x2 and
   // `:172` puts the polygon's tip at that same x2).
-  const LOOP_BOTTOM_Y = SELF_Y + 20;
+  // `getArrowOnlyHeight()` = 13 (`ComponentRoseSelfArrow.java:321-323`), drawn
+  // as `vline(arrowHeight)` at `:125`. `jobadi-87-jegi648`'s golden drops
+  // `y1="53"` to `y2="66"`; this port carried 20 until the vertical terms
+  // landed, because moving the loop moves every event under it.
+  const LOOP_BOTTOM_Y = SELF_Y + 13;
   /** `xRight = arrowWidth - 3` = 42 (`ComponentRoseSelfArrow.java:59-60`),
    *  which is where `drawRightSide:125` puts the vertical stroke. Verified
    *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
@@ -477,32 +591,45 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
     // direction = +1 (reverseDefine is unreachable from this parser), so
     // (10,-4) (0,0) (10,4) (6,0) about (80, 100).
-    expect(svg).toContain('<polygon points="90,96,80,100,90,104,86,100"');
+    expect(svg).toContain('<polygon points="90,89,80,93,90,97,86,93"');
     expect(svg).not.toContain('arrow-sync');
   });
 
-  it('still draws the loop path itself', () => {
+  it('still draws the loop itself, as upstream\'s three strokes', () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    // Out, down, and back -- the third running left-to-right from the
+    // returning x, which is `hline(xRight - x2)` translated to `x2`.
+    expect(svg).toContain(`<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`);
     expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none"`,
+      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+    );
+    expect(svg).toContain(
+      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
     );
   });
 
   it('draws a self async head as two open strokes', () => {
     const svg = assembleSvg(renderSequence(selfGeo('async'), defaultTheme));
     // `ComponentRoseSelfArrow.java:161-169` -- ULine(+arrowDeltaX, -+arrowDeltaY)
-    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="96"');
-    expect(svg).toContain('<line x1="80" y1="100" x2="90" y2="104"');
-    expect(svg).not.toContain('<polygon points="90,96,80,100,90,104,86,100"');
+    expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="89"');
+    expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="97"');
+    expect(svg).not.toContain('<polygon points="90,89,80,93,90,97,86,93"');
   });
 
   it('dashes a self reply loop', () => {
     const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
-    expect(svg).toContain(
-      `<path d="M ${SELF_X} ${SELF_Y} H ${LOOP_RIGHT_X} V ${LOOP_BOTTOM_Y} H ${SELF_X}" fill="none" ` +
-        `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
-        'stroke-dasharray="5,5"',
-    );
+    // The dash reaches all THREE strokes, not just the first: a reply loop
+    // that dashed only its outgoing segment would look like two arrows.
+    for (const seg of [
+      `<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`,
+      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
+    ]) {
+      expect(svg).toContain(
+        `${seg} stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
+          'stroke-dasharray="5,5"',
+      );
+    }
   });
 });
 
@@ -681,6 +808,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'remember this',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'remember this' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -696,6 +824,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'test note',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'test note' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -710,6 +839,7 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 60,
       text: 'line one\nline two',
+      textRuns: noteRunsFor({ x: 50, y: 80, text: 'line one\nline two' }),
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -736,6 +866,7 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabRuns: tabRunsFor({ x: 30, y: 60, tabText: 'loop', tabWidth: 77 }),
       tabText: 'loop',
       tabTextWidth: 32,
       tabWidth: 77,
@@ -760,8 +891,10 @@ describe('renderSequence — frames', () => {
       y: 60,
       width: 300,
       height: 100,
-      branchSeparators: [{ y: 110, label: 'x <= 0' }],
+      branchSeparators: [{ y: 110, label: 'x <= 0', runs: [] }],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'alt',
       tabTextWidth: 24,
       tabWidth: 69,
@@ -787,6 +920,9 @@ describe('renderSequence — frames', () => {
       height: 100,
       branchSeparators: [],
       refBody: [],
+      tabRuns: tabRunsFor({
+        x: 30, y: 60, tabText: 'opt', tabComment: 'condition', tabWidth: 69,
+      }),
       tabText: 'opt',
       tabComment: 'condition',
       tabTextWidth: 24,
@@ -813,9 +949,10 @@ describe('renderSequence — background pass (T6)', () => {
       events: [
         { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
         makeSyncMessage(),
-        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi' },
+        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi', textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }) },
         {
           kind: 'divider',
+          labelRuns: dividerRunsFor(['step']),
           text: 'step',
           lines: ['step'],
           y: 200,
@@ -851,6 +988,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#FF0000',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'g',
       tabTextWidth: 12,
       tabWidth: 40,
@@ -876,6 +1015,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#FF0000',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'outer',
       tabTextWidth: 30,
       tabWidth: 50,
@@ -892,6 +1033,8 @@ describe('renderSequence — background pass (T6)', () => {
       backColorGeneral: '#00FF00',
       branchSeparators: [],
       refBody: [],
+      // A4: tab text is placed in layout; these cases assert frame boxes.
+      tabRuns: [],
       tabText: 'inner',
       tabTextWidth: 30,
       tabWidth: 50,
@@ -973,12 +1116,34 @@ describe('renderSequence — [hidden] arrows', () => {
   });
 });
 
+/** A divider label's runs, mirroring `sequence-layout-events.ts
+ *  #dividerLabelRuns` plus the band offset `layout.ts#backfillDividerWidth`
+ *  adds. Measured at the divider's own 13pt bold. */
+function dividerRunsFor(lines: readonly string[]): TextRun[] {
+  const measurer = new DeterministicMeasurer();
+  const font = dividerFontSpecOf(defaultTheme);
+  const lineHeight = measurer.measure('M', font).height;
+  const ascent = lineHeight - measurer.getDescent(font, 'M');
+  return lines.map((text, i) => ({
+    text,
+    x: DIVIDER_LABEL_DELTA_X,
+    y: DIVIDER_PADDING + ascent + i * lineHeight,
+    textWidth: measurer.measure(text, font).width,
+    textAscent: ascent,
+    textLineHeight: lineHeight,
+  }));
+}
+
 describe('renderSequence — dividers', () => {
   /** A divider as layout resolves it: `getTextHeight` = block + 4 + 4 and
    *  `getPreferredHeight` = that + 20 (`ComponentRoseDivider.java:127-129`). */
   function dividerGeo(text: string, lines = [text]): DividerGeo {
     const textHeight = lines.length * 13 + 8;
     return {
+      // A5: the label runs are placed in layout, relative to the label box and
+      // then dropped onto the band by `layout.ts#backfillDividerWidth`. Built
+      // here from the same measurer so the emitted `textLength` is real.
+      labelRuns: dividerRunsFor(lines),
       kind: 'divider',
       text,
       lines,
@@ -1156,7 +1321,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1174,7 +1339,7 @@ describe('renderSequence — actor participant shape', () => {
   it('renders display name below the stick figure', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1187,7 +1352,7 @@ describe('renderSequence — skinparam actorStyle', () => {
     return makeGeo({
       showFootbox: false,
       participants: [
-        { id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
   }
@@ -1233,7 +1398,7 @@ describe('renderSequence — skinparam actorStyle', () => {
 
 describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
   function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
-    return { id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    return participantGeo({ id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
   }
   /** The bare body, not `assembleSvg`'s document: the shell adds a background
    *  `<rect>` of its own that would inflate every rectangle count here. */
@@ -1299,7 +1464,7 @@ describe('renderSequence — database participant shape', () => {
     const geo = makeGeo({
       showFootbox: false,
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1312,7 +1477,7 @@ describe('renderSequence — database participant shape', () => {
   });
 
   it('places the head glyph at the top of the block and the tail glyph at its bottom', () => {
-    const participant = { id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border };
+    const participant = participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
     const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
     const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
     // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
@@ -1326,7 +1491,7 @@ describe('renderSequence — database participant shape', () => {
   it('renders display name for database participant', () => {
     const geo = makeGeo({
       participants: [
-        { id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border },
+        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1341,7 +1506,7 @@ describe('renderSequence — database participant shape', () => {
 describe('renderSequence — box backgrounds', () => {
   it('box with color renders a rect with that fill color', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
@@ -1351,7 +1516,7 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box with empty color falls back to #EEE', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('#EEE');
@@ -1359,7 +1524,12 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box with label renders a text element', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink' }],
+      // A5: the label is a placed, measured run resolved by
+      // `layout.ts#boxLabelRuns`; a hand-built `BoxGeo` supplies them.
+      boxes: [{
+        x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink',
+        labelRuns: [boxRunFor('Services', 10)],
+      }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('Services');
@@ -1370,7 +1540,7 @@ describe('renderSequence — box backgrounds', () => {
     // A box with no label should produce only a rect, no extra text
     const geo = makeGeo({
       participants: [],
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow' }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).not.toContain('<text');
@@ -1378,7 +1548,7 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box background rect appears before participant header rects (z-order)', () => {
     const geo = makeGeo({
-      boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue' }],
+      boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     // After the defs block, box background must precede participant rects.
@@ -1707,8 +1877,12 @@ describe('renderSequence — exogenous arrows', () => {
     // measured from the now-nearer second lifeline, so both narrow by it.
     // 137, not 139: the exo's label is now measured at 13 rather than 14, so
     // its reach is 2px shorter.
-    expect(docWidth(without)).toBe(116);
-    expect(docWidth(withExo)).toBe(137);
+    // 117/138: `SvgGraphics#ensureVisible:128-135` writes `(int)(x + 1)`, not
+    // `trunc(x)`. Applied on the sequence path by C3, so every document is one
+    // wider -- and `bidopa-30-jafi560`, which is this exact two-participant
+    // shape, now emits the jar's own `width="116px"` where it emitted 115.
+    expect(docWidth(without)).toBe(117);
+    expect(docWidth(withExo)).toBe(138);
   });
 
   // `drawU` insets the BORDER end by `diamCircle / 2 + 2` when the matching
@@ -1734,7 +1908,13 @@ describe('renderSequence — exogenous arrows', () => {
     const svg = render('@startuml\nskinparam backgroundColor #FF0000\n[o-> Bob : hello\n@enduml');
     // cy 48.25, not 53.25: the head row lost 5px when the box height became
     // `text + 2 * 7` instead of `text + 20`, and the body starts below it.
-    expect(svg).toContain('<ellipse cx="15.5" cy="48.25" rx="4" ry="4" fill="#000"');
+    // cy 65.25 since C3: +10 for the document's top margin and +7 for the
+    // arrow's own place inside its tile (`blockH + 6` below a tile top that
+    // is `startingY` = 8 under the head row, against the 20 this port used).
+    // 65 IS the jar's arrow y for a one-message diagram -- `bidopa`'s golden
+    // draws its line at `y1="66"`, and the circle sits a quarter-pixel under
+    // the body.
+    expect(svg).toContain('<ellipse cx="15.5" cy="65.25" rx="4" ry="4" fill="#000"');
     expect(svg).not.toContain('rx="4" ry="4" fill="#F00"');
   });
 

@@ -12,6 +12,7 @@ package "core (read-only)" {
 package "sequence engine" {
   [sequence-text.ts] as TEXT #LightYellow
   [ast.ts] as AST
+  [geo.ts] as GEO #LightYellow
   [scale-geo.ts] as SCALE
   [text-block-geo.ts] as TBG
   [sequence-layout-\nparticipants.ts] as LP
@@ -33,10 +34,11 @@ LP ..> MEAS : measures
 TBG ..> MEAS : measures
 LE ..> MEAS : measures
 
-LP --> AST : populates metrics
-TBG --> AST : populates metrics
-LE --> AST : populates metrics
-AST --> SCALE : scaled by k
+AST --> GEO : re-exports (A1 split)
+LP --> GEO : builds TextRuns
+TBG --> GEO : builds TextRuns
+LE --> GEO : builds TextRuns
+GEO --> SCALE : scaled by k
 
 RM ..> TEXT : A2
 RP ..> TEXT : A3
@@ -52,6 +54,13 @@ note bottom of TEXT
   A1 creates this and changes
   no call site. Its gate is that
   nothing moves.
+end note
+
+note bottom of GEO
+  A1 splits ast.ts here: it was
+  659 lines against the 500 cap,
+  which blocked any growth of it.
+  Metrics ride on TextRun (D8).
 end note
 
 note bottom of DIST

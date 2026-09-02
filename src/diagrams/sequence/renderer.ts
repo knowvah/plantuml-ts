@@ -30,7 +30,13 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, noteBox } from '../../core/svg.js';
+// No `text` import: D3 -- every `<text>` this file emits goes through
+// `sequenceText`, and dropping the direct import is what makes that
+// structural rather than a convention.
+import { rect, line, noteBox } from '../../core/svg.js';
+import { sequenceText } from './sequence-text.js';
+import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
+import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
@@ -38,7 +44,7 @@ import { renderParticipantBox, renderFooterBox } from './renderer-participant-sh
 import { renderLifelinePass } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
 import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
-import { GROUP_FONT_SIZE } from './frame-style.js';
+import { GROUP_FONT_SIZE, GROUP_FONT_BOLD } from './frame-style.js';
 import {
   DIVIDER_BACKGROUND,
   DIVIDER_BAND_HEIGHT,
@@ -47,7 +53,6 @@ import {
   DIVIDER_LABEL_DELTA_X,
   DIVIDER_LINE_COLOR,
   DIVIDER_LINE_THICKNESS,
-  DIVIDER_PADDING,
 } from './divider-style.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
@@ -58,6 +63,38 @@ import {
   NEWPAGE_LINE_THICKNESS,
   NEWPAGE_MARGIN_Y,
 } from './newpage-style.js';
+
+/**
+ * ONE creole run as a `<text>`, at the caller's ambient font wherever creole
+ * set none -- `renderRefBody`'s shape (C5), shared by the two sites C6 added
+ * rather than copied a third and fourth time. `DriverTextSvg#draw` reads
+ * `font-weight`, `font-style`, `fill` and the assembled `text-decoration` off
+ * ONE `FontConfiguration` per `UText` (`:104-160,177-180`), and
+ * `SvgGraphics#openLink`/`closeLink` (`:1105-1150`) WRAP the drawn shape rather
+ * than decorating it -- so the url reaches `sequence-text.ts`, the single `<a>`
+ * emitter, and no measurer is acquired here (D1, D5). `boldFallback` is the
+ * component STYLE's own weight, which a run that set its own beats -- exactly
+ * as `renderBranchSeparators` resolves the group style's. */
+function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
+  return sequenceText({
+    leftX: run.x,
+    baselineY: run.y,
+    text: run.text,
+    width: run.textWidth,
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? fontSize,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'` -- the jar emits the numeric form, and
+    // `renderer-frame-header.ts#boldFontWeight` already set that convention.
+    ...(run.bold ?? boldFallback ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
+    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
+    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
+    ...(run.image !== undefined ? { image: run.image } : {}),
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Note helpers
@@ -74,18 +111,15 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
     note.shape === 'rect'
       ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
       : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth });
-  const lines = note.text.split('\n');
-  const lineHeight = theme.fontSize * 1.4; // ratio of an already-scaled fontSize: self-scaling
-  const textCenterX = x + w / 2;
-  const textEls = lines
-    .map((lineText, i) =>
-      text(textCenterX, y + lineHeight + i * lineHeight, lineText, {
-        fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
-        fill: theme.colors.text,
-        textAnchor: 'middle',
-      }),
-    )
+  // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
+  // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
+  // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
+  // centre it with a `text-anchor`, and its line advance is now the MEASURED
+  // line height where it used to be a `fontSize * 1.4` ratio. C6: one run per
+  // creole atom, at `note { FontSize 13 }` (`plantuml.skin:312-316`) scaled,
+  // the same spec layout measured the box with.
+  const textEls = note.textRuns
+    .map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK))
     .join('');
   return noteShape + textEls;
 }
@@ -101,44 +135,40 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
 const FRAME_ROUND_CORNER = 0;
 
 /**
- * A `ref over` frame's body: its source lines, ONE `<text>` each, centred in
- * the box below the header tab.
+ * A `ref over` frame's body: one `<text>` per creole atom, centred in the box
+ * below the header tab.
  *
  * `ComponentRoseReference#drawInternalU` draws the header at `(15, 2)` and
  * then the body as its own text block at `(textPos, oldPaddingY +
- * textHeaderHeight)` (`:125-136`) -- below the header, and horizontally per
- * the component's alignment. The jar's own output for a two-line ref centres
- * them: box x=70.3 w=76.775, lines at x=74.3 and x=76.962, i.e. each centred
- * on 108.7.
+ * textHeaderHeight)` (`:125-136`) -- below the header, per the component's
+ * alignment. The jar's two-line ref centres them: box x=70.3 w=76.775, lines
+ * at x=74.3 and x=76.962, each on 108.7. This used to emit the whole body as
+ * ONE `<text>` holding a literal newline, bracketed like an `alt` condition;
+ * SVG collapses it, so it drew as one run where the jar spends one per line.
  *
- * This used to emit the whole body as ONE `<text>` containing a literal
- * newline, bracketed like an `alt` condition -- `[This can be on\nseveral
- * lines]`. SVG collapses that newline, so it drew as a single run of text
- * beside the tab, and it cost one child where the jar spends one per line.
- *
- * The `y` here is upstream's `getOldPaddingY() + textHeaderHeight` with two
+ * The `y` is upstream's `getOldPaddingY() + textHeaderHeight` with two
  * deliberate substitutions: `+ theme.fontSize` because an SVG `<text>` y is a
  * BASELINE where upstream's translate is the block's top-left, and
- * `frame.tabHeight` in place of the measured `textHeaderHeight` because that
- * is the band this port actually draws -- resolved in LAYOUT (T1/T5), where
- * the measurer lives, not `ComponentRoseReference`'s own header. Keying the
- * body to the drawn tab is what keeps the two from colliding; the `x` needs
- * no such substitution, so it comes straight from layout.
+ * `frame.tabHeight` for the measured `textHeaderHeight` because that is the
+ * band this port draws -- both resolved in LAYOUT (T1/T5), as is the `x`.
  *
  * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
  */
 function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const lineHeight = theme.fontSize + 2 * k;
-  const top = frame.y + frame.tabHeight + theme.fontSize;
+  // A4: x, baseline and width come off the run; C5: so does its STYLE, where
+  // creole set one -- one `FontConfiguration` per `UText` (`DriverTextSvg
+  // .java:104-160,177-180`). `cikoca-19-feji527`'s
+  // `[[http://www.google.com]] Foo2` is two runs, the first linked; a
+  // markup-free body is one run at the ambient pair, emitting what it emitted
+  // before. `url` WRAPS rather than decorates (`SvgGraphics#openLink`/
+  // `closeLink`, `:1105-1150`) and `sequence-text.ts` owns that wrap: no
+  // second `<a>` emitter, no measurer (D1, D5).
+  // C7: through `creoleRunText`, the helper this very block's shape was
+  // extracted into -- every field it built inline is the one that helper
+  // builds, at `reference { FontSize 12 }` (`plantuml.skin:145-151`), which
+  // is what the run beside it was measured at and must agree with.
   return frame.refBody
-    .map((line, i) =>
-      text(line.x, top + i * lineHeight, line.text, {
-        fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
-        fill: theme.colors.text,
-      }),
-    )
+    .map((run) => creoleRunText(run, theme, REFERENCE_FONT_SIZE * theme.scaleK))
     .join('');
 }
 
@@ -179,15 +209,33 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
         stroke: theme.colors.frame,
         strokeDasharray: scaledDashPattern(k),
       });
-      const condition = sep.label.trim();
-      if (condition === '') return rule;
+      // A5: the runs are empty exactly when the branch carries no condition,
+      // which is the case that draws the rule alone. C5: several runs where
+      // creole styled the condition, each its own `<text>` (D3).
       return (
         rule +
-        text(frame.x + 6 * k, sep.y + theme.fontSize, `[${condition}]`, {
-          fontFamily: theme.fontFamily,
-          fontSize: labelFontSize,
-          fill: theme.colors.text,
-        })
+        sep.runs
+          .map((run) =>
+            sequenceText({
+              leftX: run.x,
+              baselineY: run.y,
+              text: run.text,
+              width: run.textWidth,
+              fontFamily: run.fontFamily ?? theme.fontFamily,
+              fontSize: run.fontSize ?? labelFontSize,
+              // `ComponentRoseGroupingElse` reads the GROUP style, whose
+              // `FontStyle bold` the jar emits as `font-weight="700"` --
+              // confirmed on `bovugo-63-lazo401`'s `[sinon]`. A creole run
+              // that set its own weight wins over the style default.
+              fontWeight: (run.bold ?? GROUP_FONT_BOLD) ? '700' : 'normal',
+              fill: run.color ?? theme.colors.text,
+              ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+              ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+              ...(run.url !== undefined ? { url: run.url } : {}),
+              ...(run.image !== undefined ? { image: run.image } : {}),
+            }),
+          )
+          .join('')
       );
     })
     .join('');
@@ -246,24 +294,15 @@ function renderDividerLabel(divider: DividerGeo, theme: ScaledTheme): string {
     stroke: DIVIDER_LINE_COLOR,
     strokeWidth: DIVIDER_LINE_THICKNESS * k,
   });
-  // One `<text>` per line, as the jar's own multi-line text block emits.
-  // `textBlock.drawU` places the block's TOP-LEFT and `text()` takes a
-  // baseline, hence `dominantBaseline: 'hanging'` -- the same adaptation
-  // `renderNote` makes for its body lines.
-  const lineHeight = (divider.textHeight - DIVIDER_PADDING * 2 * k) / divider.lines.length;
-  const top = ypos + DIVIDER_PADDING * k;
-  const label = divider.lines
-    .map((l, i) =>
-      text(xpos + deltaX, top + i * lineHeight, l, {
-        fontFamily: theme.fontFamily,
-        fontSize: DIVIDER_FONT_SIZE * k,
-        // `'700'`, not `'bold'` -- the jar emits the numeric form, and
-        // `renderer-frame-header.ts#boldFontWeight` already set that convention.
-        fontWeight: DIVIDER_FONT_BOLD ? ('700' as const) : ('normal' as const),
-        fill: theme.colors.text,
-        dominantBaseline: 'hanging',
-      }),
-    )
+  // One `<text>` per creole atom, as the jar's own multi-line text block emits
+  // (C6). A5: each run carries a real BASELINE, resolved in layout against the
+  // label box's own top-left; the `dominantBaseline: 'hanging'` that stood in
+  // for one is gone, and with it the last such adaptation in this file. The
+  // separator style's `FontStyle bold` (`plantuml.skin:174-175`) reaches every
+  // run through the `FontSpec` the seam's `FontConfiguration` was built from,
+  // so `DIVIDER_FONT_BOLD` here only covers a run that carries no weight.
+  const label = divider.labelRuns
+    .map((run) => creoleRunText(run, theme, DIVIDER_FONT_SIZE * k, DIVIDER_FONT_BOLD))
     .join('');
   return box + label;
 }
@@ -358,8 +397,9 @@ function renderEventPass(events: readonly EventGeo[], theme: ScaledTheme, isBack
 // ---------------------------------------------------------------------------
 
 const BOX_DEFAULT_COLOR = '#EEEEEE';
+/** See `layout.ts#boxLabelRun`, which measures at this same size and owns
+ *  the divergence note for it. */
 const BOX_LABEL_FONT_SIZE = 11;
-const BOX_LABEL_PADDING = 4;
 
 function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
@@ -368,20 +408,10 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
     fill,
     stroke: theme.colors.border,
   });
-  if (box.label === '') return boxRect;
-  const padding = BOX_LABEL_PADDING * k;
-  const labelFontSize = BOX_LABEL_FONT_SIZE * k;
-  const labelEl = text(
-    box.x + padding,
-    box.y + labelFontSize + padding,
-    box.label,
-    {
-      fontFamily: theme.fontFamily,
-      fontSize: labelFontSize,
-      fill: theme.colors.text,
-    },
+  return (
+    boxRect +
+    box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('')
   );
-  return boxRect + labelEl;
 }
 
 // ---------------------------------------------------------------------------
@@ -412,6 +442,34 @@ export function renderSequencePage(
 ): RenderFragment {
   return renderPaginated(paginateSequence(geo, pageIndex), theme);
 }
+
+/**
+ * `SvgGraphics#ensureVisible:128-135`, called from the constructor with the
+ * computed dimension (`:138-143`):
+ *
+ * ```java
+ * if (x > maxX)  maxX = (int) (x + 1);
+ * if (y > maxY)  maxY = (int) (y + 1);
+ * ```
+ *
+ * The emitted `width`/`height`/`viewBox` are therefore `(int)(dim + 1)`, not
+ * `trunc(dim)`. `assembleDocumentShell` truncates, so the `+ 1` is added here
+ * and the two compose into upstream's own expression.
+ *
+ * IT IS APPLIED ON THE SEQUENCE PATH ONLY, deliberately. Taken in the shared
+ * shell (`core/klimt/document-shell.ts`) it helps sequence by 830 and hurts
+ * class by 2 362, state by 936, object by 260 and description by 26 — measured
+ * per fixture across all five families before the ruling in
+ * `findings/vertical-terms.md`. Those four are already correct at `trunc`:
+ * their extent is a graphviz bounding box plus explicit margins, which already
+ * carries the rounding applied during drawing. Sequence's is a raw max
+ * coordinate, so sequence alone is short. `bidopa-30-jafi560` is the witness —
+ * its width was 115 against the jar's 116.
+ *
+ * `maxX`/`maxY` also start at 10, a floor no sequence document reaches; it is
+ * not modelled.
+ */
+const ENSURE_VISIBLE_DELTA = 1;
 
 /**
  * Render a sequence diagram geometry into an SVG string — PAGE 1 of it.
@@ -490,8 +548,8 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
 
   return {
     body: children.join(''),
-    width: scaledGeo.totalWidth,
-    height: scaledGeo.totalHeight,
+    width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
+    height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
     background: theme.colors.background,
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.

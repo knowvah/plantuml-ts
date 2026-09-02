@@ -33,6 +33,27 @@ export function measureNodeLabel(
   return measurer.measure(label, fontSpec);
 }
 
+/**
+ * LaTeX commands JLaTeXMath accepts and KaTeX does not, mapped to KaTeX's own
+ * equivalent.
+ *
+ * Upstream typesets through JLaTeXMath, which implements the standard LaTeX
+ * text-mode box commands; KaTeX implements `\text` but not its `\mbox` alias
+ * and, with `throwOnError: false`, renders an unknown control sequence as its
+ * literal name in error red. `component/vimulo-11-buni641` drew a red
+ * `\mbox` beside the formula where the jar draws the word "or"
+ * (`P(y|\mathbf{x}) \mbox{ or } f(\mathbf{x})+\epsilon`).
+ *
+ * `\mbox{…}` and `\text{…}` are the same thing in LaTeX: horizontal text
+ * mode. Mapping one to the other reproduces JLaTeXMath's reading rather than
+ * approximating it.
+ *
+ * Scoped to MEASURED reach: `\mbox` is the only command in this corpus's ten
+ * latex/math expressions that KaTeX rejects, and with this mapping none is
+ * rejected. Add an entry when a fixture needs it, not speculatively.
+ */
+const KATEX_MACROS: Readonly<Record<string, string>> = { '\\mbox': '\\text' };
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -134,6 +155,7 @@ export function renderNodeLabel(
       output: 'mathml',
       throwOnError: false,
       displayMode: false,
+      macros: KATEX_MACROS,
     });
   });
 
@@ -314,6 +336,7 @@ export function renderLatexMathML(
     output: 'mathml',
     throwOnError: false,
     displayMode: true,
+    macros: KATEX_MACROS,
   });
 
   // The foreignObject must contain an XHTML namespace wrapper for MathML to

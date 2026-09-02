@@ -97,6 +97,41 @@ const IDENTITY = 1;
 // SequenceGeometry
 // ---------------------------------------------------------------------------
 
+/**
+ * A1: the three `TextRun` metrics scale with `k` exactly as its coordinates do
+ * — they are lengths in the same pixel space, and `textWidth` reaches
+ * `textLength`, so leaving it unscaled would stretch every glyph back to the
+ * unscaled width on a `scale`d diagram.
+ *
+ * C1: `fontSize` is the fourth, and the ONLY new creole field that is a
+ * length. `SvgGraphics#format` multiplies an emitted `font-size` by the scale
+ * exactly as it does a coordinate (`SvgGraphics.java:693`), which is already
+ * why {@link scaleSequenceTheme} scales `theme.fontSize`; a run carrying its
+ * OWN size must agree with the theme it sits beside, or a `<size:N>` run would
+ * draw at 1x amid text at k. The remaining creole fields — `bold`, `italic`,
+ * `color`, `decoration`, `fontFamily`, `url` — are style tokens, not lengths,
+ * and the spread carries them through untouched.
+ *
+ * A `<math>`/`<latex>` run's `image` is the fifth: its `width`/`height` are
+ * lengths and its `y` is an absolute coordinate, so all three scale exactly as
+ * `x`/`y`/`textWidth` do — `SvgGraphics#format` multiplies an emitted
+ * `<image>`'s geometry by the scale like any other shape's
+ * (`SvgGraphics.java:693`). `href` is the image DOCUMENT, whose own intrinsic
+ * size the `width`/`height` attributes override, so it is carried untouched.
+ */
+const scaleRun = (r: TextRun, k: number): TextRun => ({
+  ...r,
+  x: r.x * k,
+  y: r.y * k,
+  textWidth: r.textWidth * k,
+  textAscent: r.textAscent * k,
+  textLineHeight: r.textLineHeight * k,
+  ...(r.fontSize !== undefined ? { fontSize: r.fontSize * k } : {}),
+  ...(r.image !== undefined
+    ? { image: { ...r.image, width: r.image.width * k, height: r.image.height * k, y: r.image.y * k } }
+    : {}),
+});
+
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
   return {
     ...p,
@@ -105,6 +140,10 @@ function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
     width: p.width * k,
     height: p.height * k,
     centerX: p.centerX * k,
+    // A3: the head's label runs carry absolute coordinates AND lengths, so
+    // both scale. Omitting this drew every scaled participant label at its
+    // unscaled left edge and baseline.
+    labelRuns: p.labelRuns.map((r) => scaleRun(r, k)),
     ...(p.badge !== undefined
       ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } }
       : {}),
@@ -112,10 +151,16 @@ function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
 }
 
 function scaleBox(b: BoxGeo, k: number): BoxGeo {
-  return { ...b, x: b.x * k, y: b.y * k, width: b.width * k, height: b.height * k };
+  return {
+    ...b,
+    x: b.x * k,
+    y: b.y * k,
+    width: b.width * k,
+    height: b.height * k,
+    labelRuns: b.labelRuns.map((r) => scaleRun(r, k)),
+  };
 }
 
-const scaleRun = (r: TextRun, k: number): TextRun => ({ ...r, x: r.x * k, y: r.y * k });
 
 /**
  * A message's geometry, scaled. Covers exo messages too: they emit a
@@ -136,7 +181,14 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
 }
 
 function scaleNote(n: NoteGeo, k: number): NoteGeo {
-  return { ...n, x: n.x * k, y: n.y * k, width: n.width * k, height: n.height * k };
+  return {
+    ...n,
+    x: n.x * k,
+    y: n.y * k,
+    width: n.width * k,
+    height: n.height * k,
+    textRuns: n.textRuns.map((r) => scaleRun(r, k)),
+  };
 }
 
 function scaleActivation(a: ActivationGeo, k: number): ActivationGeo {
@@ -157,8 +209,17 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     y: f.y * k,
     width: f.width * k,
     height: f.height * k,
-    branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
-    refBody: f.refBody.map((b) => ({ ...b, x: b.x * k })),
+    branchSeparators: f.branchSeparators.map((s) => ({
+      ...s,
+      y: s.y * k,
+      runs: s.runs.map((r) => scaleRun(r, k)),
+    })),
+    // A4: `refBody` became placed, measured runs, so its `y` and its three
+    // metrics scale too — scaling only `x`, as this did while a body entry was
+    // `{ text, x }`, left every scaled `ref` drawing its text at the unscaled
+    // baseline and stretching it to the unscaled width.
+    refBody: f.refBody.map((r) => scaleRun(r, k)),
+    tabRuns: f.tabRuns.map((r) => scaleRun(r, k)),
     tabTextWidth: f.tabTextWidth * k,
     tabWidth: f.tabWidth * k,
     tabHeight: f.tabHeight * k,
@@ -174,6 +235,7 @@ function scaleDivider(d: DividerGeo, k: number): DividerGeo {
     height: d.height * k,
     textWidth: d.textWidth * k,
     textHeight: d.textHeight * k,
+    labelRuns: d.labelRuns.map((r) => scaleRun(r, k)),
   };
 }
 

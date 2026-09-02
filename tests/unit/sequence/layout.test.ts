@@ -93,12 +93,21 @@ describe('layoutSequence — participant columns (AC 1)', () => {
     expect(alice.centerX).toBeLessThan(bob.centerX);
   });
 
-  it('assigns y=0 to all participants', () => {
+  it('starts every same-height participant on the document top margin', () => {
+    // C3: `TOP_MARGIN`, not 0. `TextBlockExporter:173` translates the diagram
+    // by `(margin.left, margin.top)` = `same(5)`
+    // (`SequenceDiagram#getDefaultMargins:624-628`) and
+    // `SequenceDiagramFileMakerTeoz:132` adds its own `UTranslate(5, 5)`, so
+    // the head row starts at 10 — `jobadi-87-jegi648`'s `rect y="10"`. Three
+    // plain participants share one head height, so none is pushed lower by
+    // the bottom-align.
     const ast = makeAst(['A', 'B', 'C'], []);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     for (const p of geo.participants) {
-      expect(p.y).toBe(0);
+      expect(p.y).toBe(10);
     }
+    // And the lifelines start one head band below it.
+    expect(geo.headHeight).toBe(10 + geo.participants[0]!.height + 1);
   });
 
   it('participant width is the text plus twice the padding, with no floor under it', () => {

@@ -24,17 +24,20 @@ import type {
   SequenceEvent,
   SpaceEvent,
   SpaceGeo,
+  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
+import { noteFontSpecOf } from './sequence-layout-shared.js';
 import {
   DIVIDER_PADDING,
+  DIVIDER_LABEL_DELTA_X,
   dividerFontSpecOf,
   dividerPreferredHeight,
 } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
-import { refBodyLines, refBodyHeight, refBodyWidth } from './text-block-geo.js';
+import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
@@ -42,6 +45,8 @@ import {
   HEADER_PADDING,
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
+  GROUP_FONT_SIZE,
+  GROUP_FONT_BOLD,
 } from './frame-style.js';
 
 /** Pending activation-bar start record. `level` is 1-based and fixed when
@@ -83,6 +88,19 @@ export interface EventProcessingContext {
    *  (`:326-336`). Collected alongside `dividerGeos` for the same reason:
    *  both need `totalWidth` back-filled once Step 3 knows it. */
   newpageGeos: NewpageGeo[];
+  /**
+   * The participants of `SequenceDiagram.lastEventWithDeactivate` when that
+   * event is a MESSAGE, and `undefined` otherwise — a diagram-level field
+   * upstream (`:145`), set by `addMessage` (`:204`) and reset to the
+   * `GroupingLeaf` by a group `end` (`:438`).
+   *
+   * Only one reader: a `destroy` binds to it when it `dealWith`s the same
+   * participant AND it is an `AbstractMessage` (`:387,396-398`), and an
+   * unbound destroy is the one life event that reserves height. `undefined`
+   * therefore covers both "nothing yet" and "the last one was a group end",
+   * which are the same answer.
+   */
+  lastMessageParticipants?: readonly string[] | undefined;
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
@@ -169,20 +187,43 @@ function handleNoteEvent(
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
-  const fontSpec = fontSpecOf(ctx.theme);
+  // `note { FontSize 13 }` (`plantuml.skin:312-316`), NOT the ambient font —
+  // the box and its text must be sized from one measurement.
+  const fontSpec = noteFontSpecOf(ctx.theme);
   const notePadding = 10;
   const lines = event.text.split('\n');
   const lineHeight = ctx.measurer.measure('M', fontSpec).height;
-  const maxLineWidth = Math.max(
-    ...lines.map((line) => ctx.measurer.measure(line, fontSpec).width),
-  );
-  const noteWidth = maxLineWidth + notePadding * 2;
-  const noteHeight = lines.length * lineHeight + notePadding * 2;
+  // C6: that ONE measurement is the CREOLE block's -- `getTextWidth` reads
+  // `textBlock.calculateDimension` plus the padding (`AbstractTextualComponent
+  // .java:100-108`) over the block `create0` built (`:89-92`), so `<b>bold</b>`
+  // reserves the width of `bold` (jar: `moxope-92-roco972`).
+  const rows = noteBodyRuns(lines, fontSpec, ctx);
+  const noteWidth = blockWidthOf(rows) + notePadding * 2;
+  // The DRAWN box is `getTextHeight` tall -- the block plus `padding.top` and
+  // `padding.bottom`, both 5 (`ComponentRoseNote:67-70,104-118`). This port
+  // used the x padding (10) on both axes, making every note box 10 too tall.
+  const noteHeight = lines.length * lineHeight + NOTE_PADDING_Y * 2;
 
-  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y, ctx.participantMap);
+  // And the box is drawn `getPaddingY` BELOW the tile top -- `Rose.paddingY`
+  // = 5, handed to the component at `Rose:115` and applied by
+  // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
+  // at y=52 against a tile top of 47.
+  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
+  noteGeo.textRuns = rows.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
   ctx.eventGeos.push(noteGeo);
-  cursor.y += noteHeight + ctx.theme.sequence.messageSpacing;
+  // `NoteTile#getPreferredHeight:167-171` is the component's height and
+  // nothing else -- no spacing either side -- and that is `getTextHeight +
+  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`.
+  cursor.y += noteHeight + NOTE_PADDING_Y * 2;
 }
+
+/** `ComponentRoseNote`'s own vertical padding, `topRightBottomLeft(5, 15, 5,
+ *  15)` (`:67-70`) — and, separately, `Rose.paddingY` (`Rose.java:66`, passed
+ *  at `:115`), which is the same 5 and is what offsets the box below its tile
+ *  top. The HORIZONTAL padding is 15 upstream against this port's 10; that is
+ *  an x term and `findings/vertical-terms.md` §4 does not claim it. */
+const NOTE_PADDING_Y = 5;
 
 function handleActivateEvent(
   event: ActivationEvent,
@@ -212,11 +253,62 @@ function handleDeactivateEvent(
     deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
   emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   cursor.lastMessageY = undefined;
+  if (isDestroyWithoutMessage(event, ctx)) cursor.y += DESTROY_CROSS_SIZE * 2;
 }
 
-/** Vertical room an `else` separator line plus its bracketed condition
- *  occupies before the branch's own first event. */
-const SEPARATOR_HEIGHT = 20;
+/**
+ * `LifeEventTile#isDestroyWithoutMessage:124-126` — `lifeEvent.getMessage() ==
+ * null && lifeEvent.getType() == DESTROY`.
+ *
+ * `getMessage()` is set only when `SequenceDiagram#activate` reaches its
+ * `setMessage` line (`:396-398`), which two earlier guards can skip: a
+ * `lastEventWithDeactivate` that does not `dealWith(p)` returns at `:387`, and
+ * one that is not an `AbstractMessage` — a group `end`, per `:438` — falls
+ * past the `instanceof` test. Both leave the message null, so both make the
+ * destroy standalone. `X -> X` followed by `destroy Y` is upstream's own
+ * worked example, in the comment above `:387`.
+ */
+function isDestroyWithoutMessage(
+  event: ActivationEvent,
+  ctx: EventProcessingContext,
+): boolean {
+  if (event.destroy !== true) return false;
+  return ctx.lastMessageParticipants?.includes(event.participantId) !== true;
+}
+
+/** `ComponentRoseDestroy.crossSize` (`:57`); the component is `crossSize * 2`
+ *  on both axes (`:68-70,72-74`), and `LifeEventTile:132-136` reserves that
+ *  height for a destroy with no message. The cross itself is not drawn here —
+ *  reserving its space is the vertical term; emitting its two strokes is an
+ *  element-deficit task. */
+const DESTROY_CROSS_SIZE = 9;
+
+/**
+ * Vertical room an `else` separator plus its bracketed condition occupies.
+ * `ElseTile:80` reserves the component's `getPreferredHeight`, whose teoz arm
+ * is `getTextHeight + 4` (`ComponentRoseGroupingElse:115-121`) over padding
+ * `topRightBottomLeft(1, 5, 1, 5)` (`:65-67`) — so `blockH + 6`, 17 for an
+ * 11px condition, where this port used a flat 20. `blockH` is **0** for a bare
+ * `else`: the constructor takes `comment == null ? null : "[" + comment + "]"`,
+ * so a conditionless branch has no display. Jar-verified on
+ * `cazusa-73-masi168`, whose bare rule at 311 chains the next frame at 316 and
+ * whose labelled rule at 496 chains it at 512.
+ */
+function separatorHeight(label: string, ctx: EventProcessingContext): number {
+  const blockH =
+    label.trim() === ''
+      ? 0
+      : ctx.measurer.measure('M', {
+          family: ctx.theme.fontFamily,
+          size: GROUP_FONT_SIZE,
+          weight: GROUP_FONT_BOLD ? 'bold' : 'normal',
+        }).height;
+  return blockH + 2 * ELSE_PADDING_Y + ELSE_TEOZ_DELTA_H;
+}
+
+/** The teoz arm's `+ 4` (`ComponentRoseGroupingElse#getPreferredHeight:
+ *  115-121`), on top of the component's own `getTextHeight`. */
+const ELSE_TEOZ_DELTA_H = 4;
 
 /** `GroupingTile.MARGINX` (`teoz/GroupingTile.java:89`) — how far a group's
  *  frame reaches beyond the tiles it contains, on each side. */
@@ -230,7 +322,7 @@ const FRAME_MARGIN_X = 16;
 function computeFrameBody(
   event: FrameEvent,
   ctx: EventProcessingContext,
-): { x: number; width: number; refBody: { text: string; x: number }[]; body: readonly string[] } {
+): { x: number; width: number; refBody: readonly TextRun[]; body: readonly string[] } {
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
   const body = refBodyLines(event.frameType, event.label);
   // `GroupingTile.MARGINX = 16` (`:89`), applied as
@@ -244,11 +336,111 @@ function computeFrameBody(
     maxCx - minCx + 2 * FRAME_MARGIN_X,
     refBodyWidth(body, ctx.theme, ctx.measurer),
   );
-  const refBody = body.map((line) => ({
-    text: line,
-    x: x + (width - ctx.measurer.measure(line, fontSpecOf(ctx.theme)).width) / 2,
-  }));
-  return { x, width, refBody, body };
+  return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
+}
+
+/** A creole BLOCK's width -- the max over its stripes that
+ *  `TextBlockSimple#calculateDimension` returns (`klimt/shape/TextBlockSimple
+ *  .java:60-73`) and `AbstractTextualComponent#getTextWidth` pads (`:100-108`).
+ *  Each run carries its line's offset in `x`, so one max IS that maximum; the
+ *  `0` seed is the empty block. Cf. {@link creoleLineWidth}, for ONE line. */
+function blockWidthOf(runs: readonly TextRun[]): number {
+  return Math.max(0, ...runs.map((r) => r.x + r.textWidth));
+}
+
+/** A creole line's total advance: its LAST run's right edge, never a sum of
+ *  widths -- a non-text atom advances x without producing a run. */
+function creoleLineWidth(runs: readonly TextRun[]): number {
+  const last = runs.at(-1);
+  return last === undefined ? 0 : last.x + last.textWidth;
+}
+
+/**
+ * A `ref over` frame's body lines, as placed and measured runs (A4), one run
+ * per creole atom (C5). The `y` moved here from `renderer.ts#renderRefBody`
+ * because the renderer may no longer derive a baseline from a font size (D1),
+ * and D5 keeps it there. Upstream draws the body
+ * at `(textPos, getOldPaddingY() + textHeaderHeight)`
+ * (`ComponentRoseReference.java:125-136`); this port substitutes
+ * `+ theme.fontSize` (an SVG `<text>` y is a BASELINE, upstream's translate a
+ * block top-left) and `frame.tabHeight` for `textHeaderHeight` (keying the
+ * body to the DRAWN tab keeps the two from colliding). The `x` is
+ * upstream's centring within the box (`AbstractTextualComponent.java:106-108`),
+ * applied to the whole LINE and not to each run: the jar's two-line `ref` puts
+ * both lines on one x (74.3, 76.962 in a box of x=70.3 w=76.775), and
+ * `cikoca-19-feji527`'s url and `Foo2` sit adjacent at 16 + 121.275.
+ */
+function refBodyRuns(
+  body: readonly string[],
+  x: number,
+  width: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  // `reference { FontSize 12 }` (`plantuml.skin:145-151`), NOT the ambient
+  // sequence font (`text-block-geo.ts#REFERENCE_FONT_SIZE`); the box this
+  // places into is sized from the same spec by `refBodyWidth`/`refBodyHeight`.
+  const font = sequenceCreoleFont(refBodyFontSpecOf(ctx.theme));
+  // The ref body's own inter-line advance, unchanged from the renderer it
+  // moved out of: NOT the measured line height, and substituting one for the
+  // other would move every multi-line `ref`.
+  const advance = ctx.theme.fontSize + 2;
+  return body.flatMap((line, i) => {
+    // Baselines are relative to the block top; `placeRefBody` drops them on.
+    const runs = sequenceCreoleRuns(line, font, { leftX: 0, baselineY: i * advance }, ctx.measurer);
+    const dx = x + (width - creoleLineWidth(runs)) / 2;
+    return runs.map((r) => ({ ...r, x: r.x + dx }));
+  });
+}
+
+/** Drop `refBodyRuns`' relative baselines onto the frame's own top. Separate
+ *  from it because `tabHeight` is resolved by `computeHeaderTab`, after the
+ *  body's x is. */
+function placeRefBody(
+  runs: readonly TextRun[],
+  frameY: number,
+  tabHeight: number,
+  fontSize: number,
+): readonly TextRun[] {
+  const top = frameY + tabHeight + fontSize;
+  return runs.map((r) => ({ ...r, y: top + r.y }));
+}
+
+/**
+ * The header tab's title and its optional `[comment]`, as placed and measured
+ * runs (A4), one run per creole atom (C5). Two FONTS, not two runs -- the
+ * title at `HEADER_FONT_SIZE` 13 bold, the comment at the group style's own
+ * `smallFont2` 11 bold (`ComponentRoseGroupingHeader.java:89,151-158`) -- and
+ * each line becomes as many runs as it has atoms. Jar-verified on
+ * `bepipo-37-fego336` (`loop` x=28 w=24.619, `[forever]` x=97.619 w=40.219,
+ * one `tabWidth` right of the title) and on `cedeti-10-bufu072`, whose
+ * `alt [[https://www.plantuml.com]]` comment is `[`, the url at 125.194, `]`.
+ */
+function buildTabRuns(
+  tab: { readonly tabText: string; readonly tabComment?: string; readonly tabWidth: number },
+  x: number,
+  y: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  // Both halves are TEXT BLOCKS (`ComponentRoseGroupingHeader.java:76-77,89`;
+  // see `text-block-geo.ts#displayLines`), and the comment's brackets wrap the
+  // whole block, not each line. Jar: `pigifu-13-kele137`, `zedepi-36-come743`.
+  // The loop is `TextBlockSimple#drawU`'s (`klimt/shape/TextBlockSimple.java
+  // :78-89`) = `text-block-geo.ts#textBlockRuns`, replaced here because that
+  // one cannot split a line into atoms.
+  const block = (text: string, size: number, bx: number, by: number): readonly TextRun[] => {
+    const spec: FontSpec = { family: ctx.theme.fontFamily, size, weight: 'bold' };
+    const lh = ctx.measurer.measure('M', spec).height;
+    const first = by + lh - ctx.measurer.getDescent(spec, 'M');
+    return displayLines(text).flatMap((line, i) =>
+      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer));
+  };
+  const left = x + HEADER_PADDING.left;
+  const top = y + HEADER_PADDING.top;
+  const title = block(tab.tabText, HEADER_FONT_SIZE, left, top);
+  if (tab.tabComment === undefined) return title;
+  // `+ 1`: `getOldPaddingY()` again, on the comment's own baseline
+  // (`ComponentRoseGroupingHeader.java:151-158`).
+  return [...title, ...block(`[${tab.tabComment}]`, GROUP_FONT_SIZE, left + tab.tabWidth, top + 1)];
 }
 
 /** The header tab's `Display`, split by `groupingHeaderDisplay`
@@ -257,17 +449,15 @@ function computeFrameBody(
  *  .java:106-114`, with `getSuppHeightForComment` and `commentMargin * 2`
  *  both 0 since this port draws no separate comment box measurement (the
  *  comment box itself is T4's, `renderer-frame-header.ts`). Layout is the
- *  only stage holding a measurer, hence resolved here.
- *  An empty `branchLabels[0]` is treated as "no comment" (`undefined`),
- *  matching how `groupingCommand` defaults a conditionless frame's label to
- *  `''` -- there is no separate "absent" state to distinguish it from.
+ *  only stage holding a measurer, hence resolved here. An empty
+ *  `branchLabels[0]` is "no comment", as `groupingCommand` defaults a
+ *  conditionless frame's label to `''`.
  *
- *  A `ref` NEVER has a comment. `ReferenceTile#getComponent:117-124` builds
- *  `Display("ref") + reference.getStrings()`, and `ComponentRoseReference`
- *  splits that display at index 1: `subList(0, 1)` is the header ("ref"),
- *  `subList(1, ...)` is the BODY (`ComponentRoseReference.java:67-78`). The
- *  label is therefore body text -- this port already routes it there via
- *  `refBodyLines` -- and there is no second box beside the tab for it. */
+ *  A `ref` NEVER has a comment: `ReferenceTile#getComponent:117-124` builds
+ *  `Display("ref") + reference.getStrings()` and `ComponentRoseReference`
+ *  splits it at index 1 -- `subList(0, 1)` the header, `subList(1, ...)` the
+ *  BODY (`ComponentRoseReference.java:67-78`), where `refBodyLines` already
+ *  routes it. */
 function computeHeaderTab(
   event: FrameEvent,
   ctx: EventProcessingContext,
@@ -281,10 +471,20 @@ function computeHeaderTab(
     size: HEADER_FONT_SIZE,
     weight: HEADER_FONT_BOLD ? 'bold' : 'normal',
   };
+  // `getPureTextWidth`/`getTextHeight` over the title's own text BLOCK
+  // (`AbstractTextualComponent.java:106-114`); the corner is drawn at exactly
+  // those (`ComponentRoseGroupingHeader.java:141-143,152`), so the tab grows
+  // with the TITLE's escaped newlines, never with the comment beside it. C5:
+  // at the title's own CREOLE width -- `groupingHeaderDisplay` makes a
+  // `group`'s comment its TITLE, so markup reaches here too.
+  const titleLines = displayLines(tabText);
   const measured = ctx.measurer.measure(tabText, fontSpec);
-  const tabTextWidth = measured.width;
+  const titleFont = sequenceCreoleFont(fontSpec);
+  const tabTextWidth = Math.max(...titleLines.map((l) =>
+    creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer))));
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
-  const tabHeight = measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
+  const tabHeight =
+    titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
 
   return {
     tabText,
@@ -294,6 +494,59 @@ function computeHeaderTab(
     tabHeight,
   };
 }
+
+/**
+ * An `else` branch's bracketed condition, as a placed and measured run (A5).
+ *
+ * `ComponentRoseGroupingElse` is its OWN component, not the header tab beside
+ * it, and it carries its own padding —
+ * `ClockwiseTopRightBottomLeft.topRightBottomLeft(1, 5, 1, 5)` (`:65-67`) —
+ * which `drawInternalU`'s teoz arm applies as
+ * `UTranslate(getOldPaddingX1(), getOldPaddingY() + 2)`, i.e. `(5, 3)`
+ * (`:109-112`). The bracket wrapping is upstream's too: the constructor is
+ * handed `"[" + comment + "]"`.
+ *
+ * Jar-verified on `bovugo-63-lazo401`, whose `else sinon` puts `[sinon]` at
+ * x=18.469 against a frame at x=13.469 — exactly 5, where this port used 6.
+ */
+function branchConditionRuns(
+  label: string,
+  frameX: number,
+  separatorY: number,
+  ctx: EventProcessingContext,
+): readonly TextRun[] {
+  const condition = label.trim();
+  if (condition === '') return [];
+  const text = `[${condition}]`;
+  const font: FontSpec = {
+    family: ctx.theme.fontFamily,
+    size: GROUP_FONT_SIZE,
+    weight: GROUP_FONT_BOLD ? 'bold' : 'normal',
+  };
+  const lineHeight = ctx.measurer.measure('M', font).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
+  // C5: the condition is a `Display` like every other component text
+  // (`AbstractTextualComponent.java:86-92`), so it goes through the same seam
+  // the tab and the `ref` body do. `cedeti-10-bufu072` writes `else [[url]]`,
+  // whose captured label is a run of its own carrying the href.
+  return sequenceCreoleRuns(
+    text,
+    sequenceCreoleFont(font),
+    {
+      leftX: frameX + ELSE_PADDING_X1,
+      baselineY: separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY + ascent,
+    },
+    ctx.measurer,
+  );
+}
+
+/** `ComponentRoseGroupingElse`'s own padding, `topRightBottomLeft(1, 5, 1, 5)`
+ *  (`:65-67`) — left and top respectively. */
+const ELSE_PADDING_X1 = 5;
+const ELSE_PADDING_Y = 1;
+/** The teoz arm's extra `+ 2` (`ComponentRoseGroupingElse.java:110`). This
+ *  engine is teoz-only, so the non-teoz arm has no reader here. */
+const ELSE_TEOZ_DY = 2;
 
 /**
  * MUTATION CONTRACT (D2 -- reserve the slot, then fill it).
@@ -323,25 +576,37 @@ function handleFrameEvent(
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
+  // `frameStartY` is the GAUGE MIN -- the chaining point, NOT the drawn
+  // frame's top. Those differ by `EXTERNAL_MARGINY`, and GroupingTile keeps
+  // them apart deliberately: a parallel (`&`) sibling chains on the min, so
+  // folding the margin into it would drift 4px per pair (`:145-152`).
   const frameStartY = cursor.y;
-  const frameHeaderHeight = 30;
-  cursor.y += frameHeaderHeight;
-
   const { x, width, refBody, body } = computeFrameBody(event, ctx);
+  const tab = computeHeaderTab(event, ctx);
+  // `final double h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY;`
+  // (`GroupingTile.java:156`) -- the body starts below the frame's top margin
+  // AND the header, where `dim1` is the header component's own preferred
+  // dimension. This port used a flat 30 where upstream MEASURES the header.
+  cursor.y = frameStartY + tab.tabHeight + FRAME_MARGINY_MAGIC / 2 + FRAME_EXTERNAL_MARGINY;
+
+  // `getFrameY()` (`:240-242`) -- the drawn border, one top margin below.
+  const frameDrawnY = frameStartY + FRAME_EXTERNAL_MARGINY;
   const frameGeo: FrameGeo = {
     kind: 'frame',
     frameType: event.frameType,
     label: event.label,
     x,
-    y: frameStartY,
+    y: frameDrawnY,
     width,
     height: 0, // placeholder -- filled below once the branch walk resolves frameEndY
     ...(event.backColorElement !== undefined ? { backColorElement: event.backColorElement } : {}),
     ...(event.backColorGeneral !== undefined ? { backColorGeneral: event.backColorGeneral } : {}),
     branchSeparators: [], // placeholder -- populated by mutation in the loop below
     refBody,
-    ...computeHeaderTab(event, ctx),
+    ...tab,
+    tabRuns: buildTabRuns(tab, x, frameDrawnY, ctx),
   };
+  frameGeo.refBody = placeRefBody(refBody, frameDrawnY, tab.tabHeight, ctx.theme.fontSize);
   ctx.eventGeos.push(frameGeo);
 
   // Process each branch in sequence (alt frames have multiple branches).
@@ -356,20 +621,46 @@ function handleFrameEvent(
   event.branches.forEach((branch, i) => {
     if (i > 0) {
       const branchColor = event.branchColors?.[i];
+      const branchLabel = event.branchLabels[i] ?? '';
       frameGeo.branchSeparators.push({
         y: cursor.y,
-        label: event.branchLabels[i] ?? '',
+        label: branchLabel,
         ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
+        runs: branchConditionRuns(branchLabel, x, cursor.y, ctx),
       });
-      cursor.y += SEPARATOR_HEIGHT;
+      cursor.y += separatorHeight(branchLabel, ctx);
     }
     cursor.y = processEvents(branch, cursor.y, ctx);
   });
 
   const frameEndY = cursor.y;
-  frameGeo.height = Math.max(frameEndY - frameStartY, refBodyHeight(body, ctx.theme, ctx.measurer));
-  cursor.y = frameEndY + ctx.theme.sequence.messageSpacing;
+  // `getTotalHeight = bodyHeight + dimIfEmpty.getHeight() + MARGINY_MAGIC / 2`
+  // (`:342-345`), which `frameEndY - frameDrawnY` is exactly: the body offset
+  // put `headerH + MARGINY_MAGIC / 2` between them and the walk added the body.
+  // The `max` is a `ref`'s floor, not a group's -- `ComponentRoseReference`'s
+  // header/body/footer split is deliberately out of C3's set (§1.9).
+  frameGeo.height = Math.max(frameEndY - frameDrawnY, refBodyHeight(body, ctx.theme, ctx.measurer));
+  // `getPreferredHeight = dim1 + bodyHeight + MARGINY_MAGIC + 2 *
+  // EXTERNAL_MARGINY` (`:348-357`), which leaves exactly
+  // `EXTERNAL_MARGINY + MARGINY_MAGIC / 2` of slack below the drawn border.
+  // This port left one `messageSpacing` (20) there.
+  cursor.y = frameEndY + FRAME_EXTERNAL_MARGINY + FRAME_MARGINY_MAGIC / 2;
+  // `grouping(... GroupingType.END ...)` sets `lastEventWithDeactivate` to the
+  // `GroupingLeaf` (`SequenceDiagram.java:438`), which is not an
+  // `AbstractMessage` -- so a `destroy` straight after `end` is standalone.
+  ctx.lastMessageParticipants = undefined;
 }
+
+/** `GroupingTile.EXTERNAL_MARGINY` (`teoz/GroupingTile.java:88`) — vertical
+ *  breathing room around a group frame, on each side. Reserved on both in
+ *  `getPreferredHeight`; the TOP one is additionally materialised at draw time
+ *  through `getFrameY()`. */
+const FRAME_EXTERNAL_MARGINY = 4;
+
+/** `GroupingTile.MARGINY_MAGIC` (`teoz/GroupingTile.java:91`) — always read as
+ *  a half (`MARGINY_MAGIC / 2`) above the body and again below the border, and
+ *  as the whole in the tile's reserved height. */
+const FRAME_MARGINY_MAGIC = 20;
 
 /**
  * `DividerTile` (`teoz/DividerTile.java`) reserves exactly its component's own
@@ -384,6 +675,27 @@ function handleFrameEvent(
  * FontStyle bold } }` (`plantuml.skin:174-175`), not the diagram font, so it
  * is measured with its own spec.
  */
+/**
+ * A divider label's runs, positioned RELATIVE to the label box's own top-left.
+ *
+ * `ComponentRoseDivider#drawInternalU` draws the block at
+ * `(xpos + deltaX, ypos + getOldPaddingY())` (`:75-83,104`), where `deltaX` is
+ * 6 and the padding is `topRightBottomLeft(4, 4, 4, 4)`. Both terms are known
+ * here; `xpos`/`ypos` are not, because they are centred within a band whose
+ * width `backfillDividerWidth` resolves in Step 3 — so these carry the inner
+ * offset and that function adds the outer one.
+ */
+function dividerLabelRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
+  const font = sequenceCreoleFont(spec);
+  const lineHeight = ctx.measurer.measure('M', spec).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  // C6: one run per creole atom -- a divider's label is an
+  // `AbstractTextualComponent` `Display` like every other sequence label
+  // (`ComponentRoseDivider.java:57-62`); `bakuba-09-fica741` is the last one.
+  return lines.flatMap((line, i) => sequenceCreoleRuns(line, font,
+    { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight }, ctx.measurer));
+}
+
 function handleDividerEvent(
   event: DividerEvent,
   cursor: EventCursor,
@@ -397,7 +709,13 @@ function handleDividerEvent(
   // label box (two 13px lines plus the 4+4 padding), not a 21-tall one.
   const lines = event.text.split('\n');
   const lineHeight = ctx.measurer.measure('M', font).height;
-  const blockWidth = Math.max(...lines.map((l) => ctx.measurer.measure(l, font).width));
+  // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
+  // them onto the band once `bandX`/`bandWidth` are known (Step 3), the same
+  // construct-then-resolve split `y`/`branchSeparators` use above. C6: the
+  // reserved width is that CREOLE block's, less the `deltaX` the runs already
+  // carry -- `getTextWidth` reads `calculateDimension`, not the display string.
+  const labelRuns = dividerLabelRuns(lines, font, ctx);
+  const blockWidth = Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
   const blockHeight = lines.length * lineHeight;
   const dividerGeo: DividerGeo = {
     kind: 'divider',
@@ -409,20 +727,44 @@ function handleDividerEvent(
     height: dividerPreferredHeight(blockHeight),
     textWidth: blockWidth + DIVIDER_PADDING * 2,
     textHeight: blockHeight + DIVIDER_PADDING * 2,
+    labelRuns,
   };
   ctx.eventGeos.push(dividerGeo);
   ctx.dividerGeos.push(dividerGeo);
   cursor.y += dividerGeo.height;
 }
 
+/**
+ * A delay reserves its component's own height and nothing else
+ * (`DelayTile#getPreferredHeight:114-118`), and there are two components. A
+ * bare `...` is a `ComponentRoseDelayLine`, a constant **20** (`:68-71`) that
+ * this port's `messageSpacing` matched by luck; a `...text...` is a
+ * `ComponentRoseDelayText`, `getTextHeight + 20` (`:72-75`) over padding
+ * `topRightBottomLeft(4, 0, 4, 0)` (`:54`), i.e. `blockH + 28` at
+ * `delay { FontSize 11 }` (`plantuml.skin:290-295`). The text is still not
+ * DRAWN — a pre-existing element gap — but its space is now reserved.
+ */
 function handleDelayEvent(
-  _event: DelayEvent,
+  event: DelayEvent,
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
-  // Delay events carry no geometry — advance by one message spacing
-  cursor.y += ctx.theme.sequence.messageSpacing;
+  if (event.text === undefined) {
+    cursor.y += DELAY_LINE_HEIGHT;
+    return;
+  }
+  const spec: FontSpec = { family: ctx.theme.fontFamily, size: DELAY_FONT_SIZE };
+  const blockH = displayLines(event.text).length * ctx.measurer.measure('M', spec).height;
+  cursor.y += blockH + 2 * DELAY_PADDING_Y + DELAY_LINE_HEIGHT;
 }
+
+/** `ComponentRoseDelayLine#getPreferredHeight:68-71`, and the constant term of
+ *  `ComponentRoseDelayText#getPreferredHeight:72-75`. */
+const DELAY_LINE_HEIGHT = 20;
+/** `ComponentRoseDelayText:54` — `topRightBottomLeft(4, 0, 4, 0)`. */
+const DELAY_PADDING_Y = 4;
+/** `delay { FontSize 11 }` (`plantuml.skin:290-295`). */
+const DELAY_FONT_SIZE = 11;
 
 /**
  * `NewpageTile` (`teoz/NewpageTile.java:63-67`): a tile whose `YGauge` starts
@@ -463,9 +805,11 @@ function handleSpaceEvent(
     height: event.pixels,
   };
   ctx.eventGeos.push(spaceGeo);
-  // Advance by the requested pixels plus one message spacing gap so that
-  // the next element starts clearly after the space region ends
-  cursor.y += event.pixels + ctx.theme.sequence.messageSpacing;
+  // Exactly the requested pixels, and nothing beside them. `HSpaceTile:72-75`
+  // returns the `HSpace`'s own pixel count as its preferred height, and
+  // `ComponentRoseGroupingSpace#getPreferredHeight:66-69` returns the `space
+  // N` argument -- neither adds a gap, because tiles chain flush.
+  cursor.y += event.pixels;
 }
 
 /**
@@ -562,9 +906,32 @@ function buildNoteGeo(
     width: finalNoteWidth,
     height: noteHeight,
     text: event.text,
+    // Filled in by the caller, which alone knows the padding it sized the box
+    // with; see `noteBodyRuns`.
+    textRuns: [],
     ...(event.color !== undefined ? { color: event.color } : {}),
     ...(event.shape !== undefined ? { shape: event.shape } : {}),
   };
+}
+
+/**
+ * A note body's lines, as placed and measured runs — one run per creole atom
+ * (C6), RELATIVE to the block's own top-left.
+ *
+ * `ComponentRoseNoteBox#drawInternalU` draws the block at
+ * `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` (`:105`) — LEFT-aligned
+ * inside the box, not centred, which is what this port had been doing with a
+ * `text-anchor="middle"`. `diffX` is the slack when the drawn area is wider
+ * than the component's preferred width; this port sizes the box to the text, so
+ * it is 0 and the block sits at the padding. Relative rather than absolute
+ * because the box's own x derives FROM this block's width
+ * (`handleNoteEvent`): the caller adds the origin and padding once it has them.
+ * Each entry is one line — a note's `\n` split already happened upstream. */
+function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
+  const font = sequenceCreoleFont(spec);
+  const lineHeight = ctx.measurer.measure('M', spec).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  return lines.flatMap((l, i) => sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer));
 }
 
 /**

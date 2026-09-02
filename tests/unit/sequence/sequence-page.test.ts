@@ -47,6 +47,8 @@ function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): Sequenc
         id: 'A', display: 'A', type: 'participant',
         x: 10, y: 0, width: 60, height: HEAD_HEIGHT, centerX: 40,
         background: defaultTheme.colors.background, border: defaultTheme.colors.border,
+        // A3: this suite asserts pagination y-arithmetic, never label text.
+        labelRuns: [],
       },
     ],
     events,
@@ -67,17 +69,24 @@ function message(y: number, labelY?: number): MessageGeo {
   return {
     kind: 'message', fromX: 40, toX: 200, y, label: 'm',
     arrow: arrowConfigurationOf({}),
-    labelLines: labelY === undefined ? [] : [{ text: 'm', x: 50, y: labelY }],
+    // A1: `TextRun` carries required metrics. The values are arbitrary here —
+    // this suite asserts pagination y-arithmetic, never text measurement.
+    labelLines:
+      labelY === undefined
+        ? []
+        : [{ text: 'm', x: 50, y: labelY, textWidth: 9, textAscent: 10, textLineHeight: 13 }],
     arrowDirection: 'right',
   };
 }
 
 const note = (y: number, height: number): NoteGeo =>
-  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n' });
+  // A5: `textRuns` is placed in layout. This suite asserts pagination
+  // y-arithmetic, never note text, so an empty body is enough.
+  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n', textRuns: [] });
 const activation = (y: number, height: number): ActivationGeo =>
   ({ kind: 'activation', participantId: 'A', lifelineX: 40, y, height, level: 1 });
 const divider = (y: number, height: number): DividerGeo =>
-  ({ kind: 'divider', text: 'd', lines: ['d'], y, bandX: 10, bandWidth: 360,
+  ({ kind: 'divider', text: 'd', lines: ['d'], labelRuns: [], y, bandX: 10, bandWidth: 360,
      height, textWidth: 40, textHeight: 20 });
 const space = (y: number): SpaceGeo => ({ kind: 'space', y, height: 12 });
 
@@ -86,6 +95,9 @@ function frame(y: number, height: number, extra?: Partial<FrameGeo>): FrameGeo {
     kind: 'frame', frameType: 'group', label: 'g',
     x: 5, y, width: 300, height,
     branchSeparators: [], refBody: [],
+    // A4 moved tab-text placement into layout; these suites assert box
+    // geometry, never the tab's own text.
+    tabRuns: [],
     tabText: 'group', tabTextWidth: 30, tabWidth: 40, tabHeight: 15,
     ...extra,
   };
@@ -158,7 +170,7 @@ describe('band and totals', () => {
 
   it('re-sizes box englobers to the page height', () => {
     const g = geo([message(100), newpage(200), message(300)], {
-      boxes: [{ x: 0, y: 0, width: 100, height: 560, label: 'b', color: '#eee' }],
+      boxes: [{ x: 0, y: 0, width: 100, height: 560, label: 'b', color: '#eee', labelRuns: [] }],
     });
     const page = paginateSequence(g, 0);
     expect(page.boxes[0]!.height).toBe(page.totalHeight);
@@ -307,16 +319,22 @@ describe('frame — body CLAMPED, header tab all-or-nothing', () => {
   it('drops the else separators that left the band and translates the rest', () => {
     const f = frame(100, 300, {
       branchSeparators: [
-        { y: 150, label: 'a' },
-        { y: 260, label: 'b' },
+        { y: 150, label: 'a', runs: [] },
+        { y: 260, label: 'b', runs: [] },
       ],
     });
     const page = paginateSequence(geo([newpage(200), f]), 0);
-    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a' }]);
+    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a', runs: [] }]);
   });
 
   it('drops the ref body with the header it hangs off', () => {
-    const f = frame(100, 300, { frameType: 'ref', refBody: [{ text: 'r', x: 20 }] });
+    // A4: `refBody` is a placed, measured `TextRun[]`. The metrics are
+    // arbitrary here — this asserts that the body is DROPPED with its header,
+    // never where it sits.
+    const f = frame(100, 300, {
+      frameType: 'ref',
+      refBody: [{ text: 'r', x: 20, y: 120, textWidth: 6, textAscent: 9, textLineHeight: 12 }],
+    });
     const page = paginateSequence(geo([f, newpage(200)]), 1);
     expect(only<FrameGeo>(page, 'frame')[0]!.refBody).toEqual([]);
   });

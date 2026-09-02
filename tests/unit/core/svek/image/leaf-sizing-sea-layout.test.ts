@@ -94,6 +94,6 @@ describe('leafTextLineLayout', () => {
 
   it('an atom-free stripe reports zeros rather than reaching Sea#getHeight, which throws on an empty sea (Sea.java:120-126; SheetBlock1.java:136-137 skips it upstream)', () => {
     const ops = { dim: () => ({ width: 0, height: 0 }), drawHeight: () => 0, descent: () => 0, normalDescent: () => 0 };
-    expect(layoutLineThroughSea([], ops)).toEqual({ width: 0, height: 0, dy: [] });
+    expect(layoutLineThroughSea([], ops)).toEqual({ width: 0, height: 0, dy: [], top: [] });
   });
 });

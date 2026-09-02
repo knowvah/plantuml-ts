@@ -1,4 +1,10 @@
-# A1 — the sequence text emitter and the geometry metrics
+# A1 — the sequence text emitter, the run metrics, and the `ast.ts` split
+
+> **Amended 2026-09-01, mid-execution.** The original task put three scalar
+> metric fields on each of six geometry types. Four of the six cannot carry
+> one; the maintainer's ruling moved them onto `TextRun` and added the
+> `ast.ts` split. See D8, and `.agent-notes/A1-sequence-geo-text-metric-fields.md`
+> for the measurements behind it.
 
 ## Context
 
@@ -21,18 +27,29 @@ This task builds the seam. It changes no call site and no output.
 
 1. Create `src/diagrams/sequence/sequence-text.ts` exporting `sequenceText`,
    the one emitter every sequence `<text>` will route through (D3).
-2. Add `textWidth`, `textAscent`, `textLineHeight` to every text-bearing geo
-   in `ast.ts`, and scale them in `scale-geo.ts` (D1).
-3. Unit-test the emitter against the jar's own markup.
+2. Split `ast.ts` at the `Geometry Types` banner it already carries: the
+   parse-stage AST stays, the geometry moves to `geo.ts`, and `ast.ts`
+   re-exports `geo.ts` so no import site changes (D8).
+3. Add `textWidth`, `textAscent` and `textLineHeight` to **`TextRun`**, all
+   three required, and populate them in `messageLabelBlock` — the only
+   producer of runs today (D1, D8).
+4. Scale all three by `k` in `scale-geo.ts`.
+5. Unit-test the emitter against the jar's own markup, and the metrics against
+   the measurer.
 
 Do **not** change any renderer or layout call site. That is A2–A5.
 
 ## Write-set
 
 - `src/diagrams/sequence/sequence-text.ts` (create)
-- `src/diagrams/sequence/ast.ts` (modify — type additions only)
+- `src/diagrams/sequence/geo.ts` (create — the moved half of `ast.ts`)
+- `src/diagrams/sequence/ast.ts` (modify — split + re-export barrel)
+- `src/diagrams/sequence/text-block-geo.ts` (modify — `TextRun` metrics)
 - `src/diagrams/sequence/scale-geo.ts` (modify — scale the new fields)
 - `tests/unit/sequence/sequence-text.test.ts` (create)
+- `tests/unit/sequence/text-block-geo-metrics.test.ts` (create)
+- `tests/unit/sequence/sequence-page.test.ts` (modify — one `TextRun` literal)
+- `docs/catalog.md` (generated; `npm run catalog`, drift-gated)
 
 ## Read-set
 
@@ -43,9 +60,10 @@ Do **not** change any renderer or layout call site. That is A2–A5.
   renderer already emitting a correct baseline, and the `textAscent` arithmetic
   D2 retires.
 - `src/core/measurer.ts:19-22, 92-94` — the `StringMeasurer` contract and a
-  `getDescent` implementation.
-- `plans/sequence-text-and-y-convergence/decisions.md` — D1, D2, D3, D4.
-- Jar reference: `~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverTextSvg.java`,
+  `getDescent` implementation. Every implementation ignores its `text`
+  argument, so any probe string gives the same descent.
+- `plans/sequence-text-and-y-convergence/decisions.md` — D1, D2, D3, D4, D8.
+- Jar reference: `~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverTextSvg.java:114-181`,
   and this port's faithful copy at
   `src/core/klimt/drawing/svg/driver-text-svg.ts:122-150` (`textLength: dim.width`,
   no anchor) — the shape to match.
@@ -58,6 +76,8 @@ Do **not** change any renderer or layout call site. That is A2–A5.
   construction.
 - **D4** — the emitter takes `leftX`, not a centre. Callers derive the left
   edge.
+- **D8** — metrics live on `TextRun`. Do NOT add a scalar `textWidth` to a
+  geometry type; four of the six cannot carry one.
 
 ## Interface contract (consumed by A2, A3, A4, A5)
 
@@ -71,23 +91,28 @@ export interface SequenceTextSpec {
   readonly fontFamily: string;
   readonly fontSize: number;
   readonly fill: string;
-  readonly fontWeight?: 'bold';
+  /** `'700'` is what this port emits for a bold sequence label; the jar's
+   *  deterministic-text SVG writes the numeric weight, never the keyword. */
+  readonly fontWeight?: 'bold' | '700';
   readonly textDecoration?: string;
 }
 export function sequenceText(spec: SequenceTextSpec): string;
 ```
 
-Geometry fields added to every text-bearing geo (`ParticipantGeo`,
-`MessageGeo`'s runs, `NoteGeo`, `FrameGeo`, `DividerGeo`, `NewpageGeo`):
+`TextRun` grows three **required** fields:
 
 ```ts
-readonly textWidth: number;       // measured, at the element's own font
-readonly textAscent: number;      // measure().height - getDescent()
-readonly textLineHeight: number;  // measure().height
+readonly textWidth: number;       // measure(text, font).width
+readonly textAscent: number;      // measure(...).height - getDescent(font, text)
+readonly textLineHeight: number;  // measure(...).height
 ```
 
-All three are **required**, not optional — an absent metric must not silently
-become zero. Scale by `k` in `scale-geo.ts`.
+Required, not optional: an absent metric defaulting to zero would emit
+`textLength="0"`, a visible text distortion the comparator barely sees.
+`scale-geo.ts` multiplies all three by `k`.
+
+Note `exactOptionalPropertyTypes: true` — passing an optional field straight
+through to another optional field does not compile. Use a spread-conditional.
 
 ## Acceptance criteria
 
@@ -100,8 +125,11 @@ become zero. Scale by `k` in `scale-geo.ts`.
   `svg-shapes.ts#textLengthOf`.
 - Given any input at all, when emitted, then the output contains neither
   `text-anchor` nor `dominant-baseline`.
-- Given a geometry with the three new fields, when `scaleSequenceGeometry` runs
-  with `k`, then `textWidth` and `textAscent` are both multiplied by `k`.
+- Given a layout driven by `FixedMeasurer(8, 16)`, when a run is built, then
+  `textAscent` is `16 - 16/4.5`, not `13 - 13/4.5` — the metric is MEASURED,
+  not derived from the font size (D1, D2).
+- Given a `TextRun`, when `scaleSequenceGeometry` runs with `k`, then all three
+  metrics are multiplied by `k`, and so are `x` and `y`.
 - Given the whole corpus, when rendered, then total distance is **exactly**
   2578916.759 — unchanged, because no call site moved.
 
@@ -112,14 +140,16 @@ instrument reporting no change.
 
 ## Rollback
 
-**Reversible.** Type additions and one new module; no baseline or golden is
-touched by this task.
+**Reversible.** Two new modules, one file split with a compensating re-export,
+and type additions; no baseline or golden is touched by this task.
 
 ## Quality bar
 
 All four gates: `npm test`, `npm run typecheck`, `npm run lint`,
-`npm run build`. `git diff --name-only` must list exactly the four write-set
-files.
+`npm run build`. `git diff --name-only` must list exactly the write-set above.
+
+`npm test`, not `npx vitest run tests/unit` — the narrow gate misses the
+catalog drift that adding a module always causes.
 
 ## Commit
 

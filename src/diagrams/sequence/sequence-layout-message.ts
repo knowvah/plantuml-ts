@@ -23,8 +23,13 @@ import {
   openActivation,
   pushActivation,
 } from './sequence-layout-events.js';
-import { fontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
-import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
+import { arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import {
+  ARROW_LABEL_HEAD_CLEARANCE,
+  ARROW_LABEL_PADDING_X1,
+  messageLabelBlock,
+  messageLabelRows,
+} from './text-block-geo.js';
 
 export function handleMessageEvent(
   event: MessageEvent,
@@ -37,27 +42,87 @@ export function handleMessageEvent(
   // Skip gracefully if either participant is unknown
   if (fromGeo === undefined || toGeo === undefined) return;
 
+  // `addMessage` sets `lastEventWithDeactivate = m` (`SequenceDiagram.java:
+  // 204`); `dealWith` is participant1-or-participant2 membership.
+  ctx.lastMessageParticipants = [event.from, event.to];
+
   const endpoints = liveOffsetEndpoints(
     resolveMessageEndpoints(event, fromGeo, toGeo, ctx),
     event,
     ctx,
     bound,
   );
-  const lineHeight = ctx.measurer.measure('M', fontSpecOf(ctx.theme)).height;
-  // A multi-line label grows UPWARD from its arrow (`text-block-geo.ts`), so
-  // the extra rows are reserved BEFORE the arrow is placed, not after.
+  // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
+  // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
+  // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to
+  // prevent, whose x half closed in Phase A.
+  const lineHeight = ctx.measurer.measure('M', arrowFontSpecOf(ctx.theme)).height;
   const rows = messageLabelRows(event.label, numberTextOf(event));
-  cursor.y += Math.max(0, rows - 1) * lineHeight;
+  const advance = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
 
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y, ctx);
+  const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx);
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
 
-  cursor.y += ctx.theme.sequence.messageSpacing + lineHeight;
+  cursor.y += advance.tileHeight;
 
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
 }
+
+/**
+ * Where the arrow sits inside its own tile, and how tall that tile is.
+ *
+ * ```java
+ * // flat, ComponentRoseArrow:341-344
+ * getTextHeight + getArrowDeltaY() + 2 * getPaddingY() + inclination1 + inclination2
+ * // self, ComponentRoseSelfArrow:316-323
+ * getTextHeight + getArrowDeltaY() + getArrowOnlyHeight() + 2 * getPaddingY()
+ * ```
+ *
+ * with `getTextHeight = blockH + padding.top + padding.bottom` = `blockH + 2`
+ * (`AbstractTextualComponent:110-114`, padding `topRightBottomLeft(1, 7, 1, 7)`
+ * at `AbstractComponentRoseArrow:62`), `getArrowDeltaY() = 4` (`:55,92-94`),
+ * `getPaddingY() = 4` (`:96-99`) and `getArrowOnlyHeight() = 13`
+ * (`ComponentRoseSelfArrow:321-323`). So a one-line flat message advances 27,
+ * not the 34 this port used, and a self message 40.
+ *
+ * The arrow's own y is `getYPoint = getTextHeight + getPaddingY`
+ * (`ComponentRoseArrow:329-335`) below the tile top, which the drawn line
+ * agrees with: `AbstractComponent#drawU:142-143` translates by `getPaddingY()`
+ * and `drawInternalU:142-158` puts `posArrow = getTextHeight`. It is the same
+ * `blockH + 6` for a self message — `drawRightSide:124-126` draws its three
+ * strokes at `textHeight` inside a component already offset by `getPaddingY`.
+ *
+ * `blockH` is the label block's own height, which is `0` for an unlabelled
+ * message (`StringBounderFromWidthTable#calculateDimension:64-80` over an
+ * empty `Display`) — `jobadi-87-jegi648`'s bare `Bob -> Bob` puts its loop at
+ * `y1="53"`, six below its tile top of 47.
+ *
+ * `inclination1`/`inclination2` are the `A ->(30) B` slanted forms, which this
+ * port does not model; both are 0 for every other message.
+ */
+export function messageTileAdvance(
+  blockH: number,
+  isSelf: boolean,
+): { arrowY: number; tileHeight: number } {
+  const textHeight = blockH + 2 * ARROW_TEXT_PADDING_Y;
+  const arrowY = textHeight + ARROW_PADDING_Y;
+  const loop = isSelf ? SELF_ARROW_ONLY_HEIGHT : 0;
+  return { arrowY, tileHeight: textHeight + ARROW_DELTA_Y + loop + 2 * ARROW_PADDING_Y };
+}
+
+/** `AbstractComponentRoseArrow:62` — `topRightBottomLeft(1, 7, 1, 7)`, the
+ *  vertical half. The horizontal half is `ARROW_PADDING_X`. */
+const ARROW_TEXT_PADDING_Y = 1;
+/** `AbstractComponentRoseArrow#getPaddingY:96-99`. */
+const ARROW_PADDING_Y = 4;
+/** `AbstractComponentRoseArrow#getArrowDeltaY:55,92-94`. */
+const ARROW_DELTA_Y = 4;
+/** `ComponentRoseSelfArrow#getArrowOnlyHeight:321-323` — the loop's drop, and
+ *  the extra a self tile reserves over a flat one. `renderer-message.ts`'s
+ *  `SELF_LOOP_HEIGHT` is the same number on the drawing side. */
+const SELF_ARROW_ONLY_HEIGHT = 13;
 
 /** The autonumber run's text, when the message carries one.
  *  `getLabelNumbered` prepends it as a `MessageNumber`
@@ -87,6 +152,54 @@ function passthroughFields(
   };
 }
 
+/**
+ * The left edge of a message's label block.
+ *
+ * Upstream's default `messagePosition` is LEFT, and its component is drawn
+ * translated to the arrow's own start, so the label sits a fixed padding right
+ * of where the line begins:
+ *
+ * ```java
+ * textPos = getOldPaddingX1()
+ *     + (direction2 == ArrowDirection.RIGHT_TO_LEFT_REVERSE || direction2 == ArrowDirection.BOTH_DIRECTION
+ *             ? getArrowDeltaX()
+ *             : 0);
+ * ```
+ * @see ~/git/plantuml/.../skin/rose/ComponentRoseArrow.java:164-179
+ *
+ * The clearance term asks whether there is a HEAD at the arrow's LEFT end, so
+ * the text can be pushed clear of it. Upstream phrases that as a direction —
+ * RIGHT_TO_LEFT_REVERSE when `dressing1` has a head and `dressing2` does not,
+ * BOTH_DIRECTION when both do (`ArrowConfiguration.java:181-192`) — because
+ * upstream keeps every arrow left-to-right in coordinates and encodes the
+ * message's direction in WHICH DRESSING carries the head.
+ *
+ * This port encodes it the other way: `bob <- alice` comes out of the parser
+ * with `dressing1.head = NONE`, `dressing2.head = NORMAL` and `fromX > toX`.
+ * So the dressing sitting at the geometric left end is `dressing1` for a
+ * rightward message and `dressing2` for a leftward one, and asking `dressing1`
+ * directly would silently never fire. Jar-verified on `bosedo-77-loge384`,
+ * whose three messages are two rightward and one leftward: the jar puts the
+ * two rightward labels at `28.681 + 7` and the leftward one at `28.681 + 17`.
+ *
+ * A SELF message takes the padding alone —
+ * `ComponentRoseSelfArrow#drawInternalU:88` is
+ * `getTextBlock().drawU(ug.apply(UTranslate.dx(getOldPaddingX1())))`, with no
+ * clearance term at all.
+ */
+function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
+  if (endpoints.arrowDirection === 'self') return endpoints.fromX + ARROW_LABEL_PADDING_X1;
+  // The component spans the arrow, so its origin is the LEFTMOST end whichever
+  // way the message runs. `fromX`/`toX` are that origin, not the drawn line:
+  // the renderer applies upstream's own `start += getArrowDeltaX() / 2` shift
+  // for a FULL NORMAL head (`ComponentRoseArrow.java:129-133`) itself.
+  const start = Math.min(endpoints.fromX, endpoints.toX);
+  const leftEnd =
+    endpoints.arrowDirection === 'left' ? event.arrow.dressing2 : event.arrow.dressing1;
+  const clearance = leftEnd.head === 'NONE' ? 0 : ARROW_LABEL_HEAD_CLEARANCE;
+  return start + ARROW_LABEL_PADDING_X1 + clearance;
+}
+
 /** Build the MessageGeo for a resolved set of endpoints at the given y. */
 function buildMessageGeo(
   event: MessageEvent,
@@ -94,11 +207,8 @@ function buildMessageGeo(
   y: number,
   ctx: EventProcessingContext,
 ): MessageGeo {
-  const centerX = endpoints.arrowDirection === 'self'
-    ? endpoints.fromX + 20
-    : (endpoints.fromX + endpoints.toX) / 2;
   const block = messageLabelBlock(
-    event.label, numberTextOf(event), centerX, y - 5, ctx.theme, ctx.measurer,
+    event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx.theme, ctx.measurer,
   );
   return {
     labelLines: block.lines,

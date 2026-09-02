@@ -3,50 +3,48 @@
  * `plans/sequence-coordinate-convergence` (T1.1), and the quantity every
  * later batch of that mission is gated on (D1).
  *
- * WHY THIS EXISTS. `weightedScore` counts diff RECORDS. An `@x` that is wrong
- * by 40 and becomes wrong by 35 costs exactly 1 either way, so a coordinate
- * that moves CLOSER to the jar is invisible to it. Three consecutive
- * jar-verified geometry fixes (`bbcc90ae`, `5dfa0982`, `ebbd1f41`) each
- * adjudicated `unchanged=1124` for precisely that reason. This instrument
- * measures the thing those commits actually changed: the sum of `|delta|`
- * over the numeric diffs `compare.ts` already computes.
+ * WHY THIS EXISTS. `weightedScore` counts diff RECORDS. An `@x` wrong by 40
+ * that becomes wrong by 35 costs exactly 1 either way, so a coordinate moving
+ * CLOSER to the jar is invisible to it. Three consecutive jar-verified
+ * geometry fixes (`bbcc90ae`, `5dfa0982`, `ebbd1f41`) each adjudicated
+ * `unchanged=1124` for precisely that reason. This instrument measures what
+ * those commits changed: the sum of `|delta|` over `compare.ts`'s numerics.
  *
- * `Diff.delta` is set at exactly four sites in `compare.ts`, all numeric — a
- * plain numeric attribute (`:274`), a `d` path argument (`:361`), a
- * `points`/`viewBox` number (`:326`), a `transform` parameter (`:371`).
- * Everything else (a colour, a tag mismatch, a child count) carries no
- * `delta` and is not distance. This script sums those four and nothing else.
+ * `Diff.delta` is set at exactly four numeric sites in `compare.ts` — a plain
+ * attribute (`:274`), a `d` argument (`:361`), a `points`/`viewBox` number
+ * (`:326`), a `transform` parameter (`:371`). Everything else (a colour, a tag
+ * mismatch, a child count) carries no `delta`; this script sums those four.
  *
  * THE COHORT HAZARD, and why `descended` is reported alongside distance.
  * `compareSvg` short-circuits at node type, tag and child count
- * (`compare.ts:198,229,404`), and a short-circuited subtree is never
- * descended into, so it contributes NO numeric diffs. A fixture that stops
- * descending therefore reports distance 0 — indistinguishable, by the number
- * alone, from a fixture whose geometry became exact. 410 of 1124 sequence
- * fixtures already short-circuit at the top-level child count, and D5 expects
- * more to cross that line mid-mission. So distance is NEVER read corpus-wide
- * without its cohort: every measurement carries `numericCount` and
- * `descended`, and `--compare` sums only fixtures whose descent status is the
- * same at both refs, reporting the rest separately rather than folding them in.
+ * (`compare.ts:198,229,404`), and a short-circuited subtree is never descended
+ * into, so it contributes NO numeric diffs. A fixture that stops descending
+ * reports distance 0 — indistinguishable, by the number alone, from one whose
+ * geometry became exact. 410 of 1124 sequence fixtures already short-circuit
+ * at the top-level child count, and D5 expects more to cross that line
+ * mid-mission. So distance is NEVER read corpus-wide without its cohort:
+ * every measurement carries `numericCount` and `descended`, and `--compare`
+ * sums only fixtures whose descent status is the same at both refs, reporting
+ * the rest separately rather than folding them in.
  *
- * THE MEASUREMENT HAZARDS are the ones `sequence-ratchet-adjudicate.ts`
- * documents at length, and the precautions are the same: `renderSync` is
- * never called (it returns `errorSvg` when `options.includeStore` is absent,
- * `src/index.ts:213`), the measurer is `DeterministicMeasurer` explicitly, and
- * the include store is a REQUIRED parameter of `measureFixture`.
+ * THE MEASUREMENT HAZARDS are `sequence-ratchet-adjudicate.ts`'s, and so are
+ * the precautions: `renderSync` is never called (it returns `errorSvg` without
+ * `options.includeStore`, `src/index.ts:213`), the measurer is
+ * `DeterministicMeasurer` explicitly, and its store is a REQUIRED parameter.
  *
- * USAGE
+ * THE AXIS SPLIT (C1) lives in `./sequence-distance-axis.js`: `points` buckets
+ * as `points.x`/`points.y` on index parity, and every report carries a
+ * per-axis subtotal beside the per-attribute table. RECORDED AND UNCLAIMED,
+ * since C1 scoped parity to `points`: `viewBox` stays mixed, yet only indices
+ * 2 and 3 of one ever differ — document WIDTH 129 336.000 over 1 122 diffs and
+ * HEIGHT 81 109.000 over 1 113 — so 1 122 of 1 124 comparable fixtures are
+ * wrong in width, 1 113 in height (1f15652f). Claiming them is C3's, after C2.
  *
- *   npx jiti scripts/sequence-geometry-distance.ts --snapshot <path>
- *
- * measures the working tree and writes the snapshot JSON to `<path>`.
- *
- *   npx jiti scripts/sequence-geometry-distance.ts --compare <baseline.json>
- *
- * measures the working tree and prints the per-attribute and per-fixture
- * movement against that baseline snapshot.
- *
- * With neither flag it measures and prints the totals alone. Rendering itself writes to stdout (`!log` reaches `console.info`,
+ * USAGE — `npx jiti scripts/sequence-geometry-distance.ts [flags]`. Every form
+ * measures the working tree and prints the totals; `--snapshot <path>` also
+ * writes the snapshot JSON there, and `--compare <baseline.json>` also prints
+ * the per-attribute and per-fixture movement against that baseline. Rendering
+ * writes to stdout (`!log` reaches `console.info`,
  * `src/core/tim/EaterLog.ts:35`), so machine-readable output is delimited by
  * `JSON_BEGIN`/`JSON_END` exactly as the adjudicator's is.
  */
@@ -59,6 +57,7 @@ import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { bucketOf, formatAxisTable } from './sequence-distance-axis.js';
 import { formatConcentration } from './sequence-distance-concentration.js';
 
 const SELF = fileURLToPath(import.meta.url);
@@ -100,7 +99,8 @@ export interface FixtureDistance {
    * about its geometry. See the cohort hazard in the header.
    */
   readonly descended: boolean;
-  /** Per-attribute breakdown, keyed by bare attribute name (`x`, `width`, …). */
+  /** Per-BUCKET breakdown: the bare attribute name (`x`, `width`, …), except
+   *  `points`, split by index parity — `bucketOf`, `./sequence-distance-axis`. */
   readonly byAttribute: Readonly<Record<string, DistanceTotals>>;
   /** Present iff the fixture errored at this ref. */
   readonly error?: string;
@@ -127,10 +127,9 @@ export interface DistanceSnapshot {
  * The bare attribute name a numeric diff path names.
  *
  * `compare.ts` builds attribute paths as `${nodePath}/@${name}` (`:245`) and
- * then suffixes the multi-valued forms: `[i]` for a `d`/`points`/`viewBox`
- * element (`:302,326,361`) and `[i].param[j]` for a transform parameter
- * (`:371`). Everything after the attribute name is therefore an index, and is
- * stripped so that all of a `d` attribute's numbers aggregate under `d`.
+ * suffixes the multi-valued forms — `[i]` for a `d`/`points`/`viewBox` element
+ * (`:302,326,361`), `[i].param[j]` for a transform parameter (`:371`) — so
+ * everything after the name is an index, stripped to aggregate under the name.
  *
  * `null` for a path with no `/@` segment — a `[childCount]` record, say —
  * which is exactly the set of diffs that carry no `delta` either.
@@ -192,7 +191,7 @@ export function distanceOf(diffs: readonly Diff[]): {
   for (const diff of diffs) {
     if (diff.delta === undefined || !Number.isFinite(diff.delta)) continue;
     const magnitude = Math.abs(diff.delta);
-    const name = attributeOf(diff.path) ?? 'unattributed';
+    const name = bucketOf(attributeOf(diff.path) ?? 'unattributed', diff.path);
     total = add(total, magnitude);
     byAttribute[name] = add(byAttribute[name] ?? ZERO, magnitude);
   }
@@ -472,6 +471,8 @@ function emit(snapshot: DistanceSnapshot): void {
   console.log(formatConcentration(snapshot));
   console.log('');
   console.log(formatAttributeTable(snapshot.byAttribute));
+  console.log('');
+  console.log(formatAxisTable(snapshot.byAttribute));
 }
 
 function main(argv: readonly string[]): number {

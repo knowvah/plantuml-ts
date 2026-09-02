@@ -57,6 +57,7 @@ import { splitMemberDisplayLines } from './class-member-display.js';
 import {
   resolveEmojiAtom,
   resolveInlineAtom,
+  resolveLatexAtom,
   resolveOpenIconicAtom,
   type ResolvedMemberAtom,
 } from './class-member-atom-resolve.js';
@@ -80,11 +81,16 @@ import { getSplitted } from '../../core/klimt/creole/Fission.js';
  * `SpriteRegistry` in scope) -- so `renderer-classifier-box.ts` never needs
  * its own sprite-registry parameter, mirroring how `row.width`/`textLength`
  * are already pre-measured at layout time rather than recomputed at render
- * time. `'latex'` `CreoleAtom`s are dropped (zero corpus reach inside a
- * class member row -- the corpus's few `<latex>` samples are activity-diagram
- * fixtures misfiled under `tests/corpus/class/`, confirmed by inspection);
- * an unresolved sprite name is ALSO dropped, matching `StripeSimple
- * .addSprite`'s "unknown sprite contributes nothing" rule (java :228-236).
+ * time. A `'latex'` `CreoleAtom` (`<math>`/`<latex>`) resolves to that SAME
+ * `'image'` kind, via {@link resolveLatexAtom} -- `AtomMath` measures and
+ * draws one image at altitude 0, exactly as `AtomImg` does
+ * (`AtomMath.java:64-97`), so it needs no variant of its own. It used to be
+ * DROPPED here; once `CommandCreoleBuilder.java:111`'s `CommandCreoleMath`
+ * was registered that stopped meaning "renders as its own literal markup"
+ * and started meaning "vanishes from the page", which is the strictly worse
+ * of the two. An unresolved sprite name IS still dropped, matching
+ * `StripeSimple.addSprite`'s "unknown sprite contributes nothing" rule
+ * (java :228-236).
  */
 export type MemberRenderAtom =
   | {
@@ -264,8 +270,8 @@ export function buildMemberAtoms(text: string, font: FontConfiguration): readonl
  * SAME `StringMeasurer` every other class text measurement uses; inline
  * (img/sprite) atoms resolve via {@link resolveInlineAtom} when a
  * `SpriteRegistry` is supplied (`ast.sprites` -- `undefined` for a diagram
- * with no `sprite` definitions at all); `latex` atoms are dropped (see
- * `MemberRenderAtom`'s own doc comment).
+ * with no `sprite` definitions at all); a `latex` atom resolves to the image
+ * `AtomMath` measures and draws (see `MemberRenderAtom`'s own doc comment).
  */
 export function resolveMemberAtoms(
   atoms: readonly CreoleAtom[],
@@ -379,9 +385,10 @@ function resolveOneAtom(
       ? undefined
       : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
-  // 'latex': dropped, see MemberRenderAtom's doc comment (zero corpus reach).
+  // 'latex': `AtomMath`, a measured+drawn image at altitude 0 -- see
+  // `resolveLatexAtom`'s own doc comment. Anything else contributes nothing.
   // #lizard forgives -- pre-existing 5 PARAM/35 NLOC (unchanged by A2s F-B).
-  return undefined;
+  return atom.kind === 'latex' ? resolveLatexAtom(atom) : undefined;
 }
 
 /** One-stop build for a member row: classify + build + resolve + measure --

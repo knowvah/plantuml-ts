@@ -1,10 +1,11 @@
 /**
  * class-member-atom-resolve.ts — the non-text atom resolvers backing
  * `class-member-creole.ts#resolveOneAtom` (inline img/sprite, OpenIconic
- * vector, emoji). Split out of that file (A2s R2i) purely to keep it under
- * the repo's 500-line cap while the emoji/row-height seam lands — each
+ * vector, emoji, latex). Split out of that file (A2s R2i) purely to keep it
+ * under the repo's 500-line cap while the emoji/row-height seam lands — each
  * function is a pure move (img/sprite, openiconic) or the new R2i emoji
- * resolver; no behavior change to the moved code.
+ * resolver; no behavior change to the moved code. {@link resolveLatexAtom}
+ * joined them later, for the same 500-line-cap reason.
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
@@ -22,6 +23,8 @@ import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { getSpriteMonochrome, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
+import { renderLatexAsImage } from '../../core/latex.js';
+import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 
 /** One resolved atom + the width/line-height it contributes to its row —
  *  the shared return shape of `class-member-creole.ts#resolveOneAtom` and
@@ -129,4 +132,51 @@ export function resolveOpenIconicAtom(
       : (ambientFont?.color ?? baseFont.color ?? '#000000');
   const dims = openIconicDims(factor);
   return { kind: 'vector', name: atom.name, factor, fill, width: dims.width, height: dims.height };
+}
+
+/**
+ * A creole `<math>`/`<latex>` atom as a drawable `<image>` — `AtomMath`
+ * MEASURES the rendered image's own box (`#calculateDimensionSlow`,
+ * `AtomMath.java:64-71`) and DRAWS that same image and nothing else
+ * (`#drawU`, `AtomMath.java:78-97`), which one call to
+ * `core/latex.ts#renderLatexAsImage` answers — the ONE latex renderer this
+ * port has, bound exactly as `klimt/creole/atom/AtomMath.ts`, the
+ * description engine (`EntityImageDescriptionDelegates.ts#descAtomOps`) and
+ * the state/sequence seams already bind it. Sizing and drawing therefore
+ * agree by construction rather than by two parallel formulas.
+ *
+ * It resolves to this union's PRE-EXISTING `'image'` kind rather than a new
+ * one because `AtomMath#getStartingAltitude` returns 0 (`AtomMath.java:
+ * 73-75`) — the same altitude `AtomImg` reports (`AtomImg.java:242-244`) —
+ * so `Sea#doAlign` drops its box to `-height + 0` (`Sea.java:72-80`),
+ * exactly the placement both class renderers already implement for an
+ * `'image'` atom: `renderer-classifier-rows.ts#renderRowAtoms` bottom-aligns
+ * it to the line bottom, and `renderer-note.ts#renderNoteLineAtoms` puts it
+ * at the line top, which is the SAME point for the atom that sets the line's
+ * own height (`lineHeight === maxSpan === height` when it is the tallest on
+ * the line, `class-member-creole-sea.ts#seaLineHeightAndSpan`). A per-atom
+ * `top` — what the state seam carries — would mean driving the general
+ * `Sea` here, silently widening this engine's deliberately text-only
+ * altitude scope (that module's own doc comment).
+ *
+ * The colour is `AtomMath#getColor(colorMapper, foreground, XColor.BLACK)`
+ * (`AtomMath.java:88,100-106`): the run's own resolved font colour, falling
+ * back to the default black whenever it is not an `HColorSimple` — a `null`
+ * atom colour here.
+ *
+ * The image BYTES and its exact `width`/`height` are a PERMANENT divergence:
+ * this port renders through KaTeX where the jar renders through JLaTeXMath
+ * (`DIVERGENCES.md`, which names `<math>` as well as `<latex>`). The
+ * STRUCTURE — an image atom in the text flow, in source order — is the
+ * conformance target; the numbers are not.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomMath.java:64-106
+ */
+export function resolveLatexAtom(atom: Extract<CreoleAtom, { kind: 'latex' }>): ResolvedMemberAtom {
+  const drawn = renderLatexAsImage(atom.expr, atom.color ?? JAR_DEFAULT_TEXT_COLOR);
+  return {
+    atom: { kind: 'image', href: drawn.href, width: drawn.width, height: drawn.height },
+    width: drawn.width,
+    lineHeight: drawn.height,
+  };
 }

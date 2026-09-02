@@ -29,8 +29,10 @@
 
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
-import type { ParticipantBadge, ParticipantGeo, ParticipantType } from './ast.js';
-import { ellipse, image, rect, text } from '../../core/svg.js';
+import type { ParticipantBadge, ParticipantGeo, ParticipantType, TextRun } from './ast.js';
+import { ellipse, image, rect, linkWrap } from '../../core/svg.js';
+import { sequenceText } from './sequence-text.js';
+import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
 import {
   COLLECTIONS_DELTA,
   renderParticipantSymbol,
@@ -89,22 +91,50 @@ function renderSymbolShape(
 // Participant head / footer blocks
 // ---------------------------------------------------------------------------
 
-/** `TextBlockSprited`'s badge-to-label gap (`:65-67`) -- see
- *  `sequence-layout-participants.ts`'s own `BADGE_GAP`, which sizes the box
- *  this places into. */
-const BADGE_GAP = 6;
-
 // ---------------------------------------------------------------------------
 // Participant helpers
 // ---------------------------------------------------------------------------
 
-function renderLabel(cx: number, cy: number, label: string, theme: Theme): string {
-  return text(cx, cy, label, {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    fill: theme.colors.text,
-    textAnchor: 'middle',
-    dominantBaseline: 'middle',
+/**
+ * One carried label run, shifted vertically by `dy`.
+ *
+ * A3: this used to take a CENTRE and lean on `text-anchor="middle"` plus
+ * `dominant-baseline="middle"` — two attributes the jar never emits on any of
+ * its 70 622 sequence `<text>` elements. The run already carries its own left
+ * edge and baseline, both resolved in layout (D1, D4), so all that is left
+ * here is the head/foot translation the run cannot know.
+ *
+ * C4: and its own STYLE, when creole set one. Every field below is the run's
+ * where it has one and the head's ambient value where it has not, which is
+ * `DriverTextSvg#draw` reading one `FontConfiguration` per `UText`
+ * (`:104-160,177-180`) — a markup-free name carries a family and a size equal
+ * to the ambient pair and none of the flags, so it emits byte-identically to
+ * the pre-C4 single run. `url` WRAPS rather than decorates
+ * (`SvgGraphics#openLink`/`closeLink`, `:1105-1150`) and `sequence-text.ts`
+ * owns that wrap, so there is no second `<a>` emitter here. No measurer is
+ * touched: every metric was resolved in layout and scaled with the geometry
+ * (D5).
+ */
+function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
+  return sequenceText({
+    leftX: run.x,
+    baselineY: run.y + dy,
+    text: run.text,
+    width: run.textWidth,
+    // `""mono""` sets its own family; `=heading`/`<size:N>` its own size.
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? theme.fontSize,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
+    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
+    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
+    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
+    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`); `dy`
+    // shifts its top exactly as it shifts the baseline beside it.
+    ...(run.image !== undefined ? { image: { ...run.image, y: run.image.y + dy } } : {}),
   });
 }
 
@@ -131,22 +161,6 @@ function renderLabel(cx: number, cy: number, label: string, theme: Theme): strin
  * it (`sequence-layout-participants.ts#visibleStereotype`) and simply leaves
  * `geo.stereotype` unset, so this function needs no style knowledge.
  */
-/**
- * `TextBlockSprited#drawU` -- the badge draws at the block origin and the
- * label block is translated right by `sprite.width + 6.0` (`:70-77`). So the
- * badge sits at the box's left padding and the name block centres in what is
- * left, which is exactly the box layout sized it for.
- *
- * Jar-verified on `birocu-87-xubi808`: box x=172.938 w=177.363 with a 64-wide
- * image gives image x=179.938 (`x + 7`) and a name block centred on 296.62 --
- * `(179.938 + 64 + 6 + (172.938 + 177.363 - 7)) / 2`.
- */
-function badgeGeo(p: ParticipantGeo, theme: ScaledTheme): { x: number; nameCx: number } | undefined {
-  if (p.badge === undefined) return undefined;
-  const pad = theme.sequence.participantPadding;
-  const x = p.x + pad;
-  return { x, nameCx: (x + p.badge.width + BADGE_GAP + (p.x + p.width - pad)) / 2 };
-}
 
 /**
  * The badge itself: a rasterised `<image>` for a sprite, or the plain filled
@@ -167,41 +181,20 @@ function renderBadge(badge: ParticipantBadge, x: number, cy: number, theme: Scal
 }
 
 function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
-  const badge = badgeGeo(p, theme);
-  const cx = badge?.nameCx ?? p.centerX;
-  const badgeEl = badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
-  const lines = p.stereotypeLines ?? [];
-  if (lines.length === 0) return badgeEl + renderLabel(cx, cy, p.display, theme);
-  // The block is centred on `cy`: N stereotype rows then the name, each one
-  // font-size tall, so the name sits half a row below centre for a single
-  // stereotype and proportionally lower for a stacked one.
-  const rowH = theme.fontSize;
-  const top = cy - (lines.length * rowH) / 2;
-  const stereo = lines.map((l, i) => renderLabel(cx, top + i * rowH, l, theme)).join('');
-  return badgeEl + stereo + renderLabel(cx, top + lines.length * rowH, p.display, theme);
+  const badge = participantBadgeGeo(p.badge, p.x, p.width, theme);
+  const badgeEl =
+    badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
+  // The runs were placed against the HEAD's own centre; every other row of the
+  // diagram draws the same text translated. `dy` is a difference of two
+  // `participantLabelCy` values rather than of two block tops, because a
+  // glyph-bearing kind puts its label BELOW the glyph at the head and ABOVE it
+  // at the tail (`ComponentRoseDatabase.java:81-87`) — the offset is not the
+  // same on both rows, so a block-top delta would be wrong for exactly those
+  // kinds.
+  const dy = cy - participantLabelCy(p.type, p.height, p.y, true, theme);
+  return badgeEl + p.labelRuns.map((run) => renderLabelRun(run, dy, theme)).join('');
 }
 
-/**
- * Where a participant's label sits inside its block, per the composition its
- * `ComponentRose*` uses.
- *
- * - `queue` puts the text INSIDE the glyph: `ComponentRoseQueue`'s constructor
- *   passes `getTextBlock()` as `USymbols.QUEUE.asSmall`'s label, and
- *   `USymbolQueue#getMargin()` is `Margin(5,15,5,5)`, so the text's vertical
- *   centre is the block's own centre.
- * - `collections` puts it inside the FRONT rectangle, which
- *   `ComponentRoseParticipant#drawInternalU:95` has already pushed down by
- *   `getDeltaCollection() = 4`.
- * - the glyph-above-text kinds (`database`, `boundary`, `control`, `entity`)
- *   put it below the glyph at the head and above it at the tail
- *   (`ComponentRoseDatabase.java:81-87`).
- */
-function labelCy(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): number {
-  if (p.type === 'queue') return blockTopY + p.height / 2;
-  if (p.type === 'collections') return blockTopY + COLLECTIONS_DELTA + (p.height - COLLECTIONS_DELTA) / 2;
-  const labelYOffset = theme.fontSize / 2 + 4 * theme.scaleK;
-  return head ? blockTopY + p.height - labelYOffset : blockTopY + labelYOffset;
-}
 
 /** `ComponentRoseParticipant#drawInternalU:97` — the FRONT rectangle of a
  *  `collections` stack. The back one is the glyph the seam draws; this is the
@@ -228,7 +221,7 @@ function renderParticipantBlock(
   head: boolean,
   theme: ScaledTheme,
 ): string {
-  const label = renderNameBlock(p, labelCy(p, blockTopY, head, theme), theme);
+  const label = renderNameBlock(p, participantLabelCy(p.type, p.height, blockTopY, head, theme), theme);
   if (hasParticipantGlyph(p.type)) {
     const glyph = renderSymbolShape(p, blockTopY, head, theme);
     // DRAW ORDER, and it is not the obvious one. Every stacked
@@ -257,12 +250,40 @@ function renderParticipantBlock(
 
 /** The header row. */
 export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
-  return renderParticipantBlock(p, p.y, true, theme);
+  return withParticipantUrl(p, renderParticipantBlock(p, p.y, true, theme));
+}
+
+/**
+ * B3: the jar's hyperlink around a participant row.
+ *
+ * ```java
+ * final Url url = getParticipant().getUrl();
+ * if (url != null) ug.startUrl(url);
+ * comp.drawU(ug, area, context);
+ * if (url != null) ug.closeUrl();
+ * ```
+ * @see ~/git/plantuml/.../sequencediagram/teoz/LivingSpace.java:205-212
+ *
+ * It wraps `comp.drawU` — the WHOLE component, label and glyph together, not
+ * the label alone. And `drawHeadOrTail` is the shared body of both `drawHead`
+ * and `drawTail` (`:181-189`), so the head row and the footer row each get
+ * their own `<a>`: `boparo-11-pema294` carries four for two participants.
+ *
+ * `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and
+ * their order are already jar-verified against the class engine's goldens. A
+ * second one is not needed here and would be a second thing to keep right.
+ *
+ * A MESSAGE-level url is deliberately not drawn — see
+ * `renderer-message.ts`'s own note, which records that the jar emits no `<a>`
+ * for `A -> B [[url]] : label`.
+ */
+function withParticipantUrl(p: ParticipantGeo, drawn: string): string {
+  return p.url === undefined ? drawn : linkWrap(drawn, p.url);
 }
 
 /** The footer row (`isShowFootbox`), drawn from `lifelineEndY` down. Every
  *  kind derives its own glyph offset from the block, so the layout's
  *  pre-computed `footerShapeY` is no longer threaded here. */
 export function renderFooterBox(p: ParticipantGeo, lifelineEndY: number, theme: ScaledTheme): string {
-  return renderParticipantBlock(p, lifelineEndY, false, theme);
+  return withParticipantUrl(p, renderParticipantBlock(p, lifelineEndY, false, theme));
 }
