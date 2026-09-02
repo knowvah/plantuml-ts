@@ -134,28 +134,29 @@ describe('sequenceCreoleRuns — measurement identity', () => {
 });
 
 describe('sequenceCreoleRuns — non-text atoms', () => {
-  // The atom itself has no `TextRun` shape (named remainder), but the run
-  // AFTER it must not slide back over the space it occupies.
+  // A line holding an atom this engine cannot draw stays WHOLLY literal —
+  // exactly what sequence emitted before the seam existed. Emitting no run for
+  // the atom drops an ELEMENT, and on the four sprite-only fixtures that
+  // 12-against-13 child count short-circuits the comparator above the whole
+  // diagram. `InlineAtomToken` keeps no source string, so a per-atom literal
+  // would have to guess which `{scale=…}`/colour modifiers were written.
   it.each([
-    // `'inline'`, an OpenIconic glyph — measured through `measureInlineAtom`.
-    ['x<&heart>y', 'x', 'y'],
-    // `'emoji'` — `AtomEmoji`'s own `36 * factor` square.
-    ['x<:smile:>y', 'x', 'y'],
-  ])('advances past a non-text atom in %s', (line, first, last) => {
+    // `'inline'`, an OpenIconic glyph.
+    'x<&heart>y',
+    // `'emoji'`.
+    'x<:smile:>y',
+    // `'latex'`, which this port resolves no dimensions for on a text path.
+    'x<latex>e^x</latex>y',
+  ])('leaves %s wholly literal, at the raw line width', (line) => {
     const runs = runsOf(line);
-    expect(runs.map((r) => r.text)).toEqual([first, last]);
-    expect(runs[1]!.x).toBeGreaterThan(runs[0]!.x + runs[0]!.textWidth);
-  });
-
-  it('advances 0 past a `<latex>` atom, which has no resolved width here', () => {
-    const runs = runsOf('x<latex>e^x</latex>y');
-    expect(runs.map((r) => r.text)).toEqual(['x', 'y']);
-    expect(runs[1]!.x).toBeCloseTo(runs[0]!.x + runs[0]!.textWidth, 10);
+    expect(runs.map((r) => r.text)).toEqual([line]);
+    expect(runs[0]!.textWidth).toBeCloseTo(measurer.measure(line, ARROW_FONT).width, 10);
   });
 
   it('keeps an undecodable `<img>` as its own fallback text run', () => {
     // `AtomImg.create` (`AtomImg.java:106-107`) emits the message as a real
-    // text run at a hardcoded monospace 14 — so this one IS a `TextRun`.
+    // text run at a hardcoded monospace 14 — so this one IS a `TextRun`, the
+    // line holds nothing undrawable, and creole still applies.
     const runs = runsOf('a<img:/nope.png>b');
     expect(runs.map((r) => r.text)).toEqual(['a', '(Cannot decode)', 'b']);
     expect(runs[1]!.fontSize).toBe(14);

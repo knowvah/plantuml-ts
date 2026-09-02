@@ -60,13 +60,15 @@
  *
  * ## Named remainders
  *
- * A non-`'text'` atom — `<img>`/`<$sprite>`/`<&openiconic>` (`'inline'`),
- * `<:emoji:>`, `<latex>` — produces NO run: a `TextRun` is a `<text>`, and an
- * image is an `<image>` that sequence geometry has nowhere to put yet. Each
- * still ADVANCES x by its own measured width ({@link nonTextAdvance}), so the
- * text runs around it stay where the jar puts them rather than sliding left
- * over a gap. Giving those atoms real sequence geometry needs a new geo kind
- * and a renderer branch in files this task does not own.
+ * A line holding a non-`'text'` atom — `<img>`/`<$sprite>`/`<&openiconic>`
+ * (`'inline'`), `<:emoji:>`, `<latex>` — is left WHOLLY literal, exactly as
+ * this engine rendered it before the seam existed. A `TextRun` is a `<text>`
+ * and an image is an `<image>` that sequence geometry has nowhere to put yet;
+ * emitting no run for the atom would drop an ELEMENT and short-circuit the
+ * comparator above everything else in the diagram, and `InlineAtomToken` keeps
+ * no source string to rebuild a per-atom literal from. See the guard in
+ * {@link sequenceCreoleRuns} for the measured case. Giving those atoms real
+ * sequence geometry needs a new geo kind and a renderer branch.
  *
  * A `HORIZONTAL_LINE` line (a bare `----`/`====`/`....`) yields no atoms at
  * all upstream — it becomes a `CreoleHorizontalLine` stripe, a drawn rule.
@@ -81,8 +83,6 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
-import { measureInlineAtom } from '../../core/creole-atoms-measure.js';
-import { emojiBoxDim } from '../../core/klimt/creole/atom/AtomEmoji.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
 import type { TextRun } from './text-block-geo.js';
 
@@ -201,24 +201,6 @@ function textAtomRun(
 }
 
 /**
- * How far a non-`'text'` atom pushes the runs after it (see the module's
- * named remainders). `'inline'` measures through the SAME
- * `measureInlineAtom` every sizer in this port uses, at the atom's own
- * ambient font size; a sprite name this diagram never defined contributes 0,
- * which is `StripeSimple.addSprite`'s own rule (`java:228-236`). `'emoji'`
- * advances by `AtomEmoji#calculateDimensionSlow`'s `36 * factor` square
- * (`AtomEmoji.java:57-59`). `'latex'` advances 0: it needs a rendered
- * formula's dimensions, which this port resolves nowhere on a text path.
- */
-function nonTextAdvance(atom: Exclude<CreoleAtom, { kind: 'text' }>, base: FontConfiguration): number {
-  if (atom.kind === 'inline') {
-    return measureInlineAtom(atom.atom, undefined, atom.ambientFont?.size ?? base.size).width;
-  }
-  if (atom.kind === 'emoji') return emojiBoxDim(atom.factor).width;
-  return 0;
-}
-
-/**
  * ONE display line -> its placed, measured runs, left to right.
  *
  * `buildLineAtoms` is the shared "line -> visible atoms" lexer: it classifies
@@ -263,13 +245,37 @@ export function sequenceCreoleRuns(
       ? [{ kind: 'text', text: line, font: built.lineFont }]
       : built.atoms;
 
+  // A line carrying an atom sequence cannot draw stays WHOLLY literal.
+  //
+  // `InlineAtomToken` keeps no source string — a `SpriteAtomToken` is a name,
+  // a scale and an optional colour — so a per-atom fallback would have to
+  // reconstruct `<$name{scale=2}>` by guessing which modifiers were written.
+  // Falling back for the whole line instead reproduces, exactly, what this
+  // engine emitted before the seam existed: one literal run at the raw line's
+  // own measured width.
+  //
+  // Why fall back at all, rather than let the atom contribute only an
+  // x-advance: dropping the run drops an ELEMENT. On the four sprite-only
+  // fixtures (`ralegi-94-fure352`, `sodovo-72-kudu756`, `vibaru-39-gebo741`,
+  // `zimoci-54-sedi066`) the jar draws the sprite as a `<path>`, this port
+  // draws neither path nor text, and the resulting 12-against-13 child count
+  // short-circuits the comparator above the other twelve elements. The literal
+  // run is wrong in CONTENT and right in COUNT; emitting nothing is wrong in
+  // both, and also silently discards the fact that a sprite was asked for.
+  //
+  // This is a REMAINDER, not a design: it retires the day sequence geometry
+  // gains a kind that carries an `<image>`, which is the follow-on
+  // `.agent-notes/C1-sequence-creole-seam.md` files.
+  if (atoms.some((a) => a.kind !== 'text')) {
+    return [textAtomRun({ kind: 'text', text: line, font: built.lineFont }, origin.leftX, origin.baselineY, measurer)];
+  }
+
   const runs: TextRun[] = [];
   let x = origin.leftX;
   for (const atom of atoms) {
-    if (atom.kind !== 'text') {
-      x += nonTextAdvance(atom, font);
-      continue;
-    }
+    // Every atom here is a `'text'` atom: the guard above returned for any
+    // line that held anything else.
+    if (atom.kind !== 'text') continue;
     const run = textAtomRun(atom, x, origin.baselineY, measurer);
     runs.push(run);
     x += run.textWidth;
