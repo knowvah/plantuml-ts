@@ -5,7 +5,7 @@ is unusual: **nothing may move**.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| C1 | creole → `TextRun[]`, run style/url, scaling | typescript-pro | `sequence-creole.ts` (new), `text-block-geo.ts`, `sequence-text.ts`, `scale-geo.ts`, its test | — | [ ] |
+| C1 | creole → `TextRun[]`, run style/url, scaling | typescript-pro | `sequence-creole.ts` (new), `text-block-geo.ts`, `sequence-text.ts`, `scale-geo.ts`, its test | — | [x] |
 
 ## Why it is alone
 

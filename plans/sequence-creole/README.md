@@ -70,7 +70,7 @@ closable element family (75 fixtures whose only root-child difference is
 
 | batch | tasks | what | status |
 |---|---|---|---|
-| [1](batch-1/overview.md) | C1 | the creole seam; gate is that NOTHING moves | [ ] |
+| [1](batch-1/overview.md) | C1 | the creole seam; gate is that NOTHING moves | [x] |
 | [2](batch-2/overview.md) | C2 | split every display on `\n` | [ ] |
 | [3](batch-3/overview.md) | C3 C4 C5 C6 | the four text kinds, in parallel | [ ] |
 | [4](batch-4/overview.md) | C7 | sweep, adjudicate, measure | [ ] |
