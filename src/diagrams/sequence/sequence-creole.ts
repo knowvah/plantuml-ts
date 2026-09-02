@@ -84,6 +84,7 @@ import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
+import { manageGuillemet } from '../../core/text/Guillemet.js';
 import type { TextRun } from './text-block-geo.js';
 
 /** Where a line's first run starts: `DriverTextSvg`'s own `x` (a LEFT edge)
@@ -221,6 +222,27 @@ export function sequenceCreoleRuns(
   origin: CreoleOrigin,
   measurer: StringMeasurer,
 ): readonly TextRun[] {
+  // GUILLEMETS, which upstream rewrites on the DISPLAY LINE before any
+  // classification happens:
+  //
+  // ```java
+  // stripes = createStripes(skinParam.guillemet().manageGuillemet(cs.toString()),
+  //         context, sheet.getLastStripe(), fontConfiguration);
+  // ```
+  // @see ~/git/plantuml/.../klimt/creole/legacy/CreoleParser.java:175
+  //
+  // It is not part of the atom engine, so a caller entering at
+  // `buildLineAtoms` skips it and every `<<x>>` stays four literal characters
+  // where the jar draws two glyphs (`bodobu-73-noli773`).
+  //
+  // The pair is `Guillemet.GUILLEMET`, upstream's default. `skinparam
+  // guillemet` can override it (`Guillemet.java:60-67`) and this port carries
+  // the override as far as `theme.guillemetStart`/`End`, but NO sequence
+  // fixture in the corpus sets it — 0 of 1141, against 82 that write `<<…>>`
+  // — so threading a pair through this signature would be building against
+  // zero measured reach. `core/edge-label-box.ts#applyGuillemet` hardcodes the
+  // same default for the same reason. Recorded as a residual, not a decision.
+  //
   // The `~` TILE ESCAPE, which upstream applies inside the engine and this
   // port makes the caller's job.
   //
@@ -237,12 +259,12 @@ export function sequenceCreoleRuns(
   // them before the scan ever saw the tile. Without this, `~[[Double]]` reaches
   // `CommandCreoleUrl` with a live `[[` and draws a link the jar does not
   // (`mufomi-43-vaso140`).
-  const built = buildLineAtoms(CharHidder.hide(line), font, CreoleMode.FULL);
+  const built = buildLineAtoms(CharHidder.hide(manageGuillemet(line)), font, CreoleMode.FULL);
   // HORIZONTAL_LINE yields no atoms at all — see the module's named
   // remainders for why the line stays its own literal text here.
   const atoms: readonly CreoleAtom[] =
     built.classification.type === 'HORIZONTAL_LINE'
-      ? [{ kind: 'text', text: line, font: built.lineFont }]
+      ? [{ kind: 'text', text: manageGuillemet(line), font: built.lineFont }]
       : built.atoms;
 
   // A line carrying an atom sequence cannot draw stays WHOLLY literal.
@@ -267,7 +289,8 @@ export function sequenceCreoleRuns(
   // gains a kind that carries an `<image>`, which is the follow-on
   // `.agent-notes/C1-sequence-creole-seam.md` files.
   if (atoms.some((a) => a.kind !== 'text')) {
-    return [textAtomRun({ kind: 'text', text: line, font: built.lineFont }, origin.leftX, origin.baselineY, measurer)];
+    const literal = { kind: 'text' as const, text: manageGuillemet(line), font: built.lineFont };
+    return [textAtomRun(literal, origin.leftX, origin.baselineY, measurer)];
   }
 
   const runs: TextRun[] = [];

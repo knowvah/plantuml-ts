@@ -319,3 +319,26 @@ describe('the `~` tile escape', () => {
     expect(run?.textWidth).toBeCloseTo(measurer.measure('[Single]', ARROW_FONT).width, 10);
   });
 });
+
+describe('guillemets', () => {
+  /**
+   * Upstream rewrites `<<x>>` on the DISPLAY LINE, before any classification:
+   * `createStripes(skinParam.guillemet().manageGuillemet(cs.toString()), …)`
+   * (`CreoleParser.java:175`). It is not part of the atom engine, so a caller
+   * entering at `buildLineAtoms` skips it and `bodobu-73-noli773` kept four
+   * literal characters where the jar draws two glyphs.
+   */
+  it('rewrites a guillemet run to the default pair', () => {
+    const runs = runsOf('<<createRequest>>');
+    expect(runs.map((r) => r.text).join('')).toBe('«createRequest»');
+  });
+
+  it('measures the REWRITTEN text, so the box is sized to the glyphs', () => {
+    const [run] = runsOf('<<createRequest>>');
+    expect(run?.textWidth).toBeCloseTo(measurer.measure('«createRequest»', ARROW_FONT).width, 10);
+  });
+
+  it('leaves a line with no guillemet run untouched', () => {
+    expect(runsOf('a < b').map((r) => r.text).join('')).toBe('a < b');
+  });
+});
