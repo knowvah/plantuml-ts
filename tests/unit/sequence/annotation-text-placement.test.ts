@@ -110,3 +110,103 @@ describe('renderer.ts emits no anchored text at all (D3)', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// C6 — the same four sites, now through the creole seam
+// ---------------------------------------------------------------------------
+
+describe('note bodies through creole (C6)', () => {
+  const svg = render('moxope-92-roco972');
+
+  it('emits one styled sibling <text> per creole run, never a <tspan>', () => {
+    // JAR, one note per line of the fixture:
+    //   ...textLength="24.619" font-weight="700">bold</text>
+    //   ...textLength="26.081" font-style="italic">italic</text>
+    //   ...textLength="31.038" text-decoration="line-through">strike</text>
+    //   ...textLength="53.544" text-decoration="underline">underline</text>
+    // D3: siblings, because `DriverTextSvg#draw` emits one `<text>` per atom
+    // and upstream has no `<tspan>` on that path.
+    expect(svg).not.toContain('<tspan');
+    const bold = textFor(svg, 'bold');
+    expect(bold['font-weight']).toBe('700');
+    expect(bold['textLength']).toBe('24.619');
+    expect(bold['font-size']).toBe('13');
+    expect(textFor(svg, 'italic')['font-style']).toBe('italic');
+    expect(textFor(svg, 'italic')['textLength']).toBe('26.081');
+    expect(textFor(svg, 'strike')['text-decoration']).toBe('line-through');
+    expect(textFor(svg, 'underline')['text-decoration']).toBe('underline');
+  });
+
+  it('carries every flag of a nested <b><i><u> run on one element', () => {
+    // JAR: textLength="107.088" font-weight="700" font-style="italic"
+    //      text-decoration="underline">boldItalicUnderline</text>
+    const run = textFor(svg, 'boldItalicUnderline');
+    expect(run['font-weight']).toBe('700');
+    expect(run['font-style']).toBe('italic');
+    expect(run['text-decoration']).toBe('underline');
+    expect(run['textLength']).toBe('107.088');
+  });
+
+  it('sizes the note box from the creole block, not from the raw markup', () => {
+    // `getTextWidth` is the TEXT BLOCK's own calculated width plus the padding
+    // (`AbstractTextualComponent.java:100-108`), and the block is built from
+    // the creole `Display` (`:89-92`) — so `<b>bold</b>` reserves the width of
+    // `bold`, not of the ten markup characters around it. The jar's own box
+    // for that note runs 86.163..131.163; this port's is one padding pair
+    // around the same 24.619 run, at a left edge that carries the note-x
+    // divergence `.agent-notes/A1-sequence-geo-text-metric-fields.md` records
+    // — so the assertion is the WIDTH, which is this task's, not the origin.
+    const bold = svg.indexOf('>bold</text>');
+    expect(bold).toBeGreaterThan(-1);
+    const box = /<path d="M91\.163,102 L125\.781,102 L135\.781,112 L135\.781,135 L91\.163,135 Z"/;
+    expect(box.test(svg)).toBe(true);
+    // 135.781 - 91.163 = 44.618 = the 24.619-wide run plus 10 of padding each
+    // side. Before C6 the same box was sized from `<b>bold</b>`, 20 wider.
+    expect(textFor(svg, 'bold')['textLength']).toBe('24.619');
+  });
+});
+
+describe('note urls (C6)', () => {
+  it("brings cedeti-10-bufu072 to the jar's four <a> elements", () => {
+    // Two for the `alt`/`else` conditions (C5) and two for the notes: the
+    // fixture writes `note over Bob: [[https://www.google.com]]` twice, and
+    // `SvgGraphics#openLink`/`closeLink` (`:1105-1150`) WRAP the drawn text.
+    const svg = render('cedeti-10-bufu072');
+    expect((svg.match(/<a /g) ?? []).length).toBe(4);
+    // JAR: <text x="40" y="123.111" fill="#00F" font-size="13"
+    //       textLength="137.881" text-decoration="underline">…</text>
+    // The note's `[[…]]` is not nested inside a literal `[`, so it does NOT
+    // hit the `CommandCreoleUrl` bracket defect the frame condition does
+    // (`plans/sequence-creole/findings/creole-url-bracket-defect.md`) and its
+    // href is assertable.
+    const linked = /<a [^>]*href="https:\/\/www\.google\.com"[^>]*>\s*<text[^>]*>https:\/\/www\.google\.com<\/text>/;
+    expect(linked.test(svg)).toBe(true);
+    const run = textFor(svg, 'https://www.google.com');
+    expect(run['textLength']).toBe('137.881');
+    expect(run['text-decoration']).toBe('underline');
+    expect(run['font-size']).toBe('13');
+  });
+});
+
+describe('divider labels through creole (C6)', () => {
+  it('draws `<color:red> KO` as the coloured KO the jar draws', () => {
+    // JAR: <text x="49.484" y="71.111" fill="#F00" font-size="13"
+    //            textLength="18.769" font-weight="700">KO</text>
+    // The `<color:red>` command sets the run's own fill; the surrounding
+    // spaces survive into the WIDTH and are trimmed out of the emitted string
+    // by `StringUtils.trin` (`DriverTextSvg.java:125`).
+    const label = textFor(render('bakuba-09-fica741'), 'KO');
+    expect(label['fill']).toBe('#F00');
+    expect(label['textLength']).toBe('18.769');
+    expect(label['font-weight']).toBe('700');
+    expect(label['font-size']).toBe('13');
+  });
+
+  it('leaves a markup-free divider exactly where it was', () => {
+    // The seam's measurement identity: one atom, the original string, the
+    // original width. `degire-21-dujo330` has no markup at all.
+    const label = textFor(render('degire-21-dujo330'), 'Resource AllocationAllocationX');
+    expect(label['textLength']).toBe('177.288');
+    expect(label['font-weight']).toBe('700');
+  });
+});

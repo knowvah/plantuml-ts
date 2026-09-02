@@ -180,14 +180,17 @@ function handleNoteEvent(
   const notePadding = 10;
   const lines = event.text.split('\n');
   const lineHeight = ctx.measurer.measure('M', fontSpec).height;
-  const maxLineWidth = Math.max(
-    ...lines.map((line) => ctx.measurer.measure(line, fontSpec).width),
-  );
-  const noteWidth = maxLineWidth + notePadding * 2;
+  // C6: that ONE measurement is the CREOLE block's -- `getTextWidth` reads
+  // `textBlock.calculateDimension` plus the padding (`AbstractTextualComponent
+  // .java:100-108`) over the block `create0` built (`:89-92`), so `<b>bold</b>`
+  // reserves the width of `bold` (jar: `moxope-92-roco972`).
+  const rows = noteBodyRuns(lines, fontSpec, ctx);
+  const noteWidth = blockWidthOf(rows) + notePadding * 2;
   const noteHeight = lines.length * lineHeight + notePadding * 2;
 
   const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y, ctx.participantMap);
-  noteGeo.textRuns = noteBodyRuns(lines, noteGeo, notePadding, ctx);
+  const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + notePadding];
+  noteGeo.textRuns = rows.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
   ctx.eventGeos.push(noteGeo);
   cursor.y += noteHeight + ctx.theme.sequence.messageSpacing;
 }
@@ -253,6 +256,15 @@ function computeFrameBody(
     refBodyWidth(body, ctx.theme, ctx.measurer),
   );
   return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
+}
+
+/** A creole BLOCK's width -- the max over its stripes that
+ *  `TextBlockSimple#calculateDimension` returns (`klimt/shape/TextBlockSimple
+ *  .java:60-73`) and `AbstractTextualComponent#getTextWidth` pads (`:100-108`).
+ *  Each run carries its line's offset in `x`, so one max IS that maximum; the
+ *  `0` seed is the empty block. Cf. {@link creoleLineWidth}, for ONE line. */
+function blockWidthOf(runs: readonly TextRun[]): number {
+  return Math.max(0, ...runs.map((r) => r.x + r.textWidth));
 }
 
 /** A creole line's total advance: its LAST run's right edge, never a sum of
@@ -559,21 +571,15 @@ function handleFrameEvent(
  * width `backfillDividerWidth` resolves in Step 3 — so these carry the inner
  * offset and that function adds the outer one.
  */
-function dividerLabelRuns(
-  lines: readonly string[],
-  font: FontSpec,
-  ctx: EventProcessingContext,
-): readonly TextRun[] {
-  const lineHeight = ctx.measurer.measure('M', font).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
-  return lines.map((text, i) => ({
-    text,
-    x: DIVIDER_LABEL_DELTA_X,
-    y: DIVIDER_PADDING + ascent + i * lineHeight,
-    textWidth: ctx.measurer.measure(text, font).width,
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  }));
+function dividerLabelRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
+  const font = sequenceCreoleFont(spec);
+  const lineHeight = ctx.measurer.measure('M', spec).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  // C6: one run per creole atom -- a divider's label is an
+  // `AbstractTextualComponent` `Display` like every other sequence label
+  // (`ComponentRoseDivider.java:57-62`); `bakuba-09-fica741` is the last one.
+  return lines.flatMap((line, i) => sequenceCreoleRuns(line, font,
+    { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight }, ctx.measurer));
 }
 
 function handleDividerEvent(
@@ -589,7 +595,13 @@ function handleDividerEvent(
   // label box (two 13px lines plus the 4+4 padding), not a 21-tall one.
   const lines = event.text.split('\n');
   const lineHeight = ctx.measurer.measure('M', font).height;
-  const blockWidth = Math.max(...lines.map((l) => ctx.measurer.measure(l, font).width));
+  // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
+  // them onto the band once `bandX`/`bandWidth` are known (Step 3), the same
+  // construct-then-resolve split `y`/`branchSeparators` use above. C6: the
+  // reserved width is that CREOLE block's, less the `deltaX` the runs already
+  // carry -- `getTextWidth` reads `calculateDimension`, not the display string.
+  const labelRuns = dividerLabelRuns(lines, font, ctx);
+  const blockWidth = Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
   const blockHeight = lines.length * lineHeight;
   const dividerGeo: DividerGeo = {
     kind: 'divider',
@@ -601,10 +613,7 @@ function handleDividerEvent(
     height: dividerPreferredHeight(blockHeight),
     textWidth: blockWidth + DIVIDER_PADDING * 2,
     textHeight: blockHeight + DIVIDER_PADDING * 2,
-    // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
-    // them onto the band once `bandX`/`bandWidth` are known (Step 3), which is
-    // the same construct-then-resolve split `y`/`branchSeparators` use above.
-    labelRuns: dividerLabelRuns(lines, font, ctx),
+    labelRuns,
   };
   ctx.eventGeos.push(dividerGeo);
   ctx.dividerGeos.push(dividerGeo);
@@ -767,32 +776,23 @@ function buildNoteGeo(
 }
 
 /**
- * A note body's lines, as placed and measured runs.
+ * A note body's lines, as placed and measured runs — one run per creole atom
+ * (C6), RELATIVE to the block's own top-left.
  *
  * `ComponentRoseNoteBox#drawInternalU` draws the block at
  * `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` (`:105`) — LEFT-aligned
  * inside the box, not centred, which is what this port had been doing with a
  * `text-anchor="middle"`. `diffX` is the slack when the drawn area is wider
- * than the component's preferred width; this port sizes the box to the text,
- * so it is 0 and the block sits at the padding.
- */
-function noteBodyRuns(
-  lines: readonly string[],
-  note: NoteGeo,
-  padding: number,
-  ctx: EventProcessingContext,
-): readonly TextRun[] {
-  const font = noteFontSpecOf(ctx.theme);
-  const lineHeight = ctx.measurer.measure('M', font).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(font, 'M');
-  return lines.map((text, i) => ({
-    text,
-    x: note.x + padding,
-    y: note.y + padding + ascent + i * lineHeight,
-    textWidth: ctx.measurer.measure(text, font).width,
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  }));
+ * than the component's preferred width; this port sizes the box to the text, so
+ * it is 0 and the block sits at the padding. Relative rather than absolute
+ * because the box's own x derives FROM this block's width
+ * (`handleNoteEvent`): the caller adds the origin and padding once it has them.
+ * Each entry is one line — a note's `\n` split already happened upstream. */
+function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
+  const font = sequenceCreoleFont(spec);
+  const lineHeight = ctx.measurer.measure('M', spec).height;
+  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  return lines.flatMap((l, i) => sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer));
 }
 
 /**

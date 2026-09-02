@@ -217,15 +217,21 @@ describe('frame text through creole', () => {
     // all and carries the group style -- none of which changes when the defect
     // is fixed.
     const svg = renderFixtureSequence(source('cedeti-10-bufu072'), new DeterministicMeasurer());
-    // Two `<a>` from the frame: the `alt` comment and the `else` condition.
-    // The jar's other two belong to the notes, which C6 owns.
-    expect((svg.match(/<a /g) ?? []).length).toBe(2);
+    // Four `<a>` -- two from the frame (the `alt` comment and the `else`
+    // condition) and, since C6, two from the notes. Equal to the jar's count.
+    expect((svg.match(/<a /g) ?? []).length).toBe(4);
     const els = elements(svg);
     const linked = els
       .map((e, i) => ({ e, i }))
       .filter(({ e, i }) => e.startsWith('<text') && els[i - 1]?.includes('<a '));
-    expect(linked).toHaveLength(2);
-    for (const { e } of linked) {
+    expect(linked).toHaveLength(4);
+    // The frame's two are the ones at the group style's own `smallFont2` 11
+    // (`ComponentRoseGroupingHeader.java:151-158`); the notes' two are at
+    // `note { FontSize 13 }` and carry no weight, which is C6's assertion in
+    // `annotation-text-placement.test.ts`, not this file's.
+    const conditions = linked.filter(({ e }) => attr(e, 'font-size') === '11');
+    expect(conditions).toHaveLength(2);
+    for (const { e } of conditions) {
       expect(attr(e, 'font-weight')).toBe('700');
       expect(attr(e, 'text-decoration')).toBe('underline');
     }

@@ -35,7 +35,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // structural rather than a convention.
 import { rect, line, noteBox } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
-import { REFERENCE_FONT_SIZE } from './text-block-geo.js';
+import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
 import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { fmt } from '../../core/svg-format.js';
@@ -64,6 +64,35 @@ import {
   NEWPAGE_MARGIN_Y,
 } from './newpage-style.js';
 
+/**
+ * ONE creole run as a `<text>`, at the caller's ambient font wherever creole
+ * set none -- `renderRefBody`'s shape (C5), shared by the two sites C6 added
+ * rather than copied a third and fourth time. `DriverTextSvg#draw` reads
+ * `font-weight`, `font-style`, `fill` and the assembled `text-decoration` off
+ * ONE `FontConfiguration` per `UText` (`:104-160,177-180`), and
+ * `SvgGraphics#openLink`/`closeLink` (`:1105-1150`) WRAP the drawn shape rather
+ * than decorating it -- so the url reaches `sequence-text.ts`, the single `<a>`
+ * emitter, and no measurer is acquired here (D1, D5). `boldFallback` is the
+ * component STYLE's own weight, which a run that set its own beats -- exactly
+ * as `renderBranchSeparators` resolves the group style's. */
+function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
+  return sequenceText({
+    leftX: run.x,
+    baselineY: run.y,
+    text: run.text,
+    width: run.textWidth,
+    fontFamily: run.fontFamily ?? theme.fontFamily,
+    fontSize: run.fontSize ?? fontSize,
+    fill: run.color ?? theme.colors.text,
+    // `'700'`, not `'bold'` -- the jar emits the numeric form, and
+    // `renderer-frame-header.ts#boldFontWeight` already set that convention.
+    ...(run.bold ?? boldFallback ? { fontWeight: '700' as const } : {}),
+    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
+    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
+    ...(run.url !== undefined ? { url: run.url } : {}),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Note helpers
 // ---------------------------------------------------------------------------
@@ -83,21 +112,11 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
   // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
   // centre it with a `text-anchor`, and its line advance is now the MEASURED
-  // line height where it used to be a `fontSize * 1.4` ratio.
+  // line height where it used to be a `fontSize * 1.4` ratio. C6: one run per
+  // creole atom, at `note { FontSize 13 }` (`plantuml.skin:312-316`) scaled,
+  // the same spec layout measured the box with.
   const textEls = note.textRuns
-    .map((run) =>
-      sequenceText({
-        leftX: run.x,
-        baselineY: run.y,
-        text: run.text,
-        width: run.textWidth,
-        fontFamily: theme.fontFamily,
-        // `note { FontSize 13 }` (`plantuml.skin:312-316`), scaled -- the same
-        // spec layout measured the box with.
-        fontSize: NOTE_FONT_SIZE * theme.scaleK,
-        fill: theme.colors.text,
-      }),
-    )
+    .map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK))
     .join('');
   return noteShape + textEls;
 }
@@ -284,25 +303,15 @@ function renderDividerLabel(divider: DividerGeo, theme: ScaledTheme): string {
     stroke: DIVIDER_LINE_COLOR,
     strokeWidth: DIVIDER_LINE_THICKNESS * k,
   });
-  // One `<text>` per line, as the jar's own multi-line text block emits.
-  // A5: each run carries a real BASELINE, resolved in layout against the label
-  // box's own top-left; the `dominantBaseline: 'hanging'` that stood in for one
-  // is gone, and with it the last such adaptation in this file.
+  // One `<text>` per creole atom, as the jar's own multi-line text block emits
+  // (C6). A5: each run carries a real BASELINE, resolved in layout against the
+  // label box's own top-left; the `dominantBaseline: 'hanging'` that stood in
+  // for one is gone, and with it the last such adaptation in this file. The
+  // separator style's `FontStyle bold` (`plantuml.skin:174-175`) reaches every
+  // run through the `FontSpec` the seam's `FontConfiguration` was built from,
+  // so `DIVIDER_FONT_BOLD` here only covers a run that carries no weight.
   const label = divider.labelRuns
-    .map((run) =>
-      sequenceText({
-        leftX: run.x,
-        baselineY: run.y,
-        text: run.text,
-        width: run.textWidth,
-        fontFamily: theme.fontFamily,
-        fontSize: DIVIDER_FONT_SIZE * k,
-        // `'700'`, not `'bold'` -- the jar emits the numeric form, and
-        // `renderer-frame-header.ts#boldFontWeight` already set that convention.
-        fontWeight: DIVIDER_FONT_BOLD ? ('700' as const) : ('normal' as const),
-        fill: theme.colors.text,
-      }),
-    )
+    .map((run) => creoleRunText(run, theme, DIVIDER_FONT_SIZE * k, DIVIDER_FONT_BOLD))
     .join('');
   return box + label;
 }
@@ -409,16 +418,7 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
     stroke: theme.colors.border,
   });
   if (box.labelRun === undefined) return boxRect;
-  const labelEl = sequenceText({
-    leftX: box.labelRun.x,
-    baselineY: box.labelRun.y,
-    text: box.labelRun.text,
-    width: box.labelRun.textWidth,
-    fontFamily: theme.fontFamily,
-    fontSize: BOX_LABEL_FONT_SIZE * k,
-    fill: theme.colors.text,
-  });
-  return boxRect + labelEl;
+  return boxRect + creoleRunText(box.labelRun, theme, BOX_LABEL_FONT_SIZE * k);
 }
 
 // ---------------------------------------------------------------------------
