@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1053 modules · 3765 exported names.
+1056 modules · 3781 exported names.
 
 ## `src/`
 
@@ -558,6 +558,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AsciiMath.ts` | `AsciiMath` | AsciiMath — upstream: `math/AsciiMath.java` (79 lines). |
+| `ASCIIMathTeXImg.ts` | `ASCIIMathTeXImg` | ASCIIMathTeXImg — a faithful transcription of upstream's `math/ASCIIMathTeXImg.java` (1032 lines): the ASCIIMath-notation to LaTeX converter reached from `AsciiMath`'s constructor, and through it from `ScientificEquationSafe.fromAsciiMath` |
+| `ASCIIMathTeXImgSymbols.ts` | `Ttype`, `Flag`, `Tuple`, `aAMsqrt`, `aAMroot`, `aAMfrac`, `aAMdiv`, `aAMover`, `aAMsub`, `aAMsup`, `aAMtext`, `aAMmbox`, `aAMquote`, `aAMsymbols` | ASCIIMathTeXImgSymbols — the data half of upstream's `math/ASCIIMathTeXImg.java`: the `Ttype` (java:96-99) and `Flag` (java:101-104) enums, the `Tuple` record (java:106-141), the ten named tuples (java:142-151) and the `aAMsymbols` table (j |
 | `ScientificEquationSafe.ts` | `ScientificEquationSafe` | ScientificEquationSafe — upstream: math/ScientificEquationSafe.java (171 lines). |
 
 ## `src/core/plasma/`

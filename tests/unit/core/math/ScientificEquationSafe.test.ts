@@ -1,8 +1,9 @@
 /**
  * ScientificEquationSafe.test.ts — T10e: coverage for `math/
  * ScientificEquationSafe.java`'s ported value-object surface
- * (`fromLatex`, `getFormula`, `getSource`) plus the `fromAsciiMath`
- * cited seam (see `ScientificEquationSafe.ts`'s own module doc comment).
+ * (`fromLatex`, `getFormula`, `getSource`) and its `fromAsciiMath` entry
+ * point, which routes through `AsciiMath`/`ASCIIMathTeXImg` and falls back
+ * to an equation-less instance when the converter raises (java:71-79).
  */
 import { describe, expect, it } from 'vitest';
 import { ScientificEquationSafe } from '../../../../src/core/math/ScientificEquationSafe.js';
@@ -33,12 +34,33 @@ describe('ScientificEquationSafe.fromLatex / getFormula / getSource (java:81-89,
   });
 });
 
-describe('ScientificEquationSafe.fromAsciiMath (java:71-79) — cited seam, not silently dropped', () => {
-  it('throws naming the unported ASCIIMathTeXImg/AsciiMath blocker', () => {
-    expect(() => ScientificEquationSafe.fromAsciiMath('x/y')).toThrow(/ASCIIMathTeXImg\.java/);
+describe('ScientificEquationSafe.fromAsciiMath (java:71-79)', () => {
+  // Expected LaTeX comes from running upstream's own
+  // `new ASCIIMathTeXImg().getTeX(...)` out of plantuml-1.2026.7beta11.jar.
+  it('getSource returns the converted LaTeX, not the ASCIIMath input', () => {
+    const eq = ScientificEquationSafe.fromAsciiMath('x/y');
+    expect(eq.getSource()).toBe('\\frac{{x}}{{y}}');
+    expect(eq.getFormula()).toBe('x/y');
   });
 
-  it('throws regardless of the input formula', () => {
-    expect(() => ScientificEquationSafe.fromAsciiMath('')).toThrow(/AsciiMath\.java/);
+  it('converts a full formula', () => {
+    expect(ScientificEquationSafe.fromAsciiMath('ax^2+bx+c=0').getSource()).toBe(
+      '{a}{x}^{{2}}+{b}{x}+{c}={0}',
+    );
+  });
+
+  it('an empty formula converts to empty LaTeX rather than failing', () => {
+    const eq = ScientificEquationSafe.fromAsciiMath('');
+    expect(eq.getFormula()).toBe('');
+    expect(eq.getSource()).toBe('');
+  });
+
+  it('falls back to an equation-less instance when the converter raises', () => {
+    // A bare `text` runs java:687 `str.charAt(0)` off the end of an empty
+    // remainder; upstream catches that and keeps the formula with a null
+    // equation (java:75-78), so getFormula still answers and getSource NPEs.
+    const eq = ScientificEquationSafe.fromAsciiMath('text');
+    expect(eq.getFormula()).toBe('text');
+    expect(() => eq.getSource()).toThrow(/NullPointerException/);
   });
 });

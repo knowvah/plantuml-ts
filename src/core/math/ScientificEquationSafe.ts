@@ -17,11 +17,12 @@
  *  - `getSource()` (java:167-169, `equation.getSource()`) — for the
  *    `fromLatex` path this is `LatexBuilder#getSource()`
  *    (`math/LatexBuilder.java:146-148`), a pure `return tex;` pass-through
- *    of the SAME string `fromLatex` received — verified identical to
- *    `getFormula()`'s value for every instance this port can construct, so
- *    the two fields are set from one constructor argument rather than
- *    threading a second, always-equal value through a fake "equation"
- *    layer.
+ *    of the SAME string `fromLatex` received, so that path stores one
+ *    constructor argument instead of threading a second, always-equal value
+ *    through a fake "equation" layer. The `fromAsciiMath` path stores
+ *    `AsciiMath#getSource()` (`math/AsciiMath.java:75-77`), which is the
+ *    CONVERTED LaTeX and therefore differs from `getFormula()`.
+ *  - `fromAsciiMath(String)` (java:71-79) — see its own section below.
  *
  * ## NOT PORTED — `getSvg`/`getImage`/`export`/`printTrace`/`getRollback`
  * (java:91-161) — an architectural boundary, not a gap
@@ -42,60 +43,37 @@
  * `renderLatexAsImage` using `getSource()`'s formula string instead of
  * calling any of these methods — see that file's own doc comment.
  *
- * ## NOT PORTED — `fromAsciiMath` (java:71-79) — a genuinely large,
- * separable follow-on, cited rather than silently dropped
+ * ## Ported: `fromAsciiMath` (java:71-79)
  *
- * `fromAsciiMath`'s only two callers anywhere upstream are
- * `CommandCreoleMath.java` (a `<math>...</math>` creole command, sibling of
- * `CommandCreoleLatex` but never built in this port) and
- * `math/PSystemMath.java` (the `@startmath` diagram type, also never
- * built) — both genuinely unported, not "no caller today" in the ADR-8
- * corollary's forbidden sense (see `decisions.md`'s corollary: "not ported
- * yet" is never "unreachable" on its own, but a member IS droppable when
- * porting it needs a whole separate, large, unbuilt subsystem). Tracing
- * what `fromAsciiMath` itself needs: `new AsciiMath(formula)`
- * (`math/AsciiMath.java`, 79 lines) immediately calls `new
- * ASCIIMathTeXImg().getTeX(form)` (`math/ASCIIMathTeXImg.java`, 1032
- * lines) — a full ASCIIMath-notation-to-LaTeX parser/converter, a
- * standalone algorithm with zero relationship to `StripeLatex`/`AtomMath`
- * (this task's actual write-set targets) or to `core/latex.ts`'s KaTeX
- * binding. Porting it would mean adding a fourth file (`ASCIIMathTeXImg.ts`)
- * outside this task's declared write-set for a class this task's own
- * callers never reach. Per this task's own boundaries ("any file outside
- * the write-set -> STOP and report") and the established batch pattern
- * for exactly this shape (`StripeTree.ts`'s `blockedOnStripeTable`,
- * `StripeStyle.ts`'s `blockedOnAtomLayer`, `CreoleParser.ts`'s
- * `blockedOnSibling`), `fromAsciiMath` is NOT silently dropped — it throws
- * a cited, labelled seam naming the exact blocker, at the same point
- * upstream's own real work begins (`AsciiMath`'s constructor).
+ * `fromAsciiMath` runs `new AsciiMath(formula)` (`math/AsciiMath.java`), whose
+ * constructor is `new ASCIIMathTeXImg().getTeX(form)` — the ASCIIMath-notation
+ * to LaTeX converter, now transcribed at `core/math/ASCIIMathTeXImg.ts` and
+ * wrapped by `core/math/AsciiMath.ts`. Upstream's `try`/`catch (Exception e)`
+ * IS reachable here and is preserved: `getTeX` walks the formula with Java
+ * string-bounds semantics, so a malformed formula raises rather than emitting
+ * wrong LaTeX (see `ASCIIMathTeXImg.ts`'s module doc comment), and this method
+ * answers that the way upstream does — with an equation-less
+ * `ScientificEquationSafe(formula, null)`, not a throw. Upstream's two
+ * logging calls in that catch (`Logme.error(e)`, `Log.info(...)`) have no
+ * counterpart in this port, which has no logging seam; the same omission
+ * `EmbeddedDiagram.ts` already documents for its own `Logme.error` catches.
+ *
+ * The `equation` field is modelled as the nullable `source` string rather than
+ * a `ScientificEquation` object, because `getSource()` (java:167-169) is the
+ * only member this port reads it through — see `getSource`'s own comment for
+ * what happens on the null branch.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/math/ScientificEquationSafe.java
  */
 
-/** Cited, thrown seam for `fromAsciiMath` — see this file's own module
- *  doc comment for the full reasoning. Mirrors `StripeTree.ts`'s
- *  `blockedOnStripeTable`/`StripeStyle.ts`'s `blockedOnAtomLayer` shape
- *  (no shared helper is exported anywhere in this batch — each file
- *  declares its own). */
-function blockedOnAsciiMath(): Error {
-  return new Error(
-    'ScientificEquationSafe.fromAsciiMath: needs math/AsciiMath.java (79 ' +
-      "lines), whose constructor immediately calls " +
-      'math/ASCIIMathTeXImg.java (1032 lines, a full ASCIIMath-notation-to-' +
-      'LaTeX parser) -- neither is ported, and both are genuinely large, ' +
-      'separable follow-ons outside this file\'s write-set (T10e). ' +
-      'fromAsciiMath\'s only two upstream callers -- CommandCreoleMath.java ' +
-      '(<math> creole command) and math/PSystemMath.java (@startmath ' +
-      'diagram type) -- are themselves not built in this port, so reaching ' +
-      'this is a build/test-time signal only, not a runtime one in any ' +
-      'shipped path today.',
-  );
-}
+import { AsciiMath } from './AsciiMath.js';
 
 export class ScientificEquationSafe {
+  /** java:66-69. `source === null` models upstream's `equation == null`,
+   *  the state `fromAsciiMath`/`fromLatex` fall back to on a parse failure. */
   private constructor(
     private readonly formula: string,
-    private readonly source: string,
+    private readonly source: string | null,
   ) {}
 
   /** java:81-89. See this file's own module doc comment for why upstream's
@@ -104,13 +82,16 @@ export class ScientificEquationSafe {
     return new ScientificEquationSafe(formula, formula);
   }
 
-  /** java:71-79. Always throws — see this file's own module doc comment's
-   *  `fromAsciiMath` section. Signature matches upstream's
-   *  (`formula: string -> ScientificEquationSafe`) even though the body
-   *  never returns, mirroring `StripeTree.ts#analyzeAndAdd`'s identical
-   *  "throw, keep the real signature" shape. */
-  static fromAsciiMath(_formula: string): ScientificEquationSafe {
-    throw blockedOnAsciiMath();
+  /** java:71-79. On any exception out of the converter, upstream logs and
+   *  returns an equation-less instance rather than propagating — see this
+   *  file's own module doc comment. */
+  static fromAsciiMath(formula: string): ScientificEquationSafe {
+    try {
+      return new ScientificEquationSafe(formula, new AsciiMath(formula).getSource());
+    } catch {
+      // Logme.error(e); Log.info(() -> "Error parsing " + formula);
+      return new ScientificEquationSafe(formula, null);
+    }
   }
 
   /** java:163-165. */
@@ -118,10 +99,19 @@ export class ScientificEquationSafe {
     return this.formula;
   }
 
-  /** java:167-169 (`equation.getSource()`) — see this file's own module
-   *  doc comment for why this equals `getFormula()` for every instance
-   *  this port constructs. */
+  /** java:167-169. Upstream is a bare `equation.getSource()`, so a
+   *  fallback instance (`equation == null`, java:77) throws a
+   *  NullPointerException here; this raises the same way rather than
+   *  inventing an empty-string result upstream never produces. For a
+   *  `fromLatex` instance the value is the constructor argument unchanged
+   *  (`LatexBuilder#getSource`, `math/LatexBuilder.java:146-148`). */
   getSource(): string {
+    if (this.source === null) {
+      throw new Error(
+        'NullPointerException: ScientificEquationSafe#getSource on an ' +
+          'instance whose formula failed to parse',
+      );
+    }
     return this.source;
   }
 }
