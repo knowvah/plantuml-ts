@@ -6,7 +6,7 @@ its own geo module.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| C3 | message labels + autonumber | typescript-pro | `geo-message.ts`, `text-block-geo.ts`, `renderer-message.ts`, tests | C1 C2 | [ ] |
+| C3 | message labels + autonumber | typescript-pro | `geo-message.ts`, `text-block-geo.ts`, `renderer-message.ts`, tests | C1 C2 | [x] |
 | C4 | participant names + stereotypes | typescript-pro | `geo-participant.ts`, `sequence-layout-participants.ts`, `renderer-participant-shapes.ts`, tests | C1 C2 | [ ] |
 | C5 | frame tab, comment, `ref` body, conditions | typescript-pro | `geo-frame.ts`, `sequence-layout-events.ts` (frame fns), `renderer-frame-header.ts`, `renderer.ts` (ref+condition), tests | C1 C2 | [ ] |
 | C6 | notes, dividers, box labels | typescript-pro | `geo-annotation.ts`, `sequence-layout-events.ts` (note/divider fns), `renderer.ts`, tests | C1 C2 | [ ] |
