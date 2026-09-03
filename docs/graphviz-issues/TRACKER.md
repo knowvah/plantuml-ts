@@ -226,20 +226,50 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         without-xlabel bb) as the repro; that filing, not this task, is
         where dot-engine's own label/xlabels.ts source would actually be
         read. ORIGINAL FILING:
-        filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it. -->
-- [ ] 17-ortho-xlabel-canvas-reservation-short.md  <!-- FILED 2026-08-19
-        (SI31 T1). Split out of issue 16's diagnosis: 16's fix (publish the
-        xlabel position) landed in 1.6.0 and is consumed here, but
-        pavuzo-79-zodu430 stopped at -1.579968 px instead of 0. Under
-        splines=ortho the engine reserves ~1.58pt LESS horizontal canvas for
-        an edge's xlabels than native graphviz 15.1.1 on byte-identical
-        input (node centre 60.75 vs 62.333; bb 106.581 vs 108.16), and that
-        shift propagates unchanged through SvekResult's +15 and
-        InnerStateAutonom's +20 into the composite's declared width. Jar-side
-        arithmetic verified faithful and ruled out; the cause is in
-        lib/dotgen/dotsplines.c's EDGETYPE_ORTHO branch / postproc.c's
-        addXLabels as ported in label/xlabels.ts. Unchecked pending an
-        upstream fix; nothing to consume here when it lands. NOTE: an earlier
-        claim under issue 16 that dot-engine's xlp matched native exactly was
-        WRONG -- it compared a hand-typed 1.2731in node width against the
-        real 1.273090in on both sides -- and is retracted there and here. -->
+        filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it.
+
+        CORRECTED 2026-09-03: the MECHANISM/ORIGIN/CAUSAL CHAIN blocks above
+        attribute the residual -1.579968 px to @knowvah/dot-engine reserving
+        less ortho xlabel canvas than native, in label/xlabels.ts. That
+        attribution is WITHDRAWN -- the pinned 1.6.0 is exact against the
+        native oracle on this fixture's own svek-1.dot, byte-for-byte via
+        -Tdot and to full float precision via getLayout(). See issue 17,
+        reclassified [~] the same day, for the disproof and for where the
+        1.583 actually lives (the ortho edge port offset, +-8.333 vs +-6.75).
+        The "RULED OUT" list and the jar-side ORIGIN analysis are unaffected;
+        only the upstream attribution was wrong.
+        This box stays UNCHECKED under this file's own rule -- the fix landed
+        and is consumed, but pavuzo-79-zodu430 still does not re-measure
+        clean. Its blocker is now a plantuml-ts work item (17), not an
+        upstream wait. -->
+- [~] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RECLASSIFIED
+        2026-09-03: NOT a dot-engine defect, closed with no upstream fix to
+        wait for. The filing's premise -- that the engine reserves ~1.58pt
+        LESS horizontal canvas for an ortho edge's xlabels than native
+        graphviz on byte-identical input -- does not reproduce. Measured
+        against the PINNED 1.6.0 in this repo's own node_modules (and
+        separately against dot-engine's src/ HEAD; both exact, so this does
+        not turn on HEAD drift): `-Tdot` on this fixture's own cached
+        svek-1.dot is BYTE-IDENTICAL to the native oracle, and through the
+        exact API path graph-layout-build-edges.ts uses (createGraph +
+        addNode/addEdge + setHtmlAttr('xlabel', fixedSizeTable(54,15)) +
+        getLayout()) the engine reports bb width 108.164568, node centre x
+        62.333328, xlabel.x 27 and 43.666656 -- matching native on all four,
+        including the two the filing recorded as diverging (106.581, 60.75,
+        40.5). Robust to dropping forcelabels/searchsize/remincross and to
+        including or excluding the start-circle node sh0006.
+        The 1.583 is NOT xlabel placement: it is the ortho edge PORT OFFSET
+        from the node centre. Native routes the two sh0007<->sh0008 edges at
+        +-8.333 about 62.333 (= 50/6, sh0007's width); the geometry the
+        filing measured has them at +-6.75. That single term is the whole
+        residual, and it also settles the filing's own open question --
+        (1) the second edge's 3.17pt xlp drift and (2) the 1.58pt centring
+        shift are ONE mechanism, since 3.167 = 2 x 1.583 (symmetric
+        displacement about the centre), not two coincident ones.
+        The 106.581 was measured on a graph built through this port's own
+        addNodes/addEdges, so the divergence is in what THAT path feeds the
+        engine. Work is ours: dump the DOT this port builds for
+        pavuzo-79-zodu430's inner scope and diff it against the jar's cached
+        svek-1.dot (node width/height and the xlabel box are the candidates
+        that would move the offset). Full disproof, arithmetic and the
+        preserved original filing are in the issue file. -->

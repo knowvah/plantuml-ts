@@ -1,5 +1,106 @@
 # `splines=ortho` xlabel canvas reservation is ~1.58pt short of native graphviz
 
+**RECLASSIFIED 2026-09-03: NOT a dot-engine defect.** The premise below —
+that `@knowvah/dot-engine` reserves less horizontal canvas than native
+graphviz on byte-identical input — does not reproduce. On this fixture's own
+cached `svek-1.dot`, and on the 2-node reduction this filing quotes, the
+pinned `1.6.0` this repo consumes is **exact against the native oracle** on
+every quantity the table below attributed to native alone. There is no
+upstream fix to wait for; the remaining `-1.579968 px` on
+`pavuzo-79-zodu430` scope 2 width idx 2 is ours, in whatever this port hands
+the engine. Kept open as a plantuml-ts work item, not as a dot-engine
+filing. The original filing is preserved verbatim at the bottom.
+
+## Disproof
+
+Oracle: `GVBINDIR=/tmp/ghl ~/git/graphviz/build/cmd/dot/dot -Tdot`
+(15.1.1, headless GVBINDIR per `dot-engine/test/corpus/gen-headless-gvbindir.sh`).
+Engine: `plantuml-ts/node_modules/@knowvah/dot-engine`, installed `1.6.0` —
+the published artifact this repo's `^1.6.0` spec resolves to, **not**
+dot-engine's `src/` HEAD (both were measured; both are exact, so the result
+does not turn on HEAD having drifted from the release).
+
+1. **`-Tdot` on `oracle/goldens/state/pavuzo-79-zodu430/svek-1.dot`** —
+   engine output is **byte-identical** to the oracle's, blank lines ignored.
+2. **Through the exact API path `graph-layout-build-edges.ts` uses** —
+   `createGraph` + `addNode`/`addEdge` + `setHtmlAttr('xlabel',
+   fixedSizeTable(54, 15))` + `getLayout()`:
+
+| Quantity | native `dot -Txdot` 15.1.1 | this filing recorded for the engine | pinned `1.6.0`, measured |
+|---|---|---|---|
+| edge 1 `xlp.x` | `27` | `27` | `27` |
+| edge 2 `xlp.x` | `43.667` | `40.5` | `43.666656` |
+| node centre x | `62.333` | `60.75` | `62.333328` |
+| bb width | `108.16` | `106.581` | `108.164568` |
+
+The engine matches native on all four, including the two this filing reports
+as diverging. Robust to dropping `forcelabels`, `searchsize` and
+`remincross`, and to including or excluding the start-circle node `sh0006`
+(the full 3-node `svek-1.dot` and the 2-node reduction agree).
+
+## Where the 1.583 actually lives
+
+Not in xlabel placement. It is the **ortho edge port offset from the node
+centre**. Native routes the two `sh0007` <-> `sh0008` edges at `x = 54` and
+`x = 70.667`, i.e. `+-8.333` about the centre `62.333` — `50/6`, where `50`
+is `sh0007`'s width (`0.694444 in`). The geometry this filing measured has
+them at `+-6.75`:
+
+```
+native:  62.333 -+ 8.333  ->  54, 70.667      bb 108.164
+theirs:  60.75  -+ 6.75   ->  54, 67.5        bb 106.581
+delta:            1.583                            1.583
+```
+
+Each 54-wide xlabel box sits flush against its edge (native's edge-1 label
+spans `[0, 54]`, its right edge exactly on the spline at `x = 54`), so the
+bb's left bound is `edge1.x - 54` and its right bound is
+`centre + 45.831`. Shrinking the port offset pulls the leftmost label right
+by the same amount it pulls the node left, and the box loses `1.583` — the
+whole residual, in one term.
+
+Caveat on provenance: the `+-6.75` is derived from this filing's own quoted
+`xlp` values (`27` and `40.5`) and centre (`60.75`) under native's flush
+placement, not read off a spline dump of that run. The arithmetic closes
+exactly, but a spline dump from the failing path would confirm it directly
+and is the first thing to capture.
+
+This also settles the filing's "open question": (1) the second edge's
+`3.17 pt` `xlp` drift and (2) the `1.58 pt` centring shift are **one
+mechanism, not two coincident ones** — `3.167 = 2 x 1.583`, the two edges
+being displaced symmetrically about the centre.
+
+## What is actually left to do (ours)
+
+The `106.581` was measured on a graph built through this port's own
+`addNodes`/`addEdges`, so the divergence is in what that path feeds the
+engine — some attribute that moves the ortho port offset off `width/6`.
+Next step:
+
+1. Dump the DOT this port actually builds for `pavuzo-79-zodu430`'s inner
+   scope and diff it against the jar's cached `svek-1.dot`. The candidates
+   that would move the offset are node `width`/`height` and the xlabel box
+   dimensions; `forcelabels`/`searchsize`/`remincross` are ruled out above.
+2. Whatever the diff shows, this becomes a plantuml-ts fix, and the
+   `-1.579968 px` row closes here with no dot-engine release involved.
+
+## Retraction
+
+The "Finding", "Where it comes from" and "Causal chain" sections of the
+original filing (preserved below) attribute the shortfall to
+`@knowvah/dot-engine`'s port of `lib/dotgen/dotsplines.c`'s `EDGETYPE_ORTHO`
+branch / `lib/common/postproc.c`'s `addXLabels` in `src/label/xlabels.ts`.
+That attribution is **withdrawn** — those code paths reproduce native
+exactly on this input. The jar-side "Why it is not the jar" analysis and the
+"Ruled out" list stand; they were never in question. Issue 16's own
+`STILL UNCHECKED` block in `TRACKER.md` carries the same withdrawn
+attribution and is corrected there.
+
+---
+
+# ORIGINAL FILING (2026-08-19, SI31 T1) — attribution withdrawn above
+
+
 **Impact:** every `skinparam linetype ortho` / `polyline` composite whose
 declared size is derived from its inner scope's ink extent comes out narrower
 than the jar's. `pavuzo-79-zodu430` scope 2 width idx 2 is the measured case:
