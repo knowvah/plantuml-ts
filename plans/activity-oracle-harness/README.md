@@ -88,7 +88,7 @@ gate**. Report it; do not tune for it.
 | [0](batch-0/overview.md) | T0 capture corpus · T1 render helper · **T0b pin corpus gates** ([D11]) | serialized | [x] |
 | [1](batch-1/overview.md) | T2 pre-chrome baseline · T3 freshness sentinel | serialized | [x] |
 | [2](batch-2/overview.md) | T4 diagnose the 2 extra g children | — | [x] |
-| [3](batch-3/overview.md) | T5 route through document shell | — | [ ] |
+| [3](batch-3/overview.md) | T5 route through document shell | — | [x] |
 | [4](batch-4/overview.md) | T6 re-pin + census | — | [ ] |
 | [5](batch-5/overview.md) | T7 close-out | — | [ ] |
 
