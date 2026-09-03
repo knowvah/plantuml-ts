@@ -800,8 +800,8 @@
       "type": "state",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 37,
-      "firstDiff": "svg/g[1]/g[1]/g[5]/path[1]/@d",
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/g[1]/g[5]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1371,9 +1371,9 @@
       "type": "state",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 71.62599999999999,
-      "firstDiff": "svg/g[1]/g[1]/g[5]/text[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/g[1]/g[6]/path[1]/@d[0]"
+      "maxDelta": 1.007000000000005,
+      "firstDiff": "svg/g[1]/g[1]/g[5]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/g[1]/g[6]/text[1]/@x"
     },
     {
       "slug": "pebepi-32-cati486",

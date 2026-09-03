@@ -2319,8 +2319,8 @@
       "type": "component",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 219.425,
-      "firstDiff": "svg/g[1]/@font-family",
+      "maxDelta": 313.35,
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/g[7]/text[1]/@x"
     },
     {

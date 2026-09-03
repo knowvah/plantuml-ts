@@ -1,21 +1,19 @@
 {
-  "_doc": "T0 floor pin for mission linetype-ortho-routing. Pre-change state of the 8 fixtures whose jar svek DOT carries splines=ortho|polyline, measured before any source changed. Every ortho fixture carries forcelabels=true and every polyline fixture carries none -- D4 asymmetry confirmed against real jar data. oursSplines is null on every pass today: that IS the defect. bbW/bbH are layoutGraph() canvas size, last pass; passes[] holds every pass.",
-  "measuredAt": "2026-09-03T16:35:52Z",
-  "measuredAgainstCommit": "763126230d9377e6e3aa7cfed55e2326e01ec7a6",
-  "pavuzoDeltaPx": -1.579968,
+  "_doc": "POST-CHANGE state of the 8 splines fixtures, mission linetype-ortho-routing T8. Supersedes the T0 pin in-place; deltaVsT0 carries the before-values. All 8 now emit the splines line their own cached jar DOT carries, on all 10 layout passes -- splinesMatchesJar is true for every one, where at T0 oursSplines was null for every one. dotEqual is true on all 8 and now MEANS it: splinesOk joined structurallyEqual in T7, proven to go 0/10 with the emitter reverted. maxDelta here is the SVG-comparison delta from parity-*.json, NOT the node-size delta size-backlog gates -- the two are different quantities.",
+  "measuredAt": "2026-09-03T18:59:06Z",
+  "measuredAgainstCommit": "6a561648512d6716aa6d56ffff604d0f5c02e71c",
+  "t0Commit": "763126230d9377e6e3aa7cfed55e2326e01ec7a6",
+  "pavuzoDeltaPx": 0.0,
+  "pavuzoDeltaPxAtT0": -1.579968,
   "fixtures": [
     {
       "slug": "bujedi-30-cize673",
       "type": "class",
       "jarSplines": "ortho",
       "jarForcelabels": true,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        }
-      ],
+      "oursSplines": "ortho",
+      "oursForcelabels": true,
+      "splinesMatchesJar": true,
       "bbW": 207.75625000000002,
       "bbH": 168.00002400000002,
       "passes": [
@@ -23,28 +21,31 @@
           "pass": 0,
           "bbW": 207.75625000000002,
           "bbH": 168.00002400000002,
-          "nodes": 4,
-          "edges": 3,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         }
       ],
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0
+      "verdict": "conformant",
+      "maxDelta": null,
+      "deltaVsT0": {
+        "bbW": 0.0,
+        "bbH": 0.0,
+        "maxDelta": 0,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "dimisi-54-dula946",
       "type": "class",
       "jarSplines": "ortho",
       "jarForcelabels": true,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        }
-      ],
+      "oursSplines": "ortho",
+      "oursForcelabels": true,
+      "splinesMatchesJar": true,
       "bbW": 84.42500000000001,
       "bbH": 168.00002400000002,
       "passes": [
@@ -52,57 +53,63 @@
           "pass": 0,
           "bbW": 84.42500000000001,
           "bbH": 168.00002400000002,
-          "nodes": 2,
-          "edges": 1,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         }
       ],
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 0.08399999999998897
+      "verdict": "conformant",
+      "maxDelta": null,
+      "deltaVsT0": {
+        "bbW": 0.0,
+        "bbH": 0.0,
+        "maxDelta": -0.08399999999998897,
+        "verdictWas": "structural-match",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "gamevo-26-runo973",
       "type": "class",
       "jarSplines": "polyline",
       "jarForcelabels": false,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "polyline",
-          "forcelabels": false
-        }
-      ],
-      "bbW": 1096.6633413038637,
+      "oursSplines": "polyline",
+      "oursForcelabels": false,
+      "splinesMatchesJar": true,
+      "bbW": 1076.89375,
       "bbH": 454.000072,
       "passes": [
         {
           "pass": 0,
-          "bbW": 1096.6633413038637,
+          "bbW": 1076.89375,
           "bbH": 454.000072,
-          "nodes": 14,
-          "edges": 20,
-          "oursSplines": null,
+          "oursSplines": "polyline",
           "oursForcelabels": false
         }
       ],
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 514.848
+      "maxDelta": 454.788,
+      "deltaVsT0": {
+        "bbW": -19.769591303863763,
+        "bbH": 0.0,
+        "maxDelta": -60.059999999999945,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "jakapi-64-tine258",
       "type": "class",
       "jarSplines": "ortho",
       "jarForcelabels": true,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        }
-      ],
+      "oursSplines": "ortho",
+      "oursForcelabels": true,
+      "splinesMatchesJar": true,
       "bbW": 482.15,
       "bbH": 424.000032,
       "passes": [
@@ -110,28 +117,31 @@
           "pass": 0,
           "bbW": 482.15,
           "bbH": 424.000032,
-          "nodes": 8,
-          "edges": 7,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         }
       ],
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 17
+      "maxDelta": 108.007,
+      "deltaVsT0": {
+        "bbW": 0.0,
+        "bbH": 0.0,
+        "maxDelta": 91.007,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "kuxato-79-muno809",
       "type": "class",
       "jarSplines": "polyline",
       "jarForcelabels": false,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "polyline",
-          "forcelabels": false
-        }
-      ],
+      "oursSplines": "polyline",
+      "oursForcelabels": false,
+      "splinesMatchesJar": true,
       "bbW": 288.9375,
       "bbH": 384.000072,
       "passes": [
@@ -139,28 +149,31 @@
           "pass": 0,
           "bbW": 288.9375,
           "bbH": 384.000072,
-          "nodes": 5,
-          "edges": 7,
-          "oursSplines": null,
+          "oursSplines": "polyline",
           "oursForcelabels": false
         }
       ],
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 36.632000000000005
+      "verdict": "conformant",
+      "maxDelta": null,
+      "deltaVsT0": {
+        "bbW": 0.0,
+        "bbH": 0.0,
+        "maxDelta": -36.632000000000005,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "zosaxo-93-nici652",
       "type": "component",
       "jarSplines": "ortho",
       "jarForcelabels": true,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        }
-      ],
+      "oursSplines": "ortho",
+      "oursForcelabels": true,
+      "splinesMatchesJar": true,
       "bbW": 250.85,
       "bbH": 263.999984,
       "passes": [
@@ -168,105 +181,102 @@
           "pass": 0,
           "bbW": 250.85,
           "bbH": 263.999984,
-          "nodes": 4,
-          "edges": 4,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         }
       ],
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 219.425
+      "maxDelta": 313.35,
+      "deltaVsT0": {
+        "bbW": 0.0,
+        "bbH": 0.0,
+        "maxDelta": 93.92500000000001,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": null,
+        "compositeScope2WidthDeltaPxWas": null
+      }
     },
     {
       "slug": "kejabo-83-vinu490",
       "type": "state",
       "jarSplines": "polyline",
       "jarForcelabels": false,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "polyline",
-          "forcelabels": false
-        },
-        {
-          "file": "svek-2.dot",
-          "splines": "polyline",
-          "forcelabels": false
-        }
-      ],
-      "bbW": 221.35880455163613,
+      "oursSplines": "polyline",
+      "oursForcelabels": false,
+      "splinesMatchesJar": true,
+      "bbW": 212,
       "bbH": 473.99995199999995,
       "passes": [
         {
           "pass": 0,
-          "bbW": 129.58299250235805,
+          "bbW": 128.83125,
           "bbH": 219.99996000000002,
-          "nodes": 3,
-          "edges": 3,
-          "oursSplines": null,
+          "oursSplines": "polyline",
           "oursForcelabels": false
         },
         {
           "pass": 1,
-          "bbW": 221.35880455163613,
+          "bbW": 212,
           "bbH": 473.99995199999995,
-          "nodes": 3,
-          "edges": 3,
-          "oursSplines": null,
+          "oursSplines": "polyline",
           "oursForcelabels": false
         }
       ],
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 37,
-      "sizeBacklog": 0.013062000000000129,
-      "compositeScope2WidthDeltaPx": 0.749952
+      "maxDelta": 44,
+      "compositeScope2WidthDeltaPx": 0.0,
+      "deltaVsT0": {
+        "bbW": -9.358804551636126,
+        "bbH": 0.0,
+        "maxDelta": 7,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": 0.013062000000000129,
+        "compositeScope2WidthDeltaPxWas": 0.749952
+      }
     },
     {
       "slug": "pavuzo-79-zodu430",
       "type": "state",
       "jarSplines": "ortho",
       "jarForcelabels": true,
-      "jarPasses": [
-        {
-          "file": "svek-1.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        },
-        {
-          "file": "svek-2.dot",
-          "splines": "ortho",
-          "forcelabels": true
-        }
-      ],
-      "bbW": 153.5825,
+      "oursSplines": "ortho",
+      "oursForcelabels": true,
+      "splinesMatchesJar": true,
+      "bbW": 155.16250000000002,
       "bbH": 441.999968,
       "passes": [
         {
           "pass": 0,
           "bbW": 103.66250000000001,
           "bbH": 203.99995999999996,
-          "nodes": 3,
-          "edges": 3,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         },
         {
           "pass": 1,
-          "bbW": 153.5825,
+          "bbW": 155.16250000000002,
           "bbH": 441.999968,
-          "nodes": 3,
-          "edges": 3,
-          "oursSplines": null,
-          "oursForcelabels": false
+          "oursSplines": "ortho",
+          "oursForcelabels": true
         }
       ],
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 71.62599999999999,
-      "sizeBacklog": 0.034166999999999836,
-      "compositeScope2WidthDeltaPx": -1.579968
+      "maxDelta": 1.007000000000005,
+      "compositeScope2WidthDeltaPx": 0.0,
+      "deltaVsT0": {
+        "bbW": 1.5800000000000125,
+        "bbH": 0.0,
+        "maxDelta": -70.61899999999999,
+        "verdictWas": "diverged",
+        "oursSplinesWas": null,
+        "sizeBacklogWas": 0.034166999999999836,
+        "compositeScope2WidthDeltaPxWas": -1.579968
+      }
     }
   ]
 }
