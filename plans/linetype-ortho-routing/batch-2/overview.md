@@ -9,7 +9,7 @@ tasks, worktrees cost more than they save.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | state forwards `linetype` (3 assembly sites, 2 files) | sonnet | `src/diagrams/state/state-dot-graph.ts`, `src/diagrams/state/state-composite-pass.ts` + tests | T2, T3 | [ ] |
+| T4 | state forwards `linetype` (3 assembly sites, 2 files) | sonnet | `src/diagrams/state/state-dot-graph.ts`, `src/diagrams/state/state-composite-pass.ts` + tests | T2, T3 | [x] |
 | T5 | class forwards `linetype` | sonnet | `src/diagrams/class/class-dot-graph.ts` + tests | T4 | [ ] |
 | T6 | description forwards `linetype` | sonnet | `src/diagrams/description/layout.ts` + tests | T5 | [ ] |
 
