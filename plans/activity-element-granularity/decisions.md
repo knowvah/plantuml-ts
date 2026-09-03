@@ -174,3 +174,37 @@ Resolving this is a choice about the instrument and belongs to the human:
 Option 2 is the recommendation — it is the only one that leaves a gate whose
 claim about itself is true — but it is out of every write-set in this mission
 (stop condition 1) and must be decided, not assumed.
+
+---
+
+## D11 — T1 resumed and landed with 8 documented exceptions
+
+**Context.** After `svg-comparator-alignment` fixed D10's instrument
+defect, T1 was reapplied. 260 of 268 fixtures fall or hold cleanly. 8 rise,
+but not because of anything T1 did: T1 happens to make their root-`<g>`
+child count land on an exact match with the jar's, routing them onto
+`compareNodes`'s untouched equal-length positional loop, which then walks
+garbage because the underlying CONTENT does not correspond position-for-
+position — a pre-existing condition, confirmed by all 8 already showing a
+canvas-dimension mismatch (`svg/@height`/`@width`/`@viewBox`) BEFORE T1 was
+even applied.
+
+Investigated (`.agent-notes/aeg-T1-8-exceptions.md`) and found **four
+separate, unrelated defects**, none of them element-granularity: a note
+attached to a terminal node laid out as flow height instead of a floating
+side-annotation; `DiamondFontSize`/activity font skinparams entirely
+unwired; swimlanes rendered as a boxed table header instead of the jar's
+colored divider-lines-with-floating-titles (architecturally different, not
+a sizing bug); and nested `split` geometry ~3x too wide, 2x too tall.
+
+**Decision, user-directed 2026-09-03:** land the other 260 now; re-pin
+these 8 as documented exceptions (mechanism stated, not silent — legal
+under stop condition 6); file all four defects as named follow-on missions
+in `planning/next-missions.md` rather than fixing any today.
+
+**Consequences.** T1 lands with an aggregate `weightedScore` of 76922
+against T0's pin of 108447 (−29.1%) — the exit bar's "aggregate falls" is
+met. The 8 exceptions carry a stated mechanism in
+`oracle/goldens/svg-activity/diff-baseline.json`'s own re-pin and this
+decision; a future mission fixing any of the four defects is expected to
+LOWER these 8 fixtures' scores further, not just hold them.

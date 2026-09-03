@@ -8,7 +8,7 @@
 import type { ActivityGeometry, ActivityEdgeGeo, SwimlaneGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, polygon, polyline as polylineEl } from '../../core/svg.js';
+import { rect, line, text, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
@@ -95,13 +95,59 @@ function renderEdgeLabel(
   });
 }
 
+/**
+ * The edge path, drawn as ONE `<line>` PER SEGMENT -- never one `<polyline>`
+ * and never one `<path>`.
+ *
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:134-183.
+ * `Worm#drawInternal` walks its own points with
+ * `for (int i = 0; i < size() - 1; i++)` (`:134`), taking `getPoint(i)` and
+ * `getPoint(i + 1)` as one `XLine2D` per iteration, and its `drawLine`
+ * helper bottoms out at `ug.draw(new ULine(x2 - x1, y2 - y1))` (`:183`) --
+ * one `ULine` per segment, no aggregate shape anywhere in the call.
+ * `DriverLineSvg#draw`
+ * (`klimt/drawing/svg/DriverLineSvg.java:54`) renders each one as a single
+ * `<line>`.
+ *
+ * Upstream could not emit a `<polyline>` here even if `Worm` asked it to:
+ * `klimt/drawing/svg/` ships `DriverLineSvg`, `DriverPolygonSvg`,
+ * `DriverEllipseSvg`, `DriverPathSvg`, `DriverRectangleSvg` and others, and
+ * NO `DriverPolylineSvg` -- the only `polyline` tokens under
+ * `src/main/java/net/` are in the sprite-reading SVG parser
+ * (`svg/parser/SvgSaxParser.java`), the TeaVM backend, graphviz's
+ * `splines=polyline` attribute (`dot/DotSplines.java`) and the
+ * `linetype polyline` skinparam. There is no polyline in the SVG driver set
+ * at all.
+ *
+ * `<path>` is equally wrong: `DriverPathSvg` exists, but `Worm` never
+ * constructs a `UPath` (D1).
+ *
+ * This makes activity SVGs LARGER, deliberately (D9). Upstream ships two
+ * "reduce SVG output size" commits inside the current pin range
+ * (`ba68279df92`, `4f3a0dcc63b`, both on `SvgGraphics.java`) and STILL emits
+ * one `ULine` per segment -- per-segment lines are what an output-size-
+ * conscious upstream chose. Do not re-introduce a polyline "optimisation".
+ */
+function renderEdgeSegments(
+  pts: ReadonlyArray<{ x: number; y: number }>,
+  edgeColor: string,
+): string {
+  let out = '';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p1 = pts[i]!;
+    const p2 = pts[i + 1]!;
+    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth: 1.5 });
+  }
+  return out;
+}
+
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
 
 
   const edgeColor = theme.colors.arrow;
-  const polyline = polylineEl(pts, { fill: 'none', stroke: edgeColor, strokeWidth: 1.5 });
+  const segments = renderEdgeSegments(pts, edgeColor);
 
   // Arrowhead at last point, direction from second-to-last to last
   const last = pts[pts.length - 1]!;
@@ -136,7 +182,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
   }
 
-  return polyline + arrow + midArrowEl + labelEl;
+  return segments + arrow + midArrowEl + labelEl;
 }
 
 // ---------------------------------------------------------------------------
