@@ -40,7 +40,10 @@ both directions** — numalo 52 vs 64, darote 144 vs 129.
 
 - The gate exists, is green, and pins every captured fixture
 - The 7 root attributes and the defs-childCount diff are **gone from every
-  fixture**; `g[1][childCount]` matches the jar
+  fixture**; `g[1][childCount]` is fixed on the **55** fixtures whose delta is
+  exactly +2 ([D13] — the original clause "matches the jar" was measured
+  impossible: 168 of 268 fixtures have FEWER children than the jar, a fidelity
+  gap no chrome change touches)
 - Every fixture whose `weightedScore` **rose** is named with a mechanism
 - Only activity entries moved in `render-manifest-baseline.json`
 - All four gates green
@@ -84,7 +87,7 @@ gate**. Report it; do not tune for it.
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 capture corpus · T1 render helper · **T0b pin corpus gates** ([D11]) | serialized | [x] |
 | [1](batch-1/overview.md) | T2 pre-chrome baseline · T3 freshness sentinel | serialized | [x] |
-| [2](batch-2/overview.md) | T4 diagnose the 2 extra g children | — | [ ] |
+| [2](batch-2/overview.md) | T4 diagnose the 2 extra g children | — | [x] |
 | [3](batch-3/overview.md) | T5 route through document shell | — | [ ] |
 | [4](batch-4/overview.md) | T6 re-pin + census | — | [ ] |
 | [5](batch-5/overview.md) | T7 close-out | — | [ ] |

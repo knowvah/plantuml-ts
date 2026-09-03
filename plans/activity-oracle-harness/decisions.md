@@ -214,3 +214,39 @@ different questions: **283** render cleanly on OUR side (373 − 90), and of
 those 15 have goldens that are jar error pages, leaving **268** numerically
 comparable. Verified: the committed baseline is 268 `baseline` + 82 `error` +
 23 `jar-error` = 373, and only `baseline` entries carry a `weightedScore`.
+
+## D13 — The exit bar's `g[1][childCount]` clause is not achievable; amended to the measured reality (2026-09-02)
+
+**Context:** The mission README's exit bar says "`g[1][childCount]` matches
+the jar", resting on its premise that ours has exactly 2 extra children on
+every fixture (measured pre-mission on two fixtures: 7 v 5, 64 v 62). T4
+retired that premise and the orchestrator re-measured it independently with
+`compareSvg` itself over all 268 numerically-comparable fixtures:
+
+| `g[1][childCount]` delta (ours − jar) | fixtures |
+|---|---|
+| ours has FEWER children | **168** |
+| already equal (no diff at all) | **20** |
+| ours has MORE | **80**, of which **55** are at exactly +2 |
+
+**Decision:** Amend the exit bar. Removing the two background rects fixes the
+55 fixtures at +2 and improves 25 more; it CANNOT make the clause true, and
+it will give the 20 currently-equal fixtures a −2 childCount diff they do not
+have today. The bar becomes: *the 7 root attributes and the defs-childCount
+diff are gone from every fixture, and `g[1][childCount]` is fixed on the 55
+fixtures whose delta is exactly +2.*
+
+**The 20 currently-equal fixtures are a PREDICTED riser set.** A childCount
+mismatch short-circuits the whole subtree and charges
+`sumUnits(actual) + sumUnits(expected)` (`compare.ts:398-404`), so acquiring
+one can raise `weightedScore` sharply even though alignment improved. T6 must
+name them; this decision is their mechanism, stated in advance rather than
+reconstructed at re-pin.
+
+**The 168 fixtures where we draw FEWER children than the jar are a fidelity
+gap this mission does not touch** — missing ink, not chrome. They are the
+single largest item for T6's census and the next mission.
+
+**Consequences:** T6 measures against an achievable bar. Without this
+amendment T6 would have failed its own acceptance criteria for a reason no
+chrome change could fix.
