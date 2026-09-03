@@ -8,7 +8,7 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, text, diamond, noteBox, circle, line, path, polygon, multilineText } from '../../core/svg.js';
+import { rect, text, diamond, noteBox, ellipse, line, path, polygon, multilineText, resolvePaint } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { ACTION_H_PAD, NOTE_FOLD } from './activity-layout-constants.js';
 
@@ -71,7 +71,16 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const r = node.height / 2;
-  return circle(cx, cy, r, { fill: actColors(theme).startFill });
+  // @see net/sourceforge/plantuml/klimt/drawing/svg/DriverEllipseSvg.java --
+  // upstream's start/end/kill circles are all UEllipse shapes (equal
+  // radii), never a dedicated circle driver.
+  //
+  // `resolvePaint` here replicates exactly what `circle()`'s own
+  // `resolvePaint(style.fill)` did -- `ellipse()`'s `extraAttrs` only
+  // shortens an ALREADY-hex string (rule 2); it does not resolve a named
+  // CSS color (e.g. "blue") to hex the way `circle()`'s pipeline did via
+  // `paintToSvg`. Pre-resolving here keeps that behaviour byte-identical.
+  return ellipse(cx, cy, r, r, { fill: resolvePaint(actColors(theme).startFill).value });
 }
 
 export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
@@ -81,8 +90,8 @@ export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const innerR = outerR * 0.55;
   const c = actColors(theme);
   return (
-    circle(cx, cy, outerR, { fill: 'none', stroke: c.endFill, strokeWidth: 2 }) +
-    circle(cx, cy, innerR, { fill: c.endFill })
+    ellipse(cx, cy, outerR, outerR, { fill: 'none', stroke: resolvePaint(c.endFill).value, 'stroke-width': 2 }) +
+    ellipse(cx, cy, innerR, innerR, { fill: resolvePaint(c.endFill).value })
   );
 }
 
@@ -98,7 +107,7 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
   const d = r * Math.SQRT1_2;
   const endFill = actColors(theme).endFill;
   return (
-    circle(cx, cy, r, { fill: 'none', stroke: endFill, strokeWidth: 1.5 }) +
+    ellipse(cx, cy, r, r, { fill: 'none', stroke: resolvePaint(endFill).value, 'stroke-width': 1.5 }) +
     line(cx - d, cy - d, cx + d, cy + d, { stroke: endFill, strokeWidth: 1.5 }) +
     line(cx - d, cy + d, cx + d, cy - d, { stroke: endFill, strokeWidth: 1.5 })
   );

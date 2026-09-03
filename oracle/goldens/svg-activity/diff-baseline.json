@@ -1715,10 +1715,10 @@
       "type": "activity",
       "slug": "lukoxa-16-cecu095",
       "status": "baseline",
-      "weightedScore": 281,
+      "weightedScore": 284,
       "diffCount": 67,
       "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "95a982b0"
+      "measuredAgainstCommit": "740e0167"
     },
     {
       "type": "activity",
@@ -1958,10 +1958,10 @@
       "type": "activity",
       "slug": "nexitu-74-luga914",
       "status": "baseline",
-      "weightedScore": 360,
+      "weightedScore": 368,
       "diffCount": 99,
       "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "95a982b0"
+      "measuredAgainstCommit": "740e0167"
     },
     {
       "type": "activity",
@@ -2129,10 +2129,10 @@
       "type": "activity",
       "slug": "noxasi-06-nejo322",
       "status": "baseline",
-      "weightedScore": 445,
+      "weightedScore": 448,
       "diffCount": 125,
       "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "95a982b0"
+      "measuredAgainstCommit": "740e0167"
     },
     {
       "type": "activity",

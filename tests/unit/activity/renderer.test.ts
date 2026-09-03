@@ -52,7 +52,7 @@ describe('renderActivity — start node', () => {
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    expect(content).toContain('<circle');
+    expect(content).toContain('<ellipse');
     expect(content).toContain(`fill="${theme.colors.border}"`);
   });
 
@@ -71,13 +71,13 @@ describe('renderActivity — start node', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — stop node', () => {
-  it('renders two <circle> elements for a bullseye', () => {
+  it('renders two <ellipse> elements for a bullseye', () => {
     const node = makeNode({ kind: 'stop', id: 'stop-0', x: 50, y: 50, width: 28, height: 28 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    const circleCount = (content.match(/<circle/g) ?? []).length;
-    expect(circleCount).toBeGreaterThanOrEqual(2);
+    const ellipseCount = (content.match(/<ellipse/g) ?? []).length;
+    expect(ellipseCount).toBeGreaterThanOrEqual(2);
   });
 
   it('outer circle has fill="none" and inner has border fill', () => {
@@ -272,10 +272,10 @@ describe('renderActivity — end and kill nodes', () => {
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    const circleCount = (content.match(/<circle/g) ?? []).length;
+    const ellipseCount = (content.match(/<ellipse/g) ?? []).length;
     const lineCount = (content.match(/<line /g) ?? []).length;
     // end = single bordered circle with 2 crossing lines (the X)
-    expect(circleCount).toBeGreaterThanOrEqual(1);
+    expect(ellipseCount).toBeGreaterThanOrEqual(1);
     expect(lineCount).toBeGreaterThanOrEqual(2);
   });
 
@@ -284,8 +284,8 @@ describe('renderActivity — end and kill nodes', () => {
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    const circleCount = (content.match(/<circle/g) ?? []).length;
-    expect(circleCount).toBeGreaterThanOrEqual(2);
+    const ellipseCount = (content.match(/<ellipse/g) ?? []).length;
+    expect(ellipseCount).toBeGreaterThanOrEqual(2);
   });
 });
 
