@@ -57,18 +57,24 @@ conditions with teeth are about movement outside the expected set.
 - `splines`/`forcelabels` emitted by both the layout builder and the DOT
   emitter, from one shared helper
 - All three engines (state, class, description) forward `linetype`
-- `pavuzo-79-zodu430` scope 2 width idx 2: `−1.579968 px` → **~0.002 px**
+- `pavuzo-79-zodu430` scope 2 width idx 2: `−1.579968 px` → **0 px**
+  (T4, measured; all 12 declarations exact). The `~0.002 px` this brief
+  originally predicted was never a residual in the port — it was the
+  deviation of the *standalone replay* that produced the prediction from
+  the real pipeline. See the decision journal's T4 rows for the arithmetic.
 - `splinesOk` gates `dotEqual`, and is **proven** to go false when the
   emitter is reverted
 - `dotEqual` stays `true` on all 8 — now actually meaning it
 - **Zero fixtures outside the 8 move**
-- All four gates green, `Test Files` == **684**
+- All four gates green, `Test Files` == the figure in [the running
+  total](#test-files-running-total) — it rises as tasks add test files and
+  must never fall
 
 ## Quality gates — all four, before any commit lands
 
 ```
 - command: npm test            # vitest + 90/90/90 coverage
-  pass: exit 0 AND `Test Files` total == 684
+  pass: exit 0 AND `Test Files` total == the running-total ledger's last row
   on_fail: fix_and_rerun
 - command: npm run typecheck   # both tsconfigs
   pass: exit 0
@@ -112,14 +118,19 @@ criterion, not an aspiration.
 3. **`splinesOk` cannot be proven to discriminate** ([D6](decisions.md)) —
    an assertion that stays green with the emitter reverted is decoration.
 4. A re-pin would **loosen** a shrink-only ratchet (`size-backlog.json`).
-5. `pavuzo` misses ~0.002 px and the deviation cannot be explained. Never fit
-   a value.
+5. `pavuzo` misses its target and the deviation cannot be explained. Never
+   fit a value. (Closed by T4 at **0 px**; the original `~0.002 px`
+   target measured the replay harness, not the fix.)
 6. A constant is needed and its upstream `file:line` cannot be located.
 7. Files outside the write-set need changing and no other task owns them.
 8. Two consecutive gate failures on the same check — the cap bounds **fix
    attempts, not investigation** (`~/.claude/rules/diagnosis.md`).
 9. Any of [D1–D6](decisions.md) is contradicted — amend and halt.
-10. `npm test` reports a `Test Files` total other than **684**.
+10. `npm test` reports a `Test Files` total **below** the last row of
+    [the running total](#test-files-running-total). A DROP is the real
+    signal — it is the `coverage/.tmp` under-collection signature, where
+    vitest silently skips files and still exits 0. A rise is expected
+    whenever a task adds a test file.
 
 ## Push-forward conditions
 
@@ -131,6 +142,26 @@ criterion, not an aspiration.
 5. Self-explanatory error with an obvious fix.
 6. `dotEqual` stays `true` while `splinesOk` is newly computed → that is
    success, not a no-op.
+
+## `Test Files` running total
+
+The gate exists to catch **silent under-collection** (`coverage/.tmp`
+orphaned by a killed run makes vitest skip files and still exit 0), so the
+invariant is *never falls*, not *equals one fixed number*. A single pinned
+figure re-stales on every task that adds a test file — which is what the
+original **684** did by T1.
+
+| after | total | added |
+|---|---|---|
+| baseline `76312623` | 684 | — |
+| T0 | 684 | none (pins only) |
+| T1 | 685 | `tests/unit/core/dot-splines.test.ts` |
+| T2 | 685 | none (extended an existing suite) |
+| T3 | 685 | none (extended an existing suite) |
+| T4 | 686 | `tests/unit/state/state-linetype-routing.test.ts` |
+
+Update this row-by-row as tasks land; the count includes the 1 skipped file
+vitest reports in its total.
 
 ## Index
 
