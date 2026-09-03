@@ -10,7 +10,39 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
 
 - [x] 01-getlayout-render-spline-mismatch.md
 - [x] 02-cluster-node-fractional-centering.md
-- [x] 03-splines-attr-unsupported.md
+- [ ] 03-splines-attr-unsupported.md  <!-- UNCHECKED 2026-09-03 (was [x]).
+        The UPSTREAM half is fixed and verified working: the pinned 1.6.0
+        honours `splines=ortho` exactly, matching native graphviz 15.1.1 on
+        bb width, node centring and both xlabel positions (measured, see
+        issue 17). But the plantuml-ts CONSUMPTION never happened -- nothing
+        in src/ ever started emitting the attribute. `applyGraphAttrs`
+        (core/graph-layout-build.ts:34-43) sets rankdir/nodesep/ranksep/
+        aspect; `graphAttrLines` (core/svek-dot-emit.ts:66-77) pushes
+        nodesep/ranksep/remincross/searchsize/rankdir=LR; `DotInputGraph`
+        has no field to carry it; zero splines/forcelabels emission anywhere
+        in src/. So every `skinparam linetype ortho|polyline` layout still
+        runs on graphviz's DEFAULT CURVED routing where the jar runs ortho.
+        `theme.linetype` is parsed and plumbed to the per-edge
+        moveLabelToXlabel switch ONLY (state-dot-graph.ts:238,
+        state-composite-edge-label.ts:98, link-edge-attrs.ts:361) -- issue 16
+        wired the label half of the feature, the routing half was never
+        wired. Upstream emits both attrs at DotStringFactory.java:161-169,
+        between searchsize=500 (:154) and rankdir=LR (:171), exactly the gap
+        in graphAttrLines. Un-checked under this file's own rule (box
+        requires the fix landed AND affected fixtures re-measuring clean):
+        pavuzo-79-zodu430 demonstrably does not, and issue 17 is this
+        entry's downstream symptom. Blast radius: 8 cached oracle fixtures
+        carry splines= in their jar DOT (class bujedi-30-cize673,
+        dimisi-54-dula946, gamevo-26-runo973, jakapi-64-tine258,
+        kuxato-79-muno809; component zosaxo-93-nici652; state
+        kejabo-83-vinu490, pavuzo-79-zodu430) plus 21 unclassified corpus
+        fixtures. NOT a one-liner -- ortho routing moves every edge on a
+        fixture; wants its own mission with before/after pins. Note the
+        DOT-parity harness (tests/oracle/svek-dot.ts) has zero splines/
+        linetype tokens and structurally cannot see this gap, which is why
+        the state suite reads DOT EQUAL 266/268 with materially different
+        routing. Full artifact:
+        .agent-notes/gvi17-splines-never-emitted.md -->
 - [x] 04-anchor-point-rank-assignment.md
 - [x] 05-cluster-label-dimensions-ignored.md
 - [x] 06-cluster-bbox-not-in-getlayout.md
@@ -226,20 +258,79 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         without-xlabel bb) as the repro; that filing, not this task, is
         where dot-engine's own label/xlabels.ts source would actually be
         read. ORIGINAL FILING:
-        filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it. -->
-- [ ] 17-ortho-xlabel-canvas-reservation-short.md  <!-- FILED 2026-08-19
-        (SI31 T1). Split out of issue 16's diagnosis: 16's fix (publish the
-        xlabel position) landed in 1.6.0 and is consumed here, but
-        pavuzo-79-zodu430 stopped at -1.579968 px instead of 0. Under
-        splines=ortho the engine reserves ~1.58pt LESS horizontal canvas for
-        an edge's xlabels than native graphviz 15.1.1 on byte-identical
-        input (node centre 60.75 vs 62.333; bb 106.581 vs 108.16), and that
-        shift propagates unchanged through SvekResult's +15 and
-        InnerStateAutonom's +20 into the composite's declared width. Jar-side
-        arithmetic verified faithful and ruled out; the cause is in
-        lib/dotgen/dotsplines.c's EDGETYPE_ORTHO branch / postproc.c's
-        addXLabels as ported in label/xlabels.ts. Unchecked pending an
-        upstream fix; nothing to consume here when it lands. NOTE: an earlier
-        claim under issue 16 that dot-engine's xlp matched native exactly was
-        WRONG -- it compared a hand-typed 1.2731in node width against the
-        real 1.273090in on both sides -- and is retracted there and here. -->
+        filed 2026-08-19, while planning the SI29 follow-on fix batch (G20b). EdgeGeometry carries no xlabel field, so every `linetype ortho`/`polyline` transition label falls back to perpendicularOffsetLabel instead of graphviz's force-search; pavuzo-79-zodu430 scope 2 width is -2.460 px because of it. Verified live on the installed 1.5.0, not inferred from the types: with `xlabel="X"` render() DOES emit the <text> (x=30.94) while getLayout()'s edge has no label field at all, and the x differs from the `label="X"` control (41.06) — so the engine places it by the real xlabels.c search and simply does not publish it. Same shape as 13 and 06. Consumption here is blocked until this lands and the .tgz moves; the plantuml-ts half (forward a?.xlabel in graph-layout-build-edges.ts, map ge.xlabel in toEdgeEntry) is deliberately NOT written in the meantime, since no fixture could exercise it.
+
+        CORRECTED 2026-09-03: the MECHANISM/ORIGIN/CAUSAL CHAIN blocks above
+        attribute the residual -1.579968 px to @knowvah/dot-engine reserving
+        less ortho xlabel canvas than native, in label/xlabels.ts. That
+        attribution is WITHDRAWN -- the pinned 1.6.0 is exact against the
+        native oracle on this fixture's own svek-1.dot, byte-for-byte via
+        -Tdot and to full float precision via getLayout(). See issue 17,
+        reclassified [~] the same day, for the disproof and for where the
+        1.583 actually lives (the ortho edge port offset, +-8.333 vs +-6.75).
+        The "RULED OUT" list and the jar-side ORIGIN analysis are unaffected;
+        only the upstream attribution was wrong.
+        This box stays UNCHECKED under this file's own rule -- the fix landed
+        and is consumed, but pavuzo-79-zodu430 still does not re-measure
+        clean. Its blocker is now a plantuml-ts work item (17), not an
+        upstream wait.
+        REFINED 2026-09-03: that blocker is specifically issue 03's
+        un-consumed fix -- `splines=ortho` is never emitted, so the ortho
+        ROUTING half of `skinparam linetype ortho` was never wired even
+        though this entry wired the LABEL half. pavuzo-79-zodu430 closes
+        when 03 does. See 17's second-pass block and
+        .agent-notes/gvi17-splines-never-emitted.md. -->
+- [~] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RECLASSIFIED
+        2026-09-03: NOT a dot-engine defect, closed with no upstream fix to
+        wait for. The filing's premise -- that the engine reserves ~1.58pt
+        LESS horizontal canvas for an ortho edge's xlabels than native
+        graphviz on byte-identical input -- does not reproduce. Measured
+        against the PINNED 1.6.0 in this repo's own node_modules (and
+        separately against dot-engine's src/ HEAD; both exact, so this does
+        not turn on HEAD drift): `-Tdot` on this fixture's own cached
+        svek-1.dot is BYTE-IDENTICAL to the native oracle, and through the
+        exact API path graph-layout-build-edges.ts uses (createGraph +
+        addNode/addEdge + setHtmlAttr('xlabel', fixedSizeTable(54,15)) +
+        getLayout()) the engine reports bb width 108.164568, node centre x
+        62.333328, xlabel.x 27 and 43.666656 -- matching native on all four,
+        including the two the filing recorded as diverging (106.581, 60.75,
+        40.5). Robust to dropping forcelabels/searchsize/remincross and to
+        including or excluding the start-circle node sh0006.
+        The 1.583 is NOT xlabel placement: it is the ortho edge PORT OFFSET
+        from the node centre. Native routes the two sh0007<->sh0008 edges at
+        +-8.333 about 62.333 (= 50/6, sh0007's width); the geometry the
+        filing measured has them at +-6.75. That single term is the whole
+        residual, and it also settles the filing's own open question --
+        (1) the second edge's 3.17pt xlp drift and (2) the 1.58pt centring
+        shift are ONE mechanism, since 3.167 = 2 x 1.583 (symmetric
+        displacement about the centre), not two coincident ones.
+        The 106.581 was measured on a graph built through this port's own
+        addNodes/addEdges, so the divergence is in what THAT path feeds the
+        engine. Work is ours: dump the DOT this port builds for
+        pavuzo-79-zodu430's inner scope and diff it against the jar's cached
+        svek-1.dot (node width/height and the xlabel box are the candidates
+        that would move the offset). Full disproof, arithmetic and the
+        preserved original filing are in the issue file.
+        MECHANISM FOUND 2026-09-03 (second pass), and the next step above is
+        WRONG: node width/height (20/50/91.6625) and the xlabel box (54x15)
+        all match the jar's cached DOT exactly. The cause is that
+        `splines=ortho` is NEVER EMITTED AT ALL -- not by the DOT emitter
+        (svek-dot-emit.ts:66-77), not by the layout builder
+        (graph-layout-build.ts:34-43), and DotInputGraph has no field for it
+        -- so every ortho layout runs on graphviz's default CURVED routing.
+        Proven by replaying this fixture's real captured DotInputGraph
+        through the identical build path and toggling only that attr:
+        without it bb=106.581238, centre=60.7500, edge2 xlabel.x=40.5000;
+        with it bb=108.164568, centre=62.3333, edge2 xlabel.x=43.6667. The
+        first column reproduces the ORIGINAL filing's three "engine" numbers
+        (106.581/60.75/40.5) TO THE DIGIT -- those measurements were always
+        real, they were measurements of OUR OWN graph misattributed to the
+        engine. Expected on fix: 108.164568+35 = 1.988397in vs jar's
+        1.988368in, ~0.002px. Also corrects this entry's own derived "+-6.75
+        straight port offset": the spline dump it asked for is now captured
+        and the edges are CURVED at ~+-6.18 (39.645/38.892/38.893/39.649).
+        Its "one mechanism, not two" conclusion IS confirmed (3.1667 =
+        2 x 1.5833). This issue is the downstream symptom of issue 03's
+        un-consumed fix -- 03 is now unchecked and carries the work and the
+        blast radius. Full artifact:
+        .agent-notes/gvi17-splines-never-emitted.md -->
