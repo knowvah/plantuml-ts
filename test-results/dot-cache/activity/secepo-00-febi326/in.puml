@@ -1,0 +1,14 @@
+@startuml
+start
+if (foo1) then
+:Hello;
+if (dummy) then (when foo with a very long\nlabel on several lines);
+	:goto label20;
+endif
+:Other3;
+:label20;
+:out;
+else
+:foo2;
+endif
+@enduml

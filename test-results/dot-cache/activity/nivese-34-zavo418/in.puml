@@ -1,0 +1,13 @@
+@startuml
+title Ceci est un titre
+start
+repeat
+  :a;
+note right: note
+  repeat
+    :b;
+    note right: note that is wider than normal - this is a very wide note
+  repeat while (condition1)
+repeat while (condition2)
+stop
+@enduml

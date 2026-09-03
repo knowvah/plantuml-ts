@@ -1,0 +1,11 @@
+@startuml
+
+|Alpha|
+start
+:something;
+
+|Omega|
+:anything;
+end
+
+@enduml

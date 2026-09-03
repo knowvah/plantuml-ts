@@ -1,0 +1,17 @@
+@startuml
+start
+:ClickServlet.handleRequest();
+:new Page;
+if (Page.onSecurityCheck) then
+  :Page.onInit();
+  if (isForward()) then
+    :process control;
+	 if (continue processing) then
+		:goto barre2;
+	 endif
+  endif
+ :barre1;
+endif
+
+:barre2;
+@enduml

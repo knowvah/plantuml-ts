@@ -1,0 +1,18 @@
+@startuml
+start
+if (t1) then (ja)
+    stop
+else (nein)
+    if (t2?) then (ja)
+        stop
+    else (nein)
+        :a1;
+        if (t3) then (nein)
+             :a2;
+        else (ja)
+            :a4;
+            stop
+        endif
+    endif
+endif
+@enduml

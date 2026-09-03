@@ -1,0 +1,17 @@
+@startuml
+if ( some condition ) then (yes)
+    :=condition1
+    ...
+    operation A something ....;
+    if (condition2) then (yes)
+        := condition2
+        ...
+        operation B something ....;
+        if (condition3) then (yes)
+            := condition3
+              ...
+              operation C something ....;
+        endif
+    endif
+endif
+@enduml

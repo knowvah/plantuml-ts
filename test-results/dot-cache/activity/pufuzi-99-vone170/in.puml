@@ -1,0 +1,11 @@
+@startuml test
+start
+:L0
+{{
+start
+:L1;
+stop
+}}
+;
+stop
+@enduml

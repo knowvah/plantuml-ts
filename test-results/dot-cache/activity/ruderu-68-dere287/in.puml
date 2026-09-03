@@ -1,0 +1,13 @@
+@startuml
+!$data={"partlen": "2", "game": "GamePlantuml", "participants": [
+{"name": "XYZ" ,"as": "xyz", "team": "A"},
+{"name": "RST" ,"as": "rst", "team": "B"},
+{"name": "UVW" ,"as": "uvw", "team": "B"}],
+"color": {"A": "red", "B": "blue"}
+}
+
+:a;
+:$data.color;
+:$data.color[A];
+:b;
+@enduml

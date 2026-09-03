@@ -1,0 +1,6 @@
+@startuml
+start
+if (One) then (Yes)
+elseif (Two) then (Yes)
+endif
+@enduml

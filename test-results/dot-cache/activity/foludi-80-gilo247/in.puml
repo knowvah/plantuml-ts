@@ -1,0 +1,6 @@
+@startuml
+start
+while(cond)is(true)
+endwhile(false)
+detach
+@enduml

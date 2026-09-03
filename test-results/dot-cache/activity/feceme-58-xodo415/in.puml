@@ -1,0 +1,9 @@
+@startuml
+:foo1;
+if (test) then
+  :foo2withaverylongdescription;
+else
+  :foo2;
+endif
+:foo5;
+@enduml

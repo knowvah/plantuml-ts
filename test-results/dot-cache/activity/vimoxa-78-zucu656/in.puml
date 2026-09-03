@@ -1,0 +1,9 @@
+@startuml
+start
+:foo1;
+note left
+  toto
+  ""example1""
+  ~""example1""
+endnote
+@enduml

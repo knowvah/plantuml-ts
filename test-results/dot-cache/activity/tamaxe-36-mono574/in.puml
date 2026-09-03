@@ -1,0 +1,13 @@
+@startuml
+start
+:Hello;
+:Init;
+:label10;
+:Other;
+:Other2;
+if (dummy) then (when foo and dummy)
+	:goto label10;
+endif
+:Other3;
+:goto label10;
+@enduml

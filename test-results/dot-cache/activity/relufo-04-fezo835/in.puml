@@ -1,0 +1,12 @@
+@startuml
+start
+if (whatever) then
+    :foo if;
+    note right
+      if this will not be rendered
+    end note
+else
+    :bar;
+endif
+stop
+@enduml

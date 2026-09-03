@@ -1,0 +1,21 @@
+@startuml
+|swinlane1|
+start
+if (foo) then
+  |swinlane2|
+  :f1;
+endif
+|swinlane1|
+:f001;
+|swinlane2|
+:f2;
+if (test2) then
+|swinlane1|
+  :t1;
+else
+|swinlane2|
+  :t2;
+endif
+|swinlane1|
+:f3;
+@enduml

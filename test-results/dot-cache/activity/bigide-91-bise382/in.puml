@@ -1,0 +1,8 @@
+@startuml
+TITLE Test_separate_action
+start
+:first part of the action\n____\nsecond part of the action;
+
+:first part of the action\n====\nsecond part of the action;
+end
+@enduml

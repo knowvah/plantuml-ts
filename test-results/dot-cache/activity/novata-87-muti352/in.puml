@@ -1,0 +1,7 @@
+@startuml
+skinparam ConditionStyle InsideDiamond
+
+repeat :SET INITIAL VALUES;
+repeat while (Start?) is (N) not (Y)
+:Done;
+@enduml

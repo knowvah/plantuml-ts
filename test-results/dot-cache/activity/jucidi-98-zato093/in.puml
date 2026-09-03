@@ -1,0 +1,14 @@
+@startuml
+|low|
+start
+:something Received;
+if (t1) then 
+    :log1;
+elseif (t2) then 
+    :log2;
+else
+|High|
+    :Hello World;
+endif
+end
+@enduml

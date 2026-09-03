@@ -1,0 +1,18 @@
+@startuml
+|S1|
+|S2|
+
+|S2|
+  :preAct;
+  switch (Test)
+  case (S1!)
+    :ActPre;
+    |S1|
+    :Act;
+  case (S2!)
+    |S2|
+    :Act;
+  endswitch
+  |S2|
+  :postAct;
+@enduml

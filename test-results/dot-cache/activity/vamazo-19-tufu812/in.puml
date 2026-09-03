@@ -1,0 +1,13 @@
+@startuml
+skinparam conditionStyle diamond
+title Receive Loop
+start
+while ( ) is ([connection open])
+:Receive data;
+while ( ) is ([data in receive buffer])
+:Invoke decode;
+:Handle decoder result;
+endwhile ([else])
+endwhile ([else])
+end
+@enduml

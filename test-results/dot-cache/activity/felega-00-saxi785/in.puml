@@ -1,0 +1,9 @@
+@startuml
+|SW1|
+start
+repeat :R1;
+repeat while (R1?)
+:R2;
+|SW2|
+:R3;
+@enduml

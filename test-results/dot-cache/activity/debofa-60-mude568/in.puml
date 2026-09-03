@@ -1,0 +1,9 @@
+@startuml
+start
+repeat
+  :Do something;
+  backward: first statement is overridden;
+  backward: second statement replaces first statement;
+repeat while (you want to)
+end
+@enduml

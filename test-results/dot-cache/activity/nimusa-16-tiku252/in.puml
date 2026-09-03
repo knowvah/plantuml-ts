@@ -1,0 +1,11 @@
+@startuml
+start
+:Hello;
+if (test) then
+	:Action1;
+	:Action2;
+endif
+:Action3;
+:Action4;
+
+@enduml

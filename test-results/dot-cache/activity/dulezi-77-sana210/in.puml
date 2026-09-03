@@ -1,0 +1,16 @@
+@startuml
+skinparam activityDiamond {
+    BackgroundColor red
+    BorderColor blue
+    FontSize 24
+}
+start
+:tekst1;
+if (teks2) then (yes)
+ :tekst1;
+else (no)
+ :tekst1;
+endif
+:tekst1;
+stop
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+!$foo = { "company": "Skynet", "employees" : [
+  {"name" : "alice", "salary": 100 },
+  {"name" : "bob", "salary": 50} ]
+}
+start
+!foreach $emp in $foo.employees
+:The salary of $emp.name is $emp.salary;
+!endfor
+:end;
+@enduml

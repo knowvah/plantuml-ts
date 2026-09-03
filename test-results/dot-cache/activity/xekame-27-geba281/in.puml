@@ -1,0 +1,17 @@
+@startuml
+
+repeat
+  :task;
+repeat while (test) is (value1)
+
+repeat
+  :task;
+repeat while (test) is (value1) not (value2)
+
+:some text;
+
+repeat
+  :task;
+repeat while (test) not (value2)
+
+@enduml

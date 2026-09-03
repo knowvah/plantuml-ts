@@ -1,0 +1,6 @@
+@startuml
+skinparam hyperlinkUnderline false
+start
+:foo1 [[http://www.google.com]] end;
+stop
+@enduml

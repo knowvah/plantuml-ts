@@ -1,0 +1,27 @@
+@startuml
+
+|swimlane1|
+start
+
+|swimlane1|
+if(q?)
+|swimlane1|
+  split
+    :c;
+    detach
+|swimlane2|
+  split again
+    :d;
+    detach
+  end split
+|swimlane1|
+else
+|swimlane2|
+  fork
+  fork again
+    :e;
+  end fork
+endif
+
+stop
+@enduml

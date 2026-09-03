@@ -1,0 +1,13 @@
+@startuml
+title Split Bug (not working)
+:Something;
+repeat
+     :Repeat Bug;
+     split
+          :something; 
+     split again
+           :Something Else;
+      end split
+repeat while(\nRepeat?\nYes=Down\nNo=Right\n)
+:something;
+@enduml

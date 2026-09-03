@@ -1,0 +1,30 @@
+@startuml
+start
+if (
+A
+A
+A
+AA
+A
+AA
+A
+A
+A
+AA
+A
+AA
+) then
+:a;
+
+elseif (B) then
+:bb;
+
+else
+
+:ccc1;
+:ccc2;
+:ccc3;
+
+endif
+
+@enduml

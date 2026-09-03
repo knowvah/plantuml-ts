@@ -1,0 +1,8 @@
+@startuml
+start
+repeat
+  :read data;
+  :generate diagrams;
+repeat while () is (test)
+stop
+@enduml

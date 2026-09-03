@@ -1,0 +1,14 @@
+@startuml
+while ( a==b ) is (yes)
+if ( c==0 ) then (yes)
+      :do something;
+      break
+    elseif (c==1) then
+      :do something;
+      break
+    elseif (c==2) then
+      break
+    endif
+end while
+end
+@enduml

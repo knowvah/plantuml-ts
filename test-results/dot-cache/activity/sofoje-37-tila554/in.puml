@@ -1,0 +1,12 @@
+@startuml
+start
+if () then
+    :Foo;
+elseif ()
+    :Bar;
+else
+    :Baz;
+    stop
+endif
+stop
+@enduml

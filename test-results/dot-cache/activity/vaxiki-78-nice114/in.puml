@@ -1,0 +1,8 @@
+@startuml
+start
+:Hello;
+if (dummy\non\nseveral) then (foo)
+stop
+endif
+:Other;
+@enduml

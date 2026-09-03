@@ -1,0 +1,10 @@
+@startuml
+start
+while (data avaiable?)
+  :read data;
+  :generate diagrams;
+(incoming) backward :Warning; (dsc_5)
+endwhile
+:end;
+stop
+@enduml

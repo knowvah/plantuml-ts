@@ -1,0 +1,18 @@
+@startuml
+
+|ebee-vdq-form|
+fork
+|ebee-vdq-form|
+:A1;
+|ebee-ws|
+:A2;
+|ebee-vdq-form|
+:A3;
+Fork again
+|ebee-vdq-form|
+:B1;
+|ebee-ws|
+:B2;
+End fork
+
+@enduml

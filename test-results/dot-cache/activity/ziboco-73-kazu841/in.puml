@@ -1,0 +1,14 @@
+@startuml
+
+start
+repeat
+:Step1;
+
+
+repeat while
+:toto1;
+
+:Step 3;
+stop
+
+@enduml

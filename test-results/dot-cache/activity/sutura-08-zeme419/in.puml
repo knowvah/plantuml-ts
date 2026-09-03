@@ -1,0 +1,18 @@
+@startuml
+start
+if (DataEfeito <= Datacorrente - 30 dias?) then
+if (tem impedimentos processo) then
+	stop
+else
+	if (valores divergentes?) then
+		stop
+	else
+		:foo;
+	endif
+endif	
+else
+  stop
+endif
+
+stop
+@enduml

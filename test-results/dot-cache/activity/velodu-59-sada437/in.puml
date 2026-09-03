@@ -1,0 +1,7 @@
+@startuml
+:f1;
+|swinlane1|
+:f2;
+|swinlane2|
+:f3;
+@enduml

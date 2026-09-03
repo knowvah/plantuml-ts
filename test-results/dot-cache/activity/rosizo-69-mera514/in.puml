@@ -1,0 +1,14 @@
+@startuml
+start
+:onCreate()
+Au demarrage;
+
+:onStart;
+if (in foreground?) then (YES)
+  :onResume();
+  :onPause();
+endif
+:onStop;
+:onDestroy;
+stop
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+:start;
+fork
+  :foo1;
+  :foo2;
+fork again
+  :foo3;
+endfork
+:end of process;
+@enduml

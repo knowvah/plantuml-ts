@@ -1,0 +1,23 @@
+@startuml
+skinparam defaultTextAlignment center
+
+start
+
+:«foreach»
+Network Ainterface controllers (NIC)
+{{
+skinparam backgroundColor #f1f1f1
+
+start
+
+:«foreach»
+NIC ports
+;
+
+stop
+}}
+FIN3
+;
+
+stop
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+start
+note
+    first note on start
+    **should point to start**
+end note
+note
+    second note on start
+    **should point to first note**
+end note
+stop
+@enduml

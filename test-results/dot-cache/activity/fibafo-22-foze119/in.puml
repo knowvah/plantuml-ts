@@ -1,0 +1,18 @@
+@startuml
+start
+if (level1) then
+if (level2) then
+if (level3) then
+if (level4) then
+if (level5) then
+if (level6) then
+if (level7) then
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+stop
+@enduml
