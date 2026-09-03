@@ -201,7 +201,16 @@ category invented for this mission. Detect them from the golden's own content
 — never from a slug list, which goes stale.
 
 **Consequences:** The numeric population is 373 − 23 jar-error − 90 our-error
-+ 8 counted once (the overlap) = **283 numerically baselined**, which is
-exactly the mission README's own "renders clean: 283". The two exclusion sets
-overlap by 8; a fixture in both records `jar-error`, since the jar's failure
-makes our own outcome unevidential either way.
++ 8 counted once (the overlap) = **268 numerically baselined**. The two
+exclusion sets overlap by 8; a fixture in both records `jar-error`, since the
+jar's failure makes our own outcome unevidential either way.
+
+**CORRECTION, 2026-09-02.** As first written this clause asserted the formula
+evaluates to 283 "which is exactly the mission README's own renders clean:
+283". That was an orchestrator arithmetic error: `373 − 23 − 90 + 8` is
+**268**. T2 measured 268, refused to force the stated total, and flagged the
+discrepancy — the correct behaviour. Both numbers are real and answer
+different questions: **283** render cleanly on OUR side (373 − 90), and of
+those 15 have goldens that are jar error pages, leaving **268** numerically
+comparable. Verified: the committed baseline is 268 `baseline` + 82 `error` +
+23 `jar-error` = 373, and only `baseline` entries carry a `weightedScore`.
