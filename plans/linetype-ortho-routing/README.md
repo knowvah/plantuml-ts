@@ -102,7 +102,7 @@ under-collect while exiting 0 (`.agent-notes/aoh-coverage-tmp-undercollect.md`).
 | [1](batch-1/overview.md) | T1 types+helper · T2 layout · T3 emitter | yes — **all three INERT** | [x] |
 | [2](batch-2/overview.md) | T4 state · T5 class · T6 description | yes | [x] |
 | [3](batch-3/overview.md) | T7 `splinesOk` gates `dotEqual` | yes | [x] |
-| [4](batch-4/overview.md) | T8 re-pin, name every mover | — | [ ] |
+| [4](batch-4/overview.md) | T8 re-pin, name every mover | — | [x] |
 
 **T0 gates everything** — without individual pins the inference on 7 fixtures
 is unfalsifiable. **Batch 1 is inert**: nothing consumes `linetype` until an
@@ -162,6 +162,7 @@ original **684** did by T1.
 | T5 | 687 | `tests/unit/class/class-linetype-routing.test.ts` |
 | T6 | 688 | `tests/unit/description/description-linetype-routing.test.ts` |
 | T7 | 688 | none (extended existing suites) |
+| T8 | 688 | none (pins + docs only) |
 
 Update this row-by-row as tasks land; the count includes the 1 skipped file
 vitest reports in its total.
