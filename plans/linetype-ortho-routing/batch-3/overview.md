@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | `splinesOk` gates `dotEqual`, PROVEN to discriminate | sonnet | `tests/oracle/svek-dot.ts`, `tests/oracle/svek-dot.test.ts` | T6 | [ ] |
+| T7 | `splinesOk` gates `dotEqual`, PROVEN to discriminate | sonnet | `tests/oracle/svek-dot.ts`, `tests/oracle/svek-dot.test.ts` | T6 | [x] |
 
 **Strictly after Batch 2** ([D6](../decisions.md)). `parity-*.json` records
 `dotEqual: true` on all 8 today only because splines is not compared;
