@@ -30,6 +30,7 @@ export const CHECKS = [
   'rankdirOk',
   'nodesepOk',
   'ranksepOk',
+  'splinesOk',
 ] as const;
 export type Check = (typeof CHECKS)[number];
 
@@ -156,6 +157,13 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   rankdirOk: { label: 'rankdir', values: (o, c) => [o.rankdir, c.rankdir] },
   nodesepOk: { label: 'nodesep (in)', values: (o, c) => [o.nodesep, c.nodesep] },
   ranksepOk: { label: 'ranksep (in)', values: (o, c) => [o.ranksep, c.ranksep] },
+  splinesOk: {
+    label: 'splines/forcelabels',
+    values: (o, c) => [
+      `${o.splines ?? '-'}/${o.forcelabels}`,
+      `${c.splines ?? '-'}/${c.forcelabels}`,
+    ],
+  },
 };
 
 function printGraphAttrs(label: string, g: StructuralGraph): void {

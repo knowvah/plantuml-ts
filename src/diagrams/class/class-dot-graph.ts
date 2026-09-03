@@ -461,7 +461,13 @@ export function buildDotGraph(
     nodes: dotNodes,
     edges: dotEdges,
     rankDir: ast.rankdir === 'LR' ? 'LR' : 'TB',
-    ...sepAttrs(theme),
+    // D3 (plans/linetype-ortho-routing/decisions.md): the SAME expression
+    // as the label half reads at line 401 above (`theme.linetype`) --
+    // forwarded via conditional spread so an absent linetype stays absent
+    // on DotInputGraph rather than becoming an explicit `undefined`. Merged
+    // onto one physical line with `sepAttrs` (not a new line) to keep
+    // `buildDotGraph` under the per-function NLOC cap without an extraction.
+    ...sepAttrs(theme), ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
     ...(clusterParts !== undefined ? { clusters: clusterParts.clusters } : {}),
     // G2/N29: class's renderer draws EVERY edge decoration as an inline
     // extremity polygon (`renderer-arrowhead.ts`, landed N1 mechanism 2 --

@@ -243,6 +243,11 @@ export function runPass(acc: PassAccumulator, ctx: DiagramCtx): DotLayoutResult 
     rankDir: ctx.rankdir,
     omitSepAttrs: true,
     ...(acc.clusters.length > 0 ? { clusters: acc.clusters } : {}),
+    // D3 (plans/linetype-ortho-routing/decisions.md): same expression as
+    // the label half (state-composite-edge-label.ts:98) -- omitSepAttrs
+    // above is irrelevant here, per D2 the splines/forcelabels pair is
+    // emitted OUTSIDE that guard by the shared emitter.
+    ...(ctx.theme.linetype !== undefined ? { linetype: ctx.theme.linetype } : {}),
     // mission G4 S8 mechanism 19 -- see state-dot-graph.ts#buildDotGraph's
     // doc comment for the full derivation (mirrors G2 N29).
     manualArrowheads: true,
@@ -416,6 +421,9 @@ export function buildTopLevelPass(
     ...(theme.nodeSep !== undefined ? { nodeSepExplicit: true } : {}),
     ...(theme.rankSep !== undefined ? { rankSepExplicit: true } : {}),
     ...(acc.clusters.length > 0 ? { clusters: acc.clusters } : {}),
+    // D3 (plans/linetype-ortho-routing/decisions.md): same expression as
+    // the label half (state-composite-edge-label.ts:98).
+    ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
     // mission G4 S8 mechanism 19 -- see state-dot-graph.ts#buildDotGraph's
     // doc comment for the full derivation (mirrors G2 N29).
     manualArrowheads: true,

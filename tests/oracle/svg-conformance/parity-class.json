@@ -266,9 +266,7 @@
       "slug": "bujedi-30-cize673",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[5]/path[1]/@d"
+      "verdict": "conformant"
     },
     {
       "slug": "bulena-06-xutu087",
@@ -855,9 +853,7 @@
       "slug": "dimisi-54-dula946",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 0.08399999999998897,
-      "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[3]"
+      "verdict": "conformant"
     },
     {
       "slug": "dipune-93-sare489",
@@ -1350,9 +1346,9 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 514.848,
-      "firstDiff": "svg/g[1]/g[3]/@id",
-      "maxDeltaPath": "svg/g[1]/g[12]/line[1]/@x2"
+      "maxDelta": 454.788,
+      "firstDiff": "svg/g[1]/g[3]/path[1]/@d",
+      "maxDeltaPath": "svg/g[1]/g[29]/path[1]/@d[0]"
     },
     {
       "slug": "ganika-12-pane511",
@@ -1706,9 +1702,9 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 17,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 108.007,
+      "firstDiff": "svg/g[1]/g[11][childCount]",
+      "maxDeltaPath": "svg/g[1]/g[12]/path[1]/@d[13]"
     },
     {
       "slug": "jalexi-21-xoje231",
@@ -2227,10 +2223,7 @@
       "slug": "kuxato-79-muno809",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 36.632000000000005,
-      "firstDiff": "svg/g[1]/g[10]/path[1]/@d",
-      "maxDeltaPath": "svg/g[1]/g[7]/path[1]/@d[5]"
+      "verdict": "conformant"
     },
     {
       "slug": "kuxosa-67-keko885",

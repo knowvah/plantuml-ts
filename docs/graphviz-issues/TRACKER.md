@@ -10,7 +10,21 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
 
 - [x] 01-getlayout-render-spline-mismatch.md
 - [x] 02-cluster-node-fractional-centering.md
-- [ ] 03-splines-attr-unsupported.md  <!-- UNCHECKED 2026-09-03 (was [x]).
+- [x] 03-splines-attr-unsupported.md  <!-- RE-CHECKED 2026-09-03 (was [ ] the
+        same day). CONSUMED at last by mission linetype-ortho-routing:
+        DotInputGraph.linetype + core/dot-splines.ts#dotSplinesAttrs, emitted
+        by BOTH applyGraphAttrs (layout) and graphAttrLines (DOT emitter),
+        forwarded by all three engines (state/class/description). All 8
+        fixtures now emit the exact splines line their own cached jar DOT
+        carries, on all 10 layout passes -- ortho five with
+        forcelabels=true, polyline three without (DotStringFactory.java
+        :161-169's asymmetry, confirmed against real jar data with zero
+        counter-examples). pavuzo-79-zodu430 re-measures CLEAN (12/12
+        declarations exact, -1.579968 px -> 0), so this file's own
+        checkbox rule is satisfied. The blast radius below was measured and
+        held exactly: grep of oracle/goldens/ found splines= in precisely
+        those 8 of 1,865 golden dirs, and nothing outside them moved.
+        ORIGINAL 2026-09-03 UNCHECKING FOLLOWS, unedited:
         The UPSTREAM half is fixed and verified working: the pinned 1.6.0
         honours `splines=ortho` exactly, matching native graphviz 15.1.1 on
         bb width, node centring and both xlabel positions (measured, see
@@ -280,7 +294,20 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         though this entry wired the LABEL half. pavuzo-79-zodu430 closes
         when 03 does. See 17's second-pass block and
         .agent-notes/gvi17-splines-never-emitted.md. -->
-- [~] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RECLASSIFIED
+- [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
+        mission linetype-ortho-routing. This entry's own reclassification was
+        right that the engine is innocent and right that the 1.583 is the
+        ortho port offset; the ROOT was issue 03's un-consumed fix --
+        splines=ortho was never emitted, so the layout ran on graphviz's
+        default CURVED routing. Forwarding skinparam linetype to the
+        graph-level attrs closes it: scope 2 width idx 2 goes -1.579968 px
+        -> 0, all 12 declarations exact, and the fixture's max SVG delta
+        drops 71.626 -> 1.007. NOTE the ~0.002 px residual predicted in
+        .agent-notes/gvi17-splines-never-emitted.md was never real -- it was
+        that note's standalone REPLAY deviating from the real pipeline by
+        0.002072 px; see the correction appended to that file.
+        ORIGINAL 2026-09-03 RECLASSIFICATION FOLLOWS, unedited:
+        RECLASSIFIED
         2026-09-03: NOT a dot-engine defect, closed with no upstream fix to
         wait for. The filing's premise -- that the engine reserves ~1.58pt
         LESS horizontal canvas for an ortho edge's xlabels than native

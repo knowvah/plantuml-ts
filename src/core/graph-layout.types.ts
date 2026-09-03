@@ -390,6 +390,13 @@ export interface DotInputGraph {
    *  its target node) — additive, no existing non-description caller sets
    *  this. */
   manualArrowheads?: true;
+  /** Semantic mirror of upstream's `DotSplines` enum
+   *  (`skinParam.getDotSplines()`, svek/DotStringFactory.java:161-169),
+   *  translated to `splines`/`forcelabels` attribute strings at the emitter
+   *  rather than carried as a raw string (D1). Absent = prior behavior (no
+   *  `splines` attribute emitted) — additive, no existing caller sets
+   *  this. */
+  linetype?: 'ortho' | 'polyline';
 }
 // `DotLayoutResult` moved to ./graph-layout-result.types.ts for the 500-line
 // file cap (see that module's header). Re-exported so no consumer changed.
