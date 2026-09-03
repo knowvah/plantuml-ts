@@ -8,8 +8,8 @@ gates green). **No `src/` changed.** Pin lives in
 
 - **Context**: pinning the pre-change state of the 8 fixtures whose cached
   jar svek DOT emits `splines=`, before wiring the routing half.
-- **Finding**: across all 11 cached jar DOTs (8 fixtures; the 2 state ones
-  dump `svek-1.dot` + `svek-2.dot`), `splines=` is present on every pass. Our
+- **Finding**: across all 10 cached jar DOT passes (8 fixtures; the 2
+  state ones dump `svek-1.dot` + `svek-2.dot`, so 5+1+2+2 = 10), `splines=` is present on every pass. Our
   own `toSvekDot(DotInputGraph)` emits `splines` on **zero** passes, and
   `DotInputGraph.linetype` does not exist to carry it. That is the defect
   stated in `.agent-notes/gvi17-splines-never-emitted.md`, re-confirmed from
