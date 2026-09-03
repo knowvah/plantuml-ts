@@ -11,7 +11,7 @@ tasks, worktrees cost more than they save.
 |---|---|---|---|---|---|
 | T4 | state forwards `linetype` (3 assembly sites, 2 files) | sonnet | `src/diagrams/state/state-dot-graph.ts`, `src/diagrams/state/state-composite-pass.ts` + tests | T2, T3 | [x] |
 | T5 | class forwards `linetype` | sonnet | `src/diagrams/class/class-dot-graph.ts` + tests | T4 | [x] |
-| T6 | description forwards `linetype` | sonnet | `src/diagrams/description/layout.ts` + tests | T5 | [ ] |
+| T6 | description forwards `linetype` | sonnet | `src/diagrams/description/layout.ts` + tests | T5 | [x] |
 
 **Disjoint fixture sets make each task separately attributable:** T4 moves
 only the 2 state fixtures, T5 only the 5 class fixtures, T6 only the 1

@@ -100,7 +100,7 @@ under-collect while exiting 0 (`.agent-notes/aoh-coverage-tmp-undercollect.md`).
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin the floor, all 8 individually | — | [x] |
 | [1](batch-1/overview.md) | T1 types+helper · T2 layout · T3 emitter | yes — **all three INERT** | [x] |
-| [2](batch-2/overview.md) | T4 state · T5 class · T6 description | yes | [ ] |
+| [2](batch-2/overview.md) | T4 state · T5 class · T6 description | yes | [x] |
 | [3](batch-3/overview.md) | T7 `splinesOk` gates `dotEqual` | yes | [ ] |
 | [4](batch-4/overview.md) | T8 re-pin, name every mover | — | [ ] |
 
@@ -160,6 +160,7 @@ original **684** did by T1.
 | T3 | 685 | none (extended an existing suite) |
 | T4 | 686 | `tests/unit/state/state-linetype-routing.test.ts` |
 | T5 | 687 | `tests/unit/class/class-linetype-routing.test.ts` |
+| T6 | 688 | `tests/unit/description/description-linetype-routing.test.ts` |
 
 Update this row-by-row as tasks land; the count includes the 1 skipped file
 vitest reports in its total.
