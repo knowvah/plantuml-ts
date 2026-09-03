@@ -751,6 +751,82 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`activity-nested-split-geometry`** (NEW, unbriefed) — FILED 2026-09-03
+  by `activity-element-granularity` T1, measured. `nexitu-74-luga914`
+  (nested `split`/`split again`) renders **504×380** here against **169×193**
+  in the jar — ~3x too wide, 2x too tall. No skinparam, note or swimlane
+  involved; pure nested-split sizing. Upstream `Ftile` not yet located
+  (likely `activitydiagram3/ftile/vertical/` or a `FtileSplit`-family
+  class). Most severe of the four filed alongside it by ratio — probably
+  the first to pick up. Full evidence: `.agent-notes/aeg-T1-8-exceptions.md`.
+
+- **`activity-swimlane-rendering`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T1, measured. Ours draws swimlanes as a
+  boxed table HEADER (`SWIMLANE_HEADER_H`,
+  `src/diagrams/activity/renderer.ts:203`) with bold black titles inside;
+  the jar draws thin colored divider `<line>`s (respecting
+  `SwimlaneBorderColor`/`SwimlaneBorderThickness`) with floating titles
+  above each lane (respecting `SwimlaneTitleFontColor`/
+  `SwimlaneTitleFontSize`) — a different visual model, not a sizing bug.
+  All four swimlane skinparams are entirely unwired (grepped, zero
+  matches). Upstream `Ftile` not yet located. Largest of the four filed
+  here — likely its own multi-task mission. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md`.
+
+- **`activity-diamond-font-skinparams`** (NEW, unbriefed) — FILED
+  2026-09-03 by `activity-element-granularity` T1, measured.
+  `DiamondFontSize`/activity `FontSize` skinparams are unwired (grepped,
+  zero matches for `DiamondFontSize`) where `arrowFontSize` already IS
+  (`src/core/skinparam-key-handlers.ts:139`) — the general mechanism
+  exists, this one key was never added to it. `dozaxu-98-xetu961`
+  (`DiamondFontSize 40`) renders 212px wide against the jar's 467px.
+  Likely short and mechanical once upstream's `SkinParam` key and its
+  diamond-`Ftile` consumer are located. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md`.
+
+- **`activity-note-after-terminal`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T1, measured. A note attached to a `stop`
+  (or via `note right` near a `break`) is laid out as FLOW HEIGHT below the
+  terminal node here; the jar positions it as a floating side-annotation
+  beside the node with no vertical cost. `cujoni-21-somi079` gains ~50px of
+  spurious height. Upstream's note-on-terminal `Ftile` not yet located
+  (likely `FtileWithNoteOpale` or similar under `activitydiagram3/ftile/`).
+  Full evidence: `.agent-notes/aeg-T1-8-exceptions.md`.
+
+- **`activity-embedded-diagram-labels`** (NEW, unbriefed) — FILED
+  2026-09-03 by `activity-element-granularity` T3, measured.
+  `bozido-07-geze049`'s label embeds FOUR sub-diagrams via creole's
+  `{{wbs}}`/`{{mindmap}}`/`{{salt}}`/`{{gantt}}` syntax; ours collapses the
+  whole region to 23 flat text lines (canvas 690px tall) where the jar
+  renders compact nested diagrams (419px). Exotic, separate creole
+  feature — not investigated further. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
+
+- **`activity-note-width-overscan`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T3, measured. `vubolo-48-cubu499` (two
+  notes on action nodes, one explicitly testing "overscan") renders 171px
+  too wide (522 vs jar's 351). May share a mechanism with
+  `activity-note-after-terminal` above (both are note sizing) or may be a
+  sibling defect — not distinguished. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
+
+- **`activity-edge-stroke-width`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T4's re-census, measured. Every activity
+  edge line draws `stroke-width="1.5"`
+  (`src/diagrams/activity/renderer.ts#renderEdgeSegments`); every cached
+  jar golden draws `stroke-width="1"`. `Worm.java:157,165`'s
+  `UStroke.withThickness(1.5)` calls are for the start/end ARROW
+  DECORATIONS only (inside `if (startDecoration != null)` /
+  `if (endDecoration != null)`) — the line itself gets its stroke from
+  `style.getStroke()` at `Worm.java:129`, a different source entirely.
+  Now the single largest individual attribute residual in
+  `oracle/goldens/svg-activity/diff-census.json` (weight ~2319, 256 of
+  268 fixtures) — was previously invisible, folded into the
+  `svg/g[][childCount]` short-circuit before this mission's comparator
+  fix and element swaps. Looks cheap: one constant, one call site,
+  needs `style.getStroke()`'s actual resolved value (likely a themeable
+  default, not literally `1` — verify before hardcoding).
+
 - **`sequence-fidelity-residuals`** (NEW, unbriefed) — FILED 2026-08-26 as
   `sequence-command-coverage`'s D6 census. **The work queue is the ten items
   below plus the ten still-refusing command gaps**; this row exists so the

@@ -347,6 +347,8 @@ describe('compareSvg', () => {
 
 // ---------------------------------------------------------------------------
 // Weighted diff score -- D5, `plans/sequence-root-chrome/decisions.md`.
+// Child-count charging revised by `plans/svg-comparator-alignment/
+// decisions.md` D1 (2026-09-03) -- see that block's own comments below.
 //
 // `compareNodes` short-circuits in THREE places (node-type mismatch, tag
 // mismatch, child-count mismatch) and charged exactly 1 for each, however
@@ -357,9 +359,15 @@ describe('compareSvg', () => {
 // charged an upper bound on what descending could have cost, measured in
 // `units`: one per node plus one per attribute, summed over the subtree.
 //
-// The weighting is purely additive. `diffs.length`, every `path`/`actual`/
-// `expected`/`delta`/`tolerance`, and the ORDER of the array are untouched,
-// because seven other engines' ratchets and five scripts read them.
+// `path`/`actual`/`expected`/`delta`/`tolerance` on any individual `Diff`
+// are untouched, and node-type/tag short-circuits still push exactly one
+// diff each, because seven other engines' ratchets and five scripts read
+// them. The CHILD-COUNT short-circuit is the one exception: D1 replaced its
+// sum-of-both-sides charge with LCS alignment, so a `[childCount]` mismatch
+// can now push MORE than one diff (the unmatched-remainder charge, plus a
+// real diff from each aligned pair that recursion finds actually differs) --
+// `diffs.length` for that case is no longer 1 by construction. `weightedScore`
+// itself is still purely additive over whatever diffs a run produces.
 // ---------------------------------------------------------------------------
 
 /** `<svg>` wrapper so each pair below differs only in its body. */
@@ -402,18 +410,23 @@ describe('compareSvg — short-circuit weights', () => {
     expect(weightedScore(diffs)).toBe(6);
   });
 
-  // AC2. actual children: rect{x,y} = 3 units. expected children: rect{x} = 2
-  // plus line{x1,y1,x2,y2} = 5, so 7. The node itself is not charged twice.
-  test('a child-count mismatch is weighted by both child lists', () => {
+  // D1: actual=[rect{x,y}], expected=[rect{x}, line{x1,y1,x2,y2}]. `rect`
+  // LCS-matches `rect` (both sides have exactly one), so it RECURSES --
+  // surfacing the real `@y` diff (actual has y, expected doesn't) -- rather
+  // than being swallowed. Only the unmatched `line{x1,y1,x2,y2}` (1 node +
+  // 4 attrs = 5 units) is charged at the `[childCount]` path.
+  test('a child-count mismatch aligns matched children and weights only the unmatched remainder', () => {
     const { diffs } = compareSvg(
       svg('<g><rect x="1" y="2"/></g>'),
       svg('<g><rect x="1"/><line x1="0" y1="0" x2="1" y2="1"/></g>'),
       'deterministic',
     );
-    expect(diffs).toHaveLength(1);
-    expect(diffs[0]?.path).toBe('svg/g[1][childCount]');
-    expect(diffs[0]?.weight).toBe(10);
-    expect(weightedScore(diffs)).toBe(10);
+    expect(diffs).toHaveLength(2);
+    const yDiff = diffs.find((d) => d.path === 'svg/g[1]/rect[1]/@y');
+    expect(yDiff?.weight).toBeUndefined(); // an ordinary attribute diff, scores 1
+    const childCountDiff = diffs.find((d) => d.path === 'svg/g[1][childCount]');
+    expect(childCountDiff?.weight).toBe(5); // unmatched line only, not both sides
+    expect(weightedScore(diffs)).toBe(6); // 5 (unmatched line) + 1 (the @y diff)
   });
 
   // The third short-circuit, distinct from the tag one above: SVG has a
@@ -496,9 +509,17 @@ describe('compareSvg — weighted score is monotone in alignment', () => {
       'deterministic',
     ).diffs;
 
-    expect(weightedScore(before)).toBe(6);
+    // `before`: actual=[rect{x=1}] vs expected=[rect{x=9},line{x1=0}] (1v2,
+    // takes the childCount branch). `rect` LCS-matches `rect` and recurses
+    // (surfacing the real @x diff, weight 1); the unmatched `line{x1}`
+    // (1 node + 1 attr = 2 units) is charged at [childCount]. Total: 1 + 2.
+    expect(weightedScore(before)).toBe(3);
+    expect(before).toHaveLength(2);
+    // `after`: actual=[rect{x=1},line{x1=5}] vs expected -- 2v2, SAME length
+    // as expected, so this takes the untouched equal-length positional
+    // loop, not the branch under test. Unaffected by D1; kept here to show
+    // the full alignment-vs-parity range stays monotone end to end.
     expect(weightedScore(after)).toBe(2);
-    expect(before).toHaveLength(1);
     expect(after).toHaveLength(2);
   });
 
@@ -511,5 +532,103 @@ describe('compareSvg — weighted score is monotone in alignment', () => {
     expect(weightedScore(after)).toBe(0);
     expect(before).toHaveLength(1);
     expect(after).toHaveLength(0);
+  });
+});
+
+
+// ---------------------------------------------------------------------------
+// LCS-aligned child-count charging -- svg-comparator-alignment D1.
+//
+// The property these three cases pin, that no case above exercises: a
+// sibling-list length mismatch that GROWS toward the expected side WITHOUT
+// reaching parity must not cost more than it did before growing. The old
+// sum-of-both-sides charge failed exactly this case in production
+// (`.agent-notes/aeg-T1.md` on `feat/activity-element-granularity`): a
+// verified-correct port added ~2413 `<line>` elements, closing 57% of the
+// element-level gap to the jar, and the gated score ROSE 7.0% anyway,
+// because the charge counted the SIZE of what grew, never whether the
+// growth was right.
+// ---------------------------------------------------------------------------
+describe('compareSvg — LCS-aligned child-count charging (D1)', () => {
+  test('an unmatched element is charged alone, not both full sibling lists', () => {
+    // actual has an extra <rect> the expected side lacks; both <circle>s
+    // LCS-match by tag. Old formula: sumUnits(actual=11) + sumUnits(expected=8)
+    // = 19. New: only the unmatched rect (1 node + x,y = 3 units).
+    const { diffs } = compareSvg(
+      svg('<g><circle cx="1" cy="1" r="1"/><circle cx="2" cy="2" r="2"/><rect x="9" y="9"/></g>'),
+      svg('<g><circle cx="1" cy="1" r="1"/><circle cx="2" cy="2" r="2"/></g>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.path).toBe('svg/g[1][childCount]');
+    expect(diffs[0]?.weight).toBe(3);
+    expect(weightedScore(diffs)).toBe(3);
+  });
+
+  test('an element inserted in the middle still lets both flanks align', () => {
+    // A <line> is inserted BETWEEN a <rect> and a <polygon> that are
+    // otherwise identical on both sides -- proof this is real LCS
+    // alignment, not a prefix/suffix trim that only handles insertions at
+    // an end. Old formula: sumUnits(actual=9) + sumUnits(expected=4) = 13.
+    // New: only the inserted line (1 node + 4 attrs = 5 units) -- which is
+    // only possible if BOTH the rect AND the polygon matched across it.
+    const { diffs } = compareSvg(
+      svg('<g><rect x="1"/><line x1="9" y1="9" x2="9" y2="9"/><polygon points="0,0"/></g>'),
+      svg('<g><rect x="1"/><polygon points="0,0"/></g>'),
+      'deterministic',
+    );
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.weight).toBe(5);
+    expect(weightedScore(diffs)).toBe(5);
+  });
+
+  test('sibling lists past MAX_ALIGN_PRODUCT degrade to the old sum charge, not a crash', () => {
+    // `sequence/zudize-61-vomi445`'s root <g> has 70093 direct children --
+    // an O(n*m) DP table at that size OOM'd a 4 GB heap (measured; see
+    // alignChildrenByKey's own doc comment). 2001x2001 = 4,004,001 safely
+    // exceeds MAX_ALIGN_PRODUCT's 2000x2000 = 4,000,000 threshold while
+    // still building and comparing in milliseconds, so this pins the
+    // DEGRADED (old-formula) behaviour without needing an actually-huge
+    // fixture in the test suite itself.
+    const bigActual = svg(`<g>${'<rect x="1"/>'.repeat(2001)}</g>`);
+    const bigExpected = svg(`<g>${'<rect x="1"/>'.repeat(2001)}<rect x="1"/></g>`);
+    const { diffs } = compareSvg(bigActual, bigExpected, 'deterministic');
+    expect(diffs).toHaveLength(1);
+    expect(diffs[0]?.path).toBe('svg/g[1][childCount]');
+    // Old formula: sumUnits(2001 rects) + sumUnits(2002 rects) = 4002 + 4004.
+    expect(diffs[0]?.weight).toBe(2001 * 2 + 2002 * 2);
+  });
+
+  test('growth toward parity that does not reach it still LOWERS the score -- the T1 regression', () => {
+    // expected has 4 <line> interspersed with 2 <rect> (6 children total).
+    // `before` has 1 line (short by 3); `after` has 3 lines (short by 1) --
+    // NEITHER step reaches exact count parity with expected, which is
+    // exactly the shape T1 broke on (686/1236 units -> 902/1236 units,
+    // never reaching 1236). Under the OLD sum-based formula this would
+    // RISE 33 -> 43 (computed by hand from sumUnits on each side); the
+    // fixed formula must FALL as more real matches are found.
+    const expected = svg(
+      '<g><rect x="1"/><line x1="0" y1="0" x2="1" y2="1"/>' +
+        '<line x1="1" y1="1" x2="2" y2="2"/><rect x="2"/>' +
+        '<line x1="2" y1="2" x2="3" y2="3"/><line x1="3" y1="3" x2="4" y2="4"/></g>',
+    );
+    const before = compareSvg(
+      svg('<g><rect x="1"/><line x1="0" y1="0" x2="1" y2="1"/><rect x="2"/></g>'),
+      expected,
+      'deterministic',
+    ).diffs;
+    const after = compareSvg(
+      svg(
+        '<g><rect x="1"/><line x1="0" y1="0" x2="1" y2="1"/>' +
+          '<line x1="1" y1="1" x2="2" y2="2"/><rect x="2"/>' +
+          '<line x1="2" y1="2" x2="3" y2="3"/></g>',
+      ),
+      expected,
+      'deterministic',
+    ).diffs;
+
+    expect(weightedScore(before)).toBe(19);
+    expect(weightedScore(after)).toBe(9);
+    expect(weightedScore(after)).toBeLessThan(weightedScore(before));
   });
 });

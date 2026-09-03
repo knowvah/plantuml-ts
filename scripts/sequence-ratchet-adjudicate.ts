@@ -5,12 +5,19 @@
  * WHY THIS EXISTS. `tests/oracle/svg-conformance/sequence.diff-baseline.
  * ratchet.test.ts` fails any fixture whose `weightedScore` rises above its
  * pin, and its header states that "a rise has no benign reading left". That
- * claim is true WITHIN ONE COMPARISON and FALSE ACROSS A CHANGE THAT GROWS
- * OUR OUTPUT. `compareNodes` short-circuits in three places — node type, tag,
- * child count (`compare.ts:198,229,404`) — and charges each
- * `units(actual) + units(expected)`. The charge therefore scales with the
- * size of OUR document, so the same "still mismatched" verdict costs strictly
- * more once our side grows, even when our side moved CLOSER to the golden.
+ * claim is true WITHIN ONE COMPARISON and WAS FALSE ACROSS A CHANGE THAT GREW
+ * OUR OUTPUT, before `plans/svg-comparator-alignment` D1 (2026-09-03).
+ * `compareNodes` short-circuits in three places — node type, tag, child
+ * count (`compare.ts:198,229,~487`, line numbers shifted by D1) — and the
+ * NODE-TYPE and TAG short-circuits still charge `units(actual) +
+ * units(expected)` unconditionally, so the reasoning below remains valid
+ * for THOSE two. The CHILD-COUNT short-circuit no longer does: D1 replaced
+ * its sum-of-both-sides charge with LCS alignment, so the "same verdict
+ * costs strictly more once our side grows" failure mode this script exists
+ * to classify is now the case D1 fixes at the root for THAT short-circuit.
+ * `isSubstructureRise`'s own arithmetic proof (below) was specific to the
+ * OLD child-count formula and is now unlikely to fire on the shape it was
+ * built for — see its doc comment.
  *
  * Worked example, `sequence/bexoce-95-vibe195` (measured, T13): baseline 622,
  * live 950, the ENTIRE delta one diff — `svg/g[1][childCount]` went from
@@ -200,19 +207,35 @@ export function classify(base: Classifiable, live: Classifiable): Verdict {
  * in the `<g><title>` group the jar emits leaves the child COUNT untouched
  * while growing our node mass.
  *
- * That is provably benign, and the proof is arithmetic rather than a
- * judgement call. When the comparison short-circuits at the root child count,
- * the ENTIRE charge is `sumUnits(ourChildren) + sumUnits(theirChildren)`
- * (`compare.ts:396-406`) and NOTHING below the root group is ever compared.
- * So if the score delta equals our own unit growth exactly, then:
+ * That was provably benign under the PRE-D1 formula, and the proof was
+ * arithmetic rather than a judgement call: when the comparison
+ * short-circuited at the root child count, the ENTIRE charge was
+ * `sumUnits(ourChildren) + sumUnits(theirChildren)` and NOTHING below the
+ * root group was ever compared, so a score delta equal to our own unit
+ * growth meant the golden's contribution cancelled and no descent happened
+ * at either ref.
  *
- *   - the golden's contribution to the charge is unchanged (it cancels), and
- *   - no descent happened at either ref, so no comparison can have got worse.
- *
- * The rise is then pure upper-bound inflation on nodes we added. A rise that
- * does NOT satisfy the equality is left a `regression` and must be diagnosed;
- * so is any rise where the child-count distance itself grew, even if the
- * arithmetic happens to line up.
+ * `plans/svg-comparator-alignment` D1 (2026-09-03) replaced that charge
+ * with LCS alignment: children that correspond now RECURSE for their real
+ * cost, and only the genuinely unmatched remainder on each side is charged.
+ * `ownUnitsOf` (below) sums ALL of our root children's units, which no
+ * longer equals what `compare.ts` actually charges for a root short-circuit
+ * (confirmed: `ownUnitsOf`'s own pinned test failed the moment D1 landed).
+ * The identity this function checks therefore no longer proves what its
+ * comment above claims in the general case -- it still HOLDS in the narrow
+ * case where nothing about the alignment differs between `base` and `live`
+ * except purely-unmatched growth on our side. Whether it can still fire
+ * FALSE-POSITIVE (classify a real regression as `artefact`) post-D1 is NOT
+ * re-proven here -- the old proof relied on `weight` exactly equalling
+ * `ownUnits(ours) + ownUnits(theirs)`, which D1 broke, so an arithmetic
+ * coincidence between total own-side growth and the new (smaller,
+ * unmatched-only) score delta is no longer ruled out by construction. Left
+ * as documented-uncertain rather than silently trusted
+ * (`plans/svg-comparator-alignment/decisions.md` D4): D1 already prevents
+ * most of the growth-driven rises this function existed to classify, which
+ * lowers how often it fires at all, but a fresh soundness proof (or a
+ * replacement) for the post-D1 formula is separable follow-on work, not
+ * required to land D1 itself.
  */
 function isSubstructureRise(base: Classifiable, live: Classifiable): boolean {
   if (base.ownUnits === null || live.ownUnits === null) return false;
@@ -373,6 +396,14 @@ function units(node: NormalizedNode): number {
  * ROOT CONTENT GROUP -- `svg/g[1]`, the same node whose child count
  * `childDistanceFrom` reads. `null` when there is no such group, which is
  * ambiguous rather than zero and so must not classify anything.
+ *
+ * Pre-D1 this equalled compare.ts's OWN root-short-circuit charge exactly
+ * (`weight === ownUnitsOf(ours) + ownUnitsOf(theirs)`, pinned in this
+ * function's own test). D1 (`plans/svg-comparator-alignment/decisions.md`)
+ * scoped that charge down to the unmatched remainder only, so this is now
+ * a DIFFERENT, larger number than what compare.ts actually charges --
+ * `isSubstructureRise`'s doc comment records what that means for its own
+ * soundness.
  */
 export function ownUnitsOf(svg: string): number | null {
   const root = normalizeSvg(svg);

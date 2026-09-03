@@ -1,0 +1,5389 @@
+{
+  "$comment": "POST-SWAP ELEMENT CENSUS for the activity-element-granularity mission (T4, D6). NOT a golden manifest and NOT a gate -- no test reads this file. It is the instrument the mission's three element swaps (T1 polyline->line, T2 circle->ellipse, T3 one <text> per line) are measured against: diff-baseline.json records HOW WRONG each activity fixture is and diff-census.json records WHICH DIFF PATHS carry the weight, but neither says WHICH SVG ELEMENT moved, so three sequenced swaps against those two pins alone would be individually unattributable (D6). Population: the 268 status:\"baseline\" fixtures of oracle/goldens/svg-activity/diff-baseline.json -- the 82 status:\"error\" and 23 status:\"jar-error\" entries are excluded, since an unrenderable fixture and a jar error page both carry no meaningful element counts and must never read as zero (D8/D12 of plans/activity-oracle-harness/decisions.md). Every number is a pure function of the committed corpus at measuredAgainstCommit, measured through the IDENTICAL seams the ratchet gate uses: tests/oracle/svg-conformance/render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and tests/helpers/fixture-include-store.ts#fixtureIncludeStore(), then compareSvg(ours, golden, 'deterministic'). `tags` counts ELEMENTS OF EACH TAG in the NORMALIZED tree (tests/oracle/svg-conformance/normalize.ts), ours vs the committed jar oracle at test-results/dot-cache/activity/<slug>/in.svg -- normalized, not raw, so the counts are exactly what the comparator sees (comments, processing instructions and whitespace text dropped). `childCountDelta` is ours-minus-jar summed over every ROOT-GROUP child-count diff -- the diffs whose path matches ^svg/g[N][childCount]$ -- read out of compareSvg's own Diff records, never from a hand-rolled tag counter, and `childCountWeight` is the weight those same records carry. That family is the mission's target: 209 records holding 99321 of 108447 total weight (91.6%). A NEGATIVE childCountDelta means we emit FEWER root-group children than the jar, which is the expected sign here -- we draw one <polyline> where the jar draws N <line>, and one <text> carrying <tspan> children where it draws one <text> per line. The totals block restates the mission README's element table; if it stops reproducing, the corpus moved and the mission's premise must be re-derived rather than assumed.",
+  "measuredAt": "2026-09-03",
+  "measuredAgainstCommit": "53942ff7",
+  "population": {
+    "baselined": 268
+  },
+  "aggregateWeightedScore": 61677,
+  "rootGroupChildCount": {
+    "records": 206,
+    "weight": 24588,
+    "shareOfAggregate": 0.39865752225302786
+  },
+  "totals": {
+    "line": { "ours": 2702, "jar": 3336 },
+    "polyline": { "ours": 0, "jar": 0 },
+    "text": { "ours": 1588, "jar": 1915 },
+    "tspan": { "ours": 0, "jar": 0 },
+    "circle": { "ours": 0, "jar": 0 },
+    "ellipse": { "ours": 518, "jar": 488 },
+    "polygon": { "ours": 1936, "jar": 2551 },
+    "rect": { "ours": 1056, "jar": 1027 },
+    "path": { "ours": 116, "jar": 112 },
+    "a": { "ours": 0, "jar": 9 },
+    "image": { "ours": 0, "jar": 6 }
+  },
+  "fixtures": [
+    {
+      "slug": "activity-creole-table",
+      "tags": {
+        "line": { "ours": 0, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 35,
+      "weightedScore": 60,
+      "diffCount": 26
+    },
+    {
+      "slug": "bakopu-96-pudu086",
+      "tags": {
+        "line": { "ours": 5, "jar": 3 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 12 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 3 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 77,
+      "weightedScore": 205,
+      "diffCount": 129
+    },
+    {
+      "slug": "bareka-88-fusu160",
+      "tags": {
+        "line": { "ours": 12, "jar": 13 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 10, "jar": 10 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 99,
+      "weightedScore": 237,
+      "diffCount": 139
+    },
+    {
+      "slug": "bazize-75-dedo568",
+      "tags": {
+        "line": { "ours": 19, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 6, "jar": 6 },
+        "polygon": { "ours": 14, "jar": 17 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -12,
+      "childCountWeight": 124,
+      "weightedScore": 370,
+      "diffCount": 247
+    },
+    {
+      "slug": "bazuma-86-metu353",
+      "tags": {
+        "line": { "ours": 5, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 4, "jar": 7 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -14,
+      "childCountWeight": 96,
+      "weightedScore": 181,
+      "diffCount": 86
+    },
+    {
+      "slug": "becaje-01-vaji284",
+      "tags": {
+        "line": { "ours": 8, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 80,
+      "weightedScore": 154,
+      "diffCount": 75
+    },
+    {
+      "slug": "becanu-19-diti597",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 164,
+      "weightedScore": 280,
+      "diffCount": 117
+    },
+    {
+      "slug": "bedezo-44-more709",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 92,
+      "weightedScore": 206,
+      "diffCount": 115
+    },
+    {
+      "slug": "begivo-34-sicu289",
+      "tags": {
+        "line": { "ours": 14, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 7, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 120,
+      "weightedScore": 250,
+      "diffCount": 131
+    },
+    {
+      "slug": "bepuku-07-vebe062",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 9, "jar": 19 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -25,
+      "childCountWeight": 175,
+      "weightedScore": 369,
+      "diffCount": 195
+    },
+    {
+      "slug": "besaga-58-poli497",
+      "tags": {
+        "line": { "ours": 12, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 17 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 16 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -24,
+      "childCountWeight": 167,
+      "weightedScore": 344,
+      "diffCount": 178
+    },
+    {
+      "slug": "bideta-97-cezo697",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 129,
+      "weightedScore": 232,
+      "diffCount": 104
+    },
+    {
+      "slug": "bidosa-98-veca008",
+      "tags": {
+        "line": { "ours": 6, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 68,
+      "weightedScore": 180,
+      "diffCount": 113
+    },
+    {
+      "slug": "bigide-91-bise382",
+      "tags": {
+        "line": { "ours": 5, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 21,
+      "weightedScore": 117,
+      "diffCount": 97
+    },
+    {
+      "slug": "biguku-39-voxu233",
+      "tags": {
+        "line": { "ours": 5, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 4, "jar": 7 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 28,
+      "weightedScore": 92,
+      "diffCount": 65
+    },
+    {
+      "slug": "biredi-08-bama025",
+      "tags": {
+        "line": { "ours": 12, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 10, "jar": 18 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -22,
+      "childCountWeight": 154,
+      "weightedScore": 334,
+      "diffCount": 181
+    },
+    {
+      "slug": "bixefi-77-moki051",
+      "tags": {
+        "line": { "ours": 16, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 145,
+      "weightedScore": 282,
+      "diffCount": 138
+    },
+    {
+      "slug": "bizono-61-sasa740",
+      "tags": {
+        "line": { "ours": 15, "jar": 21 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 12, "jar": 17 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 91,
+      "weightedScore": 234,
+      "diffCount": 144
+    },
+    {
+      "slug": "bocaga-53-nale241",
+      "tags": {
+        "line": { "ours": 9, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 5 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 26,
+      "weightedScore": 126,
+      "diffCount": 101
+    },
+    {
+      "slug": "bolizi-92-pele824",
+      "tags": {
+        "line": { "ours": 13, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 12, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 10, "jar": 8 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 85,
+      "weightedScore": 315,
+      "diffCount": 231
+    },
+    {
+      "slug": "boxoto-53-sifo232",
+      "tags": {
+        "line": { "ours": 45, "jar": 66 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 29, "jar": 44 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 36, "jar": 62 },
+        "rect": { "ours": 19, "jar": 19 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -62,
+      "childCountWeight": 462,
+      "weightedScore": 1117,
+      "diffCount": 656
+    },
+    {
+      "slug": "bozido-07-geze049",
+      "tags": {
+        "line": { "ours": 6, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 25, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 4, "jar": 4 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 4 }
+      },
+      "childCountDelta": 18,
+      "childCountWeight": 178,
+      "weightedScore": 273,
+      "diffCount": 96
+    },
+    {
+      "slug": "bozuro-33-celo170",
+      "tags": {
+        "line": { "ours": 13, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 9, "jar": 10 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 62,
+      "weightedScore": 209,
+      "diffCount": 148
+    },
+    {
+      "slug": "bugaja-31-jaso630",
+      "tags": {
+        "line": { "ours": 18, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 8 },
+        "rect": { "ours": 7, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 173,
+      "weightedScore": 332,
+      "diffCount": 160
+    },
+    {
+      "slug": "bulasi-17-vafa634",
+      "tags": {
+        "line": { "ours": 13, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 9, "jar": 14 },
+        "rect": { "ours": 4, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 128,
+      "weightedScore": 275,
+      "diffCount": 148
+    },
+    {
+      "slug": "bumaca-51-kece901",
+      "tags": {
+        "line": { "ours": 10, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 161,
+      "weightedScore": 261,
+      "diffCount": 101
+    },
+    {
+      "slug": "bunoxu-10-jabe604",
+      "tags": {
+        "line": { "ours": 13, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 7 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 8,
+      "childCountWeight": 98,
+      "weightedScore": 248,
+      "diffCount": 151
+    },
+    {
+      "slug": "cagoze-40-tete366",
+      "tags": {
+        "line": { "ours": 6, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 54,
+      "weightedScore": 134,
+      "diffCount": 81
+    },
+    {
+      "slug": "calenu-74-vigo098",
+      "tags": {
+        "line": { "ours": 15, "jar": 23 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 11, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 13, "jar": 19 },
+        "rect": { "ours": 9, "jar": 9 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -14,
+      "childCountWeight": 98,
+      "weightedScore": 348,
+      "diffCount": 251
+    },
+    {
+      "slug": "camavo-50-kaku123",
+      "tags": {
+        "line": { "ours": 19, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 13, "jar": 18 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 70,
+      "weightedScore": 288,
+      "diffCount": 219
+    },
+    {
+      "slug": "carapo-31-bisi880",
+      "tags": {
+        "line": { "ours": 4, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 60,
+      "weightedScore": 105,
+      "diffCount": 46
+    },
+    {
+      "slug": "cemagu-66-vazo965",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 75,
+      "weightedScore": 162,
+      "diffCount": 88
+    },
+    {
+      "slug": "cemipu-87-dinu624",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 169,
+      "weightedScore": 327,
+      "diffCount": 159
+    },
+    {
+      "slug": "cetica-88-toke482",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 114,
+      "diffCount": 114
+    },
+    {
+      "slug": "ciceto-21-zanu057",
+      "tags": {
+        "line": { "ours": 10, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 14 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -18,
+      "childCountWeight": 126,
+      "weightedScore": 270,
+      "diffCount": 145
+    },
+    {
+      "slug": "cifafo-49-jazi415",
+      "tags": {
+        "line": { "ours": 12, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 8 },
+        "rect": { "ours": 6, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 54,
+      "weightedScore": 194,
+      "diffCount": 141
+    },
+    {
+      "slug": "cixave-47-milo698",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 14 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -12,
+      "childCountWeight": 117,
+      "weightedScore": 235,
+      "diffCount": 119
+    },
+    {
+      "slug": "cizixu-00-koro700",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 33,
+      "diffCount": 33
+    },
+    {
+      "slug": "copisa-69-xisi273",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 63,
+      "weightedScore": 172,
+      "diffCount": 110
+    },
+    {
+      "slug": "covage-54-pine573",
+      "tags": {
+        "line": { "ours": 10, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 10, "jar": 10 },
+        "rect": { "ours": 9, "jar": 9 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 225,
+      "diffCount": 225
+    },
+    {
+      "slug": "cubida-55-meku256",
+      "tags": {
+        "line": { "ours": 2, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 45,
+      "weightedScore": 80,
+      "diffCount": 36
+    },
+    {
+      "slug": "cufega-65-beji958",
+      "tags": {
+        "line": { "ours": 9, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 28,
+      "weightedScore": 174,
+      "diffCount": 147
+    },
+    {
+      "slug": "cugezi-99-tire097",
+      "tags": {
+        "line": { "ours": 12, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 13 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 12, "jar": 12 },
+        "rect": { "ours": 13, "jar": 13 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 262,
+      "diffCount": 262
+    },
+    {
+      "slug": "cujoni-21-somi079",
+      "tags": {
+        "line": { "ours": 7, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 6, "jar": 5 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 202,
+      "diffCount": 67
+    },
+    {
+      "slug": "cutabu-59-cilo276",
+      "tags": {
+        "line": { "ours": 8, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 54,
+      "weightedScore": 133,
+      "diffCount": 80
+    },
+    {
+      "slug": "dacuga-41-popo038",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 9, "jar": 14 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 97,
+      "weightedScore": 221,
+      "diffCount": 125
+    },
+    {
+      "slug": "dakesa-98-mano758",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 19
+    },
+    {
+      "slug": "darote-51-kuta407",
+      "tags": {
+        "line": { "ours": 15, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 16, "jar": 16 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 15, "jar": 15 },
+        "rect": { "ours": 16, "jar": 16 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 323,
+      "diffCount": 323
+    },
+    {
+      "slug": "daxare-39-buci637",
+      "tags": {
+        "line": { "ours": 10, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 9, "jar": 12 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 49,
+      "weightedScore": 231,
+      "diffCount": 183
+    },
+    {
+      "slug": "decudi-92-bisu741",
+      "tags": {
+        "line": { "ours": 36, "jar": 26 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 7, "jar": 3 },
+        "polygon": { "ours": 20, "jar": 15 },
+        "rect": { "ours": 12, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 22,
+      "childCountWeight": 253,
+      "weightedScore": 518,
+      "diffCount": 266
+    },
+    {
+      "slug": "dexero-99-ziru660",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 118,
+      "diffCount": 118
+    },
+    {
+      "slug": "digexe-63-zifu774",
+      "tags": {
+        "line": { "ours": 7, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 16 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 7, "jar": 4 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 6, "jar": 6 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 122,
+      "weightedScore": 293,
+      "diffCount": 172
+    },
+    {
+      "slug": "dirame-64-cica627",
+      "tags": {
+        "line": { "ours": 4, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 4, "jar": 4 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 96,
+      "diffCount": 96
+    },
+    {
+      "slug": "disemi-67-keva276",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "dixiku-28-guzo497",
+      "tags": {
+        "line": { "ours": 10, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 13 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 84,
+      "weightedScore": 185,
+      "diffCount": 102
+    },
+    {
+      "slug": "dotuzi-75-nape254",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 82,
+      "weightedScore": 256,
+      "diffCount": 175
+    },
+    {
+      "slug": "dozaxu-98-xetu961",
+      "tags": {
+        "line": { "ours": 7, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 210,
+      "diffCount": 89
+    },
+    {
+      "slug": "doziki-93-rosi997",
+      "tags": {
+        "line": { "ours": 17, "jar": 23 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 14, "jar": 19 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -15,
+      "childCountWeight": 117,
+      "weightedScore": 306,
+      "diffCount": 190
+    },
+    {
+      "slug": "dulezi-77-sana210",
+      "tags": {
+        "line": { "ours": 8, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 63,
+      "weightedScore": 204,
+      "diffCount": 142
+    },
+    {
+      "slug": "dunejo-33-divo189",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 29,
+      "diffCount": 29
+    },
+    {
+      "slug": "dupopo-44-deto131",
+      "tags": {
+        "line": { "ours": 9, "jar": 17 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 157,
+      "weightedScore": 289,
+      "diffCount": 133
+    },
+    {
+      "slug": "duzumu-46-geve509",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 36,
+      "diffCount": 36
+    },
+    {
+      "slug": "fabexi-81-dife869",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 76,
+      "diffCount": 76
+    },
+    {
+      "slug": "fabule-54-pili300",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 13,
+      "weightedScore": 31,
+      "diffCount": 19
+    },
+    {
+      "slug": "fabuli-92-vemo727",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "farexi-86-xanu521",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 36,
+      "diffCount": 36
+    },
+    {
+      "slug": "fatuzu-07-cevu894",
+      "tags": {
+        "line": { "ours": 13, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 15 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 9, "jar": 11 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -14,
+      "childCountWeight": 110,
+      "weightedScore": 282,
+      "diffCount": 173
+    },
+    {
+      "slug": "feceme-58-xodo415",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 49,
+      "weightedScore": 152,
+      "diffCount": 104
+    },
+    {
+      "slug": "felega-00-saxi785",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 6, "jar": 7 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 93,
+      "weightedScore": 205,
+      "diffCount": 113
+    },
+    {
+      "slug": "femaco-88-bufe808",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 51,
+      "diffCount": 51
+    },
+    {
+      "slug": "fetizo-39-jace641",
+      "tags": {
+        "line": { "ours": 9, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 8, "jar": 12 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 91,
+      "weightedScore": 253,
+      "diffCount": 163
+    },
+    {
+      "slug": "fibafo-22-foze119",
+      "tags": {
+        "line": { "ours": 30, "jar": 38 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 23, "jar": 44 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -29,
+      "childCountWeight": 203,
+      "weightedScore": 485,
+      "diffCount": 283
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 1 }
+      },
+      "childCountDelta": 9,
+      "childCountWeight": 76,
+      "weightedScore": 133,
+      "diffCount": 58
+    },
+    {
+      "slug": "firibi-00-puki721",
+      "tags": {
+        "line": { "ours": 29, "jar": 28 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 11, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 16, "jar": 13 },
+        "rect": { "ours": 12, "jar": 12 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 184,
+      "weightedScore": 491,
+      "diffCount": 308
+    },
+    {
+      "slug": "fisaca-74-deco063",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 54,
+      "diffCount": 54
+    },
+    {
+      "slug": "fivama-51-cusa142",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 7, "jar": 7 },
+        "polygon": { "ours": 8, "jar": 8 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 38,
+      "weightedScore": 183,
+      "diffCount": 146
+    },
+    {
+      "slug": "fofele-65-lozo631",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 35,
+      "diffCount": 35
+    },
+    {
+      "slug": "foludi-80-gilo247",
+      "tags": {
+        "line": { "ours": 6, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 54,
+      "weightedScore": 111,
+      "diffCount": 58
+    },
+    {
+      "slug": "fomapa-90-bore251",
+      "tags": {
+        "line": { "ours": 10, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 6, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 54,
+      "weightedScore": 156,
+      "diffCount": 103
+    },
+    {
+      "slug": "fonabu-93-xama593",
+      "tags": {
+        "line": { "ours": 6, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 61,
+      "weightedScore": 134,
+      "diffCount": 74
+    },
+    {
+      "slug": "fonebe-54-save009",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "fotamo-01-rupi481",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 50,
+      "diffCount": 50
+    },
+    {
+      "slug": "fovaja-48-leso567",
+      "tags": {
+        "line": { "ours": 18, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 12, "jar": 16 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -12,
+      "childCountWeight": 112,
+      "weightedScore": 306,
+      "diffCount": 195
+    },
+    {
+      "slug": "fufefa-17-faje066",
+      "tags": {
+        "line": { "ours": 9, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 9, "jar": 9 },
+        "rect": { "ours": 10, "jar": 10 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 199,
+      "diffCount": 199
+    },
+    {
+      "slug": "gacaja-15-keko600",
+      "tags": {
+        "line": { "ours": 27, "jar": 33 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 11, "jar": 17 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 3 },
+        "polygon": { "ours": 19, "jar": 24 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -15,
+      "childCountWeight": 147,
+      "weightedScore": 469,
+      "diffCount": 323
+    },
+    {
+      "slug": "gakelo-29-neno787",
+      "tags": {
+        "line": { "ours": 10, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 14 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 124,
+      "weightedScore": 250,
+      "diffCount": 127
+    },
+    {
+      "slug": "ganaku-47-muko252",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 4, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 71,
+      "weightedScore": 235,
+      "diffCount": 165
+    },
+    {
+      "slug": "garuga-34-debe901",
+      "tags": {
+        "line": { "ours": 11, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 42,
+      "weightedScore": 172,
+      "diffCount": 131
+    },
+    {
+      "slug": "gaxezi-48-zesa921",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 1 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 23,
+      "weightedScore": 75,
+      "diffCount": 53
+    },
+    {
+      "slug": "gebuzi-30-nulo391",
+      "tags": {
+        "line": { "ours": 7, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 8, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 157,
+      "diffCount": 157
+    },
+    {
+      "slug": "gelono-70-zuce760",
+      "tags": {
+        "line": { "ours": 14, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 12, "jar": 14 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 47,
+      "weightedScore": 238,
+      "diffCount": 192
+    },
+    {
+      "slug": "gepetu-15-seba834",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 53,
+      "diffCount": 53
+    },
+    {
+      "slug": "gesogi-81-xoma900",
+      "tags": {
+        "line": { "ours": 20, "jar": 25 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 11, "jar": 16 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 180,
+      "weightedScore": 363,
+      "diffCount": 184
+    },
+    {
+      "slug": "gevaxi-80-tone223",
+      "tags": {
+        "line": { "ours": 24, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 7, "jar": 3 },
+        "polygon": { "ours": 15, "jar": 10 },
+        "rect": { "ours": 7, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 21,
+      "childCountWeight": 162,
+      "weightedScore": 334,
+      "diffCount": 173
+    },
+    {
+      "slug": "gimegi-77-xidu727",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "gitoke-38-beme495",
+      "tags": {
+        "line": { "ours": 23, "jar": 35 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 29 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 14, "jar": 37 },
+        "rect": { "ours": 11, "jar": 11 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -51,
+      "childCountWeight": 357,
+      "weightedScore": 685,
+      "diffCount": 329
+    },
+    {
+      "slug": "givanu-33-kire967",
+      "tags": {
+        "line": { "ours": 12, "jar": 17 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 178,
+      "weightedScore": 314,
+      "diffCount": 137
+    },
+    {
+      "slug": "gizore-52-fode894",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 29,
+      "diffCount": 29
+    },
+    {
+      "slug": "gofebi-87-zeka817",
+      "tags": {
+        "line": { "ours": 7, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 8 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 61,
+      "weightedScore": 154,
+      "diffCount": 94
+    },
+    {
+      "slug": "gonixe-93-zaza537",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 17,
+      "diffCount": 17
+    },
+    {
+      "slug": "goxoni-69-lemo511",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "guceja-66-tola192",
+      "tags": {
+        "line": { "ours": 7, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 28,
+      "weightedScore": 135,
+      "diffCount": 108
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 1 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 41,
+      "weightedScore": 92,
+      "diffCount": 52
+    },
+    {
+      "slug": "gugala-11-suce270",
+      "tags": {
+        "line": { "ours": 16, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 9 },
+        "rect": { "ours": 8, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 124,
+      "weightedScore": 311,
+      "diffCount": 188
+    },
+    {
+      "slug": "jafuli-91-sota277",
+      "tags": {
+        "line": { "ours": 12, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 9, "jar": 17 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -20,
+      "childCountWeight": 140,
+      "weightedScore": 334,
+      "diffCount": 195
+    },
+    {
+      "slug": "jagove-43-nako107",
+      "tags": {
+        "line": { "ours": 14, "jar": 17 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 15 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 11, "jar": 20 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -15,
+      "childCountWeight": 173,
+      "weightedScore": 365,
+      "diffCount": 193
+    },
+    {
+      "slug": "jakuco-69-dari135",
+      "tags": {
+        "line": { "ours": 6, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 85,
+      "weightedScore": 161,
+      "diffCount": 77
+    },
+    {
+      "slug": "javedu-70-vaxo310",
+      "tags": {
+        "line": { "ours": 7, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 68,
+      "weightedScore": 172,
+      "diffCount": 105
+    },
+    {
+      "slug": "jecoxu-17-zama003",
+      "tags": {
+        "line": { "ours": 8, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 47,
+      "weightedScore": 141,
+      "diffCount": 95
+    },
+    {
+      "slug": "jevoce-05-mumi686",
+      "tags": {
+        "line": { "ours": 30, "jar": 42 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 14, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 14, "jar": 17 },
+        "rect": { "ours": 10, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 309,
+      "weightedScore": 588,
+      "diffCount": 280
+    },
+    {
+      "slug": "jidefi-14-kafe151",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 35,
+      "diffCount": 35
+    },
+    {
+      "slug": "jipapo-14-kevu587",
+      "tags": {
+        "line": { "ours": 6, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 171,
+      "diffCount": 48
+    },
+    {
+      "slug": "jisema-42-rapa121",
+      "tags": {
+        "line": { "ours": 8, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 7, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 42,
+      "weightedScore": 168,
+      "diffCount": 127
+    },
+    {
+      "slug": "jodagi-12-xatu540",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 53,
+      "diffCount": 53
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "tags": {
+        "line": { "ours": 13, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 7, "jar": 11 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -12,
+      "childCountWeight": 156,
+      "weightedScore": 305,
+      "diffCount": 150
+    },
+    {
+      "slug": "judatu-15-xize591",
+      "tags": {
+        "line": { "ours": 38, "jar": 48 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 15 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 23, "jar": 34 },
+        "rect": { "ours": 12, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -19,
+      "childCountWeight": 274,
+      "weightedScore": 642,
+      "diffCount": 369
+    },
+    {
+      "slug": "jupivo-67-gidi531",
+      "tags": {
+        "line": { "ours": 23, "jar": 23 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 16, "jar": 18 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 118,
+      "weightedScore": 324,
+      "diffCount": 207
+    },
+    {
+      "slug": "jupoxe-15-sugo110",
+      "tags": {
+        "line": { "ours": 36, "jar": 95 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 72, "jar": 60 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 10, "jar": 12 },
+        "polygon": { "ours": 29, "jar": 99 },
+        "rect": { "ours": 11, "jar": 25 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -133,
+      "childCountWeight": 1343,
+      "weightedScore": 2086,
+      "diffCount": 744
+    },
+    {
+      "slug": "kafevi-44-tesu096",
+      "tags": {
+        "line": { "ours": 7, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 207,
+      "diffCount": 87
+    },
+    {
+      "slug": "kasadu-53-tuki533",
+      "tags": {
+        "line": { "ours": 12, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 114,
+      "weightedScore": 228,
+      "diffCount": 115
+    },
+    {
+      "slug": "katopo-68-xajo866",
+      "tags": {
+        "line": { "ours": 12, "jar": 11 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 12 },
+        "rect": { "ours": 2, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 64,
+      "weightedScore": 185,
+      "diffCount": 122
+    },
+    {
+      "slug": "kavoro-11-jife299",
+      "tags": {
+        "line": { "ours": 6, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 1 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 116,
+      "weightedScore": 198,
+      "diffCount": 83
+    },
+    {
+      "slug": "kepavi-26-sasu141",
+      "tags": {
+        "line": { "ours": 6, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 68,
+      "weightedScore": 172,
+      "diffCount": 105
+    },
+    {
+      "slug": "ketiro-31-nazo312",
+      "tags": {
+        "line": { "ours": 6, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 136,
+      "diffCount": 136
+    },
+    {
+      "slug": "kijazo-83-kipu485",
+      "tags": {
+        "line": { "ours": 11, "jar": 17 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 7, "jar": 9 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 142,
+      "weightedScore": 276,
+      "diffCount": 135
+    },
+    {
+      "slug": "kitupi-32-jexo155",
+      "tags": {
+        "line": { "ours": 6, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 68,
+      "weightedScore": 176,
+      "diffCount": 109
+    },
+    {
+      "slug": "kodaku-19-moni161",
+      "tags": {
+        "line": { "ours": 13, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 11, "jar": 14 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 93,
+      "weightedScore": 262,
+      "diffCount": 170
+    },
+    {
+      "slug": "kodiji-34-mofe202",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 0, "jar": 0 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 9,
+      "diffCount": 9
+    },
+    {
+      "slug": "kojivo-44-ceti956",
+      "tags": {
+        "line": { "ours": 6, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 6, "jar": 6 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 136,
+      "diffCount": 136
+    },
+    {
+      "slug": "kubaso-31-gaxu491",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 17,
+      "diffCount": 17
+    },
+    {
+      "slug": "kudedo-31-pafi082",
+      "tags": {
+        "line": { "ours": 11, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 7, "jar": 8 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 122,
+      "weightedScore": 265,
+      "diffCount": 144
+    },
+    {
+      "slug": "kuzeru-09-voke075",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 118,
+      "diffCount": 118
+    },
+    {
+      "slug": "labala-74-juki864",
+      "tags": {
+        "line": { "ours": 11, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 44,
+      "weightedScore": 172,
+      "diffCount": 129
+    },
+    {
+      "slug": "lacuci-13-nogo718",
+      "tags": {
+        "line": { "ours": 7, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 54,
+      "weightedScore": 156,
+      "diffCount": 103
+    },
+    {
+      "slug": "lafilo-69-tuti771",
+      "tags": {
+        "line": { "ours": 7, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 75,
+      "weightedScore": 177,
+      "diffCount": 103
+    },
+    {
+      "slug": "lajuxi-63-nopo039",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 30,
+      "diffCount": 30
+    },
+    {
+      "slug": "laxibe-66-teme800",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 1 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 17,
+      "weightedScore": 72,
+      "diffCount": 56
+    },
+    {
+      "slug": "leduvi-16-voli986",
+      "tags": {
+        "line": { "ours": 12, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 20 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 17 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -27,
+      "childCountWeight": 189,
+      "weightedScore": 384,
+      "diffCount": 196
+    },
+    {
+      "slug": "letare-59-gore448",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 2 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 81,
+      "diffCount": 48
+    },
+    {
+      "slug": "letuke-04-poza319",
+      "tags": {
+        "line": { "ours": 6, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 125,
+      "weightedScore": 235,
+      "diffCount": 111
+    },
+    {
+      "slug": "levuma-67-cego489",
+      "tags": {
+        "line": { "ours": 11, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 12 },
+        "rect": { "ours": 1, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 90,
+      "weightedScore": 231,
+      "diffCount": 142
+    },
+    {
+      "slug": "lidefe-01-vaki092",
+      "tags": {
+        "line": { "ours": 6, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 4, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 58,
+      "weightedScore": 144,
+      "diffCount": 80
+    },
+    {
+      "slug": "lifeve-53-zubi598",
+      "tags": {
+        "line": { "ours": 6, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 56,
+      "weightedScore": 116,
+      "diffCount": 61
+    },
+    {
+      "slug": "livigo-47-negi605",
+      "tags": {
+        "line": { "ours": 6, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 61,
+      "weightedScore": 149,
+      "diffCount": 89
+    },
+    {
+      "slug": "lokane-30-dinu378",
+      "tags": {
+        "line": { "ours": 14, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 15, "jar": 15 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 14, "jar": 14 },
+        "rect": { "ours": 15, "jar": 15 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 302,
+      "diffCount": 302
+    },
+    {
+      "slug": "lopone-15-xiki477",
+      "tags": {
+        "line": { "ours": 12, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 23 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 16 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -26,
+      "childCountWeight": 182,
+      "weightedScore": 386,
+      "diffCount": 205
+    },
+    {
+      "slug": "loxija-71-joku558",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 9, "jar": 15 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 91,
+      "weightedScore": 253,
+      "diffCount": 163
+    },
+    {
+      "slug": "lubapi-40-siji634",
+      "tags": {
+        "line": { "ours": 4, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 55,
+      "diffCount": 55
+    },
+    {
+      "slug": "lufamo-62-xavo766",
+      "tags": {
+        "line": { "ours": 13, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 10, "jar": 20 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -23,
+      "childCountWeight": 157,
+      "weightedScore": 344,
+      "diffCount": 188
+    },
+    {
+      "slug": "lukoxa-16-cecu095",
+      "tags": {
+        "line": { "ours": 9, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 5 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 284,
+      "diffCount": 67
+    },
+    {
+      "slug": "mabuke-20-muco282",
+      "tags": {
+        "line": { "ours": 15, "jar": 23 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 10, "jar": 17 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -23,
+      "childCountWeight": 161,
+      "weightedScore": 345,
+      "diffCount": 185
+    },
+    {
+      "slug": "maduja-30-xiri319",
+      "tags": {
+        "line": { "ours": 16, "jar": 29 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 11, "jar": 17 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -19,
+      "childCountWeight": 238,
+      "weightedScore": 437,
+      "diffCount": 200
+    },
+    {
+      "slug": "mafete-03-rapa918",
+      "tags": {
+        "line": { "ours": 11, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 8 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 137,
+      "weightedScore": 259,
+      "diffCount": 123
+    },
+    {
+      "slug": "maketa-43-juja264",
+      "tags": {
+        "line": { "ours": 27, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 7, "jar": 3 },
+        "polygon": { "ours": 15, "jar": 10 },
+        "rect": { "ours": 8, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 19,
+      "childCountWeight": 192,
+      "weightedScore": 390,
+      "diffCount": 199
+    },
+    {
+      "slug": "manata-12-rido730",
+      "tags": {
+        "line": { "ours": 19, "jar": 22 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 11, "jar": 14 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 155,
+      "weightedScore": 355,
+      "diffCount": 201
+    },
+    {
+      "slug": "megara-21-rumi574",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 207,
+      "weightedScore": 337,
+      "diffCount": 131
+    },
+    {
+      "slug": "mifejo-31-sovi184",
+      "tags": {
+        "line": { "ours": 3, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 3, "jar": 1 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 38,
+      "weightedScore": 117,
+      "diffCount": 80
+    },
+    {
+      "slug": "misiji-27-buje656",
+      "tags": {
+        "line": { "ours": 14, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 8, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 126,
+      "weightedScore": 291,
+      "diffCount": 166
+    },
+    {
+      "slug": "molexa-46-redi999",
+      "tags": {
+        "line": { "ours": 4, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 61,
+      "diffCount": 61
+    },
+    {
+      "slug": "movexa-27-rexe388",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 143,
+      "weightedScore": 244,
+      "diffCount": 102
+    },
+    {
+      "slug": "mulida-55-ceja768",
+      "tags": {
+        "line": { "ours": 12, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 13 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 12, "jar": 12 },
+        "rect": { "ours": 13, "jar": 13 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 264,
+      "diffCount": 264
+    },
+    {
+      "slug": "nafaxo-62-boso912",
+      "tags": {
+        "line": { "ours": 13, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 11, "jar": 13 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 124,
+      "weightedScore": 309,
+      "diffCount": 186
+    },
+    {
+      "slug": "naroji-40-nuke022",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 35,
+      "diffCount": 35
+    },
+    {
+      "slug": "narota-16-bago100",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 17,
+      "diffCount": 17
+    },
+    {
+      "slug": "navene-45-cozo466",
+      "tags": {
+        "line": { "ours": 34, "jar": 41 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 18, "jar": 21 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 24, "jar": 33 },
+        "rect": { "ours": 11, "jar": 11 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -19,
+      "childCountWeight": 292,
+      "weightedScore": 699,
+      "diffCount": 408
+    },
+    {
+      "slug": "nesozi-09-zezu092",
+      "tags": {
+        "line": { "ours": 6, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 2 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 123,
+      "weightedScore": 195,
+      "diffCount": 73
+    },
+    {
+      "slug": "nexitu-74-luga914",
+      "tags": {
+        "line": { "ours": 22, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 8, "jar": 0 },
+        "polygon": { "ours": 14, "jar": 4 },
+        "rect": { "ours": 9, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 38,
+      "childCountWeight": 270,
+      "weightedScore": 368,
+      "diffCount": 99
+    },
+    {
+      "slug": "nijipa-25-pede639",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 4, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 63,
+      "weightedScore": 128,
+      "diffCount": 66
+    },
+    {
+      "slug": "nikinu-06-sace939",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 175,
+      "weightedScore": 333,
+      "diffCount": 159
+    },
+    {
+      "slug": "niletu-83-lego826",
+      "tags": {
+        "line": { "ours": 0, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 35,
+      "weightedScore": 60,
+      "diffCount": 26
+    },
+    {
+      "slug": "niluji-46-joma773",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 51,
+      "diffCount": 51
+    },
+    {
+      "slug": "nimusa-16-tiku252",
+      "tags": {
+        "line": { "ours": 9, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 61,
+      "weightedScore": 203,
+      "diffCount": 143
+    },
+    {
+      "slug": "nisexe-68-vabu320",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 1 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 23,
+      "weightedScore": 75,
+      "diffCount": 53
+    },
+    {
+      "slug": "nivese-34-zavo418",
+      "tags": {
+        "line": { "ours": 13, "jar": 13 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 11, "jar": 15 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 89,
+      "weightedScore": 260,
+      "diffCount": 172
+    },
+    {
+      "slug": "nojije-35-teta491",
+      "tags": {
+        "line": { "ours": 16, "jar": 21 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 9, "jar": 12 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 152,
+      "weightedScore": 331,
+      "diffCount": 180
+    },
+    {
+      "slug": "nomeco-93-minu967",
+      "tags": {
+        "line": { "ours": 8, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 54,
+      "weightedScore": 131,
+      "diffCount": 78
+    },
+    {
+      "slug": "nonusu-50-nute147",
+      "tags": {
+        "line": { "ours": 13, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 9, "jar": 9 },
+        "polygon": { "ours": 10, "jar": 10 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 128,
+      "weightedScore": 262,
+      "diffCount": 135
+    },
+    {
+      "slug": "norire-15-taka956",
+      "tags": {
+        "line": { "ours": 3, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 3, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 42,
+      "weightedScore": 98,
+      "diffCount": 57
+    },
+    {
+      "slug": "novata-87-muti352",
+      "tags": {
+        "line": { "ours": 5, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 4, "jar": 5 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 20,
+      "weightedScore": 91,
+      "diffCount": 72
+    },
+    {
+      "slug": "noxasi-06-nejo322",
+      "tags": {
+        "line": { "ours": 16, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 9 },
+        "rect": { "ours": 8, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 448,
+      "diffCount": 125
+    },
+    {
+      "slug": "numalo-91-pole243",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 0, "jar": 0 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 28,
+      "diffCount": 28
+    },
+    {
+      "slug": "nupose-71-vido428",
+      "tags": {
+        "line": { "ours": 29, "jar": 41 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 13 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 13, "jar": 16 },
+        "rect": { "ours": 9, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 308,
+      "weightedScore": 567,
+      "diffCount": 260
+    },
+    {
+      "slug": "nusajo-97-bemo713",
+      "tags": {
+        "line": { "ours": 6, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 61,
+      "weightedScore": 149,
+      "diffCount": 89
+    },
+    {
+      "slug": "nuzugu-44-pega793",
+      "tags": {
+        "line": { "ours": 2, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 1 },
+        "rect": { "ours": 1, "jar": 2 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 92,
+      "weightedScore": 182,
+      "diffCount": 91
+    },
+    {
+      "slug": "pakema-21-xema183",
+      "tags": {
+        "line": { "ours": 5, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 90,
+      "weightedScore": 150,
+      "diffCount": 61
+    },
+    {
+      "slug": "patagi-39-jone354",
+      "tags": {
+        "line": { "ours": 8, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 86,
+      "weightedScore": 166,
+      "diffCount": 81
+    },
+    {
+      "slug": "pedoco-30-mose082",
+      "tags": {
+        "line": { "ours": 9, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 54,
+      "weightedScore": 198,
+      "diffCount": 145
+    },
+    {
+      "slug": "pekefu-66-mepa144",
+      "tags": {
+        "line": { "ours": 7, "jar": 11 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 5, "jar": 9 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 77,
+      "weightedScore": 168,
+      "diffCount": 92
+    },
+    {
+      "slug": "pekuxe-00-bovi270",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 1 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 23,
+      "weightedScore": 75,
+      "diffCount": 53
+    },
+    {
+      "slug": "perate-09-gale335",
+      "tags": {
+        "line": { "ours": 9, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 42,
+      "weightedScore": 226,
+      "diffCount": 185
+    },
+    {
+      "slug": "pezubu-98-niba240",
+      "tags": {
+        "line": { "ours": 12, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 9 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 184,
+      "weightedScore": 315,
+      "diffCount": 132
+    },
+    {
+      "slug": "pifoni-76-duxa505",
+      "tags": {
+        "line": { "ours": 11, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 8, "jar": 4 },
+        "rect": { "ours": 0, "jar": 0 },
+        "path": { "ours": 8, "jar": 8 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 6,
+      "childCountWeight": 111,
+      "weightedScore": 272,
+      "diffCount": 162
+    },
+    {
+      "slug": "pirofe-41-xama594",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -16,
+      "childCountWeight": 113,
+      "weightedScore": 227,
+      "diffCount": 115
+    },
+    {
+      "slug": "piruxe-91-zivi081",
+      "tags": {
+        "line": { "ours": 3, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 1 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 6,
+      "childCountWeight": 38,
+      "weightedScore": 88,
+      "diffCount": 51
+    },
+    {
+      "slug": "pixako-75-kumi821",
+      "tags": {
+        "line": { "ours": 15, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 0 },
+        "polygon": { "ours": 12, "jar": 12 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 87,
+      "weightedScore": 232,
+      "diffCount": 146
+    },
+    {
+      "slug": "podelo-13-jaja314",
+      "tags": {
+        "line": { "ours": 3, "jar": 3 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 72,
+      "diffCount": 72
+    },
+    {
+      "slug": "pokoro-73-bili712",
+      "tags": {
+        "line": { "ours": 14, "jar": 20 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 12, "jar": 16 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 136,
+      "weightedScore": 339,
+      "diffCount": 204
+    },
+    {
+      "slug": "popofi-03-momo442",
+      "tags": {
+        "line": { "ours": 22, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 14, "jar": 12 },
+        "rect": { "ours": 9, "jar": 5 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 12,
+      "childCountWeight": 165,
+      "weightedScore": 376,
+      "diffCount": 212
+    },
+    {
+      "slug": "poraji-17-goke817",
+      "tags": {
+        "line": { "ours": 4, "jar": 3 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 0, "jar": 0 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 4, "jar": 4 },
+        "polygon": { "ours": 2, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 12,
+      "weightedScore": 57,
+      "diffCount": 46
+    },
+    {
+      "slug": "povoju-50-raxi136",
+      "tags": {
+        "line": { "ours": 7, "jar": 11 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 138,
+      "weightedScore": 219,
+      "diffCount": 82
+    },
+    {
+      "slug": "pujozo-36-nino158",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 6, "jar": 7 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 135,
+      "weightedScore": 249,
+      "diffCount": 115
+    },
+    {
+      "slug": "racana-82-zece676",
+      "tags": {
+        "line": { "ours": 28, "jar": 34 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 12, "jar": 12 },
+        "rect": { "ours": 9, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 165,
+      "weightedScore": 411,
+      "diffCount": 247
+    },
+    {
+      "slug": "rarodo-65-fudu505",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 35,
+      "diffCount": 35
+    },
+    {
+      "slug": "raruzu-62-giro837",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 175,
+      "weightedScore": 333,
+      "diffCount": 159
+    },
+    {
+      "slug": "relufo-04-fezo835",
+      "tags": {
+        "line": { "ours": 7, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 8 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 68,
+      "weightedScore": 181,
+      "diffCount": 114
+    },
+    {
+      "slug": "reluvi-59-pifi444",
+      "tags": {
+        "line": { "ours": 7, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -4,
+      "childCountWeight": 28,
+      "weightedScore": 134,
+      "diffCount": 107
+    },
+    {
+      "slug": "rerovo-62-nazo755",
+      "tags": {
+        "line": { "ours": 4, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 60,
+      "weightedScore": 105,
+      "diffCount": 46
+    },
+    {
+      "slug": "ribapo-84-xudu593",
+      "tags": {
+        "line": { "ours": 9, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 42,
+      "weightedScore": 226,
+      "diffCount": 185
+    },
+    {
+      "slug": "roboja-69-susa752",
+      "tags": {
+        "line": { "ours": 29, "jar": 41 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 13 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 13, "jar": 16 },
+        "rect": { "ours": 9, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 308,
+      "weightedScore": 567,
+      "diffCount": 260
+    },
+    {
+      "slug": "rosizo-69-mera514",
+      "tags": {
+        "line": { "ours": 11, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 10, "jar": 13 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 68,
+      "weightedScore": 258,
+      "diffCount": 191
+    },
+    {
+      "slug": "ruderu-68-dere287",
+      "tags": {
+        "line": { "ours": 3, "jar": 3 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 3 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 75,
+      "diffCount": 75
+    },
+    {
+      "slug": "rujuxa-07-neco067",
+      "tags": {
+        "line": { "ours": 31, "jar": 41 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 14, "jar": 20 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 3 },
+        "polygon": { "ours": 19, "jar": 24 },
+        "rect": { "ours": 8, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -19,
+      "childCountWeight": 295,
+      "weightedScore": 618,
+      "diffCount": 324
+    },
+    {
+      "slug": "rurake-60-licu592",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 29,
+      "diffCount": 29
+    },
+    {
+      "slug": "rurebu-12-nebi203",
+      "tags": {
+        "line": { "ours": 8, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 54,
+      "weightedScore": 131,
+      "diffCount": 78
+    },
+    {
+      "slug": "ruzica-16-deli877",
+      "tags": {
+        "line": { "ours": 26, "jar": 45 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 12, "jar": 12 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 19, "jar": 25 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -25,
+      "childCountWeight": 342,
+      "weightedScore": 635,
+      "diffCount": 294
+    },
+    {
+      "slug": "samavi-13-fuku339",
+      "tags": {
+        "line": { "ours": 11, "jar": 15 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 7 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 5, "jar": 8 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 149,
+      "weightedScore": 260,
+      "diffCount": 112
+    },
+    {
+      "slug": "saxeku-17-gume203",
+      "tags": {
+        "line": { "ours": 8, "jar": 11 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 9 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 35,
+      "weightedScore": 171,
+      "diffCount": 137
+    },
+    {
+      "slug": "saxuro-16-tezu631",
+      "tags": {
+        "line": { "ours": 9, "jar": 13 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 10 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 75,
+      "weightedScore": 217,
+      "diffCount": 143
+    },
+    {
+      "slug": "secepo-00-febi326",
+      "tags": {
+        "line": { "ours": 13, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 11, "jar": 17 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 110,
+      "weightedScore": 302,
+      "diffCount": 193
+    },
+    {
+      "slug": "setecu-78-cuko533",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 52,
+      "diffCount": 52
+    },
+    {
+      "slug": "sigofi-46-gaja158",
+      "tags": {
+        "line": { "ours": 8, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 7, "jar": 6 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 2,
+      "childCountWeight": 74,
+      "weightedScore": 210,
+      "diffCount": 137
+    },
+    {
+      "slug": "sikino-19-vuca111",
+      "tags": {
+        "line": { "ours": 4, "jar": 6 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 75,
+      "weightedScore": 131,
+      "diffCount": 57
+    },
+    {
+      "slug": "simuti-16-lece058",
+      "tags": {
+        "line": { "ours": 16, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 6, "jar": 2 },
+        "polygon": { "ours": 10, "jar": 6 },
+        "rect": { "ours": 5, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 16,
+      "childCountWeight": 130,
+      "weightedScore": 243,
+      "diffCount": 114
+    },
+    {
+      "slug": "sofoje-37-tila554",
+      "tags": {
+        "line": { "ours": 8, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 7, "jar": 10 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 49,
+      "weightedScore": 185,
+      "diffCount": 137
+    },
+    {
+      "slug": "sokafe-69-jita472",
+      "tags": {
+        "line": { "ours": 10, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 14 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -18,
+      "childCountWeight": 126,
+      "weightedScore": 270,
+      "diffCount": 145
+    },
+    {
+      "slug": "sokapa-71-tifi543",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 15, "jar": 15 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 9, "jar": 10 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 88,
+      "weightedScore": 295,
+      "diffCount": 208
+    },
+    {
+      "slug": "sopape-11-laxo488",
+      "tags": {
+        "line": { "ours": 15, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 4, "jar": 2 },
+        "rect": { "ours": 3, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 7,
+      "childCountWeight": 87,
+      "weightedScore": 172,
+      "diffCount": 86
+    },
+    {
+      "slug": "sucice-41-pebi088",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 175,
+      "weightedScore": 333,
+      "diffCount": 159
+    },
+    {
+      "slug": "sufupo-40-fuke080",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 63,
+      "diffCount": 63
+    },
+    {
+      "slug": "sutura-08-zeme419",
+      "tags": {
+        "line": { "ours": 14, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 9, "jar": 9 },
+        "polygon": { "ours": 11, "jar": 11 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 6,
+      "childCountWeight": 75,
+      "weightedScore": 232,
+      "diffCount": 158
+    },
+    {
+      "slug": "suzuci-53-biku826",
+      "tags": {
+        "line": { "ours": 5, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 4, "jar": 7 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -9,
+      "childCountWeight": 63,
+      "weightedScore": 141,
+      "diffCount": 79
+    },
+    {
+      "slug": "tagixo-41-gapo816",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 51,
+      "diffCount": 51
+    },
+    {
+      "slug": "tamaxe-36-mono574",
+      "tags": {
+        "line": { "ours": 12, "jar": 13 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 11, "jar": 14 },
+        "rect": { "ours": 8, "jar": 8 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -5,
+      "childCountWeight": 54,
+      "weightedScore": 265,
+      "diffCount": 212
+    },
+    {
+      "slug": "taxeta-89-mapo546",
+      "tags": {
+        "line": { "ours": 0, "jar": 0 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 1, "jar": 1 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 0, "jar": 0 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 17,
+      "diffCount": 17
+    },
+    {
+      "slug": "tefuga-86-xefe850",
+      "tags": {
+        "line": { "ours": 5, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -2,
+      "childCountWeight": 91,
+      "weightedScore": 151,
+      "diffCount": 61
+    },
+    {
+      "slug": "tepivu-88-reze603",
+      "tags": {
+        "line": { "ours": 6, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 5, "jar": 7 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 75,
+      "weightedScore": 161,
+      "diffCount": 87
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "tags": {
+        "line": { "ours": 57, "jar": 67 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 23, "jar": 29 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 38, "jar": 58 },
+        "rect": { "ours": 14, "jar": 14 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -36,
+      "childCountWeight": 456,
+      "weightedScore": 1035,
+      "diffCount": 580
+    },
+    {
+      "slug": "topico-42-fuza478",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 51,
+      "diffCount": 51
+    },
+    {
+      "slug": "tuneta-22-mega154",
+      "tags": {
+        "line": { "ours": 15, "jar": 25 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 10, "jar": 14 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -14,
+      "childCountWeight": 203,
+      "weightedScore": 397,
+      "diffCount": 195
+    },
+    {
+      "slug": "vamazo-19-tufu812",
+      "tags": {
+        "line": { "ours": 14, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 10, "jar": 12 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 92,
+      "weightedScore": 243,
+      "diffCount": 152
+    },
+    {
+      "slug": "vaxiki-78-nice114",
+      "tags": {
+        "line": { "ours": 7, "jar": 4 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 6 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 6, "jar": 5 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 1,
+      "childCountWeight": 47,
+      "weightedScore": 136,
+      "diffCount": 90
+    },
+    {
+      "slug": "vaxuta-95-cico162",
+      "tags": {
+        "line": { "ours": 15, "jar": 14 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 12 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 7, "jar": 7 },
+        "polygon": { "ours": 12, "jar": 13 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -6,
+      "childCountWeight": 139,
+      "weightedScore": 322,
+      "diffCount": 184
+    },
+    {
+      "slug": "vebala-15-tade547",
+      "tags": {
+        "line": { "ours": 33, "jar": 44 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 16, "jar": 25 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 27, "jar": 41 },
+        "rect": { "ours": 10, "jar": 10 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -34,
+      "childCountWeight": 299,
+      "weightedScore": 731,
+      "diffCount": 433
+    },
+    {
+      "slug": "vidada-17-xuse810",
+      "tags": {
+        "line": { "ours": 12, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 11 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -10,
+      "childCountWeight": 176,
+      "weightedScore": 334,
+      "diffCount": 159
+    },
+    {
+      "slug": "vimako-25-mega336",
+      "tags": {
+        "line": { "ours": 4, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 3, "jar": 6 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -7,
+      "childCountWeight": 68,
+      "weightedScore": 115,
+      "diffCount": 48
+    },
+    {
+      "slug": "vimoxa-78-zucu656",
+      "tags": {
+        "line": { "ours": 2, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 2, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 3,
+      "childCountWeight": 38,
+      "weightedScore": 96,
+      "diffCount": 59
+    },
+    {
+      "slug": "vivate-04-guso306",
+      "tags": {
+        "line": { "ours": 14, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 14 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 9, "jar": 16 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -17,
+      "childCountWeight": 133,
+      "weightedScore": 314,
+      "diffCount": 182
+    },
+    {
+      "slug": "vokibe-29-vepe451",
+      "tags": {
+        "line": { "ours": 10, "jar": 5 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 6, "jar": 5 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 6,
+      "childCountWeight": 87,
+      "weightedScore": 176,
+      "diffCount": 90
+    },
+    {
+      "slug": "volefo-41-tolo996",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 2, "jar": 2 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 43,
+      "diffCount": 43
+    },
+    {
+      "slug": "vozane-63-kepe177",
+      "tags": {
+        "line": { "ours": 11, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 6, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 9, "jar": 15 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -13,
+      "childCountWeight": 124,
+      "weightedScore": 271,
+      "diffCount": 148
+    },
+    {
+      "slug": "vubolo-48-cubu499",
+      "tags": {
+        "line": { "ours": 9, "jar": 8 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 13, "jar": 13 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 8, "jar": 9 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 4, "jar": 4 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 418,
+      "diffCount": 103
+    },
+    {
+      "slug": "vupuse-73-nuso490",
+      "tags": {
+        "line": { "ours": 10, "jar": 11 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 9 },
+        "rect": { "ours": 1, "jar": 1 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 47,
+      "weightedScore": 157,
+      "diffCount": 111
+    },
+    {
+      "slug": "xabesu-51-dimi831",
+      "tags": {
+        "line": { "ours": 10, "jar": 12 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 8, "jar": 14 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -11,
+      "childCountWeight": 96,
+      "weightedScore": 219,
+      "diffCount": 124
+    },
+    {
+      "slug": "xarumo-26-zinu467",
+      "tags": {
+        "line": { "ours": 11, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 10 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 6, "jar": 9 },
+        "rect": { "ours": 5, "jar": 5 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -12,
+      "childCountWeight": 186,
+      "weightedScore": 313,
+      "diffCount": 128
+    },
+    {
+      "slug": "xefalo-73-sabi101",
+      "tags": {
+        "line": { "ours": 33, "jar": 44 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 16, "jar": 25 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 5, "jar": 5 },
+        "polygon": { "ours": 27, "jar": 41 },
+        "rect": { "ours": 10, "jar": 10 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -34,
+      "childCountWeight": 299,
+      "weightedScore": 731,
+      "diffCount": 433
+    },
+    {
+      "slug": "xekame-27-geba281",
+      "tags": {
+        "line": { "ours": 15, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 7, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 12, "jar": 21 },
+        "rect": { "ours": 4, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -16,
+      "childCountWeight": 112,
+      "weightedScore": 296,
+      "diffCount": 185
+    },
+    {
+      "slug": "xenofo-81-rame803",
+      "tags": {
+        "line": { "ours": 15, "jar": 10 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 9, "jar": 8 },
+        "rect": { "ours": 6, "jar": 4 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 8,
+      "childCountWeight": 80,
+      "weightedScore": 215,
+      "diffCount": 136
+    },
+    {
+      "slug": "xigelo-67-sipi599",
+      "tags": {
+        "line": { "ours": 10, "jar": 18 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 8, "jar": 14 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -18,
+      "childCountWeight": 126,
+      "weightedScore": 273,
+      "diffCount": 148
+    },
+    {
+      "slug": "xovano-23-tazo278",
+      "tags": {
+        "line": { "ours": 16, "jar": 26 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 2, "jar": 2 },
+        "polygon": { "ours": 10, "jar": 12 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -14,
+      "childCountWeight": 208,
+      "weightedScore": 403,
+      "diffCount": 196
+    },
+    {
+      "slug": "zamagu-75-vape137",
+      "tags": {
+        "line": { "ours": 2, "jar": 2 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 3, "jar": 4 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 2, "jar": 2 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 1 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -1,
+      "childCountWeight": 17,
+      "weightedScore": 72,
+      "diffCount": 56
+    },
+    {
+      "slug": "zanudo-86-seco241",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 2, "jar": 2 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 36,
+      "diffCount": 36
+    },
+    {
+      "slug": "zedoco-71-guge507",
+      "tags": {
+        "line": { "ours": 1, "jar": 1 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 1, "jar": 1 },
+        "rect": { "ours": 2, "jar": 2 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 0,
+      "childCountWeight": 0,
+      "weightedScore": 56,
+      "diffCount": 56
+    },
+    {
+      "slug": "zepima-96-peco612",
+      "tags": {
+        "line": { "ours": 16, "jar": 25 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 9, "jar": 11 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 13, "jar": 21 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -19,
+      "childCountWeight": 152,
+      "weightedScore": 364,
+      "diffCount": 213
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "tags": {
+        "line": { "ours": 22, "jar": 29 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 10, "jar": 16 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 6, "jar": 6 },
+        "polygon": { "ours": 14, "jar": 17 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -16,
+      "childCountWeight": 247,
+      "weightedScore": 492,
+      "diffCount": 246
+    },
+    {
+      "slug": "ziboco-73-kazu841",
+      "tags": {
+        "line": { "ours": 8, "jar": 9 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 4, "jar": 3 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 3, "jar": 3 },
+        "polygon": { "ours": 7, "jar": 10 },
+        "rect": { "ours": 3, "jar": 3 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -3,
+      "childCountWeight": 34,
+      "weightedScore": 155,
+      "diffCount": 122
+    },
+    {
+      "slug": "zivege-92-rise076",
+      "tags": {
+        "line": { "ours": 11, "jar": 19 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 9 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 9, "jar": 15 },
+        "rect": { "ours": 6, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -16,
+      "childCountWeight": 116,
+      "weightedScore": 290,
+      "diffCount": 175
+    },
+    {
+      "slug": "zizaki-04-guvi945",
+      "tags": {
+        "line": { "ours": 11, "jar": 7 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 5, "jar": 5 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 0, "jar": 0 },
+        "polygon": { "ours": 7, "jar": 7 },
+        "rect": { "ours": 7, "jar": 7 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": 4,
+      "childCountWeight": 42,
+      "weightedScore": 184,
+      "diffCount": 143
+    },
+    {
+      "slug": "zukori-83-fiso705",
+      "tags": {
+        "line": { "ours": 14, "jar": 16 },
+        "polyline": { "ours": 0, "jar": 0 },
+        "text": { "ours": 8, "jar": 8 },
+        "tspan": { "ours": 0, "jar": 0 },
+        "circle": { "ours": 0, "jar": 0 },
+        "ellipse": { "ours": 1, "jar": 1 },
+        "polygon": { "ours": 12, "jar": 18 },
+        "rect": { "ours": 6, "jar": 6 },
+        "path": { "ours": 0, "jar": 0 },
+        "a": { "ours": 0, "jar": 0 },
+        "image": { "ours": 0, "jar": 0 }
+      },
+      "childCountDelta": -8,
+      "childCountWeight": 89,
+      "weightedScore": 287,
+      "diffCount": 199
+    }
+  ]
+}
