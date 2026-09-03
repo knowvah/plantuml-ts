@@ -810,6 +810,23 @@ Ordered by how ready they are, not by size.
   sibling defect — not distinguished. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
 
+- **`activity-edge-stroke-width`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T4's re-census, measured. Every activity
+  edge line draws `stroke-width="1.5"`
+  (`src/diagrams/activity/renderer.ts#renderEdgeSegments`); every cached
+  jar golden draws `stroke-width="1"`. `Worm.java:157,165`'s
+  `UStroke.withThickness(1.5)` calls are for the start/end ARROW
+  DECORATIONS only (inside `if (startDecoration != null)` /
+  `if (endDecoration != null)`) — the line itself gets its stroke from
+  `style.getStroke()` at `Worm.java:129`, a different source entirely.
+  Now the single largest individual attribute residual in
+  `oracle/goldens/svg-activity/diff-census.json` (weight ~2319, 256 of
+  268 fixtures) — was previously invisible, folded into the
+  `svg/g[][childCount]` short-circuit before this mission's comparator
+  fix and element swaps. Looks cheap: one constant, one call site,
+  needs `style.getStroke()`'s actual resolved value (likely a themeable
+  default, not literally `1` — verify before hardcoding).
+
 - **`sequence-fidelity-residuals`** (NEW, unbriefed) — FILED 2026-08-26 as
   `sequence-command-coverage`'s D6 census. **The work queue is the ten items
   below plus the ten still-refusing command gaps**; this row exists so the

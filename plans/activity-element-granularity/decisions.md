@@ -208,3 +208,30 @@ met. The 8 exceptions carry a stated mechanism in
 `oracle/goldens/svg-activity/diff-baseline.json`'s own re-pin and this
 decision; a future mission fixing any of the four defects is expected to
 LOWER these 8 fixtures' scores further, not just hold them.
+
+## D12 — T4 confirms zero adopted regressions; corrects two of T4's own spec projections
+
+**Context.** T4's full, unconditional re-pin (against the mission-start
+baseline, `804232d4`, not any possibly-stale intermediate pin — see
+`.agent-notes/aeg-T4.md`) found **zero** fixtures rose across the whole
+mission. The 10 fixtures D11 named as "exceptions" all rose only at
+*intermediate* checkpoints and finished net-improved.
+
+**Two premises in T4's own task spec did not survive measurement:**
+1. `tspan` was projected to stay nonzero ("must NOT go to zero", creole
+   carve-out). Verified during T3's implementation: none of activity's 5
+   multi-line call sites carry creole markup — the pre-T3 249 tspans were
+   the old per-line splitting artifact, not creole spans. Zero is correct.
+2. `text` was projected to rise by ~522 toward the jar's 1915; it rose by
+   195. Not investigated further — per T4's own instruction, projections
+   are not results, and the gap is plausibly explained by the six named
+   pre-existing defects and out-of-scope missing content.
+
+**Decision.** Record both corrections in the T4 report rather than
+treating the mismatch as a task failure or silently adjusting the
+narrative to fit the original projection.
+
+**Consequences.** The mission's headline number (108447 → 61677, −43.1%,
+`svg/g[][childCount]` 91.6% → 39.9%) is now the audited, corrected final
+result — verified against the mission's true start, not an intermediate
+or partially-stale checkpoint.

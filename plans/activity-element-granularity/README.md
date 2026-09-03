@@ -96,7 +96,7 @@ before trusting any timing number.
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin the pre-swap element census | — | [x] |
 | [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | [x] all landed |
-| [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | [ ] |
+| [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | [x] |
 
 **T0 gates everything.** Without a pre-swap element pin the descent is
 unmeasurable and each swap's effect unattributable ([D6]).
@@ -129,7 +129,44 @@ unmeasurable and each swap's effect unattributable ([D6]).
 
 ## Index
 
-- [decisions.md](decisions.md) — D1–D9
+- [decisions.md](decisions.md) — D1–D11
 - [decision-journal.md](decision-journal.md) — appended during execution
 - [diagrams/component-map.md](diagrams/component-map.md)
 - [diagrams/data-flow.md](diagrams/data-flow.md)
+
+## Close-out — 2026-09-03
+
+**8 of 8 tasks done, all four batches, both batches.** Branch
+`feat/activity-element-granularity`, merged `svg-comparator-alignment`
+mid-mission (D3 there; D10/D11 here).
+
+**Headline: Σ`weightedScore` over the 268 numerically-comparable fixtures
+108447 → 61677, −43.1%. Zero fixtures rose against the mission-start pin
+across the whole mission.** `svg/g[][childCount]`'s share of total weight:
+**91.6% → 39.9%**. Full report: `.agent-notes/aeg-T4.md`.
+
+**The mission's own premise-correction held up under measurement**: the
+residual was a different element vocabulary for the same drawn content
+(`<polyline>`→N`<line>`, `<circle>`→`<ellipse>`, tspan-lines→N`<text>`),
+not "missing ink" as `planning/next-missions.md` described it before this
+mission — T0's element census proved that at the start, and T4's final
+census confirms it held for the whole descent.
+
+**One real mid-mission halt** (T1, D10): the shared SVG comparator's
+`[childCount]` short-circuit was itself anti-monotone under growth,
+penalising a verified-correct port. Fixed in a separate mission
+(`svg-comparator-alignment`, its own decisions D1–D5) rather than inside
+this one's scope, then merged back in and T1/T2/T3 landed clean.
+
+**Ten fixtures rose at intermediate checkpoints**, none against the
+mission's actual start — six unrelated pre-existing defects exposed by
+element-count convergence, none fixed here, all filed as named follow-ons
+in `planning/next-missions.md` (`activity-note-after-terminal`,
+`activity-diamond-font-skinparams`, `activity-swimlane-rendering`,
+`activity-nested-split-geometry`, `activity-embedded-diagram-labels`,
+`activity-note-width-overscan`), plus a seventh
+(`activity-edge-stroke-width`) found by T4's own re-census.
+
+All four gates green throughout. `src/core/svg-shapes.ts` and
+`src/core/creole-svg.ts` confirmed unchanged (`git diff --stat` empty).
+Sequence, state, class and json conformance suites confirmed unmoved.

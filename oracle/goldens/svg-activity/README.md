@@ -193,3 +193,33 @@ To add a slug:
 
 Removal is **maintainer-only** -- see `oracle/goldens/svg-description/
 README.md`'s identical rule; the same rationale applies verbatim.
+
+## `activity-element-granularity` close-out — 2026-09-03
+
+Converged activity's SVG **element vocabulary** with the jar's: one
+`<polyline>` → N `<line>` per segment (T1), `<circle>` → `<ellipse>` (T2),
+one `<text>` with `<tspan>` children → N `<text>` per label line (T3).
+Full report: `.agent-notes/aeg-T4.md`, mission brief
+`plans/activity-element-granularity/`.
+
+**Headline: Σ`weightedScore` over the 268 numerically-comparable fixtures
+108447 → 61677, −43.1%. Zero fixtures rose against the mission-start
+pin.** `svg/g[][childCount]`'s share of total weight fell from **91.6%
+(this file's own prior headline) to 39.9%**.
+
+The mission's own premise-check landed too: the residual was measured to
+be a **different element vocabulary for the same drawn content**, not
+"missing ink" as `planning/next-missions.md` had described it — the 91.6%
+figure above was never about unported activity content.
+
+Ten fixtures rose at an intermediate checkpoint mid-mission (element-count
+convergence exposing six unrelated pre-existing defects — note-after-
+terminal sizing, unwired diamond/font skinparams, swimlane rendering
+architecture, nested-split geometry, embedded diagrams in labels, note
+width/overscan); all ten finished net-improved against the mission start.
+Six defects filed as named follow-ons in `planning/next-missions.md`,
+alongside a seventh (`activity-edge-stroke-width`) found by T4's own
+re-census. None fixed in this mission — element vocabulary only.
+
+`oracle/goldens/svg-activity/diff-census.json` and `element-baseline.json`
+are current as of this close-out (`measuredAgainstCommit` in each file).

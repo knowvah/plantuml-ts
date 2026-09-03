@@ -5,7 +5,7 @@ recorded result.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4 | Re-pin, re-census, name every riser | orchestrator | `oracle/goldens/svg-activity/{diff-baseline,diff-census,element-baseline}.json`, `README.md`, `.agent-notes/aeg-T4.md` | T1, T2, T3 | [ ] |
+| T4 | Re-pin, re-census, name every riser | orchestrator | `oracle/goldens/svg-activity/{diff-baseline,diff-census,element-baseline}.json`, `README.md`, `.agent-notes/aeg-T4.md` | T1, T2, T3 | [x] |
 
 **Orchestrator-executed** — baseline JSON writes are reserved to the
 orchestrator (`scripts/repin-sequence-baselines.ts:3-8`).
