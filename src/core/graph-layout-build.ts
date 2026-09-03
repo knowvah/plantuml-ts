@@ -12,6 +12,7 @@ import type {
   DotInputNode,
 } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
+import { dotSplinesAttrs } from './dot-splines.js';
 import { rowPortTable, portTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
@@ -40,6 +41,11 @@ export function applyGraphAttrs(b: GvGraphBuilder, input: DotInputGraph): void {
     b.setAttr('ranksep', (input.rankSep / PX_PER_INCH).toString());
   }
   if (input.aspect !== undefined) b.setAttr('aspect', input.aspect.toString());
+  // D2 (plans/linetype-ortho-routing/decisions.md): emitted unconditionally,
+  // never gated on sep attrs -- pavuzo-79-zodu430's cached svek-1.dot carries
+  // `splines=ortho;forcelabels=true;` with no nodesep/ranksep at all.
+  // @see ~/git/plantuml/.../svek/DotStringFactory.java:161-169
+  for (const [k, v] of dotSplinesAttrs(input.linetype)) b.setAttr(k, v);
 }
 
 /** Layout-side mirror of `svek-dot-emit.ts#nodeLine`'s shape handling: the
