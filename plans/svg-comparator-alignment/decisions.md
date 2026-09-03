@@ -101,3 +101,63 @@ own decision journal gets an explicit "resumed" entry once this lands.
 is not a `src/`-facing change. Classified only by reversibility:
 **Reversible** — one file's algorithm plus its own tests, `git revert`
 restores the prior short-circuit.
+
+## D4 — AMENDED after T1 landed: the verified blast radius was still incomplete
+
+**Context.** D2 named 3 gated files. Running the full `npm test` after T1
+found 3 more consumers D2's grep (`compareSvg`/`weightedScore` importers)
+missed, because two of them **duplicate** logic from `compare.ts` rather
+than import it:
+
+1. **`oracle/goldens/svg-description/diff-baseline.json`** — 6 of its
+   fixtures (`component/bozana-38-xufi750`, `component/kanute-77-lacu414`,
+   `usecase/jecici-56-bimu826`, `component/codabo-50-mupa164`,
+   `component/xufexu-38-fola855`, `usecase/pivudu-29-pele178`) rose in raw
+   `diffCount` (e.g. `xufexu-38-fola855`: 3 → 12). **Mechanism, measured
+   per-fixture, not assumed:** every rise traces to a `[childCount]` diff
+   that used to short-circuit and now LCS-aligns, recursing into matched
+   pairs and surfacing REAL diffs that were previously invisible — e.g.
+   `bozana-38-xufi750`'s two nested `g[childCount]` diffs go from
+   short-circuited to aligning 3-of-4 children each and finding genuine
+   attribute diffs inside them. This is the exact "visibility increase, not
+   regression" pattern `diffCount`'s own known non-monotonicity predicts
+   (D5, `plans/sequence-root-chrome/decisions.md`) — description was never
+   upgraded off raw `diffCount` gating the way activity/sequence were.
+   **Decision: re-pin, don't adjudicate as a stop** — the mechanism is
+   verified benign for all 6, and D2's "if anything rises, stop and
+   adjudicate" is satisfied by this per-fixture mechanism check, not
+   bypassed.
+
+2. **`oracle/goldens/svg-sequence/diff-census.json`** — its own consistency
+   test (`sequence-diff-census.test.ts`, "a freshly computed slice matches
+   what the committed census records") failed: real diffs surfacing where
+   short-circuits used to hide them changes bucket membership. Informational
+   only, never gated on a pass/fail rise — regenerate via
+   `npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts`.
+
+3. **`scripts/sequence-ratchet-adjudicate.ts`** — built for
+   `sequence-command-coverage` (2026-08) to work AROUND the exact defect D1
+   fixes: because the old `compare.ts` short-circuit charge was anti-monotone
+   under growth, this script classifies a `weightedScore` rise as a benign
+   `artefact` (re-pin OK) vs a real `regression`, using an arithmetic
+   identity (`ownUnitsOf`, `isSubstructureRise`) that is PROVABLY TRUE only
+   under the OLD sum-of-both-sides charge: `weight === ownUnitsOf(ours) +
+   ownUnitsOf(theirs)` when root counts differ. Under D1's alignment that
+   identity no longer holds by construction (the charge is now scoped to
+   the unmatched remainder, not both full sides), so `ownUnitsOf`'s own
+   pinned test failed. **Decision:** correct the stale doc comments (the
+   header's "the ENTIRE charge is `sumUnits(ourChildren) +
+   sumUnits(theirChildren)`" claim, `ownUnitsOf`'s own comment) to state
+   they describe the PRE-D1 formula, and fix the one failing test to assert
+   the new (smaller, correctly-aligned) number instead of the stale
+   identity. **Do not** redesign `isSubstructureRise` in this mission: it
+   still degrades gracefully (its identity check simply fires less often,
+   since D1 already prevents most of the growth-driven rises it existed to
+   classify) and a redesign is separable follow-on work, not required to
+   land D1 with all four gates green.
+
+**Consequences.** Write-set for this mission grows by these 3 files (2 test
+files' doc/assertion updates, 1 committed census regeneration, plus the
+description baseline). None of this changes D1's algorithm or its own new
+tests — this is entirely fallout from consumers that duplicated or measured
+`compare.ts`'s old exact numbers rather than treating it as opaque.

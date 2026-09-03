@@ -239,17 +239,25 @@ describe('ownUnitsOf', () => {
     expect(ownUnitsOf('<svg xmlns="http://www.w3.org/2000/svg"><rect x="1"/></svg>')).toBeNull();
   });
 
-  it('agrees with the charge compare.ts actually levies for a root short-circuit', () => {
-    // The equivalence `isSubstructureRise` depends on, pinned rather than
-    // asserted in a comment: when the root child COUNTS differ, the whole
-    // charge is sumUnits(ours) + sumUnits(theirs), so the weighted score
-    // equals `ownUnitsOf(ours) + ownUnitsOf(theirs)`.
+  it('is now SMALLER than ownUnitsOf(ours) + ownUnitsOf(theirs) -- the D1 identity break', () => {
+    // Pre-D1 (`plans/svg-comparator-alignment/decisions.md`), the whole
+    // root-short-circuit charge was sumUnits(ours) + sumUnits(theirs), so
+    // weightedScore equalled `ownUnitsOf(ours) + ownUnitsOf(theirs)`
+    // exactly -- `isSubstructureRise`'s soundness proof. D1 LCS-aligns
+    // instead: `ours`'s one <rect> matches one of `theirs`'s two <rect>s
+    // and RECURSES (surfacing a real @x diff), so only the genuinely
+    // unmatched <rect> is charged at the [childCount] path -- weight 2, not
+    // 4. Total weightedScore is 3 (the recursed @x diff + the unmatched
+    // rect), strictly less than the old identity's 6 = ownUnitsOf(ours=2) +
+    // ownUnitsOf(theirs=4). See `ownUnitsOf`'s and `isSubstructureRise`'s
+    // own doc comments for what this means for the classifier post-D1.
     const ours = wrap('<rect x="1"/>');
     const theirs = wrap('<rect x="1"/><rect x="2"/>');
     const { diffs } = compareSvg(ours, theirs, 'deterministic');
 
     expect(diffs.map((d) => d.path)).toContain(TOP_LEVEL_CHILD_COUNT_PATH);
-    expect(weightedScore(diffs)).toBe((ownUnitsOf(ours) ?? 0) + (ownUnitsOf(theirs) ?? 0));
+    expect(weightedScore(diffs)).toBe(3);
+    expect(weightedScore(diffs)).toBeLessThan((ownUnitsOf(ours) ?? 0) + (ownUnitsOf(theirs) ?? 0));
   });
 });
 
