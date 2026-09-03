@@ -20,6 +20,46 @@ describe('toSvekDot — Svek-shaped DOT emission', () => {
     expect(tb).not.toContain('rankdir');
   });
 
+  // DotStringFactory.java:161-169 — ORTHO appends splines+forcelabels
+  // before a single println, so both land on ONE DOT line (D2); POLYLINE
+  // gets no forcelabels (D4).
+  it('joins ortho splines and forcelabels into one line', () => {
+    const dot = toSvekDot({ nodes: [], edges: [], linetype: 'ortho' });
+    const lines = dot.split('\n');
+    expect(lines).toContain('splines=ortho;forcelabels=true;');
+    expect(lines).not.toContain('splines=ortho;');
+    expect(lines).not.toContain('forcelabels=true;');
+  });
+
+  it('emits polyline splines with no forcelabels', () => {
+    const dot = toSvekDot({ nodes: [], edges: [], linetype: 'polyline' });
+    expect(dot).toContain('splines=polyline;');
+    expect(dot).not.toContain('forcelabels');
+  });
+
+  it('places the splines line after searchsize and before rankdir', () => {
+    const dot = toSvekDot({ nodes: [], edges: [], linetype: 'ortho', rankDir: 'LR' });
+    const lines = dot.split('\n');
+    const searchsizeIdx = lines.indexOf('searchsize=500;');
+    const splinesIdx = lines.indexOf('splines=ortho;forcelabels=true;');
+    const rankdirIdx = lines.indexOf('rankdir=LR;');
+    expect(searchsizeIdx).toBeGreaterThanOrEqual(0);
+    expect(splinesIdx).toBeGreaterThan(searchsizeIdx);
+    expect(rankdirIdx).toBeGreaterThan(splinesIdx);
+  });
+
+  it('still emits splines when omitSepAttrs is true (D2 regression guard)', () => {
+    const dot = toSvekDot({ nodes: [], edges: [], linetype: 'ortho', omitSepAttrs: true });
+    expect(dot).toContain('splines=ortho;forcelabels=true;');
+    expect(dot).not.toContain('nodesep');
+    expect(dot).not.toContain('ranksep');
+  });
+
+  it('emits no splines token when linetype is unset', () => {
+    const dot = toSvekDot({ nodes: [], edges: [] });
+    expect(dot).not.toContain('splines');
+  });
+
   it('emits rect nodes with empty label, inch sizes, and a color tag', () => {
     const dot = toSvekDot({ nodes: [{ id: 'a', width: 144, height: 72 }], edges: [] });
     expect(dot).toMatch(

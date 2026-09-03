@@ -15,6 +15,7 @@
 // parity gate normalizes them away, so only their presence/structure matters.
 
 import type { DotInputEdge, DotInputGraph, DotInputNode } from './graph-layout.types.js';
+import { dotSplinesAttrs } from './dot-splines.js';
 import {
   assignSequence,
   buildClusterTree,
@@ -72,6 +73,12 @@ function graphAttrLines(input: DotInputGraph): string[] {
     lines.push(`nodesep=${inches(ns)};`, `ranksep=${inches(rs)};`);
   }
   lines.push('remincross=true;', 'searchsize=500;');
+  // DotStringFactory.java:161-169 — two `sb.append`s before ONE `println`
+  // for the ortho arm, so both pairs join into a single DOT line (D2).
+  const splines = dotSplinesAttrs(input.linetype);
+  if (splines.length > 0) {
+    lines.push(splines.map(([k, v]) => `${k}=${v};`).join(''));
+  }
   if (input.rankDir === 'LR') lines.push('rankdir=LR;');
   return lines;
 }
