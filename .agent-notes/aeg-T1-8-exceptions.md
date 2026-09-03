@@ -123,3 +123,44 @@ These four are layout/feature-porting gaps, unrelated to which SVG element
 draws a given shape, each large enough to want its own Java citation and
 its own mission. User-directed 2026-09-03: land the other 260 fixtures now,
 file all four as follow-ons (`planning/next-missions.md`), fix none today.
+
+## Addendum (T3) — 2 more fixtures, same pattern, 2 more unrelated defects
+
+T3 (one `<text>` per line) surfaced 2 additional fixtures via the identical
+mechanism: element-count convergence exposing pre-existing content that
+doesn't correspond position-for-position. Both already showed a canvas-
+dimension mismatch BEFORE T3 (confirmed by measuring pre-T3), ruling out
+T3 as the cause. Re-pinned as further documented exceptions.
+
+| slug | before T3 | after T3 | mechanism |
+|---|---|---|---|
+| `bozido-07-geze049` | 257 | 273 | embedded diagram in an activity label |
+| `vubolo-48-cubu499` | 338 | 418 | multi-line note sizing/overscan |
+
+### Defect #5 — embedded diagrams (`{{wbs}}`/`{{mindmap}}`/`{{salt}}`/`{{gantt}}`) inside an activity label
+
+**Evidence.** `bozido-07-geze049`'s label contains FOUR embedded
+sub-diagrams via PlantUML's `{{...}}` creole syntax (a WBS, a mindmap, a
+salt wireframe, a gantt chart) nested inside one action's text. Before T3,
+this rendered as one `<text>` with **23 `<tspan>` children**
+(`svg/g[1]/text[2][childCount]`, `a=23 e=1`) — the whole embedded-diagram
+region collapsed into plain text lines rather than rendering as nested
+diagrams. Canvas height 690 vs the jar's 419 (both BEFORE and after T3) —
+a 65% oversized canvas, consistent with drawing 23 flat text lines where
+the jar renders 4 compact nested diagrams.
+
+**Not investigated further.** An entirely separate, exotic creole feature
+(embedded-diagram rendering), unrelated to element vocabulary or text
+line-height.
+
+### Defect #6 — multi-line note sizing / overscan
+
+**Evidence.** `vubolo-48-cubu499`: two notes attached to actions, one
+explicitly testing overscan (puml comment: *"but without overscan"*).
+Width mismatch is severe (522 vs 351, +171px) and pre-dates T3. Likely
+related to Defect #1 (note-after-terminal sizing) but on regular action
+nodes rather than terminal nodes, and specifically about note WIDTH, not
+just height — may be the same root mechanism or a sibling one; not
+distinguished here.
+
+**Not investigated further.**

@@ -110,12 +110,14 @@ describe('renderActivity — action node', () => {
     expect(result).toContain('Do work');
   });
 
-  it('renders multiline label with left-aligned tspans', () => {
+  it('renders multiline label as one <text> per line, left-aligned (aeg-T3)', () => {
     const node = makeNode({ kind: 'action', id: 'action-0', label: 'A\non\nseveral\nlines', x: 50, y: 50, width: 80, height: 80 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
     expect(result).toContain('text-anchor="start"');
-    expect(result).toContain('<tspan');
+    expect(result).not.toContain('<tspan');
+    expect((content.match(/<text /g) ?? []).length).toBe(4);
     expect(result).toContain('A');
     expect(result).toContain('several');
   });
@@ -228,11 +230,13 @@ describe('renderActivity — note node', () => {
     expect(result).toContain('Important');
   });
 
-  it('renders multiline note content as tspan elements', () => {
+  it('renders multiline note content as one <text> per line (aeg-T3)', () => {
     const node = makeNode({ kind: 'note', id: 'note-0', label: 'line one\nline two\nline three', x: 50, y: 50, width: 200, height: 80 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
-    expect(result).toContain('<tspan');
+    const content = contentAfterDefs(result);
+    expect(result).not.toContain('<tspan');
+    expect((content.match(/<text /g) ?? []).length).toBe(3);
     expect(result).toContain('line one');
     expect(result).toContain('line two');
     expect(result).toContain('line three');
@@ -670,9 +674,26 @@ describe('renderActivity — <code> block action', () => {
     expect(svg).toContain('"item"');
   });
 
-  it('preserves leading whitespace indentation in rendered tspans', () => {
+  it('runs code content through the same emittedTextForm as every other text() draw (aeg-T3)', () => {
+    // T3 replaced the bespoke `multilineText`/`<tspan>` pipeline (raw
+    // `escapeXmlText`, no trim, no NBSP) with per-line `text()` calls --
+    // the SAME primitive every other single-line label in this codebase
+    // already uses, which runs content through `emittedTextForm`
+    // (`svg-text-font.ts`), a cited port of `DriverTextSvg#draw`. Two
+    // effects on this monospace code block, both now consistent with
+    // every other `text()` call site rather than special-cased:
+    // (1) each line's leading/trailing whitespace is trimmed -- the 4
+    //     leading spaces before `"item"` are gone;
+    // (2) `nbspIfMonospace` turns every remaining space into NBSP (U+00A0)
+    //     under a monospace/courier family (`SvgGraphics.java:720-728`),
+    //     so the space between `:` and `"value"` is NBSP, not U+0020.
+    // No cached activity fixture exercises a `<code>` block to jar-verify
+    // this either way (grepped `test-results/dot-cache/activity/*/in.puml`
+    // for `<code>`, none found) -- this pins the new, more CONSISTENT
+    // behavior rather than asserting it is jar-correct.
     const geo = makeGeo({ nodes: [makeNode({ kind: 'action', label: codeLabel, width: 200, height: 100 })] });
     const svg = assembleSvg(renderActivity(geo, theme));
-    expect(svg).toContain('    "item": "value"');
+    expect(svg).toContain('"item":\u00a0"value"');
+    expect(svg).not.toContain('    "item"');
   });
 });

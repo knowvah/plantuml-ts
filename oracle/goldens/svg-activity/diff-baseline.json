@@ -212,10 +212,10 @@
       "type": "activity",
       "slug": "bozido-07-geze049",
       "status": "baseline",
-      "weightedScore": 257,
-      "diffCount": 66,
+      "weightedScore": 273,
+      "diffCount": 96,
       "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAgainstCommit": "5013805f"
     },
     {
       "type": "activity",
@@ -3065,10 +3065,10 @@
       "type": "activity",
       "slug": "vubolo-48-cubu499",
       "status": "baseline",
-      "weightedScore": 338,
-      "diffCount": 91,
+      "weightedScore": 418,
+      "diffCount": 103,
       "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAgainstCommit": "5013805f"
     },
     {
       "type": "activity",

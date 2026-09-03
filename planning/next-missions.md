@@ -793,6 +793,23 @@ Ordered by how ready they are, not by size.
   (likely `FtileWithNoteOpale` or similar under `activitydiagram3/ftile/`).
   Full evidence: `.agent-notes/aeg-T1-8-exceptions.md`.
 
+- **`activity-embedded-diagram-labels`** (NEW, unbriefed) — FILED
+  2026-09-03 by `activity-element-granularity` T3, measured.
+  `bozido-07-geze049`'s label embeds FOUR sub-diagrams via creole's
+  `{{wbs}}`/`{{mindmap}}`/`{{salt}}`/`{{gantt}}` syntax; ours collapses the
+  whole region to 23 flat text lines (canvas 690px tall) where the jar
+  renders compact nested diagrams (419px). Exotic, separate creole
+  feature — not investigated further. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
+
+- **`activity-note-width-overscan`** (NEW, unbriefed) — FILED 2026-09-03 by
+  `activity-element-granularity` T3, measured. `vubolo-48-cubu499` (two
+  notes on action nodes, one explicitly testing "overscan") renders 171px
+  too wide (522 vs jar's 351). May share a mechanism with
+  `activity-note-after-terminal` above (both are note sizing) or may be a
+  sibling defect — not distinguished. Full evidence:
+  `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
+
 - **`sequence-fidelity-residuals`** (NEW, unbriefed) — FILED 2026-08-26 as
   `sequence-command-coverage`'s D6 census. **The work queue is the ten items
   below plus the ten still-refusing command gaps**; this row exists so the

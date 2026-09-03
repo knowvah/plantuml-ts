@@ -8,11 +8,66 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, text, diamond, noteBox, ellipse, line, path, polygon, multilineText, resolvePaint } from '../../core/svg.js';
+import { rect, text, diamond, noteBox, ellipse, line, path, polygon, resolvePaint, type TextStyle } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { ACTION_H_PAD, NOTE_FOLD } from './activity-layout-constants.js';
 
 const ACTION_RX = 8;
+
+// ---------------------------------------------------------------------------
+// Multi-line labels: one <text> per line, T3 (aeg)
+// ---------------------------------------------------------------------------
+
+/**
+ * The per-line baseline ADVANCE, and the ASCENT fraction used to place a
+ * centred block's first line -- T3's D4 citation. Verified on
+ * `boxoto-53-sifo232`: the jar's two label lines sit at y=139.333 and
+ * y=151.333, 12.0 apart at `font-size="12"` -- an advance of EXACTLY 1x
+ * font size, not the `fontSize * 1.4` this file used before T3.
+ *
+ * @see net/sourceforge/plantuml/klimt/drawing/font/StringBounderFromWidthTable.java:71
+ *      -- `calculateDimension`'s returned height is `size` (the raw font
+ *      size), unconditionally: `final double height = size;`.
+ * @see net/sourceforge/plantuml/klimt/font/StringBounder.java:47 -- the
+ *      default `getDescent` is `font.getSize2D() / 4.5`.
+ *
+ * This port's own `WidthTableMeasurer` (`src/core/measurer.ts`) already
+ * carries both as `measure(text, font).height === font.size` and
+ * `getDescent(font, text) === font.size / 4.5`, and sequence's own
+ * multi-line note bodies already use exactly this formula
+ * (`sequence-layout-events.ts#noteBodyRuns`: `lineHeight =
+ * measurer.measure('M', spec).height`, `ascent = lineHeight -
+ * measurer.getDescent(spec, 'M')`). Activity's per-line label advance
+ * mirrors it: `ASCENT_FRACTION = 1 - 1/4.5 = 7/9`, replacing the old
+ * `lh * 0.8` approximation (0.8 was already close to 7/9 ≈ 0.7778 --
+ * likely someone's earlier hand-rounding of the same ratio, never cited).
+ */
+const ASCENT_FRACTION = 1 - 1 / 4.5;
+
+/**
+ * One `<text>` element PER LINE, never `<tspan>` (D3). Upstream draws a
+ * multi-line label as N separate `<text>` draws -- there is no "one
+ * `<text>` with several `<tspan>` lines" concept for a bare label; a
+ * `<tspan>` is reserved for creole's own multi-STYLE-run serialisation
+ * within a single line (`src/core/creole-svg.ts`, not this function's
+ * concern -- none of this file's multi-line call sites carry creole
+ * markup, only `\n`-split plain strings).
+ */
+function textLines(
+  lines: readonly string[],
+  x: number,
+  firstBaselineY: number,
+  lineHeight: number,
+  style: TextStyle,
+): string {
+  return lines.map((ln, i) => text(x, firstBaselineY + lineHeight * i, ln, style)).join('');
+}
+
+/** First baseline Y so an N-line block is vertically centred around `cy`,
+ *  using the cited advance/ascent above instead of the old `lh * 0.8`. */
+function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
+  return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
+}
 
 export function renderLabel(label: string, cx: number, cy: number, theme: Theme): string {
   return renderNodeLabel(label, cx, cy, theme);
@@ -24,11 +79,9 @@ export function renderMultilineText(
   cy: number,
   theme: Theme,
 ): string {
-  const lh = theme.fontSize * 1.4;
-  const totalH = lh * lines.length;
-  // y of first line baseline so the block is vertically centred around cy
-  const y = cy - totalH / 2 + lh * 0.8;
-  return multilineText(lines, cx, y, lh, {
+  const lh = theme.fontSize;
+  const y = centeredFirstBaselineY(cy, lh, lines.length);
+  return textLines(lines, cx, y, lh, {
     textAnchor: 'middle',
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
@@ -134,11 +187,10 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     const codeContent = codeMatch[1]!.replace(/^\n/, '').replace(/\n$/, '');
     const codeLines = codeContent.split('\n');
     const monoFamily = 'monospace';
-    const lh = theme.fontSize * 1.4;
-    const totalH = lh * codeLines.length;
-    const lineY = cy - totalH / 2 + lh * 0.8;
+    const lh = theme.fontSize;
+    const lineY = centeredFirstBaselineY(cy, lh, codeLines.length);
     const labelX = node.x + ACTION_H_PAD;
-    const labelText = multilineText(codeLines, labelX, lineY, lh, {
+    const labelText = textLines(codeLines, labelX, lineY, lh, {
       textAnchor: 'start',
       fontFamily: monoFamily,
       fontSize: theme.fontSize,
@@ -150,11 +202,10 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const lines = label.split('\n');
   let labelEl: string;
   if (lines.length > 1) {
-    const lh = theme.fontSize * 1.4;
-    const totalH = lh * lines.length;
-    const lineY = cy - totalH / 2 + lh * 0.8;
+    const lh = theme.fontSize;
+    const lineY = centeredFirstBaselineY(cy, lh, lines.length);
     const labelX = node.x + ACTION_H_PAD;
-    const labelText = multilineText(lines, labelX, lineY, lh, {
+    const labelText = textLines(lines, labelX, lineY, lh, {
       textAnchor: 'start',
       fontFamily: theme.fontFamily,
       fontSize: theme.fontSize,
@@ -205,10 +256,9 @@ export function renderSignalLabel(label: string, x: number, cy: number, theme: T
       dominantBaseline: 'central',
     });
   }
-  const lh = theme.fontSize * 1.4;
-  const totalH = lh * lines.length;
-  const lineY = cy - totalH / 2 + lh * 0.8;
-  const labelText = multilineText(lines, labelX, lineY, lh, {
+  const lh = theme.fontSize;
+  const lineY = centeredFirstBaselineY(cy, lh, lines.length);
+  const labelText = textLines(lines, labelX, lineY, lh, {
     textAnchor: 'start',
     fontFamily: theme.fontFamily,
     fontSize: theme.fontSize,
@@ -346,11 +396,11 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
 
   const label = node.label ?? '';
   const lines = label.split('\n');
-  const lh = theme.fontSize * 1.4;
+  const lh = theme.fontSize;
   const labelX = x + 4;
   let labelEl: string;
   if (lines.length > 1) {
-    labelEl = multilineText(lines, labelX, y + NOTE_FOLD + theme.fontSize, lh, {
+    labelEl = textLines(lines, labelX, y + NOTE_FOLD + theme.fontSize, lh, {
       textAnchor: 'start',
       fontFamily: theme.fontFamily,
       fontSize: theme.fontSize,
