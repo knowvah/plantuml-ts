@@ -9,7 +9,7 @@ responsible swap is unambiguous.
 |---|---|---|---|---|---|
 | T1 | polyline → per-segment `<line>` | orchestrator | `src/diagrams/activity/renderer.ts` + its unit tests | T0 | [x] |
 | T2 | `circle` → `ellipse` at activity call sites | orchestrator | `src/diagrams/activity/activity-renderer-shapes.ts` + its unit tests | T1 | [x] |
-| T3 | multi-line label → one `<text>` per line | opus | both files above + their unit tests | T2 | [ ] |
+| T3 | multi-line label → one `<text>` per line | orchestrator | both files above + their unit tests | T2 | [x] |
 
 **T3 may halt** ([D4]) if the per-line y advance cannot be cited from
 upstream. T1 and T2 stand on their own if it does — they are independently
