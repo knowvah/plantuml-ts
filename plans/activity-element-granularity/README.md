@@ -95,7 +95,7 @@ before trusting any timing number.
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin the pre-swap element census | — | [x] |
-| [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | T1 [x], T2/T3 pending |
+| [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | T1 [x], T2 [x], T3 pending |
 | [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | [ ] |
 
 **T0 gates everything.** Without a pre-swap element pin the descent is
