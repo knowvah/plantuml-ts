@@ -53,6 +53,8 @@ function graph(edges: StructuralEdge[]): StructuralGraph {
     remincross: false,
     searchsize: undefined,
     rankdir: undefined,
+    splines: undefined,
+    forcelabels: false,
   };
 }
 
