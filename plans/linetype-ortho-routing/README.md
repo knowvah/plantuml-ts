@@ -159,6 +159,7 @@ original **684** did by T1.
 | T2 | 685 | none (extended an existing suite) |
 | T3 | 685 | none (extended an existing suite) |
 | T4 | 686 | `tests/unit/state/state-linetype-routing.test.ts` |
+| T5 | 687 | `tests/unit/class/class-linetype-routing.test.ts` |
 
 Update this row-by-row as tasks land; the count includes the 1 skipped file
 vitest reports in its total.
