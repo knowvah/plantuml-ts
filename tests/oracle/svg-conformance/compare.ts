@@ -146,13 +146,24 @@ function parseTransformAttr(t: string): ParsedTransform[] {
 // its subtree is, while a tag MATCH costs one diff per differing attribute
 // plus whatever recursion finds, so making a document MORE structurally
 // aligned can RAISE the count. Charging each short-circuit an upper bound on
-// what descending could have cost restores monotonicity, because descending
-// can then never cost more than stopping.
+// what descending could have cost restores monotonicity for the NODE-TYPE
+// and TAG short-circuits, because descending can then never cost more than
+// stopping there.
 //
-// The weight is a design choice, not a ported constant, so it carries the
-// rationale above rather than an upstream file:line. It is deliberately a
-// loose bound (a sum, not a max): a tighter one that can be exceeded buys
-// nothing, since it is exactly the "never exceeded" property that is wanted.
+// The CHILD-COUNT short-circuit is different: `svg-comparator-alignment`
+// (2026-09-03) replaced its old sum-of-both-sides charge
+// (`sumUnits(actualChildren) + sumUnits(expectedChildren)`) with LCS
+// alignment (`alignChildrenByKey`, below `compareNodes`), because the sum
+// was NOT actually monotone -- it grows just as readily from a CORRECT
+// addition as an incorrect one. Measured on `activity-element-granularity`
+// T1 (`.agent-notes/aeg-T1.md`): a verified-correct port that improved
+// every element-level fidelity measure still RAISED the gated
+// `weightedScore` 7.0%, because the old charge counted the size of
+// whatever grew, never whether the growth was right. Alignment fixes this
+// by finding real correspondence between the two sibling lists and
+// charging only what is genuinely unmatched -- see `alignChildrenByKey`'s
+// own doc comment for the algorithm and `plans/svg-comparator-alignment/
+// decisions.md` D1 for the rejected one-line alternative and why.
 //
 // `units()` stays module-private. A second caller computing a subtly
 // different number is the failure mode this weighting exists to remove.
@@ -175,6 +186,100 @@ function sumUnits(nodes: readonly NormalizedNode[]): number {
   let total = 0;
   for (const node of nodes) total += units(node);
   return total;
+}
+
+// ---------------------------------------------------------------------------
+// Child-list alignment (svg-comparator-alignment D1)
+// ---------------------------------------------------------------------------
+
+/**
+ * The key two children are aligned by, when a `[childCount]` mismatch means
+ * they can no longer be compared positionally (see `alignChildrenByKey`).
+ * Elements key by `tag`; text nodes key by the sentinel `'#text'` --
+ * `NormalizedNode.tag` is `undefined` for `type: 'text'` nodes
+ * (`normalize.ts`'s own shape), so an element and a text node can never
+ * share a key and LCS can never pair across `type`.
+ */
+function childKey(node: NormalizedNode): string {
+  /* v8 ignore next */
+  return node.type === 'text' ? '#text' : (node.tag ?? '');
+}
+
+/**
+ * Longest-common-subsequence alignment of two sibling lists by `childKey`,
+ * used only when `actualChildren.length !== expectedChildren.length` --
+ * the case `compareNodes` used to abandon entirely, charging the SUM of
+ * both sides' full sizes with no attempt to find which children
+ * correspond. That charge grew just as readily from a correct addition as
+ * an incorrect one (`plans/svg-comparator-alignment/decisions.md` D1).
+ *
+ * Returns index pairs `[actualIndex, expectedIndex]` for the matched
+ * subsequence, in ascending `actualIndex` order -- the order
+ * `compareNodes`'s equal-length loop already walks `actualChildren` in, so
+ * a matched pair's per-tag sibling counter numbers consistently with that
+ * loop's own `childPath` convention. Unmatched children on either side are
+ * simply absent from the returned pairs; the caller charges those at full
+ * `units()` cost, exactly as the whole-subtree charge used to, but scoped
+ * to only the genuinely unmatched remainder.
+ *
+ * Standard O(n*m) time AND SPACE DP + backtrack over SIBLING-list length,
+ * not document size -- this only ever runs at a mismatch site, and sibling
+ * lists in this harness's fixtures stay small (measured: the activity and
+ * sequence corpora's largest is 293, `activity/jupoxe-15-sugo110`) with
+ * exactly ONE outlier: `sequence/zudize-61-vomi445`'s root `<g>` has
+ * **70093** direct children. An O(n*m) table at that size is untenable --
+ * measured: `npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts`
+ * OOM'd a 4 GB heap trying to allocate it. Above `MAX_ALIGN_PRODUCT`
+ * (chosen ~7x the largest REAL fixture and ~35x smaller than the outlier,
+ * so it never engages on anything but that one fixture), this returns NO
+ * pairs -- which degrades the caller to exactly the OLD sum-of-both-sides
+ * charge for that one node, never a correctness bug, just a missed
+ * improvement on the one fixture too large to align cheaply.
+ */
+const MAX_ALIGN_PRODUCT = 2000 * 2000;
+
+function alignChildrenByKey(
+  actualChildren: readonly NormalizedNode[],
+  expectedChildren: readonly NormalizedNode[],
+): ReadonlyArray<readonly [number, number]> {
+  const m = actualChildren.length;
+  const n = expectedChildren.length;
+  if (m * n > MAX_ALIGN_PRODUCT) return [];
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    const row = dp[i]!;
+    const prevRow = dp[i - 1]!;
+    for (let j = 1; j <= n; j++) {
+      if (childKey(actualChildren[i - 1]!) === childKey(expectedChildren[j - 1]!)) {
+        row[j] = (prevRow[j - 1] ?? 0) + 1;
+      } else {
+        row[j] = Math.max(prevRow[j] ?? 0, row[j - 1] ?? 0);
+      }
+    }
+  }
+
+  const pairs: Array<[number, number]> = [];
+  let i = m;
+  let j = n;
+  while (i > 0 && j > 0) {
+    const row = dp[i]!;
+    const prevRow = dp[i - 1]!;
+    if (
+      childKey(actualChildren[i - 1]!) === childKey(expectedChildren[j - 1]!) &&
+      row[j] === (prevRow[j - 1] ?? 0) + 1
+    ) {
+      pairs.push([i - 1, j - 1]);
+      i--;
+      j--;
+    } else if ((prevRow[j] ?? 0) >= (row[j - 1] ?? 0)) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+  pairs.reverse();
+  return pairs;
 }
 
 // ---------------------------------------------------------------------------
@@ -394,16 +499,44 @@ function compareNodes(
     const expectedChildren = expected.children ?? [];
 
     if (actualChildren.length !== expectedChildren.length) {
+      // LCS-align rather than abandon the subtree (D1). Matched pairs
+      // recurse below for their REAL diff cost -- previously invisible
+      // inside the short-circuit -- and only the unmatched remainder on
+      // each side is charged at full `units()` cost.
+      const pairs = alignChildrenByKey(actualChildren, expectedChildren);
+      const matchedActual = new Set(pairs.map(([ai]) => ai));
+      const matchedExpected = new Set(pairs.map(([, ei]) => ei));
+
+      const matchedTagCounters: Record<string, number> = {};
+      for (const [ai, ei] of pairs) {
+        const ac = actualChildren[ai]!;
+        const ec = expectedChildren[ei]!;
+        let childPath: string;
+        if (ac.type === 'element' && ac.tag !== undefined) {
+          matchedTagCounters[ac.tag] = (matchedTagCounters[ac.tag] ?? 0) + 1;
+          const idx = matchedTagCounters[ac.tag];
+          childPath = `${path}/${ac.tag}[${idx}]`;
+        } else {
+          childPath = `${path}/text()[${ai + 1}]`;
+        }
+        compareNodes(ac, ec, childPath, tolerance, diffs);
+      }
+
+      const unmatchedActual = actualChildren.filter((_, idx) => !matchedActual.has(idx));
+      const unmatchedExpected = expectedChildren.filter((_, idx) => !matchedExpected.has(idx));
+      // The node and its attributes are NOT charged here: they were just
+      // compared. Matched children (above) charged their own real cost via
+      // recursion; this charges only the genuinely unmatched remainder --
+      // guaranteed non-empty on at least one side, since the lists differ
+      // in length and `pairs.length` can be at most `min(m, n)`.
       diffs.push({
         path: `${path}[childCount]`,
         actual: String(actualChildren.length),
         expected: String(expectedChildren.length),
         tolerance,
-        // The node and its attributes are NOT charged here: they were just
-        // compared, and only the children are skipped.
-        weight: sumUnits(actualChildren) + sumUnits(expectedChildren),
+        weight: sumUnits(unmatchedActual) + sumUnits(unmatchedExpected),
       });
-      return; // structural mismatch — stop recursing into children
+      return; // done: matched pairs recursed above, unmatched charged here
     }
 
     // Track sibling index per tag for XPath-like notation
