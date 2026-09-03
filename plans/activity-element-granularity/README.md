@@ -94,7 +94,7 @@ before trusting any timing number.
 
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | T0 pin the pre-swap element census | — | [ ] |
+| [0](batch-0/overview.md) | T0 pin the pre-swap element census | — | [x] |
 | [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | [ ] |
 | [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | [ ] |
 
