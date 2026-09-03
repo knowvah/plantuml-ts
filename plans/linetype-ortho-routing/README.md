@@ -93,7 +93,7 @@ under-collect while exiting 0 (`.agent-notes/aoh-coverage-tmp-undercollect.md`).
 | Batch | Tasks | Sequenced | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin the floor, all 8 individually | — | [x] |
-| [1](batch-1/overview.md) | T1 types+helper · T2 layout · T3 emitter | yes — **all three INERT** | [ ] |
+| [1](batch-1/overview.md) | T1 types+helper · T2 layout · T3 emitter | yes — **all three INERT** | [x] |
 | [2](batch-2/overview.md) | T4 state · T5 class · T6 description | yes | [ ] |
 | [3](batch-3/overview.md) | T7 `splinesOk` gates `dotEqual` | yes | [ ] |
 | [4](batch-4/overview.md) | T8 re-pin, name every mover | — | [ ] |
