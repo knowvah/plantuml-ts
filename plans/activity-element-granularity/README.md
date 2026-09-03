@@ -1,5 +1,20 @@
 # Mission: `activity-element-granularity`
 
+> ## ⛔ HALTED 2026-09-03 after T1 — awaiting a decision on the INSTRUMENT
+>
+> T1 did exactly what [D1](decisions.md) specifies and every element-level
+> measure improved (`<polyline>` 1666 → **0**; summed \|element delta\|
+> **−57.0%**; summed \|root-`g` childCountDelta\| **−19.3%**) — while the
+> **gated `weightedScore` ROSE 7.0%** and the ratchet failed **207 of 268**
+> fixtures. `compare.ts:404` charges a `[childCount]` short-circuit the
+> **sum** of both sides' sizes, so growing our side is penalised even when it
+> moves us closer to the jar. The exit bar below is therefore **unreachable
+> as written**, for the whole class of change all three swaps make.
+>
+> Mechanism, isolation experiment and the three options:
+> [D10](decisions.md#d10) and `.agent-notes/aeg-T1.md`. T1 is preserved
+> unmerged on `wip/aeg-T1-measured-halt` (`f59c26bb`). Nothing was re-pinned.
+
 **Branch:** `feat/activity-element-granularity` · **Planned:** 2026-09-03 ·
 **Baseline commit:** `804232d4` (main, clean tree, all four gates green)
 
@@ -95,8 +110,8 @@ before trusting any timing number.
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin the pre-swap element census | — | [x] |
-| [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | [ ] |
-| [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | [ ] |
+| [1](batch-1/overview.md) | T1 polyline→line · T2 circle→ellipse · T3 text-per-line | no — shared write-set | ⛔ halted at T1 |
+| [2](batch-2/overview.md) | T4 re-pin, re-census, name every riser | — | blocked by the halt |
 
 **T0 gates everything.** Without a pre-swap element pin the descent is
 unmeasurable and each swap's effect unattributable ([D6]).

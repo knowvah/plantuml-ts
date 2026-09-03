@@ -7,7 +7,7 @@ responsible swap is unambiguous.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | polyline → per-segment `<line>` | opus | `src/diagrams/activity/renderer.ts` + its unit tests | T0 | [ ] |
+| T1 | polyline → per-segment `<line>` | orchestrator | `src/diagrams/activity/renderer.ts` + its unit tests | T0 | ⛔ done, GATE RED — see D10 |
 | T2 | `circle` → `ellipse` at activity call sites | sonnet | `src/diagrams/activity/activity-renderer-shapes.ts` + its unit tests | T1 | [ ] |
 | T3 | multi-line label → one `<text>` per line | opus | both files above + their unit tests | T2 | [ ] |
 
@@ -17,3 +17,5 @@ revertible and independently measured.
 
 `src/core/svg-shapes.ts` is in **no** write-set. Sequence and json must not
 move; T2 asserts that rather than assuming it.
+
+**HALTED at T1, 2026-09-03.** The swap is correct and complete (`<polyline>` 1666 → 0) but raises the gated `weightedScore` 7.0% and fails the ratchet on 207 of 268 fixtures, because `compare.ts:404` charges a `[childCount]` short-circuit the SUM of both sides' sizes. T2 and T3 grow the document the same way and would be penalised the same way, so neither was started. See [D10](../decisions.md#d10) and `.agent-notes/aeg-T1.md`. T1's code is on `wip/aeg-T1-measured-halt`.

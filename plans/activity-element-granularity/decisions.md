@@ -114,3 +114,63 @@ emitted element vocabulary for activity diagrams; that is movement toward
 jar parity, not a breaking change to manage. No versioning, no deprecation
 window, no dual-write. Classified only by reversibility: **Reversible** —
 two source files, `git revert` restores the prior shape.
+
+---
+
+## D10 — AMENDED MID-MISSION 2026-09-03, after T1. **HALTED for review.**
+
+**Stop condition 3 fired**: the code contradicts the mission's exit bar, not
+one of D1–D9. D1 is *confirmed* — upstream ships no polyline driver and
+`Worm.java:134-183` emits one `ULine` per segment. What broke is the
+**instrument**.
+
+**Context.** T1 landed exactly what D1 specifies and every element-level
+measure improved: `<polyline>` 1666 → **0**, `<line>` 289 → **2702** against
+the jar's 3336, the summed absolute element delta across all eleven censused
+tags **−57.0%** (7153 → 3074), and the summed absolute root-`<g>`
+child-count delta **−19.3%** (2676 → 2159). The gated `weightedScore`
+nevertheless **ROSE 7.0%** (108447 → 116083) and the ratchet failed **207 of
+268** fixtures.
+
+**Mechanism** (full artifact: `.agent-notes/aeg-T1.md`).
+`compare.ts:404` charges a `[childCount]` short-circuit
+`sumUnits(actualChildren) + sumUnits(expectedChildren)` — the **sum** of both
+sides' sizes, not their difference. On a subtree that still short-circuits,
+enlarging our side raises the charge no matter how much closer to the jar the
+enlargement made us. Proven by holding the jar side fixed: on
+`tobajo-64-mipi810` `jarUnits` is 1236 before and after while `oursUnits`
+goes 686 → 902, and the weight rises by exactly 216 = 902 − 686.
+
+**Consequence — the exit bar is unreachable as written.** `weightedScore` is
+monotone under element *substitution* (the fixed-node-count class of change
+every prior mission made) and **anti-monotone under growth**. All three of
+this mission's swaps grow the document: T1 adds ~2413 nodes, T2 adds 518
+attribute units (`r` → `rx`,`ry`), T3 adds ~522 `<text>`. A fixture only
+improves by reaching *exact* count equality, and 203 of the 268 cannot,
+because `polygon` (−615) is out of scope entirely and `line` retains a −634
+residual. D9 ("SVG output growth is accepted, not mitigated") and the exit
+bar ("the aggregate `weightedScore` falls") are in direct conflict, and
+nothing in D1–D9 anticipated it.
+
+**Decision: HALT. Do not re-pin, do not proceed to T2/T3, do not revert the
+port.** T1 is preserved unmerged on `wip/aeg-T1-measured-halt` (`f59c26bb`).
+Resolving this is a choice about the instrument and belongs to the human:
+
+1. **Change the gated quantity** for element-granularity work — e.g. gate on
+   summed \|element delta\| or \|childCountDelta\|, both of which already show
+   a large, unambiguous descent. Cheapest; leaves `compare.ts` alone; needs a
+   new pin and a new gate.
+2. **Fix the weighting** so a `[childCount]` short-circuit charges the
+   *difference* rather than the sum. Correct at the root, but `compare.ts` is
+   the SHARED comparator behind the sequence, class, state, object,
+   description and json ratchets — every one of their baselines would have to
+   be re-pinned. Its own mission.
+3. **Accept the rise and re-pin**, on the stated mechanism. Legal under stop
+   condition 6's "until proven otherwise", but it bakes the anti-monotonicity
+   in: T2 and T3 and every later element-granularity mission would each need
+   the same exemption, and the ratchet stops meaning what its own failure
+   message says it means.
+
+Option 2 is the recommendation — it is the only one that leaves a gate whose
+claim about itself is true — but it is out of every write-set in this mission
+(stop condition 1) and must be decided, not assumed.
