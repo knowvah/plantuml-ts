@@ -181,3 +181,27 @@ every commit green. Committing the cache first would land one red commit.
 T5's effect (350 `[FIXED]` routing entries) beyond the diff-baseline
 descent. Flagged for review: this expands the mission into two prior
 missions' gates.
+
+## D12 — A fixture whose GOLDEN is a jar error page is `status:"jar-error"`, not a number (added mid-mission, 2026-09-02)
+
+**Context:** Not anticipated at decomposition. D8 covers fixtures OUR parser
+rejects. It says nothing about the opposite case: 23 of the 373 captured
+goldens are PlantUML's own graphical error pages, detected by the same needle
+both sibling gates use (`PSystemError.java:148-155` /
+`ReportLog.java:103-108`). Fifteen of those 23 render CLEANLY on our side, so
+a naive baseline would pin a large `weightedScore` comparing a real diagram
+against an error image — a number that cannot meaningfully descend and that
+would dominate any aggregate.
+
+**Decision:** Record them `status:"jar-error"` with no `weightedScore`,
+mirroring `routing-conformance.test.ts` and `refusal-coverage.test.ts`, which
+both already exclude exactly this set on exactly this reasoning: *the jar
+failing is no evidence about us*. This is existing repo precedent, not a new
+category invented for this mission. Detect them from the golden's own content
+— never from a slug list, which goes stale.
+
+**Consequences:** The numeric population is 373 − 23 jar-error − 90 our-error
++ 8 counted once (the overlap) = **283 numerically baselined**, which is
+exactly the mission README's own "renders clean: 283". The two exclusion sets
+overlap by 8; a fixture in both records `jar-error`, since the jar's failure
+makes our own outcome unevidential either way.
