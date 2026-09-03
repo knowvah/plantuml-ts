@@ -69,7 +69,7 @@ under-collect while exiting 0 (`.agent-notes/aoh-coverage-tmp-undercollect.md`).
 | ID | Description | Writes | Done |
 |---|---|---|---|
 | T1 | Implement LCS alignment + its own tests | `compare.ts`, `compare.test.ts` | [x] |
-| T2 | Re-pin, verify zero regressions | `oracle/goldens/svg-{activity,sequence,description?}/diff-baseline.json`, `oracle/goldens/svg-activity/diff-census.json` | [ ] |
+| T2 | Re-pin, verify zero regressions | `oracle/goldens/svg-{activity,sequence,description}/diff-baseline.json` (diff-census skipped, D5) | [x] |
 
 Single-agent, sequential — T2 depends on T1's code existing.
 

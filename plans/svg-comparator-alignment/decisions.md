@@ -161,3 +161,29 @@ files' doc/assertion updates, 1 committed census regeneration, plus the
 description baseline). None of this changes D1's algorithm or its own new
 tests — this is entirely fallout from consumers that duplicated or measured
 `compare.ts`'s old exact numbers rather than treating it as opaque.
+
+## D5 — `oracle/goldens/svg-activity/diff-census.json` is NOT regenerated here
+
+**Context.** The plan's write-set listed this file for regeneration
+("housekeeping, since real diffs now surface where short-circuits used to
+hide them"). Checking before doing it: no test references
+`svg-activity/diff-census` at all (grepped `tests/`, `scripts/` — confirmed
+empty), unlike sequence's sibling, which has its own
+`sequence-diff-census.test.ts` consistency gate. There is also no committed
+script that generates it — the activity-oracle-harness mission that
+produced it (T6) ran a bespoke orchestrator script, not a repo-committed
+one, mirroring how this mission's own T0 (`element-baseline.json`) was
+generated.
+
+**Decision.** Skip it. `plans/activity-element-granularity/batch-2/
+T4-repin-recensus.md` already owns re-censusing activity's residual, and
+its write-set already includes `diff-census.json` — regenerating it now,
+before T1/T2/T3 land, would just make it stale again the moment they do,
+for a file nothing gates and nobody currently reads. Re-deriving the T6
+ranking algorithm from scratch here, twice, for an untested artifact is
+waste, not correctness.
+
+**Consequences.** `oracle/goldens/svg-activity/diff-census.json` is
+untouched by this mission. `activity-element-granularity`'s T4 measures
+against the comparator this mission lands, same as everything else once
+the branches merge.
