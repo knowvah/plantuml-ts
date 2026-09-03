@@ -173,3 +173,71 @@ vitest reports in its total.
 - [decision-journal.md](decision-journal.md) — appended during execution
 - [diagrams/component-map.md](diagrams/component-map.md)
 - [diagrams/data-flow.md](diagrams/data-flow.md)
+
+---
+
+## Mission summary — closed 2026-09-03
+
+**9 of 9 tasks complete.** Branch `feat/linetype-ortho-routing`, cut from
+`76312623`. Merge (never squash) — the journal cites per-task commit IDs.
+
+### Exit bar, against the bar as written
+
+| criterion | result |
+|---|---|
+| `splines`/`forcelabels` from one shared helper, both emitters | met — `core/dot-splines.ts`, consumed by `applyGraphAttrs` + `graphAttrLines` |
+| All three engines forward `linetype` | met — state (3 sites), class, description |
+| `pavuzo` `−1.579968 px` → `~0.002 px` | **exceeded: `0 px`**, 12/12 exact. The `~0.002` was never real (replay artifact) |
+| `splinesOk` gates `dotEqual`, proven to fail on revert | met — **0/10 reverted, 10/10 restored**, verified twice |
+| `dotEqual` true on all 8, now meaning it | met |
+| Zero fixtures outside the 8 move | met — measured on all three corpora |
+| Four gates green, `Test Files` per ledger | met — 688, no drop |
+
+### Beyond the bar
+
+- **Three fixtures reached `conformant`**: `bujedi-30-cize673`,
+  `dimisi-54-dula946`, `kuxato-79-muno809`.
+- `kejabo-83-vinu490` also went exact (`+0.749952 px` → `0`) — it had no
+  prediction on record.
+- `size-backlog.json` **tightened**: both state entries removed.
+- graphviz-issues **03 checked** (its fix finally consumed) and **17
+  resolved**.
+
+### Decisions made
+
+18 journal rows. **Three flagged for review**, all now closed except the
+hand-off:
+
+1. README's `~0.002 px` and `684` figures — both planning-stage numbers
+   execution disproved. Corrected (`60080515`), with the pass-count ledger
+   replacing the re-staling constant.
+2. The diagnosis note's predicted residual — corrected by **appending**, not
+   rewriting (`da6b7a3e`), so the original reasoning stays auditable.
+3. **Open, needs an owner**: `.agent-notes/lor-parity-pins-are-stale.md` —
+   the `parity-*.json` pins date from 2026-08-12 and carry **761** rows of
+   unrelated drift including **three** `dotEqual` regressions. Not this
+   mission's to adopt, and deliberately not adopted.
+
+### Known issues / follow-ups
+
+- `zosaxo-93-nici652`'s SVG delta rose 219.425 → 313.35. Its DOT is
+  structurally equal including `splinesOk`; the residual is renderer-side
+  (text metrics) on a corpus that is 2-conformant-of-358. **Weakest-evidence
+  claim in the mission** — attribution, not a proven mechanism for the
+  specific 94px.
+- `jakapi-64-tine258`'s rise 17 → 108.007 is the comparator descending past
+  a `childCount` short-circuit, not a render regression. Verified in
+  `compare.ts:530-539`.
+- 21 unclassified corpus fixtures carry `linetype` and were out of scope;
+  they now route correctly but are unmeasured here.
+
+### One process failure worth carrying forward
+
+The orchestrator ran `git add -A` while a task agent was live and swept its
+in-progress source edit into a docs commit. Tree was never wrong;
+attribution was. Recovered via `git reset --soft` + two clean re-commits,
+verified tree-identical. **The subagent caught it, from `git reflog`; the
+orchestrator had no signal.** Recorded in
+`.agent-notes/batch-parallelism-needs-worktrees.md`: disjoint write-sets do
+not make concurrent `git` safe in one checkout, because the index is shared
+state no write-set declaration governs.
