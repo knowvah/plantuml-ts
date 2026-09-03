@@ -89,7 +89,7 @@ gate**. Report it; do not tune for it.
 | [1](batch-1/overview.md) | T2 pre-chrome baseline · T3 freshness sentinel | serialized | [x] |
 | [2](batch-2/overview.md) | T4 diagnose the 2 extra g children | — | [x] |
 | [3](batch-3/overview.md) | T5 route through document shell | — | [x] |
-| [4](batch-4/overview.md) | T6 re-pin + census | — | [ ] |
+| [4](batch-4/overview.md) | T6 re-pin + census | — | [x] |
 | [5](batch-5/overview.md) | T7 close-out | — | [ ] |
 
 **T4 gates T5.** The diagnosis must state the mechanism before any deletion —
