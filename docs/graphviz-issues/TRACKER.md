@@ -10,7 +10,39 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
 
 - [x] 01-getlayout-render-spline-mismatch.md
 - [x] 02-cluster-node-fractional-centering.md
-- [x] 03-splines-attr-unsupported.md
+- [ ] 03-splines-attr-unsupported.md  <!-- UNCHECKED 2026-09-03 (was [x]).
+        The UPSTREAM half is fixed and verified working: the pinned 1.6.0
+        honours `splines=ortho` exactly, matching native graphviz 15.1.1 on
+        bb width, node centring and both xlabel positions (measured, see
+        issue 17). But the plantuml-ts CONSUMPTION never happened -- nothing
+        in src/ ever started emitting the attribute. `applyGraphAttrs`
+        (core/graph-layout-build.ts:34-43) sets rankdir/nodesep/ranksep/
+        aspect; `graphAttrLines` (core/svek-dot-emit.ts:66-77) pushes
+        nodesep/ranksep/remincross/searchsize/rankdir=LR; `DotInputGraph`
+        has no field to carry it; zero splines/forcelabels emission anywhere
+        in src/. So every `skinparam linetype ortho|polyline` layout still
+        runs on graphviz's DEFAULT CURVED routing where the jar runs ortho.
+        `theme.linetype` is parsed and plumbed to the per-edge
+        moveLabelToXlabel switch ONLY (state-dot-graph.ts:238,
+        state-composite-edge-label.ts:98, link-edge-attrs.ts:361) -- issue 16
+        wired the label half of the feature, the routing half was never
+        wired. Upstream emits both attrs at DotStringFactory.java:161-169,
+        between searchsize=500 (:154) and rankdir=LR (:171), exactly the gap
+        in graphAttrLines. Un-checked under this file's own rule (box
+        requires the fix landed AND affected fixtures re-measuring clean):
+        pavuzo-79-zodu430 demonstrably does not, and issue 17 is this
+        entry's downstream symptom. Blast radius: 8 cached oracle fixtures
+        carry splines= in their jar DOT (class bujedi-30-cize673,
+        dimisi-54-dula946, gamevo-26-runo973, jakapi-64-tine258,
+        kuxato-79-muno809; component zosaxo-93-nici652; state
+        kejabo-83-vinu490, pavuzo-79-zodu430) plus 21 unclassified corpus
+        fixtures. NOT a one-liner -- ortho routing moves every edge on a
+        fixture; wants its own mission with before/after pins. Note the
+        DOT-parity harness (tests/oracle/svek-dot.ts) has zero splines/
+        linetype tokens and structurally cannot see this gap, which is why
+        the state suite reads DOT EQUAL 266/268 with materially different
+        routing. Full artifact:
+        .agent-notes/gvi17-splines-never-emitted.md -->
 - [x] 04-anchor-point-rank-assignment.md
 - [x] 05-cluster-label-dimensions-ignored.md
 - [x] 06-cluster-bbox-not-in-getlayout.md
@@ -241,7 +273,13 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         This box stays UNCHECKED under this file's own rule -- the fix landed
         and is consumed, but pavuzo-79-zodu430 still does not re-measure
         clean. Its blocker is now a plantuml-ts work item (17), not an
-        upstream wait. -->
+        upstream wait.
+        REFINED 2026-09-03: that blocker is specifically issue 03's
+        un-consumed fix -- `splines=ortho` is never emitted, so the ortho
+        ROUTING half of `skinparam linetype ortho` was never wired even
+        though this entry wired the LABEL half. pavuzo-79-zodu430 closes
+        when 03 does. See 17's second-pass block and
+        .agent-notes/gvi17-splines-never-emitted.md. -->
 - [~] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RECLASSIFIED
         2026-09-03: NOT a dot-engine defect, closed with no upstream fix to
         wait for. The filing's premise -- that the engine reserves ~1.58pt
@@ -272,4 +310,27 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         pavuzo-79-zodu430's inner scope and diff it against the jar's cached
         svek-1.dot (node width/height and the xlabel box are the candidates
         that would move the offset). Full disproof, arithmetic and the
-        preserved original filing are in the issue file. -->
+        preserved original filing are in the issue file.
+        MECHANISM FOUND 2026-09-03 (second pass), and the next step above is
+        WRONG: node width/height (20/50/91.6625) and the xlabel box (54x15)
+        all match the jar's cached DOT exactly. The cause is that
+        `splines=ortho` is NEVER EMITTED AT ALL -- not by the DOT emitter
+        (svek-dot-emit.ts:66-77), not by the layout builder
+        (graph-layout-build.ts:34-43), and DotInputGraph has no field for it
+        -- so every ortho layout runs on graphviz's default CURVED routing.
+        Proven by replaying this fixture's real captured DotInputGraph
+        through the identical build path and toggling only that attr:
+        without it bb=106.581238, centre=60.7500, edge2 xlabel.x=40.5000;
+        with it bb=108.164568, centre=62.3333, edge2 xlabel.x=43.6667. The
+        first column reproduces the ORIGINAL filing's three "engine" numbers
+        (106.581/60.75/40.5) TO THE DIGIT -- those measurements were always
+        real, they were measurements of OUR OWN graph misattributed to the
+        engine. Expected on fix: 108.164568+35 = 1.988397in vs jar's
+        1.988368in, ~0.002px. Also corrects this entry's own derived "+-6.75
+        straight port offset": the spline dump it asked for is now captured
+        and the edges are CURVED at ~+-6.18 (39.645/38.892/38.893/39.649).
+        Its "one mechanism, not two" conclusion IS confirmed (3.1667 =
+        2 x 1.5833). This issue is the downstream symptom of issue 03's
+        un-consumed fix -- 03 is now unchecked and carries the work and the
+        blast radius. Full artifact:
+        .agent-notes/gvi17-splines-never-emitted.md -->

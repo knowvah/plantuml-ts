@@ -1,5 +1,64 @@
 # `splines=ortho` xlabel canvas reservation is ~1.58pt short of native graphviz
 
+**MECHANISM FOUND 2026-09-03 (second pass).** The reclassification below is
+right that this is ours and not the engine's, and its "one mechanism, not two"
+arithmetic holds. Its *next step* was wrong, though, and so was its
+intermediate geometry. The cause is not "some attribute that moves the ortho
+port offset off `width/6`" — node `width`/`height` and the xlabel box all
+match the jar's cached DOT exactly. **`splines=ortho` is never emitted at
+all**, by either the DOT emitter or the layout builder, so every ortho layout
+runs on graphviz's default *curved* routing.
+
+- `applyGraphAttrs` (`src/core/graph-layout-build.ts:34-43`) sets `rankdir`,
+  `nodesep`, `ranksep`, `aspect` — nothing else.
+- `graphAttrLines` (`src/core/svek-dot-emit.ts:66-77`) pushes `nodesep`,
+  `ranksep`, `remincross=true`, `searchsize=500`, `rankdir=LR` — nothing else.
+- `DotInputGraph` has no field to carry it. Zero `splines`/`forcelabels`
+  emission anywhere in `src/`.
+- `theme.linetype` IS parsed and IS plumbed — but only to the per-edge
+  `moveLabelToXlabel` switch (`state-dot-graph.ts:238`,
+  `state-composite-edge-label.ts:98`, `link-edge-attrs.ts:361`). Issue 16
+  wired the label half of the feature; the routing half was never wired.
+
+Upstream emits both attrs at `DotStringFactory.java:161-169`, between
+`searchsize=500;` (`:154`) and `rankdir=LR;` (`:171`) — exactly the gap in
+`graphAttrLines`, which goes straight from one to the other.
+
+**Proof — replaying this fixture's real captured `DotInputGraph` through the
+identical build path, toggling only those two attrs:**
+
+| quantity | ours today | + `splines=ortho`,`forcelabels` | native 15.1.1 |
+|---|---|---|---|
+| bb width | **106.581238** | **108.164568** | `108.16` |
+| node centre x | **60.7500** | **62.3333** | `62.333` |
+| edge 2 `xlabel.x` | **40.5000** | **43.6667** | `43.667` |
+
+The left column reproduces the ORIGINAL filing's three "engine" numbers
+(`106.581` / `60.75` / `40.5`) **to the digit**. Those measurements were
+always real — they were measurements of *our own graph*, misattributed to the
+engine. `108.164568 − 106.581238 = 1.58333`, the whole residual. Expected on
+fix: `108.164568 + 35 = 143.164568 px = 1.988397 in` vs jar's `1.988368 in`
+→ ~0.002 px.
+
+**Two corrections to the reclassification's own text.** (1) Its derived
+`±6.75` straight-port geometry is not what the failing path does — the spline
+dump it explicitly asked for is now captured and shows the edges *curved* at
+~±6.18 (`39.645 → 38.892 → 38.893 → 39.649`). (2) Its "dump the DOT and diff
+node width/height and the xlabel box" next step would have found nothing;
+those three are clean, and the missing term is a **graph** attribute.
+
+**This is issue 03's un-consumed fix.** `03-splines-attr-unsupported.md`
+("No way to set the `splines` graph attribute") is checked `[x]` in
+`TRACKER.md`. Its upstream half landed and works — but nothing in this port
+ever started emitting the attribute, so the consumption never happened. 17 is
+03's downstream symptom. 03 is now unchecked with a note; the work belongs
+there, sized as its own mission.
+
+Full artifact, including why the DOT-parity harness cannot see this gap and
+the 8-fixture blast radius: `.agent-notes/gvi17-splines-never-emitted.md`.
+
+---
+
 **RECLASSIFIED 2026-09-03: NOT a dot-engine defect.** The premise below —
 that `@knowvah/dot-engine` reserves less horizontal canvas than native
 graphviz on byte-identical input — does not reproduce. On this fixture's own

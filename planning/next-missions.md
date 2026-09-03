@@ -751,6 +751,37 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`linetype-ortho-routing`** (NEW, unbriefed) — FILED 2026-09-03 while
+  reviewing `docs/reclassify-graphviz-issue-17`. **`skinparam linetype
+  ortho|polyline` is HALF PORTED**: the per-edge label→xlabel switch is wired
+  (`state-dot-graph.ts:238`, `state-composite-edge-label.ts:98`,
+  `link-edge-attrs.ts:361`), but the graph-level `splines=ortho;
+  forcelabels=true;` is **never emitted at all** — not by
+  `svek-dot-emit.ts#graphAttrLines` (`:66-77`), not by
+  `graph-layout-build.ts#applyGraphAttrs` (`:34-43`), and `DotInputGraph` has
+  no field to carry it. Every ortho/polyline layout therefore runs on
+  graphviz's DEFAULT CURVED routing where the jar runs ortho. Upstream:
+  `DotStringFactory.java:161-169`, between `searchsize=500;` (`:154`) and
+  `rankdir=LR;` (`:171`) — precisely the gap in `graphAttrLines`.
+  **Proven by one toggle** on `pavuzo-79-zodu430`'s real captured
+  `DotInputGraph`: without it bb=106.581238 / centre=60.7500 / edge2
+  xlabel.x=40.5000; with it 108.164568 / 62.3333 / 43.6667 (native:
+  108.16 / 62.333 / 43.667). Closes `docs/graphviz-issues` 17 (its downstream
+  symptom, ~0.002px expected residual) and 03 (the un-consumed fix, now
+  un-checked in `TRACKER.md`), and unblocks 16's `pavuzo-79-zodu430` row.
+  **Blast radius, measured:** 8 cached oracle fixtures carry `splines=` in
+  their jar DOT — class `bujedi-30-cize673`, `dimisi-54-dula946`,
+  `gamevo-26-runo973`, `jakapi-64-tine258`, `kuxato-79-muno809`; component
+  `zosaxo-93-nici652`; state `kejabo-83-vinu490`, `pavuzo-79-zodu430` — plus
+  21 unclassified corpus fixtures (class 18, sequence 3). Mechanism verified
+  end-to-end on `pavuzo` only; the other 7 share the identical missing code
+  path but their numeric effect is UNMEASURED, and ortho routing moves every
+  edge on a fixture, so pin before/after. Also add a `splines`/`linetype`
+  assertion to `tests/oracle/svek-dot.ts` — it has zero such tokens today and
+  is structurally blind to this gap, which is how the state suite reads
+  "DOT EQUAL 266/268" with materially different routing. Full artifact:
+  `.agent-notes/gvi17-splines-never-emitted.md`.
+
 - **`sequence-fidelity-residuals`** (NEW, unbriefed) — FILED 2026-08-26 as
   `sequence-command-coverage`'s D6 census. **The work queue is the ten items
   below plus the ten still-refusing command gaps**; this row exists so the
