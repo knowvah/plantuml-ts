@@ -18,6 +18,15 @@ import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
 // Constants
 // ---------------------------------------------------------------------------
 
+/** The `data-diagram-type` root attribute value the jar stamps on every
+ *  exported activity document -- `net.sourceforge.plantuml.core.DiagramType`
+ *  (`DiagramType.java:45`), written by `TextBlockExporter
+ *  #createUGraphicSVG` (`core/TextBlockExporter.java:293`). Setting it is
+ *  what routes this fragment through `core/assemble-svg.ts`'s klimt document
+ *  shell instead of the generic `svgRoot`, mirroring the per-engine constant
+ *  class/state/description/json each declare for the same purpose. */
+const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
+
 
 // ---------------------------------------------------------------------------
 // Label helpers
@@ -196,12 +205,15 @@ function renderSwimlanes(
 export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragment {
   const children: string[] = [];
 
-  // Background
-  children.push(
-    rect(0, 0, geo.totalWidth, geo.totalHeight, {
-      fill: theme.colors.background,
-    }),
-  );
+  // NO background rect here. The jar paints one from `SvgGraphics`'s own
+  // constructor, guarded (`klimt/drawing/svg/SvgGraphics.java:186-192`) so
+  // that `#FFFFFF`, `#000000` and `#00000000` paint NOTHING, and it is sized
+  // to the FINAL, post-chrome canvas -- neither of which `renderActivity` can
+  // see. Both live in `core/assemble-svg.ts#finalizeActivityFragment`
+  // alongside the identical sequence/state/json mechanisms. The background
+  // itself still reaches the document, via the root `style` attribute
+  // `assembleDocumentShell` builds from `fragment.background`
+  // (`SvgGraphics.java:805-806`).
 
   // Swimlanes (drawn before nodes so nodes appear on top)
   if (geo.swimlanes.length > 0) {
@@ -223,5 +235,6 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
+    diagramType: DIAGRAM_TYPE_ACTIVITY,
   };
 }
