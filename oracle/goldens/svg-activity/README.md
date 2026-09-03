@@ -96,32 +96,76 @@ is the EXPECTED artefact of that weighting (D2), not a failure.** T5 routes
 the 12-marker `defs` short-circuit into a real comparison -- converting an
 unexamined "cost 1" into its true per-attribute diff count.
 
-## Current state (T2, pre-chrome baseline)
+## Current state (T6, post-chrome)
 
 - **Corpus: 373 fixtures**, all committed at
-  `test-results/dot-cache/activity/<slug>/`.
-- **238 of the 268 `baseline` fixtures (89%) sit at exactly `diffCount =
-  12`**, all sharing the IDENTICAL 12-path diff set:
-  `svg/@background`, `svg/@contentStyleType`, `svg/@height`,
-  `svg/@preserveAspectRatio`, `svg/@version`, `svg/@viewBox[2]`,
-  `svg/@viewBox[3]`, `svg/@width`, `svg/@xmlns:xlink`, `svg/@zoomAndPan`,
-  `svg/defs[1][childCount]`, `svg/g[1][childCount]` -- the same root-chrome
-  family D6 targets. **This floor is NOT uniform across all 268**, as an
-  earlier draft of the T2 task spec assumed ("every fixture currently sits
-  at exactly 12 diffs"): 30 fixtures sit elsewhere (`diffCount` 10, 11, 29,
-  34, 35, 40, 46, 55, 58, 63, 64, 72, 73, 74), and one fixture
-  (`kodiji-34-mofe202`) sits at 11 -- the same 12-path set minus
-  `svg/@background`, because that fixture's document never sets a
-  background colour.
-- **`weightedScore` over the 268 baseline fixtures: min 166
-  (`kodiji-34-mofe202`), median 541, max 3076.**
-- **ZERO fixtures reach 0 diffs.** `ratchet.json` ships with `fixtures: []`
-  on purpose, not as a placeholder -- the promotion path (manifest schema,
-  the branch-discrimination tests, the Add rule below) exists and is
-  tested via fabricated in-memory branches, so it cannot be improvised
-  later under time pressure. Promotion out of the diff-baseline is manual
-  and belongs to a future rebuild mission, mirroring sequence's own stop
-  13.
+  `test-results/dot-cache/activity/<slug>/`. The three-way status split is
+  unchanged by T5: **268 `baseline` + 82 `error` + 23 `jar-error`**, with
+  **zero status transitions** at the T6 re-measurement (in particular, no
+  `error` fixture started rendering -- D8's reportable transition did not
+  occur).
+- **The descent.** Aggregate `weightedScore` over the 268 fell **154722 ->
+  108447, -29.9%**. **268 fixtures fell, ZERO rose, none held.** D13
+  pre-declared ~20 risers (the fixtures whose `g[1][childCount]` was equal
+  only because two chrome rects masked a two-element deficit); they fell
+  instead. Pre-declaring the set cost nothing and would have caught a real
+  regression -- it is recorded as a conservative forecast, not a miss.
+- **`diffCount` rose on 57 and fell on 211.** This is the D2 artefact,
+  stated in advance: collapsing the 12-marker `defs` short-circuit into a
+  real comparison converts an unexamined "cost 1" into its true
+  per-attribute count. It is not a regression, and it is not gated.
+- **T2's 12-path floor is gone.** Of that set, exactly three paths survive
+  anywhere in the corpus, each on exactly ONE fixture, and each a VALUE
+  difference rather than an absent attribute:
+  `svg/@background` on `levuma-67-cego489`, `svg/@preserveAspectRatio` on
+  `setecu-78-cuko533`, and `svg/defs[1][childCount]` on
+  `dakesa-98-mano758`. See `diff-census.json#namedFamilies` for each
+  mechanism.
+- **Verified directly, not inferred from the absence of a diff:** all 268
+  emit all seven root attributes AND `data-diagram-type="ACTIVITY"`; our
+  `defs` is empty on all 268; the jar's is non-empty on exactly one
+  (`dakesa-98-mano758`, a `red-green` gradient it expands into a
+  `<linearGradient>`).
+- **`weightedScore` over the 268 now ranges min 17, median 366, max 2922**
+  (was min 166, median 541, max 3076).
+- **ZERO fixtures reach 0 diffs**, so `ratchet.json` still ships with
+  `fixtures: []` -- see the Add rule below for what would change that.
+
+## Where the residual lives -- `diff-census.json`
+
+`diff-census.json` is the work queue for the next mission: every remaining
+diff path, normalised (positional indices replaced by `[]`) and **ranked by
+the weight it carries, not by how often it appears**. Ranking by occurrence
+would put `svg/@viewBox[]` (527 records, 0.5% of the residual weight) above
+`svg/g[][childCount]` (209 records, **91.6%**) and point the next mission at
+the wrong work.
+
+Two findings that shape that queue:
+
+- **`svg/g[][childCount]` is 91.6% of what is left, and it is missing ink,
+  not chrome.** 190 of the 268 draw FEWER children than the jar; 59 match;
+  19 draw more (9 still at exactly +2). D13 measured the PRE-T5 split as
+  168 / 20 / 80 with 55 at +2 -- T5 removed the two background rects, which
+  is why the +2 cohort collapsed and the equal cohort grew. A `[childCount]`
+  mismatch short-circuits the whole subtree, so closing this gap is worth
+  more than every attribute family beneath it combined.
+- **The geometry residual goes BOTH WAYS, and `diff-census.json` records a
+  direction per fixture for exactly that reason.** Width: 195 of 268 wider
+  than the jar, 73 narrower, none equal. Height: 105 taller, 154 shorter, 9
+  equal. `numalo-91-pole243` is 52 wide against the jar's 64;
+  `darote-51-kuta407` is 144 against 129. A census reporting only magnitude
+  would send the next mission hunting a constant margin that does not
+  exist. `viewBox[2]`/`viewBox[3]` are byte-identical to `width`/`height` on
+  our side across all 268 (verified), so they are the same measurement
+  reported twice.
+
+**Correction to the T5 decision-journal entry, verified at T6:**
+`velodu-59-sada437` is NOT a second instance of the dark-theme
+resolution gap. Its golden is the jar's own graphical error page (its
+`#000000` background is that page's styling, not a resolved theme), it is
+pinned `status: "jar-error"`, and it contributes no number to any measurement
+here. `skinparam mode dark` occurs on exactly ONE fixture in the whole
+373-fixture corpus, `levuma-67-cego489`.
 
 ## Add rule
 
