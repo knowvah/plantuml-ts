@@ -1,0 +1,6 @@
+@startuml
+if(c?)then
+else(no:\n1. ONLY BLUE ARROW below\n**Should be 2 arrows**)
+    :do something;                                    
+endif
+@enduml

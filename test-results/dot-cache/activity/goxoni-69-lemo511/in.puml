@@ -1,0 +1,8 @@
+@startuml
+!$foo = { }
+start
+!foreach $emp in $foo.employees
+:The salary of $emp.name is $emp.salary;
+!endfor
+:end;
+@enduml

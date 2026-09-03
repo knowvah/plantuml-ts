@@ -1,0 +1,15 @@
+@startuml
+|Swimlane1|
+start
+:foo1;
+fork
+|#AntiqueWhite|Swimlane2|
+:foo2;
+|Swimlane1|
+forkagain
+:foo2.1;
+end fork
+|Swimlane2|
+:foo5;
+stop
+@enduml

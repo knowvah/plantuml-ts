@@ -1,0 +1,7 @@
+@startuml
+skinparam wrapWidth 150
+| this is an exceptionally long title it would be great which now wrap at 150 pixels|
+:You fixed it so this will wrap at 150 pixels thank you!;
+|Ignore Me|
+:ignore me;
+@enduml

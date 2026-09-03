@@ -1,0 +1,10 @@
+@startuml
+!$one="one"
+!$two="two"
+   
+:a;
+:$one;
+:$two;
+:%string($one+$two);
+:b;
+@enduml

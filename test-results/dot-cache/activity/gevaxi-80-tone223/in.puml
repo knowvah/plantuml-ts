@@ -1,0 +1,21 @@
+@startuml
+
+start
+
+if(q?)
+  split
+    :c;
+    detach
+  split again
+    :d;
+    detach
+  end split
+else
+  fork
+  fork again
+    :e;
+  end fork
+endif
+
+stop
+@enduml

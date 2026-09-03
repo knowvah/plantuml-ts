@@ -1,0 +1,9 @@
+@startuml
+start
+fork
+:action 1;
+fork again
+:action with long name 2;
+end fork {or}
+stop
+@enduml

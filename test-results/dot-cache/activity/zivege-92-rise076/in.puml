@@ -1,0 +1,15 @@
+@startuml
+skinparam padding 10
+:start;
+if (some test) then
+  :do this;
+  if (test 2) then
+    :do also this;
+  else
+    :this is a test;
+  endif
+else
+  :do other thing;
+endif
+:end of process;
+@enduml

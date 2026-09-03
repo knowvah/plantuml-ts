@@ -1,0 +1,12 @@
+@startuml
+start
+while ()
+  :read data;
+  :generate diagrams;
+endwhile
+while (c)
+  :read data;
+  :generate diagrams;
+endwhile
+stop
+@enduml

@@ -577,10 +577,22 @@ describe('refusal coverage — baseline shape', () => {
     // DISPATCHED `renderSync` produced a `PSystemError` page. For a source the
     // sequence engine refuses but STATE or CLASS draws, those differ. T19
     // re-measured all 3158 through `renderSync` and re-pinned the seven falls.
-    expect(manifest.fixtures.length).toBe(3158);
-    expect(pinnedJarErrors.length).toBe(8);
-    expect(pinnedErroring.length).toBe(15);
-    expect(pinnedRendering.length).toBe(3143);
+    //
+    // 3158 -> 3531 / 8 -> 31 / 15 -> 105 / 3143 -> 3426 at
+    // `activity-oracle-harness` T0b (D11), which pinned that mission's newly
+    // captured activity cache tree (373 fixtures) into this baseline
+    // additively -- `git diff` shows 4103 insertions and ZERO deletions, so
+    // no pre-existing pin moved. The split is 23 jar-error + 90 erroring
+    // here + 283 rendering. None is pinned `known-gap`: they are recorded
+    // `weErrored: true, status: "ok"`, the honest-record form this file's
+    // header defines for `nuvoja-46-dezu541`, because a `known-gap` excuse
+    // requires naming the specific unported Command and that census has not
+    // been done. They are the tracked queue `activity-oracle-harness` D8
+    // declares out of scope for that mission and hands to a later one.
+    expect(manifest.fixtures.length).toBe(3531);
+    expect(pinnedJarErrors.length).toBe(31);
+    expect(pinnedErroring.length).toBe(105);
+    expect(pinnedRendering.length).toBe(3426);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -639,11 +651,23 @@ describe('refusal coverage — baseline shape', () => {
     }
   });
 
-  it('the only non-gapped defect is nuvoja', () => {
+  it('the only non-gapped defect outside the activity queue is nuvoja', () => {
+    // Deliberately NOT flattened into a list of 83. `activity-oracle-harness`
+    // T0b (D11) added 82 activity fixtures that error here on a source the
+    // jar rendered -- that mission's D8 declares them a tracked queue for a
+    // LATER mission and captures them rather than fixing them. Asserting the
+    // flat 83 would let a future non-activity regression hide inside a number
+    // that is expected to be large. Splitting keeps the original invariant
+    // exactly as strong as it was: outside activity, nuvoja is still the only
+    // one.
     const defects = manifest.fixtures.filter(
       (f) => f.weErrored && f.jarRendered && f.status === 'ok',
     );
-    expect(defects.map(keyOf)).toEqual(['dot-cache:sequence/nuvoja-46-dezu541']);
+    expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual([
+      'dot-cache:sequence/nuvoja-46-dezu541',
+    ]);
+    // The activity queue's size is pinned so it can only shrink deliberately.
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(82);
   });
 });
 

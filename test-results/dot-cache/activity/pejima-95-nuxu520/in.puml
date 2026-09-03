@@ -1,0 +1,14 @@
+@startuml
+start
+
+while (data available?)
+  :if (x==1) then (yes)
+  :y=1;
+else (no)
+  :y=2;
+endif;
+  :generate diagrams;
+endwhile
+
+stop
+@enduml

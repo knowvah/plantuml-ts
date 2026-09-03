@@ -1,0 +1,10 @@
+@startuml
+start
+:start;
+while (data to treat)
+  :first action;
+  :second action;
+endwhile
+:end of process;
+stop
+@enduml

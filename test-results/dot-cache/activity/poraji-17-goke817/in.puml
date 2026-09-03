@@ -1,0 +1,12 @@
+@startuml
+
+skinparam ActivityEndColor red
+skinparam ActivityStartColor red
+skinparam BackgroundColor grey
+skinparam Shadowing false
+
+start
+end
+stop
+
+@enduml

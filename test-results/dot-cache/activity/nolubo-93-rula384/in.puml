@@ -1,0 +1,10 @@
+@startuml
+start
+if (foo) then (ok3)
+:f1;
+(additional text) elseif (foo2) then (ok2)
+:f2;
+else (notok)
+:f3;
+endif
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+start
+if (some test?) then
+  :action1;
+endif
+if (other test?) then (ok)
+  :action2;
+else (not ok)
+  :action3;
+endif
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+
+'start
+
+:Szabalysertesi hatosag;
+
+if (Dontes) then
+:Meghallgatas nelkuli Arecibo;
+if (Meghallgatast ker?) then (igen)
+:???;
+else (nem)
+:Jogerosse valik;
+:SZNYR-ben rogzul;
+:stop;
+else
+:Bizonyitasi eljaras;
+endif
+if (Lezaro hatarozat) then
+:Elmarasztalas\n"erdemi hatarozat";
+else 
+:Megszuntetes;
+endif
+stop
+
+@enduml

@@ -547,7 +547,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3133 agree, 17 known-misroute and 8 jar-error', () => {
+  it('the manifest splits into 3401 agree, 99 known-misroute and 31 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -577,10 +577,44 @@ describe('routing conformance — jar-error classification', () => {
     // re-pinned `agree`. It is a CLASS routing repair, NOT a sequence closure,
     // and is excluded from this mission's bucket tally. The 17 that remain are
     // all sequence, and all still measure exactly as pinned.
-    expect(pinnedAgree.length).toBe(3133);
-    expect(pinnedMisroutes.length).toBe(17);
-    expect(pinnedJarErrors.length).toBe(8);
-    expect(manifest.fixtures.length).toBe(3158);
+    //
+    // DERIVATION of 3133/367/31 over 3531, at `activity-oracle-harness` T0b
+    // (D11). The activity cache tree (373 fixtures) was captured by T0 and
+    // pinned here additively -- `git diff` on this baseline shows 4103
+    // insertions and ZERO deletions, so no pre-existing pin moved. It splits
+    // 350 `known-misroute` + 23 `jar-error`, and NONE agree, because the
+    // ACTIVITY engine stamps no root diagram type at all: `renderActivity`
+    // returns a `RenderFragment` with no `diagramType`
+    // (`src/diagrams/activity/renderer.ts:221-226`), so every activity
+    // document reads as `NONE` here while its golden says `ACTIVITY`
+    // (`TextBlockExporter.java:293`). ONE mechanism covers all 350, and
+    // `activity-oracle-harness` T5 removes it by routing activity through
+    // the klimt document shell -- at which point all 350 fall to `agree`,
+    // which this gate logs `[FIXED]`. The 23 jar errors are the same 23
+    // whose goldens carry no `data-diagram-type` because the jar never
+    // exported a diagram for them.
+    //
+    // DERIVATION of 3401/99/31 over the same 3531, at `activity-oracle-harness`
+    // T6. T5 landed the klimt document shell for activity, and 268 of T0b's 350
+    // activity `known-misroute` pins fell to `agree` -- re-pinned here, which
+    // this baseline's own `$comment` sanctions ("a fall is re-pinned to `agree`,
+    // never the reverse"). 3133 + 268 = 3401, 367 - 268 = 99.
+    //
+    // The other 82 did NOT fall, and were deliberately NOT re-pinned. T0b's
+    // prediction that ALL 350 would flip rested on the root-attribute mechanism
+    // being the only thing keeping them at `NONE`; on these 82 it is not. Our
+    // ACTIVITY parser refuses those sources outright, so `renderSync` returns a
+    // PSystemError page, which carries no root attribute either -- a DIFFERENT
+    // mechanism reaching the same `NONE`. They are exactly the 82 fixtures
+    // `oracle/goldens/svg-activity/diff-baseline.json` records as
+    // `status: "error"` (D8); the two sets were verified identical at T6. Their
+    // reasons were rewritten accordingly: the T0b text named a mechanism that no
+    // longer applies to them and promised a re-pin that would have turned this
+    // gate RED.
+    expect(pinnedAgree.length).toBe(3401);
+    expect(pinnedMisroutes.length).toBe(99);
+    expect(pinnedJarErrors.length).toBe(31);
+    expect(manifest.fixtures.length).toBe(3531);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -603,7 +637,22 @@ describe('routing conformance — jar-error classification', () => {
     // refusal gate's header and in the T20 close-out instead.
     // All 16 reasons were re-probed at HEAD by T19; seven named a refusing
     // line this port now parses and were rewritten.
-    expect(censused.length).toBe(16);
+    //
+    // 16 -> 366 at `activity-oracle-harness` T0b (D11): the 350 activity pins
+    // added there all carry a reason, and all carry the SAME one, because one
+    // mechanism explains every one of them -- activity stamps no root
+    // `data-diagram-type` (`src/diagrams/activity/renderer.ts:221-226` vs
+    // `TextBlockExporter.java:293`). The uncensused remainder is still exactly
+    // sequence/nuvoja-46-dezu541, for the reason given above.
+    //
+    // 366 -> 98 at `activity-oracle-harness` T6: 268 of those 350 activity pins
+    // left the misroute set entirely by being re-pinned `agree`, and an `agree`
+    // entry carries no `reason` (no other one in this file does). The 82 that
+    // remain still carry one, now citing the refusal each reproduces plus the
+    // upstream stamp they are measured against (`TextBlockExporter.java:293`).
+    // The uncensused remainder is STILL exactly sequence/nuvoja-46-dezu541:
+    // 99 - 1 = 98.
+    expect(censused.length).toBe(98);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

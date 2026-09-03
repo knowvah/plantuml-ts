@@ -1,0 +1,19 @@
+@startuml
+start
+:ClickServlet.handleRequest();
+:new Page;
+if (Page.onSecutiryCheck()) then (true1)
+    :Page.onInit();
+    if (isForwarded?) then (no2)
+        :Process control;
+        if (continue processing?) then (yes3)
+           :goto bareB1;
+        else (no4)
+           :goto bareB2;
+        endif
+    endif
+    :bareB1;
+endif
+:bareB2;
+stop
+@enduml

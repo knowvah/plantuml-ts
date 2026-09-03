@@ -103,6 +103,14 @@ const SENTINELS: readonly Sentinel[] = [
   { type: 'json', slug: 'babico-87-soxo095' },
   { type: 'yaml', slug: 'YAML-attribute-hierarchy' },
   { type: 'hcl', slug: 'citoda-80-dimi195' },
+  // `movexa-27-rexe388` (activity-oracle-harness T3): swimlanes plus an
+  // if/then/else branch, `test-results/dot-cache/activity`'s median oracle by
+  // file size (4255 of 291 non-error bytes) and `.puml` line count (11 of
+  // 291) — representative of the corpus's typical shape, not a two-line
+  // degenerate case (`activity-creole-table`, a 2-statement outlier, was
+  // rejected for that reason). `cmp`-verified against `oracle-render.sh`
+  // output during T3.
+  { type: 'activity', slug: 'movexa-27-rexe388' },
 ];
 
 const cachedSvg = (s: Sentinel): string => join(CACHE, s.type, s.slug, 'in.svg');

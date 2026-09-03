@@ -1,0 +1,6 @@
+@startuml
+while(a)is(b)
+:do sometyhing;
+backward: test;
+endwhile
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+start
+:act1;
+partition P1 {
+    note left
+        This is note for P1
+        which is being over-drawed
+        by the arrow.
+    end note
+    :act2;
+    :act3;
+}
+stop
+@enduml

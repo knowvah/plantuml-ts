@@ -1,0 +1,20 @@
+@startuml
+!$partlen=2
+!$data={"partlen": "2", "participants" :[
+{"name": "XYZ" ,"as": "xyz"},
+{"name": "RST" ,"as": "rst"},
+{"name": "UVW" ,"as": "uvw"}
+]
+}
+!$partlen=$data.partlen
+!$i=0
+   
+:a;
+:$i;
+:$partlen;
+:$data.participants[$i].name as $data.participants[$i].as;
+:$data.participants[0].name as $data.participants[0].as;
+:$data.participants[1].name as $data.participants[1].as;
+:$data.participants[2].name as $data.participants[2].as;
+:b;
+@enduml

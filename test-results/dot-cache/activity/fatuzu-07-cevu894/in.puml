@@ -1,0 +1,16 @@
+@startuml
+start
+
+:And so it begins;
+
+if (Testing las arrow of\na Switch-case activity\nit breaks when this \nelement gets 3 lines or more) then (Yes)
+elseif (Testing las arrow of\na Switch-case activity\nit breaks when this \nelement gets 3 lines or more) then (Yes)
+else (No)
+	:**Show Error**;
+	end
+endif
+
+:And there is no\nactivities for the YES branches;
+
+stop
+@enduml

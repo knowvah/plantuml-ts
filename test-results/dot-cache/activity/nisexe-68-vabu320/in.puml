@@ -1,0 +1,7 @@
+@startuml
+skinparam hyperlinkUnderline false
+skinparam svgLinkTarget foo
+start
+:foo1 [[http://www.google.com]] end;
+stop
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+start
+:Hello;
+if (test) then
+	:Action10;
+	if (test2) then
+		:Action11;
+	else
+		:Action12;
+	endif
+	:Action20;
+else
+	:Action30;
+	:Action40;
+endif
+:Action50;
+:Action60;
+@enduml

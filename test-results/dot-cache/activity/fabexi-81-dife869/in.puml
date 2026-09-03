@@ -1,0 +1,14 @@
+@startuml
+start
+:initiaize;
+@pause
+var a=1;
+var b=2;
+var c=3; not in plantuml because "//" after with space
+@unpause
+:run the logic;
+@pause
+a=b;
+@unpause
+end
+@enduml

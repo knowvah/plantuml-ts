@@ -1,0 +1,11 @@
+@startuml
+start
+if (is a = b) then (yes)
+  :next;
+ else
+  (A)
+  detach
+endif
+ 
+stop
+@enduml

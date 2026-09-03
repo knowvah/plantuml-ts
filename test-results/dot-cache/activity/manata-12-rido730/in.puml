@@ -1,0 +1,18 @@
+@startuml
+|actorA|
+Start
+:activity1;
+repeat
+    :activity2;
+|actorB|
+  :activity5;
+if (ifcond1) then
+  stop
+else
+|actorC|
+  :activity6;
+endif
+'|actorC| 'Doesn't help to get repeatcond2 into actorC swimlane
+  repeat while (repeatcond2)
+  end
+@enduml

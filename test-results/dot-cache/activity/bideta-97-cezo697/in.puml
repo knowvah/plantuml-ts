@@ -1,0 +1,13 @@
+@startuml
+
+|lane0b|
+|lane1b|
+start
+if (condition) then (no)
+else (yes)
+|lane0b|
+:do something;
+endif
+|lane1b|
+end
+@enduml

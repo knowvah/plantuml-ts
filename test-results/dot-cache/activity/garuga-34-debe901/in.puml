@@ -1,0 +1,11 @@
+@startuml
+skinparam ActivityBarColor red
+start
+:Hello;
+fork
+:World;
+fork again
+:Venus;
+end fork
+stop
+@enduml

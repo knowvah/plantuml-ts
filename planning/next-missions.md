@@ -35,6 +35,104 @@ post-D7 measurements.
 
 ---
 
+## `activity-oracle-harness` — DONE 2026-09-02, 8 of 8 (T0b added mid-mission)
+
+Branch `feat/activity-oracle-harness`, 14 commits, all four gates green at
+head. Activity was the **last engine still on the bare-`svgRoot` fallback**;
+it now routes through `core/klimt/document-shell.ts` like class, state,
+description, json and sequence. Full scored bar, retired premises and the
+three flagged decisions in
+`plans/activity-oracle-harness/README.md#close-out--2026-09-02`.
+
+**Headline: Σ`weightedScore` over the 268 numerically-comparable fixtures
+154722 → 108447, −29.9%. 268 fell, 0 rose, 0 held.** `diffCount` rose on 57
+and fell on 211 — the D2 short-circuit artefact, predicted in advance.
+Population 373 dispatcher-typed activity fixtures = **268 `baseline` + 82
+`error` + 23 `jar-error`**. Routing re-pinned 3133/367/31 → **3401/99/31**
+with non-activity **exactly** unchanged at 3133/17/8. Suite 682 files /
+18198 tests, 70 s (load-confounded, see the brief).
+
+**Three of the brief's own premises were measured false and retired** — the
+uniform 12-diff floor (T2), "+2 extra `g` children on every fixture" (T4),
+and the `g[1][childCount]` exit clause (D13). **T6 refused an orchestrator
+instruction to re-pin all 350 misroutes and was right**: only 268 flip, the
+other 82 misroute for a different mechanism. Read those rows before sizing
+any of the follow-ons below; they are why the numbers here are the measured
+ones and not the planned ones.
+
+**Follow-ons, ordered by measured weight** (all from
+`oracle/goldens/svg-activity/diff-census.json`, measured at `0cf15e23`):
+
+1. **`activity-child-count-deficit` — 91.6% of ALL remaining weight.**
+   `svg/g[][childCount]` carries **99321 of 108447** across **209 fixtures**.
+   Direction post-T5: **190 fewer / 59 equal / 19 more**. This is **missing
+   ink, not chrome** — our root group draws fewer children than the jar's,
+   i.e. unported activity content. The delta histogram has a long negative
+   tail (`-200`×1, `-81`×1, `-59`×1, … `-2`×20). A childCount mismatch
+   short-circuits the whole subtree (`compare.ts:398-404` charges
+   `sumUnits(actual) + sumUnits(expected)`), so closing this is worth more
+   than **every other path family combined** — the next four together are
+   under 4.2%. Highest-leverage activity work available; size it against
+   `src/diagrams/activity/renderer.ts` and the ftile/gtile system before
+   starting.
+
+2. **`activity-parser-gaps` — the 82 `status:"error"` fixtures (D8).** Our
+   parser emits a Syntax Error SVG where the jar renders; verified on a
+   10-fixture sample, the jar rendered 9. **They are set-identical to the 82
+   activity `known-misroute` entries in
+   `oracle/goldens/svg-conformance/routing-baseline.json`** (proved by set
+   equality at close-out, not by matching counts) — so fixing them closes
+   the routing gate and the diff-baseline gate at once, and each fixture
+   that stops erroring converts from `error` to a real number. They still
+   route `ACTIVITY → NONE` after T5 for a *different* mechanism than the 268
+   that T5 fixed: our parser refuses the source, so `renderSync` returns a
+   `PSystemError` page carrying no root attribute at all, and the document
+   shell cannot reach a document the activity renderer never draws. **The
+   largest tracked queue in the activity engine by fixture count.**
+
+3. **`activity-geometry-residual` — real layout divergence, both ways.**
+   `svg/@width` 268 records, `svg/@height` 259, `svg/@viewBox[]` 527 (the
+   same measurement reported twice — viewBox[2]/[3] are byte-identical to
+   width/height on our side across all 268, verified). Direction: **width
+   195 wider / 73 narrower**; **height 105 taller / 154 shorter / 9 equal**.
+   **No constant margin explains it** — `numalo-91-pole243` is 52 wide
+   against the jar's 64, `darote-51-kuta407` is 144 against 129. Only ~1%
+   of residual weight, so it ranks *below* the child-count deficit despite
+   touching every fixture; much of it is likely downstream of (1). Do not
+   start here.
+
+4. **Three single-fixture families, each with the mechanism already stated:**
+   - **`levuma-67-cego489` — theme resolution.** `skinparam mode dark`
+     resolves `theme.colors.background` to `#FFFFFF` here where the jar
+     resolves `#1B1B1B`, so the root `style` carries the wrong colour and
+     the background rect the jar paints under its own guard
+     (`SvgGraphics.java:186-192`) is correctly declined on our resolved
+     white. **The guard is faithful; its INPUT is wrong.** Exactly ONE
+     fixture corpus-wide carries `skinparam mode dark`. *Correction worth
+     not re-deriving:* `velodu-59-sada437` was named as a second instance
+     and is **not** one — its golden is the jar's own `PSystemError` page,
+     pinned `jar-error`, contributing no number; its black ground is the
+     error page's, not a theme.
+   - **`setecu-78-cuko533` — unported `skinparam preserveAspectRatio`.** The
+     source sets `xMinYMid slice`; the jar emits it verbatim on the root, we
+     emit the hardcoded default `none`. Not a missing attribute — the shell
+     emits all 7 root attributes on all 268 fixtures — an unported skinparam
+     surfacing as a root-attribute *value* diff.
+   - **`dakesa-98-mano758` — gradient fill in `defs`.** The inverse of the
+     pre-mission `defs` diff: **ours is empty (0), the jar's holds 1**. The
+     jar expands `skinparam activity { BackgroundColor red-green }` into a
+     `<linearGradient>` child of `defs`; we resolve no gradient.
+
+**No `docs/graphviz-issues/` filing is owed, and no DOT-parity row exists.**
+Verified 0 `svek-*.dot` across all 373 cached activity fixtures; upstream
+`activitydiagram3` never uses dot (D9). `docs/parity-report.md` is
+byte-identical to `main` and activity's row stays `not yet measured` —
+`EXPECTED_TAG` (`scripts/dot-sync-report.ts:68-74`) has no `activity` key,
+so `markdownRowForType` cannot produce a count for it whatever the cache
+holds. **Do not add an activity DOT gate.**
+
+---
+
 ## 1. `edge-label-box-followups` — DONE 2026-08-16 (mission-index SI24), 5 of 5
 
 Executed the same day it was planned. Branch `feat/edge-label-box-followups`,

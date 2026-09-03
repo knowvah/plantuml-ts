@@ -1,0 +1,13 @@
+@startuml
+start
+  :A;
+  if (isForward()) then
+    :B;
+    if (continue processing) then
+      :goto barre2;
+    endif
+  endif
+  :C;
+:barre2;
+:D;
+@enduml

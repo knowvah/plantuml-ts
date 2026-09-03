@@ -1,0 +1,26 @@
+@startuml
+|p1|
+start
+if (foo) then
+:on p3;
+note right
+this is a long text note to have much bigger size on p3
+end note
+if (foo2) then
+|p2|
+:d1;
+note right
+this is a long text note to have much bigger size on p3
+end note
+|p1|
+else
+:d2;
+endif
+
+else
+|p2|
+:on p1;
+|p1|
+endif
+
+@enduml

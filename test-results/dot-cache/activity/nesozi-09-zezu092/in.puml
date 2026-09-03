@@ -1,0 +1,11 @@
+@startuml
+skinparam hyperlinkColor black
+skinparam hyperlinkUnderline false
+
+|[[www.plantuml.com First actor]] |
+start
+:[[www.plantuml.com Action1]];
+| Other actors |
+:Action2;
+stop
+@enduml

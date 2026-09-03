@@ -1,0 +1,16 @@
+@startuml
+
+skinparam ConditionEndStyle hline
+
+start
+:A;
+if (test) then
+  :B;
+else
+  :D;
+endif
+:E;
+
+
+stop
+@enduml

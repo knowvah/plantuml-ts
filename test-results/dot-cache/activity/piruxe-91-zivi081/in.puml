@@ -1,0 +1,6 @@
+@startuml
+:foo1;
+:foo2;
+kill
+:foo3;
+@enduml

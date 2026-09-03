@@ -1,0 +1,11 @@
+@startuml
+!theme amiga
+start
+:Hello;
+fork
+:World;
+fork again
+:Venus;
+end fork
+stop
+@enduml

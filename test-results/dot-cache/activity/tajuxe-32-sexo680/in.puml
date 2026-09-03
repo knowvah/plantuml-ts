@@ -1,0 +1,11 @@
+@startuml
+start
+
+note left #aabbcc
+aaaa aaaaaa
+endnote
+
+note left #aabbff
+aaaa hhhhhh
+endnote
+@enduml

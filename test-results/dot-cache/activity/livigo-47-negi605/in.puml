@@ -1,0 +1,11 @@
+@startuml
+title foo
+header header
+footer footer
+
+:start;
+if (some test) then
+  :do this;
+endif
+:end of process;
+@enduml

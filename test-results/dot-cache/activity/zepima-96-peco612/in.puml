@@ -1,0 +1,20 @@
+@startuml
+skinparam activityFontSize 4
+skinparam activityDiamondFontSize 30
+skinparam activityArrowFontSize 24
+skinparam activityFontColor red
+
+:start;
+if (some) then (yes)
+repeat
+  :first action;
+  :second action;
+repeatwhile (data to treat)
+else (no)
+  :me;
+endif
+while (foo)
+  :dans le while;
+endwhile
+:end of process;
+@enduml

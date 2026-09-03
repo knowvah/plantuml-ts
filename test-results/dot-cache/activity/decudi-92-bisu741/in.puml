@@ -1,0 +1,33 @@
+@startuml
+title split?fork?if?swimlane? Bug
+
+|swimlane1|
+start
+split
+  :a;
+split again
+  :b;
+end split
+
+|swimlane1|
+if(q?) then (yes)
+|swimlane1|
+  split
+    :c;
+    detach
+|swimlane2|
+  split again
+    :d;
+    detach
+  end split
+|swimlane1|
+else
+|swimlane2|
+  fork
+  fork again
+    :e;
+  end fork
+endif
+
+stop
+@enduml
