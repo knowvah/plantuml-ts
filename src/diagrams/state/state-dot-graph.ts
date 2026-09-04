@@ -323,6 +323,11 @@ export function buildDotGraph(
     edges,
     rankDir: rankdir,
     ...sepAttrs(theme),
+    // D3 (plans/linetype-ortho-routing/decisions.md): the SAME expression
+    // as the label half reads at line 238 above (`theme.linetype`) --
+    // forwarded via conditional spread so an absent linetype stays absent
+    // on DotInputGraph rather than becoming an explicit `undefined`.
+    ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
     // mission G4 S8 (mechanism 19, mirrors G2 N29's identical class-engine
     // fix): state draws every transition's arrowhead as an inline
     // \x22<polygon>\x22 at the raw spline endpoint (mission G4 S1 mechanism 3),

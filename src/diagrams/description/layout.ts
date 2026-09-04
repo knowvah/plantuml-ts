@@ -255,6 +255,10 @@ function runLayout(
     // extremity/*.ts), matching the Svek-DOT emitter's own universal
     // `arrowhead=none` — see `DotInputGraph.manualArrowheads`'s doc comment.
     manualArrowheads: true,
+    // D3 (plans/linetype-ortho-routing/decisions.md): SAME `linetype` param
+    // already read by buildDotEdges above (the label half) -- forwarded via
+    // conditional spread so an absent value stays absent, not `undefined`.
+    ...(linetype !== undefined ? { linetype } : {}),
   };
   // DotStringFactory only emits rankdir=LR for skinparam Rankdir LEFT_TO_RIGHT
   // (`left to right direction`, CommandRankDir.java); TB emits no attribute.

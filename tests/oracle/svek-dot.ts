@@ -110,6 +110,13 @@ export interface StructuralGraph {
   remincross: boolean;
   searchsize: number | undefined;
   rankdir: string | undefined;
+  /** `splines=ortho|polyline` — see `dotSplinesAttrs`
+   *  (`src/core/dot-splines.ts`); undefined when the attr is absent (the
+   *  default Svek routing). */
+  splines: string | undefined;
+  /** `forcelabels=true` — only ever paired with `splines=ortho` (D4); false
+   *  (never undefined) when absent, since it is a boolean flag, not a value. */
+  forcelabels: boolean;
 }
 
 const attr = (attrs: string, name: string): string | undefined =>
@@ -246,6 +253,8 @@ export function parseSvekDot(dot: string): StructuralGraph {
     remincross: /remincross=true/.test(dot),
     searchsize: numAttr(dot, 'searchsize'),
     rankdir: /rankdir=(\w+)/.exec(dot)?.[1],
+    splines: /\bsplines=(\w+)/.exec(dot)?.[1],
+    forcelabels: /\bforcelabels=true\b/.test(dot),
   };
 }
 
@@ -373,6 +382,18 @@ function rankdirOk(a: string | undefined, b: string | undefined): boolean {
   return a === b;
 }
 
+/** splines: textual equality, absent==absent equal (mirrors `rankdirOk`).
+ *  forcelabels: boolean equality — it is a bare flag (D4: only ever paired
+ *  with `splines=ortho`), so there is no absent/present asymmetry to model. */
+function splinesOk(
+  aSplines: string | undefined,
+  aForcelabels: boolean,
+  bSplines: string | undefined,
+  bForcelabels: boolean,
+): boolean {
+  return aSplines === bSplines && aForcelabels === bForcelabels;
+}
+
 export interface StructuralDiff {
   nodeCountOk: boolean;
   edgeCountOk: boolean;
@@ -406,6 +427,12 @@ export interface StructuralDiff {
   nodesepOk: boolean;
   /** ranksep: numeric equality (epsilon 1e-6); absent==absent equal. */
   ranksepOk: boolean;
+  /** `splines`/`forcelabels` match — see {@link StructuralGraph.splines} /
+   *  {@link StructuralGraph.forcelabels}. Joins `structurallyEqual` (D5,
+   *  linetype-ortho-routing): before this, the harness had zero splines
+   *  tokens at all, which is how the state suite read "DOT EQUAL 266/268"
+   *  with materially different routing for six weeks. */
+  splinesOk: boolean;
   /** All structural checks hold — the DOT-level parity bar (ids/colors/sizes excluded). */
   structurallyEqual: boolean;
   /** Node width/height all within SIZE_CONFORMANCE_TOLERANCE_IN of the oracle
@@ -472,6 +499,7 @@ export function compareStructural(
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
   const nsOk = numAttrOk(oracle.nodesep, candidate.nodesep);
   const rsOk = numAttrOk(oracle.ranksep, candidate.ranksep);
+  const splOk = splinesOk(oracle.splines, oracle.forcelabels, candidate.splines, candidate.forcelabels);
   const maxDelta = maxSizeDelta(oracle, candidate);
 
   return {
@@ -490,6 +518,7 @@ export function compareStructural(
     rankdirOk: rdOk,
     nodesepOk: nsOk,
     ranksepOk: rsOk,
+    splinesOk: splOk,
     structurallyEqual:
       nodeCountOk &&
       edgeCountOk &&
@@ -505,7 +534,8 @@ export function compareStructural(
       clusterOk &&
       rdOk &&
       nsOk &&
-      rsOk,
+      rsOk &&
+      splOk,
     sizeConformantOk: maxDelta <= SIZE_CONFORMANCE_TOLERANCE_IN,
     oracle: {
       nodes: oracle.nodes.length,

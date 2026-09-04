@@ -154,3 +154,38 @@ certainty — there is no per-engine splines path to differ) but their net
 numeric effect is **unmeasured**, and ortho routing changes every edge on a
 fixture, so some will move a long way before they land. Not a one-liner's
 worth of risk: this wants its own mission, with its own before/after pins.
+
+---
+
+## CORRECTION 2026-09-03 — the fix landed exact; the `~0.002 px` was this note's own replay
+
+Appended after mission `linetype-ortho-routing` T4 landed the forwarding.
+The diagnosis above is **confirmed in full** — mechanism, origin, causal
+chain and all four "ruled out" items held. One number in it was wrong, and
+it is corrected here rather than edited in place so the reasoning stays
+auditable.
+
+**This note predicted** (line 93): ink `108.164568` + 35 = `143.164568 px`
+= `1.988397 in` against the jar's `1.988368 in` → a `~0.002 px` residual.
+
+**Measured after the fix**: `ours 1.988368 in`, `jar 1.988368 in`,
+`deltaPx 0` — **exact**, all 12 declarations, `dirtyFixtures: 0`.
+`kejabo-83-vinu490` likewise went `+0.749952 px → 0`.
+
+**Why the prediction was off, arithmetically.** `1.988368 × 72 =
+143.162496 px`; minus this note's own `+15+20` chrome gives real-pipeline
+ink **`108.162496`**. The predicted `108.164568` came from the *standalone
+replay* in the "Proof" section — a captured `DotInputGraph` pushed through
+a hand-assembled `applyGraphAttrs`/`addNodes`/`addClusters`/`addEdges`/
+`render`/`getLayout` sequence. `108.164568 − 108.162496 = 0.002072`. The
+entire predicted residual was the replay's deviation from the real build
+path, not an error left in the port.
+
+**The lesson worth carrying**, since the replay was otherwise the strongest
+evidence in this file: a replay harness reproduces the *mechanism*
+faithfully while still being off in the last digits, because it is not the
+production path. Quote replay numbers as evidence of WHICH mechanism, never
+as a target the real fix must hit. A brief that turns a replay-derived
+figure into an exit-bar threshold — as this mission's did — sets up a false
+stop condition, and a later agent reading "expected ~0.002 px" could
+reasonably mistake the exact result for a miss.

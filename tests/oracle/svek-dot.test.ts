@@ -16,11 +16,15 @@ function dot(opts: {
   nodesep?: number;
   ranksep?: number;
   minlen?: number;
+  /** Raw `splines=...;forcelabels=true;` line, verbatim (mirrors the jar's
+   *  single-line emission for the ortho arm — see `dot-splines.ts`). */
+  splinesLine?: string;
 }): string {
   const lines = ['digraph unix {'];
   if (opts.rankdir !== undefined) lines.push(`rankdir=${opts.rankdir};`);
   if (opts.nodesep !== undefined) lines.push(`nodesep=${opts.nodesep.toFixed(6)};`);
   if (opts.ranksep !== undefined) lines.push(`ranksep=${opts.ranksep.toFixed(6)};`);
+  if (opts.splinesLine !== undefined) lines.push(opts.splinesLine);
   const minlen = opts.minlen ?? 1;
   lines.push(
     `sh0007->sh0006[arrowtail=none,arrowhead=none,minlen=${minlen},color="#000008"];`,
@@ -177,5 +181,66 @@ describe('compareStructural — medianSizeDeltaIn', () => {
     const diff = compareStructural(empty, withNodes);
     expect(diff.medianSizeDeltaIn).toBe(0);
     expect(diff.maxSizeDeltaIn).toBe(0);
+  });
+});
+
+describe('parseSvekDot — splines/forcelabels (linetype-ortho-routing T7)', () => {
+  it('splines=ortho;forcelabels=true; parses to splines "ortho", forcelabels true', () => {
+    const g = parseSvekDot(dot({ minlen: 0, splinesLine: 'splines=ortho;forcelabels=true;' }));
+    expect(g.splines).toBe('ortho');
+    expect(g.forcelabels).toBe(true);
+  });
+
+  it('no splines attribute parses to splines undefined, forcelabels false', () => {
+    const g = parseSvekDot(dot({ minlen: 0 }));
+    expect(g.splines).toBeUndefined();
+    expect(g.forcelabels).toBe(false);
+  });
+
+  it('splines=polyline; parses to splines "polyline", forcelabels false', () => {
+    const g = parseSvekDot(dot({ minlen: 0, splinesLine: 'splines=polyline;' }));
+    expect(g.splines).toBe('polyline');
+    expect(g.forcelabels).toBe(false);
+  });
+});
+
+describe('compareStructural — splinesOk (linetype-ortho-routing D5)', () => {
+  it('both sides ortho+forcelabels: splinesOk true, structurallyEqual true', () => {
+    const both = dot({ minlen: 0, splinesLine: 'splines=ortho;forcelabels=true;' });
+    const diff = compareStructural(parseSvekDot(both), parseSvekDot(both));
+    expect(diff.splinesOk).toBe(true);
+    expect(diff.structurallyEqual).toBe(true);
+  });
+
+  it('oracle ortho, candidate no splines: splinesOk false, structurallyEqual false', () => {
+    const oracle = parseSvekDot(dot({ minlen: 0, splinesLine: 'splines=ortho;forcelabels=true;' }));
+    const candidate = parseSvekDot(dot({ minlen: 0 }));
+    const diff = compareStructural(oracle, candidate);
+
+    expect(diff.splinesOk).toBe(false);
+    expect(diff.structurallyEqual).toBe(false);
+    // All other checks still pass — the failure is isolated to splines.
+    expect(diff.nodeCountOk).toBe(true);
+    expect(diff.edgeCountOk).toBe(true);
+    expect(diff.degreeOk).toBe(true);
+    expect(diff.minlenOk).toBe(true);
+    expect(diff.shapeOk).toBe(true);
+    expect(diff.labelOk).toBe(true);
+    expect(diff.clusterOk).toBe(true);
+    expect(diff.rankdirOk).toBe(true);
+    expect(diff.nodesepOk).toBe(true);
+    expect(diff.ranksepOk).toBe(true);
+  });
+
+  it('oracle polyline, candidate ortho: splinesOk false (both present, values differ)', () => {
+    const oracle = parseSvekDot(dot({ minlen: 0, splinesLine: 'splines=polyline;' }));
+    const candidate = parseSvekDot(dot({ minlen: 0, splinesLine: 'splines=ortho;forcelabels=true;' }));
+    expect(compareStructural(oracle, candidate).splinesOk).toBe(false);
+  });
+
+  it('both sides no splines: splinesOk true (absent==absent)', () => {
+    const oracle = parseSvekDot(dot({ minlen: 0 }));
+    const candidate = parseSvekDot(dot({ minlen: 0 }));
+    expect(compareStructural(oracle, candidate).splinesOk).toBe(true);
   });
 });

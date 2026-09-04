@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGraph } from '@knowvah/dot-engine';
 import type { Graph } from '@knowvah/dot-engine';
-import { addClusters, addNodes, firstEncounterOrder } from '../../../src/core/graph-layout-build.js';
+import { addClusters, addNodes, applyGraphAttrs, firstEncounterOrder } from '../../../src/core/graph-layout-build.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import type { DotInputCluster } from '../../../src/core/graph-layout.types.js';
 
@@ -530,5 +530,49 @@ describe('addClusters — nested border-point clusters inherit the parent ee lab
     const b = createGraph({ directed: true });
     addClusters(b, nested());
     expect(b.graph.subgraphs.get('cluster0')!.attrs.get('label')).toBeUndefined();
+  });
+});
+
+/**
+ * lor-T2 (`plans/linetype-ortho-routing/decisions.md`, D2): `applyGraphAttrs`
+ * consumes `dot-splines.ts#dotSplinesAttrs` unconditionally -- never gated on
+ * `omitSepAttrs` or any sep attribute, matching pavuzo-79-zodu430's cached
+ * `svek-1.dot` (`splines=ortho;forcelabels=true;` with no nodesep/ranksep).
+ */
+describe('applyGraphAttrs — splines/forcelabels from linetype (lor-T2)', () => {
+  const base = (): DotInputGraph => ({ nodes: [], edges: [] });
+
+  it('linetype ortho: sets splines=ortho AND forcelabels=true', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, { ...base(), linetype: 'ortho' });
+    expect(b.getAttr('splines')).toBe('ortho');
+    expect(b.getAttr('forcelabels')).toBe('true');
+  });
+
+  it('linetype polyline: sets splines=polyline and NO forcelabels (D4 asymmetry)', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, { ...base(), linetype: 'polyline' });
+    expect(b.getAttr('splines')).toBe('polyline');
+    expect(b.getAttr('forcelabels')).toBeUndefined();
+  });
+
+  it('no linetype: sets no splines attribute at all', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, base());
+    expect(b.getAttr('splines')).toBeUndefined();
+    expect(b.getAttr('forcelabels')).toBeUndefined();
+  });
+
+  it('D2 regression guard: omitSepAttrs-shaped input (no nodeSep/rankSep) still gets splines', () => {
+    // `omitSepAttrs` itself lives in the DOT-emitter path
+    // (svek-dot-emit.ts), not here -- this input just reproduces the SHAPE
+    // that guard produces (no nodeSep/rankSep set) to prove this function
+    // never conditions splines emission on the sep attrs being present.
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, { ...base(), linetype: 'ortho' });
+    expect(b.getAttr('nodesep')).toBeUndefined();
+    expect(b.getAttr('ranksep')).toBeUndefined();
+    expect(b.getAttr('splines')).toBe('ortho');
+    expect(b.getAttr('forcelabels')).toBe('true');
   });
 });
