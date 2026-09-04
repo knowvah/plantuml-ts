@@ -76,3 +76,45 @@ outside adopted.
    not an incremental script, but a **whole-file regeneration** of a pin
    nobody has refreshed in weeks. A whole-file re-pin is an adoption
    decision about every row in the file, not just the ones you came for.
+
+
+---
+
+## CORRECTION 2026-09-04 — "three regressions of unknown origin" was wrong
+
+Appended after `doteq-regression-bisect` T0 diagnosed all three. The
+*count* and the *recommendation* in this note stand; the **characterisation
+does not**.
+
+`lurage-50-kobo763`, `xetase-70-zaza808` and `tunelu-64-xica833` are **not
+`src/` regressions**, and their origin is not unknown. `labelSizeOk` was
+added to `tests/oracle/svek-dot.ts#compareStructural` at `d3ff29be`
+(2026-08-15), **three days after** these pins were generated. It compares
+each edge-label `<TABLE>`'s FIXEDSIZE `WIDTHxHEIGHT` as a multiset; the old
+comparator checked only label *presence*. All three fixtures' label boxes had
+already differed from the jar's before the pin was taken — the old comparator
+could not see it, so the pin recorded `true`.
+
+The bisect's own 2×2 is decisive: under either FIXED definition of
+`dotEqual`, the verdict is identical at both ends of the window. Bad-end
+`src/` with the old comparator reads `true`; good-end `src/` with today's
+comparator reads `false`. The flip tracks the comparator, not the code. All
+three are already-named residuals in the edge-label-box label-size backlogs.
+
+So they belong to the **same** category as the other 758 stale rows — a pin
+older than the thing that reads it — not a separate, more alarming one. That
+mis-framing is what set the bisect mission's premise, and cost it a
+three-worktree setup for a window with nothing in it.
+
+**Re-pinned to `false` on 2026-09-04** (`67d8355e`), which is what they
+measure. The remaining **758** rows are still un-adopted and still want an
+owner; that part of this note is unchanged.
+
+**The lesson generalises past this file.** Three times in two days a number
+moved because the *instrument* changed, not the code: this, the `~0.002 px`
+replay artifact, and `jakapi-64-tine258`'s `maxDelta` rising because a
+structural improvement let the comparator descend past a `childCount`
+short-circuit. Before attributing any pin delta to the port, check whether
+the thing doing the measuring moved first — and note that a pin's
+`generatedAt` is a claim about the comparator of that date, not just the
+tree.
