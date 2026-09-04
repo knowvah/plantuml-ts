@@ -70,9 +70,9 @@ exiting 0.
 | Batch | Tasks | Sequenced | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 verify the window and the predicate | gates all | [x] — **stop condition 1** |
-| [1](batch-1/overview.md) | T1 lurage · T2 xetase · T3 tunelu | parallel, 3 worktrees | [ ] |
-| [2](batch-2/overview.md) | fix tasks — **created after Batch 1**, not now | — | [ ] |
-| [3](batch-3/overview.md) | T7 re-pin exactly three rows | after Batch 2 | [ ] |
+| [1](batch-1/overview.md) | T1 lurage · T2 xetase · T3 tunelu | parallel, 3 worktrees | [—] **not run** — T0 removed the premise |
+| [2](batch-2/overview.md) | fix tasks — **created after Batch 1**, not now | — | [—] **never created** — nothing to fix in `src/` |
+| [3](batch-3/overview.md) | T7 re-pin exactly three rows | after Batch 2 | [x] — re-pinned to **`false`**, see below |
 
 **Batch 2 is deliberately unplanned.** Per [D5](decisions.md#d5), each fix
 task is created once its diagnosis artifact exists, taking that artifact's
@@ -137,3 +137,61 @@ artifact stating why the culprit broke it, that is stop condition 4.
   three stale `parity-*.json` files; (2) whether to fix the three label
   boxes under their existing edge-label-box mechanisms; (3) remove the
   `dqb-*` worktrees when done.
+
+---
+
+## Session summary — 2026-09-04 (T7 executed, mission closed)
+
+T7 ran **against its own spec's expected value, deliberately.** The task file
+says "confirm `dotEqual=true`" — written under the pre-T0 premise that a
+`src/` regression would be found and fixed. T0 disproved that premise: there
+is no `src/` flip, the three fixtures have diverged from the jar's label
+boxes since before the pin was taken, and the correct value is **`false`**.
+
+Re-pinning them to `true` would have restored a pin that the comparator can
+prove wrong. They are pinned to what they measure.
+
+### Measured before the re-pin, on current `main`
+
+| fixture | file | `dotEqual` | svgLen |
+|---|---|---|---|
+| `lurage-50-kobo763` | `parity-state.json` | `false` | 1559 |
+| `xetase-70-zaza808` | `parity-state.json` | `false` | 1944 |
+| `tunelu-64-xica833` | `parity-class.json` | `false` | 4645 |
+
+Identical to T0's artifact, including svgLen — the verdict is stable and
+reproducible, not a flaky read.
+
+### Containment
+
+`git diff` on the two files is **exactly three changed lines**, all
+`"dotEqual": true` → `false`. The other **758** drifted rows were NOT
+adopted; they remain for whoever takes
+`.agent-notes/lor-parity-pins-are-stale.md`, which now needs a narrower
+title — its "three regressions of unknown origin" framing was **wrong**.
+They were never `src/` regressions. See below.
+
+### The correction this mission produced
+
+`linetype-ortho-routing` T8 filed these three as "`dotEqual` regressions of
+unknown origin", implying a behavioural regression. They are not. They are
+pins that predate a **stricter comparator**: `labelSizeOk` landed in
+`tests/oracle/svek-dot.ts` at `d3ff29be` (2026-08-15), three days after the
+pins were generated, and compares each edge-label `<TABLE>`'s FIXEDSIZE
+`WIDTHxHEIGHT` as a multiset where the old comparator checked only label
+presence. Same category as the other 758 stale rows, not a separate one.
+
+**The recurring hazard, now seen three times in two days:** a number moved
+because the *instrument* changed, not the code. The `~0.002 px` replay
+artifact, `jakapi-64-tine258`'s `maxDelta` rising from a deeper comparator
+descent, and this. Check what the measurement is doing before attributing a
+delta to the port.
+
+### Branch state
+
+The branch was merged up to `main` first (`19c5d3a7`): it forked from
+`76312623`, before `linetype-ortho-routing` merged, so its copies of
+`parity-{state,class}.json` predated that mission's own seven re-pinned
+rows. Editing the stale copies would have reverted them on merge-back.
+
+Four gates green, `Test Files` 688, no drop.

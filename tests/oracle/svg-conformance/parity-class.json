@@ -4446,7 +4446,7 @@
     {
       "slug": "tunelu-64-xica833",
       "type": "class",
-      "dotEqual": true,
+      "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 72,
       "firstDiff": "svg/g[1]/g[4][childCount]",

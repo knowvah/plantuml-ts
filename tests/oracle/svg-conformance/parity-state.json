@@ -1030,7 +1030,7 @@
     {
       "slug": "lurage-50-kobo763",
       "type": "state",
-      "dotEqual": true,
+      "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 340,
       "firstDiff": "svg/g[1]/g[3][childCount]",
@@ -1996,7 +1996,7 @@
     {
       "slug": "xetase-70-zaza808",
       "type": "state",
-      "dotEqual": true,
+      "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 492,
       "firstDiff": "svg/g[1]/g[4]/text[1]",
