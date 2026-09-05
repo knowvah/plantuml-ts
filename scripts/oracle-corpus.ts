@@ -12,14 +12,7 @@
  * Usage:  npx tsx scripts/oracle-corpus.ts [sampleSize]   (default 100)
  */
 import { execFileSync } from 'node:child_process';
-import {
-  readdirSync,
-  readFileSync,
-  mkdirSync,
-  rmSync,
-  cpSync,
-  existsSync,
-} from 'node:fs';
+import { readdirSync, readFileSync, mkdirSync, rmSync, cpSync, existsSync } from 'node:fs';
 import { join, basename, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -138,7 +131,7 @@ function main(): void {
     .sort((a, b) => b[1] - a[1])
     .map(([t, c]) => `${t}=${c}`)
     .join(' ');
-  // eslint-disable-next-line no-console
+
   console.log(
     `sampled ${picks.length}, kept ${kept} graphviz-backed (svek DOT) into ` +
       `oracle/corpus-cache\n  by plantuml-ts type: ${dist}`,

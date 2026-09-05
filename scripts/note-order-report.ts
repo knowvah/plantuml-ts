@@ -108,7 +108,11 @@ const TYPES = ['class', 'object'] as const;
 // Fixture discovery (mirrors scripts/shape-match-report.ts#listFixtureDirs)
 // ---------------------------------------------------------------------------
 
-interface FixtureDir { readonly slug: string; readonly type: string; readonly dir: string }
+interface FixtureDir {
+  readonly slug: string;
+  readonly type: string;
+  readonly dir: string;
+}
 
 function listFixtureDirs(type: string): FixtureDir[] {
   const typeDir = join(CACHE_DIR, type);
@@ -128,8 +132,10 @@ function listFixtureDirs(type: string): FixtureDir[] {
 // Parse-side note identity
 // ---------------------------------------------------------------------------
 
-
-interface NoteIdentity { readonly ids: ReadonlySet<string>; readonly tips: number }
+interface NoteIdentity {
+  readonly ids: ReadonlySet<string>;
+  readonly tips: number;
+}
 
 /** The parse-side note ids and TIPS count for the FIRST diagram block —
  *  the same block `renderFixtureClass` renders (its own "page-1-only"
@@ -191,7 +197,11 @@ function inkHash(doc: XmlNode): string {
         pushChildren(child, false);
         continue;
       }
-      const text = String(child);
+      // xmldom's nodes serialize to XML through their own `toString`, which
+      // its TypeScript surface does not declare -- hence the cast rather than
+      // a bare `String(child)`, which the type system reads as
+      // `[object Object]` stringification.
+      const text = (child as unknown as { toString(): string }).toString();
       if (text.trim().length > 0) parts.push(text);
     }
   };
@@ -204,7 +214,11 @@ function inkHash(doc: XmlNode): string {
 // Per-fixture line
 // ---------------------------------------------------------------------------
 
-interface FixtureLine { readonly label: string; readonly line: string; readonly hasNotes: boolean }
+interface FixtureLine {
+  readonly label: string;
+  readonly line: string;
+  readonly hasNotes: boolean;
+}
 
 function reportFixture(f: FixtureDir): FixtureLine {
   const label = `${f.type}/${f.slug}`;
@@ -245,7 +259,9 @@ function buildReport(): string[] {
 // ---------------------------------------------------------------------------
 
 function checkAgainst(baselinePath: string, current: readonly string[]): number {
-  const baseline = readFileSync(baselinePath, 'utf-8').split('\n').filter((l: string) => l.length > 0);
+  const baseline = readFileSync(baselinePath, 'utf-8')
+    .split('\n')
+    .filter((l: string) => l.length > 0);
   const byLabel = (lines: readonly string[]): Map<string, string> =>
     new Map(lines.map((l) => [l.split(' ')[0] ?? l, l]));
   const before = byLabel(baseline);
@@ -253,13 +269,28 @@ function checkAgainst(baselinePath: string, current: readonly string[]): number 
   let diffs = 0;
   for (const [label, line] of before) {
     const now = after.get(label);
-    if (now === undefined) { console.log(`- ${line}`); diffs++; continue; }
-    if (now !== line) { console.log(`- ${line}`); console.log(`+ ${now}`); diffs++; }
+    if (now === undefined) {
+      console.log(`- ${line}`);
+      diffs++;
+      continue;
+    }
+    if (now !== line) {
+      console.log(`- ${line}`);
+      console.log(`+ ${now}`);
+      diffs++;
+    }
   }
   for (const [label, line] of after) {
-    if (!before.has(label)) { console.log(`+ ${line}`); diffs++; }
+    if (!before.has(label)) {
+      console.log(`+ ${line}`);
+      diffs++;
+    }
   }
-  console.log(diffs === 0 ? `note-order: identical to ${baselinePath}` : `note-order: ${diffs} fixture(s) differ from ${baselinePath}`);
+  console.log(
+    diffs === 0
+      ? `note-order: identical to ${baselinePath}`
+      : `note-order: ${diffs} fixture(s) differ from ${baselinePath}`,
+  );
   return diffs === 0 ? 0 : 1;
 }
 
@@ -301,7 +332,9 @@ function runVsJar(): void {
     tally[verdict]++;
     console.log(`${f.type}/${f.slug} ${verdict}`);
   }
-  console.log(`TOTAL vs-jar: same=${tally.SAME} order-only=${tally['ORDER-ONLY']} other=${tally.OTHER} err=${tally.ERR}`);
+  console.log(
+    `TOTAL vs-jar: same=${tally.SAME} order-only=${tally['ORDER-ONLY']} other=${tally.OTHER} err=${tally.ERR}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -310,7 +343,11 @@ function runVsJar(): void {
 
 /** `ink` is `undefined` for a report line captured before the `ink=` column
  *  existed (falls back to the sha-vs-sequence rule in {@link classify}). */
-interface FixtureRecord { readonly sha: string; readonly ink: string | undefined; readonly seq: string }
+interface FixtureRecord {
+  readonly sha: string;
+  readonly ink: string | undefined;
+  readonly seq: string;
+}
 
 /** `cls:Foo=ent0001` -> `ent0001`, `link=lnk1` -> `lnk1`: the same
  *  strip-to-uid idea as {@link uidSequence}, applied to a report LINE's
@@ -328,7 +365,10 @@ function parseFixtureRecord(line: string): FixtureRecord | undefined {
   const sha = parts[shaIdx]!.slice('sha='.length);
   const hasInk = parts[shaIdx + 1]?.startsWith('ink=') === true;
   const ink = hasInk ? parts[shaIdx + 1]!.slice('ink='.length) : undefined;
-  const seq = parts.slice(shaIdx + (hasInk ? 2 : 1)).map(stripToUid).join(' ');
+  const seq = parts
+    .slice(shaIdx + (hasInk ? 2 : 1))
+    .map(stripToUid)
+    .join(' ');
   return { sha, ink, seq };
 }
 
@@ -385,7 +425,10 @@ function runCheckOrder(baselinePath: string): void {
   let offenders = 0;
   for (const [label, was] of before) {
     const now = after.get(label);
-    if (now === undefined) { console.log(`MISSING ${label}`); continue; }
+    if (now === undefined) {
+      console.log(`MISSING ${label}`);
+      continue;
+    }
     const verdict = classify(was, now);
     printVerdict(label, verdict);
     if (verdict.startsWith('moved')) moved++;
