@@ -118,3 +118,21 @@ short-circuit. Before attributing any pin delta to the port, check whether
 the thing doing the measuring moved first — and note that a pin's
 `generatedAt` is a claim about the comparator of that date, not just the
 tree.
+
+---
+
+## CLOSED 2026-09-05 — pins refreshed, and the count here was wrong
+
+All three files regenerated from one fresh survey (`41b002f5`); **753 of
+1,351 rows** adopted. The open item this note raised is closed.
+
+**The "three regressions" figure in this file is an under-count.** The real
+figure at filing was **eleven** — 2 state, 4 class, 5 component. It reached
+this note as 3 because the class listing was read from a truncated debug
+print (`flips[:12]`) and the component corpus was counted for movers without
+its `dotEqual` flips ever being enumerated.
+
+Three were then diagnosed and re-pinned (`lurage-50-kobo763`,
+`xetase-70-zaza808`, `tunelu-64-xica833` — comparator staleness, not
+regressions). The remaining **8** are now pinned `false` and filed by name,
+undiagnosed, in `.agent-notes/parity-repin-2026-09-05.md`. Start there.
