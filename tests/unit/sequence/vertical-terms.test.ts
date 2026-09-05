@@ -44,7 +44,14 @@ import type {
 } from '../../../src/diagrams/sequence/ast.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CORPUS = join(HERE, '..', '..', 'corpus', 'sequence');
+// Markup AND golden both come from the committed `dot-cache`, never from
+// `tests/corpus/` -- that tree is GITIGNORED and populated locally by
+// `scripts/populate-corpus.py`, so a test reading it passes on a dev box and
+// fails on a clean checkout. This file did exactly that from `3eb50eb8` until
+// 2026-09-05, red on CI for eight pushes while green locally. The cache's
+// `in.puml` is byte-identical to the corpus `.puml` for all five canaries
+// (verified before the switch), so this changes what the test READS, not what
+// it asserts.
 const CACHE = join(HERE, '..', '..', '..', 'test-results', 'dot-cache', 'sequence');
 
 function dimsOf(svg: string): { width: number; height: number } {
@@ -54,7 +61,7 @@ function dimsOf(svg: string): { width: number; height: number } {
 
 function oursFor(slug: string): string {
   return renderFixtureSequence(
-    readFileSync(join(CORPUS, `${slug}.puml`), 'utf8'),
+    readFileSync(join(CACHE, slug, 'in.puml'), 'utf8'),
     new DeterministicMeasurer(),
   );
 }
