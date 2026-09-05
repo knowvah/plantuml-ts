@@ -6,10 +6,12 @@
  * A report, not a gate: divergences are expected data, especially pre-cutover
  * (the description renderer is still legacy as of this baseline — verdicts
  * are overwhelmingly `diverged`, which proves the instrument rather than
- * signaling a regression). The survey never crashes on a bad fixture: every
- * render is isolated in a spawned `jiti` subprocess with a wall-clock
- * timeout, mirroring ~/git/knowvah/dot-engine's test/corpus/survey.ts (a hang
- * becomes `timeout`, a throw becomes `errored`). Verdict comparison logic
+ * signaling a regression). The survey never crashes on a bad fixture: renders
+ * run in PERSISTENT `jiti` worker subprocesses under a per-fixture wall-clock
+ * timeout (`svg-parity-workers.ts`), mirroring ~/git/knowvah/dot-engine's
+ * test/corpus/survey.ts (a hang becomes `timeout`, a throw becomes
+ * `errored`); the parent kills and respawns the worker that was holding a
+ * bad fixture. Verdict comparison logic
  * (`diffVerdict`, `isWellFormedSvg`) is ported near-verbatim from that
  * project's survey.ts.
  *
@@ -20,9 +22,12 @@
  *
  *   npx jiti scripts/svg-parity-survey.ts            survey the full corpus
  *   npx jiti scripts/svg-parity-survey.ts --render-one <dir>
- *     isolation-worker mode: renders ONE cached fixture dir and prints
- *     `{ svg, dotEqual, oracleBlind }` as JSON on stdout. Internal use only
- *     (spawned by the survey itself); not a supported public CLI mode.
+ *     renders ONE cached fixture dir and prints `{ svg, dotEqual,
+ *     oracleBlind }` as JSON on stdout. Kept as a one-shot debugging entry
+ *     point; the survey itself no longer uses it.
+ *   npx jiti scripts/svg-parity-survey.ts --render-many
+ *     persistent-worker mode: one fixture dir per stdin line, one JSON frame
+ *     per stdout line. Internal use only (spawned by the survey itself).
  *
  * Node-only dev/test infra — never imported by src/index.ts.
  */
@@ -47,6 +52,7 @@ import {
   compareStructural,
 } from '../tests/oracle/svek-dot.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+import { runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 
@@ -59,15 +65,24 @@ const DEFAULT_TYPES = ['component', 'usecase'];
  * Wall-clock budget per fixture. **60s, not the 10s this started at** — SI19,
  * 2026-08-12.
  *
- * The budget has to cover process START, not just the render, and the start
- * dominates by two orders of magnitude: a spawned worker spends **~10.5s
- * importing `src/index.js`** through jiti (measured directly; the render
- * itself and every other import are in the tens of milliseconds, and
+ * Historically the budget had to cover process START, which dominated the
+ * render by two orders of magnitude: a worker spends **~8.9s importing
+ * `src/index.js`** through jiti against **~7ms rendering** (measured;
  * `JITI_FS_CACHE=true` changes nothing). `src` outgrew the original 10s
  * budget, so a full run returned almost entirely `timeout` — it wrote 270
  * timeouts of 271 over a good `parity-state.json` before being caught and
  * reverted. Discriminating experiment on the 3-fixture `hcl` type: 2 timeouts
  * of 3 at 10s, 0 of 3 at 60s.
+ *
+ * Workers are persistent now, so that import is paid once per WORKER rather
+ * than once per fixture and the budget covers the render alone — 60s is
+ * enormously generous against 7ms, and deliberately so (see below). The
+ * speed-up is the point: state 271 went ~5min -> **18.7s**, class 723
+ * ~13min -> **21s**, with 0 rows differing from the per-spawn results on
+ * either. It also removes the failure mode that motivated this: the old
+ * model logged 48 spurious `timeout`s at load average 4.9, where the pooled
+ * one logs 0 at load average 52, because the contention window is seconds
+ * instead of half an hour.
  *
  * That failure mode is the reason this is generous rather than snug. A survey
  * that times out does not fail loudly — it writes a `timeout` verdict, which
@@ -263,42 +278,49 @@ function renderOneMode(dir: string): void {
   process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind }));
 }
 
-// ---------------------------------------------------------------------------
-// Subprocess plumbing (adapted from @knowvah/dot-engine's spawnCapture; simpler here
-// since `jiti` runs the render directly — no grandchild process to group-kill).
-// ---------------------------------------------------------------------------
-
-interface SpawnResult {
-  stdout: string;
-  stderr: string;
-  code: number | null;
-  timedOut: boolean;
-}
-
-function spawnCapture(
-  cmd: string,
-  args: string[],
-  env: NodeJS.ProcessEnv,
-  timeoutMs: number,
-): Promise<SpawnResult> {
-  return new Promise((resolve) => {
-    const child = spawn(cmd, args, { env });
-    let stdout = '';
-    let stderr = '';
-    let timedOut = false;
-    const timer = setTimeout(() => {
-      timedOut = true;
-      child.kill('SIGKILL');
-    }, timeoutMs);
-    child.stdout.on('data', (d: Buffer) => (stdout += d.toString()));
-    child.stderr.on('data', (d: Buffer) => (stderr += d.toString()));
-    child.on('error', (e) => (stderr += e.message));
-    child.on('close', (code) => {
-      clearTimeout(timer);
-      resolve({ stdout, stderr, code, timedOut });
+/** Renders ONE fixture and returns the protocol frame, without exiting — the
+ *  reusable half of {@link renderOneMode}. */
+function renderFrame(dir: string): string {
+  const markup = readFileSync(join(dir, 'in.puml'), 'utf-8');
+  const oracleBlind = PRAGMA_LAYOUT_RE.test(markup);
+  const svekDots = readSvekDots(dir);
+  const inputs: DotInputGraph[] = [];
+  setLayoutInputObserver((g) => inputs.push(g));
+  try {
+    const svg = renderSync(markup, {
+      measurer: new WidthTableMeasurer(),
+      assetStore: buildSpriteAssetsStore(),
     });
-  });
+    return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, inputs, oracleBlind), oracleBlind });
+  } catch (err) {
+    return JSON.stringify({ error: errText(err).split('\n')[0] });
+  } finally {
+    setLayoutInputObserver(undefined);
+  }
 }
+
+/**
+ * Persistent worker (`--render-many`): imports `src/index.js` ONCE, then
+ * services one fixture dir per stdin line, one JSON frame per stdout line.
+ * See `svg-parity-workers.ts` for the protocol and the isolation trade.
+ */
+function renderManyMode(): void {
+  let buf = '';
+  process.stdin.setEncoding('utf-8');
+  process.stdin.on('data', (chunk: string) => {
+    buf += chunk;
+    for (let nl = buf.indexOf('\n'); nl !== -1; nl = buf.indexOf('\n')) {
+      const dir = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (dir.length > 0) process.stdout.write(`${renderFrame(dir)}\n`);
+    }
+  });
+  process.stdin.on('end', () => process.exit(0));
+}
+
+// ---------------------------------------------------------------------------
+// Survey
+// ---------------------------------------------------------------------------
 
 /** Locate a runnable `jiti`: local node_modules/.bin, else `npx jiti`. */
 function resolveJiti(): { cmd: string; pre: string[] } {
@@ -307,81 +329,52 @@ function resolveJiti(): { cmd: string; pre: string[] } {
   return { cmd: 'npx', pre: ['--no-install', 'jiti'] };
 }
 
-/** Extract the render-one sentinel error, else the first stderr line. */
-function renderErrMsg(stderr: string): string {
-  const marker = '__RENDER_ERROR__';
-  for (const line of stderr.split('\n')) {
-    if (line.startsWith(marker)) return line.slice(marker.length).trim();
-  }
-  const first = stderr.split('\n').find((l) => l.trim().length > 0);
-  return first?.trim() ?? 'render-one failed with no stderr output';
-}
-
-// ---------------------------------------------------------------------------
-// Survey
-// ---------------------------------------------------------------------------
-
-interface RenderOneOutput {
-  svg: string;
-  dotEqual: boolean;
-  oracleBlind: boolean;
-}
-
-function parseRenderOneStdout(stdout: string): RenderOneOutput | undefined {
-  try {
-    const parsed = JSON.parse(stdout) as Partial<RenderOneOutput>;
-    if (typeof parsed.svg !== 'string' || typeof parsed.dotEqual !== 'boolean') return undefined;
-    return { svg: parsed.svg, dotEqual: parsed.dotEqual, oracleBlind: parsed.oracleBlind === true };
-  } catch {
-    return undefined;
-  }
-}
-
-async function surveyOneFixture(
-  type: string,
-  f: FixtureDir,
-  jiti: { cmd: string; pre: string[] },
-): Promise<FixtureRow> {
-  const oracleSvg = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
-  if (!isWellFormedSvg(oracleSvg)) {
-    return {
-      slug: f.slug, type, verdict: 'oracle-error', dotEqual: false,
-      errMsg: `cached in.svg not well-formed XML: ${oracleSvg.length}B`,
-    };
-  }
-  const args = [...jiti.pre, THIS_FILE, '--render-one', f.dir];
-  const r = await spawnCapture(jiti.cmd, args, process.env, RENDER_TIMEOUT_MS);
-  if (r.timedOut) return { slug: f.slug, type, verdict: 'timeout', dotEqual: false };
-  const rendered = r.code === 0 ? parseRenderOneStdout(r.stdout) : undefined;
-  if (rendered === undefined) {
-    return {
-      slug: f.slug, type, verdict: 'errored', dotEqual: false,
-      errMsg: renderErrMsg(r.stderr),
-    };
-  }
-  const verdict = diffVerdict(rendered.svg, oracleSvg);
-  const blindField = rendered.oracleBlind ? { oracleBlind: true } : {};
-  return { slug: f.slug, type, dotEqual: rendered.dotEqual, ...verdict, ...blindField };
-}
-
-/** Bounded worker pool: run `items` `concurrency`-at-a-time, preserving order. */
-async function runPool<T, R>(
-  items: T[],
-  fn: (item: T) => Promise<R>,
-  concurrency: number,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let next = 0;
-  let done = 0;
-  const worker = async (): Promise<void> => {
-    for (let i = next++; i < items.length; i = next++) {
-      results[i] = await fn(items[i]!);
-      if (++done % 25 === 0) process.stderr.write(`  ${done}/${items.length}\n`);
-    }
+/** The oracle-side precheck, which needs no worker: a cached `in.svg` that
+ *  is not well-formed XML can never be compared against. */
+function oracleErrorRow(type: string, f: FixtureDir, oracleSvg: string): FixtureRow | undefined {
+  if (isWellFormedSvg(oracleSvg)) return undefined;
+  return {
+    slug: f.slug, type, verdict: 'oracle-error', dotEqual: false,
+    errMsg: `cached in.svg not well-formed XML: ${oracleSvg.length}B`,
   };
-  const n = Math.min(concurrency, items.length);
-  await Promise.all(Array.from({ length: n }, worker));
-  return results;
+}
+
+/** Folds one worker outcome plus its oracle SVG into the output row. */
+function rowFor(type: string, f: FixtureDir, oracleSvg: string, o: WorkerOutcome): FixtureRow {
+  if (o.kind === 'timeout') return { slug: f.slug, type, verdict: 'timeout', dotEqual: false };
+  if (o.kind === 'errored') {
+    return { slug: f.slug, type, verdict: 'errored', dotEqual: false, errMsg: o.message };
+  }
+  const verdict = diffVerdict(o.rendered.svg, oracleSvg);
+  const blindField = o.rendered.oracleBlind ? { oracleBlind: true } : {};
+  return { slug: f.slug, type, dotEqual: o.rendered.dotEqual, ...verdict, ...blindField };
+}
+
+/** Surveys one type through the persistent pool, preserving input order. */
+async function surveyType(
+  type: string,
+  fixtures: FixtureDir[],
+  jiti: { cmd: string; pre: string[] },
+): Promise<FixtureRow[]> {
+  const svgs = fixtures.map((f) => readFileSync(join(f.dir, 'in.svg'), 'utf-8'));
+  const pre = fixtures.map((f, i) => oracleErrorRow(type, f, svgs[i]!));
+  const todo = fixtures.map((f, i) => ({ f, i })).filter(({ i }) => pre[i] === undefined);
+  const outcomes = await runPersistentPool({
+    dirs: todo.map(({ f }) => f.dir),
+    spawn: () => spawn(jiti.cmd, [...jiti.pre, THIS_FILE, '--render-many'], {
+      env: process.env, stdio: ['pipe', 'pipe', 'pipe'],
+    }),
+    timeoutMs: RENDER_TIMEOUT_MS,
+    concurrency: CONCURRENCY,
+    onProgress: (done, total) => {
+      if (done % 25 === 0) process.stderr.write(`  ${done}/${total}\n`);
+    },
+  });
+  const rows = [...pre] as (FixtureRow | undefined)[];
+  todo.forEach(({ f, i }, k) => {
+    rows[i] = rowFor(type, f, svgs[i]!, outcomes[k]!);
+  });
+  return rows as FixtureRow[];
 }
 
 function tally(rows: FixtureRow[]): Record<Verdict, number> {
@@ -415,8 +408,7 @@ async function main(): Promise<void> {
   for (const type of types) {
     const fixtures = listFixtureDirs(type);
     process.stderr.write(`surveying ${fixtures.length} ${type} fixtures (concurrency ${CONCURRENCY})\n`);
-    const results = await runPool(fixtures, (f) => surveyOneFixture(type, f, jiti), CONCURRENCY);
-    rows.push(...results);
+    rows.push(...(await surveyType(type, fixtures, jiti)));
   }
   const report: ParityReport = { generatedAt: new Date().toISOString(), fixtures: rows };
   writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
@@ -446,7 +438,9 @@ function runRenderOneCli(argv: string[]): void {
  * the unit-test suite (matches the profile of this project's other script
  * CLI blocks, e.g. tests/oracle/svg-conformance/compare.ts). */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  if (process.argv.includes('--render-one')) {
+  if (process.argv.includes('--render-many')) {
+    renderManyMode();
+  } else if (process.argv.includes('--render-one')) {
     runRenderOneCli(process.argv);
   } else {
     main().catch((e) => {
