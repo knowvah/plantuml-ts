@@ -46,6 +46,7 @@ import {
   dotInputToStructural,
   compareStructural,
 } from '../tests/oracle/svek-dot.js';
+import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 
@@ -241,7 +242,17 @@ function renderOneMode(dir: string): void {
   setLayoutInputObserver((g) => inputs.push(g));
   let svg: string;
   try {
-    svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
+    // The jar always has its internal sprites available, so a survey that
+    // renders without them measures a diagram PlantUML never produces. A
+    // `jar:` sprite (`CommandSpriteFile.java:108-112`) resolves only through
+    // `RenderOptions.assetStore`; starved of it, `<$name>` contributes ZERO
+    // width and every label reserving it under-measures. Cost is one 608 KB
+    // eager walk per subprocess, measured at 5.5 ms -- ~7 s across the whole
+    // corpus, against a survey that runs for tens of minutes.
+    svg = renderSync(markup, {
+      measurer: new WidthTableMeasurer(),
+      assetStore: buildSpriteAssetsStore(),
+    });
   } catch (err) {
     setLayoutInputObserver(undefined);
     process.stderr.write(`__RENDER_ERROR__${errText(err).split('\n')[0]}\n`);
