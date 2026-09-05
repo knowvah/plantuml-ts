@@ -99,3 +99,58 @@ size.
 The general form, now the fourth instance in three days of the same trap:
 **measure the check, not a proxy for it.** A regex over the artifact the
 check reads is not the check.
+
+
+---
+
+## `ruciga-77-ruja233` is NOT one of them — the survey was starving it
+
+Established 2026-09-05 while attempting to fix its label box, on the
+shrink-only path (adding it to the backlog would have required raising a
+guard whose own comment reads "never raise it").
+
+**Our port measures `ruciga` exactly right.** The parity survey did not.
+
+`scripts/svg-parity-survey.ts` rendered every fixture with
+`{ measurer: new WidthTableMeasurer() }` and nothing else — **no
+`assetStore`**. A `jar:` sprite (`sprite Netw jar:archimate/network`,
+`CommandSpriteFile.java:108-112`) resolves ONLY through
+`RenderOptions.assetStore`. Starved of it, `<$Netw>` contributed **zero
+width**, so the reserved label box came out `159x17` against the jar's
+`179x22`, and `labelSizeOk` failed.
+
+Isolation that settled it — each sprite removed from the label in turn:
+
+| variant | our reserved box |
+|---|---|
+| full fixture | `159x17` |
+| minus `<$printer>` (inline, data-URI sprite) | `144x15` — so it WAS measured |
+| minus `<$Netw>` (`jar:` sprite) | `159x17` — **unchanged: contributes nothing** |
+| survey wiring **+ `assetStore`** | **`179x22`** — exact against the jar |
+
+Fix landed in the survey, not in `src/`: `assetStore:
+buildSpriteAssetsStore()`, unconditional. Cost measured at 5.5 ms per
+subprocess (608 KB, 140 files, process-cached), ~7 s across the corpus.
+
+**Blast radius, measured not assumed.** Only **5** fixtures corpus-wide use a
+`jar:` sprite (`bidusa-22-jutu505`, `ruliki-78-biji661`, `ruciga-77-ruja233`,
+`tuliba-37-liza126`, `nipapu-74-roro938`); 89 use `<$…>` of any kind, and
+inline/data-URI sprites resolve fine without the store. Re-surveying with the
+fix changed **0 of 271** state rows and **0 of 722** class rows. `ruciga` is
+the only row that moved, because it is the only fixture whose `jar:` sprite
+sits INSIDE an edge label — the one place `labelSizeOk` looks.
+
+**The other seven of the eight are unaffected**: none of them uses a sprite
+at all, so the comparator-staleness diagnosis above stands for them
+unchanged. `ruciga` was the impostor in that set, and only isolating each
+sprite separately caught it — the aggregate "all 8 fail labelSizeOk" was
+true and still concealed two different causes.
+
+### Method note
+
+Three times in this investigation the first reading was an artifact of how
+it was taken: the raw-regex box count (fixed by reading the check's own
+`sortedLabelBoxes`), the sprite-starved survey (fixed by wiring
+`assetStore`), and a component re-survey that returned 48 timeouts under
+load average 4.94 (discarded, not adopted). **A measurement harness is a
+subject of study, not a neutral instrument.**

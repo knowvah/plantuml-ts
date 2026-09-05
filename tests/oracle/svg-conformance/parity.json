@@ -1624,9 +1624,9 @@
     {
       "slug": "ruciga-77-ruja233",
       "type": "component",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 136,
+      "maxDelta": 146,
       "firstDiff": "svg/defs[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
