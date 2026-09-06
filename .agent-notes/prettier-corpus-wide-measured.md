@@ -71,3 +71,45 @@ touching a gated measurement file would BE a re-pin.
 Do it as its own commit touching nothing else, at width 140 to minimise the
 residue, and resolve the ten cap-crossers deliberately in the same change.
 Do not let it ride along with feature work.
+
+
+---
+
+## DONE 2026-09-06 — the corpus-wide run landed
+
+Adopted after the cap problem was handled rather than worked around. This
+note's analysis stands; only its conclusion ("not run") is superseded.
+
+**978 files, +18,208/-17,465.** Four gates green, including the oracle
+ratchets that pin rendering against the jar.
+
+The 38 crossers resolved to zero:
+
+| step | crossers |
+|---|---|
+| measured at printWidth 100 | 38 |
+| adopting printWidth 120 | 15 |
+| ignoring generated + pure-data tables | 12 |
+| after splitting the 12 | **0** |
+
+**Ordering was the load-bearing decision.** The hook blocks edits to files
+over 500 lines, so the splits HAD to precede the format. Formatting first
+would have locked all 12 out of being fixed — a self-inflicted deadlock
+with no clean exit but a config change.
+
+**Two things measurement caught that review would not have.**
+`skinparam-key-handlers.ts`'s 73-entry dispatch table has load-bearing
+SOURCE ORDER — its own header records that `ArrowFontColor` then
+`defaultFontColor` resolves red, and the reverse green. A split that sorted
+or regrouped entries would have silently changed skinparam precedence with
+every test still passing. It was verified by diffing the ordered key list
+against `HEAD`: 73 entries, byte-for-byte. Separately, that table formats to
+**527 alone**, so it needed a three-way split, not the obvious two-way one.
+
+**What did NOT get formatted, and why that is not laziness.** Generated
+sources and pure data tables stay ignored: Prettier's readability argument
+does not apply to a machine-written glyph table, and formatting a generated
+file guarantees drift the moment its generator re-runs. Prose stays ignored
+because those documents are hand-wrapped around tables and citations.
+Pinned oracle JSON stays ignored because reformatting a gated measurement
+file would BE a re-pin.
