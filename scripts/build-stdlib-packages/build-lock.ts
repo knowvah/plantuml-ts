@@ -158,7 +158,6 @@ function sleepSync(ms: number): void {
 }
 
 function defaultLog(message: string): void {
-  // eslint-disable-next-line no-console
   console.log(`[build-stdlib-lock] ${message}`);
 }
 
@@ -181,10 +180,7 @@ function productionDefaults(repoRoot: string): ResolvedBuildLockOptions {
 /** Merges `overrides` onto `defaults`, one key at a time, skipping any key
  * whose override value is `undefined` -- so a caller passing a partial
  * `BuildLockOptions` never blanks out a default it did not mean to touch. */
-function applyOverrides(
-  defaults: ResolvedBuildLockOptions,
-  overrides: BuildLockOptions,
-): ResolvedBuildLockOptions {
+function applyOverrides(defaults: ResolvedBuildLockOptions, overrides: BuildLockOptions): ResolvedBuildLockOptions {
   const result = { ...defaults };
   for (const key of Object.keys(overrides) as (keyof ResolvedBuildLockOptions)[]) {
     const value = overrides[key];

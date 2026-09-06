@@ -1,0 +1,29 @@
+# Generated, vendored, or oracle-derived. Prettier must not touch any of it:
+# `docs/catalog.md` is generated and drift-gated (`npm run catalog`), the
+# stdlib/sprite payloads are byte-verbatim vendored copies audited against a
+# manifest, and every JSON under `oracle/goldens/` and `tests/oracle/` is a
+# measurement pinned by a gate -- reformatting one is a re-pin.
+dist/
+dist-demo/
+coverage/
+node_modules/
+assets/stdlib/
+assets/sprites/
+packages/*/generated/
+test-results/
+tests/corpus/
+tests/visual/
+docs/catalog.md
+oracle/goldens/
+tests/oracle/svg-conformance/parity*.json
+package-lock.json
+
+# Prose artifacts, hand-wrapped and full of alignment-sensitive tables,
+# upstream `file:line` citations and fenced PlantUML. Reflowing them is pure
+# churn against documents whose line breaks are deliberate.
+.agent-notes/
+plans/
+docs/
+findings/
+planning/
+*.md

@@ -81,11 +81,49 @@ for (const slug of readdirSync(DIR)) {
   dispatchErrored.set(slug, weErroredIn(svg));
 }
 
+// --- baseline row shapes ---------------------------------------------------
+// `JSON.parse` yields `any`, so every field read below is an unsafe access
+// under the type-checked lint rules. These describe only the fields this
+// script reads or writes -- the files carry more (`_doc`, per-family notes),
+// which `Record<string, unknown>` on the row keeps addressable without
+// claiming to enumerate it.
+
+interface DiffBaselineRow extends Record<string, unknown> {
+  slug: string;
+  status: string;
+  reason?: string;
+  weightedScore: number | null;
+  diffCount: number | null;
+  measuredAt: string;
+  measuredAgainstCommit: string;
+}
+interface RoutingBaselineRow extends Record<string, unknown> {
+  slug: string;
+  type: string;
+  ourType: string;
+  jarType: string;
+  status: string;
+  measuredAt: string;
+  measuredAgainstCommit: string;
+}
+interface RefusalBaselineRow extends Record<string, unknown> {
+  slug: string;
+  type: string;
+  reason?: string;
+  weErrored: boolean;
+  status: string;
+  measuredAt: string;
+  measuredAgainstCommit: string;
+}
+interface BaselineFile<R> extends Record<string, unknown> {
+  fixtures: R[];
+}
+
 let n = 0;
 
 // --- diff-baseline: status "error" -> "baseline" once a fixture renders -----
 const dbPath = 'oracle/goldens/svg-sequence/diff-baseline.json';
-const db = JSON.parse(readFileSync(dbPath, 'utf8'));
+const db = JSON.parse(readFileSync(dbPath, 'utf8')) as BaselineFile<DiffBaselineRow>;
 for (const f of db.fixtures) {
   const m = measured.get(f.slug);
   if (m === undefined) continue;
@@ -109,7 +147,7 @@ writeFileSync(dbPath, JSON.stringify(db, null, 2) + '\n');
 
 // --- routing-baseline: a misroute that now agrees with the jar --------------
 const rtPath = 'oracle/goldens/svg-conformance/routing-baseline.json';
-const rt = JSON.parse(readFileSync(rtPath, 'utf8'));
+const rt = JSON.parse(readFileSync(rtPath, 'utf8')) as BaselineFile<RoutingBaselineRow>;
 for (const f of rt.fixtures) {
   const live = routed.get(f.slug);
   if (live === undefined || f.type !== 'sequence') continue;
@@ -125,7 +163,7 @@ writeFileSync(rtPath, JSON.stringify(rt, null, 2) + '\n');
 
 // --- refusal-baseline: a known-gap that no longer errors --------------------
 const rfPath = 'oracle/goldens/svg-conformance/refusal-baseline.json';
-const rf = JSON.parse(readFileSync(rfPath, 'utf8'));
+const rf = JSON.parse(readFileSync(rfPath, 'utf8')) as BaselineFile<RefusalBaselineRow>;
 for (const f of rf.fixtures) {
   if (f.type !== 'sequence') continue;
   const errors = dispatchErrored.get(f.slug);

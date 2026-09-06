@@ -29,10 +29,7 @@ import { acquireBuildLock } from './build-stdlib-packages/build-lock.js';
 import { emitAllIndexDts, emitAllIndexJs } from './build-stdlib-packages/emit-all-index.js';
 import { emitIndexDts, emitIndexJs } from './build-stdlib-packages/emit-index.js';
 import { emitModuleDts, emitModuleJs } from './build-stdlib-packages/emit-module.js';
-import {
-  emitRemoteManifestDts,
-  emitRemoteManifestJs,
-} from './build-stdlib-packages/emit-remote-manifest.js';
+import { emitRemoteManifestDts, emitRemoteManifestJs } from './build-stdlib-packages/emit-remote-manifest.js';
 import {
   BOOTSTRAP_SPRITE_SPLIT,
   PACKAGE_SPECS,
@@ -132,7 +129,6 @@ export function isGeneratedDirUpToDate(generatedDir: string, freshOutputs: Reado
 }
 
 function logBuildDecision(packageDir: string, decision: 'skip' | 'rebuild', reason: string): void {
-  // eslint-disable-next-line no-console
   console.log(`[build-stdlib-packages] ${packageDir}: ${decision} -- ${reason}`);
 }
 
@@ -222,7 +218,11 @@ function computeSpriteSplitOutputs(spec: SpriteSplitBundleSpec, assetsStdlibDir:
  * count-based staleness signal that mission `.gitignore`/`copy-assets.mjs`
  * precedent already shows is unsafe.
  */
-export function isSpriteSplitUpToDate(bundleAssetsDir: string, spec: SpriteSplitBundleSpec, assetsStdlibDir: string): boolean {
+export function isSpriteSplitUpToDate(
+  bundleAssetsDir: string,
+  spec: SpriteSplitBundleSpec,
+  assetsStdlibDir: string,
+): boolean {
   try {
     return isGeneratedDirUpToDate(bundleAssetsDir, computeSpriteSplitOutputs(spec, assetsStdlibDir));
   } catch {
@@ -251,7 +251,11 @@ function buildSpriteSplits(): void {
   const bundleAssetsDir = join(PACKAGES_DIR, spec.packageDir, 'assets', spec.bundleName);
 
   if (isSpriteSplitUpToDate(bundleAssetsDir, spec, ASSETS_STDLIB_DIR)) {
-    logBuildDecision(`${spec.packageDir}/assets/${spec.bundleName}`, 'skip', 'sprites already match the current source content');
+    logBuildDecision(
+      `${spec.packageDir}/assets/${spec.bundleName}`,
+      'skip',
+      'sprites already match the current source content',
+    );
     return;
   }
 
@@ -263,7 +267,11 @@ function buildSpriteSplits(): void {
   });
 
   writeFileSync(join(bundleAssetsDir, 'sprites.json'), JSON.stringify(manifest), 'utf8');
-  logBuildDecision(`${spec.packageDir}/assets/${spec.bundleName}`, 'rebuild', 'sprites were missing, stale, or unreadable for the current source content');
+  logBuildDecision(
+    `${spec.packageDir}/assets/${spec.bundleName}`,
+    'rebuild',
+    'sprites were missing, stale, or unreadable for the current source content',
+  );
 }
 
 /** Generates every `@knowvah/plantuml-stdlib*` package's `generated/` tree from
@@ -313,6 +321,6 @@ export function buildStdlibPackages(): void {
 const isMain = process.argv[1] !== undefined && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   buildStdlibPackages();
-  // eslint-disable-next-line no-console
+
   console.log('Generated packages/{stdlib,stdlib-aws,stdlib-tupadr3,stdlib-all}/generated/.');
 }

@@ -20,13 +20,7 @@
  *     failure). Reads only what is already cached — no oracle jar batch build (D1, see
  *     plans/docs-site/decisions.md).
  */
-import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-  readdirSync,
-} from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -84,9 +78,7 @@ function resolveJar(): string {
     return distJar;
   }
   const libs = join(homedir(), 'git', 'plantuml', 'build', 'libs');
-  const jar = existsSync(libs)
-    ? readdirSync(libs).find((f) => /^plantuml-.*\.jar$/.test(f))
-    : undefined;
+  const jar = existsSync(libs) ? readdirSync(libs).find((f) => /^plantuml-.*\.jar$/.test(f)) : undefined;
   if (jar === undefined) throw new Error('No PlantUML jar; set PLANTUML_JAR.');
   const resolved = join(libs, jar);
   console.error(`[dot-sync] oracle jar: ${resolved}`);
@@ -120,7 +112,16 @@ function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boolean): 
   try {
     execFileSync(
       'java',
-      ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-DPLANTUML_DUMP_DOT=' + dir, '-jar', jar, '-tsvg', '-o', dir, join(dir, 'in.puml')],
+      [
+        '-DPLANTUML_DETERMINISTIC_TEXT=true',
+        '-DPLANTUML_DUMP_DOT=' + dir,
+        '-jar',
+        jar,
+        '-tsvg',
+        '-o',
+        dir,
+        join(dir, 'in.puml'),
+      ],
       { stdio: 'ignore', timeout: 25_000 },
     );
   } catch {
@@ -191,9 +192,18 @@ interface Agg {
 
 function newAgg(): Agg {
   return {
-    total: 0, equal: 0, noCandidate: 0, countMismatch: 0, oracleBlind: 0,
+    total: 0,
+    equal: 0,
+    noCandidate: 0,
+    countMismatch: 0,
+    oracleBlind: 0,
     fail: Object.fromEntries(CHECKS.map((c) => [c, 0])),
-    nodeOver: 0, nodeUnder: 0, edgeOver: 0, edgeUnder: 0, clusterOver: 0, clusterUnder: 0,
+    nodeOver: 0,
+    nodeUnder: 0,
+    edgeOver: 0,
+    edgeUnder: 0,
+    clusterOver: 0,
+    clusterUnder: 0,
     examples: Object.fromEntries(CHECKS.map((c) => [c, []])),
     equalSlugs: [],
   };
@@ -224,11 +234,25 @@ function analyzeFixture(a: Agg, slug: string, dots: string[], inputs: DotInputGr
   a.total++;
   // Both sides skip graphviz (degenerate single-leaf / empty diagrams):
   // GraphvizImageBuilder.buildImage:211-222 — that IS DOT-count agreement.
-  if (dots.length === 0 && inputs.length === 0) { a.equal++; a.equalSlugs.push(slug); return; }
-  if (inputs.length === 0) { a.noCandidate++; return; }
-  if (dots.length !== inputs.length) { a.countMismatch++; return; }
+  if (dots.length === 0 && inputs.length === 0) {
+    a.equal++;
+    a.equalSlugs.push(slug);
+    return;
+  }
+  if (inputs.length === 0) {
+    a.noCandidate++;
+    return;
+  }
+  if (dots.length !== inputs.length) {
+    a.countMismatch++;
+    return;
+  }
   const diffs = dots.map((dot, i) => compareStructural(parseSvekDot(dot), dotInputToStructural(inputs[i]!)));
-  if (diffs.every((d) => d.structurallyEqual)) { a.equal++; a.equalSlugs.push(slug); return; }
+  if (diffs.every((d) => d.structurallyEqual)) {
+    a.equal++;
+    a.equalSlugs.push(slug);
+    return;
+  }
   recordDiff(a, slug, diffs);
 }
 
@@ -241,11 +265,23 @@ function report(type: string, tag: string, a: Agg): void {
   console.log('  graph-count mismatch:             ' + a.countMismatch);
   console.log('  diverging-check failures (per fixture, among the rest):');
   for (const c of CHECKS) {
-    if (a.fail[c]! > 0) console.log('    ' + c.padEnd(12) + ' fails: ' + a.fail[c] + '   e.g. ' + a.examples[c]!.slice(0, 4).join(', '));
+    if (a.fail[c]! > 0)
+      console.log('    ' + c.padEnd(12) + ' fails: ' + a.fail[c] + '   e.g. ' + a.examples[c]!.slice(0, 4).join(', '));
   }
-  console.log('  node count: over ' + a.nodeOver + ' / under ' + a.nodeUnder +
-    ' | edges: over ' + a.edgeOver + ' / under ' + a.edgeUnder +
-    ' | clusters: over ' + a.clusterOver + ' / under ' + a.clusterUnder);
+  console.log(
+    '  node count: over ' +
+      a.nodeOver +
+      ' / under ' +
+      a.nodeUnder +
+      ' | edges: over ' +
+      a.edgeOver +
+      ' / under ' +
+      a.edgeUnder +
+      ' | clusters: over ' +
+      a.clusterOver +
+      ' / under ' +
+      a.clusterUnder,
+  );
 }
 
 /** Writes the sorted EQUAL slug list for a type to
@@ -266,8 +302,14 @@ function buildAgg(jar: string, type: string, fixtures: Fixture[], tag: string, r
   const skipped: string[] = [];
   let done = 0;
   for (const f of fixtures) {
-    if (!slugs.has(f.slug)) { skipped.push(f.slug); continue; }
-    if (/!pragma\s+layout\s+elk/i.test(f.markup)) { a.oracleBlind++; continue; }
+    if (!slugs.has(f.slug)) {
+      skipped.push(f.slug);
+      continue;
+    }
+    if (/!pragma\s+layout\s+elk/i.test(f.markup)) {
+      a.oracleBlind++;
+      continue;
+    }
     analyzeFixture(a, f.slug, plantumlDots(jar, type, f, rebuild), ourInputs(type, f.markup));
     if (++done % 50 === 0) console.error('  ' + type + ': ' + done + '/' + slugs.size);
   }
@@ -275,12 +317,22 @@ function buildAgg(jar: string, type: string, fixtures: Fixture[], tag: string, r
   return a;
 }
 
-function runType(jar: string, type: string, rebuild: boolean, tagOverride: string | undefined, equalList: boolean): void {
+function runType(
+  jar: string,
+  type: string,
+  rebuild: boolean,
+  tagOverride: string | undefined,
+  equalList: boolean,
+): void {
   const fixtures = enumerateFixtures(type);
   if (fixtures === undefined) {
     console.error(
-      'No fixture manifest for "' + type + '" at tests/visual/data/' + type + '.json. ' +
-      'Run npm run visual:classify first, then re-run this report.',
+      'No fixture manifest for "' +
+        type +
+        '" at tests/visual/data/' +
+        type +
+        '.json. ' +
+        'Run npm run visual:classify first, then re-run this report.',
     );
     return;
   }
@@ -298,12 +350,29 @@ function runType(jar: string, type: string, rebuild: boolean, tagOverride: strin
 // --markdown -------------------------------------------------------------------
 
 const PARITY_REPORT_OUT = join(REPO, 'docs', 'parity-report.md');
-interface TypeRow { type: string; comparable: number; equal: number; pct: string; oracleBlind: number; note: string }
-const NOT_MEASURED = (type: string, note: string): TypeRow => ({ type, comparable: 0, equal: 0, pct: '—', oracleBlind: 0, note });
+interface TypeRow {
+  type: string;
+  comparable: number;
+  equal: number;
+  pct: string;
+  oracleBlind: number;
+  note: string;
+}
+const NOT_MEASURED = (type: string, note: string): TypeRow => ({
+  type,
+  comparable: 0,
+  equal: 0,
+  pct: '—',
+  oracleBlind: 0,
+  note,
+});
 
 /** All diagram types with a fixture manifest, sorted for a stable report. */
 function manifestTypes(): string[] {
-  return readdirSync(DATA_DIR).filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, '')).sort();
+  return readdirSync(DATA_DIR)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => f.replace(/\.json$/, ''))
+    .sort();
 }
 
 /** One report row for `type`. Unlike ensureCanonical, never invokes the oracle jar's batch build — reads only what is cached. */
@@ -315,8 +384,12 @@ function markdownRowForType(jar: string, type: string): TypeRow {
   const tag = EXPECTED_TAG[type];
   const canonDir = join(CANON_DIR, type);
   const hasCanon = tag !== undefined && existsSync(canonDir) && readdirSync(canonDir).some((f) => f.endsWith('.svg'));
-  if (!hasCanon) return NOT_MEASURED(type, 'oracle dumps cached but no data-diagram-type classification available — run with --type-tag to classify');
-  const a = buildAgg(jar, type, fixtures, tag!, false);
+  if (!hasCanon)
+    return NOT_MEASURED(
+      type,
+      'oracle dumps cached but no data-diagram-type classification available — run with --type-tag to classify',
+    );
+  const a = buildAgg(jar, type, fixtures, tag, false);
   const pct = a.total > 0 ? ((100 * a.equal) / a.total).toFixed(0) + '%' : '—';
   return { type, comparable: a.total, equal: a.equal, pct, oracleBlind: a.oracleBlind, note: '—' };
 }
@@ -330,17 +403,26 @@ const MARKDOWN_LEGEND = [
 
 function runMarkdown(jar: string): void {
   const rows = manifestTypes().map((t) => markdownRowForType(jar, t));
-  const table = rows.map((r) => `| ${r.type} | ${r.comparable} | ${r.equal} | ${r.pct} | ${r.oracleBlind} | ${r.note} |`);
+  const table = rows.map(
+    (r) => `| ${r.type} | ${r.comparable} | ${r.equal} | ${r.pct} | ${r.oracleBlind} | ${r.note} |`,
+  );
   const lines: string[] = [
-    '<!-- GENERATED by `npx tsx scripts/dot-sync-report.ts --markdown` — do not edit by hand. -->', '',
-    '# DOT parity report', '',
-    'Generated by `npx tsx scripts/dot-sync-report.ts --markdown` on ' + new Date().toISOString().slice(0, 10) + '.', '',
-    '## Parity by diagram type', '',
+    '<!-- GENERATED by `npx tsx scripts/dot-sync-report.ts --markdown` — do not edit by hand. -->',
+    '',
+    '# DOT parity report',
+    '',
+    'Generated by `npx tsx scripts/dot-sync-report.ts --markdown` on ' + new Date().toISOString().slice(0, 10) + '.',
+    '',
+    '## Parity by diagram type',
+    '',
     '| type | comparable | equal | pct | oracle-blind | note |',
     '| --- | ---: | ---: | ---: | ---: | --- |',
-    ...table, '',
-    '## Legend', '',
-    ...MARKDOWN_LEGEND, '',
+    ...table,
+    '',
+    '## Legend',
+    '',
+    ...MARKDOWN_LEGEND,
+    '',
   ];
   mkdirSync(dirname(PARITY_REPORT_OUT), { recursive: true });
   writeFileSync(PARITY_REPORT_OUT, lines.join('\n') + '\n', 'utf-8');
@@ -361,7 +443,10 @@ function drillDownSlug(jar: string, type: string, slug: string, rebuild: boolean
 
 // --probe-json-dot ------------------------------------------------------------
 
-interface ProbeResult { anyDots: boolean; evidence: string[] }
+interface ProbeResult {
+  anyDots: boolean;
+  evidence: string[];
+}
 
 function probeType(jar: string, type: string): ProbeResult | undefined {
   const fixtures = enumerateFixtures(type);
@@ -386,19 +471,37 @@ function jsonImplication(anyDots: boolean): string {
 
 function dotImplication(anyDots: boolean): string {
   if (anyDots) {
-    return 'svek-*.dot appeared for at least one dot fixture, contradicting the phase-5 assumption that @startdot feeds the fixture\'s own DOT straight to graphviz — worth confirming before assuming the fixture body itself is the oracle.';
+    return "svek-*.dot appeared for at least one dot fixture, contradicting the phase-5 assumption that @startdot feeds the fixture's own DOT straight to graphviz — worth confirming before assuming the fixture body itself is the oracle.";
   }
-  return 'No svek-*.dot appeared for any sampled dot fixture, consistent with the phase-5 expectation that @startdot passes the fixture\'s own DOT body verbatim to graphviz with no svek intermediate. Per the overview, the oracle for this type is the fixture\'s own DOT text, and parity should be defined as "does the seam\'s DotInputGraph preserve the input graph" — a new comparison, not the svek StructuralDiff. That needs a short design note and maintainer sign-off (STOP condition) before looping.';
+  return "No svek-*.dot appeared for any sampled dot fixture, consistent with the phase-5 expectation that @startdot passes the fixture's own DOT body verbatim to graphviz with no svek intermediate. Per the overview, the oracle for this type is the fixture's own DOT text, and parity should be defined as \"does the seam's DotInputGraph preserve the input graph\" — a new comparison, not the svek StructuralDiff. That needs a short design note and maintainer sign-off (STOP condition) before looping.";
 }
 
-function probeSection(type: string, result: ProbeResult | undefined, implication: (anyDots: boolean) => string): string[] {
+function probeSection(
+  type: string,
+  result: ProbeResult | undefined,
+  implication: (anyDots: boolean) => string,
+): string[] {
   const lines: string[] = ['## ' + type, ''];
   if (result === undefined) {
-    lines.push('Verdict: no fixture manifest — tests/visual/data/' + type + '.json does not exist.', '', 'Evidence: none (no fixtures could be sampled).', '');
+    lines.push(
+      'Verdict: no fixture manifest — tests/visual/data/' + type + '.json does not exist.',
+      '',
+      'Evidence: none (no fixtures could be sampled).',
+      '',
+    );
     return lines;
   }
-  lines.push('Verdict: svek dump path ' + (result.anyDots ? 'EXISTS' : 'DOES NOT EXIST') + ' for ' + type +
-    ' (' + (result.anyDots ? 'at least one' : 'none of the') + ' sampled fixtures produced svek-*.dot).', '', 'Evidence:');
+  lines.push(
+    'Verdict: svek dump path ' +
+      (result.anyDots ? 'EXISTS' : 'DOES NOT EXIST') +
+      ' for ' +
+      type +
+      ' (' +
+      (result.anyDots ? 'at least one' : 'none of the') +
+      ' sampled fixtures produced svek-*.dot).',
+    '',
+    'Evidence:',
+  );
   for (const e of result.evidence) lines.push('- ' + e);
   lines.push('', 'Implication: ' + implication(result.anyDots), '');
   return lines;
@@ -418,8 +521,14 @@ function runProbeJsonDot(jar: string): void {
   mkdirSync(dirname(PROBE_OUT), { recursive: true });
   writeFileSync(PROBE_OUT, lines.join('\n') + '\n', 'utf-8');
   console.log('Wrote ' + PROBE_OUT);
-  console.log('json: ' + (jsonResult === undefined ? 'no manifest' : jsonResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'));
-  console.log('dot:  ' + (dotResult === undefined ? 'no manifest' : dotResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'));
+  console.log(
+    'json: ' +
+      (jsonResult === undefined ? 'no manifest' : jsonResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'),
+  );
+  console.log(
+    'dot:  ' +
+      (dotResult === undefined ? 'no manifest' : dotResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'),
+  );
 }
 
 // CLI -------------------------------------------------------------------------
@@ -460,8 +569,14 @@ function main(): void {
   const opts = parseArgs(process.argv.slice(2));
   mkdirSync(CACHE, { recursive: true });
 
-  if (opts.probeJsonDot) { runProbeJsonDot(jar); return; }
-  if (opts.markdown) { runMarkdown(jar); return; }
+  if (opts.probeJsonDot) {
+    runProbeJsonDot(jar);
+    return;
+  }
+  if (opts.markdown) {
+    runMarkdown(jar);
+    return;
+  }
   if (opts.slug !== undefined) {
     const type = opts.types[0];
     if (type === undefined) throw new Error('--slug requires a type argument, e.g. --slug <slug> <type>');

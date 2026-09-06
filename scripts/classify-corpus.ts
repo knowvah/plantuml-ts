@@ -62,15 +62,11 @@ const START_KEYWORD_MAP: Record<string, string> = {
 
 function detectStartumlType(bodyLines: readonly string[]): string {
   // Examine the first 30 non-empty body lines after the @startuml line.
-  const sample = bodyLines
-    .filter((l) => l.trim().length > 0)
-    .slice(0, 30);
+  const sample = bodyLines.filter((l) => l.trim().length > 0).slice(0, 30);
 
-  const matches = (pattern: RegExp): boolean =>
-    sample.some((l) => pattern.test(l));
+  const matches = (pattern: RegExp): boolean => sample.some((l) => pattern.test(l));
 
-  const contains = (substr: string): boolean =>
-    sample.some((l) => l.includes(substr));
+  const contains = (substr: string): boolean => sample.some((l) => l.includes(substr));
 
   // 1. Object
   if (matches(/^object\s/i) || matches(/^map\s/i)) return 'object';
@@ -90,42 +86,22 @@ function detectStartumlType(bodyLines: readonly string[]): string {
   if (matches(/^\[\*\]\s*-->/) || matches(/^state\s/i)) return 'state';
 
   // 4. Component
-  if (
-    matches(/^\[/) ||
-    matches(/^component\s/i) ||
-    matches(/^node\s/i)
-  ) {
+  if (matches(/^\[/) || matches(/^component\s/i) || matches(/^node\s/i)) {
     return 'component';
   }
 
   // 5. Activity
-  if (
-    matches(/^:/) ||
-    matches(/^start$/i) ||
-    matches(/^if\s*\(/i) ||
-    matches(/^fork$/i) ||
-    matches(/^\|/)
-  ) {
+  if (matches(/^:/) || matches(/^start$/i) || matches(/^if\s*\(/i) || matches(/^fork$/i) || matches(/^\|/)) {
     return 'activity';
   }
 
   // 6. UseCase
-  if (
-    matches(/^actor\s/i) ||
-    matches(/:.*:/) ||
-    matches(/^\(.*\)$/) ||
-    matches(/^usecase\s/i)
-  ) {
+  if (matches(/^actor\s/i) || matches(/:.*:/) || matches(/^\(.*\)$/) || matches(/^usecase\s/i)) {
     return 'usecase';
   }
 
   // 7. Timing
-  if (
-    matches(/^robust\s/i) ||
-    matches(/^concise\s/i) ||
-    matches(/^clock\s/i) ||
-    matches(/^binary\s/i)
-  ) {
+  if (matches(/^robust\s/i) || matches(/^concise\s/i) || matches(/^clock\s/i) || matches(/^binary\s/i)) {
     return 'timing';
   }
 
@@ -133,21 +109,12 @@ function detectStartumlType(bodyLines: readonly string[]): string {
   if (contains('nwdiag {') || contains('network ')) return 'network';
 
   // 9. C4
-  if (
-    contains('!include <C4') ||
-    contains('Person(') ||
-    contains('System(') ||
-    contains('Container(')
-  ) {
+  if (contains('!include <C4') || contains('Person(') || contains('System(') || contains('Container(')) {
     return 'c4';
   }
 
   // 10. Sequence
-  if (
-    matches(/->|-->>/) ||
-    matches(/^participant\s/i) ||
-    matches(/^actor\s/i)
-  ) {
+  if (matches(/->|-->>/) || matches(/^participant\s/i) || matches(/^actor\s/i)) {
     return 'sequence';
   }
 
@@ -172,10 +139,7 @@ function detectType(markup: string): string {
   // @startuml — extract body lines (everything between @startuml and @end*)
   const startIdx = lines.findIndex((l) => /^@startuml/i.test(l.trim()));
   const endIdx = lines.findIndex((l, i) => i > startIdx && /^@end/i.test(l.trim()));
-  const bodyLines = lines.slice(
-    startIdx + 1,
-    endIdx === -1 ? undefined : endIdx,
-  );
+  const bodyLines = lines.slice(startIdx + 1, endIdx === -1 ? undefined : endIdx);
 
   return detectStartumlType(bodyLines);
 }
@@ -272,7 +236,10 @@ function processInputFile(filePath: string): FixtureEntry[] {
 
     // Include the @end line
     const endLineIdx = i;
-    const markup = lines.slice(startLineIdx, endLineIdx + 1).join('\n').trimEnd();
+    const markup = lines
+      .slice(startLineIdx, endLineIdx + 1)
+      .join('\n')
+      .trimEnd();
     const slug = `${base}-${diagramIndex}`;
     entries.push({ slug, markup });
 
@@ -300,7 +267,7 @@ function parseArgs(): { filterType: string | null } {
 // Main
 // ---------------------------------------------------------------------------
 
-async function main(): Promise<void> {
+function main(): void {
   const { filterType } = parseArgs();
 
   if (filterType !== null) {
@@ -392,7 +359,11 @@ async function main(): Promise<void> {
   console.log(`output: ${OUT_DIR}`);
 }
 
-main().catch((err: unknown) => {
+// `main` is synchronous -- it awaits nothing -- so a rejected-promise
+// handler would never fire. try/catch is the equivalent that does.
+try {
+  main();
+} catch (err: unknown) {
   console.error(err);
   process.exitCode = 1;
-});
+}

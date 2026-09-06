@@ -17,7 +17,7 @@
  *
  * Usage: npx tsx scripts/visual-qa-dot.ts [--limit N] [type ...]
  */
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -33,7 +33,10 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
 const WORK = join(tmpdir(), 'plantuml-vqdot');
 
-interface Fixture { slug: string; markup: string }
+interface Fixture {
+  slug: string;
+  markup: string;
+}
 type Bucket = 'match' | 'diverge' | 'count' | 'no-candidate';
 
 function resolveJar(): string {
@@ -111,8 +114,9 @@ function main(): void {
   let limit = 50;
   const types: string[] = [];
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--limit') { limit = Number(argv[++i]); }
-    else types.push(argv[i]!);
+    if (argv[i] === '--limit') {
+      limit = Number(argv[++i]);
+    } else types.push(argv[i]!);
   }
   const runTypes = types.length > 0 ? types : ['component', 'usecase'];
   mkdirSync(WORK, { recursive: true });

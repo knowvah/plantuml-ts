@@ -68,7 +68,7 @@ import { fileURLToPath } from 'node:url';
 
 import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
 import type { PreprocessorResult } from '../src/core/preprocessor.js';
-import { resolveTheme, deepMergeTheme } from '../src/core/theme.js';
+import { resolveTheme } from '../src/core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from '../src/core/skinparam.js';
 import { applyStyleMap } from '../src/core/style-map-theme.js';
 import { computeClassTagCascadeGenerations } from '../src/core/style-cascade-class.js';
@@ -109,16 +109,14 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
   const base = resolveTheme(preprocessed.theme ?? 'default');
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, base).theme;
 
-  const styleMap = preprocessed.styles
-    .map(parseStyleBlock)
-    .reduce<StyleMap>((acc, m) => {
-      m.forEach((props, selector) => {
-        const existing = acc.get(selector) ?? new Map<string, string>();
-        props.forEach((v, k) => existing.set(k, v));
-        acc.set(selector, existing);
-      });
-      return acc;
-    }, new Map());
+  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
+    m.forEach((props, selector) => {
+      const existing = acc.get(selector) ?? new Map<string, string>();
+      props.forEach((v, k) => existing.set(k, v));
+      acc.set(selector, existing);
+    });
+    return acc;
+  }, new Map());
 
   const flatRoot = styleMap.get('') ?? new Map<string, string>();
   const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
@@ -144,7 +142,11 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
 // Fixture discovery (mirrors scripts/svg-parity-survey.ts#listFixtureDirs)
 // ---------------------------------------------------------------------------
 
-interface FixtureDir { slug: string; type: string; dir: string }
+interface FixtureDir {
+  slug: string;
+  type: string;
+  dir: string;
+}
 
 function listFixtureDirs(type: string): FixtureDir[] {
   const typeDir = join(CACHE_DIR, type);
@@ -342,9 +344,7 @@ function printReport(label: string, results: readonly CensusResult[]): void {
  */
 function printPerFixture(label: string, results: readonly CensusResult[]): void {
   console.log(`\n=== ${label} — per-fixture diff counts (${results.length} fixtures) ===`);
-  const rows = [...results].sort((a, b) =>
-    (a.type + '/' + a.slug).localeCompare(b.type + '/' + b.slug),
-  );
+  const rows = [...results].sort((a, b) => (a.type + '/' + a.slug).localeCompare(b.type + '/' + b.slug));
   for (const r of rows) {
     console.log(String(r.diffCount).padStart(8) + '  ' + r.type + '/' + r.slug);
   }
@@ -375,9 +375,7 @@ function printFamilies(results: readonly CensusResult[]): void {
   console.log('=== diff families (deterministic), by fixture reach ===');
   console.log('fixtures   diffs  family');
   for (const row of rows) {
-    console.log(
-      String(row.fixtures).padStart(8) + String(row.diffs).padStart(8) + '  ' + row.family,
-    );
+    console.log(String(row.fixtures).padStart(8) + String(row.diffs).padStart(8) + '  ' + row.family);
   }
 }
 
