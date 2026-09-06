@@ -128,9 +128,7 @@ describe('class edge <path id> — the decor/direction matrix (G2 N9)', () => {
   it('leading "." is kept verbatim under namespaceseparator none', () => {
     // `.BaseClass` auto-creates (no prior `class BaseClass` declaration
     // needed) -- matches momoba-92-bole393's own structure exactly.
-    const svg = renderFixture(
-      '@startuml\nset namespaceSeparator none\nclass Person\n.BaseClass <|-- Person\n@enduml',
-    );
+    const svg = renderFixture('@startuml\nset namespaceSeparator none\nclass Person\n.BaseClass <|-- Person\n@enduml');
     expect(firstLinkIdAndCodeLine(svg)?.id).toBe('.BaseClass-backto-Person');
   });
 
@@ -206,11 +204,14 @@ describe('parseRelationshipLine — idEntity1/idEntity2/decor fields (G2 N9)', (
   it('sets idEntity1/idEntity2 to Java cl1/cl2 order, unswapped by decor direction', () => {
     const rel = parseRelationshipLine('class1 <-- class2');
     expect(rel).toMatchObject({
-      idEntity1: 'class1', idEntity2: 'class2',
-      idEntity1Decor: 'open', idEntity2Decor: 'none',
+      idEntity1: 'class1',
+      idEntity2: 'class2',
+      idEntity1Decor: 'open',
+      idEntity2Decor: 'none',
       // DOT-layout from/to IS decor-swapped (arrowhead points at class1) --
       // the two field pairs deliberately disagree.
-      from: 'class2', to: 'class1',
+      from: 'class2',
+      to: 'class1',
     });
   });
 
@@ -220,7 +221,6 @@ describe('parseRelationshipLine — idEntity1/idEntity2/decor fields (G2 N9)', (
     expect(rel).toBeNull();
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // G2 N19: couple/lollipop synthetic-entity naming feeds `<path id>` through
@@ -241,28 +241,25 @@ describe('class edge <path id> — couple/lollipop synthetic naming (G2 N19)', (
   // jaloja-18-tisu915 (trimmed to the couple-relevant lines): a SUBSUMED
   // explicit association -> jar ids "Student-apoint5"/"apoint5-Course"/
   // "apoint5-Enrollment".
-  it('names an assoc-circle "apointN" when an explicit association was ' +
-    'subsumed (a DIFFERENT N than the no-subsumption case, same fixture ' +
-    'shape)', () => {
-    const svg = renderFixture(
-      '@startuml\nclass Student\nStudent -- Course\n' +
-      '(Student, Course) . Enrollment\n@enduml',
-    );
-    expect(allLinkIds(svg)).toEqual([
-      'Student-apoint5', 'apoint5-Course', 'apoint5-Enrollment',
-    ]);
-  });
+  it(
+    'names an assoc-circle "apointN" when an explicit association was ' +
+      'subsumed (a DIFFERENT N than the no-subsumption case, same fixture ' +
+      'shape)',
+    () => {
+      const svg = renderFixture(
+        '@startuml\nclass Student\nStudent -- Course\n' + '(Student, Course) . Enrollment\n@enduml',
+      );
+      expect(allLinkIds(svg)).toEqual(['Student-apoint5', 'apoint5-Course', 'apoint5-Enrollment']);
+    },
+  );
 
   // bososa-44-fipu544: three LOL_THEN_ENT lollipops on the same existing
   // entity -> jar ids "dummylol2-dummy"/"dummylol5-dummy"/"dummylol8-dummy".
   it('names a lollipop "<existing>lolN" in the edge id, not the raw AST id', () => {
     const svg = renderFixture(
-      '@startuml\nclass dummy\ntoto1 ()-- dummy\ntoto2 ()-- dummy\n' +
-      'toto3 ()-- dummy\n@enduml',
+      '@startuml\nclass dummy\ntoto1 ()-- dummy\ntoto2 ()-- dummy\n' + 'toto3 ()-- dummy\n@enduml',
     );
-    expect(allLinkIds(svg)).toEqual([
-      'dummylol2-dummy', 'dummylol5-dummy', 'dummylol8-dummy',
-    ]);
+    expect(allLinkIds(svg)).toEqual(['dummylol2-dummy', 'dummylol5-dummy', 'dummylol8-dummy']);
   });
 });
 
@@ -277,24 +274,36 @@ describe('class edge <path id> — couple/lollipop synthetic naming (G2 N19)', (
 // ---------------------------------------------------------------------------
 
 describe('class edge <path id> — repeat coupling (G2 N20)', () => {
-  it('bosiki-11-xaza958: two TRAILING couplings on the same (A,B) pair -- ' +
-    'no inversion, both circles named/numbered/ordered exactly as jar', () => {
-    const svg = renderFixture(
-      '@startuml\nclass R1\nclass R2\nA--B\nR1 .. (A,B)\nR2 .. (A,B)\n@enduml',
-    );
-    expect(allLinkIds(svg)).toEqual([
-      'A-apoint6', 'apoint6-B', 'R1-apoint6', 'A-apoint11', 'apoint11-B', 'apoint11-R2',
-    ]);
-  });
+  it(
+    'bosiki-11-xaza958: two TRAILING couplings on the same (A,B) pair -- ' +
+      'no inversion, both circles named/numbered/ordered exactly as jar',
+    () => {
+      const svg = renderFixture('@startuml\nclass R1\nclass R2\nA--B\nR1 .. (A,B)\nR2 .. (A,B)\n@enduml');
+      expect(allLinkIds(svg)).toEqual([
+        'A-apoint6',
+        'apoint6-B',
+        'R1-apoint6',
+        'A-apoint11',
+        'apoint11-B',
+        'apoint11-R2',
+      ]);
+    },
+  );
 
-  it('bunuce-10-vere519: a LEADING first coupling -- the conditional ' +
-    'getInv() inversion fires, moving the prior circle\'s class edge to ' +
-    'draw AFTER the second circle\'s own entity edges', () => {
-    const svg = renderFixture(
-      '@startuml\nclass R1\nclass R2\nA-B\n(A,B) .. R1\nR2 .. (A,B)\n@enduml',
-    );
-    expect(allLinkIds(svg)).toEqual([
-      'A-apoint6', 'apoint6-B', 'A-apoint11', 'apoint11-B', 'R1-apoint6', 'apoint11-R2',
-    ]);
-  });
+  it(
+    'bunuce-10-vere519: a LEADING first coupling -- the conditional ' +
+      "getInv() inversion fires, moving the prior circle's class edge to " +
+      "draw AFTER the second circle's own entity edges",
+    () => {
+      const svg = renderFixture('@startuml\nclass R1\nclass R2\nA-B\n(A,B) .. R1\nR2 .. (A,B)\n@enduml');
+      expect(allLinkIds(svg)).toEqual([
+        'A-apoint6',
+        'apoint6-B',
+        'A-apoint11',
+        'apoint11-B',
+        'R1-apoint6',
+        'apoint11-R2',
+      ]);
+    },
+  );
 });

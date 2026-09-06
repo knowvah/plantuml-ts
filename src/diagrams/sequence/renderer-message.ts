@@ -14,10 +14,7 @@ import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
-import {
-  renderFlatMessageArrow,
-  renderSelfMessageHead,
-} from './renderer-arrowhead.js';
+import { renderFlatMessageArrow, renderSelfMessageHead } from './renderer-arrowhead.js';
 
 // ---------------------------------------------------------------------------
 // Message helpers
@@ -78,11 +75,7 @@ const SELF_LOOP_HEIGHT = 13;
  * corner: `hline(xRight - x2)` translated to `x2`, which the jar emits as
  * `x1="35.469" x2="76.469"` on `jobadi-87-jegi648`.
  */
-function renderSelfMessage(
-  msg: MessageGeo,
-  configuration: ArrowConfiguration,
-  theme: ScaledTheme,
-): string {
+function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
   const k = theme.scaleK;
   const x1 = msg.fromX;
   // The RETURNING segment does not start where the outgoing one does:

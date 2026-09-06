@@ -536,27 +536,19 @@ describe('DotPath', () => {
   });
 
   it('getStartPoint/getEndPoint read the first/last bezier endpoints', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     expect(dot.getStartPoint()).toEqual({ x: 0, y: 0 });
     expect(dot.getEndPoint()).toEqual({ x: 3, y: 3 });
   });
 
   it('reverse flips segment order and swaps each bezier endpoint/control pair', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     const reversed = dot.reverse();
-    expect(reversed.getBeziers()).toEqual([
-      { x1: 3, y1: 3, ctrlx1: 2, ctrly1: 2, ctrlx2: 1, ctrly2: 1, x2: 0, y2: 0 },
-    ]);
+    expect(reversed.getBeziers()).toEqual([{ x1: 3, y1: 3, ctrlx1: 2, ctrly1: 2, ctrlx2: 1, ctrly2: 1, x2: 0, y2: 0 }]);
   });
 
   it('moveStartPoint(dx, dy) shifts the first anchor + its control point', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.moveStartPoint(10, 10);
     expect(dot.getBeziers()[0]).toEqual({
       x1: 10,
@@ -571,17 +563,13 @@ describe('DotPath', () => {
   });
 
   it('moveStartPoint accepts a UTranslate-shaped {getDx, getDy} object', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.moveStartPoint({ getDx: () => 5, getDy: () => 5 });
     expect(dot.getBeziers()[0]!.x1).toBe(5);
   });
 
   it('moveEndPoint(dx, dy) shifts the last anchor + its control point', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.moveEndPoint(10, 10);
     expect(dot.getBeziers()[0]).toEqual({
       x1: 0,
@@ -596,9 +584,7 @@ describe('DotPath', () => {
   });
 
   it('moveDelta shifts every field of every bezier', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.moveDelta(100, 200);
     expect(dot.getBeziers()[0]).toEqual({
       x1: 100,
@@ -614,36 +600,26 @@ describe('DotPath', () => {
 
   it('getStartAngle/getEndAngle report the tangent direction', () => {
     // A straight horizontal bezier: tangent is 0 radians at both ends.
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 3, y2: 0 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 3, y2: 0 }]);
     expect(dot.getStartAngle()).toBeCloseTo(0);
     expect(dot.getEndAngle()).toBeCloseTo(0);
   });
 
   it('isLine is true for a flattened (straight) bezier, false for a curved one', () => {
-    const straight = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 3, y2: 0 },
-    ]);
+    const straight = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 3, y2: 0 }]);
     expect(straight.isLine()).toBe(true);
 
-    const curved = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 0, ctrly1: 10, ctrlx2: 3, ctrly2: 10, x2: 3, y2: 0 },
-    ]);
+    const curved = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 0, ctrly1: 10, ctrlx2: 3, ctrly2: 10, x2: 3, y2: 0 }]);
     expect(curved.isLine()).toBe(false);
   });
 
   it('getMinDist returns the distance to the closest control/anchor point', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     expect(dot.getMinDist({ x: 0, y: 0 })).toBe(0);
   });
 
   it('copy() produces an independent, structurally-equal snapshot', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     const copy = dot.copy();
     expect(copy.getBeziers()).toEqual(dot.getBeziers());
     dot.moveDelta(1, 1);
@@ -651,9 +627,7 @@ describe('DotPath', () => {
   });
 
   it('setCommentAndCodeLine propagates into toUPath output', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.setCommentAndCodeLine('c', 'file.puml:1');
     const upath = dot.toUPath();
     expect(upath.getComment()).toBe('c');
@@ -666,38 +640,28 @@ describe('DotPath', () => {
       { x1: 1, y1: 0, ctrlx1: 1, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 2, y2: 0 },
     ]);
     dot.moveStartPoint(5, 0);
-    expect(dot.getBeziers()).toEqual([
-      { x1: 5, y1: 0, ctrlx1: 5, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 2, y2: 0 },
-    ]);
+    expect(dot.getBeziers()).toEqual([{ x1: 5, y1: 0, ctrlx1: 5, ctrly1: 0, ctrlx2: 2, ctrly2: 0, x2: 2, y2: 0 }]);
   });
 
   it('moveEndPoint accepts a UTranslate-shaped {getDx, getDy} object', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     dot.moveEndPoint({ getDx: () => 3, getDy: () => 4 });
     expect(dot.getBeziers()[0]!.x2).toBe(6);
     expect(dot.getBeziers()[0]!.y2).toBe(7);
   });
 
   it('getStartAngle falls back to the chord when the start control point is degenerate', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 0, ctrly1: 0, ctrlx2: 5, ctrly2: 5, x2: 10, y2: 0 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 0, ctrly1: 0, ctrlx2: 5, ctrly2: 5, x2: 10, y2: 0 }]);
     expect(dot.getStartAngle()).toBeCloseTo(0);
   });
 
   it('getEndAngle falls back to the chord when the end control point is degenerate', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 10, ctrly2: 0, x2: 10, y2: 0 },
-    ]);
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 10, ctrly2: 0, x2: 10, y2: 0 }]);
     expect(dot.getEndAngle()).toBeCloseTo(0);
   });
 
-  it('toString reports each bezier\'s 4 control points', () => {
-    const dot = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 },
-    ]);
+  it("toString reports each bezier's 4 control points", () => {
+    const dot = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 1, ctrly1: 1, ctrlx2: 2, ctrly2: 2, x2: 3, y2: 3 }]);
     expect(dot.toString()).toBe('(0,0) (1,1) (2,2) (3,3) ');
   });
 
@@ -717,8 +681,6 @@ describe('DotPath', () => {
 
   it('throws on addCurve(pt2,pt3,pt4) with no prior segment to imply pt1 from', () => {
     const empty = new DotPath();
-    expect(() => empty.addCurve({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 })).toThrow(
-      'no prior segment',
-    );
+    expect(() => empty.addCurve({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 })).toThrow('no prior segment');
   });
 });

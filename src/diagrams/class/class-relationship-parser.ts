@@ -9,7 +9,12 @@ import type { Classifier, Relationship } from './ast.js';
 import { firstWithName, splitOnSeparator } from './class-namespace.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {
-  ARROW_DIR, ARROW_STYLE, resolveArrow, parseArrowDecors, parseArrowDecorsRaw, arrowLength,
+  ARROW_DIR,
+  ARROW_STYLE,
+  resolveArrow,
+  parseArrowDecors,
+  parseArrowDecorsRaw,
+  arrowLength,
   parseArrowStyleOverrides,
 } from './class-arrow-grammar.js';
 
@@ -83,8 +88,7 @@ const ARROW_INSIDE = String.raw`\(0\)|0\)|\(0|0`;
 // ARROW_BODY2).
 // Body charset is upstream's `[-=.]` (CommandLinkClass.java:133,138) — `=`
 // is the bold-line body char, same length/type semantics as `-`.
-const ARROW_BODY =
-  String.raw`[-.=]+(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARROW_INSIDE})?(?:${ARROW_STYLE})?[-.=]*`;
+const ARROW_BODY = String.raw`[-.=]+(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARROW_INSIDE})?(?:${ARROW_STYLE})?[-.=]*`;
 // Independent head-glyph sets, longest-alternative-first within each shared
 // prefix, mirroring LinkDecor.getRegexDecors1()/getRegexDecors2() — each
 // decor is looked up independently of the other side (`resolveArrow` below),
@@ -110,10 +114,8 @@ const HEAD2_REQUIRED = String.raw`(?:${HEAD2_CHARS})`;
 // non-empty HEAD2 *or* a body that is not exactly one `.` closes the
 // collision without rejecting any real relationship shape (`o--`, `x--`,
 // `o->`, `x-->`, `o.d.>`, … all still match).
-const ARROW_BODY_SAFE_BARE =
-  String.raw`(?:-[-.=]*|=[-.=]*|\.[-.=]+)(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARROW_STYLE})?[-.=]*`;
-const WORD_HEAD =
-  String.raw`(?:o|x)(?:${ARROW_BODY}${HEAD2_REQUIRED}|${ARROW_BODY_SAFE_BARE}${HEAD2})`;
+const ARROW_BODY_SAFE_BARE = String.raw`(?:-[-.=]*|=[-.=]*|\.[-.=]+)(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARROW_STYLE})?[-.=]*`;
+const WORD_HEAD = String.raw`(?:o|x)(?:${ARROW_BODY}${HEAD2_REQUIRED}|${ARROW_BODY_SAFE_BARE}${HEAD2})`;
 const REL_ARROW =
   // Crow's-foot (ER cardinality) links — a run of |o}{ with at least one |/}/{
   // around the body (`|o--o|`, `||--||`, `}o--o{`, `}|--|{`, `}--`). Structurally
@@ -233,11 +235,7 @@ export function splitEndpointPort(
 }
 
 /** Resolve a (from, to) pair given whether the arrow points left. */
-function pickDirectional<T>(
-  swapDirection: boolean,
-  leftVal: T,
-  rightVal: T,
-): { from: T; to: T } {
+function pickDirectional<T>(swapDirection: boolean, leftVal: T, rightVal: T): { from: T; to: T } {
   return swapDirection ? { from: rightVal, to: leftVal } : { from: leftVal, to: rightVal };
 }
 
@@ -303,17 +301,28 @@ function sidedRelFields(
   right: { port?: string | undefined },
 ): Pick<
   OptionalRelFields,
-  'fromMultiplicity' | 'toMultiplicity' | 'fromRole' | 'toRole' | 'fromPort' | 'toPort' | 'fromQualifier' | 'toQualifier'
+  | 'fromMultiplicity'
+  | 'toMultiplicity'
+  | 'fromRole'
+  | 'toRole'
+  | 'fromPort'
+  | 'toPort'
+  | 'fromQualifier'
+  | 'toQualifier'
 > {
   const mult = pickDirectional(swapDirection, m[3], m[6]);
   const role = pickDirectional(swapDirection, m[4] && stripQuotes(m[4]), m[7] && stripQuotes(m[7]));
   const port = pickDirectional(swapDirection, left.port, right.port);
   const qual = pickDirectional(swapDirection, m[2], m[8]);
   return {
-    fromMultiplicity: mult.from, toMultiplicity: mult.to,
-    fromRole: role.from, toRole: role.to,
-    fromPort: port.from, toPort: port.to,
-    fromQualifier: qual.from, toQualifier: qual.to,
+    fromMultiplicity: mult.from,
+    toMultiplicity: mult.to,
+    fromRole: role.from,
+    toRole: role.to,
+    fromPort: port.from,
+    toPort: port.to,
+    fromQualifier: qual.from,
+    toQualifier: qual.to,
   };
 }
 
@@ -329,14 +338,11 @@ function decomposeLabel(
   label: string,
 ): { first?: string | undefined; mid: string; second?: string | undefined } | null {
   const both = /^"([^"]+)"([^"]+)"([^"]+)"$/.exec(label);
-  if (both !== null)
-    return { first: both[1]!, mid: stripQuotes(both[2]!.trim()).trim(), second: both[3]! };
+  if (both !== null) return { first: both[1]!, mid: stripQuotes(both[2]!.trim()).trim(), second: both[3]! };
   const firstOnly = /^"([^"]+)"([^"]+)$/.exec(label);
-  if (firstOnly !== null)
-    return { first: firstOnly[1]!, mid: stripQuotes(firstOnly[2]!.trim()).trim() };
+  if (firstOnly !== null) return { first: firstOnly[1]!, mid: stripQuotes(firstOnly[2]!.trim()).trim() };
   const secondOnly = /^([^"]+)"([^"]+)"$/.exec(label);
-  if (secondOnly !== null)
-    return { mid: stripQuotes(secondOnly[1]!.trim()).trim(), second: secondOnly[2]! };
+  if (secondOnly !== null) return { mid: stripQuotes(secondOnly[1]!.trim()).trim(), second: secondOnly[2]! };
   return null;
 }
 
@@ -362,13 +368,16 @@ export function idLeaf(rawId: string, nsSep: string | null): string {
   // Under `set namespaceSeparator none` the leading dot is just an ordinary
   // character of a flat, unsplit id -- jar keeps it (momoba-92-bole393:
   // jar id ".BaseClass-backto-Person", WITH the dot).
-  const withoutRootMarker =
-    nsSep !== null && rawId.startsWith('.') ? rawId.slice(1) : rawId;
+  const withoutRootMarker = nsSep !== null && rawId.startsWith('.') ? rawId.slice(1) : rawId;
   const parts = splitOnSeparator(withoutRootMarker, nsSep);
   return parts === null ? withoutRootMarker : parts[parts.length - 1]!;
 }
 
-export function parseRelationshipLine(line: string, nsSep: string | null = null, classifiers: readonly Classifier[] = []): Relationship | null {
+export function parseRelationshipLine(
+  line: string,
+  nsSep: string | null = null,
+  classifiers: readonly Classifier[] = [],
+): Relationship | null {
   const header = REL_HEADER_RE.exec(line);
   const weight = header !== null ? Number(header[1]) : undefined;
   const m = REL_RE.exec(header !== null ? line.slice(header[0].length) : line);
@@ -442,10 +451,16 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
   return withOptionalFields(
     { from: id.from, to: id.to, type: info.type, ...decors },
     {
-      ...sided, label, length, weight,
-      idEntity1: idNames.from, idEntity2: idNames.to,
-      idEntity1Decor: idDecors.from, idEntity2Decor: idDecors.to,
-      idEntity1FullId: idFullNames.from, idEntity2FullId: idFullNames.to,
+      ...sided,
+      label,
+      length,
+      weight,
+      idEntity1: idNames.from,
+      idEntity2: idNames.to,
+      idEntity1Decor: idDecors.from,
+      idEntity2Decor: idDecors.to,
+      idEntity1FullId: idFullNames.from,
+      idEntity2FullId: idFullNames.to,
       lineStyleOverride: styleOverrides.lineStyle,
       thicknessOverride: styleOverrides.thickness,
       colorOverride: styleOverrides.color,
@@ -463,10 +478,7 @@ export function parseRelationshipLine(line: string, nsSep: string | null = null,
       // the parent was written on the left. Only meaningful for the two
       // hierarchical types, so it is omitted elsewhere rather than carried
       // as a meaningless flag. See `Relationship.parentIsLinkEntity1`.
-      parentIsLinkEntity1:
-        info.type === 'extension' || info.type === 'implementation'
-          ? info.swapDirection
-          : undefined,
+      parentIsLinkEntity1: info.type === 'extension' || info.type === 'implementation' ? info.swapDirection : undefined,
       // G2 N59: `ArrowInfo.swapDirection` itself (NOT `upOrLeft`, which
       // `idEntity1FullId`/`idEntity2FullId` already carry) -- the ONE swap
       // that reorders `left.id`/`right.id` (pure source-text left-to-right

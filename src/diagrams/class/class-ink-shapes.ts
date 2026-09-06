@@ -9,7 +9,6 @@
  */
 import type { ClassifierGeo } from './layout.js';
 
-
 /** `LimitFinder#drawUPolygon`'s own `x`-only padding quirk
  *  (`HACK_X_FOR_POLYGON = 10` upstream, `LimitFinder.java:169`) --
  *  duplicated here rather than imported (`core/klimt/drawing/LimitFinder.ts`
@@ -101,7 +100,6 @@ export function addRectInk(box: InkBox, c: ClassifierGeo): void {
     addPoint(box, c.x + c.width - 1 + 2 * shadow, c.y + c.height - 1 + 2 * shadow);
   }
 }
-
 
 /**
  * B5/M6: the THIRD object body state — an empty field list that is still
@@ -259,4 +257,3 @@ export function addClassicRectInk(box: InkBox, x: number, y: number, w: number, 
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w + 1, y + h + 1);
 }
-

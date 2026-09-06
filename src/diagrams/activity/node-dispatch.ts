@@ -17,14 +17,37 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
-  ActivityAction, ActivityArrowLabel, ActivityFork, ActivityNode, ActivityNote, ActivityRepeat,
-  ActivitySplit, ActivityWhile,
+  ActivityAction,
+  ActivityArrowLabel,
+  ActivityFork,
+  ActivityNode,
+  ActivityNote,
+  ActivityRepeat,
+  ActivitySplit,
+  ActivityWhile,
 } from './ast.js';
 import {
-  RE_ACTION, RE_ACTION_CLOSE, RE_ARROW_LABEL, RE_ENDWHILE, RE_ESCAPED_NEWLINE, RE_NOTE_MULTI,
-  RE_NOTE_SINGLE, RE_REPEAT_HEAD, RE_REPEAT_INLINE_TERMINATOR, RE_REPEATWHILE, RE_SWIMLANE, RE_WHILE,
-  isRefusal, matchesStopKeyword, setCurrentSwimlane, swimlaneSpread,
-  type DispatchResult, type LineHandler, type ParseContext, type ParseOutcome, type StopKeywords,
+  RE_ACTION,
+  RE_ACTION_CLOSE,
+  RE_ARROW_LABEL,
+  RE_ENDWHILE,
+  RE_ESCAPED_NEWLINE,
+  RE_NOTE_MULTI,
+  RE_NOTE_SINGLE,
+  RE_REPEAT_HEAD,
+  RE_REPEAT_INLINE_TERMINATOR,
+  RE_REPEATWHILE,
+  RE_SWIMLANE,
+  RE_WHILE,
+  isRefusal,
+  matchesStopKeyword,
+  setCurrentSwimlane,
+  swimlaneSpread,
+  type DispatchResult,
+  type LineHandler,
+  type ParseContext,
+  type ParseOutcome,
+  type StopKeywords,
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
 
@@ -43,13 +66,20 @@ function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResu
 // ---------------------------------------------------------------------------
 function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | null {
   switch (lc) {
-    case 'start': return { idx: idx + 1, node: { kind: 'start', ...swimlaneSpread(ctx) } };
-    case 'stop': return { idx: idx + 1, node: { kind: 'stop', ...swimlaneSpread(ctx) } };
-    case 'end': return { idx: idx + 1, node: { kind: 'end', ...swimlaneSpread(ctx) } };
-    case 'kill': return { idx: idx + 1, node: { kind: 'kill', ...swimlaneSpread(ctx) } };
-    case 'detach': return { idx: idx + 1, node: { kind: 'detach', ...swimlaneSpread(ctx) } };
-    case 'break': return { idx: idx + 1, node: { kind: 'break', ...swimlaneSpread(ctx) } };
-    default: return null;
+    case 'start':
+      return { idx: idx + 1, node: { kind: 'start', ...swimlaneSpread(ctx) } };
+    case 'stop':
+      return { idx: idx + 1, node: { kind: 'stop', ...swimlaneSpread(ctx) } };
+    case 'end':
+      return { idx: idx + 1, node: { kind: 'end', ...swimlaneSpread(ctx) } };
+    case 'kill':
+      return { idx: idx + 1, node: { kind: 'kill', ...swimlaneSpread(ctx) } };
+    case 'detach':
+      return { idx: idx + 1, node: { kind: 'detach', ...swimlaneSpread(ctx) } };
+    case 'break':
+      return { idx: idx + 1, node: { kind: 'break', ...swimlaneSpread(ctx) } };
+    default:
+      return null;
   }
 }
 
@@ -342,8 +372,20 @@ function trySprite(ctx: ParseContext, idx: number): DispatchResult | null {
 }
 
 const LINE_HANDLERS: readonly LineHandler[] = [
-  trySwimlane, trySimpleKeyword, tryAction, tryMultilineAction, tryIf, tryWhile, tryRepeat, tryFork,
-  trySplit, tryNoteSingle, tryNoteMulti, tryArrowLabel, tryAnnotation, trySprite,
+  trySwimlane,
+  trySimpleKeyword,
+  tryAction,
+  tryMultilineAction,
+  tryIf,
+  tryWhile,
+  tryRepeat,
+  tryFork,
+  trySplit,
+  tryNoteSingle,
+  tryNoteMulti,
+  tryArrowLabel,
+  tryAnnotation,
+  trySprite,
 ];
 
 /**

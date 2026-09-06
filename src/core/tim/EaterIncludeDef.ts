@@ -24,10 +24,8 @@ export class EaterIncludeDef extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!includedef');
     this.skipSpaces();
-    this.location = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    this.location =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
   }
 
   getLocation(): string {

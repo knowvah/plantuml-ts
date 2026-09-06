@@ -101,7 +101,13 @@ const emptyTextBlock: TextBlock = {
  * matching the "Text measurement seam" convention `symbols-component
  * .test.ts` documents: this task's classes never construct text — the
  * caller (BodyFactory-equivalent) supplies the finished `TextBlock`. */
-function titleTextBlock(text: string, width: number, height: number, baselineDy: number, font: FontConfiguration): TextBlock {
+function titleTextBlock(
+  text: string,
+  width: number,
+  height: number,
+  baselineDy: number,
+  font: FontConfiguration,
+): TextBlock {
   return {
     calculateDimension: () => new XDimension2D(width, height),
     drawU: (ug) => {
@@ -289,7 +295,7 @@ describe('Cluster (T12, AC1) — package container, real jar fragment', () => {
 // ---------------------------------------------------------------------------
 
 describe('Cluster (T12, AC2) — dashed-border container variant', () => {
-  test('drawU reproduces the jar\'s stroke-dasharray emission', () => {
+  test("drawU reproduces the jar's stroke-dasharray emission", () => {
     // Real jar facts (jar-generated, `#line:blue;line.dashed`, see module
     // doc comment): rectangleArea position (6,6), width=151, height=97.49;
     // dimTitle=(135.4951, 16.4883) — the standard 14pt default font
@@ -416,7 +422,7 @@ describe('Cluster/drawU — behavioral branches', () => {
     expect(() => cluster.drawU(new GrouplessUGraphic())).toThrow(/does not support startGroup\/closeGroup/);
   });
 
-    test('a "##"-prefixed name suppresses the comment but still draws the group', () => {
+  test('a "##"-prefixed name suppresses the comment but still draws the group', () => {
     const group: ClusterGroupInfo = {
       hidden: false,
       name: '##synthetic',
@@ -560,12 +566,15 @@ describe('packageStyleToUSymbol', () => {
     expect(symbol?.getSNames()).toEqual([sname]);
   });
 
-  test.each([PackageStyle.AGENT, PackageStyle.STORAGE, PackageStyle.COMPONENT1, PackageStyle.COMPONENT2, PackageStyle.ARTIFACT])(
-    '%s maps to null (no USymbol fallback, matches upstream)',
-    (style) => {
-      expect(packageStyleToUSymbol(style)).toBeNull();
-    },
-  );
+  test.each([
+    PackageStyle.AGENT,
+    PackageStyle.STORAGE,
+    PackageStyle.COMPONENT1,
+    PackageStyle.COMPONENT2,
+    PackageStyle.ARTIFACT,
+  ])('%s maps to null (no USymbol fallback, matches upstream)', (style) => {
+    expect(packageStyleToUSymbol(style)).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -644,9 +653,9 @@ describe('ClusterDecoration', () => {
       { position: UTranslate.none(), width: 10, height: 10 },
       UStroke.simple(),
     );
-    expect(() => decoration.getTextBlock(null, null, 0, 0, HorizontalAlignment.CENTER, HorizontalAlignment.CENTER, 0)).toThrow(
-      /no USymbol resolved/,
-    );
+    expect(() =>
+      decoration.getTextBlock(null, null, 0, 0, HorizontalAlignment.CENTER, HorizontalAlignment.CENTER, 0),
+    ).toThrow(/no USymbol resolved/);
   });
 
   test('a packageStyle with no toUSymbol() mapping (e.g. AGENT) also throws', () => {
@@ -658,8 +667,8 @@ describe('ClusterDecoration', () => {
       { position: UTranslate.none(), width: 10, height: 10 },
       UStroke.simple(),
     );
-    expect(() => decoration.getTextBlock(null, null, 0, 0, HorizontalAlignment.CENTER, HorizontalAlignment.CENTER, 0)).toThrow(
-      /no USymbol resolved/,
-    );
+    expect(() =>
+      decoration.getTextBlock(null, null, 0, 0, HorizontalAlignment.CENTER, HorizontalAlignment.CENTER, 0),
+    ).toThrow(/no USymbol resolved/);
   });
 });

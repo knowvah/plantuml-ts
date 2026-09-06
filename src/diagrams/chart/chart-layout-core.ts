@@ -21,14 +21,7 @@ export const PLOT_HEIGHT = 300;
 
 export const AXIS_LABEL_SPACE = 40;
 
-const DEFAULT_COLORS: readonly string[] = [
-  '#8888FF',
-  '#FF8888',
-  '#88FF88',
-  '#FFAA00',
-  '#AA88FF',
-  '#FF88AA',
-];
+const DEFAULT_COLORS: readonly string[] = ['#8888FF', '#FF8888', '#88FF88', '#FFAA00', '#AA88FF', '#FF88AA'];
 
 export interface PlotArea {
   x: number;
@@ -118,11 +111,7 @@ export interface ScatterSeriesGeo {
   points: DataPoint[];
 }
 
-export type SeriesGeo =
-  | BarSeriesGeo
-  | LineSeriesGeo
-  | AreaSeriesGeo
-  | ScatterSeriesGeo;
+export type SeriesGeo = BarSeriesGeo | LineSeriesGeo | AreaSeriesGeo | ScatterSeriesGeo;
 
 export interface LegendEntry {
   name: string;

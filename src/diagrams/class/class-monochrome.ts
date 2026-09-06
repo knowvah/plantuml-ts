@@ -107,7 +107,8 @@ export function applyMonochromeHex(hex: string, mode: MonochromeMode): string {
  *  id/class-name conventions -- `ent0001`, `lnk3`, arrow marker ids -- never
  *  collide with this pattern, but scoping to known color properties is the
  *  defensive choice regardless). */
-const COLOR_PROPERTY_RE = /((?:fill|stroke|stop-color)(?:="|:\s*))#([0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?|[0-9A-Fa-f]{3}(?![0-9A-Fa-f]))/g;
+const COLOR_PROPERTY_RE =
+  /((?:fill|stroke|stop-color)(?:="|:\s*))#([0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?|[0-9A-Fa-f]{3}(?![0-9A-Fa-f]))/g;
 
 /**
  * The single post-processing choke point: run once, over the WHOLE assembled

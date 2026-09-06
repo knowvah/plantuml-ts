@@ -53,29 +53,24 @@ describe('YAML parser — highlight exact paths', () => {
     // Find the root node rows
     const rootNode = geo.nodes[0];
     expect(rootNode).toBeDefined();
-    const fruitRow = rootNode!.rows.find(r => r.key === 'fruit');
-    const sizeRow = rootNode!.rows.find(r => r.key === 'size');
+    const fruitRow = rootNode!.rows.find((r) => r.key === 'fruit');
+    const sizeRow = rootNode!.rows.find((r) => r.key === 'size');
     expect(fruitRow?.highlight).not.toBe(false);
     expect(sizeRow?.highlight).toBe(false);
   });
 
   it('layoutJson marks highlighted row for two-segment path in child node', () => {
-    const ast = parseYaml(makeSource([
-      '#highlight "address" / "city"',
-      'address:',
-      '  city: NYC',
-      '  state: NY',
-    ]));
+    const ast = parseYaml(makeSource(['#highlight "address" / "city"', 'address:', '  city: NYC', '  state: NY']));
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
     // Root node: "address" row should NOT be highlighted
     const rootNode = geo.nodes[0]!;
-    const addressRow = rootNode.rows.find(r => r.key === 'address');
+    const addressRow = rootNode.rows.find((r) => r.key === 'address');
     expect(addressRow?.highlight).toBe(false);
     // Child node (address): "city" highlighted, "state" not
-    const addrNode = geo.nodes.find(n => n !== rootNode && n.rows.some(r => r.key === 'city'));
+    const addrNode = geo.nodes.find((n) => n !== rootNode && n.rows.some((r) => r.key === 'city'));
     expect(addrNode).toBeDefined();
-    const cityRow = addrNode!.rows.find(r => r.key === 'city');
-    const stateRow = addrNode!.rows.find(r => r.key === 'state');
+    const cityRow = addrNode!.rows.find((r) => r.key === 'city');
+    const stateRow = addrNode!.rows.find((r) => r.key === 'state');
     expect(cityRow?.highlight).not.toBe(false);
     expect(stateRow?.highlight).toBe(false);
   });

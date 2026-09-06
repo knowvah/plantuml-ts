@@ -34,11 +34,13 @@
 import type { DescriptionNodeGeo, Bbox } from './layout-helpers.js';
 import { computeContainerBbox } from './layout-helpers.js';
 import {
-  frontierCalculator, ensureMinWidth, type RectangleArea, type Point, type FrontierRankdir,
+  frontierCalculator,
+  ensureMinWidth,
+  type RectangleArea,
+  type Point,
+  type FrontierRankdir,
 } from '../../core/svek/FrontierCalculator.js';
-import {
-  computePortClusterInitialRect, type ShadowRankSpec, type ShadowPortSpec,
-} from './frontier-shadow-layout.js';
+import { computePortClusterInitialRect, type ShadowRankSpec, type ShadowPortSpec } from './frontier-shadow-layout.js';
 
 export interface PortClusterInfo {
   readonly ranks: readonly { rank: 'source' | 'sink'; nodeIds: readonly string[] }[];
@@ -128,8 +130,10 @@ function computeAlignedInitial(
   const dx = mainPt.x - shadowPt.x;
   const dy = mainPt.y - shadowPt.y;
   return {
-    minX: shadow.initial.minX + dx, minY: shadow.initial.minY + dy,
-    maxX: shadow.initial.maxX + dx, maxY: shadow.initial.maxY + dy,
+    minX: shadow.initial.minX + dx,
+    minY: shadow.initial.minY + dy,
+    maxX: shadow.initial.maxX + dx,
+    maxY: shadow.initial.maxY + dy,
   };
 }
 

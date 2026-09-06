@@ -4,13 +4,19 @@
  * keep that file under the project's 500-line file cap (mirrors
  * `renderer-arrowhead.ts`/`renderer-group.ts`/`renderer-uid.ts`'s own
  * "split purely for size, no behavior change" precedent).
+ *
+ * `renderBulletAtom` was further split out to `renderer-bullet-atom.ts`
+ * (same reason), re-exported here unchanged for
+ * `renderer-classifier-rows.ts`'s own import.
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
 import type { EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
-import { text, path, polygon, image, linkWrap, ellipse, rect } from '../../core/svg.js';
+import { text, path, polygon, image, linkWrap } from '../../core/svg.js';
+import { renderBulletAtom } from './renderer-bullet-atom.js';
+export { renderBulletAtom };
 import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
@@ -157,56 +163,6 @@ function noteAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined 
   if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
   if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
   return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
-/**
- * `klimt/creole/Sea.java:72-79` — `doAlign` lays every atom at
- * `y = -height + getStartingAltitude()`, then `translateMinYto` shifts the
- * whole line so the TALLEST atom (the text) defines the top. For a bullet
- * that first term is **-10 at both orders** — order 0 is `5 - 5` and order
- * n is `3 - 7` (`Bullet.java:72-83`) — which is why both shapes share one
- * top offset despite different heights. So the bullet's top is
- * `lineTop + lineHeight - 10`, derived, not fitted: at the note's 13pt line
- * that is `lineTop + 3`, matching `donoki-79-riku189`'s jar output exactly
- * (ellipse `cy=27` against a `y=31.611` baseline).
- */
-const BULLET_SEA_DEPTH = 10;
-/** `Bullet.java:63-68` — the two shapes' own translate/size constants. */
-const BULLET_DX_ORDER0 = 3;
-const BULLET_R = 2.5;
-const BULLET_DX_NESTED_BASE = 1;
-const BULLET_NESTED_STEP = 8;
-const BULLET_RECT = 3.5;
-
-/**
- * B22/M21: draw a creole bullet marker — `klimt/creole/atom/Bullet.java
- * :58-69`. `order 0`: translate `dx(3)`, `UEllipse.build(5, 5)`.
- * `order >= 1`: translate `dx(1 + 8*order)`, `URectangle.build(3.5, 3.5)`.
- * Both are filled with the font colour and stroked with
- * `UStroke.withThickness(0)` — no visible stroke, which is what
- * distinguishes this shape from the `VisibilityModifier` glyph an object
- * member row's `*` draws instead (`rx=3` WITH `stroke-width:1`).
- *
- * `lineTop` is the atom box's own top; the atom is 5 tall at order 0 and 3
- * otherwise (`Bullet#calculateDimensionSlow:72-76`).
- */
-export function renderBulletAtom(
-  atom: { readonly order: number; readonly fill: string },
-  x: number,
-  lineTop: number,
-  lineHeight: number,
-): string {
-  const top = lineTop + lineHeight - BULLET_SEA_DEPTH;
-  if (atom.order === 0) {
-    return ellipse(x + BULLET_DX_ORDER0 + BULLET_R, top + BULLET_R, BULLET_R, BULLET_R, { fill: atom.fill });
-  }
-  return rect(
-    x + BULLET_DX_NESTED_BASE + BULLET_NESTED_STEP * atom.order,
-    top,
-    BULLET_RECT,
-    BULLET_RECT,
-    { fill: atom.fill },
-  );
 }
 
 /**
@@ -379,21 +335,16 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
     }
     const y = lineTop + baselineOffset;
     parts.push(
-      text(
-        note.x + NOTE_MARGIN_X1,
-        y,
-        ln,
-        {
-          fontFamily: theme.fontFamily,
-          fontSize,
-          // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
-          // now consults (this branch has no per-atom color to check first,
-          // since it draws the note's own single, un-decomposed source line).
-          fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
-          lengthAdjust: 'spacing',
-          textLength: note.lineWidths[i]!,
-        },
-      ),
+      text(note.x + NOTE_MARGIN_X1, y, ln, {
+        fontFamily: theme.fontFamily,
+        fontSize,
+        // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
+        // now consults (this branch has no per-atom color to check first,
+        // since it draws the note's own single, un-decomposed source line).
+        fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
+        lengthAdjust: 'spacing',
+        textLength: note.lineWidths[i]!,
+      }),
     );
     lineTop += lineHeight;
   });
@@ -408,9 +359,7 @@ export function renderNote(note: NoteGeo, theme: Theme): string {
 
   const connector = buildConnectorPathData(note.connector);
   if (connector !== '') {
-    parts.push(
-      path(connector, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' }),
-    );
+    parts.push(path(connector, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' }));
   }
 
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
@@ -453,7 +402,11 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: Theme): strin
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const parts: string[] = [
     path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
+      fill,
+      stroke: theme.colors.border,
+      strokeWidth: NOTE_STROKE_WIDTH,
+    }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');
@@ -464,10 +417,14 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: Theme): strin
  *  (LEFT/RIGHT only) and {@link renderOpaleNote} (all four). */
 function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: OpaleConnector): string {
   switch (direction) {
-    case 'left': return opalePolygonLeft(box, connector);
-    case 'right': return opalePolygonRight(box, connector);
-    case 'up': return opalePolygonUp(box, connector);
-    case 'down': return opalePolygonDown(box, connector);
+    case 'left':
+      return opalePolygonLeft(box, connector);
+    case 'right':
+      return opalePolygonRight(box, connector);
+    case 'up':
+      return opalePolygonUp(box, connector);
+    case 'down':
+      return opalePolygonDown(box, connector);
   }
 }
 
@@ -491,8 +448,16 @@ export function renderOpaleNote(note: NoteGeo, theme: Theme): string {
   const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const parts: string[] = [
-    path(opaleOutline(opale.direction, box, connector), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    path(opaleOutline(opale.direction, box, connector), {
+      fill,
+      stroke: theme.colors.border,
+      strokeWidth: NOTE_STROKE_WIDTH,
+    }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
+      fill,
+      stroke: theme.colors.border,
+      strokeWidth: NOTE_STROKE_WIDTH,
+    }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');

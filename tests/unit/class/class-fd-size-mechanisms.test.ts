@@ -21,16 +21,8 @@ import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
-import type {
-  Classifier,
-  ClassifierKind,
-  ClassDiagramAST,
-  Relationship,
-} from '../../../src/diagrams/class/ast.js';
-import {
-  measureClassifier,
-  type MeasuredClassifier,
-} from '../../../src/diagrams/class/class-layout-helpers.js';
+import type { Classifier, ClassifierKind, ClassDiagramAST, Relationship } from '../../../src/diagrams/class/ast.js';
+import { measureClassifier, type MeasuredClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { tryMeasureDescriptionLeaf } from '../../../src/diagrams/class/class-layout-generic-classifier.js';
 import {
   buildDotGraph,
@@ -82,7 +74,10 @@ describe('A2 — USymbol descriptive leaves route to EntityImageDescription sizi
 
   it('routes package/folder (SI1 T12 un-narrowing — gujigi-63-roki030 jar: 2.388021x0.513889in = 171.9375x37px)', () => {
     const p = tryMeasureDescriptionLeaf(
-      classifier('Elektronisk dokument', 'descriptive', 'package'), defaultTheme, measurer, undefined,
+      classifier('Elektronisk dokument', 'descriptive', 'package'),
+      defaultTheme,
+      measurer,
+      undefined,
     );
     // title = create2/BodyEnhanced1 (129.9375 text + getMarginX()=6 both
     // sides) + USymbolFolder margin [30, 23]; label slot empty (id==display,
@@ -99,7 +94,9 @@ describe('A2 — USymbol descriptive leaves route to EntityImageDescription sizi
   });
 
   it('does NOT route actor or member-bearing leaves', () => {
-    expect(tryMeasureDescriptionLeaf(classifier('a', 'descriptive', 'actor'), defaultTheme, measurer, undefined)).toBeUndefined();
+    expect(
+      tryMeasureDescriptionLeaf(classifier('a', 'descriptive', 'actor'), defaultTheme, measurer, undefined),
+    ).toBeUndefined();
     const withMember: Classifier = {
       ...classifier('d', 'descriptive', 'database'),
       members: [{ visibility: '+', name: 'x', isStatic: false, isAbstract: false }],
@@ -109,7 +106,9 @@ describe('A2 — USymbol descriptive leaves route to EntityImageDescription sizi
 
   it('does NOT route non-descriptive kinds or usymbol-less descriptives', () => {
     expect(tryMeasureDescriptionLeaf(classifier('c', 'class'), defaultTheme, measurer, undefined)).toBeUndefined();
-    expect(tryMeasureDescriptionLeaf(classifier('g', 'descriptive'), defaultTheme, measurer, undefined)).toBeUndefined();
+    expect(
+      tryMeasureDescriptionLeaf(classifier('g', 'descriptive'), defaultTheme, measurer, undefined),
+    ).toBeUndefined();
   });
 });
 
@@ -235,9 +234,15 @@ describe('B7 — sameClassWidth floors every like-class width to the max', () =>
 describe('A10/B3 — groupInheritance shared-tail parent gets +40px on both dims', () => {
   function extendsRel(parent: string, child: string): Relationship {
     return {
-      from: child, to: parent, type: 'extension',
-      idEntity1: parent, idEntity2: child, idEntity1FullId: parent, idEntity2FullId: child,
-      idEntity1Decor: 'triangle', idEntity2Decor: 'none',
+      from: child,
+      to: parent,
+      type: 'extension',
+      idEntity1: parent,
+      idEntity2: child,
+      idEntity1FullId: parent,
+      idEntity2FullId: child,
+      idEntity1Decor: 'triangle',
+      idEntity2Decor: 'none',
     };
   }
 
@@ -264,11 +269,15 @@ describe('A10/B3 — groupInheritance shared-tail parent gets +40px on both dims
 
   it('does nothing below the limit, and the limit is unset/<=1 -> never fires (SkinParam.java:1041-1044)', () => {
     const under = { ...defaultTheme, groupInheritance: 4 } as Theme & ThemeGroupInheritance;
-    expect(layoutNodes(A3_AST, under).nodes.get('A3')!.width)
-      .toBeCloseTo(layoutNodes(A3_AST, defaultTheme).map.get('A3')!.width, 6);
+    expect(layoutNodes(A3_AST, under).nodes.get('A3')!.width).toBeCloseTo(
+      layoutNodes(A3_AST, defaultTheme).map.get('A3')!.width,
+      6,
+    );
     const degenerate = { ...defaultTheme, groupInheritance: 1 } as Theme & ThemeGroupInheritance;
-    expect(layoutNodes(A3_AST, degenerate).nodes.get('A3')!.width)
-      .toBeCloseTo(layoutNodes(A3_AST, defaultTheme).map.get('A3')!.width, 6);
+    expect(layoutNodes(A3_AST, degenerate).nodes.get('A3')!.width).toBeCloseTo(
+      layoutNodes(A3_AST, defaultTheme).map.get('A3')!.width,
+      6,
+    );
   });
 
   it('duplicate extends-links each count (zuduxu-90: two `class B extends A` at limit 2 protect A)', () => {
@@ -283,9 +292,15 @@ describe('A10/B3 — groupInheritance shared-tail parent gets +40px on both dims
 
   it('ignores links whose entity1-side decor is not the triangle (upstream: `B --|> A` never counts)', () => {
     const reversed: Relationship = {
-      from: 'B', to: 'A', type: 'extension',
-      idEntity1: 'B', idEntity2: 'A', idEntity1FullId: 'B', idEntity2FullId: 'A',
-      idEntity1Decor: 'none', idEntity2Decor: 'triangle',
+      from: 'B',
+      to: 'A',
+      type: 'extension',
+      idEntity1: 'B',
+      idEntity2: 'A',
+      idEntity1FullId: 'B',
+      idEntity2FullId: 'A',
+      idEntity1Decor: 'none',
+      idEntity2Decor: 'triangle',
     };
     const ast = makeAST({
       classifiers: [classifier('A', 'class'), classifier('B', 'class')],

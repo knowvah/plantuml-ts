@@ -28,7 +28,13 @@ function getMargin(): Margin {
   return new Margin(10, 10, 10, 10);
 }
 
-function drawComponent1(ug: UGraphic, widthTotal: number, heightTotal: number, shadowing: number, roundCorner: number): void {
+function drawComponent1(
+  ug: UGraphic,
+  widthTotal: number,
+  heightTotal: number,
+  shadowing: number,
+  roundCorner: number,
+): void {
   const form = URectangle.build(widthTotal, heightTotal).rounded(roundCorner);
   form.setDeltaShadow(shadowing);
   ug.draw(form);
@@ -80,7 +86,13 @@ export class USymbolComponent1 extends USymbol {
         const dimTotal = calculateDimension(stringBounder);
         ug = UGraphicStencil.create(ug, dimTotal);
         ug = symbolContext.apply(ug);
-        drawComponent1(ug, dimTotal.getWidth(), dimTotal.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawComponent1(
+          ug,
+          dimTotal.getWidth(),
+          dimTotal.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
         tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
@@ -110,6 +122,14 @@ export class USymbolComponent1 extends USymbol {
     // signature (decoration/symbol/USymbol.java) exactly; cannot be
     // reduced without breaking the interface contract every USymbol*
     // subclass implements.
-    return new USymbolComponent2().asBig(title, labelAlignment, stereotype, width, height, symbolContext, stereoAlignment);
+    return new USymbolComponent2().asBig(
+      title,
+      labelAlignment,
+      stereotype,
+      width,
+      height,
+      symbolContext,
+      stereoAlignment,
+    );
   }
 }

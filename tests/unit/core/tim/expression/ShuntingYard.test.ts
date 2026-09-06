@@ -21,7 +21,7 @@ function iteratorOf(...tokens: Token[]) {
 
 function surfacesOf(sy: ShuntingYard): string[] {
   const out: string[] = [];
-  for (const it = sy.getQueue().tokenIterator(); it.hasMoreTokens(); ) out.push(it.nextToken()!.getSurface());
+  for (const it = sy.getQueue().tokenIterator(); it.hasMoreTokens();) out.push(it.nextToken()!.getSurface());
   return out;
 }
 

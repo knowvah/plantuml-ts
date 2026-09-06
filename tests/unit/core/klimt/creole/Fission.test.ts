@@ -55,10 +55,7 @@ describe('getSplitted — word-boundary greedy packing (1-unit-per-char measurer
     // "aaaa bbbb cccc" — maxWidth 9: "aaaa bbbb" is 9 (not > 9, kept);
     // adding " cccc" would push to 14 (> 9) — break before "cccc".
     const atoms = buildStripeAtoms('aaaa bbbb cccc', PLAIN);
-    expect(texts(getSplitted(atoms, 9, charWidthMeasure))).toEqual([
-      ['aaaa', ' ', 'bbbb'],
-      ['cccc'],
-    ]);
+    expect(texts(getSplitted(atoms, 9, charWidthMeasure))).toEqual([['aaaa', ' ', 'bbbb'], ['cccc']]);
   });
 
   test('a single word longer than maxWidth is kept whole (no break point inside it)', () => {

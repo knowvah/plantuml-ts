@@ -32,9 +32,7 @@ Alice -> Bob : one
 @enduml`;
 
 const titles = (svg: string): string[] =>
-  [...svg.matchAll(/<g class="title"[^>]*>(.*?)<\/g>/g)].map((m) =>
-    (/>([^<]*)<\/text>/.exec(m[1]!) ?? [])[1] ?? '',
-  );
+  [...svg.matchAll(/<g class="title"[^>]*>(.*?)<\/g>/g)].map((m) => (/>([^<]*)<\/text>/.exec(m[1]!) ?? [])[1] ?? '');
 
 describe('renderPagesSync', () => {
   it('returns one SVG per page', () => {
@@ -84,8 +82,6 @@ describe('renderPagesSync', () => {
 
 describe('renderPages (async)', () => {
   it('matches its sync sibling', async () => {
-    await expect(renderPages(THREE_PAGES, options)).resolves.toEqual(
-      renderPagesSync(THREE_PAGES, options),
-    );
+    await expect(renderPages(THREE_PAGES, options)).resolves.toEqual(renderPagesSync(THREE_PAGES, options));
   });
 });

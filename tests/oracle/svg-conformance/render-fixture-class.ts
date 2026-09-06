@@ -52,16 +52,14 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
   const withSkin = applySkinLayer(preprocessed, base);
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
 
-  const styleMap = preprocessed.styles
-    .map(parseStyleBlock)
-    .reduce<StyleMap>((acc, m) => {
-      m.forEach((props, selector) => {
-        const existing = acc.get(selector) ?? new Map<string, string>();
-        props.forEach((v, k) => existing.set(k, v));
-        acc.set(selector, existing);
-      });
-      return acc;
-    }, new Map());
+  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
+    m.forEach((props, selector) => {
+      const existing = acc.get(selector) ?? new Map<string, string>();
+      props.forEach((v, k) => existing.set(k, v));
+      acc.set(selector, existing);
+    });
+    return acc;
+  }, new Map());
 
   const flatRoot = styleMap.get('') ?? new Map<string, string>();
   const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
@@ -108,11 +106,7 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
  * per-element fidelity. Stripping `.pages` here (test-harness-only) routes
  * `layoutClass` through its EXISTING single-page branch -- no new
  * production code, matching what the doc comment already promised. */
-export function renderFixtureClass(
-  markup: string,
-  measurer: StringMeasurer,
-  options?: PreprocessOptions,
-): string {
+export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');

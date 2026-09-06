@@ -16,12 +16,7 @@
 import type { Point2D } from '../../core/klimt/UTranslate.js';
 import type { Theme } from '../../core/theme.js';
 import { line, polygon, ellipse } from '../../core/svg.js';
-import type {
-  ArrowCircle,
-  ArrowHeadKind,
-  ArrowSegment,
-  HeadGeometry,
-} from './sequence-arrowhead.js';
+import type { ArrowCircle, ArrowHeadKind, ArrowSegment, HeadGeometry } from './sequence-arrowhead.js';
 import { scaleHeadGeometry } from './scale-geo.js';
 
 /**
@@ -105,12 +100,7 @@ function lineThicknessOf(kind: ArrowHeadKind): number {
 // ---------------------------------------------------------------------------
 
 /** `ug.apply(getForegroundColor().bg()).draw(polygon)` — filled AND stroked. */
-function headPolygonMarkup(
-  points: readonly Point2D[],
-  tip: Point2D,
-  paint: ArrowPaint,
-  k: number,
-): string {
+function headPolygonMarkup(points: readonly Point2D[], tip: Point2D, paint: ArrowPaint, k: number): string {
   const translated = points.map((p) => ({ x: tip.x + p.x, y: tip.y + p.y }));
   return polygon(translated, {
     fill: paint.color,
@@ -143,11 +133,7 @@ function headLinesMarkup(
  * filled with the component's background colour.
  * @see skin/rose/ComponentRoseArrow.java:201-204,237-239
  */
-function headCircleMarkup(
-  arrowCircle: ArrowCircle,
-  tip: Point2D,
-  paint: ArrowPaint,
-): string {
+function headCircleMarkup(arrowCircle: ArrowCircle, tip: Point2D, paint: ArrowPaint): string {
   const radius = arrowCircle.d / 2;
   return ellipse(tip.x + arrowCircle.cx, tip.y + arrowCircle.cy, radius, radius, {
     fill: paint.background,
@@ -174,8 +160,7 @@ export function renderArrowHead(
   // scaling this OUTPUT is arithmetically identical to threading `k`
   // through every constant that module builds it from).
   const scaled = scaleHeadGeometry(head, k);
-  const circleMarkup =
-    scaled.circle === undefined ? '' : headCircleMarkup(scaled.circle, tip, paint);
+  const circleMarkup = scaled.circle === undefined ? '' : headCircleMarkup(scaled.circle, tip, paint);
   const shapeMarkup =
     scaled.polygon !== undefined
       ? headPolygonMarkup(scaled.polygon, tip, paint, k)

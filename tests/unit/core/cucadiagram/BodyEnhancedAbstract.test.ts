@@ -43,12 +43,7 @@ class TestBody extends BodyEnhancedAbstract {
     return this.marginX;
   }
 
-  callDecorate(
-    block: TextBlock,
-    separator: string | 0,
-    title: TextBlock | undefined,
-    sb: StringBounder,
-  ): TextBlock {
+  callDecorate(block: TextBlock, separator: string | 0, title: TextBlock | undefined, sb: StringBounder): TextBlock {
     return this.decorate(block, separator, title, sb);
   }
 }
@@ -105,7 +100,7 @@ describe('BodyEnhancedAbstract.calculateDimension / drawU delegate to getArea', 
   });
 });
 
-describe("BodyEnhancedAbstract.decorate — separator === 0 (Java:108-109: withMargin(block, marginX, 0))", () => {
+describe('BodyEnhancedAbstract.decorate — separator === 0 (Java:108-109: withMargin(block, marginX, 0))', () => {
   it('applies LEFT+RIGHT margin only, height unchanged (2-arg Java overload: marginX->L/R, 0->T/B)', () => {
     const body = new TestBody(0.5, 6, fixedBlock(0, 0));
     const block = fixedBlock(50, 20);

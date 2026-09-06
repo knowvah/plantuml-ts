@@ -37,5 +37,4 @@ export const USECASE_LEAF_KEYWORDS = 'usecase/|usecase';
  *  addition, NOT in descdiagram's shared table (see ClassifierKind's doc). */
 export const STATE_LEAF_KEYWORD = 'state';
 /** All descriptive leaf keywords the class declaration parser accepts. */
-export const ALL_DESCRIPTIVE_LEAF =
-  `${DESCRIPTIVE_LEAF_KEYWORDS}|${USECASE_LEAF_KEYWORDS}|${STATE_LEAF_KEYWORD}`;
+export const ALL_DESCRIPTIVE_LEAF = `${DESCRIPTIVE_LEAF_KEYWORDS}|${USECASE_LEAF_KEYWORDS}|${STATE_LEAF_KEYWORD}`;

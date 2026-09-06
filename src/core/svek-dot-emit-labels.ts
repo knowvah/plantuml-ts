@@ -14,8 +14,7 @@
 
 import type { DotInputNode, DotInputPortRow } from './graph-layout.types.js';
 
-export const hex = (n: number): string =>
-  '#' + (n & 0xffffff).toString(16).padStart(6, '0');
+export const hex = (n: number): string => '#' + (n & 0xffffff).toString(16).padStart(6, '0');
 export const round = (v: number): string => String(Math.round(v));
 
 /**
@@ -133,11 +132,7 @@ function appendTr(width: number, portId: string | undefined, height: number): st
  * where the jar truncates; `sum` accumulates the TRUNCATED values, so the error
  * never compounds into the trailer.
  */
-export function rowPortTable(
-  node: DotInputNode,
-  rows: readonly DotInputPortRow[],
-  color: number,
-): string {
+export function rowPortTable(node: DotInputNode, rows: readonly DotInputPortRow[], color: number): string {
   let body = '';
   let sum = 0;
   for (const geom of rows) {
@@ -150,7 +145,6 @@ export function rowPortTable(
   }
   body += appendTr(node.width, undefined, Math.trunc(node.height - sum));
   return (
-    `<TABLE BGCOLOR="${hex(color)}" BORDER="0" CELLBORDER="0" ` +
-    `CELLSPACING="0" CELLPADDING="0">${body}</TABLE>`
+    `<TABLE BGCOLOR="${hex(color)}" BORDER="0" CELLBORDER="0" ` + `CELLSPACING="0" CELLPADDING="0">${body}</TABLE>`
   );
 }

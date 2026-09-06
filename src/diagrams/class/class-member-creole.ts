@@ -294,9 +294,7 @@ export function resolveMemberAtoms(
     rendered.push(resolved.atom);
     width += resolved.width;
     const altitude =
-      resolved.atom.kind === 'text'
-        ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL)
-        : 0;
+      resolved.atom.kind === 'text' ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL) : 0;
     heightEntries.push({ altitude, height: resolved.lineHeight });
   }
   const { height } = seaLineHeightAndSpan(heightEntries);
@@ -381,9 +379,7 @@ function resolveOneAtom(
         : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
     }
     const resolved = resolveInlineAtom(atom.atom, baseFont, sprites, spriteDims);
-    return resolved === undefined
-      ? undefined
-      : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
+    return resolved === undefined ? undefined : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
   // 'latex': `AtomMath`, a measured+drawn image at altitude 0 -- see
   // `resolveLatexAtom`'s own doc comment. Anything else contributes nothing.
@@ -454,7 +450,9 @@ export function buildWrappedMemberRows(
     }
     const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
     const wrappedLines = getSplitted(
-      atoms, maxWidth, (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0,
+      atoms,
+      maxWidth,
+      (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0,
     );
     for (const lineAtoms of wrappedLines) rows.push(resolveMemberAtoms(lineAtoms, font, measurer, sprites));
   }

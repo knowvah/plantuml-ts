@@ -65,10 +65,7 @@ export function isRowPortKind(kind: ClassifierKind): boolean {
  * namespace id actually appears as an endpoint/note-target, so the transform
  * is a no-op for every diagram that does not hit this case.
  */
-export function packageEndpointAnchors(
-  ast: ClassDiagramAST,
-  clusterNsIds: ReadonlySet<string>,
-): Map<string, string> {
+export function packageEndpointAnchors(ast: ClassDiagramAST, clusterNsIds: ReadonlySet<string>): Map<string, string> {
   // Only a NON-EMPTY package (an actual cluster) gets an anchor; an empty
   // package used as an endpoint stays a plain rect node (oracle: mujopi p1/p3).
   const anchors = new Map<string, string>();
@@ -110,9 +107,7 @@ function memberPortIsP(target: Classifier | undefined): boolean {
  *  `toQualifier` below, never by a `::member` port relationship. Kept
  *  separate from `isPort` because a class-family port target ALSO lands in
  *  this map with `isPort: false` (`memberPortIsP`) yet is not shielded. */
-export function shieldedClassifierIds(
-  ast: ClassDiagramAST,
-): Map<string, { isPort: boolean; hasQualifier: boolean }> {
+export function shieldedClassifierIds(ast: ClassDiagramAST): Map<string, { isPort: boolean; hasQualifier: boolean }> {
   const shielded = new Map<string, { isPort: boolean; hasQualifier: boolean }>();
   const byId = new Map(ast.classifiers.map((c) => [c.id, c] as const));
   const mark = (id: string, isPort: boolean, hasQualifier: boolean): void => {

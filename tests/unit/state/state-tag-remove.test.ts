@@ -154,9 +154,7 @@ describe('computeRemovedIds semantics', () => {
   });
 
   it('reaches into nested composites (tags on a child inside state Parent { })', () => {
-    const ast = parse(
-      ['state Parent {', 'state Child1 $tagX', 'state Child2', '}', 'remove $tagX'].join('\n'),
-    );
+    const ast = parse(['state Parent {', 'state Child1 $tagX', 'state Child2', '}', 'remove $tagX'].join('\n'));
     expect([...computeRemovedIds(ast)]).toEqual(['Child1']);
   });
 

@@ -19,10 +19,7 @@ describe('YAML parser — directives', () => {
   });
 
   it('litife-43: skinparam stripped from body', () => {
-    const ast = parse([
-      'skinparam handwritten true',
-      'fruit: Apple', 'size: Large', 'color:', ' - Red', ' - Green',
-    ]);
+    const ast = parse(['skinparam handwritten true', 'fruit: Apple', 'size: Large', 'color:', ' - Red', ' - Green']);
     expect(ast.root).toEqual({ fruit: 'Apple', size: 'Large', color: ['Red', 'Green'] });
     expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(true);
   });

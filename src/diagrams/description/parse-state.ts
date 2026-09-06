@@ -162,10 +162,7 @@ export type PendingNoteState =
  *  reached through ADR-2's `RenderOptions.assetStore`. Threaded into the
  *  registry at CONSTRUCTION time because `SkinParam#getSprite`'s fallback
  *  tier is a property of the registry, not of any one lookup. */
-export function makeDefaultAST(
-  internal?: InternalSpriteStore,
-  emoji?: InternalEmojiStore,
-): DescriptionDiagramAST {
+export function makeDefaultAST(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): DescriptionDiagramAST {
   return {
     nodes: [],
     links: [],
@@ -238,9 +235,7 @@ const descriptiveLinkConnection = (l: DescriptiveLink): readonly [string, string
  * @see src/core/cucadiagram/linkDedup.ts
  */
 export function addLink(state: ParseState, link: DescriptiveLink): void {
-  if (
-    dropsAsSingleDuplicate(link.single === true, state.ast.links, link, descriptiveLinkConnection)
-  ) {
+  if (dropsAsSingleDuplicate(link.single === true, state.ast.links, link, descriptiveLinkConnection)) {
     return;
   }
   state.ast.links.push(link);
@@ -367,7 +362,10 @@ function attachNoteToEntity(
   // LinkType), consuming its own `lnkN` uid from the shared counter -- see
   // DescriptiveLink.creationIndex's doc comment.
   state.ast.links.push({
-    ...link, style: 'dashed', arrowHead: 'none', creationIndex: nextCreationIndex(state),
+    ...link,
+    style: 'dashed',
+    arrowHead: 'none',
+    creationIndex: nextCreationIndex(state),
   });
 }
 
@@ -393,11 +391,7 @@ function attachNoteToEntity(
  * executor) rather than in the grammar: `Position position = Position.BOTTOM;
  * if (arg.get("POSITION", 0) != null) position = Position.valueOf(...)`.
  */
-function attachNoteToLastLink(
-  state: ParseState,
-  text: string,
-  position: NotePosition | undefined,
-): void {
+function attachNoteToLastLink(state: ParseState, text: string, position: NotePosition | undefined): void {
   const link = state.ast.links[state.ast.links.length - 1];
   if (link === undefined) return;
   link.linkNote = text;
@@ -411,7 +405,10 @@ export function executeNoteOpen(state: ParseState, m: NoteOpenMatch): void {
   }
   if (m.kind === 'on-link-open') {
     state.pendingNote = {
-      kind: 'on-link', terminator: 'endnote', lines: [], position: m.position,
+      kind: 'on-link',
+      terminator: 'endnote',
+      lines: [],
+      position: m.position,
     };
     return;
   }
@@ -453,4 +450,3 @@ export function closePendingNote(state: ParseState): void {
   }
   attachNoteToEntity(state, pending.position, pending.targetId, text);
 }
-

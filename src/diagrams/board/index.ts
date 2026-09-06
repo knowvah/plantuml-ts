@@ -7,7 +7,6 @@ import { renderBoard } from './renderer.js';
 export const boardPlugin: SyncPlugin<BoardDiagramAST, BoardGeometry> = {
   type: 'board',
 
-
   parse(source) {
     return parseBoard(source);
   },

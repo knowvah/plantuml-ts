@@ -188,10 +188,7 @@ describe('layoutJson', () => {
   it('two-segment highlight path highlights key in child node, not in root', () => {
     // #highlight "address" / "city" → "city" highlighted in address node,
     // "address" row in root should NOT be highlighted
-    const ast = makeAst(
-      { address: { city: 'NY', state: 'New York' } },
-      [['address', 'city']],
-    );
+    const ast = makeAst({ address: { city: 'NY', state: 'New York' } }, [['address', 'city']]);
     const geo = layoutJson(ast, defaultTheme, measurer);
 
     // Root node: "address" row must NOT be highlighted
@@ -469,7 +466,9 @@ describe('layoutJson', () => {
         const base = text.length * 8;
         return { width: font.weight === 'bold' ? base * 1.2 : base, height: 14 };
       },
-      getDescent(_font: FontSpec, _text: string) { return 3; },
+      getDescent(_font: FontSpec, _text: string) {
+        return 3;
+      },
     };
 
     const ast = makeAst({ label: 'hello' });
@@ -485,7 +484,7 @@ describe('layoutJson', () => {
     };
 
     const geoNormal = layoutJson(ast, defaultTheme, boldMeasurer);
-    const geoBold   = layoutJson(ast, boldTheme,   boldMeasurer);
+    const geoBold = layoutJson(ast, boldTheme, boldMeasurer);
 
     // Bold measurement must produce a wider value column
     expect(geoBold.nodes[0]!.valueColWidth).toBeGreaterThan(geoNormal.nodes[0]!.valueColWidth);
@@ -502,11 +501,11 @@ describe('layoutJson', () => {
     const geo = layoutJson(ast, defaultTheme, measurer);
     // Both child nodes (a and b) should have 'count' highlighted
     const countHighlights = geo.nodes
-      .flatMap(n => n.rows)
-      .filter(r => r.key === 'count')
-      .map(r => r.highlight);
+      .flatMap((n) => n.rows)
+      .filter((r) => r.key === 'count')
+      .map((r) => r.highlight);
     expect(countHighlights).toHaveLength(2);
-    expect(countHighlights.every(h => h !== false)).toBe(true);
+    expect(countHighlights.every((h) => h !== false)).toBe(true);
   });
 
   // ** wildcard: marks key at any depth
@@ -514,11 +513,9 @@ describe('layoutJson', () => {
     const root = { a: { location: 'NYC' }, b: { c: { location: 'LA' } } };
     const ast = makeAst(root, [['**', 'location']]);
     const geo = layoutJson(ast, defaultTheme, measurer);
-    const locationRows = geo.nodes
-      .flatMap(n => n.rows)
-      .filter(r => r.key === 'location');
+    const locationRows = geo.nodes.flatMap((n) => n.rows).filter((r) => r.key === 'location');
     expect(locationRows.length).toBeGreaterThanOrEqual(1);
-    expect(locationRows.every(r => r.highlight !== false)).toBe(true);
+    expect(locationRows.every((r) => r.highlight !== false)).toBe(true);
   });
 
   // exact path unchanged
@@ -527,11 +524,11 @@ describe('layoutJson', () => {
     const ast = makeAst(root, [['address', 'city']]);
     const geo = layoutJson(ast, defaultTheme, measurer);
     const rootNode = geo.nodes[0]!;
-    const addrRow = rootNode.rows.find(r => r.key === 'address');
+    const addrRow = rootNode.rows.find((r) => r.key === 'address');
     expect(addrRow?.highlight).toBe(false);
-    const addrNode = geo.nodes.find(n => n !== rootNode && n.rows.some(r => r.key === 'city'));
-    expect(addrNode?.rows.find(r => r.key === 'city')?.highlight).not.toBe(false);
-    expect(addrNode?.rows.find(r => r.key === 'state')?.highlight).toBe(false);
+    const addrNode = geo.nodes.find((n) => n !== rootNode && n.rows.some((r) => r.key === 'city'));
+    expect(addrNode?.rows.find((r) => r.key === 'city')?.highlight).not.toBe(false);
+    expect(addrNode?.rows.find((r) => r.key === 'state')?.highlight).toBe(false);
   });
 
   // ---------------------------------------------------------------------------

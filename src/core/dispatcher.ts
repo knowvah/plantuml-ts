@@ -201,8 +201,7 @@ export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
  * A plugin that performs layout synchronously.
  * Discriminated from AsyncPlugin by the presence of `layoutSync`.
  */
-export interface SyncPlugin<AST = unknown, Geo = unknown>
-  extends Partial<PaginatedPlugin<AST, Geo>> {
+export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
@@ -214,8 +213,7 @@ export interface SyncPlugin<AST = unknown, Geo = unknown>
  * Discriminated from SyncPlugin by the absence of `layoutSync` and the
  * presence of `layout`.
  */
-export interface AsyncPlugin<AST = unknown, Geo = unknown>
-  extends Partial<PaginatedPlugin<AST, Geo>> {
+export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
@@ -227,9 +225,7 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown>
  *
  * Type-narrow at call sites with `'layoutSync' in plugin` to detect SyncPlugin.
  */
-export type DiagramPlugin<AST = unknown, Geo = unknown> =
-  | SyncPlugin<AST, Geo>
-  | AsyncPlugin<AST, Geo>;
+export type DiagramPlugin<AST = unknown, Geo = unknown> = SyncPlugin<AST, Geo> | AsyncPlugin<AST, Geo>;
 
 /**
  * Narrows a `parse()` result to the refusal arm.
@@ -257,11 +253,7 @@ export function parseRefusalOf(parsed: unknown): ParseRefusal | undefined {
 const ERROR_SENTINEL: SyncPlugin = {
   type: 'unknown',
   parse: (_source: UmlSource) => ({}),
-  layoutSync: (
-    _ast: unknown,
-    _theme: Theme,
-    _measurer: StringMeasurer,
-  ): unknown => ({}),
+  layoutSync: (_ast: unknown, _theme: Theme, _measurer: StringMeasurer): unknown => ({}),
   render: (_geo: unknown, theme: Theme): AssembledSvg => ({
     completeSvg:
       `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60">` +

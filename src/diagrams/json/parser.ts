@@ -33,7 +33,7 @@ const RE_DIRECTIVE = /^(?:title |skinparam |scale |skin |hide |!assume |!pragma 
 
 /** Matches @startjson / @endjson wrapper lines (case-insensitive, optional trailing whitespace). */
 const RE_STARTJSON = /^@startjson\s*$/i;
-const RE_ENDJSON   = /^@endjson\s*$/i;
+const RE_ENDJSON = /^@endjson\s*$/i;
 
 // ---------------------------------------------------------------------------
 // Highlight line parsing
@@ -54,9 +54,7 @@ function parseHighlightLine(raw: string): HighlightDirective {
   // Capture optional trailing <<stereotype>>
   const stereotypeMatch = RE_STEREOTYPE_SUFFIX.exec(body);
   const styleClass = stereotypeMatch ? stereotypeMatch[1]!.trim().toLowerCase() : '';
-  const withoutStereotype = stereotypeMatch
-    ? body.slice(0, body.length - stereotypeMatch[0].length)
-    : body;
+  const withoutStereotype = stereotypeMatch ? body.slice(0, body.length - stereotypeMatch[0].length) : body;
 
   // Split on optional-space / optional-space between quoted segments:
   // handles both `"a" / "b"` and `"a"/"b"` forms.
@@ -102,8 +100,14 @@ export function parseJson(source: UmlSource): JsonDiagramAST {
 
     // <style>...</style> blocks — stripped by preprocessor before reaching here;
     // this guard handles any that slip through (e.g. in unit tests).
-    if (trimmed === '<style>') { inStyleBlock = true; continue; }
-    if (inStyleBlock) { if (trimmed === '</style>') inStyleBlock = false; continue; }
+    if (trimmed === '<style>') {
+      inStyleBlock = true;
+      continue;
+    }
+    if (inStyleBlock) {
+      if (trimmed === '</style>') inStyleBlock = false;
+      continue;
+    }
 
     if (line.startsWith(HIGHLIGHT_PREFIX)) {
       highlights.push(parseHighlightLine(line));

@@ -25,7 +25,12 @@ function fakeContext(overrides: Partial<TContext> = {}): TContext {
 
 describe('TFunctionImpl#canCover', () => {
   it('covers exactly the declared positional arity with no defaults', () => {
-    const fn = new TFunctionImpl('f', [new TFunctionArgument('a', undefined), new TFunctionArgument('b', undefined)], false, TFunctionType.PROCEDURE);
+    const fn = new TFunctionImpl(
+      'f',
+      [new TFunctionArgument('a', undefined), new TFunctionArgument('b', undefined)],
+      false,
+      TFunctionType.PROCEDURE,
+    );
     expect(fn.canCover(2, new Set())).toBe(true);
     expect(fn.canCover(1, new Set())).toBe(false);
     expect(fn.canCover(3, new Set())).toBe(false);
@@ -175,9 +180,7 @@ describe('TFunctionImpl#executeReturnFunction', () => {
   it('LEGACY_DEFINE with no set definition throws IllegalStateException', () => {
     const global = new TMemoryGlobal();
     const fn = new TFunctionImpl('f', [], false, TFunctionType.LEGACY_DEFINE);
-    expect(() => fn.executeReturnFunction(fakeContext(), global, LOC, [], new Map())).toThrow(
-      'IllegalStateException',
-    );
+    expect(() => fn.executeReturnFunction(fakeContext(), global, LOC, [], new Map())).toThrow('IllegalStateException');
   });
 });
 

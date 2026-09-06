@@ -146,17 +146,11 @@ describe('sequence diff census — rule 3a: geometry', () => {
   });
 
   it('a transform parameter is geometry', () => {
-    expectOnly(
-      synthetic('svg/g[1]/g[2]/@transform[0].param[1]', '5', '9', 4),
-      'geometry',
-    );
+    expectOnly(synthetic('svg/g[1]/g[2]/@transform[0].param[1]', '5', '9', 4), 'geometry');
   });
 
   it('a transform function-name mismatch is geometry', () => {
-    expectOnly(
-      synthetic('svg/g[1]/g[2]/@transform[0].type', 'translate', 'matrix'),
-      'geometry',
-    );
+    expectOnly(synthetic('svg/g[1]/g[2]/@transform[0].type', 'translate', 'matrix'), 'geometry');
   });
 });
 
@@ -166,10 +160,7 @@ describe('sequence diff census — rule 3b: text-metrics', () => {
   });
 
   it('lengthAdjust is text-metrics', () => {
-    expectOnly(
-      synthetic('svg/g[1]/text[3]/@lengthAdjust', 'spacingAndGlyphs', ''),
-      'text-metrics',
-    );
+    expectOnly(synthetic('svg/g[1]/text[3]/@lengthAdjust', 'spacingAndGlyphs', ''), 'text-metrics');
   });
 
   it('a font attribute is text-metrics', () => {
@@ -252,9 +243,7 @@ describe('sequence diff census — the committed census against T2s baseline', (
   });
 
   it('reports those errors separately, with a reason, never as zero diffs', () => {
-    expect(census.errors.map((e) => e.slug).sort()).toEqual(
-      baseline.errored.map((f) => f.slug).sort(),
-    );
+    expect(census.errors.map((e) => e.slug).sort()).toEqual(baseline.errored.map((f) => f.slug).sort());
     for (const e of census.errors) expect(e.reason).toBeTruthy();
     expect(census.errors.length).toBeGreaterThan(0);
   });

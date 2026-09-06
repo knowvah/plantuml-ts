@@ -22,13 +22,7 @@ import { wrapPlainTextLine } from './class-layout-edge-labels.js';
 // comment.
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
-import {
-  hasBadge,
-  badgeBoxHeight,
-  badgeBoxWidth,
-  NAME_MARGIN_TOTAL,
-  computeHeaderSlack,
-} from './class-badge.js';
+import { hasBadge, badgeBoxHeight, badgeBoxWidth, NAME_MARGIN_TOTAL, computeHeaderSlack } from './class-badge.js';
 import {
   resolveVisibleStereotypeLabels,
   measureStereoLabelWidths,
@@ -41,11 +35,7 @@ import {
   type GuillemetPair,
   type GenericTagDim,
 } from './class-stereotype.js';
-import {
-  buildBadgeCharFields,
-  buildHeaderLineMetrics,
-  computeBadgeSpriteBox,
-} from './class-layout-header-creole.js';
+import { buildBadgeCharFields, buildHeaderLineMetrics, computeBadgeSpriteBox } from './class-layout-header-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js';
@@ -121,12 +111,17 @@ export function computeHeaderNameGeo(
   // G2 N65 item 35: word-wraps EACH already-split line via `wrapPlainTextLine`
   // (Fission) when a `MaximumWidth` cascade is in effect -- a no-op at
   // `headerMaxWidth<=0` (the overwhelming majority of classifiers).
-  const headerLines = headerMaxWidth > 0
-    ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
-    : rawHeaderSplit.lines;
+  const headerLines =
+    headerMaxWidth > 0
+      ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
+      : rawHeaderSplit.lines;
   const headerAlign = rawHeaderSplit.align;
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight } =
-    buildHeaderLineMetrics(headerLines, headerFont, measurer, sprites);
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight } = buildHeaderLineMetrics(
+    headerLines,
+    headerFont,
+    measurer,
+    sprites,
+  );
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
@@ -136,9 +131,20 @@ export function computeHeaderNameGeo(
   // here (the only place with a `measurer` reference at this layer).
   const blankLineRenderWidth = measurer.measure('\u00A0', headerFont).width;
   return {
-    badgeShown, memberRowHeight, header, badgeCharField, badgeColorField,
-    headerLines, headerDisplayLines, nameBlockHeight, badgeSpriteBox,
-    headerAlign, headerLineWidths, headerTextWidth, nameWidth, blankLineRenderWidth,
+    badgeShown,
+    memberRowHeight,
+    header,
+    badgeCharField,
+    badgeColorField,
+    headerLines,
+    headerDisplayLines,
+    nameBlockHeight,
+    badgeSpriteBox,
+    headerAlign,
+    headerLineWidths,
+    headerTextWidth,
+    nameWidth,
+    blankLineRenderWidth,
   };
 }
 
@@ -172,7 +178,11 @@ function computeStereoBlockGeo(
   // #applyStereotypeHideShow` (`hide|show [<<pattern>>] stereotype(s)`).
   const stereoLabels = resolveVisibleStereotypeLabels(classifier);
   const stereoLabelWidths = measureStereoLabelWidths(
-    stereoLabels, stereoFont.family, measurer, guillemet, stereoFont.size,
+    stereoLabels,
+    stereoFont.family,
+    measurer,
+    guillemet,
+    stereoFont.size,
   );
   const blockDim = stereoBlockDim(stereoLabelWidths, stereoFont.size);
   // A2s R2i (item 5): a `<<($sprite)>>` badge's spot box replaces the
@@ -219,7 +229,10 @@ function computeHeaderDimsGeo(
   // `FontParam.CLASS_STEREOTYPE` the stereotype label row(s) use --
   // `stereoFont`, not `headerFont`.
   const genericDim = measureGenericTagDim(
-    classifier.typeParams ?? [], stereoFont.family, measurer, stereoFont.size,
+    classifier.typeParams ?? [],
+    stereoFont.family,
+    measurer,
+    stereoFont.size,
     classifier.typeParamsRawText,
   );
   // G2 N64 item 45 / A2s R2i: the name term is the summed per-line height
@@ -238,8 +251,8 @@ function computeHeaderDimsGeo(
   // font) now that header/attribute fonts can diverge.
   const headerBaselineOffset = headerFont.size - measurer.getDescent(headerFont, '');
   const memberBaselineOffset = fontSpec.size - measurer.getDescent(fontSpec, '');
-  const stereoBaselineOffset = stereoFont.size -
-    measurer.getDescent({ family: stereoFont.family, size: stereoFont.size }, '');
+  const stereoBaselineOffset =
+    stereoFont.size - measurer.getDescent({ family: stereoFont.family, size: stereoFont.size }, '');
   return { genericDim, headerRowHeight, headerWidth, headerBaselineOffset, memberBaselineOffset, stereoBaselineOffset };
 }
 
@@ -276,13 +289,20 @@ export function computeStereoAndTagGeo(
 ): StereoAndTagGeo {
   const { guillemet, badgeRadius, stereoFont } = options;
   const { badgeShown, nameWidth, nameBlockHeight, badgeSpriteBox } = headerNameGeo;
-  const stereoBlockGeo = computeStereoBlockGeo(
-    classifier, stereoFont, measurer, { guillemet, badgeShown, badgeRadius, nameWidth, badgeSpriteBox },
-  );
-  const headerDimsGeo = computeHeaderDimsGeo(
-    classifier, fonts, measurer, stereoBlockGeo,
-    { badgeShown, badgeRadius, nameBlockHeight, stereoFont, badgeSpriteBox },
-  );
+  const stereoBlockGeo = computeStereoBlockGeo(classifier, stereoFont, measurer, {
+    guillemet,
+    badgeShown,
+    badgeRadius,
+    nameWidth,
+    badgeSpriteBox,
+  });
+  const headerDimsGeo = computeHeaderDimsGeo(classifier, fonts, measurer, stereoBlockGeo, {
+    badgeShown,
+    badgeRadius,
+    nameBlockHeight,
+    stereoFont,
+    badgeSpriteBox,
+  });
   return { ...stereoBlockGeo, ...headerDimsGeo };
 }
 
@@ -307,12 +327,20 @@ function computeGenericTagSlackGeo(
   width: number,
   stereoFont: { family: string; size: number; bold: boolean; italic: boolean },
 ) {
-  const genericTagGeo = stereoGeo.genericDim !== undefined
-    ? buildGenericTagGeo(
-        classifier.typeParams ?? [], stereoGeo.genericDim, width, stereoFont.family, stereoGeo.stereoBaselineOffset,
-        stereoFont.size, stereoFont.bold, stereoFont.italic, classifier.typeParamsRawText,
-      )
-    : undefined;
+  const genericTagGeo =
+    stereoGeo.genericDim !== undefined
+      ? buildGenericTagGeo(
+          classifier.typeParams ?? [],
+          stereoGeo.genericDim,
+          width,
+          stereoFont.family,
+          stereoGeo.stereoBaselineOffset,
+          stereoFont.size,
+          stereoFont.bold,
+          stereoFont.italic,
+          classifier.typeParamsRawText,
+        )
+      : undefined;
   const genericTagField: CommonHeaderFields = genericTagGeo !== undefined ? { genericTag: genericTagGeo } : {};
   const { h1, h2 } = computeHeaderSlack(width, stereoGeo.headerWidth, stereoGeo.circleWidth);
   return { genericTagField, h1, h2 };
@@ -381,11 +409,21 @@ function buildHeaderNameRowsGeo(
   // stay the atom-measured values above, so a mono/emoji header renders
   // sensible text at the correct measured width.
   return buildHeaderRows({
-    header: headerNameGeo.header, lines: headerNameGeo.headerDisplayLines, lineWidths: headerNameGeo.headerLineWidths,
-    align: headerNameGeo.headerAlign, circleWidth: stereoGeo.circleWidth, widthStereoAndName: stereoGeo.widthStereoAndName,
-    nameWidth: headerNameGeo.nameWidth, h1, h2, nameTop,
-    baselineOffset: stereoGeo.headerBaselineOffset, fontSpec: headerFont,
-    headerTextWidth: headerNameGeo.headerTextWidth, badgeRadius, blankLineRenderWidth: headerNameGeo.blankLineRenderWidth,
+    header: headerNameGeo.header,
+    lines: headerNameGeo.headerDisplayLines,
+    lineWidths: headerNameGeo.headerLineWidths,
+    align: headerNameGeo.headerAlign,
+    circleWidth: stereoGeo.circleWidth,
+    widthStereoAndName: stereoGeo.widthStereoAndName,
+    nameWidth: headerNameGeo.nameWidth,
+    h1,
+    h2,
+    nameTop,
+    baselineOffset: stereoGeo.headerBaselineOffset,
+    fontSpec: headerFont,
+    headerTextWidth: headerNameGeo.headerTextWidth,
+    badgeRadius,
+    blankLineRenderWidth: headerNameGeo.blankLineRenderWidth,
   });
 }
 

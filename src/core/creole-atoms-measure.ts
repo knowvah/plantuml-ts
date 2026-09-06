@@ -12,11 +12,7 @@
 
 import type { FontSpec, StringMeasurer } from './measurer.js';
 import { openIconicDims, openIconicFactor } from './openiconic-glyphs.js';
-import {
-  scanLineForAtoms,
-  type InlineAtomToken,
-  type SpriteDimsLookup,
-} from './creole-atoms.js';
+import { scanLineForAtoms, type InlineAtomToken, type SpriteDimsLookup } from './creole-atoms.js';
 
 // ---------------------------------------------------------------------------
 // Measurement (D9)
@@ -113,10 +109,7 @@ export function spriteScale(requestedScale: number, ambientFontSize?: number): n
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/AtomTextUtils.java#createAtomTextForUrl
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleSprite.java#executeAndAdvance
  */
-export function spriteAtomScale(
-  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
-  ambientFontSize?: number,
-): number {
+export function spriteAtomScale(atom: Extract<InlineAtomToken, { kind: 'sprite' }>, ambientFontSize?: number): number {
   return atom.insideUrl === true ? atom.scale : spriteScale(atom.scale, ambientFontSize);
 }
 

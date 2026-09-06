@@ -48,13 +48,8 @@ interface PackageJson {
  * the other three reach `@knowvah/plantuml-ts` through `peerDependencies`.
  */
 function declaredPackageNames(packageDir: string): string[] {
-  const pkg = JSON.parse(
-    readFileSync(join(PACKAGES_DIR, packageDir, 'package.json'), 'utf8'),
-  ) as PackageJson;
-  return [
-    ...Object.keys(pkg.dependencies ?? {}),
-    ...Object.keys(pkg.peerDependencies ?? {}),
-  ].sort();
+  const pkg = JSON.parse(readFileSync(join(PACKAGES_DIR, packageDir, 'package.json'), 'utf8')) as PackageJson;
+  return [...Object.keys(pkg.dependencies ?? {}), ...Object.keys(pkg.peerDependencies ?? {})].sort();
 }
 
 /** Every `from '<specifier>'` in a generated `.d.ts`, in source order. */
@@ -114,26 +109,35 @@ function collectUnscopedSpecifierOffenders(): string[] {
 }
 
 describe('generated .d.ts files import from the declared peer dependency', () => {
-  it.each(GENERATED_PACKAGES)('%s emits at least one .d.ts to check', (packageDir) => {
-    const count = withStdlibBuildLock(() => generatedDtsFiles(packageDir).length);
-    expect(count).toBeGreaterThan(0);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it.each(GENERATED_PACKAGES)(
+    '%s emits at least one .d.ts to check',
+    (packageDir) => {
+      const count = withStdlibBuildLock(() => generatedDtsFiles(packageDir).length);
+      expect(count).toBeGreaterThan(0);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it.each(GENERATED_PACKAGES)('%s: every bare specifier is a declared dependency', (packageDir) => {
-    const declared = declaredPackageNames(packageDir);
-    expect(declared).toContain('@knowvah/plantuml-ts');
+  it.each(GENERATED_PACKAGES)(
+    '%s: every bare specifier is a declared dependency',
+    (packageDir) => {
+      const declared = declaredPackageNames(packageDir);
+      expect(declared).toContain('@knowvah/plantuml-ts');
 
-    const undeclared = withStdlibBuildLock(() => collectUndeclaredSpecifiers(packageDir, declared));
+      const undeclared = withStdlibBuildLock(() => collectUndeclaredSpecifiers(packageDir, declared));
 
-    expect(undeclared).toEqual([]);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+      expect(undeclared).toEqual([]);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('the unscoped pre-rename specifier appears in no generated .d.ts', () => {
-    const offenders = withStdlibBuildLock(() => collectUnscopedSpecifierOffenders());
+  it(
+    'the unscoped pre-rename specifier appears in no generated .d.ts',
+    () => {
+      const offenders = withStdlibBuildLock(() => collectUnscopedSpecifierOffenders());
 
-    expect(offenders).toEqual([]);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+      expect(offenders).toEqual([]);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });

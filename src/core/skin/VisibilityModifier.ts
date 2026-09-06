@@ -426,11 +426,9 @@ export class VisibilityModifier {
   getXmiVisibility(): string {
     if (this === VisibilityModifier.PUBLIC_FIELD || this === VisibilityModifier.PUBLIC_METHOD) return 'public';
 
-    if (this === VisibilityModifier.PRIVATE_FIELD || this === VisibilityModifier.PRIVATE_METHOD)
-      return 'private';
+    if (this === VisibilityModifier.PRIVATE_FIELD || this === VisibilityModifier.PRIVATE_METHOD) return 'private';
 
-    if (this === VisibilityModifier.PROTECTED_FIELD || this === VisibilityModifier.PROTECTED_METHOD)
-      return 'protected';
+    if (this === VisibilityModifier.PROTECTED_FIELD || this === VisibilityModifier.PROTECTED_METHOD) return 'protected';
 
     if (this === VisibilityModifier.PACKAGE_PRIVATE_FIELD || this === VisibilityModifier.PACKAGE_PRIVATE_METHOD)
       return 'package';

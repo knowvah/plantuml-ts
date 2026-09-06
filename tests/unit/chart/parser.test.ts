@@ -17,13 +17,7 @@ function src(lines: string[]): UmlSource {
 
 describe('parseChart — acceptance criteria', () => {
   it('AC1: categorical h-axis, numeric v-axis, bar series', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["Jan","Feb","Mar"]',
-        'v-axis "Y" 0 --> 100',
-        'bar "sales" [10, 50, 30]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["Jan","Feb","Mar"]', 'v-axis "Y" 0 --> 100', 'bar "sales" [10, 50, 30]']));
 
     expect(ast.hAxis.labels).toEqual(['Jan', 'Feb', 'Mar']);
     expect(ast.vAxis.min).toBe(0);
@@ -34,38 +28,21 @@ describe('parseChart — acceptance criteria', () => {
   });
 
   it('AC2: line with coordinate pairs but no explicit h-axis range → error', () => {
-    const ast = parseChartAst(
-      src(['line [(1,10),(2,20)]']),
-    );
+    const ast = parseChartAst(src(['line [(1,10),(2,20)]']));
 
     expect(ast.errors.length).toBeGreaterThan(0);
-    expect(
-      ast.errors.some((e) => e.toLowerCase().includes('explicit h-axis range')),
-    ).toBe(true);
+    expect(ast.errors.some((e) => e.toLowerCase().includes('explicit h-axis range'))).toBe(true);
   });
 
   it('AC3: mixed index-based and coordinate-pair series → error', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" -5 --> 5',
-        'line [10, 20, 30]',
-        'line [(1,10),(2,20)]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" -5 --> 5', 'line [10, 20, 30]', 'line [(1,10),(2,20)]']));
 
     expect(ast.errors.length).toBeGreaterThan(0);
-    expect(
-      ast.errors.some((e) => e.toLowerCase().includes('same data format')),
-    ).toBe(true);
+    expect(ast.errors.some((e) => e.toLowerCase().includes('same data format'))).toBe(true);
   });
 
   it('AC4: h-axis numeric range and v2-axis', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" -5 --> 5',
-        'v2-axis "y2" 0 --> 200',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" -5 --> 5', 'v2-axis "y2" 0 --> 200']));
 
     expect(ast.hAxis.min).toBe(-5);
     expect(ast.hAxis.max).toBe(5);
@@ -76,9 +53,7 @@ describe('parseChart — acceptance criteria', () => {
   });
 
   it('AC5: v-axis custom ticks', () => {
-    const ast = parseChartAst(
-      src(['v-axis ticks [0:"Low", 50:"Mid", 100:"High"]']),
-    );
+    const ast = parseChartAst(src(['v-axis ticks [0:"Low", 50:"Mid", 100:"High"]']));
 
     expect(ast.vAxis.customTicks).not.toBeNull();
     expect(ast.vAxis.customTicks!.size).toBe(3);
@@ -89,9 +64,7 @@ describe('parseChart — acceptance criteria', () => {
   });
 
   it('AC6: annotation with arrow', () => {
-    const ast = parseChartAst(
-      src(['annotation "peak" at (3, 85) <<arrow>>']),
-    );
+    const ast = parseChartAst(src(['annotation "peak" at (3, 85) <<arrow>>']));
 
     expect(ast.annotations).toHaveLength(1);
     expect(ast.annotations[0]!.text).toBe('peak');
@@ -270,9 +243,7 @@ describe('parseChart — v2-axis', () => {
   });
 
   it('v2-axis with custom ticks', () => {
-    const ast = parseChartAst(
-      src(['v2-axis ticks [0:"Min", 100:"Max"]']),
-    );
+    const ast = parseChartAst(src(['v2-axis ticks [0:"Min", 100:"Max"]']));
     expect(ast.v2Axis!.customTicks!.size).toBe(2);
     expect(ast.v2Axis!.customTicks!.get(0)).toBe('Min');
     expect(ast.v2Axis!.customTicks!.get(100)).toBe('Max');
@@ -303,13 +274,7 @@ describe('parseChart — bar series', () => {
   });
 
   it('default names increment per bar series added', () => {
-    const ast = parseChartAst(
-      src([
-        'bar [1, 2]',
-        'bar [3, 4]',
-        'bar [5, 6]',
-      ]),
-    );
+    const ast = parseChartAst(src(['bar [1, 2]', 'bar [3, 4]', 'bar [5, 6]']));
     expect(ast.series[0]!.name).toBe('bar0');
     expect(ast.series[1]!.name).toBe('bar1');
     expect(ast.series[2]!.name).toBe('bar2');
@@ -323,9 +288,7 @@ describe('parseChart — bar series', () => {
   });
 
   it('does not auto-scale vAxis when explicit range given', () => {
-    const ast = parseChartAst(
-      src(['v-axis 0 --> 100', 'bar [200, 300]']),
-    );
+    const ast = parseChartAst(src(['v-axis 0 --> 100', 'bar [200, 300]']));
     // autoScale=false after explicit range
     expect(ast.vAxis.max).toBe(100);
   });
@@ -344,12 +307,7 @@ describe('parseChart — line series', () => {
   });
 
   it('parses line with coordinate pairs (explicit h-axis)', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" 0 --> 10',
-        'line [(1,5),(3,15),(7,20)]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" 0 --> 10', 'line [(1,5),(3,15),(7,20)]']));
     expect(ast.series[0]!.xValues).toEqual([1, 3, 7]);
     expect(ast.series[0]!.values).toEqual([5, 15, 20]);
     expect(ast.errors).toEqual([]);
@@ -381,12 +339,7 @@ describe('parseChart — line series', () => {
   });
 
   it('coordinate pairs on bar → error', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" 0 --> 10',
-        'bar [(1,5),(2,10)]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" 0 --> 10', 'bar [(1,5),(2,10)]']));
     // bar data with parens is treated as parse failure (invalid number format),
     // not coordinate-pair error — the bar regex captures data and parseYValues
     // fails on "(1" etc.
@@ -424,12 +377,7 @@ describe('parseChart — scatter series', () => {
   });
 
   it('parses scatter with coordinate pairs', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" 0 --> 10',
-        'scatter [(2,4),(5,8)]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" 0 --> 10', 'scatter [(2,4),(5,8)]']));
     expect(ast.series[0]!.xValues).toEqual([2, 5]);
     expect(ast.series[0]!.values).toEqual([4, 8]);
     expect(ast.errors).toEqual([]);
@@ -508,20 +456,13 @@ describe('parseChart — annotation', () => {
   });
 
   it('parses annotation with categorical x-pos', () => {
-    const ast = parseChartAst(
-      src(['annotation "peak" at (Jan, 95)']),
-    );
+    const ast = parseChartAst(src(['annotation "peak" at (Jan, 95)']));
     expect(ast.annotations[0]!.xPos).toBe('Jan');
     expect(ast.annotations[0]!.yPos).toBe(95);
   });
 
   it('multiple annotations accumulate', () => {
-    const ast = parseChartAst(
-      src([
-        'annotation "a" at (1, 10)',
-        'annotation "b" at (2, 20) <<arrow>>',
-      ]),
-    );
+    const ast = parseChartAst(src(['annotation "a" at (1, 10)', 'annotation "b" at (2, 20) <<arrow>>']));
     expect(ast.annotations).toHaveLength(2);
     expect(ast.annotations[1]!.hasArrow).toBe(true);
   });
@@ -561,14 +502,8 @@ describe('parseChart — grid command', () => {
 
 describe('block-extractor — chart type', () => {
   it('@startchart/@endchart produces type=chart', async () => {
-    const { extractBlocks } = await import(
-      '../../../src/core/block-extractor.js'
-    );
-    const blocks = extractBlocks([
-      '@startchart',
-      'bar [1,2,3]',
-      '@endchart',
-    ]);
+    const { extractBlocks } = await import('../../../src/core/block-extractor.js');
+    const blocks = extractBlocks(['@startchart', 'bar [1,2,3]', '@endchart']);
     expect(blocks).toHaveLength(1);
     expect(blocks[0]!.type).toBe('chart');
     expect(blocks[0]!.lines).toEqual(['bar [1,2,3]']);
@@ -581,25 +516,12 @@ describe('block-extractor — chart type', () => {
 
 describe('parseChart — validation', () => {
   it('x-coordinate outside h-axis range → error', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" 0 --> 5',
-        'line [(10,20)]',
-      ]),
-    );
-    expect(ast.errors.some((e) => e.includes('outside h-axis range'))).toBe(
-      true,
-    );
+    const ast = parseChartAst(src(['h-axis "x" 0 --> 5', 'line [(10,20)]']));
+    expect(ast.errors.some((e) => e.includes('outside h-axis range'))).toBe(true);
   });
 
   it('second series mixing formats (coord then index) → error', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "x" 0 --> 10',
-        'line [(1,2),(3,4)]',
-        'line [10, 20]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "x" 0 --> 10', 'line [(1,2),(3,4)]', 'line [10, 20]']));
     expect(ast.errors.some((e) => e.includes('same data format'))).toBe(true);
   });
 
@@ -626,12 +548,7 @@ describe('parseChart — validation', () => {
   });
 
   it('v2Axis auto-scales when secondary series added', () => {
-    const ast = parseChartAst(
-      src([
-        'v2-axis "R"',
-        'line [500, 1000] v2',
-      ]),
-    );
+    const ast = parseChartAst(src(['v2-axis "R"', 'line [500, 1000] v2']));
     expect(ast.v2Axis!.max).toBe(1000);
   });
 });
@@ -659,9 +576,7 @@ describe('parseChart — refusal', () => {
   });
 
   it('AC1: an unrecognised line after two recognised ones refuses at its own index', () => {
-    const result = parseChart(
-      src(['h-axis ["Jan","Feb"]', 'bar [10, 20]', 'wibble 12']),
-    );
+    const result = parseChart(src(['h-axis ["Jan","Feb"]', 'bar [10, 20]', 'wibble 12']));
     expect('refused' in result).toBe(true);
     if ('refused' in result) {
       expect(result.line).toBe(2);
@@ -670,9 +585,7 @@ describe('parseChart — refusal', () => {
   });
 
   it('AC2: a fully-recognised source never refuses (identical AST to the permissive parser)', () => {
-    const result = parseChart(
-      src(['h-axis ["Jan","Feb","Mar"]', 'v-axis "Y" 0 --> 100', 'bar "sales" [10, 50, 30]']),
-    );
+    const result = parseChart(src(['h-axis ["Jan","Feb","Mar"]', 'v-axis "Y" 0 --> 100', 'bar "sales" [10, 50, 30]']));
     expect('refused' in result).toBe(false);
   });
 

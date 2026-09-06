@@ -32,7 +32,9 @@ const ast: ClassDiagramAST = {
 /** Run layoutClass with the given theme, returning the captured DotInputGraph. */
 function captureDotGraph(theme: typeof defaultTheme): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured = g; });
+  setLayoutInputObserver((g) => {
+    captured = g;
+  });
   try {
     layoutClass(ast, theme, measurer);
   } finally {
@@ -61,7 +63,10 @@ describe('resolveSkinparam — nodesep/ranksep', () => {
 
   it('parses a value below the DOT engine default (10) verbatim', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', '10'], ['ranksep', '10']]),
+      new Map([
+        ['nodesep', '10'],
+        ['ranksep', '10'],
+      ]),
       defaultTheme,
     );
     expect(theme.nodeSep).toBe(10);
@@ -70,7 +75,10 @@ describe('resolveSkinparam — nodesep/ranksep', () => {
 
   it('treats nodesep 0 / ranksep 0 as unset (getAsInt default semantics)', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', '0'], ['ranksep', '0']]),
+      new Map([
+        ['nodesep', '0'],
+        ['ranksep', '0'],
+      ]),
       defaultTheme,
     );
     expect(theme.nodeSep).toBeUndefined();
@@ -79,7 +87,10 @@ describe('resolveSkinparam — nodesep/ranksep', () => {
 
   it('ignores a non-numeric nodesep/ranksep value', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', 'auto'], ['ranksep', 'auto']]),
+      new Map([
+        ['nodesep', 'auto'],
+        ['ranksep', 'auto'],
+      ]),
       defaultTheme,
     );
     expect(theme.nodeSep).toBeUndefined();
@@ -100,7 +111,10 @@ describe('resolveSkinparam — nodesep/ranksep', () => {
 describe('class DOT graph — nodesep/ranksep override (ADR-6)', () => {
   it('replaces the default nodesep/ranksep outright when set above the default', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', '100'], ['ranksep', '100']]),
+      new Map([
+        ['nodesep', '100'],
+        ['ranksep', '100'],
+      ]),
       defaultTheme,
     );
     const g = captureDotGraph(theme);
@@ -110,7 +124,10 @@ describe('class DOT graph — nodesep/ranksep override (ADR-6)', () => {
 
   it('replaces the default nodesep/ranksep outright when BELOW the default — no clamp', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', '10'], ['ranksep', '10']]),
+      new Map([
+        ['nodesep', '10'],
+        ['ranksep', '10'],
+      ]),
       defaultTheme,
     );
     const g = captureDotGraph(theme);
@@ -128,7 +145,10 @@ describe('class DOT graph — nodesep/ranksep override (ADR-6)', () => {
 
   it('treats a zero skinparam value as unset — falls back to the default', () => {
     const { theme } = resolveSkinparam(
-      new Map([['nodesep', '0'], ['ranksep', '0']]),
+      new Map([
+        ['nodesep', '0'],
+        ['ranksep', '0'],
+      ]),
       defaultTheme,
     );
     const g = captureDotGraph(theme);

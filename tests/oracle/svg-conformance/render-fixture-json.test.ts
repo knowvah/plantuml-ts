@@ -62,7 +62,7 @@ describe('renderFixtureJson — parse dispatch (AC4)', () => {
     expect(h).toBe(j);
   });
 
-  it('each type is tagged with the jar\'s own data-diagram-type', () => {
+  it("each type is tagged with the jar's own data-diagram-type", () => {
     expect(render('@startjson\n{"a": 1}\n@endjson')).toContain('data-diagram-type="JSON"');
     expect(render('@startyaml\na: 1\n@endyaml')).toContain('data-diagram-type="YAML"');
     expect(render('@starthcl\na = 1\n@endhcl')).toContain('data-diagram-type="HCL"');

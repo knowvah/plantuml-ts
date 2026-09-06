@@ -100,7 +100,9 @@ export function withPage(display: Display, page: number, lastpage: number): Disp
   // exactly, unlike this file's other `asList()`-based reads (see module
   // doc comment).
   if (display.isNull) return display;
-  const data = display.asList().map((line) => String(line).replaceAll('%page%', String(page)).replaceAll('%lastpage%', String(lastpage)));
+  const data = display
+    .asList()
+    .map((line) => String(line).replaceAll('%page%', String(page)).replaceAll('%lastpage%', String(lastpage)));
   return display.withData(data);
 }
 

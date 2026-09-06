@@ -26,12 +26,14 @@ function normalizeStyleInput(raw: string): string {
   // but move any content after '{' to the next line.
   // Move '}' so it always starts on a fresh line.
   // Replace ';' with newline (acts as statement separator, matching upstream tokenizer).
-  return raw
-    .replace(/\{/g, '{\n')
-    .replace(/\}/g, '\n}')
-    // Replace bare semicolons with newlines, but preserve semicolons inside
-    // double-quoted strings (e.g. LineStyle "1;5" must not be split).
-    .replace(/"[^"]*"|;/g, (m) => (m === ';' ? '\n' : m));
+  return (
+    raw
+      .replace(/\{/g, '{\n')
+      .replace(/\}/g, '\n}')
+      // Replace bare semicolons with newlines, but preserve semicolons inside
+      // double-quoted strings (e.g. LineStyle "1;5" must not be split).
+      .replace(/"[^"]*"|;/g, (m) => (m === ';' ? '\n' : m))
+  );
 }
 
 /**
@@ -119,12 +121,7 @@ function normalizeDeclarationValue(raw: string): string {
 }
 
 /** Writes `key`/`value` into `result` under every path in `selectorPaths`. */
-function writeDeclaration(
-  result: StyleMap,
-  selectorPaths: readonly string[],
-  key: string,
-  value: string,
-): void {
+function writeDeclaration(result: StyleMap, selectorPaths: readonly string[], key: string, value: string): void {
   for (const selectorPath of selectorPaths) {
     let inner = result.get(selectorPath);
     if (inner === undefined) {

@@ -6,7 +6,12 @@
  */
 import { describe, expect, it } from 'vitest';
 import { Display } from '../../../../../src/core/klimt/creole/Display.js';
-import { getWithNewlines3, jawsWarningToWarning, JawsWarning, splitDisplayLines } from '../../../../../src/core/klimt/creole/DisplayNewlines.js';
+import {
+  getWithNewlines3,
+  jawsWarningToWarning,
+  JawsWarning,
+  splitDisplayLines,
+} from '../../../../../src/core/klimt/creole/DisplayNewlines.js';
 import { HorizontalAlignment } from '../../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { Pragma } from '../../../../../src/core/skin/Pragma.js';
 import { PragmaKey } from '../../../../../src/core/skin/PragmaKey.js';
@@ -179,7 +184,7 @@ describe('splitDisplayLines (G2 item 43 / T1 shared adapter)', () => {
     });
   });
 
-  it('the LAST \\l/\\r occurrence wins, matching jar\'s overwritten field', () => {
+  it("the LAST \\l/\\r occurrence wins, matching jar's overwritten field", () => {
     expect(splitDisplayLines('a\\rb\\lc')).toEqual({ lines: ['a', 'b', 'c'], align: 'left' });
   });
 

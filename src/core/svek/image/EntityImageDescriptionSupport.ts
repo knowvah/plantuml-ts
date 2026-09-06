@@ -68,18 +68,41 @@ export class Margins {
     private readonly y2: number,
   ) {}
 
-  static uniform(value: number): Margins { return new Margins(value, value, value, value); }
-  toString(): string { return `MARGIN[${this.x1},${this.x2},${this.y1},${this.y2}]`; }
-  merge(o: Margins): Margins {
-    return new Margins(Math.max(this.x1, o.x1), Math.max(this.x2, o.x2), Math.max(this.y1, o.y1), Math.max(this.y2, o.y2));
+  static uniform(value: number): Margins {
+    return new Margins(value, value, value, value);
   }
-  isZero(): boolean { return this.x1 === 0 && this.x2 === 0 && this.y1 === 0 && this.y2 === 0; }
-  getX1(): number { return this.x1; }
-  getX2(): number { return this.x2; }
-  getY1(): number { return this.y1; }
-  getY2(): number { return this.y2; }
-  getTotalWidth(): number { return this.x1 + this.x2; }
-  getTotalHeight(): number { return this.y1 + this.y2; }
+  toString(): string {
+    return `MARGIN[${this.x1},${this.x2},${this.y1},${this.y2}]`;
+  }
+  merge(o: Margins): Margins {
+    return new Margins(
+      Math.max(this.x1, o.x1),
+      Math.max(this.x2, o.x2),
+      Math.max(this.y1, o.y1),
+      Math.max(this.y2, o.y2),
+    );
+  }
+  isZero(): boolean {
+    return this.x1 === 0 && this.x2 === 0 && this.y1 === 0 && this.y2 === 0;
+  }
+  getX1(): number {
+    return this.x1;
+  }
+  getX2(): number {
+    return this.x2;
+  }
+  getY1(): number {
+    return this.y1;
+  }
+  getY2(): number {
+    return this.y2;
+  }
+  getTotalWidth(): number {
+    return this.x1 + this.x2;
+  }
+  getTotalHeight(): number {
+    return this.y1 + this.y2;
+  }
 }
 
 /** A `UShape` that also exposes `setDeltaShadow` — the surface

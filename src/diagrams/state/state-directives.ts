@@ -145,10 +145,7 @@ function buildUnlinkedPredicate(
 
 /** Index every state and note by id — the lookup `buildUnlinkedPredicate`
  *  consults for the recursive `@unlinked` neighbor check. */
-function buildEntityIndex(
-  allStates: readonly State[],
-  notes: readonly StateNote[],
-): Map<string, RemovableEntity> {
+function buildEntityIndex(allStates: readonly State[], notes: readonly StateNote[]): Map<string, RemovableEntity> {
   const byId = new Map<string, RemovableEntity>();
   for (const s of allStates) byId.set(s.id, s);
   for (const n of notes) byId.set(n.id, { id: n.id });

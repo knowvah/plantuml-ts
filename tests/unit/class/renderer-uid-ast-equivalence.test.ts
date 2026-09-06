@@ -33,15 +33,9 @@ import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { parseClass } from './parse-helper.js';
 import { layoutClass, classifierLeaves, noteLeaves } from '../../../src/diagrams/class/layout.js';
-import {
-  buildClassUidPlan,
-  classUidPlanInputFromAst,
-} from '../../../src/diagrams/class/renderer-uid.js';
+import { buildClassUidPlan, classUidPlanInputFromAst } from '../../../src/diagrams/class/renderer-uid.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/class',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
 /** `skinparam groupInheritance N` is the only gate that can produce a
  *  `sametail` at all (`SkinParam.java:1041-1044`: absent or <= 1 means no tail
@@ -75,7 +69,9 @@ describe.skipIf(slugs.length === 0)('class uid plan: AST-derived == geo-derived 
       // T3: `ClassUidPlanInput` needs `classifiers`/`notes` explicitly --
       // `geo.leaves` replaced them (`ClassGeometry`'s own doc comment).
       const fromGeo = buildClassUidPlan({
-        ...geo, classifiers: classifierLeaves(geo.leaves), notes: noteLeaves(geo.leaves),
+        ...geo,
+        classifiers: classifierLeaves(geo.leaves),
+        notes: noteLeaves(geo.leaves),
       });
 
       // Compare over the GEO keys: those are the classifiers that actually

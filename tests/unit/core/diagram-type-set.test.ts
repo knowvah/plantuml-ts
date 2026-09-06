@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  DiagramType,
-  findStartTypes,
-} from '../../../src/core/diagram-type-set.js';
+import { DiagramType, findStartTypes } from '../../../src/core/diagram-type-set.js';
 
 // Every case exercises a branch of `DiagramType.findStartTypes`/`getTypes`
 // (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/
@@ -22,15 +19,11 @@ describe('findStartTypes — non-start lines (:69-92)', () => {
   });
 
   it('skips leading whitespace before the @ (:73-74)', () => {
-    expect(findStartTypes('   @startjson')).toEqual(
-      new Set([DiagramType.JSON]),
-    );
+    expect(findStartTypes('   @startjson')).toEqual(new Set([DiagramType.JSON]));
   });
 
   it('accepts the \\start form, not just @start (:76)', () => {
-    expect(findStartTypes('\\startjson')).toEqual(
-      new Set([DiagramType.JSON]),
-    );
+    expect(findStartTypes('\\startjson')).toEqual(new Set([DiagramType.JSON]));
   });
 });
 
@@ -51,35 +44,25 @@ describe('findStartTypes — truncated / boundary input (:81-86)', () => {
 
 describe('findStartTypes — case sensitivity (:220-232 check)', () => {
   it('matches "start" and the tag case-insensitively', () => {
-    expect(findStartTypes('@STARTJSON')).toEqual(
-      new Set([DiagramType.JSON]),
-    );
-    expect(findStartTypes('@StArTyAmL')).toEqual(
-      new Set([DiagramType.YAML]),
-    );
+    expect(findStartTypes('@STARTJSON')).toEqual(new Set([DiagramType.JSON]));
+    expect(findStartTypes('@StArTyAmL')).toEqual(new Set([DiagramType.YAML]));
   });
 });
 
 describe('findStartTypes — unmatched tags (:94-218 default fallthrough)', () => {
   it('returns {UNKNOWN} -- not empty -- for an unmatched tag (:215-216)', () => {
-    expect(findStartTypes('@startfoo')).toEqual(
-      new Set([DiagramType.UNKNOWN]),
-    );
+    expect(findStartTypes('@startfoo')).toEqual(new Set([DiagramType.UNKNOWN]));
   });
 
   it('returns {UNKNOWN} for a first character outside every case label', () => {
     // 'x' is not one of b/c/d/e/f/g/h/j/l/m/n/p/r/s/u/w/y (:94-218), so this
     // hits the Java switch's own `default:` branch (:215-216), not a
     // per-letter fallthrough.
-    expect(findStartTypes('@startxyz')).toEqual(
-      new Set([DiagramType.UNKNOWN]),
-    );
+    expect(findStartTypes('@startxyz')).toEqual(new Set([DiagramType.UNKNOWN]));
   });
 
   it('returns {UNKNOWN} when the tag is a valid group letter too short to match any key (:97-102)', () => {
-    expect(findStartTypes('@startb')).toEqual(
-      new Set([DiagramType.UNKNOWN]),
-    );
+    expect(findStartTypes('@startb')).toEqual(new Set([DiagramType.UNKNOWN]));
   });
 
   it('matches with no word-boundary check, per upstream (:198-200 check)', () => {
@@ -179,21 +162,18 @@ const KELVIN = String.fromCharCode(0x212a);
 
 describe('findStartTypes -- Character.isWhitespace, not /\\s/ (:73-74)', () => {
   it('skips the ASCII information separators U+001C-U+001F that /\\s/ misses', () => {
-    for (const c of JAVA_ONLY_WHITESPACE)
-      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+    for (const c of JAVA_ONLY_WHITESPACE) expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
   });
 
   it('skips VT and FF, which the javadoc lists explicitly', () => {
-    for (const c of at(0x0b, 0x0c))
-      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+    for (const c of at(0x0b, 0x0c)) expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
   });
 
   it('does NOT skip the three non-breaking spaces Java excludes', () => {
     // Non-breaking, so `isWhitespace` is false and the character fails the
     // `@`/`\` test -> EMPTY. `/\s/` would have skipped all three and returned
     // the JSON singleton instead.
-    for (const c of NON_BREAKING_SPACES)
-      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set());
+    for (const c of NON_BREAKING_SPACES) expect(findStartTypes(`${c}@startjson`)).toEqual(new Set());
   });
 
   it('does NOT skip U+FEFF, which is Cf rather than a separator', () => {
@@ -201,8 +181,7 @@ describe('findStartTypes -- Character.isWhitespace, not /\\s/ (:73-74)', () => {
   });
 
   it('skips the breaking Unicode separators Java does accept', () => {
-    for (const c of SHARED_SEPARATORS)
-      expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
+    for (const c of SHARED_SEPARATORS) expect(findStartTypes(`${c}@startjson`)).toEqual(new Set([DiagramType.JSON]));
   });
 });
 

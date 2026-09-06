@@ -63,11 +63,7 @@ describe('PARTICIPANT: `of` is optional (FactorySequenceNoteCommand.java:83-85,1
   });
 
   it('note over Alice, "Long Alice" : ok -- comma list unquotes each entry', () => {
-    const ast = parse([
-      'participant Alice',
-      'participant "Long Alice" as B',
-      'note over Alice, "Long Alice" : ok',
-    ]);
+    const ast = parse(['participant Alice', 'participant "Long Alice" as B', 'note over Alice, "Long Alice" : ok']);
     const ev = firstNote(ast);
     expect(ev.participants).toEqual(['Alice', 'Long Alice']);
   });

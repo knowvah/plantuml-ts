@@ -15,8 +15,7 @@ import type { EndpointShape } from './link-grammar.js';
 
 // Trailing decorations on shorthand declarations (`(uc) #green $tag`):
 // restricted to tag/stereotype/color tokens so link lines never match.
-export const SHORTHAND_TRAILER =
-  '((?:\\s*(?:\\$[\\w]+|<<[^>]+>>|#[\\w:;.#\\\\/|-]+|\\[\\[[^\\]]*\\]\\]))*)\\s*';
+export const SHORTHAND_TRAILER = '((?:\\s*(?:\\$[\\w]+|<<[^>]+>>|#[\\w:;.#\\\\/|-]+|\\[\\[[^\\]]*\\]\\]))*)\\s*';
 
 /**
  * {@link SHORTHAND_TRAILER} plus `as <alias>`, in ANY order and any number.
@@ -72,7 +71,5 @@ export function shorthandNode(
  */
 export function resolveEndpointNamespace(state: ParseState, ep: EndpointShape): EndpointShape {
   const resolved = resolveQualifiedNode(state.ast.nodes, ep.id, state.namespaceSeparator);
-  return resolved === undefined
-    ? ep
-    : { id: scopedKey(resolved.segments), symbol: resolved.node.symbol };
+  return resolved === undefined ? ep : { id: scopedKey(resolved.segments), symbol: resolved.node.symbol };
 }

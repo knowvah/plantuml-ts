@@ -215,10 +215,16 @@ describe('layoutClass -- multi-page (T7)', () => {
   });
 
   it('stacks page 2 below page 1 with NEWPAGE_GAP (20px) between them', () => {
-    const makePage1 = (): ClassDiagramAST => makeAST({ classifiers: [makeClassifier('A'), makeClassifier('B')],
-      relationships: [{ from: 'A', to: 'B', type: 'association' } satisfies Relationship] });
-    const makePage2 = (): ClassDiagramAST => makeAST({ classifiers: [makeClassifier('C'), makeClassifier('D')],
-      relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship] });
+    const makePage1 = (): ClassDiagramAST =>
+      makeAST({
+        classifiers: [makeClassifier('A'), makeClassifier('B')],
+        relationships: [{ from: 'A', to: 'B', type: 'association' } satisfies Relationship],
+      });
+    const makePage2 = (): ClassDiagramAST =>
+      makeAST({
+        classifiers: [makeClassifier('C'), makeClassifier('D')],
+        relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship],
+      });
 
     // Lay out each page alone (no `pages` field) to learn its standalone
     // totalHeight and internal top-of-content offset.
@@ -240,8 +246,10 @@ describe('layoutClass -- multi-page (T7)', () => {
 
   it('degenerate page contributes 0 graph captures and no y-collision with the next page', () => {
     const page1 = makeAST({ classifiers: [makeClassifier('Lonely')] }); // degenerate: 1 leaf, no links/groups
-    const page2 = makeAST({ classifiers: [makeClassifier('C'), makeClassifier('D')],
-      relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship] });
+    const page2 = makeAST({
+      classifiers: [makeClassifier('C'), makeClassifier('D')],
+      relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship],
+    });
     page1.pages = [page1, page2];
 
     const { geo, captured } = layoutAndCount(page1);
@@ -264,10 +272,14 @@ describe('layoutClass -- multi-page (T7)', () => {
   });
 
   it('renderClass renders all pages into one stacked SVG', () => {
-    const page1 = makeAST({ classifiers: [makeClassifier('A'), makeClassifier('B')],
-      relationships: [{ from: 'A', to: 'B', type: 'association' } satisfies Relationship] });
-    const page2 = makeAST({ classifiers: [makeClassifier('C'), makeClassifier('D')],
-      relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship] });
+    const page1 = makeAST({
+      classifiers: [makeClassifier('A'), makeClassifier('B')],
+      relationships: [{ from: 'A', to: 'B', type: 'association' } satisfies Relationship],
+    });
+    const page2 = makeAST({
+      classifiers: [makeClassifier('C'), makeClassifier('D')],
+      relationships: [{ from: 'C', to: 'D', type: 'association' } satisfies Relationship],
+    });
     page1.pages = [page1, page2];
 
     const geo = layoutClass(page1, defaultTheme, measurer);
@@ -319,10 +331,7 @@ describe('newpage layout -- corpus fixture sadamo-18-siva346', () => {
 // ---------------------------------------------------------------------------
 
 describe('oracle CLI -- multi-page CLASS export is capped at page 1 (upstream bug)', () => {
-  const dotCacheDir = join(
-    dirname(fileURLToPath(import.meta.url)),
-    '../../../test-results/dot-cache/class',
-  );
+  const dotCacheDir = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
   it('gevuci-69-fafe469 (2 degenerate pages): oracle cache has 0 svek-N.dot', () => {
     const dir = join(dotCacheDir, 'gevuci-69-fafe469');
@@ -361,10 +370,7 @@ describe('oracle CLI -- multi-page CLASS export is capped at page 1 (upstream bu
 
 describe('G2 N28: renderFixtureClass compares against page 1 only', () => {
   const measurer = new DeterministicMeasurer();
-  const dotCacheDir = join(
-    dirname(fileURLToPath(import.meta.url)),
-    '../../../test-results/dot-cache/class',
-  );
+  const dotCacheDir = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
   it.each(['bufogi-69-naba929', 'gevuci-69-fafe469'])(
     '%s: matches the jar oracle byte-for-byte (deterministic tolerance)',

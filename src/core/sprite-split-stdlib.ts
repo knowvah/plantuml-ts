@@ -199,9 +199,7 @@ export async function assembleSpriteSplitContent(
     if (!manifestSet.has(name)) throw new SpriteNotBundledError(bundleName, name);
   }
 
-  const fragments = await Promise.all(
-    sortedNames.map((name) => registry.resolveResource(bundleName, name)),
-  );
+  const fragments = await Promise.all(sortedNames.map((name) => registry.resolveResource(bundleName, name)));
   // Cannot be `undefined`: every `name` above was just checked against
   // `manifestSet`, which mirrors the exact keys `spriteSplitStdlib` used to
   // build the `RemoteBundle`'s `files` map.

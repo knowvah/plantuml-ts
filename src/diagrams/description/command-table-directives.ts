@@ -67,8 +67,7 @@ const RE_HIDE_SHOW_ENTITY = /^(hide|show)\s+(<<[^>]+>>|\S+)\s*$/i;
  *  `parse-helpers-strings.ts`'s `RE_INLINE_URL_TOKEN`).
  *  @see ~/git/plantuml/.../classdiagram/command/CommandUrl.java:62-75 */
 const RE_URL_STATEMENT = new RegExp(
-  '^url\\s*(?:of|for)?\\s+([\\p{L}\\p{N}_.]+|"[^"]+")\\s+(?:is\\s*)?' +
-    '(\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\])\\s*$',
+  '^url\\s*(?:of|for)?\\s+([\\p{L}\\p{N}_.]+|"[^"]+")\\s+(?:is\\s*)?' + '(\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\])\\s*$',
   'iu',
 );
 
@@ -79,14 +78,18 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   // 1. Comment lines
   {
     pattern: /^'/,
-    execute() { /* ignore */ },
+    execute() {
+      /* ignore */
+    },
   },
 
   // 1b. `newpage` (CommandNewpage) — finalize the current page, start a
   //     fresh one. See startNewPage's doc comment.
   {
     pattern: /^newpage\s*$/i,
-    execute(state) { startNewPage(state); },
+    execute(state) {
+      startNewPage(state);
+    },
   },
 
   // 2. Direction directives — must precede the general ignore rule (3) since
@@ -95,11 +98,15 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //    because top-to-bottom is already our unset default.
   {
     pattern: RE_LEFT_TO_RIGHT_DIRECTION,
-    execute(state) { state.ast.rankdir = 'LR'; },
+    execute(state) {
+      state.ast.rankdir = 'LR';
+    },
   },
   {
     pattern: RE_TOP_TO_BOTTOM_DIRECTION,
-    execute() { /* explicit TB is the default; no-op */ },
+    execute() {
+      /* explicit TB is the default; no-op */
+    },
   },
 
   // 2b. skinparam linetype ortho|polyline — svek routes edge labels through
@@ -161,7 +168,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   // @see ~/git/plantuml/.../command/CommonCommands.java:63
   {
     pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
-    execute() { /* ignored -- see rule 2e2's doc comment */ },
+    execute() {
+      /* ignored -- see rule 2e2's doc comment */
+    },
   },
 
   // 2f. `scale ...` directive (net/sourceforge/plantuml/command/
@@ -257,7 +266,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //    reach for `hide`/`show`, see ledger.md I-hideshow).
   {
     pattern: /^(?:skinparam|hide|show)\b/i,
-    execute() { /* ignore */ },
+    execute() {
+      /* ignore */
+    },
   },
 
   // 3b. `remove|restore <id|$tag|*>` — CommandRemoveRestore.java. A LAZY
@@ -306,6 +317,8 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   // 4. Closing brace — pops the current container
   {
     pattern: /^\}\s*$/,
-    execute(state) { state.containerStack.pop(); },
+    execute(state) {
+      state.containerStack.pop();
+    },
   },
 ];

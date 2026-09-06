@@ -255,7 +255,12 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
  *  reuses the SAME per-run size/dy/tab-stop conversion the header/body path
  *  uses, rather than re-deriving a second, narrower one (D1's "one core
  *  seam" principle extended to this state-local helper). */
-export function toStyledLine(line: CreoleTextLine, font: FontSpec, measurer: StringMeasurer, tabSizeNb: number): StateStyledTextLine {
+export function toStyledLine(
+  line: CreoleTextLine,
+  font: FontSpec,
+  measurer: StringMeasurer,
+  tabSizeNb: number,
+): StateStyledTextLine {
   const runs = line.runs.flatMap((r) => expandRun(r, font, measurer, tabSizeNb));
   return {
     text: runs.map((r) => r.text).join(''),
@@ -278,7 +283,9 @@ function blankLine(font: FontSpec): StateStyledTextLine {
     text: NBSP,
     width: 0,
     height: font.size,
-    runs: [{ text: NBSP, width: 0, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 }],
+    runs: [
+      { text: NBSP, width: 0, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 },
+    ],
   };
 }
 
@@ -338,7 +345,10 @@ interface MeasuredCell {
  *  this port's deterministic width table is weight-agnostic
  *  (`leaf-sizing-text.ts#creoleVisibleText`'s own doc comment), so the
  *  header font differs only in what the RENDERER draws. */
-function measureCell(spec: TableCellSpec, ctx: { font: FontSpec; measurer: StringMeasurer; tabSizeNb: number }): MeasuredCell {
+function measureCell(
+  spec: TableCellSpec,
+  ctx: { font: FontSpec; measurer: StringMeasurer; tabSizeNb: number },
+): MeasuredCell {
   const built = creoleTextLines(spec.text, ctx.font, ctx.measurer);
   const first = built[0];
   if (first === undefined) return { runs: [], width: 0, height: ctx.font.size };
@@ -363,9 +373,7 @@ function prefixSums(sizes: readonly number[]): number[] {
 
 function tableGeo(rows: readonly (readonly MeasuredCell[])[], fontSize: number): StateTableGeo {
   const nbCols = maxBy(rows.map((r) => r.length));
-  const colX = prefixSums(
-    Array.from({ length: nbCols }, (_, j) => maxBy(rows.map((r) => r[j]?.width ?? 0))),
-  );
+  const colX = prefixSums(Array.from({ length: nbCols }, (_, j) => maxBy(rows.map((r) => r[j]?.width ?? 0))));
   const rowY = prefixSums(rows.map((r) => (r.length === 0 ? fontSize : maxBy(r.map((c) => c.height)))));
   const cells: StateTableCell[] = [];
   rows.forEach((row, i) => {
@@ -384,7 +392,10 @@ function tableLine(
   tabSizeNb: number,
 ): StateStyledTextLine {
   const ctx = { font, measurer, tabSizeNb };
-  const table = tableGeo(rows.map((r) => splitTableRow(r).map((c) => measureCell(c, ctx))), font.size);
+  const table = tableGeo(
+    rows.map((r) => splitTableRow(r).map((c) => measureCell(c, ctx))),
+    font.size,
+  );
   return { text: '', width: table.width, height: table.height + 2 * TABLE_MARGIN_Y, runs: [], table };
 }
 

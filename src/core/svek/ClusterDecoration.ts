@@ -110,11 +110,23 @@ export class ClusterDecoration {
     diagonalCorner: number,
   ): TextBlock {
     const symbol = this.symbol;
-    if (symbol === null) throw new Error('ClusterDecoration.getTextBlock: no USymbol resolved (upstream: UnsupportedOperationException)');
+    if (symbol === null)
+      throw new Error('ClusterDecoration.getTextBlock: no USymbol resolved (upstream: UnsupportedOperationException)');
 
     const biColor = new SymbolContext(backColor, borderColor);
-    const symbolContext = biColor.withShadow(shadowing).withStroke(this.defaultStroke).withCorner(roundCorner, diagonalCorner);
-    return symbol.asBig(this.title, titleAlignment, this.stereo, this.geometry.width, this.geometry.height, symbolContext, stereoAlignment);
+    const symbolContext = biColor
+      .withShadow(shadowing)
+      .withStroke(this.defaultStroke)
+      .withCorner(roundCorner, diagonalCorner);
+    return symbol.asBig(
+      this.title,
+      titleAlignment,
+      this.stereo,
+      this.geometry.width,
+      this.geometry.height,
+      symbolContext,
+      stereoAlignment,
+    );
     // #lizard forgives -- 7 params mirrors ClusterDecoration.java#getTextBlock's
     // own signature exactly.
   }

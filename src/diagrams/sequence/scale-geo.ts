@@ -81,11 +81,7 @@ import type {
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type {
-  ArrowCircle,
-  ArrowSegment,
-  HeadGeometry,
-} from './sequence-arrowhead.js';
+import type { ArrowCircle, ArrowSegment, HeadGeometry } from './sequence-arrowhead.js';
 import type { Point2D } from '../../core/klimt/UTranslate.js';
 import { fmt } from '../../core/svg-format.js';
 
@@ -144,9 +140,7 @@ function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
     // both scale. Omitting this drew every scaled participant label at its
     // unscaled left edge and baseline.
     labelRuns: p.labelRuns.map((r) => scaleRun(r, k)),
-    ...(p.badge !== undefined
-      ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } }
-      : {}),
+    ...(p.badge !== undefined ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } } : {}),
   };
 }
 
@@ -160,7 +154,6 @@ function scaleBox(b: BoxGeo, k: number): BoxGeo {
     labelRuns: b.labelRuns.map((r) => scaleRun(r, k)),
   };
 }
-
 
 /**
  * A message's geometry, scaled. Covers exo messages too: they emit a

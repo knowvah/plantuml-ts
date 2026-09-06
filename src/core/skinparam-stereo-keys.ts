@@ -123,11 +123,7 @@ const ELEMENT_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)fontsize<<(.+)>>$');
  *  win, so its handler runs AFTER that table. */
 const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(.+)>>$');
 
-type StereoHandler = (
-  acc: SkinparamAccumulator,
-  stereo: string,
-  value: string,
-) => void;
+type StereoHandler = (acc: SkinparamAccumulator, stereo: string, value: string) => void;
 
 /**
  * Regex → handler table for stereotype-qualified keys, tried in order
@@ -209,11 +205,7 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
  * consumed, so it falls through to the table and then to `acc.unknown`,
  * exactly as it did before this matcher existed.
  */
-function applyElementStereotypeFontSize(
-  acc: SkinparamAccumulator,
-  key: string,
-  value: string,
-): boolean {
+function applyElementStereotypeFontSize(acc: SkinparamAccumulator, key: string, value: string): boolean {
   const m = ELEMENT_STEREOTYPE_FONT_SIZE_STEREO_RE.exec(key);
   if (m === null) return false;
   const sname = m[1]!;
@@ -233,11 +225,7 @@ function applyElementStereotypeFontSize(
  * {@link applyElementStereotypeFontSize}: a non-bucket sname or a non-numeric
  * value falls through to `acc.unknown`.
  */
-function applyElementFontSizeByStereo(
-  acc: SkinparamAccumulator,
-  key: string,
-  value: string,
-): boolean {
+function applyElementFontSizeByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
   const m = ELEMENT_FONT_SIZE_STEREO_RE.exec(key);
   if (m === null) return false;
   const sname = m[1]!;
@@ -264,11 +252,7 @@ function applyElementFontSizeByStereo(
  * of re-mirroring it (7 matcher rows, 13 `*ByStereo` fields, 63 consumer
  * sites) and why that is tracked separately rather than done inline.
  */
-function applyElementBackgroundColorByStereo(
-  acc: SkinparamAccumulator,
-  key: string,
-  value: string,
-): boolean {
+function applyElementBackgroundColorByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
   const m = ELEMENT_BACKGROUND_COLOR_STEREO_RE.exec(key);
   if (m === null) return false;
   const sname = m[1]!;
@@ -289,11 +273,7 @@ function applyElementBackgroundColorByStereo(
  * {@link applyElementFontSizeByStereo}. No match falls through to
  * `acc.unknown`.
  */
-export function applyStereoOverride(
-  acc: SkinparamAccumulator,
-  key: string,
-  value: string,
-): void {
+export function applyStereoOverride(acc: SkinparamAccumulator, key: string, value: string): void {
   if (applyElementStereotypeFontSize(acc, key, value)) return;
   for (const [re, handler] of STEREO_KEY_MATCHERS) {
     const m = re.exec(key);

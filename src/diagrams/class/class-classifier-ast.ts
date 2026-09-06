@@ -9,7 +9,6 @@ import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { UrlInfo } from './class-url.js';
 import type { MapRow } from './ast.js';
 
-
 export type ClassifierKind =
   | 'class'
   | 'abstract'

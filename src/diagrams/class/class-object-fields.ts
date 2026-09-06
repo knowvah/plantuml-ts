@@ -118,9 +118,7 @@ function tabStopWidthPx(theme: Theme, measurer: StringMeasurer): number {
  *  `\n` specifically has NO meaning inside a single already-newline-split
  *  field line. `layoutTabRuns` (above) consumes the resulting real tab
  *  byte via `AtomText#drawU`'s own tokenizer shape. */
-export function formatObjectMemberText(
-  member: Pick<Member, 'name' | 'type' | 'rawDisplay' | 'typeSeparator'>,
-): string {
+export function formatObjectMemberText(member: Pick<Member, 'name' | 'type' | 'rawDisplay' | 'typeSeparator'>): string {
   const raw =
     member.rawDisplay !== undefined
       ? member.rawDisplay
@@ -201,7 +199,10 @@ export function measureObjectFields(
   // stops expanded inside the resulting text atoms rather than instead of
   // them -- see `class-object-member-creole.ts`.
   const font: FontConfiguration = {
-    family: fontSpec.family, size: fontSpec.size, color: null, styles: new Set(),
+    family: fontSpec.family,
+    size: fontSpec.size,
+    color: null,
+    styles: new Set(),
   };
   const builds = texts.map((t) => buildObjectMemberRow(t, font, measurer, tabStopPx));
   const widths = builds.map((b) => b.width);

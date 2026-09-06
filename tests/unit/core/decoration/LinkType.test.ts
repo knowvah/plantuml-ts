@@ -93,9 +93,7 @@ describe('getSpecificDecorationSvek (java:163-197)', () => {
 
   it('LEGACY: both empty', () => {
     const t = new LinkType(LinkDecor.NONE, LinkDecor.NONE);
-    expect(t.getSpecificDecorationSvek(LinkStrategy.LEGACY_toberemoved)).toBe(
-      'arrowtail=none,arrowhead=none',
-    );
+    expect(t.getSpecificDecorationSvek(LinkStrategy.LEGACY_toberemoved)).toBe('arrowtail=none,arrowhead=none');
   });
 
   it('LEGACY: both decorated emits dir=both with Java double arrowsize', () => {
@@ -142,8 +140,7 @@ describe('getStroke3 (java:245-256)', () => {
 });
 
 describe('getLinkTypeName (java:276-308)', () => {
-  const name = (d1: LinkDecor, d2: LinkDecor): string | null =>
-    new LinkType(d1, d2).getLinkTypeName();
+  const name = (d1: LinkDecor, d2: LinkDecor): string | null => new LinkType(d1, d2).getLinkTypeName();
 
   it('maps decors to semantic names in upstream priority order', () => {
     expect(name(LinkDecor.COMPOSITION, LinkDecor.NONE)).toBe('composition');

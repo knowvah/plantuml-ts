@@ -127,13 +127,10 @@ const KEYWORD_SYMBOL_ENTRIES: readonly (readonly [string, USymbol])[] = [
 ];
 
 /** The descriptive keyword list (lowercase), in upstream declaration order. */
-export const ALL_TYPES: readonly string[] =
-  KEYWORD_SYMBOL_ENTRIES.map(([keyword]) => keyword);
+export const ALL_TYPES: readonly string[] = KEYWORD_SYMBOL_ENTRIES.map(([keyword]) => keyword);
 
 /** Keyword → `USymbol` shape lookup. */
-export const KEYWORD_TO_SYMBOL: ReadonlyMap<string, USymbol> = new Map(
-  KEYWORD_SYMBOL_ENTRIES,
-);
+export const KEYWORD_TO_SYMBOL: ReadonlyMap<string, USymbol> = new Map(KEYWORD_SYMBOL_ENTRIES);
 
 export function stripSpriteRegions(lines: readonly string[]): string[] {
   const out: string[] = [];

@@ -66,8 +66,11 @@ function renderDividerPart(
   return (
     segment(fullStart, y, labelStart) +
     svgText(labelStart, geo.y + part.title.y, part.title.text, {
-      fontFamily: theme.fontFamily, fontSize: theme.fontSize, fill: '#000000',
-      lengthAdjust: 'spacing', textLength: part.title.width,
+      fontFamily: theme.fontFamily,
+      fontSize: theme.fontSize,
+      fill: '#000000',
+      lengthAdjust: 'spacing',
+      textLength: part.title.width,
     }) +
     segment(labelEnd, y, fullEnd)
   );

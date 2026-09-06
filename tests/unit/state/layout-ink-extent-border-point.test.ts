@@ -54,28 +54,20 @@ describe('computeStateDocumentDims — border-point composite ink overflow', () 
 
   it('grows the canvas by the overflow, on the side that overflows', () => {
     // temuxi's own module: 81px of raw box above the frame it draws.
-    const dims = computeStateDocumentDims(
-      [composite({ inkOverflow: { top: 81, right: 0, bottom: 0, left: 0 } })],
-      [],
-    );
+    const dims = computeStateDocumentDims([composite({ inkOverflow: { top: 81, right: 0, bottom: 0, left: 0 } })], []);
     expect(dims.height - baseline.height).toBe(81);
     expect(dims.width).toBe(baseline.width);
   });
 
   it('accumulates all four sides independently', () => {
-    const dims = computeStateDocumentDims(
-      [composite({ inkOverflow: { top: 10, right: 7, bottom: 3, left: 5 } })],
-      [],
-    );
+    const dims = computeStateDocumentDims([composite({ inkOverflow: { top: 10, right: 7, bottom: 3, left: 5 } })], []);
     expect(dims.height - baseline.height).toBe(13);
     expect(dims.width - baseline.width).toBe(12);
   });
 
   it('leaves a composite without the field byte-identical', () => {
     const withField = composite({ inkOverflow: { top: 0, right: 0, bottom: 0, left: 0 } });
-    expect(computeStateDocumentDims([withField], [])).toEqual(
-      computeStateDocumentDims([composite()], []),
-    );
+    expect(computeStateDocumentDims([withField], [])).toEqual(computeStateDocumentDims([composite()], []));
   });
 });
 

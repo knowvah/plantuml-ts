@@ -27,12 +27,7 @@
  * DOT-export time, on the complete diagram model, not per-block-close.
  */
 import type { ParseState } from './parser.js';
-import {
-  splitOnSeparator,
-  ensureNamespaceChain,
-  collapseEmptyNamespace,
-  qualifiedId,
-} from './class-namespace.js';
+import { splitOnSeparator, ensureNamespaceChain, collapseEmptyNamespace, qualifiedId } from './class-namespace.js';
 import { NOTE_URL, NOTE_COLOR } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
@@ -86,11 +81,7 @@ function muteClassifierToGroup(state: ParseState, effectiveId: string): number |
  * under two different enclosing packages build two independent `ddf`
  * clusters instead of merging into one global `ddf` (tibatu-28-jiro743).
  */
-export function openNamespaceBlock(
-  state: ParseState,
-  id: string,
-  display: string,
-): string {
+export function openNamespaceBlock(state: ParseState, id: string, display: string): string {
   // Restore point for the enclosing container on the matching `}`.
   const enclosing = state.activeNamespace;
   state.namespaceStack.push(enclosing);
@@ -182,10 +173,7 @@ export function closeBraceScope(state: ParseState): void {
     state.pendingBodyId = null;
     return;
   }
-  if (
-    state.togetherStack.length > 0 &&
-    state.togetherStack[state.togetherStack.length - 1] === state.activeNamespace
-  ) {
+  if (state.togetherStack.length > 0 && state.togetherStack[state.togetherStack.length - 1] === state.activeNamespace) {
     state.togetherStack.pop();
     return;
   }
@@ -245,13 +233,42 @@ interface Command {
  * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:98-120 (fromString)
  */
 const USYMBOL_NAMES: ReadonlySet<string> = new Set([
-  'ACTION', 'ACTOR_AWESOME', 'ACTOR_HOLLOW', 'ACTOR_STICKMAN',
-  'ACTOR_STICKMAN_BUSINESS', 'AGENT', 'ARCHIMATE', 'ARTIFACT', 'BOUNDARY',
-  'CARD', 'CLOUD', 'COLLECTIONS', 'COMPONENT_RECTANGLE', 'COMPONENT1',
-  'COMPONENT2', 'CONTROL', 'DATABASE', 'ENTITY_DOMAIN', 'FILE', 'FOLDER',
-  'FRAME', 'GROUP', 'HEXAGON', 'INTERFACE', 'LABEL', 'NODE', 'PACKAGE',
-  'PARTITION', 'PERSON', 'PROCESS', 'QUEUE', 'RECTANGLE', 'STACK', 'STORAGE',
-  'USECASE', 'USECASE_BUSINESS',
+  'ACTION',
+  'ACTOR_AWESOME',
+  'ACTOR_HOLLOW',
+  'ACTOR_STICKMAN',
+  'ACTOR_STICKMAN_BUSINESS',
+  'AGENT',
+  'ARCHIMATE',
+  'ARTIFACT',
+  'BOUNDARY',
+  'CARD',
+  'CLOUD',
+  'COLLECTIONS',
+  'COMPONENT_RECTANGLE',
+  'COMPONENT1',
+  'COMPONENT2',
+  'CONTROL',
+  'DATABASE',
+  'ENTITY_DOMAIN',
+  'FILE',
+  'FOLDER',
+  'FRAME',
+  'GROUP',
+  'HEXAGON',
+  'INTERFACE',
+  'LABEL',
+  'NODE',
+  'PACKAGE',
+  'PARTITION',
+  'PERSON',
+  'PROCESS',
+  'QUEUE',
+  'RECTANGLE',
+  'STACK',
+  'STORAGE',
+  'USECASE',
+  'USECASE_BUSINESS',
 ]);
 
 /**
@@ -278,19 +295,40 @@ export const HEADER_STEREO_CAPTURE = '(?:\\s*(<<.+?>>))?';
  * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:60-95
  */
 const USYMBOL_REGISTRY_TO_KEYWORD: ReadonlyMap<string, string> = new Map([
-  ['ACTION', 'action'], ['ACTOR_AWESOME', 'actor'], ['ACTOR_HOLLOW', 'actor'],
-  ['ACTOR_STICKMAN', 'actor'], ['ACTOR_STICKMAN_BUSINESS', 'actor/'],
-  ['AGENT', 'agent'], ['ARCHIMATE', 'archimate'], ['ARTIFACT', 'artifact'],
-  ['BOUNDARY', 'boundary'], ['CARD', 'card'], ['CLOUD', 'cloud'],
-  ['COLLECTIONS', 'collections'], ['COMPONENT_RECTANGLE', 'component'],
-  ['COMPONENT1', 'component'], ['COMPONENT2', 'component'],
-  ['CONTROL', 'control'], ['DATABASE', 'database'],
-  ['ENTITY_DOMAIN', 'entity'], ['FILE', 'file'], ['FOLDER', 'folder'],
-  ['FRAME', 'frame'], ['HEXAGON', 'hexagon'], ['INTERFACE', 'interface'],
-  ['LABEL', 'label'], ['NODE', 'node'], ['PACKAGE', 'package'],
-  ['PERSON', 'person'], ['PROCESS', 'process'], ['QUEUE', 'queue'],
-  ['RECTANGLE', 'rectangle'], ['STACK', 'stack'], ['STORAGE', 'storage'],
-  ['USECASE', 'usecase'], ['USECASE_BUSINESS', 'usecase/'],
+  ['ACTION', 'action'],
+  ['ACTOR_AWESOME', 'actor'],
+  ['ACTOR_HOLLOW', 'actor'],
+  ['ACTOR_STICKMAN', 'actor'],
+  ['ACTOR_STICKMAN_BUSINESS', 'actor/'],
+  ['AGENT', 'agent'],
+  ['ARCHIMATE', 'archimate'],
+  ['ARTIFACT', 'artifact'],
+  ['BOUNDARY', 'boundary'],
+  ['CARD', 'card'],
+  ['CLOUD', 'cloud'],
+  ['COLLECTIONS', 'collections'],
+  ['COMPONENT_RECTANGLE', 'component'],
+  ['COMPONENT1', 'component'],
+  ['COMPONENT2', 'component'],
+  ['CONTROL', 'control'],
+  ['DATABASE', 'database'],
+  ['ENTITY_DOMAIN', 'entity'],
+  ['FILE', 'file'],
+  ['FOLDER', 'folder'],
+  ['FRAME', 'frame'],
+  ['HEXAGON', 'hexagon'],
+  ['INTERFACE', 'interface'],
+  ['LABEL', 'label'],
+  ['NODE', 'node'],
+  ['PACKAGE', 'package'],
+  ['PERSON', 'person'],
+  ['PROCESS', 'process'],
+  ['QUEUE', 'queue'],
+  ['RECTANGLE', 'rectangle'],
+  ['STACK', 'stack'],
+  ['STORAGE', 'storage'],
+  ['USECASE', 'usecase'],
+  ['USECASE_BUSINESS', 'usecase/'],
 ]);
 
 /**
@@ -388,11 +426,7 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
   // part of the bracket run, not the trailing brace.
   {
     pattern: new RegExp(
-      '^namespace\\s+("[^"]*"|[^\\s#<{]+)' +
-        HEADER_STEREO_CAPTURE +
-        NOTE_URL +
-        NOTE_COLOR +
-        '\\s*\\{(\\s*\\})?\\s*$',
+      '^namespace\\s+("[^"]*"|[^\\s#<{]+)' + HEADER_STEREO_CAPTURE + NOTE_URL + NOTE_COLOR + '\\s*\\{(\\s*\\})?\\s*$',
       'i',
     ),
     execute(state, match) {

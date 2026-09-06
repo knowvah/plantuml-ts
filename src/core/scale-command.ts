@@ -181,11 +181,7 @@ function clampScale(raw: number): number {
  * already computed and `SvgOption.minDim` is built from, never re-derived
  * from an already-scaled value.
  */
-export function resolveScaleFactor(
-  spec: ScaleSpec | undefined,
-  width: number,
-  height: number,
-): number {
+export function resolveScaleFactor(spec: ScaleSpec | undefined, width: number, height: number): number {
   if (spec === undefined) return 1;
   switch (spec.kind) {
     case 'simple':

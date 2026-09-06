@@ -19,12 +19,9 @@ describe('YAML parser — root-level arrays', () => {
   });
 
   it('gatuva-87: list of objects at root', () => {
-    expect(parse([
-      '  - name: Mark McGwire', '    hr:   65',
-      '  - name: Sammy Sosa',   '    hr:   63',
-    ])).toEqual([
+    expect(parse(['  - name: Mark McGwire', '    hr:   65', '  - name: Sammy Sosa', '    hr:   63'])).toEqual([
       { name: 'Mark McGwire', hr: '65' },
-      { name: 'Sammy Sosa',   hr: '63' },
+      { name: 'Sammy Sosa', hr: '63' },
     ]);
   });
 
@@ -39,9 +36,7 @@ describe('YAML parser — root-level arrays', () => {
   });
 
   it('list items with inline flow sequences', () => {
-    expect(parse(['- tags: [a, b]', '- tags: [c, d]'])).toEqual([
-      { tags: ['a', 'b'] }, { tags: ['c', 'd'] },
-    ]);
+    expect(parse(['- tags: [a, b]', '- tags: [c, d]'])).toEqual([{ tags: ['a', 'b'] }, { tags: ['c', 'd'] }]);
   });
 
   it('renderSync produces SVG for root-array YAML', () => {

@@ -42,11 +42,7 @@ describe('YAML parser — special keys', () => {
   });
 
   it('xubife-72 style: Kubernetes nested labels', () => {
-    expect(parse([
-      'labels:',
-      '  app: blazor',
-      '  pod-template-hash: "7966669766"',
-    ])).toEqual({
+    expect(parse(['labels:', '  app: blazor', '  pod-template-hash: "7966669766"'])).toEqual({
       labels: { app: 'blazor', 'pod-template-hash': '7966669766' },
     });
   });

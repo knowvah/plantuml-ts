@@ -41,11 +41,7 @@ export interface CaptureResult {
 
 /** Copy every file of one bundle into destRoot/<name>/... verbatim and
  * build its sha256 manifest (hashed from the copied, on-disk bytes). */
-export function captureBundle(
-  name: string,
-  srcDir: string,
-  destRoot: string,
-): CaptureResult {
+export function captureBundle(name: string, srcDir: string, destRoot: string): CaptureResult {
   const destDir = join(destRoot, name);
   const files = walkFiles(srcDir);
   const hashes: Record<string, string> = {};

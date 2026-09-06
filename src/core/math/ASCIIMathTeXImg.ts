@@ -59,9 +59,7 @@ function javaSubstring(str: string, beginIndex: number, endIndex?: number): stri
 /** `java.lang.String#charAt(int)`, exception included. */
 function javaCharAt(str: string, index: number): string {
   if (index < 0 || index >= str.length) {
-    throw new Error(
-      `StringIndexOutOfBoundsException: index ${String(index)}, length ${String(str.length)}`,
-    );
+    throw new Error(`StringIndexOutOfBoundsException: index ${String(index)}, length ${String(str.length)}`);
   }
   return str.charAt(index);
 }
@@ -202,9 +200,7 @@ export class ASCIIMathTeXImg {
         mk = k;
         i = match.length;
       }
-      more =
-        k < aAMnames.length &&
-        javaCompareTo(this.slice(str, 0, aAMnames[k]!.length), aAMnames[k]!) >= 0;
+      more = k < aAMnames.length && javaCompareTo(this.slice(str, 0, aAMnames[k]!.length), aAMnames[k]!) >= 0;
     }
     this.aAMpreviousSymbol = this.aAMcurrentSymbol;
     if (match !== '') {
@@ -245,12 +241,7 @@ export class ASCIIMathTeXImg {
           ? 'mo'
           : 'mi';
     }
-    if (
-      st === '-' &&
-      str.length > 1 &&
-      javaCharAt(str, 1) !== ' ' &&
-      this.aAMpreviousSymbol === Ttype.INFIX
-    ) {
+    if (st === '-' && str.length > 1 && javaCharAt(str, 1) !== ' ' && this.aAMpreviousSymbol === Ttype.INFIX) {
       this.aAMcurrentSymbol = Ttype.INFIX;
       return new Tuple(st, tagst, st, null, Ttype.UNARY, Flag.FUNC, Flag.VAL);
     }
@@ -628,10 +619,7 @@ export class ASCIIMathTeXImg {
         const right = javaCharAt(newFrag, len - 2);
         if (right === ')' || right === ']') {
           const left = javaCharAt(newFrag, 6);
-          if (
-            (left === '(' && right === ')' && symbol.output !== '}') ||
-            (left === '[' && right === ']')
-          ) {
+          if ((left === '(' && right === ')' && symbol.output !== '}') || (left === '[' && right === ']')) {
             let mxout = '';
             const pos: number[] = []; // position of commas
             pos.push(0);
@@ -663,18 +651,10 @@ export class ASCIIMathTeXImg {
                   subpos[lastsubposstart] = [i + 2];
                 }
               }
-              if (
-                javaCharAt(newFrag, i) === '[' ||
-                javaCharAt(newFrag, i) === '(' ||
-                javaCharAt(newFrag, i) === '{'
-              ) {
+              if (javaCharAt(newFrag, i) === '[' || javaCharAt(newFrag, i) === '(' || javaCharAt(newFrag, i) === '{') {
                 mxanynestingd++;
               }
-              if (
-                javaCharAt(newFrag, i) === ']' ||
-                javaCharAt(newFrag, i) === ')' ||
-                javaCharAt(newFrag, i) === '}'
-              ) {
+              if (javaCharAt(newFrag, i) === ']' || javaCharAt(newFrag, i) === ')' || javaCharAt(newFrag, i) === '}') {
                 mxanynestingd--;
               }
               if (javaCharAt(newFrag, i) === ',' && mxanynestingd === 1) {

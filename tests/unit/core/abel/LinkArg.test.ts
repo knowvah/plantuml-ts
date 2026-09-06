@@ -32,12 +32,8 @@ describe('LinkArg', () => {
   });
 
   it('extracts the method visibility modifier from the first label element', () => {
-    expect(LinkArg.build(Display.create('+run()'), 1).getVisibilityModifier()).toBe(
-      VisibilityModifier.PUBLIC_METHOD,
-    );
-    expect(LinkArg.build(Display.create('-x y'), 1).getVisibilityModifier()).toBe(
-      VisibilityModifier.PRIVATE_METHOD,
-    );
+    expect(LinkArg.build(Display.create('+run()'), 1).getVisibilityModifier()).toBe(VisibilityModifier.PUBLIC_METHOD);
+    expect(LinkArg.build(Display.create('-x y'), 1).getVisibilityModifier()).toBe(VisibilityModifier.PRIVATE_METHOD);
   });
 
   it('manageVisibilityModifier=false skips extraction', () => {

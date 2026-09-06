@@ -6,13 +6,7 @@
 import type { FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { LayoutCtx } from './activity-layout-types.js';
-import {
-  ACTION_HEIGHT,
-  ACTION_H_PAD,
-  DIAMOND_LABEL_PAD,
-  DIAMOND_MIN,
-  NOTE_FOLD,
-} from './activity-layout-constants.js';
+import { ACTION_HEIGHT, ACTION_H_PAD, DIAMOND_LABEL_PAD, DIAMOND_MIN, NOTE_FOLD } from './activity-layout-constants.js';
 
 export function nextId(ctx: LayoutCtx, prefix: string): string {
   const current = ctx.counters.get(prefix) ?? 0;
@@ -40,10 +34,7 @@ export function repeatCondSize(label: string, ctx: LayoutCtx): { width: number; 
   return { width: m.width + h, height: h };
 }
 
-export function actionSize(
-  label: string,
-  ctx: LayoutCtx,
-): { width: number; height: number } {
+export function actionSize(label: string, ctx: LayoutCtx): { width: number; height: number } {
   const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
   if (label.includes('<latex>')) {
     const measured = measureNodeLabel(label, ctx.measurer, font);
@@ -58,20 +49,14 @@ export function actionSize(
   };
 }
 
-export function parallelogramSize(
-  label: string,
-  ctx: LayoutCtx,
-): { width: number; height: number } {
+export function parallelogramSize(label: string, ctx: LayoutCtx): { width: number; height: number } {
   const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
   const measured = measureNodeLabel(label, ctx.measurer, font);
   const h = Math.max(ACTION_HEIGHT, measured.height);
   return { width: measured.width, height: h };
 }
 
-export function noteSize(
-  label: string,
-  ctx: LayoutCtx,
-): { width: number; height: number } {
+export function noteSize(label: string, ctx: LayoutCtx): { width: number; height: number } {
   const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
   const lines = label.split('\n');
   const lineHeight = ctx.theme.fontSize * 1.4;
@@ -114,11 +99,7 @@ export function orthogonalPoints(
  * When swimlanes are active and the node has a lane, uses that lane's center.
  * Otherwise uses the provided fallback center (branch-specific center).
  */
-export function nodeCenterX(
-  swimlane: string | undefined,
-  fallbackCenterX: number,
-  ctx: LayoutCtx,
-): number {
+export function nodeCenterX(swimlane: string | undefined, fallbackCenterX: number, ctx: LayoutCtx): number {
   if (swimlane !== undefined && ctx.laneX.size > 0) {
     const lx = ctx.laneX.get(swimlane);
     if (lx !== undefined) {
@@ -130,10 +111,7 @@ export function nodeCenterX(
       // or a fallback that landed on a lane boundary) snap to the lane's
       // center.
       const margin = 1;
-      if (
-        fallbackCenterX > lx + margin &&
-        fallbackCenterX < lx + ctx.laneWidth - margin
-      ) {
+      if (fallbackCenterX > lx + margin && fallbackCenterX < lx + ctx.laneWidth - margin) {
         return fallbackCenterX;
       }
       return laneCenter;

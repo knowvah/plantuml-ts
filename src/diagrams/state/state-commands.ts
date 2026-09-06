@@ -232,10 +232,7 @@ export const COMMANDS: readonly Command[] = [
         // becomes one line below.
         const localRegionNumber = scope.regions.length - 1;
         const ownerId = scope.owner?.id ?? '';
-        ps.concurrentGlobalIds.set(
-          concurrentRegionScopeId(ownerId, localRegionNumber),
-          nextConcurrentGlobalId(ps),
-        );
+        ps.concurrentGlobalIds.set(concurrentRegionScopeId(ownerId, localRegionNumber), nextConcurrentGlobalId(ps));
       }
       scope.regionCursor++;
     },

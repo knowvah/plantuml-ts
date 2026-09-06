@@ -8,11 +8,7 @@
  * sprite command layer still uses; their tests are kept and the rest removed.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  ALL_TYPES,
-  KEYWORD_TO_SYMBOL,
-  stripSpriteRegions,
-} from '../../../src/core/descriptive-keywords.js';
+import { ALL_TYPES, KEYWORD_TO_SYMBOL, stripSpriteRegions } from '../../../src/core/descriptive-keywords.js';
 
 describe('descriptive-keywords — ALL_TYPES / KEYWORD_TO_SYMBOL', () => {
   it('covers the full upstream ALL_TYPES keyword set, plus `archimate` (T8)', () => {
@@ -85,9 +81,10 @@ describe('descriptive-keywords — ALL_TYPES / KEYWORD_TO_SYMBOL', () => {
 
 describe('descriptive-keywords — stripSpriteRegions', () => {
   it('drops a multiline sprite body and keeps the surrounding lines', () => {
-    expect(
-      stripSpriteRegions(['component A', 'sprite $s [4x4/16] {', '0F', 'F0', '}', 'component B']),
-    ).toEqual(['component A', 'component B']);
+    expect(stripSpriteRegions(['component A', 'sprite $s [4x4/16] {', '0F', 'F0', '}', 'component B'])).toEqual([
+      'component A',
+      'component B',
+    ]);
   });
 
   it('leaves a source with no sprite block untouched', () => {

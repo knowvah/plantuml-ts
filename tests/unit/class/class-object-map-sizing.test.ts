@@ -125,10 +125,38 @@ describe('measureObjectClassifier — 4 explicit-visibility field rows (nukera-0
     const ast = makeAST([
       objectClassifier('p1', '~#1: Person', {
         members: [
-          { visibility: '-', name: 'toto', rawDisplay: 'String toto = "hello"', isStatic: false, isAbstract: false, visibilityExplicit: true },
-          { visibility: '#', name: 'toto', rawDisplay: 'String toto = "hello"', isStatic: false, isAbstract: false, visibilityExplicit: true },
-          { visibility: '~', name: 'toto', rawDisplay: 'String toto = "hello"', isStatic: false, isAbstract: false, visibilityExplicit: true },
-          { visibility: '+', name: 'toto', rawDisplay: 'String toto = "hello"', isStatic: false, isAbstract: false, visibilityExplicit: true },
+          {
+            visibility: '-',
+            name: 'toto',
+            rawDisplay: 'String toto = "hello"',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
+          {
+            visibility: '#',
+            name: 'toto',
+            rawDisplay: 'String toto = "hello"',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
+          {
+            visibility: '~',
+            name: 'toto',
+            rawDisplay: 'String toto = "hello"',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
+          {
+            visibility: '+',
+            name: 'toto',
+            rawDisplay: 'String toto = "hello"',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
         ],
       }),
     ]);
@@ -155,9 +183,7 @@ describe('measureObjectClassifier — 4 explicit-visibility field rows (nukera-0
 // ---------------------------------------------------------------------------
 
 describe('measureObjectClassifier — stereotype + field (majake-62-pero492)', () => {
-  const dummyMember: Classifier['members'] = [
-    { visibility: '+', name: 'dummy', isStatic: false, isAbstract: false },
-  ];
+  const dummyMember: Classifier['members'] = [{ visibility: '+', name: 'dummy', isStatic: false, isAbstract: false }];
 
   it('foo1 (no stereo, 1 field "dummy") sizes to 0.803472in x 0.555556in', () => {
     const ast = makeAST([objectClassifier('foo1', 'foo1', { members: dummyMember })]);
@@ -167,20 +193,21 @@ describe('measureObjectClassifier — stereotype + field (majake-62-pero492)', (
     expect(c.height).toBeCloseTo(40, 5);
   });
 
-  it('foo3 (stereo <<azerty>>, 1 field "dummy") sizes to 0.803472in x 0.722222in — ' +
-     'same width as foo1 (field dominates), +12px height for the stereo line', () => {
-    const ast = makeAST([
-      objectClassifier('foo3', 'foo3', { members: dummyMember, stereotype: 'azerty' }),
-    ]);
-    const geo = layoutClass(ast, theme, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(57.85, 3);
-    expect(c.height).toBeCloseTo(52, 5);
-    // stereo row (italic, guillemet-wrapped) precedes the name row
-    expect(c.rows[0]!.text).toBe('«azerty»');
-    expect(c.rows[0]!.italic).toBe(true);
-    expect(c.rows[1]!.text).toBe('foo3');
-  });
+  it(
+    'foo3 (stereo <<azerty>>, 1 field "dummy") sizes to 0.803472in x 0.722222in — ' +
+      'same width as foo1 (field dominates), +12px height for the stereo line',
+    () => {
+      const ast = makeAST([objectClassifier('foo3', 'foo3', { members: dummyMember, stereotype: 'azerty' })]);
+      const geo = layoutClass(ast, theme, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      expect(c.width).toBeCloseTo(57.85, 3);
+      expect(c.height).toBeCloseTo(52, 5);
+      // stereo row (italic, guillemet-wrapped) precedes the name row
+      expect(c.rows[0]!.text).toBe('«azerty»');
+      expect(c.rows[0]!.italic).toBe(true);
+      expect(c.rows[1]!.text).toBe('foo3');
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -210,9 +237,7 @@ describe('measureMapClassifier — 3-row map, no stereotype (bepafe-03-teda035)'
   });
 
   it('an empty map body sizes to the header alone (no substituted fallback height)', () => {
-    const ast = makeAST([
-      { id: 'Empty', display: 'Empty', kind: 'map', typeParams: [], members: [] },
-    ]);
+    const ast = makeAST([{ id: 'Empty', display: 'Empty', kind: 'map', typeParams: [], members: [] }]);
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
     // titleHeight only: measure("Empty",14).width + 4 padding, height = 14+4=18
@@ -228,54 +253,57 @@ describe('measureMapClassifier — 3-row map, no stereotype (bepafe-03-teda035)'
   // jar-verified against bepafe-03-teda035's CapitalCity: "UK" x=30.9875
   // (centered, NOT flush at rect x+5), "London"/"Washington"/"Berlin" all
   // x=79.4875 (flush at colA+5 regardless of each value's own width).
-  it("centers each row's key within colA, draws the value flush-left at colA+margin, " +
-     'and sets each cell\'s OWN textLength', () => {
-    const ast = makeAST([
-      {
-        id: 'CapitalCity',
-        display: 'CapitalCity',
-        kind: 'map',
-        typeParams: [],
-        members: [],
-        rows: [
-          { key: 'UK', value: 'London' },
-          { key: 'USA', value: 'Washington' },
-          { key: 'Germany', value: 'Berlin' },
-        ],
-      },
-    ]);
-    const geo = layoutClass(ast, theme, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    // rows[0] = header name; data rows start at index 1: UK key/value,
-    // USA key/value, Germany key/value.
-    const [ukKey, ukValue, usaKey, usaValue, deKey, deValue] = c.rows.slice(1);
+  it(
+    "centers each row's key within colA, draws the value flush-left at colA+margin, " +
+      "and sets each cell's OWN textLength",
+    () => {
+      const ast = makeAST([
+        {
+          id: 'CapitalCity',
+          display: 'CapitalCity',
+          kind: 'map',
+          typeParams: [],
+          members: [],
+          rows: [
+            { key: 'UK', value: 'London' },
+            { key: 'USA', value: 'Washington' },
+            { key: 'Germany', value: 'Berlin' },
+          ],
+        },
+      ]);
+      const geo = layoutClass(ast, theme, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      // rows[0] = header name; data rows start at index 1: UK key/value,
+      // USA key/value, Germany key/value.
+      const [ukKey, ukValue, usaKey, usaValue, deKey, deValue] = c.rows.slice(1);
 
-    // colA = 67.4875 (Germany's key cell, the widest) -- (colA - rawWidth)/2
-    expect(ukKey!.width).toBeCloseTo(19.5125, 3);
-    expect(ukKey!.indent).toBeCloseTo(23.9875, 3); // jar x=30.9875 - rect x=7
-    expect(usaKey!.width).toBeCloseTo(28.875, 3);
-    expect(usaKey!.indent).toBeCloseTo(19.3063, 3); // jar x=26.3063 - rect x=7
-    expect(deKey!.width).toBeCloseTo(57.4875, 3);
-    expect(deKey!.indent).toBeCloseTo(5, 3); // jar x=12 - rect x=7 (widest key)
+      // colA = 67.4875 (Germany's key cell, the widest) -- (colA - rawWidth)/2
+      expect(ukKey!.width).toBeCloseTo(19.5125, 3);
+      expect(ukKey!.indent).toBeCloseTo(23.9875, 3); // jar x=30.9875 - rect x=7
+      expect(usaKey!.width).toBeCloseTo(28.875, 3);
+      expect(usaKey!.indent).toBeCloseTo(19.3063, 3); // jar x=26.3063 - rect x=7
+      expect(deKey!.width).toBeCloseTo(57.4875, 3);
+      expect(deKey!.indent).toBeCloseTo(5, 3); // jar x=12 - rect x=7 (widest key)
 
-    // every value cell is flush-left at colA(67.4875) + MAP_CELL_MARGIN_X(5)
-    // = 72.4875, independent of its OWN width (London/Washington/Berlin all
-    // share the same x)
-    expect(ukValue!.width).toBeCloseTo(46.725, 3);
-    expect(ukValue!.indent).toBeCloseTo(72.4875, 3); // jar x=79.4875 - rect x=7
-    expect(usaValue!.width).toBeCloseTo(73.9375, 3);
-    expect(usaValue!.indent).toBeCloseTo(72.4875, 3);
-    expect(deValue!.width).toBeCloseTo(35.875, 3);
-    expect(deValue!.indent).toBeCloseTo(72.4875, 3);
+      // every value cell is flush-left at colA(67.4875) + MAP_CELL_MARGIN_X(5)
+      // = 72.4875, independent of its OWN width (London/Washington/Berlin all
+      // share the same x)
+      expect(ukValue!.width).toBeCloseTo(46.725, 3);
+      expect(ukValue!.indent).toBeCloseTo(72.4875, 3); // jar x=79.4875 - rect x=7
+      expect(usaValue!.width).toBeCloseTo(73.9375, 3);
+      expect(usaValue!.indent).toBeCloseTo(72.4875, 3);
+      expect(deValue!.width).toBeCloseTo(35.875, 3);
+      expect(deValue!.indent).toBeCloseTo(72.4875, 3);
 
-    // baseline: rowTop + MAP_CELL_MARGIN_Y(2) + baselineOffset(10.8889) --
-    // key and value share the same row baseline.
-    // row0 top = title.height(18); row1 top = 18+18=36; row2 top = 18+18+18=54
-    expect(ukKey!.y).toBeCloseTo(30.8889, 3); // jar y=73.8889 - rect y=43
-    expect(ukValue!.y).toBeCloseTo(30.8889, 3);
-    expect(usaKey!.y).toBeCloseTo(48.8889, 3); // jar y=91.8889 - rect y=43
-    expect(deKey!.y).toBeCloseTo(66.8889, 3); // jar y=109.8889 - rect y=43
-  });
+      // baseline: rowTop + MAP_CELL_MARGIN_Y(2) + baselineOffset(10.8889) --
+      // key and value share the same row baseline.
+      // row0 top = title.height(18); row1 top = 18+18=36; row2 top = 18+18+18=54
+      expect(ukKey!.y).toBeCloseTo(30.8889, 3); // jar y=73.8889 - rect y=43
+      expect(ukValue!.y).toBeCloseTo(30.8889, 3);
+      expect(usaKey!.y).toBeCloseTo(48.8889, 3); // jar y=91.8889 - rect y=43
+      expect(deKey!.y).toBeCloseTo(66.8889, 3); // jar y=109.8889 - rect y=43
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -386,9 +414,7 @@ describe('headerRows — object with stereotype (majake-62-pero492: foo3 <<azert
 // at the SAME box x-origin.
 describe('headerRows — object, multi-stacked stereotype (fafozi-27-reja300: node2 <<Bar>> <<Foo>>)', () => {
   it('draws ONE row per label, each independently centered, stacked at fontSize stride', () => {
-    const ast = makeAST([
-      objectClassifier('node2', 'Object1', { stereotype: 'Bar>> <<Foo' }),
-    ]);
+    const ast = makeAST([objectClassifier('node2', 'Object1', { stereotype: 'Bar>> <<Foo' })]);
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.width).toBeCloseTo(62.2125, 3);
@@ -419,7 +445,7 @@ describe('headerRows — object, multi-stacked stereotype (fafozi-27-reja300: no
 });
 
 describe('headerRows — map, no stereotype (bepafe-03-teda035: CapitalCity)', () => {
-  it('centers the name row within the map\'s final (data-row-dominated) width', () => {
+  it("centers the name row within the map's final (data-row-dominated) width", () => {
     const ast = makeAST([
       {
         id: 'CapitalCity',
@@ -480,7 +506,9 @@ describe('map DOT emission', () => {
     );
 
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, theme, measurer);
     } finally {
@@ -522,57 +550,68 @@ describe('measureObjectClassifier — skinparam tabSize field-text expansion (nu
     ]);
   }
 
-  it('sizes the box to the oracle width (157.5125 x 82), tabSize 20 folding to the ' +
-     'default 8-space (width-0) fallback -> fontSize*4 = 56px tab stop', () => {
-    const themeWithTabSize = { ...theme, tabSize: 20 };
-    const geo = layoutClass(tabAst(), themeWithTabSize, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(157.5125, 3);
-    expect(c.height).toBeCloseTo(82, 5);
-  });
+  it(
+    'sizes the box to the oracle width (157.5125 x 82), tabSize 20 folding to the ' +
+      'default 8-space (width-0) fallback -> fontSize*4 = 56px tab stop',
+    () => {
+      const themeWithTabSize = { ...theme, tabSize: 20 };
+      const geo = layoutClass(tabAst(), themeWithTabSize, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      expect(c.width).toBeCloseTo(157.5125, 3);
+      expect(c.height).toBeCloseTo(82, 5);
+    },
+  );
 
-  it('splits a multi-tab line into independently-positioned runs sharing one row y, ' +
-     'and single-tab lines into one run each -- jar-verified x/textLength/childCount', () => {
-    const themeWithTabSize = { ...theme, tabSize: 20 };
-    const geo = layoutClass(tabAst(), themeWithTabSize, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    // header(1) + field1(1) + field2(1) + field3(1) + field5+field6(2) = 6
-    expect(c.rows).toHaveLength(6);
-    const [, r1, r2, r3, r5, r6] = c.rows;
-    for (const r of [r1!, r2!, r3!, r5!]) {
-      expect(r.indent).toBeCloseTo(62, 3); // OBJECT_FIELD_MARGIN_X(6) + tabStop(56)
-      expect(r.width).toBeCloseTo(33.5125, 3);
-    }
-    expect(r1!.text).toBe('field1');
-    expect(r5!.text).toBe('field5');
-    expect(r6!.text).toBe('field6');
-    // field5's own tab stop (56) + field6's own post-field5 tab stop (56
-    // more, jar's `ceil(33.5125/56)*56`) = 112 relative -> +6 margin = 118
-    expect(r6!.indent).toBeCloseTo(118, 3);
-    // field5/field6 share the SAME row y (one source line, two runs)
-    expect(r5!.y).toBeCloseTo(r6!.y, 6);
-  });
+  it(
+    'splits a multi-tab line into independently-positioned runs sharing one row y, ' +
+      'and single-tab lines into one run each -- jar-verified x/textLength/childCount',
+    () => {
+      const themeWithTabSize = { ...theme, tabSize: 20 };
+      const geo = layoutClass(tabAst(), themeWithTabSize, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      // header(1) + field1(1) + field2(1) + field3(1) + field5+field6(2) = 6
+      expect(c.rows).toHaveLength(6);
+      const [, r1, r2, r3, r5, r6] = c.rows;
+      for (const r of [r1!, r2!, r3!, r5!]) {
+        expect(r.indent).toBeCloseTo(62, 3); // OBJECT_FIELD_MARGIN_X(6) + tabStop(56)
+        expect(r.width).toBeCloseTo(33.5125, 3);
+      }
+      expect(r1!.text).toBe('field1');
+      expect(r5!.text).toBe('field5');
+      expect(r6!.text).toBe('field6');
+      // field5's own tab stop (56) + field6's own post-field5 tab stop (56
+      // more, jar's `ceil(33.5125/56)*56`) = 112 relative -> +6 margin = 118
+      expect(r6!.indent).toBeCloseTo(118, 3);
+      // field5/field6 share the SAME row y (one source line, two runs)
+      expect(r5!.y).toBeCloseTo(r6!.y, 6);
+    },
+  );
 
-  it('falls back to the upstream default (8) when `skinparam tabSize` is unset -- ' +
-     'SAME tab stop (56px), since 8 also folds to the width-0 fallback', () => {
-    const geo = layoutClass(tabAst(), theme, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(157.5125, 3);
-    expect(c.rows[1]!.indent).toBeCloseTo(62, 3);
-  });
+  it(
+    'falls back to the upstream default (8) when `skinparam tabSize` is unset -- ' +
+      'SAME tab stop (56px), since 8 also folds to the width-0 fallback',
+    () => {
+      const geo = layoutClass(tabAst(), theme, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      expect(c.width).toBeCloseTo(157.5125, 3);
+      expect(c.rows[1]!.indent).toBeCloseTo(62, 3);
+    },
+  );
 
-  it('leaves a tab-free line completely unaffected (single run, x:0, zero behavior ' +
-     'change for the common case)', () => {
-    const ast = makeAST([
-      objectClassifier('plain', 'plain', {
-        members: [{ visibility: '+', name: 'field1', isStatic: false, isAbstract: false }],
-      }),
-    ]);
-    const geo = layoutClass(ast, theme, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.rows).toHaveLength(2);
-    expect(c.rows[1]!.indent).toBeCloseTo(6, 3); // OBJECT_FIELD_MARGIN_X, no tab
-  });
+  it(
+    'leaves a tab-free line completely unaffected (single run, x:0, zero behavior ' + 'change for the common case)',
+    () => {
+      const ast = makeAST([
+        objectClassifier('plain', 'plain', {
+          members: [{ visibility: '+', name: 'field1', isStatic: false, isAbstract: false }],
+        }),
+      ]);
+      const geo = layoutClass(ast, theme, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      expect(c.rows).toHaveLength(2);
+      expect(c.rows[1]!.indent).toBeCloseTo(6, 3); // OBJECT_FIELD_MARGIN_X, no tab
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -593,25 +632,28 @@ describe('measureObjectClassifier — skinparam style strictuml underline (jotag
     expect(c.rows[0]!.indent).toBeCloseTo(7, 3);
   });
 
-  it('splits `name : type` into an underlined name run + a plain, leading-' +
-     'whitespace-stripped type run sharing one row y -- jar-verified against o2', () => {
-    const ast = makeAST([objectClassifier('o2', 'instance name : type')]);
-    const geo = layoutClass(ast, { ...theme, strictUml: true }, measurer);
-    const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.rows).toHaveLength(2);
-    const [nameRow, typeRow] = c.rows;
-    expect(nameRow!.text).toBe('instance name');
-    expect(nameRow!.underline).toBe(true);
-    expect(nameRow!.width).toBeCloseTo(87.15, 3);
-    expect(typeRow!.text).toBe(': type'); // leading space stripped
-    expect(typeRow!.underline).toBeUndefined();
-    expect(typeRow!.width).toBeCloseTo(30.275, 3);
-    expect(typeRow!.y).toBeCloseTo(nameRow!.y, 6);
-    // jar-verified: rect x=118.74 -> name text x=125.74 (indent 7), type
-    // text x=212.89 (indent 94.15 = 7 + 87.15, immediately adjacent)
-    expect(nameRow!.indent).toBeCloseTo(7, 3);
-    expect(typeRow!.indent).toBeCloseTo(94.15, 3);
-  });
+  it(
+    'splits `name : type` into an underlined name run + a plain, leading-' +
+      'whitespace-stripped type run sharing one row y -- jar-verified against o2',
+    () => {
+      const ast = makeAST([objectClassifier('o2', 'instance name : type')]);
+      const geo = layoutClass(ast, { ...theme, strictUml: true }, measurer);
+      const c = classifierLeaves(geo.leaves)[0]!;
+      expect(c.rows).toHaveLength(2);
+      const [nameRow, typeRow] = c.rows;
+      expect(nameRow!.text).toBe('instance name');
+      expect(nameRow!.underline).toBe(true);
+      expect(nameRow!.width).toBeCloseTo(87.15, 3);
+      expect(typeRow!.text).toBe(': type'); // leading space stripped
+      expect(typeRow!.underline).toBeUndefined();
+      expect(typeRow!.width).toBeCloseTo(30.275, 3);
+      expect(typeRow!.y).toBeCloseTo(nameRow!.y, 6);
+      // jar-verified: rect x=118.74 -> name text x=125.74 (indent 7), type
+      // text x=212.89 (indent 94.15 = 7 + 87.15, immediately adjacent)
+      expect(nameRow!.indent).toBeCloseTo(7, 3);
+      expect(typeRow!.indent).toBeCloseTo(94.15, 3);
+    },
+  );
 
   it('does NOT underline without `skinparam style strictuml` (zero behavior change)', () => {
     const ast = makeAST([objectClassifier('firstObject', 'firstObject')]);
@@ -622,9 +664,7 @@ describe('measureObjectClassifier — skinparam style strictuml underline (jotag
   });
 
   it('does NOT underline map/json headers even with strictuml (object-kind only)', () => {
-    const ast = makeAST([
-      { id: 'm', display: 'CapitalCity', kind: 'map', typeParams: [], members: [] },
-    ]);
+    const ast = makeAST([{ id: 'm', display: 'CapitalCity', kind: 'map', typeParams: [], members: [] }]);
     const geo = layoutClass(ast, { ...theme, strictUml: true }, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.rows[0]!.underline).toBeUndefined();
@@ -638,9 +678,7 @@ describe('measureObjectClassifier — skinparam style strictuml underline (jotag
 
 describe('measureObjectClassifier -- hideStereotype (kocupi-02-ripa662)', () => {
   it('draws NO stereo row and collapses the title to the name-only height', () => {
-    const ast = makeAST([
-      objectClassifier('foo', 'foo', { stereotype: 'Foo', hideStereotype: true }),
-    ]);
+    const ast = makeAST([objectClassifier('foo', 'foo', { stereotype: 'Foo', hideStereotype: true })]);
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
     // header(name only, no stereo) + empty-fields placeholder -- no
@@ -670,8 +708,22 @@ describe('measureObjectFields -- visibilityIsField always true (xuvesu-44-laru20
     const ast = makeAST([
       objectClassifier('Test', 'Test', {
         members: [
-          { visibility: '+', name: 'line1', rawDisplay: 'line 1', isStatic: false, isAbstract: false, visibilityExplicit: true },
-          { visibility: '-', name: 'line5', rawDisplay: 'line 5', isStatic: false, isAbstract: false, visibilityExplicit: true },
+          {
+            visibility: '+',
+            name: 'line1',
+            rawDisplay: 'line 1',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
+          {
+            visibility: '-',
+            name: 'line5',
+            rawDisplay: 'line 5',
+            isStatic: false,
+            isAbstract: false,
+            visibilityExplicit: true,
+          },
         ],
       }),
     ]);
@@ -719,8 +771,15 @@ describe('measureMapClassifier — creole cells + empty-value rows (fusopu-05-lo
   function interfaceAst(): ClassDiagramAST {
     return makeAST([
       {
-        id: 'Interface', display: 'Interface', kind: 'map', typeParams: [], members: [],
-        rows: [{ key: '__method1__', value: 'void' }, { key: 'method2', value: '' }],
+        id: 'Interface',
+        display: 'Interface',
+        kind: 'map',
+        typeParams: [],
+        members: [],
+        rows: [
+          { key: '__method1__', value: 'void' },
+          { key: 'method2', value: '' },
+        ],
       },
     ]);
   }
@@ -752,13 +811,22 @@ describe('measureMapClassifier — creole cells + empty-value rows (fusopu-05-lo
     expect(value1!.text).not.toBe('');
     expect(value2!.text).not.toBe('');
 
-    const point = classifierLeaves(layoutClass(
-      makeAST([{
-        id: 'M', display: 'M', kind: 'map', typeParams: [], members: [],
-        rows: [{ key: 'UK', value: '\0', linkedCode: 'London' }],
-      }]),
-      theme, measurer,
-    ).leaves)[0]!;
+    const point = classifierLeaves(
+      layoutClass(
+        makeAST([
+          {
+            id: 'M',
+            display: 'M',
+            kind: 'map',
+            typeParams: [],
+            members: [],
+            rows: [{ key: 'UK', value: '\0', linkedCode: 'London' }],
+          },
+        ]),
+        theme,
+        measurer,
+      ).leaves,
+    )[0]!;
     const pointValue = point.rows.slice(1)[1]!;
     expect(pointValue.text).toBe('');
     expect(pointValue.atoms).toBeUndefined();

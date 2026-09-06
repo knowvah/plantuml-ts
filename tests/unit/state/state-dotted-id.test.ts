@@ -226,7 +226,7 @@ describe('dotted-id hierarchy — composite/frame BLOCK opener with a dotted id 
     expectDotParity('tuvugi-94-gapi519');
   });
 
-  it('a phantom ancestor is UPGRADED (flag cleared) the moment a later leaf-style declare passes through it -- mirrors ensureParentState\'s permanent promotion', () => {
+  it("a phantom ancestor is UPGRADED (flag cleared) the moment a later leaf-style declare passes through it -- mirrors ensureParentState's permanent promotion", () => {
     const ast = parse(`
       state S.I {
       }

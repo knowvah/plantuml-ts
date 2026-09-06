@@ -97,8 +97,8 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
     // shape (no `<g transform>` wrapper for margin, see blocks.ts).
     const rectMatch = /<rect x="12" y="12" width="([\d.]+)" height="([\d.]+)"/.exec(block.body);
     expect(rectMatch).not.toBeNull();
-    expect(Number(rectMatch![1])).toBeCloseTo(pureTextWidth + 10, 2);  // emitted attrs are 3-decimal (rule 1)
-    expect(Number(rectMatch![2])).toBeCloseTo(pureTextHeight + 10, 2);  // emitted attrs are 3-decimal (rule 1)
+    expect(Number(rectMatch![1])).toBeCloseTo(pureTextWidth + 10, 2); // emitted attrs are 3-decimal (rule 1)
+    expect(Number(rectMatch![2])).toBeCloseTo(pureTextHeight + 10, 2); // emitted attrs are 3-decimal (rule 1)
   });
 
   it('block-outward dimension = rect dimension + 1 + margin (12 each side)', () => {
@@ -128,7 +128,7 @@ describe('buildAnnotationBlock — legend defaults (jar fixture)', () => {
 
   it('first baseline = margin.top + padding.top + ascent (G2 N45: fontSize - getDescent)', () => {
     const first = /<text x="17" y="([\d.]+)"/.exec(block.body);
-    expect(Number(first![1])).toBeCloseTo(12 + 5 + ASCENT_14, 2);  // emitted attrs are 3-decimal (rule 1)
+    expect(Number(first![1])).toBeCloseTo(12 + 5 + ASCENT_14, 2); // emitted attrs are 3-decimal (rule 1)
   });
 });
 
@@ -197,7 +197,6 @@ describe('buildAnnotationBlock — border rect stroke/rx defaults (G2 N50)', () 
     expect(block.body).toMatch(/stroke-width="5"/);
   });
 });
-
 
 /**
  * G2 N51: `TextBlockBordered#drawU` (`klimt/shape/TextBlockBordered.java
@@ -341,7 +340,7 @@ describe('buildAnnotationBlock — Creole inline markup (G2 N45: one sibling <te
     expect(block.body).not.toContain('<a & b>');
   });
 
-  it('draws multiple runs as separate sibling <text> elements, x-advanced by each run\'s width', () => {
+  it("draws multiple runs as separate sibling <text> elements, x-advanced by each run's width", () => {
     const style = makeStyle();
     const measurer = new FixedMeasurer(10, 14);
     const block = buildAnnotationBlock('title', ['plain **bold**'], style, measurer);

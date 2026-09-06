@@ -28,7 +28,12 @@ export class TFunctionImpl implements TFunction {
   private legacyDefinition: string | undefined;
   private containsReturn = false;
 
-  constructor(functionName: string, args: readonly TFunctionArgument[], unquoted: boolean, functionType: TFunctionType) {
+  constructor(
+    functionName: string,
+    args: readonly TFunctionArgument[],
+    unquoted: boolean,
+    functionType: TFunctionType,
+  ) {
     const names = new Set(args.map((a) => a.getName()));
     this.signature = new TFunctionSignature(functionName, args.length, names);
     this.args = args;
@@ -85,10 +90,7 @@ export class TFunctionImpl implements TFunction {
     if (s.getType() === 'RETURN') {
       this.containsReturn = true;
       if (this.functionType === TFunctionType.PROCEDURE)
-        throw new EaterException(
-          'A procedure cannot have !return directive. Declare it as a function instead ?',
-          s,
-        );
+        throw new EaterException('A procedure cannot have !return directive. Declare it as a function instead ?', s);
     }
   }
 

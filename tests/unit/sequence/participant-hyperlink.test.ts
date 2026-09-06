@@ -72,11 +72,7 @@ describe('participant hyperlinks', () => {
     // `CommandParticipant.java:187-192`. No cached oracle covers this pairing
     // — `boparo-11-pema294` uses the single-line form — so it is asserted
     // against the Java rather than against a golden.
-    const parsed = parseSequence([
-      'participant Alice [[/head]] [',
-      '  body line',
-      ']',
-    ]);
+    const parsed = parseSequence(['participant Alice [[/head]] [', '  body line', ']']);
     if ('refused' in parsed) throw new Error(parsed.message);
     expect(parsed.participants[0]?.url).toEqual({ url: '/head', tooltip: '/head' });
   });

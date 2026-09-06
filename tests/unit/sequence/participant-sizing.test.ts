@@ -41,15 +41,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { headSlackOf } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  '..',
-  'test-results',
-  'dot-cache',
-  'sequence',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'test-results', 'dot-cache', 'sequence');
 
 /** `Padding 7`, both sides — the whole of the width correction. */
 const PADDING_BOTH_SIDES = 2 * defaultTheme.sequence.participantPadding;
@@ -124,9 +116,7 @@ describe('the plain participant box — width, against the jar', () => {
   it.each(GOLDENS)('$slug: box width is text + 14 in the golden itself ($note)', ({ slug }) => {
     // The relationship, checked on the JAR's own output. If this ever fails,
     // the derivation is wrong and every assertion below it is meaningless.
-    const boxes = participantBoxes(goldenOf(slug)).filter(
-      (b) => b.height === 28 && b.textLength !== undefined,
-    );
+    const boxes = participantBoxes(goldenOf(slug)).filter((b) => b.height === 28 && b.textLength !== undefined);
     expect(boxes.length).toBeGreaterThan(0);
     for (const box of boxes) {
       expect(box.width - (box.textLength ?? 0)).toBeCloseTo(PADDING_BOTH_SIDES, 2);
@@ -245,21 +235,19 @@ describe('the document origin — where the first box sits', () => {
   // Fixtures whose LEFTMOST participant is a plain box, so the box itself is
   // the leftmost ink. A glyph-first diagram would put a stickman there and the
   // first rect would be somewhere else entirely.
-  it.each([
-    'jobadi-87-jegi648',
-    'bujuma-55-rupu730',
-    'covuco-47-sotu151',
-    'bacupi-77-fuke586',
-  ])('%s: the leftmost participant box starts on the jar\'s left margin', (slug) => {
-    // `TextBlockExporter:173` translates by `margin.left`, which for a Teoz
-    // sequence is 5 (`SequenceDiagram#getDefaultMargins:624-628`), and
-    // `SequenceDiagramFileMakerTeoz#getTextBlock`'s `drawU` applies its own
-    // `UTranslate(5, 5)` (`:132`) before `dx(-min1)` lands the body's leftmost
-    // extent at 0. 5 + 5 = 10.
-    const leftmost = (svg: string): number => Math.min(...participantBoxes(svg).map((b) => b.x));
-    expect(leftmost(goldenOf(slug))).toBeCloseTo(ORIGIN, 3);
-    expect(leftmost(oursFor(slug))).toBeCloseTo(ORIGIN, 3);
-  });
+  it.each(['jobadi-87-jegi648', 'bujuma-55-rupu730', 'covuco-47-sotu151', 'bacupi-77-fuke586'])(
+    "%s: the leftmost participant box starts on the jar's left margin",
+    (slug) => {
+      // `TextBlockExporter:173` translates by `margin.left`, which for a Teoz
+      // sequence is 5 (`SequenceDiagram#getDefaultMargins:624-628`), and
+      // `SequenceDiagramFileMakerTeoz#getTextBlock`'s `drawU` applies its own
+      // `UTranslate(5, 5)` (`:132`) before `dx(-min1)` lands the body's leftmost
+      // extent at 0. 5 + 5 = 10.
+      const leftmost = (svg: string): number => Math.min(...participantBoxes(svg).map((b) => b.x));
+      expect(leftmost(goldenOf(slug))).toBeCloseTo(ORIGIN, 3);
+      expect(leftmost(oursFor(slug))).toBeCloseTo(ORIGIN, 3);
+    },
+  );
 
   it('a left-border exo arrow starts on that margin, not on the image edge', () => {
     // `border1` is the DRAWING SPACE's left edge. The jar on `[<- Bob : hello`
@@ -345,18 +333,16 @@ describe('the D6 constraint solve — labels that need more room than the gap', 
   // narrow per affected span. `TeozTimelineIssues_0003_Test` is the measured
   // example: its second lifeline is 79.669 where the jar's is 84.669, exactly
   // one `LIVE_DELTA_SIZE`. See `findings/label-widening.md`.
-  it.each([
-    'cebeje-70-bada975',
-    'binegi-05-xere209',
-    'birocu-87-xubi808',
-    'cexeco-21-piga007',
-  ])('%s: every lifeline centre matches the jar', (slug) => {
-    const jar = lifelineCentres(goldenOf(slug));
-    const ours = lifelineCentres(oursFor(slug));
-    expect(jar.length).toBeGreaterThan(1);
-    expect(ours).toHaveLength(jar.length);
-    for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
-  });
+  it.each(['cebeje-70-bada975', 'binegi-05-xere209', 'birocu-87-xubi808', 'cexeco-21-piga007'])(
+    '%s: every lifeline centre matches the jar',
+    (slug) => {
+      const jar = lifelineCentres(goldenOf(slug));
+      const ours = lifelineCentres(oursFor(slug));
+      expect(jar.length).toBeGreaterThan(1);
+      expect(ours).toHaveLength(jar.length);
+      for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
+    },
+  );
 
   it('constrains a NON-adjacent pair, which the old pairwise pre-scan could not', () => {
     // `CommunicationTile#addConstraints:392-416` constrains the two
@@ -393,9 +379,7 @@ describe('the D6 constraint solve — labels that need more room than the gap', 
 describe('Batch 8 — the three activation commits, absolutely', () => {
   function attrsAll(svg: string, tag: string): Array<Record<string, string>> {
     return [...svg.matchAll(new RegExp(`<${tag} ([^>]*?)/>`, 'g'))].map((m) =>
-      Object.fromEntries(
-        [...(m[1] ?? '').matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1] ?? '', a[2] ?? '']),
-      ),
+      Object.fromEntries([...(m[1] ?? '').matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1] ?? '', a[2] ?? ''])),
     );
   }
   /** Activation bars: the 10-wide rects on a lifeline. */
@@ -410,7 +394,7 @@ describe('Batch 8 — the three activation commits, absolutely', () => {
       .filter((a) => a['stroke-dasharray'] === undefined && a['y1'] === a['y2'])
       .map((a) => [Number(a['x1']), Number(a['x2'])] as [number, number]);
 
-  it('kejoke-76-curu931: every activation bar is on the jar\'s x (T8.1)', () => {
+  it("kejoke-76-curu931: every activation bar is on the jar's x (T8.1)", () => {
     // Four nested levels on each of two participants: position, width and the
     // 5px per-level indent all at once. This is `bbcc90ae` verified
     // absolutely, which it could not be when it landed.
@@ -421,7 +405,7 @@ describe('Batch 8 — the three activation commits, absolutely', () => {
     for (const [i, want] of jar.entries()) expect(ours[i]).toBeCloseTo(want, 3);
   });
 
-  it('kejoke-76-curu931: every message endpoint is on the jar\'s x (T8.2)', () => {
+  it("kejoke-76-curu931: every message endpoint is on the jar's x (T8.2)", () => {
     // 24 bodies across four levels and both branches of
     // `CommunicationTile#addConstraints:392-416`. This is `5dfa0982`.
     const jar = bodies(goldenOf('kejoke-76-curu931'));
@@ -434,7 +418,7 @@ describe('Batch 8 — the three activation commits, absolutely', () => {
     }
   });
 
-  it('jobadi-87-jegi648: the self loop\'s x geometry is the jar\'s (T8.3)', () => {
+  it("jobadi-87-jegi648: the self loop's x geometry is the jar's (T8.3)", () => {
     // `ebbd1f41`, plus Gap SQ-5 closed: the drawn extent is `xRight = 42`
     // (`ComponentRoseSelfArrow.java:59-60`), not `arrowWidth = 45`.
     //

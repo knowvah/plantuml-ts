@@ -20,10 +20,7 @@ import { isMethodMember } from './class-layout-helpers.js';
  * matches a scoped directive (jar-probe h1, jecopa-66-vepe168). An unscoped
  * (root-level) directive reaches everything.
  */
-export function directiveAppliesTo(
-  directive: { scopeNsId?: string },
-  classifier: { namespace?: string },
-): boolean {
+export function directiveAppliesTo(directive: { scopeNsId?: string }, classifier: { namespace?: string }): boolean {
   return directive.scopeNsId === undefined || classifier.namespace === directive.scopeNsId;
 }
 
@@ -78,12 +75,12 @@ function applyDirectivesToClassifier(
   effectiveAction: ReadonlyMap<HideTarget, 'hide' | 'show'>,
 ): void {
   const hideMembers = effectiveAction.get('members') === 'hide';
-  const hideCircle  = effectiveAction.get('circle')  === 'hide';
+  const hideCircle = effectiveAction.get('circle') === 'hide';
   // G2 N27: bare `hide fields`/`hide methods` -- unconditional (no
   // emptiness gate, unlike `empty fields`/`empty methods` below in
   // layout.ts; no entity-id gate, unlike class-directives.ts's own
   // `applyHideShowEntityDirectives`).
-  const hideFields  = effectiveAction.get('fields')  === 'hide';
+  const hideFields = effectiveAction.get('fields') === 'hide';
   const hideMethods = effectiveAction.get('methods') === 'hide';
 
   // hide circle — suppress the C/I/A/E badge in the renderer
@@ -192,19 +189,12 @@ function matchEntityName(id: string, pattern: string): boolean {
 
 /** HideOrShow#isApplyable(Entity): `$tag` → stereotags; `<<s>>` → stereotype;
  *  `@unlinked` → isAloneAndUnlinked; else leaf-name match. */
-function isApplyable(
-  e: RemovableEntity,
-  what: string,
-  unlinked: (id: string) => boolean,
-): boolean {
+function isApplyable(e: RemovableEntity, what: string, unlinked: (id: string) => boolean): boolean {
   if (what.startsWith('$')) {
     return (e.tags ?? []).some((t) => matchPattern(t, what.slice(1)));
   }
   if (what.startsWith('<<') && what.endsWith('>>')) {
-    return (
-      e.stereotype !== undefined &&
-      matchPattern(e.stereotype, what.slice(2, -2).trim())
-    );
+    return e.stereotype !== undefined && matchPattern(e.stereotype, what.slice(2, -2).trim());
   }
   if (isAboutUnlinked(what)) return unlinked(e.id);
   return matchEntityName(e.id, what);
@@ -294,10 +284,7 @@ export function computeRemovedIds(ast: ClassDiagramAST): Set<string> {
   }
   for (const n of ast.notes) {
     const other = noteSingleLinkOther(n, links, noteIds);
-    const isRemoved =
-      other !== null
-        ? removed.has(other)
-        : foldDirectives(dirs, n, true, unlinked, 'remove');
+    const isRemoved = other !== null ? removed.has(other) : foldDirectives(dirs, n, true, unlinked, 'remove');
     if (isRemoved) removed.add(n.id);
   }
   return removed;
@@ -330,10 +317,7 @@ export function computeHiddenIds(ast: ClassDiagramAST): Set<string> {
   }
   for (const n of ast.notes) {
     const other = noteSingleLinkOther(n, links, noteIds);
-    const isHiddenNote =
-      other !== null
-        ? hidden.has(other)
-        : foldDirectives(dirs, n, true, unlinked, 'hide');
+    const isHiddenNote = other !== null ? hidden.has(other) : foldDirectives(dirs, n, true, unlinked, 'hide');
     if (isHiddenNote) hidden.add(n.id);
   }
   return hidden;
@@ -383,9 +367,7 @@ export function filterRemovedEntities(ast: ClassDiagramAST): ClassDiagramAST {
     ...ast,
     classifiers: ast.classifiers.filter((c) => !removed.has(c.id)),
     notes: ast.notes.filter((n) => !removed.has(n.id)),
-    relationships: ast.relationships.filter(
-      (r) => !removed.has(r.from) && !removed.has(r.to),
-    ),
+    relationships: ast.relationships.filter((r) => !removed.has(r.from) && !removed.has(r.to)),
     namespaces: ast.namespaces.map((ns) => ({
       ...ns,
       classifiers: ns.classifiers.filter((id) => !removed.has(id)),

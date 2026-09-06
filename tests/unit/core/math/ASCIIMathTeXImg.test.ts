@@ -19,13 +19,7 @@
 import { describe, expect, it } from 'vitest';
 import { ASCIIMathTeXImg } from '../../../../src/core/math/ASCIIMathTeXImg.js';
 import { AsciiMath } from '../../../../src/core/math/AsciiMath.js';
-import {
-  Flag,
-  Ttype,
-  Tuple,
-  aAMquote,
-  aAMsymbols,
-} from '../../../../src/core/math/ASCIIMathTeXImgSymbols.js';
+import { Flag, Ttype, Tuple, aAMquote, aAMsymbols } from '../../../../src/core/math/ASCIIMathTeXImgSymbols.js';
 
 const tex = (input: string): string => new ASCIIMathTeXImg().getTeX(input);
 
@@ -40,7 +34,7 @@ interface Internals {
 
 const internals = (): Internals => new ASCIIMathTeXImg() as unknown as Internals;
 
-describe('getTeX — the four expressions this port\'s corpus contains', () => {
+describe("getTeX — the four expressions this port's corpus contains", () => {
   it('ax^2+bx+c=0', () => {
     expect(tex('ax^2+bx+c=0')).toBe('{a}{x}^{{2}}+{b}{x}+{c}={0}');
   });
@@ -50,18 +44,22 @@ describe('getTeX — the four expressions this port\'s corpus contains', () => {
   });
 
   it('[[a,b],[c,d]]((n),(k))', () => {
-    expect(tex('[[a,b],[c,d]]((n),(k))')).toBe('{\\left[\\begin{array}{cc} {a}&{b}\\\\{c}&{d}\\end{array}\\right]}{\\left(\\begin{array}{c} {n}\\\\{k}\\end{array}\\right)}');
+    expect(tex('[[a,b],[c,d]]((n),(k))')).toBe(
+      '{\\left[\\begin{array}{cc} {a}&{b}\\\\{c}&{d}\\end{array}\\right]}{\\left(\\begin{array}{c} {n}\\\\{k}\\end{array}\\right)}',
+    );
   });
 
   it('S<=1/(F+(1-F)/N)', () => {
     expect(tex('S<=1/(F+(1-F)/N)')).toBe('{S}\\le\\frac{{1}}{{{F}+\\frac{{{1}-{F}}}{{N}}}}');
   });
-
 });
 
 describe('getTeX — upstream-derived expression table', () => {
   const cases: readonly (readonly [string, string])[] = [
-    ['sum_(i=1)^n i^3=((n(n+1))/2)^2', '{\\sum_{{{i}={1}}}^{{n}}}{i}^{{3}}={\\left(\\frac{{{n}{\\left({n}+{1}\\right)}}}{{2}}\\right)}^{{2}}'],
+    [
+      'sum_(i=1)^n i^3=((n(n+1))/2)^2',
+      '{\\sum_{{{i}={1}}}^{{n}}}{i}^{{3}}={\\left(\\frac{{{n}{\\left({n}+{1}\\right)}}}{{2}}\\right)}^{{2}}',
+    ],
     ['int_0^1 f(x)dx', '{\\int_{{0}}^{{1}}}{f{{\\left({x}\\right)}}}{\\left.{d}{x}\\right.}'],
     ['lim_(x->oo) 1/x', '\\lim_{{{x}\\to\\infty}}\\frac{{1}}{{x}}'],
     ['root(3)(x)', '{\\sqrt[{{3}}]{{{x}}}}'],
@@ -75,8 +73,14 @@ describe('getTeX — upstream-derived expression table', () => {
     ['floor(x)', '{\\left\\lfloor{{x}}\\right\\rfloor}'],
     ['ceil(x)', '{\\left\\lceil{{x}}\\right\\rceil}'],
     ['norm(v)', '{\\left\\|{{v}}\\right\\|}'],
-    ['hat(x) bar(y) vec(z) dot(w) ddot(v) ul(u) ubrace(a) obrace(b)', '\\hat{{{x}}}\\overline{{{y}}}\\vec{{{z}}}\\dot{{{w}}}\\ddot{{{v}}}\\underline{{{u}}}\\underbrace{{{a}}}\\overbrace{{{b}}}'],
-    ['bb(A) sf(B) bbb(C) cc(D) tt(E) fr(F)', '{\\mathbf{{{A}}}}{\\mathsf{{{B}}}}{\\mathbb{{{C}}}}{\\mathcal{{{D}}}}{\\mathtt{{{E}}}}{\\mathfrak{{{F}}}}'],
+    [
+      'hat(x) bar(y) vec(z) dot(w) ddot(v) ul(u) ubrace(a) obrace(b)',
+      '\\hat{{{x}}}\\overline{{{y}}}\\vec{{{z}}}\\dot{{{w}}}\\ddot{{{v}}}\\underline{{{u}}}\\underbrace{{{a}}}\\overbrace{{{b}}}',
+    ],
+    [
+      'bb(A) sf(B) bbb(C) cc(D) tt(E) fr(F)',
+      '{\\mathbf{{{A}}}}{\\mathsf{{{B}}}}{\\mathbb{{{C}}}}{\\mathcal{{{D}}}}{\\mathtt{{{E}}}}{\\mathfrak{{{F}}}}',
+    ],
     ['sqrt(x)', '\\sqrt{{{x}}}'],
     ['cancel(x)', '\\cancel{{{x}}}'],
     ['{: x :}', '{\\left.{x}\\right.}'],
@@ -109,8 +113,8 @@ describe('getTeX — upstream-derived expression table', () => {
     ['CC NN QQ RR ZZ', '\\mathbb{C}\\mathbb{N}\\mathbb{Q}\\mathbb{R}\\mathbb{Z}'],
     ['%', '\\%'],
     ['\\ ', '\\ '],
-    ['\'\'\'', '\'\'\''],
-    ['prime', '\''],
+    ["'''", "'''"],
+    ['prime', "'"],
     [':|:', '|'],
     ['|:x:|', '{\\left|{x}\\right|}'],
     ['left(x right)', '{\\left({x}\\right)}'],
@@ -129,7 +133,7 @@ describe('getTeX — upstream-derived expression table', () => {
     ['setminus', '\\setminus'],
     ['-<=', '\\preceq'],
     ['>-=', '\\succeq'],
-    [':\'', '\\because'],
+    [":'", '\\because'],
     ['/_\\', '\\triangle'],
     ['qquad', '\\qquad'],
     ['{:d x:}', '{\\left.{d}{x}\\right.}'],
@@ -240,7 +244,10 @@ describe('getTeX — upstream-derived expression table', () => {
     ['([])', '{\\left({[]}\\right)}'],
     ['{()}', '{\\left\\lbrace{()}\\right\\rbrace}'],
     ['(:():)', '{\\left\\langle{()}\\right\\rangle}'],
-    ['[[(a),(b)],[(c),(d)]]', '{\\left[\\begin{array}{c} \\begin{array}{c} {a}\\\\{b}\\end{array}\\\\\\begin{array}{c} {c}\\\\{d}\\end{array}\\end{array}\\right]}'],
+    [
+      '[[(a),(b)],[(c),(d)]]',
+      '{\\left[\\begin{array}{c} \\begin{array}{c} {a}\\\\{b}\\end{array}\\\\\\begin{array}{c} {c}\\\\{d}\\end{array}\\end{array}\\right]}',
+    ],
     ['[[a,b],[c,d]]]', '{\\left[\\begin{array}{cc} {a}&{b}\\\\{c}&{d}\\end{array}\\right]}{]}'],
     ['sqrt()', '\\sqrt{{()}}'],
     ['abs()', '{\\left|{()}\\right|}'],
@@ -272,7 +279,10 @@ describe('getTeX — upstream-derived expression table', () => {
     ['[[a,b],c],[d,e]]', '{\\left[{\\left[{a},{b}\\right]},{c}\\right]},{\\left[{d},{e}\\right]}{]}'],
     ['[[{:a:},b],[c,d]]', '{\\left[\\begin{array}{cc} {\\left.{a}\\right.}&{b}\\\\{c}&{d}\\end{array}\\right]}'],
     ['[[a,|],[c,d]]', '{\\left[{\\left[{a},{\\mid}\\right]},{\\left[{c},{d}\\right]}\\right]}'],
-    ['[[a,b],[c,d]],[[e,f],[g,h]]', '{\\left[\\begin{array}{cc} {a}&{b}\\\\{c}&{d}\\end{array}\\right]},{\\left[\\begin{array}{cc} {e}&{f}\\\\{g}&{h}\\end{array}\\right]}'],
+    [
+      '[[a,b],[c,d]],[[e,f],[g,h]]',
+      '{\\left[\\begin{array}{cc} {a}&{b}\\\\{c}&{d}\\end{array}\\right]},{\\left[\\begin{array}{cc} {e}&{f}\\\\{g}&{h}\\end{array}\\right]}',
+    ],
     ['[(a,b],[c,d)]', '{\\left[{\\left({a},{b}\\right]},{\\left[{c},{d}\\right)}\\right]}'],
     ['[[a,b]],[c,d]]', '{\\left[\\begin{array}{cc} {a}&{b}\\end{array}\\right]},{\\left[{c},{d}\\right]}{]}'],
     ['((a),b),(c,d))', '{\\left({\\left({a}\\right)},{b}\\right)},{\\left({c},{d}\\right)}{)}'],
@@ -292,10 +302,7 @@ describe('getTeX — upstream-derived expression table', () => {
 });
 
 describe('getTeX — inputs upstream raises on', () => {
-  const cases: readonly string[] = [
-    'text',
-    '"',
-  ];
+  const cases: readonly string[] = ['text', '"'];
 
   it.each(cases)('%j raises, the way the Java does', (input) => {
     expect(() => tex(input)).toThrow();
@@ -357,9 +364,7 @@ describe('aAMremoveCharsAndBlanks (java:465-477)', () => {
   });
 
   it('raises when the escape test runs off the end (java:468, charAt(n + 1))', () => {
-    expect(() => internals().aAMremoveCharsAndBlanks('a\\', 1)).toThrow(
-      /StringIndexOutOfBounds/,
-    );
+    expect(() => internals().aAMremoveCharsAndBlanks('a\\', 1)).toThrow(/StringIndexOutOfBounds/);
   });
 });
 
@@ -483,9 +488,7 @@ describe('the symbol table after aAMinitSymbols (java:443-462)', () => {
 
 describe('patchColor (java:1018-1020)', () => {
   it('rewrites every \\color{, not just the first', () => {
-    expect(tex('color(red)(x)+color(blue)(y)')).toBe(
-      '{\\textcolor{red}{{x}}}+{\\textcolor{blue}{{y}}}',
-    );
+    expect(tex('color(red)(x)+color(blue)(y)')).toBe('{\\textcolor{red}{{x}}}+{\\textcolor{blue}{{y}}}');
   });
 });
 

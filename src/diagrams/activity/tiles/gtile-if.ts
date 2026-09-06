@@ -1,18 +1,10 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
-
 
 export class GtileIf extends TileComposite {
   readonly kind = 'gtile-if' as const;
@@ -32,7 +24,7 @@ export class GtileIf extends TileComposite {
     _theme: Theme,
   ) {
     super();
-    const branchTiles = branches.map(b => b.tile);
+    const branchTiles = branches.map((b) => b.tile);
 
     const xOffsets: number[] = [];
     let x = 0;
@@ -42,12 +34,11 @@ export class GtileIf extends TileComposite {
     }
     this.branchOffsets = xOffsets;
 
-    const branchTotalWidth =
-      x - (branchTiles.length > 0 ? NODE_MARGIN_X : 0);
+    const branchTotalWidth = x - (branchTiles.length > 0 ? NODE_MARGIN_X : 0);
 
     this.width = Math.max(diamond.width, branchTotalWidth);
 
-    const maxBranchH = Math.max(0, ...branchTiles.map(b => b.height));
+    const maxBranchH = Math.max(0, ...branchTiles.map((b) => b.height));
     this.branchOffsetY = diamond.height + NODE_MARGIN_Y;
     const baseHeight = this.branchOffsetY + maxBranchH;
 
@@ -59,9 +50,7 @@ export class GtileIf extends TileComposite {
       this.height = baseHeight;
     }
 
-    this.children = mergeDiamond !== null
-      ? [diamond, ...branchTiles, mergeDiamond]
-      : [diamond, ...branchTiles];
+    this.children = mergeDiamond !== null ? [diamond, ...branchTiles, mergeDiamond] : [diamond, ...branchTiles];
   }
 
   getCoord(hook: HookName): GPoint {

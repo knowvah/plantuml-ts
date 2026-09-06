@@ -2,13 +2,7 @@ import { rect, line, text } from '../../core/svg.js';
 import type { Theme } from '../../core/theme.js';
 import type { PacketGeometry } from './ast.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import {
-  INDICATOR_HEIGHT,
-  V_LINE_SHORT,
-  V_MARGIN,
-  FONT_ASCENT,
-  blockRenderedHeight,
-} from './layout.js';
+import { INDICATOR_HEIGHT, V_LINE_SHORT, V_MARGIN, FONT_ASCENT, blockRenderedHeight } from './layout.js';
 
 const FONT_SIZE = 14;
 const FONT_FAMILY = 'sans-serif';

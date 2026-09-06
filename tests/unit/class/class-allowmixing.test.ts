@@ -28,7 +28,10 @@ import type { DotInputGraph, DotInputNode } from '../../../src/core/graph-layout
 const measurer = new FormulaMeasurer();
 
 function parse(source: string): ReturnType<typeof parseClass> {
-  const lines = source.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+  const lines = source
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
   return parseClass({ lines, type: 'class' } satisfies UmlSource);
 }
 
@@ -41,7 +44,9 @@ function classifier(ast: ReturnType<typeof parseClass>, id: string): Classifier 
 /** Layout the AST and return the captured DOT input graph's nodes. */
 function captureNodes(ast: ReturnType<typeof parseClass>): DotInputNode[] {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured = g; });
+  setLayoutInputObserver((g) => {
+    captured = g;
+  });
   try {
     layoutClass(ast, defaultTheme, measurer);
   } finally {
@@ -104,18 +109,17 @@ describe('mix_ prefix descriptive leaves — DOT shape', () => {
     expect(nodes.find((n) => n.id === 'foo3')?.shape).toBeUndefined(); // default rect
   });
 
-  it('sizes mix_usecase/mix_actor via the USymbol formulas, not the generic box',
-    () => {
-      const ast = parse('mix_usecase Longlabel\nmix_actor A');
-      const nodes = captureNodes(ast);
-      const uc = nodes.find((n) => n.id === 'Longlabel')!;
-      const actor = nodes.find((n) => n.id === 'A')!;
-      // Generic class box floors width at 100 and height at fontSize*1.4+8+4;
-      // the USymbol formulas (ContainingEllipse / ActorStickMan+label) don't
-      // share that floor — actor height in particular (stickman 60 + one
-      // label line) is well above the generic header-only floor.
-      expect(uc.width).toBeGreaterThan(0);
-      expect(uc.height).toBeGreaterThan(0);
-      expect(actor.height).toBeGreaterThan(60); // stickman (60) + label line
-    });
+  it('sizes mix_usecase/mix_actor via the USymbol formulas, not the generic box', () => {
+    const ast = parse('mix_usecase Longlabel\nmix_actor A');
+    const nodes = captureNodes(ast);
+    const uc = nodes.find((n) => n.id === 'Longlabel')!;
+    const actor = nodes.find((n) => n.id === 'A')!;
+    // Generic class box floors width at 100 and height at fontSize*1.4+8+4;
+    // the USymbol formulas (ContainingEllipse / ActorStickMan+label) don't
+    // share that floor — actor height in particular (stickman 60 + one
+    // label line) is well above the generic header-only floor.
+    expect(uc.width).toBeGreaterThan(0);
+    expect(uc.height).toBeGreaterThan(0);
+    expect(actor.height).toBeGreaterThan(60); // stickman (60) + label line
+  });
 });

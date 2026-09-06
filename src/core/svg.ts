@@ -16,12 +16,7 @@
 import { paintToSvg } from './paint.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
-import {
-  DEFAULT_SVG_DECIMALS,
-  fmt,
-  formatDecimal,
-  shortenColor,
-} from './svg-format.js';
+import { DEFAULT_SVG_DECIMALS, fmt, formatDecimal, shortenColor } from './svg-format.js';
 
 // Arrow-marker builders live in ./svg-markers (no Paint involvement); re-export
 // them here so existing importers of `core/svg.js` are unaffected by the split.
@@ -242,12 +237,7 @@ export function resolvePaint(p: Paint | undefined): {
  *  `#RRGGBB` -> `#RGB` shortening. Free-form attribute bags
  *  ({@link SvgAttrsPaint}) carry non-color values too (`transform`, ids),
  *  which must never be rewritten. */
-const COLOR_ATTRS: ReadonlySet<string> = new Set([
-  'fill',
-  'stroke',
-  'stop-color',
-  'color',
-]);
+const COLOR_ATTRS: ReadonlySet<string> = new Set(['fill', 'stroke', 'stop-color', 'color']);
 
 // One `<stop stop-color="…">` value inside a `paint.ts#paintToSvg` gradient
 // def. Built from a string (not a regex literal) — the complexity checker
@@ -321,8 +311,7 @@ const ROOT_LENGTH_ADJUST = 'spacing';
  * `klimt/document-shell.ts#withRootGroupAttributes`), so they cannot drift.
  * @see .../klimt/drawing/svg/SvgGraphicsCore.java (getG)
  */
-export const ROOT_GROUP_OPEN =
-  `<g font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">`;
+export const ROOT_GROUP_OPEN = `<g font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">`;
 
 /** Closing tag of {@link ROOT_GROUP_OPEN}'s element. */
 export const ROOT_GROUP_CLOSE = '</g>';
@@ -346,11 +335,25 @@ export function strokeDecorationOf(
 // Primitive builders
 // ---------------------------------------------------------------------------
 
-
 // Shape emitters moved to a sibling module (line cap); re-exported. `noteBox`
 // joined them for the same reason when the emission rules below grew this
 // file past the cap.
-export { rect, line, text, multilineText, tspan, image, path, ellipse, circle, diamond, polygon, polyline, noteBox, emittedTextForm } from './svg-shapes.js';
+export {
+  rect,
+  line,
+  text,
+  multilineText,
+  tspan,
+  image,
+  path,
+  ellipse,
+  circle,
+  diamond,
+  polygon,
+  polyline,
+  noteBox,
+  emittedTextForm,
+} from './svg-shapes.js';
 export type { NoteBoxStyle } from './svg-shapes.js';
 
 /**
@@ -365,10 +368,7 @@ export type { NoteBoxStyle } from './svg-shapes.js';
  */
 export function group(id: string, children: string[]): string;
 export function group(children: string, extraAttrs?: SvgAttrs): string;
-export function group(
-  first: string,
-  second?: string[] | SvgAttrs,
-): string {
+export function group(first: string, second?: string[] | SvgAttrs): string {
   if (Array.isArray(second)) {
     // Legacy overload: group(id, children[])
     return `<g id="${first}">${second.join('')}</g>`;
@@ -433,17 +433,9 @@ export function defs(children: string[]): string {
  * @param h       - Height of the foreignObject.
  * @param content - Inner HTML/MathML string (verbatim, not escaped).
  */
-export function foreignObject(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  content: string,
-): string {
+export function foreignObject(x: number, y: number, w: number, h: number, content: string): string {
   return (
-    `<foreignObject x="${fmt(x)}" y="${fmt(y)}" width="${fmt(w)}" height="${fmt(h)}">` +
-    content +
-    `</foreignObject>`
+    `<foreignObject x="${fmt(x)}" y="${fmt(y)}" width="${fmt(w)}" height="${fmt(h)}">` + content + `</foreignObject>`
   );
 }
 
@@ -470,11 +462,7 @@ export function foreignObject(
 // the complexity checker miscounts `<`/`>` in literals. The id capture is the
 // FNV/base36 content-hash `paintToSvg` emits (`g` + [0-9a-z]); `[\s\S]*?` is
 // newline-safe and non-greedy so adjacent distinct defs don't merge.
-const GRADIENT_DEF_RE = new RegExp(
-  '<linearGradient id="(g[0-9a-z]+)"[\\s\\S]*?</linearGradient>',
-  'g',
-);
-
+const GRADIENT_DEF_RE = new RegExp('<linearGradient id="(g[0-9a-z]+)"[\\s\\S]*?</linearGradient>', 'g');
 
 /**
  * Lift every inline `<linearGradient>` out of `body` and return them, deduped
@@ -519,9 +507,7 @@ export function svgRoot(
   const lifted = extractGradientDefs(children.join(''));
   const defsBlock = defs([...markers, extraDefs, lifted.defs]);
   const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
-  const bgRect = isSolid
-    ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>`
-    : '';
+  const bgRect = isSolid ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>` : '';
   // Rule 3: `font-family`/`lengthAdjust` ride on the root `<g>` and are
   // inherited, so no `<text>` below repeats them (`svg-shapes.ts#text`).
   // `<defs>` stays OUTSIDE that group, matching the jar's `<defs/><g …>`

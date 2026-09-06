@@ -132,7 +132,12 @@ export abstract class TitledDiagram {
   protected readonly preprocessing: PreprocessingArtifact;
 
   /** @see TitledDiagram.java:104-112 */
-  constructor(source: UmlSource, type: DiagramType, previous: Previous | undefined, preprocessing: PreprocessingArtifact) {
+  constructor(
+    source: UmlSource,
+    type: DiagramType,
+    previous: Previous | undefined,
+    preprocessing: PreprocessingArtifact,
+  ) {
     this.source = source;
     this.type = type;
     this.previous = previous;
@@ -229,7 +234,13 @@ export abstract class TitledDiagram {
 
     const widthwarning = Number.parseInt(value, 10);
     if (actualWidth > widthwarning)
-      return 'The image is ' + String(Math.trunc(actualWidth)) + ' pixel width. (Warning limit is ' + String(widthwarning) + ')';
+      return (
+        'The image is ' +
+        String(Math.trunc(actualWidth)) +
+        ' pixel width. (Warning limit is ' +
+        String(widthwarning) +
+        ')'
+      );
 
     return undefined;
   }

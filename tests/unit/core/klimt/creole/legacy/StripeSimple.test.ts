@@ -184,7 +184,12 @@ describe('buildLiteralAtoms — LITERAL classification bypass (no style-command 
 // ---------------------------------------------------------------------------
 describe('buildLineAtoms — <img> cannot-decode fallback is a hardcoded monospace(14) font (ADR-1)', () => {
   const MALFORMED_IMG = '<img:x/y.svg>';
-  const OTHER_ELEMENT_FONT: FontConfiguration = { family: 'serif', size: 8, color: '#ff0000', styles: new Set([FontStyle.BOLD]) };
+  const OTHER_ELEMENT_FONT: FontConfiguration = {
+    family: 'serif',
+    size: 8,
+    color: '#ff0000',
+    styles: new Set([FontStyle.BOLD]),
+  };
 
   test('the fallback text run is "(Cannot decode)" at monospace/14/black, regardless of the line font', () => {
     const { atoms } = buildLineAtoms(MALFORMED_IMG, PLAIN);

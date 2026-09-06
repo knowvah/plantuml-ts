@@ -1,19 +1,10 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
-
-
 
 export class GtileWhile extends TileComposite {
   readonly kind = 'gtile-while' as const;

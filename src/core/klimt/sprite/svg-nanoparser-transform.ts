@@ -26,8 +26,7 @@ const EQUALS_SOMETHING = '="([^"]+)"';
 const DATA_TRANSFORM = new RegExp('transform' + EQUALS_SOMETHING);
 
 /** `P_MATRIX`, unchanged. */
-const P_MATRIX =
-  /matrix\(([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)\)/;
+const P_MATRIX = /matrix\(([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)\)/;
 /** `P_ROTATE`, unchanged. */
 const P_ROTATE = /rotate\(([-.0-9]+)[ ,]+([-.0-9]+)[ ,]+([-.0-9]+)\)/;
 /** `P_TRANSLATE1`/`P_TRANSLATE2`, unchanged. */

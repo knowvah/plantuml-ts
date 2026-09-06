@@ -89,10 +89,7 @@ function arrowPoint(center: CurvePoint, alpha: number, len: number): CurvePoint 
  * @see .../jsondiagram/Arrow.java#drawArrow
  * @see .../jsondiagram/JsonCurve.java#drawCurve
  */
-export function buildArrowHeadPath(
-  points: readonly CurvePoint[],
-  ep: CurvePoint | undefined,
-): string {
+export function buildArrowHeadPath(points: readonly CurvePoint[], ep: CurvePoint | undefined): string {
   const p1 = points[points.length - 1];
   const p2 = ep;
   if (p1 === undefined || p2 === undefined) return '';
@@ -116,10 +113,7 @@ export function buildArrowHeadPath(
 }
 
 /** {@link buildArrowHeadPath}'s segments, for a pen that jiggles them. */
-export function buildArrowHeadSegments(
-  points: readonly CurvePoint[],
-  ep: CurvePoint | undefined,
-): HandSegment[] {
+export function buildArrowHeadSegments(points: readonly CurvePoint[], ep: CurvePoint | undefined): HandSegment[] {
   const d = buildArrowHeadPath(points, ep);
   if (d === '') return [];
   return d.split(' ').reduce<HandSegment[]>((acc, tok, i, all) => {
@@ -155,10 +149,14 @@ export function buildCurveSegments(points: readonly CurvePoint[]): HandSegment[]
     segs.push({
       kind: 'cubic',
       c: {
-        x1: last.x, y1: last.y,
-        ctrlx1: c1.x, ctrly1: c1.y,
-        ctrlx2: c2.x, ctrly2: c2.y,
-        x2: end.x, y2: end.y,
+        x1: last.x,
+        y1: last.y,
+        ctrlx1: c1.x,
+        ctrly1: c1.y,
+        ctrlx2: c2.x,
+        ctrly2: c2.y,
+        x2: end.x,
+        y2: end.y,
       },
     });
     last = end;

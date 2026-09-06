@@ -23,13 +23,7 @@
 import type { State } from './ast.js';
 
 export type EntityPositionKind =
-  | 'normal'
-  | 'entrypoint'
-  | 'exitpoint'
-  | 'inputpin'
-  | 'outputpin'
-  | 'expansioninput'
-  | 'expansionoutput';
+  'normal' | 'entrypoint' | 'exitpoint' | 'inputpin' | 'outputpin' | 'expansioninput' | 'expansionoutput';
 
 /** EntityPosition.fromStereotype (case-insensitive `<<label>>` match) —
  *  reads the stereotype TEXT, so it serves both the AST (`getEntityPosition`)
@@ -86,18 +80,10 @@ export const PORT_TABLE_PAD_FLOOR = 10;
 
 /** EntityPosition.getInputs() — rank=source in the enclosing cluster's port
  *  chain (ClusterDotString.printRanks). */
-const INPUT_POSITIONS: ReadonlySet<EntityPositionKind> = new Set([
-  'entrypoint',
-  'inputpin',
-  'expansioninput',
-]);
+const INPUT_POSITIONS: ReadonlySet<EntityPositionKind> = new Set(['entrypoint', 'inputpin', 'expansioninput']);
 
 /** EntityPosition.getOutputs() — rank=sink. */
-const OUTPUT_POSITIONS: ReadonlySet<EntityPositionKind> = new Set([
-  'exitpoint',
-  'outputpin',
-  'expansionoutput',
-]);
+const OUTPUT_POSITIONS: ReadonlySet<EntityPositionKind> = new Set(['exitpoint', 'outputpin', 'expansionoutput']);
 
 export function isInputPosition(pos: EntityPositionKind): boolean {
   return INPUT_POSITIONS.has(pos);

@@ -92,7 +92,10 @@ const jarBackedDriverBounder: DriverStringBounder = {
  *  these two call sites need a bounder that actually reports the same
  *  jar-measured numbers `jarBackedDriverBounder`/`newGraphic()` already
  *  use, or every dimension collapses to 0. */
-function jarBackedStringBounder(): { calculateDimension: (font: { family: string; size: number }, text: string) => XDimension2D; getDescent: (font: { family: string; size: number }, text: string) => number } {
+function jarBackedStringBounder(): {
+  calculateDimension: (font: { family: string; size: number }, text: string) => XDimension2D;
+  getDescent: (font: { family: string; size: number }, text: string) => number;
+} {
   return {
     calculateDimension(font, text) {
       const { width, height } = jarMeasurer.measure(text, { family: font.family, size: font.size });
@@ -349,7 +352,9 @@ describe('EntityImageDescription (T14, AC2) — stereotype guillemet block', () 
   });
 
   test('an empty stereotypeLabels array produces no stereotype line (identical to AC1 fixture)', () => {
-    const withEmpty = new EntityImageDescription(baseParams({ labels: { codeName: 'Comp1', displayText: 'Comp1', stereotypeLabels: [] } }));
+    const withEmpty = new EntityImageDescription(
+      baseParams({ labels: { codeName: 'Comp1', displayText: 'Comp1', stereotypeLabels: [] } }),
+    );
     expectConformant(render(withEmpty), JAR_COMP1);
   });
 });
@@ -361,14 +366,18 @@ describe('EntityImageDescription (T14, AC2) — stereotype guillemet block', () 
 describe('EntityImageDescription (T14, AC3) — D3′ deferred URL/link driver', () => {
   test('drawU throws when the entity carries a non-null url', () => {
     const entity = new EntityImageDescription(
-      baseParams({ entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' } }),
+      baseParams({
+        entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' },
+      }),
     );
     expect(() => entity.drawU(newGraphic())).toThrow(/D3-prime/);
   });
 
   test('the throw message names the deferred openLink/closeLink driver', () => {
     const entity = new EntityImageDescription(
-      baseParams({ entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' } }),
+      baseParams({
+        entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' },
+      }),
     );
     expect(() => entity.drawU(newGraphic())).toThrow(/openLink\/closeLink/);
   });
@@ -385,7 +394,9 @@ describe('resolveDescriptionUSymbol — keyword to USymbol resolution', () => {
   });
 
   test('"usecase/" resolves directly to USECASE_BUSINESS (bypasses fromString, per the verified finding)', () => {
-    expect(resolveDescriptionUSymbol('usecase/', ActorStyle.STICKMAN, ComponentStyle.UML2)).toBe(USymbols.USECASE_BUSINESS);
+    expect(resolveDescriptionUSymbol('usecase/', ActorStyle.STICKMAN, ComponentStyle.UML2)).toBe(
+      USymbols.USECASE_BUSINESS,
+    );
   });
 
   test('"usecase" resolves directly to USECASE', () => {
@@ -397,7 +408,9 @@ describe('resolveDescriptionUSymbol — keyword to USymbol resolution', () => {
   });
 
   test('"actor/" resolves to ACTOR_STICKMAN_BUSINESS via USymbols.fromString\'s own actor/ branch', () => {
-    expect(resolveDescriptionUSymbol('actor/', ActorStyle.STICKMAN, ComponentStyle.UML2)).toBe(USymbols.ACTOR_STICKMAN_BUSINESS);
+    expect(resolveDescriptionUSymbol('actor/', ActorStyle.STICKMAN, ComponentStyle.UML2)).toBe(
+      USymbols.ACTOR_STICKMAN_BUSINESS,
+    );
   });
 
   test('"actor" resolves via the caller\'s actorStyle', () => {

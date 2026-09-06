@@ -4,12 +4,7 @@
  */
 
 import type { ActivityRepeat } from './ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  BranchResult,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, BranchResult, LayoutCtx } from './activity-layout-types.js';
 import { DIAMOND_MIN, NODE_MARGIN_X, NODE_MARGIN_Y } from './activity-layout-constants.js';
 import { nextId, nodeCenterX, orthogonalPoints, repeatCondSize } from './activity-layout-helpers.js';
 
@@ -48,12 +43,7 @@ function buildRepeatStartGeo(startY: number, centerX: number, ctx: LayoutCtx): R
   return { repeatStartId, repeatStartGeo, dStart };
 }
 
-function buildRepeatCondGeo(
-  condition: string,
-  bodyBottomY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): RepeatCondInfo {
+function buildRepeatCondGeo(condition: string, bodyBottomY: number, centerX: number, ctx: LayoutCtx): RepeatCondInfo {
   const condY = bodyBottomY + NODE_MARGIN_Y;
   const condId = nextId(ctx, 'repeat-cond');
   const { width: condW, height: condH } = repeatCondSize(condition, ctx);
@@ -70,11 +60,7 @@ function buildRepeatCondGeo(
 }
 
 /** repeat-start → body first. */
-function buildRepeatEntryEdge(
-  bodyResult: BranchResult,
-  centerX: number,
-  entryY: number,
-): ActivityEdgeGeo | undefined {
+function buildRepeatEntryEdge(bodyResult: BranchResult, centerX: number, entryY: number): ActivityEdgeGeo | undefined {
   if (bodyResult.firstId === undefined) return undefined;
   const firstNode = bodyResult.nodes.find((n) => n.id === bodyResult.firstId);
   if (firstNode === undefined) return undefined;
@@ -172,12 +158,7 @@ function assembleRepeatResult(
   };
 }
 
-export function layoutRepeat(
-  node: ActivityRepeat,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+export function layoutRepeat(node: ActivityRepeat, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   centerX = nodeCenterX(node.swimlane, centerX, ctx);
   const start = buildRepeatStartGeo(startY, centerX, ctx);
 
@@ -194,9 +175,7 @@ export function layoutRepeat(
 
   const breakGeos = bodyResult.breakGeos;
   const breakExit =
-    breakGeos !== undefined && breakGeos.length > 0
-      ? buildRepeatBreakExit(breakGeos, cond, centerX, ctx)
-      : undefined;
+    breakGeos !== undefined && breakGeos.length > 0 ? buildRepeatBreakExit(breakGeos, cond, centerX, ctx) : undefined;
   if (breakExit !== undefined) outEdges.push(...breakExit.edges);
 
   return assembleRepeatResult(start, bodyResult, cond, outEdges, breakExit);

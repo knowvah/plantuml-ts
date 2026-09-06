@@ -56,9 +56,7 @@ const TEST_THEME: Theme = {
 };
 
 /** Build a BarRect with sensible defaults for positive bars. */
-function makeRect(
-  overrides: Partial<BarRect> & { value: number },
-): BarRect {
+function makeRect(overrides: Partial<BarRect> & { value: number }): BarRect {
   return {
     x: 10,
     y: 50,
@@ -69,10 +67,7 @@ function makeRect(
 }
 
 /** Build a vertical BarSeriesGeo. */
-function makeVerticalGeo(
-  rects: BarRect[],
-  opts: Partial<Omit<BarSeriesGeo, 'type' | 'rects'>> = {},
-): BarSeriesGeo {
+function makeVerticalGeo(rects: BarRect[], opts: Partial<Omit<BarSeriesGeo, 'type' | 'rects'>> = {}): BarSeriesGeo {
   return {
     type: 'bar',
     name: 'Series A',
@@ -107,11 +102,7 @@ function extractYValues(svg: string): number[] {
 
 describe('drawBar — AC1: vertical bars', () => {
   it('produces exactly 3 <rect> elements for 3-rect geo', () => {
-    const rects = [
-      makeRect({ value: 10, x: 0 }),
-      makeRect({ value: 20, x: 40 }),
-      makeRect({ value: 30, x: 80 }),
-    ];
+    const rects = [makeRect({ value: 10, x: 0 }), makeRect({ value: 20, x: 40 }), makeRect({ value: 30, x: 80 })];
     const geo = makeVerticalGeo(rects);
     const svg = drawBar(geo, TEST_THEME);
 
@@ -208,11 +199,7 @@ describe('drawBar — AC4: negative-value label placement', () => {
 
 describe('drawBar — AC5: fill color', () => {
   it('sets fill attribute to the geo color on all rect elements', () => {
-    const rects = [
-      makeRect({ value: 1, x: 0 }),
-      makeRect({ value: 2, x: 40 }),
-      makeRect({ value: 3, x: 80 }),
-    ];
+    const rects = [makeRect({ value: 1, x: 0 }), makeRect({ value: 2, x: 40 }), makeRect({ value: 3, x: 80 })];
     const geo = makeVerticalGeo(rects, { color: '#FF0000' });
     const svg = drawBar(geo, TEST_THEME);
 

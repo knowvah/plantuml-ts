@@ -52,9 +52,7 @@ describe('dotPlugin — skin directives are inert, as upstream', () => {
   const baseline = renderFull(makeSource(GRAPH));
 
   it('a skinparam line changes nothing about the output', () => {
-    const withSkin = renderFull(
-      makeSource(['@startdot', 'skinparam BackgroundColor #AABBCC', ...GRAPH.slice(1)]),
-    );
+    const withSkin = renderFull(makeSource(['@startdot', 'skinparam BackgroundColor #AABBCC', ...GRAPH.slice(1)]));
     expect(withSkin).toBe(baseline);
   });
 
@@ -72,9 +70,7 @@ describe('dotPlugin — skin directives are inert, as upstream', () => {
   });
 
   it('a <style> block changes nothing', () => {
-    const withStyle = renderFull(
-      makeSource(GRAPH, ['node { BackgroundColor: red }', 'edge { LineColor: blue }']),
-    );
+    const withStyle = renderFull(makeSource(GRAPH, ['node { BackgroundColor: red }', 'edge { LineColor: blue }']));
     expect(withStyle).toBe(baseline);
   });
 
@@ -84,7 +80,7 @@ describe('dotPlugin — skin directives are inert, as upstream', () => {
 });
 
 describe('dotPlugin — output shape', () => {
-  it('emits graphviz\'s document, untouched by assembleSvg', () => {
+  it("emits graphviz's document, untouched by assembleSvg", () => {
     const svg = renderFull(makeSource(GRAPH));
     expect(svg).toContain('id="graph0"');
     expect(svg).toMatch(/width="\d+pt"/);
@@ -99,13 +95,11 @@ describe('dotPlugin — output shape', () => {
     expect(svg).toContain('id="graph0"');
   });
 
-  it('emits graphviz\'s document verbatim through the real entry point when there is no chrome', () => {
+  it("emits graphviz's document verbatim through the real entry point when there is no chrome", () => {
     const svg = renderSync(GRAPH.join('\n'));
     expect(svg.startsWith('<?xml')).toBe(true);
     expect(svg).not.toContain('<marker');
   });
 });
 
-describe('dotPlugin.accepts()', () => {
-
-});
+describe('dotPlugin.accepts()', () => {});

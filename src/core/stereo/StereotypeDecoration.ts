@@ -204,10 +204,7 @@ export class StereotypeDecoration {
    * plain resolver function (see file doc) — see that doc for why this
    * port never throws where upstream declares `throws NoSuchColorException`.
    */
-  static buildComplex(
-    full: string,
-    htmlColorSet: (name: string) => ResolvedColor | undefined,
-  ): StereotypeDecoration {
+  static buildComplex(full: string, htmlColorSet: (name: string) => ResolvedColor | undefined): StereotypeDecoration {
     let label = '';
     let htmlColor: ResolvedColor | undefined;
     let character = '';

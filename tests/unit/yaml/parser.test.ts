@@ -24,9 +24,7 @@ describe('parseYaml', () => {
   });
 
   it('parses nested objects', () => {
-    const ast = parseYaml(
-      makeSource(['metadata:', '  name: foo', '  namespace: bar']),
-    );
+    const ast = parseYaml(makeSource(['metadata:', '  name: foo', '  namespace: bar']));
     expect(ast.root).toEqual({ metadata: { name: 'foo', namespace: 'bar' } });
   });
 
@@ -61,9 +59,7 @@ describe('parseYaml', () => {
   // -------------------------------------------------------------------------
 
   it('strips skinparam directive before body', () => {
-    const ast = parseYaml(
-      makeSource(['skinparam handwritten true', 'foo: bar']),
-    );
+    const ast = parseYaml(makeSource(['skinparam handwritten true', 'foo: bar']));
     expect(ast.root).toEqual({ foo: 'bar' });
   });
 
@@ -77,9 +73,7 @@ describe('parseYaml', () => {
   // -------------------------------------------------------------------------
 
   it('strips <style> block before parsing', () => {
-    const ast = parseYaml(
-      makeSource(['<style>', 'yamlDiagram { }', '</style>', 'foo: bar']),
-    );
+    const ast = parseYaml(makeSource(['<style>', 'yamlDiagram { }', '</style>', 'foo: bar']));
     expect(ast.root).toEqual({ foo: 'bar' });
   });
 
@@ -88,9 +82,7 @@ describe('parseYaml', () => {
   // -------------------------------------------------------------------------
 
   it('ignores @startyaml and @endyaml wrapper lines defensively', () => {
-    const ast = parseYaml(
-      makeSource(['@startyaml', 'fruit: Apple', '@endyaml']),
-    );
+    const ast = parseYaml(makeSource(['@startyaml', 'fruit: Apple', '@endyaml']));
     expect(ast.root).toEqual({ fruit: 'Apple' });
   });
 
@@ -99,30 +91,22 @@ describe('parseYaml', () => {
   // -------------------------------------------------------------------------
 
   it('parses a single quoted highlight segment', () => {
-    const ast = parseYaml(
-      makeSource(['#highlight "fruit"', 'fruit: Apple']),
-    );
+    const ast = parseYaml(makeSource(['#highlight "fruit"', 'fruit: Apple']));
     expect(ast.highlights).toEqual([{ path: ['fruit'], styleClass: '' }]);
   });
 
   it('parses unquoted multi-segment highlight', () => {
-    const ast = parseYaml(
-      makeSource(['#highlight xmas-fifth-day/partridges', 'a: b']),
-    );
+    const ast = parseYaml(makeSource(['#highlight xmas-fifth-day/partridges', 'a: b']));
     expect(ast.highlights).toEqual([{ path: ['xmas-fifth-day', 'partridges'], styleClass: '' }]);
   });
 
   it('parses quoted multi-segment highlight with spaces around slash', () => {
-    const ast = parseYaml(
-      makeSource(['#highlight "xmas-fifth-day" / "partridges"', 'a: b']),
-    );
+    const ast = parseYaml(makeSource(['#highlight "xmas-fifth-day" / "partridges"', 'a: b']));
     expect(ast.highlights).toEqual([{ path: ['xmas-fifth-day', 'partridges'], styleClass: '' }]);
   });
 
   it('parses wildcard single-star highlight', () => {
-    const ast = parseYaml(
-      makeSource(['#highlight * /french-hens', 'a: b']),
-    );
+    const ast = parseYaml(makeSource(['#highlight * /french-hens', 'a: b']));
     expect(ast.highlights).toEqual([{ path: ['*', 'french-hens'], styleClass: '' }]);
   });
 
@@ -137,21 +121,12 @@ describe('parseYaml', () => {
   });
 
   it('captures stereotype from highlight line as styleClass', () => {
-    const ast = parseYaml(
-      makeSource(['#highlight "fruit" <<h1>>', 'fruit: Apple']),
-    );
+    const ast = parseYaml(makeSource(['#highlight "fruit" <<h1>>', 'fruit: Apple']));
     expect(ast.highlights).toEqual([{ path: ['fruit'], styleClass: 'h1' }]);
   });
 
   it('collects multiple highlights', () => {
-    const ast = parseYaml(
-      makeSource([
-        '#highlight "fruit"',
-        '#highlight "size"',
-        'fruit: Apple',
-        'size: Large',
-      ]),
-    );
+    const ast = parseYaml(makeSource(['#highlight "fruit"', '#highlight "size"', 'fruit: Apple', 'size: Large']));
     expect(ast.highlights).toHaveLength(2);
     expect(ast.highlights[0]).toEqual({ path: ['fruit'], styleClass: '' });
     expect(ast.highlights[1]).toEqual({ path: ['size'], styleClass: '' });

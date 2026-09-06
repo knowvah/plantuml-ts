@@ -41,7 +41,13 @@ import { buildStateUidPlan } from './renderer-uid.js';
 import type { StateUidPlan } from './renderer-uid.js';
 import { wrapEntity, wrapCluster, wrapStartEntity, wrapEndEntity } from './renderer-group.js';
 import {} from './renderer-arrowhead.js';
-import { renderInitial, renderFinal, renderForkJoin, renderChoiceJunction, renderHistory } from './renderer-pseudostate.js';
+import {
+  renderInitial,
+  renderFinal,
+  renderForkJoin,
+  renderChoiceJunction,
+  renderHistory,
+} from './renderer-pseudostate.js';
 import { renderNormal, renderSdlReceive } from './renderer-box.js';
 import { renderBorderPoint } from './renderer-border-point.js';
 import {} from './state-render-colors.js';
@@ -49,7 +55,6 @@ import { renderComposite } from './renderer-composite-box.js';
 import { renderStateNote } from './renderer-note.js';
 import { buildStateShadowFilterDef } from './state-shadow.js';
 import { renderTransitionWrapped } from './state-renderer-transitions.js';
-
 
 // ---------------------------------------------------------------------------
 // Node shape renderers
@@ -203,9 +208,7 @@ function renderNodeWrapped(
   if (node.concurrentRegions !== undefined) {
     const separators = node.separators ?? [];
     const blocks = node.concurrentRegions.map((region, i) => {
-      const stateMarkup = region.children
-        .map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds))
-        .join('');
+      const stateMarkup = region.children.map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds)).join('');
       const transitionMarkup = region.transitions
         .map((t) => renderTransitionWrapped(t, theme, uidPlan, concurrentGlobalIds))
         .join('');
@@ -214,9 +217,7 @@ function renderNodeWrapped(
     });
     inner = ownShape + blocks.join('');
   } else {
-    const childrenMarkup = node.children
-      .map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds))
-      .join('');
+    const childrenMarkup = node.children.map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds)).join('');
     const ownTransitionsMarkup = node.transitions
       .map((t) => renderTransitionWrapped(t, theme, uidPlan, concurrentGlobalIds))
       .join('');
@@ -270,9 +271,7 @@ function renderClusterSiblingMarkup(
   const ownShape = renderShape(node, theme);
   const uid = uidPlan.nodeUid.get(node.id) ?? '';
   const ownWrap = wrapCluster(node.id, uid, ownShape);
-  const childrenMarkup = node.children
-    .map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds))
-    .join('');
+  const childrenMarkup = node.children.map((c) => renderChildNode(c, theme, uidPlan, concurrentGlobalIds)).join('');
   const ownTransitionsMarkup = node.transitions
     .map((t) => renderTransitionWrapped(t, theme, uidPlan, concurrentGlobalIds))
     .join('');

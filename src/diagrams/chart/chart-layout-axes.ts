@@ -11,7 +11,6 @@ import { valueToPixel, formatAxisValue, AXIS_LABEL_SPACE } from './chart-layout-
 import type { PlotArea, TickMark, AxisGeometry } from './chart-layout-core.js';
 import {} from './chart-layout-core.js';
 
-
 /**
  * Build ticks for a categorical h-axis (hAxis.labels is non-empty).
  *
@@ -21,11 +20,7 @@ import {} from './chart-layout-core.js';
  */
 const AUTO_TICK_COUNT = 5;
 
-export function buildCategoricalTicks(
-  labels: string[],
-  plotWidth: number,
-  tickSpacing: number | null,
-): TickMark[] {
+export function buildCategoricalTicks(labels: string[], plotWidth: number, tickSpacing: number | null): TickMark[] {
   const spacing = tickSpacing !== null && tickSpacing > 0 ? tickSpacing : 1;
   const ticks: TickMark[] = [];
   for (let i = 0; i < labels.length; i++) {
@@ -44,11 +39,7 @@ export function buildCategoricalTicks(
  *   2. tickSpacing interval
  *   3. Auto ~5 ticks
  */
-export function buildNumericTicks(
-  axis: ChartAxisDef,
-  pixelMin: number,
-  pixelMax: number,
-): TickMark[] {
+export function buildNumericTicks(axis: ChartAxisDef, pixelMin: number, pixelMax: number): TickMark[] {
   const { customTicks, tickSpacing } = axis;
 
   // 1. Custom ticks map
@@ -64,11 +55,7 @@ export function buildNumericTicks(
 }
 
 /** Ticks from an explicit ChartAxisDef.customTicks map (priority 1). */
-function buildCustomTicks(
-  axis: ChartAxisDef,
-  pixelMin: number,
-  pixelMax: number,
-): TickMark[] {
+function buildCustomTicks(axis: ChartAxisDef, pixelMin: number, pixelMax: number): TickMark[] {
   const { min, max } = axis;
   const ticks: TickMark[] = [];
   for (const [value, label] of axis.customTicks!) {
@@ -79,11 +66,7 @@ function buildCustomTicks(
 }
 
 /** Ticks at an explicit tickSpacing interval (priority 2). */
-function buildSpacedTicks(
-  axis: ChartAxisDef,
-  pixelMin: number,
-  pixelMax: number,
-): TickMark[] {
+function buildSpacedTicks(axis: ChartAxisDef, pixelMin: number, pixelMax: number): TickMark[] {
   const { min, max } = axis;
   const spacing = axis.tickSpacing!;
   const ticks: TickMark[] = [];
@@ -98,11 +81,7 @@ function buildSpacedTicks(
 }
 
 /** Automatic ~AUTO_TICK_COUNT evenly-spaced ticks (priority 3, fallback). */
-function buildAutoTicks(
-  axis: ChartAxisDef,
-  pixelMin: number,
-  pixelMax: number,
-): TickMark[] {
+function buildAutoTicks(axis: ChartAxisDef, pixelMin: number, pixelMax: number): TickMark[] {
   const { min, max } = axis;
   const ticks: TickMark[] = [];
   for (let i = 0; i <= AUTO_TICK_COUNT; i++) {
@@ -117,11 +96,7 @@ function buildAutoTicks(
 // AxisGeometry builders
 // ---------------------------------------------------------------------------
 
-export function buildVAxisGeometry(
-  axis: ChartAxisDef,
-  plotArea: PlotArea,
-  leftSide: boolean,
-): AxisGeometry {
+export function buildVAxisGeometry(axis: ChartAxisDef, plotArea: PlotArea, leftSide: boolean): AxisGeometry {
   // V-axis: pixelMin = bottom of plot, pixelMax = top of plot (inverted y).
   const pixelMin = plotArea.y + plotArea.height;
   const pixelMax = plotArea.y;
@@ -136,13 +111,10 @@ export function buildVAxisGeometry(
           pixelPos: plotArea.y + (i + 0.5) * (plotArea.height / axis.labels.length),
         }))
       : buildNumericTicks(axis, pixelMin, pixelMax);
-  const gridPixels: number[] =
-    axis.gridMode === 'major' ? ticks.map((t) => t.pixelPos) : [];
+  const gridPixels: number[] = axis.gridMode === 'major' ? ticks.map((t) => t.pixelPos) : [];
 
   // Title position: centered vertically, to the left (or right for v2Axis)
-  const titleX = leftSide
-    ? plotArea.x - AXIS_LABEL_SPACE
-    : plotArea.x + plotArea.width + AXIS_LABEL_SPACE;
+  const titleX = leftSide ? plotArea.x - AXIS_LABEL_SPACE : plotArea.x + plotArea.width + AXIS_LABEL_SPACE;
   const titleY = plotArea.y + plotArea.height / 2;
 
   return {
@@ -157,23 +129,20 @@ export function buildVAxisGeometry(
   };
 }
 
-export function buildHAxisGeometry(
-  axis: ChartAxisDef,
-  plotArea: PlotArea,
-): AxisGeometry {
+export function buildHAxisGeometry(axis: ChartAxisDef, plotArea: PlotArea): AxisGeometry {
   // H-axis: pixelMin = left of plot, pixelMax = right of plot.
   const pixelMin = plotArea.x;
   const pixelMax = plotArea.x + plotArea.width;
 
   const ticks: TickMark[] =
     axis.labels.length > 0
-      ? buildCategoricalTicks(axis.labels, plotArea.width, axis.tickSpacing).map(
-          (t) => ({ ...t, pixelPos: t.pixelPos + plotArea.x }),
-        )
+      ? buildCategoricalTicks(axis.labels, plotArea.width, axis.tickSpacing).map((t) => ({
+          ...t,
+          pixelPos: t.pixelPos + plotArea.x,
+        }))
       : buildNumericTicks(axis, pixelMin, pixelMax);
 
-  const gridPixels: number[] =
-    axis.gridMode === 'major' ? ticks.map((t) => t.pixelPos) : [];
+  const gridPixels: number[] = axis.gridMode === 'major' ? ticks.map((t) => t.pixelPos) : [];
 
   // Title position: centered horizontally below the plot
   const titleX = plotArea.x + plotArea.width / 2;

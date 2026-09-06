@@ -42,9 +42,7 @@ function makeCoordPairPoints(count: number): DataPoint[] {
   }));
 }
 
-function makeGeo(
-  overrides: Partial<ScatterSeriesGeo> & { points: DataPoint[] },
-): ScatterSeriesGeo {
+function makeGeo(overrides: Partial<ScatterSeriesGeo> & { points: DataPoint[] }): ScatterSeriesGeo {
   return {
     type: 'scatter',
     name: 'series',

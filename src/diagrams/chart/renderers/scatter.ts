@@ -38,12 +38,7 @@ function drawTriangleMarker(p: DataPoint, color: string, r: number): string {
   );
 }
 
-function drawMarker(
-  p: DataPoint,
-  shape: ScatterSeriesGeo['markerShape'],
-  color: string,
-  r: number,
-): string {
+function drawMarker(p: DataPoint, shape: ScatterSeriesGeo['markerShape'], color: string, r: number): string {
   switch (shape) {
     case 'square':
       return drawSquareMarker(p, color, r);

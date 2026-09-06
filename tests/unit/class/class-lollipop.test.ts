@@ -72,8 +72,7 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
     expect(rel.length).toBe(2); // double-char body via "--"... see below
   });
 
-  it('the existing entity may be on either side (LOL_THEN_ENT with the ' +
-    'lollipop written first)', () => {
+  it('the existing entity may be on either side (LOL_THEN_ENT with the ' + 'lollipop written first)', () => {
     const ast = parse(`
       class dummy
       toto1 ()-- dummy
@@ -92,8 +91,7 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
     expect(rel.length).toBe(2); // "--" = 2 body chars -> minlen 1
   });
 
-  it('half circle: doubled paren glyph on the LOL_THEN_ENT side ("))") -> ' +
-    'lollipopKind half', () => {
+  it('half circle: doubled paren glyph on the LOL_THEN_ENT side ("))") -> ' + 'lollipopKind half', () => {
     // LOL_THEN_ENT's parens group is always `[()]\)` (glyph + literal ')') —
     // "()" (full) or "))" (half); "((" is not a valid LOL_THEN_ENT glyph.
     const ast = parse(`
@@ -153,42 +151,49 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
     expect(rel.label).toBe('implements');
   });
 
-  it('leniently auto-creates the "existing" side when not pre-declared ' +
-    '(this parser has no error-reporting channel)', () => {
-    const ast = parse(`toto1 ()-- dummy`);
-    expect(ast.classifiers).toHaveLength(2);
-    expect(ast.classifiers.some((c) => c.display === 'dummy')).toBe(true);
-  });
+  it(
+    'leniently auto-creates the "existing" side when not pre-declared ' +
+      '(this parser has no error-reporting channel)',
+    () => {
+      const ast = parse(`toto1 ()-- dummy`);
+      expect(ast.classifiers).toHaveLength(2);
+      expect(ast.classifiers.some((c) => c.display === 'dummy')).toBe(true);
+    },
+  );
 
-  it('DOT node shape matches the oracle: shape=circle (via KIND_SHAPE), not ' +
-    'the shape=plaintext used by the standalone `() name` declaration', () => {
-    const ast = parse(`
+  it(
+    'DOT node shape matches the oracle: shape=circle (via KIND_SHAPE), not ' +
+      'the shape=plaintext used by the standalone `() name` declaration',
+    () => {
+      const ast = parse(`
       class dummy
       toto1 ()-- dummy
     `);
-    const toto1 = ast.classifiers.find((c) => c.kind === 'lollipop')!;
-    expect(toto1.kind).toBe('lollipop');
-    // (KIND_SHAPE['lollipop'] === 'circle' is asserted directly against the
-    // oracle in tests/oracle/class-dot-parity.test.ts's target fixtures.)
-  });
+      const toto1 = ast.classifiers.find((c) => c.kind === 'lollipop')!;
+      expect(toto1.kind).toBe('lollipop');
+      // (KIND_SHAPE['lollipop'] === 'circle' is asserted directly against the
+      // oracle in tests/oracle/class-dot-parity.test.ts's target fixtures.)
+    },
+  );
 
-  it('bumps a third horizontal (length-1) lollipop on the same entity down a ' +
-    'rank (getNbOfHozizontalLollipop bump)', () => {
-    const ast = parse(`
+  it(
+    'bumps a third horizontal (length-1) lollipop on the same entity down a ' + 'rank (getNbOfHozizontalLollipop bump)',
+    () => {
+      const ast = parse(`
       class dummy
       tutu1 ()- dummy
       tutu2 ()- dummy
       tutu3 ()- dummy
     `);
-    const rels = ast.relationships;
-    expect(rels).toHaveLength(3);
-    expect(rels[0]!.length).toBe(1);
-    expect(rels[1]!.length).toBe(1);
-    expect(rels[2]!.length).toBe(2); // 3rd horizontal lollipop bumped
-  });
+      const rels = ast.relationships;
+      expect(rels).toHaveLength(3);
+      expect(rels[0]!.length).toBe(1);
+      expect(rels[1]!.length).toBe(1);
+      expect(rels[2]!.length).toBe(2); // 3rd horizontal lollipop bumped
+    },
+  );
 
-  it('does not bump length-2 ("--") lollipops regardless of how many attach ' +
-    'to the same entity', () => {
+  it('does not bump length-2 ("--") lollipops regardless of how many attach ' + 'to the same entity', () => {
     const ast = parse(`
       class dummy
       toto1 ()-- dummy
@@ -227,13 +232,16 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
     expect(rel.weight).toBe(2.5);
   });
 
-  it('does not confuse the standalone `() "name"` declaration ' +
-    '(CommandCreateElementParenthesis) with the lollipop-link shorthand', () => {
-    const ast = parse(`() "Iface" as IF`);
-    expect(ast.classifiers).toHaveLength(1);
-    expect(ast.classifiers[0]!.kind).toBe('circle');
-    expect(ast.relationships).toHaveLength(0);
-  });
+  it(
+    'does not confuse the standalone `() "name"` declaration ' +
+      '(CommandCreateElementParenthesis) with the lollipop-link shorthand',
+    () => {
+      const ast = parse(`() "Iface" as IF`);
+      expect(ast.classifiers).toHaveLength(1);
+      expect(ast.classifiers[0]!.kind).toBe('circle');
+      expect(ast.relationships).toHaveLength(0);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -245,53 +253,64 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
 // ---------------------------------------------------------------------------
 
 describe('interface lollipop shorthand: G2 N19 synthetic-id naming', () => {
-  it('names each new lollipop "<existingRawName>lolN", N a dense run of the ' +
-    'shared jar creation counter (bososa-44-fipu544: three LOL_THEN_ENT ' +
-    'lollipops on the SAME existing entity)', () => {
-    const ast = parse(`
+  it(
+    'names each new lollipop "<existingRawName>lolN", N a dense run of the ' +
+      'shared jar creation counter (bososa-44-fipu544: three LOL_THEN_ENT ' +
+      'lollipops on the SAME existing entity)',
+    () => {
+      const ast = parse(`
       class dummy
       toto1 ()-- dummy
       toto2 ()-- dummy
       toto3 ()-- dummy
     `);
-    const dummy = ast.classifiers.find((c) => c.kind === 'class')!;
-    expect(dummy.creationIndex).toBe(1);
-    const lollipops = ast.classifiers.filter((c) => c.kind === 'lollipop');
-    expect(lollipops.map((c) => c.syntheticIdName)).toEqual([
-      'dummylol2', 'dummylol5', 'dummylol8',
-    ]);
-    expect(lollipops.map((c) => c.creationIndex)).toEqual([3, 6, 9]);
-    for (const lol of lollipops) expect(lol.phantomSlot).toBe(true);
+      const dummy = ast.classifiers.find((c) => c.kind === 'class')!;
+      expect(dummy.creationIndex).toBe(1);
+      const lollipops = ast.classifiers.filter((c) => c.kind === 'lollipop');
+      expect(lollipops.map((c) => c.syntheticIdName)).toEqual(['dummylol2', 'dummylol5', 'dummylol8']);
+      expect(lollipops.map((c) => c.creationIndex)).toEqual([3, 6, 9]);
+      for (const lol of lollipops) expect(lol.phantomSlot).toBe(true);
 
-    const rels = ast.relationships;
-    expect(rels.map((r) => r.creationIndex)).toEqual([4, 7, 10]);
-  });
+      const rels = ast.relationships;
+      expect(rels.map((r) => r.creationIndex)).toEqual([4, 7, 10]);
+    },
+  );
 
-  it('uses the RAW (unresolved) existing-side text for the synthetic name ' +
-    'prefix, quotes stripped, even when written ENT_THEN_LOL', () => {
-    const ast = parse(`
+  it(
+    'uses the RAW (unresolved) existing-side text for the synthetic name ' +
+      'prefix, quotes stripped, even when written ENT_THEN_LOL',
+    () => {
+      const ast = parse(`
       class "My Class"
       "My Class" --() Iface
     `);
-    const lol = ast.classifiers.find((c) => c.kind === 'lollipop')!;
-    expect(lol.syntheticIdName).toBe('My Classlol2');
-  });
+      const lol = ast.classifiers.find((c) => c.kind === 'lollipop')!;
+      expect(lol.syntheticIdName).toBe('My Classlol2');
+    },
+  );
 
-  it('leaves creationIndex/syntheticIdName entirely unstamped when called ' +
-    'directly without a counter (hand-built `ClassDiagramAST` fixtures -- ' +
-    'the "absent when built by hand" posture every other creationIndex ' +
-    'field in this file establishes)', () => {
-    const ast: ClassDiagramAST = { classifiers: [], relationships: [], namespaces: [], notes: [], directives: [] };
-    const dummy: ClassDiagramAST['classifiers'][number] = {
-      id: 'dummy', display: 'dummy', kind: 'class', typeParams: [], members: [],
-    };
-    ast.classifiers.push(dummy);
-    const applied = applyLollipop(ast, () => dummy, null, 'toto1 ()-- dummy');
-    expect(applied).toBe(true);
-    const lol = ast.classifiers.find((c) => c.kind === 'lollipop')!;
-    expect(lol.syntheticIdName).toBeUndefined();
-    expect(lol.creationIndex).toBeUndefined();
-    expect(lol.phantomSlot).toBeUndefined();
-    expect(ast.relationships[0]!.creationIndex).toBeUndefined();
-  });
+  it(
+    'leaves creationIndex/syntheticIdName entirely unstamped when called ' +
+      'directly without a counter (hand-built `ClassDiagramAST` fixtures -- ' +
+      'the "absent when built by hand" posture every other creationIndex ' +
+      'field in this file establishes)',
+    () => {
+      const ast: ClassDiagramAST = { classifiers: [], relationships: [], namespaces: [], notes: [], directives: [] };
+      const dummy: ClassDiagramAST['classifiers'][number] = {
+        id: 'dummy',
+        display: 'dummy',
+        kind: 'class',
+        typeParams: [],
+        members: [],
+      };
+      ast.classifiers.push(dummy);
+      const applied = applyLollipop(ast, () => dummy, null, 'toto1 ()-- dummy');
+      expect(applied).toBe(true);
+      const lol = ast.classifiers.find((c) => c.kind === 'lollipop')!;
+      expect(lol.syntheticIdName).toBeUndefined();
+      expect(lol.creationIndex).toBeUndefined();
+      expect(lol.phantomSlot).toBeUndefined();
+      expect(ast.relationships[0]!.creationIndex).toBeUndefined();
+    },
+  );
 });

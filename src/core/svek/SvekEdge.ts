@@ -15,12 +15,7 @@ import { placeHeadExtremity, placeTailExtremity } from './svek-edge-extremity.js
 import type { PlacedExtremity } from './svek-edge-extremity.js';
 import { strokeForStyle } from './svek-edge-stroke.js';
 import type { UStroke } from '../klimt/UStroke.js';
-import {
-  getLinkTypeName,
-  looksLikeRevertedForSvg,
-  lookupDecors1,
-  lookupDecors2,
-} from './extremity/link-decor.js';
+import { getLinkTypeName, looksLikeRevertedForSvg, lookupDecors1, lookupDecors2 } from './extremity/link-decor.js';
 import type { LinkDecorName } from './extremity/link-decor.js';
 
 /**
@@ -218,10 +213,8 @@ export class SvekEdge implements UDrawable {
    *  middle branch (`looksLikeNoDecorAtAllSvg` -> plain `X-Y`) is
    *  inlined: both-NONE or both-set. */
   private idCommentForSvg(): string {
-    if (looksLikeRevertedForSvg(this.decor1, this.decor2))
-      return `${this.input.from}-backto-${this.input.to}`;
-    if ((this.decor1 === undefined) === (this.decor2 === undefined))
-      return `${this.input.from}-${this.input.to}`;
+    if (looksLikeRevertedForSvg(this.decor1, this.decor2)) return `${this.input.from}-backto-${this.input.to}`;
+    if ((this.decor1 === undefined) === (this.decor2 === undefined)) return `${this.input.from}-${this.input.to}`;
     return `${this.input.from}-to-${this.input.to}`;
   }
 

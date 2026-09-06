@@ -513,10 +513,17 @@ describe('svgRoot', () => {
   it('embeds all ArrowType markers in defs', () => {
     const result = svgRoot(400, 300, []);
     const arrowTypes: ArrowType[] = [
-      'sync', 'async', 'reply', 'replyAsync',
-      'extension', 'implementation',
-      'composition', 'aggregation',
-      'dependency', 'lost', 'found',
+      'sync',
+      'async',
+      'reply',
+      'replyAsync',
+      'extension',
+      'implementation',
+      'composition',
+      'aggregation',
+      'dependency',
+      'lost',
+      'found',
     ];
     for (const t of arrowTypes) {
       expect(result).toContain(`id="${arrowHeadRef(t)}"`);
@@ -647,10 +654,17 @@ describe('arrowHead', () => {
 
   it('every marker has a non-empty id attribute', () => {
     const types: ArrowType[] = [
-      'sync', 'async', 'reply', 'replyAsync',
-      'extension', 'implementation',
-      'composition', 'aggregation',
-      'dependency', 'lost', 'found',
+      'sync',
+      'async',
+      'reply',
+      'replyAsync',
+      'extension',
+      'implementation',
+      'composition',
+      'aggregation',
+      'dependency',
+      'lost',
+      'found',
     ];
     for (const t of types) {
       const result = arrowHead(t);
@@ -660,10 +674,17 @@ describe('arrowHead', () => {
 
   it('each marker id matches arrowHeadRef output', () => {
     const types: ArrowType[] = [
-      'sync', 'async', 'reply', 'replyAsync',
-      'extension', 'implementation',
-      'composition', 'aggregation',
-      'dependency', 'lost', 'found',
+      'sync',
+      'async',
+      'reply',
+      'replyAsync',
+      'extension',
+      'implementation',
+      'composition',
+      'aggregation',
+      'dependency',
+      'lost',
+      'found',
     ];
     for (const t of types) {
       const marker = arrowHead(t);
@@ -679,10 +700,17 @@ describe('arrowHead', () => {
 describe('arrowHeadRef', () => {
   it('returns a non-empty string for each ArrowType', () => {
     const types: ArrowType[] = [
-      'sync', 'async', 'reply', 'replyAsync',
-      'extension', 'implementation',
-      'composition', 'aggregation',
-      'dependency', 'lost', 'found',
+      'sync',
+      'async',
+      'reply',
+      'replyAsync',
+      'extension',
+      'implementation',
+      'composition',
+      'aggregation',
+      'dependency',
+      'lost',
+      'found',
     ];
     for (const t of types) {
       expect(arrowHeadRef(t)).toBeTruthy();
@@ -691,10 +719,17 @@ describe('arrowHeadRef', () => {
 
   it('returns distinct ids for distinct types', () => {
     const types: ArrowType[] = [
-      'sync', 'async', 'reply', 'replyAsync',
-      'extension', 'implementation',
-      'composition', 'aggregation',
-      'dependency', 'lost', 'found',
+      'sync',
+      'async',
+      'reply',
+      'replyAsync',
+      'extension',
+      'implementation',
+      'composition',
+      'aggregation',
+      'dependency',
+      'lost',
+      'found',
     ];
     const refs = types.map((t) => arrowHeadRef(t));
     const unique = new Set(refs);
@@ -792,14 +827,18 @@ describe('rule 1 — decimal formatting at emission (ADR-1)', () => {
   });
 
   it('trims trailing zeros and short-circuits zero', () => {
-    expect(attrs([['x', 10], ['y', 10.5], ['width', 0]])).toBe(' x="10" y="10.5" width="0"');
+    expect(
+      attrs([
+        ['x', 10],
+        ['y', 10.5],
+        ['width', 0],
+      ]),
+    ).toBe(' x="10" y="10.5" width="0"');
   });
 
   it('passes string values through untouched', () => {
     expect(attrs([['d', 'M 0 0 L 1.23456 2']])).toBe(' d="M 0 0 L 1.23456 2"');
-    expect(attrsFromRecord({ transform: 'translate(1.23456,2)' })).toBe(
-      ' transform="translate(1.23456,2)"',
-    );
+    expect(attrsFromRecord({ transform: 'translate(1.23456,2)' })).toBe(' transform="translate(1.23456,2)"');
   });
 
   it('honours an explicit decimals argument (ADR-2: threaded, not hardcoded)', () => {
@@ -815,9 +854,7 @@ describe('rule 1 — decimal formatting at emission (ADR-1)', () => {
   it('formats geometry the shape emitters interpolate directly', () => {
     expect(polygon([{ x: 1.23456, y: 2 }])).toContain('points="1.235,2"');
     expect(diamond(1.00005, 0, 0)).toContain('points="1,0 1,0 1,0 1,0"');
-    expect(foreignObject(1.23456, 0, 2.0004, 3, '')).toContain(
-      '<foreignObject x="1.235" y="0" width="2" height="3">',
-    );
+    expect(foreignObject(1.23456, 0, 2.0004, 3, '')).toContain('<foreignObject x="1.235" y="0" width="2" height="3">');
     expect(noteBox(0.12345, 0, 10, 10)).toContain('d="M0.123,0');
   });
 });
@@ -908,15 +945,14 @@ describe('rule 3 — font-family/lengthAdjust hoisted to the root', () => {
     expect(text(0, 0, 'hello', { fontFamily: 'monospaced' })).not.toContain('font-family="monospaced"');
   });
 
-  it('renames case-insensitively, as upstream\'s equalsIgnoreCase does', () => {
+  it("renames case-insensitively, as upstream's equalsIgnoreCase does", () => {
     expect(text(0, 0, 'hello', { fontFamily: 'Monospaced' })).toContain('font-family="monospace"');
   });
 
   it('renames only the WHOLE family, never a substring of a CSS stack', () => {
     // `equalsIgnoreCase` against the whole string — a stack that merely
     // contains the word is left alone.
-    expect(text(0, 0, 'hello', { fontFamily: 'Courier, monospaced' }))
-      .toContain('font-family="Courier, monospaced"');
+    expect(text(0, 0, 'hello', { fontFamily: 'Courier, monospaced' })).toContain('font-family="Courier, monospaced"');
   });
 
   it('leaves an already-CSS `monospace` family untouched', () => {

@@ -26,9 +26,24 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
       if (val === 'plain' || val === 'bold' || val === 'italic') s.fontStyle = val;
     },
   ],
-  ['fontcolor', (s, v) => { s.fontColor = expandGrayShorthand(v.trim()); }],
-  ['fontname', (s, v) => { s.fontFamily = v.trim(); }],
-  ['linecolor', (s, v) => { s.lineColor = resolveChromeColor(v); }],
+  [
+    'fontcolor',
+    (s, v) => {
+      s.fontColor = expandGrayShorthand(v.trim());
+    },
+  ],
+  [
+    'fontname',
+    (s, v) => {
+      s.fontFamily = v.trim();
+    },
+  ],
+  [
+    'linecolor',
+    (s, v) => {
+      s.lineColor = resolveChromeColor(v);
+    },
+  ],
   [
     // Absent from this table until now, so `<style> … { LineThickness N }`
     // never reached chrome at all -- only the `titleBorderThickness` /
@@ -41,7 +56,12 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
       if (Number.isFinite(n)) s.lineThickness = n;
     },
   ],
-  ['backgroundcolor', (s, v) => { s.backgroundColor = resolveChromeColor(v); }],
+  [
+    'backgroundcolor',
+    (s, v) => {
+      s.backgroundColor = resolveChromeColor(v);
+    },
+  ],
   [
     'roundcorner',
     (s, v) => {
@@ -49,8 +69,18 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
       if (Number.isFinite(n)) s.roundCorner = n;
     },
   ],
-  ['padding', (s, v) => { s.padding = parseClockwise(v); }],
-  ['margin', (s, v) => { s.margin = parseClockwise(v); }],
+  [
+    'padding',
+    (s, v) => {
+      s.padding = parseClockwise(v);
+    },
+  ],
+  [
+    'margin',
+    (s, v) => {
+      s.margin = parseClockwise(v);
+    },
+  ],
   [
     'horizontalalignment',
     (s, v) => {

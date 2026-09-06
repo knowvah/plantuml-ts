@@ -50,7 +50,7 @@ describe('creoleTextLines', () => {
     expect(lines[0]!.width).toBeCloseTo(measurer.measure('entry', font).width, 10);
   });
 
-  it('<math>x</math> IS ported now -- it becomes a latex atom, carried as an IMAGE run whose width/height are core/latex.ts#renderLatexAsImage\'s, not the tag-inclusive literal\'s', () => {
+  it("<math>x</math> IS ported now -- it becomes a latex atom, carried as an IMAGE run whose width/height are core/latex.ts#renderLatexAsImage's, not the tag-inclusive literal's", () => {
     const measurer = new WidthTableMeasurer();
 
     // This assertion used to pin the OPPOSITE, citing

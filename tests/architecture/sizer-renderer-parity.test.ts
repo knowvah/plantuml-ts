@@ -118,15 +118,10 @@ const RENDERER_FILES = [
   ...filesMatching(SVEK_IMAGE_DIR, /^EntityImageDescription.*\.ts$/),
 ];
 
-const SIZER_FILES = [
-  join(DESCRIPTION_DIR, 'layout.ts'),
-  ...filesMatching(DESCRIPTION_DIR, /^leaf-sizing.*\.ts$/),
-];
+const SIZER_FILES = [join(DESCRIPTION_DIR, 'layout.ts'), ...filesMatching(DESCRIPTION_DIR, /^leaf-sizing.*\.ts$/)];
 
 const ALL_RESOLVERS = [
-  ...stripComments(readFileSync(RESOLVER_SOURCE, 'utf8')).matchAll(
-    /export function (resolveElement[A-Za-z]+)/g,
-  ),
+  ...stripComments(readFileSync(RESOLVER_SOURCE, 'utf8')).matchAll(/export function (resolveElement[A-Za-z]+)/g),
 ].map((m) => m[1]!);
 
 const rendererRefs = resolverNamesReferencedIn(RENDERER_FILES);
@@ -164,7 +159,7 @@ const KNOWN_GAPS: Record<string, string> = {
   resolveElementShadowing:
     `${LEDGER_PATH} — "description-leaf-sizing-audit — carried findings ` +
     '(T4, 2026-07-28)", items 1 (per-element Shadowing) and 2 (diagram-wide ' +
-    'Shadowing, same resolver\'s second tier, one Batch-4 fix covers both): ' +
+    "Shadowing, same resolver's second tier, one Batch-4 fix covers both): " +
     'actor { Shadowing 6 } 1.027778 -> 1.111111in, reaches ' +
     'renderer-entity.ts:212 / renderer-cluster.ts:119, no sizer reference.',
   // `resolveElementLineThickness` was item 3 here until S1L-tail F3-fix (G5)
@@ -178,9 +173,7 @@ const KNOWN_GAPS: Record<string, string> = {
 
 describe('resolver-reachability guard (description engine)', () => {
   it('every resolveElement* reached from a renderer module is also reached from a sizer module, or is classified', () => {
-    const unclassified = gapShaped.filter(
-      (n) => !(n in SIZE_NEUTRAL) && !(n in KNOWN_GAPS),
-    );
+    const unclassified = gapShaped.filter((n) => !(n in SIZE_NEUTRAL) && !(n in KNOWN_GAPS));
     expect(
       unclassified,
       [
@@ -204,9 +197,7 @@ describe('resolver-reachability guard (description engine)', () => {
   it('every SIZE_NEUTRAL entry carries a written, non-placeholder reason', () => {
     for (const [name, reason] of Object.entries(SIZE_NEUTRAL)) {
       expect(reason.trim().length, `${name}: SIZE_NEUTRAL reason is empty`).toBeGreaterThan(20);
-      expect(reason, `${name}: reason reads as an unfilled placeholder`).not.toMatch(
-        /^(todo|tbd|n\/a|reason|fixme)$/i,
-      );
+      expect(reason, `${name}: reason reads as an unfilled placeholder`).not.toMatch(/^(todo|tbd|n\/a|reason|fixme)$/i);
     }
   });
 
@@ -295,10 +286,7 @@ describe('resolver-reachability guard mechanism (synthetic fixtures, no src/ wri
     const dir = mkdtempSync(join(tmpdir(), 'resolver-reachability-'));
     try {
       const rendererFile = join(dir, 'renderer-fake.ts');
-      writeFileSync(
-        rendererFile,
-        '/** see resolveElementFutureThing for the cascade shape */\nconst x = 1;\n',
-      );
+      writeFileSync(rendererFile, '/** see resolveElementFutureThing for the cascade shape */\nconst x = 1;\n');
       const refs = resolverNamesReferencedIn([rendererFile]);
       expect([...refs]).toEqual([]);
     } finally {

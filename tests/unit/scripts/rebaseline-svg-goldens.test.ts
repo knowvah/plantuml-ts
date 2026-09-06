@@ -34,15 +34,11 @@ describe('compareCapture', () => {
 
 describe('formatSummaryLine', () => {
   it('matches the exact interface-contract format for T9', () => {
-    expect(formatSummaryLine({ same: 0, changed: 445, failed: 1 })).toBe(
-      'SAME=0 CHANGED=445 FAILED=1',
-    );
+    expect(formatSummaryLine({ same: 0, changed: 445, failed: 1 })).toBe('SAME=0 CHANGED=445 FAILED=1');
   });
 
   it('formats an all-zero summary', () => {
-    expect(formatSummaryLine({ same: 0, changed: 0, failed: 0 })).toBe(
-      'SAME=0 CHANGED=0 FAILED=0',
-    );
+    expect(formatSummaryLine({ same: 0, changed: 0, failed: 0 })).toBe('SAME=0 CHANGED=0 FAILED=0');
   });
 });
 
@@ -72,9 +68,7 @@ describe('formatOutcomeLine', () => {
   });
 
   it('names the fixture for CHANGED', () => {
-    expect(formatOutcomeLine({ relPath: 'svg-class/foo', status: 'CHANGED' })).toBe(
-      'CHANGED svg-class/foo',
-    );
+    expect(formatOutcomeLine({ relPath: 'svg-class/foo', status: 'CHANGED' })).toBe('CHANGED svg-class/foo');
   });
 
   it('names the fixture and reason for FAILED (AC4: never skipped silently)', () => {
@@ -139,10 +133,7 @@ describe('parseErroredFiles', () => {
       'Some diagram description contains errors',
       'Error line 4 in file: /scratch/svg-state/b/in.puml',
     ].join('\n');
-    expect([...parseErroredFiles(stderr)]).toEqual([
-      '/scratch/svg-class/a/in.puml',
-      '/scratch/svg-state/b/in.puml',
-    ]);
+    expect([...parseErroredFiles(stderr)]).toEqual(['/scratch/svg-class/a/in.puml', '/scratch/svg-state/b/in.puml']);
   });
 
   it('is empty for a clean run', () => {
@@ -151,9 +142,7 @@ describe('parseErroredFiles', () => {
   });
 
   it('handles a path containing spaces', () => {
-    expect([...parseErroredFiles('Error line 1 in file: /a b/c d/in.puml')]).toEqual([
-      '/a b/c d/in.puml',
-    ]);
+    expect([...parseErroredFiles('Error line 1 in file: /a b/c d/in.puml')]).toEqual(['/a b/c d/in.puml']);
   });
 });
 

@@ -97,47 +97,119 @@ const REBUILT_FORMS: readonly {
     // sync2 = contains(dressing2, ">>", ...) -- the deleted table read the
     // shaft length instead and produced a NORMAL head. `:337`
     why: 'sync2 comes from dressing2, not from the shaft length',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NONE', head2: 'ASYNC', decoration1: 'CIRCLE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NONE',
+      head2: 'ASYNC',
+      decoration1: 'CIRCLE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice ->>o Bob',
     why: 'circleAtEnd is dressing2 `o`, and `>>` still gives ASYNC (`:328,337`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NONE', head2: 'ASYNC', decoration1: 'NONE', decoration2: 'CIRCLE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NONE',
+      head2: 'ASYNC',
+      decoration1: 'NONE',
+      decoration2: 'CIRCLE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice o-->> Bob',
     why: 'getLength() > 1 dots the body independently of the head (`:340,352`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NONE', head2: 'ASYNC', decoration1: 'CIRCLE', decoration2: 'NONE', dashed: true },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NONE',
+      head2: 'ASYNC',
+      decoration1: 'CIRCLE',
+      decoration2: 'NONE',
+      dashed: true,
+    },
   },
   {
     src: 'Alice <-> Bob',
     why: 'both dressings carry a direction: withDirectionBoth, NOT a reverse (`:306,351`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NORMAL', head2: 'NORMAL', decoration1: 'NONE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NORMAL',
+      head2: 'NORMAL',
+      decoration1: 'NONE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice <<-> Bob',
     why: 'sync1 from `<<` overwrites the NORMAL head withDirectionBoth gave dressing1 (`:336,355`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'ASYNC', head2: 'NORMAL', decoration1: 'NONE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'ASYNC',
+      head2: 'NORMAL',
+      decoration1: 'NONE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice <->> Bob',
     why: 'the mirror of the row above, on dressing2 (`:337,357`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NORMAL', head2: 'ASYNC', decoration1: 'NONE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NORMAL',
+      head2: 'ASYNC',
+      decoration1: 'NONE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice o<->x Bob',
     why: 'circleAtStart is the LEFT `o` and CROSSX the RIGHT `x`, un-swapped (`:327-328,373-387`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NORMAL', head2: 'CROSSX', decoration1: 'CIRCLE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NORMAL',
+      head2: 'CROSSX',
+      decoration1: 'CIRCLE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice \\\\-> Bob',
     why: 'a doubled backslash is one of the three sync1 tokens (`:336`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'ASYNC', head2: 'NORMAL', decoration1: 'NONE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'ASYNC',
+      head2: 'NORMAL',
+      decoration1: 'NONE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
   {
     src: 'Alice /-> Bob',
     why: 'a single `/` is a direction but not an async token, so withDirectionBoth alone (`:302,306,351`)',
-    expected: { from: 'Alice', to: 'Bob', head1: 'NORMAL', head2: 'NORMAL', decoration1: 'NONE', decoration2: 'NONE', dashed: false },
+    expected: {
+      from: 'Alice',
+      to: 'Bob',
+      head1: 'NORMAL',
+      head2: 'NORMAL',
+      decoration1: 'NONE',
+      decoration2: 'NONE',
+      dashed: false,
+    },
   },
 ];
 
@@ -287,7 +359,10 @@ describe('CommandArrow — ARROW_STYLE1/2 and getLength', () => {
   it('accepts `hidden` and a colour without inventing a field for either', () => {
     expect(firstMessage('A -[hidden]> B : x').arrow.dashed).toBe(false);
     expect(shape(firstMessage('user -[#navy]> som : sel'))).toMatchObject({
-      from: 'user', to: 'som', head2: 'NORMAL', dashed: false,
+      from: 'user',
+      to: 'som',
+      head2: 'NORMAL',
+      dashed: false,
     });
   });
 
@@ -298,16 +373,10 @@ describe('CommandArrow — ARROW_STYLE1/2 and getLength', () => {
 
 describe('CommandArrow — the trailing modifiers T3 left out of the skeleton', () => {
   it('splices STEREOTYPE and URL in after LIFECOLOR, in upstream order (:128-132)', () => {
-    const afterLifecolor = ARROW_SOURCE.slice(
-      ARROW_SOURCE.indexOf(LIFECOLOR) + LIFECOLOR.length,
-    );
+    const afterLifecolor = ARROW_SOURCE.slice(ARROW_SOURCE.indexOf(LIFECOLOR) + LIFECOLOR.length);
     expect(afterLifecolor.indexOf('?<STEREOTYPE>')).toBeGreaterThanOrEqual(0);
-    expect(afterLifecolor.indexOf('?<URL>')).toBeGreaterThan(
-      afterLifecolor.indexOf('?<STEREOTYPE>'),
-    );
-    expect(afterLifecolor.indexOf('?<MESSAGE>')).toBeGreaterThan(
-      afterLifecolor.indexOf('?<URL>'),
-    );
+    expect(afterLifecolor.indexOf('?<URL>')).toBeGreaterThan(afterLifecolor.indexOf('?<STEREOTYPE>'));
+    expect(afterLifecolor.indexOf('?<MESSAGE>')).toBeGreaterThan(afterLifecolor.indexOf('?<URL>'));
   });
 
   it('matches a `<<stereo>>` run without swallowing the message', () => {
@@ -336,7 +405,10 @@ describe('CommandArrow — the trailing modifiers T3 left out of the skeleton', 
 
   it('strips the `_` no-rank marker out of the dressing (:187)', () => {
     expect(shape(firstMessage('Bob --_> Alice : hi'))).toMatchObject({
-      from: 'Bob', to: 'Alice', head2: 'NORMAL', dashed: true,
+      from: 'Bob',
+      to: 'Alice',
+      head2: 'NORMAL',
+      dashed: true,
     });
   });
 });
@@ -522,9 +594,7 @@ describe('CommandArrow — LIFECOLOR, STEREOTYPE and URL on the message', () => 
     // `msg.setUrl(urlBuilder.getUrl(url))` -- upstream stores the resolved
     // `Url`, never the raw run. `CommandExoArrowAny.java:140-141` does the
     // same, and both now share `urlOf` in `sequence-parse-helpers.ts`.
-    expect(firstMessage('A -> B [[http://x.example {tip} lbl]] : hi').url).toBe(
-      'http://x.example',
-    );
+    expect(firstMessage('A -> B [[http://x.example {tip} lbl]] : hi').url).toBe('http://x.example');
   });
 
   it('keeps the guillemets on the stereotype (StereotypePattern.java:66-68)', () => {

@@ -20,10 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { renderDescription, unwrapKlimtSvg } from '../../../src/diagrams/description/renderer.js';
-import type {
-  DescriptionGeometry,
-  DescriptionEdgeGeo,
-} from '../../../src/diagrams/description/layout.js';
+import type { DescriptionGeometry, DescriptionEdgeGeo } from '../../../src/diagrams/description/layout.js';
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { ActorStyle } from '../../../src/core/skin/ActorStyle.js';
@@ -184,10 +181,7 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
   });
 
   it('`scale 2` (ScaleSimple) doubles the root width/height/viewBox (component/saveje-35-vumu271 mechanism)', () => {
-    const svg = renderDescription(
-      makeGeo({ scale: { kind: 'simple', factor: 2 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ scale: { kind: 'simple', factor: 2 } }), defaultTheme);
     // Unscaled baseline is 21x21 (see the preceding describe block) —
     // Math.trunc(21*2) = 42 for both the style/viewBox ints and format(21)
     // = "42" for the raw width/height attrs (21*2 has no fractional part).
@@ -197,10 +191,7 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
   });
 
   it('`scale 10` (ScaleSimple) clamps to an effective x4, not x10 (ScaleProtected — component/berome-43-xini276 mechanism)', () => {
-    const svg = renderDescription(
-      makeGeo({ scale: { kind: 'simple', factor: 10 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ scale: { kind: 'simple', factor: 10 } }), defaultTheme);
     // 21 * 4 (clamped) = 84, NOT 21 * 10 = 210.
     expect(svg).toContain('width="84px"');
     expect(svg).toContain('height="84px"');
@@ -208,10 +199,7 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
   });
 
   it('a fractional `scale 1.5` scales the root dims by exactly 1.5x', () => {
-    const svg = renderDescription(
-      makeGeo({ scale: { kind: 'simple', factor: 1.5 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ scale: { kind: 'simple', factor: 1.5 } }), defaultTheme);
     // Math.trunc(21*1.5) = 31; format(21) = "31.5".
     expect(svg).toContain('width="31.5px"');
     expect(svg).toContain('height="31.5px"');
@@ -230,7 +218,7 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
     expect(Number(scaledFontSize)).toBeCloseTo(Number(unscaledFontSize) * 2, 5);
   });
 
-  it('`scale width N` (ScaleWidth) resolves against the diagram\'s own PRE-ensureVisible unscaled dim, not the +1-padded root maxX', () => {
+  it("`scale width N` (ScaleWidth) resolves against the diagram's own PRE-ensureVisible unscaled dim, not the +1-padded root maxX", () => {
     // `resolveScaleFactor` is fed `computeDocumentDims`'s raw result (20 for
     // this empty geometry -- see the preceding describe block's comment:
     // (0,0) -> .delta(15,15) = (15,15) -> +CucaDiagram margin (0,5,5,0) =
@@ -240,19 +228,13 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
     // baseline root width/height). `scale 40 width`: factor = 40/20 = 2.0
     // exactly, so root maxX (21) scales to Math.trunc(21*2)=42, matching
     // `scale 2`'s own ScaleSimple result byte-for-byte.
-    const svg = renderDescription(
-      makeGeo({ scale: { kind: 'width', target: 40 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ scale: { kind: 'width', target: 40 } }), defaultTheme);
     expect(svg).toContain('width="42px"');
     expect(svg).toContain('viewBox="0 0 42 42"');
   });
 
   it('`scale max` never enlarges past 1x when the target exceeds the natural size', () => {
-    const svg = renderDescription(
-      makeGeo({ scale: { kind: 'maxWidth', target: 1000 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ scale: { kind: 'maxWidth', target: 1000 } }), defaultTheme);
     expect(svg).toContain('width="21px"');
     expect(svg).toContain('viewBox="0 0 21 21"');
   });
@@ -270,7 +252,14 @@ describe('renderDescription — uid assignment', () => {
 
   it('assigns sequential ent%04d uids in pre-order (container before its children)', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Pkg', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Pkg',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const sibling = makeDNode({ id: 'n2', symbol: 'component', display: 'Sibling', x: 220 });
     const svg = renderDescription(makeGeo({ nodes: [container, sibling] }), defaultTheme);
     // container "pkg" created first (ent0001), then its child "c1" (ent0002),
@@ -297,10 +286,7 @@ describe('renderDescription — uid assignment', () => {
         makeDNode({ id: 'n2', x: 10, y: 100 }),
         makeDNode({ id: 'n3', x: 10, y: 190 }),
       ],
-      edges: [
-        makeEdge({ id: 'e1', from: 'n1', to: 'n2' }),
-        makeEdge({ id: 'e2', from: 'n2', to: 'n3' }),
-      ],
+      edges: [makeEdge({ id: 'e1', from: 'n1', to: 'n2' }), makeEdge({ id: 'e2', from: 'n2', to: 'n3' })],
     });
     const svg = renderDescription(geo, defaultTheme);
     expect(svg).toContain('id="lnk4"');
@@ -334,7 +320,14 @@ describe('renderDescription — uid assignment', () => {
 describe('renderDescription — draw order', () => {
   it('draws every cluster before any leaf entity', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Pkg', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Pkg',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const leaf = makeDNode({ id: 'n2', symbol: 'component', display: 'Leaf', x: 220 });
     const svg = renderDescription(makeGeo({ nodes: [container, leaf] }), defaultTheme);
     const clusterIdx = svg.indexOf('<g class="cluster"');
@@ -353,7 +346,14 @@ describe('renderDescription — draw order', () => {
 
   it('a nested container child is drawn as a leaf, positioned after its own cluster wrapper', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Pkg', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Pkg',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     const clusterIdx = svg.indexOf('<g class="cluster"');
     const childEntityIdx = svg.indexOf('<g class="entity"');
@@ -369,7 +369,14 @@ describe('renderDescription — draw order', () => {
   // regardless of its declaration position relative to a sibling container.
   it('a top-level leaf declared BEFORE a sibling container still draws AFTER that container and its members', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Pkg', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Pkg',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const leaf = makeDNode({ id: 'n2', symbol: 'component', display: 'Leaf', x: 220 });
     // leaf declared FIRST in the nodes array, container SECOND.
     const svg = renderDescription(makeGeo({ nodes: [leaf, container] }), defaultTheme);
@@ -387,7 +394,11 @@ describe('renderDescription — draw order', () => {
   // iteration (BEFORE any true top-level leaf), never among true leaves.
   it('an explicitly-declared EMPTY group draws before a top-level leaf declared earlier in source', () => {
     const emptyGroup = makeDNode({
-      id: 'pkg', symbol: 'package', display: 'Pkg', children: [], declaredAsGroup: true,
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Pkg',
+      children: [],
+      declaredAsGroup: true,
     });
     const leaf = makeDNode({ id: 'n2', symbol: 'component', display: 'Leaf', x: 220 });
     const svg = renderDescription(makeGeo({ nodes: [leaf, emptyGroup] }), defaultTheme);
@@ -422,8 +433,13 @@ describe('renderDescription — hidden leaf/cluster/edge suppression (G1 I-hides
   it('a hidden CLUSTER paints nothing -- no cluster group, no border, no title text', () => {
     const child = makeDNode({ id: 'a_sub', symbol: 'component', display: 'Inner', hidden: true });
     const hiddenContainer = makeDNode({
-      id: 'a', symbol: 'component', display: 'A', width: 200, height: 150,
-      children: [child], hidden: true,
+      id: 'a',
+      symbol: 'component',
+      display: 'A',
+      width: 200,
+      height: 150,
+      children: [child],
+      hidden: true,
     });
     const svg = renderDescription(makeGeo({ nodes: [hiddenContainer] }), defaultTheme);
     expect(svg).not.toContain('class="cluster"');
@@ -435,12 +451,22 @@ describe('renderDescription — hidden leaf/cluster/edge suppression (G1 I-hides
   it('a VISIBLE sibling cluster is unaffected by an unrelated hidden one', () => {
     const hiddenChild = makeDNode({ id: 'a_sub', symbol: 'component', display: 'Inner', hidden: true });
     const hiddenContainer = makeDNode({
-      id: 'a', symbol: 'component', display: 'A', width: 100, height: 100,
-      children: [hiddenChild], hidden: true,
+      id: 'a',
+      symbol: 'component',
+      display: 'A',
+      width: 100,
+      height: 100,
+      children: [hiddenChild],
+      hidden: true,
     });
     const visibleChild = makeDNode({ id: 'b_sub', symbol: 'component', display: 'Visible' });
     const visibleContainer = makeDNode({
-      id: 'b', symbol: 'component', display: 'B', x: 200, width: 100, height: 100,
+      id: 'b',
+      symbol: 'component',
+      display: 'B',
+      x: 200,
+      width: 100,
+      height: 100,
       children: [visibleChild],
     });
     const svg = renderDescription(makeGeo({ nodes: [hiddenContainer, visibleContainer] }), defaultTheme);
@@ -478,58 +504,85 @@ describe('renderDescription — hidden leaf/cluster/edge suppression (G1 I-hides
 
 describe('renderDescription — node symbol dispatch', () => {
   it('component node renders a <rect> with its label', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'OrderService' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'OrderService' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<rect');
     expect(svg).toContain('OrderService');
   });
 
   it('interface node renders an <ellipse> with its label', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'interface', display: 'IPayment' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'interface', display: 'IPayment' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('IPayment');
   });
 
   it('actor node renders an <ellipse> head (rx===ry, the driver always emits <ellipse>) and a <path> body', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'AdminUser', width: 50, height: 70 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'AdminUser', width: 50, height: 70 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('<path');
     expect(svg).toContain('AdminUser');
   });
 
   it('actor-business node renders an extra diagonal <line>', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor-business', display: 'Manager', width: 50, height: 70 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor-business', display: 'Manager', width: 50, height: 70 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('<line');
     expect(svg).toContain('Manager');
   });
 
   it('usecase node renders an <ellipse> with its label', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'usecase', display: 'Login', width: 120, height: 40 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'usecase', display: 'Login', width: 120, height: 40 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('Login');
   });
 
   it('usecase-business node renders an <ellipse> and a diagonal <line>', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'usecase-business', display: 'Pay', width: 120, height: 40 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'usecase-business', display: 'Pay', width: 120, height: 40 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('<line');
     expect(svg).toContain('Pay');
   });
 
   it('database node renders a cylinder <path> with its label', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'database', display: 'PostgreSQL' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'database', display: 'PostgreSQL' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<path');
     expect(svg).toContain('PostgreSQL');
   });
 
   it('rectangle node renders a <rect> with its label', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'rectangle', display: 'System' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'rectangle', display: 'System' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('<rect');
     expect(svg).toContain('System');
   });
 
-  it('hexagon node does not throw and renders its label (EntityImageDescriptionParams.hexagonPolygon: null — no outline computed yet, a pre-existing T14 gap outside this task\'s write-set)', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'hexagon', display: 'MyHex' })] }), defaultTheme);
+  it("hexagon node does not throw and renders its label (EntityImageDescriptionParams.hexagonPolygon: null — no outline computed yet, a pre-existing T14 gap outside this task's write-set)", () => {
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'hexagon', display: 'MyHex' })] }),
+      defaultTheme,
+    );
     expect(svg.trimStart()).toMatch(/^<svg/);
     expect(svg).toContain('MyHex');
   });
@@ -546,25 +599,37 @@ describe('renderDescription — node symbol dispatch', () => {
 
 describe('renderDescription — actor node reads Theme.actorStyle (T7)', () => {
   it('unset actorStyle draws ActorStickMan (head rx="8")', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 50, height: 70 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 50, height: 70 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('rx="8"');
   });
 
   it('actorStyle AWESOME draws ActorAwesome (head rx="16")', () => {
     const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.AWESOME });
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 55, height: 75 })] }), theme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 55, height: 75 })] }),
+      theme,
+    );
     expect(svg).toContain('rx="16"');
   });
 
   it('actorStyle HOLLOW draws ActorHollow (head rx="4.5")', () => {
     const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.HOLLOW });
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 26, height: 33 })] }), theme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor', display: 'Foo', width: 26, height: 33 })] }),
+      theme,
+    );
     expect(svg).toContain('rx="4.5"');
   });
 
   it('actor-business ignores actorStyle -- always draws ActorStickMan (head rx="8"), never AWESOME/HOLLOW', () => {
     const theme = deepMergeTheme(defaultTheme, { actorStyle: ActorStyle.AWESOME });
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'actor-business', display: 'Foo', width: 50, height: 70 })] }), theme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'actor-business', display: 'Foo', width: 50, height: 70 })] }),
+      theme,
+    );
     expect(svg).toContain('rx="8"');
     expect(svg).not.toContain('rx="16"');
   });
@@ -628,10 +693,7 @@ describe('renderDescription — multi-stereotype leaf entity (G1 I5b)', () => {
   });
 
   it('a node with no stereotype draws no guillemet text at all', () => {
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'C' })] }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'C' })] }), defaultTheme);
     expect(svg).not.toContain('«');
   });
 });
@@ -652,29 +714,20 @@ describe('renderDescription — multi-stereotype leaf entity (G1 I5b)', () => {
 describe('renderDescription — transparent-color elision (G1 I5d)', () => {
   it('a "FontColor transparent" element style override draws no <text> at all', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { component: { font: 'transparent' } } } });
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Elided' })] }),
-      theme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Elided' })] }), theme);
     expect(svg).not.toContain('<text');
     expect(svg).not.toContain('Elided');
   });
 
   it('an explicit 8-digit zero-alpha hex ("#00000000") font override elides text the same way', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { component: { font: '#00000000' } } } });
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Elided' })] }),
-      theme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Elided' })] }), theme);
     expect(svg).not.toContain('<text');
   });
 
   it('an ORDINARY font color override is unaffected (only fully-transparent values elide)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { component: { font: '#FF0000' } } } });
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Visible' })] }),
-      theme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Visible' })] }), theme);
     const titleText = svg.match(/<text[^>]*>Visible<\/text>/)?.[0];
     expect(titleText).toContain('fill="#F00"');
   });
@@ -690,20 +743,14 @@ describe('renderDescription — transparent-color elision (G1 I5d)', () => {
 describe('renderDescription — per-element FontSize override (G1 I4b)', () => {
   it('a leaf entity title uses its own <sname>FontSize override, not theme.fontSize (cukafa-49-fona812)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { component: { fontSize: 18 } } } });
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Comp' })] }),
-      theme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Comp' })] }), theme);
     const titleText = svg.match(/<text[^>]*>Comp<\/text>/)?.[0];
     expect(titleText).toContain('font-size="18"');
   });
 
-  it('a leaf entity of a DIFFERENT sname is unaffected by another sname\'s FontSize override', () => {
+  it("a leaf entity of a DIFFERENT sname is unaffected by another sname's FontSize override", () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { component: { fontSize: 18 } } } });
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'node', display: 'NodeX' })] }),
-      theme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'node', display: 'NodeX' })] }), theme);
     const titleText = svg.match(/<text[^>]*>NodeX<\/text>/)?.[0];
     expect(titleText).toContain(`font-size="${defaultTheme.fontSize}"`);
   });
@@ -734,7 +781,12 @@ describe('renderDescription — per-element FontSize override (G1 I4b)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { elements: { package: { fontSize: 40 } } } });
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
     const container = makeDNode({
-      id: 'pkg', symbol: 'package', display: 'Config', width: 200, height: 150, children: [child],
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Config',
+      width: 200,
+      height: 150,
+      children: [child],
     });
     const svg = renderDescription(makeGeo({ nodes: [container] }), theme);
     const titleText = svg.match(/<text[^>]*>Config<\/text>/)?.[0];
@@ -749,20 +801,29 @@ describe('renderDescription — per-element FontSize override (G1 I4b)', () => {
 
 describe('renderDescription — note/port fallback', () => {
   it('note renders a box filled with theme.colors.noteBackground', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'note', display: 'my note' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'note', display: 'my note' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain(`fill="${defaultTheme.colors.noteBackground}"`);
     expect(svg).toContain('my note');
   });
 
   it('multi-line note body renders one <text> per line', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'note', display: 'line one\nline two' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'note', display: 'line one\nline two' })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('line one');
     expect(svg).toContain('line two');
     expect((svg.match(/<text/g) ?? []).length).toBe(2);
   });
 
   it('port renders a small box filled with theme.colors.nodeBackground, bordered with theme.colors.border at 1.5 stroke width (G1 I5: EntityImagePort.java:99-137 -- backcolor/bordercolor resolve through resolveElementPaint, not both hardcoded to theme.colors.border)', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'port', display: 'P', width: 20, height: 20 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'port', display: 'P', width: 20, height: 20 })] }),
+      defaultTheme,
+    );
     const rect = svg.match(/<rect[^>]*width="20"[^>]*\/>/)?.[0];
     expect(rect).toContain(`fill="${defaultTheme.colors.nodeBackground}"`);
     expect(rect).toContain(`stroke:${defaultTheme.colors.border}`);
@@ -770,7 +831,10 @@ describe('renderDescription — note/port fallback', () => {
   });
 
   it('port draws its display text as a label, BEFORE the box in draw order (jar-verified child order: <text> then <rect>)', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'port', display: 'p1', width: 12, height: 12 })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'port', display: 'p1', width: 12, height: 12 })] }),
+      defaultTheme,
+    );
     expect(svg).toContain('>p1<');
     const textIdx = svg.indexOf('<text');
     const rectIdx = svg.indexOf('<rect');
@@ -820,7 +884,14 @@ describe('renderDescription — note/port fallback', () => {
 describe('renderDescription — container (cluster) rendering', () => {
   it('package container renders a <g class="cluster"> wrapper with its label', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Services', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Services',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     expect(svg).toContain('<g class="cluster"');
     expect(svg).toContain('Services');
@@ -828,14 +899,28 @@ describe('renderDescription — container (cluster) rendering', () => {
 
   it('package container border is SOLID by default (no stroke-dasharray) — T12 finding', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'package', display: 'Services', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'Services',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     expect(svg).not.toContain('stroke-dasharray');
   });
 
   it('folder container also draws SOLID by default (same ClusterStyleDefaults as package)', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'folder', display: 'Handlers', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'folder',
+      display: 'Handlers',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     expect(svg).not.toContain('stroke-dasharray');
     expect(svg).toContain('<g class="cluster"');
@@ -843,21 +928,38 @@ describe('renderDescription — container (cluster) rendering', () => {
 
   it('cloud container (children present) also renders as a cluster, solid border', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
-    const container = makeDNode({ id: 'pkg', symbol: 'cloud', display: 'AWS', width: 200, height: 150, children: [child] });
+    const container = makeDNode({
+      id: 'pkg',
+      symbol: 'cloud',
+      display: 'AWS',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     expect(svg).toContain('<g class="cluster"');
     expect(svg).not.toContain('stroke-dasharray');
   });
 
   it('a cloud with no children (empty container) draws as a leaf entity, not a cluster', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'cloud', display: 'AWS', children: [] })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'cloud', display: 'AWS', children: [] })] }),
+      defaultTheme,
+    );
     expect(svg).not.toContain('<g class="cluster"');
     expect(svg).toContain('AWS');
   });
 
   it('child nodes inside a container render alongside the container', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'InnerComp' });
-    const parent = makeDNode({ id: 'pkg', symbol: 'package', display: 'MyPackage', width: 200, height: 150, children: [child] });
+    const parent = makeDNode({
+      id: 'pkg',
+      symbol: 'package',
+      display: 'MyPackage',
+      width: 200,
+      height: 150,
+      children: [child],
+    });
     const svg = renderDescription(makeGeo({ nodes: [parent] }), defaultTheme);
     expect(svg).toContain('InnerComp');
     expect(svg).toContain('MyPackage');
@@ -882,7 +984,10 @@ describe('renderDescription — container (cluster) title/stereotype font (G1 I2
   });
 
   it('a leaf entity title is NEVER bold (only container/group titles are)', () => {
-    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Leaf' })] }), defaultTheme);
+    const svg = renderDescription(
+      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'Leaf' })] }),
+      defaultTheme,
+    );
     const titleText = svg.match(/<text[^>]*>Leaf<\/text>/)?.[0];
     expect(titleText).not.toContain('font-weight');
   });
@@ -890,7 +995,13 @@ describe('renderDescription — container (cluster) title/stereotype font (G1 I2
   it('a container stereotype renders italic, at the SAME font-size as the title (not smaller)', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
     const container = makeDNode({
-      id: 'pkg', symbol: 'node', display: 'Title', stereotype: ['shared node'], width: 200, height: 150, children: [child],
+      id: 'pkg',
+      symbol: 'node',
+      display: 'Title',
+      stereotype: ['shared node'],
+      width: 200,
+      height: 150,
+      children: [child],
     });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     const stereoText = svg.match(/<text[^>]*>«shared node»<\/text>/)?.[0];
@@ -906,7 +1017,13 @@ describe('renderDescription — container (cluster) title/stereotype font (G1 I2
   it('draws one guillemet <text> per stereotype tag on a container title', () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
     const container = makeDNode({
-      id: 'pkg', symbol: 'node', display: 'Title', stereotype: ['a', 'b'], width: 200, height: 150, children: [child],
+      id: 'pkg',
+      symbol: 'node',
+      display: 'Title',
+      stereotype: ['a', 'b'],
+      width: 200,
+      height: 150,
+      children: [child],
     });
     const svg = renderDescription(makeGeo({ nodes: [container] }), defaultTheme);
     expect(svg.match(/<text[^>]*>«a»<\/text>/)).not.toBeNull();
@@ -962,17 +1079,13 @@ describe('renderDescription — edges', () => {
     expect(polygonTag).toContain('stroke:#F00;');
   });
 
-
   it('edge path uses theme arrow color (emitted in the style attribute, not a bare stroke= attr)', () => {
     const svg = renderDescription(twoNodeGeo(), defaultTheme);
     expect(svg).toContain(`stroke:${defaultTheme.colors.arrow};`);
   });
 
   it('edge with an explicit label renders the label text', () => {
-    const svg = renderDescription(
-      twoNodeGeo({ label: { text: 'uses', x: 80, y: 45 } }),
-      defaultTheme,
-    );
+    const svg = renderDescription(twoNodeGeo({ label: { text: 'uses', x: 80, y: 45 } }), defaultTheme);
     expect(svg).toContain('uses');
   });
 
@@ -982,7 +1095,10 @@ describe('renderDescription — edges', () => {
   });
 
   it('<<include>> link renders both dashed styling and the «include» label', () => {
-    const svg = renderDescription(twoNodeGeo({ style: 'dashed', stereotype: 'include', stereotypeIsLinkLabel: true }), defaultTheme);
+    const svg = renderDescription(
+      twoNodeGeo({ style: 'dashed', stereotype: 'include', stereotypeIsLinkLabel: true }),
+      defaultTheme,
+    );
     expect(svg).toContain('stroke-dasharray');
     expect(svg).toContain('«include»');
   });
@@ -1000,7 +1116,10 @@ describe('renderDescription — edges', () => {
   // stereotype run). Contrast with the POST-colon-embedded case above,
   // which DOES draw.
   it('a pre-colon (non-link-label) stereotype draws NO guillemet text', () => {
-    const svg = renderDescription(twoNodeGeo({ stereotype: 'v1.0', label: { text: 'plain label', x: 20, y: 50 } }), defaultTheme);
+    const svg = renderDescription(
+      twoNodeGeo({ stereotype: 'v1.0', label: { text: 'plain label', x: 20, y: 50 } }),
+      defaultTheme,
+    );
     expect(svg).not.toContain('«');
     expect(svg).toContain('plain label');
   });
@@ -1067,14 +1186,8 @@ describe('renderDescription — edges', () => {
   // `-1`/`-2`-suffixed disambiguation (SvekEdge.java:1093 `uniq`).
   it('two edges with the same base id get uniq-suffixed path ids (jar SvekResult#drawU wiring)', () => {
     const geo = makeGeo({
-      nodes: [
-        makeDNode({ id: 'n1', x: 10, y: 10 }),
-        makeDNode({ id: 'n2', x: 10, y: 100 }),
-      ],
-      edges: [
-        makeEdge({ id: 'e1', from: 'n1', to: 'n2' }),
-        makeEdge({ id: 'e2', from: 'n1', to: 'n2' }),
-      ],
+      nodes: [makeDNode({ id: 'n1', x: 10, y: 10 }), makeDNode({ id: 'n2', x: 10, y: 100 })],
+      edges: [makeEdge({ id: 'e1', from: 'n1', to: 'n2' }), makeEdge({ id: 'e2', from: 'n1', to: 'n2' })],
     });
     const svg = renderDescription(geo, defaultTheme);
     expect(svg).toContain('id="n1-to-n2"');
@@ -1090,10 +1203,7 @@ describe('renderDescription — edges', () => {
   // tail-only-decorated edge (e.g. `B <-- A`) must resolve to the
   // `-backto-` id, not a bare `X-Y` id.
   it('tail-only decor (arrowHead classification alone must not synthesize a head decor) gets the -backto- id', () => {
-    const svg = renderDescription(
-      twoNodeGeo({ tailDecor: '<', arrowHead: 'open' }),
-      defaultTheme,
-    );
+    const svg = renderDescription(twoNodeGeo({ tailDecor: '<', arrowHead: 'open' }), defaultTheme);
     expect(svg).toContain('id="n1-backto-n2"');
   });
 });
@@ -1104,9 +1214,7 @@ describe('renderDescription — edges', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderDescription — per-element Paint (T7)', () => {
-  const withElements = (
-    elements: NonNullable<(typeof defaultTheme)['colors']['elements']>,
-  ): typeof defaultTheme => ({
+  const withElements = (elements: NonNullable<(typeof defaultTheme)['colors']['elements']>): typeof defaultTheme => ({
     ...defaultTheme,
     colors: { ...defaultTheme.colors, elements },
   });
@@ -1131,10 +1239,13 @@ describe('renderDescription — per-element Paint (T7)', () => {
     expect(svg).toContain(defaultTheme.colors.nodeBackground);
   });
 
-  it('a container does NOT yet honor a per-element bucket background override (documented gap: renderer-cluster.ts#buildCluster hardcodes backColorOverride: null — out of this task\'s write-set, see mission report)', () => {
+  it("a container does NOT yet honor a per-element bucket background override (documented gap: renderer-cluster.ts#buildCluster hardcodes backColorOverride: null — out of this task's write-set, see mission report)", () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
     const over = makeDNode({ id: 'pkg', symbol: 'package', display: 'P', width: 200, height: 120, children: [child] });
-    const overridden = renderDescription(makeGeo({ nodes: [over] }), withElements({ package: { background: '#ABCDEF' } }));
+    const overridden = renderDescription(
+      makeGeo({ nodes: [over] }),
+      withElements({ package: { background: '#ABCDEF' } }),
+    );
     // Current (unfixed) behavior: falls back to the package style default
     // (ClusterStyleDefaults.backGroundColorDefault -> theme.colors.graph.packageBackground, 'none').
     expect(overridden).not.toContain('fill="#ABCDEF"');
@@ -1183,13 +1294,10 @@ describe('renderDescription — cluster border/stroke/roundCorner defaults (G1 I
     expect(svg).toContain('rx="2.5" ry="2.5"');
   });
 
-  it.each(['package', 'folder'] as const)(
-    '%s container: folder default (#000000, stroke-width 1.5)',
-    (symbol) => {
-      const svg = renderDescription(containerGeo(symbol), defaultTheme);
-      expect(svg).toContain('stroke:#000;stroke-width:1.5;');
-    },
-  );
+  it.each(['package', 'folder'] as const)('%s container: folder default (#000000, stroke-width 1.5)', (symbol) => {
+    const svg = renderDescription(containerGeo(symbol), defaultTheme);
+    expect(svg).toContain('stroke:#000;stroke-width:1.5;');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -1308,10 +1416,7 @@ describe('renderDescription — per-entity inline color override (T19)', () => {
   });
 
   it('a node with no color override uses the default entity stroke (0.5)', () => {
-    const svg = renderDescription(
-      makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'c' })] }),
-      defaultTheme,
-    );
+    const svg = renderDescription(makeGeo({ nodes: [makeDNode({ symbol: 'component', display: 'c' })] }), defaultTheme);
     expect(svg).not.toContain('stroke-dasharray');
     expect(svg).toContain('stroke-width:0.5;');
   });
@@ -1354,7 +1459,7 @@ describe('unwrapKlimtSvg — diagramType marker (G1 I1, T8)', () => {
   // already has. chrome.ts#applyChrome (G1d) adds its own single outer <g>
   // uniformly, so leaving klimt's <g> in place would double-nest (the G1 I1
   // "chrome sibling-<g>" residual this closes).
-  it('strips the leading <?plantuml?> PI and klimt\'s own content <g> wrapper (G1d)', () => {
+  it("strips the leading <?plantuml?> PI and klimt's own content <g> wrapper (G1d)", () => {
     const klimtSvg =
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
       'version="1.1" viewBox="0 0 10 10">' +
@@ -1370,9 +1475,7 @@ describe('unwrapKlimtSvg — diagramType marker (G1 I1, T8)', () => {
       'version="1.1" viewBox="0 0 10 10">' +
       '<?plantuml $version$?><defs/>' +
       '<rect x="1" y="2"/></svg>';
-    expect(() => unwrapKlimtSvg(klimtSvg, '#FFFFFF')).toThrow(
-      /missing content <g> wrapper/,
-    );
+    expect(() => unwrapKlimtSvg(klimtSvg, '#FFFFFF')).toThrow(/missing content <g> wrapper/);
   });
 
   // T5b: klimt's `gRoot` carries rule 3's hoisted text attributes now, so
@@ -1423,21 +1526,24 @@ describe('renderDescription — entity/cluster shadow (deferred D3 item)', () =>
     expect(svg).not.toContain('filter="url(');
   });
 
-  it('a sibling sname with no bucket override draws no shadow even when another sname has one ' +
-    '(malado-53-noso561: actor false, database true)', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: { elements: { database: { shadowing: 3 }, actor: { shadowing: 0 } } },
-    });
-    const geo = makeGeo({
-      nodes: [
-        makeDNode({ id: 'n1', symbol: 'database', x: 10, y: 10 }),
-        makeDNode({ id: 'n2', symbol: 'actor', x: 150, y: 10 }),
-      ],
-    });
-    const svg = renderDescription(geo, theme);
-    // Exactly one shadowed shape -> exactly one filter reference.
-    expect(svg.match(/filter="url\(#/g)?.length).toBe(1);
-  });
+  it(
+    'a sibling sname with no bucket override draws no shadow even when another sname has one ' +
+      '(malado-53-noso561: actor false, database true)',
+    () => {
+      const theme = deepMergeTheme(defaultTheme, {
+        colors: { elements: { database: { shadowing: 3 }, actor: { shadowing: 0 } } },
+      });
+      const geo = makeGeo({
+        nodes: [
+          makeDNode({ id: 'n1', symbol: 'database', x: 10, y: 10 }),
+          makeDNode({ id: 'n2', symbol: 'actor', x: 150, y: 10 }),
+        ],
+      });
+      const svg = renderDescription(geo, theme);
+      // Exactly one shadowed shape -> exactly one filter reference.
+      expect(svg.match(/filter="url\(#/g)?.length).toBe(1);
+    },
+  );
 
   it('a container (cluster) node with a shadowed USymbol bucket draws the filter attr on its box', () => {
     const theme = deepMergeTheme(defaultTheme, {
@@ -1489,11 +1595,7 @@ describe('note on link — text stays in the SVG (D2)', () => {
   });
 
   it('renders BOTH the link label and the note body', () => {
-    const svg = renderSrc([
-      'component toto',
-      'toto --> titi : foo',
-      'note on link #red: note red',
-    ]);
+    const svg = renderSrc(['component toto', 'toto --> titi : foo', 'note on link #red: note red']);
     expect(svg).toContain('foo');
     expect(svg).toContain('note red');
   });

@@ -17,11 +17,12 @@
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { GeoSpec } from './state-composite-pass.js';
 import { buildTopLevelPass, buildLevelTransitionGeos } from './state-composite-pass.js';
-import type { StateNodeGeo, TransitionGeo, StateGeometry, StateRegionGeo } from './state-geo-types.js';
+import type { StateNodeGeo, StateGeometry, StateRegionGeo } from './state-geo-types.js';
 import type { StateDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { frontierCalculator, ensureMinWidth, type Box } from './state-composite-frontier.js';
+import { shiftGeo, shiftTransition, boundingBox } from './state-composite-geo-shift.js';
 
 /** Exported (mission G4 S4): `state-composite-autonom.ts#buildPlainAutonomSpec`
  *  reuses this SAME node-position lookup shape to build a LOCAL (pre-outer-
@@ -48,87 +49,6 @@ const EMPTY_CLUSTER_POS_MAP: ClusterPosMap = new Map();
  *  {@link materializeSpecs}'s own doc comment for why they must. */
 export function clusterPosMapOf(result: DotLayoutResult): ClusterPosMap {
   return result.clusters !== undefined ? new Map(result.clusters.map((c) => [c.id, c])) : EMPTY_CLUSTER_POS_MAP;
-}
-
-const BOX_PAD = 12;
-
-function shiftGeo(g: StateNodeGeo, dx: number, dy: number): StateNodeGeo {
-  const children = g.children.map((c) => shiftGeo(c, dx, dy));
-  const transitions = g.transitions.map((t) => shiftTransition(t, dx, dy));
-  return {
-    ...g,
-    x: g.x + dx,
-    y: g.y + dy,
-    children,
-    transitions,
-    // mission G4 S6, mechanism 13: an ANCESTOR's own shift (e.g. this node
-    // is a nested composite reached via a grandparent's `spec.localStates`)
-    // must ALSO shift `concurrentRegions`/`separators` if this node itself
-    // owns concurrent regions -- otherwise a nested concurrent composite's
-    // separator lines would retain their PRE-ancestor-shift coordinates.
-    // `concurrentRegions` is rebuilt from the ALREADY-shifted `children`/
-    // `transitions` above (by slicing on original per-region lengths) so
-    // object identity with the flat arrays is preserved, matching
-    // `materializeAutonom`'s own identity-sharing contract.
-    ...(g.concurrentRegions !== undefined
-      ? { concurrentRegions: resliceRegions(g.concurrentRegions, children, transitions) }
-      : {}),
-    ...(g.separators !== undefined
-      ? { separators: g.separators.map((sep) => ({ x1: sep.x1 + dx, y1: sep.y1 + dy, x2: sep.x2 + dx, y2: sep.y2 + dy })) }
-      : {}),
-  };
-}
-
-/** Re-groups already-shifted flat `children`/`transitions` back into their
- *  original per-region boundaries (lengths preserved 1:1 by `shiftGeo`'s own
- *  `.map` above, which never adds/removes entries) -- see `shiftGeo`'s own
- *  doc comment for why this must reuse the SAME shifted objects rather than
- *  re-deriving them. */
-function resliceRegions(
-  original: readonly StateRegionGeo[],
-  shiftedChildren: readonly StateNodeGeo[],
-  shiftedTransitions: readonly TransitionGeo[],
-): StateRegionGeo[] {
-  const out: StateRegionGeo[] = [];
-  let childCursor = 0;
-  let transitionCursor = 0;
-  for (const region of original) {
-    out.push({
-      children: shiftedChildren.slice(childCursor, childCursor + region.children.length),
-      transitions: shiftedTransitions.slice(transitionCursor, transitionCursor + region.transitions.length),
-    });
-    childCursor += region.children.length;
-    transitionCursor += region.transitions.length;
-  }
-  return out;
-}
-
-function shiftTransition(t: TransitionGeo, dx: number, dy: number): TransitionGeo {
-  return {
-    ...t,
-    points: t.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-    ...(t.label !== undefined ? { label: { ...t.label, x: t.label.x + dx, y: t.label.y + dy } } : {}),
-  };
-}
-
-function boundingBox(children: readonly StateNodeGeo[]): { x: number; y: number; width: number; height: number } {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const c of children) {
-    minX = Math.min(minX, c.x);
-    minY = Math.min(minY, c.y);
-    maxX = Math.max(maxX, c.x + c.width);
-    maxY = Math.max(maxY, c.y + c.height);
-  }
-  if (!isFinite(minX)) return { x: 0, y: 0, width: 0, height: 0 };
-  return {
-    x: minX - BOX_PAD,
-    y: minY - BOX_PAD,
-    width: maxX - minX + BOX_PAD * 2,
-    height: maxY - minY + BOX_PAD * 2,
-  };
 }
 
 /** mission G4 S3 (mechanism 6): threads `spec.headerLines`/`bodyLines`/
@@ -196,7 +116,15 @@ function materializeAutonom(
     y2: sep.y2 + dy,
   }));
   return {
-    id: spec.id, kind: 'normal', display: spec.display, x: pos.x, y: pos.y, width: pos.width, height: pos.height, children, transitions,
+    id: spec.id,
+    kind: 'normal',
+    display: spec.display,
+    x: pos.x,
+    y: pos.y,
+    width: pos.width,
+    height: pos.height,
+    children,
+    transitions,
     ...(regionsOut !== undefined ? { concurrentRegions: regionsOut } : {}),
     ...(separators !== undefined ? { separators } : {}),
     ...(spec.headerLines !== undefined ? { headerLines: spec.headerLines } : {}),
@@ -363,20 +291,23 @@ function materializeCluster(
     // composites (`state-composite-cluster.ts#resolveClusterComposite`) --
     // every other cluster (the pre-T14b path) keeps using `real` directly,
     // byte-identical to before this task.
-    const hasBorderPoints =
-      spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0;
+    const hasBorderPoints = spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0;
     const box = hasBorderPoints
       ? borderPointBox(real, children, spec.borderPointMemberIds!, spec.frontierMinWidth ?? 0, spec.rankdir ?? 'TB')
       : real;
     // G9/T8 -- see `borderPointInkOverflow`'s own doc comment.
-    const inkOverflow = hasBorderPoints
-      ? borderPointInkOverflow(spec, children, clusterPosMap, box)
-      : undefined;
+    const inkOverflow = hasBorderPoints ? borderPointInkOverflow(spec, children, clusterPosMap, box) : undefined;
     return {
-      id: spec.id, kind: 'normal', display: spec.display,
-      x: box.x, y: box.y, width: box.width, height: box.height,
+      id: spec.id,
+      kind: 'normal',
+      display: spec.display,
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height,
       ...(inkOverflow !== undefined ? { inkOverflow } : {}),
-      children, transitions: [],
+      children,
+      transitions: [],
       headerLines: [{ text: spec.display, width: spec.titleWidth }],
       clusterHeaderHeight: spec.clusterHeaderHeight,
       ...(spec.titleBaselineMargin !== undefined ? { clusterTitleBaselineMargin: spec.titleBaselineMargin } : {}),
@@ -385,7 +316,15 @@ function materializeCluster(
   }
   const box = boundingBox(children);
   return {
-    id: spec.id, kind: 'normal', display: spec.display, x: box.x, y: box.y, width: box.width, height: box.height, children, transitions: [],
+    id: spec.id,
+    kind: 'normal',
+    display: spec.display,
+    x: box.x,
+    y: box.y,
+    width: box.width,
+    height: box.height,
+    children,
+    transitions: [],
     ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
   };
 }
@@ -437,7 +376,13 @@ export function materializeSpecs(
       const pos = posMap.get(spec.id);
       if (pos === undefined) continue;
       out.push({
-        id: spec.id, kind: spec.stateKind, display: spec.display, x: pos.x, y: pos.y, width: pos.width, height: pos.height,
+        id: spec.id,
+        kind: spec.stateKind,
+        display: spec.display,
+        x: pos.x,
+        y: pos.y,
+        width: pos.width,
+        height: pos.height,
         children: [],
         transitions: [],
         ...(spec.headerLines !== undefined ? { headerLines: spec.headerLines } : {}),
@@ -446,9 +391,7 @@ export function materializeSpecs(
         ...(spec.stereotype !== undefined ? { stereotype: spec.stereotype } : {}),
         // G9/T7: a border point's label height, for the ink band its label
         // occupies outside the symbol (`StateNodeGeo.borderPointLabelHeight`).
-        ...(spec.borderPointLabelHeight !== undefined
-          ? { borderPointLabelHeight: spec.borderPointLabelHeight }
-          : {}),
+        ...(spec.borderPointLabelHeight !== undefined ? { borderPointLabelHeight: spec.borderPointLabelHeight } : {}),
         ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
         // mission skin-file-loading Batch 2: only `EntityImageState`'s own
         // `'normal'`/`'json'` leaf shape draws jar's shadow -- see
@@ -460,16 +403,17 @@ export function materializeSpecs(
         // this mission's own Jar refs do not cover -- gating here keeps the
         // ink reservation (this value) consistent with what the render path
         // actually draws.
-        ...(shadowing > 0
-          && (spec.stateKind === 'normal' || spec.stateKind === 'json')
-          && spec.stereotype?.toLowerCase() !== 'sdlreceive'
+        ...(shadowing > 0 &&
+        (spec.stateKind === 'normal' || spec.stateKind === 'json') &&
+        spec.stereotype?.toLowerCase() !== 'sdlreceive'
           ? { shadowing }
           : {}),
       });
     } else {
-      const g = spec.kind === 'autonom'
-        ? materializeAutonom(spec, posMap, shadowing)
-        : materializeCluster(spec, posMap, clusterPosMap, shadowing);
+      const g =
+        spec.kind === 'autonom'
+          ? materializeAutonom(spec, posMap, shadowing)
+          : materializeCluster(spec, posMap, clusterPosMap, shadowing);
       // SI31 T4 (G5): the south-cap ink bit rides the spec through BOTH
       // composite shapes, so it is folded once here rather than in each
       // shape's own return -- see `StateNodeGeo.southCapInk` (state-geo-types).

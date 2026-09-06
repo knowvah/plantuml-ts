@@ -118,9 +118,7 @@ export const ELEMENT_BUCKET_SNAMES = new Set([
 
 export type ElementColorRole = 'background' | 'border' | 'font';
 
-const ELEMENT_ROLE_SUFFIXES: ReadonlyArray<
-  readonly [suffix: string, role: ElementColorRole]
-> = [
+const ELEMENT_ROLE_SUFFIXES: ReadonlyArray<readonly [suffix: string, role: ElementColorRole]> = [
   ['backgroundcolor', 'background'],
   ['bordercolor', 'border'],
   ['fontcolor', 'font'],
@@ -133,9 +131,7 @@ const ELEMENT_ROLE_SUFFIXES: ReadonlyArray<
  * ahead of `fontsize` for readability only — both suffixes are tried
  * independently per key regardless of order (a key can match at most one).
  */
-const ELEMENT_FONT_SIZE_SUFFIXES: ReadonlyArray<
-  readonly [suffix: string, role: 'fontSize' | 'stereotypeFontSize']
-> = [
+const ELEMENT_FONT_SIZE_SUFFIXES: ReadonlyArray<readonly [suffix: string, role: 'fontSize' | 'stereotypeFontSize']> = [
   ['stereotypefontsize', 'stereotypeFontSize'],
   ['fontsize', 'fontSize'],
 ];
@@ -145,9 +141,7 @@ const ELEMENT_FONT_SIZE_SUFFIXES: ReadonlyArray<
  * (`<sname>(background|border|font)color` for a bucket SName), return its
  * `sname`/`role`; otherwise `undefined`.
  */
-export function matchElementColorKey(
-  key: string,
-): { sname: string; role: ElementColorRole } | undefined {
+export function matchElementColorKey(key: string): { sname: string; role: ElementColorRole } | undefined {
   for (const [suffix, role] of ELEMENT_ROLE_SUFFIXES) {
     if (key.endsWith(suffix)) {
       const sname = key.slice(0, key.length - suffix.length);
@@ -175,9 +169,7 @@ const STEREOTYPE_SPOT_LETTER_SNAME: Readonly<Record<string, string>> = {
   n: 'spotannotation',
 };
 
-export function matchStereotypeSpotColorKey(
-  key: string,
-): { sname: string; role: ElementColorRole } | undefined {
+export function matchStereotypeSpotColorKey(key: string): { sname: string; role: ElementColorRole } | undefined {
   const m = /^stereotype([acein])(background|border)color$/.exec(key);
   if (m === null) return undefined;
   const sname = STEREOTYPE_SPOT_LETTER_SNAME[m[1]!];

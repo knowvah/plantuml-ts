@@ -36,10 +36,7 @@ describe('YAML end-to-end: plugin produces SVG for corpus fixtures', () => {
   });
 
   it('coxima-79: key with dots and slash', () => {
-    expectSvg(
-      '@startyaml\napp.kubernetes.io/component: grafana\n@endyaml',
-      'coxima-79',
-    );
+    expectSvg('@startyaml\napp.kubernetes.io/component: grafana\n@endyaml', 'coxima-79');
   });
 
   it('poxedu-72: complex highlight + tab-indented', () => {

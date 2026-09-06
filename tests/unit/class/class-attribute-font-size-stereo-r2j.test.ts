@@ -39,25 +39,22 @@ const FOO_LINES = ['class foo<<Foo>> {', 'example2', '}', 'class other'];
 
 describe('R2j: classAttributeFontSize<<Stereo>> skinparam plumbing', () => {
   it('maps classattributefontsize<<foo>> to colors.graph.classAttributeFontSizeByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classattributefontsize<<foo>>', '18']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classattributefontsize<<foo>>', '18']]), defaultTheme);
     expect(theme.colors.graph.classAttributeFontSizeByStereo).toEqual({ foo: 18 });
     expect(unknown).toEqual([]);
   });
 
   it('drops a non-numeric value silently', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['classattributefontsize<<foo>>', 'not-a-number']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['classattributefontsize<<foo>>', 'not-a-number']]), defaultTheme);
     expect(theme.colors.graph.classAttributeFontSizeByStereo).toBeUndefined();
   });
 
   it('coexists with the plain classAttributeFontSize value', () => {
     const { theme } = resolveSkinparam(
-      new Map([['classattributefontsize', '8'], ['classattributefontsize<<foo>>', '18']]),
+      new Map([
+        ['classattributefontsize', '8'],
+        ['classattributefontsize<<foo>>', '18'],
+      ]),
       defaultTheme,
     );
     expect(theme.colors.graph.classAttributeFontSize).toBe(8);
@@ -67,10 +64,7 @@ describe('R2j: classAttributeFontSize<<Stereo>> skinparam plumbing', () => {
 
 describe('R2j: per-stereotype attribute font size drives measurement', () => {
   it('applies to the matching stereotyped class only (p1 jar numbers)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['classattributefontsize<<foo>>', '18']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['classattributefontsize<<foo>>', '18']]), defaultTheme);
     const [foo, other] = classifiers(FOO_LINES);
     const mFoo = measureClassifier(foo!, theme, measurer, SUPPRESS);
     const mOther = measureClassifier(other!, theme, measurer, SUPPRESS);
@@ -84,12 +78,8 @@ describe('R2j: per-stereotype attribute font size drives measurement', () => {
   it('stereotyped value ≡ plain value for the matching class (p1 ≡ p4)', () => {
     const [fooStereo] = classifiers(FOO_LINES);
     const [fooPlain] = classifiers(FOO_LINES);
-    const stereoTheme = resolveSkinparam(
-      new Map([['classattributefontsize<<foo>>', '18']]), defaultTheme,
-    ).theme;
-    const plainTheme = resolveSkinparam(
-      new Map([['classattributefontsize', '18']]), defaultTheme,
-    ).theme;
+    const stereoTheme = resolveSkinparam(new Map([['classattributefontsize<<foo>>', '18']]), defaultTheme).theme;
+    const plainTheme = resolveSkinparam(new Map([['classattributefontsize', '18']]), defaultTheme).theme;
     const a = measureClassifier(fooStereo!, stereoTheme, measurer, SUPPRESS);
     const b = measureClassifier(fooPlain!, plainTheme, measurer, SUPPRESS);
     expect(a.width).toBeCloseTo(b.width, 6);
@@ -98,7 +88,10 @@ describe('R2j: per-stereotype attribute font size drives measurement', () => {
 
   it('sovuxo-25 combination: plain 8 for dummy, <<Foo>> 18 wins for foo', () => {
     const { theme } = resolveSkinparam(
-      new Map([['classattributefontsize', '8'], ['classattributefontsize<<foo>>', '18']]),
+      new Map([
+        ['classattributefontsize', '8'],
+        ['classattributefontsize<<foo>>', '18'],
+      ]),
       defaultTheme,
     );
     const [dummy] = classifiers(['class dummy {', 'example1', '}']);

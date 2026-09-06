@@ -239,9 +239,7 @@ function hasCachedFixture(f: FixtureRef): boolean {
  *  `oracle/goldens/svg-description/{component,usecase}/<slug>/` and
  *  `svg-skin/rose/<slug>/` nest one level deeper. */
 function walk(typeRoot: string, dir: string, tree: Tree, type: string, out: FixtureRef[]): void {
-  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
   for (const e of entries) {
     if (!e.isDirectory()) continue;
     const child = join(dir, e.name);
@@ -253,9 +251,7 @@ function walk(typeRoot: string, dir: string, tree: Tree, type: string, out: Fixt
 
 function collectTree(root: string, tree: Tree, keep: (name: string) => boolean): FixtureRef[] {
   const out: FixtureRef[] = [];
-  for (const e of readdirSync(root, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
+  for (const e of readdirSync(root, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     if (!e.isDirectory() || !keep(e.name)) continue;
     walk(join(root, e.name), join(root, e.name), tree, e.name, out);
   }
@@ -390,14 +386,10 @@ export function progressNote(f: BaselineFixture, now: LiveRefusal): string | und
  * a reason that has ceased to hold. The converse pin would floor SLI 2 above
  * zero for a reason no command-table work can move.
  */
-export function checkJarClassification(
-  f: BaselineFixture,
-  now: LiveRefusal | undefined,
-): CheckResult {
+export function checkJarClassification(f: BaselineFixture, now: LiveRefusal | undefined): CheckResult {
   const at = `${f.tree} ${f.type}/${f.slug}`;
   if (now === undefined) return { ok: true, message: `${at}: absent; owned by the walk gate.` };
-  if (f.jarRendered === now.jarRendered)
-    return { ok: true, message: `${at}: classification matches its golden.` };
+  if (f.jarRendered === now.jarRendered) return { ok: true, message: `${at}: classification matches its golden.` };
   return {
     ok: false,
     message:
@@ -484,9 +476,7 @@ describe('refusal coverage — no fixture newly errors', () => {
       .map((f) => ({ f, result: checkNoNewRefusal(f, seen.get(keyOf(f))) }))
       .filter(({ result }) => !result.ok);
 
-    const moved = broken
-      .map(({ f }) => seen.get(keyOf(f)))
-      .filter((r): r is LiveRefusal => r !== undefined);
+    const moved = broken.map(({ f }) => seen.get(keyOf(f))).filter((r): r is LiveRefusal => r !== undefined);
     const detail =
       broken.length === 0
         ? ''
@@ -544,9 +534,7 @@ describe('refusal coverage — pinned refusals', () => {
 describe('refusal coverage — baseline shape', () => {
   it('every pin matches what its own golden says about the jar erroring', () => {
     const seen = live();
-    const wrong = manifest.fixtures
-      .map((f) => checkJarClassification(f, seen.get(keyOf(f))))
-      .filter((r) => !r.ok);
+    const wrong = manifest.fixtures.map((f) => checkJarClassification(f, seen.get(keyOf(f)))).filter((r) => !r.ok);
     expect(
       wrong.map((r) => r.message),
       `${wrong.length} fixture(s) are pinned inconsistently with their golden's own content.`,
@@ -644,9 +632,7 @@ describe('refusal coverage — baseline shape', () => {
       // embedded-diagram mechanisms. Demanding the citation instead of the
       // word keeps D7's real bar (a named, locatable mechanism) while
       // admitting the gaps that are honestly not Commands.
-      expect(g.reason ?? '', `${keyOf(g)} must cite its upstream origin`).toMatch(
-        /\w+\.java:\d+/,
-      );
+      expect(g.reason ?? '', `${keyOf(g)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
       expect(g.weErrored, `${keyOf(g)} is pinned known-gap but not erroring`).toBe(true);
     }
   });
@@ -660,12 +646,8 @@ describe('refusal coverage — baseline shape', () => {
     // that is expected to be large. Splitting keeps the original invariant
     // exactly as strong as it was: outside activity, nuvoja is still the only
     // one.
-    const defects = manifest.fixtures.filter(
-      (f) => f.weErrored && f.jarRendered && f.status === 'ok',
-    );
-    expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual([
-      'dot-cache:sequence/nuvoja-46-dezu541',
-    ]);
+    const defects = manifest.fixtures.filter((f) => f.weErrored && f.jarRendered && f.status === 'ok');
+    expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual(['dot-cache:sequence/nuvoja-46-dezu541']);
     // The activity queue's size is pinned so it can only shrink deliberately.
     expect(defects.filter((f) => f.type === 'activity')).toHaveLength(82);
   });
@@ -782,30 +764,20 @@ describe('refusal coverage — branch discrimination', () => {
     // banner -- which is why the banner is the needle.
     expect(weErroredIn('<svg><text x="5">Welcome to PlantUML!</text></svg>')).toBe(false);
     // Upstream renders this INSIDE the JSON diagram (JsonDiagram.java:118).
-    expect(weErroredIn('<svg><text>Your data does not sound like JSON data</text></svg>')).toBe(
-      false,
-    );
+    expect(weErroredIn('<svg><text>Your data does not sound like JSON data</text></svg>')).toBe(false);
   });
 
   it('recognises the JAR banner and crash page, whole text element only', () => {
     expect(
-      isJarErrorPage(
-        '<text x="5" y="17">PlantUML version $version$ / $git.commit.id$ [Unknown compile time]</text>',
-      ),
+      isJarErrorPage('<text x="5" y="17">PlantUML version $version$ / $git.commit.id$ [Unknown compile time]</text>'),
     ).toBe(true);
-    expect(isJarErrorPage('<text x="5" y="14">An error has occurred : java.lang.NPE</text>')).toBe(
-      true,
-    );
-    expect(isJarErrorPage('<text x="5">Upgrade to PlantUML version 1.2024 [wiki] now</text>')).toBe(
-      false,
-    );
+    expect(isJarErrorPage('<text x="5" y="14">An error has occurred : java.lang.NPE</text>')).toBe(true);
+    expect(isJarErrorPage('<text x="5">Upgrade to PlantUML version 1.2024 [wiki] now</text>')).toBe(false);
     expect(isJarErrorPage('<svg width="10"><text x="5">Alice</text>')).toBe(false);
   });
 
   it('names the engine from the assumed type when we errored, the root attribute otherwise', () => {
-    expect(engineOf('<text>Empty description (Assumed diagram type: sequence)</text>', true)).toBe(
-      'sequence',
-    );
+    expect(engineOf('<text>Empty description (Assumed diagram type: sequence)</text>', true)).toBe('sequence');
     expect(engineOf('<text>Fatal crash</text>', true)).toBe('unknown');
     expect(engineOf('<svg data-diagram-type="CLASS" width="10">', false)).toBe('class');
     expect(engineOf('<svg width="10">', false)).toBe('none');

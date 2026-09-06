@@ -142,10 +142,7 @@ describe('skinparam front-end: <sname>StereotypeFontSize<<tag>>', () => {
   });
 
   it('does not shadow the pre-existing classAttributeFontSize<<X>> matcher', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classattributefontsize<<x>>', '7']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classattributefontsize<<x>>', '7']]), defaultTheme);
     expect(theme.colors.graph.classAttributeFontSizeByStereo).toEqual({ x: 7 });
     expect(unknown).toEqual([]);
   });

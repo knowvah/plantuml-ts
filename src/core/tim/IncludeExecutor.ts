@@ -100,9 +100,7 @@ export class IncludeExecutor {
       // `TContext.java:659-661`: an `!includesub`d file's reader is wrapped in
       // `ReadFilterMergeLines` directly -- unlike `executeInclude` /
       // `executeIncludeDef` below, which are NOT (upstream never wraps those).
-      const lines = mergeEndingBackslashLines(
-        readLines(this.load(filename, '!includesub'), filename, s.getLocation()),
-      );
+      const lines = mergeEndingBackslashLines(readLines(this.load(filename, '!includesub'), filename, s.getLocation()));
       sub = Sub.fromLines(lines, blocname, context, memory);
     }
     sub ??= this.subs.get(what);

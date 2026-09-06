@@ -79,12 +79,7 @@ function polylineLengthArr(pts: readonly Point[]): number {
 
 type TNA = { t: number; a: [Point, Point] };
 
-function mkspline(
-  inps: Point[],
-  tnas: TNA[],
-  ev0: Point,
-  ev1: Point,
-): { p0: Point; v0: Point; p1: Point; v1: Point } {
+function mkspline(inps: Point[], tnas: TNA[], ev0: Point, ev1: Point): { p0: Point; v0: Point; p1: Point; v1: Point } {
   const inpn = inps.length;
   let scale0 = 0;
   let scale3 = 0;
@@ -101,13 +96,7 @@ function mkspline(
     c[0][1] += ptDot(a0, a1);
     c[1][0] = c[0][1];
     c[1][1] += ptDot(a1, a1);
-    const tmp = ptSub(
-      inps[i]!,
-      ptAdd(
-        ptScale(inps[0]!, B01(tnas[i]!.t)),
-        ptScale(inps[inpn - 1]!, B23(tnas[i]!.t)),
-      ),
-    );
+    const tmp = ptSub(inps[i]!, ptAdd(ptScale(inps[0]!, B01(tnas[i]!.t)), ptScale(inps[inpn - 1]!, B23(tnas[i]!.t))));
     x[0] += ptDot(a0, tmp);
     x[1] += ptDot(a1, tmp);
   }
@@ -134,12 +123,7 @@ function mkspline(
   };
 }
 
-function points2coeff(
-  v0: number,
-  v1: number,
-  v2: number,
-  v3: number,
-): [number, number, number, number] {
+function points2coeff(v0: number, v1: number, v2: number, v3: number): [number, number, number, number] {
   return [v0, 3 * (v1 - v0), 3 * v0 + 3 * v2 - 6 * v1, v3 + 3 * v1 - (v0 + 3 * v2)];
 }
 
@@ -170,9 +154,7 @@ function solve3(coeff: [number, number, number, number], roots: number[]): numbe
   }
   const f = (3 * coeff2 * coeff3 - coeff1 * coeff1) / (3 * coeff3 * coeff3);
   const g =
-    (2 * coeff1 * coeff1 * coeff1 -
-      9 * coeff2 * coeff1 * coeff3 +
-      27 * coeff3 * coeff3 * coeff0) /
+    (2 * coeff1 * coeff1 * coeff1 - 9 * coeff2 * coeff1 * coeff3 + 27 * coeff3 * coeff3 * coeff0) /
     (27 * coeff3 * coeff3 * coeff3);
   const h = (g * g) / 4 + (f * f * f) / 27;
   if (h > 0) {
@@ -200,11 +182,7 @@ function solve3(coeff: [number, number, number, number], roots: number[]): numbe
   return roots.length;
 }
 
-function splineintersectslineCollect(
-  sps: [Point, Point, Point, Point],
-  lps: [Point, Point],
-  out: number[],
-): number {
+function splineintersectslineCollect(sps: [Point, Point, Point, Point], lps: [Point, Point], out: number[]): number {
   const xcoeff0 = lps[0].x;
   const xcoeff1 = lps[1].x - lps[0].x;
   const ycoeff0 = lps[0].y;
@@ -240,8 +218,7 @@ function splineintersectslineCollect(
       for (const tv of xr) {
         if (tv >= 0 && tv <= 1) {
           const yc = points2coeff(sps[0].y, sps[1].y, sps[2].y, sps[3].y);
-          const sv =
-            (yc[0] + tv * (yc[1] + tv * (yc[2] + tv * yc[3])) - ycoeff0) / ycoeff1;
+          const sv = (yc[0] + tv * (yc[1] + tv * (yc[2] + tv * yc[3])) - ycoeff0) / ycoeff1;
           if (sv >= 0 && sv <= 1) addroot(tv, out);
         }
       }
@@ -262,8 +239,7 @@ function splineintersectslineCollect(
     for (const tv of mr) {
       if (tv >= 0 && tv <= 1) {
         const xc = points2coeff(sps[0].x, sps[1].x, sps[2].x, sps[3].x);
-        const sv =
-          (xc[0] + tv * (xc[1] + tv * (xc[2] + tv * xc[3])) - xcoeff0) / xcoeff1;
+        const sv = (xc[0] + tv * (xc[1] + tv * (xc[2] + tv * xc[3])) - xcoeff0) / xcoeff1;
         if (sv >= 0 && sv <= 1) addroot(tv, out);
       }
     }
@@ -296,15 +272,7 @@ function splineisinside(edges: Edge[], sps: [Point, Point, Point, Point]): boole
   return true;
 }
 
-function splinefits(
-  edges: Edge[],
-  pa: Point,
-  va: Point,
-  pb: Point,
-  vb: Point,
-  inps: Point[],
-  ops: Point[],
-): boolean {
+function splinefits(edges: Edge[], pa: Point, va: Point, pb: Point, vb: Point, inps: Point[], ops: Point[]): boolean {
   const inpn = inps.length;
   const forceflag = inpn === 2;
   let first = true;
@@ -344,13 +312,7 @@ function splinefits(
   return false;
 }
 
-function reallyroutespline(
-  edges: Edge[],
-  inps: Point[],
-  ev0: Point,
-  ev1: Point,
-  ops: Point[],
-): void {
+function reallyroutespline(edges: Edge[], inps: Point[], ev0: Point, ev1: Point, ops: Point[]): void {
   const inpn = inps.length;
   const tnas: TNA[] = [];
 
@@ -359,7 +321,10 @@ function reallyroutespline(
     const prevT = tnas[i - 1]!.t;
     tnas.push({
       t: prevT + ptDist(inps[i]!, inps[i - 1]!),
-      a: [{ x: 0, y: 0 }, { x: 0, y: 0 }],
+      a: [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+      ],
     });
   }
   const totalLen = tnas[inpn - 1]!.t;

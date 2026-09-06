@@ -29,7 +29,14 @@ import { UGraphicStencil } from '../../klimt/drawing/UGraphicStencil.js';
  * site (matching upstream's call shape exactly), they are simply never
  * consulted by `drawAction`'s body — preserved bug-for-bug.
  */
-function drawAction(ug: UGraphic, width: number, height: number, _shadowing: number, _roundCorner: number, _diagonalCorner: number): void {
+function drawAction(
+  ug: UGraphic,
+  width: number,
+  height: number,
+  _shadowing: number,
+  _roundCorner: number,
+  _diagonalCorner: number,
+): void {
   const shape = new UPolygon();
   shape.addPoint(0, 0);
   shape.addPoint(width - 10, 0);

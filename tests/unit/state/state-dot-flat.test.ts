@@ -42,16 +42,9 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-} from '../../oracle/svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural } from '../../oracle/svek-dot.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/state',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
 const measurer = new WidthTableMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14 — matches the oracle capture

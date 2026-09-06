@@ -18,7 +18,6 @@
  * fixtures already byte-conformant are unaffected by any of this.
  */
 
-
 /** @see .../klimt/creole/NeutronType.java */
 export type NeutronType = 'UNBREAKABLE' | 'WHITESPACE' | 'CJK_IDEOGRAPH' | 'ZWSP_SEPARATOR';
 
@@ -39,7 +38,9 @@ const ZWSP: Neutron = { type: 'ZWSP_SEPARATOR', text: '' };
  * port relies on that: json's nested cell is three NBSPs and must stay ONE
  * unbreakable atom.
  */
-const JAVA_WHITESPACE_RE = new RegExp('[\\t\\n\\u000B\\f\\r \\u001C-\\u001F\\u1680\\u2000-\\u2006\\u2008-\\u200A\\u2028\\u2029\\u205F\\u3000]');
+const JAVA_WHITESPACE_RE = new RegExp(
+  '[\\t\\n\\u000B\\f\\r \\u001C-\\u001F\\u1680\\u2000-\\u2006\\u2008-\\u200A\\u2028\\u2029\\u205F\\u3000]',
+);
 
 /** @see .../klimt/creole/Neutron.java#isCjkOrJapanese */
 const CJK_RE = new RegExp('[\\u2E80-\\u9FFF\\uF900-\\uFAFF\\uFF00-\\uFFEF]');
@@ -144,11 +145,7 @@ function isWhite(line: WorkingLine): boolean {
  * `maxWidth <= 0` returns the input as a single unsplit line, which is the
  * no-wrap case and must stay one atom.
  */
-export function splitStripe(
-  text: string,
-  maxWidth: number,
-  measure: (s: string) => number,
-): string[][] {
+export function splitStripe(text: string, maxWidth: number, measure: (s: string) => number): string[][] {
   if (!(Math.abs(maxWidth) > 0)) return [[text]];
 
   const widthOf = (n: Neutron): number => (n.type === 'ZWSP_SEPARATOR' ? 0 : measure(n.text));

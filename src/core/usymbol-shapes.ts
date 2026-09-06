@@ -14,7 +14,7 @@
 import type { Theme } from './theme.js';
 import { resolveElementPaint } from './theme.js';
 import type { Paint } from './paint.js';
-import { rect, text, ellipse, line, path , attrs, resolvePaint} from './svg.js';
+import { rect, text, ellipse, line, path, attrs, resolvePaint } from './svg.js';
 import { renderNodeLabel } from './latex.js';
 
 /** The minimal node geometry a USymbol shape needs. */
@@ -118,17 +118,12 @@ export function renderComponentIcon(node: IconGeo, theme: Theme): string {
   const outerTab = rect(x + w - 20, y + 5, 15, 10, box);
   const tick1 = rect(x + w - 22, y + 7, 4, 2, box);
   const tick2 = rect(x + w - 22, y + 11, 4, 2, box);
-  const labelEl = text(
-    x + w / 2,
-    y + h / 2 + theme.fontSize / 2,
-    display,
-    {
-      fontFamily: theme.fontFamily,
-      fontSize: theme.fontSize,
-      fill: resolveElementPaint(theme, 'component', 'font'),
-      textAnchor: 'middle',
-    },
-  );
+  const labelEl = text(x + w / 2, y + h / 2 + theme.fontSize / 2, display, {
+    fontFamily: theme.fontFamily,
+    fontSize: theme.fontSize,
+    fill: resolveElementPaint(theme, 'component', 'font'),
+    textAnchor: 'middle',
+  });
   return body + outerTab + tick1 + tick2 + labelEl;
 }
 
@@ -162,14 +157,7 @@ export function renderActorIcon(node: IconGeo, theme: Theme): string {
   const arms = line(cx - 13, bodyTop + 8, cx + 13, bodyTop + 8, { stroke });
   const leftLeg = line(cx, bodyTop + 27, cx - 13, bodyTop + 42, { stroke });
   const rightLeg = line(cx, bodyTop + 27, cx + 13, bodyTop + 42, { stroke });
-  return (
-    head +
-    spine +
-    arms +
-    leftLeg +
-    rightLeg +
-    drawLabel(node, display, cx, bodyTop + 42 + theme.fontSize, theme)
-  );
+  return head + spine + arms + leftLeg + rightLeg + drawLabel(node, display, cx, bodyTop + 42 + theme.fontSize, theme);
 }
 
 /**
@@ -205,13 +193,7 @@ export function renderUseCaseIcon(node: IconGeo, theme: Theme): string {
 
 /** The caller's own label drawing when it supplied one, else the default
  *  single-`<text>` path. */
-function drawLabel(
-  node: IconGeo,
-  display: string,
-  cx: number,
-  baselineY: number,
-  theme: Theme,
-): string {
+function drawLabel(node: IconGeo, display: string, cx: number, baselineY: number, theme: Theme): string {
   return node.renderLabel !== undefined
     ? node.renderLabel(cx, baselineY)
     : renderNodeLabel(display, cx, baselineY, theme);
@@ -231,10 +213,6 @@ const USYMBOL_ICONS = new Map<string, IconRenderer>([
  * Render a descriptive element's icon for the given USymbol keyword, or
  * `undefined` when there is no distinct icon (the caller draws a plain rect).
  */
-export function renderUSymbolIcon(
-  usymbol: string,
-  node: IconGeo,
-  theme: Theme,
-): string | undefined {
+export function renderUSymbolIcon(usymbol: string, node: IconGeo, theme: Theme): string | undefined {
   return USYMBOL_ICONS.get(usymbol.toLowerCase())?.(node, theme);
 }

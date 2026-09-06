@@ -31,7 +31,8 @@ function drawRect(
   diagonalCorner: number,
 ): void {
   const rect = URectangle.build(width, height);
-  const shape: URectangle | UPath = diagonalCorner > 0 ? rect.diagonalCorner(diagonalCorner) : rect.rounded(roundCorner);
+  const shape: URectangle | UPath =
+    diagonalCorner > 0 ? rect.diagonalCorner(diagonalCorner) : rect.rounded(roundCorner);
   shape.setDeltaShadow(shadowing);
   ug.draw(shape);
   // 6 params mirrors USymbolRectangle.java's own drawRect(ug, width,

@@ -40,10 +40,7 @@ import type { UDrawable } from '../../core/klimt/shape/UDrawable.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import {
-  renderDrawableToFragment,
-  type DrawableFragment,
-} from '../../core/klimt/document-shell.js';
+import { renderDrawableToFragment, type DrawableFragment } from '../../core/klimt/document-shell.js';
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,

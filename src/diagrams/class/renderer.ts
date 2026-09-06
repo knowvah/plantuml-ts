@@ -53,7 +53,9 @@ const DIAGRAM_TYPE_CLASS = 'CLASS';
 function renderAssocPoint(geo: ClassifierGeo, theme: Theme): string {
   const r = ASSOC_POINT_SIZE / 2;
   return ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.arrow, stroke: theme.colors.arrow, 'stroke-width': 1,
+    fill: theme.colors.arrow,
+    stroke: theme.colors.arrow,
+    'stroke-width': 1,
   });
 }
 
@@ -85,12 +87,13 @@ function renderAssocPoint(geo: ClassifierGeo, theme: Theme): string {
 function renderLollipop(geo: ClassifierGeo, theme: Theme): { circle: string; label: string } {
   const r = LOLLIPOP_SIZE / 2;
   const circle = ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.graph.classBackground, stroke: theme.colors.border, 'stroke-width': 1.5,
+    fill: theme.colors.graph.classBackground,
+    stroke: theme.colors.border,
+    'stroke-width': 1.5,
   });
   const label = geo.rows[0] !== undefined ? renderRow(geo, geo.rows[0], theme) : '';
   return { circle, label };
 }
-
 
 /** Descriptive elements (database/component/actor/usecase) draw their USymbol
  *  icon instead of the class box; usecase carries no usymbol (its kind is
@@ -103,7 +106,6 @@ function tryRenderUSymbol(geo: ClassifierGeo, theme: Theme): string | undefined 
   const display = geo.rows[0]?.text ?? geo.id;
   return renderUSymbolIcon(usymbol, { ...geo, display }, theme);
 }
-
 
 function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
   const icon = tryRenderUSymbol(geo, theme);
@@ -143,8 +145,15 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
   if (folderTab === undefined) return '';
   const label = geo.rows[0]?.text ?? geo.id;
   const nsGeo: NamespaceGeo = {
-    id: geo.id, x: geo.x, y: geo.y, width: geo.width, height: geo.height, label,
-    wtitle: folderTab.wtitle, htitle: folderTab.htitle, baselineOffset: folderTab.baselineOffset,
+    id: geo.id,
+    x: geo.x,
+    y: geo.y,
+    width: geo.width,
+    height: geo.height,
+    label,
+    wtitle: folderTab.wtitle,
+    htitle: folderTab.htitle,
+    baselineOffset: folderTab.baselineOffset,
   };
   return renderEmptyPackageIcon(nsGeo, theme);
 }
@@ -259,9 +268,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // design (see that file's header doc comment).
   const resolvedBackground = resolveColorToSvgHex(theme.colors.background);
   const canonicalBackground =
-    theme.monochrome !== undefined
-      ? applyMonochromeHex(resolvedBackground, theme.monochrome)
-      : resolvedBackground;
+    theme.monochrome !== undefined ? applyMonochromeHex(resolvedBackground, theme.monochrome) : resolvedBackground;
   const children: string[] = [];
   let extraDefs = '';
   // SI14 T4: per-node fragments (ADR-2) -- collected so their OWN
@@ -278,9 +285,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   if (theme.colors.graph.pathHoverColor !== undefined) {
     const resolvedHoverHex = resolveColorToSvgHex(theme.colors.graph.pathHoverColor);
     const hoverHex =
-      theme.monochrome !== undefined
-        ? applyMonochromeHex(resolvedHoverHex, theme.monochrome)
-        : resolvedHoverHex;
+      theme.monochrome !== undefined ? applyMonochromeHex(resolvedHoverHex, theme.monochrome) : resolvedHoverHex;
     extraDefs += `<style type="text/css"><![CDATA[path:hover { stroke: ${hoverHex} !important;}]]></style>`;
   }
 
@@ -312,9 +317,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // already-passing non-title fixture (jar-verified unchanged:
   // `bovuze-89-noja934`).
   const documentBackgroundRect =
-    canonicalBackground !== '#00000000' &&
-    canonicalBackground !== '#000000' &&
-    canonicalBackground !== '#FFFFFF'
+    canonicalBackground !== '#00000000' && canonicalBackground !== '#000000' && canonicalBackground !== '#FFFFFF'
       ? canonicalBackground
       : undefined;
   // T3/T4: `geo.leaves` replaces the former `classifiers`/`notes` split
@@ -402,7 +405,9 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       continue;
     }
     const uid = uidPlan.classifierUid.get(classifier.id) ?? '';
-    children.push(wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)));
+    children.push(
+      wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)),
+    );
   }
 
   // 3. Edges (last, matching jar: `svek/SvekResult.java:97-101` draws every

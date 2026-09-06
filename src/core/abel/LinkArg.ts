@@ -70,8 +70,7 @@ export class LinkArg {
     } else {
       newLabel = label.manageGuillemet(manageVisibilityModifier);
       if (manageVisibilityModifier && VisibilityModifier.isVisibilityCharacter(String(label.get(0))))
-        visibilityModifier =
-          VisibilityModifier.getVisibilityModifier(String(label.get(0)), false) ?? undefined;
+        visibilityModifier = VisibilityModifier.getVisibilityModifier(String(label.get(0)), false) ?? undefined;
     }
     return new LinkArg(
       newLabel,

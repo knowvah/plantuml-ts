@@ -62,9 +62,7 @@ describe('toSvekDot — Svek-shaped DOT emission', () => {
 
   it('emits rect nodes with empty label, inch sizes, and a color tag', () => {
     const dot = toSvekDot({ nodes: [{ id: 'a', width: 144, height: 72 }], edges: [] });
-    expect(dot).toMatch(
-      /sh\d{4} \[shape=rect,label="",width=2\.000000,height=1\.000000,color="#[0-9a-f]{6}"\];/,
-    );
+    expect(dot).toMatch(/sh\d{4} \[shape=rect,label="",width=2\.000000,height=1\.000000,color="#[0-9a-f]{6}"\];/);
   });
 
   it('maps node shapes (rounded → rect+style=rounded; circle/diamond passthrough)', () => {
@@ -169,23 +167,33 @@ describe('toSvekDot — port cluster emission', () => {
   const portGraph = (): DotInputGraph => ({
     nodes: [
       {
-        id: 'p1', width: 12, height: 12,
-        shape: 'rect', isPort: true,
+        id: 'p1',
+        width: 12,
+        height: 12,
+        shape: 'rect',
+        isPort: true,
         attributes: { rank: 'sink' },
       },
       {
-        id: 'anchor', width: 0.72, height: 0.72,
-        shape: 'rect', titleLabelWidth: 70, titleLabelHeight: 16,
+        id: 'anchor',
+        width: 0.72,
+        height: 0.72,
+        shape: 'rect',
+        titleLabelWidth: 70,
+        titleLabelHeight: 16,
       },
     ],
     edges: [],
-    clusters: [{
-      id: 'cluster0',
-      nodeIds: ['p1', 'anchor'],
-      labelWidth: 70, labelHeight: 16,
-      portRanks: [{ rank: 'sink', nodeIds: ['p1'] }],
-      portAnchorId: 'anchor',
-    }],
+    clusters: [
+      {
+        id: 'cluster0',
+        nodeIds: ['p1', 'anchor'],
+        labelWidth: 70,
+        labelHeight: 16,
+        portRanks: [{ rank: 'sink', nodeIds: ['p1'] }],
+        portAnchorId: 'anchor',
+      },
+    ],
   });
 
   it('emits the rank group inside the cluster braces, svek format', () => {
@@ -195,9 +203,7 @@ describe('toSvekDot — port cluster emission', () => {
     // cluster's content rather than riding on the `subgraph` line. Line
     // breaks are not a parity target (this emitter joins statements with
     // newlines throughout where jar's `SvekUtils.println` does not).
-    expect(dot).toMatch(
-      /subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\n\{rank=sink;sh\d+;\}/,
-    );
+    expect(dot).toMatch(/subgraph cluster0 \{style=solid;color="#[0-9a-f]+";labeljust="c";\n\{rank=sink;sh\d+;\}/);
   });
 
   it('wraps the placeholder in clusterNee and omits the cluster label attr', () => {
@@ -235,25 +241,35 @@ describe('toSvekDot — port cluster anchor also targeted by an outer edge', () 
   const portGraphWithGroupEdge = (): DotInputGraph => ({
     nodes: [
       {
-        id: 'p1', width: 12, height: 12,
-        shape: 'rect', isPort: true,
+        id: 'p1',
+        width: 12,
+        height: 12,
+        shape: 'rect',
+        isPort: true,
         attributes: { rank: 'sink' },
       },
       {
-        id: 'anchor', width: 0.72, height: 0.72,
-        shape: 'rect', titleLabelWidth: 70, titleLabelHeight: 16,
+        id: 'anchor',
+        width: 0.72,
+        height: 0.72,
+        shape: 'rect',
+        titleLabelWidth: 70,
+        titleLabelHeight: 16,
         groupAnchorAlsoPoint: true,
       },
       { id: 'note', width: 100, height: 20 },
     ],
     edges: [{ id: 'e1', from: 'anchor', to: 'note' }],
-    clusters: [{
-      id: 'cluster0',
-      nodeIds: ['p1', 'anchor'],
-      labelWidth: 70, labelHeight: 16,
-      portRanks: [{ rank: 'sink', nodeIds: ['p1'] }],
-      portAnchorId: 'anchor',
-    }],
+    clusters: [
+      {
+        id: 'cluster0',
+        nodeIds: ['p1', 'anchor'],
+        labelWidth: 70,
+        labelHeight: 16,
+        portRanks: [{ rank: 'sink', nodeIds: ['p1'] }],
+        portAnchorId: 'anchor',
+      },
+    ],
   });
 
   it('emits the point pre-declaration before the ee-placeholder rect/table line', () => {
@@ -329,7 +345,7 @@ describe('toSvekDot — kermor cluster/ranksep path (`!pragma kermor on`)', () =
     expect(dot).not.toContain('Empty [shape=point');
   });
 
-  it('names the cluster subgraph `${id}gamma`, never bare `clusterN` — matches the oracle: under kermor no subgraph is ever named literally `clusterN` (always …alpha/…beta/…gamma), which is why the comparator\'s clusterOk always sees an empty oracle cluster list for kermor fixtures', () => {
+  it("names the cluster subgraph `${id}gamma`, never bare `clusterN` — matches the oracle: under kermor no subgraph is ever named literally `clusterN` (always …alpha/…beta/…gamma), which is why the comparator's clusterOk always sees an empty oracle cluster list for kermor fixtures", () => {
     const dot = toSvekDot({
       nodes: [{ id: 'leaf', width: 72, height: 36 }],
       edges: [],
@@ -342,16 +358,16 @@ describe('toSvekDot — kermor cluster/ranksep path (`!pragma kermor on`)', () =
 
   it('emits an empty-cluster placeholder when a cluster has zero direct non-port members', () => {
     const dot = toSvekDot({
-      nodes: [
-        { id: 'port1', width: 10, height: 10, shape: 'plaintext', isPort: true },
-      ],
+      nodes: [{ id: 'port1', width: 10, height: 10, shape: 'plaintext', isPort: true }],
       edges: [],
       kermor: true,
-      clusters: [{
-        id: 'cluster0',
-        nodeIds: ['port1'],
-        portRanks: [{ rank: 'sink', nodeIds: ['port1'] }],
-      }],
+      clusters: [
+        {
+          id: 'cluster0',
+          nodeIds: ['port1'],
+          portRanks: [{ rank: 'sink', nodeIds: ['port1'] }],
+        },
+      ],
     });
     expect(dot).toContain('cluster0empty [shape=point,label=""];');
   });
@@ -364,11 +380,13 @@ describe('toSvekDot — kermor cluster/ranksep path (`!pragma kermor on`)', () =
       ],
       edges: [],
       kermor: true,
-      clusters: [{
-        id: 'cluster0',
-        nodeIds: ['normal', 'port1'],
-        portRanks: [{ rank: 'sink', nodeIds: ['port1'] }],
-      }],
+      clusters: [
+        {
+          id: 'cluster0',
+          nodeIds: ['normal', 'port1'],
+          portRanks: [{ rank: 'sink', nodeIds: ['port1'] }],
+        },
+      ],
     });
     expect(dot).toMatch(/\{rank=sink;sh\d+;\}/);
     expect(dot).not.toContain('[arrowhead=none]');
@@ -429,19 +447,21 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
 
   it('emits a portless node as one full-height trailer row (gatefi-65-curu360)', () => {
     const dot = toSvekDot({
-      nodes: [{
-        id: 'map0',
-        width: GATEFI_BOX_WIDTH,
-        height: GATEFI_BOX_HEIGHT,
-        shape: 'plaintext',
-        portRows: [],
-      }],
+      nodes: [
+        {
+          id: 'map0',
+          width: GATEFI_BOX_WIDTH,
+          height: GATEFI_BOX_HEIGHT,
+          shape: 'plaintext',
+          portRows: [],
+        },
+      ],
       edges: [],
     });
     expect(dot).toContain(
       'shape=plaintext,label=<<TABLE BGCOLOR="#000006" BORDER="0" CELLBORDER="0" ' +
-      'CELLSPACING="0" CELLPADDING="0">' +
-      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="49.0" HEIGHT="18"></TD></TR></TABLE>>];',
+        'CELLSPACING="0" CELLPADDING="0">' +
+        '<TR><TD  FIXEDSIZE="TRUE" WIDTH="49.0" HEIGHT="18"></TD></TR></TABLE>>];',
     );
     // No width=/height= node attribute at all — graphviz sizes it from the
     // label and pads it (SvekNode.java:268-296 emits neither).
@@ -450,21 +470,21 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
 
   it('emits a filler row, then the port row, then the trailer (fusopu-05-loxo960)', () => {
     const dot = toSvekDot({
-      nodes: [{
-        id: 'User',
-        width: FUSOPU_USER_WIDTH,
-        height: FUSOPU_USER_HEIGHT,
-        shape: 'plaintext',
-        portRows: [
-          { id: FUSOPU_METHOD3_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT },
-        ],
-      }],
+      nodes: [
+        {
+          id: 'User',
+          width: FUSOPU_USER_WIDTH,
+          height: FUSOPU_USER_HEIGHT,
+          shape: 'plaintext',
+          portRows: [{ id: FUSOPU_METHOD3_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT }],
+        },
+      ],
       edges: [],
     });
     expect(dot).toContain(
       '<TR><TD  FIXEDSIZE="TRUE" WIDTH="74.425" HEIGHT="18"></TD></TR>' +
-      `<TR><TD  FIXEDSIZE="TRUE" WIDTH="74.425" HEIGHT="18" PORT="${FUSOPU_METHOD3_PORT}">` +
-      '</TD></TR></TABLE>',
+        `<TR><TD  FIXEDSIZE="TRUE" WIDTH="74.425" HEIGHT="18" PORT="${FUSOPU_METHOD3_PORT}">` +
+        '</TD></TR></TABLE>',
     );
   });
 
@@ -472,13 +492,15 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
     // A port at position 0 covering the whole box: no filler before it, no
     // trailer after it — exactly one TR.
     const dot = toSvekDot({
-      nodes: [{
-        id: 'only',
-        width: FUSOPU_USER_WIDTH,
-        height: FUSOPU_ROW_HEIGHT,
-        shape: 'plaintext',
-        portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
-      }],
+      nodes: [
+        {
+          id: 'only',
+          width: FUSOPU_USER_WIDTH,
+          height: FUSOPU_ROW_HEIGHT,
+          shape: 'plaintext',
+          portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
+        },
+      ],
       edges: [],
     });
     const table = dot.slice(dot.indexOf('<TABLE'), dot.indexOf('</TABLE>'));
@@ -488,22 +510,22 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
 
   it('truncates the trailer height to an int (rozuxo-44-fudi093 object rows)', () => {
     const dot = toSvekDot({
-      nodes: [{
-        id: 'CC',
-        width: ROZUXO_CC_WIDTH,
-        height: ROZUXO_CC_HEIGHT,
-        shape: 'plaintext',
-        portRows: [
-          { id: ROZUXO_USA_PORT, position: ROZUXO_USA_POSITION, height: ROZUXO_MEMBER_HEIGHT },
-        ],
-      }],
+      nodes: [
+        {
+          id: 'CC',
+          width: ROZUXO_CC_WIDTH,
+          height: ROZUXO_CC_HEIGHT,
+          shape: 'plaintext',
+          portRows: [{ id: ROZUXO_USA_PORT, position: ROZUXO_USA_POSITION, height: ROZUXO_MEMBER_HEIGHT }],
+        },
+      ],
       edges: [],
     });
     expect(dot).toContain(
       '<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="36"></TD></TR>' +
-      `<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="14" PORT="${ROZUXO_USA_PORT}">` +
-      '</TD></TR>' +
-      '<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="18"></TD></TR>',
+        `<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="14" PORT="${ROZUXO_USA_PORT}">` +
+        '</TD></TR>' +
+        '<TR><TD  FIXEDSIZE="TRUE" WIDTH="69.48750000000001" HEIGHT="18"></TD></TR>',
     );
   });
 
@@ -511,24 +533,30 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
     const dot = toSvekDot({
       nodes: [
         {
-          id: 'User', width: FUSOPU_USER_WIDTH, height: FUSOPU_USER_HEIGHT, shape: 'plaintext',
+          id: 'User',
+          width: FUSOPU_USER_WIDTH,
+          height: FUSOPU_USER_HEIGHT,
+          shape: 'plaintext',
           portRows: [{ id: FUSOPU_METHOD3_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT }],
         },
         {
-          id: 'Interface', width: FUSOPU_USER_WIDTH, height: FUSOPU_USER_HEIGHT, shape: 'plaintext',
+          id: 'Interface',
+          width: FUSOPU_USER_WIDTH,
+          height: FUSOPU_USER_HEIGHT,
+          shape: 'plaintext',
           portRows: [{ id: FUSOPU_METHOD1_PORT, position: FUSOPU_TITLE_HEIGHT, height: FUSOPU_ROW_HEIGHT }],
         },
       ],
-      edges: [{
-        id: 'e0',
-        from: 'User',
-        to: 'Interface',
-        attributes: { minLen: 1, tailport: FUSOPU_METHOD3_PORT, headport: FUSOPU_METHOD1_PORT },
-      }],
+      edges: [
+        {
+          id: 'e0',
+          from: 'User',
+          to: 'Interface',
+          attributes: { minLen: 1, tailport: FUSOPU_METHOD3_PORT, headport: FUSOPU_METHOD1_PORT },
+        },
+      ],
     });
-    expect(dot).toMatch(
-      new RegExp(`sh\\d{4}:${FUSOPU_METHOD3_PORT}->sh\\d{4}:${FUSOPU_METHOD1_PORT}\\[`),
-    );
+    expect(dot).toMatch(new RegExp(`sh\\d{4}:${FUSOPU_METHOD3_PORT}->sh\\d{4}:${FUSOPU_METHOD1_PORT}\\[`));
   });
 
   it('still routes a portRows node with no edge port through ":h"', () => {
@@ -558,7 +586,10 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
       nodes: [
         { id: 'a', width: 20, height: 20 },
         {
-          id: 'b', width: 20, height: 20, shape: 'plaintext',
+          id: 'b',
+          width: 20,
+          height: 20,
+          shape: 'plaintext',
           portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
         },
       ],
@@ -581,7 +612,11 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
       nodes: [
         { id: 'a', width: 20, height: 20 },
         {
-          id: 'b', width: 20, height: 20, shape: 'plaintext', qualifierShielded: true,
+          id: 'b',
+          width: 20,
+          height: 20,
+          shape: 'plaintext',
+          qualifierShielded: true,
           portRows: [{ id: FUSOPU_METHOD1_PORT, position: 0, height: FUSOPU_ROW_HEIGHT }],
         },
       ],
@@ -607,8 +642,7 @@ describe('toSvekDot — RECTANGLE_HTML_FOR_PORTS row-port tables', () => {
  *   temuxi-28-cega322  base/ee only (border points, group untouched)
  */
 describe('toSvekDot — cluster protection wrappers (ClusterDotString.java:91-158)', () => {
-  const subgraphs = (dot: string): string[] =>
-    [...dot.matchAll(/subgraph\s+(\w+)\s*\{/g)].map((m) => m[1]!);
+  const subgraphs = (dot: string): string[] => [...dot.matchAll(/subgraph\s+(\w+)\s*\{/g)].map((m) => m[1]!);
 
   /** `bupani-17-puxi938`'s own shape: one composite, one member, one anchor. */
   const bupani = (): DotInputGraph => ({
@@ -631,13 +665,7 @@ describe('toSvekDot — cluster protection wrappers (ClusterDotString.java:91-15
   });
 
   it("emits five cluster subgraphs in jar's order a, p0, base, i, p1", () => {
-    expect(subgraphs(toSvekDot(bupani()))).toEqual([
-      'cluster0a',
-      'cluster0p0',
-      'cluster0',
-      'cluster0i',
-      'cluster0p1',
-    ]);
+    expect(subgraphs(toSvekDot(bupani()))).toEqual(['cluster0a', 'cluster0p0', 'cluster0', 'cluster0i', 'cluster0p1']);
   });
 
   it('declares the group anchor in the BASE cluster, outside the i/p1 wrappers', () => {
@@ -749,12 +777,18 @@ describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
     edges: [],
     clusters: [
       {
-        id: 'cluster0', label: 'A', nodeIds: ['a', 'a-anchor'],
-        portRanks: [{ rank: 'sink', nodeIds: ['a'] }], portAnchorId: 'a-anchor',
+        id: 'cluster0',
+        label: 'A',
+        nodeIds: ['a', 'a-anchor'],
+        portRanks: [{ rank: 'sink', nodeIds: ['a'] }],
+        portAnchorId: 'a-anchor',
       },
       {
-        id: 'cluster1', label: 'B', nodeIds: ['b', 'b-anchor'],
-        portRanks: [{ rank: 'source', nodeIds: ['b'] }], portAnchorId: 'b-anchor',
+        id: 'cluster1',
+        label: 'B',
+        nodeIds: ['b', 'b-anchor'],
+        portRanks: [{ rank: 'source', nodeIds: ['b'] }],
+        portAnchorId: 'b-anchor',
       },
     ],
   });

@@ -31,15 +31,14 @@ interface EdgeDecoration {
 }
 
 export const EDGE_DECORATION_MAP: Record<RelationshipType, EdgeDecoration> = {
-  extension:      { targetDecor: 'triangle',     sourceDecor: 'none',         dashed: false },
-  implementation: { targetDecor: 'triangle',     sourceDecor: 'none',         dashed: true  },
-  composition:    { targetDecor: 'none',          sourceDecor: 'filledDiamond', dashed: false },
-  aggregation:    { targetDecor: 'none',          sourceDecor: 'diamond',      dashed: false },
-  dependency:     { targetDecor: 'open',          sourceDecor: 'none',         dashed: true  },
-  association:    { targetDecor: 'open',          sourceDecor: 'none',         dashed: false },
-  usage:          { targetDecor: 'none',          sourceDecor: 'none',         dashed: true  },
+  extension: { targetDecor: 'triangle', sourceDecor: 'none', dashed: false },
+  implementation: { targetDecor: 'triangle', sourceDecor: 'none', dashed: true },
+  composition: { targetDecor: 'none', sourceDecor: 'filledDiamond', dashed: false },
+  aggregation: { targetDecor: 'none', sourceDecor: 'diamond', dashed: false },
+  dependency: { targetDecor: 'open', sourceDecor: 'none', dashed: true },
+  association: { targetDecor: 'open', sourceDecor: 'none', dashed: false },
+  usage: { targetDecor: 'none', sourceDecor: 'none', dashed: true },
 };
-
 
 /** `FontParam.ARROW(13, normal)` (klimt/font/FontParam.java:54) --
  *  relationship-label default, distinct from `CLASS(12)`/`theme.fontSize`
@@ -216,7 +215,13 @@ export function buildDotEdges(
     ...classPortShortNames.keys(),
   ]);
   const ctx: DotEdgeAttrContext = {
-    font, cardinalityFont, measurer, linetype, noteCtx, kindBIndices, portRowIds,
+    font,
+    cardinalityFont,
+    measurer,
+    linetype,
+    noteCtx,
+    kindBIndices,
+    portRowIds,
     sametailByRelIndex: render.sametailByRelIndex,
   };
   return ast.relationships.map((rel: Relationship, i: number) => {

@@ -5,11 +5,6 @@ export class GConnectionVerticalDownThenBack implements GConnection {
   constructor(private readonly rightMargin: number = 20) {}
 
   getPoints(from: GPoint, to: GPoint): GPoint[] {
-    return [
-      from,
-      { x: from.x + this.rightMargin, y: from.y },
-      { x: from.x + this.rightMargin, y: to.y },
-      to,
-    ];
+    return [from, { x: from.x + this.rightMargin, y: from.y }, { x: from.x + this.rightMargin, y: to.y }, to];
   }
 }

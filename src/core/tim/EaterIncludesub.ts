@@ -24,10 +24,8 @@ export class EaterIncludesub extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!includesub');
     this.skipSpaces();
-    this.what = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    this.what =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
   }
 
   getWhat(): string {

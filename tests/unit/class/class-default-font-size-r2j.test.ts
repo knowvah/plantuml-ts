@@ -40,10 +40,7 @@ function bareClass(name: string): ReturnType<typeof parseClass>['classifiers'][n
 
 describe('R2j: skinparam defaultFontSize explicit-set marker plumbing', () => {
   it('maps defaultfontsize to BOTH fontSize and the defaultFontSize marker', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['defaultfontsize', '12']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['defaultfontsize', '12']]), defaultTheme);
     expect(theme.fontSize).toBe(12);
     expect(theme.defaultFontSize).toBe(12);
     expect(unknown).toEqual([]);
@@ -78,9 +75,7 @@ describe('R2j: skinparam defaultFontSize explicit-set marker plumbing', () => {
     // mizupo-59-zala765 golden sh0007 (AbstractCollection):
     // 1.648438x0.638889in = 118.6875x46px — name at 11pt (AttributeFontSize
     // cascade), badge radius 10 (explicit defaultFontSize 12 -> 12/3+6).
-    const m = measureClassifier(
-      bareClass('AbstractCollection'), resolveTheme('aws-orange'), measurer, SUPPRESS,
-    );
+    const m = measureClassifier(bareClass('AbstractCollection'), resolveTheme('aws-orange'), measurer, SUPPRESS);
     expect(m.width).toBeCloseTo(118.6875, 3);
     expect(m.height).toBe(46);
   });
@@ -121,7 +116,10 @@ describe('R2j: explicit defaultFontSize drives CIRCLED_CHARACTER sizing', () => 
     // SkinParam#getFontSize: the per-param skinparam tier sits ABOVE the
     // defaultfontsize tier (SkinParam.java:441-443).
     const { theme } = resolveSkinparam(
-      new Map([['defaultfontsize', '12'], ['circledcharacterfontsize', '17']]),
+      new Map([
+        ['defaultfontsize', '12'],
+        ['circledcharacterfontsize', '17'],
+      ]),
       defaultTheme,
     );
     const alpha = measureClassifier(bareClass('Alpha'), theme, measurer, SUPPRESS);

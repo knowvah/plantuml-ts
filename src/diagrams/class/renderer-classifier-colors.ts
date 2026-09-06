@@ -143,8 +143,7 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // for FontSize, and is retired. (The GENERIC rewrite -- upstream needs no
   // per-key matcher at all -- remains tracked; see the ledger's M22 row.)
   if (geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json') {
-    return resolveElementBackground(theme, geo.kind, geo.stereotypeLabels)
-      ?? classDefaultBackground(theme);
+    return resolveElementBackground(theme, geo.kind, geo.stereotypeLabels) ?? classDefaultBackground(theme);
   }
   // G2 N37: the `.tagname` sub-selector cascade (`class { .mystyle {
   // BackgroundColor cyan } } }`) wins over the plain ancestor cascade below

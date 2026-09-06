@@ -77,8 +77,7 @@ function diskFetcher(assetsDir: string, baseUrl: string, fetched: Map<string, nu
 }
 
 /** A fetcher that must never run -- proves a given path makes zero requests. */
-const noFetch: IncludeFetcher = (url: string): Promise<string> =>
-  Promise.reject(new Error(`unexpected fetch: ${url}`));
+const noFetch: IncludeFetcher = (url: string): Promise<string> => Promise.reject(new Error(`unexpected fetch: ${url}`));
 
 /**
  * Sum of every regular file's raw byte size under `root`, recursive -- the
@@ -104,157 +103,172 @@ function sumDirectoryBytes(root: string): number {
 // same tree, since the build `rmSync`s it first (si11a T8).
 
 describe('tupadr3 -- real manifest, real assets, real render (criteria 1-2)', () => {
-  it('fetches exactly 4 resources for a 3-icon diagram and draws all 3 icons', async () => {
-    const { tupadr3Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href))) as {
-      tupadr3Remote: StdlibRemoteManifest;
-    };
+  it(
+    'fetches exactly 4 resources for a 3-icon diagram and draws all 3 icons',
+    async () => {
+      const { tupadr3Remote } = (await withStdlibBuildLock(
+        () => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href),
+      )) as {
+        tupadr3Remote: StdlibRemoteManifest;
+      };
 
-    const fetched = new Map<string, number>();
-    const fetcher = diskFetcher(TUPADR3_ASSETS_DIR, TUPADR3_BASE_URL, fetched);
-    const registry = stdlibRegistry({
-      tupadr3: async () =>
-        Promise.resolve(remoteStdlib({ manifest: tupadr3Remote, baseUrl: TUPADR3_BASE_URL, fetcher })),
-    });
+      const fetched = new Map<string, number>();
+      const fetcher = diskFetcher(TUPADR3_ASSETS_DIR, TUPADR3_BASE_URL, fetched);
+      const registry = stdlibRegistry({
+        tupadr3: async () =>
+          Promise.resolve(remoteStdlib({ manifest: tupadr3Remote, baseUrl: TUPADR3_BASE_URL, fetcher })),
+      });
 
-    const svg = await render(
-      uml(
-        '!include <tupadr3/common>',
-        '!include <tupadr3/devicons/android>',
-        '!include <tupadr3/devicons/chrome>',
-        '!include <tupadr3/devicons/apple>',
-        'DEV_ANDROID(a1)',
-        'DEV_CHROME(a2)',
-        'DEV_APPLE(a3)',
-      ),
-      { stdlibRegistry: registry, fetcher: noFetch, measurer: measurer() },
-    );
+      const svg = await render(
+        uml(
+          '!include <tupadr3/common>',
+          '!include <tupadr3/devicons/android>',
+          '!include <tupadr3/devicons/chrome>',
+          '!include <tupadr3/devicons/apple>',
+          'DEV_ANDROID(a1)',
+          'DEV_CHROME(a2)',
+          'DEV_APPLE(a3)',
+        ),
+        { stdlibRegistry: registry, fetcher: noFetch, measurer: measurer() },
+      );
 
-    // AC1: exactly 4 resources fetched (common + 3 icons) -- comfortably
-    // inside the "<= 5" bar, and pinned exactly rather than loosely.
-    expect(fetched.size).toBe(4);
-    expect([...fetched.keys()].sort()).toEqual(
-      [
-        `${TUPADR3_BASE_URL}/common.puml`,
-        `${TUPADR3_BASE_URL}/devicons/android.puml`,
-        `${TUPADR3_BASE_URL}/devicons/apple.puml`,
-        `${TUPADR3_BASE_URL}/devicons/chrome.puml`,
-      ].sort(),
-    );
+      // AC1: exactly 4 resources fetched (common + 3 icons) -- comfortably
+      // inside the "<= 5" bar, and pinned exactly rather than loosely.
+      expect(fetched.size).toBe(4);
+      expect([...fetched.keys()].sort()).toEqual(
+        [
+          `${TUPADR3_BASE_URL}/common.puml`,
+          `${TUPADR3_BASE_URL}/devicons/android.puml`,
+          `${TUPADR3_BASE_URL}/devicons/apple.puml`,
+          `${TUPADR3_BASE_URL}/devicons/chrome.puml`,
+        ].sort(),
+      );
 
-    // The icons actually drew: one <image> element per sprite-backed
-    // rectangle (svg-graphics-elements.ts#svgImageDataUri's own shape).
-    const imageTagCount = (svg.match(/<image /g) ?? []).length;
-    expect(imageTagCount).toBe(3);
-    expect(svg).toContain('xlink:href="data:image/png;base64,');
+      // The icons actually drew: one <image> element per sprite-backed
+      // rectangle (svg-graphics-elements.ts#svgImageDataUri's own shape).
+      const imageTagCount = (svg.match(/<image /g) ?? []).length;
+      expect(imageTagCount).toBe(3);
+      expect(svg).toContain('xlink:href="data:image/png;base64,');
 
-    // --- THE MEASUREMENT ---------------------------------------------
-    // si12 T5 (ADR-3): the eager `tupadr3.js` bundle si11a measured against
-    // no longer exists (si12 T1 stopped emitting it) -- the baseline is now
-    // the sum of the bundle's ASSET bytes, read from disk, re-measured on
-    // every run. Never a hardcoded constant, never SI11a's number carried
-    // forward.
-    const manifestGzipBytes = gzipSync(
-      withStdlibBuildLock(() => readFileSync(TUPADR3_REMOTE_MODULE)),
-      { level: 9 },
-    ).length;
-    const resourceBytes = [...fetched.values()].reduce((sum, n) => sum + n, 0);
-    const totalBytes = manifestGzipBytes + resourceBytes;
-    const assetTreeBytes = sumDirectoryBytes(TUPADR3_ASSETS_DIR);
-    const reductionPct = ((assetTreeBytes - totalBytes) / assetTreeBytes) * 100;
+      // --- THE MEASUREMENT ---------------------------------------------
+      // si12 T5 (ADR-3): the eager `tupadr3.js` bundle si11a measured against
+      // no longer exists (si12 T1 stopped emitting it) -- the baseline is now
+      // the sum of the bundle's ASSET bytes, read from disk, re-measured on
+      // every run. Never a hardcoded constant, never SI11a's number carried
+      // forward.
+      const manifestGzipBytes = gzipSync(
+        withStdlibBuildLock(() => readFileSync(TUPADR3_REMOTE_MODULE)),
+        { level: 9 },
+      ).length;
+      const resourceBytes = [...fetched.values()].reduce((sum, n) => sum + n, 0);
+      const totalBytes = manifestGzipBytes + resourceBytes;
+      const assetTreeBytes = sumDirectoryBytes(TUPADR3_ASSETS_DIR);
+      const reductionPct = ((assetTreeBytes - totalBytes) / assetTreeBytes) * 100;
 
-    // Criterion 2: this IS the mission's headline evidence; it must be easy
-    // to read and quote, not buried in an assertion message (T8 spec,
-    // "Observability").
-    console.log(
-      [
-        '',
-        '=== si12 T5 measurement -- tupadr3, 3-icon diagram ====================',
-        '(denominator re-based: the eager tupadr3.js module si11a measured no',
-        ' longer exists -- si12 dropped it. Baseline below is the sum of every',
-        ' file under assets/tupadr3/, read from disk, not a carried-over number.)',
-        `manifest (tupadr3.remote.js, gzip -9): ${manifestGzipBytes.toLocaleString()} B`,
-        `resources actually fetched (4 files):  ${resourceBytes.toLocaleString()} B`,
-        `TOTAL over the wire:                   ${totalBytes.toLocaleString()} B`,
-        `asset tree baseline (assets/tupadr3/): ${assetTreeBytes.toLocaleString()} B`,
-        `reduction:                              ${reductionPct.toFixed(3)}%`,
-        '========================================================================',
-        '',
-      ].join('\n'),
-    );
+      // Criterion 2: this IS the mission's headline evidence; it must be easy
+      // to read and quote, not buried in an assertion message (T8 spec,
+      // "Observability").
+      console.log(
+        [
+          '',
+          '=== si12 T5 measurement -- tupadr3, 3-icon diagram ====================',
+          '(denominator re-based: the eager tupadr3.js module si11a measured no',
+          ' longer exists -- si12 dropped it. Baseline below is the sum of every',
+          ' file under assets/tupadr3/, read from disk, not a carried-over number.)',
+          `manifest (tupadr3.remote.js, gzip -9): ${manifestGzipBytes.toLocaleString()} B`,
+          `resources actually fetched (4 files):  ${resourceBytes.toLocaleString()} B`,
+          `TOTAL over the wire:                   ${totalBytes.toLocaleString()} B`,
+          `asset tree baseline (assets/tupadr3/): ${assetTreeBytes.toLocaleString()} B`,
+          `reduction:                              ${reductionPct.toFixed(3)}%`,
+          '========================================================================',
+          '',
+        ].join('\n'),
+      );
 
-    // Regression tripwire, not a rounded-up claim (stop condition 15): the
-    // real measured reduction against the asset-tree baseline is still
-    // comfortably above 99%, the bar this batch's stop condition names. If a
-    // future change to the manifest or asset set drops below 99%, this must
-    // fail, not be relaxed.
-    expect(reductionPct).toBeGreaterThan(99);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+      // Regression tripwire, not a rounded-up claim (stop condition 15): the
+      // real measured reduction against the asset-tree baseline is still
+      // comfortably above 99%, the bar this batch's stop condition names. If a
+      // future change to the manifest or asset set drops below 99%, this must
+      // fail, not be relaxed.
+      expect(reductionPct).toBeGreaterThan(99);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });
 
 describe('awslib14 -- uppercase multi-slash key resolves (criterion 3, ADR-3)', () => {
-  it('resolves storage/simplestorageservice -> Storage/SimpleStorageService.puml and draws', async () => {
-    const { awslib14Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(AWSLIB14_REMOTE_MODULE).href))) as {
-      awslib14Remote: StdlibRemoteManifest;
-    };
+  it(
+    'resolves storage/simplestorageservice -> Storage/SimpleStorageService.puml and draws',
+    async () => {
+      const { awslib14Remote } = (await withStdlibBuildLock(
+        () => import(pathToFileURL(AWSLIB14_REMOTE_MODULE).href),
+      )) as {
+        awslib14Remote: StdlibRemoteManifest;
+      };
 
-    const fetched = new Map<string, number>();
-    const fetcher = diskFetcher(AWSLIB14_ASSETS_DIR, AWSLIB14_BASE_URL, fetched);
-    const registry = stdlibRegistry({
-      awslib14: async () =>
-        Promise.resolve(remoteStdlib({ manifest: awslib14Remote, baseUrl: AWSLIB14_BASE_URL, fetcher })),
-    });
-    const resolveResourceSpy = vi.spyOn(registry, 'resolveResource');
+      const fetched = new Map<string, number>();
+      const fetcher = diskFetcher(AWSLIB14_ASSETS_DIR, AWSLIB14_BASE_URL, fetched);
+      const registry = stdlibRegistry({
+        awslib14: async () =>
+          Promise.resolve(remoteStdlib({ manifest: awslib14Remote, baseUrl: AWSLIB14_BASE_URL, fetcher })),
+      });
+      const resolveResourceSpy = vi.spyOn(registry, 'resolveResource');
 
-    const svg = await render(
-      uml(
-        '!include <awslib14/AWSCommon>',
-        '!include <awslib14/Storage/SimpleStorageService>',
-        'SimpleStorageService(s3, "S3", "storage")',
-      ),
-      { stdlibRegistry: registry, fetcher: noFetch, measurer: measurer() },
-    );
+      const svg = await render(
+        uml(
+          '!include <awslib14/AWSCommon>',
+          '!include <awslib14/Storage/SimpleStorageService>',
+          'SimpleStorageService(s3, "S3", "storage")',
+        ),
+        { stdlibRegistry: registry, fetcher: noFetch, measurer: measurer() },
+      );
 
-    // The exact case ADR-3 exists for: the include path is mixed-case and
-    // multi-slash (`<awslib14/Storage/SimpleStorageService>`); the manifest
-    // key it must derive to is lowercase with the slash preserved
-    // (`storage/simplestorageservice`) -- path-BY-CONVENTION would have
-    // looked for `storage/simplestorageservice.puml` on disk and missed the
-    // real `Storage/SimpleStorageService.puml`.
-    expect(resolveResourceSpy).toHaveBeenCalledWith('awslib14', 'storage/simplestorageservice');
-    expect([...fetched.keys()]).toContain(`${AWSLIB14_BASE_URL}/Storage/SimpleStorageService.puml`);
+      // The exact case ADR-3 exists for: the include path is mixed-case and
+      // multi-slash (`<awslib14/Storage/SimpleStorageService>`); the manifest
+      // key it must derive to is lowercase with the slash preserved
+      // (`storage/simplestorageservice`) -- path-BY-CONVENTION would have
+      // looked for `storage/simplestorageservice.puml` on disk and missed the
+      // real `Storage/SimpleStorageService.puml`.
+      expect(resolveResourceSpy).toHaveBeenCalledWith('awslib14', 'storage/simplestorageservice');
+      expect([...fetched.keys()]).toContain(`${AWSLIB14_BASE_URL}/Storage/SimpleStorageService.puml`);
 
-    const imageTagCount = (svg.match(/<image /g) ?? []).length;
-    expect(imageTagCount).toBe(1);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+      const imageTagCount = (svg.match(/<image /g) ?? []).length;
+      expect(imageTagCount).toBe(1);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });
 
 describe('a key absent from the manifest fails offline, no request made (criterion 4)', () => {
-  it('names the bundle and key with zero network requests', async () => {
-    const { tupadr3Remote } = (await withStdlibBuildLock(() => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href))) as {
-      tupadr3Remote: StdlibRemoteManifest;
-    };
-    expect(tupadr3Remote.files['devicons/does-not-exist']).toBeUndefined();
+  it(
+    'names the bundle and key with zero network requests',
+    async () => {
+      const { tupadr3Remote } = (await withStdlibBuildLock(
+        () => import(pathToFileURL(TUPADR3_REMOTE_MODULE).href),
+      )) as {
+        tupadr3Remote: StdlibRemoteManifest;
+      };
+      expect(tupadr3Remote.files['devicons/does-not-exist']).toBeUndefined();
 
-    const remoteFetcher = vi.fn(noFetch);
-    const registry = stdlibRegistry({
-      tupadr3: async () =>
-        Promise.resolve(remoteStdlib({ manifest: tupadr3Remote, baseUrl: TUPADR3_BASE_URL, fetcher: remoteFetcher })),
-    });
+      const remoteFetcher = vi.fn(noFetch);
+      const registry = stdlibRegistry({
+        tupadr3: async () =>
+          Promise.resolve(remoteStdlib({ manifest: tupadr3Remote, baseUrl: TUPADR3_BASE_URL, fetcher: remoteFetcher })),
+      });
 
-    const err = await prepareIncludeStore(uml('!include <tupadr3/devicons/does-not-exist>'), {
-      fetcher: noFetch,
-      stdlibRegistry: registry,
-    }).then(
-      () => undefined,
-      (e: unknown) => e as StdlibNotBundledError,
-    );
+      const err = await prepareIncludeStore(uml('!include <tupadr3/devicons/does-not-exist>'), {
+        fetcher: noFetch,
+        stdlibRegistry: registry,
+      }).then(
+        () => undefined,
+        (e: unknown) => e as StdlibNotBundledError,
+      );
 
-    expect(err).toBeInstanceOf(StdlibNotBundledError);
-    expect(err?.bundle).toBe('tupadr3');
-    expect(err?.path).toBe('tupadr3/devicons/does-not-exist');
-    expect(remoteFetcher).not.toHaveBeenCalled();
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+      expect(err).toBeInstanceOf(StdlibNotBundledError);
+      expect(err?.bundle).toBe('tupadr3');
+      expect(err?.path).toBe('tupadr3/devicons/does-not-exist');
+      expect(remoteFetcher).not.toHaveBeenCalled();
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });

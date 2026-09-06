@@ -35,19 +35,13 @@ export interface MagmaCtxLike {
  *  `applySingleStrategy` from EVERY angle, not just their own (non-existent)
  *  group's. See the description-dot-100 decision journal, iteration I1. */
 export function magmaGroups(ctx: MagmaCtxLike): MagmaGroupInput[] {
-  const containedLeafIds = new Set(
-    ctx.containers.flatMap((c) => c.directLeafAstIds),
-  );
+  const containedLeafIds = new Set(ctx.containers.flatMap((c) => c.directLeafAstIds));
   // Empty braced groups render as leaves but are still GROUP entities when
   // applySingleStrategy runs upstream — they never count as standalones.
   const isMagmaLeaf = (id: string): boolean =>
     ctx.leafIdSet.has(id) && ctx.astNodeById.get(id)?.declaredAsGroup !== true;
-  const rootLeaves = [...ctx.astNodeById.keys()].filter(
-    (id) => isMagmaLeaf(id) && !containedLeafIds.has(id),
-  );
-  const groups: MagmaGroupInput[] = [
-    { astId: undefined, parentAstId: undefined, leafDotIds: rootLeaves },
-  ];
+  const rootLeaves = [...ctx.astNodeById.keys()].filter((id) => isMagmaLeaf(id) && !containedLeafIds.has(id));
+  const groups: MagmaGroupInput[] = [{ astId: undefined, parentAstId: undefined, leafDotIds: rootLeaves }];
   for (const c of ctx.containers) {
     if (ctx.astNodeById.get(c.astId)?.phantomGroup === true) continue;
     groups.push({

@@ -63,9 +63,10 @@ export function mutedAtomFontSpec(font: FontConfiguration): FontSpec {
  *  are never empty in practice (`buildStripeAtoms`'s own "empty stripe -> one
  *  space atom" fallback), but an all-unresolved line (implausible) falls
  *  back to the pre-SI30 default of 0. */
-export function seaLineHeightAndSpan(
-  entries: readonly { readonly altitude: number; readonly height: number }[],
-): { readonly height: number; readonly maxSpan: number } {
+export function seaLineHeightAndSpan(entries: readonly { readonly altitude: number; readonly height: number }[]): {
+  readonly height: number;
+  readonly maxSpan: number;
+} {
   if (entries.length === 0) return { height: 0, maxSpan: 0 };
   let maxAltitude = -Infinity;
   let maxSpan = -Infinity;

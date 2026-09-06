@@ -75,32 +75,29 @@ function readOurDims(svg: string): { width: string; height: string } {
 
 const availableFixtures = F4_FIXTURES.filter((f) => existsSync(fixtureDir(f)));
 
-describe.skipIf(availableFixtures.length === 0)(
-  'description document dims — F4 defect fix (G0/T3)',
-  () => {
-    for (const f of availableFixtures) {
-      const label = f.note !== undefined ? `${f.slug} (${f.note})` : f.slug;
+describe.skipIf(availableFixtures.length === 0)('description document dims — F4 defect fix (G0/T3)', () => {
+  for (const f of availableFixtures) {
+    const label = f.note !== undefined ? `${f.slug} (${f.note})` : f.slug;
 
-      it(`${label}: our emitted document width/height EQUAL the jar's cached in.svg exactly`, () => {
-        const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
-        const jarDims = readJarDims(f);
+    it(`${label}: our emitted document width/height EQUAL the jar's cached in.svg exactly`, () => {
+      const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
+      const jarDims = readJarDims(f);
 
-        const ours = renderFixture(markup, new DeterministicMeasurer());
-        const ourDims = readOurDims(ours);
+      const ours = renderFixture(markup, new DeterministicMeasurer());
+      const ourDims = readOurDims(ours);
 
-        expect(ourDims.width, `${f.slug}: width mismatch`).toBe(jarDims.width);
-        expect(ourDims.height, `${f.slug}: height mismatch`).toBe(jarDims.height);
-      });
-    }
-
-    it('cifaki-66-boxa005 is exactly the mission’s 190×65 exit-bar fixture', () => {
-      const cifaki = F4_FIXTURES.find((f) => f.slug === 'cifaki-66-boxa005')!;
-      if (!existsSync(fixtureDir(cifaki))) return;
-      const jarDims = readJarDims(cifaki);
-      expect(jarDims).toEqual({ width: '190', height: '65' });
+      expect(ourDims.width, `${f.slug}: width mismatch`).toBe(jarDims.width);
+      expect(ourDims.height, `${f.slug}: height mismatch`).toBe(jarDims.height);
     });
-  },
-);
+  }
+
+  it('cifaki-66-boxa005 is exactly the mission’s 190×65 exit-bar fixture', () => {
+    const cifaki = F4_FIXTURES.find((f) => f.slug === 'cifaki-66-boxa005')!;
+    if (!existsSync(fixtureDir(cifaki))) return;
+    const jarDims = readJarDims(cifaki);
+    expect(jarDims).toEqual({ width: '190', height: '65' });
+  });
+});
 
 if (availableFixtures.length === 0) {
   it('dot-cache is not populated locally — skipped gracefully (not a failure)', () => {

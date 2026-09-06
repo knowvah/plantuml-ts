@@ -21,10 +21,7 @@ import {
   buildMemberRow,
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { sectionHeight, buildSectionRows } from '../../../src/diagrams/class/class-member-rows.js';
-import {
-  parseCircledSpriteDecoration,
-  splitStereotypeLabels,
-} from '../../../src/diagrams/class/class-stereotype.js';
+import { parseCircledSpriteDecoration, splitStereotypeLabels } from '../../../src/diagrams/class/class-stereotype.js';
 import { parseIdDisplay } from '../../../src/diagrams/class/class-declaration-extractors.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -132,15 +129,15 @@ describe('MemberRowBuild.height (lozego-15-coci435 per-row heights)', () => {
     expect(sectionHeight([sprite, plain])).toBeCloseTo(8 + (100 * 14) / 13 + 14, 6);
   });
 
-  test('buildSectionRows advances y by each PRIOR row\'s own height', () => {
+  test("buildSectionRows advances y by each PRIOR row's own height", () => {
     const registry = registryWith('test', 50, 100);
     const sprite = buildMemberRow('<$test>', {}, FONT_SPEC, measurer, registry);
     const plain = buildMemberRow('+a', {}, FONT_SPEC, measurer);
     const member = { visibility: '+', hidden: false } as never;
-    const rows = buildSectionRows(
-      [member, member], ['<$test>', '+a'], [sprite, plain], 0, false,
-      { baselineOffset: 11, iconZoneWidth: 14 },
-    );
+    const rows = buildSectionRows([member, member], ['<$test>', '+a'], [sprite, plain], 0, false, {
+      baselineOffset: 11,
+      iconZoneWidth: 14,
+    });
     expect(rows[1]!.y - rows[0]!.y).toBeCloseTo((100 * 14) / 13, 6);
   });
 });

@@ -29,8 +29,7 @@ import { classifyEndpointShape } from './link-grammar.js';
 /** ONE `#color` / `<<stereotype>>` / `$tag` / `[[url]]` decoration token,
  *  with the whitespace that may precede it. */
 const DECORATION =
-  '(?:\\s*(?:#[\\w:;.#\\\\/|-]+|<<[^>]+>>|\\$[^\\s{}"\'<>$]+|' +
-  '\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\]))';
+  '(?:\\s*(?:#[\\w:;.#\\\\/|-]+|<<[^>]+>>|\\$[^\\s{}"\'<>$]+|' + '\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\]))';
 
 /** Trailing `#color` / `<<stereotype>>` / `$tag` / `[[url]]` decorations,
  *  repeated -- shared by both sides of RE_BARE_QUOTED_DECL's `as` clause. */
@@ -115,8 +114,7 @@ export function parseBareAsDecorated(idToken: string, decoratedToken: string): B
 const PLAIN_ALIAS = '[^\\s#<>$\\[\\]"]+';
 
 export const RE_BARE_QUOTED_DECL = new RegExp(
-  '^"[^"]+"' + DECORATIONS + '(?:\\s+as\\s+' + PLAIN_ALIAS + ')?' +
-    DECORATIONS + '\\s*$',
+  '^"[^"]+"' + DECORATIONS + '(?:\\s+as\\s+' + PLAIN_ALIAS + ')?' + DECORATIONS + '\\s*$',
 );
 
 // ---------------------------------------------------------------------------
@@ -139,10 +137,7 @@ export const RE_BARE_QUOTED_DECL = new RegExp(
 // .getDummy`'s business, never this command's.
 // ---------------------------------------------------------------------------
 
-export const RE_BARE_DECORATED_DECL = new RegExp(
-  '^[\\p{L}\\p{N}_.]+' + DECORATION + '+\\s*$',
-  'u',
-);
+export const RE_BARE_DECORATED_DECL = new RegExp('^[\\p{L}\\p{N}_.]+' + DECORATION + '+\\s*$', 'u');
 
 // ---------------------------------------------------------------------------
 // `CODE as "quoted DISPLAY"`, no keyword: CommandCreateElementFull's THIRD
@@ -184,8 +179,7 @@ const STEREOTYPE_BEFORE_AS = '((?:\\s*<<[^>]+>>)?)';
  * also refuses, having swallowed the `as` into the identifier.
  */
 export const RE_CODE_AS_QUOTED_DISPLAY = new RegExp(
-  `^(${CODE_CORE})${STEREOTYPE_BEFORE_AS}\\s*\\bas\\s*` +
-    `([${QUOTE_CHARS}].+?[${QUOTE_CHARS}])(${DECORATIONS})\\s*$`,
+  `^(${CODE_CORE})${STEREOTYPE_BEFORE_AS}\\s*\\bas\\s*` + `([${QUOTE_CHARS}].+?[${QUOTE_CHARS}])(${DECORATIONS})\\s*$`,
   'iu',
 );
 
@@ -221,10 +215,7 @@ function codeSymbol(code: string): USymbol {
  * from the DISPLAY instead -- there the CODE is always bare, so it carries no
  * notation of its own.
  */
-export function parseCodeAsQuotedDisplay(
-  code: string,
-  quotedDisplay: string,
-): CodeAsQuotedDisplay {
+export function parseCodeAsQuotedDisplay(code: string, quotedDisplay: string): CodeAsQuotedDisplay {
   const raw = code.trim();
   return { id: cleanId(raw), display: finalizeDisplay(quotedDisplay), symbol: codeSymbol(raw) };
 }

@@ -32,8 +32,7 @@ export const edgeKey = (tail: string, head: string): string => `${tail} ${head}`
  *  the `Math.trunc` here. Graphviz draws nothing; jar draws the text itself
  *  from the box graphviz reserved. */
 const fixedSizeTable = (width: number, height: number): string =>
-  `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.trunc(width)}" ` +
-  `HEIGHT="${Math.trunc(height)}"><TR><TD></TD></TR></TABLE>`;
+  `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.trunc(width)}" ` + `HEIGHT="${Math.trunc(height)}"><TR><TD></TD></TR></TABLE>`;
 
 /** `DotStringFactory#createDotString:187-198` registers jar's two edge batches
  *  in `lines0`-then-`lines1` order, not in link-declaration order; `lines0` is
@@ -47,10 +46,7 @@ const fixedSizeTable = (width: number, height: number): string =>
  *  ranks out mirrored, and edge insertion order is what mincross's initial
  *  permutation and transpose tie-breaks read after that. */
 function svekEdgeOrder(edges: readonly DotInputEdge[]): DotInputEdge[] {
-  return [
-    ...edges.filter((e) => e.attributes?.minLen === 0),
-    ...edges.filter((e) => e.attributes?.minLen !== 0),
-  ];
+  return [...edges.filter((e) => e.attributes?.minLen === 0), ...edges.filter((e) => e.attributes?.minLen !== 0)];
 }
 
 export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
@@ -78,9 +74,8 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // .manualArrowheads`'s own doc comment) — scoped to avoid regressing
     // their already-correct, already-tested output.
     const a = e.attributes;
-    const attrs: Record<string, string> = input.manualArrowheads === true || a?.noArrow === true
-      ? { arrowtail: 'none', arrowhead: 'none' }
-      : {};
+    const attrs: Record<string, string> =
+      input.manualArrowheads === true || a?.noArrow === true ? { arrowtail: 'none', arrowhead: 'none' } : {};
     if (a?.weight !== undefined) attrs.weight = a.weight.toString();
     if (a?.minLen !== undefined) attrs.minlen = a.minLen.toString();
     // A5/T7: a record field port on the TAIL node, resolved by the engine's own

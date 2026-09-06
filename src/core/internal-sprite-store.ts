@@ -75,9 +75,7 @@ const PROBE_EXTENSIONS: readonly string[] = ['.svg', '.png'];
 const PNG_SIGNATURE: readonly number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 function uint32At(bytes: Uint8Array, offset: number): number {
-  return (
-    bytes[offset]! * 16777216 + bytes[offset + 1]! * 65536 + bytes[offset + 2]! * 256 + bytes[offset + 3]!
-  );
+  return bytes[offset]! * 16777216 + bytes[offset + 1]! * 65536 + bytes[offset + 2]! * 256 + bytes[offset + 3]!;
 }
 
 /** `SImageIO.read(is)` -> `image.getWidth()/getHeight()`, reduced to the

@@ -146,14 +146,19 @@ export function renderRowText(
         // && !isStereoLabelRow` -- `resolveElementHeaderFont`'s own doc
         // comment; the stereo label row's FontConfiguration is independent
         // upstream, `EntityImageObject.java`'s own ctor).
-        (isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
+        ((isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
         resolveElementFont(theme, geo.kind) ??
-        (isHeader ? theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor
+        (isHeader
+          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
           : theme.colors.graph.classCascadeFontColor) ??
-        '#000000'
-      : (isStereoLabelRow ? undefined : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
-        ((isHeader ? theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor
-          : theme.colors.graph.classCascadeFontColor) ?? '#000000');
+        '#000000')
+      : ((isStereoLabelRow
+          ? undefined
+          : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
+        (isHeader
+          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
+          : theme.colors.graph.classCascadeFontColor) ??
+        '#000000');
   if (row.atoms !== undefined) {
     return renderRowAtoms(row.atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
@@ -326,13 +331,7 @@ export function renderRowAtoms(
     // so a 0.158 residual remains here -- shared with every text baseline in
     // the port, not specific to atoms.
     const lineBottomY = y + theme.fontSize / 4.5;
-    out += image(
-      x,
-      lineBottomY - atom.height,
-      Math.round(atom.width),
-      Math.round(atom.height),
-      atom.href,
-    );
+    out += image(x, lineBottomY - atom.height, Math.round(atom.width), Math.round(atom.height), atom.href);
     x += atom.width;
   }
   return out;

@@ -108,9 +108,7 @@ describe('renderPacket — blocks', () => {
   });
 
   it('skips rendering 0-width blocks (only background rect, no block text)', () => {
-    const grid = [
-      [{ width: 0, height: 1, label: 'Phantom', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 0, height: 1, label: 'Phantom', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid }), THEME));
     // Only the background rect from svgRoot should be present
     const rectCount = (svg.match(/<rect /g) ?? []).length;
@@ -119,18 +117,14 @@ describe('renderPacket — blocks', () => {
   });
 
   it('renders block label as centered text', () => {
-    const grid = [
-      [{ width: 8, height: 1, label: 'Hello', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 8, height: 1, label: 'Hello', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
     expect(svg).toContain('Hello');
     expect(svg).toContain('text-anchor="middle"');
   });
 
   it('omits text element for blocks with empty label', () => {
-    const grid = [
-      [{ width: 8, height: 1, label: '', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 8, height: 1, label: '', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
     // There should be a rect but no text beyond any indicator text
     const textCount = (svg.match(/<text /g) ?? []).length;
@@ -138,25 +132,19 @@ describe('renderPacket — blocks', () => {
   });
 
   it('block rect starts at y=indicatorHeight (56)', () => {
-    const grid = [
-      [{ width: 16, height: 1, label: 'Z', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 16, height: 1, label: 'Z', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
     expect(svg).toContain('y="56"');
   });
 
   it('block rect x starts at MARGIN_LEFT=10', () => {
-    const grid = [
-      [{ width: 8, height: 1, label: 'Z', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 8, height: 1, label: 'Z', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
     expect(svg).toContain('x="10"');
   });
 
   it('block rect width = block.width * bitWidth', () => {
-    const grid = [
-      [{ width: 8, height: 1, label: 'Z', leftOpen: false, rightOpen: false }],
-    ];
+    const grid = [[{ width: 8, height: 1, label: 'Z', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
     // 8 * 42 = 336
     expect(svg).toContain('width="336"');
@@ -174,10 +162,7 @@ describe('renderPacket — multi-row positioning', () => {
       [{ width: 16, height: 1, label: 'Row1', leftOpen: false, rightOpen: false }],
       [{ width: 8, height: 1, label: 'Row2', leftOpen: false, rightOpen: false }],
     ];
-    const svg = assembleSvg(renderPacket(
-      geo({ grid, colWidth: 16, totalHeight: 135 }),
-      THEME,
-    ));
+    const svg = assembleSvg(renderPacket(geo({ grid, colWidth: 16, totalHeight: 135 }), THEME));
     expect(svg).toContain('y="90"');
   });
 });

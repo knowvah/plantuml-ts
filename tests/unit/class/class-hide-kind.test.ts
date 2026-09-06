@@ -30,7 +30,11 @@ function makeClassifier(id: string, overrides?: Partial<Classifier>): Classifier
 
 function makeAST(classifiers: Classifier[]): ClassDiagramAST {
   return {
-    classifiers, relationships: [], namespaces: [], directives: [], notes: [],
+    classifiers,
+    relationships: [],
+    namespaces: [],
+    directives: [],
+    notes: [],
   };
 }
 
@@ -41,14 +45,21 @@ function makeAST(classifiers: Classifier[]): ClassDiagramAST {
 describe('parseHideShowKindDirective', () => {
   it('parses "hide object fields"', () => {
     expect(parseHideShowKindDirective('hide object fields')).toEqual({
-      kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'fields',
+      kind: 'hideshowkind',
+      action: 'hide',
+      classifierKind: 'object',
+      target: 'fields',
     });
   });
 
   it('parses every ported type keyword (class/abstract/interface/enum/annotation/object)', () => {
     for (const [word, classifierKind] of [
-      ['class', 'class'], ['abstract', 'abstract'], ['interface', 'interface'],
-      ['enum', 'enum'], ['annotation', 'annotation'], ['object', 'object'],
+      ['class', 'class'],
+      ['abstract', 'abstract'],
+      ['interface', 'interface'],
+      ['enum', 'enum'],
+      ['annotation', 'annotation'],
+      ['object', 'object'],
     ] as const) {
       expect(parseHideShowKindDirective(`hide ${word} circle`)).toMatchObject({ classifierKind });
     }
@@ -73,7 +84,10 @@ describe('parseHideShowKindDirective', () => {
   it('maps stereotype/stereotypes to target "stereotype"', () => {
     expect(parseHideShowKindDirective('hide object stereotype')?.target).toBe('stereotype');
     expect(parseHideShowKindDirective('hide object stereotypes')).toEqual({
-      kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'stereotype',
+      kind: 'hideshowkind',
+      action: 'hide',
+      classifierKind: 'object',
+      target: 'stereotype',
     });
   });
 
@@ -83,7 +97,9 @@ describe('parseHideShowKindDirective', () => {
 
   it('is case-insensitive on keyword, kind, and portion word', () => {
     expect(parseHideShowKindDirective('HIDE OBJECT FIELDS')).toMatchObject({
-      action: 'hide', classifierKind: 'object', target: 'fields',
+      action: 'hide',
+      classifierKind: 'object',
+      target: 'fields',
     });
   });
 
@@ -116,9 +132,7 @@ describe('applyHideShowKindDirectives', () => {
       makeClassifier('bar', { kind: 'object' }),
       makeClassifier('C1', { kind: 'class' }),
     ]);
-    ast.hideKindDirectives = [
-      { kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'fields' },
-    ];
+    ast.hideKindDirectives = [{ kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'fields' }];
     applyHideShowKindDirectives(ast);
     expect(ast.classifiers.find((c) => c.id === 'foo')?.suppressFields).toBe(true);
     expect(ast.classifiers.find((c) => c.id === 'bar')?.suppressFields).toBe(true);
@@ -127,9 +141,7 @@ describe('applyHideShowKindDirectives', () => {
 
   it('sets BOTH suppressFields and suppressMethods for target=members', () => {
     const ast = makeAST([makeClassifier('X', { kind: 'object' })]);
-    ast.hideKindDirectives = [
-      { kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'members' },
-    ];
+    ast.hideKindDirectives = [{ kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'members' }];
     applyHideShowKindDirectives(ast);
     const x = ast.classifiers[0]!;
     expect(x.suppressFields).toBe(true);
@@ -138,21 +150,14 @@ describe('applyHideShowKindDirectives', () => {
 
   it('sets hideCircle for target=circle', () => {
     const ast = makeAST([makeClassifier('C1', { kind: 'class' })]);
-    ast.hideKindDirectives = [
-      { kind: 'hideshowkind', action: 'hide', classifierKind: 'class', target: 'circle' },
-    ];
+    ast.hideKindDirectives = [{ kind: 'hideshowkind', action: 'hide', classifierKind: 'class', target: 'circle' }];
     applyHideShowKindDirectives(ast);
     expect(ast.classifiers[0]!.hideCircle).toBe(true);
   });
 
   it('sets hideStereotype for target=stereotype, scoped to the matching kind (G3/O4)', () => {
-    const ast = makeAST([
-      makeClassifier('foo', { kind: 'object' }),
-      makeClassifier('bar', { kind: 'class' }),
-    ]);
-    ast.hideKindDirectives = [
-      { kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'stereotype' },
-    ];
+    const ast = makeAST([makeClassifier('foo', { kind: 'object' }), makeClassifier('bar', { kind: 'class' })]);
+    ast.hideKindDirectives = [{ kind: 'hideshowkind', action: 'hide', classifierKind: 'object', target: 'stereotype' }];
     applyHideShowKindDirectives(ast);
     expect(ast.classifiers.find((c) => c.id === 'foo')?.hideStereotype).toBe(true);
     expect(ast.classifiers.find((c) => c.id === 'bar')?.hideStereotype).toBeUndefined();

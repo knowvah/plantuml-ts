@@ -216,7 +216,9 @@ describe('calculateDimensionOnlyMembers via calculateDimension (java:140-178)', 
   });
 
   it('icons on: adds the radius+3 zone once (java:156-157, 175; A2s pin: radius 11 -> 14)', () => {
-    const area = makeArea([asElement(Member.field('-count : int'))], { skinParam: fakeSkin({ classAttributeIconSize: 1 }) });
+    const area = makeArea([asElement(Member.field('-count : int'))], {
+      skinParam: fakeSkin({ classAttributeIconSize: 1 }),
+    });
     // withVisibilityChar false -> 'count : int' (11 chars) + zone 14
     const dim = area.calculateDimension(sb);
     expect(dim.getWidth()).toBe(11 * CHAR_WIDTH + (DEFAULT_RADIUS + 3));
@@ -231,7 +233,9 @@ describe('calculateDimensionOnlyMembers via calculateDimension (java:140-178)', 
   });
 
   it('icons on but no member carries a modifier: hasSmallIcon false, no zone (java:125-138)', () => {
-    const area = makeArea([asElement(Member.field('plain', false))], { skinParam: fakeSkin({ classAttributeIconSize: 1 }) });
+    const area = makeArea([asElement(Member.field('plain', false))], {
+      skinParam: fakeSkin({ classAttributeIconSize: 1 }),
+    });
     expect(area.calculateDimension(sb).getWidth()).toBe(5 * CHAR_WIDTH);
   });
 
@@ -354,7 +358,9 @@ describe('getInnerPosition (java:381-393) through getLayout (java:395-427)', () 
   });
 
   it('getUBlock without the resolveVisibilityStyle seam throws the typed ADR-2 deferral', () => {
-    const area = makeArea([asElement(Member.field('-count : int'))], { skinParam: fakeSkin({ classAttributeIconSize: 1 }) });
+    const area = makeArea([asElement(Member.field('-count : int'))], {
+      skinParam: fakeSkin({ classAttributeIconSize: 1 }),
+    });
     expect(() => area.getInnerPosition('-count : int', sb)).toThrow(/deferred per SI1\/ADR-2/);
   });
 });

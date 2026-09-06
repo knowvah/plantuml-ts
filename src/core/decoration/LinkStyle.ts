@@ -111,8 +111,7 @@ export class LinkStyle {
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkStyle.java:111-116 */
   muteStroke(stroke: UStroke): UStroke {
-    if (this.type === Type.DASHED || this.type === Type.DOTTED || this.type === Type.BOLD)
-      return this.getStroke3();
+    if (this.type === Type.DASHED || this.type === Type.DOTTED || this.type === Type.BOLD) return this.getStroke3();
 
     return stroke;
   }

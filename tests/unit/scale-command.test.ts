@@ -198,15 +198,11 @@ describe('resolveScaleFactor — maxWidth / maxHeight (ScaleMaxWidth / ScaleMaxH
 
 describe('resolveScaleFactor — maxWidthAndHeight (ScaleMaxWidthAndHeight)', () => {
   it('never enlarges even when both ratios exceed 1', () => {
-    expect(
-      resolveScaleFactor({ kind: 'maxWidthAndHeight', width: 300, height: 400 }, 100, 100),
-    ).toBe(1);
+    expect(resolveScaleFactor({ kind: 'maxWidthAndHeight', width: 300, height: 400 }, 100, 100)).toBe(1);
   });
 
   it('shrinks to the smaller of the two ratios when both are < 1', () => {
     // width ratio 40/100=0.4, height ratio 60/100=0.6 -> min = 0.4
-    expect(
-      resolveScaleFactor({ kind: 'maxWidthAndHeight', width: 40, height: 60 }, 100, 100),
-    ).toBe(0.4);
+    expect(resolveScaleFactor({ kind: 'maxWidthAndHeight', width: 40, height: 60 }, 100, 100)).toBe(0.4);
   });
 });

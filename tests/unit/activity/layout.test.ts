@@ -38,10 +38,7 @@ function findByKind(nodes: ActivityNodeGeo[], kind: string): ActivityNodeGeo {
   return found;
 }
 
-function findAllByKind(
-  nodes: ActivityNodeGeo[],
-  kind: string,
-): ActivityNodeGeo[] {
+function findAllByKind(nodes: ActivityNodeGeo[], kind: string): ActivityNodeGeo[] {
   return nodes.filter((n) => n.kind === kind);
 }
 
@@ -88,11 +85,7 @@ describe('layoutActivity — start above first action', () => {
 describe('layoutActivity — sequential actions', () => {
   it('places three sequential actions at strictly increasing y values', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('First'),
-        makeAction('Second'),
-        makeAction('Third'),
-      ],
+      nodes: [makeAction('First'), makeAction('Second'), makeAction('Third')],
       swimlanes: [],
     };
 
@@ -114,10 +107,7 @@ describe('layoutActivity — fork bar spans branches', () => {
   it('fork-bar width covers both branch action widths combined', () => {
     const forkNode: ActivityFork = {
       kind: 'fork',
-      branches: [
-        [makeAction('Branch A')],
-        [makeAction('Branch B')],
-      ],
+      branches: [[makeAction('Branch A')], [makeAction('Branch B')]],
     };
 
     const ast: ActivityDiagramAST = {
@@ -133,8 +123,7 @@ describe('layoutActivity — fork bar spans branches', () => {
     expect(branchActions).toHaveLength(2);
 
     // The fork bar must be at least as wide as both branch columns combined
-    const combinedBranchWidth =
-      branchActions[0]!.width + branchActions[1]!.width;
+    const combinedBranchWidth = branchActions[0]!.width + branchActions[1]!.width;
     expect(forkBar.width).toBeGreaterThanOrEqual(combinedBranchWidth);
   });
 });
@@ -175,9 +164,7 @@ describe('layoutActivity — node after if block is below all branches', () => {
     expect(afterNode).toBeDefined();
     expect(branchActions).toHaveLength(2);
 
-    const maxBranchY = Math.max(
-      ...branchActions.map((n) => n.y + n.height),
-    );
+    const maxBranchY = Math.max(...branchActions.map((n) => n.y + n.height));
 
     // Node after endif must be below all branch content
     expect(afterNode.y).toBeGreaterThanOrEqual(maxBranchY);
@@ -195,10 +182,7 @@ describe('layoutActivity — node after if block is below all branches', () => {
 describe('layoutActivity — swimlane actions do not overlap', () => {
   it('places actions in different swimlanes at non-overlapping x ranges', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Alice work', 'Alice'),
-        makeAction('Bob review', 'Bob'),
-      ],
+      nodes: [makeAction('Alice work', 'Alice'), makeAction('Bob review', 'Bob')],
       swimlanes: ['Alice', 'Bob'],
     };
 
@@ -258,10 +242,7 @@ describe('layoutActivity — while loop', () => {
 
     // Find the exit edge: it starts at the header's left vertex (header.x, headerCY)
     const exitEdge = geo.edges.find(
-      (e) =>
-        e.points.length >= 4 &&
-        Math.abs(e.points[0]!.x - header.x) < 1 &&
-        Math.abs(e.points[0]!.y - headerCY) < 1,
+      (e) => e.points.length >= 4 && Math.abs(e.points[0]!.x - header.x) < 1 && Math.abs(e.points[0]!.y - headerCY) < 1,
     );
     expect(exitEdge).toBeDefined();
     // Second point should be to the LEFT of the header
@@ -366,10 +347,7 @@ describe('layoutActivity — note node', () => {
 
   it('note right is placed to the right of the preceding action', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Step'),
-        { kind: 'note', text: 'side note', position: 'right' },
-      ],
+      nodes: [makeAction('Step'), { kind: 'note', text: 'side note', position: 'right' }],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
@@ -380,10 +358,7 @@ describe('layoutActivity — note node', () => {
 
   it('note left is placed to the left of the preceding action', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Step'),
-        { kind: 'note', text: 'side note', position: 'left' },
-      ],
+      nodes: [makeAction('Step'), { kind: 'note', text: 'side note', position: 'left' }],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
@@ -394,10 +369,7 @@ describe('layoutActivity — note node', () => {
 
   it('note shares the same top-y as the preceding action', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Step'),
-        { kind: 'note', text: 'side note', position: 'right' },
-      ],
+      nodes: [makeAction('Step'), { kind: 'note', text: 'side note', position: 'right' }],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
@@ -408,11 +380,7 @@ describe('layoutActivity — note node', () => {
 
   it('flow continues from the action, not the note (note has no outgoing flow edge)', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('A'),
-        { kind: 'note', text: 'annotation', position: 'right' },
-        makeAction('B'),
-      ],
+      nodes: [makeAction('A'), { kind: 'note', text: 'annotation', position: 'right' }, makeAction('B')],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
@@ -434,10 +402,7 @@ describe('layoutActivity — split bar spans branches', () => {
   it('split-bar width covers both branch action widths combined', () => {
     const splitNode: ActivitySplit = {
       kind: 'split',
-      branches: [
-        [makeAction('Branch X')],
-        [makeAction('Branch Y')],
-      ],
+      branches: [[makeAction('Branch X')], [makeAction('Branch Y')]],
     };
     const ast: ActivityDiagramAST = {
       nodes: [splitNode],
@@ -685,11 +650,7 @@ describe('layoutActivity — break inside repeat loop', () => {
 
     const connectingEdge = geo.edges.find((e) => {
       const last = e.points[e.points.length - 1];
-      return (
-        last !== undefined &&
-        Math.abs(last.x - breakExitTopX) < 2 &&
-        Math.abs(last.y - breakExitTopY) < 2
-      );
+      return last !== undefined && Math.abs(last.x - breakExitTopX) < 2 && Math.abs(last.y - breakExitTopY) < 2;
     });
     expect(connectingEdge).toBeDefined();
   });
@@ -727,9 +688,7 @@ describe('layoutActivity — break inside repeat loop', () => {
     const geo = layoutActivity(ast, theme, measurer);
 
     const breakExitDiamond = findByKind(geo.nodes, 'while-header');
-    const afterNode = geo.nodes.find(
-      (n) => n.kind === 'action' && n.label === 'After repeat',
-    );
+    const afterNode = geo.nodes.find((n) => n.kind === 'action' && n.label === 'After repeat');
     expect(afterNode).toBeDefined();
     expect(afterNode!.y).toBeGreaterThan(breakExitDiamond.y);
   });
@@ -742,11 +701,7 @@ describe('layoutActivity — break inside repeat loop', () => {
 describe('layoutActivity — arrow-label pending label on next edge', () => {
   it('AC3: edge between two actions has label and color from arrow-label node', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Action A'),
-        { kind: 'arrow-label', label: 'x', color: 'blue' },
-        makeAction('Action B'),
-      ],
+      nodes: [makeAction('Action A'), { kind: 'arrow-label', label: 'x', color: 'blue' }, makeAction('Action B')],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
@@ -758,10 +713,7 @@ describe('layoutActivity — arrow-label pending label on next edge', () => {
 
   it('AC4: arrow-label at end of sequence is silently discarded (no crash)', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('Action A'),
-        { kind: 'arrow-label', label: 'orphan', color: 'red' },
-      ],
+      nodes: [makeAction('Action A'), { kind: 'arrow-label', label: 'orphan', color: 'red' }],
       swimlanes: [],
     };
     // Should not throw
@@ -785,11 +737,7 @@ describe('layoutActivity — arrow-label pending label on next edge', () => {
 
   it('arrow-label without color leaves edge color undefined', () => {
     const ast: ActivityDiagramAST = {
-      nodes: [
-        makeAction('A'),
-        { kind: 'arrow-label', label: 'plain' },
-        makeAction('B'),
-      ],
+      nodes: [makeAction('A'), { kind: 'arrow-label', label: 'plain' }, makeAction('B')],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);

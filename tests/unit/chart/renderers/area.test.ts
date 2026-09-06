@@ -110,11 +110,7 @@ describe('drawArea — stacked baseline', () => {
   it('AC4: non-flat baseline points appear in the fill path d attribute', () => {
     const pts = [makePoint(50, 200, 40), makePoint(100, 150, 60), makePoint(150, 180, 50)];
     // Non-flat baseline: x coords match but y is different from a zero line
-    const baseline: DataPoint[] = [
-      makePoint(50, 260, 20),
-      makePoint(100, 240, 30),
-      makePoint(150, 255, 25),
-    ];
+    const baseline: DataPoint[] = [makePoint(50, 260, 20), makePoint(100, 240, 30), makePoint(150, 255, 25)];
 
     const svg = drawArea(makeGeo(pts, baseline), THEME);
 

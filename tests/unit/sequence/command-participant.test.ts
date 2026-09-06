@@ -15,10 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
-import {
-  makeDefaultAST,
-  type ParseState,
-} from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { matchParticipantMultilineCommand } from '../../../src/diagrams/sequence/command-participant.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
@@ -87,16 +84,9 @@ describe('matchParticipantMultilineCommand', () => {
     expect(state.ast.participants).toHaveLength(0);
   });
 
-  it('parses jozomu-87-tajo507\'s block: a heading, a rule, and monospace text', () => {
+  it("parses jozomu-87-tajo507's block: a heading, a rule, and monospace text", () => {
     const state = freshState();
-    const lines = [
-      'participant MyParticipant [',
-      '=MyTitle',
-      '----',
-      '""MySubTitle""',
-      ']',
-      'participant Bob',
-    ];
+    const lines = ['participant MyParticipant [', '=MyTitle', '----', '""MySubTitle""', ']', 'participant Bob'];
     const consumed = matchParticipantMultilineCommand(state, lines, 0);
     expect(consumed).toBe(5); // open + 3 body lines + close
     expect(state.ast.participants).toHaveLength(1);
@@ -109,13 +99,7 @@ describe('matchParticipantMultilineCommand', () => {
 
   it('parses lafuzo-13-xura634\'s block and discards "order N" from CODE', () => {
     const state = freshState();
-    const lines = [
-      'participant MyParticipant order 20 [',
-      '=MyTitle',
-      '----',
-      '""MySubTitle""',
-      ']',
-    ];
+    const lines = ['participant MyParticipant order 20 [', '=MyTitle', '----', '""MySubTitle""', ']'];
     const consumed = matchParticipantMultilineCommand(state, lines, 0);
     expect(consumed).toBe(5);
     expect(state.ast.participants[0]?.id).toBe('MyParticipant');

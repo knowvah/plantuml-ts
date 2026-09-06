@@ -93,11 +93,7 @@ import { buildUidPlan } from './renderer-uid.js';
 import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer-draw-sequence.js';
 import { computeDocumentDims, driverBounderFor } from './renderer-ink-extent.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
-import {
-  extractViewBoxDims,
-  extractFlatContent,
-  VERSION_PLACEHOLDER,
-} from '../../core/klimt/document-shell.js';
+import { extractViewBoxDims, extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#DESCRIPTION` — verified
  *  against `DiagramType.java:45` and every cached jar description-diagram
@@ -218,7 +214,6 @@ export function renderDescription(
 
   return ug.getSvgString();
 }
-
 
 // ---------------------------------------------------------------------------
 // T7 -- klimt CompleteSvg -> RenderFragment unwrap (decisions.md D2 "klimt

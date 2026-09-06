@@ -295,9 +295,7 @@ export function computeHclFamilyOverride(styleMap: StyleMap): Partial<JsonGraphO
  * `undefined` when no `.`-prefixed selector sets any of the four supported
  * properties (matching the original "only assign when non-empty" gate).
  */
-export function computeHighlightClassesOverride(
-  styleMap: StyleMap,
-): Record<string, HighlightClassEntry> | undefined {
+export function computeHighlightClassesOverride(styleMap: StyleMap): Record<string, HighlightClassEntry> | undefined {
   const highlightClasses: Record<string, HighlightClassEntry> = {};
   for (const [selector, props] of styleMap.entries()) {
     if (!selector.startsWith('.')) continue;

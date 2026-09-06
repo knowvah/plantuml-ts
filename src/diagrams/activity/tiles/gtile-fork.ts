@@ -1,12 +1,5 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import { BAR_HEIGHT, NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
@@ -28,14 +21,12 @@ export class GtileFork extends TileComposite {
     super();
     this.children = branches;
     const branchTotalWidth =
-      branches.reduce((s, b) => s + b.width, 0) +
-      Math.max(0, branches.length - 1) * NODE_MARGIN_X;
+      branches.reduce((s, b) => s + b.width, 0) + Math.max(0, branches.length - 1) * NODE_MARGIN_X;
     this.width = branchTotalWidth + 2 * BAR_OVERHANG;
     this.barWidth = this.width;
     const maxBranchH = Math.max(0, ...branches.map((b) => b.height));
     this.branchTopY = BAR_HEIGHT + NODE_MARGIN_Y;
-    this.height =
-      BAR_HEIGHT + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + BAR_HEIGHT;
+    this.height = BAR_HEIGHT + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + BAR_HEIGHT;
 
     const offsets: number[] = [];
     let x = BAR_OVERHANG;

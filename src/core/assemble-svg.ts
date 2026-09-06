@@ -143,7 +143,9 @@ function withDiagramBorderRect(body: string, fragment: RenderFragment, colorHex:
   if (expectedFinal.width !== fragment.width || expectedFinal.height !== fragment.height) return body;
   const rectDims = computeBorderRectDims(rawDims, DIAGRAM_BORDER_THICKNESS);
   const borderRect = rect(0, 0, rectDims.width, rectDims.height, {
-    fill: 'none', stroke: colorHex, strokeWidth: DIAGRAM_BORDER_THICKNESS,
+    fill: 'none',
+    stroke: colorHex,
+    strokeWidth: DIAGRAM_BORDER_THICKNESS,
   });
   return spliceAsFirstChild(body, borderRect);
 }
@@ -163,7 +165,9 @@ function finalizeClassBody(fragment: RenderFragment): string {
       ? spliceAsFirstChild(
           body,
           rect(0, 0, fragment.width, fragment.height, {
-            fill: fragment.documentBackgroundRect, stroke: 'none', strokeWidth: 1,
+            fill: fragment.documentBackgroundRect,
+            stroke: 'none',
+            strokeWidth: 1,
           }),
         )
       : body;
@@ -191,7 +195,9 @@ function maybeStateBackgroundRect(fragment: RenderFragment): string {
   const background = fragment.background ?? STATE_DEFAULT_BACKGROUND;
   if (background === STATE_DEFAULT_BACKGROUND) return '';
   return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background, stroke: 'none', strokeWidth: 1,
+    fill: background,
+    stroke: 'none',
+    strokeWidth: 1,
   });
 }
 
@@ -238,7 +244,8 @@ function maybeJsonBackgroundRect(fragment: RenderFragment): string {
   const background = fragment.background ?? JSON_DEFAULT_BACKGROUND;
   if (!isSolidNonDefault(background)) return '';
   return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background, stroke: 'none',
+    fill: background,
+    stroke: 'none',
   });
 }
 
@@ -328,7 +335,9 @@ function maybeSequenceBackgroundRect(fragment: RenderFragment): string {
   const background = fragment.background ?? SEQUENCE_DEFAULT_BACKGROUND;
   if (SEQUENCE_UNPAINTED_BACKGROUNDS.has(background)) return '';
   return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background, stroke: 'none', strokeWidth: 1,
+    fill: background,
+    stroke: 'none',
+    strokeWidth: 1,
   });
 }
 
@@ -400,7 +409,9 @@ function maybeActivityBackgroundRect(fragment: RenderFragment): string {
   const background = fragment.background ?? ACTIVITY_DEFAULT_BACKGROUND;
   if (ACTIVITY_UNPAINTED_BACKGROUNDS.has(background)) return '';
   return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background, stroke: 'none', strokeWidth: 1,
+    fill: background,
+    stroke: 'none',
+    strokeWidth: 1,
   });
 }
 
@@ -449,10 +460,14 @@ function finalizeActivityFragment(fragment: RenderFragment): RenderFragment {
  */
 function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
   switch (fragment.diagramType) {
-    case DIAGRAM_TYPE_CLASS: return { ...fragment, body: finalizeClassBody(fragment) };
-    case DIAGRAM_TYPE_STATE: return { ...fragment, body: finalizeStateBody(fragment) };
-    case DIAGRAM_TYPE_SEQUENCE: return { ...fragment, body: finalizeSequenceBody(fragment) };
-    case DIAGRAM_TYPE_ACTIVITY: return finalizeActivityFragment(fragment);
+    case DIAGRAM_TYPE_CLASS:
+      return { ...fragment, body: finalizeClassBody(fragment) };
+    case DIAGRAM_TYPE_STATE:
+      return { ...fragment, body: finalizeStateBody(fragment) };
+    case DIAGRAM_TYPE_SEQUENCE:
+      return { ...fragment, body: finalizeSequenceBody(fragment) };
+    case DIAGRAM_TYPE_ACTIVITY:
+      return finalizeActivityFragment(fragment);
     case DIAGRAM_TYPE_JSON:
     case DIAGRAM_TYPE_YAML:
     case DIAGRAM_TYPE_HCL:

@@ -73,7 +73,13 @@ export function leafPortion(id: string): string {
  *  .java:142` always comments; `EntityImageNote.java` never does — see
  *  `core/svek/DecorateEntityImage.ts#decorateEntityDrawing`'s own
  *  `withComment` precedent for the identical description-side split). */
-export function wrapEntity(name: string, uid: string, qualifiedName: string, withComment: boolean, inner: string): string {
+export function wrapEntity(
+  name: string,
+  uid: string,
+  qualifiedName: string,
+  withComment: boolean,
+  inner: string,
+): string {
   const comment = withComment ? `<!--class ${name}-->` : '';
   return comment + group(inner, { class: 'entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
 }

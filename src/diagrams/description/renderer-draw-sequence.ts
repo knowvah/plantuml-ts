@@ -108,7 +108,10 @@ export function collectByKind(nodes: readonly DescriptionNodeGeo[]): {
 /** `SvekResult#drawU`'s first loop — every cluster, absolute position
  *  resolved internally by `Cluster#drawU` (see `renderer-cluster.ts`). */
 export function drawClusters(
-  ug: UGraphic, containers: readonly DescriptionNodeGeo[], theme: Theme, plan: UidPlan,
+  ug: UGraphic,
+  containers: readonly DescriptionNodeGeo[],
+  theme: Theme,
+  plan: UidPlan,
   respectHidden: boolean,
 ): void {
   for (const node of containers) {
@@ -192,7 +195,11 @@ export function drawEntities(
  * field populated yet — Interface Segregation, not a behavior change.
  */
 export function drawEdges(
-  ug: UGraphic, edges: readonly DescriptionEdgeGeo[], theme: Theme, plan: UidPlan, respectHidden: boolean,
+  ug: UGraphic,
+  edges: readonly DescriptionEdgeGeo[],
+  theme: Theme,
+  plan: UidPlan,
+  respectHidden: boolean,
 ): void {
   // Upstream `SvekResult#drawU` (SvekResult.java:93-101): ONE `Set<String>
   // ids` created per diagram draw, shared across every edge via

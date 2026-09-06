@@ -1,29 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '../../../src/index.js';
 
-describe('jsonPlugin.accepts', () => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-});
+describe('jsonPlugin.accepts', () => {});
 
 describe('render @startjson — parse errors', () => {
   it('renders PlantUML error message for invalid JSON', async () => {

@@ -74,7 +74,13 @@ export class CreoleHorizontalLine extends AbstractAtom implements Atom {
     return new CreoleHorizontalLine(fontConfiguration, line, style, skinParam, atomOps);
   }
 
-  private constructor(fontConfiguration: FontConfiguration, line: string, style: string, skinParam: ISkinSimple, atomOps: AtomOps) {
+  private constructor(
+    fontConfiguration: FontConfiguration,
+    line: string,
+    style: string,
+    skinParam: ISkinSimple,
+    atomOps: AtomOps,
+  ) {
     super();
     this.fontConfiguration = fontConfiguration;
     this.line = line;
@@ -97,7 +103,9 @@ export class CreoleHorizontalLine extends AbstractAtom implements Atom {
   private getTitle(): TextBlock {
     if (this.line.length === 0) return TextBlockUtils.empty(0, 0);
     const parser = this.skinParam.sheet(this.fontConfiguration, HorizontalAlignment.LEFT, CreoleMode.FULL);
-    const sheet = parser.createSheet(Display.getWithNewlines(this.skinParam.getPragma(), this.line)) as unknown as Sheet<CreoleAtom>;
+    const sheet = parser.createSheet(
+      Display.getWithNewlines(this.skinParam.getPragma(), this.line),
+    ) as unknown as Sheet<CreoleAtom>;
     return new SheetBlock1(sheet, LineBreakStrategy.NONE, this.atomOps, this.skinParam.getPadding());
   }
 

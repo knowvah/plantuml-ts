@@ -64,9 +64,7 @@ describe('detectCause', () => {
     expect(detectCause('node <&heart> n')).toBe('icon');
     expect(detectCause('package "P"')).toBe('package-folder-tab');
     expect(detectCause('interface I')).toBe('interface-shield');
-    expect(detectCause('component A [a very long bracketed description body here]')).toBe(
-      'bracket-body',
-    );
+    expect(detectCause('component A [a very long bracketed description body here]')).toBe('bracket-body');
     expect(detectCause('component $myVar')).toBe('variable-display');
   });
 
@@ -120,8 +118,13 @@ describe('summarize', () => {
 
   it('counts an empty result set as all zeros', () => {
     expect(summarize([])).toEqual({
-      total: 0, conformant: 0, conformantPct: 0,
-      widened: 0, improved: 0, unchanged: 0, causes: {},
+      total: 0,
+      conformant: 0,
+      conformantPct: 0,
+      widened: 0,
+      improved: 0,
+      unchanged: 0,
+      causes: {},
     });
   });
 
@@ -154,12 +157,15 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     expect(unexcusedFailures(diff({ labelSizeOk: true, portOk: true }), ['labelSizeOk'])).toEqual([]);
   });
 
-  it('a label-size-only miss is excused ONLY when label-size-backlog names the slug ' +
-     '(the 10 description slugs CI run 31919140187 reported as widened, e.g. berelu-46)', () => {
-    const d = diff({ labelSizeOk: false, portOk: true, sizeConformantOk: false });
-    expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual([]);
-    expect(unexcusedFailures(d, [])).toEqual(['labelSizeOk']);
-  });
+  it(
+    'a label-size-only miss is excused ONLY when label-size-backlog names the slug ' +
+      '(the 10 description slugs CI run 31919140187 reported as widened, e.g. berelu-46)',
+    () => {
+      const d = diff({ labelSizeOk: false, portOk: true, sizeConformantOk: false });
+      expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual([]);
+      expect(unexcusedFailures(d, [])).toEqual(['labelSizeOk']);
+    },
+  );
 
   it('a backlog never excuses a check it does not name', () => {
     const d = diff({ labelSizeOk: false, portOk: false });

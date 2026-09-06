@@ -68,6 +68,9 @@ describe('json family — structural conformance', () => {
         if (structuralDiffs(type, slug).diffs.length === 0) missing.push(entry);
       }
     }
-    expect(missing, `newly clean — add to oracle/goldens/json-family-structural.json:\n  ${missing.join('\n  ')}`).toEqual([]);
+    expect(
+      missing,
+      `newly clean — add to oracle/goldens/json-family-structural.json:\n  ${missing.join('\n  ')}`,
+    ).toEqual([]);
   });
 });

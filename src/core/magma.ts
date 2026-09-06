@@ -78,10 +78,7 @@ export interface MagmaGroupInput {
  *                 (upstream isStandalone: any diagram link touching the
  *                 entity, hidden/invisible included).
  */
-export function buildMagmaEdges(
-  groups: readonly MagmaGroupInput[],
-  touched: ReadonlySet<string>,
-): DotInputEdge[] {
+export function buildMagmaEdges(groups: readonly MagmaGroupInput[], touched: ReadonlySet<string>): DotInputEdge[] {
   const edges: DotInputEdge[] = [];
   let n = 0;
   const push = (from: string, to: string, length: number): void => {
@@ -112,10 +109,7 @@ export function buildMagmaEdges(
 }
 
 /** MagmaList.putInSquare: >= 3 magmas under the same parent chain together. */
-function chainMagmas(
-  magmas: readonly MagmaSquare[],
-  push: (from: string, to: string, length: number) => void,
-): void {
+function chainMagmas(magmas: readonly MagmaSquare[], push: (from: string, to: string, length: number) => void): void {
   const byParent = new Map<string, MagmaSquare[]>();
   for (const m of magmas) {
     const key = m.parentAstId ?? '';

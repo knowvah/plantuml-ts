@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  applyMonochromeHex,
-  applyMonochromeToFragment,
-} from '../../../src/diagrams/class/class-monochrome.js';
+import { applyMonochromeHex, applyMonochromeToFragment } from '../../../src/diagrams/class/class-monochrome.js';
 
 // G2 N61: `skinparam monochrome true|reverse` -- jar's `ColorMapper.MONOCHROME`/
 // `MONOCHROME_REVERSE` (`ColorUtils.java#getGrayScaleColor`/
@@ -66,9 +63,7 @@ describe('applyMonochromeToFragment', () => {
 
   it('rewrites a CSS-style "stroke: #RRGGBB" with a space after the colon', () => {
     const svg = 'path:hover { stroke: #ADD1B2 !important;}';
-    expect(applyMonochromeToFragment(svg, 'true')).toBe(
-      'path:hover { stroke: #C2C2C2 !important;}',
-    );
+    expect(applyMonochromeToFragment(svg, 'true')).toBe('path:hover { stroke: #C2C2C2 !important;}');
   });
 
   it('does not touch a "fill: none" or unrelated hex-free markup', () => {

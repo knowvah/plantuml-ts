@@ -1,20 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { defaultTheme } from '../../src/core/theme.js';
 import { parseStyleBlock, type StyleMap } from '../../src/core/skinparam.js';
-import {
-  resolveAnnotationStyles,
-  expandGrayShorthand,
-  parseClockwise,
-} from '../../src/core/annotations/style.js';
+import { resolveAnnotationStyles, expandGrayShorthand, parseClockwise } from '../../src/core/annotations/style.js';
 import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
 
 const EMPTY_SKINPARAM = new Map<string, string>();
 const EMPTY_STYLEMAP: StyleMap = new Map();
 
-function resolve(
-  skinparam: ReadonlyMap<string, string> = EMPTY_SKINPARAM,
-  styleMap: StyleMap = EMPTY_STYLEMAP,
-) {
+function resolve(skinparam: ReadonlyMap<string, string> = EMPTY_SKINPARAM, styleMap: StyleMap = EMPTY_STYLEMAP) {
   return resolveAnnotationStyles(defaultTheme, skinparam, styleMap);
 }
 
@@ -163,7 +156,7 @@ describe('resolveAnnotationStyles — defaults, no overrides', () => {
   // `document{}` child), and its own block sets `LineThickness 1.5`
   // explicitly -- the ONE annotation element whose default differs from
   // root's own `LineThickness 1.0`.
-  it('mainframe: lineThickness 1.5 (its own plantuml.skin override, not root\'s 1.0)', () => {
+  it("mainframe: lineThickness 1.5 (its own plantuml.skin override, not root's 1.0)", () => {
     const { mainframe } = resolve();
     expect(mainframe.lineThickness).toBe(1.5);
   });
@@ -332,9 +325,7 @@ describe('resolveAnnotationStyles — bare document {} cascade (G2 N51)', () => 
   });
 
   it('a nested document { legend { ... } } override wins over the enclosing bare document {} value', () => {
-    const styleMap = parseStyleBlock(
-      'document { BackGroundColor orange; legend { BackGroundColor green } }',
-    );
+    const styleMap = parseStyleBlock('document { BackGroundColor orange; legend { BackGroundColor green } }');
     const styles = resolve(EMPTY_SKINPARAM, styleMap);
     expect(styles.legend.backgroundColor).toBe('green');
     expect(styles.title.backgroundColor).toBe('orange');

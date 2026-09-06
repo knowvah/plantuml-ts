@@ -1,9 +1,4 @@
-import type {
-  ChronologyDiagramAST,
-  ChronologyGeometry,
-  EventGeometry,
-  DayTick,
-} from './ast.js';
+import type { ChronologyDiagramAST, ChronologyGeometry, EventGeometry, DayTick } from './ast.js';
 
 const TOTAL_WIDTH = 1000;
 const HEADER_HEIGHT = 30;

@@ -41,8 +41,10 @@ describe('concentrationOf', () => {
   });
 
   it('reports the heaviest ten, which is what a skewed corpus shows', () => {
-    const rows = [...Array.from({ length: 10 }, (_, i) => fx(`heavy${String(i)}`, 10)),
-                  ...Array.from({ length: 100 }, (_, i) => fx(`light${String(i)}`, 1))];
+    const rows = [
+      ...Array.from({ length: 10 }, (_, i) => fx(`heavy${String(i)}`, 10)),
+      ...Array.from({ length: 100 }, (_, i) => fx(`light${String(i)}`, 1)),
+    ];
     const c = concentrationOf(summarize(rows));
     expect(c.top10Share).toBeCloseTo(100 / 200, 6);
   });

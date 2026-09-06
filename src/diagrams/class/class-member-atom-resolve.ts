@@ -11,14 +11,8 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { emojiBoxDim, emojiRenderRun } from '../../core/klimt/creole/atom/AtomEmoji.js';
-import {
-  type SpriteDimsLookup,
-  type InlineAtomToken,
-} from '../../core/creole-atoms.js';
-import {
-  measureInlineAtom,
-  spriteScale,
-} from '../../core/creole-atoms-measure.js';
+import { type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-atoms.js';
+import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { getSpriteMonochrome, type SpriteRegistry } from '../../core/sprite-commands.js';

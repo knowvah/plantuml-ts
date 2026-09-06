@@ -65,12 +65,7 @@ const DIM_SENTINEL = /^_dim_([.\d]+)_([\d.]+)_$/;
 class DimAwareLutMeasurer implements TextMeasurer {
   private readonly lut = new LutTextMeasurer();
 
-  measure(
-    text: string,
-    fontname: string,
-    fontsize: number,
-    flags?: TextVariantFlags,
-  ): TextSize {
+  measure(text: string, fontname: string, fontsize: number, flags?: TextVariantFlags): TextSize {
     const m = DIM_SENTINEL.exec(text);
     if (m !== null) return { w: Number(m[1]), h: Number(m[2]) };
     return this.lut.measure(text, fontname, fontsize, flags);

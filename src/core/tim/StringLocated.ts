@@ -111,12 +111,7 @@ export class StringLocated {
    * classifier computes `type` before constructing; this class does not
    * change.
    */
-  constructor(
-    s: string,
-    location: LineLocation | undefined,
-    type?: TLineType,
-    preprocessorError?: string,
-  ) {
+  constructor(s: string, location: LineLocation | undefined, type?: TLineType, preprocessorError?: string) {
     this.s = s;
     this.location = location;
     this.type = type;

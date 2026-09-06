@@ -57,19 +57,8 @@ import {
   scaleCommand,
   skinParamMessageAlignCommand,
 } from './command-common.js';
-import {
-  boxEndCommand,
-  boxStartCommand,
-  elseCommand,
-  endCommand,
-  groupingCommand,
-} from './command-grouping.js';
-import {
-  activateCommand,
-  deactivateCommand,
-  deactivateShortCommand,
-  destroyCommand,
-} from './command-lifeline.js';
+import { boxEndCommand, boxStartCommand, elseCommand, endCommand, groupingCommand } from './command-grouping.js';
+import { activateCommand, deactivateCommand, deactivateShortCommand, destroyCommand } from './command-lifeline.js';
 import {
   autoactivateCommand,
   bareDelayCommand,

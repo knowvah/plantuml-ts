@@ -446,12 +446,7 @@ function applyDeclaredContent(target: State, source: State, pass: Pass): void {
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java#quarkInContextSafe
  * @see ~/git/plantuml/.../statediagram/command/CommandCreateState.java (ParserPass.ONE gate)
  */
-export function declareState(
-  ps: ParseState,
-  state: State,
-  pass: Pass,
-  opts?: { phantomAncestors?: boolean },
-): State {
+export function declareState(ps: ParseState, state: State, pass: Pass, opts?: { phantomAncestors?: boolean }): State {
   if (hasSeparator(ps, state.id)) {
     const resolved = resolveOrCreateDottedPath(
       ps,
@@ -469,7 +464,11 @@ export function declareState(
     // decisions.md#D2, StateDiagram.java:70-90 via CommandCreateState
     // .java:189-191 -- same guard as ensureState's (upstream calls it from
     // both commands); zecivu-62's ensureState touch fires first here.
-    assertConcurrentStateOk(ps, existing, `The state ${state.id} has been created in a concurrent state : it cannot be used here.`);
+    assertConcurrentStateOk(
+      ps,
+      existing,
+      `The state ${state.id} has been created in a concurrent state : it cannot be used here.`,
+    );
     applyDeclaredContent(existing, state, pass);
     ps.lastEntity = existing.id;
     return existing;

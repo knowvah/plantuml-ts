@@ -38,21 +38,13 @@ describe('measureJsonState', () => {
   });
 
   it('falls back to the empty-object formula when jsonValue is absent (unparsed/never-set body)', () => {
-    const withValue = measureJsonState(
-      jsonState('e', { kind: 'object', entries: [] }),
-      defaultTheme,
-      measurer,
-    );
+    const withValue = measureJsonState(jsonState('e', { kind: 'object', entries: [] }), defaultTheme, measurer);
     const withoutValue = measureJsonState(jsonState('e', undefined), defaultTheme, measurer);
     expect(withoutValue).toEqual(withValue);
   });
 
   it('empty object entries area uses the fixed empty-height fallback (13), not 0', () => {
-    const dim = measureJsonState(
-      jsonState('e', { kind: 'object', entries: [] }),
-      defaultTheme,
-      measurer,
-    );
+    const dim = measureJsonState(jsonState('e', { kind: 'object', entries: [] }), defaultTheme, measurer);
     // title height (name-only, no stereotype) + 13 fallback fields height.
     const nameHeight = measurer.measure('e', { family: defaultTheme.fontFamily, size: defaultTheme.fontSize }).height;
     expect(dim.height).toBe(nameHeight + 2 * 2 + 13);
@@ -92,7 +84,13 @@ describe('measureJsonState', () => {
   });
 
   it('populated array: width = max item width, height = sum of item heights (stacked)', () => {
-    const value: JsonNode = { kind: 'array', items: [{ kind: 'scalar', value: 'x' }, { kind: 'scalar', value: 'yy' }] };
+    const value: JsonNode = {
+      kind: 'array',
+      items: [
+        { kind: 'scalar', value: 'x' },
+        { kind: 'scalar', value: 'yy' },
+      ],
+    };
     const dim = measureJsonState(jsonState('arr', value), defaultTheme, measurer);
     const font = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
     const cellX = measurer.measure('x', font);
@@ -144,7 +142,11 @@ describe('measureJsonState', () => {
   });
 
   it('short stereotype does not widen the title beyond the name (name stays the max)', () => {
-    const withoutStereo = measureJsonState(jsonState('averylongname', { kind: 'scalar', value: 1 }), defaultTheme, measurer);
+    const withoutStereo = measureJsonState(
+      jsonState('averylongname', { kind: 'scalar', value: 1 }),
+      defaultTheme,
+      measurer,
+    );
     const withStereo = measureJsonState(
       jsonState('averylongname', { kind: 'scalar', value: 1 }, { stereotype: 'a' }),
       defaultTheme,

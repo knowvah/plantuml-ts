@@ -288,12 +288,26 @@ describe('USymbolQueue (AC1)', () => {
   it('asSmall/asBig execute end-to-end through a real UGraphic', () => {
     const ctx = new SymbolContext('#F1F1F1', '#181818');
     const symbol = new Queue.USymbolQueue();
-    const small = symbol.asSmall(fixedTextBlock(0, 0), fixedTextBlock(20, 10), fixedTextBlock(15, 8), ctx, HorizontalAlignment.CENTER);
+    const small = symbol.asSmall(
+      fixedTextBlock(0, 0),
+      fixedTextBlock(20, 10),
+      fixedTextBlock(15, 8),
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ugSmall = newGraphic();
     small.drawU(ugSmall);
     expect(ugSmall.getSvgString()).toContain('fill="#F1F1F1"');
 
-    const big = symbol.asBig(fixedTextBlock(10, 6), HorizontalAlignment.LEFT, fixedTextBlock(8, 5), 60, 40, ctx, HorizontalAlignment.RIGHT);
+    const big = symbol.asBig(
+      fixedTextBlock(10, 6),
+      HorizontalAlignment.LEFT,
+      fixedTextBlock(8, 5),
+      60,
+      40,
+      ctx,
+      HorizontalAlignment.RIGHT,
+    );
     expect(big.calculateDimension(stubStringBounder as never).getWidth()).toBe(60);
     const ugBig = newGraphic();
     big.drawU(ugBig);
@@ -356,12 +370,26 @@ describe('USymbolStorage (AC1)', () => {
   it('asSmall/asBig execute end-to-end through a real UGraphic (stencil seam is a documented no-op passthrough)', () => {
     const ctx = new SymbolContext('#F1F1F1', '#181818');
     const symbol = new Storage.USymbolStorage();
-    const small = symbol.asSmall(fixedTextBlock(0, 0), fixedTextBlock(20, 10), fixedTextBlock(15, 8), ctx, HorizontalAlignment.CENTER);
+    const small = symbol.asSmall(
+      fixedTextBlock(0, 0),
+      fixedTextBlock(20, 10),
+      fixedTextBlock(15, 8),
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ugSmall = newGraphic();
     small.drawU(ugSmall);
     expect(ugSmall.getSvgString()).toContain('rx="35"');
 
-    const big = symbol.asBig(fixedTextBlock(10, 6), HorizontalAlignment.CENTER, fixedTextBlock(8, 5), 60, 40, ctx, HorizontalAlignment.CENTER);
+    const big = symbol.asBig(
+      fixedTextBlock(10, 6),
+      HorizontalAlignment.CENTER,
+      fixedTextBlock(8, 5),
+      60,
+      40,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ugBig = newGraphic();
     big.drawU(ugBig);
     expect(ugBig.getSvgString()).toContain('<rect');
@@ -411,7 +439,11 @@ describe('USymbolHexagon (AC1)', () => {
 
   it('drawRect (asBig-only container outline) reproduces the jar-generated cluster fragment', () => {
     const root = newGraphic();
-    const styled = root.apply(new UTranslate(6, 6)).apply(new Fore('#181818')).apply(new Back('none')).apply(UStroke.withThickness(1));
+    const styled = root
+      .apply(new UTranslate(6, 6))
+      .apply(new Fore('#181818'))
+      .apply(new Back('none'))
+      .apply(UStroke.withThickness(1));
     Hexagon.drawRect(styled, 86, 87.49, 0, 0, 0);
     const actual = root.getSvgString();
     const { pass, diffs } = compareSvg(actual, HEXAGON_GOLDEN, 'deterministic');
@@ -461,7 +493,15 @@ describe('USymbolHexagon (AC1)', () => {
     const ctx = new SymbolContext('#181818', 'none');
     for (const stereoAlignment of [HorizontalAlignment.RIGHT, HorizontalAlignment.CENTER]) {
       for (const labelAlignment of [HorizontalAlignment.LEFT, HorizontalAlignment.CENTER, HorizontalAlignment.RIGHT]) {
-        const tb = symbol.asBig(fixedTextBlock(10, 6), labelAlignment, fixedTextBlock(8, 5), 60, 40, ctx, stereoAlignment);
+        const tb = symbol.asBig(
+          fixedTextBlock(10, 6),
+          labelAlignment,
+          fixedTextBlock(8, 5),
+          60,
+          40,
+          ctx,
+          stereoAlignment,
+        );
         const ug = newGraphic();
         expect(() => tb.drawU(ug)).not.toThrow();
         expect(ug.getSvgString()).toContain('<path');
@@ -555,13 +595,29 @@ describe('USymbolProcess (AC1)', () => {
       expect(ugSmall.getSvgString()).toContain('<polygon');
     }
 
-    const big = symbol.asBig(fixedTextBlock(0, 0), HorizontalAlignment.CENTER, fixedTextBlock(8, 5), 60, 40, ctx, HorizontalAlignment.CENTER);
+    const big = symbol.asBig(
+      fixedTextBlock(0, 0),
+      HorizontalAlignment.CENTER,
+      fixedTextBlock(8, 5),
+      60,
+      40,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ugBig = newGraphic();
     big.drawU(ugBig);
     expect(ugBig.getSvgString()).toContain('<polygon');
 
     // getHTitle's width===0 branch, exercised through asBig with an empty title.
-    const bigEmptyTitle = symbol.asBig(fixedTextBlock(0, 0), HorizontalAlignment.CENTER, fixedTextBlock(8, 5), 60, 40, ctx, HorizontalAlignment.CENTER);
+    const bigEmptyTitle = symbol.asBig(
+      fixedTextBlock(0, 0),
+      HorizontalAlignment.CENTER,
+      fixedTextBlock(8, 5),
+      60,
+      40,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expect(() => bigEmptyTitle.drawU(newGraphic())).not.toThrow();
   });
 });

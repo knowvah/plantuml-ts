@@ -6,11 +6,7 @@
  * (tail,head)→id EdgeIndex the snapshot mapper consumes.
  */
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
-import type {
-  DotInputCluster,
-  DotInputGraph,
-  DotInputNode,
-} from './graph-layout.types.js';
+import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
 import { dotSplinesAttrs } from './dot-splines.js';
 import { rowPortTable, portTable } from './svek-dot-emit-labels.js';
@@ -68,7 +64,6 @@ function layoutShape(n: DotInputNode): string {
 // module's worth of `ClusterDotString` walk. Re-exported here so the import
 // path callers and tests already use keeps working unchanged.
 export { firstEncounterOrder };
-
 
 /**
  * B1/M4: a `RECTANGLE_HTML_FOR_PORTS` node, laid out the way the jar's DOT
@@ -256,9 +251,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const idByName = new Map<string, string>();
   const clusters = input.clusters;
   if (clusters === undefined || clusters.length === 0) return { idByName };
-  const byId = new Map<string, DotInputCluster>(
-    clusters.map((c) => [c.id, c]),
-  );
+  const byId = new Map<string, DotInputCluster>(clusters.map((c) => [c.id, c]));
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
   let nextIndex = 0;
@@ -292,9 +285,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // protection wrapper), not its `main` handle — see `ClusterHandles`'s
     // own doc comment.
     const parentInnermost =
-      c.parentId !== undefined && byId.has(c.parentId)
-        ? handlesFor(byId.get(c.parentId)!).innermost
-        : b;
+      c.parentId !== undefined && byId.has(c.parentId) ? handlesFor(byId.get(c.parentId)!).innermost : b;
     const outerName = nameFor(c);
     // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
     // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME
@@ -451,4 +442,3 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   }
   return { idByName };
 }
-

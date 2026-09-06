@@ -45,6 +45,10 @@ export class USymbolInterface extends USymbolSimpleAbstract {
   }
 
   protected getDrawing(symbolContext: SymbolContext): TextBlock {
-    return new CircleInterface2(symbolContext.getBackColor(), symbolContext.getForeColor(), symbolContext.isShadowing() ? 4.0 : 0.0);
+    return new CircleInterface2(
+      symbolContext.getBackColor(),
+      symbolContext.getForeColor(),
+      symbolContext.isShadowing() ? 4.0 : 0.0,
+    );
   }
 }

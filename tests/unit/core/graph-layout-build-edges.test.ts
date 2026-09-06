@@ -64,9 +64,7 @@ describe('addEdges — xlabel forwarding (SI31 T1, docs/graphviz-issues/16)', ()
   it('a non-ortho edge (plain `label`, no xlabel) never gains an xlabel attr — no regression on the label path', () => {
     const input: DotInputGraph = {
       nodes: twoNodes,
-      edges: [
-        { id: 'e0', from: 'a', to: 'b', attributes: { label: 'go', labelWidth: 20, labelHeight: 12 } },
-      ],
+      edges: [{ id: 'e0', from: 'a', to: 'b', attributes: { label: 'go', labelWidth: 20, labelHeight: 12 } }],
     };
     const g = build(input);
     expect(g.edges[0]!.attrs.has('xlabel')).toBe(false);

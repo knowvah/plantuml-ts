@@ -143,7 +143,6 @@ export function computeHeaderSlack(
   return { h1, h2 };
 }
 
-
 // ---------------------------------------------------------------------------
 // object/map/json never draw the kind badge -- upstream EntityImageObject,
 // EntityImageMap, and EntityImageJson have no circled-character affordance
@@ -171,12 +170,18 @@ export function hasBadge(kind: ClassifierKind): boolean {
  */
 export function badgeFill(kind: ClassifierKind): string {
   switch (kind) {
-    case 'class':      return '#ADD1B2'; // spotClass
-    case 'abstract':   return '#A9DCDF'; // spotAbstractClass
-    case 'interface':  return '#B4A7E5'; // spotInterface
-    case 'enum':       return '#EB937F'; // spotEnum
-    case 'annotation': return '#E3664A'; // spotAnnotation
-    default:           return '#ADD1B2'; // spotClass -- default/unsurveyed kinds
+    case 'class':
+      return '#ADD1B2'; // spotClass
+    case 'abstract':
+      return '#A9DCDF'; // spotAbstractClass
+    case 'interface':
+      return '#B4A7E5'; // spotInterface
+    case 'enum':
+      return '#EB937F'; // spotEnum
+    case 'annotation':
+      return '#E3664A'; // spotAnnotation
+    default:
+      return '#ADD1B2'; // spotClass -- default/unsurveyed kinds
   }
 }
 
@@ -260,12 +265,18 @@ export function resolveBadgeGlyphColor(
  */
 export function spotSnameForKind(kind: ClassifierKind): string | undefined {
   switch (kind) {
-    case 'class':      return 'spotclass';
-    case 'abstract':   return 'spotabstractclass';
-    case 'interface':  return 'spotinterface';
-    case 'enum':       return 'spotenum';
-    case 'annotation': return 'spotannotation';
-    default:           return undefined;
+    case 'class':
+      return 'spotclass';
+    case 'abstract':
+      return 'spotabstractclass';
+    case 'interface':
+      return 'spotinterface';
+    case 'enum':
+      return 'spotenum';
+    case 'annotation':
+      return 'spotannotation';
+    default:
+      return undefined;
   }
 }
 
@@ -353,20 +364,25 @@ const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
     'Q22.8853,25.335 22.8811,25.4346 Q22.877,25.5342 22.8687,25.6504 Z',
 };
 
-
 /** `getCircledChar(LeafType)`: which glyph letter a classifier kind draws. */
 export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' | 'P' {
   switch (kind) {
-    case 'interface':  return 'I';
-    case 'abstract':   return 'A';
-    case 'enum':       return 'E';
-    case 'annotation': return '@';
+    case 'interface':
+      return 'I';
+    case 'abstract':
+      return 'A';
+    case 'enum':
+      return 'E';
+    case 'annotation':
+      return '@';
     // T14 (dispatch-by-parse-attempt): `protocol`'s own badge letter --
     // `getCircledChar` returns 'P' for `LeafType.PROTOCOL`, distinct from
     // the 'C' every other un-surveyed kind falls to below.
     // @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:243
-    case 'protocol':   return 'P';
-    default:           return 'C';
+    case 'protocol':
+      return 'P';
+    default:
+      return 'C';
   }
 }
 
@@ -411,12 +427,16 @@ export function badgeGlyphPath(
   circledCharacterFontItalic?: boolean,
 ): string {
   const letter = resolveBadgeLetter(kind, charOverride);
-  const sized = circledCharacterFontSize !== undefined
-    ? lookupSizedGlyph(
-        letter, circledCharacterFontSize,
-        circledCharacterFontFamily, circledCharacterFontBold, circledCharacterFontItalic,
-      )
-    : undefined;
+  const sized =
+    circledCharacterFontSize !== undefined
+      ? lookupSizedGlyph(
+          letter,
+          circledCharacterFontSize,
+          circledCharacterFontFamily,
+          circledCharacterFontBold,
+          circledCharacterFontItalic,
+        )
+      : undefined;
   const refD = sized?.d ?? BADGE_GLYPH_D[letter];
   const refCx = sized?.refCx ?? REFERENCE_CX;
   const refCy = sized?.refCy ?? REFERENCE_CY;
@@ -453,15 +473,18 @@ export function badgeGlyphPath(
  * (would need per-letter corpus-scraped `d` data, the same technique this
  * function's own table already uses).
  */
-export function resolveBadgeLetter(
-  kind: ClassifierKind,
-  charOverride: string | undefined,
-): BadgeLetter {
+export function resolveBadgeLetter(kind: ClassifierKind, charOverride: string | undefined): BadgeLetter {
   if (charOverride === '?') return '?';
   const upper = charOverride?.toUpperCase();
   if (
-    upper === 'C' || upper === 'I' || upper === 'A' || upper === 'E' || upper === '@' ||
-    upper === 'P' || upper === 'M' || upper === 'F'
+    upper === 'C' ||
+    upper === 'I' ||
+    upper === 'A' ||
+    upper === 'E' ||
+    upper === '@' ||
+    upper === 'P' ||
+    upper === 'M' ||
+    upper === 'F'
   ) {
     return upper;
   }

@@ -46,14 +46,9 @@ interface RatchetManifest {
   fixtures: RatchetFixture[];
 }
 
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-sequence',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-sequence');
 
-const manifest = JSON.parse(
-  readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8'),
-) as RatchetManifest;
+const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
 function fixtureDir(f: RatchetFixture): string {
   return join(GOLDENS_ROOT, f.slug);
@@ -75,25 +70,22 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 // AC1 -- every locked fixture stays conformant.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-sequence conformance ratchet (AC1)',
-  () => {
-    for (const f of manifest.fixtures) {
-      it(`sequence/${f.slug}: stays zero-diff against the pinned golden`, () => {
-        const golden = readGolden(f);
-        const markup = readSource(f);
-        const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
-        const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-        expect(
-          pass,
-          `sequence/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-            ` — ${JSON.stringify(diffs[0])}`,
-        ).toBe(true);
-        expect(diffs).toEqual([]);
-      });
-    }
-  },
-);
+describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratchet (AC1)', () => {
+  for (const f of manifest.fixtures) {
+    it(`sequence/${f.slug}: stays zero-diff against the pinned golden`, () => {
+      const golden = readGolden(f);
+      const markup = readSource(f);
+      const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
+      const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+      expect(
+        pass,
+        `sequence/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+          ` — ${JSON.stringify(diffs[0])}`,
+      ).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+  }
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-sequence goldens yet (skip gracefully, not a failure)', () => {
@@ -106,39 +98,36 @@ if (manifest.fixtures.length === 0) {
 // the failure message must name the slug + first diff path.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-sequence conformance ratchet — tamper detection (AC2)',
-  () => {
-    it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
-      const f = manifest.fixtures[0];
-      expect(f, 'expected at least one seeded fixture to exercise tamper detection').toBeDefined();
-      const target = f!;
+describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratchet — tamper detection (AC2)', () => {
+  it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
+    const f = manifest.fixtures[0];
+    expect(f, 'expected at least one seeded fixture to exercise tamper detection').toBeDefined();
+    const target = f!;
 
-      const golden = readGolden(target);
-      const markup = readSource(target);
-      const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
+    const golden = readGolden(target);
+    const markup = readSource(target);
+    const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
 
-      // Confirm the untampered pair really is zero-diff first, so the
-      // tampered-case failure below is attributable to the mutation alone.
-      const clean = compareSvg(ours, golden, 'deterministic');
-      expect(clean.pass, `sequence/${target.slug}: expected zero-diff baseline`).toBe(true);
+    // Confirm the untampered pair really is zero-diff first, so the
+    // tampered-case failure below is attributable to the mutation alone.
+    const clean = compareSvg(ours, golden, 'deterministic');
+    expect(clean.pass, `sequence/${target.slug}: expected zero-diff baseline`).toBe(true);
 
-      // Mutate a numeric attribute in-memory — never touches disk.
-      const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
-      expect(tampered).not.toBe(golden);
+    // Mutate a numeric attribute in-memory — never touches disk.
+    const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
+    expect(tampered).not.toBe(golden);
 
-      const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
-      expect(pass).toBe(false);
-      expect(diffs.length).toBeGreaterThan(0);
+    const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
+    expect(pass).toBe(false);
+    expect(diffs.length).toBeGreaterThan(0);
 
-      const message =
-        `sequence/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-        ` — ${JSON.stringify(diffs[0])}`;
-      expect(message).toContain(target.slug);
-      expect(message).toContain(diffs[0]!.path);
-    });
-  },
-);
+    const message =
+      `sequence/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+      ` — ${JSON.stringify(diffs[0])}`;
+    expect(message).toContain(target.slug);
+    expect(message).toContain(diffs[0]!.path);
+  });
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-sequence golden yet to exercise tamper detection against (AC2, deferred)', () => {

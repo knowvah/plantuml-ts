@@ -26,20 +26,14 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..', '..', '..', 'test-results', 'dot-cache', 'sequence',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'test-results', 'dot-cache', 'sequence');
 
 function goldenOf(slug: string): string {
   return readFileSync(join(CACHE, slug, 'in.svg'), 'utf8');
 }
 
 function oursFor(slug: string): string {
-  return renderFixtureSequence(
-    readFileSync(join(CACHE, slug, 'in.puml'), 'utf8'),
-    new DeterministicMeasurer(),
-  );
+  return renderFixtureSequence(readFileSync(join(CACHE, slug, 'in.puml'), 'utf8'), new DeterministicMeasurer());
 }
 
 /**
@@ -48,9 +42,7 @@ function oursFor(slug: string): string {
  * max over participants makes this the row rather than one head.
  */
 function headRow(svg: string): number {
-  const ys = [...svg.matchAll(/<g><title>[^<]*<\/title><rect x="[\d.]+" y="([\d.]+)"/g)].map((m) =>
-    Number(m[1]),
-  );
+  const ys = [...svg.matchAll(/<g><title>[^<]*<\/title><rect x="[\d.]+" y="([\d.]+)"/g)].map((m) => Number(m[1]));
   return Math.max(...ys);
 }
 
@@ -117,7 +109,9 @@ describe('collections — the stacked pair', () => {
     // one `dy(4)` from it. `COLLECTIONS_DELTA` is that 4.
     const boxOf = (svg: string): Array<[number, number, number]> =>
       [...svg.matchAll(/<rect x="([\d.]+)" y="([\d.]+)" width="(79\.45)" height="28"/g)].map((m) => [
-        Number(m[1]), Number(m[2]), Number(m[3]),
+        Number(m[1]),
+        Number(m[2]),
+        Number(m[3]),
       ]);
     const jar = boxOf(goldenOf('kibave-01-tafo463'));
     const ours = boxOf(oursFor('kibave-01-tafo463'));

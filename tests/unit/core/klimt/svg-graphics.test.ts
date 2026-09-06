@@ -401,7 +401,6 @@ describe('SvgGraphics — fill/stroke state', () => {
     expect(svg.createXml()).toContain('fill="url(#g0)"');
   });
 
-
   it('setStrokeWidth(0, ...) makes styleMe a no-op (no style attribute at all)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.setStrokeWidth(0, null);

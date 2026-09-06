@@ -5,18 +5,24 @@
  * `StringUtils.getQueueDirection` (`net.sourceforge.plantuml`).
  *
  * Split out of parse-helpers.ts so both files stay under 500 lines.
+ * `classifyEndpointShape`/`EndpointShape` were further split out to
+ * `link-grammar-endpoints.ts` (same reason, re-exported here unchanged
+ * for existing consumers); `EndpointPair`/`resolveEndpoints` stay behind
+ * since they are otherwise plain inversion bookkeeping local to this
+ * file's own link-assembly pipeline.
  *
  * Line shape (CommandLinkElement.getRegexConcat, after tokenizing):
  *   ENT1 [FIRST_LABEL] HEAD1 BODY1 [STYLE1] [DIRECTION] [INSIDE] [STYLE2]
  *   BODY2 HEAD2 [SECOND_LABEL] ENT2 [#color] [<<stereotype>>] [: label]
  */
 
-import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptiveLink, DescriptiveLinkStyle } from './ast.js';
-import { cleanId, extractLinkStereotype } from './parse-helpers.js';
+import { extractLinkStereotype } from './parse-helpers.js';
 
 import { LINK_LINE_RE, TAIL_TO_HEAD_TOKEN, HEAD_TO_TAIL_TOKEN, type LinkGroups } from './link-grammar-regex.js';
 export { LINK_LINE_RE };
+import { classifyEndpointShape, type EndpointShape, type EndpointPair } from './link-grammar-endpoints.js';
+export { classifyEndpointShape, type EndpointShape };
 
 const RE_BOTH_LABELS = new RegExp('^"([^"]+)"([^"]+)"([^"]+)"$');
 const RE_FIRST_LABEL_ONLY = new RegExp('^"([^"]+)"([^"]+)$');
@@ -93,7 +99,11 @@ function queueDirection(raw: string): LinkDirection {
  * checks; `length` is queue.length except LEFT/RIGHT collapse it to 1 (the
  * upstream `queue = "-"` override — minlen 0 on those edges).
  */
-interface DirectionInfo { inverted: boolean; length: number; queue: string }
+interface DirectionInfo {
+  inverted: boolean;
+  length: number;
+  queue: string;
+}
 
 function resolveDirectionInfo(g: LinkGroups): DirectionInfo {
   const queue = g.body1 + g.body2;
@@ -154,9 +164,7 @@ interface StyleFlags {
  *  `DescriptiveLink.colorOverride`'s doc comment). `plain`/`node` are
  *  matched (so they are never misclassified as a color) but otherwise
  *  produce no effect, mirroring upstream's own no-op branches. */
-const STYLE_KEYWORDS = new Set([
-  'dashed', 'dotted', 'bold', 'plain', 'hidden', 'norank', 'single', 'node',
-]);
+const STYLE_KEYWORDS = new Set(['dashed', 'dotted', 'bold', 'plain', 'hidden', 'norank', 'single', 'node']);
 const THICKNESS_TOKEN_RE = /^thickness=(\d+)$/i;
 
 /**
@@ -181,14 +189,24 @@ function parseArrowStyle(style1: string | undefined, style2: string | undefined)
       const token = rawToken.trim();
       if (token.length === 0) continue;
       const lower = token.toLowerCase();
-      if (lower === 'dashed') { result.style = 'dashed'; delete result.thickness; }
-      else if (lower === 'dotted') { result.style = 'dotted'; delete result.thickness; }
-      else if (lower === 'bold') { result.style = 'bold'; delete result.thickness; }
-      else if (lower === 'hidden') { result.hidden = true; }
-      else if (lower === 'norank') { result.norank = true; }
-      else if (lower === 'single') { result.single = true; }
-      else if (STYLE_KEYWORDS.has(lower)) { /* plain/node: upstream no-op */ }
-      else {
+      if (lower === 'dashed') {
+        result.style = 'dashed';
+        delete result.thickness;
+      } else if (lower === 'dotted') {
+        result.style = 'dotted';
+        delete result.thickness;
+      } else if (lower === 'bold') {
+        result.style = 'bold';
+        delete result.thickness;
+      } else if (lower === 'hidden') {
+        result.hidden = true;
+      } else if (lower === 'norank') {
+        result.norank = true;
+      } else if (lower === 'single') {
+        result.single = true;
+      } else if (STYLE_KEYWORDS.has(lower)) {
+        /* plain/node: upstream no-op */
+      } else {
         const m = THICKNESS_TOKEN_RE.exec(lower);
         if (m !== null) {
           result.thickness = Number(m[1]);
@@ -205,62 +223,6 @@ function parseArrowStyle(style1: string | undefined, style2: string | undefined)
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// Endpoint shape classification (CommandLinkElement.getDummy) — used both to
-// resolve a link endpoint's plain id and, for auto-created endpoints, the
-// USymbol shape to create it with.
-// ---------------------------------------------------------------------------
-
-const RE_EP_BRACKET = /^\[([^\]]+)\]$/;
-const RE_EP_IFACE = /^\(\)/;
-const RE_EP_USECASE = /^\([^)]+\)\/?$/;
-const RE_EP_ACTOR = /^:[^:]+:\/?$/;
-const RE_EP_QUOTED = /^"[^"]+"$/;
-
-export interface EndpointShape {
-  id: string;
-  symbol: USymbol;
-  /** Bare/quoted identifier — upstream LeafType.STILL_UNKNOWN. Resolved at
-   *  the end of parseDescription per DescriptionDiagram.makeDiagramReady:
-   *  actor when the diagram has any usecase/actor leaf, else interface. */
-  stillUnknown?: true;
-}
-
-/**
- * CommandLinkElement.getDummy(): `()x` → interface, `(x)`/`(x)/` → usecase /
- * business usecase, `:x:`/`:x:/` → actor / business actor, `[x]` → component.
- * A bare or quoted identifier is upstream `LeafType.STILL_UNKNOWN` (no
- * USymbol) — flagged stillUnknown and resolved at the end of the parse
- * (DescriptionDiagram.makeDiagramReady:81-88: actor if isUsecase(), else
- * INTERFACE — which then gets the shielded plaintext svek shape).
- *
- * The id is always `cleanId(token)` (getDummy:347,358 — every branch cleans
- * the raw ident before creating/looking up the quark), the same normalizer a
- * plain keyword declaration's CODE goes through
- * (CommandCreateElementFull.executeArg:302 via parseNameSection). Symbol
- * classification is a separate, RAW-token character sniff (getDummy's
- * `codeChar`) that runs *before* cleaning — a declaration and a link endpoint
- * for the same notation therefore always resolve to the identical id.
- */
-export function classifyEndpointShape(token: string): EndpointShape {
-  const t = token.trim();
-  if (RE_EP_BRACKET.test(t)) return { id: cleanId(t), symbol: 'component' };
-  if (RE_EP_IFACE.test(t)) return { id: cleanId(t), symbol: 'interface' };
-  if (RE_EP_USECASE.test(t)) {
-    return { id: cleanId(t), symbol: t.endsWith('/') ? 'usecase-business' : 'usecase' };
-  }
-  if (RE_EP_ACTOR.test(t)) {
-    return { id: cleanId(t), symbol: t.endsWith('/') ? 'actor-business' : 'actor' };
-  }
-  return {
-    id: RE_EP_QUOTED.test(t) ? cleanId(t) : t,
-    symbol: 'rectangle',
-    stillUnknown: true,
-  };
-}
-
-interface EndpointPair { from: EndpointShape; to: EndpointShape }
-
 /** Inversion (LEFT/UP direction) swaps which raw ENT token is "from". */
 function resolveEndpoints(g: LinkGroups, inverted: boolean): EndpointPair {
   return {
@@ -273,7 +235,10 @@ function resolveEndpoints(g: LinkGroups, inverted: boolean): EndpointPair {
 // Match → DescriptiveLink assembly (CommandLinkElement.executeArg)
 // ---------------------------------------------------------------------------
 
-interface DecorPair { tail: string; head: string }
+interface DecorPair {
+  tail: string;
+  head: string;
+}
 
 /**
  * Inversion (LEFT/UP direction) swaps from/to and, symmetrically, which
@@ -292,12 +257,13 @@ function resolveDecorPair(head1: string, head2: string, inverted: boolean): Deco
   };
 }
 
-interface LabelPair { first: string | undefined; second: string | undefined }
+interface LabelPair {
+  first: string | undefined;
+  second: string | undefined;
+}
 
 function resolveLabelPair(g: LinkGroups, inverted: boolean): LabelPair {
-  return inverted
-    ? { first: g.secondLabel, second: g.firstLabel }
-    : { first: g.firstLabel, second: g.secondLabel };
+  return inverted ? { first: g.secondLabel, second: g.firstLabel } : { first: g.firstLabel, second: g.secondLabel };
 }
 
 /** LinkType queue check (getLinkType): '.' → dashed, '~' → dotted, '=' →
@@ -350,9 +316,11 @@ function linkStyleFromQueue(queue: string): DescriptiveLinkStyle {
  * is guaranteed to match: `g.stereotype` is only ever set from that same
  * capturing group.
  */
-function resolveStereotypeAndLabel(
-  g: LinkGroups,
-): { stereotype?: string; label?: string; stereotypeIsLinkLabel: boolean } {
+function resolveStereotypeAndLabel(g: LinkGroups): {
+  stereotype?: string;
+  label?: string;
+  stereotypeIsLinkLabel: boolean;
+} {
   if (g.stereotype !== undefined) {
     // Pre-colon form -- style-selector/`remove` input only, NEVER drawn as
     // edge text (see `DescriptiveLink.stereotypeIsLinkLabel`'s doc comment).
@@ -396,7 +364,11 @@ interface LinkBuildArgs {
 
 function buildLinkFromArgs(a: LinkBuildArgs): DescriptiveLink {
   const link: DescriptiveLink = {
-    from: a.from, to: a.to, style: a.style, arrowHead: a.arrowHead, length: a.length,
+    from: a.from,
+    to: a.to,
+    style: a.style,
+    arrowHead: a.arrowHead,
+    length: a.length,
   };
   if (a.firstLabel !== undefined) link.firstLabel = a.firstLabel;
   if (a.secondLabel !== undefined) link.secondLabel = a.secondLabel;
@@ -451,16 +423,27 @@ export function parseLinkLine(groups: Record<string, string>): ParsedLink {
   const { stereotype, label, stereotypeIsLinkLabel } = resolveStereotypeAndLabel(g);
 
   const link = buildLinkFromArgs({
-    from: from.id, to: to.id,
+    from: from.id,
+    to: to.id,
     // A bracket dashed/dotted/bold keyword OVERRIDES the queue-char style --
     // upstream applies `applyStyle` strictly after `getLinkType`
     // (`CommandLinkElement.executeArg:301,330`).
-    style: arrowStyle.style ?? linkStyleFromQueue(queue), arrowHead, length,
-    firstLabel: labels.first, secondLabel: labels.second,
-    tailDecor: decors.tail, headDecor: decors.head,
-    hidden, norank, single, rawStyle,
-    thicknessOverride: thickness, colorOverride: color,
-    stereotype, stereotypeIsLinkLabel, label,
+    style: arrowStyle.style ?? linkStyleFromQueue(queue),
+    arrowHead,
+    length,
+    firstLabel: labels.first,
+    secondLabel: labels.second,
+    tailDecor: decors.tail,
+    headDecor: decors.head,
+    hidden,
+    norank,
+    single,
+    rawStyle,
+    thicknessOverride: thickness,
+    colorOverride: color,
+    stereotype,
+    stereotypeIsLinkLabel,
+    label,
   });
   return { from, to, link, inverted };
 }

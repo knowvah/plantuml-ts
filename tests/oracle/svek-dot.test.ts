@@ -26,9 +26,7 @@ function dot(opts: {
   if (opts.ranksep !== undefined) lines.push(`ranksep=${opts.ranksep.toFixed(6)};`);
   if (opts.splinesLine !== undefined) lines.push(opts.splinesLine);
   const minlen = opts.minlen ?? 1;
-  lines.push(
-    `sh0007->sh0006[arrowtail=none,arrowhead=none,minlen=${minlen},color="#000008"];`,
-  );
+  lines.push(`sh0007->sh0006[arrowtail=none,arrowhead=none,minlen=${minlen},color="#000008"];`);
   lines.push('sh0006 [shape=rect,label="",width=2.141873,height=0.985786,color="#000006"];');
   lines.push('sh0007 [shape=rect,label="",width=0.901204,height=1.402452,color="#000007"];');
   lines.push('}');
@@ -57,9 +55,7 @@ describe('compareStructural — rankdir/nodesep/ranksep parity bar (T1)', () => 
 
   it('oracle has no rankdir, candidate emits rankdir=LR: rankdirOk false (babafi-51)', () => {
     const oracle = parseSvekDot(dot({ nodesep: 0.486111, ranksep: 0.833333, minlen: 0 }));
-    const candidate = parseSvekDot(
-      dot({ rankdir: 'LR', nodesep: 0.486111, ranksep: 0.833333, minlen: 0 }),
-    );
+    const candidate = parseSvekDot(dot({ rankdir: 'LR', nodesep: 0.486111, ranksep: 0.833333, minlen: 0 }));
     const diff = compareStructural(oracle, candidate);
 
     expect(diff.rankdirOk).toBe(false);

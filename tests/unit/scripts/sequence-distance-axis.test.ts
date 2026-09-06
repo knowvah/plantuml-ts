@@ -18,13 +18,7 @@
  */
 import { describe, it, expect } from 'vitest';
 
-import {
-  AXES,
-  axisOf,
-  axisTotals,
-  bucketOf,
-  formatAxisTable,
-} from '../../../scripts/sequence-distance-axis.js';
+import { AXES, axisOf, axisTotals, bucketOf, formatAxisTable } from '../../../scripts/sequence-distance-axis.js';
 import type { DistanceTotals } from '../../../scripts/sequence-geometry-distance.js';
 
 const t = (distance: number, count: number): DistanceTotals => ({ distance, count });

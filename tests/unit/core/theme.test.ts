@@ -52,9 +52,7 @@ describe('resolveElementPaint (T3 / D4)', () => {
   it('falls through to the root default for an unrecognized sname without throwing (AC3)', () => {
     const theme = freshTheme();
     expect(() => resolveElementPaint(theme, 'totally-unknown', 'background')).not.toThrow();
-    expect(resolveElementPaint(theme, 'totally-unknown', 'background')).toBe(
-      theme.colors.nodeBackground,
-    );
+    expect(resolveElementPaint(theme, 'totally-unknown', 'background')).toBe(theme.colors.nodeBackground);
   });
 
   it('resolves only the role that is set, cascading the others', () => {

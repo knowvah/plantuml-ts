@@ -58,18 +58,28 @@ describe('parseMagicArrowLabel (G2 item 44)', () => {
 describe('magicArrowAngle (G2 item 44)', () => {
   // Jar-verified against `lojepe-37-liri985`'s straight horizontal edge
   // (start (48.73,31) -> end (105.67,31), atan2(dx,dy) = atan2(+,0) = PI/2).
-  it('computes atan2(dx, dy) over the edge\'s own start/end points (forward)', () => {
-    const points = [{ x: 48.73, y: 31 }, { x: 105.67, y: 31 }];
+  it("computes atan2(dx, dy) over the edge's own start/end points (forward)", () => {
+    const points = [
+      { x: 48.73, y: 31 },
+      { x: 105.67, y: 31 },
+    ];
     expect(magicArrowAngle(points, 'forward')).toBeCloseTo(Math.PI / 2, 10);
   });
 
   it('adds PI for the backward direction', () => {
-    const points = [{ x: 48.73, y: 31 }, { x: 105.67, y: 31 }];
+    const points = [
+      { x: 48.73, y: 31 },
+      { x: 105.67, y: 31 },
+    ];
     expect(magicArrowAngle(points, 'backward')).toBeCloseTo(Math.PI / 2 + Math.PI, 10);
   });
 
   it('uses only the first and last point of a multi-point spline', () => {
-    const points = [{ x: 0, y: 0 }, { x: 999, y: 999 }, { x: 10, y: 0 }];
+    const points = [
+      { x: 0, y: 0 },
+      { x: 999, y: 999 },
+      { x: 10, y: 0 },
+    ];
     expect(magicArrowAngle(points, 'forward')).toBeCloseTo(Math.PI / 2, 10);
   });
 });
@@ -97,14 +107,14 @@ describe('magicArrowGlyphPoints (G2 item 44)', () => {
     expect(tip!.y).toBeCloseTo(20 + 6.5, 6);
   });
 
-  it('the y-center tracks the CALLER\'s arrowFontSize, not ARROW_GLYPH_SIZE', () => {
+  it("the y-center tracks the CALLER's arrowFontSize, not ARROW_GLYPH_SIZE", () => {
     // TextBlockArrow2.java:68: UTranslate(triSize/2, size/2) -- the
     // y-translate is the FULL font size, never the draw-only ink triangle.
     const [tip] = magicArrowGlyphPoints(0, 0, Math.PI / 2, 20);
     expect(tip!.y).toBeCloseTo(10, 6); // 20/2, not ARROW_GLYPH_SIZE/2
   });
 
-  it('the ink radius follows the CALLER\'s arrowFontSize -- (int)(size*.80), TextBlockArrow2.java:64-65', () => {
+  it("the ink radius follows the CALLER's arrowFontSize -- (int)(size*.80), TextBlockArrow2.java:64-65", () => {
     // At 20: triSize = trunc(16) = 16, so the tip sits at originX + 16 and
     // each back corner is (16/2)*(1-cos(4PI/5)) = 14.472 behind it -- the
     // 13-based ARROW_GLYPH_SIZE (10) would leave both at 10 / 9.045.
@@ -150,7 +160,7 @@ describe('hasSeveralGuideLines (D6, Display.java:715-740)', () => {
     expect(hasSeveralGuideLines(['a', 'ab >'])).toBe(true);
   });
 
-  it('gobuco/lapoma\'s exact 4-line label is a several-guide-line label', () => {
+  it("gobuco/lapoma's exact 4-line label is a several-guide-line label", () => {
     expect(hasSeveralGuideLines(['ab >', 'cd <', '< ef', '> gh'])).toBe(true);
   });
 });
@@ -164,7 +174,7 @@ describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
   // gobuco-16-ruke239 class`): WIDTH="29" HEIGHT="54" after edgeLabelAttrs'
   // own +2*marginLabel and floor -- this function returns the PRE-margin
   // block (29.4625 x 54), matching computeMeasuredLabelAttrs' contract.
-  it('sizes gobuco/lapoma\'s 4-line all-token label to the oracle box', () => {
+  it("sizes gobuco/lapoma's 4-line all-token label to the oracle box", () => {
     const box = computeGuideLinesBox(['ab >', 'cd <', '< ef', '> gh'], font, measurer);
     expect(box.width).toBeCloseTo(27.4625, 4); // + 2*1 margin = 29.4625 -> floors to 29
     expect(box.height).toBe(52); // + 2*1 margin = 54

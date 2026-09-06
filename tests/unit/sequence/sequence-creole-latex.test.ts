@@ -19,10 +19,7 @@ import { describe, it, expect } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
-import {
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-} from '../../../src/diagrams/sequence/sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from '../../../src/diagrams/sequence/sequence-creole.js';
 import { sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';

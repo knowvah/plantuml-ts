@@ -17,9 +17,7 @@ describe('CodeIteratorIf orphan directives (SI6: an error, as upstream has it)',
   });
 
   it('!elseif with no matching !if throws No if related to this elseif', () => {
-    expect(() => runBody([line('!elseif 1', 'ELSEIF')])).toThrow(
-      'No if related to this elseif',
-    );
+    expect(() => runBody([line('!elseif 1', 'ELSEIF')])).toThrow('No if related to this elseif');
   });
 
   it('the throw is an EaterException, so it carries the offending line', () => {
@@ -44,10 +42,7 @@ describe('CodeIteratorIf — an UNCLOSED !ifdef is NOT an orphan directive', () 
   });
 
   it('a FALSE unclosed !ifdef suppresses the rest of the document and does not throw', () => {
-    const { memory } = runBody([
-      line('!ifdef NEVER', 'IFDEF'),
-      line('!$x = 1', 'AFFECTATION'),
-    ]);
+    const { memory } = runBody([line('!ifdef NEVER', 'IFDEF'), line('!$x = 1', 'AFFECTATION')]);
     expect(memory.getVariable('$x')).toBeUndefined();
   });
 });

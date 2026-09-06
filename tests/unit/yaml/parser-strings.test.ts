@@ -37,7 +37,9 @@ describe('YAML parser — quoted strings + flow sequences', () => {
 
   it('boolean and numeric values stay as strings', () => {
     expect(parse(['pi: 3.14159', 'xmas: true', 'count: 3'])).toEqual({
-      pi: '3.14159', xmas: 'true', count: '3',
+      pi: '3.14159',
+      xmas: 'true',
+      count: '3',
     });
   });
 

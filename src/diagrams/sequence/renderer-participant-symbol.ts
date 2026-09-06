@@ -322,10 +322,7 @@ function glyphOffset(
  * is a pure upstream constant for five of the six kinds and the collections
  * delta for the sixth, so no `Theme` lookup reaches it.
  */
-export function measureParticipantSymbol(
-  type: GlyphParticipantType,
-  theme: Theme,
-): { width: number; height: number } {
+export function measureParticipantSymbol(type: GlyphParticipantType, theme: Theme): { width: number; height: number } {
   if (type === 'actor') {
     // The ONE kind whose glyph dimension is theme-dependent:
     // `ActorStickMan` 27x60 (or 26x33 hollow, 55x61 awesome) per
@@ -366,9 +363,21 @@ export function renderParticipantSymbol(
     scale: k,
     minDim: { width: (geo.x + geo.width) / k, height: (geo.y + geo.height) / k },
   });
-  const ug = UGraphicSvg.build(seedOf(`${type}:${geo.x},${geo.y}`), option, VERSION_PLACEHOLDER, DRIVER_BOUNDER, MEASURER);
+  const ug = UGraphicSvg.build(
+    seedOf(`${type}:${geo.x},${geo.y}`),
+    option,
+    VERSION_PLACEHOLDER,
+    DRIVER_BOUNDER,
+    MEASURER,
+  );
 
-  const unscaled: ParticipantSymbolGeo = { ...geo, x: geo.x / k, y: geo.y / k, width: geo.width / k, height: geo.height / k };
+  const unscaled: ParticipantSymbolGeo = {
+    ...geo,
+    x: geo.x / k,
+    y: geo.y / k,
+    width: geo.width / k,
+    height: geo.height / k,
+  };
   const glyph = glyphFor(type, unscaled, opts.theme);
   const offset = glyphOffset(type, unscaled, glyph.calculateDimension(ug.getStringBounder()), opts.head);
   glyph.drawU(ug.apply(new UTranslate(unscaled.x, unscaled.y)).apply(offset));

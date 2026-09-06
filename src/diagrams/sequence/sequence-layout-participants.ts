@@ -21,9 +21,7 @@ import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import {
-  ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, TOP_MARGIN,
-} from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, TOP_MARGIN } from './sequence-layout-shared.js';
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
@@ -36,16 +34,16 @@ import {
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import {
-  participantBadgeGeo, participantLabelCy, symbolPreferredHeight, symbolPreferredWidth,
+  participantBadgeGeo,
+  participantLabelCy,
+  symbolPreferredHeight,
+  symbolPreferredWidth,
 } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import { displayLines } from './text-block-geo.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
-import {
-  spriteToPngDataUri,
-  spriteMonochromeAsLike,
-} from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -89,16 +87,19 @@ export function computeParticipantLayout(
   measurer: StringMeasurer,
   originX: number = LEFT_MARGIN,
 ): ParticipantLayoutResult {
-  const sortedParticipants = [...ast.participants].sort(
-    (a, b) => a.order - b.order,
-  );
+  const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
   scanMessageLabels(ast.events, sortedParticipants, theme, measurer, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
-  const { participantGeos, participantMap, participantIndex, maxParticipantHeight } =
-    positionParticipants(sortedParticipants, participantWidths, constraints, ctx, originX);
+  const { participantGeos, participantMap, participantIndex, maxParticipantHeight } = positionParticipants(
+    sortedParticipants,
+    participantWidths,
+    constraints,
+    ctx,
+    originX,
+  );
 
   return {
     sortedParticipants,
@@ -150,10 +151,7 @@ function scanMessageLabels(
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
         const lines = ev.label === '' ? [] : displayLines(ev.label);
-        const labelWidth =
-          lines.length === 0
-            ? 0
-            : Math.max(...lines.map((l) => measurer.measure(l, arrowSpec).width));
+        const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => measurer.measure(l, arrowSpec).width));
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),
@@ -191,10 +189,7 @@ function scanMessageLabels(
  * two halves must land together: `renderer-participant-shapes.ts` draws the
  * glyph and this reserves the column (`planning/sizer-renderer-parity.md`).
  */
-function computeParticipantWidths(
-  sortedParticipants: Participant[],
-  ctx: ParticipantLayoutCtx,
-): number[] {
+function computeParticipantWidths(sortedParticipants: Participant[], ctx: ParticipantLayoutCtx): number[] {
   const { theme, measurer } = ctx;
   const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
@@ -488,20 +483,13 @@ function charBadgeFor(p: Participant, theme: Theme): ParticipantBadge | undefine
   if (p.stereotype === undefined) return undefined;
   const deco = parseCircledCharDecoration(stereotypeInner(p.stereotype));
   if (deco === undefined) return undefined;
-  const r = resolveBadgeRadius(
-    theme.colors.graph.circledCharacterFontSize,
-    theme.colors.graph.circledCharacterRadius,
-  );
+  const r = resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius);
   return { kind: 'char', color: deco.color, width: r * 2, height: r * 2 };
 }
 
 /** Either badge form, sprite first -- `createStereotype` tries the sprite
  *  before the circled character (`Display.java:671-676`). */
-function anyBadgeFor(
-  p: Participant,
-  ctx: ParticipantLayoutCtx,
-  background: Paint,
-): ParticipantBadge | undefined {
+function anyBadgeFor(p: Participant, ctx: ParticipantLayoutCtx, background: Paint): ParticipantBadge | undefined {
   return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
 

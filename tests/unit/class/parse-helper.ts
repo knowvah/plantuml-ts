@@ -24,8 +24,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST {
   const refusal = parseRefusalOf(parsed);
   if (refusal !== undefined) {
     throw new Error(
-      `class parser refused this source at line ${String(refusal.line)} ` +
-        `(${refusal.kind}): ${refusal.message}`,
+      `class parser refused this source at line ${String(refusal.line)} ` + `(${refusal.kind}): ${refusal.message}`,
     );
   }
   // `parsed` is `ClassDiagramAST | ParseRefusal` and the refusal arm is

@@ -22,10 +22,7 @@ import { RELATIONSHIP_COMMANDS } from './class-command-relationships.js';
 import { DECLARATION_COMMANDS } from './class-command-declarations.js';
 import { NOTE_COMMANDS } from './class-command-notes.js';
 import { DESCRIPTIVE_LEAF_COMMANDS } from './class-descriptive-leaf-command.js';
-import {
-  applyStereotypeStatement,
-  STEREOTYPE_STATEMENT_RE,
-} from './class-stereotype-command.js';
+import { applyStereotypeStatement, STEREOTYPE_STATEMENT_RE } from './class-stereotype-command.js';
 import type { Command } from './class-command-types.js';
 
 /**

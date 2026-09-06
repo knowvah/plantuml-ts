@@ -6,11 +6,7 @@
  * `Line`/`Atom` surface bound to an injected `NestedDiagramRenderer`.
  */
 import { describe, expect, it, vi } from 'vitest';
-import {
-  EmbeddedDiagram,
-  getEmbeddedType,
-  type NestedDiagramRenderer,
-} from '../../../src/core/EmbeddedDiagram.js';
+import { EmbeddedDiagram, getEmbeddedType, type NestedDiagramRenderer } from '../../../src/core/EmbeddedDiagram.js';
 import { HorizontalAlignment } from '../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { XDimension2D } from '../../../src/core/klimt/geom/XDimension2D.js';
 import { UTranslate } from '../../../src/core/klimt/UTranslate.js';
@@ -47,7 +43,8 @@ class RecordingUGraphic implements UGraphic {
 
   apply(change: UChange): UGraphic {
     if (change instanceof UTranslate) return new RecordingUGraphic(this.draws, this.translate.compose(change), this.bg);
-    if (change instanceof Back) return new RecordingUGraphic(this.draws, this.translate, change.getBackColor() as string);
+    if (change instanceof Back)
+      return new RecordingUGraphic(this.draws, this.translate, change.getBackColor() as string);
     return this;
   }
 
@@ -140,7 +137,7 @@ describe('getEmbeddedType', () => {
     expect(getEmbeddedType('}}')).toBeNull();
   });
 
-  it('a leading non-breaking space (U+00A0) is NOT skipped as whitespace -- Java\'s isWhitespace excludes it too', () => {
+  it("a leading non-breaking space (U+00A0) is NOT skipped as whitespace -- Java's isWhitespace excludes it too", () => {
     expect(getEmbeddedType(' {{salt')).toBeNull();
   });
 });
@@ -183,15 +180,7 @@ describe('EmbeddedDiagram.createAndSkip', () => {
     const lines = ['before', '{{salt', 'inner', '}}', 'after', '}}', 'unreached'];
     const diagram = EmbeddedDiagram.createAndSkip('uml', iterOf(lines), null, capturing);
     diagram.calculateDimension(sb);
-    expect(seenSource).toEqual([
-      '@startuml',
-      'before',
-      '{{salt',
-      'inner',
-      '}}',
-      'after',
-      '@enduml',
-    ]);
+    expect(seenSource).toEqual(['@startuml', 'before', '{{salt', 'inner', '}}', 'after', '@enduml']);
   });
 
   it('bare "{{" also opens a nested block (getEmbeddedType returns "uml", non-null)', () => {
@@ -247,7 +236,7 @@ describe('EmbeddedDiagram.createAndSkip', () => {
     expect(seenSource).toEqual(['@startsalt', '', 'x', '@endsalt']);
   });
 
-  it('a whitespace-only line (all chars <= 0x20) is not the terminator either (trim2\'s all-trimmed fast path)', () => {
+  it("a whitespace-only line (all chars <= 0x20) is not the terminator either (trim2's all-trimmed fast path)", () => {
     let seenSource: readonly string[] | undefined;
     const capturing: NestedDiagramRenderer = {
       render: (source) => {
@@ -281,7 +270,7 @@ describe('EmbeddedDiagram.getNeutrons (java:252-255, ADR-9)', () => {
 });
 
 describe('EmbeddedDiagram.calculateDimensionSlow (java:126-152, TeaVM branch)', () => {
-  it('delegates to the renderer TextBlock\'s calculateDimension, memoized (java:154-163)', () => {
+  it("delegates to the renderer TextBlock's calculateDimension, memoized (java:154-163)", () => {
     const spy = vi.fn(() => fakeTextBlock(30, 20));
     const diagram = EmbeddedDiagram.from(null, ['@startuml', '@enduml'], { render: spy });
     expect(diagram.calculateDimension(sb)).toEqual(new XDimension2D(30, 20));

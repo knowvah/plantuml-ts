@@ -1,18 +1,10 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { ACTION_H_PAD, NOTE_FOLD } from '../activity-layout-constants.js';
-
 
 export class GtileNote extends TileLeaf {
   readonly kind = 'gtile-note' as const;

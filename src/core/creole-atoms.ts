@@ -184,9 +184,7 @@ export interface DrawablePrimitive {
  * time too, producing REAL `kind: 'drawable'` primitives instead of a
  * synthesized ink box -- see that function's doc comment.
  */
-export type AtomImageResolver = (
-  atom: InlineAtomToken,
-) =>
+export type AtomImageResolver = (atom: InlineAtomToken) =>
   | {
       readonly kind: 'image';
       readonly href: string;
@@ -252,7 +250,9 @@ export const SPRITE_NAME_PATTERN_SOURCE = '[-\\p{L}0-9_/]+';
  *  `#`) or undefined; 2 sprite name; 3 optional `{scale=N,color=X}` block.
  *  Exported for `sprite-prefetch.ts#scanSpriteNames` (si11b ADR-4). */
 export const SPRITE_PATTERN_SOURCE =
-  '<(#[A-Za-z0-9_]+)?\\$(' + SPRITE_NAME_PATTERN_SOURCE + ')' +
+  '<(#[A-Za-z0-9_]+)?\\$(' +
+  SPRITE_NAME_PATTERN_SOURCE +
+  ')' +
   '((?:[{,]?(?:(?:scale=|\\*)[0-9.]+)?(?:,?color[= :](?:#[0-9a-fA-F]{1,8}|[A-Za-z0-9_]+))?\\}?)?)>';
 
 /** Parser.getScale's SCALE pattern, java Parser.java:67. */

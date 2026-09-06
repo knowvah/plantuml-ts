@@ -284,9 +284,7 @@ describe('LimitFinder -- per-shape extent math', () => {
 
   it('DotPath: via its MinMax (all four points of every bezier)', () => {
     const lf = LimitFinder.create(sb, true);
-    const dp = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 10, ctrly1: -5, ctrlx2: 20, ctrly2: 15, x2: 30, y2: 10 },
-    ]);
+    const dp = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 10, ctrly1: -5, ctrlx2: 20, ctrly2: 15, x2: 30, y2: 10 }]);
     lf.draw(dp);
     const mm = lf.getMinMax();
     expect(mm.getMinX()).toBe(0);
@@ -297,9 +295,7 @@ describe('LimitFinder -- per-shape extent math', () => {
 
   it('DotPath: translate composes into every accumulated point', () => {
     const lf = LimitFinder.create(sb, false);
-    const dp = DotPath.fromBeziers([
-      { x1: 0, y1: 0, ctrlx1: 0, ctrly1: 0, ctrlx2: 0, ctrly2: 0, x2: 10, y2: 10 },
-    ]);
+    const dp = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 0, ctrly1: 0, ctrlx2: 0, ctrly2: 0, x2: 10, y2: 10 }]);
     lf.apply(new UTranslate(5, 5)).draw(dp);
     const mm = lf.getMinMax();
     expect(mm.getMinX()).toBe(5);

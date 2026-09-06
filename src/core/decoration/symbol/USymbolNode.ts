@@ -163,7 +163,9 @@ export class USymbolNode extends USymbol {
         const dimStereoWidth = dimStereo.getWidth();
         const posStereoY = 2;
         const posStereoX =
-          stereoAlignment === HorizontalAlignment.RIGHT ? width - dimStereoWidth - getMargin().getX1() : (width - dimStereoWidth) / 2;
+          stereoAlignment === HorizontalAlignment.RIGHT
+            ? width - dimStereoWidth - getMargin().getX1()
+            : (width - dimStereoWidth) / 2;
         stereotype.drawU(ug.apply(new UTranslate(posStereoX, posStereoY)));
         const dimTitle = title.calculateDimension(ug.getStringBounder());
         const dimTitleWidth = dimTitle.getWidth();

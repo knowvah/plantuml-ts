@@ -96,7 +96,7 @@ function writeFragmentsFromLines(lines: readonly string[], outDir: string, sourc
   const registry = createSpriteRegistry();
   const names = new Set<string>();
 
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     const result = matchSpriteCommand(lines, i, registry);
     if (result === null) {
       i += 1;

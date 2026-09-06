@@ -123,7 +123,6 @@ export interface JsonGeometry {
 // Value display helpers
 // ---------------------------------------------------------------------------
 
-
 import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
@@ -256,11 +255,7 @@ function layoutParseFailure(
   };
 }
 
-export function layoutJson(
-  ast: JsonDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): JsonGeometry {
+export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMeasurer): JsonGeometry {
   // Handle parse failure: return an error geometry that the renderer will
   // display as PlantUML's canonical "Your data does not sound like JSON data".
   const margin = marginsOf(theme);
@@ -295,13 +290,7 @@ export function layoutJson(
 
   // Measure each node
   const measured = flatNodes.map((fn) =>
-    measureNode(
-      fn,
-      highlightMap.get(fn.id) ?? EMPTY_MAP,
-      measurer,
-      nodeFontSize,
-      measureOptions,
-    ),
+    measureNode(fn, highlightMap.get(fn.id) ?? EMPTY_MAP, measurer, nodeFontSize, measureOptions),
   );
 
   // Build dot input graph. A5/T6 (ADR-1): dimensions are SWAPPED on the way in
@@ -427,15 +416,16 @@ export function layoutJson(
   // arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
   const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
     points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
-    ...(e.epX !== undefined && e.epY !== undefined
-      ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } }
-      : {}),
+    ...(e.epX !== undefined && e.epY !== undefined ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } } : {}),
     spline: true,
   }));
 
   const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
   const result: JsonGeometry = {
-    nodes, edges, width, height,
+    nodes,
+    edges,
+    width,
+    height,
     finalDimension: { width: finalWidth, height: finalHeight },
     // Type-carrying only: resolved to a factor at RENDER time against these
     // (unscaled) dims, mirroring `TextBlockExporter#computeScaleFactor(dim)`

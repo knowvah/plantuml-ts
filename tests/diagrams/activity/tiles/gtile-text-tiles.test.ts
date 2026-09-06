@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileNote } from '../../../../src/diagrams/activity/tiles/gtile-note.js';
-import {
-  NORTH_HOOK,
-  SOUTH_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityAction, ActivityNote } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';

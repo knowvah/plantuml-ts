@@ -46,7 +46,7 @@ describe('resolveArrowLabelFont (T2, D3)', () => {
     expect(resolveArrowLabelFont(theme).weight).toBe('bold');
   });
 
-  it("ticuxa shape: skinparam ClassArrowFontSize 58 + FontName Courier + FontStyle Italic", () => {
+  it('ticuxa shape: skinparam ClassArrowFontSize 58 + FontName Courier + FontStyle Italic', () => {
     const theme = withArrowGraph({
       arrowFontSize: 58,
       arrowFontFamily: 'Courier',
@@ -102,7 +102,10 @@ describe('resolveArrowLabelFont colour + resolveCardinalityFontColor (SI26 T1)',
 
   it('b: ArrowFontColor green THEN defaultFontColor red -> #FF0000 (later wins)', () => {
     const { theme } = resolveSkinparam(
-      new Map([['arrowfontcolor', 'green'], ['defaultfontcolor', 'red']]),
+      new Map([
+        ['arrowfontcolor', 'green'],
+        ['defaultfontcolor', 'red'],
+      ]),
       defaultTheme,
     );
     expect(resolveArrowLabelFont(theme).color).toBe('#FF0000');
@@ -110,7 +113,10 @@ describe('resolveArrowLabelFont colour + resolveCardinalityFontColor (SI26 T1)',
 
   it('g: defaultFontColor red THEN ArrowFontColor green -> #008000 (later wins)', () => {
     const { theme } = resolveSkinparam(
-      new Map([['defaultfontcolor', 'red'], ['arrowfontcolor', 'green']]),
+      new Map([
+        ['defaultfontcolor', 'red'],
+        ['arrowfontcolor', 'green'],
+      ]),
       defaultTheme,
     );
     expect(resolveArrowLabelFont(theme).color).toBe('#008000');

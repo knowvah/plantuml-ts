@@ -39,8 +39,14 @@ export function extractStyleMap(source: UmlSource): StyleMap {
   let inside = false;
   for (const rawLine of source.lines) {
     const line = rawLine.trim();
-    if (/^<style>/i.test(line)) { inside = true; continue; }
-    if (/^<\/style>/i.test(line)) { inside = false; continue; }
+    if (/^<style>/i.test(line)) {
+      inside = true;
+      continue;
+    }
+    if (/^<\/style>/i.test(line)) {
+      inside = false;
+      continue;
+    }
     if (inside) content += rawLine + '\n';
   }
   return content.length > 0 ? parseStyleBlock(content) : new Map<string, Map<string, string>>();
@@ -60,7 +66,10 @@ export function colorFromStereo(
   // per-series-type color resolution (already over CCN threshold before
   // mission G0b/T6 moved it here verbatim from parser.ts).
   if (stereo === undefined) return null;
-  const name = stereo.replace(/^<<\s*/, '').replace(/\s*>>$/, '').toLowerCase();
+  const name = stereo
+    .replace(/^<<\s*/, '')
+    .replace(/\s*>>$/, '')
+    .toLowerCase();
   const decls = styleMap.get(`.${name}`);
   if (decls === undefined) return null;
   if (type === 'scatter') {
@@ -74,12 +83,12 @@ export function colorFromStereo(
 }
 
 // Resolve MarkerShape from a stereotype's style-class entry (scatter/line).
-export function markerShapeFromStereo(
-  stereo: string | undefined,
-  styleMap: StyleMap,
-): MarkerShape | null {
+export function markerShapeFromStereo(stereo: string | undefined, styleMap: StyleMap): MarkerShape | null {
   if (stereo === undefined) return null;
-  const name = stereo.replace(/^<<\s*/, '').replace(/\s*>>$/, '').toLowerCase();
+  const name = stereo
+    .replace(/^<<\s*/, '')
+    .replace(/\s*>>$/, '')
+    .toLowerCase();
   const decls = styleMap.get(`.${name}`);
   if (decls === undefined) return null;
   const shape = decls.get('markershape')?.toLowerCase();
@@ -90,12 +99,12 @@ export function markerShapeFromStereo(
 }
 
 // Resolve MarkerSize from a stereotype's style-class entry.
-export function markerSizeFromStereo(
-  stereo: string | undefined,
-  styleMap: StyleMap,
-): number | null {
+export function markerSizeFromStereo(stereo: string | undefined, styleMap: StyleMap): number | null {
   if (stereo === undefined) return null;
-  const name = stereo.replace(/^<<\s*/, '').replace(/\s*>>$/, '').toLowerCase();
+  const name = stereo
+    .replace(/^<<\s*/, '')
+    .replace(/\s*>>$/, '')
+    .toLowerCase();
   const decls = styleMap.get(`.${name}`);
   if (decls === undefined) return null;
   const raw = decls.get('markersize');
@@ -227,9 +236,7 @@ export function parseCustomTicks(ticksStr: string): Map<number, string> | null {
 // Returns null on parse failure.
 // ---------------------------------------------------------------------------
 
-export function parseCoordinatePairs(
-  data: string,
-): { xValues: number[]; yValues: number[] } | null {
+export function parseCoordinatePairs(data: string): { xValues: number[]; yValues: number[] } | null {
   const cleaned = data.replace(/\s+/g, '');
   const pairs = cleaned.split('),(');
   const xValues: number[] = [];
@@ -271,7 +278,10 @@ export function parseYValues(data: string): number[] | null {
 
 export function stereoToMarker(stereo: string | undefined): MarkerShape {
   if (stereo === undefined) return 'circle';
-  const inner = stereo.replace(/^<<\s*/, '').replace(/\s*>>$/, '').toLowerCase();
+  const inner = stereo
+    .replace(/^<<\s*/, '')
+    .replace(/\s*>>$/, '')
+    .toLowerCase();
   if (inner === 'square') return 'square';
   if (inner === 'triangle') return 'triangle';
   return 'circle';
@@ -281,16 +291,11 @@ export function stereoToMarker(stereo: string | undefined): MarkerShape {
 // Helper: validate and add a series to the AST (mirrors Java addSeries)
 // ---------------------------------------------------------------------------
 
-export function addSeries(
-  ast: ChartDiagramAST,
-  series: ChartSeriesDef,
-): void {
+export function addSeries(ast: ChartDiagramAST, series: ChartSeriesDef): void {
   if (series.xValues !== null) {
     // Coordinate pairs only for line or scatter
     if (series.type !== 'line' && series.type !== 'scatter') {
-      ast.errors.push(
-        'Coordinate pair notation (x:y) is only supported for line and scatter charts',
-      );
+      ast.errors.push('Coordinate pair notation (x:y) is only supported for line and scatter charts');
       return;
     }
 
@@ -304,35 +309,27 @@ export function addSeries(
 
     // Coordinate pairs require explicit h-axis range
     if (ast.hAxis.autoScale) {
-      ast.errors.push(
-        'Coordinate pair notation requires explicit h-axis range (e.g., h-axis "x" -5 --> 5)',
-      );
+      ast.errors.push('Coordinate pair notation requires explicit h-axis range (e.g., h-axis "x" -5 --> 5)');
       return;
     }
 
     // All series must use the same format
     if (ast.series.length > 0 && ast.series[0]!.xValues === null) {
-      ast.errors.push(
-        'All series must use the same data format (either all coordinate pairs or all index-based)',
-      );
+      ast.errors.push('All series must use the same data format (either all coordinate pairs or all index-based)');
       return;
     }
 
     // Validate x-coordinates within axis range
     for (const x of series.xValues) {
       if (x < ast.hAxis.min || x > ast.hAxis.max) {
-        ast.errors.push(
-          `X-coordinate ${x} is outside h-axis range [${ast.hAxis.min}, ${ast.hAxis.max}]`,
-        );
+        ast.errors.push(`X-coordinate ${x} is outside h-axis range [${ast.hAxis.min}, ${ast.hAxis.max}]`);
         return;
       }
     }
   } else {
     // Index-based: ensure consistency
     if (ast.series.length > 0 && ast.series[0]!.xValues !== null) {
-      ast.errors.push(
-        'All series must use the same data format (either all coordinate pairs or all index-based)',
-      );
+      ast.errors.push('All series must use the same data format (either all coordinate pairs or all index-based)');
       return;
     }
   }
@@ -340,8 +337,7 @@ export function addSeries(
   ast.series.push(series);
 
   // Auto-scale the appropriate y-axis
-  const targetAxis =
-    series.useSecondaryAxis && ast.v2Axis !== null ? ast.v2Axis : ast.vAxis;
+  const targetAxis = series.useSecondaryAxis && ast.v2Axis !== null ? ast.v2Axis : ast.vAxis;
   for (const v of series.values) {
     includeValue(targetAxis, v);
   }

@@ -107,7 +107,11 @@ describe('eatOneToken', () => {
 
   it('tokenizes plain text up to the next break character', () => {
     const tokens = tokenizeAll('foo+bar');
-    expect(tokens.map((t) => t.getTokenType())).toEqual([TokenType.PLAIN_TEXT, TokenType.OPERATOR, TokenType.PLAIN_TEXT]);
+    expect(tokens.map((t) => t.getTokenType())).toEqual([
+      TokenType.PLAIN_TEXT,
+      TokenType.OPERATOR,
+      TokenType.PLAIN_TEXT,
+    ]);
     expect(tokens[0]!.getSurface()).toBe('foo');
     expect(tokens[2]!.getSurface()).toBe('bar');
   });

@@ -89,7 +89,7 @@ describe('composed arrow grammar — new constructs (D6 iteration 4)', () => {
   });
 });
 
-describe('composed arrow grammar — regression (today\'s common arrows)', () => {
+describe("composed arrow grammar — regression (today's common arrows)", () => {
   it('plain association arrow: -->', () => {
     const r = parseRelationshipLine('A --> B');
     expect(r).toMatchObject({ from: 'A', to: 'B', type: 'association', length: 2 });

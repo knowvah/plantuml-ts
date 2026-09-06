@@ -27,10 +27,7 @@ test.describe('SVG text overflow', () => {
 
     // Wait until the preview SVG contains text from our diagram
     // (proves the re-render from the filled source completed)
-    await expect(page.locator('#preview svg')).toContainText(
-      'validateCredentials',
-      { timeout: 5000 },
-    );
+    await expect(page.locator('#preview svg')).toContainText('validateCredentials', { timeout: 5000 });
 
     const overflowDescription = await page.evaluate(() => {
       const svgEl = document.querySelector<SVGSVGElement>('#preview svg');

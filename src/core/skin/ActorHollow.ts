@@ -51,7 +51,10 @@ export class ActorHollow implements TextBlock {
     path.moveTo(-this.bodyWidth / 2, 0);
     path.lineTo(-this.bodyWidth / 2, this.armThickness);
     path.lineTo(-this.bodyThickness / 2, this.armThickness);
-    path.lineTo(-this.bodyThickness / 2, this.bodyHeight - (this.bodyWidth + this.legThickness * Math.sqrt(2) - this.bodyThickness) / 2);
+    path.lineTo(
+      -this.bodyThickness / 2,
+      this.bodyHeight - (this.bodyWidth + this.legThickness * Math.sqrt(2) - this.bodyThickness) / 2,
+    );
     path.lineTo(-this.bodyWidth / 2, this.bodyHeight - legDiag);
     path.lineTo(-(this.bodyWidth / 2 - legDiag), this.bodyHeight);
 
@@ -59,7 +62,10 @@ export class ActorHollow implements TextBlock {
 
     path.lineTo(this.bodyWidth / 2 - legDiag, this.bodyHeight);
     path.lineTo(this.bodyWidth / 2, this.bodyHeight - legDiag);
-    path.lineTo(this.bodyThickness / 2, this.bodyHeight - (this.bodyWidth + this.legThickness * Math.sqrt(2) - this.bodyThickness) / 2);
+    path.lineTo(
+      this.bodyThickness / 2,
+      this.bodyHeight - (this.bodyWidth + this.legThickness * Math.sqrt(2) - this.bodyThickness) / 2,
+    );
     path.lineTo(this.bodyThickness / 2, this.armThickness);
     path.lineTo(this.bodyWidth / 2, this.armThickness);
     path.lineTo(this.bodyWidth / 2, 0);

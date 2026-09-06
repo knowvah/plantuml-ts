@@ -76,10 +76,7 @@ const BASE64_DATA = '([A-Za-z0-9+/=]+)';
  *  upstream compiles every `RegexConcat` with `Pattern.CASE_INSENSITIVE`
  *  (`regex/Pattern2.java:114`), matching `core/sprite-commands.ts`'s own
  *  sprite patterns. */
-const BASE64_SPRITE_RE = new RegExp(
-  '^sprite\\s+' + NAME + '\\s+' + PNG_DATA_URI_PREFIX + BASE64_DATA + '$',
-  'i',
-);
+const BASE64_SPRITE_RE = new RegExp('^sprite\\s+' + NAME + '\\s+' + PNG_DATA_URI_PREFIX + BASE64_DATA + '$', 'i');
 
 /**
  * Tries `CommandSpriteBase64`'s grammar at line `i`, mutating `registry` in

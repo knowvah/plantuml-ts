@@ -109,9 +109,7 @@ describe('buildEdgeGeos — tail/head multiplicity-label width stays unrounded (
         { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
         { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
       ],
-      relationships: [
-        { from: 'A', to: 'B', type: 'association', fromMultiplicity: '1', toMultiplicity: '0..*' },
-      ],
+      relationships: [{ from: 'A', to: 'B', type: 'association', fromMultiplicity: '1', toMultiplicity: '0..*' }],
       namespaces: [],
       directives: [],
       notes: [],
@@ -149,9 +147,7 @@ describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
         { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] },
         { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
       ],
-      relationships: [
-        { from: 'Foo', to: 'Bar', type: 'association', label: 'demo' },
-      ],
+      relationships: [{ from: 'Foo', to: 'Bar', type: 'association', label: 'demo' }],
       namespaces: [],
       directives: [],
       notes: [],
@@ -188,9 +184,7 @@ describe('buildEdgeGeos — plain edge label position/width (G2 N62)', () => {
         { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] },
         { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
       ],
-      relationships: [
-        { from: 'Foo', to: 'Bar', type: 'association' },
-      ],
+      relationships: [{ from: 'Foo', to: 'Bar', type: 'association' }],
       namespaces: [],
       directives: [],
       notes: [],
@@ -309,7 +303,7 @@ describe('buildEdgeGeos — multi-line edge label layout (G2 item 43)', () => {
     for (const c of centers) expect(c).toBeCloseTo(centers[0]!, 6);
   });
 
-  it('reduces to portLabelAnchor\'s exact single-line formula when there is no line break', () => {
+  it("reduces to portLabelAnchor's exact single-line formula when there is no line break", () => {
     const ast: ClassDiagramAST = {
       ...fourClassAst,
       relationships: [{ from: 'cl1', to: 'cl2', type: 'association', label: 'demo' }],
@@ -391,8 +385,10 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     // rewritten string -- proves the render width isn't left over from
     // measuring the raw `<<alias>>` token (jar's own tebore-53-tese080
     // golden: `textLength="41.275"` on `«alias»` at font-size 13).
-    const expectedWidth = new WidthTableMeasurer()
-      .measure('«alias»', { family: defaultTheme.fontFamily, size: 13 }).width;
+    const expectedWidth = new WidthTableMeasurer().measure('«alias»', {
+      family: defaultTheme.fontFamily,
+      size: 13,
+    }).width;
     expect(edge.label!.width).toBeCloseTo(expectedWidth, 5);
   });
 });
@@ -410,8 +406,13 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
  */
 describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
   const measurer = new DeterministicMeasurer();
-  const cls = (id: string): ClassDiagramAST['classifiers'][number] =>
-    ({ id, display: id, kind: 'class', typeParams: [], members: [] });
+  const cls = (id: string): ClassDiagramAST['classifiers'][number] => ({
+    id,
+    display: id,
+    kind: 'class',
+    typeParams: [],
+    members: [],
+  });
   const astFor = (label: string): ClassDiagramAST => ({
     classifiers: [cls('A'), cls('B')],
     namespaces: [],
@@ -421,7 +422,7 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
   });
   const GOBUCO = 'ab >\\ncd <\\n< ef\\n> gh';
 
-  it("gobuco: 4 labelLines, each with a 3-point glyph, text stripped, x = block left + font.size", () => {
+  it('gobuco: 4 labelLines, each with a 3-point glyph, text stripped, x = block left + font.size', () => {
     const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
     const lines = geo.edges[0]!.labelLines!;
     expect(geo.edges[0]!.label).toBeUndefined();
@@ -461,7 +462,7 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     const lines = geo.edges[0]!.labelLines!;
     // block left = text.x - 13; block width = 13 + textWidth; every block's
     // centre coincides -- TextBlockVertical.java:94's `(W - w)/2`.
-    const centres = lines.map((l) => (l.x - 13) + (13 + l.width) / 2);
+    const centres = lines.map((l) => l.x - 13 + (13 + l.width) / 2);
     for (const c of centres) expect(c).toBeCloseTo(centres[0]!, 6);
     // Jar's own deltas between successive text x values, to the thousandth.
     expect(lines[1]!.x - lines[0]!.x).toBeCloseTo(80.046 - 79.68, 3);

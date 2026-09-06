@@ -27,7 +27,14 @@ export class EaterLegacyDefine extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!define');
     this.skipSpaces();
-    const func = this.eatDeclareFunction(context, memory, true, this.getStringLocated(), false, TFunctionType.LEGACY_DEFINE);
+    const func = this.eatDeclareFunction(
+      context,
+      memory,
+      true,
+      this.getStringLocated(),
+      false,
+      TFunctionType.LEGACY_DEFINE,
+    );
     const def = this.eatAllToEnd();
     func.setLegacyDefinition(def);
     this.function = func;

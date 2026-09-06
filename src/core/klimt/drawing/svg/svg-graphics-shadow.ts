@@ -52,10 +52,24 @@ export class SvgGraphicsShadow extends SvgGraphicsCore {
     filter.setAttribute('height', '300%');
     this.addFilter(filter, 'feGaussianBlur', ['result', 'blurOut', 'stdDeviation', this.format(2)]);
     this.addFilter(filter, 'feColorMatrix', [
-      'type', 'matrix', 'in', 'blurOut', 'result', 'blurOut2', 'values', SHADOW_COLOR_MATRIX_VALUES,
+      'type',
+      'matrix',
+      'in',
+      'blurOut',
+      'result',
+      'blurOut2',
+      'values',
+      SHADOW_COLOR_MATRIX_VALUES,
     ]);
     this.addFilter(filter, 'feOffset', [
-      'result', 'blurOut3', 'in', 'blurOut2', 'dx', this.format(4), 'dy', this.format(4),
+      'result',
+      'blurOut3',
+      'in',
+      'blurOut2',
+      'dx',
+      this.format(4),
+      'dy',
+      this.format(4),
     ]);
     this.addFilter(filter, 'feBlend', ['in', 'SourceGraphic', 'in2', 'blurOut3', 'mode', 'normal']);
     return filter;

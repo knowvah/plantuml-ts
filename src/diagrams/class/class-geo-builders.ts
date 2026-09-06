@@ -13,11 +13,7 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import {
-  getHTitle,
-  getWTitle,
-  getTitleBaselineOffset,
-} from './class-namespace-shape.js';
+import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
@@ -134,19 +130,13 @@ export function buildClassifierGeos(
         ? { repeatCoupleInvisLinkCreationIndex: classifier.repeatCoupleInvisLinkCreationIndex }
         : {}),
       ...(hiddenIds.has(classifier.id) ? { hidden: true } : {}),
-      ...(classifier.stereotype !== undefined
-        ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) }
-        : {}),
-      ...(classifier.styleGeneration !== undefined
-        ? { styleGeneration: classifier.styleGeneration }
-        : {}),
+      ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
+      ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
       // mission skin-file-loading (deferred D3 item): see
       // `ClassifierGeo.shadowing`'s own doc comment (class-geo-types.ts)
       // for the full jar-verified mechanism and the eligibility gate
       // `drawsBorderedBox` below reproduces.
-      ...(theme.shadowing !== undefined &&
-      theme.shadowing > 0 &&
-      drawsBorderedBox(classifier, measured)
+      ...(theme.shadowing !== undefined && theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
         ? { shadowing: theme.shadowing }
         : {}),
     });
@@ -285,7 +275,6 @@ function resolveNamespaceInkShape(theme: Theme): 'polygon' | 'rect' | undefined 
   return undefined;
 }
 
-
 // Edge geometry moved to a sibling module (line cap); re-exported.
 export { buildEdgeGeos } from './class-edge-geo.js';
 
@@ -358,17 +347,13 @@ export function degenerateSingleClassifier(
     ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
     ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
     ...(measured.enhancedBody !== undefined ? { enhancedBody: measured.enhancedBody } : {}),
-      ...(measured.jsonBody !== undefined ? { jsonBody: measured.jsonBody } : {}),
+    ...(measured.jsonBody !== undefined ? { jsonBody: measured.jsonBody } : {}),
     ...(classifier.hideCircle === true ? { hideCircle: true } : {}),
     ...(classifier.usymbol !== undefined ? { usymbol: classifier.usymbol } : {}),
     ...(classifier.url !== undefined ? { url: classifier.url } : {}),
     ...(classifier.color !== undefined ? { color: classifier.color } : {}),
-    ...(classifier.stereotype !== undefined
-      ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) }
-      : {}),
-    ...(classifier.styleGeneration !== undefined
-      ? { styleGeneration: classifier.styleGeneration }
-      : {}),
+    ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
+    ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
   };
   // G2 N48 (item 24): expose `rawWidth`/`rawHeight` (the PRE-`applyClass
   // DocumentMargin` ink dims, `ClassGeometry.rawWidth`'s own doc comment)

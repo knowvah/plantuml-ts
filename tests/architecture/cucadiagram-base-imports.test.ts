@@ -14,12 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const BASE_DIRS = [
-  'src/core/plasma',
-  'src/core/abel',
-  'src/core/cucadiagram',
-  'src/core/decoration',
-];
+const BASE_DIRS = ['src/core/plasma', 'src/core/abel', 'src/core/cucadiagram', 'src/core/decoration'];
 
 function tsFiles(dir: string): string[] {
   const out: string[] = [];

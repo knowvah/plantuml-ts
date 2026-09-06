@@ -28,10 +28,7 @@ export class YamlBuilder {
     if (indent > this._indents[this._indents.length - 1]!) {
       this._indents.push(indent);
     } else {
-      while (
-        this._indents.length > 0 &&
-        indent < this._indents[this._indents.length - 1]!
-      ) {
+      while (this._indents.length > 0 && indent < this._indents[this._indents.length - 1]!) {
         this._indents.pop();
         this._nodes.pop();
         if (this.getLast().type === 'LIST') {

@@ -129,7 +129,7 @@ describe('getArea separator loop (java:123-187)', () => {
     expect(sheetFonts).toContain(TREE_FONT);
   });
 
-  it('consecutive tree lines are un-indented by the FIRST line\'s leading whitespace and the run stops without eating the next line (buildTreeOrTable/purge, java:199-225)', () => {
+  it("consecutive tree lines are un-indented by the FIRST line's leading whitespace and the run stops without eating the next line (buildTreeOrTable/purge, java:199-225)", () => {
     const dim = makeBody(Display.create(['  |_a', '  |_b', 'z'])).calculateDimension(sb);
     // block1 empty (12,0); tree run '|_a' + '|_b' joined -> 7 chars = 14 wide, no table margin;
     // 'z' survives as its own compartment (14,10)
@@ -144,7 +144,7 @@ describe('getArea separator loop (java:123-187)', () => {
     expect(dim.getHeight()).toBe(20);
   });
 
-  it('purge leaves a line NOT sharing the first line\'s indent untouched (java:220-225 miss branch)', () => {
+  it("purge leaves a line NOT sharing the first line's indent untouched (java:220-225 miss branch)", () => {
     const dim = makeBody(Display.create(['  |_a', ' |_b'])).calculateDimension(sb);
     // start='  ': '  |_a' -> '|_a' (3); ' |_b' does NOT start with '  ' -> kept (4);
     // joined '|_a  |_b' = 8 chars = 16 wide

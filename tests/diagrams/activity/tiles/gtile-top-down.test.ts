@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
-import {
-  NORTH_HOOK,
-  SOUTH_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 

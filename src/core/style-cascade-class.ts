@@ -280,10 +280,7 @@ export function computeArrowFontOverride(
  * the skinparam value), not a synthetic styleMap declaration.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:250
  */
-function applyWrapWidthDefaults(
-  override: Partial<GraphCascadeOverride>,
-  skinparamWrapWidth: number | undefined,
-): void {
+function applyWrapWidthDefaults(override: Partial<GraphCascadeOverride>, skinparamWrapWidth: number | undefined): void {
   if (skinparamWrapWidth === undefined) return;
   override.classCascadeMaximumWidth ??= skinparamWrapWidth;
   override.classCascadeHeaderMaximumWidth ??= skinparamWrapWidth;
@@ -402,10 +399,7 @@ export function computeClassStyleCascadeOverrides(
  *   signature, reusing `cascadeFontColorHex` -- the class side's own
  *   FontColor helper -- against the note's own default background estimate).
  */
-function applyColorCascadeOverrides(
-  styleMap: StyleMap,
-  override: Partial<GraphCascadeOverride>,
-): void {
+function applyColorCascadeOverrides(styleMap: StyleMap, override: Partial<GraphCascadeOverride>): void {
   const background = cascadeHex(styleMap, CLASS_SNAMES, 'backgroundcolor');
   if (background !== undefined) override.classCascadeBackground = background;
   const border = cascadeHex(styleMap, CLASS_SNAMES, 'linecolor');

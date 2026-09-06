@@ -63,7 +63,10 @@ const HYPERLINK_COLOR = '#0000FF';
  *  `{tooltip}`, the first whitespace-run is the url, everything after is
  *  the label; falls back to the url itself when nothing remains. */
 function resolveLabel(inner: string): string {
-  const withoutTooltip = inner.replace(/\{[^}]*\}/g, '').replace(/\s+/g, ' ').trim();
+  const withoutTooltip = inner
+    .replace(/\{[^}]*\}/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   const spaceIdx = withoutTooltip.indexOf(' ');
   return spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(spaceIdx + 1).trim();
 }
@@ -75,18 +78,16 @@ function resolveLabel(inner: string): string {
  *  already applies for the classifier-level grammar). */
 function resolveUrlAndTooltip(inner: string): { url: string; tooltip: string } {
   const tooltipMatch = /\{([^}]*)\}/.exec(inner);
-  const withoutTooltip = inner.replace(/\{[^}]*\}/g, '').replace(/\s+/g, ' ').trim();
+  const withoutTooltip = inner
+    .replace(/\{[^}]*\}/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   const spaceIdx = withoutTooltip.indexOf(' ');
   const url = spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(0, spaceIdx);
   return { url, tooltip: tooltipMatch?.[1] ?? url };
 }
 
-function applyHyperlinkStyleAndPush(
-  label: string,
-  url: string,
-  tooltip: string,
-  stripe: StripeBuilder,
-): void {
+function applyHyperlinkStyleAndPush(label: string, url: string, tooltip: string, stripe: StripeBuilder): void {
   const saved: FontConfiguration = stripe.getActualFontConfiguration();
   stripe.setActualFontConfiguration({
     ...saved,

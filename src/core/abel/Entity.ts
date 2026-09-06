@@ -49,10 +49,7 @@ import { isPureInnerLink12, isPureInnerLink3 } from './EntityUtils.js';
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Entity.java:89
  */
-export class Entity
-  extends EntityBase
-  implements SpecificBackcolorable, Hideable, Removeable, LineConfigurable, Bag
-{
+export class Entity extends EntityBase implements SpecificBackcolorable, Hideable, Removeable, LineConfigurable, Bag {
   /** @see abel/Entity.java:365-368 */
   getGroupType(): GroupType | undefined {
     this.checkGroup();
@@ -86,8 +83,7 @@ export class Entity
     this.svekImage = img;
     this.url = undefined;
 
-    for (const link of [...this.diagram.getLinks()])
-      if (isPureInnerLink12(this, link)) this.diagram.removeLink(link);
+    for (const link of [...this.diagram.getLinks()]) if (isPureInnerLink12(this, link)) this.diagram.removeLink(link);
 
     this.groupType = undefined;
     this.leafType = leafType;

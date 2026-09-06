@@ -62,14 +62,7 @@ describe('participant declarations', () => {
   });
 
   it('parses boundary, control, entity, database, collections, queue types', () => {
-    const types = [
-      'boundary',
-      'control',
-      'entity',
-      'database',
-      'collections',
-      'queue',
-    ] as const;
+    const types = ['boundary', 'control', 'entity', 'database', 'collections', 'queue'] as const;
     for (const t of types) {
       const ast = parse([`${t} X`]);
       expect(ast.participants[0]?.type).toBe(t);
@@ -406,25 +399,13 @@ describe('note events', () => {
   });
 
   it('note over with multiple participants', () => {
-    const ast = parse([
-      'participant Alice',
-      'participant Bob',
-      'note over Alice, Bob',
-      'shared note',
-      'end note',
-    ]);
+    const ast = parse(['participant Alice', 'participant Bob', 'note over Alice, Bob', 'shared note', 'end note']);
     const ev = ast.events[0] as NoteEvent | undefined;
     expect(ev?.participants).toEqual(['Alice', 'Bob']);
   });
 
   it('multi-line note accumulates all lines', () => {
-    const ast = parse([
-      'participant Alice',
-      'note left of Alice',
-      'line one',
-      'line two',
-      'end note',
-    ]);
+    const ast = parse(['participant Alice', 'note left of Alice', 'line one', 'line two', 'end note']);
     const ev = ast.events[0] as NoteEvent | undefined;
     expect(ev?.text).toBe('line one\nline two');
   });
@@ -511,13 +492,7 @@ describe('frame events', () => {
   });
 
   it('alt with else creates two branches', () => {
-    const ast = parse([
-      'alt success',
-      'Alice -> Bob: ok',
-      'else failure',
-      'Alice -> Bob: fail',
-      'end',
-    ]);
+    const ast = parse(['alt success', 'Alice -> Bob: ok', 'else failure', 'Alice -> Bob: fail', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
     expect(ev?.frameType).toBe('alt');
     expect(ev?.branches).toHaveLength(2);
@@ -526,13 +501,7 @@ describe('frame events', () => {
   });
 
   it('else label is used as frame label for that branch', () => {
-    const ast = parse([
-      'alt success',
-      'Alice -> Bob: ok',
-      'else failure',
-      'Alice -> Bob: fail',
-      'end',
-    ]);
+    const ast = parse(['alt success', 'Alice -> Bob: ok', 'else failure', 'Alice -> Bob: fail', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
     expect(ev?.label).toBe('success');
   });
@@ -556,13 +525,7 @@ describe('frame events', () => {
   // T2/D10: `elseCommand`'s own COLORS-index-1 capture, index-aligned with
   // `branchLabels` via `FrameEvent.branchColors`.
   it('captures an else branch color without absorbing it into the label', () => {
-    const ast = parse([
-      'alt first case',
-      'Alice -> Bob: ok',
-      'else #eee other case',
-      'Alice -> Bob: fail',
-      'end',
-    ]);
+    const ast = parse(['alt first case', 'Alice -> Bob: ok', 'else #eee other case', 'Alice -> Bob: fail', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
     expect(ev?.branchLabels).toEqual(['first case', 'other case']);
     expect(ev?.branchColors).toEqual([undefined, '#eee']);
@@ -598,13 +561,7 @@ describe('frame events', () => {
   });
 
   it('nested frames: inner frame appears inside outer branch', () => {
-    const ast = parse([
-      'loop outer',
-      'opt inner',
-      'Alice -> Bob: msg',
-      'end',
-      'end',
-    ]);
+    const ast = parse(['loop outer', 'opt inner', 'Alice -> Bob: msg', 'end', 'end']);
     const outerFrame = ast.events[0] as FrameEvent | undefined;
     expect(outerFrame?.frameType).toBe('loop');
     const innerEvent = outerFrame?.branches[0]?.[0] as FrameEvent | undefined;
@@ -789,103 +746,59 @@ describe('box / end box parsing', () => {
   });
 
   it('box with label and color creates a BoxGroup', () => {
-    const ast = parse([
-      'box "Frontend" #LightBlue',
-      'participant Alice',
-      'end box',
-    ]);
+    const ast = parse(['box "Frontend" #LightBlue', 'participant Alice', 'end box']);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('Frontend');
     expect(ast.boxes[0]?.color).toBe('#LightBlue');
   });
 
   it('box with color only has empty label', () => {
-    const ast = parse([
-      'box #pink',
-      'participant Alice',
-      'end box',
-    ]);
+    const ast = parse(['box #pink', 'participant Alice', 'end box']);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('');
     expect(ast.boxes[0]?.color).toBe('#pink');
   });
 
   it('box with label only has empty color', () => {
-    const ast = parse([
-      'box "Backend"',
-      'participant Bob',
-      'end box',
-    ]);
+    const ast = parse(['box "Backend"', 'participant Bob', 'end box']);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('Backend');
     expect(ast.boxes[0]?.color).toBe('');
   });
 
   it('bare box (no label, no color) creates a BoxGroup with empty strings', () => {
-    const ast = parse([
-      'box',
-      'participant Alice',
-      'end box',
-    ]);
+    const ast = parse(['box', 'participant Alice', 'end box']);
     expect(ast.boxes).toHaveLength(1);
     expect(ast.boxes[0]?.label).toBe('');
     expect(ast.boxes[0]?.color).toBe('');
   });
 
   it('participant declared inside box has boxId matching the box id', () => {
-    const ast = parse([
-      'box "Group" #yellow',
-      'participant Alice',
-      'end box',
-    ]);
+    const ast = parse(['box "Group" #yellow', 'participant Alice', 'end box']);
     const alice = ast.participants.find((p) => p.id === 'Alice');
     expect(alice?.boxId).toBe(ast.boxes[0]?.id);
   });
 
   it('participant declared outside box has no boxId', () => {
-    const ast = parse([
-      'box "Group" #yellow',
-      'participant Alice',
-      'end box',
-      'participant Bob',
-    ]);
+    const ast = parse(['box "Group" #yellow', 'participant Alice', 'end box', 'participant Bob']);
     const bob = ast.participants.find((p) => p.id === 'Bob');
     expect(bob?.boxId).toBeUndefined();
   });
 
   it('multiple participants in a box are all in participantIds', () => {
-    const ast = parse([
-      'box "Team" #blue',
-      'participant Alice',
-      'participant Bob',
-      'end box',
-    ]);
+    const ast = parse(['box "Team" #blue', 'participant Alice', 'participant Bob', 'end box']);
     expect(ast.boxes[0]?.participantIds).toEqual(['Alice', 'Bob']);
   });
 
   it('multiple boxes are collected in order', () => {
-    const ast = parse([
-      'box "A" #red',
-      'participant Alice',
-      'end box',
-      'box "B" #blue',
-      'participant Bob',
-      'end box',
-    ]);
+    const ast = parse(['box "A" #red', 'participant Alice', 'end box', 'box "B" #blue', 'participant Bob', 'end box']);
     expect(ast.boxes).toHaveLength(2);
     expect(ast.boxes[0]?.label).toBe('A');
     expect(ast.boxes[1]?.label).toBe('B');
   });
 
   it('each box gets a unique id', () => {
-    const ast = parse([
-      'box "A" #red',
-      'participant Alice',
-      'end box',
-      'box "B" #blue',
-      'participant Bob',
-      'end box',
-    ]);
+    const ast = parse(['box "A" #red', 'participant Alice', 'end box', 'box "B" #blue', 'participant Bob', 'end box']);
     expect(ast.boxes[0]?.id).not.toBe(ast.boxes[1]?.id);
   });
 
@@ -895,11 +808,7 @@ describe('box / end box parsing', () => {
   });
 
   it('implicit participants inside box also get boxId (via message)', () => {
-    const ast = parse([
-      'box "X" #green',
-      'Alice -> Bob: hello',
-      'end box',
-    ]);
+    const ast = parse(['box "X" #green', 'Alice -> Bob: hello', 'end box']);
     // Both Alice and Bob are created implicitly while box is open
     const alice = ast.participants.find((p) => p.id === 'Alice');
     const bob = ast.participants.find((p) => p.id === 'Bob');

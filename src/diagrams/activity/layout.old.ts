@@ -26,23 +26,13 @@
 import type { ActivityArrowLabel, ActivityDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityGeometry,
-  ActivityNodeGeo,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo, LayoutCtx } from './activity-layout-types.js';
 import { DEFAULT_WIDTH, LAYOUT_MARGIN, SWIMLANE_HEADER_H } from './activity-layout-constants.js';
 import { measureSubtreeWidth } from './activity-layout-measure.js';
 import { layoutSequence } from './activity-layout-sequence.js';
 import { buildSwimlaneCtx, buildSwimlaneGeos } from './activity-layout-swimlane.js';
 
-export type {
-  ActivityNodeGeo,
-  ActivityEdgeGeo,
-  SwimlaneGeo,
-  ActivityGeometry,
-} from './activity-layout-types.js';
+export type { ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo, ActivityGeometry } from './activity-layout-types.js';
 
 // Re-export ActivityArrowLabel so consumers can use it without importing ast.ts directly.
 export type { ActivityArrowLabel };
@@ -100,11 +90,7 @@ function computeActivityGeometryBounds(
 }
 
 /** If routing extends left of LAYOUT_MARGIN, shifts all geometry right so it fits. */
-function shiftActivityGeometry(
-  nodes: ActivityNodeGeo[],
-  edges: ActivityEdgeGeo[],
-  minLeft: number,
-): number {
+function shiftActivityGeometry(nodes: ActivityNodeGeo[], edges: ActivityEdgeGeo[], minLeft: number): number {
   const shiftX = minLeft < LAYOUT_MARGIN ? LAYOUT_MARGIN - minLeft : 0;
   if (shiftX > 0) {
     for (const n of nodes) {
@@ -119,11 +105,7 @@ function shiftActivityGeometry(
   return shiftX;
 }
 
-export function layoutActivity(
-  ast: ActivityDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): ActivityGeometry {
+export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer): ActivityGeometry {
   if (ast.nodes.length === 0) {
     return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
   }

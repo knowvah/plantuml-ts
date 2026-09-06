@@ -44,7 +44,8 @@ const PLAIN_STYLE: AnnotationBoxStyle = {
 function plainStyles(): AnnotationStyles {
   const elements: AnnotationElement[] = ['title', 'caption', 'header', 'footer', 'legend', 'mainframe'];
   const result = {} as AnnotationStyles;
-  for (const el of elements) result[el] = { ...PLAIN_STYLE, padding: { ...PLAIN_STYLE.padding }, margin: { ...PLAIN_STYLE.margin } };
+  for (const el of elements)
+    result[el] = { ...PLAIN_STYLE, padding: { ...PLAIN_STYLE.padding }, margin: { ...PLAIN_STYLE.margin } };
   return result;
 }
 

@@ -129,12 +129,7 @@ export function drawHAxis(axis: AxisGeometry, geo: ChartGeometry, theme: Theme):
  * leftSide=true  → axis on left edge, ticks extend left, labels right-aligned left of ticks
  * leftSide=false → axis on right edge, ticks extend right, labels left-aligned right of ticks
  */
-export function drawVAxis(
-  axis: AxisGeometry,
-  geo: ChartGeometry,
-  theme: Theme,
-  leftSide: boolean,
-): string {
+export function drawVAxis(axis: AxisGeometry, geo: ChartGeometry, theme: Theme, leftSide: boolean): string {
   const parts: string[] = [];
   const axisX = leftSide ? geo.plotArea.x : geo.plotArea.x + geo.plotArea.width;
 

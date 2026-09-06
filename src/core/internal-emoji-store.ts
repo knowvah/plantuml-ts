@@ -65,9 +65,7 @@ export type EmojiArtworkResolver = (unicode: string) => string | undefined;
  * .md`). That desync is exactly what left `murava-69-tago286` non-conformant
  * while the renderer was already correct.
  */
-export function emojiArtworkResolverFor(
-  store: InternalEmojiStore | undefined,
-): EmojiArtworkResolver | undefined {
+export function emojiArtworkResolverFor(store: InternalEmojiStore | undefined): EmojiArtworkResolver | undefined {
   return store === undefined ? undefined : (unicode: string): string | undefined => store.get(unicode);
 }
 

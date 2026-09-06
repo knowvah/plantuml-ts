@@ -356,8 +356,10 @@ function writeSpriteSource(assetsDir: string, bundleName: string, content: strin
   writeFileSync(join(dir, 'source.puml'), content, 'utf8');
 }
 
-const SPRITE_SOURCE_V1 = 'sprite alpha <svg width="4" height="4">A</svg>\nsprite beta <svg width="4" height="4">B</svg>\n';
-const SPRITE_SOURCE_V2 = 'sprite alpha <svg width="4" height="4">A2</svg>\nsprite beta <svg width="4" height="4">B</svg>\n';
+const SPRITE_SOURCE_V1 =
+  'sprite alpha <svg width="4" height="4">A</svg>\nsprite beta <svg width="4" height="4">B</svg>\n';
+const SPRITE_SOURCE_V2 =
+  'sprite alpha <svg width="4" height="4">A2</svg>\nsprite beta <svg width="4" height="4">B</svg>\n';
 
 /** A real (not scratch) split, simulating "a prior successful build" of
  * `bundleAssetsDir` -- same two writes `buildSpriteSplits` performs. */

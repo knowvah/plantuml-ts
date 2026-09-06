@@ -25,9 +25,7 @@
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/DotStringFactory.java:161-169
  */
-export function dotSplinesAttrs(
-  linetype: 'ortho' | 'polyline' | undefined,
-): ReadonlyArray<readonly [string, string]> {
+export function dotSplinesAttrs(linetype: 'ortho' | 'polyline' | undefined): ReadonlyArray<readonly [string, string]> {
   if (linetype === 'polyline') {
     return [['splines', 'polyline']];
   }

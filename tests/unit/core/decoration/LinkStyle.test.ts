@@ -22,8 +22,16 @@ describe('factories and predicates (java:66-92)', () => {
 
 describe('getStroke3 (java:98-109)', () => {
   it('DASHED is 7/7, DOTTED is 1/3, at thickness 1 by default', () => {
-    expect(LinkStyle.DASHED().getStroke3().equals(new UStroke(7, 7, 1))).toBe(true);
-    expect(LinkStyle.DOTTED().getStroke3().equals(new UStroke(1, 3, 1))).toBe(true);
+    expect(
+      LinkStyle.DASHED()
+        .getStroke3()
+        .equals(new UStroke(7, 7, 1)),
+    ).toBe(true);
+    expect(
+      LinkStyle.DOTTED()
+        .getStroke3()
+        .equals(new UStroke(1, 3, 1)),
+    ).toBe(true);
   });
 
   it('BOLD is plain thickness 2; NORMAL is plain thickness 1', () => {
@@ -32,7 +40,12 @@ describe('getStroke3 (java:98-109)', () => {
   });
 
   it('goThickness overrides the dash thickness (java:94-96, 118-123)', () => {
-    expect(LinkStyle.DASHED().goThickness(2.5).getStroke3().equals(new UStroke(7, 7, 2.5))).toBe(true);
+    expect(
+      LinkStyle.DASHED()
+        .goThickness(2.5)
+        .getStroke3()
+        .equals(new UStroke(7, 7, 2.5)),
+    ).toBe(true);
     expect(LinkStyle.NORMAL().goThickness(3).getStroke3().equals(UStroke.withThickness(3))).toBe(true);
   });
 });
@@ -40,7 +53,11 @@ describe('getStroke3 (java:98-109)', () => {
 describe('muteStroke (java:111-116)', () => {
   it('replaces the stroke for DASHED/DOTTED/BOLD only', () => {
     const base = new UStroke(2, 2, 5);
-    expect(LinkStyle.DASHED().muteStroke(base).equals(new UStroke(7, 7, 1))).toBe(true);
+    expect(
+      LinkStyle.DASHED()
+        .muteStroke(base)
+        .equals(new UStroke(7, 7, 1)),
+    ).toBe(true);
     expect(LinkStyle.BOLD().muteStroke(base).equals(UStroke.withThickness(2))).toBe(true);
     expect(LinkStyle.NORMAL().muteStroke(base)).toBe(base);
     expect(LinkStyle.INVISIBLE().muteStroke(base)).toBe(base);

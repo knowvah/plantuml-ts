@@ -26,12 +26,7 @@
  */
 
 import type { DelayEvent, DividerEvent, SpaceEvent } from './ast.js';
-import {
-  emit,
-  ensureParticipant,
-  type Command,
-  type ParseState,
-} from './sequence-parse-helpers.js';
+import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
 
 // 2. hide footbox
 export const hideFootboxCommand: Command = {
@@ -229,4 +224,3 @@ export const refOverMultilineCommand: Command = {
     state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''] };
   },
 };
-

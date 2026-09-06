@@ -1,4 +1,12 @@
-import type { ActivityDiagramAST, ActivityNode, ActivityIf, ActivityWhile, ActivityRepeat, ActivityFork, ActivitySplit } from '../ast.js';
+import type {
+  ActivityDiagramAST,
+  ActivityNode,
+  ActivityIf,
+  ActivityWhile,
+  ActivityRepeat,
+  ActivityFork,
+  ActivitySplit,
+} from '../ast.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import type { Theme } from '../../../core/theme.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
@@ -19,12 +27,7 @@ import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
 
 // Re-export geometry types so renderer and index can import from one place.
-export type {
-  ActivityGeometry,
-  ActivityNodeGeo,
-  ActivityEdgeGeo,
-  SwimlaneGeo,
-} from '../layout.old.js';
+export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../layout.old.js';
 
 function makeBounder(measurer: StringMeasurer, theme: Theme): StringBounder {
   return {
@@ -120,7 +123,7 @@ function tileRepeat(node: ActivityRepeat, bounder: StringBounder, theme: Theme):
 }
 
 function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): GtileFork {
-  const branches = node.branches.map(b => {
+  const branches = node.branches.map((b) => {
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
@@ -128,18 +131,14 @@ function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): Gti
 }
 
 function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): GtileSplit {
-  const branches = node.branches.map(b => {
+  const branches = node.branches.map((b) => {
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
   return new GtileSplit(branches, bounder);
 }
 
-export function layoutActivity(
-  ast: ActivityDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-) {
+export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
   if (ast.nodes.length === 0) {
     return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
   }

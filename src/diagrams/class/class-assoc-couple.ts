@@ -96,9 +96,7 @@ export function applyAssocCouple(
   const m = ASSOC_COUPLE_RE.exec(line);
   if (m === null) return false;
   const leading = m[1] !== undefined;
-  const [a, b, c, arrowToken] = leading
-    ? [m[1]!, m[2]!, m[4]!, m[3]!]
-    : [m[7]!, m[8]!, m[5]!, m[6]!];
+  const [a, b, c, arrowToken] = leading ? [m[1]!, m[2]!, m[4]!, m[3]!] : [m[7]!, m[8]!, m[5]!, m[6]!];
   // G2 N19: the C endpoint may already be a declared NOTE (`note as N1` then
   // `N1 .. (A,B)`, temise-16-neco018) — reuse its id directly rather than
   // spawning a phantom classifier (mirrors class-commands.ts rule 6's
@@ -111,8 +109,14 @@ export function applyAssocCouple(
   // its `creationIndex` before the circle's phantom-slot burns below.
   const cName = stripQuotes(c);
   const cId = isNoteId(ast, cName) ? cName : ensure(c).id;
-  const { circleId, classEdgeLength, forceCircleToClass, circle, invisSiblingEdges } =
-    makeCoupleCircle(ast, ensure, a, b, true, counter);
+  const { circleId, classEdgeLength, forceCircleToClass, circle, invisSiblingEdges } = makeCoupleCircle(
+    ast,
+    ensure,
+    a,
+    b,
+    true,
+    counter,
+  );
   // Leading `(A,B) arrow C` draws circle→C (executeArgSpecial1, mode 1);
   // trailing `C arrow (A,B)` draws C→circle (executeArgSpecial2, mode 2).
   // A REPEAT coupling on an already-coupled pair overrides this: its class
@@ -165,11 +169,7 @@ export function applyAssocCouple(
  * — no note-on-link split here (that strategy only exists on the one-sided
  * `Association#createNew` path, i.e. `applyAssocCouple` above).
  */
-export function applyDoubleCouple(
-  ast: ClassDiagramAST,
-  ensure: (id: string) => Classifier,
-  line: string,
-): boolean {
+export function applyDoubleCouple(ast: ClassDiagramAST, ensure: (id: string) => Classifier, line: string): boolean {
   const m = ASSOC_DOUBLE_COUPLE_RE.exec(line);
   if (m === null) return false;
   const c1 = makeCoupleCircle(ast, ensure, m[1]!, m[2]!).circleId;
@@ -211,8 +211,13 @@ function makeCoupleCircle(
   // ledger.md` N19.
   counter?: AssocCoupleCounter,
 ): {
-  circleId: string; aId: string; bId: string; classEdgeLength: number; forceCircleToClass: boolean;
-  circle: Classifier; invisSiblingEdges: Relationship[];
+  circleId: string;
+  aId: string;
+  bId: string;
+  classEdgeLength: number;
+  forceCircleToClass: boolean;
+  circle: Classifier;
+  invisSiblingEdges: Relationship[];
 } {
   const aId = ensure(aName).id;
   const bId = ensure(bName).id;
@@ -260,8 +265,13 @@ function makeCoupleCircle(
   // style (`linkStyle`, untouched by the split) is shared by both new edges.
   const subsumedDashed = subsumed.dashed ?? false;
   const aEdge: Relationship = {
-    from: aId, to: circleId, type: 'association', length: entityLength,
-    sourceDecor: 'none', targetDecor: subsumed.bSideDecor ?? 'none', dashed: subsumedDashed,
+    from: aId,
+    to: circleId,
+    type: 'association',
+    length: entityLength,
+    sourceDecor: 'none',
+    targetDecor: subsumed.bSideDecor ?? 'none',
+    dashed: subsumedDashed,
   };
   if (subsumed.a !== undefined) aEdge.fromMultiplicity = subsumed.a;
   // B2 (SI17): a `Class::member` port on the subsumed edge (pajoka-72-reju527)
@@ -275,8 +285,13 @@ function makeCoupleCircle(
   // their own (`sh0006->sh0009`, bare, not `sh0006:pea9f6…->sh0009`).
   registerPersistentPort(ast, aId, subsumed.portA);
   const bEdge: Relationship = {
-    from: circleId, to: bId, type: 'association', length: entityLength,
-    sourceDecor: subsumed.aSideDecor ?? 'none', targetDecor: 'none', dashed: subsumedDashed,
+    from: circleId,
+    to: bId,
+    type: 'association',
+    length: entityLength,
+    sourceDecor: subsumed.aSideDecor ?? 'none',
+    targetDecor: 'none',
+    dashed: subsumedDashed,
   };
   if (subsumed.b !== undefined) bEdge.toMultiplicity = subsumed.b;
   registerPersistentPort(ast, bId, subsumed.portB);

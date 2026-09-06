@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileSwitch } from '../../../../src/diagrams/activity/tiles/gtile-switch.js';
-import {
-  EAST_HOOK,
-  NORTH_HOOK,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import type { GPoint, HookName } from '../../../../src/diagrams/activity/tiles/points.js';
@@ -43,13 +38,7 @@ describe('GtileSwitch — 2 cases, no merge diamond', () => {
   const diamond = makeDiamond(60, 40);
   const case0 = makeTile(80, 100);
   const case1 = makeTile(80, 60);
-  const tile = new GtileSwitch(
-    diamond,
-    [{ tile: case0 }, { tile: case1 }],
-    null,
-    bounder,
-    theme,
-  );
+  const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], null, bounder, theme);
 
   it('width === case0.width + NODE_MARGIN_X + case1.width', () => {
     expect(tile.width).toBe(80 + NODE_MARGIN_X + 80);
@@ -93,13 +82,7 @@ describe('GtileSwitch — 2 cases with merge diamond', () => {
   const case0 = makeTile(80, 100);
   const case1 = makeTile(80, 60);
   const merge = makeDiamond(60, 40);
-  const tile = new GtileSwitch(
-    diamond,
-    [{ tile: case0 }, { tile: case1 }],
-    merge,
-    bounder,
-    theme,
-  );
+  const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], merge, bounder, theme);
 
   it('mergeOffsetY is non-null', () => {
     expect(tile.mergeOffsetY).not.toBeNull();
@@ -130,13 +113,7 @@ describe('GtileSwitch — hooks', () => {
   const diamond = makeDiamond(60, 40);
   const case0 = makeTile(80, 100);
   const case1 = makeTile(80, 60);
-  const tile = new GtileSwitch(
-    diamond,
-    [{ tile: case0 }, { tile: case1 }],
-    null,
-    bounder,
-    theme,
-  );
+  const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], null, bounder, theme);
 
   it('NORTH_HOOK.y === 0', () => {
     expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
@@ -158,13 +135,7 @@ describe('GtileSwitch — hooks', () => {
 describe('GtileSwitch — diamond wider than cases', () => {
   const diamond = makeDiamond(300, 40);
   const case0 = makeTile(80, 60);
-  const tile = new GtileSwitch(
-    diamond,
-    [{ tile: case0 }],
-    null,
-    bounder,
-    theme,
-  );
+  const tile = new GtileSwitch(diamond, [{ tile: case0 }], null, bounder, theme);
 
   it('width driven by diamond.width when wider than cases', () => {
     expect(tile.width).toBe(300);

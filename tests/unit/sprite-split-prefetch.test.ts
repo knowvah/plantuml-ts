@@ -32,11 +32,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  prefetchIncludes,
-  prepareIncludeStore,
-  type IncludeFetcher,
-} from '../../src/core/include-resolver.js';
+import { prefetchIncludes, prepareIncludeStore, type IncludeFetcher } from '../../src/core/include-resolver.js';
 import {
   spriteSplitStdlib,
   SpriteNotBundledError,
@@ -148,10 +144,11 @@ describe('sprite-split prefetch -- RenderOptions.sprites escape hatch (criterion
     });
     const registry = registrySplitBootstrap(remoteFetcher);
 
-    const store = await prepareIncludeStore(
-      uml('!include <bootstrap/bootstrap>', 'usecase a as "<$bi-heart>"'),
-      { fetcher: noFetch, stdlibRegistry: registry, sprites: ['bi-globe', 'bi-heart'] },
-    );
+    const store = await prepareIncludeStore(uml('!include <bootstrap/bootstrap>', 'usecase a as "<$bi-heart>"'), {
+      fetcher: noFetch,
+      stdlibRegistry: registry,
+      sprites: ['bi-globe', 'bi-heart'],
+    });
 
     // 'bi-heart' named by BOTH the scan and the option: one fetch, not two.
     expect(remoteFetcher).toHaveBeenCalledTimes(2);
@@ -193,11 +190,7 @@ describe('sprite-split prefetch -- absent name (criterion 3, ADR-5a)', () => {
     const registry = registrySplitBootstrap(remoteFetcher);
 
     const err = await prefetchIncludes(
-      uml(
-        '!include <bootstrap/bootstrap>',
-        'usecase a as "<$bi-globe>"',
-        'usecase z as "<$bi-not-a-real-sprite>"',
-      ),
+      uml('!include <bootstrap/bootstrap>', 'usecase a as "<$bi-globe>"', 'usecase z as "<$bi-not-a-real-sprite>"'),
       noFetch,
       undefined,
       registry,
@@ -269,9 +262,7 @@ describe('sprite-split prefetch -- determinism regardless of completion order (c
     const reversed = await runWithDelays({ 'bi-bootstrap-fill': 0, 'bi-globe': 15, 'bi-heart': 30 });
 
     expect(forward).toBe(reversed);
-    expect(forward).toBe(
-      fragmentFor('bi-bootstrap-fill') + fragmentFor('bi-globe') + fragmentFor('bi-heart'),
-    );
+    expect(forward).toBe(fragmentFor('bi-bootstrap-fill') + fragmentFor('bi-globe') + fragmentFor('bi-heart'));
   });
 });
 

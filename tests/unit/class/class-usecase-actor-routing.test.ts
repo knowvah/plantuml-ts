@@ -42,10 +42,14 @@ function spriteRegistryWithIcon() {
   return registry;
 }
 
-describe('measureUsecaseOrActor routes through the description engine\'s faithful path (SI10/ADR-2)', () => {
-  it('a class-diagram usecase (reachable via allowmixing) sizes exactly like the description engine\'s own usecase', () => {
+describe("measureUsecaseOrActor routes through the description engine's faithful path (SI10/ADR-2)", () => {
+  it("a class-diagram usecase (reachable via allowmixing) sizes exactly like the description engine's own usecase", () => {
     const classifier: Classifier = {
-      id: 'u', display: 'Hello World', kind: 'usecase', typeParams: [], members: [],
+      id: 'u',
+      display: 'Hello World',
+      kind: 'usecase',
+      typeParams: [],
+      members: [],
     };
     const measured = measureUsecaseOrActor(classifier, fontSpec, measurer);
 
@@ -71,15 +75,18 @@ describe('measureUsecaseOrActor routes through the description engine\'s faithfu
 
     // The class-specific MeasuredClassifier composition is unchanged --
     // one row at y = height/2, no dividers (task item 2).
-    expect(measured.rows).toEqual([
-      { text: 'Hello World', y: measured.height / 2, indent: 0, italic: false },
-    ]);
+    expect(measured.rows).toEqual([{ text: 'Hello World', y: measured.height / 2, indent: 0, italic: false }]);
     expect(measured.dividerYs).toEqual([]);
   });
 
-  it('a bare actor sizes exactly like the description engine\'s own actor (stickman + label)', () => {
+  it("a bare actor sizes exactly like the description engine's own actor (stickman + label)", () => {
     const classifier: Classifier = {
-      id: 'a', display: 'Bob', kind: 'descriptive', usymbol: 'actor', typeParams: [], members: [],
+      id: 'a',
+      display: 'Bob',
+      kind: 'descriptive',
+      usymbol: 'actor',
+      typeParams: [],
+      members: [],
     };
     const measured = measureUsecaseOrActor(classifier, fontSpec, measurer);
 
@@ -100,7 +107,11 @@ describe('measureUsecaseOrActor routes through the description engine\'s faithfu
 
   it('threads sprites through to the faithful path -- a registered <$sprite> lookup changes the measured dimension (task item 3)', () => {
     const classifier: Classifier = {
-      id: 'u2', display: '<$icon>', kind: 'usecase', typeParams: [], members: [],
+      id: 'u2',
+      display: '<$icon>',
+      kind: 'usecase',
+      typeParams: [],
+      members: [],
     };
     const registry = spriteRegistryWithIcon();
 
@@ -114,7 +125,8 @@ describe('measureUsecaseOrActor routes through the description engine\'s faithfu
     // the call site (the exact regression this test guards), `withSprites`
     // would equal `withoutSprites` and this assertion would fail.
     expect(withoutSprites).toEqual({
-      width: 6, height: 6,
+      width: 6,
+      height: 6,
       rows: [{ text: '<$icon>', y: 3, indent: 0, italic: false }],
       dividerYs: [],
     });
@@ -128,13 +140,23 @@ describe('measureUsecaseOrActor routes through the description engine\'s faithfu
     // performs internally -- proves the threaded value reaches the
     // identical faithful measurement, not just a coincidentally-matching
     // literal.
-    const viaEntryPoint = measureUsecaseOrActorLeaf('<$icon>', 'usecase', fontSpec, measurer, spriteDimsLookupFor(registry));
+    const viaEntryPoint = measureUsecaseOrActorLeaf(
+      '<$icon>',
+      'usecase',
+      fontSpec,
+      measurer,
+      spriteDimsLookupFor(registry),
+    );
     expect({ width: withSprites.width, height: withSprites.height }).toEqual(viaEntryPoint);
   });
 
   it('the sprite threading survives the REAL call site -- class-layout-helpers.ts#measureClassifier -> tryMeasureNonGenericClassifier -> measureUsecaseOrActor (task item 3, method rule: verify against the current call graph, not just the leaf function in isolation)', () => {
     const classifier: Classifier = {
-      id: 'u3', display: '<$icon>', kind: 'usecase', typeParams: [], members: [],
+      id: 'u3',
+      display: '<$icon>',
+      kind: 'usecase',
+      typeParams: [],
+      members: [],
     };
     const suppress = { fields: false, methods: false };
     const registry = spriteRegistryWithIcon();
@@ -148,7 +170,8 @@ describe('measureUsecaseOrActor routes through the description engine\'s faithfu
     // from this file's own fontSpec but the bare `<$icon>` display has no
     // text ink to size against).
     expect(withoutSprites).toEqual({
-      width: 6, height: 6,
+      width: 6,
+      height: 6,
       rows: [{ text: '<$icon>', y: 3, indent: 0, italic: false }],
       dividerYs: [],
     });

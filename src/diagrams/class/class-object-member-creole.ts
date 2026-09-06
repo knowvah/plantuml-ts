@@ -45,7 +45,11 @@
  */
 
 import { resolveMemberAtoms } from './class-member-creole.js';
-import { buildStripeAtoms, buildLiteralAtoms, fontConfigurationForHeading } from '../../core/klimt/creole/legacy/StripeSimple.js';
+import {
+  buildStripeAtoms,
+  buildLiteralAtoms,
+  fontConfigurationForHeading,
+} from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
@@ -121,9 +125,10 @@ export function buildObjectMemberRow(
     // commands have already been resolved against the hidden text.
     const shown = CharHidder.unhide(atom.text);
     if (!shown.includes('\t')) {
-      const width = shown === atom.text
-        ? atom.width
-        : measurer.measure(shown, { family: atom.font.family, size: atom.font.size }).width;
+      const width =
+        shown === atom.text
+          ? atom.width
+          : measurer.measure(shown, { family: atom.font.family, size: atom.font.size }).width;
       out.push({ atom: { ...atom, text: shown, width }, x });
       x += width;
       continue;

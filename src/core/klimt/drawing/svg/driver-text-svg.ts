@@ -71,7 +71,10 @@ import type { SvgGraphics } from './svg-graphics.js';
  * seam rather than a real font-metrics implementation. Upstream:
  * `klimt.font.StringBounder#calculateDimension(UFont, String)`. */
 export interface StringBounder {
-  calculateDimension(font: { readonly family: string; readonly size: number }, text: string): { readonly width: number };
+  calculateDimension(
+    font: { readonly family: string; readonly size: number },
+    text: string,
+  ): { readonly width: number };
 }
 
 // Upstream: `text.replace(' ', (char) 160)` — regular space -> NBSP.

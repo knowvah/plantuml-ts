@@ -27,3 +27,12 @@ docs/
 findings/
 planning/
 *.md
+
+# Generated sources and pure data tables. Prettier's readability argument does
+# not apply to a machine-written glyph/theme table, and formatting a generated
+# file guarantees drift the moment its generator re-runs. All three below
+# ALREADY exist only because they were split out to stay under the 500-line
+# cap -- reformatting them past it again, to then split them again, is a loop.
+src/core/themes-builtin-a-m.ts
+src/core/themes-builtin-p-v.ts
+src/core/openiconic-glyphs-data.ts

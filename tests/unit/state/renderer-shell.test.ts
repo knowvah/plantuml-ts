@@ -69,9 +69,7 @@ describe('renderState — explicit background rect for non-default background', 
     // attrs equivalence (this codebase's established convention, see
     // renderer-shell.ts's own doc comment) makes both forms byte-equivalent
     // for the conformance comparator.
-    expect(svg).toContain(
-      '<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none"/>',
-    );
+    expect(svg).toContain('<rect x="0" y="0" width="155" height="121" fill="#808080" stroke="none"/>');
   });
 
   it('positions the background rect as the FIRST child of the content <g>, before any entity markup', () => {

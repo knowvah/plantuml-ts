@@ -190,24 +190,23 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // packagebackgroundcolor transparent/background) to jar's real literal
   // `fill="none"` -- see that helper's own doc comment.
   const fill = packageFillValue(theme.colors.graph.packageBackground);
-  const outline = theme.strictUml === true
-    ? renderFolderPolygon(
-        folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-        theme.colors.graph.packageBorder,
-        strokeWidth,
-        fill,
-      )
-    : path(
-        folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER),
-        { stroke: theme.colors.graph.packageBorder, strokeWidth, fill },
-      );
-  const hline = line(
-    geo.x,
-    geo.y + geo.htitle,
-    geo.x + geo.wtitle + MARGIN_TITLE_X3,
-    geo.y + geo.htitle,
-    { stroke: theme.colors.graph.packageBorder, strokeWidth },
-  );
+  const outline =
+    theme.strictUml === true
+      ? renderFolderPolygon(
+          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
+          theme.colors.graph.packageBorder,
+          strokeWidth,
+          fill,
+        )
+      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
+          stroke: theme.colors.graph.packageBorder,
+          strokeWidth,
+          fill,
+        });
+  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
+    stroke: theme.colors.graph.packageBorder,
+    strokeWidth,
+  });
   // G2 N18: jar's deterministic-text mode always emits `textLength`/
   // `lengthAdjust` on this title (matches every OTHER class text row,
   // `renderer-classifier-box.ts`'s identical convention) plus the RAW
@@ -298,23 +297,29 @@ export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme): string 
   const fill = theme.colors.graph.classBackground;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
-  const outline = theme.strictUml === true
-    ? renderFolderPolygon(
-        folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-        border, strokeWidth, fill,
-      )
-    : path(
-        folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER),
-        { stroke: border, strokeWidth, fill },
-      );
-  const hline = line(
-    geo.x, geo.y + geo.htitle,
-    geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle,
-    { stroke: border, strokeWidth },
-  );
+  const outline =
+    theme.strictUml === true
+      ? renderFolderPolygon(
+          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
+          border,
+          strokeWidth,
+          fill,
+        )
+      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
+          stroke: border,
+          strokeWidth,
+          fill,
+        });
+  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
+    stroke: border,
+    strokeWidth,
+  });
   const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
   const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily, fontSize, fontWeight: '700', fill: fontColor,
+    fontFamily: theme.fontFamily,
+    fontSize,
+    fontWeight: '700',
+    fill: fontColor,
     ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
   });
   return outline + hline + label;

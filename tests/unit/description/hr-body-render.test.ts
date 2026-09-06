@@ -34,7 +34,9 @@ describe('description — creole HR in a leaf body (S1L-b T1)', () => {
 
   it('a mixed plain/titled HR body (codabo-50 shape) renders without an error diagram', () => {
     const body = 'no1\n----\nno2\n====\nno3\n--title1--\nno4\n==title2==\nno5';
-    const svg = renderSync(`@startuml\nnode node2 [\n${body}\n]\ndatabase left [\n${body}\n]\ncloud cl [\n${body}\n]\n@enduml`);
+    const svg = renderSync(
+      `@startuml\nnode node2 [\n${body}\n]\ndatabase left [\n${body}\n]\ncloud cl [\n${body}\n]\n@enduml`,
+    );
     expectNoErrorDiagram(svg, 'mixed HR bodies');
   });
 

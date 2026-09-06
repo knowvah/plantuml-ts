@@ -229,8 +229,16 @@ describe('parseMemberLine — G2 N16 ownUrl parsing', () => {
   it('two DIFFERENT member lines on the same classifier parse two DIFFERENT ownUrl values', () => {
     const m1 = parseMemberLine('name1 [[[https://example.com/link1]]]');
     const m2 = parseMemberLine('name2 [[[https://example.com/link2]]]');
-    expect(m1!.ownUrl).toEqual({ url: 'https://example.com/link1', tooltip: 'https://example.com/link1', label: 'https://example.com/link1' });
-    expect(m2!.ownUrl).toEqual({ url: 'https://example.com/link2', tooltip: 'https://example.com/link2', label: 'https://example.com/link2' });
+    expect(m1!.ownUrl).toEqual({
+      url: 'https://example.com/link1',
+      tooltip: 'https://example.com/link1',
+      label: 'https://example.com/link1',
+    });
+    expect(m2!.ownUrl).toEqual({
+      url: 'https://example.com/link2',
+      tooltip: 'https://example.com/link2',
+      label: 'https://example.com/link2',
+    });
   });
 
   it('omits ownUrl (not undefined-valued) for a member with no url suffix', () => {

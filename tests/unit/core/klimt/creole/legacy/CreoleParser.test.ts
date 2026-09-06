@@ -10,7 +10,11 @@
  * constructs a real sibling and is asserted on concrete produced stripes.
  */
 import { describe, expect, it } from 'vitest';
-import { CreoleParser, type CreoleTextStyle, type CreoleParserAdapters } from '../../../../../../src/core/klimt/creole/legacy/CreoleParser.js';
+import {
+  CreoleParser,
+  type CreoleTextStyle,
+  type CreoleParserAdapters,
+} from '../../../../../../src/core/klimt/creole/legacy/CreoleParser.js';
 import { CreoleMode } from '../../../../../../src/core/klimt/creole/CreoleMode.js';
 import { HorizontalAlignment } from '../../../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { ISkinSimple } from '../../../../../../src/core/style/ISkinSimple.js';
@@ -42,7 +46,8 @@ const sb: StringBounder = new FakeStringBounder();
  *  character for a `'text'` atom, 0-width for anything else. */
 function fakeAtomOps(): AtomOps {
   return {
-    calculateDimension: (atom): XDimension2D => (atom.kind === 'text' ? new XDimension2D(atom.text.length, 10) : new XDimension2D(0, 10)),
+    calculateDimension: (atom): XDimension2D =>
+      atom.kind === 'text' ? new XDimension2D(atom.text.length, 10) : new XDimension2D(0, 10),
     getStartingAltitude: (): number => 0,
     drawU: (): void => undefined,
   };
@@ -56,7 +61,9 @@ const EMPTY_TEXT_BLOCK: TextBlock = {
 /** Per-file `NestedDiagramRenderer` test double — records every `render`
  *  call's arguments so the embedded-diagram tests can assert on exactly
  *  what `EmbeddedDiagram.createAndSkip` collected. */
-function fakeRenderer(calls: { source: readonly string[]; skinParam: ISkinSimple | null }[] = []): NestedDiagramRenderer {
+function fakeRenderer(
+  calls: { source: readonly string[]; skinParam: ISkinSimple | null }[] = [],
+): NestedDiagramRenderer {
   return {
     render: (source, skinParam): TextBlock => {
       calls.push({ source, skinParam });
@@ -85,7 +92,10 @@ function fakeSkin(guillemet: GuillemetPair = GUILLEMET_DEFAULT): ISkinSimple {
   };
 }
 
-function display(lines: readonly DisplayLine[], opts: { isNull?: boolean; showStereotype?: boolean } = {}): DisplayLike {
+function display(
+  lines: readonly DisplayLine[],
+  opts: { isNull?: boolean; showStereotype?: boolean } = {},
+): DisplayLike {
   const key = opts.isNull === true ? ' NULL' : lines.map(String).join(' ');
   return {
     isNull: opts.isNull ?? false,
@@ -127,8 +137,12 @@ describe('CreoleParser constructor', () => {
   it('throws when skinParam is null or undefined (java:75 Objects.requireNonNull)', () => {
     const textStyle: CreoleTextStyle = { creoleMode: CreoleMode.FULL, stereotype: FONT };
     const adapters: CreoleParserAdapters = { atomOps: fakeAtomOps(), renderer: fakeRenderer() };
-    expect(() => new CreoleParser(FONT, HorizontalAlignment.LEFT, null as unknown as ISkinSimple, textStyle, adapters)).toThrow();
-    expect(() => new CreoleParser(FONT, HorizontalAlignment.LEFT, undefined as unknown as ISkinSimple, textStyle, adapters)).toThrow();
+    expect(
+      () => new CreoleParser(FONT, HorizontalAlignment.LEFT, null as unknown as ISkinSimple, textStyle, adapters),
+    ).toThrow();
+    expect(
+      () => new CreoleParser(FONT, HorizontalAlignment.LEFT, undefined as unknown as ISkinSimple, textStyle, adapters),
+    ).toThrow();
   });
 });
 
@@ -376,7 +390,10 @@ describe('CreoleParser — embedded-diagram dispatch (java:153-163, T10g)', () =
     );
     const stripes = [...sheet];
     expect(stripes).toHaveLength(2); // the embedded block, then "after"
-    const atom = blockAtomOf(stripes[0]!) as { calculateDimension: (sb: StringBounder) => XDimension2D; constructor: { name: string } };
+    const atom = blockAtomOf(stripes[0]!) as {
+      calculateDimension: (sb: StringBounder) => XDimension2D;
+      constructor: { name: string };
+    };
     expect(atom.constructor.name).toBe('EmbeddedDiagram');
     expect(textOf(stripes[1]!.getAtoms())).toBe('after');
     // `EmbeddedDiagram.getInternalTextBlock` is LAZY (java:154-163's own

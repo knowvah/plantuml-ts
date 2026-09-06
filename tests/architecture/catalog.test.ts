@@ -58,14 +58,10 @@ describe('docs/catalog.md', () => {
   //
   // Full prior diagnosis, causal chain and what was ruled out:
   // `.agent-notes/tbi-T2.md`; this correction: `.agent-notes/catalog-ci-budget.md`.
-  it(
-    'is up to date with src/ (run `npm run catalog` if this fails)',
-    () => {
-      const committed = readFileSync(CATALOG_PATH, 'utf8');
-      expect(buildCatalog()).toBe(committed);
-    },
-    30_000,
-  );
+  it('is up to date with src/ (run `npm run catalog` if this fails)', () => {
+    const committed = readFileSync(CATALOG_PATH, 'utf8');
+    expect(buildCatalog()).toBe(committed);
+  }, 30_000);
 
   it('indexes a known shared seam, so the catalog can answer "does this exist?"', () => {
     // The worked example from SI31 T5: the faithful `DotPath#simulateCompound`

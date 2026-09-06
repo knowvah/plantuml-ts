@@ -17,11 +17,7 @@ type FieldGetter = (acc: SkinparamAccumulator) => unknown;
 type FieldTable = ReadonlyArray<readonly [key: string, get: FieldGetter]>;
 
 /** Copies every field whose getter returns non-`undefined` into `target`. */
-function applyDefinedFields(
-  target: Record<string, unknown>,
-  acc: SkinparamAccumulator,
-  fields: FieldTable,
-): void {
+function applyDefinedFields(target: Record<string, unknown>, acc: SkinparamAccumulator, fields: FieldTable): void {
   for (const [key, get] of fields) {
     const value = get(acc);
     if (value !== undefined) target[key] = value;
@@ -124,10 +120,7 @@ function hasActivityOverride(acc: SkinparamAccumulator): boolean {
 }
 
 function hasGraphOverride(acc: SkinparamAccumulator): boolean {
-  return (
-    GRAPH_OVERRIDE_FIELDS.some(([, get]) => get(acc) !== undefined) ||
-    hasActivityOverride(acc)
-  );
+  return GRAPH_OVERRIDE_FIELDS.some(([, get]) => get(acc) !== undefined) || hasActivityOverride(acc);
 }
 
 function hasColorsOverride(acc: SkinparamAccumulator): boolean {
@@ -142,9 +135,7 @@ function hasColorsOverride(acc: SkinparamAccumulator): boolean {
   );
 }
 
-function buildActivityOverride(
-  acc: SkinparamAccumulator,
-): NonNullable<Theme['colors']['graph']['activity']> {
+function buildActivityOverride(acc: SkinparamAccumulator): NonNullable<Theme['colors']['graph']['activity']> {
   const actOverride: Record<string, unknown> = {};
   applyDefinedFields(actOverride, acc, ACTIVITY_OVERRIDE_FIELDS);
   return actOverride;

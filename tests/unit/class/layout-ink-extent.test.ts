@@ -45,10 +45,7 @@ describe('computeClassDocumentDims', () => {
     // x="101" -- raw (pre-render-anchor) positions are x=0 and x=94 (this
     // port's own +7,+7 render-time anchor is translation-invariant to the
     // dimension math). Jar's real output: width="175px" height="70px".
-    const classifiers = [
-      makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }),
-      makeClassifierGeo({ id: 'foo2', x: 94, y: 0 }),
-    ];
+    const classifiers = [makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }), makeClassifierGeo({ id: 'foo2', x: 94, y: 0 })];
     const dims = computeClassDocumentDims(classifiers, [], [], []);
     expect(dims).toEqual({ width: 175, height: 70 });
   });
@@ -73,7 +70,17 @@ describe('computeClassDocumentDims', () => {
 
   it('a namespace cluster contributes its own bbox with NO `-1` inset (UPath ink rule)', () => {
     const namespaces: NamespaceGeo[] = [
-      { id: 'ns', x: 6, y: 6, width: 117.15, height: 113, label: 'p1', wtitle: 25, htitle: 20, baselineOffset: 12.8889 },
+      {
+        id: 'ns',
+        x: 6,
+        y: 6,
+        width: 117.15,
+        height: 113,
+        label: 'p1',
+        wtitle: 25,
+        htitle: 20,
+        baselineOffset: 12.8889,
+      },
     ];
     const dims = computeClassDocumentDims([], namespaces, [], []);
     // Ink span: x in [6, 123.15], y in [6, 119] (no -1 quirk for UPath).
@@ -83,56 +90,78 @@ describe('computeClassDocumentDims', () => {
     expect(dims.height).toBe(134);
   });
 
-  it('item 42 (G2 N60): inkShape "polygon" (strictuml FOLDER) pads x by ' +
-    'HACK_X_FOR_POLYGON=10 on both sides, y unpadded -- jar-verified against ' +
-    'jinibe-02-tebi269\'s real LimitFinder walk (raw cluster bbox [16,64] -> ' +
-    'ink [6,74])', () => {
-    const namespaces: NamespaceGeo[] = [
-      {
-        id: 'a', x: 16, y: 16, width: 48, height: 89, label: 'a',
-        wtitle: 25, htitle: 10, baselineOffset: 12.8889, inkShape: 'polygon',
-      },
-    ];
-    const { inkShape: _polyInkShape, ...plainNsPoly } = namespaces[0]!;
-    const polygon = computeClassDocumentDims([], namespaces, [], []);
-    const plain = computeClassDocumentDims([], [plainNsPoly], [], []);
-    // Ink span with the hack: x in [6, 74] vs the plain-UPath rule's [16, 64]
-    // -- exactly 20px (2*HACK_X_FOR_POLYGON) wider, y unaffected.
-    expect(polygon.width).toBe(plain.width + 20);
-    expect(polygon.height).toBe(plain.height);
-  });
+  it(
+    'item 42 (G2 N60): inkShape "polygon" (strictuml FOLDER) pads x by ' +
+      'HACK_X_FOR_POLYGON=10 on both sides, y unpadded -- jar-verified against ' +
+      "jinibe-02-tebi269's real LimitFinder walk (raw cluster bbox [16,64] -> " +
+      'ink [6,74])',
+    () => {
+      const namespaces: NamespaceGeo[] = [
+        {
+          id: 'a',
+          x: 16,
+          y: 16,
+          width: 48,
+          height: 89,
+          label: 'a',
+          wtitle: 25,
+          htitle: 10,
+          baselineOffset: 12.8889,
+          inkShape: 'polygon',
+        },
+      ];
+      const { inkShape: _polyInkShape, ...plainNsPoly } = namespaces[0]!;
+      const polygon = computeClassDocumentDims([], namespaces, [], []);
+      const plain = computeClassDocumentDims([], [plainNsPoly], [], []);
+      // Ink span with the hack: x in [6, 74] vs the plain-UPath rule's [16, 64]
+      // -- exactly 20px (2*HACK_X_FOR_POLYGON) wider, y unaffected.
+      expect(polygon.width).toBe(plain.width + 20);
+      expect(polygon.height).toBe(plain.height);
+    },
+  );
 
-  it('item 42 (G2 N60): inkShape "rect" (skinparam packageStyle rect) uses ' +
-    'the classic URectangle ink rule (-1 on BOTH corners: [x-1,x+w-1]) -- ' +
-    'the SAME width/height as the plain UPath rule ([x,x+w], since both are ' +
-    'w-wide), but SHIFTED 1px left/up -- jar-verified against mucuxi-36-' +
-    'beku683\'s real LimitFinder walk (raw cluster bbox [16,64] -> ink ' +
-    '[15,63])', () => {
-    const namespaces: NamespaceGeo[] = [
-      {
-        id: 'a', x: 16, y: 16, width: 48, height: 89, label: 'a',
-        wtitle: 25, htitle: 10, baselineOffset: 12.8889, inkShape: 'rect',
-      },
-    ];
-    const { inkShape: _rectInkShape, ...plainNs } = namespaces[0]!;
-    const rectDims = computeClassDocumentDims([], namespaces, [], []);
-    const plainDims = computeClassDocumentDims([], [plainNs], [], []);
-    // A namespace-only diagram: the ink SPAN width/height (max-min) is
-    // identical between the two rules (both exactly `width`/`height` wide),
-    // so the FINAL canvas dimension is unaffected in isolation -- the rule
-    // only matters once ANOTHER element's own ink could dominate a corner,
-    // or via the absolute ink-shift position (`computeClassInkShift` below).
-    expect(rectDims).toEqual(plainDims);
+  it(
+    'item 42 (G2 N60): inkShape "rect" (skinparam packageStyle rect) uses ' +
+      'the classic URectangle ink rule (-1 on BOTH corners: [x-1,x+w-1]) -- ' +
+      'the SAME width/height as the plain UPath rule ([x,x+w], since both are ' +
+      'w-wide), but SHIFTED 1px left/up -- jar-verified against mucuxi-36-' +
+      "beku683's real LimitFinder walk (raw cluster bbox [16,64] -> ink " +
+      '[15,63])',
+    () => {
+      const namespaces: NamespaceGeo[] = [
+        {
+          id: 'a',
+          x: 16,
+          y: 16,
+          width: 48,
+          height: 89,
+          label: 'a',
+          wtitle: 25,
+          htitle: 10,
+          baselineOffset: 12.8889,
+          inkShape: 'rect',
+        },
+      ];
+      const { inkShape: _rectInkShape, ...plainNs } = namespaces[0]!;
+      const rectDims = computeClassDocumentDims([], namespaces, [], []);
+      const plainDims = computeClassDocumentDims([], [plainNs], [], []);
+      // A namespace-only diagram: the ink SPAN width/height (max-min) is
+      // identical between the two rules (both exactly `width`/`height` wide),
+      // so the FINAL canvas dimension is unaffected in isolation -- the rule
+      // only matters once ANOTHER element's own ink could dominate a corner,
+      // or via the absolute ink-shift position (`computeClassInkShift` below).
+      expect(rectDims).toEqual(plainDims);
 
-    const rectShift = computeClassInkShift([], namespaces, [], []);
-    const plainShift = computeClassInkShift([], [plainNs], [], []);
-    // rect's ink-min corner is 1px further out (x-1,y-1 vs x,y), so the
-    // uniform shift needed to land it at JAR_INK_MARGIN is 1px smaller in
-    // magnitude on both axes -- jar-verified: mucuxi's real shift is -9
-    // (raw minX 15 -> 6), jinibe/plain's is -10 (raw minX 16 -> 6).
-    expect(rectShift.dx).toBe(plainShift.dx + 1);
-    expect(rectShift.dy).toBe(plainShift.dy + 1);
-  });
+      const rectShift = computeClassInkShift([], namespaces, [], []);
+      const plainShift = computeClassInkShift([], [plainNs], [], []);
+      // rect's ink-min corner is 1px further out (x-1,y-1 vs x,y), so the
+      // uniform shift needed to land it at JAR_INK_MARGIN is 1px smaller in
+      // magnitude on both axes -- jar-verified: mucuxi's real shift is -9
+      // (raw minX 15 -> 6), jinibe/plain's is -10 (raw minX 16 -> 6).
+      expect(rectShift.dx).toBe(plainShift.dx + 1);
+      expect(rectShift.dy).toBe(plainShift.dy + 1);
+    },
+  );
 
   it('edge points widen the box beyond the classifiers alone', () => {
     const classifiers = [makeClassifierGeo({ x: 0, y: 0, width: 40, height: 40 })];
@@ -199,11 +228,30 @@ describe('computeClassDocumentDims', () => {
     // note-leaf-model T3: dropped-ness is resolved inside this draw pass
     // (`buildInkBox` is this port's `LimitFinder`) -- `typo` matches no row
     // of host `A`, so `EntityImageTips#drawU` returns before drawing.
-    const host = makeClassifierGeo({ id: 'A', x: 600, y: 0, width: 0, height: 0, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] });
+    const host = makeClassifierGeo({
+      id: 'A',
+      x: 600,
+      y: 0,
+      width: 0,
+      height: 0,
+      rows: [
+        { text: 'A', y: 14, indent: 0 },
+        { text: 'member', y: 40, indent: 6, width: 30 },
+      ],
+    });
     const notes: NoteGeo[] = [
       {
-        id: 'n0', kind: 'tips', x: 0, y: 0, width: 500, height: 500, lines: ['error'], lineWidths: [], connector: [],
-        target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
+        id: 'n0',
+        kind: 'tips',
+        x: 0,
+        y: 0,
+        width: 500,
+        height: 500,
+        lines: ['error'],
+        lineWidths: [],
+        connector: [],
+        target: 'A',
+        tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
       },
     ];
     const dims = computeClassDocumentDims([host], [], [], notes);
@@ -220,55 +268,33 @@ describe('computeClassDocumentDims — shadow ink (deferred D3 item)', () => {
   it('shadow=0 is byte-identical to the unshadowed dims (no regression)', () => {
     const classifiers = [makeClassifierGeo({ x: 0, y: 0, shadowing: 0 })];
     const withShadowField = computeClassDocumentDims(classifiers, [], [], []);
-    const withoutShadowField = computeClassDocumentDims(
-      [makeClassifierGeo({ x: 0, y: 0 })],
-      [],
-      [],
-      [],
-    );
+    const withoutShadowField = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
     expect(withShadowField).toEqual(withoutShadowField);
   });
 
-  it('shadow>0 widens both dims by 2*shadow-1 (filoxo-23-fafi328, skin rose ' +
-    'Shadowing 4.0) — measured on the raw (pre-floor) ink dims, since the ' +
-    'final margined dims\' SvgGraphics#ensureVisible truncation can absorb a ' +
-    'fractional part differently depending on which corner dominates. The ' +
-    '"-1" (not a flat 2*shadow=8) is because the UNSHADOWED baseline this ' +
-    'delta is measured against already picked the un-inset `x+w` UEmpty ' +
-    'corner as dominant (addRectInk\'s own doc comment) -- the shadowed ' +
-    'rect corner is `x+w-1+2*shadow`, exactly `2*shadow-1` past that ' +
-    'baseline, not past the rect\'s own un-shadowed `-1`-inset corner. ' +
-    'Matches the full-pipeline measurement exactly: filoxo/rakopi\'s canvas ' +
-    'grew 249->256 and 234->241 (both +7) once this ink rule landed.', () => {
-    const unshadowed = computeClassRawInkDims(
-      [makeClassifierGeo({ x: 0, y: 0 })],
-      [],
-      [],
-      [],
-    );
-    const shadowed = computeClassRawInkDims(
-      [makeClassifierGeo({ x: 0, y: 0, shadowing: 4 })],
-      [],
-      [],
-      [],
-    );
-    expect(shadowed.width).toBe(unshadowed.width + 7);
-    expect(shadowed.height).toBe(unshadowed.height + 7);
-  });
+  it(
+    'shadow>0 widens both dims by 2*shadow-1 (filoxo-23-fafi328, skin rose ' +
+      'Shadowing 4.0) — measured on the raw (pre-floor) ink dims, since the ' +
+      "final margined dims' SvgGraphics#ensureVisible truncation can absorb a " +
+      'fractional part differently depending on which corner dominates. The ' +
+      '"-1" (not a flat 2*shadow=8) is because the UNSHADOWED baseline this ' +
+      'delta is measured against already picked the un-inset `x+w` UEmpty ' +
+      "corner as dominant (addRectInk's own doc comment) -- the shadowed " +
+      'rect corner is `x+w-1+2*shadow`, exactly `2*shadow-1` past that ' +
+      "baseline, not past the rect's own un-shadowed `-1`-inset corner. " +
+      "Matches the full-pipeline measurement exactly: filoxo/rakopi's canvas " +
+      'grew 249->256 and 234->241 (both +7) once this ink rule landed.',
+    () => {
+      const unshadowed = computeClassRawInkDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+      const shadowed = computeClassRawInkDims([makeClassifierGeo({ x: 0, y: 0, shadowing: 4 })], [], [], []);
+      expect(shadowed.width).toBe(unshadowed.width + 7);
+      expect(shadowed.height).toBe(unshadowed.height + 7);
+    },
+  );
 
   it('an undefined shadowing field behaves identically to shadowing=0', () => {
-    const withUndefined = computeClassDocumentDims(
-      [makeClassifierGeo({ x: 0, y: 0 })],
-      [],
-      [],
-      [],
-    );
-    const withZero = computeClassDocumentDims(
-      [makeClassifierGeo({ x: 0, y: 0, shadowing: 0 })],
-      [],
-      [],
-      [],
-    );
+    const withUndefined = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0 })], [], [], []);
+    const withZero = computeClassDocumentDims([makeClassifierGeo({ x: 0, y: 0, shadowing: 0 })], [], [], []);
     expect(withUndefined).toEqual(withZero);
   });
 });
@@ -283,68 +309,102 @@ describe('computeClassDocumentDims — shadow ink (deferred D3 item)', () => {
 // #getBody`'s `LeafType.OBJECT` arm + `LimitFinder#drawRectangle`'s native
 // `-1`/`-1` inset).
 describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
-  it('two hidden-members object classifiers -- jar-verified kexica-21-gega428 ' +
-    '(global "hide members"): rawWidth 96.3625 (NOT addRectInk\'s 97.3625), ' +
-    'rawHeight unaffected', () => {
-    // B35/M40: `bodyInkWidth: 0` is what `class-object-map-sizing.ts` emits
-    // for this state -- upstream's `TextBlockUtils.empty(0, 0)` body draws no
-    // `TextBlockMarged`/`UEmpty`, so it reserves no ink. The jar numbers below
-    // are UNCHANGED; only the geo is now fully specified (the dedicated
-    // `addRectInkEmptyBody` rule these once exercised collapsed into the
-    // general one).
-    const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({
-        id: 'A', kind: 'object', x: 7, y: 7, width: 23.3625, height: 18, dividerYs: [], bodyInkWidth: 0,
-      }),
-      makeClassifierGeo({
-        id: 'B', kind: 'object', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [], bodyInkWidth: 0,
-      }),
-    ];
-    const dims = computeClassRawInkDims(classifiers, [], [], []);
-    expect(dims.width).toBeCloseTo(96.3625, 4);
-    expect(dims.height).toBe(34);
-  });
+  it(
+    'two hidden-members object classifiers -- jar-verified kexica-21-gega428 ' +
+      '(global "hide members"): rawWidth 96.3625 (NOT addRectInk\'s 97.3625), ' +
+      'rawHeight unaffected',
+    () => {
+      // B35/M40: `bodyInkWidth: 0` is what `class-object-map-sizing.ts` emits
+      // for this state -- upstream's `TextBlockUtils.empty(0, 0)` body draws no
+      // `TextBlockMarged`/`UEmpty`, so it reserves no ink. The jar numbers below
+      // are UNCHANGED; only the geo is now fully specified (the dedicated
+      // `addRectInkEmptyBody` rule these once exercised collapsed into the
+      // general one).
+      const classifiers: ClassifierGeo[] = [
+        makeClassifierGeo({
+          id: 'A',
+          kind: 'object',
+          x: 7,
+          y: 7,
+          width: 23.3625,
+          height: 18,
+          dividerYs: [],
+          bodyInkWidth: 0,
+        }),
+        makeClassifierGeo({
+          id: 'B',
+          kind: 'object',
+          x: 65,
+          y: 7,
+          width: 23.3625,
+          height: 18,
+          dividerYs: [],
+          bodyInkWidth: 0,
+        }),
+      ];
+      const dims = computeClassRawInkDims(classifiers, [], [], []);
+      expect(dims.width).toBeCloseTo(96.3625, 4);
+      expect(dims.height).toBe(34);
+    },
+  );
 
-  it('"hide empty members" only narrows the genuinely-empty sibling -- ' +
-    'jar-verified janoma-30-dovo501 (A keeps its populated-field ink at ' +
-    'dividerYs:[18], B is the empty one)', () => {
-    const populated = makeClassifierGeo({
-      id: 'A', kind: 'object', x: 7, y: 7, width: 31.425, height: 40,
-      dividerYs: [18],
-    });
-    const emptyBody = makeClassifierGeo({
-      id: 'B', kind: 'object', x: 73.03125, y: 18, width: 23.3625, height: 18,
-      dividerYs: [], bodyInkWidth: 0,
-    });
-    const withEmptyRule = computeClassRawInkDims([populated, emptyBody], [], [], []);
-    // B35/M40: the contrast is now carried by `bodyInkWidth`, not by `kind`.
-    // Dropping it models an UNMEASURED body, which keeps the pre-B35 fixed
-    // `x + w`; the two jar numbers below are unchanged.
-    const { bodyInkWidth: _dropped, ...unmeasured } = emptyBody;
-    const withGeneralRuleOnly = computeClassRawInkDims([populated, unmeasured], [], [], []);
-    // The empty-body sibling's own rule shaves exactly 1px off the raw
-    // width relative to treating it with the general (addRectInk) rule --
-    // jar-verified rawWidth 104.39375 (this rule) vs 105.39375 (general).
-    expect(withEmptyRule.width).toBeCloseTo(104.39375, 4);
-    expect(withGeneralRuleOnly.width - withEmptyRule.width).toBe(1);
-    expect(withEmptyRule.height).toBe(withGeneralRuleOnly.height);
-  });
+  it(
+    '"hide empty members" only narrows the genuinely-empty sibling -- ' +
+      'jar-verified janoma-30-dovo501 (A keeps its populated-field ink at ' +
+      'dividerYs:[18], B is the empty one)',
+    () => {
+      const populated = makeClassifierGeo({
+        id: 'A',
+        kind: 'object',
+        x: 7,
+        y: 7,
+        width: 31.425,
+        height: 40,
+        dividerYs: [18],
+      });
+      const emptyBody = makeClassifierGeo({
+        id: 'B',
+        kind: 'object',
+        x: 73.03125,
+        y: 18,
+        width: 23.3625,
+        height: 18,
+        dividerYs: [],
+        bodyInkWidth: 0,
+      });
+      const withEmptyRule = computeClassRawInkDims([populated, emptyBody], [], [], []);
+      // B35/M40: the contrast is now carried by `bodyInkWidth`, not by `kind`.
+      // Dropping it models an UNMEASURED body, which keeps the pre-B35 fixed
+      // `x + w`; the two jar numbers below are unchanged.
+      const { bodyInkWidth: _dropped, ...unmeasured } = emptyBody;
+      const withGeneralRuleOnly = computeClassRawInkDims([populated, unmeasured], [], [], []);
+      // The empty-body sibling's own rule shaves exactly 1px off the raw
+      // width relative to treating it with the general (addRectInk) rule --
+      // jar-verified rawWidth 104.39375 (this rule) vs 105.39375 (general).
+      expect(withEmptyRule.width).toBeCloseTo(104.39375, 4);
+      expect(withGeneralRuleOnly.width - withEmptyRule.width).toBe(1);
+      expect(withEmptyRule.height).toBe(withGeneralRuleOnly.height);
+    },
+  );
 
-  it('B35/M40: the 1px is gated on the body reservation, NOT on kind -- an ' +
-    'unmeasured body (class/interface/enum) keeps x+w, a zero-width one gives x+w-1', () => {
-    // Pre-B35 this asserted a KIND gate, because the suppressed-body rule was
-    // reachable only for `kind: 'object'`. The real discriminator is whether
-    // the body draws a `TextBlockMarged` `UEmpty` at all -- so an object with
-    // a zero-width reservation and a class with none differ by exactly the
-    // same 1px, and an object whose body DROVE the width does not.
-    const base: Partial<ClassifierGeo> = { id: 'C', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] };
-    const unmeasured = makeClassifierGeo({ ...base, kind: 'class' });
-    const noReservation = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 0 });
-    const bodyDriven = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 23.3625 });
-    const widthOf = (c: ClassifierGeo): number => computeClassRawInkDims([c], [], [], []).width;
-    expect(widthOf(unmeasured) - widthOf(noReservation)).toBe(1);
-    expect(widthOf(bodyDriven)).toBe(widthOf(unmeasured));
-  });
+  it(
+    'B35/M40: the 1px is gated on the body reservation, NOT on kind -- an ' +
+      'unmeasured body (class/interface/enum) keeps x+w, a zero-width one gives x+w-1',
+    () => {
+      // Pre-B35 this asserted a KIND gate, because the suppressed-body rule was
+      // reachable only for `kind: 'object'`. The real discriminator is whether
+      // the body draws a `TextBlockMarged` `UEmpty` at all -- so an object with
+      // a zero-width reservation and a class with none differ by exactly the
+      // same 1px, and an object whose body DROVE the width does not.
+      const base: Partial<ClassifierGeo> = { id: 'C', x: 65, y: 7, width: 23.3625, height: 18, dividerYs: [] };
+      const unmeasured = makeClassifierGeo({ ...base, kind: 'class' });
+      const noReservation = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 0 });
+      const bodyDriven = makeClassifierGeo({ ...base, kind: 'object', bodyInkWidth: 23.3625 });
+      const widthOf = (c: ClassifierGeo): number => computeClassRawInkDims([c], [], [], []).width;
+      expect(widthOf(unmeasured) - widthOf(noReservation)).toBe(1);
+      expect(widthOf(bodyDriven)).toBe(widthOf(unmeasured));
+    },
+  );
 });
 
 // B5/M6: the THIRD object body state -- an empty field list that is still
@@ -358,21 +418,36 @@ describe('computeClassRawInkDims — object empty-body ink (G3/O2)', () => {
 // :184-188`) -- unlike EITHER sibling state. See `addRectInkEmptyShownBody`'s
 // own doc comment for the three-way jar-rendered control set.
 describe('computeClassRawInkDims — object empty-but-SHOWN placeholder ink (B5/M6)', () => {
-  it('jar-verified jabote-02-rajo672 (three bare `object oN`, no title): ' +
-    'canvas 115x149, i.e. the rect inset on BOTH axes', () => {
-    const geo = (id: string, x: number, y: number): ClassifierGeo =>
-      makeClassifierGeo({
-        id, kind: 'object', x, y, width: 29.575, height: 34,
-        dividerYs: [18], emptyFieldPlaceholder: true,
-      });
-    const classifiers = [geo('o1', 0, 0), geo('o2', 65, 0), geo('o3', 0, 94)];
-    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 115, height: 149 });
-  });
+  it(
+    'jar-verified jabote-02-rajo672 (three bare `object oN`, no title): ' +
+      'canvas 115x149, i.e. the rect inset on BOTH axes',
+    () => {
+      const geo = (id: string, x: number, y: number): ClassifierGeo =>
+        makeClassifierGeo({
+          id,
+          kind: 'object',
+          x,
+          y,
+          width: 29.575,
+          height: 34,
+          dividerYs: [18],
+          emptyFieldPlaceholder: true,
+        });
+      const classifiers = [geo('o1', 0, 0), geo('o2', 65, 0), geo('o3', 0, 94)];
+      expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 115, height: 149 });
+    },
+  );
 
   it('drops exactly 1px on EACH axis versus the general addRectInk rule', () => {
     const withFlag = makeClassifierGeo({
-      id: 'o1', kind: 'object', x: 0, y: 0, width: 29.575, height: 34,
-      dividerYs: [18], emptyFieldPlaceholder: true,
+      id: 'o1',
+      kind: 'object',
+      x: 0,
+      y: 0,
+      width: 29.575,
+      height: 34,
+      dividerYs: [18],
+      emptyFieldPlaceholder: true,
     });
     const { emptyFieldPlaceholder: _drop, ...withoutFlag } = withFlag;
     const a = computeClassRawInkDims([withFlag], [], [], []);
@@ -381,58 +456,98 @@ describe('computeClassRawInkDims — object empty-but-SHOWN placeholder ink (B5/
     expect(b.height - a.height).toBe(1);
   });
 
-  it('authored jar control (2 bare objects, no title, no edges): the ' +
-    'zero-height-body sibling rule must NOT be reused -- it keeps y+h and ' +
-    'would give 56, jar says 55', () => {
-    // Rendered through the pinned jar as `@startuml object foo / object bar
-    // @enduml`: rects (7,7,33.425,34) and (75.61,7,34.213,34), canvas
-    // 123x55. Raw positions are the SVG ones less this port's +7 anchor.
-    const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({
-        id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 34,
-        dividerYs: [18], emptyFieldPlaceholder: true,
-      }),
-      makeClassifierGeo({
-        id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 34,
-        dividerYs: [18], emptyFieldPlaceholder: true,
-      }),
-    ];
-    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 55 });
-  });
+  it(
+    'authored jar control (2 bare objects, no title, no edges): the ' +
+      'zero-height-body sibling rule must NOT be reused -- it keeps y+h and ' +
+      'would give 56, jar says 55',
+    () => {
+      // Rendered through the pinned jar as `@startuml object foo / object bar
+      // @enduml`: rects (7,7,33.425,34) and (75.61,7,34.213,34), canvas
+      // 123x55. Raw positions are the SVG ones less this port's +7 anchor.
+      const classifiers: ClassifierGeo[] = [
+        makeClassifierGeo({
+          id: 'foo',
+          kind: 'object',
+          x: 0,
+          y: 0,
+          width: 33.425,
+          height: 34,
+          dividerYs: [18],
+          emptyFieldPlaceholder: true,
+        }),
+        makeClassifierGeo({
+          id: 'bar',
+          kind: 'object',
+          x: 68.61,
+          y: 0,
+          width: 34.213,
+          height: 34,
+          dividerYs: [18],
+          emptyFieldPlaceholder: true,
+        }),
+      ];
+      expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 55 });
+    },
+  );
 
-  it('authored jar control (`hide object fields`, 2 objects, no title): the ' +
-    'zero-height-body state keeps y+h -- canvas 123x40, NOT 39', () => {
-    // Rendered through the pinned jar as `@startuml hide object fields /
-    // object foo { field1 } / object bar { field2 } @enduml`: rects
-    // (7,7,33.425,18) and (75.61,7,34.213,18), canvas 123x40. This is the
-    // negative control that killed the wider "field list is empty" gate the
-    // B5 ledger row proposed.
-    const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({
-        id: 'foo', kind: 'object', x: 0, y: 0, width: 33.425, height: 18, dividerYs: [], bodyInkWidth: 0,
-      }),
-      makeClassifierGeo({
-        id: 'bar', kind: 'object', x: 68.61, y: 0, width: 34.213, height: 18, dividerYs: [], bodyInkWidth: 0,
-      }),
-    ];
-    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 40 });
-  });
+  it(
+    'authored jar control (`hide object fields`, 2 objects, no title): the ' +
+      'zero-height-body state keeps y+h -- canvas 123x40, NOT 39',
+    () => {
+      // Rendered through the pinned jar as `@startuml hide object fields /
+      // object foo { field1 } / object bar { field2 } @enduml`: rects
+      // (7,7,33.425,18) and (75.61,7,34.213,18), canvas 123x40. This is the
+      // negative control that killed the wider "field list is empty" gate the
+      // B5 ledger row proposed.
+      const classifiers: ClassifierGeo[] = [
+        makeClassifierGeo({
+          id: 'foo',
+          kind: 'object',
+          x: 0,
+          y: 0,
+          width: 33.425,
+          height: 18,
+          dividerYs: [],
+          bodyInkWidth: 0,
+        }),
+        makeClassifierGeo({
+          id: 'bar',
+          kind: 'object',
+          x: 68.61,
+          y: 0,
+          width: 34.213,
+          height: 18,
+          dividerYs: [],
+          bodyInkWidth: 0,
+        }),
+      ];
+      expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 123, height: 40 });
+    },
+  );
 
-  it('authored jar control (2 POPULATED objects, no title): the general ' +
-    'addRectInk rule is unchanged -- canvas 148x62', () => {
-    // Pinned jar, `@startuml object foo { field1 } / object bar { field2 }
-    // @enduml`: rects (7,7,45.512,40) and (88,7,45.512,40), canvas 148x62.
-    const classifiers: ClassifierGeo[] = [
-      makeClassifierGeo({ id: 'foo', kind: 'object', x: 0, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
-      makeClassifierGeo({ id: 'bar', kind: 'object', x: 81, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
-    ];
-    expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 148, height: 62 });
-  });
+  it(
+    'authored jar control (2 POPULATED objects, no title): the general ' +
+      'addRectInk rule is unchanged -- canvas 148x62',
+    () => {
+      // Pinned jar, `@startuml object foo { field1 } / object bar { field2 }
+      // @enduml`: rects (7,7,45.512,40) and (88,7,45.512,40), canvas 148x62.
+      const classifiers: ClassifierGeo[] = [
+        makeClassifierGeo({ id: 'foo', kind: 'object', x: 0, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
+        makeClassifierGeo({ id: 'bar', kind: 'object', x: 81, y: 0, width: 45.512, height: 40, dividerYs: [18] }),
+      ];
+      expect(computeClassDocumentDims(classifiers, [], [], [])).toEqual({ width: 148, height: 62 });
+    },
+  );
 
   it('is object-kind-gated: the flag is inert on a class leaf', () => {
     const common = {
-      id: 'C', x: 0, y: 0, width: 29.575, height: 34,
-      dividerYs: [18], emptyFieldPlaceholder: true as const,
+      id: 'C',
+      x: 0,
+      y: 0,
+      width: 29.575,
+      height: 34,
+      dividerYs: [18],
+      emptyFieldPlaceholder: true as const,
     };
     const asObject = makeClassifierGeo({ ...common, kind: 'object' });
     const asClass = makeClassifierGeo({ ...common, kind: 'class' });
@@ -451,23 +566,46 @@ describe('computeClassRawInkDims — object empty-but-SHOWN placeholder ink (B5/
 // see that function's own doc comment). Jar-verified `caboco-62-jula911`:
 // canvas width 234 (both "Foo<Param>" and "Bar<P, Q>" side by side).
 describe('computeClassDocumentDims — generic tag box (G2 N32)', () => {
-  it('the tag\'s 3px top/right overhang widens/heightens the canvas -- ' +
-    'jar-verified caboco-62-jula911', () => {
+  it("the tag's 3px top/right overhang widens/heightens the canvas -- " + 'jar-verified caboco-62-jula911', () => {
     const classifiers = [
       makeClassifierGeo({
-        id: 'Foo', x: 7, y: 10, width: 95.475, height: 48,
+        id: 'Foo',
+        x: 7,
+        y: 10,
+        width: 95.475,
+        height: 48,
         genericTag: {
-          text: 'Param', rectX: 61.15, rectY: -3, rectWidth: 37.325, rectHeight: 14,
-          textX: 62.15, textY: 7.3333, textWidth: 35.325, fontFamily: 'sans-serif',
-          fontSize: 12, italic: true,
+          text: 'Param',
+          rectX: 61.15,
+          rectY: -3,
+          rectWidth: 37.325,
+          rectHeight: 14,
+          textX: 62.15,
+          textY: 7.3333,
+          textWidth: 35.325,
+          fontFamily: 'sans-serif',
+          fontSize: 12,
+          italic: true,
         },
       }),
       makeClassifierGeo({
-        id: 'Bar', x: 137.53125, y: 10, width: 78.4125, height: 48,
+        id: 'Bar',
+        x: 137.53125,
+        y: 10,
+        width: 78.4125,
+        height: 48,
         genericTag: {
-          text: 'P, Q', rectX: 58.7875, rectY: -3, rectWidth: 22.625, rectHeight: 14,
-          textX: 59.7875, textY: 7.3333, textWidth: 20.625, fontFamily: 'sans-serif',
-          fontSize: 12, italic: true,
+          text: 'P, Q',
+          rectX: 58.7875,
+          rectY: -3,
+          rectWidth: 22.625,
+          rectHeight: 14,
+          textX: 59.7875,
+          textY: 7.3333,
+          textWidth: 20.625,
+          fontFamily: 'sans-serif',
+          fontSize: 12,
+          italic: true,
         },
       }),
     ];
@@ -475,15 +613,18 @@ describe('computeClassDocumentDims — generic tag box (G2 N32)', () => {
     expect(dims).toEqual({ width: 234, height: 73 });
   });
 
-  it('without any genericTag, the SAME classifiers produce a narrower canvas ' +
-    '(regression guard -- confirms the tag genuinely widens it)', () => {
-    const classifiers = [
-      makeClassifierGeo({ id: 'Foo', x: 7, y: 7, width: 95.475, height: 48 }),
-      makeClassifierGeo({ id: 'Bar', x: 137.53125, y: 7, width: 78.4125, height: 48 }),
-    ];
-    const dims = computeClassDocumentDims(classifiers, [], [], []);
-    expect(dims.width).toBeLessThan(234);
-  });
+  it(
+    'without any genericTag, the SAME classifiers produce a narrower canvas ' +
+      '(regression guard -- confirms the tag genuinely widens it)',
+    () => {
+      const classifiers = [
+        makeClassifierGeo({ id: 'Foo', x: 7, y: 7, width: 95.475, height: 48 }),
+        makeClassifierGeo({ id: 'Bar', x: 137.53125, y: 7, width: 78.4125, height: 48 }),
+      ];
+      const dims = computeClassDocumentDims(classifiers, [], [], []);
+      expect(dims.width).toBeLessThan(234);
+    },
+  );
 });
 
 // G2 N35: the lollipop interface's own display-label row (`renderer.ts
@@ -498,8 +639,14 @@ describe('computeClassDocumentDims — generic tag box (G2 N32)', () => {
 describe('computeClassDocumentDims - lollipop label overhang (G2 N35)', () => {
   function makeLollipopGeo(indent: number, width: number): ClassifierGeo {
     return {
-      id: 'L', kind: 'lollipop', x: 0, y: 0, width: 10, height: 10,
-      dividerYs: [], rows: [{ text: 'label', y: 20, indent, width }],
+      id: 'L',
+      kind: 'lollipop',
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10,
+      dividerYs: [],
+      rows: [{ text: 'label', y: 20, indent, width }],
     };
   }
 
@@ -526,26 +673,37 @@ describe('computeClassDocumentDims - lollipop label overhang (G2 N35)', () => {
     const withLabel = computeClassDocumentDims([makeLollipopGeo(3, 4)], [], [], []);
     const withoutLabel = computeClassDocumentDims(
       [{ id: 'L', kind: 'lollipop', x: 0, y: 0, width: 10, height: 10, dividerYs: [], rows: [] }],
-      [], [], [],
+      [],
+      [],
+      [],
     );
     expect(withLabel).toEqual(withoutLabel);
   });
 
-  it('a non-lollipop classifier with an out-of-box row is UNAFFECTED (regression guard -- ' +
-    'the mechanism is lollipop-scoped, not a general row-ink walk)', () => {
-    const classifiers: ClassifierGeo[] = [
-      {
-        id: 'C', kind: 'class', x: 0, y: 0, width: 10, height: 10,
-        dividerYs: [], rows: [{ text: 'label', y: 20, indent: -10, width: 30 }],
-      },
-    ];
-    const dims = computeClassDocumentDims(classifiers, [], [], []);
-    // Same nominal 10x10 box + wide row as the lollipop test above, but ink
-    // stays at the classifier's OWN addRectInk bounds (width 32, the SAME
-    // value a row-less 10x10 classifier box produces), NOT widened by the
-    // out-of-box row -- confirms the mechanism is lollipop-scoped.
-    expect(dims.width).toBe(32);
-  });
+  it(
+    'a non-lollipop classifier with an out-of-box row is UNAFFECTED (regression guard -- ' +
+      'the mechanism is lollipop-scoped, not a general row-ink walk)',
+    () => {
+      const classifiers: ClassifierGeo[] = [
+        {
+          id: 'C',
+          kind: 'class',
+          x: 0,
+          y: 0,
+          width: 10,
+          height: 10,
+          dividerYs: [],
+          rows: [{ text: 'label', y: 20, indent: -10, width: 30 }],
+        },
+      ];
+      const dims = computeClassDocumentDims(classifiers, [], [], []);
+      // Same nominal 10x10 box + wide row as the lollipop test above, but ink
+      // stays at the classifier's OWN addRectInk bounds (width 32, the SAME
+      // value a row-less 10x10 classifier box produces), NOT widened by the
+      // out-of-box row -- confirms the mechanism is lollipop-scoped.
+      expect(dims.width).toBe(32);
+    },
+  );
 });
 
 describe('computeClassInkShift', () => {
@@ -566,10 +724,7 @@ describe('computeClassInkShift', () => {
     // diagram's raw ink minX/minY = (-1,-1); jar-verified real output:
     // `<rect x="7" y="7".../><rect x="101" y="7".../>` -- EXACTLY `(+7,+7)`
     // on BOTH boxes (uniform, not per-element), matching `6 - (-1) = 7`.
-    const classifiers = [
-      makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }),
-      makeClassifierGeo({ id: 'foo2', x: 94, y: 0 }),
-    ];
+    const classifiers = [makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }), makeClassifierGeo({ id: 'foo2', x: 94, y: 0 })];
     const shift = computeClassInkShift(classifiers, [], [], []);
     expect(shift).toEqual({ dx: 7, dy: 7 });
   });
@@ -614,10 +769,7 @@ describe('computeClassInkShift', () => {
     // is exactly what `layout.ts#assembleShiftedGeometry` does -- this test
     // locks that composition against the real jar output: canvas 175x70,
     // rect x/y = (7,7) and (101,7).
-    const classifiers = [
-      makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }),
-      makeClassifierGeo({ id: 'foo2', x: 94, y: 0 }),
-    ];
+    const classifiers = [makeClassifierGeo({ id: 'foo1', x: 0, y: 0 }), makeClassifierGeo({ id: 'foo2', x: 94, y: 0 })];
     const dims = computeClassDocumentDims(classifiers, [], [], []);
     const shift = computeClassInkShift(classifiers, [], [], []);
     expect(dims).toEqual({ width: 175, height: 70 });
@@ -635,12 +787,15 @@ describe('computeClassInkShift', () => {
 // truncated canvas size.
 // ---------------------------------------------------------------------------
 describe('computeClassBorderRectDims (G2 N66)', () => {
-  it('vinujo-78-kapo329: jar-verified byte-exact (rawWidth=109.7875, ' +
-     'rawHeight=62, thickness=1 -> rect 113.7875 x 66)', () => {
-    const dims = computeClassBorderRectDims({ width: 109.7875, height: 62 }, 1);
-    expect(dims.width).toBeCloseTo(113.7875, 4);
-    expect(dims.height).toBe(66);
-  });
+  it(
+    'vinujo-78-kapo329: jar-verified byte-exact (rawWidth=109.7875, ' +
+      'rawHeight=62, thickness=1 -> rect 113.7875 x 66)',
+    () => {
+      const dims = computeClassBorderRectDims({ width: 109.7875, height: 62 }, 1);
+      expect(dims.width).toBeCloseTo(113.7875, 4);
+      expect(dims.height).toBe(66);
+    },
+  );
 
   it('a thickness of 0 leaves the full margined dims untouched', () => {
     const dims = computeClassBorderRectDims({ width: 100, height: 50 }, 0);
@@ -743,7 +898,10 @@ describe('edge-label text ink (G9/T16)', () => {
   const labelled = (label: EdgeGeo['label']): EdgeGeo[] => [
     {
       id: 'e0',
-      points: [{ x: 30, y: 60 }, { x: 30, y: 90 }],
+      points: [
+        { x: 30, y: 60 },
+        { x: 30, y: 90 },
+      ],
       targetDecor: 'none',
       sourceDecor: 'none',
       dashed: false,
@@ -767,18 +925,14 @@ describe('edge-label text ink (G9/T16)', () => {
   it('reaches 1.5 below it, and the label width to the right', () => {
     // baseline 200 -> ink bottom 201.5 against the box's own 39; x spans
     // [100, 160] against the box's 39. Both dominate, so both show in dims.
-    const dims = computeClassDocumentDims(
-      boxes, [], labelled({ text: 'x', x: 100, y: 200, width: 60 }), [],
-    );
+    const dims = computeClassDocumentDims(boxes, [], labelled({ text: 'x', x: 100, y: 200, width: 60 }), []);
     // width  = (160 - (-1)) + INK_DELTA 15 + margins 0/5, +1 truncating
     // height = (201.5 - (-1)) + 15 + 0/5 -> floor(223.5) = 223
     expect(dims).toEqual({ width: 182, height: 223 });
   });
 
   it('leaves a label sitting inside the boxes` own ink with no effect', () => {
-    const inside = computeClassDocumentDims(
-      boxes, [], labelled({ text: 'x', x: 5, y: 30, width: 12 }), [],
-    );
+    const inside = computeClassDocumentDims(boxes, [], labelled({ text: 'x', x: 5, y: 30, width: 12 }), []);
     expect(inside).toEqual(computeClassDocumentDims(boxes, [], labelled(undefined), []));
   });
 });

@@ -1,19 +1,10 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
-
-
 
 export class GtileRepeat extends TileComposite {
   readonly kind = 'gtile-repeat' as const;
@@ -25,13 +16,7 @@ export class GtileRepeat extends TileComposite {
   readonly backwardOffsetY: number | null;
   readonly backEdgeLeftX = 0;
 
-  constructor(
-    body: Tile,
-    condition: GtileDiamond,
-    backwardBody: Tile | null,
-    _bounder: StringBounder,
-    _theme: Theme,
-  ) {
+  constructor(body: Tile, condition: GtileDiamond, backwardBody: Tile | null, _bounder: StringBounder, _theme: Theme) {
     super();
     this.conditionOffsetY = body.height + NODE_MARGIN_Y;
     const contentWidth = Math.max(body.width, condition.width);
@@ -44,9 +29,7 @@ export class GtileRepeat extends TileComposite {
       this.backwardOffsetY = null;
     }
     this.height = h + NODE_MARGIN_Y;
-    this.children = backwardBody !== null
-      ? [body, condition, backwardBody]
-      : [body, condition];
+    this.children = backwardBody !== null ? [body, condition, backwardBody] : [body, condition];
   }
 
   getCoord(hook: HookName): GPoint {

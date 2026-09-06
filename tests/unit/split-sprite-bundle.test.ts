@@ -196,7 +196,12 @@ describe('ADR-2: fail-closed MIT allowlist', () => {
 // ---------------------------------------------------------------------------
 
 describe('build-stdlib-packages.ts wiring emits fragments + manifest to disk', () => {
-  const bundleAssetsDir = join(PACKAGES_DIR, BOOTSTRAP_SPRITE_SPLIT.packageDir, 'assets', BOOTSTRAP_SPRITE_SPLIT.bundleName);
+  const bundleAssetsDir = join(
+    PACKAGES_DIR,
+    BOOTSTRAP_SPRITE_SPLIT.packageDir,
+    'assets',
+    BOOTSTRAP_SPRITE_SPLIT.bundleName,
+  );
   const spritesDir = join(bundleAssetsDir, 'sprites');
 
   it('BOOTSTRAP_SPRITE_SPLIT declares the MIT-allowlisted bootstrap bundle', () => {

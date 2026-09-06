@@ -120,8 +120,7 @@ export class ScientificEquationSafe {
   getSource(): string {
     if (this.source === null) {
       throw new Error(
-        'NullPointerException: ScientificEquationSafe#getSource on an ' +
-          'instance whose formula failed to parse',
+        'NullPointerException: ScientificEquationSafe#getSource on an ' + 'instance whose formula failed to parse',
       );
     }
     return this.source;

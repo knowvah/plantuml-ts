@@ -25,8 +25,9 @@ describe('prefetchIncludes — stdlib angle-bracket includes', () => {
   });
 
   it('names the bundle a host must supply', async () => {
-    const err = await prefetchIncludes('!include <aws/common>', vi.fn())
-      .catch((e: unknown) => e) as StdlibNotBundledError;
+    const err = (await prefetchIncludes('!include <aws/common>', vi.fn()).catch(
+      (e: unknown) => e,
+    )) as StdlibNotBundledError;
     expect(err.bundle).toBe('aws');
     expect(err.path).toBe('aws/common');
     expect(err.message).toContain('includeStore');
@@ -110,9 +111,7 @@ describe('prefetchIncludes — multiple !include directives', () => {
       '@enduml',
     ].join('\n');
 
-    const fetcher = vi.fn()
-      .mockResolvedValueOnce('A -> B')
-      .mockResolvedValueOnce('B -> C');
+    const fetcher = vi.fn().mockResolvedValueOnce('A -> B').mockResolvedValueOnce('B -> C');
 
     const store = await prefetchIncludes(source, fetcher);
     expect(store.get('https://a.example.com/a.puml')).toBe('A -> B');
@@ -137,9 +136,9 @@ describe('prefetchIncludes — multiple !include directives', () => {
 describe('prefetchIncludes — fetcher error propagation', () => {
   it('propagates errors thrown by the fetcher', async () => {
     const source = '!include https://bad.example.com/missing.puml';
-    const fetcher = vi.fn().mockRejectedValue(
-      new IncludeResolveError('not found', 'https://bad.example.com/missing.puml'),
-    );
+    const fetcher = vi
+      .fn()
+      .mockRejectedValue(new IncludeResolveError('not found', 'https://bad.example.com/missing.puml'));
     await expect(prefetchIncludes(source, fetcher)).rejects.toBeInstanceOf(IncludeResolveError);
   });
 });
@@ -207,8 +206,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    await expect(prefetchIncludes('!include a', fetcher))
-      .rejects.toBeInstanceOf(CircularIncludeError);
+    await expect(prefetchIncludes('!include a', fetcher)).rejects.toBeInstanceOf(CircularIncludeError);
   });
 
   it('throws CircularIncludeError for an indirect cycle (a → b → a)', async () => {
@@ -218,8 +216,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    await expect(prefetchIncludes('!include a', fetcher))
-      .rejects.toBeInstanceOf(CircularIncludeError);
+    await expect(prefetchIncludes('!include a', fetcher)).rejects.toBeInstanceOf(CircularIncludeError);
   });
 
   it('CircularIncludeError.url is the URL that closed the cycle', async () => {
@@ -228,8 +225,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    const err = await prefetchIncludes('!include a', fetcher)
-      .catch((e: unknown) => e) as CircularIncludeError;
+    const err = (await prefetchIncludes('!include a', fetcher).catch((e: unknown) => e)) as CircularIncludeError;
     expect(err.url).toBe('a');
   });
 
@@ -240,8 +236,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    const err = await prefetchIncludes('!include a', fetcher)
-      .catch((e: unknown) => e) as CircularIncludeError;
+    const err = (await prefetchIncludes('!include a', fetcher).catch((e: unknown) => e)) as CircularIncludeError;
     expect(err.chain).toEqual(['a', 'b']);
   });
 
@@ -252,8 +247,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    const err = await prefetchIncludes('!include a', fetcher)
-      .catch((e: unknown) => e) as CircularIncludeError;
+    const err = (await prefetchIncludes('!include a', fetcher).catch((e: unknown) => e)) as CircularIncludeError;
     expect(err.message).toContain('a');
     expect(err.message).toContain('b');
     expect(err.message).toContain('→');
@@ -265,8 +259,7 @@ describe('prefetchIncludes — circular include detection', () => {
       return Promise.reject(new Error(`unexpected url: ${url}`));
     });
 
-    const err = await prefetchIncludes('!include a', fetcher)
-      .catch((e: unknown) => e) as CircularIncludeError;
+    const err = (await prefetchIncludes('!include a', fetcher).catch((e: unknown) => e)) as CircularIncludeError;
     expect(err.name).toBe('CircularIncludeError');
   });
 });
@@ -281,34 +274,43 @@ describe('fetchInclude — HTTP error response', () => {
   });
 
   it('throws IncludeResolveError for a non-OK HTTP response', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-      statusText: 'Not Found',
-    }));
-    await expect(fetchInclude('https://example.com/missing.puml'))
-      .rejects.toBeInstanceOf(IncludeResolveError);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      }),
+    );
+    await expect(fetchInclude('https://example.com/missing.puml')).rejects.toBeInstanceOf(IncludeResolveError);
   });
 
   it('includes the HTTP status in the error message', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-      statusText: 'Not Found',
-    }));
-    const err = await fetchInclude('https://example.com/missing.puml')
-      .catch((e: unknown) => e) as IncludeResolveError;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      }),
+    );
+    const err = (await fetchInclude('https://example.com/missing.puml').catch(
+      (e: unknown) => e,
+    )) as IncludeResolveError;
     expect(err.message).toContain('404');
   });
 
   it('includes the URL in the IncludeResolveError', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-      statusText: 'Not Found',
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      }),
+    );
     const url = 'https://example.com/missing.puml';
-    const err = await fetchInclude(url).catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.url).toBe(url);
   });
 });
@@ -323,10 +325,13 @@ describe('fetchInclude — successful response', () => {
   });
 
   it('returns the response text on success', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve('skinparam monochrome true\n'),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('skinparam monochrome true\n'),
+      }),
+    );
     const result = await fetchInclude('https://example.com/shared.puml');
     expect(result).toBe('skinparam monochrome true\n');
   });
@@ -357,7 +362,7 @@ describe('fetchInclude — CORS error for GitHub raw URLs', () => {
   it('CorsIncludeError message identifies a server-side CORS issue and does not suggest a CSP fix', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
     const url = 'https://raw.githubusercontent.com/user/repo/main/file.puml';
-    const err = await fetchInclude(url).catch((e: unknown) => e) as CorsIncludeError;
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as CorsIncludeError;
     expect(err.message).toMatch(/CORS/i);
     // Must not suggest adding to connect-src — that would mislead the user
     expect(err.message).not.toContain('connect-src');
@@ -366,9 +371,9 @@ describe('fetchInclude — CORS error for GitHub raw URLs', () => {
 
   it('CorsIncludeError name is CorsIncludeError', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
-    const err = await fetchInclude(
-      'https://raw.githubusercontent.com/user/repo/main/file.puml',
-    ).catch((e: unknown) => e) as CorsIncludeError;
+    const err = (await fetchInclude('https://raw.githubusercontent.com/user/repo/main/file.puml').catch(
+      (e: unknown) => e,
+    )) as CorsIncludeError;
     expect(err.name).toBe('CorsIncludeError');
   });
 });
@@ -384,14 +389,13 @@ describe('fetchInclude — generic fetch failure (non-GitHub URL)', () => {
 
   it('throws IncludeResolveError for a non-GitHub URL that fails to fetch', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
-    await expect(fetchInclude('https://example.com/file.puml'))
-      .rejects.toBeInstanceOf(IncludeResolveError);
+    await expect(fetchInclude('https://example.com/file.puml')).rejects.toBeInstanceOf(IncludeResolveError);
   });
 
   it('IncludeResolveError carries the URL', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
     const url = 'https://example.com/file.puml';
-    const err = await fetchInclude(url).catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.url).toBe(url);
   });
 });
@@ -419,12 +423,17 @@ describe('fetchInclude — CSP violation (browser env)', () => {
   it('throws CspIncludeError when a securitypolicyviolation event fires before fetch failure', async () => {
     const url = 'https://cdn.example.com/styles.puml';
     let capturedHandler: ((evt: Event) => void) | null = null;
-    makeBrowserEnv((h) => { capturedHandler = h; });
+    makeBrowserEnv((h) => {
+      capturedHandler = h;
+    });
 
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-      capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
-      return Promise.reject(new TypeError('Failed to fetch'));
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }),
+    );
 
     await expect(fetchInclude(url)).rejects.toBeInstanceOf(CspIncludeError);
   });
@@ -432,14 +441,19 @@ describe('fetchInclude — CSP violation (browser env)', () => {
   it('CspIncludeError message includes the connect-src directive with the origin', async () => {
     const url = 'https://cdn.example.com/styles.puml';
     let capturedHandler: ((evt: Event) => void) | null = null;
-    makeBrowserEnv((h) => { capturedHandler = h; });
+    makeBrowserEnv((h) => {
+      capturedHandler = h;
+    });
 
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-      capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
-      return Promise.reject(new TypeError('Failed to fetch'));
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }),
+    );
 
-    const err = await fetchInclude(url).catch((e: unknown) => e) as CspIncludeError;
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as CspIncludeError;
     expect(err.requiredDirective).toContain('connect-src');
     expect(err.requiredDirective).toContain('https://cdn.example.com');
     expect(err.message).toContain('Content-Security-Policy');
@@ -448,14 +462,19 @@ describe('fetchInclude — CSP violation (browser env)', () => {
   it('CspIncludeError name is CspIncludeError', async () => {
     const url = 'https://cdn.example.com/styles.puml';
     let capturedHandler: ((evt: Event) => void) | null = null;
-    makeBrowserEnv((h) => { capturedHandler = h; });
+    makeBrowserEnv((h) => {
+      capturedHandler = h;
+    });
 
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-      capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
-      return Promise.reject(new TypeError('Failed to fetch'));
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        capturedHandler?.({ blockedURI: 'https://cdn.example.com' } as unknown as Event);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }),
+    );
 
-    const err = await fetchInclude(url).catch((e: unknown) => e) as CspIncludeError;
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as CspIncludeError;
     expect(err.name).toBe('CspIncludeError');
   });
 
@@ -463,12 +482,17 @@ describe('fetchInclude — CSP violation (browser env)', () => {
     // Covers originOf()'s catch branch: new URL('relative/path') throws
     const url = 'https://cdn.example.com/styles.puml';
     let capturedHandler: ((evt: Event) => void) | null = null;
-    makeBrowserEnv((h) => { capturedHandler = h; });
+    makeBrowserEnv((h) => {
+      capturedHandler = h;
+    });
 
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => {
-      capturedHandler?.({ blockedURI: 'relative/path/that/is/not/a/url' } as unknown as Event);
-      return Promise.reject(new TypeError('Failed to fetch'));
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => {
+        capturedHandler?.({ blockedURI: 'relative/path/that/is/not/a/url' } as unknown as Event);
+        return Promise.reject(new TypeError('Failed to fetch'));
+      }),
+    );
 
     // Origin check fails to match → falls through to IncludeResolveError (not CSP)
     await expect(fetchInclude(url)).rejects.toBeInstanceOf(IncludeResolveError);

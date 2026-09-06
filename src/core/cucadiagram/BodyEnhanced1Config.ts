@@ -5,10 +5,7 @@ import type { AtomOps } from '../klimt/creole/Sea.js';
 import type { NestedDiagramRenderer } from '../EmbeddedDiagram.js';
 import type { ISkinParam, Style } from '../abel/ISkinParam.js';
 import type { VisibilityModifier } from '../skin/VisibilityModifier.js';
-import type {
-  MethodsOrFieldsAreaSkinParam,
-  VisibilityModifierStyleValues,
-} from './MethodsOrFieldsAreaConfig.js';
+import type { MethodsOrFieldsAreaSkinParam, VisibilityModifierStyleValues } from './MethodsOrFieldsAreaConfig.js';
 
 /**
  * The ADR-9 constructor-seam types for `BodyEnhanced1.ts` plus the two

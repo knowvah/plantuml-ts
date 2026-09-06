@@ -140,25 +140,62 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
   // catches it; the original two literal-string checks are kept for any
   // caller that still passes a raw, un-resolved value.
   const isSolid = background !== 'transparent' && background !== 'none' && background !== '#00000000';
-  const style =
-    `width:${String(width)}px;height:${String(height)}px;` +
-    (isSolid ? `background:${background};` : '');
+  const style = `width:${String(width)}px;height:${String(height)}px;` + (isSolid ? `background:${background};` : '');
   const lifted = extractGradientDefs(fragment.body);
   const defsBody = extraDefs + lifted.defs;
   return (
-    '<svg xmlns=' + DQUOTE + 'http://www.w3.org/2000/svg' + DQUOTE +
-    ' xmlns:xlink=' + DQUOTE + 'http://www.w3.org/1999/xlink' + DQUOTE +
-    ' version=' + DQUOTE + '1.1' + DQUOTE +
-    ' ' + DIAGRAM_TYPE_ATTR + '=' + DQUOTE + diagramType + DQUOTE +
-    ' style=' + DQUOTE + style + DQUOTE +
-    ' width=' + DQUOTE + String(width) + 'px' + DQUOTE +
-    ' height=' + DQUOTE + String(height) + 'px' + DQUOTE +
-    ' viewBox=' + DQUOTE + `0 0 ${String(width)} ${String(height)}` + DQUOTE +
-    ' zoomAndPan=' + DQUOTE + 'magnify' + DQUOTE +
-    ' preserveAspectRatio=' + DQUOTE + 'none' + DQUOTE +
-    ' contentStyleType=' + DQUOTE + 'text/css' + DQUOTE +
+    '<svg xmlns=' +
+    DQUOTE +
+    'http://www.w3.org/2000/svg' +
+    DQUOTE +
+    ' xmlns:xlink=' +
+    DQUOTE +
+    'http://www.w3.org/1999/xlink' +
+    DQUOTE +
+    ' version=' +
+    DQUOTE +
+    '1.1' +
+    DQUOTE +
+    ' ' +
+    DIAGRAM_TYPE_ATTR +
+    '=' +
+    DQUOTE +
+    diagramType +
+    DQUOTE +
+    ' style=' +
+    DQUOTE +
+    style +
+    DQUOTE +
+    ' width=' +
+    DQUOTE +
+    String(width) +
+    'px' +
+    DQUOTE +
+    ' height=' +
+    DQUOTE +
+    String(height) +
+    'px' +
+    DQUOTE +
+    ' viewBox=' +
+    DQUOTE +
+    `0 0 ${String(width)} ${String(height)}` +
+    DQUOTE +
+    ' zoomAndPan=' +
+    DQUOTE +
+    'magnify' +
+    DQUOTE +
+    ' preserveAspectRatio=' +
+    DQUOTE +
+    'none' +
+    DQUOTE +
+    ' contentStyleType=' +
+    DQUOTE +
+    'text/css' +
+    DQUOTE +
     '>' +
-    '<?plantuml ' + VERSION_PLACEHOLDER + '?>' +
+    '<?plantuml ' +
+    VERSION_PLACEHOLDER +
+    '?>' +
     // Self-closing when empty, which is how the jar writes it: 973 of the 992
     // cached class/state goldens carry a bare `<defs/>`, and the 19 that use
     // the open/close form all have children. `createXml` serializes an
@@ -365,10 +402,7 @@ function driverBounderFor(measurer: StringMeasurer): DriverStringBounder {
  *
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2)
  */
-export function renderDrawableToFragment(
-  drawable: UDrawable,
-  opts: RenderDrawableToFragmentOptions,
-): DrawableFragment {
+export function renderDrawableToFragment(drawable: UDrawable, opts: RenderDrawableToFragmentOptions): DrawableFragment {
   const seed = seedOf(opts.uid);
   const option = basicSvgOption({ minDim: { width: opts.width, height: opts.height } });
   const stringBounder = driverBounderFor(opts.measurer);
@@ -438,9 +472,7 @@ function extractIdAttribute(element: string): string | undefined {
  * matching {@link renderDrawableToFragment}'s own `extraDefs`-omission
  * convention (T1 interface contract).
  */
-export function mergeFragmentDefs(
-  fragments: readonly { readonly extraDefs?: string }[],
-): string | undefined {
+export function mergeFragmentDefs(fragments: readonly { readonly extraDefs?: string }[]): string | undefined {
   const merged = new Map<string, string>();
   for (const fragment of fragments) {
     const defs = fragment.extraDefs;

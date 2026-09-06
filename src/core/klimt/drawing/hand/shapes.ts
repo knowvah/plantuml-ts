@@ -88,8 +88,8 @@ export function ellipseHand(width: number, height: number, rnd: JavaRandom): rea
       angle += ((10 + rnd.nextDouble() * 10) * Math.PI) / 180;
       const variation = 1 + (rnd.nextDouble() - 0.5) / 8;
       pts.push({
-        x: width / 2 + Math.cos(angle) * width * variation / 2,
-        y: height / 2 + Math.sin(angle) * height * variation / 2,
+        x: width / 2 + (Math.cos(angle) * width * variation) / 2,
+        y: height / 2 + (Math.sin(angle) * height * variation) / 2,
       });
     }
     return pts;
@@ -98,8 +98,8 @@ export function ellipseHand(width: number, height: number, rnd: JavaRandom): rea
     angle += Math.PI / 20;
     const variation = (rnd.nextDouble() - 0.5) / 50;
     pts.push({
-      x: width / 2 + Math.cos(angle) * width / 2 + variation * width,
-      y: height / 2 + Math.sin(angle) * height / 2 + variation * height,
+      x: width / 2 + (Math.cos(angle) * width) / 2 + variation * width,
+      y: height / 2 + (Math.sin(angle) * height) / 2 + variation * height,
     });
   }
   return pts;

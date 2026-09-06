@@ -41,9 +41,7 @@ const METADATA_FIELDS = ['license', 'link', 'version', 'source'] as const;
 
 /** Pick only the audited/tracked fields, omitting empty ones (never
  * setting them to undefined — exactOptionalPropertyTypes). */
-export function extractBundleMetadata(
-  frontmatter: Record<string, string>,
-): BundleFrontmatter {
+export function extractBundleMetadata(frontmatter: Record<string, string>): BundleFrontmatter {
   const metadata: BundleFrontmatter = {};
   for (const field of METADATA_FIELDS) {
     const value = frontmatter[field];

@@ -87,16 +87,21 @@ describe('T6: byte-level render proof -- Empty draws the small leaf icon, not a 
     expect(svg).toContain('data-qualified-name="Full"');
   });
 
-  it('draws Empty as a standalone leaf-icon <path>, fill/stroke from renderEmptyPackageIcon '
-    + '(theme.colors.graph.classBackground / theme.colors.border, stroke-width 0.5) -- '
-    + 'NOT renderNamespaceFolder\'s cluster styling (fill="none", stroke-width 1.5)', () => {
-    expect(svg).toContain(
-      'd="M99.5,37 L140.5,37 A3.75,3.75 0 0 1 143,39.5 L150,59 L154.5,59 A2.5,2.5 0 0 1 157,61.5 '
-        + 'L157,86.5 A2.5,2.5 0 0 1 154.5,89 L99.5,89 A2.5,2.5 0 0 1 97,86.5 L97,39.5 A2.5,2.5 0 0 1 99.5,37" '
-        + 'fill="#F1F1F1" stroke="#181818" stroke-width="0.5"',
-    );
-    expect(svg).toContain('<text x="101" y="49.444" font-size="14" font-weight="700" fill="#000" textLength="40">Empty</text>');
-  });
+  it(
+    'draws Empty as a standalone leaf-icon <path>, fill/stroke from renderEmptyPackageIcon ' +
+      '(theme.colors.graph.classBackground / theme.colors.border, stroke-width 0.5) -- ' +
+      'NOT renderNamespaceFolder\'s cluster styling (fill="none", stroke-width 1.5)',
+    () => {
+      expect(svg).toContain(
+        'd="M99.5,37 L140.5,37 A3.75,3.75 0 0 1 143,39.5 L150,59 L154.5,59 A2.5,2.5 0 0 1 157,61.5 ' +
+          'L157,86.5 A2.5,2.5 0 0 1 154.5,89 L99.5,89 A2.5,2.5 0 0 1 97,86.5 L97,39.5 A2.5,2.5 0 0 1 99.5,37" ' +
+          'fill="#F1F1F1" stroke="#181818" stroke-width="0.5"',
+      );
+      expect(svg).toContain(
+        '<text x="101" y="49.444" font-size="14" font-weight="700" fill="#000" textLength="40">Empty</text>',
+      );
+    },
+  );
 
   it('the Empty leaf path is NOT nested inside a <g class="cluster"> wrapper', () => {
     const clusterOpen = svg.indexOf('<g class="cluster"');

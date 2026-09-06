@@ -73,9 +73,7 @@ export function walkTree(root: JsonContainer): FlatNode[] {
   const result: FlatNode[] = [];
   let counter = 0;
 
-  const stack: FlatNode[] = [
-    { id: `n${counter++}`, value: root, parentId: null, parentKey: null },
-  ];
+  const stack: FlatNode[] = [{ id: `n${counter++}`, value: root, parentId: null, parentKey: null }];
 
   while (stack.length > 0) {
     const current = stack.pop()!;
@@ -136,7 +134,10 @@ export function buildHighlightMap(
   for (const fn of flatNodes) {
     if (fn.parentId !== null) {
       let arr = childrenOf.get(fn.parentId);
-      if (arr === undefined) { arr = []; childrenOf.set(fn.parentId, arr); }
+      if (arr === undefined) {
+        arr = [];
+        childrenOf.set(fn.parentId, arr);
+      }
       arr.push(fn.id);
     }
   }
@@ -147,7 +148,7 @@ export function buildHighlightMap(
     const queue = [nodeId];
     while (queue.length > 0) {
       const id = queue.shift()!;
-      for (const child of (childrenOf.get(id) ?? [])) {
+      for (const child of childrenOf.get(id) ?? []) {
         desc.push(child);
         queue.push(child);
       }
@@ -163,7 +164,10 @@ export function buildHighlightMap(
     if (path.length === 1) {
       // Mark the last key on this node
       let map = result.get(nodeId);
-      if (map === undefined) { map = new Map(); result.set(nodeId, map); }
+      if (map === undefined) {
+        map = new Map();
+        result.set(nodeId, map);
+      }
       map.set(path[0]!, styleClass);
       return;
     }
@@ -176,7 +180,7 @@ export function buildHighlightMap(
       }
     } else if (seg === '*') {
       // * = match all direct children of nodeId
-      for (const childId of (childrenOf.get(nodeId) ?? [])) {
+      for (const childId of childrenOf.get(nodeId) ?? []) {
         navigate(childId, rest, styleClass);
       }
     } else {

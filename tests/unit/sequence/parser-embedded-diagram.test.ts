@@ -119,17 +119,7 @@ describe('embedded `{{ }}` blocks inside a note body', () => {
 
 describe('pinned corpus fixtures route SEQUENCE', () => {
   it('lezonu-15-cege608 shape: a nested sequence diagram with its own note', () => {
-    const ast = parse([
-      'a->b: test',
-      'note right',
-      '{{',
-      'c->d',
-      'note right',
-      'test',
-      'end note',
-      '}}',
-      'end note',
-    ]);
+    const ast = parse(['a->b: test', 'note right', '{{', 'c->d', 'note right', 'test', 'end note', '}}', 'end note']);
 
     expect(ast.participants.map((p) => p.id)).toEqual(['a', 'b']);
     expect(notes(ast).map((n) => n.position)).toEqual(['right']);

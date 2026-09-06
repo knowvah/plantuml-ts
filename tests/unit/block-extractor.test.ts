@@ -2,10 +2,7 @@ import { refuse } from '../../src/core/parse-refusal.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { extractBlocks, upstreamTypeOf } from '../../src/core/block-extractor.js';
 import { DiagramType as UpstreamDiagramType } from '../../src/core/diagram-type-set.js';
-import {
-  DiagramRegistry,
-  type SyncPlugin,
-} from '../../src/core/dispatcher.js';
+import { DiagramRegistry, type SyncPlugin } from '../../src/core/dispatcher.js';
 import type { UmlSource, DiagramType } from '../../src/core/block-extractor.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import { FixedMeasurer } from '../../src/core/measurer.js';
@@ -21,14 +18,10 @@ import { assembleSvg } from '../../src/index.js';
  * every test below reading the same way -- true means "this plugin claims the
  * source", which is now expressed as a successful parse.
  */
-function makePlugin(
-  diagramType: DiagramType,
-  wantsFn: (lines: readonly string[]) => boolean,
-): SyncPlugin {
+function makePlugin(diagramType: DiagramType, wantsFn: (lines: readonly string[]) => boolean): SyncPlugin {
   return {
     type: diagramType,
-    parse: (source: UmlSource) =>
-      wantsFn(source.lines) ? {} : refuse('syntax', 0, 0, 'Syntax Error?'),
+    parse: (source: UmlSource) => (wantsFn(source.lines) ? {} : refuse('syntax', 0, 0, 'Syntax Error?')),
     layoutSync: (_ast: unknown) => ({}),
     render: (_geo: unknown) => ({ completeSvg: '<svg/>' }),
   };
@@ -55,8 +48,7 @@ describe('extractBlocks — structural extraction', () => {
   });
 
   it('extracts multiple blocks from one string', () => {
-    const src =
-      '@startuml\nAlice -> Bob\n@enduml\n@startuml\nBob -> Carol\n@enduml';
+    const src = '@startuml\nAlice -> Bob\n@enduml\n@startuml\nBob -> Carol\n@enduml';
     const blocks = linesToBlocks(src);
     expect(blocks).toHaveLength(2);
     expect(blocks[0]?.lines).toEqual(['Alice -> Bob']);
@@ -99,9 +91,7 @@ describe('extractBlocks — @start<type> keyword detection', () => {
   });
 
   it('detects gantt type from @startgantt / @endgantt', () => {
-    const blocks = linesToBlocks(
-      '@startgantt\n[Task] lasts 3 days\n@endgantt',
-    );
+    const blocks = linesToBlocks('@startgantt\n[Task] lasts 3 days\n@endgantt');
     expect(blocks[0]?.type).toBe('gantt');
   });
 
@@ -117,9 +107,7 @@ describe('extractBlocks — @start<type> keyword detection', () => {
 
   it('returns "unknown" type for unrecognised @start<suffix>', () => {
     // @startfuturediagram is not in the suffix map
-    const blocks = linesToBlocks(
-      '@startfuturediagram\nsome content\n@endfuturediagram',
-    );
+    const blocks = linesToBlocks('@startfuturediagram\nsome content\n@endfuturediagram');
     expect(blocks[0]?.type).toBe('unknown');
   });
 
@@ -135,7 +123,6 @@ describe('extractBlocks — @start<type> keyword detection', () => {
     expect(blocks).toHaveLength(1);
     expect(blocks[0]?.type).toBe('yaml');
   });
-
 });
 
 // ---------------------------------------------------------------------------
@@ -234,9 +221,7 @@ describe('extractBlocks — content-based type detection for @startuml', () => {
   // diagram with no participants is `isIncomplete()`, so ClassDiagramFactory
   // takes it. The jar tags `@startuml` + `title X` `data-diagram-type="CLASS"`.
   it('falls back to "class" when no pattern matches (upstream factory order)', () => {
-    const blocks = linesToBlocks(
-      '@startuml\nskinparam monochrome true\n@enduml',
-    );
+    const blocks = linesToBlocks('@startuml\nskinparam monochrome true\n@enduml');
     expect(blocks[0]?.type).toBe('class');
   });
 
@@ -266,16 +251,14 @@ describe('extractBlocks — content-based type detection for @startuml', () => {
   describe('sprite regions do not consume the detection window (T5 mechanism 1)', () => {
     it('types on the body when a 24-row sprite block fills the window first', () => {
       const spriteRows = Array.from({ length: 24 }, () => '1234567890').join('\n');
-      const src =
-        `@startuml\nsprite $disk16 {\n${spriteRows}\n}\nAlice -> Bob : hello\n@enduml`;
+      const src = `@startuml\nsprite $disk16 {\n${spriteRows}\n}\nAlice -> Bob : hello\n@enduml`;
       const blocks = linesToBlocks(src);
       expect(blocks[0]?.type).toBe('sequence');
     });
 
     it('types on the body when a multiline svg sprite fills the window first', () => {
       const svgRows = Array.from({ length: 24 }, (_, i) => `  <path d="M${i},0"/>`).join('\n');
-      const src =
-        `@startuml\nsprite complexsprite <svg width="1">\n${svgRows}\n</svg>\nAlice -> Bob : hello\n@enduml`;
+      const src = `@startuml\nsprite complexsprite <svg width="1">\n${svgRows}\n</svg>\nAlice -> Bob : hello\n@enduml`;
       const blocks = linesToBlocks(src);
       expect(blocks[0]?.type).toBe('sequence');
     });
@@ -286,8 +269,7 @@ describe('extractBlocks — content-based type detection for @startuml', () => {
       const spriteRows = Array.from({ length: 3 }, () => '111').join('\n');
       const neutralLine = 'skinparam backgroundColor white';
       const padding = Array.from({ length: 21 }, () => neutralLine).join('\n');
-      const src =
-        `@startuml\nsprite $x {\n${spriteRows}\n}\n${padding}\nAlice -> Bob\n@enduml`;
+      const src = `@startuml\nsprite $x {\n${spriteRows}\n}\n${padding}\nAlice -> Bob\n@enduml`;
       const blocks = linesToBlocks(src);
       expect(blocks[0]?.type).toBe('class');
     });
@@ -315,16 +297,12 @@ describe('extractBlocks — content-based type detection for @startuml', () => {
     });
 
     it('detects the full todozi-34-jire490 shape (activate/note over/deactivate)', () => {
-      const blocks = linesToBlocks(
-        '@startuml\nactivate A\nnote over A: Hello\ndeactivate A\n@enduml',
-      );
+      const blocks = linesToBlocks('@startuml\nactivate A\nnote over A: Hello\ndeactivate A\n@enduml');
       expect(blocks[0]?.type).toBe('sequence');
     });
 
     it('detects the full zicadi-21-koje636 shape (activate/left arrow/deactivate)', () => {
-      const blocks = linesToBlocks(
-        '@startuml\nactivate Test\nTest <<-- Test : msg\ndeactivate Test\n@enduml',
-      );
+      const blocks = linesToBlocks('@startuml\nactivate Test\nTest <<-- Test : msg\ndeactivate Test\n@enduml');
       expect(blocks[0]?.type).toBe('sequence');
     });
 
@@ -351,9 +329,7 @@ describe('DiagramRegistry', () => {
   });
 
   it('resolves a registered plugin by attempting the parse', () => {
-    const plugin = makePlugin('sequence', (lines) =>
-      lines.some((l) => l.includes('->')),
-    );
+    const plugin = makePlugin('sequence', (lines) => lines.some((l) => l.includes('->')));
     registry.register(plugin);
 
     const source: UmlSource = {
@@ -430,7 +406,6 @@ describe('DiagramRegistry', () => {
     expect(svg.toLowerCase()).toMatch(/error|unknown/);
   });
 
-
   it('parse() on sentinel plugin returns empty object without throwing', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
     const sentinel = registry.resolve(source).plugin;
@@ -449,9 +424,7 @@ describe('DiagramRegistry', () => {
     const source: UmlSource = { lines: [], type: 'unknown' };
     const sentinel = registry.resolve(source).plugin;
     if ('layoutSync' in sentinel) {
-      expect(() =>
-        sentinel.layoutSync({}, defaultTheme, measurer),
-      ).not.toThrow();
+      expect(() => sentinel.layoutSync({}, defaultTheme, measurer)).not.toThrow();
     } else {
       throw new Error('Expected sentinel to be a SyncPlugin');
     }
@@ -477,8 +450,16 @@ describe('UmlSource.types -- findStartTypes of the @start line', () => {
     // guess, so neither does this field -- even though `type` still carries
     // detectUmlType's guess alongside it until T12.
     expect([...typesOf(['@startuml', 'Alice -> Bob: hi', '@enduml'])].sort()).toEqual([
-      'ACTIVITY', 'CLASS', 'COMPOSITE', 'DESCRIPTION', 'HELP',
-      'OBJECT', 'SEQUENCE', 'SPRITES', 'STATE', 'TIMING',
+      'ACTIVITY',
+      'CLASS',
+      'COMPOSITE',
+      'DESCRIPTION',
+      'HELP',
+      'OBJECT',
+      'SEQUENCE',
+      'SPRITES',
+      'STATE',
+      'TIMING',
     ]);
   });
 
@@ -499,18 +480,33 @@ describe('UmlSource.types -- findStartTypes of the @start line', () => {
     // The divergence is PRE-EXISTING; T3 carries it forward unchanged rather
     // than repairing it, because repairing it would move fixtures and this
     // task's whole property is that it moves none.
-    expect(typesOf(['@startcomponent', '[A] --> [B]', '@endcomponent'])).toEqual(
-      new Set(['DESCRIPTION']),
-    );
+    expect(typesOf(['@startcomponent', '[A] --> [B]', '@endcomponent'])).toEqual(new Set(['DESCRIPTION']));
   });
 });
 
 describe('upstreamTypeOf -- the port type union mapped onto the enum', () => {
   it('is total: every port type has an upstream member', () => {
     const PORT_TYPES: readonly DiagramType[] = [
-      'sequence', 'class', 'state', 'description', 'activity', 'object',
-      'timing', 'mindmap', 'gantt', 'wbs', 'json', 'yaml', 'hcl', 'board',
-      'chronology', 'files', 'packetdiag', 'chart', 'dot', 'unknown',
+      'sequence',
+      'class',
+      'state',
+      'description',
+      'activity',
+      'object',
+      'timing',
+      'mindmap',
+      'gantt',
+      'wbs',
+      'json',
+      'yaml',
+      'hcl',
+      'board',
+      'chronology',
+      'files',
+      'packetdiag',
+      'chart',
+      'dot',
+      'unknown',
     ];
     for (const t of PORT_TYPES) {
       expect(Object.values(UpstreamDiagramType)).toContain(upstreamTypeOf(t));

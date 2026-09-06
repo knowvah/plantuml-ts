@@ -31,11 +31,7 @@ function parse(source: string): ReturnType<typeof parseClass> {
 describe('note command variants — URL / stereotype / color decorations', () => {
   // danozo-79-nunu375: multi-line opener with a URL right after `of <Entity>`.
   it('multi-line note-of opener followed by a [[url]] is not dropped', () => {
-    const ast = parse(
-      ['class Alice', 'note left of Alice [[http://www.google.fr]]', 'Note', 'end note'].join(
-        '\n',
-      ),
-    );
+    const ast = parse(['class Alice', 'note left of Alice [[http://www.google.fr]]', 'Note', 'end note'].join('\n'));
     expect(ast.notes).toHaveLength(1);
     expect(ast.notes[0]).toMatchObject({ target: 'Alice', position: 'left', text: 'Note' });
   });
@@ -45,12 +41,13 @@ describe('note command variants — URL / stereotype / color decorations', () =>
   // `NOTE_STEREO_CAPTURE`) -- was merely "not dropped" (consumed but
   // discarded) before this iteration.
   it('multi-line note-of opener followed by a <<stereotype>> captures its value', () => {
-    const ast = parse(
-      ['class A', 'note left of A <<faint>>', 'test red', 'end note'].join('\n'),
-    );
+    const ast = parse(['class A', 'note left of A <<faint>>', 'test red', 'end note'].join('\n'));
     expect(ast.notes).toHaveLength(1);
     expect(ast.notes[0]).toMatchObject({
-      target: 'A', position: 'left', text: 'test red', stereotype: 'faint',
+      target: 'A',
+      position: 'left',
+      text: 'test red',
+      stereotype: 'faint',
     });
   });
 
@@ -67,9 +64,7 @@ describe('note command variants — URL / stereotype / color decorations', () =>
     });
 
     it('multi-line opener `note <pos> of X #color` with `end note` closer', () => {
-      const ast = parse(
-        ['class A1', 'note bottom of A1 #red', 'this is red', 'end note'].join('\n'),
-      );
+      const ast = parse(['class A1', 'note bottom of A1 #red', 'this is red', 'end note'].join('\n'));
       expect(ast.notes).toHaveLength(1);
       expect(ast.notes[0]).toMatchObject({
         target: 'A1',
@@ -94,9 +89,7 @@ describe('note command variants — URL / stereotype / color decorations', () =>
     });
 
     it('multi-line brace opener `note <pos> of X #color {` closed by `}`', () => {
-      const ast = parse(
-        ['class A1', 'note left of A1 #green {', 'body', '}'].join('\n'),
-      );
+      const ast = parse(['class A1', 'note left of A1 #green {', 'body', '}'].join('\n'));
       expect(ast.notes).toHaveLength(1);
       expect(ast.notes[0]).toMatchObject({ target: 'A1', position: 'left', color: '#green' });
     });
@@ -105,19 +98,19 @@ describe('note command variants — URL / stereotype / color decorations', () =>
     // NOTE_STEREO_CAPTURE/NOTE_COLOR/brace-closer match-index shift
     // (match[3]=stereotype, match[4]=color, match[5]=closer).
     it('multi-line brace opener `note <pos> of X <<stereotype>> #color {` closed by `}`', () => {
-      const ast = parse(
-        ['class A1', 'note left of A1 <<faint>> #green {', 'body', '}'].join('\n'),
-      );
+      const ast = parse(['class A1', 'note left of A1 <<faint>> #green {', 'body', '}'].join('\n'));
       expect(ast.notes).toHaveLength(1);
       expect(ast.notes[0]).toMatchObject({
-        target: 'A1', position: 'left', text: 'body', stereotype: 'faint', color: '#green',
+        target: 'A1',
+        position: 'left',
+        text: 'body',
+        stereotype: 'faint',
+        color: '#green',
       });
     });
 
     it('compound `#color;line.bold:purple;text:777` is captured whole', () => {
-      const ast = parse(
-        ['class cl1', 'note right of cl1 #blue;line.bold:purple;text:FF0', 'end note'].join('\n'),
-      );
+      const ast = parse(['class cl1', 'note right of cl1 #blue;line.bold:purple;text:FF0', 'end note'].join('\n'));
       expect(ast.notes).toHaveLength(1);
       expect(ast.notes[0]!.color).toBe('#blue;line.bold:purple;text:FF0');
     });
@@ -142,7 +135,11 @@ describe('note command variants — URL / stereotype / color decorations', () =>
     const ast = parse(['class A1', 'note left of A1 <<faint>> #green: text here'].join('\n'));
     expect(ast.notes).toHaveLength(1);
     expect(ast.notes[0]).toMatchObject({
-      target: 'A1', position: 'left', text: 'text here', stereotype: 'faint', color: '#green',
+      target: 'A1',
+      position: 'left',
+      text: 'text here',
+      stereotype: 'faint',
+      color: '#green',
     });
   });
 

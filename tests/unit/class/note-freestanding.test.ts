@@ -70,20 +70,14 @@ describe('findFreestandingNoteRelationshipIndices', () => {
     expect(findFreestandingNoteRelationshipIndices(notes, rels, NO_CLASSIFIERS).size).toBe(0);
   });
 
-  it('preserves the relationship\'s own index among several unrelated ones', () => {
+  it("preserves the relationship's own index among several unrelated ones", () => {
     const notes = [makeNote('N1')];
-    const rels = [
-      makeRelationship('Foo', 'Goo'),
-      makeRelationship('N1', 'Bar'),
-      makeRelationship('Baz', 'Qux'),
-    ];
+    const rels = [makeRelationship('Foo', 'Goo'), makeRelationship('N1', 'Bar'), makeRelationship('Baz', 'Qux')];
     expect(findFreestandingNoteRelationshipIndices(notes, rels, NO_CLASSIFIERS)).toEqual(new Set([1]));
   });
 
   it('returns an empty set when there are no freestanding notes at all', () => {
-    expect(
-      findFreestandingNoteRelationshipIndices([], [makeRelationship('Foo', 'Bar')], NO_CLASSIFIERS).size,
-    ).toBe(0);
+    expect(findFreestandingNoteRelationshipIndices([], [makeRelationship('Foo', 'Bar')], NO_CLASSIFIERS).size).toBe(0);
   });
 
   it('two DIFFERENT freestanding notes each with their own single connection are both eligible', () => {

@@ -19,7 +19,6 @@ import { renderDot } from './renderer.js';
 export const dotPlugin: SyncPlugin<DotDiagramAST, DotGeometry> = {
   type: 'dot',
 
-
   parse(source: UmlSource): DotDiagramAST {
     // parseDot expects a raw string; join the extracted lines back together so
     // the @startdot / @enddot markers and chrome directives are visible.

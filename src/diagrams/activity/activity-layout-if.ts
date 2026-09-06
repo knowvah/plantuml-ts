@@ -6,12 +6,7 @@
  */
 
 import type { ActivityIf, ActivityNode } from './ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  BranchResult,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, BranchResult, LayoutCtx } from './activity-layout-types.js';
 import { NODE_MARGIN_X, NODE_MARGIN_Y, STOP_OUTER_RADIUS } from './activity-layout-constants.js';
 import { diamondSize, nextId, nodeCenterX, repeatCondSize } from './activity-layout-helpers.js';
 import { measureSubtreeWidth } from './activity-layout-measure.js';
@@ -99,12 +94,7 @@ interface IfBranchEdgePointsParams {
 // Split diamond + branch-entry setup
 // ---------------------------------------------------------------------------
 
-function buildIfSplitGeo(
-  node: ActivityIf,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): IfSplitInfo {
+function buildIfSplitGeo(node: ActivityIf, startY: number, centerX: number, ctx: LayoutCtx): IfSplitInfo {
   const splitId = nextId(ctx, 'if-split');
   // Labeled conditions render as hexagons; unlabeled merge points as diamonds.
   const splitSz =
@@ -157,10 +147,7 @@ function isTerminalOnlyBranch(nodes: readonly ActivityNode[]): boolean {
  * returns which branch is the terminal one and which is the main flow.
  * Returns undefined when the short-circuit doesn't apply.
  */
-function detectIfShortCircuit(
-  elseIfCount: number,
-  allBranches: IfBranchEntry[],
-): IfShortCircuitTarget | undefined {
+function detectIfShortCircuit(elseIfCount: number, allBranches: IfBranchEntry[]): IfShortCircuitTarget | undefined {
   if (allBranches.length !== 2 || elseIfCount !== 0) return undefined;
   const thenIsTerminal = isTerminalOnlyBranch(allBranches[0]!.nodes);
   const elseIsTerminal = isTerminalOnlyBranch(allBranches[1]!.nodes);
@@ -178,20 +165,12 @@ function computeIfShortCircuitBranches(params: IfShortCircuitParams): IfShortCir
   // Terminal node sits at hexagon mid-height, to the right
   const hexRightX = centerX + splitGeo.width / 2;
   const termCX = hexRightX + NODE_MARGIN_X + STOP_OUTER_RADIUS;
-  const termResult = ctx.layoutSequenceFn(
-    termBranch.nodes,
-    splitCenterY - STOP_OUTER_RADIUS,
-    termCX,
-    ctx,
-  );
+  const termResult = ctx.layoutSequenceFn(termBranch.nodes, splitCenterY - STOP_OUTER_RADIUS, termCX, ctx);
 
   return { mainResult, termResult, hexRightX, termCX, branchStartY };
 }
 
-function buildIfShortCircuitEdges(
-  params: IfShortCircuitParams,
-  branches: IfShortCircuitBranches,
-): ActivityEdgeGeo[] {
+function buildIfShortCircuitEdges(params: IfShortCircuitParams, branches: IfShortCircuitBranches): ActivityEdgeGeo[] {
   const { mainBranch, termBranch, splitBottomY, splitCenterY, centerX } = params;
   const { mainResult, termResult, hexRightX, termCX, branchStartY } = branches;
 
@@ -202,8 +181,14 @@ function buildIfShortCircuitEdges(
   const mainEdge: ActivityEdgeGeo = {
     points:
       mainFirstNode !== undefined
-        ? [{ x: centerX, y: splitBottomY }, { x: centerX, y: mainFirstNode.y }]
-        : [{ x: centerX, y: splitBottomY }, { x: centerX, y: branchStartY }],
+        ? [
+            { x: centerX, y: splitBottomY },
+            { x: centerX, y: mainFirstNode.y },
+          ]
+        : [
+            { x: centerX, y: splitBottomY },
+            { x: centerX, y: branchStartY },
+          ],
   };
   if (mainBranch.label !== undefined) mainEdge.label = mainBranch.label;
   outEdges.push(mainEdge);
@@ -238,9 +223,7 @@ function computeIfShortCircuitExit(mainResult: BranchResult): {
     }
   }
   const breakGeos =
-    mainResult.breakGeos !== undefined && mainResult.breakGeos.length > 0
-      ? mainResult.breakGeos
-      : undefined;
+    mainResult.breakGeos !== undefined && mainResult.breakGeos.length > 0 ? mainResult.breakGeos : undefined;
   const singleLastId = exitIds.length === 1 ? exitIds[0] : undefined;
   return { exitIds, singleLastId, breakGeos };
 }
@@ -300,8 +283,7 @@ function accumulateIfBranchColumn(placement: IfBranchPlacement, columns: IfBranc
 function placeIfBranchColumns(params: IfBranchesParams): IfBranchColumnsResult {
   const { allBranches, splitBottomY, centerX, ctx } = params;
   const colWidths = allBranches.map((b) => measureSubtreeWidth(b.nodes, ctx));
-  const totalBranchWidth =
-    colWidths.reduce((s, w) => s + w, 0) + NODE_MARGIN_X * (allBranches.length - 1);
+  const totalBranchWidth = colWidths.reduce((s, w) => s + w, 0) + NODE_MARGIN_X * (allBranches.length - 1);
   const branchStartY = splitBottomY + NODE_MARGIN_Y;
 
   const columns: IfBranchColumnsResult = {
@@ -343,7 +325,10 @@ function computeIfBranchEdgePoints(params: IfBranchEdgePointsParams): Array<{ x:
   const targetY = firstNode !== undefined ? firstNode.y : branchStartY;
   // Horizontal at diamond level, then straight down to branch first node
   return Math.abs(targetX - centerX) < 1
-    ? [{ x: centerX, y: splitBottomY }, { x: targetX, y: targetY }]
+    ? [
+        { x: centerX, y: splitBottomY },
+        { x: targetX, y: targetY },
+      ]
     : [
         { x: centerX, y: splitBottomY },
         { x: targetX, y: splitBottomY },
@@ -380,10 +365,7 @@ function buildIfSplitToBranchEdges(
   return outEdges;
 }
 
-function computeIfBranchExitIds(
-  allBranches: IfBranchEntry[],
-  columns: IfBranchColumnsResult,
-): string[] {
+function computeIfBranchExitIds(allBranches: IfBranchEntry[], columns: IfBranchColumnsResult): string[] {
   const { allBranchNodes, branchLastIds, branchSubExitIds } = columns;
   const exitIds: string[] = [];
   for (let i = 0; i < allBranches.length; i++) {
@@ -429,12 +411,7 @@ function layoutIfBranches(params: IfBranchesParams): BranchResult {
 // Public entry
 // ---------------------------------------------------------------------------
 
-export function layoutIf(
-  node: ActivityIf,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+export function layoutIf(node: ActivityIf, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   centerX = nodeCenterX(node.swimlane, centerX, ctx);
   const { splitId, splitGeo, splitBottomY, splitCenterY } = buildIfSplitGeo(node, startY, centerX, ctx);
   const allBranches = buildIfBranchEntries(node);

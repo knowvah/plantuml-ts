@@ -18,7 +18,14 @@ import { UGraphicStencil } from '../../klimt/drawing/UGraphicStencil.js';
  * read no `USymbolCard` instance field upstream — ported as top-level,
  * non-exported functions.
  */
-function drawCard(ug: UGraphic, width: number, height: number, shadowing: number, top: number, roundCorner: number): void {
+function drawCard(
+  ug: UGraphic,
+  width: number,
+  height: number,
+  shadowing: number,
+  top: number,
+  roundCorner: number,
+): void {
   const shape = URectangle.build(width, height).rounded(roundCorner);
   shape.setDeltaShadow(shadowing);
   ug.draw(shape);
@@ -87,7 +94,14 @@ export class USymbolCard extends USymbol {
         const dim = calculateDimension(stringBounder);
         ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
-        drawCard(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), 0, symbolContext.getRoundCorner());
+        drawCard(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          0,
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
         tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));

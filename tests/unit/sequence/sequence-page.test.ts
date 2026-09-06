@@ -44,9 +44,16 @@ function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): Sequenc
     totalHeight: 560,
     participants: [
       {
-        id: 'A', display: 'A', type: 'participant',
-        x: 10, y: 0, width: 60, height: HEAD_HEIGHT, centerX: 40,
-        background: defaultTheme.colors.background, border: defaultTheme.colors.border,
+        id: 'A',
+        display: 'A',
+        type: 'participant',
+        x: 10,
+        y: 0,
+        width: 60,
+        height: HEAD_HEIGHT,
+        centerX: 40,
+        background: defaultTheme.colors.background,
+        border: defaultTheme.colors.border,
         // A3: this suite asserts pagination y-arithmetic, never label text.
         labelRuns: [],
       },
@@ -67,14 +74,16 @@ function newpage(y: number): NewpageGeo {
 
 function message(y: number, labelY?: number): MessageGeo {
   return {
-    kind: 'message', fromX: 40, toX: 200, y, label: 'm',
+    kind: 'message',
+    fromX: 40,
+    toX: 200,
+    y,
+    label: 'm',
     arrow: arrowConfigurationOf({}),
     // A1: `TextRun` carries required metrics. The values are arbitrary here —
     // this suite asserts pagination y-arithmetic, never text measurement.
     labelLines:
-      labelY === undefined
-        ? []
-        : [{ text: 'm', x: 50, y: labelY, textWidth: 9, textAscent: 10, textLineHeight: 13 }],
+      labelY === undefined ? [] : [{ text: 'm', x: 50, y: labelY, textWidth: 9, textAscent: 10, textLineHeight: 13 }],
     arrowDirection: 'right',
   };
 }
@@ -83,22 +92,46 @@ const note = (y: number, height: number): NoteGeo =>
   // A5: `textRuns` is placed in layout. This suite asserts pagination
   // y-arithmetic, never note text, so an empty body is enough.
   ({ kind: 'note', x: 10, y, width: 80, height, text: 'n', textRuns: [] });
-const activation = (y: number, height: number): ActivationGeo =>
-  ({ kind: 'activation', participantId: 'A', lifelineX: 40, y, height, level: 1 });
-const divider = (y: number, height: number): DividerGeo =>
-  ({ kind: 'divider', text: 'd', lines: ['d'], labelRuns: [], y, bandX: 10, bandWidth: 360,
-     height, textWidth: 40, textHeight: 20 });
+const activation = (y: number, height: number): ActivationGeo => ({
+  kind: 'activation',
+  participantId: 'A',
+  lifelineX: 40,
+  y,
+  height,
+  level: 1,
+});
+const divider = (y: number, height: number): DividerGeo => ({
+  kind: 'divider',
+  text: 'd',
+  lines: ['d'],
+  labelRuns: [],
+  y,
+  bandX: 10,
+  bandWidth: 360,
+  height,
+  textWidth: 40,
+  textHeight: 20,
+});
 const space = (y: number): SpaceGeo => ({ kind: 'space', y, height: 12 });
 
 function frame(y: number, height: number, extra?: Partial<FrameGeo>): FrameGeo {
   return {
-    kind: 'frame', frameType: 'group', label: 'g',
-    x: 5, y, width: 300, height,
-    branchSeparators: [], refBody: [],
+    kind: 'frame',
+    frameType: 'group',
+    label: 'g',
+    x: 5,
+    y,
+    width: 300,
+    height,
+    branchSeparators: [],
+    refBody: [],
     // A4 moved tab-text placement into layout; these suites assert box
     // geometry, never the tab's own text.
     tabRuns: [],
-    tabText: 'group', tabTextWidth: 30, tabWidth: 40, tabHeight: 15,
+    tabText: 'group',
+    tabTextWidth: 30,
+    tabWidth: 40,
+    tabHeight: 15,
     ...extra,
   };
 }
@@ -107,8 +140,7 @@ const kinds = (g: SequenceGeometry): string[] => g.events.map((e) => e.kind);
 /** The kinds a page carries APART from its own separators. Every band in the
  *  per-kind cases below straddles a `newpage` tile, whose separator survives
  *  on both adjacent pages by design -- that is its own section. */
-const inkKinds = (g: SequenceGeometry): string[] =>
-  kinds(g).filter((k) => k !== 'newpage');
+const inkKinds = (g: SequenceGeometry): string[] => kinds(g).filter((k) => k !== 'newpage');
 const only = <T extends EventGeo>(g: SequenceGeometry, kind: T['kind']): T[] =>
   g.events.filter((e): e is T => e.kind === kind);
 
@@ -275,9 +307,7 @@ describe('divider — anchored on the BAND rule, y + height / 2', () => {
   });
 
   it('keeps that same divider on the page it opens', () => {
-    expect(kinds(paginateSequence(geo([newpage(200), divider(221, 41)]), 1))).toEqual(
-      ['newpage', 'divider'],
-    );
+    expect(kinds(paginateSequence(geo([newpage(200), divider(221, 41)]), 1))).toEqual(['newpage', 'divider']);
   });
 
   it('keeps a divider whose band rule is inside', () => {

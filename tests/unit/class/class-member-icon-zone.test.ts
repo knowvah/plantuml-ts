@@ -55,19 +55,40 @@ describe('buildSectionRows — indent follows the resolved icon zone', () => {
 
   it('icon section indents by margin + zone (6 + 11 = 17 for radius 8)', () => {
     const m = member();
-    const rows = buildSectionRows([m], ['a'], [{ atoms: [], width: 10, height: 14 }], 0, true, ctx(rowIconZoneWidth(8)));
+    const rows = buildSectionRows(
+      [m],
+      ['a'],
+      [{ atoms: [], width: 10, height: 14 }],
+      0,
+      true,
+      ctx(rowIconZoneWidth(8)),
+    );
     expect(rows[0]!.indent).toBe(ROW_TEXT_LEFT_MARGIN + 11);
   });
 
   it('default radius reproduces the historical 20px indent', () => {
     const m = member();
-    const rows = buildSectionRows([m], ['a'], [{ atoms: [], width: 10, height: 14 }], 0, true, ctx(rowIconZoneWidth(11)));
+    const rows = buildSectionRows(
+      [m],
+      ['a'],
+      [{ atoms: [], width: 10, height: 14 }],
+      0,
+      true,
+      ctx(rowIconZoneWidth(11)),
+    );
     expect(rows[0]!.indent).toBe(20);
   });
 
   it('no-icon section keeps the bare 6px margin', () => {
     const m = member();
-    const rows = buildSectionRows([m], ['a'], [{ atoms: [], width: 10, height: 14 }], 0, false, ctx(rowIconZoneWidth(8)));
+    const rows = buildSectionRows(
+      [m],
+      ['a'],
+      [{ atoms: [], width: 10, height: 14 }],
+      0,
+      false,
+      ctx(rowIconZoneWidth(8)),
+    );
     expect(rows[0]!.indent).toBe(ROW_TEXT_LEFT_MARGIN);
   });
 });

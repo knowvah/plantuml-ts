@@ -134,7 +134,7 @@ describe('StripeLatex.getStartingAltitude (java:105-107)', () => {
 });
 
 describe('StripeLatex.drawU (java:109-111) — delegates to the lazily-built AtomMath', () => {
-  it('draws one UImage using the fontConfiguration\'s own color as foreground', () => {
+  it("draws one UImage using the fontConfiguration's own color as foreground", () => {
     const stripe = new StripeLatex(FONT);
     stripe.addAndCheckTermination('x^2');
     const ug = new RecordingUGraphic();
@@ -150,7 +150,7 @@ describe('StripeLatex.drawU (java:109-111) — delegates to the lazily-built Ato
     expect(shape.getHref()).toBe(expected.href);
   });
 
-  it('a null-color FontConfiguration falls back to AtomMath\'s own black default', () => {
+  it("a null-color FontConfiguration falls back to AtomMath's own black default", () => {
     const noColorFont: FontConfiguration = { family: 'sanserif', size: 12, color: null, styles: new Set() };
     const stripe = new StripeLatex(noColorFont);
     stripe.addAndCheckTermination('x');

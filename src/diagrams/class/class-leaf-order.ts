@@ -162,9 +162,7 @@ function drawNamespace(
   );
   const childLeaves = childIds.flatMap((childId) => {
     const child = allNamespaces.find((n) => n.id === childId);
-    return child === undefined
-      ? [childId]
-      : drawNamespace(child, allNamespaces, leafRank, nsRank, collapsedGroupRank);
+    return child === undefined ? [childId] : drawNamespace(child, allNamespaces, leafRank, nsRank, collapsedGroupRank);
   });
   return [...ownLeaves, ...childLeaves];
 }
@@ -224,20 +222,13 @@ export function computeLeafDrawOrder(ast: ClassDiagramAST): readonly string[] {
   const rootIds = sortByRank(
     [
       ...ast.namespaces.filter((ns) => ns.parentId === undefined).map((ns) => ns.id),
-      ...ast.classifiers
-        .filter((c) => collapsedGroupRank.has(c.id) && !namespaced.has(c.id))
-        .map((c) => c.id),
+      ...ast.classifiers.filter((c) => collapsedGroupRank.has(c.id) && !namespaced.has(c.id)).map((c) => c.id),
     ],
     rootGroupRank,
   );
   const grouped = rootIds.flatMap((id) => {
     const ns = ast.namespaces.find((n) => n.id === id);
-    return ns === undefined
-      ? [id]
-      : drawNamespace(ns, ast.namespaces, leafRank, nsRank, collapsedGroupRank);
+    return ns === undefined ? [id] : drawNamespace(ns, ast.namespaces, leafRank, nsRank, collapsedGroupRank);
   });
-  return [
-    ...grouped,
-    ...sortByRank(unpackagedIds(ast, namespaced, collapsedGroupRank), leafRank),
-  ];
+  return [...grouped, ...sortByRank(unpackagedIds(ast, namespaced, collapsedGroupRank), leafRank)];
 }

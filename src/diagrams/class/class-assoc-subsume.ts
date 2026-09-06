@@ -107,12 +107,20 @@ export function subsumeExplicitAssociation(ast: ClassDiagramAST, aId: string, bI
   const oriented =
     ex.from === aId
       ? {
-          a: ex.fromMultiplicity, b: ex.toMultiplicity, portA: ex.fromPort, portB: ex.toPort,
-          aSideDecor: exSourceDecor, bSideDecor: exTargetDecor,
+          a: ex.fromMultiplicity,
+          b: ex.toMultiplicity,
+          portA: ex.fromPort,
+          portB: ex.toPort,
+          aSideDecor: exSourceDecor,
+          bSideDecor: exTargetDecor,
         }
       : {
-          a: ex.toMultiplicity, b: ex.fromMultiplicity, portA: ex.toPort, portB: ex.fromPort,
-          aSideDecor: exTargetDecor, bSideDecor: exSourceDecor,
+          a: ex.toMultiplicity,
+          b: ex.fromMultiplicity,
+          portA: ex.toPort,
+          portB: ex.fromPort,
+          aSideDecor: exTargetDecor,
+          bSideDecor: exSourceDecor,
         };
   return {
     ...oriented,
@@ -123,4 +131,3 @@ export function subsumeExplicitAssociation(ast: ClassDiagramAST, aId: string, bI
     creationIndex: ex.creationIndex,
   };
 }
-

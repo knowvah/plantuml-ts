@@ -45,11 +45,7 @@ function drawTriangleMarker(p: DataPoint, color: string): string {
   );
 }
 
-function drawMarker(
-  p: DataPoint,
-  shape: LineSeriesGeo['markerShape'],
-  color: string,
-): string {
+function drawMarker(p: DataPoint, shape: LineSeriesGeo['markerShape'], color: string): string {
   switch (shape) {
     case 'square':
       return drawSquareMarker(p, color);
@@ -92,9 +88,7 @@ export function drawLine(geo: LineSeriesGeo, _theme: Theme): string {
   for (let i = 0; i < geo.points.length - 1; i++) {
     const p1 = geo.points[i]!;
     const p2 = geo.points[i + 1]!;
-    parts.push(
-      line(p1.x, p1.y, p2.x, p2.y, { stroke: geo.color, strokeWidth: 2 }),
-    );
+    parts.push(line(p1.x, p1.y, p2.x, p2.y, { stroke: geo.color, strokeWidth: 2 }));
   }
 
   // --- Markers and optional labels ---

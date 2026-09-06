@@ -11,15 +11,24 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import {
-  attachPortLabels, guideLinesAnchor, multiLineLabelAnchor, portLabelAnchor, type LabelAnchorContext,
+  attachPortLabels,
+  guideLinesAnchor,
+  multiLineLabelAnchor,
+  portLabelAnchor,
+  type LabelAnchorContext,
 } from './class-edge-label-anchor.js';
 // T1: the ONE `Display#getWithNewlines` port -- replaces the former
 // `splitEdgeLabelLines` re-export chain through `class-layout-helpers.js`,
 // see `class-edge-label-lines.ts`'s own doc comment.
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import {
-  hasSeveralGuideLines, magicArrowAngle, magicArrowGlyphPoints, parseMagicArrowLabel, splitGuideLines,
-  type MagicArrowDirection, type MagicArrowLabel,
+  hasSeveralGuideLines,
+  magicArrowAngle,
+  magicArrowGlyphPoints,
+  parseMagicArrowLabel,
+  splitGuideLines,
+  type MagicArrowDirection,
+  type MagicArrowLabel,
 } from './class-magic-arrow.js';
 import { applyGuillemet } from '../../core/edge-label-box.js';
 import type { EdgeGeo } from './layout.js';
@@ -255,9 +264,8 @@ function buildStrokeOverride(
   // B7/M8: the link's `<<tag>>` labels ride along regardless of whether the
   // edge carries a bracket override -- they are resolved against
   // `theme.colors.graph.arrowTagCascade` at render time, not here.
-  const tags = rel.stereotypeTags !== undefined && rel.stereotypeTags.length > 0
-    ? { stereotypeTags: rel.stereotypeTags }
-    : {};
+  const tags =
+    rel.stereotypeTags !== undefined && rel.stereotypeTags.length > 0 ? { stereotypeTags: rel.stereotypeTags } : {};
   const hasOverride =
     rel.lineStyleOverride !== undefined ||
     rel.thicknessOverride !== undefined ||
@@ -340,7 +348,12 @@ function normalizeEdgePoints(
   const start = rawPts[0];
   const end = rawPts[rawPts.length - 1];
   let reversed = dotSwap;
-  if (rel.idEntity1FullId !== undefined && rel.idEntity2FullId !== undefined && start !== undefined && end !== undefined) {
+  if (
+    rel.idEntity1FullId !== undefined &&
+    rel.idEntity2FullId !== undefined &&
+    start !== undefined &&
+    end !== undefined
+  ) {
     const c1 = nodeCenter(posMap, anchors, rel.idEntity1FullId);
     const c2 = nodeCenter(posMap, anchors, rel.idEntity2FullId);
     if (c1 !== undefined && c2 !== undefined) {
@@ -420,7 +433,11 @@ export function buildEdgeGeos(
     // `result.nodes` is the collision set — the closest analogue to
     // upstream's `getBibliotekon().allNodes()` (`DotStringFactory.java:466`),
     // which is likewise every laid-out node, in layout order.
-    attachPortLabels(edgeGeo, rel, edgeResult, { measurer: text.measurer, fontFamily: text.fontFamily, nodes: result.nodes });
+    attachPortLabels(edgeGeo, rel, edgeResult, {
+      measurer: text.measurer,
+      fontFamily: text.fontFamily,
+      nodes: result.nodes,
+    });
     edges.push(edgeGeo);
   }
   return edges;

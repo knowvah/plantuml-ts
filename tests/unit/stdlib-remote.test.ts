@@ -24,11 +24,7 @@
  * @see ../../src/core/tim/StdlibRemote.ts
  */
 import { describe, expect, it, vi } from 'vitest';
-import {
-  StdlibResourceFetchError,
-  remoteStdlib,
-  type StdlibRemoteManifest,
-} from '../../src/core/tim/StdlibRemote.js';
+import { StdlibResourceFetchError, remoteStdlib, type StdlibRemoteManifest } from '../../src/core/tim/StdlibRemote.js';
 
 const TUPADR3: StdlibRemoteManifest = {
   name: 'tupadr3',
@@ -159,9 +155,7 @@ describe('remoteStdlib -- baseUrl trailing slash (criterion 6)', () => {
     const withSlash = vi.fn(async () => Promise.resolve('x'));
     const withoutSlash = vi.fn(async () => Promise.resolve('x'));
 
-    await remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3/', fetcher: withSlash }).fetch(
-      'ban',
-    );
+    await remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3/', fetcher: withSlash }).fetch('ban');
     await remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3', fetcher: withoutSlash }).fetch(
       'ban',
     );
@@ -193,9 +187,9 @@ describe('remoteStdlib -- asBundleData (ADR-2 alias reuse)', () => {
 
 describe('remoteStdlib -- default fetcher (ADR-5, reuses fetchInclude)', () => {
   it('defaults to fetchInclude when no fetcher is supplied, invoking global fetch', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response('sprite $ban [...] endsprite', { status: 200 }),
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response('sprite $ban [...] endsprite', { status: 200 }));
     try {
       const bundle = remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3' });
 
@@ -203,7 +197,7 @@ describe('remoteStdlib -- default fetcher (ADR-5, reuses fetchInclude)', () => {
 
       expect(content).toBe('sprite $ban [...] endsprite');
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith('https://example.com/tupadr3/font-awesome-5/ban.puml');
+      expect(fetchSpy).toHaveBeenCalledWith('https://example.com/tupadr3/font-awesome-5/ban.puml');
     } finally {
       fetchSpy.mockRestore();
     }

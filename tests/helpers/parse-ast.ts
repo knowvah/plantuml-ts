@@ -29,8 +29,7 @@ export function parseAst<AST>(
   const refusal = parseRefusalOf(parsed);
   if (refusal !== undefined) {
     throw new Error(
-      `${plugin.type} refused this source at line ${String(refusal.line)} ` +
-        `(${refusal.kind}): ${refusal.message}`,
+      `${plugin.type} refused this source at line ${String(refusal.line)} ` + `(${refusal.kind}): ${refusal.message}`,
     );
   }
   // `parsed` is `AST | ParseRefusal` and the refusal arm is excluded above;
@@ -53,8 +52,7 @@ export function astOrThrow<T>(parsed: T | ParseRefusal, engine: string): T {
   const refusal = parseRefusalOf(parsed);
   if (refusal !== undefined) {
     throw new Error(
-      `${engine} parser refused this source at line ${String(refusal.line)} ` +
-        `(${refusal.kind}): ${refusal.message}`,
+      `${engine} parser refused this source at line ${String(refusal.line)} ` + `(${refusal.kind}): ${refusal.message}`,
     );
   }
   return parsed as T;

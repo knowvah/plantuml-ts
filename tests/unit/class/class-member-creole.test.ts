@@ -269,9 +269,7 @@ describe('resolveMemberAtoms — a latex atom draws its image', () => {
     // `AtomMath#calculateDimensionSlow` IS that box (`AtomMath.java:64-71`),
     // so the term comes from the one renderer, never from a jar golden.
     const expectedWidth =
-      measurer.measure('before ', FONT_SPEC).width +
-      drawn.width +
-      measurer.measure('after', FONT_SPEC).width;
+      measurer.measure('before ', FONT_SPEC).width + drawn.width + measurer.measure('after', FONT_SPEC).width;
     expect(build.width).toBeCloseTo(expectedWidth, 6);
   });
 });
@@ -332,7 +330,6 @@ describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, it
   });
 });
 
-
 describe('buildWrappedMemberRows (G2 N65 item 35 -- MaximumWidth word-wrap)', () => {
   test('maxWidth<=0 returns exactly the same single row buildMemberRow would', () => {
     const wrapped = buildWrappedMemberRows('+name: String', {}, FONT_SPEC, measurer, 0);
@@ -361,7 +358,10 @@ describe('buildWrappedMemberRows (G2 N65 item 35 -- MaximumWidth word-wrap)', ()
   test('every produced row concatenates back to the original words (nothing lost)', () => {
     const text = 'alpha beta gamma delta epsilon zeta eta theta';
     const wrapped = buildWrappedMemberRows(text, {}, FONT_SPEC, measurer, 60);
-    const rejoined = wrapped.map((r) => atomsToPlainText(r.atoms)).join(' ').replace(/\s+/g, ' ');
+    const rejoined = wrapped
+      .map((r) => atomsToPlainText(r.atoms))
+      .join(' ')
+      .replace(/\s+/g, ' ');
     expect(rejoined).toBe(text);
   });
 
@@ -478,7 +478,7 @@ describe('buildWrappedMemberRows — B5 literal \\n member rows', () => {
 });
 
 describe('atomsToPlainText (G2 N65 item 35)', () => {
-  test('joins every text atom\'s own text, dropping non-text atoms', () => {
+  test("joins every text atom's own text, dropping non-text atoms", () => {
     const atoms = buildMemberAtoms('+name: String', BASE_FONT);
     const build = resolveMemberAtoms(atoms, BASE_FONT, measurer);
     expect(atomsToPlainText(build.atoms)).toBe('+name: String');

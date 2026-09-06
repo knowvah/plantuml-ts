@@ -60,10 +60,7 @@ export const SHORTHAND_COMMANDS: readonly Command[] = [
   //    (RE_DQ_AS_ALIAS / RE_PLAIN_ALIAS) resolves it — SHORTHAND_TRAILER
   //    (tag/stereotype/color/url only) still gates what may follow.
   {
-    pattern: new RegExp(
-      '^\\(\\)\\s*("[^"]+"(?:\\s+as\\s+\\S+)?|\\S+(?:\\s+as\\s+\\S+)?)' +
-        SHORTHAND_TRAILER + '$',
-    ),
+    pattern: new RegExp('^\\(\\)\\s*("[^"]+"(?:\\s+as\\s+\\S+)?|\\S+(?:\\s+as\\s+\\S+)?)' + SHORTHAND_TRAILER + '$'),
     execute(state, match) {
       shorthandNode(state, match[1]!.trim(), 'interface', match[2]);
     },

@@ -26,10 +26,7 @@ function makeGeo(activities: ActivityGeometry[], maxStage: number): BoardGeometr
 
 describe('renderBoard', () => {
   it('AC1: card at dx=0, dy=0 renders rect at x=10 y=10', () => {
-    const geo = makeGeo(
-      [makeActivity(0, 170, [makeCard('Root', 0, 0)])],
-      0,
-    );
+    const geo = makeGeo([makeActivity(0, 170, [makeCard('Root', 0, 0)])], 0);
     const svg = assembleSvg(renderBoard(geo, theme));
     expect(svg).toContain('x="10" y="10"');
   });
@@ -71,10 +68,7 @@ describe('renderBoard', () => {
   it('AC6: second activity cards offset by first activity fullWidth', () => {
     const root1 = makeCard('A', 0, 0);
     const root2 = makeCard('B', 0, 0);
-    const geo = makeGeo(
-      [makeActivity(0, 170, [root1]), makeActivity(170, 170, [root2])],
-      0,
-    );
+    const geo = makeGeo([makeActivity(0, 170, [root1]), makeActivity(170, 170, [root2])], 0);
     const svg = assembleSvg(renderBoard(geo, theme));
     // Second activity header at x = 170 + 10 = 180
     const rects = [...svg.matchAll(/x="(\d+)" y="10"/g)];
@@ -82,8 +76,6 @@ describe('renderBoard', () => {
     expect(xs).toContain(10);
     expect(xs).toContain(180);
   });
-
-
 
   it('AC8: boardPlugin.type is "board"', () => {
     expect(boardPlugin.type).toBe('board');
@@ -127,8 +119,8 @@ describe('renderBoard', () => {
     const root = makeCard('Root', 0, 0);
     const geo = makeGeo([makeActivity(0, 170, [root])], 3);
     const svg = assembleSvg(renderBoard(geo, theme));
-    expect(svg).toContain('y1="90"');   // (0+1)*90-10+10
-    expect(svg).toContain('y1="180"');  // (1+1)*90-10+10
-    expect(svg).toContain('y1="270"');  // (2+1)*90-10+10
+    expect(svg).toContain('y1="90"'); // (0+1)*90-10+10
+    expect(svg).toContain('y1="180"'); // (1+1)*90-10+10
+    expect(svg).toContain('y1="270"'); // (2+1)*90-10+10
   });
 });

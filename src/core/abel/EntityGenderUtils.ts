@@ -65,8 +65,7 @@ export function byStereotype(stereotype: string): EntityGender {
       const testStereotype = test.getStereotype();
       if (testStereotype === undefined) return false;
 
-      for (const label of testStereotype.getLabels(GUILLEMET_DOUBLE_COMPARATOR))
-        if (label === stereotype) return true;
+      for (const label of testStereotype.getLabels(GUILLEMET_DOUBLE_COMPARATOR)) if (label === stereotype) return true;
 
       return false;
     },

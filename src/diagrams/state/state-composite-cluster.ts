@@ -17,11 +17,7 @@ import type { State } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
 import type { DotInputNode, DotInputCluster, DotLayoutResult } from '../../core/graph-layout.js';
 import { splitStateDisplayLines } from './state-sizing.js';
-import {
-  measureLines,
-  measureClusterTitle,
-  titleAndAttributeWidth,
-} from './state-composite-header.js';
+import { measureLines, measureClusterTitle, titleAndAttributeWidth } from './state-composite-header.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { zaentId } from './state-composite-classify.js';
 import { isGroupTouched } from './state-composite-detect.js';
@@ -463,7 +459,10 @@ export function resolveClusterComposite(
   addLevelEdges(s.id, s.transitions, acc, ctx);
 
   return {
-    kind: 'cluster', id: s.id, display: s.display, children: sortSpecsByCreationIndex([...pseudoSpecs, ...childSpecs, ...regionSpecs]),
+    kind: 'cluster',
+    id: s.id,
+    display: s.display,
+    children: sortSpecsByCreationIndex([...pseudoSpecs, ...childSpecs, ...regionSpecs]),
     clusterId,
     ...(titleTableEligible
       ? {
@@ -500,11 +499,7 @@ export function resolveClusterComposite(
  *  no-chain rendering (state diagrams never produce PORTIN/PORTOUT, so the
  *  NoLabel/chained hasPort() branch never applies here). No-op when `s` has
  *  no border-point direct children. */
-function applyBorderPointRanks(
-  directMembers: readonly State[],
-  cluster: DotInputCluster,
-  anchorId: string,
-): void {
+function applyBorderPointRanks(directMembers: readonly State[], cluster: DotInputCluster, anchorId: string): void {
   const inputs = directMembers.filter((c) => isInputPosition(getEntityPosition(c))).map((c) => c.id);
   const outputs = directMembers.filter((c) => isOutputPosition(getEntityPosition(c))).map((c) => c.id);
   if (inputs.length === 0 && outputs.length === 0) return;

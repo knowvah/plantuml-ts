@@ -10,16 +10,22 @@
  * `mapColumnDividerEntries`), no behavior change (this note describes
  * the original G2 split -- see `MAP_JSON_DIVIDER_STROKE_WIDTH`'s own doc
  * comment for the G3/O3 map/json divider fix, which DID change behavior).
+ *
+ * `renderBadge`/`renderGenericTag` were further split out to
+ * `renderer-classifier-badge-tag.ts`, purely to keep this file under the
+ * 500-line cap once more -- another pure move, re-exported/imported back
+ * here unchanged.
  */
 import { roundedTopRectD } from '../../core/svg-path-builder.js';
 import type { ClassifierGeo, JsonBodyItem } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, text, line, ellipse, path } from '../../core/svg.js';
+import { rect, line, path } from '../../core/svg.js';
 import {} from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import { MAP_CELL_MARGIN_X } from './class-map-sizing.js';
-import { hasBadge, resolveBadgeFill, resolveBadgeBorder, resolveBadgeGlyphColor, spotSnameForKind, badgeGlyphPath, resolveBadgeRadius, BADGE_LEFT_MARGIN } from './class-badge.js';
+import { hasBadge } from './class-badge.js';
+import { renderBadge, renderGenericTag } from './renderer-classifier-badge-tag.js';
 import { renderVisibilityIcon, renderVisibilityUrlBackground, visibilityIconOriginY } from './class-visibility-icon.js';
 import { wrapClassifierBody, type UrlTaggedPrimitive } from './renderer-url.js';
 import {} from '../../core/svg.js';
@@ -29,109 +35,19 @@ import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
 import { renderEnhancedBody } from './renderer-body-enhanced.js';
 import { classShadowFilterUrl } from './class-shadow.js';
-import { resolveElementHeaderBackground, classifierFill, classBorder, classBorderStrokeWidth, MAP_JSON_DIVIDER_STROKE_WIDTH } from './renderer-classifier-colors.js';
+import {
+  resolveElementHeaderBackground,
+  classifierFill,
+  classBorder,
+  classBorderStrokeWidth,
+  MAP_JSON_DIVIDER_STROKE_WIDTH,
+} from './renderer-classifier-colors.js';
 import { renderRow, renderRowText, attributeFontSize } from './renderer-classifier-rows.js';
 export { renderRow };
-
-
 
 // ---------------------------------------------------------------------------
 // Classifier kind → fill color
 // ---------------------------------------------------------------------------
-
-/**
- * The kind badge in the header: a filled `<ellipse>` (radius {@link
- * BADGE_RADIUS}, upstream `SkinParam#getCircledCharacterRadius()` default)
- * plus the kind letter drawn as a real vector glyph outline (`<path>`),
- * matching `klimt/shape/CircledCharacter.java` -- never `<circle>`+`<text>`.
- *
- * Position (G2 N23, replacing N4's indent-reversal trick): `cx` reads the
- * NAME row's own `badgeIndent` directly -- `class-stereotype.ts#
- * buildHeaderRow`'s own `h1 + BADGE_LEFT_MARGIN + BADGE_RADIUS` term. N4's
- * "reverse the text row's own indent" shortcut is NO LONGER valid post-N23:
- * the header TEXT row's `indent` bakes in `h1 + h2` (an asymmetric
- * wider-box-centering split, see that function's doc comment), while the
- * badge only moves by `h1` alone -- the two diverge by `h2/2` whenever
- * `h2 > 0`, so they need their OWN stored field rather than one shared
- * offset. `cy = geo.y + headerHeight / 2`, unchanged. G2 N24: the NAME row
- * is `rows[headerRowCount - 1]`, not always `rows[0]` -- a stacked
- * `<<stereotype>>` pushes N stereo rows in FRONT of it (`badgeIndent` is
- * only ever set on the name row, never a stereo row).
- *
- * G2 N24 (pre-existing bug, unmasked while jar-verifying the "fully
- * suppressed" height fix on `xibibe-37-regi626`): `dividerYs[0]` is only
- * absent when BOTH compartments are suppressed (`hide members`/`hide empty
- * members` on a member-less classifier) -- `measureGenericClassifier`'s own
- * early-return branch, which now sets `geo.height === headerRowHeight`
- * EXACTLY in that case (no other content). The old fallback (a flat,
- * unverified `28`) was simply wrong whenever the real `headerRowHeight`
- * differed (badge-dominant `32`, or higher still with a stereotype row) --
- * `geo.height` is the correct value in every case that reaches this
- * fallback, not a new formula.
- */
-function renderBadge(geo: ClassifierGeo, theme: Theme): string {
-  const headerH = geo.dividerYs[0] ?? geo.height;
-  const nameRowIndex = (geo.headerRowCount ?? 1) - 1;
-  // G2 N38: resolved from theme (formula or explicit override) -- see
-  // `class-badge.ts#resolveBadgeRadius`'s own doc comment. Falls back to
-  // the SAME value `buildHeaderRow` used to compute `badgeIndent`
-  // whenever that field is present (the common case); only reached for
-  // hand-built test geometries that bypass the real layout pipeline.
-  const badgeRadius = resolveBadgeRadius(
-    theme.colors.graph.circledCharacterFontSize,
-    theme.colors.graph.circledCharacterRadius,
-  );
-  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN + badgeRadius;
-  const badgeX = geo.x + badgeIndent;
-  const badgeY = geo.y + headerH / 2;
-  // G2 N32: `skinparam stereotype<X>BackgroundColor/BorderColor` / `<style>
-  // spot<Kind> { BackgroundColor; LineColor; FontColor }` -- the badge's
-  // own theme-level spot-color override bucket, see `class-badge.ts
-  // #spotSnameForKind`'s doc comment. `undefined` for any kind with no
-  // bucket (every non-badge-bearing kind, plus unsurveyed badge kinds).
-  const spotSname = spotSnameForKind(geo.kind);
-  const spot = spotSname !== undefined ? theme.colors.elements?.[spotSname] : undefined;
-  return (
-    ellipse(badgeX, badgeY, badgeRadius, badgeRadius, {
-      // G2 N4: `strokeWidth` (camelCase) is not a valid SVG attribute name --
-      // was silently emitting a bogus `strokeWidth="1"` attribute (invisible
-      // to any real SVG renderer) instead of the intended `stroke-width="1"`,
-      // a pre-existing bug from N3 diagnosed this iteration (blocked EVERY
-      // badge-bearing fixture's `ellipse/@stroke-width` from matching jar).
-      // G2 N26: `resolveBadgeFill` -- the badge-customization COLOR half
-      // of `class Foo << (F,orange) >>` (`geo.badgeColor`) wins over the
-      // kind default when present; see that function's own doc comment.
-      // G2 N36: `theme.colors.graph.spotCascade*` -- the bare `<style>
-      // root { BackGroundColor/LineColor/FontColor } }` ancestor-cascade
-      // fallback, see `resolveBadgeFill`/`resolveBadgeBorder`/
-      // `resolveBadgeGlyphColor`'s own `rootFallback` doc comments.
-      fill: resolveBadgeFill(geo.kind, geo.badgeColor, spot?.background, theme.colors.graph.spotCascadeBackground),
-      stroke: resolveBadgeBorder(theme.colors.border, spot?.border, theme.colors.graph.spotCascadeBorder),
-      'stroke-width': 1,
-    }) +
-    // `style.value(PName.FontColor)` on the spot style signature -- black in
-    // every non-monochrome theme sampled (`plans/g2-class-svg/ledger.md`
-    // N3); monochrome-reverse flips this to white, a separate, smaller,
-    // unfixed divergence (that theme already diverges more broadly). G2 N32:
-    // `spot.font` (`<style> spot<Kind> { FontColor }`) overrides the
-    // hardcoded default -- jar-verified `gekofe-43-lufa479`.
-    // G2 N26: `geo.badgeChar` -- the CHAR half of the same decoration,
-    // see `badgeGlyphPath`/`resolveBadgeLetter`'s own doc comment for the
-    // 5-known-letters limitation.
-    // T7b: routed through `path()` (was a raw template literal) -- the
-    // `d` string itself is already formatted at its source
-    // (`class-badge.ts#badgeGlyphPath`'s own T7b fix), so this call only
-    // needed to stop bypassing the shared emitter for the `fill` attribute.
-    path(
-      badgeGlyphPath(
-        geo.kind, badgeX, badgeY, geo.badgeChar, theme.colors.graph.circledCharacterFontSize,
-        theme.colors.graph.circledCharacterFontFamily, theme.colors.graph.circledCharacterFontBold,
-        theme.colors.graph.circledCharacterFontItalic,
-      ),
-      { fill: resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont) },
-    )
-  );
-}
 
 /**
  * Map-only: the column-B vertical divider per non-linked data row
@@ -178,7 +94,8 @@ function mapColumnDividerEntries(geo: ClassifierGeo, theme: Theme): Array<{ y: n
       item: {
         url: geo.url,
         body: line(dividerX, geo.y + top, dividerX, geo.y + bottom, {
-          stroke: classBorder(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
+          stroke: classBorder(geo, theme),
+          strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
         }),
       },
     });
@@ -240,12 +157,15 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
   // comment. Zero behavior change for every classifier with no `<style>`
   // RoundCorner declaration.
   const roundCorner =
-    resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner
-    ?? theme.colors.graph.classCascadeRoundCorner
-    ?? 5;
+    resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner ??
+    theme.colors.graph.classCascadeRoundCorner ??
+    5;
   let body = rect(geo.x, geo.y, geo.width, geo.height, {
-    fill: classifierFill(geo, theme), stroke: classBorder(geo, theme), strokeWidth: classBorderStrokeWidth(geo, theme),
-    rx: roundCorner / 2, ry: roundCorner / 2,
+    fill: classifierFill(geo, theme),
+    stroke: classBorder(geo, theme),
+    strokeWidth: classBorderStrokeWidth(geo, theme),
+    rx: roundCorner / 2,
+    ry: roundCorner / 2,
     // mission skin-file-loading (deferred D3 item): `geo.shadowing`'s own
     // doc comment -- the outer bordered rect is the ONE shape jar's
     // `EntityImageClass`/`Object`/`Map`/`Json` all draw the shadow on
@@ -283,49 +203,6 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
   });
   if (geo.genericTag !== undefined) body += renderGenericTag(geo, geo.genericTag, theme);
   return { url: geo.url, body };
-}
-
-/**
- * G2 N32: `class Foo<T>`'s generic type-parameter tag box -- a dashed
- * `<rect>` + italic `<text>`, drawn OUTSIDE/above the classifier box (see
- * `class-stereotype.ts#buildGenericTagGeo`'s doc comment for the position
- * derivation) as the LAST header-bundle primitive (jar's own draw order:
- * box, badge, name, THEN the generic tag -- `EntityImageClassHeader
- * .java:163`'s `HeaderLayout` ctor argument order, `circledCharacter, stereo,
- * name, genericBlock`, matches `HeaderLayout#drawU`'s own sequential draw
- * calls). Fill is a FIXED white default (`GENERIC_TAG_BACKGROUND`), NOT
- * `theme.colors.background` (the ROOT canvas background) -- G2 N49
- * jar-verified `remulu-24-zadi546` (`skinparam backgroundcolor transparent`
- * still draws the tag `fill="#FFFFFF"`, proving the two are independent):
- * the tag's fill is `element.classDiagram.class.generic`'s OWN style-cascade
- * default (`EntityImageClassHeader.java:149`, `styleGeneric.value(BackGround
- * Color)`), a DIFFERENT selector from both `class_`'s own fill AND the
- * document/root background -- the earlier `caboco-62-jula911` citation
- * (default theme, non-transparent) couldn't distinguish the two since
- * `theme.colors.background` ALSO defaults to `#FFFFFF`. A `<style> class {
- * generic { BackgroundColor ... } } }` override (jar-verified honored,
- * `camuna-58-veca254`) is NOT yet wired here -- no corpus fixture reaches
- * zero-diff on that path alone (that fixture has unrelated, larger diffs);
- * ledgered as a follow-up, not attempted this iteration. Text fill
- * is the SAME hardcoded `#000000` every other classifier text row uses
- * (`renderRowText`'s own doc comment); `font-style="italic"` always
- * (`FontParam.CLASS_STEREOTYPE`'s own default face, `FontParam.java:59`).
- */
-const GENERIC_TAG_BACKGROUND = '#FFFFFF';
-function renderGenericTag(geo: ClassifierGeo, tag: NonNullable<ClassifierGeo['genericTag']>, theme: Theme): string {
-  return (
-    rect(geo.x + tag.rectX, geo.y + tag.rectY, tag.rectWidth, tag.rectHeight, {
-      fill: GENERIC_TAG_BACKGROUND, stroke: theme.colors.border, strokeWidth: 1, strokeDasharray: '2,2',
-    }) +
-    text(geo.x + tag.textX, geo.y + tag.textY, tag.text, {
-      fontFamily: tag.fontFamily, fontSize: tag.fontSize, fill: '#000000',
-      // G2 N39: `skinparam classStereotypeFontStyle` override -- see
-      // `GenericTagGeo`'s own doc comment.
-      ...(tag.italic ? { fontStyle: 'italic' as const } : {}),
-      ...(tag.bold === true ? { fontWeight: '700' as const } : {}),
-      lengthAdjust: 'spacing', textLength: tag.textWidth,
-    })
-  );
 }
 
 /**
@@ -372,10 +249,12 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
   // (never the Y-sort merge below -- `renderer-body-enhanced.ts`'s own
   // module doc comment for why the two orderings genuinely differ).
   if (geo.enhancedBody !== undefined) {
-    return [{
-      url: geo.url,
-      body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorder(geo, theme)),
-    }];
+    return [
+      {
+        url: geo.url,
+        body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorder(geo, theme)),
+      },
+    ];
   }
   // M3(c): a `json` leaf's entries area owns its own draw order
   // (`TextBlockCucaJSon#drawU` is a pre-order traversal, not a Y-order) --
@@ -396,10 +275,12 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
       url: geo.url,
       body: isMapOrJsonDivider
         ? line(geo.x, geo.y + divY, geo.x + geo.width, geo.y + divY, {
-            stroke: classBorder(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
+            stroke: classBorder(geo, theme),
+            strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
           })
         : line(geo.x + 1, geo.y + divY, geo.x + geo.width - 1, geo.y + divY, {
-            stroke: classBorder(geo, theme), strokeWidth: classBorderStrokeWidth(geo, theme),
+            stroke: classBorder(geo, theme),
+            strokeWidth: classBorderStrokeWidth(geo, theme),
           }),
     },
   }));
@@ -492,9 +373,6 @@ export function renderClassifierBox(geo: ClassifierGeo, theme: Theme): string {
   // G3/O3: map's own vertical column dividers now interleave INSIDE
   // buildBodyPrimitives' own Y-sort (mapColumnDividerEntries), not appended
   // here as one extra batched-at-the-end primitive (pre-O3 bug).
-  const primitives: UrlTaggedPrimitive[] = [
-    buildHeaderPrimitive(geo, theme),
-    ...buildBodyPrimitives(geo, theme),
-  ];
+  const primitives: UrlTaggedPrimitive[] = [buildHeaderPrimitive(geo, theme), ...buildBodyPrimitives(geo, theme)];
   return wrapClassifierBody(geo, primitives);
 }

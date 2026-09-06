@@ -182,8 +182,7 @@ export function isFillDecor(name: LinkDecorName): boolean {
  * dispatch itself stays a single map lookup (CCN 1).
  */
 const BUILDERS: Record<LinkDecorName, (backgroundColor: Paint) => ExtremityFactory> = {
-  EXTENDS: () =>
-    new ExtremityFactoryTriangle({ backgroundColor: null, xWing: 18, yAperture: 6, decorationLength: 18 }),
+  EXTENDS: () => new ExtremityFactoryTriangle({ backgroundColor: null, xWing: 18, yAperture: 6, decorationLength: 18 }),
   ARROW_TRIANGLE: () =>
     new ExtremityFactoryTriangle({ backgroundColor: null, xWing: 8, yAperture: 3, decorationLength: 8 }),
   ARROW: () => new ExtremityFactoryArrow(),
@@ -225,10 +224,7 @@ export function buildExtremityFactory(name: LinkDecorName, backgroundColor: Pain
  */
 
 /** `LinkType#looksLikeRevertedForSvg()` — decor only on the tail side. */
-export function looksLikeRevertedForSvg(
-  decor1: LinkDecorName | undefined,
-  decor2: LinkDecorName | undefined,
-): boolean {
+export function looksLikeRevertedForSvg(decor1: LinkDecorName | undefined, decor2: LinkDecorName | undefined): boolean {
   return decor1 === undefined && decor2 !== undefined;
 }
 

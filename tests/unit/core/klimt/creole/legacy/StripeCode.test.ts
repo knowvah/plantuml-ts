@@ -160,7 +160,7 @@ describe('StripeCode.drawU (java:104-117)', () => {
     expect(ug.getDrawn()).toHaveLength(0);
   });
 
-  it('the drawn UText carries the stripe\'s own FontConfiguration unchanged (no adjustColorForBackground call)', () => {
+  it("the drawn UText carries the stripe's own FontConfiguration unchanged (no adjustColorForBackground call)", () => {
     const code = new StripeCode(FONT);
     code.addAndCheckTermination('x');
     const ug = new RecordingUGraphic();
@@ -168,7 +168,7 @@ describe('StripeCode.drawU (java:104-117)', () => {
     expect((ug.getDrawn()[0]!.shape as UText).getFontConfiguration()).toBe(FONT);
   });
 
-  it('falls back to font.size/4.5 when the StringBounder has no getDescent (measureLine\'s established fallback)', () => {
+  it("falls back to font.size/4.5 when the StringBounder has no getDescent (measureLine's established fallback)", () => {
     class NoDescentStringBounder implements StringBounder {
       calculateDimension(_font: { readonly family: string; readonly size: number }, text: string): XDimension2D {
         return new XDimension2D(text.length * 2, LINE_HEIGHT);

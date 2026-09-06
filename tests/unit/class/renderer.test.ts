@@ -16,11 +16,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 /**
  * Build a minimal ClassifierGeo without running the layout engine.
  */
-function makeClassifierGeo(
-  id: string,
-  headerText: string,
-  overrides?: Partial<ClassifierGeo>,
-): ClassifierGeo {
+function makeClassifierGeo(id: string, headerText: string, overrides?: Partial<ClassifierGeo>): ClassifierGeo {
   return {
     id,
     kind: 'class',
@@ -133,10 +129,7 @@ describe('renderClass — minimal geometry', () => {
 describe('renderClass — classifiers', () => {
   it('emits at least 2 <rect> elements beyond background for 2 classifiers', () => {
     const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo'),
-        makeClassifierGeo('Bar', 'Bar', { x: 150, y: 10 }),
-      ],
+      classifiers: [makeClassifierGeo('Foo', 'Foo'), makeClassifierGeo('Bar', 'Bar', { x: 150, y: 10 })],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     // G2 N1/N4: no body-level background <rect> for the default white
@@ -147,9 +140,7 @@ describe('renderClass — classifiers', () => {
 
   it('emits a divider <line> for each dividerY', () => {
     const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo', { dividerYs: [28, 50] }),
-      ],
+      classifiers: [makeClassifierGeo('Foo', 'Foo', { dividerYs: [28, 50] })],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<line');
@@ -194,10 +185,7 @@ describe('renderClass — hidden classifiers (G2 N7, hide <entity>)', () => {
 
   it('suppresses an edge when either endpoint is hidden (abel/Link.java#isHidden, lafama-65-zoci799)', () => {
     const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo2', 'Foo2'),
-        makeClassifierGeo('Foo3', 'Foo3', { x: 150, hidden: true }),
-      ],
+      classifiers: [makeClassifierGeo('Foo2', 'Foo2'), makeClassifierGeo('Foo3', 'Foo3', { x: 150, hidden: true })],
       edges: [makeEdgeGeo({ from: 'Foo2', to: 'Foo3' })],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
@@ -215,30 +203,42 @@ describe('renderClass — hidden classifiers (G2 N7, hide <entity>)', () => {
 });
 
 describe('renderClass — association-class-couple "point" entity (G2 N8)', () => {
-  it('draws a bare 4x4 circle ellipse (radius 2), no <g class="entity"> ' +
-    'wrapper, no id, no comment (EntityImageAssociationPoint.SIZE=4)', () => {
-    const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('__assoc0', '', {
-          kind: 'assoc-circle' as ClassifierGeo['kind'],
-          x: 10, y: 20, width: 4, height: 4, dividerYs: [], rows: [],
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('<ellipse cx="12" cy="22" rx="2" ry="2"');
-    expect(svg).not.toContain('class="entity"');
-    expect(svg).not.toContain('<!--class __assoc0-->');
-    expect(svg).not.toContain('id="ent');
-  });
+  it(
+    'draws a bare 4x4 circle ellipse (radius 2), no <g class="entity"> ' +
+      'wrapper, no id, no comment (EntityImageAssociationPoint.SIZE=4)',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [
+          makeClassifierGeo('__assoc0', '', {
+            kind: 'assoc-circle' as ClassifierGeo['kind'],
+            x: 10,
+            y: 20,
+            width: 4,
+            height: 4,
+            dividerYs: [],
+            rows: [],
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      expect(svg).toContain('<ellipse cx="12" cy="22" rx="2" ry="2"');
+      expect(svg).not.toContain('class="entity"');
+      expect(svg).not.toContain('<!--class __assoc0-->');
+      expect(svg).not.toContain('id="ent');
+    },
+  );
 
-  it('fills AND strokes the circle with the SAME theme arrow color ' +
-    '(CopyForegroundColorToBackgroundColor)', () => {
+  it('fills AND strokes the circle with the SAME theme arrow color ' + '(CopyForegroundColorToBackgroundColor)', () => {
     const geo = makeMinimalGeo({
       classifiers: [
         makeClassifierGeo('__assoc0', '', {
           kind: 'assoc-circle' as ClassifierGeo['kind'],
-          x: 0, y: 0, width: 4, height: 4, dividerYs: [], rows: [],
+          x: 0,
+          y: 0,
+          width: 4,
+          height: 4,
+          dividerYs: [],
+          rows: [],
         }),
       ],
     });
@@ -247,13 +247,18 @@ describe('renderClass — association-class-couple "point" entity (G2 N8)', () =
     expect(svg).toContain(`stroke="${defaultTheme.colors.arrow}"`);
   });
 
-  it('a hidden assoc-circle classifier draws nothing (hide/show still ' +
-    'applies to point entities)', () => {
+  it('a hidden assoc-circle classifier draws nothing (hide/show still ' + 'applies to point entities)', () => {
     const geo = makeMinimalGeo({
       classifiers: [
         makeClassifierGeo('__assoc0', '', {
           kind: 'assoc-circle' as ClassifierGeo['kind'],
-          x: 0, y: 0, width: 4, height: 4, dividerYs: [], rows: [], hidden: true,
+          x: 0,
+          y: 0,
+          width: 4,
+          height: 4,
+          dividerYs: [],
+          rows: [],
+          hidden: true,
         }),
       ],
     });
@@ -261,20 +266,22 @@ describe('renderClass — association-class-couple "point" entity (G2 N8)', () =
     expect(svg).not.toContain('<ellipse');
   });
 
-  it("G2 N58 item 40: a plain class classifier draws the circled-character " +
-    "badge <ellipse> by default", () => {
+  it('G2 N58 item 40: a plain class classifier draws the circled-character ' + 'badge <ellipse> by default', () => {
     const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('C1', 'Foo')] });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<ellipse');
   });
 
-  it("G2 N58 item 40: theme.strictUml suppresses the badge <ellipse> even " +
-    "though hideCircle is unset (CucaDiagram#showPortion's unconditional " +
-    "CIRCLED_CHARACTER guard, jar-verified fogexa-30-zupo141)", () => {
-    const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('C1', 'Foo')] });
-    const svg = assembleSvg(renderClass(geo, { ...defaultTheme, strictUml: true }));
-    expect(svg).not.toContain('<ellipse');
-  });
+  it(
+    'G2 N58 item 40: theme.strictUml suppresses the badge <ellipse> even ' +
+      "though hideCircle is unset (CucaDiagram#showPortion's unconditional " +
+      'CIRCLED_CHARACTER guard, jar-verified fogexa-30-zupo141)',
+    () => {
+      const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('C1', 'Foo')] });
+      const svg = assembleSvg(renderClass(geo, { ...defaultTheme, strictUml: true }));
+      expect(svg).not.toContain('<ellipse');
+    },
+  );
 });
 
 describe('renderClass — interface lollipop (G2 N20)', () => {
@@ -289,7 +296,11 @@ describe('renderClass — interface lollipop (G2 N20)', () => {
       classifiers: [
         makeClassifierGeo('__lol0', '', {
           kind: 'lollipop' as ClassifierGeo['kind'],
-          x: 16.5313, y: 6, width: 10, height: 10, dividerYs: [],
+          x: 16.5313,
+          y: 6,
+          width: 10,
+          height: 10,
+          dividerYs: [],
           rows: [{ text: 'toto1', y: 20.8889, indent: -10.53125, width: 31.0625 }],
           ...overrides,
         }),
@@ -297,45 +308,53 @@ describe('renderClass — interface lollipop (G2 N20)', () => {
     });
   }
 
-  it('wraps ONLY the circle in <g class="entity">, with no ' +
-    '<!--class ...--> comment (drawU never calls ug.draw(new UComment(...)))', () => {
-    const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
-    expect(svg).not.toContain('<!--class __lol0-->');
-    const entityOpen = svg.indexOf('<g class="entity"');
-    expect(entityOpen).toBeGreaterThanOrEqual(0);
-    const entityClose = svg.indexOf('</g>', entityOpen);
-    const ellipseIdx = svg.indexOf('<ellipse', entityOpen);
-    expect(ellipseIdx).toBeGreaterThan(entityOpen);
-    expect(ellipseIdx).toBeLessThan(entityClose);
-  });
+  it(
+    'wraps ONLY the circle in <g class="entity">, with no ' +
+      '<!--class ...--> comment (drawU never calls ug.draw(new UComment(...)))',
+    () => {
+      const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
+      expect(svg).not.toContain('<!--class __lol0-->');
+      const entityOpen = svg.indexOf('<g class="entity"');
+      expect(entityOpen).toBeGreaterThanOrEqual(0);
+      const entityClose = svg.indexOf('</g>', entityOpen);
+      const ellipseIdx = svg.indexOf('<ellipse', entityOpen);
+      expect(ellipseIdx).toBeGreaterThan(entityOpen);
+      expect(ellipseIdx).toBeLessThan(entityClose);
+    },
+  );
 
-  it('draws the circle at the node center, radius = width/2, fill = ' +
-    'classBackground, stroke = border, stroke-width 1.5 (getUStroke)', () => {
-    const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
-    expect(svg).toContain('<ellipse cx="21.531" cy="11" rx="5" ry="5"');
-    expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
-    expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
-    expect(svg).toContain('stroke-width="1.5"');
-  });
+  it(
+    'draws the circle at the node center, radius = width/2, fill = ' +
+      'classBackground, stroke = border, stroke-width 1.5 (getUStroke)',
+    () => {
+      const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
+      expect(svg).toContain('<ellipse cx="21.531" cy="11" rx="5" ry="5"');
+      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
+      expect(svg).toContain('stroke-width="1.5"');
+    },
+  );
 
-  it('draws the display-label <text> as a plain sibling AFTER the entity ' +
-    'group closes, not nested inside it', () => {
-    const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
-    const entityOpen = svg.indexOf('<g class="entity"');
-    const entityClose = svg.indexOf('</g>', entityOpen);
-    const textIdx = svg.indexOf('<text', entityOpen);
-    expect(textIdx).toBeGreaterThan(entityClose);
-    expect(svg).toContain('>toto1<');
-    // Byte-verified target is x="6"/y="26.8889" (bososa-44-fipu544's
-    // dummylol2/"toto1") -- asserted numerically (not string-exact) since
-    // this test's hand-picked geo.x (16.5313) carries the SAME limited
-    // decimal precision as the jar sample itself, and indent + geo.x floats
-    // to 6.00005, not a bare 6.
-    const xMatch = /<text x="([\d.]+)" y="([\d.]+)"/.exec(svg);
-    expect(xMatch).not.toBeNull();
-    expect(Number(xMatch![1])).toBeCloseTo(6, 3);
-    expect(Number(xMatch![2])).toBeCloseTo(26.8889, 3);
-  });
+  it(
+    'draws the display-label <text> as a plain sibling AFTER the entity ' + 'group closes, not nested inside it',
+    () => {
+      const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
+      const entityOpen = svg.indexOf('<g class="entity"');
+      const entityClose = svg.indexOf('</g>', entityOpen);
+      const textIdx = svg.indexOf('<text', entityOpen);
+      expect(textIdx).toBeGreaterThan(entityClose);
+      expect(svg).toContain('>toto1<');
+      // Byte-verified target is x="6"/y="26.8889" (bososa-44-fipu544's
+      // dummylol2/"toto1") -- asserted numerically (not string-exact) since
+      // this test's hand-picked geo.x (16.5313) carries the SAME limited
+      // decimal precision as the jar sample itself, and indent + geo.x floats
+      // to 6.00005, not a bare 6.
+      const xMatch = /<text x="([\d.]+)" y="([\d.]+)"/.exec(svg);
+      expect(xMatch).not.toBeNull();
+      expect(Number(xMatch![1])).toBeCloseTo(6, 3);
+      expect(Number(xMatch![2])).toBeCloseTo(26.8889, 3);
+    },
+  );
 
   it('a hidden lollipop classifier draws nothing', () => {
     const svg = assembleSvg(renderClass(makeLollipopGeo({ hidden: true }), defaultTheme));
@@ -359,9 +378,7 @@ describe('renderClass — descriptive-element icons', () => {
 
   it('renders an ellipse for a usecase kind (carries no usymbol)', () => {
     const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('UC', 'UC', { kind: 'usecase' as ClassifierGeo['kind'] }),
-      ],
+      classifiers: [makeClassifierGeo('UC', 'UC', { kind: 'usecase' as ClassifierGeo['kind'] })],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<ellipse');
@@ -536,7 +553,7 @@ describe('renderClass — map row dividers (G3/O3, TextBlockMap#drawU)', () => {
 });
 
 describe('renderClass — json row dividers (G3/O3, same TextBlockCucaJSon convention as map)', () => {
-  it('draws a json entity\'s horizontal divider full box width with a fixed stroke-width of 1', () => {
+  it("draws a json entity's horizontal divider full box width with a fixed stroke-width of 1", () => {
     // bepafe-03-teda035's json "A" entity: box x=209,width=143.025, header
     // divider at absolute y=25 (relative 18) -- jar-verified golden value.
     const jsonGeo: ClassifierGeo = {
@@ -782,15 +799,22 @@ describe('renderClass — classifier kind fill', () => {
   });
 
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box.
-  it('renders the generic tag box (dashed rect + italic text) when ' +
-    'geo.genericTag is set', () => {
+  it('renders the generic tag box (dashed rect + italic text) when ' + 'geo.genericTag is set', () => {
     const geo = makeMinimalGeo({
       classifiers: [
         makeClassifierGeo('Foo', 'Foo', {
           genericTag: {
-            text: 'T', rectX: 68.15, rectY: -3, rectWidth: 9.35, rectHeight: 14,
-            textX: 69.15, textY: 7.3333, textWidth: 7.35, fontFamily: 'sans-serif',
-            fontSize: 12, italic: true,
+            text: 'T',
+            rectX: 68.15,
+            rectY: -3,
+            rectWidth: 9.35,
+            rectHeight: 14,
+            textX: 69.15,
+            textY: 7.3333,
+            textWidth: 7.35,
+            fontFamily: 'sans-serif',
+            fontSize: 12,
+            italic: true,
           },
         }),
       ],
@@ -807,27 +831,38 @@ describe('renderClass — classifier kind fill', () => {
   // (`skinparam backgroundcolor transparent` still draws the tag box
   // white). A theme with a non-white/transparent root background must
   // NOT leak into the tag's own fill.
-  it('renders the generic tag box white even when theme.colors.background ' +
-    'is transparent (independent of the document background)', () => {
-    const transparentTheme = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, background: '#00000000' },
-    };
-    const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo', {
-          genericTag: {
-            text: 'T', rectX: 68.15, rectY: -3, rectWidth: 9.35, rectHeight: 14,
-            textX: 69.15, textY: 7.3333, textWidth: 7.35, fontFamily: 'sans-serif',
-            fontSize: 12, italic: true,
-          },
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, transparentTheme));
-    expect(svg).toContain('fill="#FFF"');
-    expect(svg).not.toContain('fill="#00000000"');
-  });
+  it(
+    'renders the generic tag box white even when theme.colors.background ' +
+      'is transparent (independent of the document background)',
+    () => {
+      const transparentTheme = {
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, background: '#00000000' },
+      };
+      const geo = makeMinimalGeo({
+        classifiers: [
+          makeClassifierGeo('Foo', 'Foo', {
+            genericTag: {
+              text: 'T',
+              rectX: 68.15,
+              rectY: -3,
+              rectWidth: 9.35,
+              rectHeight: 14,
+              textX: 69.15,
+              textY: 7.3333,
+              textWidth: 7.35,
+              fontFamily: 'sans-serif',
+              fontSize: 12,
+              italic: true,
+            },
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, transparentTheme));
+      expect(svg).toContain('fill="#FFF"');
+      expect(svg).not.toContain('fill="#00000000"');
+    },
+  );
 
   it('omits the generic tag box when geo.genericTag is absent', () => {
     const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('Foo', 'Foo')] });
@@ -951,7 +986,7 @@ describe('renderClass — visibility icon Y-centers on classAttributeFontSize, n
       // which rule 1 rounds to 3 decimals.
       3,
     );
-    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 3);  // diff of two 3-decimal emitted values
+    expect(overriddenY - defaultY).toBeCloseTo(-1.1111, 3); // diff of two 3-decimal emitted values
   });
 
   it('falls back to theme.fontSize unchanged when no AttributeFontSize override is set (regression guard)', () => {
@@ -1059,18 +1094,21 @@ describe('renderClass — edges', () => {
     expect(svg).not.toContain('marker-start');
   });
 
-  it('draws the full crow-foot IE-notation family (circleLine/doubleLine/' +
-    'circleCrowfoot/lineCrowfoot) without erroring', () => {
-    for (const decor of ['circleLine', 'doubleLine', 'circleCrowfoot', 'lineCrowfoot'] as const) {
-      const geo = makeMinimalGeo({
-        edges: [makeEdgeGeo({ sourceDecor: decor, targetDecor: decor })],
-      });
-      const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain('<g class="link"');
-      expect(svg).not.toContain('marker-start');
-      expect(svg).not.toContain('marker-end');
-    }
-  });
+  it(
+    'draws the full crow-foot IE-notation family (circleLine/doubleLine/' +
+      'circleCrowfoot/lineCrowfoot) without erroring',
+    () => {
+      for (const decor of ['circleLine', 'doubleLine', 'circleCrowfoot', 'lineCrowfoot'] as const) {
+        const geo = makeMinimalGeo({
+          edges: [makeEdgeGeo({ sourceDecor: decor, targetDecor: decor })],
+        });
+        const svg = assembleSvg(renderClass(geo, defaultTheme));
+        expect(svg).toContain('<g class="link"');
+        expect(svg).not.toContain('marker-start');
+        expect(svg).not.toContain('marker-end');
+      }
+    },
+  );
 
   // G2 N28: the connecting <path> must stop at the decor's outer edge
   // (`renderer-arrowhead.ts#applyDecorTrim`, `SvekEdge#drawU`'s
@@ -1112,14 +1150,17 @@ describe('renderClass — edges', () => {
     expect(svg).toContain('M70,70');
   });
 
-  it('emits stroke-dasharray for dashed edges (G2 N8: jar uses "7,7", not ' +
-    '"5 5" -- corpus-surveyed, 383/388 sampled dashed class-diagram edges)', () => {
-    const geo = makeMinimalGeo({
-      edges: [makeEdgeGeo({ dashed: true })],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('stroke-dasharray="7,7"');
-  });
+  it(
+    'emits stroke-dasharray for dashed edges (G2 N8: jar uses "7,7", not ' +
+      '"5 5" -- corpus-surveyed, 383/388 sampled dashed class-diagram edges)',
+    () => {
+      const geo = makeMinimalGeo({
+        edges: [makeEdgeGeo({ dashed: true })],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      expect(svg).toContain('stroke-dasharray="7,7"');
+    },
+  );
 
   it('does not emit stroke-dasharray for solid edges', () => {
     const geo = makeMinimalGeo({
@@ -1133,7 +1174,7 @@ describe('renderClass — edges', () => {
     expect(pathMatch?.[0]).not.toContain('stroke-dasharray');
   });
 
-  it('renders edge label text with jar\'s real arrow-block styling (G2 N62)', () => {
+  it("renders edge label text with jar's real arrow-block styling (G2 N62)", () => {
     const geo = makeMinimalGeo({
       edges: [
         makeEdgeGeo({
@@ -1147,57 +1188,58 @@ describe('renderClass — edges', () => {
     // use (`class-geo-builders.ts#attachEdgeLabel`'s doc comment), NOT
     // the pre-N62 placeholder (`theme.colors.graph.edgeLabel`/
     // `fontSize-2`/`text-anchor`/`dominant-baseline`).
-    expect(svg).toContain(
-      '<text x="70" y="105" font-size="13" fill="#000" textLength="26.325">uses</text>',
-    );
+    expect(svg).toContain('<text x="70" y="105" font-size="13" fill="#000" textLength="26.325">uses</text>');
   });
 
-  it('renders one <text> per line for a multi-line edge label (G2 item 43), ' +
-    'omitting the single-line geo.label path entirely', () => {
-    const geo = makeMinimalGeo({
-      edges: [
-        makeEdgeGeo({
-          labelLines: [
-            { text: 'this is', x: 44, y: 100, width: 29.6563 },
-            { text: 'on several', x: 31, y: 113, width: 56.3875 },
-            { text: 'lines', x: 46, y: 126, width: 26.8125 },
-          ],
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain(
-      '<text x="44" y="100" font-size="13" fill="#000" textLength="29.656">this is</text>',
-    );
-    expect(svg).toContain(
-      '<text x="31" y="113" font-size="13" fill="#000" textLength="56.388">on several</text>',
-    );
-    expect(svg).toContain(
-      '<text x="46" y="126" font-size="13" fill="#000" textLength="26.813">lines</text>',
-    );
-  });
+  it(
+    'renders one <text> per line for a multi-line edge label (G2 item 43), ' +
+      'omitting the single-line geo.label path entirely',
+    () => {
+      const geo = makeMinimalGeo({
+        edges: [
+          makeEdgeGeo({
+            labelLines: [
+              { text: 'this is', x: 44, y: 100, width: 29.6563 },
+              { text: 'on several', x: 31, y: 113, width: 56.3875 },
+              { text: 'lines', x: 46, y: 126, width: 26.8125 },
+            ],
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      expect(svg).toContain('<text x="44" y="100" font-size="13" fill="#000" textLength="29.656">this is</text>');
+      expect(svg).toContain('<text x="31" y="113" font-size="13" fill="#000" textLength="56.388">on several</text>');
+      expect(svg).toContain('<text x="46" y="126" font-size="13" fill="#000" textLength="26.813">lines</text>');
+    },
+  );
 
-  it('renders the magic-arrow glyph as a 3-point (+closing) filled ' +
-    'triangle before the label text (G2 item 44)', () => {
-    const geo = makeMinimalGeo({
-      edges: [
-        makeEdgeGeo({
-          arrowGlyph: {
-            points: [{ x: 75.68, y: 20.5 }, { x: 66.6349, y: 17.5611 }, { x: 66.6349, y: 23.4389 }],
-          },
-          label: { text: 'ok', x: 79.68, y: 24.1111, width: 13.7313 },
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain(
-      '<polygon points="75.68,20.5,66.635,17.561,66.635,23.439,75.68,20.5" ' +
-      'fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
-    );
-    // Element order: glyph polygon BEFORE the label text, matching jar's
-    // real golden SVG (`lojepe-37-liri985`).
-    expect(svg.indexOf('<polygon points="75.68')).toBeLessThan(svg.indexOf('>ok<'));
-  });
+  it(
+    'renders the magic-arrow glyph as a 3-point (+closing) filled ' + 'triangle before the label text (G2 item 44)',
+    () => {
+      const geo = makeMinimalGeo({
+        edges: [
+          makeEdgeGeo({
+            arrowGlyph: {
+              points: [
+                { x: 75.68, y: 20.5 },
+                { x: 66.6349, y: 17.5611 },
+                { x: 66.6349, y: 23.4389 },
+              ],
+            },
+            label: { text: 'ok', x: 79.68, y: 24.1111, width: 13.7313 },
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      expect(svg).toContain(
+        '<polygon points="75.68,20.5,66.635,17.561,66.635,23.439,75.68,20.5" ' +
+          'fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="miter" stroke-miterlimit="10"/>',
+      );
+      // Element order: glyph polygon BEFORE the label text, matching jar's
+      // real golden SVG (`lojepe-37-liri985`).
+      expect(svg.indexOf('<polygon points="75.68')).toBeLessThan(svg.indexOf('>ok<'));
+    },
+  );
 
   // T3 (`plans/arrow-label-font-colour/decisions.md` D2/D3/D5/D6, oracle
   // experiment "a"): the main label/glyph fill is `resolveArrowLabelFont
@@ -1207,8 +1249,7 @@ describe('renderClass — edges', () => {
   // the SAME rule-2 shortening `core/svg.ts#formatAttrValue` applies to
   // every `fill`/`stroke` -- `#FF0000`/`#0000FF` both have equal
   // channel-byte pairs and so shorten too, exactly like `#000000` -> `#000`.
-  it('threads an `arrowFontColor` override into the label, glyph, and ' +
-    'cardinality fills alike (D2/D3/D5)', () => {
+  it('threads an `arrowFontColor` override into the label, glyph, and ' + 'cardinality fills alike (D2/D3/D5)', () => {
     const theme = {
       ...defaultTheme,
       colors: {
@@ -1221,7 +1262,11 @@ describe('renderClass — edges', () => {
         makeEdgeGeo({
           label: { text: 'uses', x: 70, y: 105, width: 26.325 },
           arrowGlyph: {
-            points: [{ x: 75.68, y: 20.5 }, { x: 66.6349, y: 17.5611 }, { x: 66.6349, y: 23.4389 }],
+            points: [
+              { x: 75.68, y: 20.5 },
+              { x: 66.6349, y: 17.5611 },
+              { x: 66.6349, y: 23.4389 },
+            ],
           },
           tailLabel: { text: '1', x: 60, y: 65, width: 7 },
           headLabel: { text: '*', x: 60, y: 145, width: 7 },
@@ -1236,42 +1281,48 @@ describe('renderClass — edges', () => {
     expect(svg).toContain(`fill="${expectedFill}">*</text>`);
   });
 
-  it('`cardinalityFontColor` overrides ONLY the tail/head fills, leaving ' +
-    'the main label at the arrow-font colour (D5/D6)', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: { ...defaultTheme.colors.graph, arrowFontColor: '#FF0000' },
-      },
-      cardinalityFontColor: '#0000FF',
-    };
-    const geo = makeMinimalGeo({
-      edges: [
-        makeEdgeGeo({
-          label: { text: 'uses', x: 70, y: 105, width: 26.325 },
-          tailLabel: { text: '1', x: 60, y: 65, width: 7 },
-          headLabel: { text: '*', x: 60, y: 145, width: 7 },
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, theme));
-    const expectedLabelFill = shortenColor('#FF0000');
-    const expectedCardinalityFill = shortenColor('#0000FF');
-    expect(svg).toContain(`fill="${expectedLabelFill}" textLength="26.325">uses</text>`);
-    expect(svg).toContain(`fill="${expectedCardinalityFill}">1</text>`);
-    expect(svg).toContain(`fill="${expectedCardinalityFill}">*</text>`);
-  });
+  it(
+    '`cardinalityFontColor` overrides ONLY the tail/head fills, leaving ' +
+      'the main label at the arrow-font colour (D5/D6)',
+    () => {
+      const theme = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: { ...defaultTheme.colors.graph, arrowFontColor: '#FF0000' },
+        },
+        cardinalityFontColor: '#0000FF',
+      };
+      const geo = makeMinimalGeo({
+        edges: [
+          makeEdgeGeo({
+            label: { text: 'uses', x: 70, y: 105, width: 26.325 },
+            tailLabel: { text: '1', x: 60, y: 65, width: 7 },
+            headLabel: { text: '*', x: 60, y: 145, width: 7 },
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, theme));
+      const expectedLabelFill = shortenColor('#FF0000');
+      const expectedCardinalityFill = shortenColor('#0000FF');
+      expect(svg).toContain(`fill="${expectedLabelFill}" textLength="26.325">uses</text>`);
+      expect(svg).toContain(`fill="${expectedCardinalityFill}">1</text>`);
+      expect(svg).toContain(`fill="${expectedCardinalityFill}">*</text>`);
+    },
+  );
 
-  it('pins the default arrow-font colour to `#000000` (D3) -- NEVER ' +
-    '`theme.colors.text` (`#181818`)', () => {
+  it('pins the default arrow-font colour to `#000000` (D3) -- NEVER ' + '`theme.colors.text` (`#181818`)', () => {
     expect(defaultTheme.colors.text).not.toBe('#000000');
     const geo = makeMinimalGeo({
       edges: [
         makeEdgeGeo({
           label: { text: 'uses', x: 70, y: 105, width: 26.325 },
           arrowGlyph: {
-            points: [{ x: 75.68, y: 20.5 }, { x: 66.6349, y: 17.5611 }, { x: 66.6349, y: 23.4389 }],
+            points: [
+              { x: 75.68, y: 20.5 },
+              { x: 66.6349, y: 17.5611 },
+              { x: 66.6349, y: 23.4389 },
+            ],
           },
           tailLabel: { text: '1', x: 60, y: 65, width: 7 },
           headLabel: { text: '*', x: 60, y: 145, width: 7 },
@@ -1290,16 +1341,45 @@ describe('renderClass — edges', () => {
     // Geo shape as T2's `guideLinesAnchor` produces it for gobuco-16-ruke239
     // (`A -> B : ab >\\ncd <\\n< ef\\n> gh`); the points here are jar's own
     // four `<polygon>`s from that fixture's oracle SVG.
-    const tri = (tip: [number, number], a: [number, number], b: [number, number]) =>
-      ({ points: [{ x: tip[0], y: tip[1] }, { x: a[0], y: a[1] }, { x: b[0], y: b[1] }] });
+    const tri = (tip: [number, number], a: [number, number], b: [number, number]) => ({
+      points: [
+        { x: tip[0], y: tip[1] },
+        { x: a[0], y: a[1] },
+        { x: b[0], y: b[1] },
+      ],
+    });
     const geo = makeMinimalGeo({
       edges: [
         makeEdgeGeo({
           labelLines: [
-            { text: 'ab', x: 79.68, y: 17.5, width: 14.4625, glyph: tri([76.68, 13.889], [67.635, 10.95], [67.635, 16.828]) },
-            { text: 'cd', x: 80.046, y: 30.5, width: 13.7313, glyph: tri([67.046, 26.889], [76.091, 29.828], [76.091, 23.95]) },
-            { text: 'ef', x: 81.508, y: 43.5, width: 10.8063, glyph: tri([68.508, 39.889], [77.553, 42.828], [77.553, 36.95]) },
-            { text: 'gh', x: 79.68, y: 56.5, width: 14.4625, glyph: tri([76.68, 52.889], [67.635, 49.95], [67.635, 55.828]) },
+            {
+              text: 'ab',
+              x: 79.68,
+              y: 17.5,
+              width: 14.4625,
+              glyph: tri([76.68, 13.889], [67.635, 10.95], [67.635, 16.828]),
+            },
+            {
+              text: 'cd',
+              x: 80.046,
+              y: 30.5,
+              width: 13.7313,
+              glyph: tri([67.046, 26.889], [76.091, 29.828], [76.091, 23.95]),
+            },
+            {
+              text: 'ef',
+              x: 81.508,
+              y: 43.5,
+              width: 10.8063,
+              glyph: tri([68.508, 39.889], [77.553, 42.828], [77.553, 36.95]),
+            },
+            {
+              text: 'gh',
+              x: 79.68,
+              y: 56.5,
+              width: 14.4625,
+              glyph: tri([76.68, 52.889], [67.635, 49.95], [67.635, 55.828]),
+            },
           ],
         }),
       ],
@@ -1332,7 +1412,19 @@ describe('renderClass — edges', () => {
       edges: [
         makeEdgeGeo({
           labelLines: [
-            { text: '', x: 79.68, y: 17.5, width: 0, glyph: { points: [{ x: 76.68, y: 13.889 }, { x: 67.635, y: 10.95 }, { x: 67.635, y: 16.828 }] } },
+            {
+              text: '',
+              x: 79.68,
+              y: 17.5,
+              width: 0,
+              glyph: {
+                points: [
+                  { x: 76.68, y: 13.889 },
+                  { x: 67.635, y: 10.95 },
+                  { x: 67.635, y: 16.828 },
+                ],
+              },
+            },
             { text: 'cd', x: 80.046, y: 30.5, width: 13.7313 },
           ],
         }),
@@ -1408,14 +1500,19 @@ describe('renderClass — edges', () => {
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain(
-      '<path d="M0,0 C10,10 20,20 30,30 C40,40 50,50 60,60"',
-    );
+    expect(svg).toContain('<path d="M0,0 C10,10 20,20 30,30 C40,40 50,50 60,60"');
   });
 
   it('falls back to a straight L segment for a non-bezier (2-point) point list', () => {
     const geo = makeMinimalGeo({
-      edges: [makeEdgeGeo({ points: [{ x: 70, y: 70 }, { x: 70, y: 140 }] })],
+      edges: [
+        makeEdgeGeo({
+          points: [
+            { x: 70, y: 70 },
+            { x: 70, y: 140 },
+          ],
+        }),
+      ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<path d="M70,70 L70,140"');
@@ -1473,18 +1570,21 @@ describe('renderClass — namespaces', () => {
 describe('renderClass — classifier url wrap (G2 N15)', () => {
   const url = { url: 'http://x.com', tooltip: 'http://x.com', label: 'http://x.com' };
 
-  it('wraps the whole classifier box in <a> when geo.url is set and no ' +
-     'row has a visibility icon or its own url (jar-verified byte-exact ' +
-     'against tegoxa-17-kudo421/gavimi-70-nuju057)', () => {
-    const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('Foo', 'Foo', { url })] });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain(
-      '<a target="_top" href="http://x.com" xlink:href="http://x.com" xlink:type="simple" ' +
-        'xlink:actuate="onRequest" xlink:show="new" title="http://x.com" xlink:title="http://x.com">',
-    );
-    // The <a> wraps the rect -- not merely present somewhere in the output.
-    expect(svg).toMatch(/<a[^>]*><rect/);
-  });
+  it(
+    'wraps the whole classifier box in <a> when geo.url is set and no ' +
+      'row has a visibility icon or its own url (jar-verified byte-exact ' +
+      'against tegoxa-17-kudo421/gavimi-70-nuju057)',
+    () => {
+      const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('Foo', 'Foo', { url })] });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      expect(svg).toContain(
+        '<a target="_top" href="http://x.com" xlink:href="http://x.com" xlink:type="simple" ' +
+          'xlink:actuate="onRequest" xlink:show="new" title="http://x.com" xlink:title="http://x.com">',
+      );
+      // The <a> wraps the rect -- not merely present somewhere in the output.
+      expect(svg).toMatch(/<a[^>]*><rect/);
+    },
+  );
 
   it('does not wrap when geo.url is undefined', () => {
     const geo = makeMinimalGeo({ classifiers: [makeClassifierGeo('Foo', 'Foo')] });
@@ -1492,81 +1592,88 @@ describe('renderClass — classifier url wrap (G2 N15)', () => {
     expect(svg).not.toContain('<a target=');
   });
 
-  it('wraps the icon\'s <a> INSIDE its own <g data-visibility-modifier> ' +
-     '(G2 N21) -- the icon <g> forces a link-flush boundary, so it gets an ' +
-     'INDEPENDENT <a> run, separate from the row\'s text run, rather than ' +
-     'either merging with the header or bailing out unwrapped entirely ' +
-     '(jar-verified byte-exact against jovaxe-68-bube754)', () => {
-    const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo', {
-          url,
-          rows: [
-            { text: 'Foo', y: 14, indent: 0 },
-            { text: '+bar', y: 30, indent: 6, visibilityIcon: '+', visibilityIsField: true },
-          ],
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    // The icon's <a> is NESTED inside its <g data-visibility-modifier>, not
-    // the other way around.
-    expect(svg).toMatch(
-      /<g data-visibility-modifier="PUBLIC_FIELD"><a[^>]*><ellipse[^>]*\/><\/a><\/g>/,
-    );
-    // The row's text is a SEPARATE <a> run, not merged into the icon's.
-    expect(svg).toMatch(/<\/g><a[^>]*><text[^>]*>\+bar<\/text><\/a>/);
-  });
+  it(
+    "wraps the icon's <a> INSIDE its own <g data-visibility-modifier> " +
+      '(G2 N21) -- the icon <g> forces a link-flush boundary, so it gets an ' +
+      "INDEPENDENT <a> run, separate from the row's text run, rather than " +
+      'either merging with the header or bailing out unwrapped entirely ' +
+      '(jar-verified byte-exact against jovaxe-68-bube754)',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [
+          makeClassifierGeo('Foo', 'Foo', {
+            url,
+            rows: [
+              { text: 'Foo', y: 14, indent: 0 },
+              { text: '+bar', y: 30, indent: 6, visibilityIcon: '+', visibilityIsField: true },
+            ],
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      // The icon's <a> is NESTED inside its <g data-visibility-modifier>, not
+      // the other way around.
+      expect(svg).toMatch(/<g data-visibility-modifier="PUBLIC_FIELD"><a[^>]*><ellipse[^>]*\/><\/a><\/g>/);
+      // The row's text is a SEPARATE <a> run, not merged into the icon's.
+      expect(svg).toMatch(/<\/g><a[^>]*><text[^>]*>\+bar<\/text><\/a>/);
+    },
+  );
 
-  it('splits into per-primitive <a> runs when a member row carries its ' +
-     'OWN url different from the classifier\'s (G2 N16, jar-verified via ' +
-     'fugexa-12-zoti674): header+divider fall back to the classifier url, ' +
-     'the own-url row gets its own run, and a LATER fallback row does NOT ' +
-     're-merge with the header run since it is not adjacent', () => {
-    const urlY = {
-      url: 'https://example.com/link1',
-      tooltip: 'https://example.com/link1',
-      label: 'https://example.com/link1',
-    };
-    const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo', {
-          url,
-          dividerYs: [28],
-          rows: [
-            { text: 'Foo', y: 14, indent: 0 },
-            { text: 'name1', y: 40, indent: 6, url: urlY },
-            { text: 'name2', y: 56, indent: 6 },
-          ],
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    const aCount = (svg.match(/<a target=/g) ?? []).length;
-    expect(aCount).toBe(3);
-    expect(svg).toMatch(/<a[^>]*href="http:\/\/x.com"[^>]*><rect/);
-    expect(svg).toContain('href="https://example.com/link1"');
-  });
+  it(
+    'splits into per-primitive <a> runs when a member row carries its ' +
+      "OWN url different from the classifier's (G2 N16, jar-verified via " +
+      'fugexa-12-zoti674): header+divider fall back to the classifier url, ' +
+      'the own-url row gets its own run, and a LATER fallback row does NOT ' +
+      're-merge with the header run since it is not adjacent',
+    () => {
+      const urlY = {
+        url: 'https://example.com/link1',
+        tooltip: 'https://example.com/link1',
+        label: 'https://example.com/link1',
+      };
+      const geo = makeMinimalGeo({
+        classifiers: [
+          makeClassifierGeo('Foo', 'Foo', {
+            url,
+            dividerYs: [28],
+            rows: [
+              { text: 'Foo', y: 14, indent: 0 },
+              { text: 'name1', y: 40, indent: 6, url: urlY },
+              { text: 'name2', y: 56, indent: 6 },
+            ],
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      const aCount = (svg.match(/<a target=/g) ?? []).length;
+      expect(aCount).toBe(3);
+      expect(svg).toMatch(/<a[^>]*href="http:\/\/x.com"[^>]*><rect/);
+      expect(svg).toContain('href="https://example.com/link1"');
+    },
+  );
 
-  it('a bare double-bracket suffix on a member (not real member-url ' +
-     'grammar, always triple-bracket upstream) has no ownUrl -- the row ' +
-     'falls back to the classifier url like any other unmarked row', () => {
-    const geo = makeMinimalGeo({
-      classifiers: [
-        makeClassifierGeo('Foo', 'Foo', {
-          url,
-          dividerYs: [28],
-          rows: [
-            { text: 'Foo', y: 14, indent: 0 },
-            { text: 'name1', y: 40, indent: 6 },
-          ],
-        }),
-      ],
-    });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
-    const aCount = (svg.match(/<a target=/g) ?? []).length;
-    expect(aCount).toBe(1);
-  });
+  it(
+    'a bare double-bracket suffix on a member (not real member-url ' +
+      'grammar, always triple-bracket upstream) has no ownUrl -- the row ' +
+      'falls back to the classifier url like any other unmarked row',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [
+          makeClassifierGeo('Foo', 'Foo', {
+            url,
+            dividerYs: [28],
+            rows: [
+              { text: 'Foo', y: 14, indent: 0 },
+              { text: 'name1', y: 40, indent: 6 },
+            ],
+          }),
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      const aCount = (svg.match(/<a target=/g) ?? []).length;
+      expect(aCount).toBe(1);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1647,14 +1754,19 @@ describe('renderClass — non-default background (G2 N4)', () => {
 // own doc comment for the full mechanism + chrome-scope guard.
 // ---------------------------------------------------------------------------
 describe('renderClass — diagramBorderColor (G2 N66)', () => {
-  it('draws a whole-canvas <rect fill="none"> border, jar-verified BYTE-EXACT ' +
-     'against vinujo-78-kapo329 (rawWidth=109.7875, rawHeight=62 -> rect ' +
-     '113.7875 x 66)', () => {
-    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
-    const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
-    const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).toContain('<rect x="0" y="0" width="113.788" height="66" fill="none" stroke="#000" stroke-width="1"/>');
-  });
+  it(
+    'draws a whole-canvas <rect fill="none"> border, jar-verified BYTE-EXACT ' +
+      'against vinujo-78-kapo329 (rawWidth=109.7875, rawHeight=62 -> rect ' +
+      '113.7875 x 66)',
+    () => {
+      const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
+      const geo = makeMinimalGeo({ totalWidth: 115, totalHeight: 68, rawWidth: 109.7875, rawHeight: 62 });
+      const svg = assembleSvg(renderClass(geo, theme));
+      expect(svg).toContain(
+        '<rect x="0" y="0" width="113.788" height="66" fill="none" stroke="#000" stroke-width="1"/>',
+      );
+    },
+  );
 
   it('resolves a named CSS color to its canonical hex (not the raw keyword)', () => {
     const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'red' } } });
@@ -1676,16 +1788,19 @@ describe('renderClass — diagramBorderColor (G2 N66)', () => {
     expect(svg).not.toContain('fill="none" stroke=');
   });
 
-  it('does NOT draw the border when totalWidth/Height diverge from the raw-derived expectation ' +
-     '(simulated chrome inflation -- declared out of this item\'s verified scope)', () => {
-    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
-    // rawWidth/rawHeight say the class body alone would margin/floor to
-    // 115x68, but totalWidth/Height claim a LARGER canvas (as chrome
-    // inflating the canvas would) -- the guard must decline to draw.
-    const geo = makeMinimalGeo({ totalWidth: 200, totalHeight: 150, rawWidth: 109.7875, rawHeight: 62 });
-    const svg = assembleSvg(renderClass(geo, theme));
-    expect(svg).not.toContain('fill="none" stroke=');
-  });
+  it(
+    'does NOT draw the border when totalWidth/Height diverge from the raw-derived expectation ' +
+      "(simulated chrome inflation -- declared out of this item's verified scope)",
+    () => {
+      const theme = deepMergeTheme(defaultTheme, { colors: { graph: { diagramBorderColor: 'black' } } });
+      // rawWidth/rawHeight say the class body alone would margin/floor to
+      // 115x68, but totalWidth/Height claim a LARGER canvas (as chrome
+      // inflating the canvas would) -- the guard must decline to draw.
+      const geo = makeMinimalGeo({ totalWidth: 200, totalHeight: 150, rawWidth: 109.7875, rawHeight: 62 });
+      const svg = assembleSvg(renderClass(geo, theme));
+      expect(svg).not.toContain('fill="none" stroke=');
+    },
+  );
 });
 
 describe('renderClass — notes', () => {
@@ -1700,7 +1815,8 @@ describe('renderClass — notes', () => {
           width: 80,
           height: 40,
           lines: ['hello', 'world'],
-          lineWidths: [30, 30], connector: [
+          lineWidths: [30, 30],
+          connector: [
             { x: 100, y: 50 },
             { x: 140, y: 50 },
           ],
@@ -1719,11 +1835,27 @@ describe('renderClass — notes', () => {
     // note-leaf-model T3: dropped-ness is resolved at DRAW time against the
     // host's rows (`note-tips-resolve.ts`) -- `typo` matches no row of `A`.
     const geo = makeMinimalGeo({
-      classifiers: [makeClassifierGeo('A', 'A', { rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
+      classifiers: [
+        makeClassifierGeo('A', 'A', {
+          rows: [
+            { text: 'A', y: 14, indent: 0 },
+            { text: 'member', y: 40, indent: 6, width: 30 },
+          ],
+        }),
+      ],
       notes: [
         {
-          id: '__note_0', kind: 'tips', x: 20, y: 30, width: 80, height: 40, lines: ['error'], lineWidths: [30], connector: [],
-          target: 'A', tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
+          id: '__note_0',
+          kind: 'tips',
+          x: 20,
+          y: 30,
+          width: 80,
+          height: 40,
+          lines: ['error'],
+          lineWidths: [30],
+          connector: [],
+          target: 'A',
+          tipRequest: { member: 'typo', position: 'right', baselineOffset: 10, rowHeight: 13 },
         },
       ],
     });
@@ -1732,7 +1864,7 @@ describe('renderClass — notes', () => {
     expect(svg).not.toContain('#FEFFDD');
   });
 
-  it('G2/N21: renders EACH line with its OWN textLength, not the box\'s shared width', () => {
+  it("G2/N21: renders EACH line with its OWN textLength, not the box's shared width", () => {
     const geo = makeMinimalGeo({
       notes: [
         {
@@ -1759,7 +1891,15 @@ describe('renderClass — notes', () => {
     // note-leaf-model T3: the notch is resolved at DRAW time against the
     // host (`note-tips-resolve.ts`) -- `member` matches `A`'s second row.
     const geo = makeMinimalGeo({
-      classifiers: [makeClassifierGeo('A', 'A', { x: 110, rows: [{ text: 'A', y: 14, indent: 0 }, { text: 'member', y: 40, indent: 6, width: 30 }] })],
+      classifiers: [
+        makeClassifierGeo('A', 'A', {
+          x: 110,
+          rows: [
+            { text: 'A', y: 14, indent: 0 },
+            { text: 'member', y: 40, indent: 6, width: 30 },
+          ],
+        }),
+      ],
       notes: [
         {
           id: '__note_0',
@@ -1769,8 +1909,10 @@ describe('renderClass — notes', () => {
           width: 80,
           height: 40,
           lines: ['hi'],
-          lineWidths: [10], connector: [],
-          target: 'A', tipRequest: { member: 'member', position: 'left', baselineOffset: 10, rowHeight: 13 },
+          lineWidths: [10],
+          connector: [],
+          target: 'A',
+          tipRequest: { member: 'member', position: 'left', baselineOffset: 10, rowHeight: 13 },
         },
       ],
     });
@@ -1794,29 +1936,35 @@ describe('renderClass — notes', () => {
 // .test.ts`'s own T3 doc comment).
 // ---------------------------------------------------------------------------
 describe('renderClass — leaf draw order (mission leaf-draw-order T4)', () => {
-  it('D5: a tip note on a hidden host still draws (jar probe 2026-08-15, ' +
-    'pinned jar: hello=1, 223x84; port before T4: hello=0)', () => {
-    const svg = renderFixtureClass(
-      '@startuml\nclass A {\n  m\n}\nclass C\nnote left of A::m\nhello\nend note\nhide A\n@enduml',
-      new DeterministicMeasurer(),
-    );
-    expect(svg).toContain('width="223px" height="84px"');
-    expect((svg.match(/hello/g) ?? []).length).toBe(1);
-    // The hidden host itself still draws nothing.
-    expect(svg).not.toContain('data-qualified-name="A"');
-  });
+  it(
+    'D5: a tip note on a hidden host still draws (jar probe 2026-08-15, ' +
+      'pinned jar: hello=1, 223x84; port before T4: hello=0)',
+    () => {
+      const svg = renderFixtureClass(
+        '@startuml\nclass A {\n  m\n}\nclass C\nnote left of A::m\nhello\nend note\nhide A\n@enduml',
+        new DeterministicMeasurer(),
+      );
+      expect(svg).toContain('width="223px" height="84px"');
+      expect((svg.match(/hello/g) ?? []).length).toBe(1);
+      // The hidden host itself still draws nothing.
+      expect(svg).not.toContain('data-qualified-name="A"');
+    },
+  );
 
-  it('D1/D2: packaged leaves draw before unpackaged ones, even when the ' +
-    'unpackaged leaf was declared FIRST in source (jar: P.A, P.N, X, Y, GMN6 ' +
-    '-- this port\'s own note-naming scheme differs from jar\'s, orthogonal ' +
-    'to this test\'s own ORDER claim)', () => {
-    const svg = renderFixtureClass(
-      '@startuml\nclass X\npackage P {\nclass A\nnote "n" as N\n}\nclass Y\nnote left of X : hello\n@enduml',
-      new DeterministicMeasurer(),
-    );
-    const order = [...svg.matchAll(/data-qualified-name="([^"]*)"/g)].map((m) => m[1]);
-    expect(order).toEqual(['P', 'P.A', 'N', 'X', 'Y', '__note_1']);
-  });
+  it(
+    'D1/D2: packaged leaves draw before unpackaged ones, even when the ' +
+      'unpackaged leaf was declared FIRST in source (jar: P.A, P.N, X, Y, GMN6 ' +
+      "-- this port's own note-naming scheme differs from jar's, orthogonal " +
+      "to this test's own ORDER claim)",
+    () => {
+      const svg = renderFixtureClass(
+        '@startuml\nclass X\npackage P {\nclass A\nnote "n" as N\n}\nclass Y\nnote left of X : hello\n@enduml',
+        new DeterministicMeasurer(),
+      );
+      const order = [...svg.matchAll(/data-qualified-name="([^"]*)"/g)].map((m) => m[1]);
+      expect(order).toEqual(['P', 'P.A', 'N', 'X', 'Y', '__note_1']);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1839,16 +1987,14 @@ describe('renderClass — edge markers (T8/D6)', () => {
   // <marker>/markerEnd/markerStart references (jar's own architecture,
   // `plans/g2-class-svg/ledger.md` N0 mechanism 2).
   it('a decorated link draws an inline extremity shape, never a marker ref (AC2)', () => {
-    const tri = assembleSvg(renderClass(
-      makeMinimalGeo({ edges: [makeEdgeGeo({ targetDecor: 'triangle' })] }),
-      defaultTheme,
-    ));
+    const tri = assembleSvg(
+      renderClass(makeMinimalGeo({ edges: [makeEdgeGeo({ targetDecor: 'triangle' })] }), defaultTheme),
+    );
     expect(tri).not.toContain('marker-end');
     expect(tri).toContain('<polygon');
-    const comp = assembleSvg(renderClass(
-      makeMinimalGeo({ edges: [makeEdgeGeo({ sourceDecor: 'filledDiamond' })] }),
-      defaultTheme,
-    ));
+    const comp = assembleSvg(
+      renderClass(makeMinimalGeo({ edges: [makeEdgeGeo({ sourceDecor: 'filledDiamond' })] }), defaultTheme),
+    );
     expect(comp).not.toContain('marker-start');
     expect(comp).toContain('<polygon');
   });
@@ -1868,7 +2014,6 @@ describe('renderClass — descriptive classifier per-element color (T8/D4)', () 
     expect(svg).not.toContain('#FEFECE');
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // G2 N65 item 47: bare `skinparam RoundCorner N` -- theme.colors.graph
@@ -1928,16 +2073,19 @@ describe('renderClass — classifier-box shadow (deferred D3 item)', () => {
     expect(svg).not.toContain('filter="url(');
   });
 
-  it('a diagram-wide theme.shadowing with no geo.shadowing on the classifier draws no filter attr ' +
-    '(object/map/json/degenerate paths that never set the field)', () => {
-    const geo = makeMinimalGeo({
-      classifiers: [makeClassifierGeo('Foo', 'Foo')], // no shadowing field
-    });
-    const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
-    const svg = assembleSvg(renderClass(geo, theme));
-    // The shared filter def still emits (diagram-level gate), but no shape
-    // references it.
-    expect(svg).toContain('<filter id="classShadow"');
-    expect(svg).not.toContain('filter="url(');
-  });
+  it(
+    'a diagram-wide theme.shadowing with no geo.shadowing on the classifier draws no filter attr ' +
+      '(object/map/json/degenerate paths that never set the field)',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [makeClassifierGeo('Foo', 'Foo')], // no shadowing field
+      });
+      const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
+      const svg = assembleSvg(renderClass(geo, theme));
+      // The shared filter def still emits (diagram-level gate), but no shape
+      // references it.
+      expect(svg).toContain('<filter id="classShadow"');
+      expect(svg).not.toContain('filter="url(');
+    },
+  );
 });

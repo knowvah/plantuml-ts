@@ -99,8 +99,7 @@ function resolveGroupLabel(frameType: FrameEvent['frameType'], comment: string):
 //     so that combination is left unported rather than guessed at.
 // @see sequencediagram/command/CommandGrouping.java:64-73,66,134-135,151-152
 export const groupingCommand: Command = {
-  pattern:
-    /^(&\s*)?(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
+  pattern: /^(&\s*)?(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
     const backColorElement = match[3];
@@ -174,4 +173,3 @@ export const endCommand: Command = {
     }
   },
 };
-

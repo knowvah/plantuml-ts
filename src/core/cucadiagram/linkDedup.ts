@@ -42,11 +42,7 @@ export type LinkConnection<TLink> = (link: TLink) => readonly [unknown, unknown]
  *  only, ignoring style/type/label.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Link.java:462-470
  *  @see src/core/abel/Link.ts#sameConnections (the ported real-class form) */
-function sameConnections<TLink>(
-  self: TLink,
-  other: TLink,
-  connection: LinkConnection<TLink>,
-): boolean {
+function sameConnections<TLink>(self: TLink, other: TLink, connection: LinkConnection<TLink>): boolean {
   const [cl1, cl2] = connection(self);
   const [o1, o2] = connection(other);
   if (cl1 === o1 && cl2 === o2) return true;
@@ -95,7 +91,6 @@ export function dropsAsSingleDuplicate<TLink>(
 export function arrowStyleHasSingle(rawStyle: string | undefined): boolean {
   if (rawStyle === undefined) return false;
   for (const segment of rawStyle.split(';'))
-    for (const token of segment.split(','))
-      if (token.trim().toLowerCase() === 'single') return true;
+    for (const token of segment.split(',')) if (token.trim().toLowerCase() === 'single') return true;
   return false;
 }

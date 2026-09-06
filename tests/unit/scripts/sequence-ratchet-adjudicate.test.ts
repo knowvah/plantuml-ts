@@ -55,11 +55,7 @@ const BEXOCE = {
   liveChildDistance: 1,
 };
 
-function at(
-  score: number | null,
-  childDistance: number | null,
-  ownUnits: number | null = null,
-): Classifiable {
+function at(score: number | null, childDistance: number | null, ownUnits: number | null = null): Classifiable {
   return { score, childDistance, ownUnits };
 }
 
@@ -72,7 +68,7 @@ function childCountDiff(actual: string, expected: string): Diff {
 // ---------------------------------------------------------------------------
 
 describe('childDistanceFrom', () => {
-  it("reads |actual - expected| off the svg/g[1][childCount] record", () => {
+  it('reads |actual - expected| off the svg/g[1][childCount] record', () => {
     expect(childDistanceFrom([childCountDiff('14', '59')])).toBe(45);
     expect(childDistanceFrom([childCountDiff('60', '59')])).toBe(1);
   });
@@ -113,10 +109,7 @@ describe('childDistanceFrom', () => {
 describe('classify', () => {
   it("calls bexoce-95-vibe195's recorded rise an artefact (622->950, 45->1)", () => {
     expect(
-      classify(
-        at(BEXOCE.baseScore, BEXOCE.baseChildDistance),
-        at(BEXOCE.liveScore, BEXOCE.liveChildDistance),
-      ),
+      classify(at(BEXOCE.baseScore, BEXOCE.baseChildDistance), at(BEXOCE.liveScore, BEXOCE.liveChildDistance)),
     ).toBe('artefact');
   });
 
@@ -442,19 +435,13 @@ describe('listFixtureSlugs', () => {
   });
 
   it('treats a missing corpus as a broken checkout, not an empty run', () => {
-    expect(() => listFixtureSlugs(join(CACHE_ROOT, 'no-such-tree'))).toThrow(
-      /broken checkout/,
-    );
+    expect(() => listFixtureSlugs(join(CACHE_ROOT, 'no-such-tree'))).toThrow(/broken checkout/);
   });
 });
 
 describe('measureFixture', () => {
   it('measures the canonical fixture with the store and DeterministicMeasurer', () => {
-    const result = measureFixture(
-      join(CACHE_ROOT, BEXOCE.slug),
-      BEXOCE.slug,
-      fixtureIncludeStore(),
-    );
+    const result = measureFixture(join(CACHE_ROOT, BEXOCE.slug), BEXOCE.slug, fixtureIncludeStore());
     expect(result.error).toBeUndefined();
     expect(result.slug).toBe(BEXOCE.slug);
     // Shape, not a pinned value: this branch is under concurrent edit.
@@ -474,9 +461,7 @@ describe('measureFixture', () => {
     // `BEXOCE`'s recorded historical numbers, in the `classify` unit tests
     // below -- those are synthetic and independent of what the port renders
     // today, which is why they are the right place for that assertion.
-    expect(result.childDistance === null || typeof result.childDistance === 'number').toBe(
-      true,
-    );
+    expect(result.childDistance === null || typeof result.childDistance === 'number').toBe(true);
     if (result.childDistance !== null) {
       expect(result.childDistance).toBeGreaterThanOrEqual(0);
     }
@@ -485,9 +470,7 @@ describe('measureFixture', () => {
   it('is deterministic: two measurements of one fixture agree exactly', () => {
     const dir = join(CACHE_ROOT, BEXOCE.slug);
     const store = fixtureIncludeStore();
-    expect(measureFixture(dir, BEXOCE.slug, store)).toEqual(
-      measureFixture(dir, BEXOCE.slug, store),
-    );
+    expect(measureFixture(dir, BEXOCE.slug, store)).toEqual(measureFixture(dir, BEXOCE.slug, store));
   });
 
   it('records a failure as a null score with a reason, never as zero', () => {

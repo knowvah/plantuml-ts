@@ -31,11 +31,7 @@ function findState(ast: StateDiagramAST, id: string): State | undefined {
   return ast.states.find((s) => s.id === id);
 }
 
-function findTransition(
-  ast: StateDiagramAST,
-  from: string,
-  to: string,
-): Transition | undefined {
+function findTransition(ast: StateDiagramAST, from: string, to: string): Transition | undefined {
   return ast.transitions.find((t) => t.from === from && t.to === to);
 }
 

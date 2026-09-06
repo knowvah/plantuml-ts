@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  parseColor,
-  paintToSvg,
-  isTransparentColor,
-  type Gradient,
-  type Paint,
-} from '../../../src/core/paint.js';
+import { parseColor, paintToSvg, isTransparentColor, type Gradient, type Paint } from '../../../src/core/paint.js';
 
 describe('parseColor', () => {
   it('parses a hex gradient with a backslash policy (AC1)', () => {

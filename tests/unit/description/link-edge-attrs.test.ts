@@ -96,7 +96,9 @@ describe('buildLinkEdgeAttributes — magic-arrow main label (M4 cause D)', () =
 describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
   const arrowFontSpec: FontSpec = { family: 'Helvetica', size: 13 };
   const fonts: EdgeFontSpecs = {
-    label: arrowFontSpec, cardinality: arrowFontSpec, noteTheme: defaultTheme,
+    label: arrowFontSpec,
+    cardinality: arrowFontSpec,
+    noteTheme: defaultTheme,
   };
   // 7px per character, 13px tall — so every expectation below is arithmetic
   // on the cited formula, not a recorded output.
@@ -110,8 +112,12 @@ describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
     // (`SvekEdge.java:281-283`); `mergeTB` short-circuits to the note.
     // pure 'hi' = 2*7 = 14 x 13 => 14+31 = 45, 13+20 = 33.
     const link = {
-      from: 'a', to: 'b', length: 2, arrowHead: 'none',
-      linkNote: 'hi', linkNotePosition: 'bottom',
+      from: 'a',
+      to: 'b',
+      length: 2,
+      arrowHead: 'none',
+      linkNote: 'hi',
+      linkNotePosition: 'bottom',
     } as DescriptiveLink;
     const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
     expect(attrs.labelWidth).toBe(45);
@@ -122,8 +128,13 @@ describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
     // label 'x': 7 + 2*marginLabel(1) = 9 wide, 13 + 2 = 15 tall.
     // mergeTB(label, note) => width max(9, 45) = 45, height 15 + 33 = 48.
     const link = {
-      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
-      linkNote: 'hi', linkNotePosition: 'bottom',
+      from: 'a',
+      to: 'b',
+      length: 2,
+      arrowHead: 'none',
+      label: 'x',
+      linkNote: 'hi',
+      linkNotePosition: 'bottom',
     } as DescriptiveLink;
     const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
     expect(attrs.labelWidth).toBe(45);
@@ -133,8 +144,13 @@ describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
   it('places the note beside the label for the LEFT position — mergeLR', () => {
     // mergeLR(note, label) => width 45 + 9 = 54, height max(33, 15) = 33.
     const link = {
-      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
-      linkNote: 'hi', linkNotePosition: 'left',
+      from: 'a',
+      to: 'b',
+      length: 2,
+      arrowHead: 'none',
+      label: 'x',
+      linkNote: 'hi',
+      linkNotePosition: 'left',
     } as DescriptiveLink;
     const attrs = buildLinkEdgeAttributes(link, fonts, charMeasurer);
     expect(attrs.labelWidth).toBe(54);
@@ -143,8 +159,13 @@ describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
 
   it('leaves the label text itself untouched — only the box grows', () => {
     const link = {
-      from: 'a', to: 'b', length: 2, arrowHead: 'none', label: 'x',
-      linkNote: 'hi', linkNotePosition: 'bottom',
+      from: 'a',
+      to: 'b',
+      length: 2,
+      arrowHead: 'none',
+      label: 'x',
+      linkNote: 'hi',
+      linkNotePosition: 'bottom',
     } as DescriptiveLink;
     expect(buildLinkEdgeAttributes(link, fonts, charMeasurer).label).toBe('x');
   });
@@ -154,7 +175,11 @@ describe('buildLinkEdgeAttributes — note on link (merged label box)', () => {
     // hand-built callers that pass no theme keep their pre-T3 behaviour.
     const noThemeFonts: EdgeFontSpecs = { label: arrowFontSpec, cardinality: arrowFontSpec };
     const link = {
-      from: 'a', to: 'b', length: 2, arrowHead: 'none', linkNote: 'hi',
+      from: 'a',
+      to: 'b',
+      length: 2,
+      arrowHead: 'none',
+      linkNote: 'hi',
     } as DescriptiveLink;
     const attrs = buildLinkEdgeAttributes(link, noThemeFonts, charMeasurer);
     expect(attrs.labelWidth).toBeUndefined();

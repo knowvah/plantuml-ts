@@ -84,7 +84,6 @@ import {
   type GuillemetPair,
 } from '../../core/stereotype-decoration.js';
 
-
 /** Per-label raw (unmargined) text widths, matching jar's `SvgGraphics#format`
  *  rounding at emission (`core/svg.ts`'s `formatDecimal(value, 3)`, ADR-1) --
  *  this function itself returns unrounded floats. Empty when the classifier
@@ -98,12 +97,13 @@ export function measureStereoLabelWidths(
   guillemet: GuillemetPair = DEFAULT_GUILLEMET,
   fontSize: number = CLASS_STEREOTYPE_FONT_SIZE,
 ): number[] {
-  return labels.map((l) =>
-    measurer.measure(wrapGuillemet(l, guillemet), { family: fontFamily, size: fontSize }).width,
-  );
+  return labels.map((l) => measurer.measure(wrapGuillemet(l, guillemet), { family: fontFamily, size: fontSize }).width);
 }
 
-interface Dim { width: number; height: number; }
+interface Dim {
+  width: number;
+  height: number;
+}
 
 /** A2s R2f (puvono-84-doro361 / sekame-22-meze147): every text line's
  *  height is floored at 10 — `AtomText#calculateDimensionSlow`'s
@@ -125,10 +125,7 @@ function stereoLineHeight(fontSize: number): number {
  *  stereoLineHeight}). Zero when there is no stereotype.
  *  `fontSize` defaults to `CLASS_STEREOTYPE_FONT_SIZE` -- see that
  *  constant's own doc comment (G2 N39). */
-export function stereoBlockDim(
-  labelWidths: readonly number[],
-  fontSize: number = CLASS_STEREOTYPE_FONT_SIZE,
-): Dim {
+export function stereoBlockDim(labelWidths: readonly number[], fontSize: number = CLASS_STEREOTYPE_FONT_SIZE): Dim {
   if (labelWidths.length === 0) return { width: 0, height: 0 };
   return {
     width: Math.max(...labelWidths) + CLASS_STEREO_MARGIN * 2,
@@ -179,9 +176,7 @@ export interface StereoRowsInput {
  * `HeaderLayout#drawU`'s `xStereo`/`yStereo` (per label, nested-centered
  * within the stereo block) and `yName`'s stereo-height-dependent term.
  */
-export function buildStereoRows(
-  input: StereoRowsInput,
-): { rows: ClassifierGeo['rows']; nameTop: number } {
+export function buildStereoRows(input: StereoRowsInput): { rows: ClassifierGeo['rows']; nameTop: number } {
   const { labels, labelWidths, fontFamily, circleWidth, widthStereoAndName, blockDim } = input;
   const { h1, h2, headerRowHeight, nameLineHeight, stereoBaselineOffset, fontSize, bold, italic } = input;
   const guillemet = input.guillemet ?? DEFAULT_GUILLEMET;
@@ -218,10 +213,12 @@ export function buildStereoRows(
 // values `buildStereoRows` above computes, so the two now live together.
 // ---------------------------------------------------------------------------
 
-
 // Header-row + generic-tag layout moved to a sibling module (line cap).
 export {
-  computeHeaderInfo, buildHeaderRows, measureGenericTagDim, buildGenericTagGeo,
+  computeHeaderInfo,
+  buildHeaderRows,
+  measureGenericTagDim,
+  buildGenericTagGeo,
 } from './class-stereotype-layout.js';
 export type { HeaderInfo, GenericTagDim, GenericTagGeo } from './class-stereotype-layout.js';
 
@@ -257,10 +254,7 @@ export function parseHideStereotypeDirective(line: string): HideStereotypeDirect
  * (no directive matches) is VISIBLE — mirrors upstream's `result = true`
  * seed.
  */
-export function isStereotypeLabelHidden(
-  label: string,
-  directives: readonly HideStereotypeDirective[],
-): boolean {
+export function isStereotypeLabelHidden(label: string, directives: readonly HideStereotypeDirective[]): boolean {
   let shown = true;
   for (const d of directives) {
     if (d.pattern === undefined || d.pattern === label) shown = d.action === 'show';
@@ -283,9 +277,8 @@ export function applyStereotypeHideShow(ast: ClassDiagramAST): void {
   for (const classifier of ast.classifiers) {
     if (classifier.stereotype === undefined) continue;
     const labels = splitStereotypeLabels(classifier.stereotype);
-    classifier.visibleStereotypeLabels = directives.length === 0
-      ? labels
-      : labels.filter((l) => !isStereotypeLabelHidden(l, directives));
+    classifier.visibleStereotypeLabels =
+      directives.length === 0 ? labels : labels.filter((l) => !isStereotypeLabelHidden(l, directives));
   }
 }
 
@@ -299,8 +292,10 @@ export function applyStereotypeHideShow(ast: ClassDiagramAST): void {
  * without duplicating the expression a third time.
  */
 export function resolveVisibleStereotypeLabels(classifier: Classifier): string[] {
-  return classifier.visibleStereotypeLabels
-    ?? (classifier.stereotype !== undefined ? splitStereotypeLabels(classifier.stereotype) : []);
+  return (
+    classifier.visibleStereotypeLabels ??
+    (classifier.stereotype !== undefined ? splitStereotypeLabels(classifier.stereotype) : [])
+  );
 }
 
 /**

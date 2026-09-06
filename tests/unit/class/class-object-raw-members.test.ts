@@ -163,9 +163,7 @@ describe('object member parsing — raw lines kept through the full parser', () 
 
   it('regression: multiline "name = value" body still parses structured', () => {
     const c = findClassifier('object user1 {\nname = "x"\n}', 'user1');
-    expect(c.members).toEqual([
-      { visibility: '+', name: 'name', type: '"x"', isStatic: false, isAbstract: false },
-    ]);
+    expect(c.members).toEqual([{ visibility: '+', name: 'name', type: '"x"', isStatic: false, isAbstract: false }]);
   });
 
   it('regression: a blank line inside a multiline body is still dropped', () => {

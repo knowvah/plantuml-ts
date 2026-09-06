@@ -10,7 +10,14 @@ import { grayScale } from '../../tim/builtin/color-utils.js';
 import { parseSvgPath } from './SvgPath.js';
 import { UTranslate } from '../UTranslate.js';
 import { extract, applyTransformAttribute } from './svg-nanoparser-transform.js';
-import { applyFillAndStroke, getFillString, drawCircle, drawEllipse, drawText, DATA_STROKE } from './svg-nanoparser-shapes.js';
+import {
+  applyFillAndStroke,
+  getFillString,
+  drawCircle,
+  drawEllipse,
+  drawText,
+  DATA_STROKE,
+} from './svg-nanoparser-shapes.js';
 
 /**
  * SvgNanoParser -- draw-time decomposition of a `<$sprite>`'s raw SVG body
@@ -152,7 +159,12 @@ export class SvgNanoParser implements GrayLevelRange {
    * are typed `ResolvedColor | undefined`, matching `ColorResolver`'s own
    * constructor exactly.
    */
-  drawU(ug: UGraphic, scale: number, fontColor: ResolvedColor | undefined, forcedColor: ResolvedColor | undefined): void {
+  drawU(
+    ug: UGraphic,
+    scale: number,
+    fontColor: ResolvedColor | undefined,
+    forcedColor: ResolvedColor | undefined,
+  ): void {
     const colorResolver = new ColorResolver(fontColor, forcedColor, this);
     const paintResolver = new PaintColorResolver(colorResolver);
     let ugs = UGraphicWithScale.create(ug, paintResolver, scale);

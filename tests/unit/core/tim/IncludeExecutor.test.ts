@@ -10,11 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { preprocess } from '../../../../src/core/preprocessor.js';
-import {
-  IncludeNotFoundError,
-  MapIncludeStore,
-  StdlibNotBundledError,
-} from '../../../../src/core/tim/IncludeStore.js';
+import { IncludeNotFoundError, MapIncludeStore, StdlibNotBundledError } from '../../../../src/core/tim/IncludeStore.js';
 import { EaterException } from '../../../../src/core/tim/EaterException.js';
 
 /** Preprocess `lines` with `store` as the include seam; return the emitted lines. */
@@ -79,8 +75,7 @@ describe('!include — PreprocessorIncludeStrategy', () => {
   });
 
   it('!include_once throws when the file was already included', () => {
-    expect(() => run(['!include a.iuml', '!include_once a.iuml'], { 'a.iuml': 'class A' }))
-      .toThrow(EaterException);
+    expect(() => run(['!include a.iuml', '!include_once a.iuml'], { 'a.iuml': 'class A' })).toThrow(EaterException);
   });
 
   it('!includeurl resolves through the store like any other target', () => {
@@ -91,10 +86,9 @@ describe('!include — PreprocessorIncludeStrategy', () => {
   });
 
   it('a URL is re-read every time it is named (no dedup outside the file branch)', () => {
-    const lines = run(
-      ['!include https://example.com/a.iuml', '!include https://example.com/a.iuml'],
-      { 'https://example.com/a.iuml': 'class A' },
-    );
+    const lines = run(['!include https://example.com/a.iuml', '!include https://example.com/a.iuml'], {
+      'https://example.com/a.iuml': 'class A',
+    });
     expect(lines).toEqual(['class A', 'class A']);
   });
 });
@@ -145,8 +139,7 @@ describe('!includesub', () => {
   });
 
   it('throws when the file exists but holds no such sub', () => {
-    expect(() => run(['!includesub shared.iuml!NOPE'], { 'shared.iuml': 'class A' }))
-      .toThrow(EaterException);
+    expect(() => run(['!includesub shared.iuml!NOPE'], { 'shared.iuml': 'class A' })).toThrow(EaterException);
   });
 });
 

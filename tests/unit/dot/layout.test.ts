@@ -15,7 +15,7 @@ function layoutOf(inner: string) {
 }
 
 describe('layoutDot', () => {
-  it('returns graphviz\'s own SVG document, not this port\'s markup', () => {
+  it("returns graphviz's own SVG document, not this port's markup", () => {
     const geo = layoutOf('digraph G { a -> b; }');
     expect(geo.svg).toContain('<svg');
     // graphviz's SVG writer signature: pt units on the root, a `graph0`

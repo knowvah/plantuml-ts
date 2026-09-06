@@ -96,11 +96,7 @@ const IMG_FALLBACK_FONT: FontConfiguration = {
  *  form's own minimum-match rule, so this never rejects a real match).
  *  A2s R2a: `commands` is now the per-stripe map (`StripeSimple.java`'s
  *  own `this.commands` field, set FULL-vs-OTHER in its ctor java:112-115). */
-function searchCommand(
-  line: string,
-  pos: number,
-  commands: ReadonlyMap<string, readonly Command[]>,
-): Command | null {
+function searchCommand(line: string, pos: number, commands: ReadonlyMap<string, readonly Command[]>): Command | null {
   if (line.length <= pos + 2) return null;
   const candidates = commands.get(line.slice(pos, pos + 2));
   if (candidates === undefined) return null;

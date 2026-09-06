@@ -106,7 +106,7 @@ describe('sanitizeSvg — on* event handler stripping', () => {
   });
 
   it('removes onerror attribute with single-quoted value', () => {
-    const svg = "<svg><image onerror='fetch(\"/bad\")'/></svg>";
+    const svg = '<svg><image onerror=\'fetch("/bad")\'/></svg>';
     const result = sanitizeSvg(svg);
     expect(result).not.toContain('onerror');
   });

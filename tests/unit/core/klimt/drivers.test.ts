@@ -107,7 +107,10 @@ describe('DriverEllipseSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => 
     const root = newGraphic();
     // start=0, extend=90 -> DriverEllipseSvg.java's `start = start + 90`
     // then the `extend > 0` branch: angleA=90, angleB=180.
-    root.apply(new Fore('#181818')).apply(new Back('#F1F1F1')).draw(new UEllipse(20, 20, 0, 90));
+    root
+      .apply(new Fore('#181818'))
+      .apply(new Back('#F1F1F1'))
+      .draw(new UEllipse(20, 20, 0, 90));
 
     // start=0 -> angleA=90, angleB=180 puts sin(90)=1/cos(90)~=0 and
     // sin(180)~=0/cos(180)=-1 exactly on axis, so the expected numbers
@@ -121,7 +124,10 @@ describe('DriverEllipseSvg (AC2 — component/babafi-51-dixi026/in.svg)', () => 
     const root = newGraphic();
     // start=0, extend=-90 -> start+90=90; extend<0 branch: angleA=start+extend=0,
     // angleB=start=90 (the mirror of the extend>0 case above).
-    root.apply(new Fore('#181818')).apply(new Back('#F1F1F1')).draw(new UEllipse(20, 20, 0, -90));
+    root
+      .apply(new Fore('#181818'))
+      .apply(new Back('#F1F1F1'))
+      .draw(new UEllipse(20, 20, 0, -90));
 
     expect(root.getSvgString()).toContain('<path d="M10,20 A10,10 0 0 0 20 10"');
   });
@@ -164,7 +170,11 @@ describe('DriverPolygonSvg (AC2 — component/babafi-51-dixi026/in.svg, arrowhea
       { x: 106.71, y: 57.5 },
       { x: 115.71, y: 53.5 },
     ]);
-    root.apply(new UStroke(0, 0, 1)).apply(new Fore('#181818')).apply(new Back('#181818')).draw(polygon);
+    root
+      .apply(new UStroke(0, 0, 1))
+      .apply(new Fore('#181818'))
+      .apply(new Back('#181818'))
+      .draw(polygon);
 
     expect(root.getSvgString()).toContain(
       '<polygon points="115.71,53.5,106.71,49.5,110.71,53.5,106.71,57.5,115.71,53.5" fill="#181818"' +
@@ -181,7 +191,11 @@ describe('DriverPathSvg', () => {
     path.lineTo(10, 0);
     path.lineTo(10, 10);
 
-    root.apply(new UStroke(0, 0, 1)).apply(new Fore('#181818')).apply(new Back('#F1F1F1')).draw(path);
+    root
+      .apply(new UStroke(0, 0, 1))
+      .apply(new Fore('#181818'))
+      .apply(new Back('#F1F1F1'))
+      .draw(path);
 
     const xml = root.getSvgString();
     expect(xml).toContain('<path d="M0,0 L10,0 L10,10" style="stroke:#181818;stroke-width:1;" fill="#F1F1F1"/>');
@@ -194,7 +208,11 @@ describe('DriverPathSvg', () => {
     path.lineTo(10, 0);
     path.lineTo(10, 10);
 
-    root.apply(new UStroke(0, 0, 1)).apply(new Fore('#112233')).apply(new Back('#112233')).draw(path);
+    root
+      .apply(new UStroke(0, 0, 1))
+      .apply(new Fore('#112233'))
+      .apply(new Back('#112233'))
+      .draw(path);
 
     const xml = root.getSvgString();
     // strokeWidth becomes "0" -> styleMe short-circuits, no style attr at all.
@@ -208,7 +226,11 @@ describe('DriverPathSvg', () => {
     path.lineTo(5, 0);
 
     const gradient = { color1: '#FF0000', color2: '#FFFF00', policy: '/' as const };
-    root.apply(new UStroke(0, 0, 1)).apply(new Fore(gradient)).apply(new Back(gradient)).draw(path);
+    root
+      .apply(new UStroke(0, 0, 1))
+      .apply(new Fore(gradient))
+      .apply(new Back(gradient))
+      .draw(path);
 
     // General branch always registers gradient defs via SvgGraphics —
     // the fast path (flat fill/no-stroke) never fires for gradients,
@@ -222,7 +244,10 @@ describe('DriverDotPathSvg', () => {
     const root = newGraphic();
     const dotPath = DotPath.fromBeziers([{ x1: 0, y1: 0, ctrlx1: 2, ctrly1: 0, ctrlx2: 4, ctrly2: 4, x2: 6, y2: 4 }]);
 
-    root.apply(new UStroke(0, 0, 1)).apply(new Fore('#181818')).draw(dotPath);
+    root
+      .apply(new UStroke(0, 0, 1))
+      .apply(new Fore('#181818'))
+      .draw(dotPath);
 
     const xml = root.getSvgString();
     expect(xml).toContain('<path d="M0,0 C2,0 4,4 6,4" style="stroke:#181818;stroke-width:1;" fill="none"/>');
@@ -251,8 +276,7 @@ describe('DriverTextSvg', () => {
     root.apply(new UTranslate(10, 95.3489)).draw(UText.build('Pack1', font));
 
     expect(root.getSvgString()).toContain(
-      '<text x="10" y="95.349" fill="#000" font-size="14" textLength="38.938"' +
-        ' font-weight="700">Pack1</text>',
+      '<text x="10" y="95.349" fill="#000" font-size="14" textLength="38.938"' + ' font-weight="700">Pack1</text>',
     );
   });
 

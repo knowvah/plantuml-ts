@@ -22,24 +22,15 @@ export type ReadFileFn = (path: string, encoding: 'utf-8') => Promise<string>;
  * @param readFileFn  Injectable readFile implementation (defaults to
  *                    node:fs/promises readFile). Override in tests.
  */
-export function makeNodeFsFetcher(
-  basePath: string,
-  readFileFn: ReadFileFn = fsReadFile,
-): IncludeFetcher {
+export function makeNodeFsFetcher(basePath: string, readFileFn: ReadFileFn = fsReadFile): IncludeFetcher {
   const resolvedBase = resolve(basePath);
 
   return async (target: string): Promise<string> => {
     const resolvedTarget = resolve(resolvedBase, normalize(target));
 
     // Path traversal protection: resolved target must be inside basePath.
-    if (
-      !resolvedTarget.startsWith(resolvedBase + '/') &&
-      resolvedTarget !== resolvedBase
-    ) {
-      throw new IncludeResolveError(
-        `!include path '${target}' escapes the base directory '${basePath}'`,
-        target,
-      );
+    if (!resolvedTarget.startsWith(resolvedBase + '/') && resolvedTarget !== resolvedBase) {
+      throw new IncludeResolveError(`!include path '${target}' escapes the base directory '${basePath}'`, target);
     }
 
     try {

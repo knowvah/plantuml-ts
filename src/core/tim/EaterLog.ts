@@ -28,10 +28,8 @@ export class EaterLog extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!log');
     this.skipSpaces();
-    const logData = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    const logData =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
     console.info(`[Log] ${logData}`);
   }
 }

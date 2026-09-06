@@ -100,9 +100,7 @@ describe('addClusters — parent-resolution into the innermost wrap (G7 T5/T7)',
     // The child ("cluster1") must appear on a path descending through
     // BOTH the parent's outer wrappers (a, p0) AND its inner wrappers
     // (i, p1) — anything less means it escaped the innermost handle.
-    expect(paths).toContain(
-      'cluster0a > cluster0p0 > cluster0 > cluster0i > cluster0p1 > cluster1',
-    );
+    expect(paths).toContain('cluster0a > cluster0p0 > cluster0 > cluster0i > cluster0p1 > cluster1');
     // And it must NOT appear anywhere else (no stray sibling placement).
     expect(paths.filter((p) => p.includes('cluster1'))).toEqual([
       'cluster0a > cluster0p0 > cluster0 > cluster0i > cluster0p1 > cluster1',
@@ -130,9 +128,7 @@ describe('addClusters — unwrappedNodeId stays outside the protection wrap (G7 
         { id: 'a', width: 1, height: 1 },
       ],
       edges: [],
-      clusters: [
-        { id: 'grp', nodeIds: ['anchor', 'a'], innerMarginLevels: 2, unwrappedNodeId: 'anchor' },
-      ],
+      clusters: [{ id: 'grp', nodeIds: ['anchor', 'a'], innerMarginLevels: 2, unwrappedNodeId: 'anchor' }],
     };
     const b = createGraph({ directed: true });
     addClusters(b, input);
@@ -313,7 +309,10 @@ describe('addClusters — portRanks rank constraint (G8 T1b)', () => {
 describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () => {
   it('no minLen===0 edges: returns the input node array unchanged (acyclic-pass regression guard)', () => {
     const input: DotInputGraph = {
-      nodes: [{ id: 'a', width: 1, height: 1 }, { id: 'b', width: 1, height: 1 }],
+      nodes: [
+        { id: 'a', width: 1, height: 1 },
+        { id: 'b', width: 1, height: 1 },
+      ],
       edges: [{ id: 'e1', from: 'a', to: 'b', attributes: { minLen: 1 } }],
       // clusters/other fields absent -- irrelevant to this pure function.
     };
@@ -338,7 +337,7 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
     expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(['tail', 'head', 'first', 'last']);
   });
 
-  it('pesita/AA shape: two minLen===0 reversed edges reorder the 4-node cycle to jar\'s DFS-root order', () => {
+  it("pesita/AA shape: two minLen===0 reversed edges reorder the 4-node cycle to jar's DFS-root order", () => {
     // Mirrors pesita-10-dene726's `nasreq_auth` pass (G7 T13 derivation):
     // `Closing->Idle` and `__zaent_AA->Reanimate`, both T12-reversed
     // (`-left-`) transitions with length===1/minLen===0. Jar's cached
@@ -384,7 +383,10 @@ describe('firstEncounterOrder — jar lines0 node-creation order (G7 T16)', () =
 
   it('a dangling minLen===0 edge (unknown endpoint) is skipped without throwing — addEdges owns dropping it', () => {
     const input: DotInputGraph = {
-      nodes: [{ id: 'a', width: 1, height: 1 }, { id: 'b', width: 1, height: 1 }],
+      nodes: [
+        { id: 'a', width: 1, height: 1 },
+        { id: 'b', width: 1, height: 1 },
+      ],
       edges: [{ id: 'e1', from: 'a', to: 'ghost', attributes: { minLen: 0 } }],
     };
     expect(firstEncounterOrder(input).map((n) => n.id)).toEqual(['a', 'b']);
@@ -416,9 +418,7 @@ describe('addClusters — title-table FIXEDSIZE dims truncate, never round (G8 T
     const input: DotInputGraph = {
       nodes: [{ id: 'a', width: 1, height: 1 }],
       edges: [],
-      clusters: [
-        { id: 'grp', nodeIds: ['a'], titleTableWidth: 107.8875, titleTableHeight: 42 },
-      ],
+      clusters: [{ id: 'grp', nodeIds: ['a'], titleTableWidth: 107.8875, titleTableHeight: 42 }],
     };
     const b = createGraph({ directed: true });
     addClusters(b, input);
@@ -433,9 +433,7 @@ describe('addClusters — title-table FIXEDSIZE dims truncate, never round (G8 T
     const input: DotInputGraph = {
       nodes: [{ id: 'a', width: 1, height: 1 }],
       edges: [],
-      clusters: [
-        { id: 'grp', nodeIds: ['a'], titleTableWidth: 91.875, titleTableHeight: 9 },
-      ],
+      clusters: [{ id: 'grp', nodeIds: ['a'], titleTableWidth: 91.875, titleTableHeight: 9 }],
     };
     const b = createGraph({ directed: true });
     addClusters(b, input);

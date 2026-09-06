@@ -10,11 +10,7 @@
  * never `<circle>` (`plans/activity-element-granularity/decisions.md` D2).
  */
 import { describe, it, expect } from 'vitest';
-import {
-  renderStart,
-  renderStop,
-  renderEnd,
-} from '../../../src/diagrams/activity/activity-renderer-shapes.js';
+import { renderStart, renderStop, renderEnd } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
 import type { ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 
@@ -42,7 +38,7 @@ describe('renderStart', () => {
     expect(svg).toContain('rx="10"');
   });
 
-  it('resolves a named theme color to hex, matching circle()\'s old pipeline', () => {
+  it("resolves a named theme color to hex, matching circle()'s old pipeline", () => {
     // The gap T2 had to close explicitly: ellipse()'s own `extraAttrs`
     // only shortens an ALREADY-hex string; it does not resolve a raw CSS
     // name like "blue". `renderStart` pre-resolves via `resolvePaint` so

@@ -77,12 +77,7 @@ describe('parseJson', () => {
     });
 
     it('parses JSON with block /* */ comments (JSONC)', () => {
-      const ast = parse([
-        '{',
-        '  /* block comment */',
-        '  "x": 1',
-        '}',
-      ]);
+      const ast = parse(['{', '  /* block comment */', '  "x": 1', '}']);
       expect(ast.parseError).toBe(false);
       expect(ast.root).toEqual({ x: 1 });
     });
@@ -147,26 +142,17 @@ describe('parseJson', () => {
     });
 
     it('parses a three-segment highlight path', () => {
-      const ast = parse([
-        '#highlight "a" / "b" / "c"',
-        '{"a": {"b": {"c": true}}}',
-      ]);
+      const ast = parse(['#highlight "a" / "b" / "c"', '{"a": {"b": {"c": true}}}']);
       expect(ast.highlights).toEqual([{ path: ['a', 'b', 'c'], styleClass: '' }]);
     });
 
     it('parses highlight path with no spaces around slashes', () => {
-      const ast = parse([
-        '#highlight "quiz"/"maths"/"q1"/"options"',
-        '{}',
-      ]);
+      const ast = parse(['#highlight "quiz"/"maths"/"q1"/"options"', '{}']);
       expect(ast.highlights).toEqual([{ path: ['quiz', 'maths', 'q1', 'options'], styleClass: '' }]);
     });
 
     it('parses highlight path mixing spaced and unspaced slashes', () => {
-      const ast = parse([
-        '#highlight "quiz"/"maths" / "q2"/"options"/"2"',
-        '{}',
-      ]);
+      const ast = parse(['#highlight "quiz"/"maths" / "q2"/"options"/"2"', '{}']);
       expect(ast.highlights).toEqual([{ path: ['quiz', 'maths', 'q2', 'options', '2'], styleClass: '' }]);
     });
   });
@@ -199,12 +185,7 @@ describe('parseJson', () => {
 
   describe('<style> block handling', () => {
     it('style block does not bleed into JSON body', () => {
-      const ast = parse([
-        '<style>',
-        'element { BackgroundColor: red; }',
-        '</style>',
-        '{"key": "val"}',
-      ]);
+      const ast = parse(['<style>', 'element { BackgroundColor: red; }', '</style>', '{"key": "val"}']);
       expect(ast.root).toEqual({ key: 'val' });
       expect(ast.parseError).toBe(false);
     });

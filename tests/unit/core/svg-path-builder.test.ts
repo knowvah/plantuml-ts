@@ -36,9 +36,7 @@ describe('svg-path-builder', () => {
     });
 
     it('cubicTo formats all three control points', () => {
-      expect(
-        cubicTo({ x: 1.00005, y: 2 }, { x: 3, y: 4.9999 }, { x: 5.5, y: 6 }),
-      ).toBe('C1,2 3,5 5.5,6');
+      expect(cubicTo({ x: 1.00005, y: 2 }, { x: 3, y: 4.9999 }, { x: 5.5, y: 6 })).toBe('C1,2 3,5 5.5,6');
     });
 
     it('emits no value with more than three decimal places', () => {

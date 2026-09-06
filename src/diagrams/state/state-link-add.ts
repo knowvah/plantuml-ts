@@ -6,17 +6,8 @@
  * (`net.atmp.CucaDiagram.java:896-901` via `core/cucadiagram/linkDedup.ts`,
  * ADR-3) lives here.
  */
-import {
-  arrowStyleHasSingle,
-  dropsAsSingleDuplicate,
-} from '../../core/cucadiagram/linkDedup.js';
-import {
-  currentScope,
-  nextCreationIndex,
-  noteScopeId,
-  pseudoTickKey,
-  type ParseState,
-} from './state-parse-state.js';
+import { arrowStyleHasSingle, dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
+import { currentScope, nextCreationIndex, noteScopeId, pseudoTickKey, type ParseState } from './state-parse-state.js';
 import type { Transition } from './ast.js';
 
 /** A transition endpoint's connection identity for the `-[single]->` dedup
@@ -64,14 +55,7 @@ export function emitTransition(ps: ParseState, t: Transition): void {
     transitionEndpointKey(ps, t.from, 'start'),
     transitionEndpointKey(ps, t.to, 'end'),
   ];
-  if (
-    dropsAsSingleDuplicate(
-      arrowStyleHasSingle(t.arrowStyle),
-      ps.linkConnections,
-      connection,
-      (pair) => pair,
-    )
-  ) {
+  if (dropsAsSingleDuplicate(arrowStyleHasSingle(t.arrowStyle), ps.linkConnections, connection, (pair) => pair)) {
     return;
   }
   ps.linkConnections.push(connection);

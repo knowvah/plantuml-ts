@@ -157,9 +157,7 @@ describe('TContext — plantuml-ts divergences (each preserves pre-TIM behavior)
   // text). Upstream throws; the jar renders the error diagram. Kept here, in the
   // divergence block, as the pin that the divergence is GONE.
   it('SI6: a known macro called with an uncoverable arity throws, as upstream does', () => {
-    expect(() => run(['!define BOLD(x) <b>x</b>', 'BOLD(a,b)'])).toThrow(
-      'Function not found BOLD',
-    );
+    expect(() => run(['!define BOLD(x) <b>x</b>', 'BOLD(a,b)'])).toThrow('Function not found BOLD');
   });
 
   it('DIVERGENCE 4: !undef and its !undefine alias both drop the variable', () => {
@@ -176,13 +174,7 @@ describe('TContext — plantuml-ts divergences (each preserves pre-TIM behavior)
 
 describe('TContext — nesting the flat loop could not express', () => {
   it('nests !foreach inside !foreach', () => {
-    const { context } = run([
-      '!foreach $a in ["x", "y"]',
-      '!foreach $b in ["1", "2"]',
-      '$a$b',
-      '!endfor',
-      '!endfor',
-    ]);
+    const { context } = run(['!foreach $a in ["x", "y"]', '!foreach $b in ["1", "2"]', '$a$b', '!endfor', '!endfor']);
     expect(output(context)).toEqual(['x1', 'x2', 'y1', 'y2']);
   });
 

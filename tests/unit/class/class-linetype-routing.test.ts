@@ -21,10 +21,7 @@ import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 
-const GOLDENS = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/class',
-);
+const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/class');
 
 const measurer = new WidthTableMeasurer();
 
@@ -56,26 +53,12 @@ function ourSplinesLine(slug: string): string | undefined {
 
 describe('class-dot-graph.ts buildDotGraph — forwards theme.linetype', () => {
   it('carries linetype: "ortho" on the DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype ortho',
-      'class A',
-      'class B',
-      'A --> B',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype ortho', 'class A', 'class B', 'A --> B', '@enduml'].join('\n');
     expect(captureFirst(puml).linetype).toBe('ortho');
   });
 
   it('carries linetype: "polyline" on the DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype polyline',
-      'class A',
-      'class B',
-      'A --> B',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype polyline', 'class A', 'class B', 'A --> B', '@enduml'].join('\n');
     expect(captureFirst(puml).linetype).toBe('polyline');
   });
 
@@ -98,15 +81,15 @@ describe.each([
   });
 });
 
-describe.each([
-  ['gamevo-26-runo973'],
-  ['kuxato-79-muno809'],
-] as const)('%s (polyline): emitted splines line matches the pinned jar DOT, no forcelabels', (slug) => {
-  it('splines=polyline; alone, matching svek-1.dot, forcelabels absent', () => {
-    const jar = jarSplinesLine(slug);
-    const ours = ourSplinesLine(slug);
-    expect(jar).toBe('splines=polyline;');
-    expect(ours).toBe(jar);
-    expect(ours).not.toMatch(/forcelabels/);
-  });
-});
+describe.each([['gamevo-26-runo973'], ['kuxato-79-muno809']] as const)(
+  '%s (polyline): emitted splines line matches the pinned jar DOT, no forcelabels',
+  (slug) => {
+    it('splines=polyline; alone, matching svek-1.dot, forcelabels absent', () => {
+      const jar = jarSplinesLine(slug);
+      const ours = ourSplinesLine(slug);
+      expect(jar).toBe('splines=polyline;');
+      expect(ours).toBe(jar);
+      expect(ours).not.toMatch(/forcelabels/);
+    });
+  },
+);

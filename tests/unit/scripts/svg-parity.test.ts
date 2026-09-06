@@ -6,11 +6,7 @@
  * task (tests/oracle/svg-conformance/parity.json + PARITY-SVG.md).
  */
 import { describe, it, expect } from 'vitest';
-import {
-  isWellFormedSvg,
-  diffVerdict,
-  computeDotEqual,
-} from '../../../scripts/svg-parity-survey.js';
+import { isWellFormedSvg, diffVerdict, computeDotEqual } from '../../../scripts/svg-parity-survey.js';
 import type { FixtureRow, ParityReport } from '../../../scripts/svg-parity-survey.js';
 import {
   pct,
@@ -32,8 +28,7 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.types.js';
 function svg(children: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg"><g>${children}</g></svg>`;
 }
-const ell = (cx: number, cy: number): string =>
-  `<ellipse cx="${cx}" cy="${cy}" rx="5" ry="5"/>`;
+const ell = (cx: number, cy: number): string => `<ellipse cx="${cx}" cy="${cy}" rx="5" ry="5"/>`;
 
 // ---------------------------------------------------------------------------
 // isWellFormedSvg
@@ -145,12 +140,20 @@ describe('svg-parity-dashboard pure functions', () => {
     fixtures: [
       { slug: 'a', type: 'component', verdict: 'conformant', dotEqual: true },
       {
-        slug: 'b', type: 'component', verdict: 'diverged', dotEqual: false,
-        firstDiff: 'svg/g[1]/ellipse[1][childCount]', maxDelta: 12.5,
+        slug: 'b',
+        type: 'component',
+        verdict: 'diverged',
+        dotEqual: false,
+        firstDiff: 'svg/g[1]/ellipse[1][childCount]',
+        maxDelta: 12.5,
       },
       {
-        slug: 'c', type: 'usecase', verdict: 'structural-match', dotEqual: false,
-        maxDelta: 3.2, maxDeltaPath: 'svg/g[1]/ellipse[1]/@cx',
+        slug: 'c',
+        type: 'usecase',
+        verdict: 'structural-match',
+        dotEqual: false,
+        maxDelta: 3.2,
+        maxDeltaPath: 'svg/g[1]/ellipse[1]/@cx',
       },
       { slug: 'd', type: 'usecase', verdict: 'errored', dotEqual: false, errMsg: 'boom' },
     ] satisfies FixtureRow[],

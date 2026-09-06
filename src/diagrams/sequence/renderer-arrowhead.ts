@@ -60,11 +60,7 @@ import {
   inclinationAngle1,
   inclinationAngle2,
 } from './sequence-arrowhead.js';
-import type {
-  ArrowConfiguration,
-  ArrowDressing,
-  HeadGeometry,
-} from './sequence-arrowhead.js';
+import type { ArrowConfiguration, ArrowDressing, HeadGeometry } from './sequence-arrowhead.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
 
@@ -72,12 +68,7 @@ import { scaledDashPattern } from './scale-geo.js';
 // Paint
 // ---------------------------------------------------------------------------
 
-import {
-  ARROW_THICKNESS,
-  niceArrowOf,
-  paintOf,
-  renderArrowHead,
-} from './renderer-arrowhead-glyph.js';
+import { ARROW_THICKNESS, niceArrowOf, paintOf, renderArrowHead } from './renderer-arrowhead-glyph.js';
 /**
  * `ArrowConfiguration#reverse` — both dressings and both decorations swap,
  * and upstream's constructor call passes EVERY other field straight through:
@@ -88,9 +79,7 @@ import {
  * field list and nothing produced one.
  * @see skin/ArrowConfiguration.java:110-113
  */
-export function reverseArrowConfiguration(
-  configuration: ArrowConfiguration,
-): ArrowConfiguration {
+export function reverseArrowConfiguration(configuration: ArrowConfiguration): ArrowConfiguration {
   return {
     ...configuration,
     dressing1: configuration.dressing2,
@@ -136,8 +125,7 @@ function decorationTrim1(configuration: ArrowConfiguration, k: number): number {
  */
 function dressingTrim(dressing: ArrowDressing, k: number): number {
   let trim = 0;
-  if (dressing.part === 'FULL' && dressing.head === 'NORMAL')
-    trim += (ARROW_DELTA_X / 2) * k;
+  if (dressing.part === 'FULL' && dressing.head === 'NORMAL') trim += (ARROW_DELTA_X / 2) * k;
   if (dressing.head === 'CROSSX') trim += 2 * SPACE_CROSS_X * k;
   return trim;
 }
@@ -206,11 +194,7 @@ function arrowBodyEnds(extent: ArrowExtent, slope: ArrowSlope): readonly [Point2
  * is shortened.
  * @see skin/rose/ComponentRoseArrow.java:96-140
  */
-function arrowExtent(
-  configuration: ArrowConfiguration,
-  width: number,
-  k: number,
-): ArrowExtent {
+function arrowExtent(configuration: ArrowConfiguration, width: number, k: number): ArrowExtent {
   let start = 0;
   let len = width - 1 * k;
   const pos1 = start + 1 * k;
@@ -240,16 +224,11 @@ function arrowExtent(
  * two head rotations are taken against, and it is not `extent.len`.
  * @see skin/rose/ComponentRoseArrow.java:151-162
  */
-export function renderFlatMessageArrow(
-  msg: MessageGeo,
-  configuration: ArrowConfiguration,
-  theme: ScaledTheme,
-): string {
+export function renderFlatMessageArrow(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
   const k = theme.scaleK;
   // `CommunicationTile#isReverse` compares the two lifeline positions, not
   // the participants' declaration order (`:125-131`).
-  const drawn =
-    msg.fromX > msg.toX ? reverseArrowConfiguration(configuration) : configuration;
+  const drawn = msg.fromX > msg.toX ? reverseArrowConfiguration(configuration) : configuration;
   const origin = { x: Math.min(msg.fromX, msg.toX), y: msg.y };
   const lenFull = Math.abs(msg.toX - msg.fromX);
   const extent = arrowExtent(drawn, lenFull, k);
@@ -309,14 +288,9 @@ function flatArrowHeads(
  * loop does not carry (Gap SQ-5 keeps the spike's own 40 px loop).
  * @see skin/rose/ComponentRoseSelfArrow.java:152-173
  */
-function selfHeadGeometry(
-  configuration: ArrowConfiguration,
-  reverseDefine: boolean,
-  niceArrow: boolean,
-): HeadGeometry {
+function selfHeadGeometry(configuration: ArrowConfiguration, reverseDefine: boolean, niceArrow: boolean): HeadGeometry {
   const dressing = configuration.dressing2;
-  if (dressing.head === 'NORMAL')
-    return headGeometrySelf(configuration, reverseDefine, niceArrow);
+  if (dressing.head === 'NORMAL') return headGeometrySelf(configuration, reverseDefine, niceArrow);
   // 0, not `slope.theta*`: no self component reads an inclination — the
   // token appears nowhere under `net/` outside `ArrowConfiguration` and
   // `ComponentRoseArrow` (verified by grep), so a self `(n)` draws square.

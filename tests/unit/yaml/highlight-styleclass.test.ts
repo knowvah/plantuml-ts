@@ -44,11 +44,7 @@ describe('parseYaml — captures styleClass from <<stereotype>>', () => {
   });
 
   it('captures styleClass from multi-segment path with stereotype', () => {
-    const ast = parseYaml(makeYamlSource([
-      '#highlight "address" / "city" <<highlight>>',
-      'address:',
-      '  city: NYC',
-    ]));
+    const ast = parseYaml(makeYamlSource(['#highlight "address" / "city" <<highlight>>', 'address:', '  city: NYC']));
     expect(ast.highlights[0]).toEqual({ path: ['address', 'city'], styleClass: 'highlight' });
   });
 });
@@ -86,7 +82,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
-    const row = geo.nodes[0]!.rows.find(r => r.key === 'fruit');
+    const row = geo.nodes[0]!.rows.find((r) => r.key === 'fruit');
     expect(row?.highlight).toBe('h1');
   });
 
@@ -97,7 +93,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
       highlights: [{ path: ['fruit'], styleClass: '' }],
     };
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
-    const row = geo.nodes[0]!.rows.find(r => r.key === 'fruit');
+    const row = geo.nodes[0]!.rows.find((r) => r.key === 'fruit');
     expect(row?.highlight).toBe('');
   });
 
@@ -108,7 +104,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
-    const row = geo.nodes[0]!.rows.find(r => r.key === 'size');
+    const row = geo.nodes[0]!.rows.find((r) => r.key === 'size');
     expect(row?.highlight).toBe(false);
   });
 });
@@ -171,11 +167,7 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
     const theme = deepMergeTheme(defaultTheme, {
       colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
     });
-    const ast = parseYaml(makeYamlSource([
-      '#highlight "fruit" <<h1>>',
-      'fruit: Apple',
-      'size: Large',
-    ]));
+    const ast = parseYaml(makeYamlSource(['#highlight "fruit" <<h1>>', 'fruit: Apple', 'size: Large']));
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
     expect(svg).toContain('#0F0');
@@ -183,11 +175,7 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
   });
 
   it('full pipeline with no class uses default highlight color', () => {
-    const ast = parseYaml(makeYamlSource([
-      '#highlight "fruit"',
-      'fruit: Apple',
-      'size: Large',
-    ]));
+    const ast = parseYaml(makeYamlSource(['#highlight "fruit"', 'fruit: Apple', 'size: Large']));
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const hlBg = defaultTheme.colors.graph.json?.highlightBackground ?? '#CCFF02';
@@ -207,12 +195,9 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
         },
       },
     });
-    const ast = parseYaml(makeYamlSource([
-      '#highlight "fruit" <<h1>>',
-      '#highlight "size" <<h2>>',
-      'fruit: Apple',
-      'size: Large',
-    ]));
+    const ast = parseYaml(
+      makeYamlSource(['#highlight "fruit" <<h1>>', '#highlight "size" <<h2>>', 'fruit: Apple', 'size: Large']),
+    );
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
     expect(svg).toContain('#F00');

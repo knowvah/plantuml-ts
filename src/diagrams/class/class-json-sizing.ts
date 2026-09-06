@@ -76,12 +76,6 @@ interface Dim {
   height: number;
 }
 
-
-
-
-
-
-
 /** `json Name {}` with no body, or a body that failed to parse (ast.ts's
  *  `Classifier.jsonValue` doc) — measured as an empty object, the closest
  *  stand-in for "no data" that still exercises the real empty-entries path. */
@@ -242,16 +236,18 @@ interface JsonDrawCursor {
  *  file doc); every cell also carries its OWN `rawWidth` for `textLength`,
  *  never a shared column width. */
 function buildScalarItems(node: JsonDimNode & { kind: 'scalar' }, cur: JsonDrawCursor): JsonBodyItem[] {
-  return [{
-    kind: 'text',
-    row: {
-      text: node.text,
-      y: cur.y + JSON_CELL_MARGIN_Y + cur.baselineOffset,
-      indent: cur.x + JSON_CELL_MARGIN_X,
-      width: node.rawWidth,
-      atoms: node.atoms,
+  return [
+    {
+      kind: 'text',
+      row: {
+        text: node.text,
+        y: cur.y + JSON_CELL_MARGIN_Y + cur.baselineOffset,
+        indent: cur.x + JSON_CELL_MARGIN_X,
+        width: node.rawWidth,
+        atoms: node.atoms,
+      },
     },
-  }];
+  ];
 }
 
 /** `TextBlockArray#drawU` (`TextBlockCucaJSon.java:213-224`): an hline
@@ -280,9 +276,7 @@ function buildArrayItems(node: JsonDimNode & { kind: 'array' }, cur: JsonDrawCur
  * bepafe-03-teda035's "user").
  */
 function buildObjectItems(node: JsonDimNode & { kind: 'object' }, cur: JsonDrawCursor): JsonBodyItem[] {
-  const out: JsonBodyItem[] = [
-    { kind: 'vline', x: cur.x + node.width1, y: cur.y, height: node.height },
-  ];
+  const out: JsonBodyItem[] = [{ kind: 'vline', x: cur.x + node.width1, y: cur.y, height: node.height }];
   let curY = cur.y;
   for (const m of node.members) {
     out.push({ kind: 'hline', x: cur.x, y: curY, width: cur.totalWidth });
@@ -296,12 +290,14 @@ function buildObjectItems(node: JsonDimNode & { kind: 'object' }, cur: JsonDrawC
         atoms: m.keyAtoms,
       },
     });
-    out.push(...buildJsonItems(m.value, {
-      ...cur,
-      x: cur.x + node.width1,
-      y: curY,
-      totalWidth: cur.totalWidth - node.width1,
-    }));
+    out.push(
+      ...buildJsonItems(m.value, {
+        ...cur,
+        x: cur.x + node.width1,
+        y: curY,
+        totalWidth: cur.totalWidth - node.width1,
+      }),
+    );
     curY += Math.max(m.keyDim.height, m.value.height);
   }
   return out;
@@ -347,8 +343,7 @@ export function measureJsonClassifier(
 
   // B25/M27: `EntityImageJson.java:127-132` clamps here, identically to
   // object/map/class -- see `floorAtMinimumWidth`'s own doc comment.
-  const width = floorAtMinimumWidth(
-    Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2), theme, 'json');
+  const width = floorAtMinimumWidth(Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2), theme, 'json');
   const height = title.height + fieldsHeight;
 
   const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: JSON_NAME_MARGIN });
@@ -358,7 +353,10 @@ export function measureJsonClassifier(
   // `svek/image/EntityImageJson.java:207`), then draws the entries area
   // translated down by the title height (`:208`).
   const jsonBody = buildJsonItems(dimNode, {
-    x: 0, y: title.height, totalWidth: width, baselineOffset,
+    x: 0,
+    y: title.height,
+    totalWidth: width,
+    baselineOffset,
   });
   const entryRows = jsonBody.flatMap((i) => (i.kind === 'text' ? [i.row] : []));
   const dividerYs = jsonBody.flatMap((i) => (i.kind === 'hline' ? [i.y] : []));

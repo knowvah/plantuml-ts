@@ -139,10 +139,7 @@ function scanSvgSpriteBlock(
   return null;
 }
 
-const SINGLE_LINE_RE = new RegExp(
-  '^sprite\\s+' + NAME + '\\s*' + DIM_SINGLE_LINE + '\\s+([-_A-Za-z0-9]+)$',
-  'i',
-);
+const SINGLE_LINE_RE = new RegExp('^sprite\\s+' + NAME + '\\s*' + DIM_SINGLE_LINE + '\\s+([-_A-Za-z0-9]+)$', 'i');
 
 // ---------------------------------------------------------------------------
 // Body post-processing -- BlocLines.removeEmptyColumns (java
@@ -198,12 +195,7 @@ interface DimMatch {
  *  invalid gray-level count, a failed z-decode, or an empty body -- all
  *  four mirror upstream's `CommandExecutionResult.error(...)` paths, which
  *  likewise never call `system.addSprite`. */
-function buildAndRegister(
-  registry: SpriteRegistry,
-  name: string,
-  dim: DimMatch,
-  bodyLines: readonly string[],
-): void {
+function buildAndRegister(registry: SpriteRegistry, name: string, dim: DimMatch, bodyLines: readonly string[]): void {
   if (dim.color !== undefined) {
     registry.skippedColorSprites.push(name);
     return;
@@ -322,8 +314,7 @@ export function matchSpriteCommand(
   const jar = matchJarSpriteLine(trimmed);
   if (jar !== undefined) {
     const sprite = registry.internal?.get(jar.path);
-    if (sprite === undefined)
-      registry.unresolved.push(`No such internal sprite: ${jar.path} (sprite $${jar.name})`);
+    if (sprite === undefined) registry.unresolved.push(`No such internal sprite: ${jar.path} (sprite $${jar.name})`);
     else addSprite(registry, jar.name, sprite);
     return { consumed: 1 };
   }

@@ -5,11 +5,6 @@ export class GConnectionDownThenUp implements GConnection {
   constructor(private readonly leftMargin: number = 20) {}
 
   getPoints(from: GPoint, to: GPoint): GPoint[] {
-    return [
-      from,
-      { x: from.x - this.leftMargin, y: from.y },
-      { x: from.x - this.leftMargin, y: to.y },
-      to,
-    ];
+    return [from, { x: from.x - this.leftMargin, y: from.y }, { x: from.x - this.leftMargin, y: to.y }, to];
   }
 }

@@ -347,20 +347,20 @@ export const defaultTheme: Theme = {
         // upstream draws every value cell in the node's own FontColor. The
         // per-type palette that used to be here was retired 2026-08-09 — see
         // DIVERGENCES.md, "Value text — per-type colors".
-        stringValue:         '#000000',
-        numberValue:         '#000000',
-        booleanValue:        '#000000',
-        nullValue:           '#000000',
+        stringValue: '#000000',
+        numberValue: '#000000',
+        booleanValue: '#000000',
+        nullValue: '#000000',
         // plantuml.skin sets jsonDiagram.node.BackGroundColor #F1F1F1 as the default.
         // Named themes override this via their compiled graph.json entry.
-        background:          '#F1F1F1',
+        background: '#F1F1F1',
         // `skin/plantuml.skin`'s `yamlDiagram,jsonDiagram { LineColor black }`
         // (:446) — this family does NOT take the global `#181818` default.
         // Every cached golden draws its node borders, separators and edges in
         // `#000`; these two were `#181818`, unsourced.
-        border:              '#000000',
+        border: '#000000',
         highlightBackground: '#CCFF02',
-        arrowColor:          '#000000',
+        arrowColor: '#000000',
       },
     },
   },
@@ -398,16 +398,16 @@ export const darkTheme: Theme = {
       usecaseFill: '#1E1E1E',
       businessUsecaseFill: '#1E1E1E',
       json: {
-        keyText:             '#CCCCCC',
-        stringValue:         '#6A9FBF',
-        numberValue:         '#C9985A',
-        booleanValue:        '#D47070',
-        nullValue:           '#999999',
-        background:          '#2D2D2D',
-        border:              '#CCCCCC',
-        headerBackground:    '#3C3C3C',
+        keyText: '#CCCCCC',
+        stringValue: '#6A9FBF',
+        numberValue: '#C9985A',
+        booleanValue: '#D47070',
+        nullValue: '#999999',
+        background: '#2D2D2D',
+        border: '#CCCCCC',
+        headerBackground: '#3C3C3C',
         highlightBackground: '#555500',
-        arrowColor:          '#CCCCCC',
+        arrowColor: '#CCCCCC',
       },
     },
   },
@@ -500,10 +500,7 @@ export type ThemeOverride = {
  * base value.
  */
 /** Merge the nested `colors.graph` block (activity/json one level deep). */
-function mergeGraphColors(
-  base: Theme,
-  partial: ThemeOverride,
-): Theme['colors']['graph'] {
+function mergeGraphColors(base: Theme, partial: ThemeOverride): Theme['colors']['graph'] {
   const pg = partial.colors?.graph;
   return {
     ...base.colors.graph,
@@ -521,25 +518,37 @@ function mergeGraphColors(
 
 /** Top-level optional scalar fields copied verbatim during a merge. */
 const OPTIONAL_SCALAR_KEYS = [
-  'defaultFontSize', 'linetype', 'fixCircleLabelOverlapping',
-  'componentStyle', 'actorStyle', 'minimumWidth', 'strictUml', 'monochrome',
-  'shadowing', 'packageStyle', 'nodeSep', 'rankSep', 'wrapWidth',
-  'sameClassWidth', 'classAttributeIconSize', 'groupInheritance', 'tabSize',
-  'cardinalityFontSize', 'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
+  'defaultFontSize',
+  'linetype',
+  'fixCircleLabelOverlapping',
+  'componentStyle',
+  'actorStyle',
+  'minimumWidth',
+  'strictUml',
+  'monochrome',
+  'shadowing',
+  'packageStyle',
+  'nodeSep',
+  'rankSep',
+  'wrapWidth',
+  'sameClassWidth',
+  'classAttributeIconSize',
+  'groupInheritance',
+  'tabSize',
+  'cardinalityFontSize',
+  'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
   'cardinalityFontColor', // SI26 T1 (D5)
   // `diagramMargin` is the one non-scalar here. It rides this list because the
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the
   // default. Omitting it silently dropped every theme's margin.
-  'diagramMargin', 'handwritten', 'styleOverrides',
+  'diagramMargin',
+  'handwritten',
+  'styleOverrides',
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */
-function applyOptionalScalars(
-  merged: Theme,
-  base: Theme,
-  partial: ThemeOverride,
-): void {
+function applyOptionalScalars(merged: Theme, base: Theme, partial: ThemeOverride): void {
   for (const key of OPTIONAL_SCALAR_KEYS) {
     const value = partial[key] ?? base[key];
     if (value !== undefined) {
@@ -576,9 +585,7 @@ export function deepMergeTheme(base: Theme, partial: ThemeOverride): Theme {
  *   defaultTheme is never mutated.
  * - undefined / omitted: returns defaultTheme.
  */
-export function resolveTheme(
-  option?: ThemeOverride | string,
-): Theme {
+export function resolveTheme(option?: ThemeOverride | string): Theme {
   if (option === undefined || option === 'default') {
     return defaultTheme;
   }

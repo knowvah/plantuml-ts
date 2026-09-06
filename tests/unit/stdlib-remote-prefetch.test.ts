@@ -37,11 +37,7 @@
  * @see ../../src/core/tim/stdlib-path.ts -- `splitStdlibPath`
  */
 import { describe, expect, it, vi } from 'vitest';
-import {
-  prefetchIncludes,
-  CircularIncludeError,
-  type IncludeFetcher,
-} from '../../src/core/include-resolver.js';
+import { prefetchIncludes, CircularIncludeError, type IncludeFetcher } from '../../src/core/include-resolver.js';
 import { StdlibNotBundledError } from '../../src/core/tim/IncludeStore.js';
 import { stdlibRegistry, type StdlibRegistry } from '../../src/core/tim/StdlibRegistry.js';
 import { remoteStdlib, type StdlibRemoteManifest } from '../../src/core/tim/StdlibRemote.js';
@@ -103,20 +99,10 @@ describe('remote registry in the prefetch walk -- exactly one resource (criterio
       files: { 'font-awesome-5/ban': 'font-awesome-5/ban.puml' },
     };
     const remoteFetcher = vi.fn(async () => Promise.resolve('sprite $ban [...] endsprite'));
-    const registry = registryWithRemote(
-      'tupadr3',
-      manifest,
-      'https://cdn.example.com/tupadr3',
-      remoteFetcher,
-    );
+    const registry = registryWithRemote('tupadr3', manifest, 'https://cdn.example.com/tupadr3', remoteFetcher);
     const resolveResourceSpy = vi.spyOn(registry, 'resolveResource');
 
-    const store = await prefetchIncludes(
-      uml('!include <tupadr3/font-awesome-5/ban>'),
-      noFetch,
-      undefined,
-      registry,
-    );
+    const store = await prefetchIncludes(uml('!include <tupadr3/font-awesome-5/ban>'), noFetch, undefined, registry);
 
     // The requested key, asserted directly against the registry call --
     // not inferred from the render.
@@ -141,23 +127,11 @@ describe('remote registry in the prefetch walk -- transitivity (criterion 2, ADR
       },
     };
     const remoteFetcher = vi.fn(async (url: string) =>
-      Promise.resolve(
-        url.endsWith('ban.puml') ? '!include <tupadr3/common>\nsprite $ban' : '!define ENTITY(x) x',
-      ),
+      Promise.resolve(url.endsWith('ban.puml') ? '!include <tupadr3/common>\nsprite $ban' : '!define ENTITY(x) x'),
     );
-    const registry = registryWithRemote(
-      'tupadr3',
-      manifest,
-      'https://cdn.example.com/tupadr3',
-      remoteFetcher,
-    );
+    const registry = registryWithRemote('tupadr3', manifest, 'https://cdn.example.com/tupadr3', remoteFetcher);
 
-    const store = await prefetchIncludes(
-      uml('!include <tupadr3/font-awesome-5/ban>'),
-      noFetch,
-      undefined,
-      registry,
-    );
+    const store = await prefetchIncludes(uml('!include <tupadr3/font-awesome-5/ban>'), noFetch, undefined, registry);
 
     // BOTH resources fetched: the outer icon and the nested <tupadr3/common>
     // it names. One level of resolution would leave the second unresolved.
@@ -174,12 +148,7 @@ describe('remote registry in the prefetch walk -- absent key (criterion 4)', () 
       files: { 'font-awesome-5/ban': 'font-awesome-5/ban.puml' },
     };
     const remoteFetcher = vi.fn(async () => Promise.resolve('unused'));
-    const registry = registryWithRemote(
-      'tupadr3',
-      manifest,
-      'https://cdn.example.com/tupadr3',
-      remoteFetcher,
-    );
+    const registry = registryWithRemote('tupadr3', manifest, 'https://cdn.example.com/tupadr3', remoteFetcher);
 
     const err = await prefetchIncludes(
       uml('!include <tupadr3/font-awesome-5/missing>'),
@@ -205,27 +174,15 @@ describe('remote registry in the prefetch walk -- key derivation (criterion 5)',
       files: { 'storage/simplestorageservice': 'Storage/SimpleStorageService.puml' },
     };
     const remoteFetcher = vi.fn(async () => Promise.resolve('class S3'));
-    const registry = registryWithRemote(
-      'awslib14',
-      manifest,
-      'https://cdn.example.com/awslib14',
-      remoteFetcher,
-    );
+    const registry = registryWithRemote('awslib14', manifest, 'https://cdn.example.com/awslib14', remoteFetcher);
     const resolveResourceSpy = vi.spyOn(registry, 'resolveResource');
 
-    await prefetchIncludes(
-      uml('!include <awslib14/Storage/SimpleStorageService>'),
-      noFetch,
-      undefined,
-      registry,
-    );
+    await prefetchIncludes(uml('!include <awslib14/Storage/SimpleStorageService>'), noFetch, undefined, registry);
 
     // If the transform mis-cased or mis-split, this key would miss the
     // manifest and remoteFetcher would never run at all.
     expect(resolveResourceSpy).toHaveBeenCalledWith('awslib14', 'storage/simplestorageservice');
-    expect(remoteFetcher).toHaveBeenCalledWith(
-      'https://cdn.example.com/awslib14/Storage/SimpleStorageService.puml',
-    );
+    expect(remoteFetcher).toHaveBeenCalledWith('https://cdn.example.com/awslib14/Storage/SimpleStorageService.puml');
   });
 });
 
@@ -235,9 +192,9 @@ describe('remote registry in the prefetch walk -- cycle guard (criterion 6)', ()
     const remoteFetcher = vi.fn(async () => Promise.resolve('!include <loop/a>'));
     const registry = registryWithRemote('loop', manifest, 'https://cdn.example.com/loop', remoteFetcher);
 
-    await expect(
-      prefetchIncludes(uml('!include <loop/a>'), noFetch, undefined, registry),
-    ).rejects.toBeInstanceOf(CircularIncludeError);
+    await expect(prefetchIncludes(uml('!include <loop/a>'), noFetch, undefined, registry)).rejects.toBeInstanceOf(
+      CircularIncludeError,
+    );
   });
 });
 
@@ -255,10 +212,7 @@ describe('remote registry in the prefetch walk -- cycle guard (criterion 6)', ()
  */
 describe('concurrent fetch -- all targets in flight before any resolves (criterion 1)', () => {
   it('issues all 20 fetches before any of them settle, proven structurally', async () => {
-    const urls = Array.from(
-      { length: 20 },
-      (_, i) => `https://cdn.example.com/icon${i}.puml`,
-    );
+    const urls = Array.from({ length: 20 }, (_, i) => `https://cdn.example.com/icon${i}.puml`);
     const { fetcher, started, release } = blockingFetcher();
 
     // No `await` yet: prefetchIncludes's synchronous prefix runs the whole
@@ -297,10 +251,7 @@ describe('concurrent fetch -- error propagation names the failing target (criter
       return Promise.resolve(`content:${url}`);
     };
 
-    const err = await prefetchIncludes(
-      uml(`!include ${ok1}`, `!include ${bad}`, `!include ${ok2}`),
-      fetcher,
-    ).then(
+    const err = await prefetchIncludes(uml(`!include ${ok1}`, `!include ${bad}`, `!include ${ok2}`), fetcher).then(
       () => undefined,
       (e: unknown) => e as Error,
     );

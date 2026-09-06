@@ -48,40 +48,30 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
  * the label in every failure message.
  */
 export function describeJsonFamilyRatchet(type: 'json' | 'yaml' | 'hcl'): void {
-  const goldensRoot = join(
-    dirname(fileURLToPath(import.meta.url)),
-    `../../../oracle/goldens/svg-${type}`,
-  );
+  const goldensRoot = join(dirname(fileURLToPath(import.meta.url)), `../../../oracle/goldens/svg-${type}`);
 
-  const manifest = JSON.parse(
-    readFileSync(join(goldensRoot, 'ratchet.json'), 'utf8'),
-  ) as RatchetManifest;
+  const manifest = JSON.parse(readFileSync(join(goldensRoot, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
-  const readGolden = (f: RatchetFixture): string =>
-    readFileSync(join(goldensRoot, f.slug, 'golden.svg'), 'utf8');
-  const readSource = (f: RatchetFixture): string =>
-    readFileSync(join(goldensRoot, f.slug, 'in.puml'), 'utf8');
+  const readGolden = (f: RatchetFixture): string => readFileSync(join(goldensRoot, f.slug, 'golden.svg'), 'utf8');
+  const readSource = (f: RatchetFixture): string => readFileSync(join(goldensRoot, f.slug, 'in.puml'), 'utf8');
 
   // -------------------------------------------------------------------------
   // AC1 — every locked fixture stays conformant.
   // -------------------------------------------------------------------------
-  describe.skipIf(manifest.fixtures.length === 0)(
-    `svg-${type} conformance ratchet (AC1)`,
-    () => {
-      for (const f of manifest.fixtures) {
-        it(`${type}/${f.slug}: stays zero-diff against the pinned golden`, () => {
-          const ours = renderFixtureJson(readSource(f), new DeterministicMeasurer());
-          const { pass, diffs } = compareSvg(ours, readGolden(f), 'deterministic');
-          expect(
-            pass,
-            `${type}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-              ` — ${JSON.stringify(diffs[0])}`,
-          ).toBe(true);
-          expect(diffs).toEqual([]);
-        });
-      }
-    },
-  );
+  describe.skipIf(manifest.fixtures.length === 0)(`svg-${type} conformance ratchet (AC1)`, () => {
+    for (const f of manifest.fixtures) {
+      it(`${type}/${f.slug}: stays zero-diff against the pinned golden`, () => {
+        const ours = renderFixtureJson(readSource(f), new DeterministicMeasurer());
+        const { pass, diffs } = compareSvg(ours, readGolden(f), 'deterministic');
+        expect(
+          pass,
+          `${type}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+            ` — ${JSON.stringify(diffs[0])}`,
+        ).toBe(true);
+        expect(diffs).toEqual([]);
+      });
+    }
+  });
 
   if (manifest.fixtures.length === 0) {
     it(`has no pinned svg-${type} goldens yet (skip gracefully, not a failure)`, () => {
@@ -92,40 +82,37 @@ export function describeJsonFamilyRatchet(type: 'json' | 'yaml' | 'hcl'): void {
   // -------------------------------------------------------------------------
   // AC2 — tamper detection, with the slug and first diff path in the message.
   // -------------------------------------------------------------------------
-  describe.skipIf(manifest.fixtures.length === 0)(
-    `svg-${type} conformance ratchet — tamper detection (AC2)`,
-    () => {
-      it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
-        const target = manifest.fixtures[0]!;
-        const golden = readGolden(target);
-        const ours = renderFixtureJson(readSource(target), new DeterministicMeasurer());
+  describe.skipIf(manifest.fixtures.length === 0)(`svg-${type} conformance ratchet — tamper detection (AC2)`, () => {
+    it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
+      const target = manifest.fixtures[0]!;
+      const golden = readGolden(target);
+      const ours = renderFixtureJson(readSource(target), new DeterministicMeasurer());
 
-        // Confirm the untampered pair really is zero-diff first, so the
-        // tampered failure below is attributable to the mutation alone.
-        expect(
-          compareSvg(ours, golden, 'deterministic').pass,
-          `${type}/${target.slug}: expected zero-diff baseline`,
-        ).toBe(true);
+      // Confirm the untampered pair really is zero-diff first, so the
+      // tampered failure below is attributable to the mutation alone.
+      expect(
+        compareSvg(ours, golden, 'deterministic').pass,
+        `${type}/${target.slug}: expected zero-diff baseline`,
+      ).toBe(true);
 
-        // Mutate a numeric attribute in-memory — never touches disk.
-        const tampered = golden.replace(
-          /(<rect[^>]*\sx=")([\d.]+)"/,
-          (_m, head: string, x: string) => `${head}${Number(x) + 500}"`,
-        );
-        expect(tampered).not.toBe(golden);
+      // Mutate a numeric attribute in-memory — never touches disk.
+      const tampered = golden.replace(
+        /(<rect[^>]*\sx=")([\d.]+)"/,
+        (_m, head: string, x: string) => `${head}${Number(x) + 500}"`,
+      );
+      expect(tampered).not.toBe(golden);
 
-        const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
-        expect(pass).toBe(false);
-        expect(diffs.length).toBeGreaterThan(0);
+      const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
+      expect(pass).toBe(false);
+      expect(diffs.length).toBeGreaterThan(0);
 
-        const message =
-          `${type}/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-          ` — ${JSON.stringify(diffs[0])}`;
-        expect(message).toContain(target.slug);
-        expect(message).toContain(diffs[0]!.path);
-      });
-    },
-  );
+      const message =
+        `${type}/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+        ` — ${JSON.stringify(diffs[0])}`;
+      expect(message).toContain(target.slug);
+      expect(message).toContain(diffs[0]!.path);
+    });
+  });
 
   if (manifest.fixtures.length === 0) {
     it(`has no pinned svg-${type} golden yet to tamper with (AC2, deferred)`, () => {

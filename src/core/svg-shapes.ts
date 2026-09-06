@@ -6,7 +6,19 @@
 
 import {} from './paint.js';
 import type {} from './paint.js';
-import { attrs, escapeXmlText, resolvePaint, resolvePaintAttrs, attrsFromRecord, strokeDecorationOf, PAINT_NONE, type BoxStyle, type LineStyle, type TextStyle, type SvgAttrsPaint } from './svg.js';
+import {
+  attrs,
+  escapeXmlText,
+  resolvePaint,
+  resolvePaintAttrs,
+  attrsFromRecord,
+  strokeDecorationOf,
+  PAINT_NONE,
+  type BoxStyle,
+  type LineStyle,
+  type TextStyle,
+  type SvgAttrsPaint,
+} from './svg.js';
 import { textFontFamily, emittedTextForm } from './svg-text-font.js';
 export { emittedTextForm } from './svg-text-font.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
@@ -15,13 +27,7 @@ import { roundedCornerAttrs } from './svg-rect-corners.js';
 /**
  * `<rect>` element.
  */
-export function rect(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  style: BoxStyle = {},
-): string {
+export function rect(x: number, y: number, w: number, h: number, style: BoxStyle = {}): string {
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
@@ -50,13 +56,7 @@ export function rect(
 /**
  * `<line>` element.
  */
-export function line(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  style: LineStyle = {},
-): string {
+export function line(x1: number, y1: number, x2: number, y2: number, style: LineStyle = {}): string {
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
   const a = attrs([
@@ -103,12 +103,7 @@ function textLengthOf(content: string, textLength: number | undefined): number |
   return content.length > 1 ? textLength : undefined;
 }
 
-export function text(
-  x: number,
-  y: number,
-  rawContent: string,
-  style: TextStyle = {},
-): string {
+export function text(x: number, y: number, rawContent: string, style: TextStyle = {}): string {
   const content = emittedTextForm(rawContent, style.fontFamily);
   const fillR = resolvePaint(style.fill);
   const a = attrs([
@@ -218,7 +213,10 @@ export function path(d: string, style: LineStyle = {}): string {
   const a = attrs([
     ['d', d],
     ['fill', fillR?.value ?? PAINT_NONE],
-    ['fill-opacity', style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS)],
+    [
+      'fill-opacity',
+      style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS),
+    ],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -235,21 +233,14 @@ export function path(d: string, style: LineStyle = {}): string {
  * vertical radius ry.  Optional SvgAttrs are appended after the geometry
  * attributes.
  */
-export function ellipse(
-  cx: number,
-  cy: number,
-  rx: number,
-  ry: number,
-  extraAttrs?: SvgAttrsPaint,
-): string {
+export function ellipse(cx: number, cy: number, rx: number, ry: number, extraAttrs?: SvgAttrsPaint): string {
   const a = attrs([
     ['cx', cx],
     ['cy', cy],
     ['rx', rx],
     ['ry', ry],
   ] as const);
-  const resolved =
-    extraAttrs !== undefined ? resolvePaintAttrs(extraAttrs) : undefined;
+  const resolved = extraAttrs !== undefined ? resolvePaintAttrs(extraAttrs) : undefined;
   const extra = resolved !== undefined ? attrsFromRecord(resolved.plain) : '';
   const def = resolved?.def ?? '';
   return `${def}<ellipse${a}${extra}/>`;
@@ -291,20 +282,14 @@ export function circle(cx: number, cy: number, r: number, style: BoxStyle = {}):
  * - bottom: (cx, cy + size)
  * - left:   (cx - size, cy)
  */
-export function diamond(
-  cx: number,
-  cy: number,
-  size: number,
-  extraAttrs?: SvgAttrsPaint,
-): string {
+export function diamond(cx: number, cy: number, size: number, extraAttrs?: SvgAttrsPaint): string {
   const points =
     `${fmt(cx)},${fmt(cy - size)} ` +
     `${fmt(cx + size)},${fmt(cy)} ` +
     `${fmt(cx)},${fmt(cy + size)} ` +
     `${fmt(cx - size)},${fmt(cy)}`;
   const a = attrs([['points', points]] as const);
-  const resolved =
-    extraAttrs !== undefined ? resolvePaintAttrs(extraAttrs) : undefined;
+  const resolved = extraAttrs !== undefined ? resolvePaintAttrs(extraAttrs) : undefined;
   const extra = resolved !== undefined ? attrsFromRecord(resolved.plain) : '';
   const def = resolved?.def ?? '';
   return `${def}<polygon${a}${extra}/>`;
@@ -313,10 +298,7 @@ export function diamond(
 /**
  * `<polygon>` from an explicit point list, with fill/stroke styling.
  */
-export function polygon(
-  points: ReadonlyArray<{ x: number; y: number }>,
-  style: BoxStyle = {},
-): string {
+export function polygon(points: ReadonlyArray<{ x: number; y: number }>, style: BoxStyle = {}): string {
   // Flat comma-separated, which is how the jar writes it —
   // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
   // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
@@ -347,10 +329,7 @@ export function polygon(
  * `<polyline>` -- the open counterpart of {@link polygon}. Same attributes,
  * same order; only the element name differs, so the two cannot drift.
  */
-export function polyline(
-  points: ReadonlyArray<{ x: number; y: number }>,
-  style: BoxStyle = {},
-): string {
+export function polyline(points: ReadonlyArray<{ x: number; y: number }>, style: BoxStyle = {}): string {
   // Flat comma-separated, which is how the jar writes it —
   // `svg-graphics-elements.ts:200` (`points.map(format).join(',')`), mirroring
   // `SvgGraphics`. Every cached golden agrees: `points="54,98,64,88,1006,88,…"`,
@@ -411,13 +390,7 @@ export interface NoteBoxStyle {
  * @param dogEar - Size of the folded corner in px (default 10).
  * @see ~/git/plantuml/.../skin/rose/Opale.java#getCorner
  */
-export function noteBox(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  style: NoteBoxStyle = {},
-): string {
+export function noteBox(x: number, y: number, w: number, h: number, style: NoteBoxStyle = {}): string {
   const { fill = '#FEFECE', stroke = '#AAAAAA', strokeWidth = 1, dogEar = 10 } = style;
   const paint = shortenColor(stroke);
   // Rule 4: `stroke:none` suppresses `stroke-width` here too.

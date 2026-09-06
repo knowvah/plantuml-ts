@@ -12,10 +12,7 @@
 import { describe, expect, test } from 'vitest';
 import { FontStyle, getFont, type FontConfiguration } from '../../../../../../src/core/klimt/shape/UText.js';
 import { FontPosition } from '../../../../../../src/core/klimt/font/FontPosition.js';
-import {
-  buildStripeAtoms,
-  buildLineAtoms,
-} from '../../../../../../src/core/klimt/creole/legacy/StripeSimple.js';
+import { buildStripeAtoms, buildLineAtoms } from '../../../../../../src/core/klimt/creole/legacy/StripeSimple.js';
 import type { CreoleAtom } from '../../../../../../src/core/klimt/creole/atom/Atom.js';
 
 const PLAIN: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
@@ -40,16 +37,12 @@ function textOf(atom: CreoleAtom): TextShape {
 describe('CommandCreoleExposantChange — bracketed form (java:65-70)', () => {
   test('<sup>x</sup> yields one EXPOSANT text atom', () => {
     const { atoms } = buildLineAtoms('<sup>x</sup>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([
-      { text: 'x', size: 14, fontPosition: FontPosition.EXPOSANT, styles: [] },
-    ]);
+    expect(atoms.map(textOf)).toEqual([{ text: 'x', size: 14, fontPosition: FontPosition.EXPOSANT, styles: [] }]);
   });
 
   test('<sub>x</sub> yields one INDICE text atom', () => {
     const { atoms } = buildLineAtoms('<sub>x</sub>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([
-      { text: 'x', size: 14, fontPosition: FontPosition.INDICE, styles: [] },
-    ]);
+    expect(atoms.map(textOf)).toEqual([{ text: 'x', size: 14, fontPosition: FontPosition.INDICE, styles: [] }]);
   });
 
   test('the position is restored after the closing tag (java:95)', () => {
@@ -99,9 +92,7 @@ describe('CommandCreoleExposantChange — no match cases', () => {
 
   test('the shared "<s" starter still reaches CommandCreoleSizeChange first', () => {
     const atoms = buildStripeAtoms('<size:20>big</size>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([
-      { text: 'big', size: 20, fontPosition: undefined, styles: [] },
-    ]);
+    expect(atoms.map(textOf)).toEqual([{ text: 'big', size: 20, fontPosition: undefined, styles: [] }]);
   });
 
   test('the shared "<s" starter still reaches the legacy STRIKE form', () => {
@@ -133,8 +124,6 @@ describe('lazy mute on nesting (decisions.md#D1, FontConfiguration.java:98-104)'
 
   test('nested <sub> inside <sup> keeps only the innermost position', () => {
     const atoms = buildStripeAtoms('<sup><sub>x</sub></sup>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([
-      { text: 'x', size: 14, fontPosition: FontPosition.INDICE, styles: [] },
-    ]);
+    expect(atoms.map(textOf)).toEqual([{ text: 'x', size: 14, fontPosition: FontPosition.INDICE, styles: [] }]);
   });
 });

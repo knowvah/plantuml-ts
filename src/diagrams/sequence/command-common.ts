@@ -99,4 +99,3 @@ export const scaleCommand: Command = {
     if (spec !== undefined) state.ast.scale = spec;
   },
 };
-

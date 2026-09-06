@@ -32,10 +32,21 @@ const PROCESSING_INSTRUCTION_NODE = 7;
 
 /** Numeric SVG attribute names whose values need normalization. */
 const NUMERIC_ATTRS = new Set([
-  'x', 'y', 'cx', 'cy', 'rx', 'ry',
-  'width', 'height',
-  'x1', 'y1', 'x2', 'y2',
-  'dx', 'dy', 'r',
+  'x',
+  'y',
+  'cx',
+  'cy',
+  'rx',
+  'ry',
+  'width',
+  'height',
+  'x1',
+  'y1',
+  'x2',
+  'y2',
+  'dx',
+  'dy',
+  'r',
 ]);
 
 /**
@@ -53,27 +64,21 @@ function normalizeNumber(raw: string): string {
  * Non-numeric tokens (command letters) are preserved verbatim.
  */
 function normalizePathD(d: string): string {
-  return d.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) =>
-    normalizeNumber(m),
-  );
+  return d.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) => normalizeNumber(m));
 }
 
 /**
  * Normalize a `points` attribute (polygon/polyline) — space/comma-separated pairs.
  */
 function normalizePoints(points: string): string {
-  return points.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) =>
-    normalizeNumber(m),
-  );
+  return points.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) => normalizeNumber(m));
 }
 
 /**
  * Normalize a `transform` attribute — numeric parameters inside any function.
  */
 function normalizeTransform(transform: string): string {
-  return transform.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) =>
-    normalizeNumber(m),
-  );
+  return transform.replace(/[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g, (m) => normalizeNumber(m));
 }
 
 /**

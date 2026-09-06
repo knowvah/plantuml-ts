@@ -68,15 +68,11 @@ describe('unwrapContentG — attributed vs. malformed content <g>', () => {
   });
 
   it('throws when the root <g> is never closed', () => {
-    expect(() => unwrapContentG(ROOT_GROUP_OPEN + INNER)).toThrow(
-      /malformed klimt SVG output/,
-    );
+    expect(() => unwrapContentG(ROOT_GROUP_OPEN + INNER)).toThrow(/malformed klimt SVG output/);
   });
 
   it('does not mistake a different element name for the content <g>', () => {
-    expect(() => unwrapContentG('<glyph x="1">' + INNER + CLOSE)).toThrow(
-      /malformed klimt SVG output/,
-    );
+    expect(() => unwrapContentG('<glyph x="1">' + INNER + CLOSE)).toThrow(/malformed klimt SVG output/);
   });
 
   it('round-trips a klimt document whose content <g> is attributed', () => {
@@ -103,8 +99,6 @@ describe('assembleDocumentShell — root <g> text attributes', () => {
 
   it('preserves the content <g>’s first child position when upgrading', () => {
     const first = '<rect x="0" y="0" width="100" height="50" fill="#EEE"/>';
-    expect(afterDefs(shell('<g>' + first + INNER + CLOSE))).toBe(
-      ROOT_GROUP_OPEN + first + INNER + CLOSE,
-    );
+    expect(afterDefs(shell('<g>' + first + INNER + CLOSE))).toBe(ROOT_GROUP_OPEN + first + INNER + CLOSE);
   });
 });

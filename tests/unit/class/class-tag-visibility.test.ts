@@ -148,7 +148,15 @@ describe('computeRemovedIds semantics', () => {
     // N1 has tag z; Bar restored by $z; N1 survives via delegation to Bar
     // (its own tags are never consulted). Foo/Goo stay removed.
     const ast = parse(
-      ['class Foo $a', 'Foo -- Goo', 'class Bar $z', 'note "A note" as N1 $z', 'N1 .. Bar', 'remove *', 'restore $z'].join('\n'),
+      [
+        'class Foo $a',
+        'Foo -- Goo',
+        'class Bar $z',
+        'note "A note" as N1 $z',
+        'N1 .. Bar',
+        'remove *',
+        'restore $z',
+      ].join('\n'),
     );
     expect([...computeRemovedIds(ast)].sort()).toEqual(['Foo', 'Goo']);
   });
@@ -216,7 +224,15 @@ describe('filterRemovedEntities at the layout boundary', () => {
 
   it('remove * / restore $z keeps the tagged class and its delegating note (zuxoxu-54)', () => {
     const g = captureDotGraph(
-      ['class Foo $a', 'Foo -- Goo', 'class Bar $z', 'note "A note" as N1 $z', 'N1 .. Bar', 'remove *', 'restore $z'].join('\n'),
+      [
+        'class Foo $a',
+        'Foo -- Goo',
+        'class Bar $z',
+        'note "A note" as N1 $z',
+        'N1 .. Bar',
+        'remove *',
+        'restore $z',
+      ].join('\n'),
     );
     expect(nodeIds(g)).toEqual(['Bar', 'N1']);
     expect(g.edges).toHaveLength(1);
@@ -348,15 +364,13 @@ describe('hide-class / show-class dispatch (G2 N21)', () => {
   });
 
   it('"show-class" combines with a prior hide the same way "show" does', () => {
-    const ast = parse(
-      ['class Foo $a', 'Foo -- Goo', 'class Bar $z', 'hide *', 'show-class $z'].join('\n'),
-    );
+    const ast = parse(['class Foo $a', 'Foo -- Goo', 'class Bar $z', 'hide *', 'show-class $z'].join('\n'));
     expect([...computeHiddenIds(ast)].sort()).toEqual(['Foo', 'Goo']);
   });
 });
 
 describe('hide-by-name does not filter the DOT graph (net/atmp/CucaDiagram.java#isHidden)', () => {
-  it('hide aaa keeps aaa\'s node and does not touch edges (cikeni-99-kojo447 pattern)', () => {
+  it("hide aaa keeps aaa's node and does not touch edges (cikeni-99-kojo447 pattern)", () => {
     const g = captureDotGraph(
       ['class aaa', 'hide aaa', 'interface Entity', 'interface SubEntity', 'Entity o-- SubEntity'].join('\n'),
     );

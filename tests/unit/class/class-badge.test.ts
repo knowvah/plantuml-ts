@@ -76,10 +76,13 @@ describe('resolveBadgeFill (G2 N32 spotBackground param)', () => {
     expect(resolveBadgeFill('class', undefined, '#FFFFFF')).toBe('#FFFFFF');
   });
 
-  it('the per-classifier colorOverride wins over spotBackground -- jar\'s ' +
-    'exact precedence (EntityImageClassHeader.java:183)', () => {
-    expect(resolveBadgeFill('class', 'orange', '#FFFFFF')).toBe('#FFA500');
-  });
+  it(
+    "the per-classifier colorOverride wins over spotBackground -- jar's " +
+      'exact precedence (EntityImageClassHeader.java:183)',
+    () => {
+      expect(resolveBadgeFill('class', 'orange', '#FFFFFF')).toBe('#FFA500');
+    },
+  );
 });
 
 describe('resolveBadgeBorder (G2 N32)', () => {

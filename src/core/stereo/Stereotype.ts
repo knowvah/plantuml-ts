@@ -313,13 +313,7 @@ export class Stereotype {
    */
   isMachineOrSpecification(): boolean {
     const l = this.decoration.label.toLowerCase();
-    return (
-      l === 'm' ||
-      l === '<<machine>>' ||
-      l === '<<s>>' ||
-      l === '<<spec>>' ||
-      l === '<<specification>>'
-    );
+    return l === 'm' || l === '<<machine>>' || l === '<<s>>' || l === '<<spec>>' || l === '<<specification>>';
   }
 
   /** java:235-237. */

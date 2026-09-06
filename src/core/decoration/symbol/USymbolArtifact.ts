@@ -20,7 +20,13 @@ function getMargin(): Margin {
   return new Margin(10, 10 + 10, 10 + 3, 10);
 }
 
-function drawArtifact(ug: UGraphic, widthTotal: number, heightTotal: number, shadowing: number, roundCorner: number): void {
+function drawArtifact(
+  ug: UGraphic,
+  widthTotal: number,
+  heightTotal: number,
+  shadowing: number,
+  roundCorner: number,
+): void {
   const form = URectangle.build(widthTotal, heightTotal).rounded(roundCorner);
   form.setDeltaShadow(shadowing);
 
@@ -79,7 +85,13 @@ export class USymbolArtifact extends USymbol {
         const dim = calculateDimension(ug.getStringBounder());
         ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
-        drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawArtifact(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
         tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
@@ -105,7 +117,13 @@ export class USymbolArtifact extends USymbol {
       drawU(ug: UGraphic): void {
         const dim = calculateDimension(ug.getStringBounder());
         ug = symbolContext.apply(ug);
-        drawArtifact(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawArtifact(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const dimStereo = stereotype.calculateDimension(ug.getStringBounder());
         // See `USymbolComponent2.ts`'s doc comment for why `getWidth()` is
         // hoisted to an intermediate const before the surrounding `(...)`.

@@ -36,7 +36,10 @@ function state(id: string, overrides: Partial<State> = {}): State {
 function diagram(compositeOverrides: Partial<State> = {}): StateDiagramAST {
   return {
     states: [state('C', { children: [state('m'), state('n')], ...compositeOverrides }), state('X')],
-    transitions: [{ from: 'm', to: 'n' }, { from: 'X', to: 'm' }],
+    transitions: [
+      { from: 'm', to: 'n' },
+      { from: 'X', to: 'm' },
+    ],
   };
 }
 

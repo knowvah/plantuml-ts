@@ -129,12 +129,12 @@ function renderAll(out: string): void {
 
 function staleMessage(s: Sentinel, fresh: Buffer, cached: Buffer): string {
   return (
-    `test-results/dot-cache/${s.type}/${s.slug}/in.svg does NOT match a fresh render of `
-    + `oracle/dist/plantuml-oracle.jar (fresh ${fresh.length} bytes, cached ${cached.length}). `
-    + `The committed ${s.type} oracle cache is STALE: every census and survey number measured `
-    + 'against it is an artifact, not a measurement. Re-capture it — see '
-    + 'plans/object-close/batch-0/T1-recapture-oracle.md for the procedure — rather than '
-    + 'relaxing this check.'
+    `test-results/dot-cache/${s.type}/${s.slug}/in.svg does NOT match a fresh render of ` +
+    `oracle/dist/plantuml-oracle.jar (fresh ${fresh.length} bytes, cached ${cached.length}). ` +
+    `The committed ${s.type} oracle cache is STALE: every census and survey number measured ` +
+    'against it is an artifact, not a measurement. Re-capture it — see ' +
+    'plans/object-close/batch-0/T1-recapture-oracle.md for the procedure — rather than ' +
+    'relaxing this check.'
   );
 }
 
@@ -215,11 +215,11 @@ describe('oracle cache freshness (object-close D4, all types per SI16)', () => {
       });
       expect(
         offenders.length,
-        `${String(offenders.length)} of the ${type} oracles carry a ${SUPERSEDED_FORM.name}, `
-          + `which the pinned jar no longer emits — so that cache was captured by MORE THAN ONE `
-          + `jar and is PARTIALLY stale. The per-type sentinel cannot see this: on 2026-09-02 `
-          + `244 of 266 component oracles were stale while its sentinel was fresh. Re-capture `
-          + `the whole type. First few: ${offenders.slice(0, 5).join(', ')}`,
+        `${String(offenders.length)} of the ${type} oracles carry a ${SUPERSEDED_FORM.name}, ` +
+          `which the pinned jar no longer emits — so that cache was captured by MORE THAN ONE ` +
+          `jar and is PARTIALLY stale. The per-type sentinel cannot see this: on 2026-09-02 ` +
+          `244 of 266 component oracles were stale while its sentinel was fresh. Re-capture ` +
+          `the whole type. First few: ${offenders.slice(0, 5).join(', ')}`,
       ).toBe(0);
     },
   );

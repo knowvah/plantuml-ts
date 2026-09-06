@@ -1,12 +1,5 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
@@ -30,16 +23,15 @@ export class GtileAction extends TileLeaf {
     // Strip <code>/<\/code> wrapper lines — they are not rendered as content.
     const allLines = node.label.split('\n');
     const isCodeBlock = /^<code>$/i.test(allLines[0]?.trim() ?? '');
-    const lines = allLines.filter(l => !/^<\/?code>$/i.test(l.trim()));
+    const lines = allLines.filter((l) => !/^<\/?code>$/i.test(l.trim()));
     const lineCount = lines.length;
-    const lineHeight =
-      bounder.getDimension('M', theme.fontSize).height * 1.4;
+    const lineHeight = bounder.getDimension('M', theme.fontSize).height * 1.4;
     // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
     // indented code lines because space glyphs are narrower than code chars.
     const monoCharWidth = theme.fontSize * 0.6;
     const maxWidth = isCodeBlock
-      ? Math.max(0, ...lines.map(l => l.length * monoCharWidth))
-      : Math.max(...lines.map(l => bounder.getDimension(l, theme.fontSize).width));
+      ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
+      : Math.max(...lines.map((l) => bounder.getDimension(l, theme.fontSize).width));
     this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, ACTION_MIN_WIDTH);
     this.height = Math.max(lineHeight * lineCount + 2 * V_PAD, ACTION_HEIGHT);
   }

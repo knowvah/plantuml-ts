@@ -55,9 +55,7 @@ describe('splitEnhancedBlocks', () => {
   });
 
   it('a plain member body (no separator/tree) is one rows block, initial sep', () => {
-    expect(splitEnhancedBlocks(['a', 'b'])).toEqual([
-      { kind: 'rows', separator: { char: '_' }, lines: ['a', 'b'] },
-    ]);
+    expect(splitEnhancedBlocks(['a', 'b'])).toEqual([{ kind: 'rows', separator: { char: '_' }, lines: ['a', 'b'] }]);
   });
 
   it('a bare separator splits into a leading block and a trailing sep=char block', () => {
@@ -98,7 +96,7 @@ describe('splitEnhancedBlocks', () => {
     ]);
   });
 
-  it('purges the first tree line\'s own leading-indent prefix from every consumed line', () => {
+  it("purges the first tree line's own leading-indent prefix from every consumed line", () => {
     const blocks = splitEnhancedBlocks(['        |_ Tree item 11', '        |_ Tree item 12']);
     expect(blocks[1]).toEqual({
       kind: 'tree',
@@ -109,7 +107,7 @@ describe('splitEnhancedBlocks', () => {
     });
   });
 
-  it('computes tab-indent tree levels (StripeTree#computeLevel\'s tab branch)', () => {
+  it("computes tab-indent tree levels (StripeTree#computeLevel's tab branch)", () => {
     const blocks = splitEnhancedBlocks(['|_ a', '\t|_ b']);
     expect(blocks[1]).toEqual({
       kind: 'tree',
@@ -129,9 +127,16 @@ describe('splitEnhancedBlocks', () => {
     ]);
   });
 
-  it('fecolo-08-gepu579\'s exact shape: labeled separator, one field, then a tree', () => {
+  it("fecolo-08-gepu579's exact shape: labeled separator, one field, then a tree", () => {
     const blocks = splitEnhancedBlocks([
-      '-- A1 --', 'coco', '|_ A1', '|_ b()', '  |_ b1', '  |_ b2', '    |_ b2.1', '|_ c()',
+      '-- A1 --',
+      'coco',
+      '|_ A1',
+      '|_ b()',
+      '  |_ b1',
+      '  |_ b2',
+      '    |_ b2.1',
+      '|_ c()',
     ]);
     expect(blocks).toEqual([
       { kind: 'rows', separator: { char: '_' }, lines: [] },
@@ -165,7 +170,7 @@ describe('dedentRawLines', () => {
     expect(dedentRawLines(['field', '--', 'method()'])).toEqual(['field', '--', 'method()']);
   });
 
-  it('strips the first line\'s own leading-space count from every line', () => {
+  it("strips the first line's own leading-space count from every line", () => {
     expect(dedentRawLines(['    + public_member', '    --', '    - private_member'])).toEqual([
       '+ public_member',
       '--',
@@ -173,7 +178,7 @@ describe('dedentRawLines', () => {
     ]);
   });
 
-  it('strips at most the first line\'s own count, preserving relative indent', () => {
+  it("strips at most the first line's own count, preserving relative indent", () => {
     // A line indented DEEPER than the reference keeps its extra indent
     // (matches BlocLines#trimSmart's per-line `min(nbStartingSpace, ...)`
     // clamp -- needed so `|_` tree-level computation still sees the extra
@@ -181,7 +186,7 @@ describe('dedentRawLines', () => {
     expect(dedentRawLines(['  a', '    b'])).toEqual(['a', '  b']);
   });
 
-  it('clamps to a shorter line\'s own leading-whitespace count (never goes negative)', () => {
+  it("clamps to a shorter line's own leading-whitespace count (never goes negative)", () => {
     expect(dedentRawLines(['    a', '  b', 'c'])).toEqual(['a', 'b', 'c']);
   });
 

@@ -18,11 +18,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { emittedTextForm } from '../../core/svg.js';
 import { splitStripe } from './Fission.js';
 import { tabStopWidth, tabAwareWidth, walkTabs, hasTab } from './tab-stops.js';
-import {
-  getDisplayValue,
-  containerEntries,
-  splitDisplayLines,
-} from './json-layout-prep.js';
+import { getDisplayValue, containerEntries, splitDisplayLines } from './json-layout-prep.js';
 import type { FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 
 /**
@@ -175,10 +171,7 @@ interface FontSpec {
 /** The key- and value-cell fonts. Upstream resolves these per cell through the
  *  style cascade (`getStyleToUse(header, highlighted)`); this port carries the
  *  same header-vs-body distinction on `BuildRowsOptions`. */
-function fontsFor(
-  fontSize: number,
-  options: BuildRowsOptions | undefined,
-): { keyFont: FontSpec; valFont: FontSpec } {
+function fontsFor(fontSize: number, options: BuildRowsOptions | undefined): { keyFont: FontSpec; valFont: FontSpec } {
   const family = options?.fontFamily ?? 'sans-serif';
   const tab = options?.tabSize === undefined ? {} : { tabSize: options.tabSize };
   const bold = { family, size: fontSize, weight: 'bold' as const, ...tab };
@@ -327,7 +320,14 @@ function cellMetrics(
   valFont: FontSpec,
 ): Pick<
   JsonRowGeo,
-  'keyWidth' | 'valueLineWidths' | 'keyBaselineY' | 'valueBaselineYs' | 'keyTextLength' | 'valueTextLengths' | 'valueAtoms' | 'keyAtoms'
+  | 'keyWidth'
+  | 'valueLineWidths'
+  | 'keyBaselineY'
+  | 'valueBaselineYs'
+  | 'keyTextLength'
+  | 'valueTextLengths'
+  | 'valueAtoms'
+  | 'keyAtoms'
 > {
   // `withMargin(_, 5, 2)` — the text block's top edge sits CELL_MARGIN_Y below
   // the row's, and its baseline `descent` above its own bottom.
@@ -359,8 +359,7 @@ function cellMetrics(
     }
     return out;
   };
-  const lineWidth = (l: string) =>
-    hasTab(l) ? tabAwareWidth(l, valMeasure, tabStop) : valMeasure(l);
+  const lineWidth = (l: string) => (hasTab(l) ? tabAwareWidth(l, valMeasure, tabStop) : valMeasure(l));
   return {
     keyWidth: cell.arrayEntry ? 0 : measurer.measure(cell.key, keyFont).width,
     valueLineWidths: cell.valueLines.map(lineWidth),
@@ -394,7 +393,11 @@ function buildRow(
   const { processed, valueLines, atomLines, valueType } = cellLines(cell.value, measurer, valFont, fonts.maximumWidth);
   const textHeight = measurer.measure(cell.key, valFont).height;
   const positioned = {
-    key: cell.key, valueLines, atomLines, rowY: cell.rowY, arrayEntry: cell.arrayEntry,
+    key: cell.key,
+    valueLines,
+    atomLines,
+    rowY: cell.rowY,
+    arrayEntry: cell.arrayEntry,
     wrap: fonts.maximumWidth ?? 0,
   };
   return {
@@ -446,9 +449,7 @@ export function measureNode(
   const { keyFont, valFont } = fontsFor(fontSize, options);
   const rows = buildRows(flatNode, highlightKeys, measurer, fontSize, options);
 
-  const { keyColWidth, valueColWidth } = columnWidths(
-    rows, measurer, keyFont, valFont, options?.maximumWidth,
-  );
+  const { keyColWidth, valueColWidth } = columnWidths(rows, measurer, keyFont, valFont, options?.maximumWidth);
 
   const lastRow = rows.at(-1);
   const summedHeight = lastRow !== undefined ? lastRow.y + lastRow.height : 0;
@@ -510,10 +511,8 @@ export function recordLabelFor(m: MeasuredNode): string {
   const heightPad = 4 * RECORD_FIELD_GAP;
   const widthA = m.keyColWidth - 2 * RECORD_FIELD_GAP;
   const widthB = m.valueColWidth - 2 * RECORD_FIELD_GAP;
-  const cell = (height: number, width: number): string =>
-    `_dim_${height - heightPad}_${width}_`;
-  const ported = (i: number, height: number, width: number): string =>
-    `<P${i}>${cell(height, width)}`;
+  const cell = (height: number, width: number): string => `_dim_${height - heightPad}_${width}_`;
+  const ported = (i: number, height: number, width: number): string => `<P${i}>${cell(height, width)}`;
 
   if (m.rows.length === 0) return '';
   if (m.rows[0]!.arrayEntry) {

@@ -33,10 +33,7 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { attachPortLabels } from '../../../src/diagrams/class/class-edge-label-anchor.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/class',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
 function makeAST(rel: Relationship): ClassDiagramAST {
   return {
@@ -53,7 +50,9 @@ function makeAST(rel: Relationship): ClassDiagramAST {
 
 function captureGraph(ast: ClassDiagramAST): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured = g; });
+  setLayoutInputObserver((g) => {
+    captured = g;
+  });
   try {
     layoutClass(ast, defaultTheme, new FormulaMeasurer());
   } finally {
@@ -155,13 +154,17 @@ describe('T11 — attachPortLabels binds the DOT-swapped multiplicity to its own
     // to=Potential (toMultiplicity "0..*"), dotEdgeReversed=true.
     const rel = parseRelationshipLine('Potential "0..*" <--o "1" CompositePotential')!;
     expect(rel).toMatchObject({
-      from: 'CompositePotential', to: 'Potential',
-      fromMultiplicity: '1', toMultiplicity: '0..*', dotEdgeReversed: true,
+      from: 'CompositePotential',
+      to: 'Potential',
+      fromMultiplicity: '1',
+      toMultiplicity: '0..*',
+      dotEdgeReversed: true,
     });
 
     const edgeGeo = baseEdgeGeo(rel);
     attachPortLabels(
-      edgeGeo, rel,
+      edgeGeo,
+      rel,
       { id: 'edge-0', points: [], tailLabelX: 100, tailLabelY: 200, headLabelX: 300, headLabelY: 400 },
       { measurer: new FormulaMeasurer(), fontFamily: 'sans-serif', nodes: [] },
     );
@@ -185,7 +188,8 @@ describe('T11 — attachPortLabels binds the DOT-swapped multiplicity to its own
 
     const edgeGeo = baseEdgeGeo(rel);
     attachPortLabels(
-      edgeGeo, rel,
+      edgeGeo,
+      rel,
       { id: 'edge-0', points: [], tailLabelX: 10, tailLabelY: 20, headLabelX: 30, headLabelY: 40 },
       { measurer: new FormulaMeasurer(), fontFamily: 'sans-serif', nodes: [] },
     );

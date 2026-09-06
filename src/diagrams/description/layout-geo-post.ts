@@ -83,8 +83,11 @@ function assembleEdgeGeo(
   hidden: ReadonlySet<string>,
 ): DescriptionEdgeGeo {
   const geo: DescriptionEdgeGeo = {
-    id: `edge-${linkIdx}`, from: link.from, to: link.to,
-    points: pts, style: link.style,
+    id: `edge-${linkIdx}`,
+    from: link.from,
+    to: link.to,
+    points: pts,
+    style: link.style,
   };
   if (link.thicknessOverride !== undefined) geo.styleThickness = link.thicknessOverride;
   if (link.colorOverride !== undefined) geo.styleColor = link.colorOverride;
@@ -103,13 +106,7 @@ function assembleEdgeGeo(
   return geo;
 }
 
-function addEdgeLabel(
-  geo: DescriptionEdgeGeo,
-  link: DescriptiveLink,
-  re: ResultEdge,
-  dx: number,
-  dy: number,
-): void {
+function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, dx: number, dy: number): void {
   if (link.label === undefined) return;
   geo.label = { text: link.label, ...edgeLabelGeo(re, geo.points, dx, dy) };
 }

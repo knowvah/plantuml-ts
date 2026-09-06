@@ -114,7 +114,11 @@ interface TextSlot {
  *
  * @see ~/git/plantuml/.../svek/DecorateEntityImage.java:103-167
  */
-function decorateEntityImage(original: AnnotationBlock, text1: TextSlot | null, text2: TextSlot | null): AnnotationBlock {
+function decorateEntityImage(
+  original: AnnotationBlock,
+  text1: TextSlot | null,
+  text2: TextSlot | null,
+): AnnotationBlock {
   const dim1: Dim = text1?.block ?? EMPTY_DIM;
   const dim2: Dim = text2?.block ?? EMPTY_DIM;
   const dimText = mergeTB(dim1, dim2);
@@ -154,7 +158,12 @@ function nonNullDisplay(dp: DisplayPositioned): readonly string[] {
 }
 
 /** @see DiagramChromeFactory.java:324-336 */
-function addLegend(original: AnnotationBlock, legend: DisplayPositioned, style: AnnotationBoxStyle, measurer: StringMeasurer): AnnotationBlock {
+function addLegend(
+  original: AnnotationBlock,
+  legend: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  measurer: StringMeasurer,
+): AnnotationBlock {
   const block = buildAnnotationBlock('legend', nonNullDisplay(legend), style, measurer);
   const halign = legend.horizontalAlignment ?? HorizontalAlignment.CENTER;
   const slot: TextSlot = { block, halign, className: 'legend' };
@@ -165,14 +174,24 @@ function addLegend(original: AnnotationBlock, legend: DisplayPositioned, style: 
 
 /** D8: title is forced CENTER at draw time regardless of the stored
  *  alignment. @see DiagramChromeFactory.java:342-356 */
-function addTitle(original: AnnotationBlock, title: DisplayPositioned, style: AnnotationBoxStyle, measurer: StringMeasurer): AnnotationBlock {
+function addTitle(
+  original: AnnotationBlock,
+  title: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  measurer: StringMeasurer,
+): AnnotationBlock {
   const block = buildAnnotationBlock('title', nonNullDisplay(title), style, measurer);
   return decorateEntityImage(original, { block, halign: HorizontalAlignment.CENTER, className: 'title' }, null);
 }
 
 /** D8: caption is forced CENTER at draw time regardless of the stored
  *  alignment. @see DiagramChromeFactory.java:362-376 */
-function addCaption(original: AnnotationBlock, caption: DisplayPositioned, style: AnnotationBoxStyle, measurer: StringMeasurer): AnnotationBlock {
+function addCaption(
+  original: AnnotationBlock,
+  caption: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  measurer: StringMeasurer,
+): AnnotationBlock {
   const block = buildAnnotationBlock('caption', nonNullDisplay(caption), style, measurer);
   return decorateEntityImage(original, null, { block, halign: HorizontalAlignment.CENTER, className: 'caption' });
 }

@@ -24,66 +24,77 @@ function parse(source: string): ReturnType<typeof parseClass> {
 }
 
 describe('note creation-index / phantom-slot threading (G2 N15)', () => {
-  it('a non-tip attached note (multi-line, `note <pos> of X ... end note`) consumes ' +
-     'a phantom GMN slot before its own — jar-verified fezugi-39-fujo327 ' +
-     '(class a=ent0001, phantom=ent0002 [discarded], note=ent0003)', () => {
-    const ast = parse('class a\nnote right of a\nnote on a\nend note');
-    expect(ast.classifiers[0]).toMatchObject({ id: 'a', creationIndex: 1 });
-    expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
-  });
+  it(
+    'a non-tip attached note (multi-line, `note <pos> of X ... end note`) consumes ' +
+      'a phantom GMN slot before its own — jar-verified fezugi-39-fujo327 ' +
+      '(class a=ent0001, phantom=ent0002 [discarded], note=ent0003)',
+    () => {
+      const ast = parse('class a\nnote right of a\nnote on a\nend note');
+      expect(ast.classifiers[0]).toMatchObject({ id: 'a', creationIndex: 1 });
+      expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
+    },
+  );
 
-  it('a non-tip attached note (single-line, `note <pos> of X : text`) also ' +
-     'consumes the phantom slot', () => {
+  it('a non-tip attached note (single-line, `note <pos> of X : text`) also ' + 'consumes the phantom slot', () => {
     const ast = parse('class a\nnote right of a : hi');
     expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
   });
 
-  it('a bare `note <pos>` (implicit target, still CommandFactoryNoteOnEntity) ' +
-     'ALSO consumes the phantom slot — GMN generation is unconditional on ' +
-     'idShort in the upstream source', () => {
-    const ast = parse('class a\nnote bottom: hi');
-    expect(ast.notes[0]).toMatchObject({ implicitTarget: true, creationIndex: 3, phantomSlot: true });
-  });
+  it(
+    'a bare `note <pos>` (implicit target, still CommandFactoryNoteOnEntity) ' +
+      'ALSO consumes the phantom slot — GMN generation is unconditional on ' +
+      'idShort in the upstream source',
+    () => {
+      const ast = parse('class a\nnote bottom: hi');
+      expect(ast.notes[0]).toMatchObject({ implicitTarget: true, creationIndex: 3, phantomSlot: true });
+    },
+  );
 
-  it('a freestanding note (`note "text" as N1`) consumes only ONE slot — no ' +
-     'GMN call in CommandFactoryNote', () => {
-    const ast = parse('class a\nnote "hi" as N1');
-    expect(ast.notes[0]).toMatchObject({ id: 'N1', creationIndex: 2 });
-    expect(ast.notes[0]!.phantomSlot).toBeUndefined();
-  });
+  it(
+    'a freestanding note (`note "text" as N1`) consumes only ONE slot — no ' + 'GMN call in CommandFactoryNote',
+    () => {
+      const ast = parse('class a\nnote "hi" as N1');
+      expect(ast.notes[0]).toMatchObject({ id: 'N1', creationIndex: 2 });
+      expect(ast.notes[0]!.phantomSlot).toBeUndefined();
+    },
+  );
 
-  it('a freestanding multi-line note (`note as N1 ... end note`) also consumes ' +
-     'only one slot', () => {
+  it('a freestanding multi-line note (`note as N1 ... end note`) also consumes ' + 'only one slot', () => {
     const ast = parse('class a\nnote as N1\nhello\nend note');
     expect(ast.notes[0]).toMatchObject({ id: 'N1', creationIndex: 2 });
     expect(ast.notes[0]!.phantomSlot).toBeUndefined();
   });
 
-  it('a member-tip note (`note <pos> of X::member`) leaves creationIndex ' +
-     'undefined — CommandFactoryTipOnEntity has no GMN call, and its ' +
-     'host+position merge is not modeled at parse time (pre-existing ' +
-     'fallback numbering, unchanged since N13)', () => {
-    const ast = parse('class a { int i }\nnote right of a::i\ntip\nend note');
-    expect(ast.notes[0]!.targetPort).toBe('i');
-    expect(ast.notes[0]!.creationIndex).toBeUndefined();
-    expect(ast.notes[0]!.phantomSlot).toBeUndefined();
-  });
+  it(
+    'a member-tip note (`note <pos> of X::member`) leaves creationIndex ' +
+      'undefined — CommandFactoryTipOnEntity has no GMN call, and its ' +
+      'host+position merge is not modeled at parse time (pre-existing ' +
+      'fallback numbering, unchanged since N13)',
+    () => {
+      const ast = parse('class a { int i }\nnote right of a::i\ntip\nend note');
+      expect(ast.notes[0]!.targetPort).toBe('i');
+      expect(ast.notes[0]!.creationIndex).toBeUndefined();
+      expect(ast.notes[0]!.phantomSlot).toBeUndefined();
+    },
+  );
 
-  it('a classifier created AFTER a note reflects the note\'s three-slot ' +
-     'consumption in its own creationIndex, keeping later entities ' +
-     'correctly interleaved', () => {
-    // G2 N68: `CommandFactoryNoteOnEntity` burns THREE ranks -- the GMN
-    // phantom (slot 2), the note entity (slot 3, `creationIndex`), and the
-    // note<->host connector Link (slot 4, a `noDisplay` dashed link). `b`
-    // therefore lands at 5, not 4 (jar-verified `lenunu-95-bame774`).
-    const ast = parse('class a\nnote right of a: hi\nclass b');
-    expect(ast.classifiers[0]).toMatchObject({ id: 'a', creationIndex: 1 });
-    expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
-    expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 5 });
-  });
+  it(
+    "a classifier created AFTER a note reflects the note's three-slot " +
+      'consumption in its own creationIndex, keeping later entities ' +
+      'correctly interleaved',
+    () => {
+      // G2 N68: `CommandFactoryNoteOnEntity` burns THREE ranks -- the GMN
+      // phantom (slot 2), the note entity (slot 3, `creationIndex`), and the
+      // note<->host connector Link (slot 4, a `noDisplay` dashed link). `b`
+      // therefore lands at 5, not 4 (jar-verified `lenunu-95-bame774`).
+      const ast = parse('class a\nnote right of a: hi\nclass b');
+      expect(ast.classifiers[0]).toMatchObject({ id: 'a', creationIndex: 1 });
+      expect(ast.notes[0]).toMatchObject({ creationIndex: 3, phantomSlot: true });
+      expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 5 });
+    },
+  );
 
-  it('a classifier created AFTER a freestanding note only reflects one ' +
-     'consumed slot', () => {
+  it('a classifier created AFTER a freestanding note only reflects one ' + 'consumed slot', () => {
     const ast = parse('class a\nnote "hi" as N1\nclass b');
     expect(ast.notes[0]).toMatchObject({ creationIndex: 2 });
     expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 3 });

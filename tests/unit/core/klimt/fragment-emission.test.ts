@@ -51,12 +51,7 @@ function shadowedRect(width: number, height: number, deltaShadow: number): UDraw
 /** A rectangle filled with a two-stop gradient: registers a
  *  `<linearGradient id="...">` def (`extraDefs`) referenced via
  *  `fill="url(#...)"` in `body`. */
-function gradientRect(
-  width: number,
-  height: number,
-  color1: string,
-  color2: string,
-): UDrawable {
+function gradientRect(width: number, height: number, color1: string, color2: string): UDrawable {
   return {
     drawU(ug: UGraphic): void {
       const gradient = { color1, color2, policy: '/' as const };

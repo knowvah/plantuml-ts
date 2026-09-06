@@ -8,7 +8,18 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, text, diamond, noteBox, ellipse, line, path, polygon, resolvePaint, type TextStyle } from '../../core/svg.js';
+import {
+  rect,
+  text,
+  diamond,
+  noteBox,
+  ellipse,
+  line,
+  path,
+  polygon,
+  resolvePaint,
+  type TextStyle,
+} from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { ACTION_H_PAD, NOTE_FOLD } from './activity-layout-constants.js';
 
@@ -73,12 +84,7 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme)
   return renderNodeLabel(label, cx, cy, theme);
 }
 
-export function renderMultilineText(
-  lines: string[],
-  cx: number,
-  cy: number,
-  theme: Theme,
-): string {
+export function renderMultilineText(lines: string[], cx: number, cy: number, theme: Theme): string {
   const lh = theme.fontSize;
   const y = centeredFirstBaselineY(cy, lh, lines.length);
   return textLines(lines, cx, y, lh, {
@@ -277,13 +283,16 @@ export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
   // the midpoint of the right edge → concave right notch pointing left.
   // dent = (h/2) / tan(60°) = h / (2√3)
   const dent = h / (2 * Math.sqrt(3));
-  const shape = polygon([
-    { x: x, y: y },
-    { x: x + w, y: y },
-    { x: x + w - dent, y: y + h / 2 },
-    { x: x + w, y: y + h },
-    { x: x, y: y + h },
-  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
+  const shape = polygon(
+    [
+      { x: x, y: y },
+      { x: x + w, y: y },
+      { x: x + w - dent, y: y + h / 2 },
+      { x: x + w, y: y + h },
+      { x: x, y: y + h },
+    ],
+    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+  );
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
 
@@ -295,13 +304,16 @@ export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string 
   const dent = h / (2 * Math.sqrt(3));
   // <<output>> = right-pointing arrow: body rectangle indented on right,
   // vertex pointing right at the midpoint of the right edge.
-  const shape = polygon([
-    { x: x, y: y },
-    { x: x + w - dent, y: y },
-    { x: x + w, y: y + h / 2 },
-    { x: x + w - dent, y: y + h },
-    { x: x, y: y + h },
-  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
+  const shape = polygon(
+    [
+      { x: x, y: y },
+      { x: x + w - dent, y: y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w - dent, y: y + h },
+      { x: x, y: y + h },
+    ],
+    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+  );
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
 
@@ -310,14 +322,17 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
   const dent = h / 2;
-  const shape = polygon([
-    { x: x + dent, y: y },
-    { x: x + w - dent, y: y },
-    { x: x + w, y: y + h / 2 },
-    { x: x + w - dent, y: y + h },
-    { x: x + dent, y: y + h },
-    { x: x, y: y + h / 2 },
-  ], { fill, stroke: c.diamondBorder, strokeWidth: 1 });
+  const shape = polygon(
+    [
+      { x: x + dent, y: y },
+      { x: x + w - dent, y: y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w - dent, y: y + h },
+      { x: x + dent, y: y + h },
+      { x: x, y: y + h / 2 },
+    ],
+    { fill, stroke: c.diamondBorder, strokeWidth: 1 },
+  );
   const cx = x + w / 2;
   const cy = y + h / 2;
   const lines = (node.label ?? '').split('\n');
@@ -335,12 +350,15 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
   // Right-leaning parallelogram: interior angles 75° (acute) / 105° (obtuse).
   // tan(75°) = h/d  →  d = h / (2 + √3) = h · (2 − √3)
   const d = h * (2 - Math.sqrt(3));
-  const shape = polygon([
-    { x: x + d, y: y },
-    { x: x + w, y: y },
-    { x: x + w - d, y: y + h },
-    { x: x, y: y + h },
-  ], { fill, stroke: c.nodeBorder, strokeWidth: 1 });
+  const shape = polygon(
+    [
+      { x: x + d, y: y },
+      { x: x + w, y: y },
+      { x: x + w - d, y: y + h },
+      { x: x, y: y + h },
+    ],
+    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+  );
   const cx = x + w / 2;
   const cy = y + h / 2;
   const lines = (node.label ?? '').split('\n');
@@ -443,9 +461,7 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderBar(node, theme);
     case 'if-split':
     case 'while-header':
-      return (node.label !== undefined && node.label !== '')
-        ? renderHexagon(node, theme)
-        : renderDiamond(node, theme);
+      return node.label !== undefined && node.label !== '' ? renderHexagon(node, theme) : renderDiamond(node, theme);
     case 'repeat-cond':
       return renderHexagon(node, theme);
     case 'if-merge':

@@ -24,10 +24,7 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/class',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
 const measurer = new WidthTableMeasurer();
 
@@ -46,9 +43,7 @@ describe('class-dot-graph.ts buildDotGraph — relationship-label font size', ()
   it('measures "contains" at font-size 13 (jar-exact 48.425px), not 14 (bejusa-95-gafo325)', () => {
     const puml = readFileSync(join(CACHE, 'bejusa-95-gafo325', 'in.puml'), 'utf8');
     const graphs = captureAll(puml);
-    const edge = graphs
-      .flatMap((g) => g.edges)
-      .find((e) => e.attributes?.label === 'contains');
+    const edge = graphs.flatMap((g) => g.edges).find((e) => e.attributes?.label === 'contains');
     expect(edge, 'expected a DOT edge labeled "contains"').toBeDefined();
     const expectedAt13 = measurer.measure('contains', { family: 'sans-serif', size: 13 }).width;
     const expectedAt14 = measurer.measure('contains', { family: 'sans-serif', size: 14 }).width;
@@ -97,15 +92,7 @@ describe('class-dot-graph.ts buildDotGraph — B1 qualifierShielded wiring', () 
   });
 
   it('leaves a port-row node WITHOUT a qualifier unshielded', () => {
-    const puml = [
-      '@startuml',
-      'class B {',
-      '  method1()',
-      '}',
-      'class C',
-      'C --> B::method1',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'class B {', '  method1()', '}', 'class C', 'C --> B::method1', '@enduml'].join('\n');
     const graphs = captureAll(puml);
     const portRowNode = graphs.flatMap((g) => g.nodes).find((n) => n.portRows !== undefined);
     expect(portRowNode, 'expected one node with portRows (class B)').toBeDefined();

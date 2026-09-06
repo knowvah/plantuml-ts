@@ -48,14 +48,7 @@ describe('preprocessor: TIM !procedure family', () => {
       'init_class("foo1")',
       'init_class("foo2")',
     ]);
-    expect(result).toEqual([
-      'class foo1 {',
-      '  init()',
-      '}',
-      'class foo2 {',
-      '  init()',
-      '}',
-    ]);
+    expect(result).toEqual(['class foo1 {', '  init()', '}', 'class foo2 {', '  init()', '}']);
   });
 
   it('expands a nested procedure call inside another procedure body', () => {
@@ -116,21 +109,11 @@ describe('preprocessor: TIM !procedure family', () => {
       '    do_something(): void',
       '}',
     ]);
-    expect(result).toEqual([
-      'class test << (A, #FF00DD) >> {',
-      '    id: int4',
-      '    do_something(): void',
-      '}',
-    ]);
+    expect(result).toEqual(['class test << (A, #FF00DD) >> {', '    id: int4', '    do_something(): void', '}']);
   });
 
   it('!unquoted procedure accepts a bare (unquoted) identifier argument', () => {
-    const result = run([
-      '!unquoted procedure greet($who)',
-      'hello $who',
-      '!endprocedure',
-      'greet(world)',
-    ]);
+    const result = run(['!unquoted procedure greet($who)', 'hello $who', '!endprocedure', 'greet(world)']);
     expect(result).toEqual(['hello world']);
   });
 

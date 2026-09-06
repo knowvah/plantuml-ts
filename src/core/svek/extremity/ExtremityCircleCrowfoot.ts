@@ -49,9 +49,9 @@ export class ExtremityCircleCrowfoot extends Extremity {
     drawLineSegment(ug, this.contact, base, left);
     drawLineSegment(ug, this.contact, base, right);
     drawLineSegment(ug, this.contact, base, middle);
-    ug.apply(
-      new UTranslate(this.contact.x + circleBase.x - radius, this.contact.y + circleBase.y - radius),
-    ).draw(UEllipse.build(2 * radius, 2 * radius));
+    ug.apply(new UTranslate(this.contact.x + circleBase.x - radius, this.contact.y + circleBase.y - radius)).draw(
+      UEllipse.build(2 * radius, 2 * radius),
+    );
   }
 }
 

@@ -29,12 +29,7 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { noteFontSpecOf } from './sequence-layout-shared.js';
-import {
-  DIVIDER_PADDING,
-  DIVIDER_LABEL_DELTA_X,
-  dividerFontSpecOf,
-  dividerPreferredHeight,
-} from './divider-style.js';
+import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
@@ -113,11 +108,7 @@ export interface EventCursor {
  * Process a list of events, mutating `ctx.eventGeos`/`ctx.dividerGeos` in
  * place. Returns the updated Y position after all events are processed.
  */
-export function processEvents(
-  events: SequenceEvent[],
-  startY: number,
-  ctx: EventProcessingContext,
-): number {
+export function processEvents(events: SequenceEvent[], startY: number, ctx: EventProcessingContext): number {
   const cursor: EventCursor = { y: startY, lastMessageY: undefined };
   for (let i = 0; i < events.length; i++) {
     dispatchEvent(events[i]!, cursor, ctx, boundLifeEvents(events, i));
@@ -143,10 +134,7 @@ export function processEvents(
  * break;` — and that is what keeps a frame boundary from binding an
  * `activate` inside the frame to the message before it.
  */
-function boundLifeEvents(
-  events: readonly SequenceEvent[],
-  index: number,
-): ActivationEvent[] {
+function boundLifeEvents(events: readonly SequenceEvent[], index: number): ActivationEvent[] {
   const bound: ActivationEvent[] = [];
   for (let i = index + 1; i < events.length; i++) {
     const next = events[i]!;
@@ -165,28 +153,44 @@ function dispatchEvent(
   bound: readonly ActivationEvent[],
 ): void {
   switch (event.kind) {
-    case 'message': handleMessageEvent(event, cursor, ctx, bound); return;
+    case 'message':
+      handleMessageEvent(event, cursor, ctx, bound);
+      return;
     // Exo geometry is its own module, never `handleMessageEvent`'s:
     // `MessageExo.isSelfMessage()` is FALSE (`MessageExo.java:99-101`, D3)
     // although both of its participants are the same, so the `from === to`
     // reading there would put every exo arrow on a self loop.
-    case 'messageExo': handleMessageExoEvent(event, cursor, ctx); return;
-    case 'note': handleNoteEvent(event, cursor, ctx); return;
-    case 'activate': handleActivateEvent(event, cursor, ctx); return;
-    case 'deactivate': handleDeactivateEvent(event, cursor, ctx); return;
-    case 'frame': handleFrameEvent(event, cursor, ctx); return;
-    case 'divider': handleDividerEvent(event, cursor, ctx); return;
-    case 'delay': handleDelayEvent(event, cursor, ctx); return;
-    case 'space': handleSpaceEvent(event, cursor, ctx); return;
-    case 'newpage': handleNewpageEvent(event, cursor, ctx); return;
+    case 'messageExo':
+      handleMessageExoEvent(event, cursor, ctx);
+      return;
+    case 'note':
+      handleNoteEvent(event, cursor, ctx);
+      return;
+    case 'activate':
+      handleActivateEvent(event, cursor, ctx);
+      return;
+    case 'deactivate':
+      handleDeactivateEvent(event, cursor, ctx);
+      return;
+    case 'frame':
+      handleFrameEvent(event, cursor, ctx);
+      return;
+    case 'divider':
+      handleDividerEvent(event, cursor, ctx);
+      return;
+    case 'delay':
+      handleDelayEvent(event, cursor, ctx);
+      return;
+    case 'space':
+      handleSpaceEvent(event, cursor, ctx);
+      return;
+    case 'newpage':
+      handleNewpageEvent(event, cursor, ctx);
+      return;
   }
 }
 
-function handleNoteEvent(
-  event: NoteEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   // `note { FontSize 13 }` (`plantuml.skin:312-316`), NOT the ambient font —
   // the box and its text must be sized from one measurement.
   const fontSpec = noteFontSpecOf(ctx.theme);
@@ -225,11 +229,7 @@ function handleNoteEvent(
  *  an x term and `findings/vertical-terms.md` §4 does not claim it. */
 const NOTE_PADDING_Y = 5;
 
-function handleActivateEvent(
-  event: ActivationEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleActivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   // Use the last message arrow y when available so the bar top aligns
   // with its triggering arrow, not with the post-arrow spacing position.
   pushActivation(ctx.activationStart, event.participantId, {
@@ -239,18 +239,13 @@ function handleActivateEvent(
   cursor.lastMessageY = undefined;
 }
 
-function handleDeactivateEvent(
-  event: ActivationEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleDeactivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   // End at the last message arrow y. If that would give zero/negative
   // height (activate and deactivate at the same y), fall back to
   // post-spacing cursor.y so the bar is always visible.
   const deactStartY = openActivation(ctx.activationStart, event.participantId)?.y;
   const rawEndY = cursor.lastMessageY ?? cursor.y;
-  const deactEndY =
-    deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
+  const deactEndY = deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
   emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   cursor.lastMessageY = undefined;
   if (isDestroyWithoutMessage(event, ctx)) cursor.y += DESTROY_CROSS_SIZE * 2;
@@ -268,10 +263,7 @@ function handleDeactivateEvent(
  * destroy standalone. `X -> X` followed by `destroy Y` is upstream's own
  * worked example, in the comment above `:387`.
  */
-function isDestroyWithoutMessage(
-  event: ActivationEvent,
-  ctx: EventProcessingContext,
-): boolean {
+function isDestroyWithoutMessage(event: ActivationEvent, ctx: EventProcessingContext): boolean {
   if (event.destroy !== true) return false;
   return ctx.lastMessageParticipants?.includes(event.participantId) !== true;
 }
@@ -332,10 +324,7 @@ function computeFrameBody(
   // used, which was uncited and made the frame overhang the participant row
   // far enough to shift the whole document's origin.
   const x = minCx - FRAME_MARGIN_X;
-  const width = Math.max(
-    maxCx - minCx + 2 * FRAME_MARGIN_X,
-    refBodyWidth(body, ctx.theme, ctx.measurer),
-  );
+  const width = Math.max(maxCx - minCx + 2 * FRAME_MARGIN_X, refBodyWidth(body, ctx.theme, ctx.measurer));
   return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
 }
 
@@ -432,7 +421,8 @@ function buildTabRuns(
     const lh = ctx.measurer.measure('M', spec).height;
     const first = by + lh - ctx.measurer.getDescent(spec, 'M');
     return displayLines(text).flatMap((line, i) =>
-      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer));
+      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer),
+    );
   };
   const left = x + HEADER_PADDING.left;
   const top = y + HEADER_PADDING.top;
@@ -480,11 +470,13 @@ function computeHeaderTab(
   const titleLines = displayLines(tabText);
   const measured = ctx.measurer.measure(tabText, fontSpec);
   const titleFont = sequenceCreoleFont(fontSpec);
-  const tabTextWidth = Math.max(...titleLines.map((l) =>
-    creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer))));
+  const tabTextWidth = Math.max(
+    ...titleLines.map((l) =>
+      creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer)),
+    ),
+  );
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
-  const tabHeight =
-    titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
+  const tabHeight = titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
 
   return {
     tabText,
@@ -571,11 +563,7 @@ const ELSE_TEOZ_DY = 2;
  * construct-then-resolve-gauge split (the `Real`/`YGauge` chain is built at
  * construction, then read once solved).
  */
-function handleFrameEvent(
-  event: FrameEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   // `frameStartY` is the GAUGE MIN -- the chaining point, NOT the drawn
   // frame's top. Those differ by `EXTERNAL_MARGINY`, and GroupingTile keeps
   // them apart deliberately: a parallel (`&`) sibling chains on the min, so
@@ -692,15 +680,17 @@ function dividerLabelRuns(lines: readonly string[], spec: FontSpec, ctx: EventPr
   // C6: one run per creole atom -- a divider's label is an
   // `AbstractTextualComponent` `Display` like every other sequence label
   // (`ComponentRoseDivider.java:57-62`); `bakuba-09-fica741` is the last one.
-  return lines.flatMap((line, i) => sequenceCreoleRuns(line, font,
-    { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight }, ctx.measurer));
+  return lines.flatMap((line, i) =>
+    sequenceCreoleRuns(
+      line,
+      font,
+      { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight },
+      ctx.measurer,
+    ),
+  );
 }
 
-function handleDividerEvent(
-  event: DividerEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleDividerEvent(event: DividerEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   const font = dividerFontSpecOf(ctx.theme);
   // `\n` splits the label into a multi-line text block, exactly as it does for
   // a `ref` body (`text-block-geo.ts#refBodyLines`): the widest line drives the
@@ -744,11 +734,7 @@ function handleDividerEvent(
  * `delay { FontSize 11 }` (`plantuml.skin:290-295`). The text is still not
  * DRAWN — a pre-existing element gap — but its space is now reserved.
  */
-function handleDelayEvent(
-  event: DelayEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleDelayEvent(event: DelayEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   if (event.text === undefined) {
     cursor.y += DELAY_LINE_HEIGHT;
     return;
@@ -777,11 +763,7 @@ const DELAY_FONT_SIZE = 11;
  * `isBackground`) and one `ULine.hline` in the foreground; the band it spans
  * is back-filled in Step 3.
  */
-function handleNewpageEvent(
-  _event: NewpageEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleNewpageEvent(_event: NewpageEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   const newpageGeo: NewpageGeo = {
     kind: 'newpage',
     y: cursor.y,
@@ -794,11 +776,7 @@ function handleNewpageEvent(
   cursor.y += newpageGeo.height;
 }
 
-function handleSpaceEvent(
-  event: SpaceEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+function handleSpaceEvent(event: SpaceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   const spaceGeo: SpaceGeo = {
     kind: 'space',
     y: cursor.y,
@@ -825,9 +803,7 @@ function centerXOf(participantMap: Map<string, ParticipantGeo>, id: string): num
  * Returns [0, 0] when the map is empty (only possible in degenerate inputs
  * since layoutSequence returns early for empty participants).
  */
-function participantCenterXBounds(
-  participantMap: Map<string, ParticipantGeo>,
-): { minCx: number; maxCx: number } {
+function participantCenterXBounds(participantMap: Map<string, ParticipantGeo>): { minCx: number; maxCx: number } {
   const centerXs = [...participantMap.values()].map((g) => g.centerX);
   if (centerXs.length === 0) return { minCx: 0, maxCx: 0 };
   return { minCx: Math.min(...centerXs), maxCx: Math.max(...centerXs) };
@@ -878,9 +854,7 @@ function computeOverNotePosition(
   }
 
   // Span between two (or more) participants
-  const centers = event.participants
-    .map((id) => centerXOf(participantMap, id))
-    .filter((cx) => cx > 0);
+  const centers = event.participants.map((id) => centerXOf(participantMap, id)).filter((cx) => cx > 0);
   const minCx = Math.min(...centers);
   const maxCx = Math.max(...centers);
   return { noteX: minCx - notePadding, finalNoteWidth: maxCx - minCx + notePadding * 2 };
@@ -931,7 +905,9 @@ function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProces
   const font = sequenceCreoleFont(spec);
   const lineHeight = ctx.measurer.measure('M', spec).height;
   const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  return lines.flatMap((l, i) => sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer));
+  return lines.flatMap((l, i) =>
+    sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer),
+  );
 }
 
 /**
@@ -953,20 +929,14 @@ export function pushActivation(
 
 /** The INNERMOST open activation for `participantId`, or `undefined` at
  *  level 0. */
-export function openActivation(
-  activationStart: ActivationStack,
-  participantId: string,
-): ActivationRecord | undefined {
+export function openActivation(activationStart: ActivationStack, participantId: string): ActivationRecord | undefined {
   const stack = activationStart.get(participantId);
   return stack === undefined ? undefined : stack[stack.length - 1];
 }
 
 /** How deep `participantId` is currently activated — upstream's own `level`
  *  (`LiveBoxes#getLevelAt`). 0 when nothing is open. */
-export function activationLevel(
-  activationStart: ActivationStack,
-  participantId: string,
-): number {
+export function activationLevel(activationStart: ActivationStack, participantId: string): number {
   return activationStart.get(participantId)?.length ?? 0;
 }
 

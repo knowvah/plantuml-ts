@@ -1,15 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  defaultTheme,
-  darkTheme,
-  resolveTheme,
-} from '../../src/core/theme.js';
-import {
-  FormulaMeasurer,
-  CanvasMeasurer,
-  FixedMeasurer,
-  glyphWidth,
-} from '../../src/core/measurer.js';
+import { defaultTheme, darkTheme, resolveTheme } from '../../src/core/theme.js';
+import { FormulaMeasurer, CanvasMeasurer, FixedMeasurer, glyphWidth } from '../../src/core/measurer.js';
 import type { FontSpec, StringMeasurer } from '../../src/core/measurer.js';
 
 // ---------------------------------------------------------------------------
@@ -426,9 +417,7 @@ describe('FixedMeasurer', () => {
   it('different instances with different charWidth produce different results', () => {
     const narrow = new FixedMeasurer(4, 16);
     const wide = new FixedMeasurer(12, 16);
-    expect(wide.measure('Hello', font).width).toBeGreaterThan(
-      narrow.measure('Hello', font).width,
-    );
+    expect(wide.measure('Hello', font).width).toBeGreaterThan(narrow.measure('Hello', font).width);
   });
 });
 
@@ -455,7 +444,7 @@ describe('FixedMeasurer — getDescent', () => {
 function makeMockCtx(charWidth: number): CanvasRenderingContext2D {
   return {
     font: '',
-    measureText: (text: string) => ({ width: text.length * charWidth } as TextMetrics),
+    measureText: (text: string) => ({ width: text.length * charWidth }) as TextMetrics,
   } as unknown as CanvasRenderingContext2D;
 }
 
@@ -542,9 +531,13 @@ describe('CanvasMeasurer — with injected mock context', () => {
   it('sets ctx.font before calling measureText', () => {
     const fontStrings: string[] = [];
     const mockCtx = {
-      get font() { return fontStrings[fontStrings.length - 1] ?? ''; },
-      set font(val: string) { fontStrings.push(val); },
-      measureText: (text: string) => ({ width: text.length * 7 } as TextMetrics),
+      get font() {
+        return fontStrings[fontStrings.length - 1] ?? '';
+      },
+      set font(val: string) {
+        fontStrings.push(val);
+      },
+      measureText: (text: string) => ({ width: text.length * 7 }) as TextMetrics,
     } as unknown as CanvasRenderingContext2D;
     const measurer = new CanvasMeasurer(() => mockCtx);
     measurer.measure('Hi', { family: 'Courier', size: 12, weight: 'bold', style: 'italic' });
@@ -554,7 +547,7 @@ describe('CanvasMeasurer — with injected mock context', () => {
   it('falls back to per-glyph formula when measureText returns 0 for non-empty text', () => {
     const zeroCtx = {
       font: '',
-      measureText: (_text: string) => ({ width: 0 } as TextMetrics),
+      measureText: (_text: string) => ({ width: 0 }) as TextMetrics,
     } as unknown as CanvasRenderingContext2D;
     const measurer = new CanvasMeasurer(() => zeroCtx);
     const font14: FontSpec = { family: 'Arial', size: 14 };
@@ -576,7 +569,9 @@ describe('CanvasMeasurer — with injected mock context', () => {
   it('falls back to formula when measureText throws', () => {
     const throwingCtx = {
       font: '',
-      measureText: () => { throw new Error('canvas error'); },
+      measureText: () => {
+        throw new Error('canvas error');
+      },
     } as unknown as CanvasRenderingContext2D;
     const measurer = new CanvasMeasurer(() => throwingCtx);
     expect(() => measurer.measure('Hello', font)).not.toThrow();
@@ -659,7 +654,7 @@ describe('CanvasMeasurer — LRU cache', () => {
   it('evicts oldest entry when cache exceeds 8192 entries', () => {
     const ctx = {
       font: '',
-      measureText: (text: string) => ({ width: text.length * 8 } as TextMetrics),
+      measureText: (text: string) => ({ width: text.length * 8 }) as TextMetrics,
     } as unknown as CanvasRenderingContext2D;
     const measurer = new CanvasMeasurer(() => ctx);
     const font: FontSpec = { family: 'Arial', size: 14 };

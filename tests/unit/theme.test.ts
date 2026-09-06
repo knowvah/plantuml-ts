@@ -89,15 +89,11 @@ describe('defaultTheme', () => {
   });
 
   it('graph.usecaseFill equals colors.background', () => {
-    expect(defaultTheme.colors.graph.usecaseFill).toBe(
-      defaultTheme.colors.background,
-    );
+    expect(defaultTheme.colors.graph.usecaseFill).toBe(defaultTheme.colors.background);
   });
 
   it('graph.businessUsecaseFill equals colors.background', () => {
-    expect(defaultTheme.colors.graph.businessUsecaseFill).toBe(
-      defaultTheme.colors.background,
-    );
+    expect(defaultTheme.colors.graph.businessUsecaseFill).toBe(defaultTheme.colors.background);
   });
 
   it('has all required sequence fields', () => {
@@ -157,9 +153,7 @@ describe('darkTheme', () => {
   });
 
   it('graph.businessUsecaseFill equals darkTheme colors.background', () => {
-    expect(darkTheme.colors.graph.businessUsecaseFill).toBe(
-      darkTheme.colors.background,
-    );
+    expect(darkTheme.colors.graph.businessUsecaseFill).toBe(darkTheme.colors.background);
   });
 });
 
@@ -232,7 +226,9 @@ describe('resolveTheme', () => {
 
   it('does not mutate defaultTheme when merging partial', () => {
     const originalBg = defaultTheme.colors.background;
-    resolveTheme({ colors: { ...defaultTheme.colors, background: '#FF0000', graph: { ...defaultTheme.colors.graph } } });
+    resolveTheme({
+      colors: { ...defaultTheme.colors, background: '#FF0000', graph: { ...defaultTheme.colors.graph } },
+    });
     expect(defaultTheme.colors.background).toBe(originalBg);
   });
 
@@ -303,7 +299,17 @@ describe('resolveTheme', () => {
   });
 
   it('merges sequence partial fields', () => {
-    const partial: Partial<Theme> = { sequence: { participantPadding: 99, participantGap: 10, messageSpacing: 20, activationWidth: 10, noteMargin: 5, frameHeaderHeight: 20, lifelineExtension: 20 } };
+    const partial: Partial<Theme> = {
+      sequence: {
+        participantPadding: 99,
+        participantGap: 10,
+        messageSpacing: 20,
+        activationWidth: 10,
+        noteMargin: 5,
+        frameHeaderHeight: 20,
+        lifelineExtension: 20,
+      },
+    };
     const result = resolveTheme(partial);
     expect(result.sequence.participantPadding).toBe(99);
     expect(result.sequence.participantGap).toBe(defaultTheme.sequence.participantGap);

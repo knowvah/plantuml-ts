@@ -116,7 +116,13 @@ export class USymbolCollections extends USymbol {
         const dim = calculateDimension(stringBounder);
         ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
-        drawCollections(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawCollections(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const delta = getDeltaCollection();
         const tb = TextBlockUtils.mergeTB(stereotype, label, stereoAlignment);
@@ -143,7 +149,13 @@ export class USymbolCollections extends USymbol {
         const stringBounder = ug.getStringBounder();
         const dim = new XDimension2D(width, height);
         ug = symbolContext.apply(ug);
-        drawCollections(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawCollections(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const dimStereo = stereotype.calculateDimension(stringBounder);
         const [posStereoX, posStereoY] = computeStereoPos(stereoAlignment, width, dimStereo);
         stereotype.drawU(ug.apply(new UTranslate(posStereoX, posStereoY)));

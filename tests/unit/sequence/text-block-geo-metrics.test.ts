@@ -208,9 +208,7 @@ describe('messageLabelBlock creole (C3)', () => {
   const spec = arrowFontSpecOf(defaultTheme);
 
   it('splits one line into one run per styled atom, bolding only the <b> run', () => {
-    const block = messageLabelBlock(
-      'a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
-    );
+    const block = messageLabelBlock('a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     expect(block.lines.map((r) => r.text)).toEqual(['a ', 'bold', ' label']);
     expect(block.lines.map((r) => r.bold)).toEqual([undefined, true, undefined]);
     // The jar's own three advances: 7.231, 24.619, 27.544.
@@ -218,9 +216,7 @@ describe('messageLabelBlock creole (C3)', () => {
   });
 
   it('advances each run by the previous run’s own measured width', () => {
-    const block = messageLabelBlock(
-      'a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
-    );
+    const block = messageLabelBlock('a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     const [a, bold, label] = block.lines;
     expect(bold!.x).toBeCloseTo(a!.x + a!.textWidth, 10);
     expect(label!.x).toBeCloseTo(bold!.x + bold!.textWidth, 10);
@@ -242,9 +238,7 @@ describe('messageLabelBlock creole (C3)', () => {
   });
 
   it('interprets creole in the AUTONUMBER rather than emitting it literally', () => {
-    const block = messageLabelBlock(
-      'plain', '<font color=red>[001]</font>', LEFT_X, ARROW_Y, defaultTheme, measurer,
-    );
+    const block = messageLabelBlock('plain', '<font color=red>[001]</font>', LEFT_X, ARROW_Y, defaultTheme, measurer);
     expect(block.number!.text).toBe('[001]');
     expect(block.number!.color).toBe('#FF0000');
     // The width that matters is the RENDERED number's, not the markup's: the
@@ -267,9 +261,7 @@ describe('messageLabelBlock creole (C3)', () => {
   });
 
   it('keeps a multi-line label’s rows one lineHeight apart when a row splits', () => {
-    const block = messageLabelBlock(
-      'a <b>b</b>\\nc', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer,
-    );
+    const block = messageLabelBlock('a <b>b</b>\\nc', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer);
     // Row 0 is two runs, row 1 is one — four entries would mean the split
     // leaked into the row advance.
     expect(block.lines).toHaveLength(3);

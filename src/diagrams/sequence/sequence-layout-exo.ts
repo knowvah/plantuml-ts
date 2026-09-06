@@ -51,7 +51,6 @@ import { LEFT_MARGIN } from './sequence-layout-participants.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-
 /** The right margin between a leading `MessageNumber` and the label beside it
  *  — `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`). Same
  *  value `text-block-geo.ts` places the number with; duplicated rather than
@@ -136,8 +135,7 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): n
   const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
   const lines = event.label === '' ? [] : event.label.split('\n');
-  const labelWidth =
-    lines.length === 0 ? 0 : Math.max(...lines.map((l) => ctx.measurer.measure(l, fontSpec).width));
+  const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => ctx.measurer.measure(l, fontSpec).width));
   return numberWidth + gap + labelWidth;
 }
 
@@ -234,12 +232,7 @@ function exoLabelLeft(event: MessageExoEvent, span: ExoSpan): number {
  *  run in the message's own direction, so the renderer's own `fromX > toX`
  *  reversal reproduces `getComponent`'s `arrowConfiguration.reverse()`
  *  (`CommunicationExoTile.java:96-98`). */
-function buildExoGeo(
-  event: MessageExoEvent,
-  span: ExoSpan,
-  y: number,
-  ctx: EventProcessingContext,
-): MessageGeo {
+function buildExoGeo(event: MessageExoEvent, span: ExoSpan, y: number, ctx: EventProcessingContext): MessageGeo {
   const rightwards = getDirection(event.exoType) === 1;
   // A2 changed `messageLabelBlock`'s third parameter from a centre to the
   // block's LEFT edge, which is what `exoLabelLeft` already computes — the
@@ -285,11 +278,7 @@ function buildExoGeo(
  * `lastMessageY`. Leaving it unset would start every exo-triggered bar one
  * message-spacing BELOW its own arrow.
  */
-export function handleMessageExoEvent(
-  event: MessageExoEvent,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
+export function handleMessageExoEvent(event: MessageExoEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   const participant = ctx.participantMap.get(event.participant);
   // Skip gracefully if the participant is unknown, as `handleMessageEvent` does.
   if (participant === undefined) return;

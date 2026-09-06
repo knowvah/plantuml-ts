@@ -69,13 +69,7 @@ const COCICE_LINES = [
 
 describe('description engine — end-to-end via plugin', () => {
   it('renders a mixed-symbol deployment diagram as valid SVG with every element', () => {
-    const svg = renderViaPlugin([
-      'node Server',
-      'database DB',
-      'cloud Internet',
-      'component App',
-      'Server --> DB',
-    ]);
+    const svg = renderViaPlugin(['node Server', 'database DB', 'cloud Internet', 'component App', 'Server --> DB']);
     expect(svg).toMatch(/^<svg/);
     expect(svg).toMatch(/<\/svg>\s*$/);
     for (const label of ['Server', 'DB', 'Internet', 'App']) {
@@ -208,9 +202,14 @@ describe('description engine — jar SVG conformance (E2E)', () => {
   // font-family (defaultTheme now emits 'sans-serif', matching upstream)
   // were both fixed and are intentionally absent.
   const ALLOWED_DIFF_ATTRS = new Set([
-    'width', 'height', 'viewBox', // text-height/measurer mismatch (D12), document-level
-    'x', 'y', 'd', 'points',       // layout margin offset, cascading — layout-engine, out of scope
-    'textLength',                  // cascades from jarMeasurer vs. corpus deterministic-mode text width (D12)
+    'width',
+    'height',
+    'viewBox', // text-height/measurer mismatch (D12), document-level
+    'x',
+    'y',
+    'd',
+    'points', // layout margin offset, cascading — layout-engine, out of scope
+    'textLength', // cascades from jarMeasurer vs. corpus deterministic-mode text width (D12)
   ]);
 
   function diffAttrName(path: string): string {
@@ -272,12 +271,7 @@ const PLAIN_HEX_SPRITE = ['sprite $foo {', 'F0F0', '0F0F', 'F0F0', '0F0F', '}'];
 
 describe('description engine — T7 sprite/img inline-atom rendering', () => {
   it('renders an inline sprite definition + <$name> in a component label as one <image> (renderSync, full production pipeline)', () => {
-    const src = [
-      '@startuml',
-      ...PLAIN_HEX_SPRITE,
-      'component "Icon <$foo>" as C1',
-      '@enduml',
-    ].join('\n');
+    const src = ['@startuml', ...PLAIN_HEX_SPRITE, 'component "Icon <$foo>" as C1', '@enduml'].join('\n');
 
     const svg = renderSync(src);
 

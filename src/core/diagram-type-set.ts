@@ -181,7 +181,6 @@ function getTypes(text: string, p: number): ReadonlySet<DiagramType> {
   return new Set([DiagramType.UNKNOWN]);
 }
 
-
 /**
  * The start-tag candidate set for a diagram's first line: skip leading
  * whitespace, require `@` or `\`, require `start`, then dispatch on the

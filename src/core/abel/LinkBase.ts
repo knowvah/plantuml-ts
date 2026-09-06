@@ -95,8 +95,7 @@ export abstract class LinkBase extends WithLinkType implements Hideable, Removea
     if (this.type.looksLikeRevertedForSvg())
       return this.getEntity1().getName() + '-backto-' + this.getEntity2().getName();
 
-    if (this.type.looksLikeNoDecorAtAllSvg())
-      return this.getEntity1().getName() + '-' + this.getEntity2().getName();
+    if (this.type.looksLikeNoDecorAtAllSvg()) return this.getEntity1().getName() + '-' + this.getEntity2().getName();
 
     return this.getEntity1().getName() + '-to-' + this.getEntity2().getName();
   }

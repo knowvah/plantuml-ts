@@ -199,7 +199,13 @@ export abstract class CucaDiagramBase extends TitledDiagram {
     if (ident.getData() !== undefined) throw new Error('IllegalStateException');
     if (Display.isNull(display)) throw new Error('IllegalArgumentException');
 
-    const result = this.createLeaf(location, ident, this as unknown as CucaDiagram, type, this.getHidesVisibilityModifier());
+    const result = this.createLeaf(
+      location,
+      ident,
+      this as unknown as CucaDiagram,
+      type,
+      this.getHidesVisibilityModifier(),
+    );
     result.setUSymbol(symbol);
     this.lastEntity = result;
 

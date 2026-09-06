@@ -323,11 +323,7 @@ function getPolygonReverse(part: ArrowPart, niceArrow: boolean): Point2D[] {
  * and its part variants nudge the whole shape back by one along `x`.
  * @see skin/rose/ComponentRoseSelfArrow.java:275-296
  */
-function getPolygonSelf(
-  part: ArrowPart,
-  direction: number,
-  niceArrow: boolean,
-): Point2D[] {
+function getPolygonSelf(part: ArrowPart, direction: number, niceArrow: boolean): Point2D[] {
   const x = direction * ARROW_DELTA_X;
   const dy = ARROW_DELTA_Y;
   if (part === 'TOP_PART') return [pt(x - 1, -dy), pt(-1, 0), pt(x - 1, 0)];
@@ -350,8 +346,7 @@ function getPolygonSelf(
 function asyncLinesReverse(part: ArrowPart): ArrowSegment[] {
   const o = pt(0, 0);
   const lines: ArrowSegment[] = [];
-  if (part !== 'BOTTOM_PART')
-    lines.push([o, pt(ARROW_DELTA_X, -ARROW_DELTA_Y)]);
+  if (part !== 'BOTTOM_PART') lines.push([o, pt(ARROW_DELTA_X, -ARROW_DELTA_Y)]);
   if (part !== 'TOP_PART') lines.push([o, pt(ARROW_DELTA_X, ARROW_DELTA_Y)]);
   return lines;
 }
@@ -404,10 +399,8 @@ function crossxLinesNormal(): ArrowSegment[] {
 /** `drawDressing2`'s head branch, rotated by `theta` then shifted by `dx`.
  *  The saltire passes 0: upstream never rotates it (`:255-260`). */
 function normalSideShape(dressing: ArrowDressing, niceArrow: boolean, dx: number, theta: number): HeadGeometry {
-  if (dressing.head === 'ASYNC')
-    return { lines: placeSegments(asyncLinesNormal(dressing.part), theta, dx) };
-  if (dressing.head === 'CROSSX')
-    return { lines: placeSegments(crossxLinesNormal(), 0, dx) };
+  if (dressing.head === 'ASYNC') return { lines: placeSegments(asyncLinesNormal(dressing.part), theta, dx) };
+  if (dressing.head === 'CROSSX') return { lines: placeSegments(crossxLinesNormal(), 0, dx) };
   if (dressing.head === 'NORMAL')
     return { polygon: placePoints(getPolygonNormal(dressing.part, niceArrow), theta, dx) };
   return {};
@@ -415,10 +408,8 @@ function normalSideShape(dressing: ArrowDressing, niceArrow: boolean, dx: number
 
 /** `drawDressing1`'s head branch; the saltire again passes 0 (`:218-223`). */
 function reverseSideShape(dressing: ArrowDressing, niceArrow: boolean, dx: number, theta: number): HeadGeometry {
-  if (dressing.head === 'ASYNC')
-    return { lines: placeSegments(asyncLinesReverse(dressing.part), theta, dx) };
-  if (dressing.head === 'CROSSX')
-    return { lines: placeSegments(crossxLinesReverse(), 0, dx) };
+  if (dressing.head === 'ASYNC') return { lines: placeSegments(asyncLinesReverse(dressing.part), theta, dx) };
+  if (dressing.head === 'CROSSX') return { lines: placeSegments(crossxLinesReverse(), 0, dx) };
   if (dressing.head === 'NORMAL')
     return { polygon: placePoints(getPolygonReverse(dressing.part, niceArrow), theta, dx) };
   return {};
@@ -474,8 +465,7 @@ export function headGeometryReverseSide(
  * @see skin/ArrowConfiguration.java:221-226
  */
 function configurationPart(configuration: ArrowConfiguration): ArrowPart {
-  if (configuration.dressing2.head !== 'NONE')
-    return configuration.dressing2.part;
+  if (configuration.dressing2.head !== 'NONE') return configuration.dressing2.part;
   return configuration.dressing1.part;
 }
 
@@ -494,10 +484,6 @@ export function headGeometrySelf(
   let direction = 1;
   if (reverseDefine) direction = -1;
   return {
-    polygon: getPolygonSelf(
-      configurationPart(configuration),
-      direction,
-      niceArrow,
-    ),
+    polygon: getPolygonSelf(configurationPart(configuration), direction, niceArrow),
   };
 }

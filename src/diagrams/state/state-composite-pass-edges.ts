@@ -65,12 +65,7 @@ export function resetEdgeCounter(): void {
  *  pattern for the same reason: a note declared inside a non-autonom
  *  composite's scope is a member of that cluster's subgraph). No-op for a
  *  scope with no notes. */
-export function addScopeNotes(
-  scopeId: string,
-  ctx: DiagramCtx,
-  acc: PassAccumulator,
-  cluster?: DotInputCluster,
-): void {
+export function addScopeNotes(scopeId: string, ctx: DiagramCtx, acc: PassAccumulator, cluster?: DotInputCluster): void {
   const parts = ctx.noteParts.get(scopeId);
   if (parts === undefined) return;
   acc.nodes.push(...parts.nodes);
@@ -99,7 +94,12 @@ function isReversedDirection(direction: TransitionDirection | undefined): boolea
   return direction === 'left' || direction === 'up';
 }
 
-export function addLevelEdges(scopeId: string, transitions: readonly Transition[], acc: PassAccumulator, ctx: DiagramCtx): void {
+export function addLevelEdges(
+  scopeId: string,
+  transitions: readonly Transition[],
+  acc: PassAccumulator,
+  ctx: DiagramCtx,
+): void {
   // T7/D3/D4: shared resolver, not `theme.fontSize` (14, the STATE
   // body/title-text default) -- WIDTH-ONLY in the sense that this swaps
   // ONLY the edge-label measurement call site, not state's body/title text

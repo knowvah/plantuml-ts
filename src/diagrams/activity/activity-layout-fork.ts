@@ -4,12 +4,7 @@
  */
 
 import type { ActivityFork, ActivityNode, ActivitySplit } from './ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  BranchResult,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, BranchResult, LayoutCtx } from './activity-layout-types.js';
 import { BAR_HEIGHT, NODE_MARGIN_X, NODE_MARGIN_Y } from './activity-layout-constants.js';
 import { nextId, nodeCenterX, orthogonalPoints } from './activity-layout-helpers.js';
 import { measureSubtreeWidth } from './activity-layout-measure.js';
@@ -85,8 +80,7 @@ function buildForkBarGeo(
   forkBarBottomY: number;
 } {
   const colWidths = branches.map((b) => measureSubtreeWidth(b, ctx));
-  const totalBranchWidth =
-    colWidths.reduce((s, w) => s + w, 0) + NODE_MARGIN_X * Math.max(branches.length - 1, 0);
+  const totalBranchWidth = colWidths.reduce((s, w) => s + w, 0) + NODE_MARGIN_X * Math.max(branches.length - 1, 0);
   const forkBarKind = barKind === 'fork' ? 'fork-bar' : 'split-bar';
   const forkBarId = nextId(ctx, forkBarKind);
   const forkBarGeo: ActivityNodeGeo = {
@@ -182,12 +176,7 @@ function buildBranchToJoinBarEdges(params: JoinBarEdgesParams): ActivityEdgeGeo[
       const lastNode = allBranchNodes.find((n) => n.id === lastId);
       if (lastNode !== undefined) {
         outEdges.push({
-          points: orthogonalPoints(
-            lastNode.x + lastNode.width / 2,
-            lastNode.y + lastNode.height,
-            colCenterX,
-            joinBarY,
-          ),
+          points: orthogonalPoints(lastNode.x + lastNode.width / 2, lastNode.y + lastNode.height, colCenterX, joinBarY),
         });
       }
     }
@@ -246,8 +235,13 @@ function layoutParallelBranches(
   centerX: number,
   ctx: LayoutCtx,
 ): BranchResult {
-  const { colWidths, totalBranchWidth, forkBarGeo, forkBarId, forkBarBottomY } =
-    buildForkBarGeo(barKind, branches, startY, centerX, ctx);
+  const { colWidths, totalBranchWidth, forkBarGeo, forkBarId, forkBarBottomY } = buildForkBarGeo(
+    barKind,
+    branches,
+    startY,
+    centerX,
+    ctx,
+  );
   const branchStartY = forkBarBottomY + NODE_MARGIN_Y;
   const columns = placeForkBranchColumns({ branches, colWidths, totalBranchWidth, branchStartY, centerX, ctx });
 
@@ -273,22 +267,12 @@ function layoutParallelBranches(
   };
 }
 
-export function layoutFork(
-  node: ActivityFork,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+export function layoutFork(node: ActivityFork, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   const cx = nodeCenterX(node.swimlane, centerX, ctx);
   return layoutParallelBranches('fork', node.branches, startY, cx, ctx);
 }
 
-export function layoutSplit(
-  node: ActivitySplit,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+export function layoutSplit(node: ActivitySplit, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   const cx = nodeCenterX(node.swimlane, centerX, ctx);
   return layoutParallelBranches('split', node.branches, startY, cx, ctx);
 }

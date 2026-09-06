@@ -38,11 +38,7 @@
 import { finalizeBlock } from './block-extractor.js';
 import type { UmlSource } from './block-extractor.js';
 import { preprocessLinesOrError } from './preprocessor.js';
-import type {
-  PreprocessOptions,
-  PreprocessorFailure,
-  PreprocessorResult,
-} from './preprocessor.js';
+import type { PreprocessOptions, PreprocessorFailure, PreprocessorResult } from './preprocessor.js';
 import {
   isEndDirective,
   isExit,
@@ -110,9 +106,7 @@ export type BlockUml = BlockUmlOk | BlockUmlErr;
 function appendWhilePaused(current: StringLocated[], s: StringLocated): void {
   const text = possibleAppend(s.getString());
   if (text === undefined) return;
-  current.push(
-    new StringLocated(text, s.getLocation(), s.getType(), s.getPreprocessorError()),
-  );
+  current.push(new StringLocated(text, s.getLocation(), s.getType(), s.getPreprocessorError()));
 }
 
 /**
@@ -125,9 +119,7 @@ function appendWhilePaused(current: StringLocated[], s: StringLocated): void {
  * synthesizes the missing `@end`), not in the library.
  */
 export function buildBlockUmls(source: string, options?: PreprocessOptions): BlockUml[] {
-  return splitRawBlocks(mergeEndingBackslashLines(readLines(source))).map((raw) =>
-    buildBlockUml(raw, options),
-  );
+  return splitRawBlocks(mergeEndingBackslashLines(readLines(source))).map((raw) => buildBlockUml(raw, options));
 }
 
 /**
@@ -190,8 +182,7 @@ function splitRawBlocks(lines: readonly StringLocated[]): RawBlock[] {
 /** @see ~/git/plantuml/.../BlockUml.java#BlockUml -- the `TimLoader` branch. */
 function buildBlockUml(raw: RawBlock, options?: PreprocessOptions): BlockUml {
   const outcome = preprocessLinesOrError(raw.lines, undefined, options);
-  if (!outcome.ok)
-    return { ok: false, suffix: raw.suffix, rawSource: raw.lines, failure: outcome.failure };
+  if (!outcome.ok) return { ok: false, suffix: raw.suffix, rawSource: raw.lines, failure: outcome.failure };
 
   const interior = interiorOf(outcome.result.lines, outcome.result.linePositions);
   return {
@@ -243,8 +234,6 @@ function interiorOf(
  */
 export function isBlockEmpty(block: BlockUmlOk): boolean {
   return (
-    block.source.lines.length === 0 &&
-    block.preprocessed.styles.length === 0 &&
-    block.preprocessed.skinparam.size === 0
+    block.source.lines.length === 0 && block.preprocessed.styles.length === 0 && block.preprocessed.skinparam.size === 0
   );
 }

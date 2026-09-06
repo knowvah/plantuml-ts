@@ -78,7 +78,6 @@ import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
 
-
 interface BaselineFixture {
   readonly type: string;
   readonly slug: string;
@@ -153,9 +152,7 @@ const LARGE_GOLDEN_BUDGET_MS = 30_000;
 /** `undefined` leaves vitest's default in place -- the 1,140 small fixtures
  * keep their tight guard; only an outlier golden buys headroom. */
 function budgetFor(f: FixtureRef): number | undefined {
-  return statSync(join(fixtureDir(f), 'in.svg')).size > LARGE_GOLDEN_BYTES
-    ? LARGE_GOLDEN_BUDGET_MS
-    : undefined;
+  return statSync(join(fixtureDir(f), 'in.svg')).size > LARGE_GOLDEN_BYTES ? LARGE_GOLDEN_BUDGET_MS : undefined;
 }
 
 type MeasureResult =
@@ -203,11 +200,7 @@ interface RiseCheckResult {
  * `diff-baseline.json` on disk. `baseline` is `undefined` for an entry that
  * carries no `weightedScore` pin yet — an unpinned entry FAILS rather than
  * falling back to `diffCount`, which measures a different quantity. */
-function checkNoRise(
-  f: FixtureRef,
-  baseline: number | undefined,
-  live: number,
-): RiseCheckResult {
+function checkNoRise(f: FixtureRef, baseline: number | undefined, live: number): RiseCheckResult {
   if (baseline === undefined) {
     return {
       ok: false,
@@ -304,28 +297,32 @@ describe('svg-sequence weighted-score baseline ratchet — corpus presence', () 
 
 describe('svg-sequence weighted-score baseline ratchet', () => {
   for (const f of baselineFixtures) {
-    it(`sequence/${f.slug}: weighted score never rises above its baseline (${String(f.weightedScore ?? 'unpinned')})`, () => {
-      const result = measure(f);
-      if (result.errored) {
-        throw new Error(
-          `${f.type}/${f.slug}: expected a measurable score (baseline ${String(f.weightedScore ?? 'unpinned')}) ` +
-            `but rendering/comparison threw: ${result.message}. This fixture's status changed from ` +
-            `"baseline" to erroring -- update diff-baseline.json deliberately (status: "error", with ` +
-            `a reason); do not let this pass silently as if nothing changed.`,
-        );
-      }
-      const baseline = f.weightedScore;
-      const live = result.weightedScore;
-      const { ok, message } = checkNoRise(f, baseline, live);
-      expect(ok, message).toBe(true);
+    it(
+      `sequence/${f.slug}: weighted score never rises above its baseline (${String(f.weightedScore ?? 'unpinned')})`,
+      () => {
+        const result = measure(f);
+        if (result.errored) {
+          throw new Error(
+            `${f.type}/${f.slug}: expected a measurable score (baseline ${String(f.weightedScore ?? 'unpinned')}) ` +
+              `but rendering/comparison threw: ${result.message}. This fixture's status changed from ` +
+              `"baseline" to erroring -- update diff-baseline.json deliberately (status: "error", with ` +
+              `a reason); do not let this pass silently as if nothing changed.`,
+          );
+        }
+        const baseline = f.weightedScore;
+        const live = result.weightedScore;
+        const { ok, message } = checkNoRise(f, baseline, live);
+        expect(ok, message).toBe(true);
 
-      // `checkNoRise` fails an unpinned entry outright, so reaching this line
-      // guarantees `baseline` is a number; the `?? 0` is required only
-      // because TS cannot narrow through `expect`.
-      /* v8 ignore next */
-      const note = progressLog(f, baseline ?? 0, live);
-      if (note !== undefined) console.log(note);
-    }, budgetFor(f));
+        // `checkNoRise` fails an unpinned entry outright, so reaching this line
+        // guarantees `baseline` is a number; the `?? 0` is required only
+        // because TS cannot narrow through `expect`.
+        /* v8 ignore next */
+        const note = progressLog(f, baseline ?? 0, live);
+        if (note !== undefined) console.log(note);
+      },
+      budgetFor(f),
+    );
   }
 });
 
@@ -432,6 +429,9 @@ describe('svg-sequence weighted-score baseline ratchet — promotion is never au
 
   it('no fixture is recorded as already promoted', () => {
     const promoted = baselineFixtures.filter((f) => f.diffCount === 0);
-    expect(promoted.map((f) => f.slug), 'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion').toEqual([]);
+    expect(
+      promoted.map((f) => f.slug),
+      'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion',
+    ).toEqual([]);
   });
 });

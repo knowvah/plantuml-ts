@@ -57,12 +57,15 @@ describe('leaf-sizing — actor/actorStyle (T7, description-leaf-sizing-audit)',
     expect(size({ actorStyle: ActorStyle.HOLLOW })).toEqual({ width: 30, height: 47 });
   });
 
-  it('actor-business ignores actorStyle -- upstream ALWAYS resolves the "actor/" keyword to ' +
-    'ACTOR_STICKMAN_BUSINESS regardless of skinparam actorStyle (USymbols.java\'s own ' +
-    '"actor/" branch is checked before the actorStyle-driven "actor" branch, bug-for-bug ' +
-    'preserved -- see USymbols.ts\'s own doc comment)', () => {
-    const node: DescriptiveNode = { id: 'x', display: 'Foo', symbol: 'actor-business', children: [] };
-    const dims = measureLeafNode(node, fontSpec, stubMeasurer, { actorStyle: ActorStyle.AWESOME });
-    expect(dims).toEqual({ width: 30, height: 74 });
-  });
+  it(
+    'actor-business ignores actorStyle -- upstream ALWAYS resolves the "actor/" keyword to ' +
+      "ACTOR_STICKMAN_BUSINESS regardless of skinparam actorStyle (USymbols.java's own " +
+      '"actor/" branch is checked before the actorStyle-driven "actor" branch, bug-for-bug ' +
+      "preserved -- see USymbols.ts's own doc comment)",
+    () => {
+      const node: DescriptiveNode = { id: 'x', display: 'Foo', symbol: 'actor-business', children: [] };
+      const dims = measureLeafNode(node, fontSpec, stubMeasurer, { actorStyle: ActorStyle.AWESOME });
+      expect(dims).toEqual({ width: 30, height: 74 });
+    },
+  );
 });

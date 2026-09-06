@@ -52,8 +52,7 @@ beforeAll(() => {
   const throwPlugin: AsyncPlugin = {
     type: 'state',
     parse: (block) => {
-      if (!block.lines.some((l) => l.trim() === THROW_TRIGGER_LINE))
-        return refuse('syntax', 0, 0, 'Syntax Error?');
+      if (!block.lines.some((l) => l.trim() === THROW_TRIGGER_LINE)) return refuse('syntax', 0, 0, 'Syntax Error?');
       throw new Error('deliberate parse failure for coverage');
     },
     layout: (_ast, _theme, _measurer) => Promise.resolve({ laid: true }),
@@ -134,8 +133,7 @@ describe('renderAll() outer error catch', () => {
 
 describe('render() with fetcher option', () => {
   it('resolves !include via custom fetcher and renders the expanded source', async () => {
-    const fetcher = (_url: string): Promise<string> =>
-      Promise.resolve('Alice -> Bob : hello');
+    const fetcher = (_url: string): Promise<string> => Promise.resolve('Alice -> Bob : hello');
 
     const source = `@startuml\n!include https://example.com/actors.puml\n@enduml`;
     const svg = await render(source, { fetcher });
@@ -158,8 +156,7 @@ describe('render() with fetcher option', () => {
 
 describe('renderAll() with fetcher option', () => {
   it('resolves !include via custom fetcher and renders all blocks', async () => {
-    const fetcher = (_url: string): Promise<string> =>
-      Promise.resolve('Alice -> Bob : from include');
+    const fetcher = (_url: string): Promise<string> => Promise.resolve('Alice -> Bob : from include');
 
     const source = `@startuml\n!include https://example.com/seq.puml\n@enduml`;
     const svgs = await renderAll(source, { fetcher });
@@ -263,12 +260,7 @@ describe('renderSync() with !include in source', () => {
 
 describe('three-stage theme resolution', () => {
   it('applies skinparam classBackgroundColor to rendered SVG', async () => {
-    const source = [
-      '@startuml',
-      'skinparam classBackgroundColor #ABC',
-      'class Foo',
-      '@enduml',
-    ].join('\n');
+    const source = ['@startuml', 'skinparam classBackgroundColor #ABC', 'class Foo', '@enduml'].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     expect(svg).toContain('#ABC');
@@ -279,25 +271,16 @@ describe('three-stage theme resolution', () => {
   // upstream's `BlockUmlBuilder` collects nothing until a `@start` directive.
   // Jar-verified: the same source renders with NO #ABC anywhere.
   it('ignores a skinparam placed OUTSIDE the block, as the jar does', async () => {
-    const source = [
-      'skinparam classBackgroundColor #ABC',
-      '@startuml',
-      'class Foo',
-      '@enduml',
-    ].join('\n');
+    const source = ['skinparam classBackgroundColor #ABC', '@startuml', 'class Foo', '@enduml'].join('\n');
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     expect(svg).not.toContain('#ABC');
   });
 
   it('skinparam backgroundColor overrides !theme dark background', async () => {
-    const source = [
-      '!theme dark',
-      'skinparam backgroundColor #FFF',
-      '@startuml',
-      'Alice -> Bob : hi',
-      '@enduml',
-    ].join('\n');
+    const source = ['!theme dark', 'skinparam backgroundColor #FFF', '@startuml', 'Alice -> Bob : hi', '@enduml'].join(
+      '\n',
+    );
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     // The skinparam value (#FFF) must win over dark theme default (#1E1E1E)
@@ -306,12 +289,7 @@ describe('three-stage theme resolution', () => {
   });
 
   it('caller Partial<Theme> overrides skinparam backgroundColor', async () => {
-    const source = [
-      'skinparam backgroundColor #ABC',
-      '@startuml',
-      'Alice -> Bob : hi',
-      '@enduml',
-    ].join('\n');
+    const source = ['skinparam backgroundColor #ABC', '@startuml', 'Alice -> Bob : hi', '@enduml'].join('\n');
     // Build a valid Partial<Theme> — colors must be the full colors shape.
     // Only `background` changes; everything else falls back to defaultTheme.
     const callerTheme = {
@@ -325,14 +303,9 @@ describe('three-stage theme resolution', () => {
   });
 
   it('applies backgroundColor from <style> block', async () => {
-    const source = [
-      '@startuml',
-      '<style>',
-      'backgroundcolor: #CDE',
-      '</style>',
-      'Alice -> Bob : hi',
-      '@enduml',
-    ].join('\n');
+    const source = ['@startuml', '<style>', 'backgroundcolor: #CDE', '</style>', 'Alice -> Bob : hi', '@enduml'].join(
+      '\n',
+    );
     const svg = await render(source);
     expectNoErrorDiagram(svg);
     expect(svg).toContain('#CDE');
@@ -347,24 +320,14 @@ describe('three-stage theme resolution', () => {
   });
 
   it('renderSync applies skinparam classBackgroundColor', () => {
-    const source = [
-      '@startuml',
-      'skinparam classBackgroundColor #ABC',
-      'class Foo',
-      '@enduml',
-    ].join('\n');
+    const source = ['@startuml', 'skinparam classBackgroundColor #ABC', 'class Foo', '@enduml'].join('\n');
     const svg = renderSync(source);
     expectNoErrorDiagram(svg);
     expect(svg).toContain('#ABC');
   });
 
   it('renderAll applies skinparam classBackgroundColor', async () => {
-    const source = [
-      '@startuml',
-      'skinparam classBackgroundColor #ABC',
-      'class Foo',
-      '@enduml',
-    ].join('\n');
+    const source = ['@startuml', 'skinparam classBackgroundColor #ABC', 'class Foo', '@enduml'].join('\n');
     const svgs = await renderAll(source);
     expect(svgs).toHaveLength(1);
     const svg = svgs[0] ?? '';

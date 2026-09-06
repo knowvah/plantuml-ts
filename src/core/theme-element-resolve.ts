@@ -18,11 +18,7 @@ import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
  * default), NOT the class-specific `classBackground`, so a `database` (or any
  * non-`class` element) is not tinted with the class color.
  */
-export function resolveElementPaint(
-  theme: Theme,
-  sname: string,
-  role: 'background' | 'border' | 'font',
-): Paint {
+export function resolveElementPaint(theme: Theme, sname: string, role: 'background' | 'border' | 'font'): Paint {
   const specific = theme.colors.elements?.[sname]?.[role];
   if (specific !== undefined) return specific;
   switch (role) {

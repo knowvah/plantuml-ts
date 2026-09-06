@@ -36,7 +36,11 @@ function makeTransition(overrides: Partial<TransitionGeo> = {}): TransitionGeo {
   return {
     from: 'A',
     to: 'B',
-    points: [{ x: 10, y: 20 }, { x: 10, y: 80 }, { x: 100, y: 80 }],
+    points: [
+      { x: 10, y: 20 },
+      { x: 10, y: 80 },
+      { x: 100, y: 80 },
+    ],
     ...overrides,
   };
 }
@@ -603,7 +607,12 @@ describe('renderState — transitions', () => {
   // never smooths a raw 2-point secant into a curve; the pre-S8 Catmull-Rom
   // smoothing here was an un-jar-verified invention).
   it('transition with exactly two points falls back to a straight L segment (not a bezier spline)', () => {
-    const t = makeTransition({ points: [{ x: 10, y: 10 }, { x: 90, y: 90 }] });
+    const t = makeTransition({
+      points: [
+        { x: 10, y: 10 },
+        { x: 90, y: 90 },
+      ],
+    });
     const geo = makeGeo({ transitions: [t] });
     const result = assembleSvg(renderState(geo, defaultTheme));
     expect(result).toContain('<path');
@@ -617,7 +626,11 @@ describe('renderState — transitions', () => {
   // lists (4, 7, 10, ...) are real dot-layout bezier splines.
   it('a non-bezier (3-point) point list falls back to straight L segments, not a curve', () => {
     const t = makeTransition({
-      points: [{ x: 5, y: 10 }, { x: 50, y: 10 }, { x: 50, y: 90 }],
+      points: [
+        { x: 5, y: 10 },
+        { x: 50, y: 10 },
+        { x: 50, y: 90 },
+      ],
     });
     const geo = makeGeo({ transitions: [t] });
     const result = assembleSvg(renderState(geo, defaultTheme));
@@ -737,21 +750,7 @@ describe('renderState — transitions', () => {
 // statePlugin.accepts (AC #4, #5, #6)
 // ---------------------------------------------------------------------------
 
-describe('statePlugin.accepts', () => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-});
+describe('statePlugin.accepts', () => {});
 
 // ---------------------------------------------------------------------------
 // Shadow filter def (mission skin-file-loading Batch 2)
@@ -760,7 +759,8 @@ describe('statePlugin.accepts', () => {
 describe('renderState — shadow filter extraDefs', () => {
   it('emits the shared <filter> def when theme.shadowing > 0', () => {
     const geo = makeGeo({
-      totalWidth: 200, totalHeight: 100,
+      totalWidth: 200,
+      totalHeight: 100,
       states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }], shadowing: 4 })],
     });
     const theme = deepMergeTheme(defaultTheme, { shadowing: 4 });
@@ -771,7 +771,8 @@ describe('renderState — shadow filter extraDefs', () => {
 
   it('emits NO <filter> def when theme.shadowing is absent (byte-identical to pre-Batch-2 output)', () => {
     const geo = makeGeo({
-      totalWidth: 200, totalHeight: 100,
+      totalWidth: 200,
+      totalHeight: 100,
       states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }] })],
     });
     const result = assembleSvg(renderState(geo, defaultTheme));
@@ -781,7 +782,8 @@ describe('renderState — shadow filter extraDefs', () => {
 
   it('emits NO <filter> def when theme.shadowing is explicitly 0', () => {
     const geo = makeGeo({
-      totalWidth: 200, totalHeight: 100,
+      totalWidth: 200,
+      totalHeight: 100,
       states: [makeNode({ kind: 'normal', headerLines: [{ text: 'A', width: 10 }] })],
     });
     const theme = deepMergeTheme(defaultTheme, { shadowing: 0 });

@@ -87,7 +87,15 @@ import { rect, line, text, path } from '../../core/svg.js';
 // `renderer-box.ts`'s own doc comments for each.
 import { renderStateTextLines, renderOOSymbol, isOOSymbolStereotype } from './renderer-box.js';
 import { styledLines } from './state-sizing-creole.js';
-import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
+import {
+  STATE_DEFAULT_BACKGROUND,
+  STATE_BORDER_STROKE_WIDTH,
+  resolveStateFillBucketed,
+  resolveStateBorder,
+  resolveStateFontColor,
+  resolveStateBoxRadius,
+  textAscent,
+} from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
 
 /** `URectangle.halfRounded`'s own `roundCorner/2` — SAME `rx`/`ry` value as
@@ -108,11 +116,17 @@ import {
  *  `renderer-classifier-box.ts#headerBackgroundPath` already ports for
  *  class, but WITHOUT a stroke attribute (jar-verified: the composite
  *  header `<path>` carries only `fill`, never `stroke`/`stroke-width`). */
-function compositeHeaderPath(x0: number, y0: number, width: number, headerHeight: number, fill: string, r: number): string {
+function compositeHeaderPath(
+  x0: number,
+  y0: number,
+  width: number,
+  headerHeight: number,
+  fill: string,
+  r: number,
+): string {
   const x1 = x0 + width;
   const y1 = y0 + headerHeight;
-  const d =
-    roundedTopRectD(x0, y0, x1, y1, r);
+  const d = roundedTopRectD(x0, y0, x1, y1, r);
   return path(d, { fill });
 }
 
@@ -129,12 +143,19 @@ function compositeHeaderPath(x0: number, y0: number, width: number, headerHeight
  *  T4) via the `r` parameter's own `resolveStateBoxRadius(theme,
  *  STATE_BOX_RX)` call at each of this function's two call sites, no longer
  *  a gap). */
-function compositeBodyPath(x0: number, y0: number, width: number, height: number, headerHeight: number, fill: string, r: number): string {
+function compositeBodyPath(
+  x0: number,
+  y0: number,
+  width: number,
+  height: number,
+  headerHeight: number,
+  fill: string,
+  r: number,
+): string {
   const x1 = x0 + width;
   const yTop = y0 + headerHeight;
   const y1 = y0 + height;
-  const d =
-    roundedBottomRectD(x0, yTop, x1, y1, r);
+  const d = roundedBottomRectD(x0, yTop, x1, y1, r);
   return path(d, { fill });
 }
 
@@ -192,8 +213,19 @@ function renderCompositeFallback(node: StateNodeGeo, theme: Theme): string {
  *  per-function token-length cap. Returns the four markup strings plus the
  *  shared values {@link buildActionZone} needs (`dividerY1`/`ascent`/`fill`)
  *  so the two halves never independently re-derive the same numbers. */
-function buildCoreLayers(node: StateNodeGeo, theme: Theme): {
-  header: string; outline: string; shadowRect: string; divider1: string; title: string; dividerY1: number; ascent: number; fill: string; fontColor: string;
+function buildCoreLayers(
+  node: StateNodeGeo,
+  theme: Theme,
+): {
+  header: string;
+  outline: string;
+  shadowRect: string;
+  divider1: string;
+  title: string;
+  dividerY1: number;
+  ascent: number;
+  fill: string;
+  fontColor: string;
 } {
   const headerLines = node.headerLines!;
   // mission G4 S10: `state`-element bucket tier -- see `resolveStateFillBucketed`'s own doc comment.
@@ -213,7 +245,11 @@ function buildCoreLayers(node: StateNodeGeo, theme: Theme): {
 
   const header = compositeHeaderPath(node.x, node.y, node.width, headerHeight, fill, radius);
   const outline = rect(node.x, node.y, node.width, node.height, {
-    fill: 'none', stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH, rx: radius, ry: radius,
+    fill: 'none',
+    stroke: border,
+    strokeWidth: STATE_BORDER_STROKE_WIDTH,
+    rx: radius,
+    ry: radius,
   });
   // mission skin-file-loading Batch 2: `RoundedContainer.drawU`
   // (`~/git/plantuml/.../svek/RoundedContainer.java:78-92`) draws a SECOND,
@@ -228,12 +264,25 @@ function buildCoreLayers(node: StateNodeGeo, theme: Theme): {
   const shadowRect =
     node.shadowing !== undefined && node.shadowing > 0
       ? rect(node.x, node.y, node.width, node.height, {
-          fill: 'none', stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH, rx: radius, ry: radius,
+          fill: 'none',
+          stroke: border,
+          strokeWidth: STATE_BORDER_STROKE_WIDTH,
+          rx: radius,
+          ry: radius,
           filter: stateShadowFilterUrl(),
         })
       : '';
-  const divider1 = line(node.x, dividerY1, node.x + node.width, dividerY1, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
-  const title = renderCompositeTextLines(headerLines, (ln) => node.x + node.width / 2 - ln.width / 2, node.y + MARGIN + ascent, theme, fontColor);
+  const divider1 = line(node.x, dividerY1, node.x + node.width, dividerY1, {
+    stroke: border,
+    strokeWidth: STATE_BORDER_STROKE_WIDTH,
+  });
+  const title = renderCompositeTextLines(
+    headerLines,
+    (ln) => node.x + node.width / 2 - ln.width / 2,
+    node.y + MARGIN + ascent,
+    theme,
+    fontColor,
+  );
 
   return { header, outline, shadowRect, divider1, title, dividerY1, ascent, fill, fontColor };
 }
@@ -270,7 +319,10 @@ function buildActionZone(
   const actionZoneHeight = textBlockHeight(bodyLines, theme) + MARGIN;
   const dividerY2 = dividerY1 + actionZoneHeight;
   const bg = rect(node.x, dividerY1, node.width, actionZoneHeight, { fill, stroke: fill, strokeWidth: 1 });
-  const divider2 = line(node.x, dividerY2, node.x + node.width, dividerY2, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
+  const divider2 = line(node.x, dividerY2, node.x + node.width, dividerY2, {
+    stroke: border,
+    strokeWidth: STATE_BORDER_STROKE_WIDTH,
+  });
   const text_ = renderCompositeTextLines(bodyLines, () => node.x + MARGIN, dividerY1 + ascent, theme, fontColor);
   return { bg, divider2, text: text_ };
 }
@@ -291,7 +343,17 @@ function renderCompositeMeasured(node: StateNodeGeo, theme: Theme): string {
   const symbol = isOOSymbolStereotype(node.stereotype)
     ? renderOOSymbol(node.x + node.width, node.y + node.height, core.fill, resolveStateBorder(node, theme))
     : '';
-  return core.shadowRect + core.header + action.bg + core.outline + core.divider1 + action.divider2 + core.title + action.text + symbol;
+  return (
+    core.shadowRect +
+    core.header +
+    action.bg +
+    core.outline +
+    core.divider1 +
+    action.divider2 +
+    core.title +
+    action.text +
+    symbol
+  );
 }
 
 /**
@@ -372,14 +434,28 @@ function renderClusterMeasured(node: StateNodeGeo, theme: Theme): string {
   // by this signal -- that selector tier is a separate, already-named,
   // pre-existing gap (this port does not apply diagram-level `<style>`
   // cascades to state diagrams at all yet), not a defect in this rule.
-  const body = fill !== STATE_DEFAULT_BACKGROUND
-    ? compositeBodyPath(node.x, node.y, node.width, node.height, headerHeight, fill, radius)
-    : '';
+  const body =
+    fill !== STATE_DEFAULT_BACKGROUND
+      ? compositeBodyPath(node.x, node.y, node.width, node.height, headerHeight, fill, radius)
+      : '';
   const outline = rect(node.x, node.y, node.width, node.height, {
-    fill: 'none', stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH, rx: radius, ry: radius,
+    fill: 'none',
+    stroke: border,
+    strokeWidth: STATE_BORDER_STROKE_WIDTH,
+    rx: radius,
+    ry: radius,
   });
-  const divider = line(node.x, dividerY, node.x + node.width, dividerY, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
-  const title = renderCompositeTextLines(headerLines, (ln) => node.x + node.width / 2 - ln.width / 2, node.y + titleMargin + ascent, theme, fontColor);
+  const divider = line(node.x, dividerY, node.x + node.width, dividerY, {
+    stroke: border,
+    strokeWidth: STATE_BORDER_STROKE_WIDTH,
+  });
+  const title = renderCompositeTextLines(
+    headerLines,
+    (ln) => node.x + node.width / 2 - ln.width / 2,
+    node.y + titleMargin + ascent,
+    theme,
+    fontColor,
+  );
 
   return header + body + outline + divider + title;
 }

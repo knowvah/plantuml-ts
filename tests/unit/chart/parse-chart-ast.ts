@@ -22,8 +22,7 @@ export function parseChartAst(source: UmlSource): ChartDiagramAST {
   const parsed = parseChart(source);
   if ('refused' in parsed) {
     throw new Error(
-      `chart refused this source at line ${String(parsed.line)} ` +
-        `(${parsed.kind}): ${parsed.message}`,
+      `chart refused this source at line ${String(parsed.line)} ` + `(${parsed.kind}): ${parsed.message}`,
     );
   }
   return parsed;

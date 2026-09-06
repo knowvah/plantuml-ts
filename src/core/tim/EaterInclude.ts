@@ -52,10 +52,8 @@ export class EaterInclude extends Eater {
       }
     }
     this.skipSpaces();
-    this.what = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    this.what =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
   }
 
   getWhat(): string {

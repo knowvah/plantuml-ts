@@ -37,7 +37,28 @@ interface ColorSizeMatch {
 // quote. `%s`: whitespace or NBSP.
 const QUOTE = '[\x22“”]?';
 const WS = '[\\s\\u00A0]';
-const ONE_ATTR_SOURCE = '(?:' + WS + '+size' + WS + '*=' + WS + '*' + QUOTE + '\\d+' + QUOTE + '|' + WS + '+color' + WS + '*=' + WS + '*' + QUOTE + '(?:#[0-9a-fA-F]{6}|\\w+)' + QUOTE + ')';
+const ONE_ATTR_SOURCE =
+  '(?:' +
+  WS +
+  '+size' +
+  WS +
+  '*=' +
+  WS +
+  '*' +
+  QUOTE +
+  '\\d+' +
+  QUOTE +
+  '|' +
+  WS +
+  '+color' +
+  WS +
+  '*=' +
+  WS +
+  '*' +
+  QUOTE +
+  '(?:#[0-9a-fA-F]{6}|\\w+)' +
+  QUOTE +
+  ')';
 const FONT_TAG_SOURCE = '<font' + ONE_ATTR_SOURCE + '+' + WS + '*>';
 
 const SIZE_ATTR_SOURCE = 'size' + WS + '*=' + WS + '*' + QUOTE + '(\\d+)' + QUOTE;

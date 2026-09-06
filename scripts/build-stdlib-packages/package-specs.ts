@@ -17,9 +17,7 @@ const STDLIB_PACKAGE: PackageSpec = {
     },
     {
       fileBaseName: 'archimate',
-      exports: [
-        { kind: 'concrete', exportName: 'archimate', bundleName: 'archimate', assetFolder: 'archimate' },
-      ],
+      exports: [{ kind: 'concrete', exportName: 'archimate', bundleName: 'archimate', assetFolder: 'archimate' }],
     },
     {
       fileBaseName: 'cloudinsight',
@@ -29,9 +27,7 @@ const STDLIB_PACKAGE: PackageSpec = {
     },
     {
       fileBaseName: 'cloudogu',
-      exports: [
-        { kind: 'concrete', exportName: 'cloudogu', bundleName: 'cloudogu', assetFolder: 'cloudogu' },
-      ],
+      exports: [{ kind: 'concrete', exportName: 'cloudogu', bundleName: 'cloudogu', assetFolder: 'cloudogu' }],
     },
     {
       // One module file for the alias/target pair -- `batch-3/overview.md` T8
@@ -85,11 +81,7 @@ const STDLIB_TUPADR3_PACKAGE: PackageSpec = {
   remoteModules: [TUPADR3_MODULE],
 };
 
-export const PACKAGE_SPECS: readonly PackageSpec[] = [
-  STDLIB_PACKAGE,
-  STDLIB_AWS_PACKAGE,
-  STDLIB_TUPADR3_PACKAGE,
-];
+export const PACKAGE_SPECS: readonly PackageSpec[] = [STDLIB_PACKAGE, STDLIB_AWS_PACKAGE, STDLIB_TUPADR3_PACKAGE];
 
 /**
  * si11b T1 -- the ONE bundle that additionally gets a per-sprite fragment

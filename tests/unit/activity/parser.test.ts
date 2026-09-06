@@ -97,50 +97,26 @@ describe('parses stop', () => {
 
 describe('parses if / else / endif', () => {
   it('produces an if node', () => {
-    const ast = parse([
-      'if (condition?) then (yes)',
-      '  :A;',
-      'else (no)',
-      '  :B;',
-      'endif',
-    ]);
+    const ast = parse(['if (condition?) then (yes)', '  :A;', 'else (no)', '  :B;', 'endif']);
     expect(firstNode(ast).kind).toBe('if');
   });
 
   it('thenBranch has one action with label "A"', () => {
-    const ast = parse([
-      'if (condition?) then (yes)',
-      '  :A;',
-      'else (no)',
-      '  :B;',
-      'endif',
-    ]);
+    const ast = parse(['if (condition?) then (yes)', '  :A;', 'else (no)', '  :B;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect(node.thenBranch).toHaveLength(1);
     expect((node.thenBranch[0] as ActivityAction).label).toBe('A');
   });
 
   it('elseBranch has one action with label "B"', () => {
-    const ast = parse([
-      'if (condition?) then (yes)',
-      '  :A;',
-      'else (no)',
-      '  :B;',
-      'endif',
-    ]);
+    const ast = parse(['if (condition?) then (yes)', '  :A;', 'else (no)', '  :B;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect(node.elseBranch).toHaveLength(1);
     expect((node.elseBranch[0] as ActivityAction).label).toBe('B');
   });
 
   it('captures the condition text', () => {
-    const ast = parse([
-      'if (condition?) then (yes)',
-      '  :A;',
-      'else (no)',
-      '  :B;',
-      'endif',
-    ]);
+    const ast = parse(['if (condition?) then (yes)', '  :A;', 'else (no)', '  :B;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect(node.condition).toBe('condition?');
   });
@@ -152,43 +128,19 @@ describe('parses if / else / endif', () => {
 
 describe('parses elseif', () => {
   it('elseIfBranches has length 1', () => {
-    const ast = parse([
-      'if (a?) then',
-      '  :A;',
-      'elseif (b?) then',
-      '  :B;',
-      'else',
-      '  :C;',
-      'endif',
-    ]);
+    const ast = parse(['if (a?) then', '  :A;', 'elseif (b?) then', '  :B;', 'else', '  :C;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect(node.elseIfBranches).toHaveLength(1);
   });
 
   it('elseIfBranches[0].condition is "b?"', () => {
-    const ast = parse([
-      'if (a?) then',
-      '  :A;',
-      'elseif (b?) then',
-      '  :B;',
-      'else',
-      '  :C;',
-      'endif',
-    ]);
+    const ast = parse(['if (a?) then', '  :A;', 'elseif (b?) then', '  :B;', 'else', '  :C;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect(node.elseIfBranches[0]?.condition).toBe('b?');
   });
 
   it('thenBranch has action "A" and elseBranch has action "C"', () => {
-    const ast = parse([
-      'if (a?) then',
-      '  :A;',
-      'elseif (b?) then',
-      '  :B;',
-      'else',
-      '  :C;',
-      'endif',
-    ]);
+    const ast = parse(['if (a?) then', '  :A;', 'elseif (b?) then', '  :B;', 'else', '  :C;', 'endif']);
     const node = firstNode(ast) as ActivityIf;
     expect((node.thenBranch[0] as ActivityAction).label).toBe('A');
     expect((node.elseBranch[0] as ActivityAction).label).toBe('C');
@@ -456,48 +408,24 @@ describe('parses detach keyword', () => {
 
 describe('parses split / split again / end split', () => {
   it('produces a split node', () => {
-    const ast = parse([
-      'split',
-      '  :A;',
-      'split again',
-      '  :B;',
-      'end split',
-    ]);
+    const ast = parse(['split', '  :A;', 'split again', '  :B;', 'end split']);
     expect(firstNode(ast).kind).toBe('split');
   });
 
   it('has two branches', () => {
-    const ast = parse([
-      'split',
-      '  :A;',
-      'split again',
-      '  :B;',
-      'end split',
-    ]);
+    const ast = parse(['split', '  :A;', 'split again', '  :B;', 'end split']);
     const node = firstNode(ast) as ActivitySplit;
     expect(node.branches).toHaveLength(2);
   });
 
   it('branch[0] has action "A"', () => {
-    const ast = parse([
-      'split',
-      '  :A;',
-      'split again',
-      '  :B;',
-      'end split',
-    ]);
+    const ast = parse(['split', '  :A;', 'split again', '  :B;', 'end split']);
     const node = firstNode(ast) as ActivitySplit;
     expect((node.branches[0]?.[0] as ActivityAction).label).toBe('A');
   });
 
   it('branch[1] has action "B"', () => {
-    const ast = parse([
-      'split',
-      '  :A;',
-      'split again',
-      '  :B;',
-      'end split',
-    ]);
+    const ast = parse(['split', '  :A;', 'split again', '  :B;', 'end split']);
     const node = firstNode(ast) as ActivitySplit;
     expect((node.branches[1]?.[0] as ActivityAction).label).toBe('B');
   });
@@ -519,12 +447,7 @@ describe('parses break keyword', () => {
   });
 
   it('break inside repeat body is captured as ActivityBreak', () => {
-    const ast = parse([
-      'repeat',
-      '  :Do something;',
-      '  break',
-      'repeat while (again?)',
-    ]);
+    const ast = parse(['repeat', '  :Do something;', '  break', 'repeat while (again?)']);
     const repeatNode = firstNode(ast) as ActivityRepeat;
     expect(repeatNode.kind).toBe('repeat');
     const breakNode = repeatNode.body.find((n) => n.kind === 'break');
@@ -653,13 +576,7 @@ describe('parses arrow-label line without trailing semicolon', () => {
 });
 
 describe('parses <code>...</code> multi-line action', () => {
-  const codeLines = [
-    ':<code>',
-    '"data": {',
-    '    "item": "value"',
-    '}',
-    '</code>;',
-  ];
+  const codeLines = [':<code>', '"data": {', '    "item": "value"', '}', '</code>;'];
 
   it('produces a single action node', () => {
     const ast = parse(codeLines);

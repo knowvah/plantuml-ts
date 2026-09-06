@@ -42,18 +42,29 @@ describe('resolveBadgeRadius', () => {
   // jar-verified samples (munepa/macira/mudune/pafare/defipi/pucebe/
   // fipezi/zijaso/koloba) -- floor(fontSize/3)+6.
   it.each([
-    [13, 10], [14, 10], [15, 11], [16, 11], [18, 12], [19, 12], [20, 12], [21, 13], [22, 13],
+    [13, 10],
+    [14, 10],
+    [15, 11],
+    [16, 11],
+    [18, 12],
+    [19, 12],
+    [20, 12],
+    [21, 13],
+    [22, 13],
   ])('fontSize %d -> radius %d', (fontSize, radius) => {
     expect(resolveBadgeRadius(fontSize)).toBe(radius);
   });
 
-  it('an explicit circledCharacterRadius override wins unconditionally, ' +
-    'even when the formula would predict a different value', () => {
-    // depulu-53-xoca727: fontSize 20 (formula predicts 12), radius 13.
-    expect(resolveBadgeRadius(20, 13)).toBe(13);
-    // gateja-70-losi738: fontSize 30 (formula predicts 16), radius 18.
-    expect(resolveBadgeRadius(30, 18)).toBe(18);
-  });
+  it(
+    'an explicit circledCharacterRadius override wins unconditionally, ' +
+      'even when the formula would predict a different value',
+    () => {
+      // depulu-53-xoca727: fontSize 20 (formula predicts 12), radius 13.
+      expect(resolveBadgeRadius(20, 13)).toBe(13);
+      // gateja-70-losi738: fontSize 30 (formula predicts 16), radius 18.
+      expect(resolveBadgeRadius(30, 18)).toBe(18);
+    },
+  );
 
   it('an explicit override with NO fontSize set also wins', () => {
     expect(resolveBadgeRadius(undefined, 9)).toBe(9);
@@ -89,10 +100,12 @@ describe('badgeGlyphPath — per-fontSize glyph capture (G2 N38)', () => {
     expect(badgeGlyphPath('class', 22, 23, undefined, 25)).toBe(badgeGlyphPath('class', 22, 23));
   });
 
-  it('a non-C letter at a captured size falls back to that letter\'s default shape ' +
-    '(only C is captured per-size)', () => {
-    expect(badgeGlyphPath('interface', 22, 23, undefined, 18)).toBe(badgeGlyphPath('interface', 22, 23));
-  });
+  it(
+    "a non-C letter at a captured size falls back to that letter's default shape " + '(only C is captured per-size)',
+    () => {
+      expect(badgeGlyphPath('interface', 22, 23, undefined, 18)).toBe(badgeGlyphPath('interface', 22, 23));
+    },
+  );
 });
 
 describe('renderFixtureClass — N38 badge radius/glyph reach fixtures zero-diff', () => {

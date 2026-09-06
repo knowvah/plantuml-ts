@@ -110,30 +110,18 @@ describe('grouping COLORS', () => {
 // `branchLabels` via `FrameEvent.branchColors`.
 describe('else COLORS', () => {
   it('a space-separated color on `else` is captured without the label absorbing it', () => {
-    const frame = firstFrame([
-      'alt first case',
-      'Alice -> Bob: a',
-      'else #eee other case',
-      'Alice -> Bob: b',
-      'end',
-    ]);
+    const frame = firstFrame(['alt first case', 'Alice -> Bob: a', 'else #eee other case', 'Alice -> Bob: b', 'end']);
     expect(frame.branchLabels).toEqual(['first case', 'other case']);
     expect(frame.branchColors).toEqual([undefined, '#eee']);
   });
 
   it('`also` carries the same color grammar as `else`', () => {
-    const frame = firstFrame([
-      'alt first case',
-      'Alice -> Bob: a',
-      'also #0f0 other case',
-      'Alice -> Bob: b',
-      'end',
-    ]);
+    const frame = firstFrame(['alt first case', 'Alice -> Bob: a', 'also #0f0 other case', 'Alice -> Bob: b', 'end']);
     expect(frame.branchLabels).toEqual(['first case', 'other case']);
     expect(frame.branchColors).toEqual([undefined, '#0f0']);
   });
 
-  it('index 0 of branchColors is the frame\'s own COLORS-index-1 value', () => {
+  it("index 0 of branchColors is the frame's own COLORS-index-1 value", () => {
     const frame = firstFrame([
       'alt #ffa first case',
       'Alice -> Bob: a',
@@ -145,24 +133,12 @@ describe('else COLORS', () => {
   });
 
   it('an else branch with no color leaves that index undefined', () => {
-    const frame = firstFrame([
-      'alt first case',
-      'Alice -> Bob: a',
-      'else other case',
-      'Alice -> Bob: b',
-      'end',
-    ]);
+    const frame = firstFrame(['alt first case', 'Alice -> Bob: a', 'else other case', 'Alice -> Bob: b', 'end']);
     expect(frame.branchColors).toEqual([undefined, undefined]);
   });
 
   it('reaches branchSeparators[0].backColorGeneral after layout (D10 end-to-end)', () => {
-    const ast = parse([
-      'alt first case',
-      'Alice -> Bob: a',
-      'else #eee other case',
-      'Alice -> Bob: b',
-      'end',
-    ]);
+    const ast = parse(['alt first case', 'Alice -> Bob: a', 'else #eee other case', 'Alice -> Bob: b', 'end']);
     const measurer = new FixedMeasurer(8, 16);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const frameGeo = geo.events.find((e): e is FrameGeo => e.kind === 'frame');

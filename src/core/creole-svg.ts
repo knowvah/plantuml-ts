@@ -44,11 +44,8 @@ function styleOf(span: CreoleSpan, inheritFill?: string): TextStyle {
  * `style.fill` is the inherited text color; it is applied to spans that do
  * not carry their own color override.
  */
-export function spansToTspan(
-  spans: CreoleSpan[],
-  style?: { fill?: string },
-): string {
+export function spansToTspan(spans: CreoleSpan[], style?: { fill?: string }): string {
   if (spans.length === 0) return '';
 
-  return spans.map(span => tspan(span.text, styleOf(span, style?.fill))).join('');
+  return spans.map((span) => tspan(span.text, styleOf(span, style?.fill))).join('');
 }

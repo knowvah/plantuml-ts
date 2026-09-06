@@ -21,7 +21,11 @@ vi.mock('../../../src/core/graph-layout.js', () => ({
     // Minimal believable placement so layoutJson can finish.
     return {
       nodes: input.nodes.map((n, i) => ({
-        id: n.id, x: 0, y: i * 100, width: n.width, height: n.height,
+        id: n.id,
+        x: 0,
+        y: i * 100,
+        width: n.width,
+        height: n.height,
       })),
       edges: input.edges.map((e) => ({ id: e.id, points: [] })),
       width: 500,
@@ -45,7 +49,9 @@ function layoutOf(body: string): DotInputGraph {
 }
 
 describe('layoutJson — the graph handed to the engine (AC2)', () => {
-  beforeEach(() => { captured.length = 0; });
+  beforeEach(() => {
+    captured.length = 0;
+  });
 
   it('sets NO rankDir — upstream never calls it, so graphviz defaults to TB', () => {
     expect(layoutOf('{"a": {"b": 1}}').rankDir).toBeUndefined();
@@ -58,7 +64,7 @@ describe('layoutJson — the graph handed to the engine (AC2)', () => {
     expect(g.omitSepAttrs).toBe(true);
   });
 
-  it('swaps every node\'s width and height on the way in', () => {
+  it("swaps every node's width and height on the way in", () => {
     // A node wider than it is tall must arrive at the engine taller than wide.
     const g = layoutOf('{"a_long_key_name_here": "and a long value too"}');
     expect(g.nodes.length).toBeGreaterThan(0);

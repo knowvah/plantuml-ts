@@ -32,10 +32,7 @@ describe('normalizeSvg', () => {
 
   test('collapses and trims whitespace-only text nodes to nothing', () => {
     const svg =
-      '<svg xmlns="http://www.w3.org/2000/svg">' +
-      '<text>  hello   world  </text>' +
-      '<g>   \n  </g>' +
-      '</svg>';
+      '<svg xmlns="http://www.w3.org/2000/svg">' + '<text>  hello   world  </text>' + '<g>   \n  </g>' + '</svg>';
 
     const result = normalizeSvg(svg);
     const text = result.children?.find((c) => c.tag === 'text');
@@ -78,10 +75,7 @@ describe('normalizeSvg', () => {
   });
 
   test('style declaration overwrites a conflicting presentation attribute', () => {
-    const svg =
-      '<svg xmlns="http://www.w3.org/2000/svg">' +
-      '<rect fill="#F1F1F1" style="fill:#FFFFFF;"/>' +
-      '</svg>';
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg">' + '<rect fill="#F1F1F1" style="fill:#FFFFFF;"/>' + '</svg>';
 
     const result = normalizeSvg(svg);
     const rect = result.children?.[0];
@@ -116,10 +110,7 @@ describe('normalizeSvg', () => {
   });
 
   test('skips non-element/text/comment/PI nodes such as CDATA sections', () => {
-    const svg =
-      '<svg xmlns="http://www.w3.org/2000/svg">' +
-      '<script><![CDATA[ignored]]></script>' +
-      '</svg>';
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg">' + '<script><![CDATA[ignored]]></script>' + '</svg>';
 
     const result = normalizeSvg(svg);
     const script = result.children?.[0];

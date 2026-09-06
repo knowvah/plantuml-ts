@@ -4,12 +4,7 @@
  */
 
 import type { ActivityWhile } from './ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  BranchResult,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, BranchResult, LayoutCtx } from './activity-layout-types.js';
 import { NODE_MARGIN_X, NODE_MARGIN_Y } from './activity-layout-constants.js';
 import { diamondSize, nextId, nodeCenterX, orthogonalPoints, repeatCondSize } from './activity-layout-helpers.js';
 
@@ -55,12 +50,7 @@ interface WhileWiringResult {
   exitGeo: ActivityNodeGeo;
 }
 
-function buildWhileHeaderGeo(
-  node: ActivityWhile,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): WhileHeaderInfo {
+function buildWhileHeaderGeo(node: ActivityWhile, startY: number, centerX: number, ctx: LayoutCtx): WhileHeaderInfo {
   const headerId = nextId(ctx, 'while-header');
   const headerSz =
     node.condition !== ''
@@ -199,12 +189,7 @@ function buildWhileWiring(params: WhileWiringParams): WhileWiringResult {
   return { outEdges, leftX, rightX, loopBottomY, exitId, exitGeo };
 }
 
-export function layoutWhile(
-  node: ActivityWhile,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+export function layoutWhile(node: ActivityWhile, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   centerX = nodeCenterX(node.swimlane, centerX, ctx);
   const { headerId, headerGeo, headerBottomY, headerCenterY } = buildWhileHeaderGeo(node, startY, centerX, ctx);
   const bodyStartY = headerBottomY + NODE_MARGIN_Y;

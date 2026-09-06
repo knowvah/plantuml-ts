@@ -31,11 +31,7 @@ import { stripDiagramName, stripLayoutPragma } from '../../../scripts/dot-sync-d
 
 /** The three fixtures authored by `svg-sprite-nanoparser`; SI9 exists so that
  *  fixtures like these can be measured and ratcheted. */
-const AUTHORED_USECASE_SLUGS = [
-  'sprite-svg-archimate-0',
-  'sprite-svg-bootstrap-0',
-  'sprite-svg-multiline-0',
-];
+const AUTHORED_USECASE_SLUGS = ['sprite-svg-archimate-0', 'sprite-svg-bootstrap-0', 'sprite-svg-multiline-0'];
 
 /** The five fixtures authored under `oracle/goldens/svg-class/` (SI13), in
  *  the sorted order `authoredFixtures` returns them. */
@@ -75,7 +71,7 @@ afterAll(() => {
 // ---------------------------------------------------------------------------
 
 describe('authoredFixtures', () => {
-  it('reads each golden directory\'s in.puml as the fixture markup', () => {
+  it("reads each golden directory's in.puml as the fixture markup", () => {
     const golden = join(tmp, 'authored-basic');
     makeGoldens(golden, 'usecase', { bravo: '@startuml\nB\n@enduml\n', alpha: '@startuml\nA\n@enduml\n' });
 
@@ -118,7 +114,7 @@ describe('authoredFixtures', () => {
     ]);
   });
 
-  it('skips the flat root\'s non-fixture entries (README.md, ratchet.json)', () => {
+  it("skips the flat root's non-fixture entries (README.md, ratchet.json)", () => {
     const golden = join(tmp, 'authored-class-flat-noise');
     mkdirSync(join(golden, 'real'), { recursive: true });
     writeFileSync(join(golden, 'real', 'in.puml'), '@startuml\nR\n@enduml\n', 'utf-8');
@@ -146,7 +142,10 @@ describe('authoredFixtures', () => {
 
 describe('mergeFixtures', () => {
   it('appends authored fixtures the manifest lacks, after the manifest, in order', () => {
-    const manifest: Fixture[] = [{ slug: 'm1', markup: 'M1' }, { slug: 'm2', markup: 'M2' }];
+    const manifest: Fixture[] = [
+      { slug: 'm1', markup: 'M1' },
+      { slug: 'm2', markup: 'M2' },
+    ];
     const authored: Fixture[] = [{ slug: 'a1', markup: 'A1' }];
 
     expect(mergeFixtures('usecase', manifest, authored)).toEqual([
@@ -236,7 +235,10 @@ describe('enumerateFixtures', () => {
   it('returns the manifest verbatim for a type with no authored fixtures', () => {
     const data = join(tmp, 'enum-manifest-only', 'data');
     const golden = join(tmp, 'enum-manifest-only', 'goldens');
-    const manifest: Fixture[] = [{ slug: 'm1', markup: 'M1' }, { slug: 'm2', markup: 'M2' }];
+    const manifest: Fixture[] = [
+      { slug: 'm1', markup: 'M1' },
+      { slug: 'm2', markup: 'M2' },
+    ];
     makeManifest(data, 'state', manifest);
 
     expect(enumerateFixtures('state', data, golden)).toEqual(manifest);
@@ -275,13 +277,10 @@ describe('enumerateFixtures over the committed corpus', () => {
     expect(enumerated!.slice(351).map((f) => f.slug)).toEqual(AUTHORED_USECASE_SLUGS);
   });
 
-  it('takes an authored fixture\'s markup from its golden in.puml', () => {
+  it("takes an authored fixture's markup from its golden in.puml", () => {
     const enumerated = enumerateFixtures('usecase')!;
     const sprite = enumerated.find((f) => f.slug === 'sprite-svg-bootstrap-0');
-    const onDisk = readFileSync(
-      join(GOLDEN_DIR, 'usecase', 'sprite-svg-bootstrap-0', 'in.puml'),
-      'utf-8',
-    );
+    const onDisk = readFileSync(join(GOLDEN_DIR, 'usecase', 'sprite-svg-bootstrap-0', 'in.puml'), 'utf-8');
 
     expect(sprite?.markup).toBe(onDisk);
   });
@@ -334,7 +333,7 @@ describe('enumerateFixtures over the committed corpus', () => {
     ]);
   });
 
-  it('reads every one of the five authored class goldens\' markup from their in.puml', () => {
+  it("reads every one of the five authored class goldens' markup from their in.puml", () => {
     const enumerated = enumerateFixtures('class')!;
     for (const slug of AUTHORED_CLASS_SLUGS) {
       const onDisk = readFileSync(join(CLASS_GOLDEN_DIR, slug, 'in.puml'), 'utf-8');
@@ -364,7 +363,7 @@ describe('enumerateFixtures over the committed corpus', () => {
     }
   });
 
-  it('skips the flat class root\'s README.md and ratchet.json entries', () => {
+  it("skips the flat class root's README.md and ratchet.json entries", () => {
     const slugs = new Set(enumerateFixtures('class')!.map((f) => f.slug));
     expect(slugs.has('README.md')).toBe(false);
     expect(slugs.has('ratchet.json')).toBe(false);
@@ -430,8 +429,10 @@ describe('reportSkips', () => {
       const lines = err.mock.calls.map((c) => c[0] as string);
       expect(lines).toHaveLength(3);
       expect(lines[0]).toBe(
-        '[dot-sync] ' + TYPE + ': enumerated 5, analysed 3, skipped 2 ' +
-        '(2 with no canonical SVG, 0 canonical but not tagged DESCRIPTION)',
+        '[dot-sync] ' +
+          TYPE +
+          ': enumerated 5, analysed 3, skipped 2 ' +
+          '(2 with no canonical SVG, 0 canonical but not tagged DESCRIPTION)',
       );
       expect(lines[1]).toBe('  skip ' + TYPE + '/alpha: no canonical SVG');
       expect(lines[2]).toBe('  skip ' + TYPE + '/bravo: no canonical SVG');
@@ -447,15 +448,17 @@ describe('reportSkips', () => {
 
       expect(err).toHaveBeenCalledTimes(1);
       expect(err.mock.calls[0]![0] as string).toBe(
-        '[dot-sync] ' + TYPE + ': enumerated 3, analysed 3, skipped 0 ' +
-        '(0 with no canonical SVG, 0 canonical but not tagged DESCRIPTION)',
+        '[dot-sync] ' +
+          TYPE +
+          ': enumerated 3, analysed 3, skipped 0 ' +
+          '(0 with no canonical SVG, 0 canonical but not tagged DESCRIPTION)',
       );
     } finally {
       err.mockRestore();
     }
   });
 
-  it('separates a slug that has a canonical SVG but carries another diagram type\'s tag', () => {
+  it("separates a slug that has a canonical SVG but carries another diagram type's tag", () => {
     const canon = join(tmp, 'skip-mixed');
     mkdirSync(canon, { recursive: true });
     writeFileSync(join(canon, 'tagged-other.svg'), '<svg data-diagram-type="CLASS"/>', 'utf-8');
@@ -466,7 +469,7 @@ describe('reportSkips', () => {
       const lines = err.mock.calls.map((c) => c[0] as string);
       expect(lines[0]).toBe(
         '[dot-sync] usecase: enumerated 4, analysed 1, skipped 2 ' +
-        '(1 with no canonical SVG, 1 canonical but not tagged DESCRIPTION)',
+          '(1 with no canonical SVG, 1 canonical but not tagged DESCRIPTION)',
       );
       expect(lines[1]).toBe('  skip usecase/tagged-other: not tagged DESCRIPTION');
       expect(lines[2]).toBe('  skip usecase/never-rendered: no canonical SVG');
@@ -496,16 +499,12 @@ describe('reportSkips', () => {
  */
 describe('stripDiagramName', () => {
   it('drops the name from @startuml, the case that cost a state fixture', () => {
-    expect(stripDiagramName('@startuml Test\n[*] --> A\n@enduml\n')).toBe(
-      '@startuml\n[*] --> A\n@enduml\n',
-    );
+    expect(stripDiagramName('@startuml Test\n[*] --> A\n@enduml\n')).toBe('@startuml\n[*] --> A\n@enduml\n');
   });
 
   it('drops the name from any @start directive, not just @startuml', () => {
     // 14 of the corpus's 18 named fixtures are @startcreole.
-    expect(stripDiagramName('@startcreole math-Page-2\n= T\n@endcreole\n')).toBe(
-      '@startcreole\n= T\n@endcreole\n',
-    );
+    expect(stripDiagramName('@startcreole math-Page-2\n= T\n@endcreole\n')).toBe('@startcreole\n= T\n@endcreole\n');
     expect(stripDiagramName('@startjson n\n{}\n@endjson\n')).toBe('@startjson\n{}\n@endjson\n');
   });
 
@@ -515,9 +514,7 @@ describe('stripDiagramName', () => {
   });
 
   it('preserves leading whitespace and CRLF line endings', () => {
-    expect(stripDiagramName('  @startuml Test\r\nA\r\n@enduml\r\n')).toBe(
-      '  @startuml\r\nA\r\n@enduml\r\n',
-    );
+    expect(stripDiagramName('  @startuml Test\r\nA\r\n@enduml\r\n')).toBe('  @startuml\r\nA\r\n@enduml\r\n');
   });
 
   it('does not touch an @startuml that is not at the start of a line', () => {

@@ -52,9 +52,7 @@ export { spansToTspan } from './creole-svg.js';
  * - `spans` — a single inline line parsed into styled spans
  * - `table` — a block of consecutive table rows
  */
-export type CreoleToken =
-  | { kind: 'spans'; spans: CreoleSpan[] }
-  | TableToken;
+export type CreoleToken = { kind: 'spans'; spans: CreoleSpan[] } | TableToken;
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -109,9 +107,6 @@ export function parseCreoleTokens(input: string): CreoleToken[] {
 /**
  * Convenience function: parse and serialise in one step.
  */
-export function creoleToSvg(
-  input: string,
-  style?: { fill?: string },
-): string {
+export function creoleToSvg(input: string, style?: { fill?: string }): string {
   return spansToTspan(parseCreole(input), style);
 }

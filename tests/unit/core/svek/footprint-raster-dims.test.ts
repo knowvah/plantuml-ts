@@ -184,13 +184,25 @@ describe('sizing-path reachability — SI15 T6 (`.agent-notes/si15-ink-offset.md
   }
 
   it('sprite+text ordering matches the jar (was already exact -- size-insensitive diameter pair)', () => {
-    const dim = measureUsecaseOrActorLeaf('<$inkbox>\ninkbox', 'usecase', fontSpec, new WidthTableMeasurer(), inkboxSprites());
+    const dim = measureUsecaseOrActorLeaf(
+      '<$inkbox>\ninkbox',
+      'usecase',
+      fontSpec,
+      new WidthTableMeasurer(),
+      inkboxSprites(),
+    );
     expect(Math.abs(dim.width - 56.2184)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
     expect(Math.abs(dim.height - 44.713)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
   });
 
   it('text+sprite ordering matches the jar (the T4-diagnosed size-sensitive case)', () => {
-    const dim = measureUsecaseOrActorLeaf('inkbox\n<$inkbox>', 'usecase', fontSpec, new WidthTableMeasurer(), inkboxSprites());
+    const dim = measureUsecaseOrActorLeaf(
+      'inkbox\n<$inkbox>',
+      'usecase',
+      fontSpec,
+      new WidthTableMeasurer(),
+      inkboxSprites(),
+    );
     expect(Math.abs(dim.width - 58.132)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
     expect(Math.abs(dim.height - 46.1882)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
   });

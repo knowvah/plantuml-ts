@@ -75,10 +75,7 @@ describe('AC1 — polygon count matches event count', () => {
 
   it('produces exactly 1 <polygon element for 1 event', () => {
     const body = stripDefs(
-      assembleSvg(renderChronology(
-        makeGeo({ events: [makeEvent({ name: 'Solo', x: 100 })] }),
-        theme,
-      )),
+      assembleSvg(renderChronology(makeGeo({ events: [makeEvent({ name: 'Solo', x: 100 })] }), theme)),
     );
     const matches = body.match(/<polygon/g);
     expect(matches).not.toBeNull();
@@ -193,10 +190,9 @@ describe('AC7 — empty geometry does not throw', () => {
 
 describe('AC8 — label dominant-baseline based on labelAbove', () => {
   it('label above baseline does not include dominant-baseline="hanging"', () => {
-    const svg = assembleSvg(renderChronology(
-      makeGeo({ events: [makeEvent({ name: 'AboveEvent', x: 100, labelAbove: true })] }),
-      theme,
-    ));
+    const svg = assembleSvg(
+      renderChronology(makeGeo({ events: [makeEvent({ name: 'AboveEvent', x: 100, labelAbove: true })] }), theme),
+    );
     // Locate the text element that wraps the event name
     const nameIdx = svg.indexOf('AboveEvent');
     // Look at the ~200 chars preceding the name for the text element's attributes
@@ -205,10 +201,9 @@ describe('AC8 — label dominant-baseline based on labelAbove', () => {
   });
 
   it('label below baseline includes dominant-baseline="hanging"', () => {
-    const svg = assembleSvg(renderChronology(
-      makeGeo({ events: [makeEvent({ name: 'BelowEvent', x: 100, labelAbove: false })] }),
-      theme,
-    ));
+    const svg = assembleSvg(
+      renderChronology(makeGeo({ events: [makeEvent({ name: 'BelowEvent', x: 100, labelAbove: false })] }), theme),
+    );
     const nameIdx = svg.indexOf('BelowEvent');
     const window = svg.slice(Math.max(0, nameIdx - 200), nameIdx);
     expect(window).toContain('dominant-baseline="hanging"');
@@ -231,10 +226,9 @@ describe('AC9 — event name strings appear in SVG', () => {
   });
 
   it('contains custom event name', () => {
-    const svg = assembleSvg(renderChronology(
-      makeGeo({ events: [makeEvent({ name: 'DeploymentFreeze', x: 300 })] }),
-      theme,
-    ));
+    const svg = assembleSvg(
+      renderChronology(makeGeo({ events: [makeEvent({ name: 'DeploymentFreeze', x: 300 })] }), theme),
+    );
     expect(svg).toContain('DeploymentFreeze');
   });
 });

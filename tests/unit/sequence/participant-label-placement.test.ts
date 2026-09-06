@@ -168,7 +168,9 @@ describe('participant labels through creole', () => {
     // JAR box 2: x=283.594 w=227.325 -> centre 397.2565, and the three runs
     // span 297.594..496.919, whose midpoint is that same centre.
     const svg = render('kofuti-29-goti188');
-    const row = runs(svg).filter((r) => r.size === '28' && r.y < 100).slice(1);
+    const row = runs(svg)
+      .filter((r) => r.size === '28' && r.y < 100)
+      .slice(1);
     const left = row[0]!.x;
     const right = row.at(-1)!.x + row.at(-1)!.textLength!;
     expect(right - left).toBeCloseTo(199.325, 3);

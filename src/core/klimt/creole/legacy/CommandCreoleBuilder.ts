@@ -93,9 +93,10 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
     // class NAME headers (`CreoleMode.FULL_BUT_UNDERSCORE`,
     // EntityImageClassHeader.java:107-108) measure `__Test__` raw
     // (curupe-50-kibu120 golden).
-    const cmds = style === FontStyle.UNDERLINE && mode === 'OTHER'
-      ? createStyleCommandsWithoutCreoleForm(style)
-      : createStyleCommands(style);
+    const cmds =
+      style === FontStyle.UNDERLINE && mode === 'OTHER'
+        ? createStyleCommandsWithoutCreoleForm(style)
+        : createStyleCommands(style);
     for (const cmd of cmds) addCommand(map, cmd);
   }
   // Upstream ctor position (java :96-97): BACKCOLOR legacy + legacyEol,

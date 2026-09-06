@@ -2,11 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { FrameGeo, TextRun } from '../../../src/diagrams/sequence/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import {
-  HEADER_PADDING,
-  HEADER_FONT_SIZE,
-  GROUP_FONT_SIZE,
-} from '../../../src/diagrams/sequence/frame-style.js';
+import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
 import { scaleSequenceTheme, type ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import {
   renderGroupingHeaderBackground,

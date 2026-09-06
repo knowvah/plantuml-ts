@@ -307,18 +307,36 @@ function absolutizeOne(letter: string, args: readonly number[], cursor: Absolute
     case 'c':
       return {
         op: 'C',
-        c1x: curX + args[0]!, c1y: curY + args[1]!,
-        c2x: curX + args[2]!, c2y: curY + args[3]!,
-        x: curX + args[4]!, y: curY + args[5]!,
+        c1x: curX + args[0]!,
+        c1y: curY + args[1]!,
+        c2x: curX + args[2]!,
+        c2y: curY + args[3]!,
+        x: curX + args[4]!,
+        y: curY + args[5]!,
       };
     // `link-intact` (the only glyph using an arc) uses lowercase `a`.
     /* v8 ignore next 2 */
     case 'A':
-      return { op: 'A', rx: args[0]!, ry: args[1]!, rot: args[2]!, laf: args[3]!, sf: args[4]!, x: args[5]!, y: args[6]! };
+      return {
+        op: 'A',
+        rx: args[0]!,
+        ry: args[1]!,
+        rot: args[2]!,
+        laf: args[3]!,
+        sf: args[4]!,
+        x: args[5]!,
+        y: args[6]!,
+      };
     case 'a':
       return {
-        op: 'A', rx: args[0]!, ry: args[1]!, rot: args[2]!, laf: args[3]!, sf: args[4]!,
-        x: curX + args[5]!, y: curY + args[6]!,
+        op: 'A',
+        rx: args[0]!,
+        ry: args[1]!,
+        rot: args[2]!,
+        laf: args[3]!,
+        sf: args[4]!,
+        x: curX + args[5]!,
+        y: curY + args[6]!,
       };
     case 'S':
     case 's': {

@@ -57,12 +57,7 @@ import {
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
-import {
-  NEWPAGE_DASH_UNIT,
-  NEWPAGE_LINE_COLOR,
-  NEWPAGE_LINE_THICKNESS,
-  NEWPAGE_MARGIN_Y,
-} from './newpage-style.js';
+import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
  * ONE creole run as a `<text>`, at the caller's ambient font wherever creole
@@ -86,7 +81,7 @@ function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldF
     fill: run.color ?? theme.colors.text,
     // `'700'`, not `'bold'` -- the jar emits the numeric form, and
     // `renderer-frame-header.ts#boldFontWeight` already set that convention.
-    ...(run.bold ?? boldFallback ? { fontWeight: '700' as const } : {}),
+    ...((run.bold ?? boldFallback) ? { fontWeight: '700' as const } : {}),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
     ...(run.url !== undefined ? { url: run.url } : {}),
@@ -118,9 +113,7 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   // line height where it used to be a `fontSize * 1.4` ratio. C6: one run per
   // creole atom, at `note { FontSize 13 }` (`plantuml.skin:312-316`) scaled,
   // the same spec layout measured the box with.
-  const textEls = note.textRuns
-    .map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK))
-    .join('');
+  const textEls = note.textRuns.map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK)).join('');
   return noteShape + textEls;
 }
 
@@ -167,9 +160,7 @@ function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
   // extracted into -- every field it built inline is the one that helper
   // builds, at `reference { FontSize 12 }` (`plantuml.skin:145-151`), which
   // is what the run beside it was measured at and must agree with.
-  return frame.refBody
-    .map((run) => creoleRunText(run, theme, REFERENCE_FONT_SIZE * theme.scaleK))
-    .join('');
+  return frame.refBody.map((run) => creoleRunText(run, theme, REFERENCE_FONT_SIZE * theme.scaleK)).join('');
 }
 
 /**
@@ -180,9 +171,7 @@ function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
  */
 function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
   return (
-    renderGroupingHeaderForeground(frame, theme) +
-    renderRefBody(frame, theme) +
-    renderBranchSeparators(frame, theme)
+    renderGroupingHeaderForeground(frame, theme) + renderRefBody(frame, theme) + renderBranchSeparators(frame, theme)
   );
 }
 
@@ -193,10 +182,7 @@ function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
  * own order.
  */
 function renderFrameBackground(frame: FrameGeo, theme: ScaledTheme): string {
-  return (
-    renderFrameBlotter(frame, FRAME_ROUND_CORNER * theme.scaleK) +
-    renderGroupingHeaderBackground(frame, theme)
-  );
+  return renderFrameBlotter(frame, FRAME_ROUND_CORNER * theme.scaleK) + renderGroupingHeaderBackground(frame, theme);
 }
 
 /** The dashed rule + bracketed condition each `else` branch opens with. */
@@ -269,9 +255,7 @@ function renderDividerBand(divider: DividerGeo, theme: ScaledTheme): string {
     strokeWidth: (DIVIDER_LINE_THICKNESS / 2) * k,
   };
   return (
-    band +
-    line(x, midY - 1 * k, x + w, midY - 1 * k, ruleStyle) +
-    line(x, midY + 2 * k, x + w, midY + 2 * k, ruleStyle)
+    band + line(x, midY - 1 * k, x + w, midY - 1 * k, ruleStyle) + line(x, midY + 2 * k, x + w, midY + 2 * k, ruleStyle)
   );
 }
 
@@ -408,10 +392,7 @@ function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
     fill,
     stroke: theme.colors.border,
   });
-  return (
-    boxRect +
-    box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('')
-  );
+  return boxRect + box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -435,11 +416,7 @@ const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
  * `paginateSequence` returns `geo` by reference when the document has no
  * `newpage`, which is every document but 35 of the oracle corpus.
  */
-export function renderSequencePage(
-  geo: SequenceGeometry,
-  theme: Theme,
-  pageIndex: number,
-): RenderFragment {
+export function renderSequencePage(geo: SequenceGeometry, theme: Theme, pageIndex: number): RenderFragment {
   return renderPaginated(paginateSequence(geo, pageIndex), theme);
 }
 

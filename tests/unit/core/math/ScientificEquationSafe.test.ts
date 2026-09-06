@@ -44,9 +44,7 @@ describe('ScientificEquationSafe.fromAsciiMath (java:71-79)', () => {
   });
 
   it('converts a full formula', () => {
-    expect(ScientificEquationSafe.fromAsciiMath('ax^2+bx+c=0').getSource()).toBe(
-      '{a}{x}^{{2}}+{b}{x}+{c}={0}',
-    );
+    expect(ScientificEquationSafe.fromAsciiMath('ax^2+bx+c=0').getSource()).toBe('{a}{x}^{{2}}+{b}{x}+{c}={0}');
   });
 
   it('an empty formula converts to empty LaTeX rather than failing', () => {

@@ -69,9 +69,12 @@ class RecordingUGraphic implements UGraphic {
   ) {}
 
   apply(change: UChange): UGraphic {
-    if (change instanceof UTranslate) return new RecordingUGraphic(this.draws, this.translate.compose(change), this.fg, this.bg);
-    if (change instanceof Fore) return new RecordingUGraphic(this.draws, this.translate, change.getColor() as string, this.bg);
-    if (change instanceof Back) return new RecordingUGraphic(this.draws, this.translate, this.fg, change.getBackColor() as string);
+    if (change instanceof UTranslate)
+      return new RecordingUGraphic(this.draws, this.translate.compose(change), this.fg, this.bg);
+    if (change instanceof Fore)
+      return new RecordingUGraphic(this.draws, this.translate, change.getColor() as string, this.bg);
+    if (change instanceof Back)
+      return new RecordingUGraphic(this.draws, this.translate, this.fg, change.getBackColor() as string);
     return this;
   }
 

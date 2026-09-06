@@ -17,12 +17,7 @@
 import type { DotInputCluster, DotInputNode } from './graph-layout.types.js';
 import type { ClusterColors, ClusterTree, NodeRec } from './svek-dot-sequence.js';
 import { hex, labelTable, portTable, rowPortTable, shieldTable } from './svek-dot-emit-labels.js';
-import {
-  closeCount,
-  innerWrapperLines,
-  outerWrapperLines,
-  wrapperLevels,
-} from './svek-dot-wrappers.js';
+import { closeCount, innerWrapperLines, outerWrapperLines, wrapperLevels } from './svek-dot-wrappers.js';
 
 import { PX_PER_INCH } from './graph-layout-build.js';
 
@@ -35,7 +30,6 @@ import { PX_PER_INCH } from './graph-layout-build.js';
  *  graph (a 400px node becomes 400.000032px at 6dp, and that difference
  *  changes spline routing). See `graph-layout-build.ts#addNodes`. */
 export const inches = (px: number): string => (px / PX_PER_INCH).toFixed(6);
-
 
 function shapeAttr(node: DotInputNode): string {
   const shape = node.shape ?? 'rect';
@@ -58,12 +52,12 @@ export function nodeLine(node: DotInputNode, rec: NodeRec): string {
     // (thereALinkFromOrToGroup2), independently of hasPort(); graphviz lets
     // a node id be redeclared, and the comparator dedupes by first-seen
     // shape, so both lines matter (see graph-layout.types.ts).
-    const pointDecl = node.groupAnchorAlsoPoint === true
-      ? `${rec.sh} [shape=point,width=.01,label=""];`
-      : '';
-    return `${pointDecl}${rec.sh} [shape=rect,width=.01,height=.01,label=${
-      labelTable(node.titleLabelWidth, node.titleLabelHeight, rec.color)
-    }];`;
+    const pointDecl = node.groupAnchorAlsoPoint === true ? `${rec.sh} [shape=point,width=.01,label=""];` : '';
+    return `${pointDecl}${rec.sh} [shape=rect,width=.01,height=.01,label=${labelTable(
+      node.titleLabelWidth,
+      node.titleLabelHeight,
+      rec.color,
+    )}];`;
   }
   if (shape === 'plaintext') {
     // RECTANGLE_HTML_FOR_PORTS is checked FIRST: SvekNode#appendShape tests it
@@ -82,7 +76,6 @@ export function nodeLine(node: DotInputNode, rec: NodeRec): string {
     `width=${inches(node.width)},height=${inches(node.height)},color="${hex(rec.color)}"];`
   );
 }
-
 
 /** ClusterDotString.printRanks' port rank-chain: one `A->B->C
  *  [arrowhead=none]` statement per rank present, then `C->anchor;`
@@ -163,9 +156,7 @@ function unrankedPortLines(
  *  (`subgraphClusterWithLabel`) branch, none on the genuine-port
  *  (`subgraphClusterNoLabel`) one — `ClusterDotString.java:138-141`. */
 function eeLabelAttr(cluster: DotInputCluster, cc: ClusterColors): string {
-  return cluster.portRanksLabelOnEe === true &&
-    cluster.labelWidth !== undefined &&
-    cluster.labelHeight !== undefined
+  return cluster.portRanksLabelOnEe === true && cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
     ? `label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
     : 'label="";';
 }

@@ -171,7 +171,7 @@ describe('classifierPortShortNames (Entity#getPortShortNames, abel/Link.java:515
 });
 
 describe('classPortShortNamesById (B2, SI17: unions Classifier.portShortNames)', () => {
-  it('unions a classifier\'s persistent portShortNames with its live relationship scan', () => {
+  it("unions a classifier's persistent portShortNames with its live relationship scan", () => {
     const ast: ClassDiagramAST = {
       classifiers: [
         { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [], portShortNames: new Set(['method']) },
@@ -234,20 +234,29 @@ describe('classPortShortNamesById (B2, SI17: unions Classifier.portShortNames)',
  * Neither guard adds defensive code to the production path.
  */
 const ALL_KINDS_BY_NAME: Record<ClassifierKind, true> = {
-  class: true, abstract: true, interface: true, enum: true, annotation: true,
-  object: true, map: true, json: true, entity: true, circle: true,
-  descriptive: true, usecase: true, state: true, association: true,
-  'assoc-circle': true, lollipop: true, protocol: true,
+  class: true,
+  abstract: true,
+  interface: true,
+  enum: true,
+  annotation: true,
+  object: true,
+  map: true,
+  json: true,
+  entity: true,
+  circle: true,
+  descriptive: true,
+  usecase: true,
+  state: true,
+  association: true,
+  'assoc-circle': true,
+  lollipop: true,
+  protocol: true,
 };
 
 describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () => {
   it('accepts exactly the class family plus object', () => {
-    const rowPort = (Object.keys(ALL_KINDS_BY_NAME) as ClassifierKind[])
-      .filter(isRowPortKind)
-      .sort();
-    expect(rowPort).toEqual([
-      'abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object', 'protocol',
-    ]);
+    const rowPort = (Object.keys(ALL_KINDS_BY_NAME) as ClassifierKind[]).filter(isRowPortKind).sort();
+    expect(rowPort).toEqual(['abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object', 'protocol']);
   });
 
   it('excludes map and json, whose bands are mapPortRows own concern (ADR-4)', () => {

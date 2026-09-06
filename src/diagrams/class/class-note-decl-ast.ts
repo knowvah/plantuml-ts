@@ -5,7 +5,6 @@
 
 import type { UrlInfo } from './class-url.js';
 
-
 export type NotePosition = 'left' | 'right' | 'top' | 'bottom';
 
 /**

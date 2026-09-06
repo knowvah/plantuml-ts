@@ -29,9 +29,7 @@ describe('R2h — association diamond fixed 24x24 (EntityImageAssociation)', () 
   });
 
   it('never measures the name — a long display yields the same 24x24', () => {
-    const m = measureClassifier(
-      association('a much longer association node name'), defaultTheme, measurer, SUPPRESS,
-    );
+    const m = measureClassifier(association('a much longer association node name'), defaultTheme, measurer, SUPPRESS);
     expect(m.width).toBe(24);
     expect(m.height).toBe(24);
   });

@@ -30,9 +30,7 @@ export class PSystemWelcome {
     this.strings.push(' ');
     this.strings.push('""class Example""');
     this.strings.push(' ');
-    this.strings.push(
-      'You will find more information about PlantUML syntax on <u>https://plantuml.com</u>',
-    );
+    this.strings.push('You will find more information about PlantUML syntax on <u>https://plantuml.com</u>');
     this.strings.push(' ');
     this.strings.push('(Details by typing ""license"" keyword)');
     this.strings.push(' ');

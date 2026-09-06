@@ -58,10 +58,7 @@ function javaFixedN(x: number, decimals: number): string {
   const fracPart = dot < 0 ? '' : shortest.slice(dot + 1);
   // Pad to (at least) decimals+1 fractional digits so there is always a
   // digit to make the HALF_UP round/no-round decision on.
-  const padded = (fracPart + '0'.repeat(decimals + 1)).slice(
-    0,
-    Math.max(decimals + 1, fracPart.length),
-  );
+  const padded = (fracPart + '0'.repeat(decimals + 1)).slice(0, Math.max(decimals + 1, fracPart.length));
   const keep = padded.slice(0, decimals);
   const roundUp = padded.charCodeAt(decimals) - 48 >= 5;
   let digits = intPart + keep; // decimal point implicitly `decimals` digits from the right

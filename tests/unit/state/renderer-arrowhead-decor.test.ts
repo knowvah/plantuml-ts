@@ -21,10 +21,7 @@
  * @see plans/g4-state-svg/ledger.md (S15)
  */
 import { describe, it, expect } from 'vitest';
-import {
-  buildCircleEndMarkup,
-  buildCrossStartMarkup,
-} from '../../../src/diagrams/state/renderer-arrowhead.js';
+import { buildCircleEndMarkup, buildCrossStartMarkup } from '../../../src/diagrams/state/renderer-arrowhead.js';
 import type { TransitionGeo } from '../../../src/diagrams/state/state-geo-types.js';
 
 const ARROW_COLOR = '#181818';

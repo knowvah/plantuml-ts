@@ -93,7 +93,12 @@ function segmentAngle(from: Point2D, to: Point2D): number {
  *  `SvekEdge#drawExtremity`'s draw-context construction (`Fore` then a
  *  thickness-only `solid` stroke then `Back`) — see `class/renderer-
  *  arrowhead.ts#drawExtremityMarkup`'s identical doc comment. */
-function drawArrowMarkup(point: Point2D, angle: number, color: Paint, strokeWidth: number): { body: string; extraDefs: string; trim: Point2D } {
+function drawArrowMarkup(
+  point: Point2D,
+  angle: number,
+  color: Paint,
+  strokeWidth: number,
+): { body: string; extraDefs: string; trim: Point2D } {
   const placed = place('ARROW', point, angle, 'none');
   const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
   const thicknessOnlyStroke = UStroke.withThickness(strokeWidth);
@@ -120,7 +125,11 @@ const EMPTY_ARROWHEAD: TransitionArrowhead = { markup: '', extraDefs: '' };
 /** Builds the head-side inline-polygon arrowhead markup for one transition
  *  — the replacement for `renderer.ts`'s old `markerEnd: 'url(#arrow-
  *  dependency)'` path attribute. */
-export function buildTransitionArrowhead(transition: TransitionGeo, color: Paint, strokeWidth: number): TransitionArrowhead {
+export function buildTransitionArrowhead(
+  transition: TransitionGeo,
+  color: Paint,
+  strokeWidth: number,
+): TransitionArrowhead {
   const points = transition.points;
   if (points.length < 2) return EMPTY_ARROWHEAD;
   const last = points[points.length - 1]!;

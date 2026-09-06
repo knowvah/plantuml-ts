@@ -120,7 +120,13 @@ describe('ReversePolishInterpretor: function calls', () => {
 
 describe('ReversePolishInterpretor.getResult', () => {
   it('exposes the final computed value', () => {
-    const rpn = new ReversePolishInterpretor(LOC, queueOf(NUM('9')), new FakeKnowledge(), new TMemoryGlobal(), fakeContext(new FakeKnowledge()));
+    const rpn = new ReversePolishInterpretor(
+      LOC,
+      queueOf(NUM('9')),
+      new FakeKnowledge(),
+      new TMemoryGlobal(),
+      fakeContext(new FakeKnowledge()),
+    );
     expect(rpn.getResult().toInt()).toBe(9);
   });
 });

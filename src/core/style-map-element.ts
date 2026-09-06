@@ -119,9 +119,7 @@ function collectStereotypeTagFontSize(
  * nesting, or `<sname>.stereotype`); all others are left for
  * `applyStyleMap`'s existing generic/class handling.
  */
-export function collectElementStyleBuckets(
-  styleMap: StyleMap,
-): Record<string, ElementColors> {
+export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, ElementColors> {
   const elements: Record<string, ElementColors> = {};
   for (const [selector, props] of styleMap.entries()) {
     if (collectStereotypeTagFontSize(selector, props, elements)) continue;
@@ -248,9 +246,7 @@ const DOCUMENT_BACKGROUND_SELECTOR_PRECEDENCE: readonly string[] = [
  * cover a bare `root` selector and every DOT-gate diagram type's bare +
  * nested `document` selector (`bikuka-40-pezi068`/`cilaba-36-zogi212`).
  */
-export function resolveDocumentBackground(
-  styleMap: StyleMap,
-): string | undefined {
+export function resolveDocumentBackground(styleMap: StyleMap): string | undefined {
   let documentBg: string | undefined;
   for (const sel of DOCUMENT_BACKGROUND_SELECTOR_PRECEDENCE) {
     const doc = styleMap.get(sel);
@@ -409,9 +405,7 @@ export function resolveStyleCascade(
  * {@link computeNoteStyleTagCascade} is: `cusiru-97-buco277` is the corpus
  * sample and it uses the bare form.
  */
-export function computeShowStereotypeByTag(
-  styleMap: StyleMap,
-): Readonly<Record<string, boolean>> {
+export function computeShowStereotypeByTag(styleMap: StyleMap): Readonly<Record<string, boolean>> {
   const result: Record<string, boolean> = {};
   for (const tag of collectStyleTagNames(styleMap)) {
     const raw = resolveStyleCascade(styleMap, ['participant'], 'showstereotype', [tag]);
@@ -431,9 +425,7 @@ export function computeShowStereotypeByTag(
  * narrower by design, not by oversight). Returns only the properties each
  * tag actually sets (empty entries are dropped).
  */
-export function computeNoteStyleTagCascade(
-  styleMap: StyleMap,
-): Readonly<Record<string, ElementColors>> {
+export function computeNoteStyleTagCascade(styleMap: StyleMap): Readonly<Record<string, ElementColors>> {
   const result: Record<string, ElementColors> = {};
   for (const tag of collectStyleTagNames(styleMap)) {
     const bg = resolveStyleCascade(styleMap, ['note'], 'backgroundcolor', [tag]);

@@ -37,7 +37,13 @@ function source(slug: string): string {
   return readFileSync(join(CACHE, slug, 'in.puml'), 'utf8');
 }
 
-interface Emitted { x: string; y: string; size: string; textLength: string | undefined; text: string }
+interface Emitted {
+  x: string;
+  y: string;
+  size: string;
+  textLength: string | undefined;
+  text: string;
+}
 
 function texts(svg: string): Emitted[] {
   const out: Emitted[] = [];
@@ -113,8 +119,7 @@ describe('frame header text', () => {
     expect(frameOf(new FixedMeasurer(8, 16)).tabRuns[0]!.textAscent).toBeCloseTo(16 - 16 / 4.5, 9);
     // The production measurer still agrees with the old shorthand exactly,
     // which is why no golden moved.
-    expect(frameOf(new DeterministicMeasurer()).tabRuns[0]!.textAscent)
-      .toBeCloseTo(13 - 13 / 4.5, 9);
+    expect(frameOf(new DeterministicMeasurer()).tabRuns[0]!.textAscent).toBeCloseTo(13 - 13 / 4.5, 9);
   });
 });
 

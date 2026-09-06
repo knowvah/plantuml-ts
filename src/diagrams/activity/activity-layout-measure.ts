@@ -20,10 +20,7 @@ function measureIfWidth(node: ActivityIf, ctx: LayoutCtx): number {
   return branchWidths.reduce((sum, w) => sum + w, 0) + NODE_MARGIN_X * (n - 1);
 }
 
-function measureParallelBranchesWidth(
-  branches: readonly (readonly ActivityNode[])[],
-  ctx: LayoutCtx,
-): number {
+function measureParallelBranchesWidth(branches: readonly (readonly ActivityNode[])[], ctx: LayoutCtx): number {
   const n = branches.length;
   const total = branches.reduce((sum, b) => sum + measureSubtreeWidth(b, ctx), 0);
   return total + NODE_MARGIN_X * Math.max(n - 1, 0);
@@ -61,10 +58,7 @@ export function measureNodeWidth(node: ActivityNode, ctx: LayoutCtx): number {
  * nodes vertically. This is the MAX width of any individual node in the
  * sequence (since nodes stack vertically and share the same column).
  */
-export function measureSubtreeWidth(
-  nodes: readonly ActivityNode[],
-  ctx: LayoutCtx,
-): number {
+export function measureSubtreeWidth(nodes: readonly ActivityNode[], ctx: LayoutCtx): number {
   if (nodes.length === 0) return ACTION_H_PAD * 2;
   return Math.max(...nodes.map((n) => measureNodeWidth(n, ctx)));
 }

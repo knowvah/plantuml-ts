@@ -244,7 +244,9 @@ export function buildEdgeArrowheads(
   }
 
   return {
-    tail, head, extraDefs,
+    tail,
+    head,
+    extraDefs,
     ...(tailTrim !== undefined ? { tailTrim } : {}),
     ...(headTrim !== undefined ? { headTrim } : {}),
   };

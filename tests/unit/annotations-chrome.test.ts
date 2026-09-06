@@ -93,7 +93,9 @@ function plainStyle(overrides: Partial<AnnotationBoxStyle> = {}): AnnotationBoxS
   };
 }
 
-function plainStyles(overrides: Partial<Record<AnnotationElement, Partial<AnnotationBoxStyle>>> = {}): AnnotationStyles {
+function plainStyles(
+  overrides: Partial<Record<AnnotationElement, Partial<AnnotationBoxStyle>>> = {},
+): AnnotationStyles {
   const elements: AnnotationElement[] = ['title', 'caption', 'header', 'footer', 'legend', 'mainframe'];
   const result = {} as AnnotationStyles;
   for (const el of elements) result[el] = plainStyle(overrides[el]);

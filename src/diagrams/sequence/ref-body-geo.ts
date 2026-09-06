@@ -104,14 +104,9 @@ function refHeaderHeight(theme: Theme, measurer: StringMeasurer): number {
  * block's own height plus the top and bottom padding
  * (`AbstractTextualComponent.java:110-114`).
  */
-export function refBodyHeight(
-  body: readonly string[],
-  theme: Theme,
-  measurer: StringMeasurer,
-): number {
+export function refBodyHeight(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
   if (body.length === 0) return 0;
-  const textHeight =
-    body.length * measurer.measure('M', refBodyFontSpecOf(theme)).height + 2 * REF_PADDING;
+  const textHeight = body.length * measurer.measure('M', refBodyFontSpecOf(theme)).height + 2 * REF_PADDING;
   return textHeight + refHeaderHeight(theme, measurer) + REF_HEIGHT_FOOTER;
 }
 
@@ -122,17 +117,9 @@ export function refBodyHeight(
  * (`AbstractTextualComponent.java:106-108`). The shadow delta that term also
  * carries is 0 here: this port draws no shadow.
  */
-export function refBodyWidth(
-  body: readonly string[],
-  theme: Theme,
-  measurer: StringMeasurer,
-): number {
+export function refBodyWidth(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
   if (body.length === 0) return 0;
-  const widest = Math.max(
-    ...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width),
-  );
-  const headerWidth =
-    measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
+  const widest = Math.max(...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
+  const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN;
 }
-

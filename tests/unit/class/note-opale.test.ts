@@ -86,11 +86,7 @@ describe('matchScore — BodierAbstract#matchScore port', () => {
 });
 
 describe('getBestMatchRow — picks the lowest-score row, or undefined for none', () => {
-  const rows = [
-    { text: 'member1' },
-    { text: 'memberB()' },
-    { text: 'member2' },
-  ];
+  const rows = [{ text: 'member1' }, { text: 'memberB()' }, { text: 'member2' }];
 
   it('picks the exact match over a longer/prefixed one', () => {
     expect(getBestMatchRow(rows, 'member2')?.text).toBe('member2');

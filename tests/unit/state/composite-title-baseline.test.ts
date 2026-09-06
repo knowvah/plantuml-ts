@@ -38,9 +38,7 @@ function state(id: string, overrides: Partial<State> = {}): State {
  *  plain case needs an edge crossing C's boundary, or C resolves as its own
  *  layout pass and takes the autonom title rule instead of a cluster's. */
 function diagram(withPin: boolean): StateDiagramAST {
-  const inner = withPin
-    ? [state('pin', { stereotype: 'entrypoint' }), state('m')]
-    : [state('m'), state('n')];
+  const inner = withPin ? [state('pin', { stereotype: 'entrypoint' }), state('m')] : [state('m'), state('n')];
   return {
     states: [state('C', { children: inner }), state('X')],
     transitions: [

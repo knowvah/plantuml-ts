@@ -64,7 +64,6 @@ import { resolveStyleStereotypeTags } from './class-stereotype.js';
 // functions gets mis-attributed to the preceding one's NLOC by lizard).
 // ---------------------------------------------------------------------------
 
-
 /** Result of {@link computeObjectTitle} -- the combined name+stereotype
  *  title dimension plus the resolved header FontSize override (if any),
  *  both needed by every branch of {@link measureObjectClassifier}. */
@@ -131,11 +130,12 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
   // `object { FontSize 16, <<Foo1>> { FontSize 8 } }`: its `A` must draw at 8
   // and its unstereotyped `B` at 16.
   const byStereo = objectBucket?.fontSizeByStereo;
-  const stereoSize = byStereo === undefined
-    ? undefined
-    : resolveStyleStereotypeTags(classifier)
-        .map((t) => byStereo[t.toLowerCase()])
-        .find((v) => v !== undefined);
+  const stereoSize =
+    byStereo === undefined
+      ? undefined
+      : resolveStyleStereotypeTags(classifier)
+          .map((t) => byStereo[t.toLowerCase()])
+          .find((v) => v !== undefined);
   const nameFontSizeOverride = stereoSize ?? objectBucket?.headerFontSize ?? objectBucket?.fontSize;
   const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
   // Tilde escapes resolved before measuring -- see `class-object-display.ts`.
@@ -156,7 +156,10 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
 function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredClassifier {
   const { classifier, theme, measurer, title, nameFontSizeOverride, enhancedBody } = params;
   const width = floorAtMinimumWidth(
-    Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
+    Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2),
+    theme,
+    'object',
+  );
   const patchedHeaderRows = headerRows(classifier, theme, measurer, {
     boxWidth: width,
     namePadding: OBJECT_NAME_PADDING,
@@ -164,8 +167,11 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
     nameFontSizeOverride,
   });
   return {
-    width, height: title.height + enhancedBody.height, rows: patchedHeaderRows,
-    dividerYs: [title.height], enhancedBody,
+    width,
+    height: title.height + enhancedBody.height,
+    rows: patchedHeaderRows,
+    dividerYs: [title.height],
+    enhancedBody,
     // B35/M40: an enhanced body is upstream `BodyEnhanced1`, whose
     // `decorate` wraps every block in `TextBlockUtils.withMargin(block,
     // getMarginX() = 6, 4)` (`BodyEnhancedAbstract.java:106-113`) -- a real
@@ -190,7 +196,10 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   const fieldsHeight = methodOrFieldHeight(fieldsDim.height, showFields);
 
   const width = floorAtMinimumWidth(
-    Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2), theme, 'object');
+    Math.max(fieldsDim.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2),
+    theme,
+    'object',
+  );
   const height = title.height + fieldsHeight;
 
   const rows = headerRows(classifier, theme, measurer, {
@@ -221,7 +230,10 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
   const portMemberSections = { headerHeight: title.height, ...(bodyPorts ? { fields: flat } : {}) };
 
   return {
-    width, height, rows, portMemberSections,
+    width,
+    height,
+    rows,
+    portMemberSections,
     dividerYs: showFields ? [title.height] : [],
     ...(emptyFieldPlaceholder ? { emptyFieldPlaceholder: true as const } : {}),
     // B35/M40: only a POPULATED field list is a real `BodyFactory.create1`
@@ -277,7 +289,11 @@ export function measureObjectClassifier(
   const enhancedBody =
     isEnhancedBody(classifier.rawBodyLines) && showFields
       ? measureEnhancedBody(classifier.rawBodyLines!, {
-          fontSpec, measurer, sprites, baselineOffset: baselineOffsetFor(fontSpec, measurer), bodyTop: title.height,
+          fontSpec,
+          measurer,
+          sprites,
+          baselineOffset: baselineOffsetFor(fontSpec, measurer),
+          bodyTop: title.height,
         })
       : undefined;
 

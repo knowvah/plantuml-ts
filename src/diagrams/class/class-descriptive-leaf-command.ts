@@ -14,10 +14,7 @@
  */
 
 import { refuse } from '../../core/parse-refusal.js';
-import {
-  applyClassifierDecl,
-  parseClassifierDecl,
-} from './class-declaration-parser.js';
+import { applyClassifierDecl, parseClassifierDecl } from './class-declaration-parser.js';
 import { ALL_DESCRIPTIVE_LEAF } from './class-descriptive-leaf-keywords.js';
 import type { ParseState } from './parser.js';
 
@@ -28,8 +25,7 @@ interface Command {
 
 /** Upstream's own wording, verbatim —
  *  `CommandCreateElementFull2#executeArg` line 198. */
-export const ALLOW_MIXING_ERROR =
-  "Use 'allowmixing' if you want to mix classes and other UML elements.";
+export const ALLOW_MIXING_ERROR = "Use 'allowmixing' if you want to mix classes and other UML elements.";
 
 /**
  * `CommandPackageWithUSymbol`'s own SYMBOL alternation, verbatim
@@ -72,13 +68,7 @@ const MIX_PREFIX = /^\s*mix_/i;
  * a block containing one of these, and `CommandCreateElementFull2`'s
  * `allowmixing` gate is only reachable once that factory owns the block.
  */
-const NATIVE_CLASS_KINDS: ReadonlySet<string> = new Set([
-  'class',
-  'abstract',
-  'interface',
-  'enum',
-  'annotation',
-]);
+const NATIVE_CLASS_KINDS: ReadonlySet<string> = new Set(['class', 'abstract', 'interface', 'enum', 'annotation']);
 
 /**
  * Promote a recorded gate violation to a diagram error, at end of parse.
@@ -119,11 +109,7 @@ export const DESCRIPTIVE_LEAF_COMMANDS: readonly Command[] = [
       // next candidate, which is what upstream does. Measured: deferring it
       // cost 200 DESCRIPTION and 150 STATE fixtures, each claimed by the
       // class engine because this gate never fired in time.
-      if (
-        !state.allowMixing &&
-        !MIX_PREFIX.test(line) &&
-        !isContainerOpener(line.trim())
-      ) {
+      if (!state.allowMixing && !MIX_PREFIX.test(line) && !isContainerOpener(line.trim())) {
         // Upstream returns the error BEFORE applying anything, so the
         // declaration below must not run. `error(String)` carries score 0
         // (`CommandExecutionResult.java:81-83`).

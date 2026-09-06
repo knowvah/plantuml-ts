@@ -31,7 +31,11 @@ function makeClassifier(id: string, overrides?: Partial<Classifier>): Classifier
 
 function makeAST(classifiers: Classifier[]): ClassDiagramAST {
   return {
-    classifiers, relationships: [], namespaces: [], directives: [], notes: [],
+    classifiers,
+    relationships: [],
+    namespaces: [],
+    directives: [],
+    notes: [],
   };
 }
 
@@ -42,13 +46,19 @@ function makeAST(classifiers: Classifier[]): ClassDiagramAST {
 describe('parseHideShowEntityDirective', () => {
   it('parses a bare entity id + circle', () => {
     expect(parseHideShowEntityDirective('hide C2 circle')).toEqual({
-      kind: 'hideshowentity', action: 'hide', entityId: 'C2', target: 'circle',
+      kind: 'hideshowentity',
+      action: 'hide',
+      entityId: 'C2',
+      target: 'circle',
     });
   });
 
   it('parses a quoted entity id', () => {
     expect(parseHideShowEntityDirective('hide "EventEmitter" circle')).toEqual({
-      kind: 'hideshowentity', action: 'hide', entityId: 'EventEmitter', target: 'circle',
+      kind: 'hideshowentity',
+      action: 'hide',
+      entityId: 'EventEmitter',
+      target: 'circle',
     });
   });
 
@@ -80,7 +90,9 @@ describe('parseHideShowEntityDirective', () => {
 
   it('is case-insensitive on both keyword and portion word', () => {
     expect(parseHideShowEntityDirective('HIDE C2 CIRCLE')).toMatchObject({
-      action: 'hide', entityId: 'C2', target: 'circle',
+      action: 'hide',
+      entityId: 'C2',
+      target: 'circle',
     });
   });
 
@@ -111,10 +123,16 @@ describe('parseHideShowEntityDirective', () => {
   // comment), not overlapping grammar for the SAME feature.
   it('parses the entity-scoped stereotype portion (target: "stereotype")', () => {
     expect(parseHideShowEntityDirective('hide Dummy2 stereotype')).toEqual({
-      kind: 'hideshowentity', action: 'hide', entityId: 'Dummy2', target: 'stereotype',
+      kind: 'hideshowentity',
+      action: 'hide',
+      entityId: 'Dummy2',
+      target: 'stereotype',
     });
     expect(parseHideShowEntityDirective('show Dummy2 stereotypes')).toEqual({
-      kind: 'hideshowentity', action: 'show', entityId: 'Dummy2', target: 'stereotype',
+      kind: 'hideshowentity',
+      action: 'show',
+      entityId: 'Dummy2',
+      target: 'stereotype',
     });
   });
 
@@ -135,9 +153,7 @@ describe('parseHideShowEntityDirective', () => {
 describe('applyHideShowEntityDirectives', () => {
   it('sets hideCircle only on the targeted classifier', () => {
     const ast = makeAST([makeClassifier('C1'), makeClassifier('C2')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'C2', target: 'circle' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'C2', target: 'circle' }];
     applyHideShowEntityDirectives(ast);
     expect(ast.classifiers.find((c) => c.id === 'C1')?.hideCircle).toBeUndefined();
     expect(ast.classifiers.find((c) => c.id === 'C2')?.hideCircle).toBe(true);
@@ -145,9 +161,7 @@ describe('applyHideShowEntityDirectives', () => {
 
   it('sets BOTH suppressFields and suppressMethods for target=members', () => {
     const ast = makeAST([makeClassifier('X')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'X', target: 'members' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'X', target: 'members' }];
     applyHideShowEntityDirectives(ast);
     const x = ast.classifiers[0]!;
     expect(x.suppressFields).toBe(true);
@@ -156,9 +170,7 @@ describe('applyHideShowEntityDirectives', () => {
 
   it('sets only suppressFields for target=fields', () => {
     const ast = makeAST([makeClassifier('Dummy3')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'Dummy3', target: 'fields' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'Dummy3', target: 'fields' }];
     applyHideShowEntityDirectives(ast);
     const d = ast.classifiers[0]!;
     expect(d.suppressFields).toBe(true);
@@ -167,9 +179,7 @@ describe('applyHideShowEntityDirectives', () => {
 
   it('sets only suppressMethods for target=methods', () => {
     const ast = makeAST([makeClassifier('Dummy2')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'Dummy2', target: 'methods' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'Dummy2', target: 'methods' }];
     applyHideShowEntityDirectives(ast);
     const d = ast.classifiers[0]!;
     expect(d.suppressMethods).toBe(true);
@@ -178,9 +188,7 @@ describe('applyHideShowEntityDirectives', () => {
 
   it('sets hideStereotype only on the targeted classifier (G3/O4)', () => {
     const ast = makeAST([makeClassifier('C1'), makeClassifier('C2')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'C2', target: 'stereotype' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'C2', target: 'stereotype' }];
     applyHideShowEntityDirectives(ast);
     expect(ast.classifiers.find((c) => c.id === 'C1')?.hideStereotype).toBeUndefined();
     expect(ast.classifiers.find((c) => c.id === 'C2')?.hideStereotype).toBe(true);
@@ -200,9 +208,7 @@ describe('applyHideShowEntityDirectives', () => {
 
   it('is a no-op for an unresolvable entity id', () => {
     const ast = makeAST([makeClassifier('C1')]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: 'NoSuchEntity', target: 'circle' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: 'NoSuchEntity', target: 'circle' }];
     expect(() => applyHideShowEntityDirectives(ast)).not.toThrow();
     expect(ast.classifiers[0]!.hideCircle).toBeUndefined();
   });
@@ -221,7 +227,7 @@ describe('renderFixtureClass — entity-qualified hide reaches the rendered <rec
   // dokego-92-zilu832/in.svg: C2's own rect is 23.9375x40 (no badge
   // reservation) once its circle is hidden -- C1 (untouched) keeps its
   // full 49.9375x48 badge-reserving box.
-  it('hide <entity> circle shrinks only the targeted classifier\'s box', () => {
+  it("hide <entity> circle shrinks only the targeted classifier's box", () => {
     const svg = renderFixtureClass(
       `@startuml
 class C1
@@ -238,7 +244,7 @@ C1 "1" -- "1" C2
   // nirija-04-veti140/in.svg: `hide X members` / `hide Y members` fully
   // collapse BOTH classifiers to a header-only 41.3625x32 box (no dividers,
   // no member rows) despite X/Y each declaring 5 real member lines.
-  it('hide <entity> members fully collapses that entity\'s box (fields + methods)', () => {
+  it("hide <entity> members fully collapses that entity's box (fields + methods)", () => {
     const svg = renderFixtureClass(
       `@startuml
 class X {
@@ -287,13 +293,19 @@ hide C2 circle
 describe('parseHideShowEntityDirective — <<stereotype>> gender (B2)', () => {
   it('parses `hide <<even>> methods` with the raw bracketed gender as entityId', () => {
     expect(parseHideShowEntityDirective('hide <<even>> methods')).toEqual({
-      kind: 'hideshowentity', action: 'hide', entityId: '<<even>>', target: 'methods',
+      kind: 'hideshowentity',
+      action: 'hide',
+      entityId: '<<even>>',
+      target: 'methods',
     });
   });
 
   it('parses `show <<even>> circled` (show + circled alias)', () => {
     expect(parseHideShowEntityDirective('show <<even>> circled')).toEqual({
-      kind: 'hideshowentity', action: 'show', entityId: '<<even>>', target: 'circle',
+      kind: 'hideshowentity',
+      action: 'show',
+      entityId: '<<even>>',
+      target: 'circle',
     });
   });
 
@@ -307,9 +319,7 @@ describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
     const even = makeClassifier('D2', { stereotype: 'even' });
     const odd = makeClassifier('D1');
     const ast = makeAST([odd, even]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: '<<even>>', target: 'methods' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: '<<even>>', target: 'methods' }];
     applyHideShowEntityDirectives(ast);
     expect(even.suppressMethods).toBe(true);
     expect(odd.suppressMethods).toBeUndefined();
@@ -318,9 +328,7 @@ describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
   it('matches any one label of a stacked stereotype', () => {
     const c = makeClassifier('C', { stereotype: 'Green >>  << Blue' });
     const ast = makeAST([c]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: '<<Blue>>', target: 'fields' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: '<<Blue>>', target: 'fields' }];
     applyHideShowEntityDirectives(ast);
     expect(c.suppressFields).toBe(true);
   });
@@ -328,9 +336,7 @@ describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
   it('does not match a different label (exact equality, byStereotype has no wildcards)', () => {
     const c = makeClassifier('C', { stereotype: 'even' });
     const ast = makeAST([c]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'hide', entityId: '<<odd>>', target: 'methods' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: '<<odd>>', target: 'methods' }];
     applyHideShowEntityDirectives(ast);
     expect(c.suppressMethods).toBeUndefined();
   });
@@ -338,9 +344,7 @@ describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
   it('`show` explicitly clears a previously-set flag (CucaDiagram#showPortion last-writer fold)', () => {
     const c = makeClassifier('C', { stereotype: 'even', hideCircle: true });
     const ast = makeAST([c]);
-    ast.hideEntityDirectives = [
-      { kind: 'hideshowentity', action: 'show', entityId: '<<even>>', target: 'circle' },
-    ];
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'show', entityId: '<<even>>', target: 'circle' }];
     applyHideShowEntityDirectives(ast);
     expect(c.hideCircle).toBe(false);
   });

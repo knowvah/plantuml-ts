@@ -167,39 +167,42 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
   // (possibly taller) sub-table row, not its vertical center -- jar-
   // verified: "user"'s key row and its first nested member "age" share the
   // SAME y despite the nested sub-table being much taller than one row.
-  it("sets each entry row's OWN textLength and an ascent-from-row-top baseline " +
-     "(including a nested object's key, top-aligned not centered)", () => {
-    const ast = parse(BEPAFE_JSON_SOURCE);
-    const geo = layoutClass(ast, theme, measurer);
-    const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
-    const [, nameKey, nameValue, colorKey, , , , , , userKey, ageKey, ageValue] = jsonGeo.rows;
+  it(
+    "sets each entry row's OWN textLength and an ascent-from-row-top baseline " +
+      "(including a nested object's key, top-aligned not centered)",
+    () => {
+      const ast = parse(BEPAFE_JSON_SOURCE);
+      const geo = layoutClass(ast, theme, measurer);
+      const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
+      const [, nameKey, nameValue, colorKey, , , , , , userKey, ageKey, ageValue] = jsonGeo.rows;
 
-    // "name" key/value row -- jar y=37.8889, rect y=7 -> relative 30.8889
-    expect(nameKey!.text).toBe('name');
-    expect(nameKey!.width).toBeCloseTo(35, 3);
-    expect(nameKey!.y).toBeCloseTo(30.8889, 3);
-    expect(nameValue!.text).toBe('component c1');
-    expect(nameValue!.width).toBeCloseTo(84, 3);
-    expect(nameValue!.y).toBeCloseTo(30.8889, 3);
+      // "name" key/value row -- jar y=37.8889, rect y=7 -> relative 30.8889
+      expect(nameKey!.text).toBe('name');
+      expect(nameKey!.width).toBeCloseTo(35, 3);
+      expect(nameKey!.y).toBeCloseTo(30.8889, 3);
+      expect(nameValue!.text).toBe('component c1');
+      expect(nameValue!.width).toBeCloseTo(84, 3);
+      expect(nameValue!.y).toBeCloseTo(30.8889, 3);
 
-    // "color" key row -- jar y=55.8889, rect y=7 -> relative 48.8889
-    expect(colorKey!.text).toBe('color');
-    expect(colorKey!.width).toBeCloseTo(30.3625, 3);
-    expect(colorKey!.y).toBeCloseTo(48.8889, 3);
+      // "color" key row -- jar y=55.8889, rect y=7 -> relative 48.8889
+      expect(colorKey!.text).toBe('color');
+      expect(colorKey!.width).toBeCloseTo(30.3625, 3);
+      expect(colorKey!.y).toBeCloseTo(48.8889, 3);
 
-    // "user" key row + its nested "age" key/value share the SAME top-of-row
-    // y (top-aligned, NOT centered within the taller nested sub-table) --
-    // jar y=127.8889, rect y=7 -> relative 120.8889
-    expect(userKey!.text).toBe('user');
-    expect(userKey!.width).toBeCloseTo(27.2125, 3);
-    expect(userKey!.y).toBeCloseTo(120.8889, 3);
-    expect(ageKey!.text).toBe('age');
-    expect(ageKey!.width).toBeCloseTo(23.3625, 3);
-    expect(ageKey!.y).toBeCloseTo(120.8889, 3);
-    expect(ageValue!.text).toBe('23');
-    expect(ageValue!.width).toBeCloseTo(15.575, 3);
-    expect(ageValue!.y).toBeCloseTo(120.8889, 3);
-  });
+      // "user" key row + its nested "age" key/value share the SAME top-of-row
+      // y (top-aligned, NOT centered within the taller nested sub-table) --
+      // jar y=127.8889, rect y=7 -> relative 120.8889
+      expect(userKey!.text).toBe('user');
+      expect(userKey!.width).toBeCloseTo(27.2125, 3);
+      expect(userKey!.y).toBeCloseTo(120.8889, 3);
+      expect(ageKey!.text).toBe('age');
+      expect(ageKey!.width).toBeCloseTo(23.3625, 3);
+      expect(ageKey!.y).toBeCloseTo(120.8889, 3);
+      expect(ageValue!.text).toBe('23');
+      expect(ageValue!.width).toBeCloseTo(15.575, 3);
+      expect(ageValue!.y).toBeCloseTo(120.8889, 3);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -369,22 +372,25 @@ describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () =>
     return classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!.jsonBody!;
   }
 
-  it('emits the object vline FIRST, before that object\'s first hline', () => {
+  it("emits the object vline FIRST, before that object's first hline", () => {
     const body = bodyOf();
     expect(body[0]).toEqual({ kind: 'vline', x: ROOT_VLINE_X, y: ROOT_VLINE_Y, height: ROOT_VLINE_HEIGHT });
     expect(body[1]).toMatchObject({ kind: 'hline', y: ROOT_VLINE_Y, width: ROOT_HLINE_WIDTH });
   });
 
-  it('emits a nested object\'s OWN vline, at its own x/height', () => {
+  it("emits a nested object's OWN vline, at its own x/height", () => {
     const body = bodyOf();
     const vlines = body.filter((i) => i.kind === 'vline');
     expect(vlines).toHaveLength(2);
     expect(vlines[1]).toEqual({
-      kind: 'vline', x: NESTED_VLINE_X, y: NESTED_VLINE_Y, height: NESTED_VLINE_HEIGHT,
+      kind: 'vline',
+      x: NESTED_VLINE_X,
+      y: NESTED_VLINE_Y,
+      height: NESTED_VLINE_HEIGHT,
     });
   });
 
-  it('scopes a nested table\'s hlines to its own width, not the full box', () => {
+  it("scopes a nested table's hlines to its own width, not the full box", () => {
     const body = bodyOf();
     const hlines = body.filter((i) => i.kind === 'hline');
     expect(hlines.filter((h) => h.width === ROOT_HLINE_WIDTH && h.x === 0)).toHaveLength(4);

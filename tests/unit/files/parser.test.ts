@@ -55,9 +55,7 @@ describe('parseFiles', () => {
     const src = child(ast.root, 'src');
     expect(src).toBeDefined();
     // Only one `src` folder
-    const srcFolders = ast.root.children.filter(
-      (c) => c.type === 'folder' && c.name === 'src',
-    );
+    const srcFolders = ast.root.children.filter((c) => c.type === 'folder' && c.name === 'src');
     expect(srcFolders.length).toBe(1);
     expect(src!.children.length).toBe(2);
     expect(child(src!, 'a.ts')!.type).toBe('file');
@@ -68,9 +66,7 @@ describe('parseFiles', () => {
   // AC5 — <note> after /src/foo.ts attaches to src folder (not foo.ts)
   // -------------------------------------------------------------------------
   it('AC5: note after a file attaches to the parent folder of that file', () => {
-    const ast = parseFiles(
-      makeSource(['/src/foo.ts', '<note>', 'A note line', '</note>']),
-    );
+    const ast = parseFiles(makeSource(['/src/foo.ts', '<note>', 'A note line', '</note>']));
     const src = child(ast.root, 'src');
     expect(src).toBeDefined();
     const note = src!.children.find((c) => c.type === 'note');
@@ -85,9 +81,7 @@ describe('parseFiles', () => {
   // AC6 — <note> as first entry (no prior file) → NOTE child of root
   // -------------------------------------------------------------------------
   it('AC6: note with no prior file entry attaches to root', () => {
-    const ast = parseFiles(
-      makeSource(['<note>', 'root note', '</note>']),
-    );
+    const ast = parseFiles(makeSource(['<note>', 'root note', '</note>']));
     const note = ast.root.children.find((c) => c.type === 'note');
     expect(note).toBeDefined();
     expect(note!.noteLines).toEqual(['root note']);
@@ -97,16 +91,7 @@ describe('parseFiles', () => {
   // AC7 — <style>…</style> silently consumed; !theme and blanks ignored
   // -------------------------------------------------------------------------
   it('AC7: style blocks and !-directives are silently consumed', () => {
-    const ast = parseFiles(
-      makeSource([
-        '<style>',
-        '.foo { color: red }',
-        '</style>',
-        '!theme plain',
-        '',
-        '/main.ts',
-      ]),
-    );
+    const ast = parseFiles(makeSource(['<style>', '.foo { color: red }', '</style>', '!theme plain', '', '/main.ts']));
     expect(ast.root.children.length).toBe(1);
     expect(ast.root.children[0]!.type).toBe('file');
     expect(ast.root.children[0]!.name).toBe('main.ts');
@@ -116,9 +101,7 @@ describe('parseFiles', () => {
   // AC8 — @startfiles / @endfiles wrapper lines produce no tree entries
   // -------------------------------------------------------------------------
   it('AC8: @startfiles and @endfiles are stripped without producing entries', () => {
-    const ast = parseFiles(
-      makeSource(['@startfiles', '/index.ts', '@endfiles']),
-    );
+    const ast = parseFiles(makeSource(['@startfiles', '/index.ts', '@endfiles']));
     expect(ast.root.children.length).toBe(1);
     expect(ast.root.children[0]!.name).toBe('index.ts');
   });
@@ -171,9 +154,7 @@ describe('parseFiles', () => {
   it('note after trailing-slash folder uses last real file as anchor', () => {
     // lastCreated stays as /src/a.ts after /src/ because trailing slash
     // returns null and we leave lastCreated unchanged
-    const ast = parseFiles(
-      makeSource(['/src/a.ts', '/lib/', '<note>', 'n', '</note>']),
-    );
+    const ast = parseFiles(makeSource(['/src/a.ts', '/lib/', '<note>', 'n', '</note>']));
     // note should attach to parent of a.ts = src
     const src = child(ast.root, 'src');
     const note = src!.children.find((c) => c.type === 'note');
@@ -181,16 +162,7 @@ describe('parseFiles', () => {
   });
 
   it('multi-line note captures all inner lines', () => {
-    const ast = parseFiles(
-      makeSource([
-        '/doc/readme.md',
-        '<note>',
-        'line1',
-        'line2',
-        'line3',
-        '</note>',
-      ]),
-    );
+    const ast = parseFiles(makeSource(['/doc/readme.md', '<note>', 'line1', 'line2', 'line3', '</note>']));
     const doc = child(ast.root, 'doc');
     const note = doc!.children.find((c) => c.type === 'note');
     expect(note!.noteLines).toEqual(['line1', 'line2', 'line3']);
@@ -198,15 +170,7 @@ describe('parseFiles', () => {
 
   it('note does not update lastCreated — subsequent note still attaches to same parent', () => {
     const ast = parseFiles(
-      makeSource([
-        '/pkg/mod.ts',
-        '<note>',
-        'first note',
-        '</note>',
-        '<note>',
-        'second note',
-        '</note>',
-      ]),
+      makeSource(['/pkg/mod.ts', '<note>', 'first note', '</note>', '<note>', 'second note', '</note>']),
     );
     const pkg = child(ast.root, 'pkg');
     const notes = pkg!.children.filter((c) => c.type === 'note');

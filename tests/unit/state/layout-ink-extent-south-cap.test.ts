@@ -33,13 +33,27 @@ import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.j
  *  cap, when drawn, extends max-Y to `y + h = 70`. */
 function composite(southCapInk?: boolean): StateNodeGeo {
   return {
-    id: 'c1', kind: 'normal', display: 'c1', x: 10, y: 20, width: 100, height: 50,
+    id: 'c1',
+    kind: 'normal',
+    display: 'c1',
+    x: 10,
+    y: 20,
+    width: 100,
+    height: 50,
     headerLines: [{ text: 'c1', width: 20 }],
     transitions: [],
     children: [
       {
-        id: 'leaf', kind: 'normal', display: 'leaf', x: 20, y: 35, width: 20, height: 10,
-        headerLines: [{ text: 'leaf', width: 10 }], children: [], transitions: [],
+        id: 'leaf',
+        kind: 'normal',
+        display: 'leaf',
+        x: 20,
+        y: 35,
+        width: 20,
+        height: 10,
+        headerLines: [{ text: 'leaf', width: 10 }],
+        children: [],
+        transitions: [],
       },
     ],
     ...(southCapInk !== undefined ? { southCapInk } : {}),
@@ -81,8 +95,16 @@ describe('composite south-cap ink — non-transparent south', () => {
 describe('composite south-cap ink — scope', () => {
   it('is ignored on a LEAF box (no children): jar draws no RoundedContainer there', () => {
     const leaf: StateNodeGeo = {
-      id: 's1', kind: 'normal', display: 's1', x: 0, y: 0, width: 100, height: 50,
-      children: [], transitions: [], headerLines: [{ text: 's1', width: 20 }],
+      id: 's1',
+      kind: 'normal',
+      display: 's1',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 50,
+      children: [],
+      transitions: [],
+      headerLines: [{ text: 's1', width: 20 }],
       southCapInk: true,
     };
     expect(computeStateDocumentDims([leaf], [])).toEqual({ width: 122, height: 71 });

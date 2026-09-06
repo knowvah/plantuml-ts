@@ -35,8 +35,7 @@ const NOTE_COLOR_ATOM = String.raw`#\w+[-\\|/]?\w+`;
  * drawn from the fixed `ColorParam`-backed keyword set.
  * @see klimt/color/ColorParser.java:45
  */
-const NOTE_COLOR_COMPOUND =
-  String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
+const NOTE_COLOR_COMPOUND = String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
 
 /**
  * `ColorParser.COLORS_REGEXP = PART2 | COLOR_REGEXP` — compound tried
@@ -95,12 +94,7 @@ export const noteCommand: Command = {
   ),
   execute(state, match) {
     const rawPos = match[1]!.toLowerCase();
-    const position: NoteEvent['position'] =
-      rawPos === 'left of'
-        ? 'left'
-        : rawPos === 'right of'
-          ? 'right'
-          : 'over';
+    const position: NoteEvent['position'] = rawPos === 'left of' ? 'left' : rawPos === 'right of' ? 'right' : 'over';
     const rawParticipants = match[2]!;
     const color = match[3];
     const inlineText = match[4];
@@ -265,8 +259,7 @@ export const styledNoteCommand: Command = {
     const stereo2 = match[7];
     const color = match[8];
     const inlineText = match[9];
-    const position: NoteEvent['position'] =
-      rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
+    const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
     const participants = match[6]!
       .split(',')
       .map((s) => unquote(s.trim()))
@@ -318,4 +311,3 @@ export const noteAcrossCommand: Command = {
     }
   },
 };
-

@@ -121,10 +121,7 @@ function matchSymmetricDelim(input: string, pos: number): Token | undefined {
  * Match `<color:X>` / `</color>` at `pos`, if any. Close is checked before
  * open to mirror the original hand-written scan order.
  */
-function matchColorTag(
-  input: string,
-  pos: number,
-): { token: Token; length: number } | undefined {
+function matchColorTag(input: string, pos: number): { token: Token; length: number } | undefined {
   if (input.startsWith('</color>', pos)) {
     return { token: { kind: 'close-color' }, length: 8 };
   }
@@ -142,10 +139,7 @@ function matchColorTag(
  * Match a `<b>`/`<i>`/`<u>`/`<s>` open or close tag at `pos`, if any. For
  * each tag, close is checked before open to mirror the original scan order.
  */
-function matchSimpleTag(
-  input: string,
-  pos: number,
-): { token: Token; length: number } | undefined {
+function matchSimpleTag(input: string, pos: number): { token: Token; length: number } | undefined {
   for (const tag of SIMPLE_TAGS) {
     if (input.startsWith(tag.close, pos)) {
       return { token: { kind: tag.closeKind }, length: tag.close.length };
@@ -268,10 +262,7 @@ const BOOLEAN_DELIMS: Record<
 };
 
 /** Literal text emitted for an orphan (unmatched) HTML-style close tag. */
-const ORPHAN_CLOSE_LITERAL: Record<
-  'close-color' | 'close-b' | 'close-i' | 'close-u' | 'close-s',
-  string
-> = {
+const ORPHAN_CLOSE_LITERAL: Record<'close-color' | 'close-b' | 'close-i' | 'close-u' | 'close-s', string> = {
   'close-color': '</color>',
   'close-b': '</b>',
   'close-i': '</i>',

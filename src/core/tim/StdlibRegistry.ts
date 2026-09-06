@@ -254,9 +254,7 @@ function harvest(module: unknown, into: Map<string, BundleData | RemoteBundle>):
  * @param entries Bundle name -> a thunk returning the package module. Use a
  *                STATIC specifier inside the thunk (ADR-3).
  */
-export function stdlibRegistry(
-  entries: Readonly<Record<string, () => Promise<unknown>>>,
-): StdlibRegistry {
+export function stdlibRegistry(entries: Readonly<Record<string, () => Promise<unknown>>>): StdlibRegistry {
   const thunks = new Map<string, () => Promise<unknown>>();
   for (const [name, thunk] of Object.entries(entries)) thunks.set(name.toLowerCase(), thunk);
 

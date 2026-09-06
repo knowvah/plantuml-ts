@@ -16,51 +16,42 @@ import { sequencePageAst, sequencePageCount } from './sequence-page.js';
 // Plugin
 // ---------------------------------------------------------------------------
 
-export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry> =
-  {
-    type: 'sequence',
+export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry> = {
+  type: 'sequence',
 
-    // T4: widened to match `DiagramPlugin.parse`'s `AST | ParseRefusal`
-    // contract (D1) now that `parseSequence` can return a `ParseRefusal`.
-    // `accepts()` above is untouched -- T12 owns dispatch/routing.
-    parse(source: UmlSource): SequenceDiagramAST | ParseRefusal {
-      return parseSequence(source.lines);
-    },
+  // T4: widened to match `DiagramPlugin.parse`'s `AST | ParseRefusal`
+  // contract (D1) now that `parseSequence` can return a `ParseRefusal`.
+  // `accepts()` above is untouched -- T12 owns dispatch/routing.
+  parse(source: UmlSource): SequenceDiagramAST | ParseRefusal {
+    return parseSequence(source.lines);
+  },
 
-    layout(
-      ast: SequenceDiagramAST,
-      theme,
-      measurer,
-    ): Promise<SequenceGeometry> {
-      return Promise.resolve(layoutSequence(ast, theme, measurer));
-    },
+  layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequenceGeometry> {
+    return Promise.resolve(layoutSequence(ast, theme, measurer));
+  },
 
-    layoutSync(
-      ast: SequenceDiagramAST,
-      theme,
-      measurer,
-    ): SequenceGeometry {
-      return layoutSequence(ast, theme, measurer);
-    },
+  layoutSync(ast: SequenceDiagramAST, theme, measurer): SequenceGeometry {
+    return layoutSequence(ast, theme, measurer);
+  },
 
-    render(geo: SequenceGeometry, theme): RenderFragment {
-      return renderSequence(geo, theme);
-    },
+  render(geo: SequenceGeometry, theme): RenderFragment {
+    return renderSequence(geo, theme);
+  },
 
-    // The `PaginatedPlugin` trio (`core/dispatcher.ts`). Sequence is the only
-    // engine in this port that implements it: `newpage` is the only command
-    // in the corpus that makes one source produce more than one image, and
-    // upstream's own `getNbPages()` is `countNewpage + 1` on
-    // `SequenceDiagram` alone (`:517-519`).
-    getNbPages(geo: SequenceGeometry): number {
-      return sequencePageCount(geo);
-    },
+  // The `PaginatedPlugin` trio (`core/dispatcher.ts`). Sequence is the only
+  // engine in this port that implements it: `newpage` is the only command
+  // in the corpus that makes one source produce more than one image, and
+  // upstream's own `getNbPages()` is `countNewpage + 1` on
+  // `SequenceDiagram` alone (`:517-519`).
+  getNbPages(geo: SequenceGeometry): number {
+    return sequencePageCount(geo);
+  },
 
-    renderPage(geo: SequenceGeometry, theme, pageIndex: number): RenderFragment {
-      return renderSequencePage(geo, theme, pageIndex);
-    },
+  renderPage(geo: SequenceGeometry, theme, pageIndex: number): RenderFragment {
+    return renderSequencePage(geo, theme, pageIndex);
+  },
 
-    pageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {
-      return sequencePageAst(ast, pageIndex);
-    },
-  };
+  pageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {
+    return sequencePageAst(ast, pageIndex);
+  },
+};

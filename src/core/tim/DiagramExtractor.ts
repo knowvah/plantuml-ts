@@ -79,11 +79,7 @@ export function extractDiagram(
  * block does not exist. Upstream does this seek in the decorator's constructor.
  * @see ~/git/plantuml/.../preproc/DiagramExtractor.java (constructor)
  */
-function seekBlockStart(
-  lines: readonly StringLocated[],
-  block: number,
-  uid: string | undefined,
-): number | undefined {
+function seekBlockStart(lines: readonly StringLocated[], block: number, uid: string | undefined): number | undefined {
   let remaining = block;
   for (let i = 0; i < lines.length; i++) {
     const s = lines[i]!;

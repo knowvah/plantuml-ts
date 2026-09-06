@@ -43,10 +43,7 @@ const RE_NOTE_ON_LINK_OPEN = new RegExp(
 );
 
 // CommandFactoryNote — floating, named note (usable as a link endpoint).
-const RE_NOTE_FLOATING_SINGLE = new RegExp(
-  '^note\\s+"([^"]*)"\\s+as\\s+([\\w.]+)\\s*(.*)$',
-  'i',
-);
+const RE_NOTE_FLOATING_SINGLE = new RegExp('^note\\s+"([^"]*)"\\s+as\\s+([\\w.]+)\\s*(.*)$', 'i');
 const RE_NOTE_FLOATING_OPEN = new RegExp('^note\\s+as\\s+([\\w.]+)\\s*(.*)$', 'i');
 
 // CommandFactoryNoteOnEntity — attached to an entity (`of X`) or the last
@@ -58,17 +55,20 @@ const RE_NOTE_FLOATING_OPEN = new RegExp('^note\\s+as\\s+([\\w.]+)\\s*(.*)$', 'i
 const NOTE_STEREOTYPE_OPT = '(?:\\s+<<[^>]+>>)?';
 const RE_NOTE_ON_ENTITY_SINGLE = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
-    NOTE_STEREOTYPE_OPT + '(?:\\s+#\\w+)?\\s*:\\s*(.+)$',
+    NOTE_STEREOTYPE_OPT +
+    '(?:\\s+#\\w+)?\\s*:\\s*(.+)$',
   'i',
 );
 const RE_NOTE_ON_ENTITY_OPEN_BRACE = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
-    NOTE_STEREOTYPE_OPT + '(?:\\s+#\\w+)?\\s*\\{\\s*$',
+    NOTE_STEREOTYPE_OPT +
+    '(?:\\s+#\\w+)?\\s*\\{\\s*$',
   'i',
 );
 const RE_NOTE_ON_ENTITY_OPEN_PLAIN = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
-    NOTE_STEREOTYPE_OPT + '(?:\\s+#\\w+)?\\s*$',
+    NOTE_STEREOTYPE_OPT +
+    '(?:\\s+#\\w+)?\\s*$',
   'i',
 );
 
@@ -120,9 +120,7 @@ export function noteAttachment(
 ): { from: string; to: string; length: 1 | 2 } {
   const length = position === 'left' || position === 'right' ? 1 : 2;
   const fromNote = position === 'left' || position === 'top';
-  return fromNote
-    ? { from: noteId, to: targetId, length }
-    : { from: targetId, to: noteId, length };
+  return fromNote ? { from: noteId, to: targetId, length } : { from: targetId, to: noteId, length };
 }
 
 // ---------------------------------------------------------------------------

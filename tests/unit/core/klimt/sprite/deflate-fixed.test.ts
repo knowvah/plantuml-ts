@@ -10,8 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { inflateRawSync, deflateRawSync } from 'node:zlib';
 import { deflateFixed } from '../../../../../src/core/klimt/sprite/deflate-fixed.js';
 
-const roundTrip = (data: Uint8Array): Uint8Array =>
-  new Uint8Array(inflateRawSync(Buffer.from(deflateFixed(data))));
+const roundTrip = (data: Uint8Array): Uint8Array => new Uint8Array(inflateRawSync(Buffer.from(deflateFixed(data))));
 
 describe('deflateFixed — round-trips through a real inflater', () => {
   it('reproduces highly repetitive data exactly', () => {

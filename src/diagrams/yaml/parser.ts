@@ -58,8 +58,14 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
     if (/^@startyaml\s*$/i.test(t) || /^@endyaml\s*$/i.test(t)) continue;
 
     // <style> blocks stripped before YAML parsing
-    if (t === '<style>') { inStyleBlock = true; continue; }
-    if (inStyleBlock) { if (t === '</style>') inStyleBlock = false; continue; }
+    if (t === '<style>') {
+      inStyleBlock = true;
+      continue;
+    }
+    if (inStyleBlock) {
+      if (t === '</style>') inStyleBlock = false;
+      continue;
+    }
 
     // #highlight lines — extract before YAML body
     if (t.startsWith('#highlight ')) {
@@ -92,9 +98,9 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
     // `title ` no longer reaches here (consumed by the matcher above).
     if (bodyLines.length === 0) {
       if (/^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) {
-      // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
-      // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
-      // path because both factories construct a JsonDiagram.
+        // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
+        // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
+        // path because both factories construct a JsonDiagram.
         scale = matchScaleCommand(t) ?? scale;
         continue;
       }
@@ -123,6 +129,13 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
   // entry point (already over threshold before mission G0b/T6 added the
   // annotation-matcher check; T8 removed the bespoke title field/branch but
   // did not reduce the function below threshold).
-  return { root, parseError: false, diagramLabel: 'YAML' as const, highlights, annotations, sprites,
-    ...(scale === undefined ? {} : { scale }) };
+  return {
+    root,
+    parseError: false,
+    diagramLabel: 'YAML' as const,
+    highlights,
+    annotations,
+    sprites,
+    ...(scale === undefined ? {} : { scale }),
+  };
 }

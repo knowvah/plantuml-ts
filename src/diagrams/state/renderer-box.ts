@@ -42,7 +42,16 @@ import { rect, line, text, path, ellipse, linkWrap, image } from '../../core/svg
 import type { StateTableGeo, StateTextRun } from './state-sizing-creole.js';
 import type { CreoleRunImage } from '../../core/svek/image/creole-text-lines.js';
 import { styledLines } from './state-sizing-creole.js';
-import { STATE_DEFAULT_BACKGROUND, STATE_BORDER_STROKE_WIDTH, resolveStateFillBucketed, resolveStateBorder, resolveStateFontColor, resolveStateFontSize, resolveStateBoxRadius, textAscent } from './state-render-colors.js';
+import {
+  STATE_DEFAULT_BACKGROUND,
+  STATE_BORDER_STROKE_WIDTH,
+  resolveStateFillBucketed,
+  resolveStateBorder,
+  resolveStateFontColor,
+  resolveStateFontSize,
+  resolveStateBoxRadius,
+  textAscent,
+} from './state-render-colors.js';
 import { stateShadowFilterUrl } from './state-shadow.js';
 
 const STATE_BOX_RX = 12.5;
@@ -369,31 +378,25 @@ export function renderSdlReceive(node: StateNodeGeo, theme: Theme): string {
   const textHeight = 12;
   const x0 = node.x;
   const y0 = node.y;
-  const d =
-    [
-      moveTo(x0 + textWidth, y0),
-      lineTo(x0 + textWidth, y0 + textHeight - cornerSize),
-      lineTo(x0 + textWidth - cornerSize, y0 + textHeight),
-      lineTo(x0, y0 + textHeight),
-    ].join(' ');
+  const d = [
+    moveTo(x0 + textWidth, y0),
+    lineTo(x0 + textWidth, y0 + textHeight - cornerSize),
+    lineTo(x0 + textWidth - cornerSize, y0 + textHeight),
+    lineTo(x0, y0 + textHeight),
+  ].join(' ');
   const notch = path(d, { stroke: border, strokeWidth: STATE_BORDER_STROKE_WIDTH });
 
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
   // `state-render-colors.ts#resolveStateFontSize`'s own doc comment.
   const fontSize = resolveStateFontSize(node, theme, theme.fontSize);
   const ascent = textAscent(fontSize);
-  const label = text(
-    node.x + SDL_MARGIN.x1 + BODY_MARGIN_X,
-    node.y + SDL_MARGIN.y1 + ascent,
-    node.display,
-    {
-      fill: '#000000',
-      fontFamily: theme.fontFamily,
-      fontSize,
-      lengthAdjust: 'spacing',
-      textLength: node.headerLines?.[0]?.width ?? 0,
-    },
-  );
+  const label = text(node.x + SDL_MARGIN.x1 + BODY_MARGIN_X, node.y + SDL_MARGIN.y1 + ascent, node.display, {
+    fill: '#000000',
+    fontFamily: theme.fontFamily,
+    fontSize,
+    lengthAdjust: 'spacing',
+    textLength: node.headerLines?.[0]?.width ?? 0,
+  });
 
   return box + notch + label;
 }
@@ -421,12 +424,7 @@ export function isOOSymbolStereotype(stereotype: string | undefined): boolean {
   return stereotype !== undefined && stereotype.toUpperCase() === 'O-O';
 }
 
-export function renderOOSymbol(
-  right: number,
-  bottom: number,
-  fill: string,
-  stroke: string,
-): string {
+export function renderOOSymbol(right: number, bottom: number, fill: string, stroke: string): string {
   const x = right - (4 * OO_SMALL_RADIUS + OO_SMALL_LINE + OO_SMALL_MARGIN_X);
   const y = bottom - (2 * OO_SMALL_RADIUS + OO_SMALL_MARGIN_Y);
   // `ellipse`'s own paint bag is keyed by the HYPHENATED SVG attribute name
@@ -503,7 +501,14 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   });
 
   const bodyLines = node.bodyLines ?? [];
-  const bodyMarkup = renderTextLines(bodyLines, () => node.x + MARGIN, dividerY + MARGIN_LINE + ascent, theme, fontColor, fontSize);
+  const bodyMarkup = renderTextLines(
+    bodyLines,
+    () => node.x + MARGIN,
+    dividerY + MARGIN_LINE + ascent,
+    theme,
+    fontColor,
+    fontSize,
+  );
 
   // G8: `EntityImageState.drawU`'s own order -- shape, divider hline,
   // SYMBOL, name, fields (`EntityImageState.java:142-166`).

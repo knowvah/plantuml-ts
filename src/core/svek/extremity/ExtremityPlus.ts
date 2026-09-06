@@ -55,7 +55,12 @@ export class ExtremityPlus extends Extremity {
   drawU(ug: UGraphic): void {
     ug.apply(new Back(this.backgroundColor)).apply(new UTranslate(this.px, this.py)).draw(this.circle);
     const origin: Point2D = { x: 0, y: 0 };
-    drawLineSegment(ug, origin, this.getPointOnCircle(this.angle - Math.PI / 2), this.getPointOnCircle(this.angle + Math.PI / 2));
+    drawLineSegment(
+      ug,
+      origin,
+      this.getPointOnCircle(this.angle - Math.PI / 2),
+      this.getPointOnCircle(this.angle + Math.PI / 2),
+    );
     drawLineSegment(ug, origin, this.getPointOnCircle(this.angle), this.getPointOnCircle(this.angle + Math.PI));
   }
 

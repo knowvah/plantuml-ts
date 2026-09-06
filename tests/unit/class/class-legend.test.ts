@@ -48,24 +48,11 @@ function parse(source: string): ClassDiagramAST {
  *  fixtures (bixogo-47-xulu385, roxosu-00-pini153): a salt widget wrapped in
  *  `{{salt ... }}`, itself containing `{+ ... }`-bracketed choice syntax with
  *  `()one`, `()two`, `[ok]` lines. */
-const SALT_LEGEND_BODY = [
-  '{{salt',
-  '{+',
-  '<b>an example',
-  'choose one option',
-  '()one',
-  '()two',
-  '[ok]',
-  '}',
-  '}}',
-];
-
+const SALT_LEGEND_BODY = ['{{salt', '{+', '<b>an example', 'choose one option', '()one', '()two', '[ok]', '}', '}}'];
 
 describe('parseClass — legend block consumption (iter 23b)', () => {
   it('consumes a salt-widget legend body without inventing classifiers, relationships, or notes', () => {
-    const ast = parse(
-      ['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'].join('\n'),
-    );
+    const ast = parse(['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'].join('\n'));
     expect(ast.classifiers).toHaveLength(1);
     expect(ast.classifiers[0]?.id).toBe('foo');
     expect(ast.relationships).toHaveLength(0);
@@ -82,30 +69,17 @@ describe('parseClass — legend block consumption (iter 23b)', () => {
     },
   );
 
-  it.each(['endlegend', 'end legend'])(
-    'closer spelling %s is recognized and parsing resumes afterward',
-    (closer) => {
-      const ast = parse(
-        ['class foo', 'legend', '[ok]', closer, 'class bar', 'foo -- bar'].join('\n'),
-      );
-      // Legend consumed everything up to (and including) the closer; the
-      // class/relationship lines AFTER it parse normally.
-      expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['bar', 'foo']);
-      expect(ast.relationships).toHaveLength(1);
-    },
-  );
+  it.each(['endlegend', 'end legend'])('closer spelling %s is recognized and parsing resumes afterward', (closer) => {
+    const ast = parse(['class foo', 'legend', '[ok]', closer, 'class bar', 'foo -- bar'].join('\n'));
+    // Legend consumed everything up to (and including) the closer; the
+    // class/relationship lines AFTER it parse normally.
+    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['bar', 'foo']);
+    expect(ast.relationships).toHaveLength(1);
+  });
 
   it('a note declared before the legend is unaffected', () => {
     const ast = parse(
-      [
-        'class foo',
-        'note right of foo',
-        'a real note',
-        'end note',
-        'legend',
-        '[ok]',
-        'endlegend',
-      ].join('\n'),
+      ['class foo', 'note right of foo', 'a real note', 'end note', 'legend', '[ok]', 'endlegend'].join('\n'),
     );
     expect(ast.classifiers).toHaveLength(1);
     expect(ast.notes).toHaveLength(1);
@@ -116,9 +90,7 @@ describe('end-to-end: bixogo/roxosu-shaped fixture renders as a degenerate 0-gra
   const measurer = new FormulaMeasurer();
 
   it('layoutClass sees 0 DOT graphs for a single classifier + salt legend', () => {
-    const ast = parse(
-      ['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'].join('\n'),
-    );
+    const ast = parse(['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'].join('\n'));
     let captured = 0;
     const graphs: DotInputGraph[] = [];
     setLayoutInputObserver((g) => {
@@ -167,8 +139,4 @@ describe('end-to-end: bixogo/roxosu-shaped fixture renders as a degenerate 0-gra
   });
 });
 
-describe('description diagrams keep their own legend unaffected (iter 23b)', () => {
-
-
-
-});
+describe('description diagrams keep their own legend unaffected (iter 23b)', () => {});

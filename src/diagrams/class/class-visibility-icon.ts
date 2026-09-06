@@ -173,19 +173,26 @@ function styleAttr(stroke: string, strokeWidth: number, suffix = ''): string {
   return `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
 }
 
-
 function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: string, stroke: string): string {
   const pts = points.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(',');
   const style = styleAttr(stroke, STROKE_WIDTH, 'stroke-linejoin:miter;stroke-miterlimit:10;');
-  return `<polygon${attrs([['points', pts], ['fill', fill], ['style', style]])}/>`;
+  return `<polygon${attrs([
+    ['points', pts],
+    ['fill', fill],
+    ['style', style],
+  ])}/>`;
 }
 
 /** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
 function drawSquare(x: number, y: number, fill: string, stroke: string, size: number): string {
   const s = size - 4;
   return `<rect${attrs([
-    ['x', x + 2], ['y', y + 2], ['width', s], ['height', s],
-    ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
+    ['x', x + 2],
+    ['y', y + 2],
+    ['width', s],
+    ['height', s],
+    ['fill', fill],
+    ['style', styleAttr(stroke, STROKE_WIDTH)],
   ])}/>`;
 }
 
@@ -193,8 +200,12 @@ function drawSquare(x: number, y: number, fill: string, stroke: string, size: nu
 function drawCircle(x: number, y: number, fill: string, stroke: string, size: number): string {
   const r = (size - 4) / 2;
   return `<ellipse${attrs([
-    ['cx', x + 2 + r], ['cy', y + 2 + r], ['rx', r], ['ry', r],
-    ['fill', fill], ['style', styleAttr(stroke, STROKE_WIDTH)],
+    ['cx', x + 2 + r],
+    ['cy', y + 2 + r],
+    ['rx', r],
+    ['ry', r],
+    ['fill', fill],
+    ['style', styleAttr(stroke, STROKE_WIDTH)],
   ])}/>`;
 }
 
@@ -294,21 +305,19 @@ export function renderVisibilityIcon(
  * @see ~/git/plantuml/.../skin/VisibilityModifier.java:94-116
  * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:341-368
  */
-export function renderVisibilityUrlBackground(
-  originX: number,
-  originY: number,
-  fill: string,
-  url: UrlInfo,
-): string {
+export function renderVisibilityUrlBackground(originX: number, originY: number, fill: string, url: UrlInfo): string {
   // T7b: routed through `attrs()` (was a raw template literal). Rule 4
   // (`core/svg.ts#strokeDecorationOf`) drops `stroke-width` when
   // `stroke="none"` -- matches upstream's own `if (!"none".equals(stroke))`
   // guard, so the combined `style=` carries `stroke:none;` alone, not the
   // pre-T7b literal's redundant `stroke-width="1"`.
   const shape = `<rect${attrs([
-    ['x', originX], ['y', originY],
-    ['width', VISIBILITY_ICON_SIZE * 2], ['height', VISIBILITY_ICON_SIZE],
-    ['fill', fill], ['style', 'stroke:none;'],
+    ['x', originX],
+    ['y', originY],
+    ['width', VISIBILITY_ICON_SIZE * 2],
+    ['height', VISIBILITY_ICON_SIZE],
+    ['fill', fill],
+    ['style', 'stroke:none;'],
   ])}/>`;
   return linkWrap(shape, url);
 }

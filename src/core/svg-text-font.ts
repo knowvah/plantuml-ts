@@ -75,7 +75,6 @@ export function textFontFamily(family: string | undefined): string | undefined {
   return renamed;
 }
 
-
 /**
  * A whitespace-ONLY label has every space swapped for NBSP (U+00A0):
  *

@@ -154,8 +154,20 @@ describe('buildNamespaceGroups', () => {
     const bbb2 = ['ccc02', 'ccc06', 'ccc07', 'ccc10', 'ccc11', 'ccc12', 'ccc23', 'ccc24', 'ccc25', 'ccc26'];
     const bbb3 = ['ccc08', 'ccc13'];
     const bbb4 = [
-      'ccc15', 'ccc16', 'ccc17', 'ccc18', 'ccc19', 'ccc20', 'ccc21', 'ccc22',
-      'ccc04', 'ccc27', 'ccc28', 'ccc29', 'ccc30', 'ccc25',
+      'ccc15',
+      'ccc16',
+      'ccc17',
+      'ccc18',
+      'ccc19',
+      'ccc20',
+      'ccc21',
+      'ccc22',
+      'ccc04',
+      'ccc27',
+      'ccc28',
+      'ccc29',
+      'ccc30',
+      'ccc25',
     ];
     const nodes = [
       ...bbb1.map((c) => leaf(`aaa.bbb1.${c}`)),

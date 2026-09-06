@@ -196,7 +196,10 @@ function styleMapHasNoOverrides(graphOverride: Partial<GraphColors>, extras: Sty
  * OWN (more specific) signatures, so a `<style>` rule for one tag must not
  * evict a skinparam-derived rule for a different tag either.
  */
-function mergeElementBuckets(base: Theme, incoming: Record<string, ElementColors>): Partial<Record<string, ElementColors>> {
+function mergeElementBuckets(
+  base: Theme,
+  incoming: Record<string, ElementColors>,
+): Partial<Record<string, ElementColors>> {
   const merged: Partial<Record<string, ElementColors>> = { ...base.colors.elements };
   for (const [sname, style] of Object.entries(incoming)) {
     const orig = merged[sname];
@@ -215,7 +218,11 @@ function mergeElementBuckets(base: Theme, incoming: Record<string, ElementColors
 }
 
 /** Assemble the `Partial<Theme>` passed to `deepMergeTheme`. */
-function buildStyleMapPartialTheme(base: Theme, graphOverride: Partial<GraphColors>, extras: StyleMapExtras): Partial<Theme> {
+function buildStyleMapPartialTheme(
+  base: Theme,
+  graphOverride: Partial<GraphColors>,
+  extras: StyleMapExtras,
+): Partial<Theme> {
   return {
     ...(extras.shadowing !== undefined ? { shadowing: extras.shadowing } : {}),
     // T14/D3: top-level fold -- see StyleMapExtras#cardinalityFont's own

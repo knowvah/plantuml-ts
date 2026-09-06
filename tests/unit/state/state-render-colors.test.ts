@@ -9,7 +9,17 @@
  * comment for the full derivation.
  */
 import { describe, it, expect } from 'vitest';
-import { resolveStateBorder, resolveStateFillBucketed, resolveStateFontColor, resolveStateFontSize, resolveStateArrowLineColor, resolveStateArrowHeadColor, resolveActivityBarForkColor, resolveActivityBarJoinColor, resolveStateBoxRadius } from '../../../src/diagrams/state/state-render-colors.js';
+import {
+  resolveStateBorder,
+  resolveStateFillBucketed,
+  resolveStateFontColor,
+  resolveStateFontSize,
+  resolveStateArrowLineColor,
+  resolveStateArrowHeadColor,
+  resolveActivityBarForkColor,
+  resolveActivityBarJoinColor,
+  resolveStateBoxRadius,
+} from '../../../src/diagrams/state/state-render-colors.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 
 describe('resolveStateBorder', () => {
@@ -18,9 +28,7 @@ describe('resolveStateBorder', () => {
   });
 
   it('falls back to theme.colors.border when the node has a stereotype but no matching skinparam entry', () => {
-    expect(resolveStateBorder({ stereotype: 'unmatched' }, defaultTheme)).toBe(
-      defaultTheme.colors.border,
-    );
+    expect(resolveStateBorder({ stereotype: 'unmatched' }, defaultTheme)).toBe(defaultTheme.colors.border);
   });
 
   // jar-verified `semala-31-joji042`: `skinparam StateBorderColor<<meblue>>

@@ -69,7 +69,6 @@ const HEADER_FONT_COLOR = 'black';
  * `class-visibility-icon.ts`) are deliberately LEFT ALONE — D2 again.
  */
 
-
 /**
  * `FontStyle bold` -> SVG's numeric `font-weight="700"` (this project's own
  * emission convention -- confirmed for the sequence engine's own group/

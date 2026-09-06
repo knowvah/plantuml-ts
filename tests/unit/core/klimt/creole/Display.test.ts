@@ -141,20 +141,26 @@ describe('Display.create0 dispatch (java:637-669) -- all three branches reached'
   it('branch 1 (Stereotype at position 0) -- cited seam throws (circled-character decoration blocked, ADR-8 corollary)', () => {
     const stereotype = Stereotype.build('<<Foo>>')!;
     const display = Display.create(stereotype, 'Hello');
-    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(/circled-character\/sprite decoration is blocked/);
+    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(
+      /circled-character\/sprite decoration is blocked/,
+    );
   });
 
   it('branch 1 (Stereotype at LAST position) -- same cited seam', () => {
     const stereotype = Stereotype.build('<<Foo>>')!;
     const display = Display.create('Hello', stereotype);
-    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(/circled-character\/sprite decoration is blocked/);
+    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(
+      /circled-character\/sprite decoration is blocked/,
+    );
   });
 
   it('a SPOTTED Stereotype cites the HColor/CircledCharacter gap specifically', () => {
     const spotted = Stereotype.build('<<(X, red)Foo>>', 0, undefined, () => undefined);
     expect(spotted.isSpotted()).toBe(true);
     const display = Display.create(spotted);
-    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(/CircledCharacter\.java/);
+    expect(() => display.create9(ctx(), HorizontalAlignment.LEFT, LineBreakStrategy.NONE)).toThrow(
+      /CircledCharacter\.java/,
+    );
   });
 
   it('a non-spotted Stereotype cites the SpriteRegistry/ISkinSimple integration gap specifically', () => {
@@ -180,7 +186,11 @@ describe('Display.create0 dispatch (java:637-669) -- all three branches reached'
         return builder;
       },
     };
-    display.create9({ fontConfiguration: FONT, spriteContainer: skin, atomOps: unitOps() }, HorizontalAlignment.LEFT, LineBreakStrategy.NONE);
+    display.create9(
+      { fontConfiguration: FONT, spriteContainer: skin, atomOps: unitOps() },
+      HorizontalAlignment.LEFT,
+      LineBreakStrategy.NONE,
+    );
     expect(capturedAlignment).toBe(HorizontalAlignment.RIGHT);
   });
 });

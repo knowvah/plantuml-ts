@@ -130,9 +130,7 @@ describe('addLevelEdges — "-up->" transition (direction: "up")', () => {
     const graph = captureTopLevelGraph(ast);
     const unreversed = { ...ast, transitions: [makeTransition('A', 'B', { length: 2 })] };
     const unreversedGraph = captureTopLevelGraph(unreversed);
-    expect(findEdge(graph, 'B', 'A')!.attributes?.minLen).toBe(
-      findEdge(unreversedGraph, 'A', 'B')!.attributes?.minLen,
-    );
+    expect(findEdge(graph, 'B', 'A')!.attributes?.minLen).toBe(findEdge(unreversedGraph, 'A', 'B')!.attributes?.minLen);
   });
 
   it('TransitionGeo.from/to stay semantic source->target despite the DOT swap', () => {
@@ -238,9 +236,7 @@ describe('buildLevelTransitionGeos — crossStart/circleEnd survive the swap unc
   it('crossStart (source-side) and circleEnd (target-side) both round-trip for a reversed "-up->" transition', () => {
     const ast: StateDiagramAST = {
       states: [DUMMY_COMPOSITE, makeState('A'), makeState('B')],
-      transitions: [
-        makeTransition('A', 'B', { direction: 'up', length: 2, crossStart: true, circleEnd: true }),
-      ],
+      transitions: [makeTransition('A', 'B', { direction: 'up', length: 2, crossStart: true, circleEnd: true })],
     };
     const geo = layoutState(ast, theme, measurer);
     const t = geo.transitions.find((tr) => tr.from === 'A' && tr.to === 'B');
@@ -266,9 +262,7 @@ describe('addLevelEdges — "[*] -up-> Composite" (kotagu-43-miza629 shape)', ()
   const ast: StateDiagramAST = {
     states: [
       makeState('CompositeState', {
-        children: [
-          makeState('SubComposite', { children: [makeState('Inner')] }),
-        ],
+        children: [makeState('SubComposite', { children: [makeState('Inner')] })],
         transitions: [makeTransition('[*]', 'SubComposite', { direction: 'up', length: 2 })],
       }),
     ],
@@ -283,9 +277,7 @@ describe('addLevelEdges — "[*] -up-> Composite" (kotagu-43-miza629 shape)', ()
     // (which only carries CompositeState's own resolved-autonom placeholder
     // node). Find it by shape across every captured pass.
     const graphs = captureAllGraphs(ast);
-    const reversedEdge = graphs
-      .flatMap((g) => g.edges)
-      .find((e) => e.to.includes('init') || e.from.includes('init'));
+    const reversedEdge = graphs.flatMap((g) => g.edges).find((e) => e.to.includes('init') || e.from.includes('init'));
     expect(reversedEdge, 'expected exactly one edge touching the [*] anchor').toBeDefined();
     // jar-verified direction (`kotagu-43-miza629`'s cached `svek-1.dot:24`,
     // `zaent0003->sh0011`): the anchor for `[*]` (the SOURCE) is the DOT

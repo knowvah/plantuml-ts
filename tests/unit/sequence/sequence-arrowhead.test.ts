@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
-import {
-  arrowConfigurationOf,
-} from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowSpec } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import {
   ARROW_DELTA_X,
@@ -112,7 +110,12 @@ const LEGACY_HEAD_BY_STYLE: Readonly<Record<LegacyStyle, ArrowDressing>> = {
 
 /** `DASHED_STYLES`, transcribed from the deleted `sequence-arrowhead.ts:462`. */
 const LEGACY_DASHED: Readonly<Record<LegacyStyle, boolean>> = {
-  sync: false, async: false, reply: true, replyAsync: true, lost: false, found: false,
+  sync: false,
+  async: false,
+  reply: true,
+  replyAsync: true,
+  lost: false,
+  found: false,
 };
 
 /**
@@ -122,10 +125,7 @@ const LEGACY_DASHED: Readonly<Record<LegacyStyle, boolean>> = {
  * every assertion below compares the parser's new `ArrowConfiguration`
  * against it, so a divergence fails rather than being absorbed.
  */
-function legacyArrowConfiguration(
-  style: LegacyStyle,
-  d: LegacyDecorations = {},
-): ArrowConfiguration {
+function legacyArrowConfiguration(style: LegacyStyle, d: LegacyDecorations = {}): ArrowConfiguration {
   const base = {
     dressing1: dressing('NONE', 'FULL'),
     dressing2: LEGACY_HEAD_BY_STYLE[style],
@@ -138,26 +138,19 @@ function legacyArrowConfiguration(
     decoration1: d.tailCircle === true ? CIRCLE_DECORATION : base.decoration1,
     decoration2: d.headCircle === true ? CIRCLE_DECORATION : base.decoration2,
     dressing1: d.tailCross === true ? dressing('CROSSX', 'FULL') : base.dressing1,
-    dressing2: d.headCross === true
-      ? { ...base.dressing2, head: 'CROSSX' }
-      : base.dressing2,
+    dressing2: d.headCross === true ? { ...base.dressing2, head: 'CROSSX' } : base.dressing2,
   };
 }
 
-const ALL_LEGACY_STYLES: readonly LegacyStyle[] = [
-  'sync', 'async', 'reply', 'replyAsync', 'lost', 'found',
-];
+const ALL_LEGACY_STYLES: readonly LegacyStyle[] = ['sync', 'async', 'reply', 'replyAsync', 'lost', 'found'];
 
 /** All 2^4 settings of the four deleted booleans. */
-const ALL_DECORATION_COMBOS: readonly LegacyDecorations[] = Array.from(
-  { length: 16 },
-  (_unused, bits) => ({
-    headCircle: (bits & 1) !== 0,
-    tailCircle: (bits & 2) !== 0,
-    headCross: (bits & 4) !== 0,
-    tailCross: (bits & 8) !== 0,
-  }),
-);
+const ALL_DECORATION_COMBOS: readonly LegacyDecorations[] = Array.from({ length: 16 }, (_unused, bits) => ({
+  headCircle: (bits & 1) !== 0,
+  tailCircle: (bits & 2) !== 0,
+  headCross: (bits & 4) !== 0,
+  tailCross: (bits & 8) !== 0,
+}));
 
 /** The spec `command-arrow.ts` hands {@link arrowConfigurationOf} for a
  *  message the old enum described as `style` plus those four booleans. */
@@ -173,46 +166,39 @@ function specFor(style: LegacyStyle, d: LegacyDecorations): ArrowSpec {
 }
 
 describe('arrowConfigurationOf — exhaustive parity with the deleted adapter', () => {
-  const cases = ALL_LEGACY_STYLES.flatMap((style) =>
-    ALL_DECORATION_COMBOS.map((d) => ({ style, d })),
-  );
+  const cases = ALL_LEGACY_STYLES.flatMap((style) => ALL_DECORATION_COMBOS.map((d) => ({ style, d })));
 
   it('covers all six styles times all sixteen decoration settings', () => {
     expect(cases).toHaveLength(96);
   });
 
-  it.each(cases)(
-    'builds the legacy configuration for $style with $d',
-    ({ style, d }) => {
-      expect(arrowConfigurationOf(specFor(style, d))).toEqual(
-        legacyArrowConfiguration(style, d),
-      );
-    },
-  );
+  it.each(cases)('builds the legacy configuration for $style with $d', ({ style, d }) => {
+    expect(arrowConfigurationOf(specFor(style, d))).toEqual(legacyArrowConfiguration(style, d));
+  });
 
   // `withDirectionBoth()` (`ArrowConfiguration.java:101-105`) gives dressing1
   // a NORMAL head too. No enumerated token reached it, so it has no legacy
   // counterpart -- assert it directly against the Java.
   it('gives dressing1 a NORMAL head under withDirectionBoth', () => {
-    expect(arrowConfigurationOf({ both: true }).dressing1).toEqual(
-      dressing('NORMAL', 'FULL'),
-    );
+    expect(arrowConfigurationOf({ both: true }).dressing1).toEqual(dressing('NORMAL', 'FULL'));
   });
 
   // `withHead1`/`withHead2(CROSSX)` run AFTER `withHead1/2(ASYNC)`
   // (`CommandArrow.java:355-358` then `:373-387`), so the cross wins.
   it('lets CROSSX overwrite an ASYNC head on either side', () => {
     const cfg = arrowConfigurationOf({
-      async1: true, async2: true, cross1: true, cross2: true, both: true,
+      async1: true,
+      async2: true,
+      cross1: true,
+      cross2: true,
+      both: true,
     });
     expect(cfg.dressing1.head).toBe('CROSSX');
     expect(cfg.dressing2.head).toBe('CROSSX');
   });
 
   it('keeps an ASYNC head on dressing1 when no cross overwrites it', () => {
-    expect(arrowConfigurationOf({ async1: true }).dressing1).toEqual(
-      dressing('ASYNC', 'FULL'),
-    );
+    expect(arrowConfigurationOf({ async1: true }).dressing1).toEqual(dressing('ASYNC', 'FULL'));
   });
 });
 
@@ -265,10 +251,28 @@ const LEGACY_TOKEN_ORACLE: readonly {
   { src: 'Alice o-> Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { tailCircle: true } },
   { src: 'Alice ->x Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { headCross: true } },
   { src: 'Alice x-> Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { tailCross: true } },
-  { src: 'Alice o->o Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { headCircle: true, tailCircle: true } },
+  {
+    src: 'Alice o->o Bob',
+    from: 'Alice',
+    to: 'Bob',
+    style: 'sync',
+    decorations: { headCircle: true, tailCircle: true },
+  },
   { src: 'Alice x->x Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { headCross: true, tailCross: true } },
-  { src: 'Alice o->x Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { tailCircle: true, headCross: true } },
-  { src: 'Alice x->o Bob', from: 'Alice', to: 'Bob', style: 'sync', decorations: { headCircle: true, tailCross: true } },
+  {
+    src: 'Alice o->x Bob',
+    from: 'Alice',
+    to: 'Bob',
+    style: 'sync',
+    decorations: { tailCircle: true, headCross: true },
+  },
+  {
+    src: 'Alice x->o Bob',
+    from: 'Alice',
+    to: 'Bob',
+    style: 'sync',
+    decorations: { headCircle: true, tailCross: true },
+  },
   { src: 'Alice -->o Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { headCircle: true } },
   { src: 'Alice o--> Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { tailCircle: true } },
   { src: 'Alice -->x Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { headCross: true } },
@@ -283,7 +287,13 @@ const LEGACY_TOKEN_ORACLE: readonly {
   { src: 'Alice o<<- Bob', from: 'Bob', to: 'Alice', style: 'async', decorations: { headCircle: true } },
   { src: 'Alice <<--o Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { tailCircle: true } },
   { src: 'Alice o<<-- Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { headCircle: true } },
-  { src: 'Alice o<<--x Bob', from: 'Bob', to: 'Alice', style: 'replyAsync', decorations: { headCircle: true, tailCross: true } },
+  {
+    src: 'Alice o<<--x Bob',
+    from: 'Bob',
+    to: 'Alice',
+    style: 'replyAsync',
+    decorations: { headCircle: true, tailCross: true },
+  },
   { src: 'Alice -->>x Bob', from: 'Alice', to: 'Bob', style: 'reply', decorations: { headCross: true } },
   { src: 'Alice -> Alice', from: 'Alice', to: 'Alice', style: 'sync' },
   { src: 'Alice ->o Alice', from: 'Alice', to: 'Alice', style: 'sync', decorations: { headCircle: true } },
@@ -324,54 +334,29 @@ describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
 
 describe('headGeometryNormalSide', () => {
   it('builds the nice-arrow FULL polygon', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 4), pt(-6, 0)]);
     expect(geo.lines).toBeUndefined();
     expect(geo.circle).toBeUndefined();
   });
 
   it('omits the nice-arrow point under strict UML style', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      false,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'FULL'), NO_DECORATION, false, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 4)]);
   });
 
   it('builds the TOP_PART half polygon with no nice-arrow point', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'TOP_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'TOP_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(-10, -4), pt(0, 0), pt(-10, 0)]);
   });
 
   it('builds the BOTTOM_PART half polygon', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'BOTTOM_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'BOTTOM_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(-10, 0), pt(0, 0), pt(-10, 4)]);
   });
 
   it('builds two ASYNC line segments for a FULL part', () => {
-    const geo = headGeometryNormalSide(
-      dressing('ASYNC', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('ASYNC', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(0, 0), pt(-10, -4)],
       [pt(0, 0), pt(-10, 4)],
@@ -380,32 +365,17 @@ describe('headGeometryNormalSide', () => {
   });
 
   it('builds exactly one ASYNC segment for TOP_PART', () => {
-    const geo = headGeometryNormalSide(
-      dressing('ASYNC', 'TOP_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('ASYNC', 'TOP_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([[pt(0, 0), pt(-10, -4)]]);
   });
 
   it('builds exactly one ASYNC segment for BOTTOM_PART', () => {
-    const geo = headGeometryNormalSide(
-      dressing('ASYNC', 'BOTTOM_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('ASYNC', 'BOTTOM_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([[pt(0, 0), pt(-10, 4)]]);
   });
 
   it('builds the CROSSX saltire left of the tip', () => {
-    const geo = headGeometryNormalSide(
-      dressing('CROSSX', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('CROSSX', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(-16, -5), pt(-6, 5)],
       [pt(-16, 5), pt(-6, -5)],
@@ -413,22 +383,12 @@ describe('headGeometryNormalSide', () => {
   });
 
   it('produces no shape for a NONE head', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NONE', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NONE', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo).toEqual({});
   });
 
   it('places the CIRCLE decoration right of the tip and shifts the head', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.circle).toEqual({
       cx: 1.5,
       cy: -0.75,
@@ -444,12 +404,7 @@ describe('headGeometryNormalSide', () => {
   });
 
   it('shifts a CROSSX head too — dressing2 translates unconditionally', () => {
-    const geo = headGeometryNormalSide(
-      dressing('CROSSX', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('CROSSX', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(-16 - CIRCLE_SHIFT, -5), pt(-6 - CIRCLE_SHIFT, 5)],
       [pt(-16 - CIRCLE_SHIFT, 5), pt(-6 - CIRCLE_SHIFT, -5)],
@@ -457,12 +412,7 @@ describe('headGeometryNormalSide', () => {
   });
 
   it('draws the circle alone for a NONE head', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NONE', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryNormalSide(dressing('NONE', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.circle).toEqual({ cx: 1.5, cy: -0.75, d: 8, thickness: 1.5 });
     expect(geo.polygon).toBeUndefined();
     expect(geo.lines).toBeUndefined();
@@ -475,52 +425,27 @@ describe('headGeometryNormalSide', () => {
 
 describe('headGeometryReverseSide', () => {
   it('builds the nice-arrow FULL polygon mirrored about the tip', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 4), pt(6, 0)]);
   });
 
   it('omits the nice-arrow point under strict UML style', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      false,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'FULL'), NO_DECORATION, false, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 4)]);
   });
 
   it('builds the TOP_PART half polygon with no nice-arrow point', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'TOP_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'TOP_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(10, -4), pt(0, 0), pt(10, 0)]);
   });
 
   it('builds the BOTTOM_PART half polygon', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'BOTTOM_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'BOTTOM_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.polygon).toEqual([pt(10, 0), pt(0, 0), pt(10, 4)]);
   });
 
   it('builds two ASYNC line segments for a FULL part', () => {
-    const geo = headGeometryReverseSide(
-      dressing('ASYNC', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('ASYNC', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(0, 0), pt(10, -4)],
       [pt(0, 0), pt(10, 4)],
@@ -528,32 +453,17 @@ describe('headGeometryReverseSide', () => {
   });
 
   it('builds exactly one ASYNC segment for TOP_PART', () => {
-    const geo = headGeometryReverseSide(
-      dressing('ASYNC', 'TOP_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('ASYNC', 'TOP_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([[pt(0, 0), pt(10, -4)]]);
   });
 
   it('builds exactly one ASYNC segment for BOTTOM_PART', () => {
-    const geo = headGeometryReverseSide(
-      dressing('ASYNC', 'BOTTOM_PART'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('ASYNC', 'BOTTOM_PART'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([[pt(0, 0), pt(10, 4)]]);
   });
 
   it('builds the CROSSX saltire right of the tip', () => {
-    const geo = headGeometryReverseSide(
-      dressing('CROSSX', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('CROSSX', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(6, -5), pt(16, 5)],
       [pt(6, 5), pt(16, -5)],
@@ -561,22 +471,12 @@ describe('headGeometryReverseSide', () => {
   });
 
   it('produces no shape for a NONE head', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NONE', 'FULL'),
-      NO_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NONE', 'FULL'), NO_DECORATION, true, NO_INCLINE);
     expect(geo).toEqual({});
   });
 
   it('places the CIRCLE decoration left of the tip and shifts the head', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.circle).toEqual({
       cx: -1.5,
       cy: -0.75,
@@ -592,12 +492,7 @@ describe('headGeometryReverseSide', () => {
   });
 
   it('leaves a CROSSX head unshifted — dressing1 skips the translate', () => {
-    const geo = headGeometryReverseSide(
-      dressing('CROSSX', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('CROSSX', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.circle).toEqual({ cx: -1.5, cy: -0.75, d: 8, thickness: 1.5 });
     expect(geo.lines).toEqual([
       [pt(6, -5), pt(16, 5)],
@@ -606,12 +501,7 @@ describe('headGeometryReverseSide', () => {
   });
 
   it('shifts ASYNC segments when a circle is present', () => {
-    const geo = headGeometryReverseSide(
-      dressing('ASYNC', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      NO_INCLINE,
-    );
+    const geo = headGeometryReverseSide(dressing('ASYNC', 'FULL'), CIRCLE_DECORATION, true, NO_INCLINE);
     expect(geo.lines).toEqual([
       [pt(CIRCLE_SHIFT, 0), pt(10 + CIRCLE_SHIFT, -4)],
       [pt(CIRCLE_SHIFT, 0), pt(10 + CIRCLE_SHIFT, 4)],
@@ -645,20 +535,12 @@ describe('headGeometrySelf', () => {
   });
 
   it('nudges the BOTTOM_PART polygon back by one', () => {
-    const geo = headGeometrySelf(
-      selfConfig('NORMAL', 'BOTTOM_PART'),
-      false,
-      true,
-    );
+    const geo = headGeometrySelf(selfConfig('NORMAL', 'BOTTOM_PART'), false, true);
     expect(geo.polygon).toEqual([pt(9, 0), pt(-1, 0), pt(9, 4)]);
   });
 
   it('mirrors the BOTTOM_PART nudge when reverse-defined', () => {
-    const geo = headGeometrySelf(
-      selfConfig('NORMAL', 'BOTTOM_PART'),
-      true,
-      true,
-    );
+    const geo = headGeometrySelf(selfConfig('NORMAL', 'BOTTOM_PART'), true, true);
     expect(geo.polygon).toEqual([pt(-11, 0), pt(-1, 0), pt(-11, 4)]);
   });
 
@@ -681,11 +563,7 @@ describe('headGeometrySelf', () => {
 
 /** A flat config with both dressings and the stored `(n)` offset spelled
  *  out, so each `getInclination*` branch can be driven independently. */
-function inclinedConfig(
-  head1: ArrowHeadKind,
-  head2: ArrowHeadKind,
-  inclination: number,
-): ArrowConfiguration {
+function inclinedConfig(head1: ArrowHeadKind, head2: ArrowHeadKind, inclination: number): ArrowConfiguration {
   return {
     dressing1: dressing(head1, 'FULL'),
     dressing2: dressing(head2, 'FULL'),
@@ -762,12 +640,7 @@ const THETA_3_4_5 = Math.atan2(30, 40);
 
 describe('the head builders rotate by theta', () => {
   it('turns the head-side FULL polygon about its tip', () => {
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      true,
-      THETA_3_4_5,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'FULL'), NO_DECORATION, true, THETA_3_4_5);
     // (-10,-4) (0,0) (-10,4) (-6,0) under x' = 0.8x - 0.6y, y' = 0.6x + 0.8y
     expect(geo.polygon?.map((p) => [p.x, p.y])).toEqual([
       [expect.closeTo(-5.6, 9), expect.closeTo(-9.2, 9)],
@@ -778,12 +651,7 @@ describe('the head builders rotate by theta', () => {
   });
 
   it('turns the tail-side FULL polygon the other way', () => {
-    const geo = headGeometryReverseSide(
-      dressing('NORMAL', 'FULL'),
-      NO_DECORATION,
-      true,
-      -THETA_3_4_5,
-    );
+    const geo = headGeometryReverseSide(dressing('NORMAL', 'FULL'), NO_DECORATION, true, -THETA_3_4_5);
     expect(geo.polygon?.map((p) => [p.x, p.y])).toEqual([
       [expect.closeTo(5.6, 9), expect.closeTo(-9.2, 9)],
       [expect.closeTo(0, 9), expect.closeTo(0, 9)],
@@ -793,12 +661,7 @@ describe('the head builders rotate by theta', () => {
   });
 
   it('turns the ASYNC stroke pair, both strokes leaving the tip', () => {
-    const geo = headGeometryNormalSide(
-      dressing('ASYNC', 'FULL'),
-      NO_DECORATION,
-      true,
-      THETA_3_4_5,
-    );
+    const geo = headGeometryNormalSide(dressing('ASYNC', 'FULL'), NO_DECORATION, true, THETA_3_4_5);
     expect(geo.lines?.map(([a, b]) => [a.x, a.y, b.x, b.y])).toEqual([
       [expect.closeTo(0, 9), expect.closeTo(0, 9), expect.closeTo(-5.6, 9), expect.closeTo(-9.2, 9)],
       [expect.closeTo(0, 9), expect.closeTo(0, 9), expect.closeTo(-10.4, 9), expect.closeTo(-2.8, 9)],
@@ -820,12 +683,7 @@ describe('the head builders rotate by theta', () => {
   it('leaves the `o` circle square, and still pushes the head off the tip', () => {
     // `:240-241` draws the ellipse from a `ug` the rotation never touched;
     // `:243`'s dx is applied AFTER the polygon is rotated (`:265`).
-    const geo = headGeometryNormalSide(
-      dressing('NORMAL', 'FULL'),
-      CIRCLE_DECORATION,
-      true,
-      THETA_3_4_5,
-    );
+    const geo = headGeometryNormalSide(dressing('NORMAL', 'FULL'), CIRCLE_DECORATION, true, THETA_3_4_5);
     expect(geo.circle).toEqual({
       cx: THIN_CIRCLE,
       cy: -THIN_CIRCLE / 2,
@@ -863,17 +721,12 @@ describe('reverseArrowConfiguration carries every unswapped field', () => {
 // ---------------------------------------------------------------------------
 
 function svgOf(arrow: string): string {
-  return renderFixtureSequence(
-    `@startuml\n${arrow}\n@enduml\n`,
-    new DeterministicMeasurer(),
-  );
+  return renderFixtureSequence(`@startuml\n${arrow}\n@enduml\n`, new DeterministicMeasurer());
 }
 
 function attrs(tag: string, svg: string): Array<Record<string, string>> {
   return [...svg.matchAll(new RegExp(`<${tag}\\s([^>]*?)/>`, 'g'))].map((m) =>
-    Object.fromEntries(
-      [...m[1]!.matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!]),
-    ),
+    Object.fromEntries([...m[1]!.matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!])),
   );
 }
 
@@ -906,10 +759,9 @@ function bodyLine(svg: string): Segment {
 function polygonPoints(svg: string): Array<[number, number]> {
   const raw = attrs('polygon', svg)[0]?.['points'] ?? '';
   const n = raw.split(',').map(Number);
-  return n.slice(0, n.length - (n.length % 2)).reduce<Array<[number, number]>>(
-    (acc, _v, i) => (i % 2 === 0 ? [...acc, [n[i]!, n[i + 1]!]] : acc),
-    [],
-  );
+  return n
+    .slice(0, n.length - (n.length % 2))
+    .reduce<Array<[number, number]>>((acc, _v, i) => (i % 2 === 0 ? [...acc, [n[i]!, n[i + 1]!]] : acc), []);
 }
 
 const INCLINATION = 30;
@@ -1007,8 +859,6 @@ describe('the `x`, `o` and half-head dressings reach the SVG', () => {
   it('leaves the half-head`s share of the line untrimmed — :126-127', () => {
     // The `arrowDeltaX / 2` trim is gated on `part == FULL`, so a half head
     // reaches a pixel further right than a whole one does.
-    expect(bodyLine(svgOf('A -\\ B')).x2 - bodyLine(svgOf('A -> B')).x2).toBe(
-      ARROW_DELTA_X / 2,
-    );
+    expect(bodyLine(svgOf('A -\\ B')).x2 - bodyLine(svgOf('A -> B')).x2).toBe(ARROW_DELTA_X / 2);
   });
 });

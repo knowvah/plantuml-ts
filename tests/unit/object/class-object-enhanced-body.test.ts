@@ -28,13 +28,7 @@ function src(lines: string[]): UmlSource {
 
 describe('measureObjectClassifier -- enhanced body dispatch (G3/O4)', () => {
   it('routes an object body containing a "--" separator through enhancedBody', () => {
-    const ast = parseClass(src([
-      'object Foo1 {',
-      'line one',
-      '--',
-      'line two',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Foo1 {', 'line one', '--', 'line two', '}']));
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
     expect(c.enhancedBody).toBeDefined();
@@ -53,13 +47,7 @@ describe('measureObjectClassifier -- enhanced body dispatch (G3/O4)', () => {
   // own `style == '='` branch (`class-body-enhanced-layout.ts
   // #EnhancedDividerPart.doubleLine`'s own doc comment).
   it('draws TWO <line> elements for a bare "==" separator (double-line)', () => {
-    const ast = parseClass(src([
-      'object Foo1 {',
-      'and group',
-      '==',
-      'things together.',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Foo1 {', 'and group', '==', 'things together.', '}']));
     const geo = layoutClass(ast, theme, measurer);
     const svg = assembleSvg(renderClass(geo, theme));
     const lineCount = (svg.match(/<line /g) ?? []).length;
@@ -68,13 +56,7 @@ describe('measureObjectClassifier -- enhanced body dispatch (G3/O4)', () => {
   });
 
   it('draws only ONE <line> for a bare "--" separator (single line)', () => {
-    const ast = parseClass(src([
-      'object Foo1 {',
-      'and group',
-      '--',
-      'things together.',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Foo1 {', 'and group', '--', 'things together.', '}']));
     const geo = layoutClass(ast, theme, measurer);
     const svg = assembleSvg(renderClass(geo, theme));
     const lineCount = (svg.match(/<line /g) ?? []).length;

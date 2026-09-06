@@ -65,10 +65,7 @@ export interface SpriteRegistry {
   readonly emoji?: InternalEmojiStore | undefined;
 }
 
-export function createSpriteRegistry(
-  internal?: InternalSpriteStore,
-  emoji?: InternalEmojiStore,
-): SpriteRegistry {
+export function createSpriteRegistry(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): SpriteRegistry {
   return { byName: new Map(), skippedColorSprites: [], collisions: [], unresolved: [], internal, emoji };
 }
 
@@ -108,10 +105,7 @@ export function addSprite(registry: SpriteRegistry, name: string, sprite: Sprite
  * later for `skippedColorSprites` and ADR-5(a)'s macro-miss reporting,
  * neither of which has a surfacing channel today.
  */
-export function surfaceSpriteWarnings(
-  ast: unknown,
-  onWarning: ((message: string) => void) | undefined,
-): void {
+export function surfaceSpriteWarnings(ast: unknown, onWarning: ((message: string) => void) | undefined): void {
   if (onWarning === undefined) return;
   if (typeof ast !== 'object' || ast === null || !('sprites' in ast)) return;
   const sprites = (ast as { sprites?: SpriteRegistry }).sprites;

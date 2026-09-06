@@ -50,14 +50,9 @@ interface ParityReport {
   fixtures: ParityEntry[];
 }
 
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-state',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-state');
 
-const manifest = JSON.parse(
-  readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8'),
-) as RatchetManifest;
+const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
 // Source of DOT-EQUAL truth for eligibility (AC3) — state-scoped, mirrors
 // class's/object's own `parity-class.json`/`parity-object.json` (see
@@ -65,10 +60,7 @@ const manifest = JSON.parse(
 // README.md`'s "Add rule"). Regenerate via `svg-parity-survey.ts --out
 // ... state` before adding new slugs.
 const parity = JSON.parse(
-  readFileSync(
-    join(dirname(fileURLToPath(import.meta.url)), 'parity-state.json'),
-    'utf8',
-  ),
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'parity-state.json'), 'utf8'),
 ) as ParityReport;
 
 function findParityEntry(slug: string): ParityEntry | undefined {
@@ -95,25 +87,22 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 // AC1 — every locked fixture stays conformant.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-state conformance ratchet (AC1)',
-  () => {
-    for (const f of manifest.fixtures) {
-      it(`state/${f.slug}: stays zero-diff against the pinned golden`, () => {
-        const golden = readGolden(f);
-        const markup = readSource(f);
-        const ours = renderFixtureState(markup, new DeterministicMeasurer());
-        const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-        expect(
-          pass,
-          `state/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-            ` — ${JSON.stringify(diffs[0])}`,
-        ).toBe(true);
-        expect(diffs).toEqual([]);
-      });
-    }
-  },
-);
+describe.skipIf(manifest.fixtures.length === 0)('svg-state conformance ratchet (AC1)', () => {
+  for (const f of manifest.fixtures) {
+    it(`state/${f.slug}: stays zero-diff against the pinned golden`, () => {
+      const golden = readGolden(f);
+      const markup = readSource(f);
+      const ours = renderFixtureState(markup, new DeterministicMeasurer());
+      const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+      expect(
+        pass,
+        `state/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+          ` — ${JSON.stringify(diffs[0])}`,
+      ).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+  }
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-state goldens yet (skip gracefully, not a failure)', () => {
@@ -126,39 +115,36 @@ if (manifest.fixtures.length === 0) {
 // the failure message must name the slug + first diff path.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-state conformance ratchet — tamper detection (AC2)',
-  () => {
-    it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
-      const f = manifest.fixtures[0];
-      expect(f, 'expected at least one seeded fixture to exercise tamper detection').toBeDefined();
-      const target = f!;
+describe.skipIf(manifest.fixtures.length === 0)('svg-state conformance ratchet — tamper detection (AC2)', () => {
+  it('a mutated golden (in-memory only) produces a failure naming slug + diff path', () => {
+    const f = manifest.fixtures[0];
+    expect(f, 'expected at least one seeded fixture to exercise tamper detection').toBeDefined();
+    const target = f!;
 
-      const golden = readGolden(target);
-      const markup = readSource(target);
-      const ours = renderFixtureState(markup, new DeterministicMeasurer());
+    const golden = readGolden(target);
+    const markup = readSource(target);
+    const ours = renderFixtureState(markup, new DeterministicMeasurer());
 
-      // Confirm the untampered pair really is zero-diff first, so the
-      // tampered-case failure below is attributable to the mutation alone.
-      const clean = compareSvg(ours, golden, 'deterministic');
-      expect(clean.pass, `state/${target.slug}: expected zero-diff baseline`).toBe(true);
+    // Confirm the untampered pair really is zero-diff first, so the
+    // tampered-case failure below is attributable to the mutation alone.
+    const clean = compareSvg(ours, golden, 'deterministic');
+    expect(clean.pass, `state/${target.slug}: expected zero-diff baseline`).toBe(true);
 
-      // Mutate a numeric attribute in-memory — never touches disk.
-      const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
-      expect(tampered).not.toBe(golden);
+    // Mutate a numeric attribute in-memory — never touches disk.
+    const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
+    expect(tampered).not.toBe(golden);
 
-      const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
-      expect(pass).toBe(false);
-      expect(diffs.length).toBeGreaterThan(0);
+    const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');
+    expect(pass).toBe(false);
+    expect(diffs.length).toBeGreaterThan(0);
 
-      const message =
-        `state/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-        ` — ${JSON.stringify(diffs[0])}`;
-      expect(message).toContain(target.slug);
-      expect(message).toContain(diffs[0]!.path);
-    });
-  },
-);
+    const message =
+      `state/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+      ` — ${JSON.stringify(diffs[0])}`;
+    expect(message).toContain(target.slug);
+    expect(message).toContain(diffs[0]!.path);
+  });
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-state golden yet to exercise tamper detection against (AC2, deferred)', () => {
@@ -170,21 +156,17 @@ if (manifest.fixtures.length === 0) {
 // AC3 — DOT-EQUAL eligibility is enforced in the suite, not just documented.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-state conformance ratchet — eligibility (AC3)',
-  () => {
-    it('every manifest slug has a dotEqual=true parity-state.json entry', () => {
-      for (const f of manifest.fixtures) {
-        const entry = findParityEntry(f.slug);
-        expect(entry, `state/${f.slug}: no parity-state.json entry found`).toBeDefined();
-        expect(
-          entry!.dotEqual,
-          `state/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`,
-        ).toBe(true);
-      }
-    });
-  },
-);
+describe.skipIf(manifest.fixtures.length === 0)('svg-state conformance ratchet — eligibility (AC3)', () => {
+  it('every manifest slug has a dotEqual=true parity-state.json entry', () => {
+    for (const f of manifest.fixtures) {
+      const entry = findParityEntry(f.slug);
+      expect(entry, `state/${f.slug}: no parity-state.json entry found`).toBeDefined();
+      expect(entry!.dotEqual, `state/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
+        true,
+      );
+    }
+  });
+});
 
 if (manifest.fixtures.length === 0) {
   // S0's own baseline survey (`svg-parity-survey.ts --out ... state`) is a

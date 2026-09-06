@@ -30,8 +30,7 @@ import { stdlibStore, withStdlib, type BundleData } from '../../src/core/tim/Std
 const measurer = (): FormulaMeasurer => new FormulaMeasurer();
 
 /** A fetcher that must never run -- every target in these tests is a bundle. */
-const noFetch = (url: string): Promise<string> =>
-  Promise.reject(new Error(`unexpected network fetch for ${url}`));
+const noFetch = (url: string): Promise<string> => Promise.reject(new Error(`unexpected network fetch for ${url}`));
 
 function uml(...lines: readonly string[]): string {
   return ['@startuml', ...lines, '@enduml'].join('\n');
@@ -98,9 +97,7 @@ describe('registry in the prefetch walk -- transitivity (ADR-4)', () => {
     // second import().
     const alias: BundleData = { name: 'bootstrap', aliasOf: 'bootstrap1.13.1', files: {} };
     const concrete: BundleData = { name: 'bootstrap1.13.1', files: { bootstrap: 'class Sprites' } };
-    const thunk = vi.fn(async () =>
-      Promise.resolve({ bootstrap: alias, bootstrap1_13_1: concrete }),
-    );
+    const thunk = vi.fn(async () => Promise.resolve({ bootstrap: alias, bootstrap1_13_1: concrete }));
     const registry = stdlibRegistry({ bootstrap: thunk });
 
     const svg = await render(uml('!include <bootstrap/bootstrap>'), {
@@ -117,12 +114,7 @@ describe('registry in the prefetch walk -- transitivity (ADR-4)', () => {
     const thunk = vi.fn(async () => Promise.resolve({ c4 }));
     const registry = stdlibRegistry({ c4: thunk });
 
-    await prefetchIncludes(
-      uml('!include <C4/C4>', '!include <C4/Other>'),
-      noFetch,
-      undefined,
-      registry,
-    );
+    await prefetchIncludes(uml('!include <C4/C4>', '!include <C4/Other>'), noFetch, undefined, registry);
 
     expect(thunk).toHaveBeenCalledTimes(1);
   });
@@ -133,9 +125,9 @@ describe('registry in the prefetch walk -- the cycle guard survives bundle text'
     const loop: BundleData = { name: 'loop', files: { a: '!include <loop/a>' } };
     const registry = stdlibRegistry({ loop: async () => Promise.resolve({ loop }) });
 
-    await expect(
-      prefetchIncludes(uml('!include <loop/a>'), noFetch, undefined, registry),
-    ).rejects.toBeInstanceOf(CircularIncludeError);
+    await expect(prefetchIncludes(uml('!include <loop/a>'), noFetch, undefined, registry)).rejects.toBeInstanceOf(
+      CircularIncludeError,
+    );
   });
 
   it('a TRANSITIVE bundle cycle raises CircularIncludeError', async () => {
@@ -165,9 +157,9 @@ describe('registry in the prefetch walk -- the cycle guard survives bundle text'
       b: async () => Promise.resolve({ b }),
     });
 
-    await expect(
-      prefetchIncludes(uml('!include <a/thing>'), noFetch, undefined, registry),
-    ).rejects.toBeInstanceOf(StdlibNotBundledError);
+    await expect(prefetchIncludes(uml('!include <a/thing>'), noFetch, undefined, registry)).rejects.toBeInstanceOf(
+      StdlibNotBundledError,
+    );
   });
 });
 
@@ -177,12 +169,7 @@ describe('registry in the prefetch walk -- failure modes stay distinguishable', 
       c4: async () => Promise.resolve({ c4: { name: 'c4', files: { c4: 'class Base' } } }),
     });
 
-    const err = await prefetchIncludes(
-      uml('!include <tupadr3/font-awesome/star>'),
-      noFetch,
-      undefined,
-      registry,
-    ).then(
+    const err = await prefetchIncludes(uml('!include <tupadr3/font-awesome/star>'), noFetch, undefined, registry).then(
       () => undefined,
       (e: unknown) => e as StdlibNotBundledError,
     );
@@ -196,12 +183,7 @@ describe('registry in the prefetch walk -- failure modes stay distinguishable', 
     const cause = new Error('Failed to fetch dynamically imported module');
     const registry = stdlibRegistry({ tupadr3: async () => Promise.reject(cause) });
 
-    const err = await prefetchIncludes(
-      uml('!include <tupadr3/star>'),
-      noFetch,
-      undefined,
-      registry,
-    ).then(
+    const err = await prefetchIncludes(uml('!include <tupadr3/star>'), noFetch, undefined, registry).then(
       () => undefined,
       (e: unknown) => e as StdlibChunkLoadError,
     );
@@ -274,12 +256,7 @@ describe('registry in the prefetch walk -- inert for existing callers (criterion
     const fetcher = vi.fn(async () => Promise.resolve('class Fetched'));
     const registry = stdlibRegistry({ c4: async () => Promise.resolve({}) });
 
-    const store = await prefetchIncludes(
-      uml('!include https://example.com/a.puml'),
-      fetcher,
-      undefined,
-      registry,
-    );
+    const store = await prefetchIncludes(uml('!include https://example.com/a.puml'), fetcher, undefined, registry);
 
     expect(fetcher).toHaveBeenCalledTimes(1);
     expect(store.get('https://example.com/a.puml')).toBe('class Fetched');

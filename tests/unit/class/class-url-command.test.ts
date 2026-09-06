@@ -80,11 +80,13 @@ describe('standalone `url [of|for] <Code> [is] [[url]]` statement', () => {
     expect(ast.classifiers).toEqual([]);
   });
 
-  it('a later statement overwrites an earlier inline url (last-writer-wins, ' +
-     'mirrors upstream `Entity#addUrl`)', () => {
-    const ast = parse('class Foo [[http://first.com]]\nurl of Foo is [[http://second.com]]');
-    expect(ast.classifiers[0]!.url!.url).toBe('http://second.com');
-  });
+  it(
+    'a later statement overwrites an earlier inline url (last-writer-wins, ' + 'mirrors upstream `Entity#addUrl`)',
+    () => {
+      const ast = parse('class Foo [[http://first.com]]\nurl of Foo is [[http://second.com]]');
+      expect(ast.classifiers[0]!.url!.url).toBe('http://second.com');
+    },
+  );
 });
 
 describe('applyUrlStatement — malformed bracket', () => {

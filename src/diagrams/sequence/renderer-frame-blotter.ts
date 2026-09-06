@@ -97,9 +97,7 @@ function buildBands(frame: FrameGeo): BlotterBand[] {
   // `Blotter.java:126-128` -- always set, unconditionally, never through the
   // `last`-dedup gate `addChange` applies.
   changes.set(frame.height, defaultColor);
-  return [...changes.entries()]
-    .sort(([a], [b]) => a - b)
-    .map(([y, color]) => ({ y, color }));
+  return [...changes.entries()].sort(([a], [b]) => a - b).map(([y, color]) => ({ y, color }));
 }
 
 /** `Blotter#getRectangleBackground`'s two arc paths (`:98-122`), with the

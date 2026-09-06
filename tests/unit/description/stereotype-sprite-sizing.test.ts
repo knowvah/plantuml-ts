@@ -60,7 +60,9 @@ describe('stereotype sprite sizing (F4-f)', () => {
 
   it('leaves a plain text stereotype on the text path', () => {
     const before = nodeDims(plain)[0]!;
-    const textStereo = nodeDims(`${HEAD}rectangle "Technology Interface" as A <<foo>>\nrectangle "z" as Z\n${TAIL}`)[0]!;
+    const textStereo = nodeDims(
+      `${HEAD}rectangle "Technology Interface" as A <<foo>>\nrectangle "z" as Z\n${TAIL}`,
+    )[0]!;
     // One stereotype line at the default 14px font — jar-verified (48 vs 34).
     expect(Math.round(textStereo.height - before.height)).toBe(14);
   });

@@ -68,10 +68,7 @@ async function resolveBundleContent(
  * `stdlibContentFor` treats that as a miss (upstream has no such guard and
  * would infinite-loop the JVM -- see `StdlibStore.ts`'s divergence note).
  */
-async function bundlesFor(
-  registry: StdlibRegistry,
-  bundleName: string,
-): Promise<readonly BundleData[]> {
+async function bundlesFor(registry: StdlibRegistry, bundleName: string): Promise<readonly BundleData[]> {
   const collected: BundleData[] = [];
   const visited = new Set<string>();
 

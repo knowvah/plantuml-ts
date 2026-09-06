@@ -28,8 +28,7 @@ import {
 //      participant Alice #pink
 //      participant "Alice Smith" as A #pink
 export const participantCommand: Command = {
-  pattern:
-    /^(participant|actor|boundary|control|entity|database|collections|queue)\s+(.+)$/i,
+  pattern: /^(participant|actor|boundary|control|entity|database|collections|queue)\s+(.+)$/i,
   execute(state, match) {
     const type = match[1]!.toLowerCase() as ParticipantType;
     const rest = match[2]!.trim();
@@ -50,8 +49,7 @@ export const participantCommand: Command = {
  *  declaration here, same scope cut as `autoactivate`'s write-only flag.
  *  @see sequencediagram/command/CommandParticipant.java:80-86,142-201 */
 export const createCommand: Command = {
-  pattern:
-    /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
+  pattern: /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
     const { id, display, color, stereotype, url } = parseParticipantDeclaration(match[2]!.trim());
@@ -158,4 +156,3 @@ export function matchParticipantMultilineCommand(
 
   return closeIndex - i + 1;
 }
-

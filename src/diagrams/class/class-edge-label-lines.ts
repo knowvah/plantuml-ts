@@ -52,11 +52,17 @@ export function wrapPlainTextLine(
 ): readonly string[] {
   if (maxWidth <= 0) return [text];
   const atom: CreoleAtom = {
-    kind: 'text', text,
+    kind: 'text',
+    text,
     font: { family: fontSpec.family, size: fontSpec.size, color: null, styles: new Set() },
   };
-  const wrapped = getSplitted(
-    [atom], maxWidth, (a) => (a.kind === 'text' ? measurer.measure(a.text, fontSpec).width : 0),
+  const wrapped = getSplitted([atom], maxWidth, (a) =>
+    a.kind === 'text' ? measurer.measure(a.text, fontSpec).width : 0,
   );
-  return wrapped.map((lineAtoms) => lineAtoms.filter((a) => a.kind === 'text').map((a) => a.text).join(''));
+  return wrapped.map((lineAtoms) =>
+    lineAtoms
+      .filter((a) => a.kind === 'text')
+      .map((a) => a.text)
+      .join(''),
+  );
 }

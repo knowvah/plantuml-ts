@@ -140,8 +140,7 @@ export class FunctionsSet {
   /** Re-derive the name trie from the functions that remain. */
   private rebuildTrie(): void {
     this.functions3 = new TrieImpl();
-    for (const func of this.functions.values())
-      this.functions3.add(`${func.getSignature().getFunctionName()}(`);
+    for (const func of this.functions.values()) this.functions3.add(`${func.getSignature().getFunctionName()}(`);
   }
 
   executeEndfunction(): void {

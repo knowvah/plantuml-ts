@@ -36,11 +36,7 @@ export function intersect(big: Positionable, small: Positionable): boolean {
 
 /** Grow `pos` by `widthMargin`/`heightMargin` on every side: the origin
  *  moves up-left by one margin, the size grows by two. */
-export function addMargin(
-  pos: Positionable,
-  widthMargin: number,
-  heightMargin: number,
-): Positionable {
+export function addMargin(pos: Positionable, widthMargin: number, heightMargin: number): Positionable {
   return {
     getPosition(): XPoint2D {
       const p = pos.getPosition();

@@ -60,9 +60,7 @@ export function wrapGuillemet(label: string, guillemet: GuillemetPair = DEFAULT_
 // String-built (not a regex literal) purely so the complexity hook's lizard
 // parser doesn't mis-tokenize the literal and swallow the rest of the file
 // (see .agent-notes / memory: complexity-hook workarounds). Same pattern.
-const STRIP_CIRCLED_CHAR_RE = new RegExp(
-  String.raw`^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)\s*,?\s*(.*)$`,
-);
+const STRIP_CIRCLED_CHAR_RE = new RegExp(String.raw`^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)\s*,?\s*(.*)$`);
 
 /** A2s R2i (rotisi-30-loge424): `StereotypeDecoration`'s `circleSprite`
  *  sub-pattern (java:76-92), applied to one trimmed `<<...>>` chunk's inner
@@ -73,7 +71,9 @@ const STRIP_CIRCLED_CHAR_RE = new RegExp(
  *  SPRITE-badge twin of {@link CIRCLE_CHAR_RE}'s char form. Groups: 1=name,
  *  2=raw scale text (fed to `getScale`), 3=color, 4=residual label. */
 const CIRCLE_SPRITE_RE = new RegExp(
-  String.raw`^\(?\$(` + SPRITE_NAME_PATTERN_SOURCE + String.raw`)((?:\{scale=|\*)[0-9.]+\}?)?` +
+  String.raw`^\(?\$(` +
+    SPRITE_NAME_PATTERN_SOURCE +
+    String.raw`)((?:\{scale=|\*)[0-9.]+\}?)?` +
     String.raw`\s*(?:,\s*(#[0-9a-fA-F]{6}|\w+))?\s*(?:[),](.*))?$`,
   'u',
 );
@@ -119,9 +119,7 @@ function stripCircledCharDecoration(label: string): string {
  * regardless of bracket count, feeds `.tagname` style-cascade matching --
  * `style-map-element.ts#resolveStyleCascade`'s `stereotypeTags` param).
  */
-function splitStereotypeTokens(
-  stereotype: string,
-): Array<{ label: string; visible: boolean }> {
+function splitStereotypeTokens(stereotype: string): Array<{ label: string; visible: boolean }> {
   const reconstructed = `<<${stereotype}>>`;
   const tokens: Array<{ label: string; visible: boolean }> = [];
   const re = /(<{2,3})(.*?)>{2,3}/g;
@@ -175,9 +173,7 @@ export interface CircledCharDecoration {
  */
 const CIRCLE_CHAR_RE = /^\(\s*(\S)\s*(?:,\s*(#[0-9a-fA-F]{6}|\w+)\s*)?\)/;
 
-export function parseCircledCharDecoration(
-  stereotype: string | undefined,
-): CircledCharDecoration | undefined {
+export function parseCircledCharDecoration(stereotype: string | undefined): CircledCharDecoration | undefined {
   if (stereotype === undefined) return undefined;
   const reconstructed = `<<${stereotype}>>`;
   const re = /<{2,3}(.*?)>{2,3}/g;
@@ -210,9 +206,7 @@ export interface CircledSpriteDecoration {
   color?: string;
 }
 
-export function parseCircledSpriteDecoration(
-  stereotype: string | undefined,
-): CircledSpriteDecoration | undefined {
+export function parseCircledSpriteDecoration(stereotype: string | undefined): CircledSpriteDecoration | undefined {
   if (stereotype === undefined) return undefined;
   const reconstructed = `<<${stereotype}>>`;
   const re = /<{2,3}(.*?)>{2,3}/g;
@@ -250,10 +244,7 @@ export const DEFAULT_CIRCLED_CHARACTER_FONT_SIZE = 17;
  * their font sizes do -- `nimoxu-60-xale291` (rx=11) and
  * `fakova-98-suze610` (rx=9).
  */
-export function resolveBadgeRadius(
-  circledCharacterFontSize?: number,
-  circledCharacterRadiusOverride?: number,
-): number {
+export function resolveBadgeRadius(circledCharacterFontSize?: number, circledCharacterRadiusOverride?: number): number {
   if (circledCharacterRadiusOverride !== undefined) return circledCharacterRadiusOverride;
   const fontSize = circledCharacterFontSize ?? DEFAULT_CIRCLED_CHARACTER_FONT_SIZE;
   return Math.floor(fontSize / 3) + 6;

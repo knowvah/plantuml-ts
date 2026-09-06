@@ -5,9 +5,7 @@ import { line, runBody } from '../../../../helpers/tim-iterator-context.js';
 describe('CodeIteratorForeach', () => {
   it('!endforeach with no matching !foreach throws', () => {
     expect(() => runBody([line('!endforeach', 'ENDFOREACH')])).toThrow(EaterException);
-    expect(() => runBody([line('!endforeach', 'ENDFOREACH')])).toThrow(
-      'No foreach related to this endforeach',
-    );
+    expect(() => runBody([line('!endforeach', 'ENDFOREACH')])).toThrow('No foreach related to this endforeach');
   });
 
   it('a !foreach over an empty array never runs its body', () => {

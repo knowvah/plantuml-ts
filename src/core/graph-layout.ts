@@ -8,11 +8,7 @@
 // and maps it to the DotLayoutResult shape the renderers already consume (burn
 // decision D4 — renderers untouched). See plans/burn-graphviz-engines/.
 
-import {
-  createGraph,
-  render,
-  getLayout,
-} from '@knowvah/dot-engine';
+import { createGraph, render, getLayout } from '@knowvah/dot-engine';
 import type { LayoutSnapshot } from '@knowvah/dot-engine';
 import {
   applyGraphAttrs,
@@ -30,12 +26,7 @@ import {
 // itself cannot import the class-local copy (`core/` -> `diagrams/class/`
 // is the wrong layering direction; the reverse, done here, is not).
 export { CARDINALITY_FONT_SIZE } from './graph-layout-build.js';
-import type {
-  DotInputEdge,
-  DotInputGraph,
-  DotInputNode,
-  DotLayoutResult,
-} from './graph-layout.types.js';
+import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from './graph-layout.types.js';
 
 // Imported for its side effect: pins @knowvah/dot-engine's text measurer.
 // A5/T7: this file used to install `new LutTextMeasurer()` itself. That was a
@@ -55,7 +46,6 @@ type OutNodes = DotLayoutResult['nodes'];
 type OutEdges = DotLayoutResult['edges'];
 type OutClusters = NonNullable<DotLayoutResult['clusters']>;
 
-
 // Instrumentation seam for the oracle DOT-parity workstream. When set, every
 // layoutGraph() call hands its input here before layout — letting the parity
 // tests capture the exact graph plantuml-ts feeds graphviz, for one fixture, to
@@ -63,9 +53,7 @@ type OutClusters = NonNullable<DotLayoutResult['clusters']>;
 // every production path. See oracle/README.md and tests/oracle/.
 let layoutInputObserver: ((input: DotInputGraph) => void) | undefined;
 
-export function setLayoutInputObserver(
-  fn: ((input: DotInputGraph) => void) | undefined,
-): void {
+export function setLayoutInputObserver(fn: ((input: DotInputGraph) => void) | undefined): void {
   layoutInputObserver = fn;
 }
 
@@ -173,11 +161,7 @@ function portNodeSize(d: DotInputNode | undefined, engine: number, declared: num
  *      table cell sizing — the floor happens inside graphviz's own table
  *      layout, before `poly_init` ever sees a size)
  */
-function cornerSize(
-  d: DotInputNode | undefined,
-  width: number,
-  height: number,
-): [number, number] {
+function cornerSize(d: DotInputNode | undefined, width: number, height: number): [number, number] {
   if (d?.portRows === undefined) return [width, height];
   return [Math.floor(width), Math.floor(height)];
 }
@@ -219,11 +203,7 @@ function assignLabelPos(
   entry[yKey] = pos.y;
 }
 
-function toEdgeEntry(
-  ge: LayoutSnapshot['edges'][number],
-  id: string,
-  inp: DotInputEdge | undefined,
-): OutEdges[number] {
+function toEdgeEntry(ge: LayoutSnapshot['edges'][number], id: string, inp: DotInputEdge | undefined): OutEdges[number] {
   const entry: OutEdges[number] = {
     id,
     points: ge.points.map((p) => ({ x: p.x, y: p.y })),
@@ -400,10 +380,7 @@ function canvasSize(nodes: OutNodes, edges: OutEdges): { width: number; height: 
  *                BFS-depth engine-selection heuristic was intentionally dropped
  *                (burn decision D2).
  */
-export function layoutGraph(
-  input: DotInputGraph,
-  opts?: { engine?: string },
-): DotLayoutResult {
+export function layoutGraph(input: DotInputGraph, opts?: { engine?: string }): DotLayoutResult {
   // BEFORE the observer, deliberately: the oracle DOT-parity harness captures
   // its comparison subject here, and it must see the same graph the engine
   // does. Marking after this point would emit a faithful DOT from a graph the

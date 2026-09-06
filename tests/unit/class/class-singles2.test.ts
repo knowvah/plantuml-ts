@@ -103,16 +103,23 @@ describe('tilipa-86-suxi130: quoted multiplicities inside the free-text label', 
   it('"1" contains "0..*" decomposes into both multiplicities + middle label', () => {
     const r = parseRelationshipLine('FleetVehicle *- Car : "1" contains "0..*"');
     expect(r).toMatchObject({
-      from: 'FleetVehicle', to: 'Car', type: 'composition',
-      fromMultiplicity: '1', toMultiplicity: '0..*', label: 'contains',
+      from: 'FleetVehicle',
+      to: 'Car',
+      type: 'composition',
+      fromMultiplicity: '1',
+      toMultiplicity: '0..*',
+      label: 'contains',
     });
   });
 
   it('first-only form: "1" has', () => {
     const r = parseRelationshipLine('Car o- Wheel : "1" has');
     expect(r).toMatchObject({
-      from: 'Car', to: 'Wheel', type: 'aggregation',
-      fromMultiplicity: '1', label: 'has',
+      from: 'Car',
+      to: 'Wheel',
+      type: 'aggregation',
+      fromMultiplicity: '1',
+      label: 'has',
     });
     expect(r!.toMultiplicity).toBeUndefined();
   });
@@ -120,8 +127,11 @@ describe('tilipa-86-suxi130: quoted multiplicities inside the free-text label', 
   it('second-only form: has "4"', () => {
     const r = parseRelationshipLine('Car o- Wheel : has "4"');
     expect(r).toMatchObject({
-      from: 'Car', to: 'Wheel', type: 'aggregation',
-      toMultiplicity: '4', label: 'has',
+      from: 'Car',
+      to: 'Wheel',
+      type: 'aggregation',
+      toMultiplicity: '4',
+      label: 'has',
     });
     expect(r!.fromMultiplicity).toBeUndefined();
   });
@@ -129,8 +139,11 @@ describe('tilipa-86-suxi130: quoted multiplicities inside the free-text label', 
   it('explicit endpoint quantifiers suppress decomposition (firstLabel != null guard), but the unconditional Labels#init fallthrough (line 102) still strips the label\'s own outer quote pair — jar-verified against pucazu-91-paxe635\'s golden `a" is "b` text (item 46)', () => {
     const r = parseRelationshipLine('A "1" -- "1" B : "x" mid "y"');
     expect(r).toMatchObject({
-      from: 'A', to: 'B',
-      fromMultiplicity: '1', toMultiplicity: '1', label: 'x" mid "y',
+      from: 'A',
+      to: 'B',
+      fromMultiplicity: '1',
+      toMultiplicity: '1',
+      label: 'x" mid "y',
     });
   });
 
@@ -174,7 +187,10 @@ describe('gujigi-63-roki030: constraint on links marks the two last links', () =
   // used at :430-444) on each constrained edge with no note/label text.
 
   function parse(source: string) {
-    const lines = source.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+    const lines = source
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
     return parseClass({ lines, type: 'class' });
   }
 
@@ -234,7 +250,10 @@ describe('nadono-22-gidu983: together { } block scoping', () => {
   // the ENCLOSING namespace early, stranding later classifiers outside it.
 
   function parse(source: string) {
-    const lines = source.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+    const lines = source
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
     return parseClass({ lines, type: 'class' });
   }
 

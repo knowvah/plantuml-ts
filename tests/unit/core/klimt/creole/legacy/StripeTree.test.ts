@@ -51,7 +51,8 @@ function fakeSkinParam(): ISkinSimple {
  *  .ts`'s established `AtomOps` test-double convention. */
 function unitOps(): AtomOps {
   return {
-    calculateDimension: (atom): XDimension2D => (atom.kind === 'text' ? new XDimension2D(atom.text.length, 10) : new XDimension2D(0, 10)),
+    calculateDimension: (atom): XDimension2D =>
+      atom.kind === 'text' ? new XDimension2D(atom.text.length, 10) : new XDimension2D(0, 10),
     getStartingAltitude: (): number => 0,
     drawU: (): void => undefined,
   };
@@ -144,7 +145,7 @@ describe('StripeTree construction (java:63-69, T10g: real, no longer seamed)', (
     expect(ug.lastFore).toBe('none');
   });
 
-  it('one cell: height is the single cell\'s measured height plus the 2/2 margin', () => {
+  it("one cell: height is the single cell's measured height plus the 2/2 margin", () => {
     const tree = new StripeTree(FONT, fakeSkinParam(), '|_ root', unitOps());
     // "root" (4 chars) inside a 1-cell AtomTable-via-asAtom wrapper: unit
     // height 10 for the text row, +2+2 from StripeTree's own AtomWithMargin.
@@ -159,7 +160,9 @@ describe('StripeTree.analyzeAndAdd (java:80-90, T10g: real per-line cell constru
     // measured widths would differ by the marker's own length.
     const withMarker = new StripeTree(FONT, fakeSkinParam(), '|_root', unitOps());
     const bareText = new StripeTree(FONT, fakeSkinParam(), 'root', unitOps());
-    expect(treeAtom(withMarker).calculateDimension(sb).getWidth()).toBe(treeAtom(bareText).calculateDimension(sb).getWidth());
+    expect(treeAtom(withMarker).calculateDimension(sb).getWidth()).toBe(
+      treeAtom(bareText).calculateDimension(sb).getWidth(),
+    );
   });
 
   it('a "\\n"-split line becomes multiple stacked cells (StripeTable.getWithNewlinesInternal reuse, java:80)', () => {

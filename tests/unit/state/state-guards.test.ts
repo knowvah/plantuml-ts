@@ -109,7 +109,8 @@ describe('G24 concurrent-region guard — checkConcurrentStateOk (StateDiagram.j
   });
 
   it('a transition BETWEEN two states declared in the SAME concurrent region stays legitimate (no false positive)', () => {
-    const ast = parseAst(statePlugin,
+    const ast = parseAst(
+      statePlugin,
       block(`
         state S {
           state a
@@ -143,7 +144,8 @@ describe('G24 concurrent-region guard — checkConcurrentStateOk (StateDiagram.j
   });
 
   it('a transition crossing a NON-concurrent scope boundary (no "--" involved) stays legitimate (no false positive)', () => {
-    const ast = parseAst(statePlugin,
+    const ast = parseAst(
+      statePlugin,
       block(`
         state Outer {
           state Inner
@@ -185,7 +187,8 @@ describe('G24 dotted-phantom guard — CommandLinkStateCommon.java:277-278 (quar
   });
 
   it('a dotted transition endpoint reaching an ALREADY-DECLARED nested composite (no fresh ancestor) is legitimate (bujuta-44-rovo666 shape)', () => {
-    const ast = parseAst(statePlugin,
+    const ast = parseAst(
+      statePlugin,
       block(`
         state Somp {
           state entry1
@@ -202,9 +205,7 @@ describe('G24 guards, full pipeline — renderSync produces the jar-shaped error
   const ERROR_BANNER = 'plantuml-ts version';
 
   it('cagego-53-vemo516 shape renders the error diagram (banner + message), never a phantom "d" node', () => {
-    const svg = renderSync(
-      '@startuml\nstate S {\nstate a\n--\nstate b {\nstate c\n}\nc -> d\n}\n@enduml',
-    );
+    const svg = renderSync('@startuml\nstate S {\nstate a\n--\nstate b {\nstate c\n}\nc -> d\n}\n@enduml');
     const text = deNbsp(svg);
     expect(text).toContain(ERROR_BANNER);
     expect(text).toContain('The state c cannot be used here.');

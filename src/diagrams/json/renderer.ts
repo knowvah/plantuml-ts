@@ -15,7 +15,13 @@ import { canonicalColor } from './color-form.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
 
-import { buildCurvePath, veryFirstPoint, buildArrowHeadPath, buildCurveSegments, buildArrowHeadSegments } from './JsonCurve.js';
+import {
+  buildCurvePath,
+  veryFirstPoint,
+  buildArrowHeadPath,
+  buildCurveSegments,
+  buildArrowHeadSegments,
+} from './JsonCurve.js';
 import { penFor } from './renderer-pen.js';
 import type { JsonPen, PenInk } from './renderer-pen.js';
 import { resolveNodeStyle, SVG_CORNER_DIVISOR, JSON_SKIN_BLACK } from './renderer-style.js';
@@ -64,18 +70,12 @@ const PARSE_FAILURE_FONT_SIZE = 14;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function valueColor(
-  valueType: JsonRowGeo['valueType'],
-  json: Theme['colors']['graph']['json'],
-): string {
+function valueColor(valueType: JsonRowGeo['valueType'], json: Theme['colors']['graph']['json']): string {
   return canonicalColor(rawValueColor(valueType, json));
 }
 
 /** The theme's own string, before `color-form.ts` puts it in emitted form. */
-function rawValueColor(
-  valueType: JsonRowGeo['valueType'],
-  json: Theme['colors']['graph']['json'],
-): string {
+function rawValueColor(valueType: JsonRowGeo['valueType'], json: Theme['colors']['graph']['json']): string {
   // Upstream has NO per-type value styling: `TextBlockJson#getTextBlock` builds
   // every cell from one `getStyleToUse(false, highlighted)` style, whose
   // FontColor the skin sets to black for this family (`plantuml.skin:446`).
@@ -83,15 +83,19 @@ function rawValueColor(
   // which is exactly what the four fields exist for, and what all 20 built-in
   // themes use them for (each sets a single shared value color).
   switch (valueType) {
-    case 'string': return json?.stringValue ?? JSON_SKIN_BLACK;
-    case 'number': return json?.numberValue ?? JSON_SKIN_BLACK;
-    case 'boolean': return json?.booleanValue ?? JSON_SKIN_BLACK;
-    case 'null': return json?.nullValue ?? JSON_SKIN_BLACK;
+    case 'string':
+      return json?.stringValue ?? JSON_SKIN_BLACK;
+    case 'number':
+      return json?.numberValue ?? JSON_SKIN_BLACK;
+    case 'boolean':
+      return json?.booleanValue ?? JSON_SKIN_BLACK;
+    case 'null':
+      return json?.nullValue ?? JSON_SKIN_BLACK;
     // 'nested' — the three-space cell (`TextBlockJson.java:194`).
-    default: return json?.keyText ?? JSON_SKIN_BLACK;
+    default:
+      return json?.keyText ?? JSON_SKIN_BLACK;
   }
 }
-
 
 /**
  * `HorizontalAlignment#draw(ug, tb, 0, 0, width)` — the block (text plus its
@@ -263,9 +267,12 @@ function renderRowText(
     // — `getTextBlock` builds both from the same style, wrapWidth included.
     const keyX = cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align);
     for (const atom of row.keyAtoms) {
-      parts.push(text(keyX + atom.dx, node.y + row.keyBaselineY, atom.text, {
-        ...keyStyle, textLength: atom.textLength,
-      }));
+      parts.push(
+        text(keyX + atom.dx, node.y + row.keyBaselineY, atom.text, {
+          ...keyStyle,
+          textLength: atom.textLength,
+        }),
+      );
     }
   }
 
@@ -373,7 +380,10 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
   const strokeDasharray = scaleDasharray(json?.arrowDasharray ?? '3,3', k);
 
   const linePart = pen.path(buildCurveSegments(edge.points), d, {
-    stroke, strokeWidth, strokeDasharray, fill: 'none',
+    stroke,
+    strokeWidth,
+    strokeDasharray,
+    fill: 'none',
   });
 
   // `Arrow#drawArrow` — filled, and deliberately unstroked: the jar emits
@@ -385,16 +395,19 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
   // point the stub starts from (`JsonCurve.java:114-118`), stroked by the
   // `UStroke.simple()` that call applies.
   const spot = veryFirstPoint(edge.points);
-  const dotPart = spot !== undefined
-    // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
-    // keys `rect`/`line` use — `strokeWidth` here would emit a literal
-    // `strokeWidth=` attribute.
-    // Radius and stroke are pre-scale lengths, so both take `k` like every
-    // other numeric `SvgGraphics#format` writes.
-    ? pen.ellipse(spot.x, spot.y, SPOT_RADIUS * k, SPOT_RADIUS * k, {
-        fill: stroke, stroke, 'stroke-width': SPOT_STROKE_WIDTH * k,
-      })
-    : '';
+  const dotPart =
+    spot !== undefined
+      ? // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
+        // keys `rect`/`line` use — `strokeWidth` here would emit a literal
+        // `strokeWidth=` attribute.
+        // Radius and stroke are pre-scale lengths, so both take `k` like every
+        // other numeric `SvgGraphics#format` writes.
+        pen.ellipse(spot.x, spot.y, SPOT_RADIUS * k, SPOT_RADIUS * k, {
+          fill: stroke,
+          stroke,
+          'stroke-width': SPOT_STROKE_WIDTH * k,
+        })
+      : '';
 
   return linePart + headPart + dotPart;
 }
@@ -422,12 +435,15 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
  */
 function renderParseFailure(geo: JsonGeometry): RenderFragment {
   const at = geo.errorLayout;
-  const body = at === undefined ? '' : text(at.x, at.y, geo.error ?? '', {
-    fontFamily: PARSE_FAILURE_FONT_FAMILY,
-    fontSize: PARSE_FAILURE_FONT_SIZE,
-    fill: JSON_SKIN_BLACK,
-    textLength: at.textLength,
-  });
+  const body =
+    at === undefined
+      ? ''
+      : text(at.x, at.y, geo.error ?? '', {
+          fontFamily: PARSE_FAILURE_FONT_FAMILY,
+          fontSize: PARSE_FAILURE_FONT_SIZE,
+          fill: JSON_SKIN_BLACK,
+          textLength: at.textLength,
+        });
   return { body, width: geo.width, height: geo.height };
 }
 
@@ -500,9 +516,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   // has become a polygon. `layout.ts` cannot know that extent without
   // repeating the jiggle, and the pen already has it.
   const ink = pen.ink();
-  const dims = ink === undefined
-    ? { width: geo.width, height: geo.height }
-    : handwrittenDims(ink, theme);
+  const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink, theme);
   return {
     body: parts.join(''),
     ...dims,

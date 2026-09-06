@@ -90,7 +90,7 @@ describe('UrlBuilder modes and topurl (java:130-146)', () => {
 describe('Pattern2 %-token transform (regex/Pattern2.java:51-61)', () => {
   it('substitutes %s/%q/%g/%pLN and leaves other text verbatim', () => {
     expect(transform('[%s]*')).toBe('[\\s\\u00A0]*');
-    expect(transform("a[%q]b")).toBe("a['\\u2018\\u2019]b");
+    expect(transform('a[%q]b')).toBe("a['\\u2018\\u2019]b");
     expect(transform('[%g]')).toBe('["\\u201C\\u201D\\uE121]');
     expect(transform('[%pLN]')).toBe('[\\p{L}\\p{N}]');
   });

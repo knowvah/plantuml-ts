@@ -15,13 +15,8 @@
  */
 
 import type { StringMeasurer, FontSpec } from '../../measurer.js';
-import {
-  type SpriteDimsLookup,
-} from '../../creole-atoms.js';
-import {
-  measureInlineAtom,
-  lineAtomHeightExcess,
-} from '../../creole-atoms-measure.js';
+import { type SpriteDimsLookup } from '../../creole-atoms.js';
+import { measureInlineAtom, lineAtomHeightExcess } from '../../creole-atoms-measure.js';
 import { classifyStripeLine } from '../../klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getFont, type FontConfiguration } from '../../klimt/shape/UText.js';
@@ -308,8 +303,7 @@ export function maxLineWidth(
     // own `isCreoleHrLine` and the renderer's `buildLine` — the sizer↔
     // renderer sync invariant.
     const w =
-      lineTextMetrics(raw, fontSpec, measurer, guillemet, defaultFont).width +
-      inlineAtomWidth(raw, fontSpec, sprites);
+      lineTextMetrics(raw, fontSpec, measurer, guillemet, defaultFont).width + inlineAtomWidth(raw, fontSpec, sprites);
     if (w > max) max = w;
   }
   return max;
@@ -404,4 +398,3 @@ export function measureTextBlock(
   // HEAD` lizard run before this task's own edits; unchanged by
   // sizer-footprint-parity T2).
 }
-

@@ -59,11 +59,7 @@ describe('layoutActivity — single start node', () => {
 
 describe('layoutActivity — start → action → stop', () => {
   const ast: ActivityDiagramAST = {
-    nodes: [
-      { kind: 'start' },
-      { kind: 'action', label: 'Hello' },
-      { kind: 'stop' },
-    ],
+    nodes: [{ kind: 'start' }, { kind: 'action', label: 'Hello' }, { kind: 'stop' }],
     swimlanes: [],
   };
   const geo = layoutActivity(ast, theme, measurer);
@@ -77,7 +73,7 @@ describe('layoutActivity — start → action → stop', () => {
   });
 
   it('nodes have increasing y coordinates', () => {
-    const ys = geo.nodes.map(n => n.y);
+    const ys = geo.nodes.map((n) => n.y);
     expect(ys[1]).toBeGreaterThan(ys[0]!);
     expect(ys[2]).toBeGreaterThan(ys[1]!);
   });
@@ -127,7 +123,7 @@ describe('layoutActivity — while loop produces back-edge', () => {
   const geo = layoutActivity(ast, theme, measurer);
 
   it('has at least one edge with >= 4 waypoints (back-edge)', () => {
-    const backEdge = geo.edges.find(e => e.points.length >= 4);
+    const backEdge = geo.edges.find((e) => e.points.length >= 4);
     expect(backEdge).toBeDefined();
   });
 });
@@ -138,16 +134,13 @@ describe('layoutActivity — existing renderer tests still work', () => {
       nodes: [
         {
           kind: 'fork',
-          branches: [
-            [{ kind: 'action', label: 'branch A' }],
-            [{ kind: 'action', label: 'branch B' }],
-          ],
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
         },
       ],
       swimlanes: [],
     };
     const geo = layoutActivity(ast, theme, measurer);
-    const kinds = geo.nodes.map(n => n.kind);
+    const kinds = geo.nodes.map((n) => n.kind);
     expect(kinds).toContain('fork-bar');
     expect(kinds).toContain('join-bar');
   });

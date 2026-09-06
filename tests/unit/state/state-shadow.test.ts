@@ -6,7 +6,11 @@
  * `url(#...)` reference (D5's "id-normalized" self-consistency bar).
  */
 import { describe, it, expect } from 'vitest';
-import { STATE_SHADOW_FILTER_ID, buildStateShadowFilterDef, stateShadowFilterUrl } from '../../../src/diagrams/state/state-shadow.js';
+import {
+  STATE_SHADOW_FILTER_ID,
+  buildStateShadowFilterDef,
+  stateShadowFilterUrl,
+} from '../../../src/diagrams/state/state-shadow.js';
 
 describe('state-shadow.ts', () => {
   it('builds a <filter> def with jar-verified x/y/width/height and the fixed dx=dy=4/stdDeviation=2 shape', () => {

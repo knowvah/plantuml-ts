@@ -20,10 +20,7 @@ import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { measureForRepin } from '../../../scripts/sequence-repin-snapshot.js';
 import { requireIncludeStore } from '../../../scripts/sequence-geometry-distance.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '..', '..', '..', 'test-results', 'dot-cache', 'sequence',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'test-results', 'dot-cache', 'sequence');
 
 describe('measureForRepin', () => {
   const store = requireIncludeStore(fixtureIncludeStore);

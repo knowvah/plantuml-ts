@@ -301,9 +301,8 @@ function computeMeasuredLabelAttrs(
   }
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
-    const m = magic.text !== undefined && magic.text !== ''
-      ? measurer.measure(magic.text, font)
-      : { width: 0, height: 0 };
+    const m =
+      magic.text !== undefined && magic.text !== '' ? measurer.measure(magic.text, font) : { width: 0, height: 0 };
     // `TextBlockArrow2.calculateDimension` (`klimt/shape/TextBlockArrow2
     // .java:57,87`) returns `(size, size)` where `size` is the SAME font
     // passed to `addMagicArrow` (`SvekEdge.java:304`) -- `font.size` here,

@@ -108,8 +108,7 @@ function diskFetcher(fetched: Map<string, number>): IncludeFetcher {
 
 /** A fetcher that must never run -- proves a given path makes zero requests
  *  for ordinary (non-stdlib) `!include` targets. */
-const noFetch: IncludeFetcher = (url: string): Promise<string> =>
-  Promise.reject(new Error(`unexpected fetch: ${url}`));
+const noFetch: IncludeFetcher = (url: string): Promise<string> => Promise.reject(new Error(`unexpected fetch: ${url}`));
 
 /**
  * Registers `bootstrap1.13.1` via `spriteSplitStdlib` (the recipe in that
@@ -126,10 +125,8 @@ function buildRegistry(fetcher: IncludeFetcher) {
   expect(manifest.name).toBe('bootstrap1.13.1');
 
   return stdlibRegistry({
-    bootstrap: (): Promise<BundleData> =>
-      Promise.resolve({ name: 'bootstrap', aliasOf: 'bootstrap1.13.1', files: {} }),
-    'bootstrap1.13.1': () =>
-      Promise.resolve(spriteSplitStdlib({ manifest, baseUrl: BASE_URL, fetcher })),
+    bootstrap: (): Promise<BundleData> => Promise.resolve({ name: 'bootstrap', aliasOf: 'bootstrap1.13.1', files: {} }),
+    'bootstrap1.13.1': () => Promise.resolve(spriteSplitStdlib({ manifest, baseUrl: BASE_URL, fetcher })),
   });
 }
 
@@ -168,9 +165,7 @@ describe('bootstrap1.13.1 -- real manifest, real fragments, real render (criteri
     // rather than loosely, and independent of fetch completion order
     // (`assembleSpriteSplitContent` sorts names before any fetch starts).
     expect(fetched.size).toBe(3);
-    expect([...fetched.keys()].sort()).toEqual(
-      spriteNames.map((name) => `${BASE_URL}/sprites/${name}.puml`).sort(),
-    );
+    expect([...fetched.keys()].sort()).toEqual(spriteNames.map((name) => `${BASE_URL}/sprites/${name}.puml`).sort());
 
     // The sprites actually drew: a plain-text usecase diagram draws ZERO
     // `<path>` elements (verified against the real golden corpus -- this

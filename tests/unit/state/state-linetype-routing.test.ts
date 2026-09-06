@@ -28,10 +28,7 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/state',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
 const measurer = new WidthTableMeasurer();
 
@@ -52,25 +49,13 @@ function captureAll(puml: string): DotInputGraph[] {
 
 describe('state-dot-graph.ts buildDotGraph — flat pipeline forwards theme.linetype', () => {
   it('carries linetype: "ortho" on the flat DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype ortho',
-      'state A',
-      'A --> B : go',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype ortho', 'state A', 'A --> B : go', '@enduml'].join('\n');
     const [graph] = captureAll(puml);
     expect(graph!.linetype).toBe('ortho');
   });
 
   it('carries linetype: "polyline" on the flat DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype polyline',
-      'state A',
-      'A --> B : go',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype polyline', 'state A', 'A --> B : go', '@enduml'].join('\n');
     const [graph] = captureAll(puml);
     expect(graph!.linetype).toBe('polyline');
   });
