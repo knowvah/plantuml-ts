@@ -12,6 +12,7 @@ import { rect, line, text, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
+import { activityFontSize, activityLineThickness, swimlaneFontSize } from './activity-style-defaults.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -48,7 +49,15 @@ function arrowTip(x: number, y: number, dx: number, dy: number, color: string): 
       { x: x1, y: y1 },
       { x: x2, y: y2 },
     ],
-    { fill: color },
+    // The arrow DECORATION draws through `.apply(UStroke.simple())`
+    // (`ftile/Worm.java:159,166`), which is thickness 1.0
+    // (`klimt/UStroke.java:75-77`) -- NOT the `UStroke.withThickness(1.5)`
+    // applied to `ug` two lines earlier, which those `.apply` calls
+    // override before the draw. Upstream applies `arrowHeadColor` to both
+    // the foreground and the background (`Worm.java:152-153`), so the
+    // decoration is filled AND stroked in the same colour; this port drew a
+    // fill alone.
+    { fill: color, stroke: color, strokeWidth: 1 },
   );
 }
 
@@ -60,10 +69,16 @@ function arrowTip(x: number, y: number, dx: number, dy: number, color: string): 
  * padding; height = fontSize + 4px padding.
  */
 function renderEdgeLabel(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
+  // `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373). The
+  // activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
+  // the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
+  // / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
+  // through `of(root, element, activityDiagram, arrow)`.
+  const size = activityFontSize(theme, 'arrow');
   if (color !== undefined) {
-    const textWidth = label.length * (theme.fontSize * 0.6);
+    const textWidth = label.length * (size * 0.6);
     const pillW = textWidth + 8;
-    const pillH = theme.fontSize + 4;
+    const pillH = size + 4;
     const pillX = midX - pillW / 2;
     const pillY = midY - pillH / 2;
     const background = rect(pillX, pillY, pillW, pillH, {
@@ -73,7 +88,7 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
     const labelEl = text(midX, midY, label, {
       fill: theme.colors.text,
       fontFamily: theme.fontFamily,
-      fontSize: theme.fontSize,
+      fontSize: size,
       textAnchor: 'middle',
       dominantBaseline: 'central',
     });
@@ -84,7 +99,7 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
   return text(midX + 4, midY - 4, label, {
     fill: theme.colors.text,
     fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
+    fontSize: size,
   });
 }
 
@@ -121,12 +136,16 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * one `ULine` per segment -- per-segment lines are what an output-size-
  * conscious upstream chose. Do not re-introduce a polyline "optimisation".
  */
-function renderEdgeSegments(pts: ReadonlyArray<{ x: number; y: number }>, edgeColor: string): string {
+function renderEdgeSegments(
+  pts: ReadonlyArray<{ x: number; y: number }>,
+  edgeColor: string,
+  strokeWidth: number,
+): string {
   let out = '';
   for (let i = 0; i < pts.length - 1; i++) {
     const p1 = pts[i]!;
     const p2 = pts[i + 1]!;
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth: 1.5 });
+    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
   }
   return out;
 }
@@ -136,7 +155,16 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   if (pts.length < 2) return '';
 
   const edgeColor = theme.colors.arrow;
-  const segments = renderEdgeSegments(pts, edgeColor);
+  // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
+  // `Worm#drawInternalOneColor` takes the LINE's stroke from
+  // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`
+  // branch). The `UStroke.withThickness(1.5)` calls at `:154` and `:161`
+  // are inside `if (startDecoration != null)` / `if (endDecoration !=
+  // null)` -- and each of those then draws through
+  // `.apply(UStroke.simple())` (`:159`, `:166`), which is thickness 1.0
+  // (`klimt/UStroke.java:75-77`), so the 1.5 never reaches any output at
+  // all. This port had generalised it to every segment of every edge.
+  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'));
 
   // Arrowhead at last point, direction from second-to-last to last
   const last = pts[pts.length - 1]!;
@@ -200,14 +228,20 @@ function renderSwimlanes(swimlanes: readonly SwimlaneGeo[], totalHeight: number,
     ),
   );
 
+  const laneTitleSize = swimlaneFontSize(theme);
   for (const lane of swimlanes) {
     // Lane header text, centered
     parts.push(
-      text(lane.x + lane.width / 2, SWIMLANE_HEADER_H / 2 + theme.fontSize / 3, lane.name, {
+      // The ROOT `swimlane { FontSize 18 }` block (plantuml.skin:313),
+      // resolved by `ftile/Swimlanes.java:127` and
+      // `ftile/LaneDivider.java:72`. D7 scopes this task to the FONT: the
+      // divider-line-vs-boxed-header visual model stays exactly as it is
+      // and belongs to the filed `activity-swimlane-rendering`.
+      text(lane.x + lane.width / 2, SWIMLANE_HEADER_H / 2 + laneTitleSize / 3, lane.name, {
         textAnchor: 'middle',
         fill: theme.colors.text,
         fontFamily: theme.fontFamily,
-        fontSize: theme.fontSize,
+        fontSize: laneTitleSize,
         fontWeight: 'bold',
       }),
     );

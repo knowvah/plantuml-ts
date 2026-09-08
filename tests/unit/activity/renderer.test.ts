@@ -724,3 +724,63 @@ describe('renderActivity — <code> block action', () => {
     expect(svg).not.toContain('    "item"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// activity-style-defaults T6 — edges and swimlane titles at their skin values
+// ---------------------------------------------------------------------------
+
+describe('T6 — edge stroke, arrow decoration, and swimlane title', () => {
+  const edge = {
+    id: 'e0',
+    from: 'a',
+    to: 'b',
+    points: [
+      { x: 10, y: 10 },
+      { x: 10, y: 60 },
+    ],
+  };
+
+  it('an edge line draws stroke-width 1, not the port s old 1.5', () => {
+    // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
+    // `Worm#drawInternalOneColor` takes the LINE's stroke from
+    // `style.getStroke()` (ftile/Worm.java:129).
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    expect(content).toMatch(/<line[^>]*stroke-width="1"/);
+    expect(content).not.toMatch(/<line[^>]*stroke-width="1\.5"/);
+  });
+
+  it('the arrow DECORATION strokes at 1.0 — the 1.5 in Worm.java never reaches output', () => {
+    // ftile/Worm.java:154 and :161 apply `UStroke.withThickness(1.5)` to
+    // `ug`, but each decoration is then drawn through
+    // `.apply(UStroke.simple())` (:159, :166), and `UStroke.simple()` is
+    // `new UStroke(0, 0, 1.0)` (klimt/UStroke.java:75-77). So the 1.5 is
+    // overridden before the draw and is dead upstream. The decoration is
+    // also FILLED and STROKED in the same colour: `arrowHeadColor` is
+    // applied to both foreground and background (Worm.java:152-153).
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    expect(content).toMatch(/<polygon[^>]*stroke-width="1"/);
+    expect(content).not.toMatch(/<polygon[^>]*stroke-width="1\.5"/);
+    expect(content).toMatch(/<polygon[^>]*stroke="/);
+  });
+
+  it('an edge LABEL draws font-size 11 — the activity-scoped arrow block beats the root 13', () => {
+    // `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373) is
+    // more specific than the root `arrow { FontSize 13 }` (:317), and an
+    // activity edge resolves `of(root, element, activityDiagram, arrow)`
+    // (decoration/HtmlColorAndStyle.java:83).
+    const labelled = { ...edge, label: 'yes' };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [labelled] }), theme)));
+    expect(content).toContain('font-size="11"');
+    expect(content).not.toContain('font-size="13"');
+  });
+
+  it('a swimlane title draws font-size 18', () => {
+    // The ROOT `swimlane { FontSize 18 }` block (plantuml.skin:313),
+    // resolved by ftile/Swimlanes.java:127. D7 scopes T6 to the FONT — the
+    // boxed-header visual model is deliberately untouched.
+    const geo = makeGeo({ swimlanes: [{ name: 'Lane A', x: 0, width: 150 }] });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toContain('font-size="18"');
+    expect(content).toContain('Lane A');
+  });
+});
