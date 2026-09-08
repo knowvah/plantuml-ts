@@ -6,7 +6,7 @@ pin neither is measurable on its own).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Pin the pre-change activity style census | orchestrator | `oracle/goldens/svg-activity/style-baseline.json`, `tests/oracle/svg-conformance/activity.style-baseline.test.ts`, `.agent-notes/asd-T0.md` | — | [ ] |
+| T0 | Pin the pre-change activity style census | orchestrator | `oracle/goldens/svg-activity/style-baseline.json`, `tests/oracle/svg-conformance/activity.style-baseline.test.ts`, `.agent-notes/asd-T0.md` | — | [x] |
 
 **Orchestrator-executed.** `scripts/repin-sequence-baselines.ts:3-8`
 reserves baseline JSON writes to the orchestrator: *"Task agents never
