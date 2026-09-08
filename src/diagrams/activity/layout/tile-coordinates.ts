@@ -363,6 +363,33 @@ export function assignCoordinates(
       maxY = Math.max(maxY, p.y);
     }
   }
+  // SWIMLANES COUNT TOWARD THE CANVAS TOO. This function returns three
+  // geometry arrays -- nodes, edges and swimlanes -- and the renderer draws
+  // all three, but the bounds above used to consult only the first two. A
+  // lane band wider than the widest node therefore fell OUTSIDE the canvas
+  // it was drawn into: 32 of the 268 baselined fixtures overflowed, by up
+  // to 216px (`pakema-21-xema183`: lanes to x=252 against a totalWidth of
+  // 144).
+  //
+  // Both extents the renderer actually draws are taken, because they are
+  // not the same number: the header band and the header/body separator run
+  // from x=0 to the SUM of the lane widths (`renderer.ts#renderSwimlanes`,
+  // the `reduce` at its band and separator calls), while each lane's own
+  // right edge is `lane.x + lane.width`, and the lanes start at `baseX`,
+  // not at 0. Whether those two SHOULD agree is the swimlane visual model,
+  // which `activity-swimlane-rendering` owns (D7 of
+  // `plans/activity-style-defaults/decisions.md`) -- containing what is
+  // drawn today is this fix's whole scope, and it must not quietly decide
+  // that question by picking one.
+  //
+  // Y is deliberately untouched: a lane draws its divider from y=0 to
+  // `totalHeight` and its title inside `SWIMLANE_HEADER_H`, so it can never
+  // extend past a bound Y already covers.
+  if (swimlanes.length > 0) {
+    const bandRight = swimlanes.reduce((acc, s) => acc + s.width, 0);
+    const lanesRight = Math.max(...swimlanes.map((s) => s.x + s.width));
+    maxX = Math.max(maxX, bandRight, lanesRight);
+  }
 
   return {
     totalWidth: maxX + LAYOUT_MARGIN,

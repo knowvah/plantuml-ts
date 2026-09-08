@@ -950,6 +950,51 @@ Ordered by how ready they are, not by size.
   sibling defect — not distinguished. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
 
+- **`activity-canvas-bounds`** — **CLOSED 2026-09-08**, on
+  `fix/activity-canvas-bounds`. Found while investigating
+  `activity-canvas-margin` below, which turned out to be mis-premised.
+  `assignCoordinates` (`layout/tile-coordinates.ts`) returns three geometry
+  arrays — `nodes`, `edges` and `swimlanes` — and `renderActivity` draws all
+  three, but its `maxX`/`maxY` bounds consulted only the first two. **32 of
+  the 268 baselined fixtures drew OUTSIDE their own viewport**, by up to
+  216px (`pakema-21-xema183`: lanes to x=252 inside a `totalWidth` of 144).
+  Now 0. 34 canvas widths moved, **28 closer** to the jar and 6 further —
+  the 6 are fixtures where `SWIMLANE_MIN_WIDTH = 120` forces lanes wider
+  than the jar's content-fitted ones, which is `activity-swimlane-rendering`
+  again, not this. Aggregate `weightedScore` moved only **52565 → 52563**:
+  the comparator charges `svg/@width` one unit whether the number is
+  slightly or catastrophically wrong, which is precisely why the defect was
+  invisible for so long. Pinned by
+  `tests/diagrams/activity/layout/canvas-bounds.test.ts`, which asserts
+  containment directly and was verified to FAIL without the fix.
+
+- **`activity-canvas-margin`** — **RE-FILED 2026-09-08; the original
+  premise is FALSE and is corrected here.** The 2026-09-08 filing said "the
+  jar's 16" and proposed retuning `LAYOUT_MARGIN = 12`. Both halves are
+  wrong.
+
+  **Upstream's margin is 10, not 16.** `ActivityDiagram3 extends
+  TitledDiagram`, and `TitledDiagram#getDefaultMargins()` returns
+  `ClockwiseTopRightBottomLeft.same(10)` (`TitledDiagram.java:275`;
+  `AbstractDiagram.java:231` is the `same(0)` base it overrides).
+  `ActivityDiagram3` declares no override of its own. The 16 in the original
+  filing was read off a golden — retuning to it would have been fitting, at
+  the wrong number.
+
+  **And it is not one constant.** Ink offsets measured across all 268
+  goldens: left `16`×123 / `20`×56 / `25`×40; top `15`×139 / `17.5`×52 /
+  `16`×50; bottom `20`×134 / `20.5`×44 / `21`×33. Ours is a flat **12** on
+  every side (left ×195, top ×187, bottom ×187). So the residual is the gap
+  between upstream's `same(10)` document margin and whatever its FTile
+  bounding box includes that we do not model — a structural question, not a
+  constant to retune. **Do not open this as a one-line change.** The real
+  first task is to read what `UgDiagram.java:145`'s `.margin(...)` is
+  applied TO, and what the activity FTile's own bounds contain beyond the
+  drawn ink.
+
+  Original filing follows, unedited per this file's amend-don't-rewrite
+  convention, and is superseded by the two paragraphs above:
+
 - **`activity-canvas-margin`** (NEW, unbriefed) — FILED 2026-09-08 by
   `activity-style-defaults` T4, measured. `LAYOUT_MARGIN = 12`
   (`src/diagrams/activity/activity-layout-constants.ts`) against the jar's
