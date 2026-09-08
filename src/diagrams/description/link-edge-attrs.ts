@@ -258,7 +258,8 @@ function mainLabelText(link: DescriptiveLink): string | undefined {
  * because the helper measures plain text and an icon occupies real width.
  */
 function measureMainLabelBox(text: string, isSelfLoop: boolean, ctx: MeasureCtx): { width: number; height: number } {
-  const box = computeReservedLabelBox(text, ctx.fontSpec, ctx.measurer, isSelfLoop);
+  const wrap = { maxWidth: ctx.theme?.maxMessageSize }; // G20: SvekEdge.java:288-300, inline label only
+  const box = computeReservedLabelBox(text, ctx.fontSpec, ctx.measurer, isSelfLoop, wrap);
   const widest = Math.max(
     ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
   );

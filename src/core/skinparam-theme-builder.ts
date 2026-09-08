@@ -12,6 +12,7 @@
 
 import type { Theme } from './theme.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
+import { LineBreakStrategy } from './klimt/LineBreakStrategy.js';
 
 type FieldGetter = (acc: SkinparamAccumulator) => unknown;
 type FieldTable = ReadonlyArray<readonly [key: string, get: FieldGetter]>;
@@ -24,6 +25,21 @@ function applyDefinedFields(target: Record<string, unknown>, acc: SkinparamAccum
   }
 }
 
+/**
+ * `SkinParam#maxMessageSize()` (`skin/SkinParam.java:971-978`), reused
+ * verbatim via the already-ported {@link LineBreakStrategy}: whichever raw
+ * key was ever declared wins outright -- `wrapMessageWidth` first, falling
+ * back to `maxMessageSize` -- not whichever the source declared last (see
+ * `theme.ts#maxMessageSize`'s own doc comment). `getMaxWidth()` folds the
+ * `"auto"`/non-numeric case to 0, matching `wrapWidth`'s own "0/absent = no
+ * wrap" convention, so no extra normalisation is needed here.
+ */
+function resolveMaxMessageSize(acc: SkinparamAccumulator): number | undefined {
+  const raw = acc.wrapMessageWidth ?? acc.maxMessageSize;
+  if (raw === undefined) return undefined;
+  return new LineBreakStrategy(raw).getMaxWidth();
+}
+
 const ROOT_SCALAR_FIELDS: FieldTable = [
   ['fontFamily', (acc) => acc.fontFamily],
   ['fontSize', (acc) => acc.fontSize],
@@ -32,6 +48,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],
   ['wrapWidth', (acc) => acc.wrapWidth],
+  ['maxMessageSize', (acc) => resolveMaxMessageSize(acc)],
   ['sameClassWidth', (acc) => acc.sameClassWidth],
   ['classAttributeIconSize', (acc) => acc.classAttributeIconSize],
   ['groupInheritance', (acc) => acc.groupInheritance],

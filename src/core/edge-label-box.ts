@@ -15,6 +15,11 @@
  * `state-transition-label.ts` re-export from here, so no import changed.
  */
 import type { FontSpec, StringMeasurer } from './measurer.js';
+// G20: `skinparam maxMessageSize`/`wrapMessageWidth` edge-label word-wrap --
+// reuses `Fission#getSplitted` (already ported, `Fission.ts`) rather than
+// re-deriving the greedy word-break algorithm. See {@link wrapResolvedLine}.
+import { getSplitted } from './klimt/creole/Fission.js';
+import type { CreoleAtom } from './klimt/creole/atom/Atom.js';
 // mission `shared-seam-extraction` T1: the ONE `Display#getWithNewlines`
 // port every engine's edge-label line-splitting now reaches, replacing
 // this file's own `splitCreoleLines` (real-newline-splitting, escape-blind)
@@ -244,6 +249,59 @@ export function parseMagicArrowLabel(label: string): MagicArrowLabel | undefined
 }
 
 /**
+ * {@link computeReservedLabelBox}'s 5th argument -- bundled into one object
+ * (rather than two more positional params) to stay under this project's
+ * 5-parameter cap. `classAttributeIconSize` is unchanged from before this
+ * option existed; `maxWidth` is new (G20).
+ */
+export interface ReservedLabelBoxOptions {
+  readonly classAttributeIconSize?: number;
+  /**
+   * `LineBreakStrategy#getMaxWidth()`'s resolved pixel width --
+   * `skinparam maxMessageSize`/`wrapMessageWidth`, `theme.ts#maxMessageSize`'s
+   * own doc comment. 0/absent (the default) means NO wrap -- `SvekEdge.java`
+   * sets no default anywhere either (same "absent = no wrap" convention as
+   * `wrapWidth`/`Fission.ts`'s own doc comment). Applies to the inline label
+   * only -- never a `note on link` operand (`SvekEdge.java:288-306` builds
+   * `labelOnly` BEFORE any note merge; {@link computeMergedLabelBox} passes
+   * this straight through to its OWN `computeReservedLabelBox` call for
+   * exactly that reason).
+   */
+  readonly maxWidth?: number | undefined;
+}
+
+/**
+ * `Fission#getSplitted` applied to ONE already-resolved (creole-stripped,
+ * `<size:N>`-resolved) physical line ({@link resolveLineFont}'s output) --
+ * word-wraps it into 1+ sub-lines at `maxWidth`, all carrying the SAME
+ * resolved font (a `<size:N>` tag changes the font for the rest of the
+ * PHYSICAL line, not per sub-line -- `resolveLineFont`'s own doc comment).
+ * Builds a single plain-text `CreoleAtom`: {@link resolveLineFont} already
+ * stripped every creole markup tag, so there is no formatting left for
+ * `Fission` to preserve across the split. `getSplitted` itself no-ops when
+ * `maxWidth` is 0 (its own `valueMaxWidth === 0` early return) -- the
+ * `maxWidth > 0` gate below is this module's OWN explicit "don't wrap
+ * unless asked" invariant, not reliance on that internal short-circuit.
+ */
+function wrapResolvedLine(
+  resolvedLine: { text: string; font: FontSpec },
+  maxWidth: number,
+  measurer: StringMeasurer,
+): { text: string; font: FontSpec }[] {
+  const { text, font } = resolvedLine;
+  const atom: CreoleAtom = {
+    kind: 'text',
+    text,
+    font: { family: font.family, size: font.size, color: null, styles: new Set() },
+  };
+  const split = getSplitted([atom], maxWidth, (a) => (a.kind === 'text' ? measurer.measure(a.text, font).width : 0));
+  return split.map((atoms) => ({
+    text: atoms.map((a) => (a.kind === 'text' ? a.text : '')).join(''),
+    font,
+  }));
+}
+
+/**
  * Width is the MAX over lines, not their sum; height SUMS each line's own
  * font size (`XDimension2D#mergeTB`, `XDimension2D.java:94-98`) — equal to
  * `lines.length * font.size` unless a leading `<size:N>` tag resolves a
@@ -260,23 +318,34 @@ export function parseMagicArrowLabel(label: string): MagicArrowLabel | undefined
  * `klimt/creole/Display.java:262-346`) -- every caller's upstream site builds
  * its input via that SAME method (class: `CommandLinkClass.java:413`; state:
  * `CommandCreateState.java:195`/`BodierSimple.java:61`; description: `CommandLinkElement.java:320`).
+ *
+ * G20: `options.maxWidth` (`skinparam maxMessageSize`/`wrapMessageWidth`)
+ * word-wraps each of the ABOVE physical lines independently, via
+ * {@link wrapResolvedLine} -- `svek/SvekEdge.java:288-300`'s `wrapWidth`,
+ * passed into `link.getLabel().create0(font, alignment, skinParam,
+ * wrapWidth, CreoleMode.SIMPLE_LINE, null, null)`. Inserted AFTER the
+ * `\n`-split + creole-strip + `<size:N>`-resolve above and BEFORE
+ * measurement, exactly where every caller of `Display#create0` invokes
+ * `Fission#getSplitted` too (`SheetBlock1.ts#initMap`).
  */
 export function computeReservedLabelBox(
   text: string,
   font: FontSpec,
   measurer: StringMeasurer,
   isSelfLoop: boolean,
-  classAttributeIconSize: number = CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT,
+  options: ReservedLabelBoxOptions = {},
 ): ReservedLabelBox {
+  const { classAttributeIconSize = CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT, maxWidth = 0 } = options;
   const marginLabel = isSelfLoop ? 6 : 1;
   const rawLines = splitDisplayLines(text).lines;
   const vis = applyVisibilityIcon(rawLines[0] ?? '', classAttributeIconSize);
   // Resolve BEFORE measuring: colour tags are formatting, `<size:N>` rewrites
   // the font; `lines` only feeds a descent measurement (`state-transition-label.ts:60`).
   const resolved = [vis.text, ...rawLines.slice(1)].map((l) => resolveLineFont(l, font));
-  const lines = resolved.map((r) => r.text);
-  const measuredWidth = Math.max(...resolved.map((r) => measurer.measure(r.text, r.font).width)) + vis.iconWidth;
-  const stackedHeight = resolved.reduce((sum, r) => sum + r.font.size, 0);
+  const wrapped = maxWidth > 0 ? resolved.flatMap((r) => wrapResolvedLine(r, maxWidth, measurer)) : resolved;
+  const lines = wrapped.map((r) => r.text);
+  const measuredWidth = Math.max(...wrapped.map((r) => measurer.measure(r.text, r.font).width)) + vis.iconWidth;
+  const stackedHeight = wrapped.reduce((sum, r) => sum + r.font.size, 0);
   const measuredHeight = Math.max(stackedHeight, vis.iconHeight);
   const reservedWidth = Math.floor(measuredWidth + 2 * marginLabel);
   const reservedHeight = measuredHeight + 2 * marginLabel;

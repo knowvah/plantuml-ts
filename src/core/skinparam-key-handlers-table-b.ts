@@ -261,4 +261,23 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.swimlaneBorder = color;
     },
   ],
+  // Edge-label word-wrap, `skin/SkinParam.java:971-978`'s two source keys.
+  // Stored RAW (like `footbox`) -- `skinparam-theme-builder.ts` resolves the
+  // `wrapmessagewidth`-over-`maxmessagesize` precedence via the already-
+  // ported `LineBreakStrategy`, not here (see `theme.ts#maxMessageSize`'s
+  // own doc comment for why this can't be one shared-field handler like
+  // `fontname`/`defaultfontname`: whichever KEY was ever declared wins,
+  // not whichever handler ran last).
+  [
+    ['maxmessagesize'],
+    (acc, value) => {
+      acc.maxMessageSize = value;
+    },
+  ],
+  [
+    ['wrapmessagewidth'],
+    (acc, value) => {
+      acc.wrapMessageWidth = value;
+    },
+  ],
 ];

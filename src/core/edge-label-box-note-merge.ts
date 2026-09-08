@@ -89,6 +89,10 @@ export interface MergedLabelBoxInput {
   readonly hasMiddleDecor: boolean;
   readonly font: FontSpec;
   readonly measurer: StringMeasurer;
+  /** G20: forwarded verbatim to the label-side {@link computeReservedLabelBox}
+   *  call below -- `SvekEdge.java:288-306` builds `labelOnly` (wrap-aware)
+   *  BEFORE any note merge, so the note operand itself never sees this. */
+  readonly maxWidth?: number | undefined;
 }
 
 /**
@@ -133,8 +137,8 @@ export interface MergedLabelBoxInput {
  * `reservedHeight` (`:108`), so it is already the fractional value.
  */
 export function computeMergedLabelBox(input: MergedLabelBoxInput): ReservedLabelBox {
-  const { label, noteDim, position, halfWidth, hasMiddleDecor, font, measurer } = input;
-  const labelBox = computeReservedLabelBox(label, font, measurer, false);
+  const { label, noteDim, position, halfWidth, hasMiddleDecor, font, measurer, maxWidth } = input;
+  const labelBox = computeReservedLabelBox(label, font, measurer, false, { maxWidth });
   const labelDim: Dim = {
     width: labelBox.measuredWidth + 2 * labelBox.marginLabel,
     height: labelBox.reservedHeight,

@@ -11,6 +11,7 @@ import { BUILTIN_THEMES } from './themes-builtin.js';
 // project's 500-line file-size cap — see that module's own doc comment.
 import type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
+import { deepMergeTheme } from './theme-merge.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 
@@ -170,6 +171,29 @@ export interface Theme {
    *  `Fission.ts`'s doc comment) — word-wrap is a no-op unless a diagram
    *  explicitly sets this skinparam. */
   wrapWidth?: number;
+  /** `skinparam maxMessageSize N` / `skinparam wrapMessageWidth N` — the
+   *  edge-LABEL word-wrap width, distinct from {@link wrapWidth} (which
+   *  wraps a descdiagram entity's own `desc`/note body, never an edge
+   *  label). `SkinParam#maxMessageSize()` (`skin/SkinParam.java:971-978`):
+   *  `getValue("wrapmessagewidth")`, falling back to
+   *  `getValue("maxmessagesize")` — whichever KEY was ever declared wins,
+   *  regardless of source order between the two DIFFERENT keys (a plain
+   *  per-key map read, not a merge) — resolved via the already-ported
+   *  {@link LineBreakStrategy} in `skinparam-theme-builder.ts`, which is
+   *  also where `getMaxWidth()`'s regex/`"auto"` handling is applied, so
+   *  this field is always a plain resolved pixel width (0/absent = no
+   *  wrap, mirroring `wrapWidth`'s own convention). Consumed by
+   *  `SvekEdge.java:288-300`'s inline label (`labelOnly`, BEFORE any `note
+   *  on link` merge) only — never the note operand's own text block — via
+   *  `edge-label-box.ts#computeReservedLabelBox`'s `maxWidth` option.
+   *  Threaded to the description/usecase engine (`link-edge-attrs.ts`) and
+   *  the state engine's DOT-gate box sizing (`state-dot-graph.ts`/
+   *  `state-composite-edge-label.ts`) — NOT the state engine's render-time
+   *  anchor recomputation (`state-transition-label.ts`), a named,
+   *  unaddressed gap (see that module's own callers). NOT threaded to
+   *  sequence — `sequence-creole.ts` reads neither key; wiring this field
+   *  must not change sequence output. */
+  maxMessageSize?: number;
   /** `skinparam sameClassWidth true` — floors every class-like node's width
    *  to the widest one's (`SkinParam.java:994` sameClassWidth();
    *  `GraphvizImageBuilder.java:371-375` setParamSameClassWidth;
@@ -465,6 +489,8 @@ export type ThemeOverride = {
   nodeSep?: number;
   rankSep?: number;
   wrapWidth?: number;
+  /** See {@link Theme.maxMessageSize}'s own doc comment. */
+  maxMessageSize?: number;
   sameClassWidth?: boolean;
   classAttributeIconSize?: number;
   groupInheritance?: number;
@@ -491,89 +517,11 @@ export type ThemeOverride = {
   sequence?: Partial<Theme['sequence']>;
 };
 
-/**
- * Deep-merge a partial Theme on top of a base Theme.
- * Returns a new Theme object — neither `base` nor `partial` is mutated.
- * Nested objects (`colors`, `colors.graph`, `colors.graph.activity`,
- * `colors.graph.json`, `sequence`) are merged one level deep; scalar fields
- * use nullish coalescing so that explicit `undefined` falls through to the
- * base value.
- */
-/** Merge the nested `colors.graph` block (activity/json one level deep). */
-function mergeGraphColors(base: Theme, partial: ThemeOverride): Theme['colors']['graph'] {
-  const pg = partial.colors?.graph;
-  return {
-    ...base.colors.graph,
-    ...(pg ?? {}),
-    activity: {
-      ...(base.colors.graph.activity ?? {}),
-      ...(pg?.activity ?? {}),
-    },
-    json: {
-      ...(base.colors.graph.json ?? {}),
-      ...(pg?.json ?? {}),
-    },
-  };
-}
-
-/** Top-level optional scalar fields copied verbatim during a merge. */
-const OPTIONAL_SCALAR_KEYS = [
-  'defaultFontSize',
-  'linetype',
-  'fixCircleLabelOverlapping',
-  'componentStyle',
-  'actorStyle',
-  'minimumWidth',
-  'strictUml',
-  'monochrome',
-  'shadowing',
-  'packageStyle',
-  'nodeSep',
-  'rankSep',
-  'wrapWidth',
-  'sameClassWidth',
-  'classAttributeIconSize',
-  'groupInheritance',
-  'tabSize',
-  'cardinalityFontSize',
-  'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
-  'cardinalityFontColor', // SI26 T1 (D5)
-  // `diagramMargin` is the one non-scalar here. It rides this list because the
-  // merge is a whole-value replacement, which is exactly right for a margin:
-  // a theme that sets one replaces all four sides, it does not blend with the
-  // default. Omitting it silently dropped every theme's margin.
-  'diagramMargin',
-  'handwritten',
-  'styleOverrides',
-] as const;
-
-/** Copy the top-level optional scalars, preferring `partial` then `base`. */
-function applyOptionalScalars(merged: Theme, base: Theme, partial: ThemeOverride): void {
-  for (const key of OPTIONAL_SCALAR_KEYS) {
-    const value = partial[key] ?? base[key];
-    if (value !== undefined) {
-      (merged as Record<typeof key, unknown>)[key] = value;
-    }
-  }
-}
-
-export function deepMergeTheme(base: Theme, partial: ThemeOverride): Theme {
-  const merged: Theme = {
-    fontFamily: partial.fontFamily ?? base.fontFamily,
-    fontSize: partial.fontSize ?? base.fontSize,
-    colors: {
-      ...base.colors,
-      ...(partial.colors ?? {}),
-      graph: mergeGraphColors(base, partial),
-    },
-    sequence: {
-      ...base.sequence,
-      ...(partial.sequence ?? {}),
-    },
-  };
-  applyOptionalScalars(merged, base, partial);
-  return merged;
-}
+// `deepMergeTheme` and its merge helpers moved to `theme-merge.ts` (mechanical
+// extraction to keep this file under the 500-line cap, same rationale as the
+// `theme-graph-colors.ts`/`theme-element-resolve.ts` splits above) and
+// re-exported here so no consumer's import path changed.
+export { deepMergeTheme } from './theme-merge.js';
 
 /**
  * Resolve a theme option to a concrete Theme object.

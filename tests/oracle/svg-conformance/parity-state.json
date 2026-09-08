@@ -991,7 +991,7 @@
     {
       "slug": "lurage-50-kobo763",
       "type": "state",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 347,
       "firstDiff": "svg/g[1]/g[3]/text[1]/@textLength",

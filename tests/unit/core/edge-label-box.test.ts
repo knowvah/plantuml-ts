@@ -296,7 +296,7 @@ describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => 
     // pre-fix code, which had no `classAttributeIconSize` parameter at all
     // and always measured the raw string — i.e. it already "passes"
     // pre-fix, which is exactly what a regression guard must do.
-    const gated = computeReservedLabelBox('-var1', LINK_FONT, measurer, false, 0);
+    const gated = computeReservedLabelBox('-var1', LINK_FONT, measurer, false, { classAttributeIconSize: 0 });
     const rawWidth = measurer.measure('-var1', LINK_FONT).width;
     expect(gated.reservedWidth).toBe(Math.floor(rawWidth + 2));
     expect(gated.reservedWidth).not.toBe(39);
@@ -304,7 +304,9 @@ describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => 
 
   it('a label with no leading visibility char is unaffected by the gate', () => {
     const withIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false);
-    const withoutIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false, 0);
+    const withoutIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false, {
+      classAttributeIconSize: 0,
+    });
     expect(withIcon.reservedWidth).toBe(withoutIcon.reservedWidth);
   });
 
@@ -693,5 +695,53 @@ describe('roseNoteDim', () => {
     });
     expect(box.reservedWidth).toBe(80);
     expect(box.reservedHeight).toBe(33);
+  });
+});
+
+/**
+ * G20: `skinparam maxMessageSize`/`wrapMessageWidth` edge-label word-wrap.
+ *
+ * `usecase/kafexo-72-xupa679`: `skinparam maxMessageSize 100`,
+ * `foo --> (Use case) : this is a very long sentence on one single line`.
+ * Jar's own `svek-1.dot` reserves 90x41. Verified via `Fission#getSplitted`
+ * (`getSplitted`, ported verbatim) against `WidthTableMeasurer` at font size
+ * 13: greedy word-wrap breaks at
+ *   "this is a very long"   86.04
+ *   "sentence on one"       88.89   <- widest
+ *   "single line"           54.36
+ * `floor(88.8875 + 2*1) x (3*13 + 2*1)` = 90 x 41 (marginLabel 1, non-self
+ * link, `computeReservedLabelBox`'s own formula).
+ */
+describe('computeReservedLabelBox — maxWidth (G20 word-wrap)', () => {
+  const KAFEXO_FONT = { family: 'sans-serif', size: 13 };
+  const KAFEXO_LABEL = 'this is a very long sentence on one single line';
+
+  it('kafexo-72-xupa679: wraps to 3 lines and reserves 90x41', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false, { maxWidth: 100 });
+    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line']);
+    expect(box.reservedWidth).toBe(90);
+    expect(box.reservedHeight).toBe(41);
+  });
+
+  it('no maxWidth set (the default) never wraps -- byte-identical to the pre-G20 formula', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false);
+    expect(box.lines).toEqual([KAFEXO_LABEL]);
+  });
+
+  it('maxWidth: 0 is treated the same as absent -- no wrap', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false, { maxWidth: 0 });
+    expect(box.lines).toEqual([KAFEXO_LABEL]);
+  });
+
+  it('a label that already fits under maxWidth is untouched, not re-split', () => {
+    const box = computeReservedLabelBox('short label', KAFEXO_FONT, measurer, false, { maxWidth: 100 });
+    expect(box.lines).toEqual(['short label']);
+  });
+
+  it('wraps each \\n-separated physical line independently', () => {
+    const box = computeReservedLabelBox(String.raw`${KAFEXO_LABEL}\nshort`, KAFEXO_FONT, measurer, false, {
+      maxWidth: 100,
+    });
+    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line', 'short']);
   });
 });

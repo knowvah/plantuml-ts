@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1074 modules · 3843 exported names.
+1075 modules · 3845 exported names.
 
 ## `src/`
 
@@ -43,7 +43,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `dot-splines.ts` | `dotSplinesAttrs` | Translates the `linetype` semantic enum on `DotInputGraph` into the DOT attribute pairs upstream emits for it. |
 | `edge-label-box-note-merge.ts` | `NoteOnLinkPosition`, `MergedLabelBoxInput`, `computeMergedLabelBox` | The `note on link` merge half of `edge-label-box.ts` — the note operand, the four `Position` merges and the shield. |
-| `edge-label-box.ts` | `stripCreoleMarkup`, `resolveLineFont`, `ReservedLabelBox`, `CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT`, `VisibilityIconAdjustment`, `applyVisibilityIcon`, `applyGuillemet`, `MagicArrowDirection`, `MagicArrowLabel`, `parseMagicArrowLabel`, `computeReservedLabelBox`, `QuantifierBox`, `computeQuantifierBox`, `computeMergedLabelBox`, `MergedLabelBoxInput`, `NoteOnLinkPosition` | The reserved box an edge label occupies in the DOT handed to graphviz. |
+| `edge-label-box.ts` | `stripCreoleMarkup`, `resolveLineFont`, `ReservedLabelBox`, `CLASS_ATTRIBUTE_ICON_SIZE_DEFAULT`, `VisibilityIconAdjustment`, `applyVisibilityIcon`, `applyGuillemet`, `MagicArrowDirection`, `MagicArrowLabel`, `parseMagicArrowLabel`, `ReservedLabelBoxOptions`, `computeReservedLabelBox`, `QuantifierBox`, `computeQuantifierBox`, `computeMergedLabelBox`, `MergedLabelBoxInput`, `NoteOnLinkPosition` | The reserved box an edge label occupies in the DOT handed to graphviz. |
 | `EmbeddedDiagram.ts` | `Line`, `NestedDiagramRenderer`, `getEmbeddedType`, `EmbeddedDiagram` | EmbeddedDiagram — a creole `{{ ... |
 | `graph-layout-build-borderpoint.ts` | `ClusterHandles`, `inheritedEeLabel`, `buildBorderPointClusterHandles` | G7 T14b border-point (`<<entrypoint>>`/`<<exitpoint>>`-child, `portRanksLabelOnEe`) cluster nesting — split out of ./graph-layout-build.ts#addClusters (500-line file-cap compliance; pure extraction, no behavior change). |
 | `graph-layout-build-constraint.ts` | `withSameContainerConstraints` | The two graph-level paths to `constraint=false`. |
@@ -123,6 +123,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors.ts` | `ElementColors`, `ThemeGraphColors` | theme-graph-colors.ts — the `Theme["colors"]["graph"]` sub-object, extracted from ./theme.ts (which re-declares it as `graph: ThemeGraphColors`) purely to keep theme.ts under the project 500-line file-size cap after the mission skin-file-lo |
+| `theme-merge.ts` | `deepMergeTheme` | `deepMergeTheme` and its helpers — split out of `theme.ts` (mechanical extraction to keep that file under the project's 500-line cap, same rationale as `theme-graph-colors.ts`/`theme-element-resolve.ts`; a pure move, no behavior change). |
 | `theme.ts` | `ElementColors`, `ThemeGraphColors`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
 | `themes-builtin-a-m.ts` | `BUILTIN_THEMES_A_M` | Built-in PlantUML theme definitions (amiga .. |
 | `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme definitions (plain .. |

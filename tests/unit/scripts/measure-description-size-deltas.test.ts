@@ -172,7 +172,7 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     expect(unexcusedFailures(d, ['labelSizeOk'])).toEqual(['portOk']);
   });
 
-  it('the description goldens name exactly the 4 label-size slugs and no direction slugs', () => {
+  it('the description goldens name exactly the 3 label-size slugs and no direction slugs', () => {
     const backlogs = loadStructuralBacklogs(join(REPO, 'oracle', 'goldens', 'description'));
     expect(expectedBacklogFailures('berelu-46-namo819', backlogs)).toEqual(['labelSizeOk']);
     expect(expectedBacklogFailures('zosuje-43-zebi775', backlogs)).toEqual([]);
@@ -196,9 +196,16 @@ describe('unexcusedFailures (dot-parity-backlog-data, shared with the ratchets)'
     // cleared `zosuje-43-zebi775` (`arrow { FontSize 10 FontStyle bold }`) --
     // 5x12/9x12/12x12, exact.
     //
+    // Was 4 until `maxMessageSize` wrapping landed (2026-09-08): the jar
+    // wraps `kafexo-72-xupa679`'s label at its own `skinparam
+    // maxMessageSize 100` (`SkinParam.java:972-978` ->
+    // `SvekEdge.java:288-300`), which this port never parsed, so one 231px
+    // line was reserved where the jar reserves three. Its box now matches
+    // the oracle exactly at 90x41 and the slug cleared.
+    //
     // This count is deliberately hardcoded rather than derived from the file:
     // the backlog is shrink-only, so a bare `.size` assertion is what catches
     // a slug being ADDED. Lower it as slugs legitimately clear; never raise it.
-    expect(backlogs.get('label-size-backlog.json')!.size).toBe(4);
+    expect(backlogs.get('label-size-backlog.json')!.size).toBe(3);
   });
 });
