@@ -141,4 +141,105 @@ is most of the rest.
 - [x] Batch 1 — T1
 - [x] Batch 2 — T2
 - [x] Batch 3 — T3, T4
-- [ ] Batch 4 — T5, T6, T7
+- [x] Batch 4 — T5, T6, T7
+
+---
+
+## Close-out — 2026-09-08
+
+Executed on `feat/activity-style-defaults` from baseline `5bd96186`. Eight
+tasks, five batches, all landed. **Two halts, both resolved by the human**
+(D3a, and the T3 re-scope); both are recorded in
+[`decisions.md`](decisions.md) and [`decision-journal.md`](decision-journal.md).
+
+### Exit bar — scored
+
+| bar | result |
+|---|---|
+| Aggregate `weightedScore` **falls**, stated against `61677` | ✅ **61677 → 52565, −14.77%** over the same 268 fixtures |
+| `svg/g[]/text[]/@font-size` restated against `1316` | ✅ **1316 → 291, −77.9%**; 263 → 120 fixtures |
+| `svg/g[]/line[]/@stroke-width` restated against `2319` | ✅ **2319 → 143, −93.8%**; 256 → 55 fixtures |
+| Font-size histogram restated beside the jar's | ✅ below |
+| **Zero fixtures rise** against T0's pin; any rise named with a mechanism | ⚠️ **14 rose, every one named with a mechanism** (see below) — the bar as written was not met; the escape clause was |
+| Both filed follow-ons resolved or re-scoped with a reason | ✅ `activity-edge-stroke-width` **closed**; `activity-diamond-font-skinparams` **partially resolved and re-scoped** |
+| Sequence, state, class, description, json suites unmoved | ✅ 5 files, **1564 tests**, all passing |
+| All four gates green | ✅ `npm test` 693 files / 18737 tests, typecheck, lint, build |
+
+### The histogram, ours beside the jar's
+
+`font-size` over every `<text>`, 268 fixtures:
+
+| size | ours (before) | ours (after) | jar |
+|---|---|---|---|
+| `12` activity | 0 | **1008** | 996 |
+| `11` diamond, arrow | 0 | **258** | 614 |
+| `18` swimlane | 0 | **140** | 135 |
+| `13` note | 0 | **146** | 102 |
+| `14` root | **1577** | 15 | 16 |
+
+`stroke-width` over every `<line>` INVERTED: ours `{1.5: 2503, 1: 199}` →
+`{1: 2610, 1.5: 90}`, against the jar's `{1: 2976, 1.5: 224, 2.5: 90, …}`.
+`rx` over every `<rect>`: ours `{8: 915}` → `{12.5: 915}`, against the jar's
+`{12.5: 929}`.
+
+The remaining font gap is the **`11`** row — 258 against 614. Not chased:
+those are branch labels and conditions in fixtures whose structure diverges
+for reasons this mission scoped out.
+
+### The 14 risers, and why the bar was written wrong
+
+Two mechanisms, both instrumented rather than guessed:
+
+1. **T4, 14 fixtures.** Deriving the box height made `rect/@height` exact
+   (it disappears from 13 of the 14 diff lists) and so SHRANK the canvas —
+   which was already short, because `LAYOUT_MARGIN = 12` against the jar's
+   16 puts every rect at `12,12` instead of `16,16`. Filed as
+   `activity-canvas-margin`.
+2. **T5 (8) and T6 (5), overlapping the above.** `compareSvg` pairs
+   elements POSITIONALLY. On a fixture whose draw order already diverges,
+   correcting a value adds one more differing attribute to a pairing that
+   was already wrong — a swimlane header paired against an action label
+   ([D7]), a note drawn one position early (`activity-note-after-terminal`),
+   an arrowhead paired against a `path`, a nested `split` at childCount 58
+   vs 20.
+
+**None of the 14 is a wrong value.** The exit bar demanded "zero rises"
+from a mission that corrects values inside a structure known to be wrong;
+that combination is not achievable, and the bar should have asked for zero
+*unexplained* rises from the start. Every riser was adopted deliberately,
+with its mechanism in the journal, before its commit landed.
+
+### A premise this mission measured FALSE
+
+**T3's write-set was on dead code.** `activity-layout-helpers.ts` and the
+whole `layout.old.ts` cluster (~2049 LOC across ten files) are NOT on the
+render path: `activityPlugin.layoutSync` calls `layoutActivity` from
+`layout/tile-layout.ts`, which builds the `Gtile*` classes in `tiles/`, and
+the live path imports `layout.old.ts` for **types only**. Applying the
+brief's T3 verbatim moved the aggregate `61677 → 61677`, 0 of 268 fixtures.
+The real sizer is `src/diagrams/activity/tiles/`, where the `1.4×` advance
+and four separate `theme.fontSize - 2` expressions actually lived. The
+cluster is kept alive by `tests/unit/activity/layout.test.ts` alone and is
+filed for its own mission.
+
+The brief was also wrong on one SName: it assigned the repeat/while
+condition to `activity`; upstream assigns it `diamond`
+(`gtile/GtileIfHexagon.java:184`, `gtile/GtileHexagonInside.java:64`,
+`gtile/GtileRepeat.java:89`). The brief's own "verify each against
+upstream's ftile" instruction is what caught it.
+
+### Follow-ons filed, with measured weight
+
+| mission | measured |
+|---|---|
+| `activity-canvas-margin` | the mechanism behind all 14 risers; flipped the corpus from too-tall (154/105) to too-short (198/69) |
+| `activity-swimlane-line-thickness` | **51 of the 143** remaining `line/@stroke-width` units; one line, forbidden here by [D7] |
+| `activity-min-box-width` | `ACTION_MIN_WIDTH = 120` vs upstream's `MinimumWidth` default of `0`; `cizixu-00-koro700` is 120 wide against the jar's 26.675 |
+| `activity-layout-old-cluster` (see the journal) | ~2049 LOC of superseded engine, one test file holding it alive |
+| `activity-diamond-font-skinparams` | re-scoped: the flat and `<style>` spellings work; the block-nested one needs key-normalization work spanning every diagram type |
+
+### Where the weight is now
+
+`svg/g[][childCount]` is **24911 of 52565 — 47.4%**, up from 39.9% as a
+SHARE precisely because everything else fell. It is the next thing to
+attack, and it is structural, not stylistic.

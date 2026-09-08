@@ -1,7 +1,7 @@
 {
-  "$comment": "Residual cause census for the committed ACTIVITY oracle corpus, RE-CENSUSED by activity-element-granularity T4 after landing T1 (polyline->line), T2 (circle->ellipse) and T3 (one <text> per label line). Sibling of oracle/goldens/svg-sequence/diff-census.json. Every number is a pure function of the committed corpus at measuredAgainstCommit: each of the 268 status:\"baseline\" fixtures in diff-baseline.json is rendered through render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), and compared with compareSvg(ours, golden, 'deterministic'). Paths are normalised by replacing every positional index with [], so svg/g[1]/rect[3]/@x and svg/g[1]/rect[7]/@x are one family. RANKED BY WEIGHT, NOT COUNT (D2 of the prior mission): a ranking by occurrence would misdirect the next mission the same way it did before this one existed.",
-  "measuredAt": "2026-09-03",
-  "measuredAgainstCommit": "53942ff7",
+  "$comment": "Residual cause census for the committed ACTIVITY oracle corpus, RE-CENSUSED by activity-style-defaults T7 after landing T1-T6 (per-element FontSize/LineThickness/RoundCorner resolution, the 1.4x->1.0x sizer advance, and the derived box height). The prior re-census was activity-element-granularity T4. Sibling of oracle/goldens/svg-sequence/diff-census.json. Every number is a pure function of the committed corpus at measuredAgainstCommit: each of the 268 status:\"baseline\" fixtures in diff-baseline.json is rendered through render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), and compared with compareSvg(ours, golden, 'deterministic'). Paths are normalised by replacing every positional index with [], so svg/g[1]/rect[3]/@x and svg/g[1]/rect[7]/@x are one family. RANKED BY WEIGHT, NOT COUNT (D2 of the prior mission): a ranking by occurrence would misdirect the next mission the same way it did before this one existed.",
+  "measuredAt": "2026-09-08",
+  "measuredAgainstCommit": "3880f37d",
   "population": {
     "total": 373,
     "censused": 268,
@@ -9,355 +9,348 @@
     "jarError": 23
   },
   "descent": {
-    "note": "The activity-element-granularity headline. Before = the value main was merged at, pinned by this mission's own T0 (oracle/goldens/svg-activity/element-baseline.json at commit 804232d4). After = this measurement, post T1+T2+T3. Zero fixtures rose against T0 across the whole mission -- verified by direct comparison, not assumed; ten fixtures rose at an INTERMEDIATE checkpoint (mid-swap-sequence) due to element-count convergence exposing six unrelated pre-existing defects (.agent-notes/aeg-T1-8-exceptions.md), but every one of those ten still finished net-improved against T0.",
-    "weightedScoreBefore": 108447,
-    "weightedScoreAfter": 61677,
-    "percentChange": -43.1,
-    "fixturesFell": 268,
-    "fixturesRose": 0,
-    "fixturesUnchanged": 0
+    "note": "The activity-style-defaults headline. Before = 61677, the figure this file was pinned at by activity-element-granularity T4 (commit 53942ff7) and which this mission stated its exit bar against. After = this measurement, post T1-T6. FOURTEEN distinct fixtures rose at intermediate checkpoints and each was ADOPTED with a stated mechanism rather than silenced -- see plans/activity-style-defaults/decision-journal.md. The mechanisms are (a) a corrected box height exposing the separate, still-wrong LAYOUT_MARGIN, and (b) compareSvg pairing elements POSITIONALLY, so a correctly-added attribute costs one more unit on a pairing that was already structurally wrong (swimlane chrome, note draw order, nested-split childCount). None of those risers is a wrong VALUE.",
+    "weightedScoreBefore": 61677,
+    "weightedScoreAfter": 52565,
+    "percentChange": -14.77
+  },
+  "exitBarFamilies": {
+    "note": "The two families the mission named as DIRECTLY attributable, restated against the figures its exit bar demanded.",
+    "svg/g[]/text[]/@font-size": {
+      "before": 1316,
+      "after": 291,
+      "percentChange": -77.89,
+      "fixturesBefore": 263,
+      "fixturesAfter": 120
+    },
+    "svg/g[]/line[]/@stroke-width": {
+      "before": 2319,
+      "after": 143,
+      "percentChange": -93.83,
+      "fixturesBefore": 256,
+      "fixturesAfter": 55
+    }
   },
   "paths": [
     {
       "path": "svg/g[][childCount]",
-      "weight": 24588,
-      "weightShare": 39.87,
+      "weight": 24911,
+      "weightShare": 47.39,
       "occurrences": 206,
       "fixtures": 206
     },
     {
       "path": "svg/g[]/line[]/@x1",
       "weight": 2350,
-      "weightShare": 3.81,
+      "weightShare": 4.47,
       "occurrences": 2350,
       "fixtures": 256
     },
     {
       "path": "svg/g[]/line[]/@x2",
       "weight": 2350,
-      "weightShare": 3.81,
+      "weightShare": 4.47,
       "occurrences": 2350,
       "fixtures": 256
     },
     {
       "path": "svg/g[]/line[]/@y2",
-      "weight": 2323,
-      "weightShare": 3.77,
-      "occurrences": 2323,
-      "fixtures": 248
-    },
-    {
-      "path": "svg/g[]/line[]/@y1",
-      "weight": 2320,
-      "weightShare": 3.76,
-      "occurrences": 2320,
-      "fixtures": 248
-    },
-    {
-      "path": "svg/g[]/line[]/@stroke-width",
-      "weight": 2319,
-      "weightShare": 3.76,
-      "occurrences": 2319,
+      "weight": 2349,
+      "weightShare": 4.47,
+      "occurrences": 2349,
       "fixtures": 256
     },
     {
-      "path": "svg/g[]/polygon[]/@stroke-width",
-      "weight": 1769,
-      "weightShare": 2.87,
-      "occurrences": 1769,
-      "fixtures": 253
+      "path": "svg/g[]/line[]/@y1",
+      "weight": 2348,
+      "weightShare": 4.47,
+      "occurrences": 2348,
+      "fixtures": 256
     },
     {
       "path": "svg/g[]/polygon[]/@points",
       "weight": 1760,
-      "weightShare": 2.85,
+      "weightShare": 3.35,
       "occurrences": 1760,
       "fixtures": 254
     },
     {
-      "path": "svg/g[]/polygon[]/@stroke",
-      "weight": 1554,
-      "weightShare": 2.52,
-      "occurrences": 1554,
-      "fixtures": 255
-    },
-    {
-      "path": "svg/g[]/text[]/@x",
+      "path": "svg/g[]/text[]/@y",
       "weight": 1320,
-      "weightShare": 2.14,
+      "weightShare": 2.51,
       "occurrences": 1320,
       "fixtures": 264
     },
     {
-      "path": "svg/g[]/text[]/@y",
-      "weight": 1320,
-      "weightShare": 2.14,
-      "occurrences": 1320,
+      "path": "svg/g[]/text[]/@x",
+      "weight": 1319,
+      "weightShare": 2.51,
+      "occurrences": 1319,
       "fixtures": 264
     },
     {
       "path": "svg/g[]/text[]/@fill",
       "weight": 1318,
-      "weightShare": 2.14,
+      "weightShare": 2.51,
       "occurrences": 1318,
-      "fixtures": 263
-    },
-    {
-      "path": "svg/g[]/text[]/@font-size",
-      "weight": 1316,
-      "weightShare": 2.13,
-      "occurrences": 1316,
       "fixtures": 263
     },
     {
       "path": "svg/g[]/text[]/@text-anchor",
       "weight": 1283,
-      "weightShare": 2.08,
+      "weightShare": 2.44,
       "occurrences": 1283,
       "fixtures": 261
     },
     {
       "path": "svg/g[]/text[]/@textLength",
       "weight": 1180,
-      "weightShare": 1.91,
+      "weightShare": 2.24,
       "occurrences": 1180,
       "fixtures": 254
     },
     {
-      "path": "svg/g[]/rect[]/@height",
-      "weight": 876,
-      "weightShare": 1.42,
-      "occurrences": 876,
-      "fixtures": 241
-    },
-    {
-      "path": "svg/g[]/rect[]/@width",
-      "weight": 876,
-      "weightShare": 1.42,
-      "occurrences": 876,
-      "fixtures": 241
-    },
-    {
       "path": "svg/g[]/rect[]/@x",
       "weight": 874,
-      "weightShare": 1.42,
+      "weightShare": 1.66,
       "occurrences": 874,
       "fixtures": 240
     },
     {
       "path": "svg/g[]/rect[]/@y",
-      "weight": 844,
-      "weightShare": 1.37,
-      "occurrences": 844,
+      "weight": 874,
+      "weightShare": 1.66,
+      "occurrences": 874,
       "fixtures": 240
-    },
-    {
-      "path": "svg/g[]/rect[]/@rx",
-      "weight": 838,
-      "weightShare": 1.36,
-      "occurrences": 838,
-      "fixtures": 238
-    },
-    {
-      "path": "svg/g[]/rect[]/@ry",
-      "weight": 837,
-      "weightShare": 1.36,
-      "occurrences": 837,
-      "fixtures": 237
     },
     {
       "path": "svg/g[]/rect[]/@stroke-width",
       "weight": 821,
-      "weightShare": 1.33,
+      "weightShare": 1.56,
       "occurrences": 821,
       "fixtures": 238
     },
     {
+      "path": "svg/g[]/rect[]/@width",
+      "weight": 795,
+      "weightShare": 1.51,
+      "occurrences": 795,
+      "fixtures": 228
+    },
+    {
       "path": "svg/g[]/text[]/text()[]",
       "weight": 609,
-      "weightShare": 0.99,
+      "weightShare": 1.16,
       "occurrences": 609,
       "fixtures": 172
     },
     {
       "path": "svg/@viewBox[]",
-      "weight": 527,
-      "weightShare": 0.85,
-      "occurrences": 527,
+      "weight": 534,
+      "weightShare": 1.02,
+      "occurrences": 534,
       "fixtures": 268
     },
     {
       "path": "svg/g[]/line[]",
       "weight": 428,
-      "weightShare": 0.69,
+      "weightShare": 0.81,
       "occurrences": 30,
       "fixtures": 7
     },
     {
       "path": "svg/g[]/ellipse[]/@cx",
       "weight": 417,
-      "weightShare": 0.68,
+      "weightShare": 0.79,
       "occurrences": 417,
       "fixtures": 178
     },
     {
       "path": "svg/g[]/ellipse[]/@cy",
-      "weight": 415,
-      "weightShare": 0.67,
-      "occurrences": 415,
+      "weight": 399,
+      "weightShare": 0.76,
+      "occurrences": 399,
       "fixtures": 178
     },
     {
-      "path": "svg/g[]/ellipse[]/@stroke",
-      "weight": 414,
-      "weightShare": 0.67,
-      "occurrences": 414,
-      "fixtures": 177
-    },
-    {
-      "path": "svg/g[]/ellipse[]/@stroke-width",
-      "weight": 376,
-      "weightShare": 0.61,
-      "occurrences": 376,
-      "fixtures": 170
-    },
-    {
       "path": "svg/g[]/polygon[]",
-      "weight": 329,
-      "weightShare": 0.53,
+      "weight": 369,
+      "weightShare": 0.7,
       "occurrences": 26,
       "fixtures": 7
     },
     {
       "path": "svg/g[]/path[]/@d[]",
       "weight": 304,
-      "weightShare": 0.49,
+      "weightShare": 0.58,
       "occurrences": 304,
       "fixtures": 26
     },
     {
-      "path": "svg/@width",
-      "weight": 268,
-      "weightShare": 0.43,
-      "occurrences": 268,
-      "fixtures": 268
+      "path": "svg/g[]/text[]/@font-size",
+      "weight": 291,
+      "weightShare": 0.55,
+      "occurrences": 291,
+      "fixtures": 120
     },
     {
-      "path": "svg/g[]/ellipse[]/@fill",
-      "weight": 266,
-      "weightShare": 0.43,
-      "occurrences": 266,
-      "fixtures": 171
+      "path": "svg/@height",
+      "weight": 267,
+      "weightShare": 0.51,
+      "occurrences": 267,
+      "fixtures": 267
+    },
+    {
+      "path": "svg/@width",
+      "weight": 267,
+      "weightShare": 0.51,
+      "occurrences": 267,
+      "fixtures": 267
     },
     {
       "path": "svg/g[]/ellipse[]/@rx",
       "weight": 263,
-      "weightShare": 0.43,
+      "weightShare": 0.5,
       "occurrences": 263,
       "fixtures": 127
     },
     {
       "path": "svg/g[]/ellipse[]/@ry",
       "weight": 263,
-      "weightShare": 0.43,
+      "weightShare": 0.5,
       "occurrences": 263,
       "fixtures": 127
     },
     {
-      "path": "svg/@height",
-      "weight": 259,
-      "weightShare": 0.42,
-      "occurrences": 259,
-      "fixtures": 259
-    },
-    {
       "path": "svg/g[]/text[]",
       "weight": 238,
-      "weightShare": 0.39,
+      "weightShare": 0.45,
       "occurrences": 16,
       "fixtures": 5
     },
     {
+      "path": "svg/g[]/polygon[]/@stroke-width",
+      "weight": 224,
+      "weightShare": 0.43,
+      "occurrences": 224,
+      "fixtures": 144
+    },
+    {
       "path": "svg/g[]/rect[]",
-      "weight": 191,
-      "weightShare": 0.31,
+      "weight": 202,
+      "weightShare": 0.38,
       "occurrences": 12,
       "fixtures": 6
     },
     {
       "path": "svg/g[]/ellipse[]",
-      "weight": 184,
-      "weightShare": 0.3,
+      "weight": 188,
+      "weightShare": 0.36,
       "occurrences": 13,
       "fixtures": 5
     },
     {
-      "path": "svg/g[]/line[]/@stroke",
-      "weight": 116,
-      "weightShare": 0.19,
-      "occurrences": 116,
-      "fixtures": 50
+      "path": "svg/g[]/line[]/@stroke-width",
+      "weight": 143,
+      "weightShare": 0.27,
+      "occurrences": 143,
+      "fixtures": 55
+    },
+    {
+      "path": "svg/g[]/rect[]/@height",
+      "weight": 130,
+      "weightShare": 0.25,
+      "occurrences": 130,
+      "fixtures": 82
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@stroke",
+      "weight": 118,
+      "weightShare": 0.22,
+      "occurrences": 118,
+      "fixtures": 97
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@stroke-width",
+      "weight": 112,
+      "weightShare": 0.21,
+      "occurrences": 112,
+      "fixtures": 97
     },
     {
       "path": "svg/g[]/rect[]/@fill",
       "weight": 103,
-      "weightShare": 0.17,
+      "weightShare": 0.2,
       "occurrences": 103,
       "fixtures": 70
     },
     {
+      "path": "svg/g[]/line[]/@stroke",
+      "weight": 101,
+      "weightShare": 0.19,
+      "occurrences": 101,
+      "fixtures": 39
+    },
+    {
       "path": "svg/g[]/polygon[]/@points[]",
       "weight": 90,
-      "weightShare": 0.15,
+      "weightShare": 0.17,
       "occurrences": 90,
       "fixtures": 3
     },
     {
       "path": "svg/g[]/path[]",
       "weight": 88,
-      "weightShare": 0.14,
+      "weightShare": 0.17,
       "occurrences": 7,
       "fixtures": 3
     },
     {
       "path": "svg/g[]/rect[]/@stroke",
       "weight": 79,
-      "weightShare": 0.13,
+      "weightShare": 0.15,
       "occurrences": 79,
       "fixtures": 49
     },
     {
       "path": "svg/g[]/path[]/@fill",
       "weight": 77,
-      "weightShare": 0.12,
-      "occurrences": 77,
-      "fixtures": 27
-    },
-    {
-      "path": "svg/g[]/path[]/@stroke-width",
-      "weight": 77,
-      "weightShare": 0.12,
+      "weightShare": 0.15,
       "occurrences": 77,
       "fixtures": 27
     },
     {
       "path": "svg/g[]/text[]/@font-weight",
       "weight": 66,
-      "weightShare": 0.11,
+      "weightShare": 0.13,
       "occurrences": 66,
+      "fixtures": 39
+    },
+    {
+      "path": "svg/g[]/rect[]/@rx",
+      "weight": 65,
+      "weightShare": 0.12,
+      "occurrences": 65,
+      "fixtures": 39
+    },
+    {
+      "path": "svg/g[]/rect[]/@ry",
+      "weight": 65,
+      "weightShare": 0.12,
+      "occurrences": 65,
       "fixtures": 39
     },
     {
       "path": "svg/g[]/g[][childCount]",
       "weight": 42,
-      "weightShare": 0.07,
+      "weightShare": 0.08,
       "occurrences": 2,
       "fixtures": 2
     },
     {
       "path": "svg/g[]/path[]/@d",
       "weight": 39,
-      "weightShare": 0.06,
+      "weightShare": 0.07,
       "occurrences": 39,
       "fixtures": 27
     },
@@ -367,48 +360,181 @@
       "weightShare": 0.04,
       "occurrences": 22,
       "fixtures": 16
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/@y",
+      "weight": 22,
+      "weightShare": 0.04,
+      "occurrences": 22,
+      "fixtures": 16
+    },
+    {
+      "path": "svg/g[]/polygon[]/@fill",
+      "weight": 16,
+      "weightShare": 0.03,
+      "occurrences": 16,
+      "fixtures": 9
+    },
+    {
+      "path": "svg/defs[][childCount]",
+      "weight": 12,
+      "weightShare": 0.02,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke",
+      "weight": 12,
+      "weightShare": 0.02,
+      "occurrences": 12,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke-linejoin",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke-miterlimit",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@fill",
+      "weight": 7,
+      "weightShare": 0.01,
+      "occurrences": 7,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/text[][childCount]",
+      "weight": 4,
+      "weightShare": 0.01,
+      "occurrences": 4,
+      "fixtures": 3
+    },
+    {
+      "path": "svg/g[]/text[]/@font-family",
+      "weight": 3,
+      "weightShare": 0.01,
+      "occurrences": 3,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/@textLength",
+      "weight": 3,
+      "weightShare": 0.01,
+      "occurrences": 3,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/text[]/@text-decoration",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@x",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@y",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/text()[]",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@height",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@width",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/@background",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/text[][childCount]",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/@preserveAspectRatio",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
     }
   ],
   "geometryResidual": {
-    "note": "width/height go BOTH WAYS still -- no constant margin explains them, unchanged qualitative shape from T6's original finding, just smaller in magnitude now that childCount no longer dominates the weight.",
+    "note": "width/height still go BOTH WAYS -- no constant margin explains them -- but the SHAPE has moved. Width was wider=195 / narrower=73 / equal=0 and is now wider=168 / narrower=99 / equal=1; height was shorter=154 / taller=105 / equal=9 and is now shorter=198 / taller=69 / equal=1. The port is no longer systematically too BIG; it is now systematically too SHORT, which is LAYOUT_MARGIN = 12 against the jar's 16 (named in the T4 journal entry, filed as activity-canvas-margin). One fixture now matches each axis exactly, from zero before this mission.",
     "widthDirection": {
-      "wider": 195,
-      "narrower": 73,
-      "equal": 0
+      "wider": 168,
+      "narrower": 99,
+      "equal": 1
     },
     "heightDirection": {
-      "shorter": 154,
-      "taller": 105,
-      "equal": 9
+      "shorter": 198,
+      "taller": 69,
+      "equal": 1
     },
     "perFixture": [
       {
         "slug": "activity-creole-table",
         "width": {
-          "ours": 174,
+          "ours": 145,
           "jar": 150,
-          "delta": 24,
-          "direction": "wider"
+          "delta": -5,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 79,
+          "ours": 68,
           "jar": 84,
-          "delta": -5,
+          "delta": -16,
           "direction": "shorter"
         }
       },
       {
         "slug": "bakopu-96-pudu086",
         "width": {
-          "ours": 482,
+          "ours": 517,
           "jar": 327,
-          "delta": 155,
+          "delta": 190,
           "direction": "wider"
         },
         "height": {
-          "ours": 382,
+          "ours": 350,
           "jar": 280,
-          "delta": 102,
+          "delta": 70,
           "direction": "taller"
         }
       },
@@ -421,9 +547,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 400,
+          "ours": 388,
           "jar": 377,
-          "delta": 23,
+          "delta": 11,
           "direction": "taller"
         }
       },
@@ -436,9 +562,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 519,
+          "ours": 503,
           "jar": 533,
-          "delta": -14,
+          "delta": -30,
           "direction": "shorter"
         }
       },
@@ -451,24 +577,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 176,
+          "ours": 168,
           "jar": 229,
-          "delta": -53,
+          "delta": -61,
           "direction": "shorter"
         }
       },
       {
         "slug": "becaje-01-vaji284",
         "width": {
-          "ours": 222,
+          "ours": 212,
           "jar": 168,
-          "delta": 54,
+          "delta": 44,
           "direction": "wider"
         },
         "height": {
-          "ours": 224,
+          "ours": 216,
           "jar": 205,
-          "delta": 19,
+          "delta": 11,
           "direction": "taller"
         }
       },
@@ -481,25 +607,25 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 340,
+          "ours": 328,
           "jar": 367,
-          "delta": -27,
+          "delta": -39,
           "direction": "shorter"
         }
       },
       {
         "slug": "bedezo-44-more709",
         "width": {
-          "ours": 462,
+          "ours": 415,
           "jar": 308,
-          "delta": 154,
+          "delta": 107,
           "direction": "wider"
         },
         "height": {
-          "ours": 227,
+          "ours": 216,
           "jar": 225,
-          "delta": 2,
-          "direction": "taller"
+          "delta": -9,
+          "direction": "shorter"
         }
       },
       {
@@ -511,9 +637,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 268,
+          "ours": 256,
           "jar": 277,
-          "delta": -9,
+          "delta": -21,
           "direction": "shorter"
         }
       },
@@ -526,24 +652,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 256,
+          "ours": 252,
           "jar": 280,
-          "delta": -24,
+          "delta": -28,
           "direction": "shorter"
         }
       },
       {
         "slug": "besaga-58-poli497",
         "width": {
-          "ours": 1080,
+          "ours": 949,
           "jar": 1296,
-          "delta": -216,
+          "delta": -347,
           "direction": "narrower"
         },
         "height": {
-          "ours": 381,
+          "ours": 347,
           "jar": 391,
-          "delta": -10,
+          "delta": -44,
           "direction": "shorter"
         }
       },
@@ -556,54 +682,54 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 208,
+          "ours": 204,
           "jar": 265,
-          "delta": -57,
+          "delta": -61,
           "direction": "shorter"
         }
       },
       {
         "slug": "bidosa-98-veca008",
         "width": {
-          "ours": 330,
+          "ours": 339,
           "jar": 323,
-          "delta": 7,
+          "delta": 16,
           "direction": "wider"
         },
         "height": {
-          "ours": 273,
+          "ours": 270,
           "jar": 222,
-          "delta": 51,
+          "delta": 48,
           "direction": "taller"
         }
       },
       {
         "slug": "bigide-91-bise382",
         "width": {
-          "ours": 193,
+          "ours": 161,
           "jar": 176,
-          "delta": 17,
-          "direction": "wider"
+          "delta": -15,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 316,
+          "ours": 279,
           "jar": 280,
-          "delta": 36,
-          "direction": "taller"
+          "delta": -1,
+          "direction": "shorter"
         }
       },
       {
         "slug": "biguku-39-voxu233",
         "width": {
-          "ours": 341,
+          "ours": 291,
           "jar": 310,
-          "delta": 31,
-          "direction": "wider"
+          "delta": -19,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 180,
+          "ours": 176,
           "jar": 196,
-          "delta": -16,
+          "delta": -20,
           "direction": "shorter"
         }
       },
@@ -616,24 +742,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 324,
+          "ours": 316,
           "jar": 340,
-          "delta": -16,
+          "delta": -24,
           "direction": "shorter"
         }
       },
       {
         "slug": "bixefi-77-moki051",
         "width": {
-          "ours": 519,
+          "ours": 488,
           "jar": 420,
-          "delta": 99,
+          "delta": 68,
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 112,
           "jar": 145,
-          "delta": -29,
+          "delta": -33,
           "direction": "shorter"
         }
       },
@@ -655,15 +781,15 @@
       {
         "slug": "bocaga-53-nale241",
         "width": {
-          "ours": 154,
+          "ours": 144,
           "jar": 168,
-          "delta": -14,
+          "delta": -24,
           "direction": "narrower"
         },
         "height": {
-          "ours": 272,
+          "ours": 264,
           "jar": 205,
-          "delta": 67,
+          "delta": 59,
           "direction": "taller"
         }
       },
@@ -676,69 +802,69 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 600,
+          "ours": 593,
           "jar": 333,
-          "delta": 267,
+          "delta": 260,
           "direction": "taller"
         }
       },
       {
         "slug": "boxoto-53-sifo232",
         "width": {
-          "ours": 1113,
+          "ours": 977,
           "jar": 862,
-          "delta": 251,
+          "delta": 115,
           "direction": "wider"
         },
         "height": {
-          "ours": 1011,
+          "ours": 964,
           "jar": 1126,
-          "delta": -115,
+          "delta": -162,
           "direction": "shorter"
         }
       },
       {
         "slug": "bozido-07-geze049",
         "width": {
-          "ours": 336,
+          "ours": 284,
           "jar": 343,
-          "delta": -7,
+          "delta": -59,
           "direction": "narrower"
         },
         "height": {
-          "ours": 690,
+          "ours": 512,
           "jar": 419,
-          "delta": 271,
+          "delta": 93,
           "direction": "taller"
         }
       },
       {
         "slug": "bozuro-33-celo170",
         "width": {
-          "ours": 359,
+          "ours": 324,
           "jar": 485,
-          "delta": -126,
+          "delta": -161,
           "direction": "narrower"
         },
         "height": {
-          "ours": 344,
+          "ours": 336,
           "jar": 332,
-          "delta": 12,
+          "delta": 4,
           "direction": "taller"
         }
       },
       {
         "slug": "bugaja-31-jaso630",
         "width": {
-          "ours": 519,
+          "ours": 488,
           "jar": 483,
-          "delta": 36,
+          "delta": 5,
           "direction": "wider"
         },
         "height": {
-          "ours": 212,
+          "ours": 204,
           "jar": 225,
-          "delta": -13,
+          "delta": -21,
           "direction": "shorter"
         }
       },
@@ -751,54 +877,54 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 372,
+          "ours": 360,
           "jar": 385,
-          "delta": -13,
+          "delta": -25,
           "direction": "shorter"
         }
       },
       {
         "slug": "bumaca-51-kece901",
         "width": {
-          "ours": 188,
+          "ours": 164,
           "jar": 292,
-          "delta": -104,
+          "delta": -128,
           "direction": "narrower"
         },
         "height": {
-          "ours": 284,
+          "ours": 276,
           "jar": 323,
-          "delta": -39,
+          "delta": -47,
           "direction": "shorter"
         }
       },
       {
         "slug": "bunoxu-10-jabe604",
         "width": {
-          "ours": 326,
+          "ours": 340,
           "jar": 478,
-          "delta": -152,
+          "delta": -138,
           "direction": "narrower"
         },
         "height": {
-          "ours": 316,
+          "ours": 309,
           "jar": 268,
-          "delta": 48,
+          "delta": 41,
           "direction": "taller"
         }
       },
       {
         "slug": "cagoze-40-tete366",
         "width": {
-          "ours": 202,
+          "ours": 189,
           "jar": 241,
-          "delta": -39,
+          "delta": -52,
           "direction": "narrower"
         },
         "height": {
-          "ours": 208,
+          "ours": 204,
           "jar": 241,
-          "delta": -33,
+          "delta": -37,
           "direction": "shorter"
         }
       },
@@ -811,24 +937,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 500,
+          "ours": 476,
           "jar": 495,
-          "delta": 5,
-          "direction": "taller"
+          "delta": -19,
+          "direction": "shorter"
         }
       },
       {
         "slug": "camavo-50-kaku123",
         "width": {
-          "ours": 381,
+          "ours": 364,
           "jar": 351,
-          "delta": 30,
+          "delta": 13,
           "direction": "wider"
         },
         "height": {
-          "ours": 420,
+          "ours": 412,
           "jar": 407,
-          "delta": 13,
+          "delta": 5,
           "direction": "taller"
         }
       },
@@ -841,55 +967,55 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 120,
+          "ours": 116,
           "jar": 171,
-          "delta": -51,
+          "delta": -55,
           "direction": "shorter"
         }
       },
       {
         "slug": "cemagu-66-vazo965",
         "width": {
-          "ours": 242,
+          "ours": 227,
           "jar": 339,
-          "delta": -97,
+          "delta": -112,
           "direction": "narrower"
         },
         "height": {
-          "ours": 252,
+          "ours": 240,
           "jar": 247,
-          "delta": 5,
-          "direction": "taller"
+          "delta": -7,
+          "direction": "shorter"
         }
       },
       {
         "slug": "cemipu-87-dinu624",
         "width": {
-          "ours": 312,
+          "ours": 263,
           "jar": 432,
-          "delta": -120,
+          "delta": -169,
           "direction": "narrower"
         },
         "height": {
-          "ours": 400,
+          "ours": 376,
           "jar": 456,
-          "delta": -56,
+          "delta": -80,
           "direction": "shorter"
         }
       },
       {
         "slug": "cetica-88-toke482",
         "width": {
-          "ours": 440,
+          "ours": 373,
           "jar": 385,
-          "delta": 55,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 324,
+          "ours": 304,
           "jar": 315,
-          "delta": 9,
-          "direction": "taller"
+          "delta": -11,
+          "direction": "shorter"
         }
       },
       {
@@ -901,9 +1027,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 276,
+          "ours": 268,
           "jar": 287,
-          "delta": -11,
+          "delta": -19,
           "direction": "shorter"
         }
       },
@@ -916,24 +1042,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 295,
+          "ours": 287,
           "jar": 276,
-          "delta": 19,
+          "delta": 11,
           "direction": "taller"
         }
       },
       {
         "slug": "cixave-47-milo698",
         "width": {
-          "ours": 249,
+          "ours": 234,
           "jar": 266,
-          "delta": -17,
+          "delta": -32,
           "direction": "narrower"
         },
         "height": {
-          "ours": 328,
+          "ours": 324,
           "jar": 353,
-          "delta": -25,
+          "delta": -29,
           "direction": "shorter"
         }
       },
@@ -946,9 +1072,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -961,9 +1087,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 227,
+          "ours": 216,
           "jar": 234,
-          "delta": -7,
+          "delta": -18,
           "direction": "shorter"
         }
       },
@@ -976,10 +1102,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 615,
+          "ours": 572,
           "jar": 577,
-          "delta": 38,
-          "direction": "taller"
+          "delta": -5,
+          "direction": "shorter"
         }
       },
       {
@@ -991,9 +1117,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 156,
+          "ours": 153,
           "jar": 107,
-          "delta": 49,
+          "delta": 46,
           "direction": "taller"
         }
       },
@@ -1006,39 +1132,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 404,
+          "ours": 384,
           "jar": 404,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -20,
+          "direction": "shorter"
         }
       },
       {
         "slug": "cugezi-99-tire097",
         "width": {
-          "ours": 301,
+          "ours": 254,
           "jar": 266,
-          "delta": 35,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 732,
+          "ours": 680,
           "jar": 692,
-          "delta": 40,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "cujoni-21-somi079",
         "width": {
-          "ours": 120,
+          "ours": 122,
           "jar": 156,
-          "delta": -36,
+          "delta": -34,
           "direction": "narrower"
         },
         "height": {
-          "ours": 256,
+          "ours": 257,
           "jar": 210,
-          "delta": 46,
+          "delta": 47,
           "direction": "taller"
         }
       },
@@ -1051,24 +1177,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 228,
+          "ours": 224,
           "jar": 189,
-          "delta": 39,
+          "delta": 35,
           "direction": "taller"
         }
       },
       {
         "slug": "dacuga-41-popo038",
         "width": {
-          "ours": 168,
+          "ours": 164,
           "jar": 203,
-          "delta": -35,
+          "delta": -39,
           "direction": "narrower"
         },
         "height": {
-          "ours": 352,
+          "ours": 340,
           "jar": 394,
-          "delta": -42,
+          "delta": -54,
           "direction": "shorter"
         }
       },
@@ -1081,9 +1207,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 68,
-          "delta": -8,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -1096,10 +1222,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 900,
+          "ours": 836,
           "jar": 848,
-          "delta": 52,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1111,10 +1237,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 384,
+          "ours": 364,
           "jar": 379,
-          "delta": 5,
-          "direction": "taller"
+          "delta": -15,
+          "direction": "shorter"
         }
       },
       {
@@ -1126,9 +1252,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 459,
+          "ours": 451,
           "jar": 398,
-          "delta": 61,
+          "delta": 53,
           "direction": "taller"
         }
       },
@@ -1141,24 +1267,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 340,
+          "ours": 316,
           "jar": 328,
-          "delta": 12,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "digexe-63-zifu774",
         "width": {
-          "ours": 226,
+          "ours": 240,
           "jar": 283,
-          "delta": -57,
+          "delta": -43,
           "direction": "narrower"
         },
         "height": {
-          "ours": 482,
+          "ours": 455,
           "jar": 343,
-          "delta": 139,
+          "delta": 112,
           "direction": "taller"
         }
       },
@@ -1171,10 +1297,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 284,
+          "ours": 264,
           "jar": 276,
-          "delta": 8,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1186,9 +1312,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -1216,9 +1342,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 432,
+          "ours": 422,
           "jar": 330,
-          "delta": 102,
+          "delta": 92,
           "direction": "taller"
         }
       },
@@ -1231,9 +1357,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 264,
+          "ours": 292,
           "jar": 301,
-          "delta": -37,
+          "delta": -9,
           "direction": "shorter"
         }
       },
@@ -1246,9 +1372,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 484,
+          "ours": 476,
           "jar": 521,
-          "delta": -37,
+          "delta": -45,
           "direction": "shorter"
         }
       },
@@ -1261,39 +1387,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 320,
+          "ours": 308,
           "jar": 317,
-          "delta": 3,
-          "direction": "taller"
+          "delta": -9,
+          "direction": "shorter"
         }
       },
       {
         "slug": "dunejo-33-divo189",
         "width": {
-          "ours": 215,
+          "ours": 181,
           "jar": 193,
-          "delta": 22,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 98,
+          "ours": 80,
           "jar": 92,
-          "delta": 6,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "dupopo-44-deto131",
         "width": {
-          "ours": 154,
+          "ours": 144,
           "jar": 365,
-          "delta": -211,
+          "delta": -221,
           "direction": "narrower"
         },
         "height": {
-          "ours": 340,
+          "ours": 316,
           "jar": 353,
-          "delta": -13,
+          "delta": -37,
           "direction": "shorter"
         }
       },
@@ -1306,9 +1432,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 108,
+          "ours": 104,
           "jar": 110,
-          "delta": -2,
+          "delta": -6,
           "direction": "shorter"
         }
       },
@@ -1321,24 +1447,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 204,
+          "ours": 196,
           "jar": 199,
-          "delta": 5,
-          "direction": "taller"
+          "delta": -3,
+          "direction": "shorter"
         }
       },
       {
         "slug": "fabule-54-pili300",
         "width": {
-          "ours": 181,
+          "ours": 151,
           "jar": 115,
-          "delta": 66,
+          "delta": 36,
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 92,
-          "delta": -32,
+          "delta": -36,
           "direction": "shorter"
         }
       },
@@ -1351,9 +1477,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -1366,39 +1492,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "fatuzu-07-cevu894",
         "width": {
-          "ours": 500,
+          "ours": 462,
           "jar": 456,
-          "delta": 44,
+          "delta": 6,
           "direction": "wider"
         },
         "height": {
-          "ours": 387,
+          "ours": 368,
           "jar": 368,
-          "delta": 19,
-          "direction": "taller"
+          "delta": 0,
+          "direction": "equal"
         }
       },
       {
         "slug": "feceme-58-xodo415",
         "width": {
-          "ours": 396,
+          "ours": 358,
           "jar": 265,
-          "delta": 131,
+          "delta": 93,
           "direction": "wider"
         },
         "height": {
-          "ours": 232,
+          "ours": 220,
           "jar": 236,
-          "delta": -4,
+          "delta": -16,
           "direction": "shorter"
         }
       },
@@ -1411,24 +1537,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 292,
+          "ours": 280,
           "jar": 301,
-          "delta": -9,
+          "delta": -21,
           "direction": "shorter"
         }
       },
       {
         "slug": "femaco-88-bufe808",
         "width": {
-          "ours": 164,
+          "ours": 144,
           "jar": 149,
-          "delta": 15,
-          "direction": "wider"
+          "delta": -5,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
@@ -1441,18 +1567,18 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 312,
+          "ours": 304,
           "jar": 316,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "fibafo-22-foze119",
         "width": {
-          "ours": 315,
+          "ours": 312,
           "jar": 244,
-          "delta": 71,
+          "delta": 68,
           "direction": "wider"
         },
         "height": {
@@ -1465,15 +1591,15 @@
       {
         "slug": "fikuki-99-kulu790",
         "width": {
-          "ours": 259,
+          "ours": 218,
           "jar": 234,
-          "delta": 25,
-          "direction": "wider"
+          "delta": -16,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 363,
+          "ours": 276,
           "jar": 203,
-          "delta": 160,
+          "delta": 73,
           "direction": "taller"
         }
       },
@@ -1486,9 +1612,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 428,
+          "ours": 408,
           "jar": 468,
-          "delta": -40,
+          "delta": -60,
           "direction": "shorter"
         }
       },
@@ -1501,10 +1627,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1531,18 +1657,18 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "foludi-80-gilo247",
         "width": {
-          "ours": 90,
+          "ours": 87,
           "jar": 136,
-          "delta": -46,
+          "delta": -49,
           "direction": "narrower"
         },
         "height": {
@@ -1555,16 +1681,16 @@
       {
         "slug": "fomapa-90-bore251",
         "width": {
-          "ours": 1122,
+          "ours": 959,
           "jar": 921,
-          "delta": 201,
+          "delta": 38,
           "direction": "wider"
         },
         "height": {
-          "ours": 228,
+          "ours": 216,
           "jar": 228,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1576,9 +1702,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 216,
+          "ours": 208,
           "jar": 247,
-          "delta": -31,
+          "delta": -39,
           "direction": "shorter"
         }
       },
@@ -1591,9 +1717,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -1606,9 +1732,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
@@ -1621,25 +1747,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 284,
+          "ours": 280,
           "jar": 277,
-          "delta": 7,
+          "delta": 3,
           "direction": "taller"
         }
       },
       {
         "slug": "fufefa-17-faje066",
         "width": {
-          "ours": 245,
+          "ours": 206,
           "jar": 218,
-          "delta": 27,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 564,
+          "ours": 524,
           "jar": 536,
-          "delta": 28,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1651,9 +1777,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 576,
+          "ours": 560,
           "jar": 497,
-          "delta": 79,
+          "delta": 63,
           "direction": "taller"
         }
       },
@@ -1666,9 +1792,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 276,
+          "ours": 268,
           "jar": 312,
-          "delta": -36,
+          "delta": -44,
           "direction": "shorter"
         }
       },
@@ -1681,9 +1807,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 432,
+          "ours": 422,
           "jar": 330,
-          "delta": 102,
+          "delta": 92,
           "direction": "taller"
         }
       },
@@ -1696,24 +1822,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 260,
+          "ours": 252,
           "jar": 253,
-          "delta": 7,
-          "direction": "taller"
+          "delta": -1,
+          "direction": "shorter"
         }
       },
       {
         "slug": "gaxezi-48-zesa921",
         "width": {
-          "ours": 263,
+          "ours": 221,
           "jar": 220,
-          "delta": 43,
+          "delta": 1,
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
@@ -1726,10 +1852,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 452,
+          "ours": 420,
           "jar": 432,
-          "delta": 20,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1741,9 +1867,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 512,
+          "ours": 492,
           "jar": 448,
-          "delta": 64,
+          "delta": 44,
           "direction": "taller"
         }
       },
@@ -1756,24 +1882,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "gesogi-81-xoma900",
         "width": {
-          "ours": 501,
+          "ours": 430,
           "jar": 485,
-          "delta": 16,
-          "direction": "wider"
+          "delta": -55,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 252,
+          "ours": 244,
           "jar": 316,
-          "delta": -64,
+          "delta": -72,
           "direction": "shorter"
         }
       },
@@ -1786,24 +1912,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 312,
+          "ours": 308,
           "jar": 235,
-          "delta": 77,
+          "delta": 73,
           "direction": "taller"
         }
       },
       {
         "slug": "gimegi-77-xidu727",
         "width": {
-          "ours": 191,
+          "ours": 160,
           "jar": 172,
-          "delta": 19,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -1816,9 +1942,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 355,
+          "ours": 343,
           "jar": 362,
-          "delta": -7,
+          "delta": -19,
           "direction": "shorter"
         }
       },
@@ -1831,25 +1957,25 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 396,
+          "ours": 380,
           "jar": 427,
-          "delta": -31,
+          "delta": -47,
           "direction": "shorter"
         }
       },
       {
         "slug": "gizore-52-fode894",
         "width": {
-          "ours": 215,
+          "ours": 181,
           "jar": 193,
-          "delta": 22,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 98,
+          "ours": 80,
           "jar": 92,
-          "delta": 6,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -1861,9 +1987,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 284,
+          "ours": 281,
           "jar": 237,
-          "delta": 47,
+          "delta": 44,
           "direction": "taller"
         }
       },
@@ -1876,9 +2002,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 68,
-          "delta": -8,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -1891,24 +2017,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
       {
         "slug": "guceja-66-tola192",
         "width": {
-          "ours": 188,
+          "ours": 164,
           "jar": 179,
-          "delta": 9,
-          "direction": "wider"
+          "delta": -15,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 284,
+          "ours": 276,
           "jar": 296,
-          "delta": -12,
+          "delta": -20,
           "direction": "shorter"
         }
       },
@@ -1921,9 +2047,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 245,
+          "ours": 204,
           "jar": 191,
-          "delta": 54,
+          "delta": 13,
           "direction": "taller"
         }
       },
@@ -1936,39 +2062,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 372,
+          "ours": 356,
           "jar": 386,
-          "delta": -14,
+          "delta": -30,
           "direction": "shorter"
         }
       },
       {
         "slug": "jafuli-91-sota277",
         "width": {
-          "ours": 813,
+          "ours": 712,
           "jar": 680,
-          "delta": 133,
+          "delta": 32,
           "direction": "wider"
         },
         "height": {
-          "ours": 328,
+          "ours": 312,
           "jar": 339,
-          "delta": -11,
+          "delta": -27,
           "direction": "shorter"
         }
       },
       {
         "slug": "jagove-43-nako107",
         "width": {
-          "ours": 324,
+          "ours": 291,
           "jar": 244,
-          "delta": 80,
+          "delta": 47,
           "direction": "wider"
         },
         "height": {
-          "ours": 468,
+          "ours": 412,
           "jar": 547,
-          "delta": -79,
+          "delta": -135,
           "direction": "shorter"
         }
       },
@@ -1981,9 +2107,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 212,
+          "ours": 200,
           "jar": 237,
-          "delta": -25,
+          "delta": -37,
           "direction": "shorter"
         }
       },
@@ -1996,39 +2122,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 264,
+          "ours": 261,
           "jar": 226,
-          "delta": 38,
+          "delta": 35,
           "direction": "taller"
         }
       },
       {
         "slug": "jecoxu-17-zama003",
         "width": {
-          "ours": 222,
+          "ours": 212,
           "jar": 168,
-          "delta": 54,
+          "delta": 44,
           "direction": "wider"
         },
         "height": {
-          "ours": 232,
+          "ours": 220,
           "jar": 215,
-          "delta": 17,
+          "delta": 5,
           "direction": "taller"
         }
       },
       {
         "slug": "jevoce-05-mumi686",
         "width": {
-          "ours": 646,
+          "ours": 644,
           "jar": 977,
-          "delta": -331,
+          "delta": -333,
           "direction": "narrower"
         },
         "height": {
-          "ours": 376,
+          "ours": 364,
           "jar": 395,
-          "delta": -19,
+          "delta": -31,
           "direction": "shorter"
         }
       },
@@ -2041,9 +2167,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -2056,9 +2182,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 216,
+          "ours": 213,
           "jar": 185,
-          "delta": 31,
+          "delta": 28,
           "direction": "taller"
         }
       },
@@ -2071,9 +2197,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 328,
+          "ours": 317,
           "jar": 312,
-          "delta": 16,
+          "delta": 5,
           "direction": "taller"
         }
       },
@@ -2086,10 +2212,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -2101,9 +2227,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 264,
+          "ours": 256,
           "jar": 292,
-          "delta": -28,
+          "delta": -36,
           "direction": "shorter"
         }
       },
@@ -2116,9 +2242,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 620,
+          "ours": 604,
           "jar": 653,
-          "delta": -33,
+          "delta": -49,
           "direction": "shorter"
         }
       },
@@ -2131,24 +2257,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 384,
+          "ours": 380,
           "jar": 367,
-          "delta": 17,
+          "delta": 13,
           "direction": "taller"
         }
       },
       {
         "slug": "jupoxe-15-sugo110",
         "width": {
-          "ours": 7508,
+          "ours": 7878,
           "jar": 1937,
-          "delta": 5571,
+          "delta": 5941,
           "direction": "wider"
         },
         "height": {
-          "ours": 748,
+          "ours": 728,
           "jar": 1390,
-          "delta": -642,
+          "delta": -662,
           "direction": "shorter"
         }
       },
@@ -2161,24 +2287,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 264,
+          "ours": 256,
           "jar": 269,
-          "delta": -5,
+          "delta": -13,
           "direction": "shorter"
         }
       },
       {
         "slug": "kasadu-53-tuki533",
         "width": {
-          "ours": 887,
+          "ours": 759,
           "jar": 851,
-          "delta": 36,
-          "direction": "wider"
+          "delta": -92,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 284,
+          "ours": 276,
           "jar": 321,
-          "delta": -37,
+          "delta": -45,
           "direction": "shorter"
         }
       },
@@ -2191,9 +2317,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 308,
+          "ours": 304,
           "jar": 303,
-          "delta": 5,
+          "delta": 1,
           "direction": "taller"
         }
       },
@@ -2206,24 +2332,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 228,
+          "ours": 222,
           "jar": 151,
-          "delta": 77,
+          "delta": 71,
           "direction": "taller"
         }
       },
       {
         "slug": "kepavi-26-sasu141",
         "width": {
-          "ours": 375,
+          "ours": 304,
           "jar": 298,
-          "delta": 77,
+          "delta": 6,
           "direction": "wider"
         },
         "height": {
-          "ours": 235,
+          "ours": 213,
           "jar": 189,
-          "delta": 46,
+          "delta": 24,
           "direction": "taller"
         }
       },
@@ -2236,54 +2362,54 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 396,
+          "ours": 368,
           "jar": 380,
-          "delta": 16,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "kijazo-83-kipu485",
         "width": {
-          "ours": 423,
+          "ours": 358,
           "jar": 584,
-          "delta": -161,
+          "delta": -226,
           "direction": "narrower"
         },
         "height": {
-          "ours": 348,
+          "ours": 332,
           "jar": 380,
-          "delta": -32,
+          "delta": -48,
           "direction": "shorter"
         }
       },
       {
         "slug": "kitupi-32-jexo155",
         "width": {
-          "ours": 738,
+          "ours": 781,
           "jar": 765,
-          "delta": -27,
-          "direction": "narrower"
+          "delta": 16,
+          "direction": "wider"
         },
         "height": {
-          "ours": 224,
+          "ours": 221,
           "jar": 173,
-          "delta": 51,
+          "delta": 48,
           "direction": "taller"
         }
       },
       {
         "slug": "kodaku-19-moni161",
         "width": {
-          "ours": 188,
+          "ours": 164,
           "jar": 215,
-          "delta": -27,
+          "delta": -51,
           "direction": "narrower"
         },
         "height": {
-          "ours": 476,
+          "ours": 460,
           "jar": 426,
-          "delta": 50,
+          "delta": 34,
           "direction": "taller"
         }
       },
@@ -2311,10 +2437,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 396,
+          "ours": 368,
           "jar": 380,
-          "delta": 16,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -2326,25 +2452,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 68,
-          "delta": -8,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "kudedo-31-pafi082",
         "width": {
-          "ours": 171,
+          "ours": 164,
           "jar": 253,
-          "delta": -82,
+          "delta": -89,
           "direction": "narrower"
         },
         "height": {
-          "ours": 364,
+          "ours": 344,
           "jar": 355,
-          "delta": 9,
-          "direction": "taller"
+          "delta": -11,
+          "direction": "shorter"
         }
       },
       {
@@ -2356,10 +2482,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 340,
+          "ours": 316,
           "jar": 328,
-          "delta": 12,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -2371,9 +2497,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 260,
+          "ours": 252,
           "jar": 243,
-          "delta": 17,
+          "delta": 9,
           "direction": "taller"
         }
       },
@@ -2386,24 +2512,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 272,
+          "ours": 260,
           "jar": 303,
-          "delta": -31,
+          "delta": -43,
           "direction": "shorter"
         }
       },
       {
         "slug": "lafilo-69-tuti771",
         "width": {
-          "ours": 295,
+          "ours": 274,
           "jar": 274,
-          "delta": 21,
-          "direction": "wider"
+          "delta": 0,
+          "direction": "equal"
         },
         "height": {
-          "ours": 264,
+          "ours": 256,
           "jar": 302,
-          "delta": -38,
+          "delta": -46,
           "direction": "shorter"
         }
       },
@@ -2416,25 +2542,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
       {
         "slug": "laxibe-66-teme800",
         "width": {
-          "ours": 261,
+          "ours": 220,
           "jar": 219,
-          "delta": 42,
+          "delta": 1,
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -2446,9 +2572,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 264,
+          "ours": 256,
           "jar": 334,
-          "delta": -70,
+          "delta": -78,
           "direction": "shorter"
         }
       },
@@ -2461,24 +2587,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 175,
+          "ours": 167,
           "jar": 185,
-          "delta": -10,
+          "delta": -18,
           "direction": "shorter"
         }
       },
       {
         "slug": "letuke-04-poza319",
         "width": {
-          "ours": 200,
+          "ours": 184,
           "jar": 168,
-          "delta": 32,
+          "delta": 16,
           "direction": "wider"
         },
         "height": {
-          "ours": 290,
+          "ours": 256,
           "jar": 320,
-          "delta": -30,
+          "delta": -64,
           "direction": "shorter"
         }
       },
@@ -2491,24 +2617,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 240,
+          "ours": 236,
           "jar": 274,
-          "delta": -34,
+          "delta": -38,
           "direction": "shorter"
         }
       },
       {
         "slug": "lidefe-01-vaki092",
         "width": {
-          "ours": 313,
+          "ours": 333,
           "jar": 381,
-          "delta": -68,
+          "delta": -48,
           "direction": "narrower"
         },
         "height": {
-          "ours": 309,
+          "ours": 307,
           "jar": 199,
-          "delta": 110,
+          "delta": 108,
           "direction": "taller"
         }
       },
@@ -2536,9 +2662,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 289,
+          "ours": 277,
           "jar": 317,
-          "delta": -28,
+          "delta": -40,
           "direction": "shorter"
         }
       },
@@ -2551,24 +2677,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 844,
+          "ours": 784,
           "jar": 796,
-          "delta": 48,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "lopone-15-xiki477",
         "width": {
-          "ours": 1488,
+          "ours": 1274,
           "jar": 1319,
-          "delta": 169,
-          "direction": "wider"
+          "delta": -45,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 381,
+          "ours": 347,
           "jar": 413,
-          "delta": -32,
+          "delta": -66,
           "direction": "shorter"
         }
       },
@@ -2581,9 +2707,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 368,
+          "ours": 320,
           "jar": 387,
-          "delta": -19,
+          "delta": -67,
           "direction": "shorter"
         }
       },
@@ -2596,10 +2722,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 147,
-          "delta": 1,
-          "direction": "taller"
+          "delta": -3,
+          "direction": "shorter"
         }
       },
       {
@@ -2611,9 +2737,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 268,
+          "ours": 264,
           "jar": 297,
-          "delta": -29,
+          "delta": -33,
           "direction": "shorter"
         }
       },
@@ -2626,24 +2752,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 216,
+          "ours": 208,
           "jar": 229,
-          "delta": -13,
+          "delta": -21,
           "direction": "shorter"
         }
       },
       {
         "slug": "mabuke-20-muco282",
         "width": {
-          "ours": 361,
+          "ours": 344,
           "jar": 307,
-          "delta": 54,
+          "delta": 37,
           "direction": "wider"
         },
         "height": {
-          "ours": 324,
+          "ours": 316,
           "jar": 356,
-          "delta": -32,
+          "delta": -40,
           "direction": "shorter"
         }
       },
@@ -2656,25 +2782,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 444,
+          "ours": 424,
           "jar": 507,
-          "delta": -63,
+          "delta": -83,
           "direction": "shorter"
         }
       },
       {
         "slug": "mafete-03-rapa918",
         "width": {
-          "ours": 188,
+          "ours": 164,
           "jar": 313,
-          "delta": -125,
+          "delta": -149,
           "direction": "narrower"
         },
         "height": {
-          "ours": 340,
+          "ours": 328,
           "jar": 333,
-          "delta": 7,
-          "direction": "taller"
+          "delta": -5,
+          "direction": "shorter"
         }
       },
       {
@@ -2686,9 +2812,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 312,
+          "ours": 308,
           "jar": 271,
-          "delta": 41,
+          "delta": 37,
           "direction": "taller"
         }
       },
@@ -2701,9 +2827,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 456,
+          "ours": 440,
           "jar": 466,
-          "delta": -10,
+          "delta": -26,
           "direction": "shorter"
         }
       },
@@ -2716,24 +2842,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 340,
+          "ours": 328,
           "jar": 367,
-          "delta": -27,
+          "delta": -39,
           "direction": "shorter"
         }
       },
       {
         "slug": "mifejo-31-sovi184",
         "width": {
-          "ours": 295,
+          "ours": 314,
           "jar": 224,
-          "delta": 71,
+          "delta": 90,
           "direction": "wider"
         },
         "height": {
-          "ours": 204,
+          "ours": 206,
           "jar": 189,
-          "delta": 15,
+          "delta": 17,
           "direction": "taller"
         }
       },
@@ -2746,25 +2872,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 228,
+          "ours": 216,
           "jar": 279,
-          "delta": -51,
+          "delta": -63,
           "direction": "shorter"
         }
       },
       {
         "slug": "molexa-46-redi999",
         "width": {
-          "ours": 210,
+          "ours": 176,
           "jar": 188,
-          "delta": 22,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 167,
+          "ours": 156,
           "jar": 159,
-          "delta": 8,
-          "direction": "taller"
+          "delta": -3,
+          "direction": "shorter"
         }
       },
       {
@@ -2776,9 +2902,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 208,
+          "ours": 204,
           "jar": 265,
-          "delta": -57,
+          "delta": -61,
           "direction": "shorter"
         }
       },
@@ -2791,10 +2917,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 732,
+          "ours": 680,
           "jar": 692,
-          "delta": 40,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -2806,9 +2932,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 456,
+          "ours": 440,
           "jar": 393,
-          "delta": 63,
+          "delta": 47,
           "direction": "taller"
         }
       },
@@ -2821,9 +2947,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -2836,39 +2962,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 68,
-          "delta": -8,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "navene-45-cozo466",
         "width": {
-          "ours": 234,
+          "ours": 199,
           "jar": 610,
-          "delta": -376,
+          "delta": -411,
           "direction": "narrower"
         },
         "height": {
-          "ours": 979,
+          "ours": 932,
           "jar": 1050,
-          "delta": -71,
+          "delta": -118,
           "direction": "shorter"
         }
       },
       {
         "slug": "nesozi-09-zezu092",
         "width": {
-          "ours": 235,
+          "ours": 197,
           "jar": 234,
-          "delta": 1,
-          "direction": "wider"
+          "delta": -37,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 204,
+          "ours": 196,
           "jar": 227,
-          "delta": -23,
+          "delta": -31,
           "direction": "shorter"
         }
       },
@@ -2881,9 +3007,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 380,
+          "ours": 368,
           "jar": 193,
-          "delta": 187,
+          "delta": 175,
           "direction": "taller"
         }
       },
@@ -2896,39 +3022,39 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 176,
+          "ours": 173,
           "jar": 183,
-          "delta": -7,
+          "delta": -10,
           "direction": "shorter"
         }
       },
       {
         "slug": "nikinu-06-sace939",
         "width": {
-          "ours": 312,
+          "ours": 263,
           "jar": 445,
-          "delta": -133,
+          "delta": -182,
           "direction": "narrower"
         },
         "height": {
-          "ours": 400,
+          "ours": 376,
           "jar": 441,
-          "delta": -41,
+          "delta": -65,
           "direction": "shorter"
         }
       },
       {
         "slug": "niletu-83-lego826",
         "width": {
-          "ours": 174,
+          "ours": 145,
           "jar": 150,
-          "delta": 24,
-          "direction": "wider"
+          "delta": -5,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 79,
+          "ours": 68,
           "jar": 84,
-          "delta": -5,
+          "delta": -16,
           "direction": "shorter"
         }
       },
@@ -2941,9 +3067,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 156,
+          "ours": 148,
           "jar": 159,
-          "delta": -3,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -2956,39 +3082,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 384,
+          "ours": 364,
           "jar": 418,
-          "delta": -34,
+          "delta": -54,
           "direction": "shorter"
         }
       },
       {
         "slug": "nisexe-68-vabu320",
         "width": {
-          "ours": 263,
+          "ours": 221,
           "jar": 220,
-          "delta": 43,
+          "delta": 1,
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
       {
         "slug": "nivese-34-zavo418",
         "width": {
-          "ours": 353,
+          "ours": 374,
           "jar": 451,
-          "delta": -98,
+          "delta": -77,
           "direction": "narrower"
         },
         "height": {
-          "ours": 511,
+          "ours": 505,
           "jar": 419,
-          "delta": 92,
+          "delta": 86,
           "direction": "taller"
         }
       },
@@ -3001,24 +3127,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 368,
+          "ours": 356,
           "jar": 383,
-          "delta": -15,
+          "delta": -27,
           "direction": "shorter"
         }
       },
       {
         "slug": "nomeco-93-minu967",
         "width": {
-          "ours": 511,
+          "ours": 437,
           "jar": 489,
-          "delta": 22,
-          "direction": "wider"
+          "delta": -52,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 228,
+          "ours": 224,
           "jar": 174,
-          "delta": 54,
+          "delta": 50,
           "direction": "taller"
         }
       },
@@ -3046,24 +3172,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 204,
+          "ours": 201,
           "jar": 150,
-          "delta": 54,
+          "delta": 51,
           "direction": "taller"
         }
       },
       {
         "slug": "novata-87-muti352",
         "width": {
-          "ours": 206,
+          "ours": 175,
           "jar": 194,
-          "delta": 12,
-          "direction": "wider"
+          "delta": -19,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 196,
+          "ours": 188,
           "jar": 205,
-          "delta": -9,
+          "delta": -17,
           "direction": "shorter"
         }
       },
@@ -3076,9 +3202,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 372,
+          "ours": 356,
           "jar": 398,
-          "delta": -26,
+          "delta": -42,
           "direction": "shorter"
         }
       },
@@ -3106,9 +3232,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 376,
+          "ours": 364,
           "jar": 381,
-          "delta": -5,
+          "delta": -17,
           "direction": "shorter"
         }
       },
@@ -3121,24 +3247,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 289,
+          "ours": 277,
           "jar": 317,
-          "delta": -28,
+          "delta": -40,
           "direction": "shorter"
         }
       },
       {
         "slug": "nuzugu-44-pega793",
         "width": {
-          "ours": 588,
+          "ours": 632,
           "jar": 263,
-          "delta": 325,
+          "delta": 369,
           "direction": "wider"
         },
         "height": {
-          "ours": 156,
+          "ours": 153,
           "jar": 180,
-          "delta": -24,
+          "delta": -27,
           "direction": "shorter"
         }
       },
@@ -3151,9 +3277,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 156,
+          "ours": 148,
           "jar": 185,
-          "delta": -29,
+          "delta": -37,
           "direction": "shorter"
         }
       },
@@ -3166,9 +3292,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 204,
+          "ours": 196,
           "jar": 225,
-          "delta": -21,
+          "delta": -29,
           "direction": "shorter"
         }
       },
@@ -3181,9 +3307,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 384,
+          "ours": 364,
           "jar": 407,
-          "delta": -23,
+          "delta": -43,
           "direction": "shorter"
         }
       },
@@ -3196,24 +3322,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 160,
+          "ours": 156,
           "jar": 183,
-          "delta": -23,
+          "delta": -27,
           "direction": "shorter"
         }
       },
       {
         "slug": "pekuxe-00-bovi270",
         "width": {
-          "ours": 263,
+          "ours": 221,
           "jar": 220,
-          "delta": 43,
+          "delta": 1,
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
@@ -3226,9 +3352,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 396,
+          "ours": 380,
           "jar": 418,
-          "delta": -22,
+          "delta": -38,
           "direction": "shorter"
         }
       },
@@ -3241,39 +3367,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 320,
+          "ours": 308,
           "jar": 343,
-          "delta": -23,
+          "delta": -35,
           "direction": "shorter"
         }
       },
       {
         "slug": "pifoni-76-duxa505",
         "width": {
-          "ours": 495,
+          "ours": 525,
           "jar": 365,
-          "delta": 130,
+          "delta": 160,
           "direction": "wider"
         },
         "height": {
-          "ours": 320,
+          "ours": 323,
           "jar": 188,
-          "delta": 132,
+          "delta": 135,
           "direction": "taller"
         }
       },
       {
         "slug": "pirofe-41-xama594",
         "width": {
-          "ours": 462,
+          "ours": 415,
           "jar": 308,
-          "delta": 154,
+          "delta": 107,
           "direction": "wider"
         },
         "height": {
-          "ours": 227,
+          "ours": 216,
           "jar": 236,
-          "delta": -9,
+          "delta": -20,
           "direction": "shorter"
         }
       },
@@ -3286,9 +3412,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 220,
+          "ours": 208,
           "jar": 162,
-          "delta": 58,
+          "delta": 46,
           "direction": "taller"
         }
       },
@@ -3301,25 +3427,25 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 404,
+          "ours": 396,
           "jar": 287,
-          "delta": 117,
+          "delta": 109,
           "direction": "taller"
         }
       },
       {
         "slug": "podelo-13-jaja314",
         "width": {
-          "ours": 191,
+          "ours": 160,
           "jar": 172,
-          "delta": 19,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 212,
+          "ours": 200,
           "jar": 211,
-          "delta": 1,
-          "direction": "taller"
+          "delta": -11,
+          "direction": "shorter"
         }
       },
       {
@@ -3331,24 +3457,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 492,
+          "ours": 482,
           "jar": 417,
-          "delta": 75,
+          "delta": 65,
           "direction": "taller"
         }
       },
       {
         "slug": "popofi-03-momo442",
         "width": {
-          "ours": 420,
+          "ours": 434,
           "jar": 384,
-          "delta": 36,
+          "delta": 50,
           "direction": "wider"
         },
         "height": {
-          "ours": 484,
+          "ours": 474,
           "jar": 333,
-          "delta": 151,
+          "delta": 141,
           "direction": "taller"
         }
       },
@@ -3376,24 +3502,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 212,
+          "ours": 200,
           "jar": 237,
-          "delta": -25,
+          "delta": -37,
           "direction": "shorter"
         }
       },
       {
         "slug": "pujozo-36-nino158",
         "width": {
-          "ours": 214,
+          "ours": 184,
           "jar": 334,
-          "delta": -120,
+          "delta": -150,
           "direction": "narrower"
         },
         "height": {
-          "ours": 280,
+          "ours": 268,
           "jar": 323,
-          "delta": -43,
+          "delta": -55,
           "direction": "shorter"
         }
       },
@@ -3406,9 +3532,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 112,
           "jar": 130,
-          "delta": -14,
+          "delta": -18,
           "direction": "shorter"
         }
       },
@@ -3421,9 +3547,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 100,
+          "ours": 96,
           "jar": 107,
-          "delta": -7,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -3436,24 +3562,24 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 400,
+          "ours": 376,
           "jar": 441,
-          "delta": -41,
+          "delta": -65,
           "direction": "shorter"
         }
       },
       {
         "slug": "relufo-04-fezo835",
         "width": {
-          "ours": 343,
+          "ours": 353,
           "jar": 296,
-          "delta": 47,
+          "delta": 57,
           "direction": "wider"
         },
         "height": {
-          "ours": 264,
+          "ours": 261,
           "jar": 213,
-          "delta": 51,
+          "delta": 48,
           "direction": "taller"
         }
       },
@@ -3466,9 +3592,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 292,
+          "ours": 280,
           "jar": 306,
-          "delta": -14,
+          "delta": -26,
           "direction": "shorter"
         }
       },
@@ -3481,9 +3607,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 120,
+          "ours": 116,
           "jar": 160,
-          "delta": -40,
+          "delta": -44,
           "direction": "shorter"
         }
       },
@@ -3496,9 +3622,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 396,
+          "ours": 380,
           "jar": 410,
-          "delta": -14,
+          "delta": -30,
           "direction": "shorter"
         }
       },
@@ -3511,9 +3637,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 376,
+          "ours": 364,
           "jar": 381,
-          "delta": -5,
+          "delta": -17,
           "direction": "shorter"
         }
       },
@@ -3526,25 +3652,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 507,
+          "ours": 476,
           "jar": 528,
-          "delta": -21,
+          "delta": -52,
           "direction": "shorter"
         }
       },
       {
         "slug": "ruderu-68-dere287",
         "width": {
-          "ours": 182,
+          "ours": 152,
           "jar": 164,
-          "delta": 18,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 228,
+          "ours": 212,
           "jar": 224,
-          "delta": 4,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -3556,39 +3682,39 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 576,
+          "ours": 560,
           "jar": 558,
-          "delta": 18,
+          "delta": 2,
           "direction": "taller"
         }
       },
       {
         "slug": "rurake-60-licu592",
         "width": {
-          "ours": 219,
+          "ours": 184,
           "jar": 196,
-          "delta": 23,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 98,
+          "ours": 80,
           "jar": 92,
-          "delta": 6,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "rurebu-12-nebi203",
         "width": {
-          "ours": 184,
+          "ours": 174,
           "jar": 220,
-          "delta": -36,
+          "delta": -46,
           "direction": "narrower"
         },
         "height": {
-          "ours": 228,
+          "ours": 224,
           "jar": 174,
-          "delta": 54,
+          "delta": 50,
           "direction": "taller"
         }
       },
@@ -3601,9 +3727,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 592,
+          "ours": 572,
           "jar": 607,
-          "delta": -15,
+          "delta": -35,
           "direction": "shorter"
         }
       },
@@ -3616,9 +3742,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 208,
+          "ours": 204,
           "jar": 251,
-          "delta": -43,
+          "delta": -47,
           "direction": "shorter"
         }
       },
@@ -3631,9 +3757,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 320,
+          "ours": 308,
           "jar": 305,
-          "delta": 15,
+          "delta": 3,
           "direction": "taller"
         }
       },
@@ -3646,10 +3772,10 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 396,
+          "ours": 380,
           "jar": 386,
-          "delta": 10,
-          "direction": "taller"
+          "delta": -6,
+          "direction": "shorter"
         }
       },
       {
@@ -3661,9 +3787,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 444,
+          "ours": 424,
           "jar": 477,
-          "delta": -33,
+          "delta": -53,
           "direction": "shorter"
         }
       },
@@ -3676,24 +3802,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 148,
+          "ours": 144,
           "jar": 149,
-          "delta": -1,
+          "delta": -5,
           "direction": "shorter"
         }
       },
       {
         "slug": "sigofi-46-gaja158",
         "width": {
-          "ours": 266,
+          "ours": 280,
           "jar": 263,
-          "delta": 3,
+          "delta": 17,
           "direction": "wider"
         },
         "height": {
-          "ours": 336,
+          "ours": 330,
           "jar": 269,
-          "delta": 67,
+          "delta": 61,
           "direction": "taller"
         }
       },
@@ -3706,9 +3832,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 136,
-          "delta": -20,
+          "delta": -28,
           "direction": "shorter"
         }
       },
@@ -3721,9 +3847,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 252,
+          "ours": 248,
           "jar": 187,
-          "delta": 65,
+          "delta": 61,
           "direction": "taller"
         }
       },
@@ -3736,10 +3862,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 256,
+          "ours": 252,
           "jar": 255,
-          "delta": 1,
-          "direction": "taller"
+          "delta": -3,
+          "direction": "shorter"
         }
       },
       {
@@ -3751,24 +3877,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 276,
+          "ours": 268,
           "jar": 287,
-          "delta": -11,
+          "delta": -19,
           "direction": "shorter"
         }
       },
       {
         "slug": "sokapa-71-tifi543",
         "width": {
-          "ours": 642,
+          "ours": 677,
           "jar": 384,
-          "delta": 258,
+          "delta": 293,
           "direction": "wider"
         },
         "height": {
-          "ours": 498,
+          "ours": 462,
           "jar": 396,
-          "delta": 102,
+          "delta": 66,
           "direction": "taller"
         }
       },
@@ -3796,9 +3922,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 400,
+          "ours": 376,
           "jar": 441,
-          "delta": -41,
+          "delta": -65,
           "direction": "shorter"
         }
       },
@@ -3811,10 +3937,10 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 186,
+          "ours": 168,
           "jar": 173,
-          "delta": 13,
-          "direction": "taller"
+          "delta": -5,
+          "direction": "shorter"
         }
       },
       {
@@ -3826,9 +3952,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 328,
+          "ours": 324,
           "jar": 281,
-          "delta": 47,
+          "delta": 43,
           "direction": "taller"
         }
       },
@@ -3841,24 +3967,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 160,
+          "ours": 156,
           "jar": 172,
-          "delta": -12,
+          "delta": -16,
           "direction": "shorter"
         }
       },
       {
         "slug": "tagixo-41-gapo816",
         "width": {
-          "ours": 191,
+          "ours": 160,
           "jar": 172,
-          "delta": 19,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 156,
+          "ours": 148,
           "jar": 159,
-          "delta": -3,
+          "delta": -11,
           "direction": "shorter"
         }
       },
@@ -3871,9 +3997,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 552,
+          "ours": 520,
           "jar": 563,
-          "delta": -11,
+          "delta": -43,
           "direction": "shorter"
         }
       },
@@ -3886,9 +4012,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 60,
+          "ours": 56,
           "jar": 68,
-          "delta": -8,
+          "delta": -12,
           "direction": "shorter"
         }
       },
@@ -3901,25 +4027,25 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 156,
+          "ours": 148,
           "jar": 185,
-          "delta": -29,
+          "delta": -37,
           "direction": "shorter"
         }
       },
       {
         "slug": "tepivu-88-reze603",
         "width": {
-          "ours": 242,
+          "ours": 227,
           "jar": 307,
-          "delta": -65,
+          "delta": -80,
           "direction": "narrower"
         },
         "height": {
-          "ours": 252,
+          "ours": 240,
           "jar": 252,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -3931,9 +4057,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 555,
+          "ours": 535,
           "jar": 637,
-          "delta": -82,
+          "delta": -102,
           "direction": "shorter"
         }
       },
@@ -3946,54 +4072,54 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
         "slug": "tuneta-22-mega154",
         "width": {
-          "ours": 630,
+          "ours": 650,
           "jar": 828,
-          "delta": -198,
+          "delta": -178,
           "direction": "narrower"
         },
         "height": {
-          "ours": 388,
+          "ours": 382,
           "jar": 341,
-          "delta": 47,
+          "delta": 41,
           "direction": "taller"
         }
       },
       {
         "slug": "vamazo-19-tufu812",
         "width": {
-          "ours": 225,
+          "ours": 194,
           "jar": 256,
-          "delta": -31,
+          "delta": -62,
           "direction": "narrower"
         },
         "height": {
-          "ours": 455,
+          "ours": 443,
           "jar": 402,
-          "delta": 53,
+          "delta": 41,
           "direction": "taller"
         }
       },
       {
         "slug": "vaxiki-78-nice114",
         "width": {
-          "ours": 155,
+          "ours": 146,
           "jar": 153,
-          "delta": 2,
-          "direction": "wider"
+          "delta": -7,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 264,
+          "ours": 256,
           "jar": 212,
-          "delta": 52,
+          "delta": 44,
           "direction": "taller"
         }
       },
@@ -4006,24 +4132,24 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 384,
+          "ours": 376,
           "jar": 352,
-          "delta": 32,
+          "delta": 24,
           "direction": "taller"
         }
       },
       {
         "slug": "vebala-15-tade547",
         "width": {
-          "ours": 524,
+          "ours": 476,
           "jar": 424,
-          "delta": 100,
+          "delta": 52,
           "direction": "wider"
         },
         "height": {
-          "ours": 892,
+          "ours": 864,
           "jar": 906,
-          "delta": -14,
+          "delta": -42,
           "direction": "shorter"
         }
       },
@@ -4036,9 +4162,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 400,
+          "ours": 376,
           "jar": 441,
-          "delta": -41,
+          "delta": -65,
           "direction": "shorter"
         }
       },
@@ -4051,39 +4177,39 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 120,
+          "ours": 116,
           "jar": 170,
-          "delta": -50,
+          "delta": -54,
           "direction": "shorter"
         }
       },
       {
         "slug": "vimoxa-78-zucu656",
         "width": {
-          "ours": 272,
+          "ours": 290,
           "jar": 194,
-          "delta": 78,
+          "delta": 96,
           "direction": "wider"
         },
         "height": {
-          "ours": 156,
+          "ours": 153,
           "jar": 116,
-          "delta": 40,
+          "delta": 37,
           "direction": "taller"
         }
       },
       {
         "slug": "vivate-04-guso306",
         "width": {
-          "ours": 439,
+          "ours": 407,
           "jar": 302,
-          "delta": 137,
+          "delta": 105,
           "direction": "wider"
         },
         "height": {
-          "ours": 365,
+          "ours": 324,
           "jar": 379,
-          "delta": -14,
+          "delta": -55,
           "direction": "shorter"
         }
       },
@@ -4096,9 +4222,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 212,
+          "ours": 209,
           "jar": 159,
-          "delta": 53,
+          "delta": 50,
           "direction": "taller"
         }
       },
@@ -4111,9 +4237,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 113,
           "jar": 110,
-          "delta": 6,
+          "delta": 3,
           "direction": "taller"
         }
       },
@@ -4126,84 +4252,84 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 332,
+          "ours": 320,
           "jar": 364,
-          "delta": -32,
+          "delta": -44,
           "direction": "shorter"
         }
       },
       {
         "slug": "vubolo-48-cubu499",
         "width": {
-          "ours": 522,
+          "ours": 557,
           "jar": 351,
-          "delta": 171,
+          "delta": 206,
           "direction": "wider"
         },
         "height": {
-          "ours": 442,
+          "ours": 410,
           "jar": 369,
-          "delta": 73,
+          "delta": 41,
           "direction": "taller"
         }
       },
       {
         "slug": "vupuse-73-nuso490",
         "width": {
-          "ours": 195,
+          "ours": 166,
           "jar": 185,
-          "delta": 10,
-          "direction": "wider"
+          "delta": -19,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 308,
+          "ours": 304,
           "jar": 310,
-          "delta": -2,
+          "delta": -6,
           "direction": "shorter"
         }
       },
       {
         "slug": "xabesu-51-dimi831",
         "width": {
-          "ours": 300,
+          "ours": 280,
           "jar": 181,
-          "delta": 119,
+          "delta": 99,
           "direction": "wider"
         },
         "height": {
-          "ours": 312,
+          "ours": 300,
           "jar": 357,
-          "delta": -45,
+          "delta": -57,
           "direction": "shorter"
         }
       },
       {
         "slug": "xarumo-26-zinu467",
         "width": {
-          "ours": 208,
+          "ours": 184,
           "jar": 412,
-          "delta": -204,
+          "delta": -228,
           "direction": "narrower"
         },
         "height": {
-          "ours": 288,
+          "ours": 272,
           "jar": 341,
-          "delta": -53,
+          "delta": -69,
           "direction": "shorter"
         }
       },
       {
         "slug": "xefalo-73-sabi101",
         "width": {
-          "ours": 524,
+          "ours": 476,
           "jar": 424,
-          "delta": 100,
+          "delta": 52,
           "direction": "wider"
         },
         "height": {
-          "ours": 892,
+          "ours": 864,
           "jar": 936,
-          "delta": -44,
+          "delta": -72,
           "direction": "shorter"
         }
       },
@@ -4216,25 +4342,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 468,
+          "ours": 452,
           "jar": 508,
-          "delta": -40,
+          "delta": -56,
           "direction": "shorter"
         }
       },
       {
         "slug": "xenofo-81-rame803",
         "width": {
-          "ours": 507,
+          "ours": 484,
           "jar": 234,
-          "delta": 273,
+          "delta": 250,
           "direction": "wider"
         },
         "height": {
-          "ours": 260,
+          "ours": 252,
           "jar": 256,
-          "delta": 4,
-          "direction": "taller"
+          "delta": -4,
+          "direction": "shorter"
         }
       },
       {
@@ -4246,40 +4372,40 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 268,
+          "ours": 264,
           "jar": 277,
-          "delta": -9,
+          "delta": -13,
           "direction": "shorter"
         }
       },
       {
         "slug": "xovano-23-tazo278",
         "width": {
-          "ours": 206,
+          "ours": 175,
           "jar": 372,
-          "delta": -166,
+          "delta": -197,
           "direction": "narrower"
         },
         "height": {
-          "ours": 508,
+          "ours": 484,
           "jar": 509,
-          "delta": -1,
+          "delta": -25,
           "direction": "shorter"
         }
       },
       {
         "slug": "zamagu-75-vape137",
         "width": {
-          "ours": 261,
+          "ours": 220,
           "jar": 94,
-          "delta": 167,
+          "delta": 126,
           "direction": "wider"
         },
         "height": {
-          "ours": 172,
+          "ours": 160,
           "jar": 172,
-          "delta": 0,
-          "direction": "equal"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -4291,25 +4417,25 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 116,
+          "ours": 108,
           "jar": 120,
-          "delta": -4,
+          "delta": -12,
           "direction": "shorter"
         }
       },
       {
         "slug": "zedoco-71-guge507",
         "width": {
-          "ours": 206,
+          "ours": 172,
           "jar": 184,
-          "delta": 22,
-          "direction": "wider"
+          "delta": -12,
+          "direction": "narrower"
         },
         "height": {
-          "ours": 174,
+          "ours": 144,
           "jar": 156,
-          "delta": 18,
-          "direction": "taller"
+          "delta": -12,
+          "direction": "shorter"
         }
       },
       {
@@ -4321,9 +4447,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 504,
+          "ours": 444,
           "jar": 516,
-          "delta": -12,
+          "delta": -72,
           "direction": "shorter"
         }
       },
@@ -4336,9 +4462,9 @@
           "direction": "narrower"
         },
         "height": {
-          "ours": 519,
+          "ours": 503,
           "jar": 560,
-          "delta": -41,
+          "delta": -57,
           "direction": "shorter"
         }
       },
@@ -4351,9 +4477,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 340,
+          "ours": 328,
           "jar": 341,
-          "delta": -1,
+          "delta": -13,
           "direction": "shorter"
         }
       },
@@ -4366,9 +4492,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 348,
+          "ours": 332,
           "jar": 474,
-          "delta": -126,
+          "delta": -142,
           "direction": "shorter"
         }
       },
@@ -4381,9 +4507,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 228,
+          "ours": 216,
           "jar": 254,
-          "delta": -26,
+          "delta": -38,
           "direction": "shorter"
         }
       },
@@ -4396,9 +4522,9 @@
           "direction": "wider"
         },
         "height": {
-          "ours": 500,
+          "ours": 476,
           "jar": 543,
-          "delta": -43,
+          "delta": -67,
           "direction": "shorter"
         }
       }
@@ -4440,128 +4566,128 @@
   "topFixturesByWeight": [
     {
       "slug": "jupoxe-15-sugo110",
-      "weightedScore": 2086,
-      "diffCount": 744
+      "weightedScore": 1951,
+      "diffCount": 607
     },
     {
       "slug": "boxoto-53-sifo232",
-      "weightedScore": 1117,
-      "diffCount": 656
+      "weightedScore": 915,
+      "diffCount": 454
     },
     {
       "slug": "tobajo-64-mipi810",
-      "weightedScore": 1035,
-      "diffCount": 580
-    },
-    {
-      "slug": "vebala-15-tade547",
-      "weightedScore": 731,
-      "diffCount": 433
+      "weightedScore": 888,
+      "diffCount": 428
     },
     {
       "slug": "xefalo-73-sabi101",
-      "weightedScore": 731,
-      "diffCount": 433
-    },
-    {
-      "slug": "navene-45-cozo466",
-      "weightedScore": 699,
-      "diffCount": 408
-    },
-    {
-      "slug": "gitoke-38-beme495",
-      "weightedScore": 685,
-      "diffCount": 329
-    },
-    {
-      "slug": "judatu-15-xize591",
-      "weightedScore": 642,
-      "diffCount": 369
-    },
-    {
-      "slug": "ruzica-16-deli877",
-      "weightedScore": 635,
-      "diffCount": 294
-    },
-    {
-      "slug": "rujuxa-07-neco067",
-      "weightedScore": 618,
-      "diffCount": 324
-    },
-    {
-      "slug": "jevoce-05-mumi686",
-      "weightedScore": 588,
-      "diffCount": 280
-    },
-    {
-      "slug": "nupose-71-vido428",
-      "weightedScore": 567,
-      "diffCount": 260
-    },
-    {
-      "slug": "roboja-69-susa752",
-      "weightedScore": 567,
-      "diffCount": 260
-    },
-    {
-      "slug": "decudi-92-bisu741",
-      "weightedScore": 518,
-      "diffCount": 266
-    },
-    {
-      "slug": "zeporo-46-zicu301",
-      "weightedScore": 492,
-      "diffCount": 246
-    },
-    {
-      "slug": "firibi-00-puki721",
-      "weightedScore": 491,
+      "weightedScore": 607,
       "diffCount": 308
     },
     {
-      "slug": "fibafo-22-foze119",
-      "weightedScore": 485,
-      "diffCount": 283
+      "slug": "vebala-15-tade547",
+      "weightedScore": 606,
+      "diffCount": 307
     },
     {
-      "slug": "gacaja-15-keko600",
-      "weightedScore": 469,
-      "diffCount": 323
+      "slug": "navene-45-cozo466",
+      "weightedScore": 599,
+      "diffCount": 302
     },
     {
-      "slug": "noxasi-06-nejo322",
-      "weightedScore": 448,
-      "diffCount": 125
+      "slug": "gitoke-38-beme495",
+      "weightedScore": 598,
+      "diffCount": 242
     },
     {
-      "slug": "maduja-30-xiri319",
-      "weightedScore": 437,
-      "diffCount": 200
+      "slug": "ruzica-16-deli877",
+      "weightedScore": 560,
+      "diffCount": 217
     },
     {
-      "slug": "vubolo-48-cubu499",
-      "weightedScore": 418,
-      "diffCount": 103
+      "slug": "judatu-15-xize591",
+      "weightedScore": 558,
+      "diffCount": 281
     },
     {
-      "slug": "racana-82-zece676",
-      "weightedScore": 411,
-      "diffCount": 247
+      "slug": "rujuxa-07-neco067",
+      "weightedScore": 532,
+      "diffCount": 237
     },
     {
-      "slug": "xovano-23-tazo278",
-      "weightedScore": 403,
+      "slug": "jevoce-05-mumi686",
+      "weightedScore": 520,
+      "diffCount": 209
+    },
+    {
+      "slug": "nupose-71-vido428",
+      "weightedScore": 506,
       "diffCount": 196
     },
     {
-      "slug": "tuneta-22-mega154",
-      "weightedScore": 397,
-      "diffCount": 195
+      "slug": "roboja-69-susa752",
+      "weightedScore": 506,
+      "diffCount": 196
+    },
+    {
+      "slug": "decudi-92-bisu741",
+      "weightedScore": 464,
+      "diffCount": 200
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "weightedScore": 441,
+      "diffCount": 191
+    },
+    {
+      "slug": "noxasi-06-nejo322",
+      "weightedScore": 438,
+      "diffCount": 102
+    },
+    {
+      "slug": "firibi-00-puki721",
+      "weightedScore": 425,
+      "diffCount": 233
+    },
+    {
+      "slug": "vubolo-48-cubu499",
+      "weightedScore": 421,
+      "diffCount": 91
+    },
+    {
+      "slug": "fibafo-22-foze119",
+      "weightedScore": 410,
+      "diffCount": 208
+    },
+    {
+      "slug": "maduja-30-xiri319",
+      "weightedScore": 383,
+      "diffCount": 145
+    },
+    {
+      "slug": "xovano-23-tazo278",
+      "weightedScore": 381,
+      "diffCount": 169
+    },
+    {
+      "slug": "gacaja-15-keko600",
+      "weightedScore": 378,
+      "diffCount": 232
+    },
+    {
+      "slug": "nexitu-74-luga914",
+      "weightedScore": 356,
+      "diffCount": 67
     },
     {
       "slug": "maketa-43-juja264",
-      "weightedScore": 390,
-      "diffCount": 199
+      "weightedScore": 354,
+      "diffCount": 153
+    },
+    {
+      "slug": "racana-82-zece676",
+      "weightedScore": 353,
+      "diffCount": 185
     }
   ]
 }

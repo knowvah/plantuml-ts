@@ -133,6 +133,32 @@ holds. **Do not add an activity DOT gate.**
 
 ---
 
+## `activity-style-defaults` — **EXECUTED and CLOSED 2026-09-08**
+
+Close-out in `plans/activity-style-defaults/README.md`. All 8 tasks landed
+on `feat/activity-style-defaults`. **Aggregate `weightedScore` 61677 →
+52565 (−14.77%)** over the 268 comparable fixtures;
+`svg/g[]/text[]/@font-size` 1316 → 291 (−77.9%) and
+`svg/g[]/line[]/@stroke-width` 2319 → 143 (−93.8%). The font-size histogram
+went from a flat `{14: 1577}` to `{12: 1008, 11: 258, 13: 146, 18: 140,
+14: 15}` against the jar's `{12: 996, 11: 614, 18: 135, 13: 102, 14: 16}`.
+Fourteen fixtures ROSE, each adopted with a stated mechanism (a corrected
+box height exposing `LAYOUT_MARGIN`, and positional element pairing on
+fixtures whose draw order already diverges) — none is a wrong value.
+
+**Two premises the execution measured FALSE**, both worth carrying forward:
+T3's write-set (`activity-layout-helpers.ts` and the ~2049-LOC
+`layout.old.ts` cluster) is **not on the render path** — applying the brief
+verbatim moved the score 61677 → 61677, 0 of 268 fixtures; the live sizer
+is `src/diagrams/activity/tiles/`. And the brief's SName for the
+repeat/while condition was `activity` where upstream says `diamond`.
+
+`svg/g[][childCount]` is now **47.4%** of the residual (24911 of 52565) —
+up as a SHARE because everything else fell. Structural, not stylistic.
+
+Original briefing entry follows, unedited per this file's
+amend-don't-rewrite convention:
+
 ## `activity-style-defaults` — BRIEFED 2026-09-08, **NOT executed**
 
 Brief at `plans/activity-style-defaults/README.md`, 8 tasks over 5 batches,
@@ -861,6 +887,32 @@ Ordered by how ready they are, not by size.
   here — likely its own multi-task mission. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md`.
 
+- **`activity-diamond-font-skinparams`** — **PARTIALLY RESOLVED
+  2026-09-08 by `activity-style-defaults` T1/T7, re-scoped with a
+  mechanism.** What now works: the FLAT spelling `skinparam DiamondFontSize
+  40` resolves end to end, because T1 added `diamond` to
+  `ELEMENT_BUCKET_SNAMES` and `matchElementFontSizeKey` splits the key into
+  `diamond` + `fontsize` (asserted in
+  `tests/unit/core/skinparam-element-buckets.test.ts`). So does the modern
+  `<style> activityDiagram { diamond { FontSize N } }` selector, which T1's
+  D3a wired. **What remains, with its mechanism:** the BLOCK-NESTED spelling
+  `skinparam activity { DiamondFontSize 40 }` still does not, and the reason
+  is key normalization rather than the bucket — the preprocessor prefixes a
+  block-form key with its block name, producing `activitydiamondfontsize`
+  (probed, not inferred), whose sname slice is `activitydiamond`, which is
+  not a bucket SName and is dropped. Fixing it means teaching the key
+  matcher that a `<block><Sub>FontSize` key names the SUB-element, not a
+  compound one — that is `skinparam-element-buckets.ts` /
+  `skinparam-key-normalize.ts` work touching every diagram type, which is
+  why it was NOT folded into a mission whose D3 deliberately bounded its own
+  blast radius. `dozaxu-98-xetu961` (the filed fixture) now renders 212×292
+  against the jar's 467×301, with `activity { FontSize 30 }` correctly
+  applied and `DiamondFontSize 40` still not. Its unrendered `YES`/`no`
+  branch labels are a separate gap again.
+
+  Original filing follows, unedited per this file's amend-don't-rewrite
+  convention:
+
 - **`activity-diamond-font-skinparams`** (NEW, unbriefed) — FILED
   2026-09-03 by `activity-element-granularity` T1, measured.
   `DiamondFontSize`/activity `FontSize` skinparams are unwired (grepped,
@@ -897,6 +949,76 @@ Ordered by how ready they are, not by size.
   `activity-note-after-terminal` above (both are note sizing) or may be a
   sibling defect — not distinguished. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md` (T3 addendum).
+
+- **`activity-canvas-margin`** (NEW, unbriefed) — FILED 2026-09-08 by
+  `activity-style-defaults` T4, measured. `LAYOUT_MARGIN = 12`
+  (`src/diagrams/activity/activity-layout-constants.ts`) against the jar's
+  16: every activity rect sits at `x=12,y=12` where the jar puts it at
+  `16,16`, and the canvas is short by the difference. Invisible before this
+  mission because the boxes were themselves too tall; now that
+  `activityBoxHeight` derives the box exactly, the margin is what remains,
+  and it is why the corpus flipped from systematically TOO TALL
+  (shorter=154 / taller=105) to systematically TOO SHORT (shorter=198 /
+  taller=69). It is the mechanism behind all 14 pins T4 adopted upward.
+  Looks like one constant, but confirm against the jar's own layout margin
+  rather than the observed 16 — CLAUDE.md forbids fitting. Full evidence:
+  `plans/activity-style-defaults/decision-journal.md` (T4 rows),
+  `.agent-notes/asd-T7.md`.
+
+- **`activity-swimlane-line-thickness`** (NEW, unbriefed) — FILED
+  2026-09-08 by `activity-style-defaults` T7, measured. The swimlane
+  divider and header-separator lines (`src/diagrams/activity/renderer.ts`)
+  draw a hardcoded `strokeWidth: 1` where `swimlane { LineThickness 1.5 }`
+  (`plantuml.skin:312`, resolved by `ftile/Swimlanes.java:127` and
+  `ftile/LaneDivider.java:72`) says 1.5. `swimlaneLineThickness` already
+  exists in `activity-style-defaults.ts` and returns the right value — the
+  call site was deliberately not changed, because [D7] scoped T6 to the
+  swimlane FONT and forbade touching the visual model. **51 of the 143
+  remaining `line/@stroke-width` residual units.** Likely one line; pair it
+  with `activity-swimlane-rendering` if that runs first, since the
+  divider-vs-boxed-header model may move the call site anyway.
+
+- **`activity-min-box-width`** (NEW, unbriefed) — FILED 2026-09-08 by
+  `activity-style-defaults` T4, measured. `ACTION_MIN_WIDTH = 120`
+  (`src/diagrams/activity/tiles/gtile-action.ts`) has no upstream
+  counterpart: upstream's floor is `PName.MinimumWidth`, whose unset value
+  is `0` (`style/ValueNull.java:61-63`). Short-labelled fixtures are
+  dominated by it — `cizixu-00-koro700` renders a 120-wide box against the
+  jar's 26.675. Deliberately left in place by T4, whose D8 scope was the
+  HEIGHT: removing a 120px width floor is an independent geometric move
+  that would have confounded that measurement. Should be cheap, and should
+  be measured on its own.
+
+- **`activity-edge-stroke-width`** — **CLOSED 2026-09-08 by
+  `activity-style-defaults` T6, measured.** Edge lines take
+  `activityLineThickness(theme, 'arrow')` = 1 (`plantuml.skin:374`). The
+  family's weight fell **2319 → 143** (−93.8%) across **256 → 55** fixtures,
+  and the corpus `stroke-width` histogram INVERTED: ours was
+  `{1.5: 2503, 1: 199}` and is now `{1: 2610, 1.5: 90}` against the jar's
+  `{1: 2976, 1.5: 224, 2.5: 90, …}`.
+
+  The filing's own mechanism was right but INCOMPLETE, in our favour.
+  `UStroke.withThickness(1.5)` at `Worm.java:154,161` is decoration-only as
+  filed — but each decoration is then drawn through `.apply(UStroke
+  .simple())` (`:159`, `:166`), and `UStroke.simple()` is `new UStroke(0, 0,
+  1.0)` (`klimt/UStroke.java:75-77`), so the 1.5 is overridden before the
+  draw and reaches no output at all. It is dead upstream, and 1.5 is
+  therefore preserved nowhere on an activity edge. T6 also gave the
+  arrowhead polygon the stroke it never had: `arrowHeadColor` is applied to
+  both foreground and background (`Worm.java:152-153`).
+
+  **The 143 residual is no longer one family.** Measured pairs (ours→jar):
+  `1.5→2.5` ×43, `1→1.5` ×51, `1.5→1` ×24, `1→2.5` ×10, `1→0.1` ×11, plus
+  singletons at `10`, `5`, `0.1`. The largest sub-class, `1→1.5` ×51, is the
+  **swimlane divider**: `swimlane { LineThickness 1.5 }`
+  (`plantuml.skin:312`) is resolved by `swimlaneLineThickness` but the
+  divider and header lines in `renderer.ts` still draw a hardcoded 1 —
+  deliberately, because [D7] scoped T6 to the swimlane FONT only. Filed as
+  the new `activity-swimlane-line-thickness` below; it is a one-line change
+  that D7 forbade this mission from making.
+
+  Original filing follows, unedited per this file's amend-don't-rewrite
+  convention:
 
 - **`activity-edge-stroke-width`** (NEW, unbriefed) — FILED 2026-09-03 by
   `activity-element-granularity` T4's re-census, measured. Every activity
