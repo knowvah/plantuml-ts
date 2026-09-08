@@ -7,7 +7,9 @@
 
 import type { ActivityIf, ActivityNode } from './ast.js';
 import type { LayoutCtx } from './activity-layout-types.js';
-import { ACTION_H_PAD, NODE_MARGIN_X } from './activity-layout-constants.js';
+import { NODE_MARGIN_X } from './activity-layout-constants.js';
+// The superseded engine's own constant -- see `activity-layout-helpers.ts`.
+import { ACTION_H_PAD } from './activity-layout-helpers.js';
 import { actionSize, parallelogramSize } from './activity-layout-helpers.js';
 
 function measureIfWidth(node: ActivityIf, ctx: LayoutCtx): number {

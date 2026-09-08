@@ -4,9 +4,15 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { ACTION_HEIGHT, ACTION_H_PAD } from '../activity-layout-constants.js';
+import { activityBoxHeight, activityFontSize, activityPadding } from '../activity-style-defaults.js';
 
-const V_PAD = 8;
+/** This port's own minimum box width. Upstream's floor is `PName
+ *  .MinimumWidth`, whose unset value is `0`
+ *  (`style/ValueNull.java:61-63`), so the jar imposes no width floor on an
+ *  action box at all. Left in place by `activity-style-defaults` T4, whose
+ *  scope is the HEIGHT derivation (D8): removing a 120px width floor is a
+ *  large independent geometric move that would confound that measurement.
+ *  Unsourced, and recorded as such. */
 const ACTION_MIN_WIDTH = 120;
 
 export class GtileAction extends TileLeaf {
@@ -25,15 +31,35 @@ export class GtileAction extends TileLeaf {
     const isCodeBlock = /^<code>$/i.test(allLines[0]?.trim() ?? '');
     const lines = allLines.filter((l) => !/^<\/?code>$/i.test(l.trim()));
     const lineCount = lines.length;
-    const lineHeight = bounder.getDimension('M', theme.fontSize).height * 1.4;
+    // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361).
+    // Every BoxStyle -- plain and SDL alike -- is an `FtileBox`, and every
+    // `FtileBox` resolves `SName.activity`
+    // (`ftile/vertical/FtileBox.java:97-99`, `:146`).
+    const fontSize = activityFontSize(theme, 'activity');
+    // The per-line baseline ADVANCE is EXACTLY 1x the font size, which is
+    // what the RENDERER has advanced at since `activity-element-granularity`
+    // T3 (`activity-renderer-shapes.ts`'s ASCENT_FRACTION block):
+    // `calculateDimension`'s returned height is `size`, unconditionally --
+    // `klimt/drawing/font/StringBounderFromWidthTable.java:71`. This sizer
+    // used `* 1.4` until `activity-style-defaults` D6, an unsourced constant
+    // that reserved 40% more height than the renderer then drew into.
+    const lineHeight = bounder.getDimension('M', fontSize).height;
     // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
     // indented code lines because space glyphs are narrower than code chars.
-    const monoCharWidth = theme.fontSize * 0.6;
+    const monoCharWidth = fontSize * 0.6;
     const maxWidth = isCodeBlock
       ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
-      : Math.max(...lines.map((l) => bounder.getDimension(l, theme.fontSize).width));
-    this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, ACTION_MIN_WIDTH);
-    this.height = Math.max(lineHeight * lineCount + 2 * V_PAD, ACTION_HEIGHT);
+      : Math.max(...lines.map((l) => bounder.getDimension(l, fontSize).width));
+    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
+    // :237-243`) adds the resolved `Padding` to BOTH axes and floors the
+    // WIDTH only -- `atLeast(minimumWidth, 0)`, a literal 0 for the height.
+    // So there is no upstream minimum height, and the port's own
+    // `ACTION_HEIGHT = 36` floor is deleted rather than lowered to the 32
+    // the jar emits (D8): 32 is what this derivation RETURNS for one line
+    // at FontSize 12 and Padding 10, which is corroboration, not a source.
+    const pad = activityPadding('activity');
+    this.width = Math.max(maxWidth + 2 * pad, ACTION_MIN_WIDTH);
+    this.height = activityBoxHeight(lineHeight * lineCount, 'activity');
   }
 
   getCoord(hook: HookName): GPoint {

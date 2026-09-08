@@ -4,7 +4,8 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { ACTION_H_PAD, NOTE_FOLD } from '../activity-layout-constants.js';
+import { NOTE_FOLD, NOTE_H_PAD } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 export class GtileNote extends TileLeaf {
   readonly kind = 'gtile-note' as const;
@@ -17,8 +18,15 @@ export class GtileNote extends TileLeaf {
     super();
     this.text = node.text;
     this.side = node.position;
-    const measured = bounder.getDimension(node.text, theme.fontSize - 2);
-    this.width = measured.width + 2 * ACTION_H_PAD + NOTE_FOLD;
+    // The ROOT `note { FontSize 13 }` block (plantuml.skin:323): an activity
+    // note resolves `SName.note` under `activityDiagram`
+    // (`ftile/vcompact/FtileWithNoteOpale.java:89`,
+    // `ftile/vcompact/FtileNoteAlone.java:77`), and `activityDiagram { }`
+    // declares no `note` override, so the root value stands. Was
+    // `theme.fontSize - 2` = 12, which moved the note the WRONG WAY: the
+    // jar's note text is LARGER than its action text, not smaller.
+    const measured = bounder.getDimension(node.text, activityFontSize(theme, 'note'));
+    this.width = measured.width + 2 * NOTE_H_PAD + NOTE_FOLD;
     this.height = measured.height + NOTE_FOLD + 16;
   }
 

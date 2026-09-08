@@ -20,7 +20,15 @@ export class GtileLabel extends TileLeaf {
   constructor(node: ActivityLabel, bounder: StringBounder, theme: Theme) {
     super();
     this.name = node.name;
-    const measured = bounder.getDimension(node.name, theme.fontSize - 2);
+    // A `label`/`goto` target resolves `of(root, element, activityDiagram,
+    // goto)` (`ftile/Swimlanes.java:248,270`), and `plantuml.skin` carries
+    // NO `goto` block at any scope -- verified by grep, not assumed -- so
+    // the name inherits the root `FontSize 14` (:10) verbatim. The previous
+    // `- 2` was unsourced. Read straight from the theme rather than through
+    // `activityFontSize`: there is no `goto` SName in that resolver's union
+    // and no bucket for it, so routing it there would invent a scope
+    // upstream does not have.
+    const measured = bounder.getDimension(node.name, theme.fontSize);
     this.width = measured.width + 16;
     this.height = measured.height + 8;
   }

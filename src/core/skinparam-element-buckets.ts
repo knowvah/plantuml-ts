@@ -99,6 +99,31 @@ export const ELEMENT_BUCKET_SNAMES = new Set([
   'object',
   'map',
   'json',
+  // mission activity-style-defaults T1 (D3): the four SNames that are
+  // EXCLUSIVE to activitydiagram3, so adding them cannot move any other
+  // engine's resolved theme. Each is a real member of upstream's `SName`
+  // enum and the target of an `activityDiagram { <sname> { ... } }` block
+  // in `plantuml.skin:358-385`:
+  //   `activity`    (`style/SName.java:44`)  -- the action box; upstream
+  //                 `Padding 10; FontSize 12; RoundCorner 25`
+  //                 (`plantuml.skin:360-362`).
+  //   `activityBar` (`style/SName.java:45`)  -- the fork/join bar;
+  //                 `BackgroundColor #5` (`plantuml.skin:387`).
+  //   `diamond`     (`style/SName.java:87`)  -- the branch/merge rhombus;
+  //                 `FontSize 11` (`plantuml.skin:370`).
+  //   `swimlane`    (`style/SName.java:157`) -- `FontSize 18; LineColor
+  //                 black; LineThickness 1.5` at ROOT scope
+  //                 (`plantuml.skin:309-314`), inherited by activity.
+  // DELIBERATELY NOT ADDED (D3): `arrow`, `note`, `circle`, `composite`.
+  // All four are SHARED SNames already routed by description/class/state,
+  // and admitting them here would change which selector spellings resolve
+  // for EVERY diagram type, not just activity. Activity reads its own
+  // DEFAULTS for those from `diagrams/activity/activity-style-defaults.ts`
+  // instead (D2) -- the flat bucket cannot hold a diagram-scoped default.
+  'activity',
+  'activitybar',
+  'diamond',
+  'swimlane',
   // mission G4 S10: `EntityImageState`/`EntityImageStateCommon`'s own
   // `StyleSignatureBasic.of(root, element, stateDiagram, state)` -- the SAME
   // generic per-element bucket mechanism `object`/`map`/`json` already reuse

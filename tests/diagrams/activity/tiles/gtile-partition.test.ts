@@ -3,6 +3,7 @@ import { GtilePartition } from '../../../../src/diagrams/activity/tiles/gtile-pa
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
+import { resolveTheme } from '../../../../src/core/theme.js';
 import type { GPoint } from '../../../../src/diagrams/activity/tiles/points.js';
 
 const NODE_MARGIN_Y = 20;
@@ -15,7 +16,13 @@ const bounder: StringBounder = {
   }),
 };
 
-const theme = { fontSize: 13, fontFamily: 'Arial' } as unknown as Theme;
+// A REAL resolved theme, not a `{ fontSize, fontFamily } as unknown as
+// Theme` stub. The tiles now resolve per-element style through
+// `activityFontSize` (`activity-style-defaults.ts`), which reads
+// `theme.colors.elements` -- a partial cast had no `colors` at all and
+// threw. `fontSize` is kept at 13 so every assertion below that depends
+// on the ROOT font is unchanged.
+const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
 function makeTile(width: number, height: number): Tile {
   return {

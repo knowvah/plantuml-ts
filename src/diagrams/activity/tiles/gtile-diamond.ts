@@ -4,6 +4,7 @@ import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { DIAMOND_LABEL_PAD, DIAMOND_MIN } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 export class GtileDiamond extends TileLeaf {
   readonly kind = 'gtile-diamond' as const;
@@ -14,7 +15,13 @@ export class GtileDiamond extends TileLeaf {
   constructor(label: string, bounder: StringBounder, theme: Theme) {
     super();
     this.label = label;
-    const measured = bounder.getDimension(label, theme.fontSize - 2);
+    // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370),
+    // the signature every rhombus and hexagon condition resolves
+    // (`gtile/GtileIfHexagon.java:184`, `gtile/GtileHexagonInside.java:64`,
+    // `gtile/GtileRepeat.java:89`). Was `theme.fontSize - 2` -- an
+    // unsourced expression that reached 12, not 11, and that tracked the
+    // ROOT default instead of the diamond's own style.
+    const measured = bounder.getDimension(label, activityFontSize(theme, 'diamond'));
     const halfW = Math.max(measured.width / 2 + DIAMOND_LABEL_PAD, DIAMOND_MIN);
     const halfH = Math.max(measured.height / 2 + 4, DIAMOND_MIN);
     this.width = halfW * 2;

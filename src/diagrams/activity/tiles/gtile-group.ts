@@ -4,6 +4,7 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_Y } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 const H_PAD = 12;
 
@@ -21,7 +22,15 @@ export class GtileGroup extends TileComposite {
   constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme) {
     super();
     this.children = [body];
-    const titleMeasured = bounder.getDimension(title, theme.fontSize);
+    // A group/partition frame resolves `of(root, element, activityDiagram,
+    // <symbol>, composite)` (`ftile/vcompact/FtileGroup.java:89-92`), and
+    // `activityDiagram { composite { ... } }` (plantuml.skin:364-368)
+    // declares LineColor, BackgroundColor and LineThickness but NO FontSize
+    // -- so the title inherits the root `FontSize 14` (:10), which is what
+    // `activityFontSize` returns for a kind declaring none. Routed through
+    // the resolver rather than left as a bare `theme.fontSize` so a user's
+    // `<style> activityDiagram { composite { FontSize N } }` reaches it.
+    const titleMeasured = bounder.getDimension(title, activityFontSize(theme, 'composite'));
     const TITLE_H = titleMeasured.height + 8;
     this.titleHeight = TITLE_H;
     this.width = Math.max(body.width + 2 * H_PAD, titleMeasured.width + 2 * H_PAD);

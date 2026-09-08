@@ -6,7 +6,30 @@
 import type { FontSpec } from '../../core/measurer.js';
 import { measureNodeLabel } from '../../core/latex.js';
 import type { LayoutCtx } from './activity-layout-types.js';
-import { ACTION_HEIGHT, ACTION_H_PAD, DIAMOND_LABEL_PAD, DIAMOND_MIN, NOTE_FOLD } from './activity-layout-constants.js';
+import { DIAMOND_LABEL_PAD, DIAMOND_MIN, NOTE_FOLD } from './activity-layout-constants.js';
+
+/**
+ * The SUPERSEDED engine's own box constants.
+ *
+ * This file, `layout.old.ts` and their `activity-layout-*.ts` siblings are
+ * NOT on the render path: `activityPlugin.layoutSync` calls `layoutActivity`
+ * from `layout/tile-layout.ts`, which builds the `Gtile*` classes in
+ * `tiles/`; the live path imports `layout.old.ts` for TYPES ONLY
+ * (`layout/tile-layout.ts:30`, `layout/tile-coordinates.ts:2`). The cluster
+ * is kept alive by `tests/unit/activity/layout.test.ts` alone.
+ *
+ * Both numbers used to live in `activity-layout-constants.ts`, shared with
+ * the live tiles. `activity-style-defaults` T4 replaced the LIVE uses with
+ * `activityBoxHeight`/`activityPadding`, which derive the box from the
+ * resolved `FontSize` and `Padding` per `FtileBox.java:237-243`. Moving the
+ * two literals here rather than deleting them keeps this dead engine
+ * compiling and its tests passing, without leaving an undeived `36` in a
+ * module the live path still imports. Neither is sourced from upstream;
+ * both die with the cluster.
+ */
+const ACTION_HEIGHT = 36;
+const ACTION_H_PAD = 16;
+export { ACTION_HEIGHT, ACTION_H_PAD };
 
 export function nextId(ctx: LayoutCtx, prefix: string): string {
   const current = ctx.counters.get(prefix) ?? 0;
