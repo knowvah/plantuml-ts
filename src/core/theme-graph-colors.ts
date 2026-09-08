@@ -146,6 +146,28 @@ export interface ElementColors {
    * default). See `resolveElementMinimumWidth`.
    */
   minimumWidth?: number;
+  /**
+   * `<style> <sname> { RoundCorner N } }` -- the per-element CORNER RADIUS,
+   * registered under this element's own `SName` bucket
+   * (`StyleSignatureBasic.of(root, element, <diagramType>, <sname>)`,
+   * `PName.RoundCorner`). Stores the RAW, UNHALVED style value: `rx` and
+   * `ry` are each `value / 2`, following `URectangle.ts#build().rounded()`'s
+   * existing halving convention and the identical treatment
+   * {@link import('./theme-graph-colors-b.js').ThemeGraphColorsB.classCascadeRoundCorner}
+   * already gives the class-diagram ancestor tier.
+   *
+   * First consumer: `activityDiagram { activity { RoundCorner 25 } }`
+   * (`plantuml.skin:361`) -- the jar emits `rx="12.5" ry="12.5"` on an
+   * action rect, which is `25 / 2` on BOTH axes (mission
+   * `activity-style-defaults` D4; the port's own prior `rx="8"` was an
+   * unsourced constant and carried no `ry` at all).
+   *
+   * Absent = no per-element override; the caller applies its own default,
+   * mirroring {@link lineThickness} and {@link minimumWidth}'s "absent ->
+   * caller default" shape rather than inventing a hard default here, since
+   * the radius differs per element kind.
+   */
+  roundCorner?: number;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB;

@@ -55,6 +55,31 @@ const DIAGRAM_TYPE_SELECTOR_NAMES = [
   'usecasediagram',
   'statediagram',
   'objectdiagram',
+  // mission activity-style-defaults T1: `activitydiagram3`'s own style
+  // signatures are diagram-scoped in exactly this shape --
+  // `StyleSignatureBasic.of(root, element, activityDiagram, <sname>)` at
+  // `activitydiagram3/ftile/vertical/FtileBox.java:98` (activity),
+  // `ftile/FtileFactoryDelegator.java:84` (arrow),
+  // `ftile/Swimlanes.java:127` + `ftile/LaneDivider.java:72` (swimlane) and
+  // `ftile/vcompact/FtileWithNoteOpale.java:89` (note) -- and `plantuml.skin
+  // :358-385` writes the built-in defaults as an `activityDiagram { <sname>
+  // { ... } }` block, the same nesting every entry above already covers.
+  // Without this entry `<style> activityDiagram { activity { FontSize 20 } }`
+  // produced the selector "activitydiagram.activity", matched neither a bare
+  // bucket name nor a recognized prefix, and was silently dropped.
+  //
+  // This DOES widen the shared buckets: `activityDiagram { note { ... } }`
+  // now feeds the same `note` bucket a class diagram's `note { ... }` feeds,
+  // and `activityDiagram { arrow { ... } }` would feed `arrow` if `arrow`
+  // were ever admitted to ELEMENT_BUCKET_SNAMES (it is not -- D3). That
+  // widening is upstream's own behavior, not a side effect: `note` under
+  // `activityDiagram` IS `SName.note` upstream (FtileWithNoteOpale above),
+  // and our bucket map being FLAT (this function collapses the prefix) is
+  // the reason activity's own DEFAULTS live in
+  // `diagrams/activity/activity-style-defaults.ts` instead (D2). A user who
+  // writes the nested selector is asking for the nested selector's upstream
+  // meaning; only the DEFAULT tier is the one a flat map cannot express.
+  'activitydiagram',
 ] as const;
 
 /**
@@ -154,6 +179,19 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
       if (mw !== undefined) {
         const minWidth = Number.parseFloat(mw);
         if (Number.isFinite(minWidth)) bucket.minimumWidth = minWidth;
+      }
+      // mission activity-style-defaults T1 (D4): the per-element
+      // `RoundCorner` corner radius (`PName.RoundCorner`), scoped to this
+      // bucket's SName -- `activityDiagram { activity { RoundCorner 25 } }`
+      // (`plantuml.skin:361`). Stored RAW/UNHALVED, exactly as
+      // `classCascadeRoundCorner` stores the class-diagram ancestor tier;
+      // consumers emit `rx` = `ry` = value / 2 (`URectangle.ts#build()
+      // .rounded()`'s halving convention). Parsed with `parseFloat` like
+      // `linethickness` and `minimumwidth` -- a `RoundCorner 12.5` is legal.
+      const rc = props.get('roundcorner');
+      if (rc !== undefined) {
+        const radius = Number.parseFloat(rc);
+        if (Number.isFinite(radius)) bucket.roundCorner = radius;
       }
       const fs = props.get('fontsize');
       if (fs !== undefined) {

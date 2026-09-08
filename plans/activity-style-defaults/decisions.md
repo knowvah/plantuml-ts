@@ -56,6 +56,41 @@ for every diagram type.
 **Consequences:** bounded blast radius. T1 must assert that no other
 engine's resolved theme changes.
 
+### D3a — amendment, 2026-09-08 (T1, approved after a halt)
+
+**Context discovered during T1:** D3's SName allowlist is necessary but not
+sufficient for the task's own AC1. `<style> activityDiagram { activity {
+FontSize 20 } }` produces the selector `activitydiagram.activity`, and
+`style-map-element.ts:76-85#resolveElementBucketSelector` only strips a
+`<diagramType>.` prefix drawn from `DIAGRAM_TYPE_SELECTOR_NAMES`
+(`:52-58` — classdiagram, componentdiagram, usecasediagram, statediagram,
+objectdiagram). `activitydiagram` was absent, so the selector matched
+neither a bare bucket name nor a recognized prefix and was silently
+dropped. The same file is also the only place a `<style>` block's
+`RoundCorner` can populate the field D4 adds. `src/core/style-map-element
+.ts` was in **no** task's write-set.
+
+**Decision:** widen T1's write-set to include `src/core/style-map-element
+.ts`; add `activitydiagram` to `DIAGRAM_TYPE_SELECTOR_NAMES` and populate
+`ElementColors.roundCorner` in `collectElementStyleBuckets`.
+
+**Consequences — the one cross-engine effect, accepted deliberately:**
+`activityDiagram { note { ... } }` now feeds the SAME `note` bucket a class
+diagram's bare `note { ... }` feeds, because the prefix is collapsed. That
+is upstream's own behavior, not a side effect of our flatness: a note inside
+an activity diagram carries `SName.note` under `SName.activityDiagram`
+(`activitydiagram3/ftile/vcompact/FtileWithNoteOpale.java:89`), and every
+activity signature has this exact `of(root, element, activityDiagram,
+<sname>)` shape (`ftile/vertical/FtileBox.java:98`,
+`ftile/FtileFactoryDelegator.java:84`, `ftile/Swimlanes.java:127`,
+`ftile/LaneDivider.java:72`). A user writing the nested selector is asking
+for the nested selector's upstream meaning. **D2 is unchanged and still
+binds:** only the DEFAULT tier is the thing a flat map cannot express, and
+it still lives in `diagrams/activity/activity-style-defaults.ts`. This
+amendment moves no default into the bucket. Pinned by an explicit assertion
+in `tests/unit/core/skinparam-element-buckets.test.ts` so a future reader
+meets it as a decision rather than a surprise.
+
 ## D4 — `RoundCorner N` maps to `rx = ry = N / 2`
 
 **Context:** `activityDiagram { activity { RoundCorner 25 } }`
