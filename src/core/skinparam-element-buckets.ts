@@ -106,14 +106,14 @@ export const ELEMENT_BUCKET_SNAMES = new Set([
   // in `plantuml.skin:358-385`:
   //   `activity`    (`style/SName.java:44`)  -- the action box; upstream
   //                 `Padding 10; FontSize 12; RoundCorner 25`
-  //                 (`plantuml.skin:360-361`).
+  //                 (`plantuml.skin:360-362`).
   //   `activityBar` (`style/SName.java:45`)  -- the fork/join bar;
-  //                 `BackgroundColor #5` (`plantuml.skin:384`).
+  //                 `BackgroundColor #5` (`plantuml.skin:387`).
   //   `diamond`     (`style/SName.java:87`)  -- the branch/merge rhombus;
-  //                 `FontSize 11` (`plantuml.skin:365`).
+  //                 `FontSize 11` (`plantuml.skin:370`).
   //   `swimlane`    (`style/SName.java:157`) -- `FontSize 18; LineColor
   //                 black; LineThickness 1.5` at ROOT scope
-  //                 (`plantuml.skin:308-313`), inherited by activity.
+  //                 (`plantuml.skin:309-314`), inherited by activity.
   // DELIBERATELY NOT ADDED (D3): `arrow`, `note`, `circle`, `composite`.
   // All four are SHARED SNames already routed by description/class/state,
   // and admitting them here would change which selector spellings resolve
