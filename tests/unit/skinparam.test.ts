@@ -1187,6 +1187,58 @@ describe('resolveSkinparam — wrapWidth', () => {
 });
 
 // ---------------------------------------------------------------------------
+// resolveSkinparam — maxMessageSize / wrapMessageWidth (G20, edge-label wrap)
+// ---------------------------------------------------------------------------
+describe('resolveSkinparam — maxMessageSize', () => {
+  it('maps maxMessageSize to theme.maxMessageSize', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['maxMessageSize', '100']]), defaultTheme);
+    expect(theme.maxMessageSize).toBe(100);
+    expect(unknown).toEqual([]);
+  });
+
+  it('maps wrapMessageWidth to theme.maxMessageSize', () => {
+    const { theme } = resolveSkinparam(new Map([['wrapMessageWidth', '75']]), defaultTheme);
+    expect(theme.maxMessageSize).toBe(75);
+  });
+
+  it('wrapMessageWidth wins over maxMessageSize regardless of declaration order (skin/SkinParam.java:971-978)', () => {
+    const { theme: declaredWrapFirst } = resolveSkinparam(
+      new Map([
+        ['wrapmessagewidth', '50'],
+        ['maxmessagesize', '100'],
+      ]),
+      defaultTheme,
+    );
+    expect(declaredWrapFirst.maxMessageSize).toBe(50);
+
+    const { theme: declaredMaxFirst } = resolveSkinparam(
+      new Map([
+        ['maxmessagesize', '100'],
+        ['wrapmessagewidth', '50'],
+      ]),
+      defaultTheme,
+    );
+    expect(declaredMaxFirst.maxMessageSize).toBe(50);
+  });
+
+  it('is case/key-normalisation insensitive, matching nodesep/wrapwidth precedent', () => {
+    const { theme } = resolveSkinparam(new Map([['MaxMessageSize', '42']]), defaultTheme);
+    expect(theme.maxMessageSize).toBe(42);
+  });
+
+  it('absent by default — no wrap unless a diagram sets one of the two keys', () => {
+    const { theme } = resolveSkinparam(new Map(), defaultTheme);
+    expect(theme.maxMessageSize).toBeUndefined();
+    expect(defaultTheme.maxMessageSize).toBeUndefined();
+  });
+
+  it('deepMergeTheme copies maxMessageSize as a top-level optional scalar', () => {
+    const merged = deepMergeTheme(defaultTheme, { maxMessageSize: 90 });
+    expect(merged.maxMessageSize).toBe(90);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // resolveSkinparam — bare `RoundCorner` (G2 N65 item 47)
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — roundCorner', () => {

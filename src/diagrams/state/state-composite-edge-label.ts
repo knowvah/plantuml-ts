@@ -46,8 +46,9 @@ function computeEdgeLabelBox(
   text: string | undefined,
   font: FontSpec,
   measurer: StringMeasurer,
+  maxWidth: number | undefined,
 ): ReservedLabelBox {
-  if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to);
+  if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to, { maxWidth });
   return computeMergedLabelBox({
     label: text ?? '',
     noteDim: measureLinkNoteDim(t.linkNote, { family: font.family }, measurer),
@@ -56,6 +57,7 @@ function computeEdgeLabelBox(
     hasMiddleDecor: false,
     font,
     measurer,
+    maxWidth,
   });
 }
 
@@ -64,10 +66,15 @@ function computeEdgeLabelBox(
  *  together from the same box, including when a `note on link` is attached
  *  — T9 closes the gap the prior "merged label+note margin story is still
  *  unverified" comment named; see `computeEdgeLabelBox`. */
-function edgeLabelAttrs(t: Transition, font: FontSpec, measurer: StringMeasurer): EdgeAttrs {
+function edgeLabelAttrs(
+  t: Transition,
+  font: FontSpec,
+  measurer: StringMeasurer,
+  maxWidth: number | undefined,
+): EdgeAttrs {
   const text = transitionLabelOf(t);
   if (text === undefined && t.linkNote === undefined) return {};
-  const box = computeEdgeLabelBox(t, text, font, measurer);
+  const box = computeEdgeLabelBox(t, text, font, measurer, maxWidth);
   return {
     label: text ?? t.linkNote ?? '',
     labelWidth: box.reservedWidth,
@@ -93,7 +100,8 @@ function moveLabelToXlabel(attrs: EdgeAttrs): void {
 export function buildEdgeAttrs(t: Transition, font: FontSpec, ctx: DiagramCtx): EdgeAttrs {
   const attrs: EdgeAttrs = {
     minLen: (t.length ?? 2) - 1,
-    ...edgeLabelAttrs(t, font, ctx.measurer),
+    // G20: same expression as `ctx.theme.linetype` below (D3 precedent).
+    ...edgeLabelAttrs(t, font, ctx.measurer, ctx.theme.maxMessageSize),
   };
   if (ctx.theme.linetype === 'ortho') moveLabelToXlabel(attrs);
   return attrs;

@@ -18,6 +18,7 @@ import {
   stripCreoleMarkup,
   applyVisibilityIcon,
   applyGuillemet,
+  resolveLineFont,
 } from '../../../src/core/edge-label-box.js';
 // T1: the ONE `Display#getWithNewlines` port -- replaces the former
 // `splitCreoleLines` import (retired).
@@ -59,6 +60,52 @@ describe('stripCreoleMarkup', () => {
     // `back` before `b`, `size` before `s` — alternation is first-match.
     expect(stripCreoleMarkup('<back:#eee>q')).toBe('q');
     expect(stripCreoleMarkup('<size:9>q')).toBe('q');
+  });
+
+  it('does not eat a `<U+XXXX>` unicode escape — regression guard', () => {
+    // The alternation's `u` arm is case-insensitive (`gi`), so `<U+00AB>`
+    // reaches it: after `u` matches `U`, the optional `(?::[^>]*|\s[^>]*)?`
+    // group tries `:`/whitespace (next char is `+`, neither), falls back to
+    // empty, and then requires a literal `>` immediately — but the next
+    // char is still `+`, so the whole match fails and `<U+00AB>` survives.
+    // If this ever starts failing, the alternation widened and now eats
+    // `<U+XXXX>` escapes silently — see `core/text-escapes.ts#resolveTextEscapes`,
+    // which must run on this text INSTEAD, not have it stripped away first.
+    expect(stripCreoleMarkup('<U+00AB>typedef<U+00BB>')).toBe('<U+00AB>typedef<U+00BB>');
+  });
+});
+
+/**
+ * `resolveLineFont` (fix `label-size-tag-height`, `xamule-03-jeda376`): a
+ * leading `<size:N>` tag rewrites the font a line measures at, ported from
+ * `CommandCreoleSizeChange.java:57,81-93`'s EOL form. The oracle arithmetic:
+ * `"to Foo"` at size 30 measures 76.6875 x 30 via `WidthTableMeasurer`
+ * (verified independently against `measurer.measure`, not assumed).
+ */
+describe('resolveLineFont — leading <size:N> resolves the per-run font', () => {
+  const font = { family: 'SansSerif', size: 13 };
+
+  it('rewrites font.size and strips the tag (xamule-03-jeda376)', () => {
+    const r = resolveLineFont('<size:30>to Foo', font);
+    expect(r.text).toBe('to Foo');
+    expect(r.font).toEqual({ family: 'SansSerif', size: 30 });
+    expect(measurer.measure(r.text, r.font).width).toBeCloseTo(76.6875, 6);
+    expect(measurer.measure(r.text, r.font).height).toBe(30);
+  });
+
+  it('leaves font untouched and still strips ordinary formatting tags with no leading size tag', () => {
+    const r = resolveLineFont('<color:green>plain', font);
+    expect(r.text).toBe('plain');
+    expect(r.font).toBe(font);
+  });
+
+  it('does not resolve a MID-STRING <size:N> tag -- out of scope, still stripped as formatting', () => {
+    // No corpus fixture needs a genuine per-run change (part of a line at
+    // one size, the rest at another); this only proves the tag does not
+    // silently leak through as literal glyphs either.
+    const r = resolveLineFont('abc <size:30>def', font);
+    expect(r.font).toBe(font);
+    expect(r.text).toBe('abc def');
   });
 });
 
@@ -110,6 +157,33 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
     const widestUnstripped = Math.max(...unstripped.map((l) => measurer.measure(l, ARROW_FONT).width));
     const stripped = computeReservedLabelBox(raw, ARROW_FONT, measurer, false);
     expect(widestUnstripped).toBeGreaterThan(stripped.reservedWidth * 1.5);
+  });
+
+  /**
+   * Fix `label-size-tag-height`: a leading `<size:N>` tag used to be counted
+   * as literal glyphs (width) and never changed the measured height. Both
+   * `measuredWidth`/`measuredHeight` here feed {@link computeQuantifierBox}'s
+   * SIBLING callers (state/description edge labels) — no corpus fixture
+   * combines a `<size:N>` tag with a STATE/description edge label, so this
+   * is verified against the measurer directly, not an oracle pixel count.
+   */
+  it('measures a leading <size:N> line at its own font, not the base font', () => {
+    const box = computeReservedLabelBox('<size:30>to Foo', LINK_FONT, measurer, false);
+    expect(box.measuredWidth).toBeCloseTo(76.6875, 6);
+    expect(box.measuredHeight).toBe(30);
+  });
+
+  it('FAILS against pre-fix computeReservedLabelBox (tag counted as glyphs, base size used)', () => {
+    const preFixWidth = measurer.measure('<size:30>to Foo', LINK_FONT).width;
+    const box = computeReservedLabelBox('<size:30>to Foo', LINK_FONT, measurer, false);
+    expect(box.measuredWidth).not.toBeCloseTo(preFixWidth, 1);
+    expect(box.measuredHeight).not.toBe(LINK_FONT.size);
+  });
+
+  it('is unaffected when no line carries a <size:N> tag — backward compatible', () => {
+    const box = computeReservedLabelBox('plain text', LINK_FONT, measurer, false);
+    expect(box.measuredWidth).toBe(measurer.measure('plain text', LINK_FONT).width);
+    expect(box.measuredHeight).toBe(LINK_FONT.size);
   });
 });
 
@@ -234,7 +308,7 @@ describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => 
     // pre-fix code, which had no `classAttributeIconSize` parameter at all
     // and always measured the raw string — i.e. it already "passes"
     // pre-fix, which is exactly what a regression guard must do.
-    const gated = computeReservedLabelBox('-var1', LINK_FONT, measurer, false, 0);
+    const gated = computeReservedLabelBox('-var1', LINK_FONT, measurer, false, { classAttributeIconSize: 0 });
     const rawWidth = measurer.measure('-var1', LINK_FONT).width;
     expect(gated.reservedWidth).toBe(Math.floor(rawWidth + 2));
     expect(gated.reservedWidth).not.toBe(39);
@@ -242,7 +316,9 @@ describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => 
 
   it('a label with no leading visibility char is unaffected by the gate', () => {
     const withIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false);
-    const withoutIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false, 0);
+    const withoutIcon = computeReservedLabelBox('plainlabel', LINK_FONT, measurer, false, {
+      classAttributeIconSize: 0,
+    });
     expect(withIcon.reservedWidth).toBe(withoutIcon.reservedWidth);
   });
 
@@ -631,5 +707,53 @@ describe('roseNoteDim', () => {
     });
     expect(box.reservedWidth).toBe(80);
     expect(box.reservedHeight).toBe(33);
+  });
+});
+
+/**
+ * G20: `skinparam maxMessageSize`/`wrapMessageWidth` edge-label word-wrap.
+ *
+ * `usecase/kafexo-72-xupa679`: `skinparam maxMessageSize 100`,
+ * `foo --> (Use case) : this is a very long sentence on one single line`.
+ * Jar's own `svek-1.dot` reserves 90x41. Verified via `Fission#getSplitted`
+ * (`getSplitted`, ported verbatim) against `WidthTableMeasurer` at font size
+ * 13: greedy word-wrap breaks at
+ *   "this is a very long"   86.04
+ *   "sentence on one"       88.89   <- widest
+ *   "single line"           54.36
+ * `floor(88.8875 + 2*1) x (3*13 + 2*1)` = 90 x 41 (marginLabel 1, non-self
+ * link, `computeReservedLabelBox`'s own formula).
+ */
+describe('computeReservedLabelBox — maxWidth (G20 word-wrap)', () => {
+  const KAFEXO_FONT = { family: 'sans-serif', size: 13 };
+  const KAFEXO_LABEL = 'this is a very long sentence on one single line';
+
+  it('kafexo-72-xupa679: wraps to 3 lines and reserves 90x41', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false, { maxWidth: 100 });
+    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line']);
+    expect(box.reservedWidth).toBe(90);
+    expect(box.reservedHeight).toBe(41);
+  });
+
+  it('no maxWidth set (the default) never wraps -- byte-identical to the pre-G20 formula', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false);
+    expect(box.lines).toEqual([KAFEXO_LABEL]);
+  });
+
+  it('maxWidth: 0 is treated the same as absent -- no wrap', () => {
+    const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false, { maxWidth: 0 });
+    expect(box.lines).toEqual([KAFEXO_LABEL]);
+  });
+
+  it('a label that already fits under maxWidth is untouched, not re-split', () => {
+    const box = computeReservedLabelBox('short label', KAFEXO_FONT, measurer, false, { maxWidth: 100 });
+    expect(box.lines).toEqual(['short label']);
+  });
+
+  it('wraps each \\n-separated physical line independently', () => {
+    const box = computeReservedLabelBox(String.raw`${KAFEXO_LABEL}\nshort`, KAFEXO_FONT, measurer, false, {
+      maxWidth: 100,
+    });
+    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line', 'short']);
   });
 });

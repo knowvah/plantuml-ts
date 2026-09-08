@@ -176,8 +176,9 @@ function computeEdgeLabelBox(
   text: string | undefined,
   font: { family: string; size: number },
   measurer: StringMeasurer,
+  maxWidth: number | undefined,
 ): ReservedLabelBox {
-  if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to);
+  if (t.linkNote === undefined) return computeReservedLabelBox(text!, font, measurer, t.from === t.to, { maxWidth });
   return computeMergedLabelBox({
     label: text ?? '',
     noteDim: measureLinkNoteDim(t.linkNote, { family: font.family }, measurer),
@@ -186,6 +187,7 @@ function computeEdgeLabelBox(
     hasMiddleDecor: false,
     font,
     measurer,
+    maxWidth,
   });
 }
 
@@ -193,10 +195,11 @@ function edgeLabelAttrs(
   t: Transition,
   font: { family: string; size: number },
   measurer: StringMeasurer,
+  maxWidth: number | undefined,
 ): NonNullable<DotInputEdge['attributes']> {
   const text = transitionLabelText(t);
   if (text === undefined && t.linkNote === undefined) return {};
-  const box = computeEdgeLabelBox(t, text, font, measurer);
+  const box = computeEdgeLabelBox(t, text, font, measurer, maxWidth);
   return {
     label: text ?? t.linkNote ?? '',
     labelWidth: box.reservedWidth,
@@ -229,7 +232,10 @@ function buildDotEdges(ast: StateDiagramAST, theme: Theme, measurer: StringMeasu
     // class/object, not state-specific (mechanisms.md §4).
     const attributes: NonNullable<DotInputEdge['attributes']> = {
       minLen: (t.length ?? 2) - 1,
-      ...edgeLabelAttrs(t, font, measurer),
+      // G20: the SAME expression the label half above reads elsewhere
+      // (`theme.linetype`'s own D3 precedent) -- `SvekEdge.java:288-300`'s
+      // inline-label `wrapWidth` (`skin/SkinParam.java:971-978`).
+      ...edgeLabelAttrs(t, font, measurer, theme.maxMessageSize),
     };
     if (theme.linetype === 'ortho') moveLabelToXlabel(attributes);
     // T2/B33: upstream inverts the Link when the arrow carries a `left`/`up`

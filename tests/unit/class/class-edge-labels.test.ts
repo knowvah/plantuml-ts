@@ -197,6 +197,54 @@ describe('M4 cause C — guillemet rewrite (xopuku-46-nefa571, tebore-53-tese080
 });
 
 // ---------------------------------------------------------------------------
+// fix(label-size-tag-height) -- magic-arrow branch resolves a leading
+// <size:N> tag (xamule-03-jeda376: `Book - Foo : <size:30>to Foo >`).
+// Jar oracle (test-results/dot-cache/class/xamule-03-jeda376/svek-1.dot):
+// WIDTH="91" HEIGHT="32". Arithmetic: "to Foo" at size 30 = 76.6875x30
+// (WidthTableMeasurer); arrow block stays at the BASE font, 13x13
+// (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2.java
+// :57,87`); mergeLR sums width/maxes height = 89.6875x30; + 2*marginLabel(1)
+// = 91.6875x32; width floors to 91 (`SvekEdge.java:504-507`).
+// ---------------------------------------------------------------------------
+
+describe('fix(label-size-tag-height) — magic-arrow <size:N> (xamule-03-jeda376)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+
+  function magicRel(label: string): Relationship {
+    return { from: 'Book', to: 'Foo', type: 'association', label };
+  }
+
+  it('<size:30>to Foo > reserves the oracle box 91x32', () => {
+    const attrs = edgeLabelAttrs(magicRel('<size:30>to Foo >'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(91);
+    expect(Math.floor(attrs.labelHeight!)).toBe(32);
+  });
+
+  it('FAILS against pre-fix (tag counted as glyphs, arrow block always base size)', () => {
+    // Pre-fix: `measure('<size:30>to Foo', 13).width + 13` (no strip, no
+    // size resolution) landed ~104.7 wide, not 91.
+    const preFixWidth = oracleMeasurer.measure('<size:30>to Foo', font).width + font.size;
+    const attrs = edgeLabelAttrs(magicRel('<size:30>to Foo >'), font, font, oracleMeasurer);
+    expect(attrs.labelWidth).not.toBeCloseTo(preFixWidth, 1);
+  });
+
+  it('a bare magic-arrow token with no size tag is unaffected — regression guard', () => {
+    // `Book -- Foo1 : >` (svek-1.dot WIDTH="13" HEIGHT="13") — bare token
+    // skips marginLabel entirely (`withLabelMargin`'s bare-arrow check).
+    const attrs = edgeLabelAttrs(magicRel('>'), font, font, oracleMeasurer);
+    expect(attrs.labelWidth).toBe(13);
+    expect(attrs.labelHeight).toBe(13);
+  });
+
+  it('a text-bearing magic-arrow label with no size tag still strips creole markup — regression guard', () => {
+    const attrs = edgeLabelAttrs(magicRel('toFoo >'), font, font, oracleMeasurer);
+    const textWidth = oracleMeasurer.measure('toFoo', font).width;
+    expect(attrs.labelWidth).toBeCloseTo(font.size + textWidth + 2 * 1, 6);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // SI25 D2/D3 -- the DOT reservation and the ink share one font and one walk
 // ---------------------------------------------------------------------------
 
@@ -223,4 +271,50 @@ describe('SI25 — guide-line label: DOT box and geo ink agree at the resolved a
       for (const l of lines) expect(l.glyph).toBeDefined();
     },
   );
+});
+
+// ---------------------------------------------------------------------------
+// fix(label-size-tag-height) -- `<U+XXXX>` unicode escapes on a relationship
+// label decode to their literal glyph, both in the DOT reservation
+// (`edgeLabelAttrs`) and in the drawn ink (`buildEdgeGeos`/`attachEdgeLabel`).
+// Jar oracle (class/nagega-30-poso418, `!define L_GUILLEMET U+00AB` /
+// `R_GUILLEMET U+00BB`, `assocStereotype(x)` -> `<L_GUILLEMET>x<R_GUILLEMET>`):
+// `«typedef»` reserves 59x15, `«alias»` reserves 43x15 -- read off this
+// repo's own `WidthTableMeasurer` at size 13: "«typedef»" = 57.0375,
+// floor(57.0375 + 2*1) = 59; "«alias»" = 41.275, floor(41.275 + 2*1) = 43.
+// ---------------------------------------------------------------------------
+
+describe('fix(label-size-tag-height) — <U+XXXX> escape decode (nagega-30-poso418)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+
+  function escapeRel(label: string): Relationship {
+    return { from: 'A', to: 'B', type: 'association', label };
+  }
+
+  it('<U+00AB>typedef<U+00BB> reserves the oracle box 59x15', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>typedef<U+00BB>'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(59);
+    expect(Math.floor(attrs.labelHeight!)).toBe(15);
+  });
+
+  it('<U+00AB>alias<U+00BB> reserves the oracle box 43x15', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>alias<U+00BB>'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(43);
+    expect(Math.floor(attrs.labelHeight!)).toBe(15);
+  });
+
+  it('draws the decoded glyph, not the literal escape text', () => {
+    const theme = deepMergeTheme(defaultTheme, {});
+    const geo = layoutClass(makeAST({ relationships: [escapeRel('<U+00AB>typedef<U+00BB>')] }), theme, oracleMeasurer);
+    expect(geo.edges[0]!.label!.text).toBe('«typedef»');
+  });
+
+  it('a magic-arrow label with a trailing escape decodes its remaining text too', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>typedef<U+00BB> >'), font, font, oracleMeasurer);
+    const textWidth = oracleMeasurer.measure('«typedef»', font).width;
+    // Text-bearing magic-arrow labels still take the normal `2 * marginLabel`
+    // (only a BARE `<`/`>` token skips it — `withLabelMargin`'s own doc comment).
+    expect(attrs.labelWidth).toBeCloseTo(font.size + textWidth + 2, 6);
+  });
 });

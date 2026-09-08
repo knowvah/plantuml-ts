@@ -2662,7 +2662,7 @@
     {
       "slug": "kafexo-72-xupa679",
       "type": "usecase",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 312,
       "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",

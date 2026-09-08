@@ -23,6 +23,14 @@ export interface SkinparamAccumulator {
   nodeSep: number | undefined;
   rankSep: number | undefined;
   wrapWidth: number | undefined;
+  /** Raw `skinparam maxMessageSize` value -- see `theme.ts#maxMessageSize`'s
+   *  own doc comment for the fallback-precedence resolution against
+   *  {@link wrapMessageWidth}, done in `skinparam-theme-builder.ts`. */
+  maxMessageSize: string | undefined;
+  /** Raw `skinparam wrapMessageWidth` value -- takes precedence over
+   *  {@link maxMessageSize} when EITHER key was declared, regardless of
+   *  source order (`skin/SkinParam.java:971-978`). */
+  wrapMessageWidth: string | undefined;
   sameClassWidth: boolean | undefined;
   classAttributeIconSize: number | undefined;
   groupInheritance: number | undefined;
@@ -135,6 +143,8 @@ const SCALAR_FIELD_NAMES = [
   'nodeSep',
   'rankSep',
   'wrapWidth',
+  'maxMessageSize',
+  'wrapMessageWidth',
   'sameClassWidth',
   'classAttributeIconSize',
   'groupInheritance',
