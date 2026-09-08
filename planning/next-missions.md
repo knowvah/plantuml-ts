@@ -133,6 +133,63 @@ holds. **Do not add an activity DOT gate.**
 
 ---
 
+## `activity-style-defaults` — BRIEFED 2026-09-08, **NOT executed**
+
+Brief at `plans/activity-style-defaults/README.md`, 8 tasks over 5 batches,
+branch `feat/activity-style-defaults` (brief commit `8d7ccdfc`; no source
+changed). Baseline `5bd96186`, all four gates green: 687 test files / 18277
+tests, coverage 95.78/91.12/96.96/96.79.
+
+**It supersedes the framing of the two activity follow-ons above.** The
+`activity-oracle-harness` list was written before `activity-element-
+granularity` landed, and two of its lines are now stale: item 1's
+`svg/g[][childCount]` is **39.87% of a 61677 residual**, not 91.6% of
+108447, and `activity-element-granularity`'s own [D5] handed font size
+forward as a separate mission rather than folding it in. Per this file's
+amend-don't-rewrite convention those lines are left as written.
+
+**The defect, measured 2026-09-08 on a clean tree.** The activity engine
+resolves every font size, stroke width and corner radius from the
+diagram-wide root default. Nothing under `src/diagrams/activity/` calls
+`resolveElementFontSize`/`resolveElementLineThickness`
+(`src/core/theme-element-resolve.ts`) — the seam
+`src/diagrams/description/layout.ts:21,362` already consumes. Font-size
+census over a 200-fixture window: jar goldens 1195x`12` · 461x`11` ·
+80x`18` · 62x`13` · 45x`14`; ours **952x`14`** and essentially nothing
+else. Upstream's per-element values are `plantuml.skin:358-385`'s
+`activityDiagram` block, which is present verbatim in our own ported skin
+text (`skins-builtin-rose-2.ts:104-120`) and **inert** — that text applies
+only under an explicit `skin rose`, while `plantuml.skin` itself is baked
+into `defaultTheme` as constants (`skins-builtin.ts:16-18`) and the
+activity block was never baked in.
+
+**A second defect, same files, also in scope:** the sizer advances
+multi-line text at `fontSize * 1.4` (`activity-layout-helpers.ts:44,62`,
+unsourced) while the renderer advances at `1.0x` with a citation
+(`activity-renderer-shapes.ts:33-42`, `StringBounderFromWidthTable.java:71`).
+The sizer over-reserves 40% of the height of every multi-line action and
+note. This is the class `planning/mission-guide.md` names and
+`planning/sizer-renderer-parity.md` audits.
+
+**The design constraint that shaped the brief** ([D2]): `theme.colors
+.elements` is a **flat** map — `style-map-element.ts:76-85` accepts a
+`<diagramType>.<sname>` selector spelling but returns the bare `sname`. So
+`activityDiagram { arrow { FontSize 11 } }` cannot be seeded into
+`elements.arrow` without moving description, class and state arrows.
+Defaults go in an activity-local module with `plantuml.skin:NNN` citations;
+the bucket carries user overrides only, which is the tier
+`resolveElementFontSize`'s own "caller applies its own default" contract
+reserves.
+
+It closes or re-scopes two filed follow-ons: `activity-diamond-font-
+skinparams` and `activity-edge-stroke-width`. Out of scope and unchanged:
+`activity-swimlane-rendering` (font wired, visual model untouched — [D7]),
+`activity-note-after-terminal`, `activity-note-width-overscan`,
+`activity-nested-split-geometry`, `activity-embedded-diagram-labels`,
+`activity-parser-gaps`.
+
+---
+
 ## 1. `edge-label-box-followups` — DONE 2026-08-16 (mission-index SI24), 5 of 5
 
 Executed the same day it was planned. Branch `feat/edge-label-box-followups`,
