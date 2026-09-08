@@ -259,8 +259,69 @@ export function activityRoundCorner(theme: Theme, sname: ActivitySName): number 
  * padding, the second half (with {@link ACTIVITY_FONT_SIZE}) of what makes
  * its height. D8 derives that height rather than keeping the port's
  * unsourced `ACTION_HEIGHT = 36`.
+ *
+ * ONE number for all four sides: `Style#getPadding` parses the value with
+ * `ClockwiseTopRightBottomLeft.read`, whose single-token case returns
+ * `new ClockwiseTopRightBottomLeft(v, v, v, v)`
+ * (`klimt/geom/ClockwiseTopRightBottomLeft.java:74-77`).
  * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:360 */
 export const ACTIVITY_PADDING = 10;
+
+/** The ROOT block declares no `Padding` at all (`plantuml.skin:1-19`), and
+ * `ClockwiseTopRightBottomLeft.read` returns `none()` — zero on every side
+ * — for an absent value (`:67-68`). So a kind that declares none has NO
+ * padding upstream, which is a real value and not a missing one.
+ * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:1-19 */
+export const ROOT_PADDING = 0;
+
+const PADDING_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
+  activity: ACTIVITY_PADDING,
+  activityBar: ROOT_PADDING,
+  arrow: ROOT_PADDING,
+  circle: ROOT_PADDING,
+  composite: ROOT_PADDING,
+  diamond: ROOT_PADDING,
+  note: ROOT_PADDING,
+};
+
+/**
+ * The resolved inner padding for one activity element kind, per side.
+ *
+ * There is no bucket tier: `ElementColors` carries no `padding` field, and
+ * D2's reasoning for adding one does not apply — the DEFAULT is what this
+ * module exists to supply, and no corpus fixture sets `<style> activity {
+ * Padding N }`. Add the bucket field when one does.
+ */
+export function activityPadding(sname: ActivitySName): number {
+  return PADDING_DEFAULTS[sname];
+}
+
+/**
+ * The height an activity box reserves for `lineCount` lines of its own
+ * resolved text — upstream's own arithmetic, not a constant.
+ *
+ * `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java:237-243`):
+ *
+ * ```java
+ * XDimension2D dimRaw = tb.calculateDimension(stringBounder);
+ * dimRaw = dimRaw.delta(padding.getLeft() + padding.getRight(),
+ *                       padding.getBottom() + padding.getTop());
+ * dimRaw = dimRaw.atLeast(minimumWidth, 0);
+ * ```
+ *
+ * — so the height is the text height plus the top and bottom padding, and
+ * the `atLeast` floors the WIDTH only: its second argument is a literal
+ * `0`, so **upstream imposes no minimum height on an action box**. The
+ * port's `ACTION_HEIGHT = 36` was a floor with no upstream counterpart
+ * (D8), and it is deleted rather than lowered to the 32 the jar happens to
+ * emit — 32 is what this derivation RETURNS for one line at `FontSize 12`
+ * and `Padding 10`, which is corroboration, not the source.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBox.java:237-243
+ */
+export function activityBoxHeight(textHeight: number, sname: ActivitySName): number {
+  return textHeight + 2 * activityPadding(sname);
+}
 
 // ---------------------------------------------------------------------------
 // Ink

@@ -21,7 +21,8 @@ import {
   type TextStyle,
 } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import { ACTION_H_PAD, NOTE_FOLD } from './activity-layout-constants.js';
+import { NOTE_FOLD } from './activity-layout-constants.js';
+import { activityPadding } from './activity-style-defaults.js';
 
 const ACTION_RX = 8;
 
@@ -195,7 +196,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     const monoFamily = 'monospace';
     const lh = theme.fontSize;
     const lineY = centeredFirstBaselineY(cy, lh, codeLines.length);
-    const labelX = node.x + ACTION_H_PAD;
+    const labelX = node.x + activityPadding('activity');
     const labelText = textLines(codeLines, labelX, lineY, lh, {
       textAnchor: 'start',
       fontFamily: monoFamily,
@@ -210,7 +211,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   if (lines.length > 1) {
     const lh = theme.fontSize;
     const lineY = centeredFirstBaselineY(cy, lh, lines.length);
-    const labelX = node.x + ACTION_H_PAD;
+    const labelX = node.x + activityPadding('activity');
     const labelText = textLines(lines, labelX, lineY, lh, {
       textAnchor: 'start',
       fontFamily: theme.fontFamily,
@@ -251,7 +252,7 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
 }
 
 export function renderSignalLabel(label: string, x: number, cy: number, theme: Theme): string {
-  const labelX = x + ACTION_H_PAD;
+  const labelX = x + activityPadding('activity');
   const lines = label.split('\n');
   if (lines.length === 1) {
     return text(labelX, cy, label, {

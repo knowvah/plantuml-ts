@@ -4,7 +4,7 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { ACTION_H_PAD, NOTE_FOLD } from '../activity-layout-constants.js';
+import { NOTE_FOLD, NOTE_H_PAD } from '../activity-layout-constants.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 
 export class GtileNote extends TileLeaf {
@@ -26,7 +26,7 @@ export class GtileNote extends TileLeaf {
     // `theme.fontSize - 2` = 12, which moved the note the WRONG WAY: the
     // jar's note text is LARGER than its action text, not smaller.
     const measured = bounder.getDimension(node.text, activityFontSize(theme, 'note'));
-    this.width = measured.width + 2 * ACTION_H_PAD + NOTE_FOLD;
+    this.width = measured.width + 2 * NOTE_H_PAD + NOTE_FOLD;
     this.height = measured.height + NOTE_FOLD + 16;
   }
 

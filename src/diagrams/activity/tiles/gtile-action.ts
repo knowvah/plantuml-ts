@@ -4,10 +4,15 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { ACTION_HEIGHT, ACTION_H_PAD } from '../activity-layout-constants.js';
-import { activityFontSize } from '../activity-style-defaults.js';
+import { activityBoxHeight, activityFontSize, activityPadding } from '../activity-style-defaults.js';
 
-const V_PAD = 8;
+/** This port's own minimum box width. Upstream's floor is `PName
+ *  .MinimumWidth`, whose unset value is `0`
+ *  (`style/ValueNull.java:61-63`), so the jar imposes no width floor on an
+ *  action box at all. Left in place by `activity-style-defaults` T4, whose
+ *  scope is the HEIGHT derivation (D8): removing a 120px width floor is a
+ *  large independent geometric move that would confound that measurement.
+ *  Unsourced, and recorded as such. */
 const ACTION_MIN_WIDTH = 120;
 
 export class GtileAction extends TileLeaf {
@@ -45,8 +50,16 @@ export class GtileAction extends TileLeaf {
     const maxWidth = isCodeBlock
       ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
       : Math.max(...lines.map((l) => bounder.getDimension(l, fontSize).width));
-    this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, ACTION_MIN_WIDTH);
-    this.height = Math.max(lineHeight * lineCount + 2 * V_PAD, ACTION_HEIGHT);
+    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
+    // :237-243`) adds the resolved `Padding` to BOTH axes and floors the
+    // WIDTH only -- `atLeast(minimumWidth, 0)`, a literal 0 for the height.
+    // So there is no upstream minimum height, and the port's own
+    // `ACTION_HEIGHT = 36` floor is deleted rather than lowered to the 32
+    // the jar emits (D8): 32 is what this derivation RETURNS for one line
+    // at FontSize 12 and Padding 10, which is corroboration, not a source.
+    const pad = activityPadding('activity');
+    this.width = Math.max(maxWidth + 2 * pad, ACTION_MIN_WIDTH);
+    this.height = activityBoxHeight(lineHeight * lineCount, 'activity');
   }
 
   getCoord(hook: HookName): GPoint {

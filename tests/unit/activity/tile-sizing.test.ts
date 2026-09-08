@@ -65,9 +65,13 @@ describe('GtileAction — the action box measures at activity FontSize 12', () =
     // `* 1.4` reserved 50.4, which is the 40% over-reservation D6 names.
     const { bounder } = recordingBounder();
     const tile = new GtileAction(action('a\nb\nc'), bounder, THEME);
-    const V_PAD = 8;
-    expect(tile.height).toBe(3 * 12 + 2 * V_PAD);
-    expect(tile.height).not.toBe(3 * 12 * 1.4 + 2 * V_PAD);
+    // T4 replaced the box's own `V_PAD = 8` with the resolved
+    // `Padding 10` (plantuml.skin:360); the ADVANCE assertion below is
+    // independent of which padding is added, since it is the same on both
+    // sides of the comparison.
+    const PAD = 10;
+    expect(tile.height).toBe(3 * 12 + 2 * PAD);
+    expect(tile.height).not.toBe(3 * 12 * 1.4 + 2 * PAD);
   });
 
   it('grows when the user overrides the activity font — a fixed size could not', () => {
@@ -78,7 +82,7 @@ describe('GtileAction — the action box measures at activity FontSize 12', () =
     const { bounder, sizes } = recordingBounder();
     const tile = new GtileAction(action('a\nb'), bounder, themed);
     expect(new Set(sizes)).toEqual(new Set([24]));
-    expect(tile.height).toBe(2 * 24 + 16);
+    expect(tile.height).toBe(2 * 24 + 2 * 10);
   });
 });
 
