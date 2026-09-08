@@ -114,13 +114,20 @@ function measureMixedLabel(spans: LabelSpan[]): { width: number; height: number 
  * @param cx     - Horizontal centre of the label.
  * @param cy     - Vertical centre of the label.
  * @param theme  - Theme for font and color values.
+ * @param fontSize - Optional override for the PLAIN-text branch, for an
+ *   engine that resolves a PER-ELEMENT size rather than the diagram-wide
+ *   `theme.fontSize` (activity: `activityDiagram { activity { FontSize 12 }
+ *   }`, `plantuml.skin:361`). Defaults to `theme.fontSize`, so every
+ *   existing caller is unaffected. The `<latex>` branch below ignores it:
+ *   KaTeX sizing is a separate, unported axis (see `DIVERGENCES.md`), and
+ *   threading a size into it would imply a fidelity this port does not have.
  */
-export function renderNodeLabel(label: string, cx: number, cy: number, theme: Theme): string {
+export function renderNodeLabel(label: string, cx: number, cy: number, theme: Theme, fontSize?: number): string {
   if (!label.includes('<latex>')) {
     return text(cx, cy, label, {
       textAnchor: 'middle',
       fontFamily: theme.fontFamily,
-      fontSize: theme.fontSize,
+      fontSize: fontSize ?? theme.fontSize,
       fill: theme.colors.text,
     });
   }

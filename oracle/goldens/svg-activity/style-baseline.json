@@ -1,7 +1,7 @@
 {
-  "$comment": "PLACEHOLDER T4 (derived box size): 254 of 268 censuses moved, textCount still 1588, histogram still unchanged (T5/T6 own the emitted font-size); aggregate weightedScore 61644 -> 60917, with 14 pins ADOPTED UPWARD -- see the decision journal for the single mechanism they share.",
+  "$comment": "PLACEHOLDER T4 (derived box size): 254 of 268 censuses moved, textCount still 1588, histogram still unchanged (T5/T6 own the emitted font-size); aggregate weightedScore 61644 -> 60917, with 14 pins ADOPTED UPWARD -- see the decision journal for the single mechanism they share. T5 (renderer shapes): the font-size histogram MOVES for the first time -- ours {12:1008, 11:258, 14:155, 13:146, 4:11, 10:4, 8:3, 30:2, 5:1} against the jar’s {12:996, 11:614, 18:135, 13:102, 14:16, ...}; the 12 is now near-exact (1008 vs 996), the missing 11s are ARROW LABELS and the missing 18s are SWIMLANE titles, both T6. rx moved 8 -> 12.5 on all 915 rounded rects (jar: 929). textCount still 1588. Aggregate weightedScore 60917 -> 57600, 8 pins adopted upward -- all on fixtures whose element DRAW ORDER already diverges (swimlane chrome, note-before-action), see the journal.",
   "measuredAt": "2026-09-08",
-  "measuredAgainstCommit": "6cbf4acf",
+  "measuredAgainstCommit": "85fc0ede",
   "fixtures": [
     {
       "type": "activity",
@@ -9,11 +9,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "145",
@@ -34,7 +34,7 @@
         "height": "84"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -42,13 +42,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "12": 6,
+          "13": 6
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 12,
         "width": "517",
@@ -70,7 +71,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -78,7 +79,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -86,13 +87,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "204",
@@ -114,7 +116,7 @@
         "height": "377"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -122,13 +124,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 2,
+          "12": 5,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 19
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 8,
         "width": "384",
@@ -152,7 +156,7 @@
         "height": "533"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -160,13 +164,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "304",
@@ -188,7 +193,7 @@
         "height": "229"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -196,13 +201,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "212",
@@ -225,7 +231,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -233,15 +239,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "164",
@@ -265,7 +273,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -273,13 +281,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "415",
@@ -301,7 +310,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -309,15 +318,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 4,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 11
         },
         "rx": {
-          "8": 4,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 4
         },
         "textCount": 6,
         "width": "324",
@@ -341,7 +351,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -349,13 +359,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 6,
         "width": "784",
@@ -377,7 +388,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -385,13 +396,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "12": 7,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 8,
         "width": "949",
@@ -414,7 +426,7 @@
         "height": "391"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -422,15 +434,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 1,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 1,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 1
         },
         "textCount": 4,
         "width": "184",
@@ -456,7 +470,7 @@
         "height": "265"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -464,13 +478,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 2,
+          "13": 1,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2,
+          "12.5": 2,
           "7.5": 1
         },
         "textCount": 5,
@@ -496,7 +513,7 @@
         "height": "222"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -504,13 +521,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 6,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 7,
         "width": "161",
@@ -533,7 +551,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -541,13 +559,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "291",
@@ -569,7 +588,7 @@
         "height": "196"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -577,13 +596,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 5,
         "width": "464",
@@ -605,7 +624,7 @@
         "height": "340"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -613,15 +632,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 3,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 12
         },
         "rx": {
-          "8": 3,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "488",
@@ -646,7 +666,7 @@
         "height": "145"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -654,7 +674,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 3
         },
         "strokeWidth": {
           "1.5": 15
@@ -677,7 +697,7 @@
         "height": "415"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -685,13 +705,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "144",
@@ -714,7 +735,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -722,13 +743,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "11": 1,
+          "12": 4,
+          "13": 5
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 10,
         "width": "304",
@@ -751,7 +774,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -759,7 +782,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -767,13 +790,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 29
+          "11": 7,
+          "12": 22
         },
         "strokeWidth": {
           "1.5": 45
         },
         "rx": {
-          "8": 19
+          "12.5": 19
         },
         "textCount": 29,
         "width": "977",
@@ -795,7 +819,7 @@
         "height": "1126"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -803,13 +827,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 25
+          "12": 25
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 25,
         "width": "284",
@@ -831,7 +855,7 @@
         "height": "419"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -839,13 +863,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "324",
@@ -868,7 +893,7 @@
         "height": "332"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -876,15 +901,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 4,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 14
         },
         "rx": {
-          "8": 4,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 4
         },
         "textCount": 7,
         "width": "488",
@@ -908,7 +934,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -916,15 +942,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 2,
+          "12": 3,
+          "14": 1
         },
         "strokeWidth": {
           "1": 2,
           "1.5": 11
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "184",
@@ -946,7 +974,7 @@
         "height": "385"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -954,15 +982,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 7
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 5,
         "width": "164",
@@ -987,7 +1017,7 @@
         "height": "323"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -995,14 +1025,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 3,
+          "13": 2
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 3,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 3
         },
         "textCount": 5,
         "width": "340",
@@ -1025,7 +1056,7 @@
         "height": "268"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1033,7 +1064,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1041,7 +1072,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1049,13 +1080,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "189",
@@ -1077,7 +1109,7 @@
         "height": "241"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1085,7 +1117,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1093,13 +1125,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 11
+          "11": 2,
+          "12": 9
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 9
+          "12.5": 9
         },
         "textCount": 11,
         "width": "464",
@@ -1121,7 +1154,7 @@
         "height": "495"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1129,13 +1162,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 19
         },
         "rx": {
-          "8": 3,
+          "12.5": 3,
           "(absent)": 2
         },
         "textCount": 5,
@@ -1159,7 +1193,7 @@
         "height": "407"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1167,13 +1201,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "184",
@@ -1195,7 +1230,7 @@
         "height": "171"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1203,7 +1238,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1211,13 +1246,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "227",
@@ -1239,7 +1275,7 @@
         "height": "247"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1247,15 +1283,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "263",
@@ -1280,7 +1318,7 @@
         "height": "456"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1288,13 +1326,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 5,
         "width": "373",
@@ -1315,7 +1353,7 @@
         "height": "315"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1323,13 +1361,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 2,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 6,
         "width": "464",
@@ -1351,7 +1390,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1359,14 +1398,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 4,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 4,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 4
         },
         "textCount": 5,
         "width": "324",
@@ -1389,7 +1429,7 @@
         "height": "276"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1397,7 +1437,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1405,7 +1445,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1413,7 +1453,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1421,13 +1461,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 2,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "234",
@@ -1449,7 +1490,7 @@
         "height": "353"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1457,13 +1498,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -1484,7 +1525,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1492,13 +1533,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "304",
@@ -1520,7 +1562,7 @@
         "height": "234"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1528,13 +1570,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "12": 10
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 9
+          "12.5": 9
         },
         "textCount": 10,
         "width": "144",
@@ -1555,7 +1597,7 @@
         "height": "577"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1563,13 +1605,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "144",
@@ -1591,7 +1634,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1599,13 +1642,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 6,
         "width": "164",
@@ -1627,7 +1671,7 @@
         "height": "404"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1635,13 +1679,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "12": 13
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 13
+          "12.5": 13
         },
         "textCount": 13,
         "width": "254",
@@ -1662,7 +1706,7 @@
         "height": "692"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1670,7 +1714,8 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 7
@@ -1694,7 +1739,7 @@
         "height": "210"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1702,13 +1747,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "164",
@@ -1731,7 +1776,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1739,13 +1784,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "164",
@@ -1767,7 +1813,7 @@
         "height": "394"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1775,11 +1821,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -1798,7 +1844,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1806,13 +1852,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 16
+          "12": 16
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 16
+          "12.5": 16
         },
         "textCount": 16,
         "width": "144",
@@ -1833,7 +1879,7 @@
         "height": "848"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1841,13 +1887,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 7
+          "12.5": 7
         },
         "textCount": 8,
         "width": "304",
@@ -1869,7 +1916,7 @@
         "height": "379"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1877,7 +1924,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1885,15 +1932,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 5,
+          "14": 3
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 33
         },
         "rx": {
-          "8": 5,
-          "(absent)": 7
+          "(absent)": 7,
+          "12.5": 5
         },
         "textCount": 9,
         "width": "544",
@@ -1920,7 +1969,7 @@
         "height": "398"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1928,7 +1977,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1936,7 +1985,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1944,13 +1993,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 6,
         "width": "144",
@@ -1971,7 +2020,7 @@
         "height": "328"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -1979,13 +2028,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "12": 6,
+          "13": 6
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 12,
         "width": "240",
@@ -2007,7 +2057,7 @@
         "height": "343"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2015,13 +2065,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 5,
         "width": "144",
@@ -2042,7 +2092,7 @@
         "height": "276"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2050,13 +2100,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -2077,7 +2127,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2085,7 +2135,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 2
         },
         "strokeWidth": {
           "1.5": 10
@@ -2108,7 +2158,7 @@
         "height": "319"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2116,13 +2166,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "13": 2
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 7,
         "width": "304",
@@ -2145,7 +2197,7 @@
         "height": "330"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2153,13 +2205,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "30": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "212",
@@ -2182,7 +2235,7 @@
         "height": "301"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2190,13 +2243,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 3,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 17
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "164",
@@ -2218,7 +2272,7 @@
         "height": "521"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2226,7 +2280,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2234,13 +2288,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "304",
@@ -2263,7 +2318,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2271,11 +2326,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "181",
@@ -2294,7 +2349,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2302,15 +2357,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "12": 6,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 5
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "144",
@@ -2334,7 +2390,7 @@
         "height": "353"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2342,13 +2398,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -2369,7 +2425,7 @@
         "height": "110"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2377,13 +2433,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -2405,7 +2461,7 @@
         "height": "199"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2413,11 +2469,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "151",
@@ -2436,7 +2492,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2444,13 +2500,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -2471,7 +2527,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2479,7 +2535,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2487,13 +2543,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -2514,7 +2570,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2522,13 +2578,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "462",
@@ -2551,7 +2608,7 @@
         "height": "368"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2559,13 +2616,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "358",
@@ -2587,7 +2645,7 @@
         "height": "236"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2595,15 +2653,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 7
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "164",
@@ -2628,7 +2688,7 @@
         "height": "301"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2636,13 +2696,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -2663,7 +2723,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2671,13 +2731,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "464",
@@ -2699,7 +2760,7 @@
         "height": "316"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2707,7 +2768,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 7
         },
         "strokeWidth": {
           "1.5": 30
@@ -2730,7 +2791,7 @@
         "height": "709"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2738,13 +2799,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "12": 12
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 12,
         "width": "218",
@@ -2765,7 +2826,7 @@
         "height": "203"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2773,7 +2834,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2781,15 +2842,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 11
+          "12": 9,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 26
         },
         "rx": {
-          "8": 9,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 9
         },
         "textCount": 11,
         "width": "484",
@@ -2815,7 +2877,7 @@
         "height": "468"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2823,13 +2885,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "144",
@@ -2850,7 +2912,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2858,13 +2920,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 2,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "280",
@@ -2886,7 +2949,7 @@
         "height": "207"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2894,7 +2957,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2902,13 +2965,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -2929,7 +2992,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2937,7 +3000,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "11": 1
         },
         "strokeWidth": {
           "1.5": 6
@@ -2960,7 +3023,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -2968,13 +3031,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 4,
+          "12.5": 4,
           "(absent)": 2
         },
         "textCount": 4,
@@ -2997,7 +3060,7 @@
         "height": "228"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3005,13 +3068,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "184",
@@ -3033,7 +3097,7 @@
         "height": "247"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3041,13 +3105,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -3068,7 +3132,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3076,13 +3140,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -3103,7 +3167,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3111,14 +3175,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 2,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 18
         },
         "rx": {
-          "8": 2,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "364",
@@ -3141,7 +3206,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3149,13 +3214,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "12": 10
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 10
+          "12.5": 10
         },
         "textCount": 10,
         "width": "206",
@@ -3176,7 +3241,7 @@
         "height": "536"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3184,7 +3249,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3192,7 +3257,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3200,13 +3265,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 11
+          "11": 4,
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 27
         },
         "rx": {
-          "8": 7
+          "12.5": 7
         },
         "textCount": 11,
         "width": "644",
@@ -3229,7 +3295,7 @@
         "height": "497"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3237,13 +3303,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "304",
@@ -3265,7 +3332,7 @@
         "height": "312"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3273,13 +3340,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "13": 2
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 7,
         "width": "304",
@@ -3302,7 +3371,7 @@
         "height": "330"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3310,13 +3379,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 3,
+          "12.5": 3,
           "(absent)": 2
         },
         "textCount": 3,
@@ -3339,7 +3408,7 @@
         "height": "253"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3347,13 +3416,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "221",
@@ -3374,7 +3443,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3382,13 +3451,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "12": 8
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 8
+          "12.5": 8
         },
         "textCount": 8,
         "width": "144",
@@ -3409,7 +3478,7 @@
         "height": "432"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3417,13 +3486,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 2,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 7,
         "width": "164",
@@ -3445,7 +3515,7 @@
         "height": "448"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3453,13 +3523,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "144",
@@ -3480,7 +3550,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3488,7 +3558,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3496,15 +3566,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 2,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 17
         },
         "rx": {
-          "8": 3,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 3
         },
         "textCount": 7,
         "width": "430",
@@ -3530,7 +3602,7 @@
         "height": "316"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3538,7 +3610,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3546,14 +3618,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 24
         },
         "rx": {
-          "8": 3,
-          "(absent)": 4
+          "(absent)": 4,
+          "12.5": 3
         },
         "textCount": 4,
         "width": "544",
@@ -3577,7 +3650,7 @@
         "height": "235"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3585,13 +3658,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "160",
@@ -3612,7 +3685,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3620,7 +3693,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3628,13 +3701,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "11": 1,
+          "12": 11,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 23
         },
         "rx": {
-          "8": 11
+          "12.5": 11
         },
         "textCount": 13,
         "width": "1424",
@@ -3658,7 +3733,7 @@
         "height": "362"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3666,15 +3741,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 7,
         "width": "164",
@@ -3698,7 +3775,7 @@
         "height": "427"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3706,11 +3783,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "181",
@@ -3729,7 +3806,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3737,13 +3814,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "164",
@@ -3766,7 +3845,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3774,7 +3853,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3782,11 +3861,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -3805,7 +3884,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3813,13 +3892,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -3840,7 +3919,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3848,13 +3927,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "164",
@@ -3876,7 +3956,7 @@
         "height": "296"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3884,7 +3964,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3892,13 +3972,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 6,
         "width": "144",
@@ -3919,7 +3999,7 @@
         "height": "191"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3927,15 +4007,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 5,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 13
         },
         "rx": {
-          "8": 5,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 5
         },
         "textCount": 7,
         "width": "324",
@@ -3959,7 +4040,7 @@
         "height": "386"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -3967,13 +4048,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 7
+          "12.5": 7
         },
         "textCount": 8,
         "width": "712",
@@ -3995,7 +4077,7 @@
         "height": "339"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4003,7 +4085,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4011,13 +4093,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "11": 3,
+          "12": 9
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 12,
         "width": "291",
@@ -4040,7 +4123,7 @@
         "height": "547"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4048,15 +4131,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 3
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 5,
         "width": "144",
@@ -4080,7 +4164,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4088,7 +4172,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4096,7 +4180,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4104,13 +4188,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 2,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 4,
         "width": "304",
@@ -4133,7 +4219,7 @@
         "height": "226"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4141,7 +4227,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4149,13 +4235,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "212",
@@ -4178,7 +4265,7 @@
         "height": "215"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4186,15 +4273,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 14
+          "11": 1,
+          "12": 7,
+          "14": 6
         },
         "strokeWidth": {
           "1": 7,
           "1.5": 23
         },
         "rx": {
-          "8": 7,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 7
         },
         "textCount": 14,
         "width": "644",
@@ -4220,7 +4309,7 @@
         "height": "395"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4228,7 +4317,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4236,13 +4325,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -4263,7 +4352,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4271,13 +4360,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "184",
@@ -4300,7 +4391,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4308,13 +4399,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 3,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "184",
@@ -4337,7 +4430,7 @@
         "height": "312"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4345,13 +4438,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "144",
@@ -4372,7 +4465,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4380,7 +4473,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4388,7 +4481,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4396,7 +4489,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4404,15 +4497,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 10
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 7,
         "width": "464",
@@ -4438,7 +4533,7 @@
         "height": "292"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4446,15 +4541,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "11": 4,
+          "12": 7,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 35
         },
         "rx": {
-          "8": 7,
-          "(absent)": 5
+          "(absent)": 5,
+          "12.5": 7
         },
         "textCount": 13,
         "width": "744",
@@ -4479,7 +4576,7 @@
         "height": "653"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4487,7 +4584,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4495,7 +4592,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4503,13 +4600,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 3,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 23
         },
         "rx": {
-          "8": 1,
+          "12.5": 1,
           "(absent)": 2
         },
         "textCount": 4,
@@ -4533,7 +4631,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4541,13 +4639,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 72
+          "11": 5,
+          "12": 11,
+          "13": 56
         },
         "strokeWidth": {
           "1.5": 36
         },
         "rx": {
-          "8": 11
+          "12.5": 11
         },
         "textCount": 72,
         "width": "7878",
@@ -4570,7 +4670,7 @@
         "height": "1390"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4578,13 +4678,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "212",
@@ -4607,7 +4708,7 @@
         "height": "269"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4615,15 +4716,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 5,
         "width": "759",
@@ -4649,7 +4752,7 @@
         "height": "321"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4657,15 +4760,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 2,
+          "12": 1,
+          "14": 1
         },
         "strokeWidth": {
           "1": 2,
           "1.5": 10
         },
         "rx": {
-          "8": 1,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 1
         },
         "textCount": 4,
         "width": "184",
@@ -4687,7 +4792,7 @@
         "height": "303"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4695,15 +4800,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 2,
+          "13": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 3
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 6,
         "width": "144",
@@ -4728,7 +4835,7 @@
         "height": "151"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4736,7 +4843,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4744,7 +4851,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4752,13 +4859,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "19": 4
+          "5": 1,
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 4,
         "width": "304",
@@ -4780,7 +4889,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4788,7 +4897,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4796,13 +4905,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 7
+          "12.5": 7
         },
         "textCount": 7,
         "width": "144",
@@ -4823,7 +4932,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4831,7 +4940,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4839,15 +4948,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 7,
         "width": "358",
@@ -4872,7 +4983,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4880,13 +4991,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 2,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 4,
         "width": "781",
@@ -4909,7 +5022,7 @@
         "height": "173"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4917,7 +5030,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4925,13 +5038,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "164",
@@ -4953,7 +5067,7 @@
         "height": "426"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4976,7 +5090,7 @@
         "height": "55"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -4984,13 +5098,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 7
+          "12.5": 7
         },
         "textCount": 7,
         "width": "144",
@@ -5011,7 +5125,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5019,11 +5133,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -5042,7 +5156,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5050,15 +5164,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 5,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 5,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 5
         },
         "textCount": 8,
         "width": "164",
@@ -5083,7 +5199,7 @@
         "height": "355"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5091,13 +5207,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 6,
         "width": "144",
@@ -5118,7 +5234,7 @@
         "height": "328"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5126,14 +5242,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 3,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 3
         },
         "textCount": 3,
         "width": "324",
@@ -5156,7 +5272,7 @@
         "height": "243"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5164,13 +5280,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "184",
@@ -5192,7 +5309,7 @@
         "height": "303"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5200,13 +5317,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "274",
@@ -5228,7 +5346,7 @@
         "height": "302"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5236,13 +5354,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -5263,7 +5381,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5271,7 +5389,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 11 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5279,13 +5397,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "220",
@@ -5306,7 +5424,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5314,13 +5432,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 7,
         "width": "624",
@@ -5342,7 +5461,7 @@
         "height": "334"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5350,7 +5469,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5359,13 +5478,13 @@
       "ours": {
         "fontSize": {
           "8": 3,
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2,
+          "12.5": 2,
           "7.5": 1
         },
         "textCount": 5,
@@ -5389,7 +5508,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5397,13 +5516,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 7,
         "width": "184",
@@ -5426,7 +5546,7 @@
         "height": "320"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5434,13 +5554,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 2,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "272",
@@ -5463,7 +5584,7 @@
         "height": "274"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5471,13 +5592,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 1,
+          "13": 2,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 4,
         "width": "333",
@@ -5501,7 +5624,7 @@
         "height": "199"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5509,7 +5632,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "11": 1
         },
         "strokeWidth": {
           "1.5": 6
@@ -5532,7 +5655,7 @@
         "height": "130"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5540,7 +5663,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5549,13 +5672,15 @@
       "ours": {
         "fontSize": {
           "10": 2,
-          "14": 5
+          "11": 1,
+          "12": 3,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 7,
         "width": "184",
@@ -5579,7 +5704,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5587,13 +5712,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 15
+          "12": 15
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 15
+          "12.5": 15
         },
         "textCount": 15,
         "width": "144",
@@ -5614,7 +5739,7 @@
         "height": "796"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5622,13 +5747,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "12": 11,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 12,
         "width": "1274",
@@ -5651,7 +5777,7 @@
         "height": "413"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5659,13 +5785,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "4": 5,
+          "11": 2
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 7,
         "width": "324",
@@ -5688,7 +5815,7 @@
         "height": "387"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5696,13 +5823,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -5724,7 +5851,7 @@
         "height": "147"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5732,13 +5859,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 2,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 7,
         "width": "784",
@@ -5760,7 +5888,7 @@
         "height": "297"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5768,15 +5896,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 6
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 5,
         "width": "212",
@@ -5801,7 +5931,7 @@
         "height": "229"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5809,7 +5939,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5817,13 +5947,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 2,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 6,
         "width": "344",
@@ -5846,7 +5977,7 @@
         "height": "356"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5854,15 +5985,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "11": 2,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 13
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 10,
         "width": "304",
@@ -5887,7 +6020,7 @@
         "height": "507"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5895,15 +6028,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "164",
@@ -5928,7 +6063,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5936,15 +6071,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 24
         },
         "rx": {
-          "8": 3,
-          "(absent)": 5
+          "(absent)": 5,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "544",
@@ -5970,7 +6107,7 @@
         "height": "271"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -5978,15 +6115,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 2,
+          "12": 4,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 15
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 9,
         "width": "232",
@@ -6012,7 +6151,7 @@
         "height": "466"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6020,15 +6159,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 3,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 8
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 7,
         "width": "164",
@@ -6053,7 +6194,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6061,7 +6202,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6069,7 +6210,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6077,7 +6218,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "13": 4
         },
         "strokeWidth": {
           "1.5": 3
@@ -6100,7 +6241,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6108,7 +6249,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6116,15 +6257,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 5,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 11
         },
         "rx": {
-          "8": 5,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 5
         },
         "textCount": 7,
         "width": "324",
@@ -6149,7 +6291,7 @@
         "height": "279"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6157,7 +6299,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6165,13 +6307,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "176",
@@ -6193,7 +6335,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6201,15 +6343,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 1,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 1,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 1
         },
         "textCount": 4,
         "width": "184",
@@ -6235,7 +6379,7 @@
         "height": "265"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6243,7 +6387,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6251,7 +6395,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6259,7 +6403,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6267,13 +6411,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "12": 13
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 13
+          "12.5": 13
         },
         "textCount": 13,
         "width": "144",
@@ -6294,7 +6438,7 @@
         "height": "692"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6302,13 +6446,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 2,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 7,
         "width": "324",
@@ -6330,7 +6475,7 @@
         "height": "393"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6338,7 +6483,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6346,13 +6491,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -6373,7 +6518,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6381,11 +6526,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -6404,7 +6549,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6412,15 +6557,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 18
+          "11": 4,
+          "12": 11,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 30
         },
         "rx": {
-          "8": 10,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 10
         },
         "textCount": 18,
         "width": "199",
@@ -6446,7 +6593,7 @@
         "height": "1050"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6454,7 +6601,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6462,15 +6609,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 3
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "197",
@@ -6494,7 +6642,7 @@
         "height": "227"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6502,14 +6650,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 22
         },
         "rx": {
-          "8": 5,
-          "(absent)": 4
+          "(absent)": 4,
+          "12.5": 5
         },
         "textCount": 5,
         "width": "504",
@@ -6531,7 +6679,7 @@
         "height": "193"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6539,13 +6687,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "184",
@@ -6568,7 +6718,7 @@
         "height": "183"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6576,15 +6726,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "263",
@@ -6609,7 +6761,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6617,7 +6769,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6625,11 +6777,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "145",
@@ -6650,7 +6802,7 @@
         "height": "84"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6658,13 +6810,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -6685,7 +6837,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6693,13 +6845,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 6,
         "width": "184",
@@ -6721,7 +6874,7 @@
         "height": "418"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6729,7 +6882,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6737,7 +6890,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6745,13 +6898,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "221",
@@ -6772,7 +6925,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6780,13 +6933,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 2,
+          "12": 2,
+          "13": 2,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 7,
         "width": "374",
@@ -6810,7 +6966,7 @@
         "height": "419"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6818,7 +6974,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6826,15 +6982,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 1,
+          "12": 4,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 13
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 7,
         "width": "344",
@@ -6860,7 +7018,7 @@
         "height": "383"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6868,7 +7026,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6876,13 +7034,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "437",
@@ -6905,7 +7064,7 @@
         "height": "174"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6913,7 +7072,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 3
         },
         "strokeWidth": {
           "1.5": 13
@@ -6936,7 +7095,7 @@
         "height": "227"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6944,13 +7103,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 3
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "144",
@@ -6972,7 +7132,7 @@
         "height": "150"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6980,7 +7140,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -6988,13 +7148,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "175",
@@ -7016,7 +7177,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7024,15 +7185,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 5,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 13
         },
         "rx": {
-          "8": 5,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 5
         },
         "textCount": 7,
         "width": "324",
@@ -7057,7 +7219,7 @@
         "height": "398"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7065,7 +7227,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7092,7 +7254,7 @@
         "height": "97"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7100,7 +7262,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7108,15 +7270,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "11": 1,
+          "12": 6,
+          "14": 6
         },
         "strokeWidth": {
           "1": 7,
           "1.5": 22
         },
         "rx": {
-          "8": 6,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 6
         },
         "textCount": 13,
         "width": "644",
@@ -7142,7 +7306,7 @@
         "height": "381"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7151,13 +7315,15 @@
       "ours": {
         "fontSize": {
           "10": 2,
-          "14": 5
+          "11": 1,
+          "12": 3,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 7,
         "width": "184",
@@ -7181,7 +7347,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7189,13 +7355,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "12": 1,
+          "13": 8
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 9,
         "width": "632",
@@ -7218,7 +7385,7 @@
         "height": "180"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7226,15 +7393,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 2
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "144",
@@ -7258,7 +7426,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7266,15 +7434,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 5
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "144",
@@ -7299,7 +7468,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7307,7 +7476,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7315,13 +7484,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 6,
         "width": "184",
@@ -7343,7 +7513,7 @@
         "height": "407"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7351,7 +7521,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7359,13 +7529,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "344",
@@ -7387,7 +7558,7 @@
         "height": "183"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7395,13 +7566,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "221",
@@ -7422,7 +7593,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7430,13 +7601,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "164",
@@ -7458,7 +7630,7 @@
         "height": "418"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7466,15 +7638,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 4,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 8
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 8,
         "width": "304",
@@ -7499,7 +7673,7 @@
         "height": "343"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7507,7 +7681,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "13": 8
         },
         "strokeWidth": {
           "1.5": 11
@@ -7532,7 +7706,7 @@
         "height": "188"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7540,13 +7714,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "415",
@@ -7568,7 +7743,7 @@
         "height": "236"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7576,13 +7751,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 3
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "144",
@@ -7603,7 +7778,7 @@
         "height": "162"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7611,13 +7786,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 3,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "204",
@@ -7639,7 +7815,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7647,7 +7823,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7655,13 +7831,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 3
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "160",
@@ -7682,7 +7858,7 @@
         "height": "211"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7690,13 +7866,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 2,
+          "12": 5,
+          "13": 2
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 9,
         "width": "464",
@@ -7719,7 +7897,7 @@
         "height": "417"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7727,14 +7905,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "12": 5,
+          "13": 2
         },
         "strokeWidth": {
           "1.5": 22
         },
         "rx": {
-          "8": 5,
-          "(absent)": 4
+          "(absent)": 4,
+          "12.5": 5
         },
         "textCount": 7,
         "width": "434",
@@ -7757,7 +7936,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7789,7 +7968,7 @@
         "height": "127"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7797,15 +7976,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "12": 3,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 3
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "144",
@@ -7829,7 +8009,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7837,7 +8017,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7845,7 +8025,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7853,15 +8033,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 1,
+          "12": 3,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 7
         },
         "rx": {
-          "8": 3,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 3
         },
         "textCount": 6,
         "width": "184",
@@ -7886,7 +8068,7 @@
         "height": "323"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7894,7 +8076,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7902,7 +8084,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7910,15 +8092,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "12": 6,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 24
         },
         "rx": {
-          "8": 6,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "964",
@@ -7942,7 +8125,7 @@
         "height": "130"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7950,13 +8133,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -7977,7 +8160,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -7985,15 +8168,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "184",
@@ -8018,7 +8203,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8026,7 +8211,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8034,7 +8219,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8042,13 +8227,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 2,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 4,
         "width": "353",
@@ -8071,7 +8258,7 @@
         "height": "213"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8079,13 +8266,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "164",
@@ -8107,7 +8295,7 @@
         "height": "306"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8115,13 +8303,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "184",
@@ -8143,7 +8332,7 @@
         "height": "160"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8151,13 +8340,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "164",
@@ -8179,7 +8369,7 @@
         "height": "410"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8187,7 +8377,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8195,15 +8385,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "11": 1,
+          "12": 6,
+          "14": 6
         },
         "strokeWidth": {
           "1": 7,
           "1.5": 22
         },
         "rx": {
-          "8": 6,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 6
         },
         "textCount": 13,
         "width": "644",
@@ -8229,7 +8421,7 @@
         "height": "381"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8237,7 +8429,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8245,7 +8437,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8253,13 +8445,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 8,
         "width": "184",
@@ -8281,7 +8474,7 @@
         "height": "528"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8289,7 +8482,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8297,13 +8490,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 3
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 4,
         "width": "152",
@@ -8324,7 +8517,7 @@
         "height": "224"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8332,7 +8525,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8340,15 +8533,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 14
+          "11": 4,
+          "12": 7,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 27
         },
         "rx": {
-          "8": 7,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 7
         },
         "textCount": 14,
         "width": "644",
@@ -8374,7 +8569,7 @@
         "height": "558"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8382,7 +8577,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 30 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8390,11 +8585,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "184",
@@ -8413,7 +8608,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8421,13 +8616,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "174",
@@ -8450,7 +8646,7 @@
         "height": "174"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8458,7 +8654,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8466,15 +8662,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 12
+          "11": 4,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 23
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 12,
         "width": "344",
@@ -8499,7 +8697,7 @@
         "height": "607"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8507,7 +8705,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8515,15 +8713,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 8
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 5,
         "width": "304",
@@ -8549,7 +8749,7 @@
         "height": "251"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8557,13 +8757,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "304",
@@ -8585,7 +8786,7 @@
         "height": "305"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8593,13 +8794,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 1,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 5,
         "width": "164",
@@ -8621,7 +8823,7 @@
         "height": "386"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8629,13 +8831,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 2,
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 8,
         "width": "344",
@@ -8657,7 +8860,7 @@
         "height": "477"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8665,7 +8868,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8673,13 +8876,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -8700,7 +8903,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8708,7 +8911,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8716,13 +8919,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 2,
+          "13": 5
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 8,
         "width": "280",
@@ -8745,7 +8950,7 @@
         "height": "269"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8753,15 +8958,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 1
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "144",
@@ -8785,7 +8991,7 @@
         "height": "136"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8793,14 +8999,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 16
         },
         "rx": {
-          "8": 3,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 3
         },
         "textCount": 3,
         "width": "484",
@@ -8823,7 +9029,7 @@
         "height": "187"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8831,13 +9037,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "464",
@@ -8858,7 +9064,7 @@
         "height": "255"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8866,7 +9072,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8874,13 +9080,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 2,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 6,
         "width": "464",
@@ -8902,7 +9109,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8910,13 +9117,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 15
+          "11": 1,
+          "12": 8,
+          "13": 6
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 5
+          "12.5": 5
         },
         "textCount": 15,
         "width": "677",
@@ -8939,7 +9148,7 @@
         "height": "396"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8977,7 +9186,7 @@
         "height": "116"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -8985,15 +9194,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "184",
@@ -9018,7 +9229,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9026,13 +9237,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "144",
@@ -9053,7 +9264,7 @@
         "height": "173"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9061,7 +9272,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9069,13 +9280,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 3,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 4,
         "width": "348",
@@ -9097,7 +9309,7 @@
         "height": "281"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9105,13 +9317,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 5
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "304",
@@ -9133,7 +9346,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9141,13 +9354,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "160",
@@ -9168,7 +9381,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9176,7 +9389,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9184,13 +9397,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 8
         },
         "strokeWidth": {
           "1.5": 12
         },
         "rx": {
-          "8": 8
+          "12.5": 8
         },
         "textCount": 9,
         "width": "184",
@@ -9212,7 +9426,7 @@
         "height": "563"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9220,11 +9434,11 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {},
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 1,
         "width": "144",
@@ -9243,7 +9457,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9251,15 +9465,16 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 2
         },
         "rx": {
-          "8": 2,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 2
         },
         "textCount": 4,
         "width": "144",
@@ -9283,7 +9498,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9291,13 +9506,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 6
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "227",
@@ -9319,7 +9535,7 @@
         "height": "252"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9327,7 +9543,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9335,7 +9551,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9343,7 +9559,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9351,15 +9567,18 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 23
+          "11": 7,
+          "12": 11,
+          "13": 1,
+          "14": 4
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 53
         },
         "rx": {
-          "8": 11,
-          "(absent)": 3
+          "(absent)": 3,
+          "12.5": 11
         },
         "textCount": 23,
         "width": "864",
@@ -9387,7 +9606,7 @@
         "height": "637"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9395,7 +9614,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9403,13 +9622,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "144",
@@ -9430,7 +9649,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9438,15 +9657,18 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "11": 2,
+          "12": 4,
+          "13": 2,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 12
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 10,
         "width": "650",
@@ -9472,7 +9694,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9480,7 +9702,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9488,13 +9710,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 3,
+          "14": 1
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "194",
@@ -9518,7 +9741,7 @@
         "height": "402"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9526,13 +9749,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 1,
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 7
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 3,
         "width": "146",
@@ -9554,7 +9778,7 @@
         "height": "212"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9562,13 +9786,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 3,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 6,
         "width": "440",
@@ -9590,7 +9815,7 @@
         "height": "352"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9598,13 +9823,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 16
+          "11": 6,
+          "12": 10
         },
         "strokeWidth": {
           "1.5": 33
         },
         "rx": {
-          "8": 10
+          "12.5": 10
         },
         "textCount": 16,
         "width": "476",
@@ -9626,7 +9852,7 @@
         "height": "906"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9634,7 +9860,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9642,7 +9868,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9650,15 +9876,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 9
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "184",
@@ -9683,7 +9911,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9691,7 +9919,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9699,13 +9927,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "11": 1,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 4
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "184",
@@ -9727,7 +9956,7 @@
         "height": "170"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9735,13 +9964,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 1,
+          "13": 4
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 5,
         "width": "290",
@@ -9763,7 +9993,7 @@
         "height": "116"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9771,13 +10001,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 2,
+          "12": 7
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 9,
         "width": "407",
@@ -9800,7 +10031,7 @@
         "height": "379"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9808,7 +10039,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9816,14 +10047,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 2,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 2,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 2
         },
         "textCount": 3,
         "width": "324",
@@ -9846,7 +10078,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9854,13 +10086,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 1,
+          "13": 1
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 2,
         "width": "144",
@@ -9882,7 +10115,7 @@
         "height": "110"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9890,13 +10123,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 6
+          "11": 2,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 6,
         "width": "304",
@@ -9918,7 +10152,7 @@
         "height": "364"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9926,13 +10160,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 13
+          "11": 1,
+          "12": 6,
+          "13": 6
         },
         "strokeWidth": {
           "1.5": 9
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 13,
         "width": "557",
@@ -9955,7 +10191,7 @@
         "height": "369"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9963,13 +10199,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "11": 2,
+          "12": 1
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 1
+          "12.5": 1
         },
         "textCount": 3,
         "width": "166",
@@ -9991,7 +10228,7 @@
         "height": "310"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -9999,13 +10236,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "280",
@@ -10027,7 +10265,7 @@
         "height": "357"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10035,15 +10273,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 1,
+          "12": 4,
+          "14": 3
         },
         "strokeWidth": {
           "1": 4,
           "1.5": 7
         },
         "rx": {
-          "8": 4,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 4
         },
         "textCount": 8,
         "width": "184",
@@ -10068,7 +10308,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10076,13 +10316,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 16
+          "11": 6,
+          "12": 10
         },
         "strokeWidth": {
           "1.5": 33
         },
         "rx": {
-          "8": 10
+          "12.5": 10
         },
         "textCount": 16,
         "width": "476",
@@ -10104,7 +10345,7 @@
         "height": "936"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10112,13 +10353,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 7
+          "11": 3,
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 15
         },
         "rx": {
-          "8": 4
+          "12.5": 4
         },
         "textCount": 7,
         "width": "164",
@@ -10140,7 +10382,7 @@
         "height": "508"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10148,14 +10390,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "12": 4
         },
         "strokeWidth": {
           "1.5": 13
         },
         "rx": {
-          "8": 4,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 4
         },
         "textCount": 4,
         "width": "484",
@@ -10177,7 +10419,7 @@
         "height": "256"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10185,7 +10427,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10193,13 +10435,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "11": 2,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 10
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 5,
         "width": "464",
@@ -10221,7 +10464,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10229,7 +10472,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10237,7 +10480,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10245,7 +10488,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10253,7 +10496,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10261,15 +10504,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "11": 1,
+          "12": 6,
+          "14": 2
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 13
         },
         "rx": {
-          "8": 6,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 6
         },
         "textCount": 9,
         "width": "175",
@@ -10295,7 +10540,7 @@
         "height": "509"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10303,7 +10548,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10311,7 +10556,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10319,7 +10564,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10327,13 +10572,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 3
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 2
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 3,
         "width": "220",
@@ -10354,7 +10599,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10362,13 +10607,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 2,
         "width": "144",
@@ -10389,7 +10634,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10397,7 +10642,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10405,13 +10650,13 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 1
         },
         "rx": {
-          "8": 2
+          "12.5": 2
         },
         "textCount": 5,
         "width": "172",
@@ -10432,7 +10677,7 @@
         "height": "156"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10440,7 +10685,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10448,13 +10693,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 9
+          "4": 6,
+          "11": 3
         },
         "strokeWidth": {
           "1.5": 16
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 9,
         "width": "324",
@@ -10477,7 +10723,7 @@
         "height": "516"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10485,15 +10731,17 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 10
+          "11": 2,
+          "12": 5,
+          "14": 3
         },
         "strokeWidth": {
           "1": 3,
           "1.5": 19
         },
         "rx": {
-          "8": 5,
-          "(absent)": 1
+          "(absent)": 1,
+          "12.5": 5
         },
         "textCount": 10,
         "width": "384",
@@ -10520,7 +10768,7 @@
         "height": "560"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10528,13 +10776,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 4
+          "11": 1,
+          "12": 3
         },
         "strokeWidth": {
           "1.5": 8
         },
         "rx": {
-          "8": 3
+          "12.5": 3
         },
         "textCount": 4,
         "width": "164",
@@ -10555,7 +10804,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10563,7 +10812,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10571,13 +10820,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 2,
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 8,
         "width": "464",
@@ -10601,7 +10851,7 @@
         "height": "474"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10609,14 +10859,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 5
+          "12": 5
         },
         "strokeWidth": {
           "1.5": 11
         },
         "rx": {
-          "8": 5,
-          "(absent)": 2
+          "(absent)": 2,
+          "12.5": 5
         },
         "textCount": 5,
         "width": "324",
@@ -10638,7 +10888,7 @@
         "height": "254"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10646,7 +10896,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10654,7 +10904,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10662,7 +10912,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10670,13 +10920,14 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "14": 8
+          "11": 2,
+          "12": 6
         },
         "strokeWidth": {
           "1.5": 14
         },
         "rx": {
-          "8": 6
+          "12.5": 6
         },
         "textCount": 8,
         "width": "224",
@@ -10698,7 +10949,7 @@
         "height": "543"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     },
     {
       "type": "activity",
@@ -10706,7 +10957,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 9 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "6cbf4acf"
+      "measuredAgainstCommit": "85fc0ede"
     }
   ]
 }

@@ -47,13 +47,19 @@ function contentAfterDefs(svg: string): string {
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — start node', () => {
-  it('renders a filled circle with border fill color', () => {
+  it('renders an ellipse filled AND stroked in the resolved circle ink', () => {
+    // plantuml.skin:378-380 -- the same `#2` token for LineColor and
+    // BackgroundColor, at LineThickness 1. This port previously drew the
+    // start terminal with a `theme.colors.border` fill and NO stroke at
+    // all, so the shape was a hair small as well as the wrong colour.
     const node = makeNode({ kind: 'start', id: 'start', x: 50, y: 50, width: 20, height: 20 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('<ellipse');
-    expect(content).toContain(`fill="${theme.colors.border}"`);
+    expect(content).toContain('fill="#222"');
+    expect(content).toContain('stroke="#222"');
+    expect(content).toContain('stroke-width="1"');
   });
 
   it('circle is centered on the node bounding box', () => {
@@ -80,13 +86,13 @@ describe('renderActivity — stop node', () => {
     expect(ellipseCount).toBeGreaterThanOrEqual(2);
   });
 
-  it('outer circle has fill="none" and inner has border fill', () => {
+  it('outer circle has fill="none" and inner is filled in the resolved circle ink', () => {
     const node = makeNode({ kind: 'stop', id: 'stop-0', x: 50, y: 50, width: 28, height: 28 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('fill="none"');
-    expect(content).toContain(`fill="${theme.colors.border}"`);
+    expect(content).toContain('fill="#222"');
   });
 });
 
