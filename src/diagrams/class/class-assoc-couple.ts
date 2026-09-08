@@ -307,8 +307,30 @@ function makeCoupleCircle(
       : 1;
 
   if (splitNoteOnLink && subsumed.linkNote !== undefined) {
-    aEdge.label = subsumed.linkNote;
-    if (classEdgeLength !== 1) bEdge.label = subsumed.linkNote;
+    // `Association#createNew`'s `NoteLinkStrategy` split
+    // (`AbstractClassOrObjectDiagram.java:280-285`): the subsumed link's note
+    // carries onto the new circle edge(s) as a REAL note (`Relationship
+    // .linkNote`), not a plain label -- so `computeNoteMergedLabelAttrs`
+    // (class-layout-edge-labels.ts) reserves the merged note+label box
+    // (`roseNoteDim`) instead of a bare measured-label box. `linkNotePosition`
+    // is not threaded from `subsumed` (`SubsumedLink` carries no such field):
+    // no corpus fixture couples an association class with a non-default
+    // `note <pos> on link`, so both edges fall through to the same 'bottom'
+    // default `computeNoteMergedLabelAttrs` already applies.
+    aEdge.linkNote = subsumed.linkNote;
+    if (classEdgeLength !== 1) {
+      // `length == 1` (entityLength/self-couple-ness disagree): jar's
+      // `entity1ToPoint`/`pointToEntity2` split -- HALF_PRINTED_FULL on the
+      // A-side, HALF_NOT_PRINTED on the B-side (SvekEdge.java:314-316's `||`
+      // treats them identically: BOTH halve the reserved width, only drawing
+      // differs, which is outside this port's DOT-label-box scope).
+      bEdge.linkNote = subsumed.linkNote;
+      aEdge.linkNoteHalfWidth = true;
+      bEdge.linkNoteHalfWidth = true;
+    }
+    // else: `NoteLinkStrategy.NORMAL` -- aEdge alone carries the note, at its
+    // full (unhalved) reservation; bEdge gets none, matching `SvekEdge
+    // .java:309`'s `note == null` arm (`tunelu-64-xica833`).
   } else if (subsumed.label !== undefined) {
     aEdge.label = subsumed.label;
   }

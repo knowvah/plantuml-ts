@@ -254,8 +254,16 @@ describe('association-class couple: note-on-link split', () => {
       const a = ast.classifiers.find((c) => c.display === 'A')!;
       const b = ast.classifiers.find((c) => c.display === 'B')!;
       const [circleId] = circleIds(ast);
-      expect(findRel(ast, a.id, circleId!).label).toBe('hello world');
-      expect(findRel(ast, circleId!, b.id).label).toBeUndefined();
+      const aEdge = findRel(ast, a.id, circleId!);
+      const bEdge = findRel(ast, circleId!, b.id);
+      // `NoteLinkStrategy.NORMAL` (SvekEdge.java:280-281): a REAL note, not a
+      // plain label, so it sizes via `computeMergedLabelBox`'s roseNoteDim,
+      // unhalved (`tunelu-64-xica833`'s oracle: 253x33 on the A-edge alone).
+      expect(aEdge.linkNote).toBe('hello world');
+      expect(aEdge.label).toBeUndefined();
+      expect(aEdge.linkNoteHalfWidth).toBeUndefined();
+      expect(bEdge.linkNote).toBeUndefined();
+      expect(bEdge.label).toBeUndefined();
     },
   );
 
@@ -274,8 +282,18 @@ describe('association-class couple: note-on-link split', () => {
       const a = ast.classifiers.find((c) => c.display === 'A')!;
       const b = ast.classifiers.find((c) => c.display === 'B')!;
       const [circleId] = circleIds(ast);
-      expect(findRel(ast, a.id, circleId!).label).toBe('hello world');
-      expect(findRel(ast, circleId!, b.id).label).toBe('hello world');
+      const aEdge = findRel(ast, a.id, circleId!);
+      const bEdge = findRel(ast, circleId!, b.id);
+      // `NoteLinkStrategy.HALF_PRINTED_FULL`/`HALF_NOT_PRINTED`
+      // (SvekEdge.java:282-284): BOTH circle edges carry the SAME note text
+      // and BOTH halve their reservation (`vonago-16-zime449`'s oracle: 126x33
+      // on each edge, from the same 253.788-wide note+label merge).
+      expect(aEdge.linkNote).toBe('hello world');
+      expect(aEdge.linkNoteHalfWidth).toBe(true);
+      expect(bEdge.linkNote).toBe('hello world');
+      expect(bEdge.linkNoteHalfWidth).toBe(true);
+      expect(aEdge.label).toBeUndefined();
+      expect(bEdge.label).toBeUndefined();
     },
   );
 

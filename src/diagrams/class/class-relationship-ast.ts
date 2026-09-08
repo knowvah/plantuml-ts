@@ -160,6 +160,18 @@ export interface Relationship {
    */
   linkNotePosition?: NotePosition;
   /**
+   * `NoteLinkStrategy.HALF_PRINTED_FULL`/`HALF_NOT_PRINTED` vs. `NORMAL`
+   * (`abel/NoteLinkStrategy.java:41`) -- both halving strategies set
+   * `SvekEdge`'s `divideLabelWidthByTwo` (`svek/SvekEdge.java:314-316`), so
+   * BOTH new circle edges reserve half the merged note+label box when the
+   * couple's class-link length flips to 2 (`Association#createNew`'s
+   * `length == 1` branch, `AbstractClassOrObjectDiagram.java:280-285`); only
+   * meaningful together with {@link linkNote}; set by class-assoc-couple.ts
+   * alongside it, never by `applyNoteOnLink` (an ordinary, un-split
+   * `note on link` always reserves the NORMAL, unhalved box).
+   */
+  linkNoteHalfWidth?: boolean;
+  /**
    * Marked by `constraint on links : text` (CommandConstraintOnLinks →
    * `Link#setLinkConstraint`, applied to the two most-recent non-note links).
    * svek emits a fixed 10x10 `label` spot on a constrained edge with no
