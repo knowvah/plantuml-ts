@@ -4300,7 +4300,7 @@
     {
       "slug": "tunelu-64-xica833",
       "type": "class",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 24,
       "firstDiff": "svg/g[1]/g[4]/path[1]/@d",
@@ -4489,7 +4489,7 @@
     {
       "slug": "vonago-16-zime449",
       "type": "class",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 196.00000000000006,
       "firstDiff": "svg/g[1]/g[4]/path[1]/@d",

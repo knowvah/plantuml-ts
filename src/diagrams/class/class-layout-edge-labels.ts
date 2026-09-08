@@ -234,12 +234,13 @@ function computeNoteMergedLabelAttrs(
     label: rel.label ?? '',
     noteDim,
     position: rel.linkNotePosition ?? 'bottom',
-    // `NoteLinkStrategy.HALF_NOT_PRINTED`/`HALF_PRINTED_FULL` only fires on
+    // `NoteLinkStrategy.HALF_NOT_PRINTED`/`HALF_PRINTED_FULL` fire only on
     // the association-class couple's split-note path (`Association
-    // .createNew`, class-assoc-couple.ts) -- untouched by this task. Every
-    // note reaching this function (a still-live `ast.relationships` entry)
-    // carries the NORMAL strategy (SvekEdge.java:314-317).
-    halfWidth: false,
+    // .createNew`, class-assoc-couple.ts), which stamps `linkNoteHalfWidth`
+    // on both new circle edges when the class-link length flips. An
+    // ordinary `note on link` carries NORMAL and stays unhalved
+    // (SvekEdge.java:314-317,280-285).
+    halfWidth: rel.linkNoteHalfWidth ?? false,
     // This port has no `LinkMiddleDecor` concept: the `0`/`(0`/`0)`/`(0)`
     // mid-arrow "INSIDE" syntax (`CommandLinkClass.java:490-509`) is a
     // surveyed-and-deferred, unbuilt feature (class-relationship-ast.ts's

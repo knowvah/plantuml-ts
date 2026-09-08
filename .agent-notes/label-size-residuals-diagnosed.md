@@ -95,3 +95,104 @@ best-understood first:
 
 And re-classify the two `<latex>` fixtures as permanent rather than
 outstanding, so the residual count reads 5, not 7.
+
+
+---
+
+## CORRECTION 2026-09-08 — defect 4 is NOT a wrapping bug
+
+Written while scoping `vonago-16-zime449`. This file called it "note-on-link
+bodies are not wrapped". **Wrong. No wrapping is involved.**
+
+The jar draws the note as ONE unwrapped line — its SVG carries
+`<text ... textLength="222.788">note on link with assication class is
+ignored</text>`, the same width this port measures — inside a folded note
+shape 243x23. What differs is the DOT RESERVATION, and it decomposes
+exactly:
+
+```
+pure text                     222.788 x 13
+roseNoteDim (+31 w, +20 h)  = 253.788 x 33
+halfWidth: 253.788 / 2      = 126.894  -> floor 126
+                                          height 33
+```
+
+`126x33`, the jar's box, is `roseNoteDim` under the **half-width**
+reservation — the `halfWidth` branch that already exists in
+`edge-label-box-note-merge.ts:150`.
+
+**Mechanism.** `class-assoc-couple.ts:309-311` assigns the note text to
+`aEdge.label`/`bEdge.label` — a PLAIN label — instead of preserving it as
+`linkNote`. So `computeNoteMergedLabelAttrs` never fires and the reservation
+comes out as raw text plus `2 * marginLabel`: `222.788 + 2 = 224.788` ->
+`224x15`, which is exactly what we emit.
+
+**Why half.** `splitNoteOnLink` splits one note across the TWO circle edges
+the association class creates; each reserves half its width. Both our edges
+already carry the text, so the structure is right and only the sizing path
+is wrong. `class-layout-edge-labels.ts:242` currently hardcodes
+`halfWidth: false`.
+
+So the fix is routing, not measurement: preserve `linkNote` through the
+couple split and reserve it with `halfWidth: true`. Everything downstream
+(`roseNoteDim`, `computeMergedLabelBox`, the `halfWidth` branch) already
+exists and is already correct.
+
+**How the wrapping guess got in.** It was inferred from the shape of the
+numbers — jar shorter and taller than ours reads like a wrap — without
+opening the jar's SVG. Two of the seven residuals genuinely were wrap bugs,
+which made a third look like one. The geometry was one `grep` away.
+
+---
+
+## Defect 5 (`berelu-46-namo819`) diagnosed 2026-09-08 — and it is the delicate one
+
+Was "small creole-marker width deltas, least diagnosed". Now measured.
+
+**Mechanism.** Creole-pure `**bold**` markers are measured as literal glyphs.
+Upstream's creole parser turns them into a bold atom, so the asterisks never
+reach the measurer. All six of the fixture's labels reconstruct exactly:
+
+| label | jar | ours |
+|---|---|---|
+| `> up arrow **missing**` | **106** = `91.081 + 13 + 2` | **126** = `111.231 + 13 + 2` |
+| `> left arrow **missing**` | **108** = `93.925 + 13 + 2` | **129** = `114.075 + 13 + 2` |
+
+(`+ 13` is the magic-arrow block at the base font size, `+ 2` the
+`2 * marginLabel`.) The four `*` characters are the whole delta: 18 and 17 px.
+
+**Upstream's marker set** — `klimt/font/FontStyle.java:45-72`, the
+`isCreolePure` arm of `starters()`:
+
+| style | creole-pure | HTML-ish (already stripped here) |
+|---|---|---|
+| BOLD | `**` | `<b>` |
+| ITALIC | `//` | `<i>` |
+| UNDERLINE | `__` | `<u>` |
+| STRIKE | `--` | `<s>`, `<d>` |
+| WAVE | `~~` | `<w>` |
+
+`stripCreoleMarkup` covers the whole right-hand column and none of the left.
+
+## Why this one must NOT be a blind regex
+
+Upstream matches these as PAIRED activation/deactivation through the creole
+parser (`CommandCreoleStyle.createCreole`), not by deleting substrings. Two
+of the five markers are ambiguous in real diagrams:
+
+- **`//` is the URL separator.** Stripping it unpaired turns
+  `http://example.com` into `http:example.com` — silently, in a label that
+  currently measures correctly.
+- **`--` is arrow syntax and a common text dash**, and this file's own
+  `isVisibilityCharacter` already gives a leading `-` special meaning
+  (`VisibilityModifier.java:211-234`). Its guard exists precisely because
+  `--comment` must not read as a visibility marker.
+
+So the safe scope is **paired `**…**` only**, which is what the corpus
+exercises here, with `//`, `__`, `--`, `~~` left unported and the hazard
+named — rather than five markers stripped blind and two of them wrong.
+
+**Blast radius is the largest of these five: 21 fixtures carry `**` in an
+edge-label position, 48 anywhere.** Bold is common. Every one needs a
+before/after against its own jar DOT; this is the fix most likely to move
+something unintended.
