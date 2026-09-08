@@ -41,21 +41,31 @@ import { splitDisplayLines } from './klimt/creole/DisplayNewlines.js';
 const CREOLE_FORMAT_TAG_SOURCE = '</?(?:color|back|size|font|plain|w|b|i|u|s)(?::[^>]*|\\s[^>]*)?>';
 
 /**
- * Strip inline creole formatting to the text a measurer should see.
- *
- * Upstream never faces this: `SvekEdge` measures a real creole `TextBlock`
- * (`SvekEdge.java:441`), where a colour tag is a formatting change rather than
- * characters. This port measures strings, so the tags have to come out first
- * or they are counted as glyphs — measured at 336.1px against a 72px oracle
- * box on `usecase/jecici-56-bimu826`, whose label carries two colour tags.
- *
- * A faithful TextBlock port is the Phase 4h creole track and is out of scope
- * here; this closes the measurement gap without it. The one case it cannot
- * represent is a per-run font change inside a label (`<size:N>` mid-string),
- * which genuinely needs the block — no corpus fixture exercises it.
+ * Strip inline creole formatting to the text a measurer should see. Upstream
+ * never faces this: `SvekEdge` measures a real creole `TextBlock`
+ * (`SvekEdge.java:441`), a colour tag is a formatting change there, not
+ * characters — measured 336.1px against a 72px oracle on
+ * `usecase/jecici-56-bimu826` before this landed. See {@link resolveLineFont}
+ * for the one case handed off separately: a leading `<size:N>` run change.
  */
 export function stripCreoleMarkup(text: string): string {
   return text.replace(new RegExp(CREOLE_FORMAT_TAG_SOURCE, 'gi'), '');
+}
+
+/**
+ * `<size:N>` with no closing `</size>` changes the font to the end of the
+ * LINE (`CommandCreoleSizeChange.java:57,81-93` EOL form, `Splitter.java:53`
+ * `fontSizePattern`). LEADING-only: `starters()` (`:50-52`) fires anywhere,
+ * but a MID-STRING change (`abc <size:30>def`) needs per-run measurement no
+ * fixture requires. Shared below by {@link computeReservedLabelBox} and the
+ * class engine's magic-arrow branch (`class-layout-edge-labels.ts`).
+ */
+const LEADING_SIZE_TAG = /^<size[\s:]+(\d+)[^>]*>/i;
+
+export function resolveLineFont(line: string, font: FontSpec): { text: string; font: FontSpec } {
+  const m = LEADING_SIZE_TAG.exec(line);
+  if (!m) return { text: stripCreoleMarkup(line), font };
+  return { text: stripCreoleMarkup(line.slice(m[0].length)), font: { ...font, size: Number(m[1]) } };
 }
 
 /** Every intermediate the box formula produces, so a caller that needs the
@@ -234,23 +244,22 @@ export function parseMagicArrowLabel(label: string): MagicArrowLabel | undefined
 }
 
 /**
- * Width is the MAX over lines, not their sum; height is the line count times
- * the font size; both then take `2 * marginLabel` and the width floors, as
- * the jar truncates toward zero (`(int)` cast, `SvekEdge.java:504-507`).
+ * Width is the MAX over lines, not their sum; height SUMS each line's own
+ * font size (`XDimension2D#mergeTB`, `XDimension2D.java:94-98`) — equal to
+ * `lines.length * font.size` unless a leading `<size:N>` tag resolves a
+ * different size per {@link resolveLineFont}. Both then take `2 *
+ * marginLabel` and the width floors, as the jar truncates toward zero
+ * (`(int)` cast, `SvekEdge.java:504-507`). `marginLabel` is 6 for a
+ * self-loop, 1 otherwise.
  *
- * `marginLabel` is 6 for a self-loop and 1 otherwise.
+ * `classAttributeIconSize` gates M4 causes A+B (visibility-char strip + icon
+ * block, {@link applyVisibilityIcon}) on LINE 0 only, matching
+ * `Display#manageGuillemet`'s `first`-only guard (`Display.java:414-416`).
  *
- * `classAttributeIconSize` gates M4 causes A+B (visibility-char strip +
- * icon block, see {@link applyVisibilityIcon}) on LINE 0 only — every other
- * line is unaffected, matching `Display#manageGuillemet`'s `first`-only
- * guard (`klimt/creole/Display.java:414-416`).
- *
- * T1: `text` is split via {@link splitDisplayLines} (`Display#getWithNewlines`,
- * `klimt/creole/Display.java:262-346`) -- every caller's own upstream site
- * builds its input via that SAME method (class: `CommandLinkClass.java:413`;
- * state: `CommandCreateState.java:195`/`BodierSimple.java:61`; description:
- * `CommandLinkElement.java:320`), not the narrower real-newline-splitting
- * `splitCreoleLines` this replaced.
+ * T1: `text` splits via {@link splitDisplayLines} (`Display#getWithNewlines`,
+ * `klimt/creole/Display.java:262-346`) -- every caller's upstream site builds
+ * its input via that SAME method (class: `CommandLinkClass.java:413`; state:
+ * `CommandCreateState.java:195`/`BodierSimple.java:61`; description: `CommandLinkElement.java:320`).
  */
 export function computeReservedLabelBox(
   text: string,
@@ -262,12 +271,13 @@ export function computeReservedLabelBox(
   const marginLabel = isSelfLoop ? 6 : 1;
   const rawLines = splitDisplayLines(text).lines;
   const vis = applyVisibilityIcon(rawLines[0] ?? '', classAttributeIconSize);
-  // Strip BEFORE measuring: a colour tag is a formatting change upstream, not
-  // glyphs. `lines` carries the stripped text because its only consumer is a
-  // descent measurement (`state-transition-label.ts:60`), not drawing.
-  const lines = [vis.text, ...rawLines.slice(1)].map(stripCreoleMarkup);
-  const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width)) + vis.iconWidth;
-  const measuredHeight = Math.max(lines.length * font.size, vis.iconHeight);
+  // Resolve BEFORE measuring: colour tags are formatting, `<size:N>` rewrites
+  // the font; `lines` only feeds a descent measurement (`state-transition-label.ts:60`).
+  const resolved = [vis.text, ...rawLines.slice(1)].map((l) => resolveLineFont(l, font));
+  const lines = resolved.map((r) => r.text);
+  const measuredWidth = Math.max(...resolved.map((r) => measurer.measure(r.text, r.font).width)) + vis.iconWidth;
+  const stackedHeight = resolved.reduce((sum, r) => sum + r.font.size, 0);
+  const measuredHeight = Math.max(stackedHeight, vis.iconHeight);
   const reservedWidth = Math.floor(measuredWidth + 2 * marginLabel);
   const reservedHeight = measuredHeight + 2 * marginLabel;
   return { marginLabel, lines, measuredWidth, measuredHeight, reservedWidth, reservedHeight };

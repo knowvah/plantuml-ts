@@ -197,6 +197,54 @@ describe('M4 cause C — guillemet rewrite (xopuku-46-nefa571, tebore-53-tese080
 });
 
 // ---------------------------------------------------------------------------
+// fix(label-size-tag-height) -- magic-arrow branch resolves a leading
+// <size:N> tag (xamule-03-jeda376: `Book - Foo : <size:30>to Foo >`).
+// Jar oracle (test-results/dot-cache/class/xamule-03-jeda376/svek-1.dot):
+// WIDTH="91" HEIGHT="32". Arithmetic: "to Foo" at size 30 = 76.6875x30
+// (WidthTableMeasurer); arrow block stays at the BASE font, 13x13
+// (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2.java
+// :57,87`); mergeLR sums width/maxes height = 89.6875x30; + 2*marginLabel(1)
+// = 91.6875x32; width floors to 91 (`SvekEdge.java:504-507`).
+// ---------------------------------------------------------------------------
+
+describe('fix(label-size-tag-height) — magic-arrow <size:N> (xamule-03-jeda376)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+
+  function magicRel(label: string): Relationship {
+    return { from: 'Book', to: 'Foo', type: 'association', label };
+  }
+
+  it('<size:30>to Foo > reserves the oracle box 91x32', () => {
+    const attrs = edgeLabelAttrs(magicRel('<size:30>to Foo >'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(91);
+    expect(Math.floor(attrs.labelHeight!)).toBe(32);
+  });
+
+  it('FAILS against pre-fix (tag counted as glyphs, arrow block always base size)', () => {
+    // Pre-fix: `measure('<size:30>to Foo', 13).width + 13` (no strip, no
+    // size resolution) landed ~104.7 wide, not 91.
+    const preFixWidth = oracleMeasurer.measure('<size:30>to Foo', font).width + font.size;
+    const attrs = edgeLabelAttrs(magicRel('<size:30>to Foo >'), font, font, oracleMeasurer);
+    expect(attrs.labelWidth).not.toBeCloseTo(preFixWidth, 1);
+  });
+
+  it('a bare magic-arrow token with no size tag is unaffected — regression guard', () => {
+    // `Book -- Foo1 : >` (svek-1.dot WIDTH="13" HEIGHT="13") — bare token
+    // skips marginLabel entirely (`withLabelMargin`'s bare-arrow check).
+    const attrs = edgeLabelAttrs(magicRel('>'), font, font, oracleMeasurer);
+    expect(attrs.labelWidth).toBe(13);
+    expect(attrs.labelHeight).toBe(13);
+  });
+
+  it('a text-bearing magic-arrow label with no size tag still strips creole markup — regression guard', () => {
+    const attrs = edgeLabelAttrs(magicRel('toFoo >'), font, font, oracleMeasurer);
+    const textWidth = oracleMeasurer.measure('toFoo', font).width;
+    expect(attrs.labelWidth).toBeCloseTo(font.size + textWidth + 2 * 1, 6);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // SI25 D2/D3 -- the DOT reservation and the ink share one font and one walk
 // ---------------------------------------------------------------------------
 

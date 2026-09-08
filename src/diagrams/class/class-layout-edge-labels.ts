@@ -20,6 +20,7 @@ import {
   applyVisibilityIcon,
   applyGuillemet,
   stripCreoleMarkup,
+  resolveLineFont,
 } from '../../core/edge-label-box.js';
 import {
   isBareMagicArrowLabel,
@@ -121,6 +122,8 @@ export { wrapPlainTextLine } from './class-edge-label-lines.js';
  * the literal `>`/`<` token as a visible glyph and never reserve space for
  * the triangle). A BARE token (no remaining text) additionally skips
  * `marginLabel` entirely -- see {@link withLabelMargin}'s bare-arrow check.
+ * A leading `<size:N>` tag on the remaining text resolves to its own font
+ * before measuring ({@link resolveLineFont}, `xamule-03-jeda376`).
  */
 type LabelAttrs = Pick<
   NonNullable<DotInputEdge['attributes']>,
@@ -256,11 +259,12 @@ function computeNoteMergedLabelAttrs(
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
  *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
  *  `core/edge-label-box.ts`); multi-line ports C, the D6 per-line
- *  guide-line-arrow branch, and (T4) a per-line creole-tag strip; plain
- *  single-line magic-arrow gets neither A/B/C nor a creole strip (cause D
- *  territory, out of this task's scope -- no fixture combines a magic-arrow
- *  token with `<<x>>` or a creole tag). `label` stays RAW: only
- *  width/height change. */
+ *  guide-line-arrow branch, and (T4) a per-line creole-tag strip;
+ *  single-line magic-arrow resolves a leading `<size:N>` tag and strips
+ *  creole formatting on its remaining text via {@link resolveLineFont}
+ *  (`xamule-03-jeda376`) -- still no guillemet rewrite on that arm (no
+ *  fixture combines a magic-arrow token with `<<x>>`). `label` stays RAW:
+ *  only width/height change. */
 function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
@@ -301,15 +305,21 @@ function computeMeasuredLabelAttrs(
   }
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
-    const m =
-      magic.text !== undefined && magic.text !== '' ? measurer.measure(magic.text, font) : { width: 0, height: 0 };
+    // A leading `<size:N>` tag on the remaining text rewrites the TEXT's
+    // own font ({@link resolveLineFont}) -- the arrow glyph below stays at
+    // the BASE `font`, matching `addMagicArrow`'s own font argument
+    // (`SvekEdge.java:304`); see the comment on `font.size` below.
+    const resolved = magic.text !== undefined && magic.text !== '' ? resolveLineFont(magic.text, font) : undefined;
+    const m = resolved !== undefined ? measurer.measure(resolved.text, resolved.font) : { width: 0, height: 0 };
     // `TextBlockArrow2.calculateDimension` (`klimt/shape/TextBlockArrow2
     // .java:57,87`) returns `(size, size)` where `size` is the SAME font
     // passed to `addMagicArrow` (`SvekEdge.java:304`) -- `font.size` here,
     // NOT `ARROW_GLYPH_SIZE` (the draw-only `.80` ink triangle, `:64-65`,
-    // which never enters a measurement). `mergeLR` sums width, maxes
-    // height (`XDimension2D.java:108-112`). A bare token's `marginLabel`
-    // skip lives in {@link withLabelMargin}, not here.
+    // which never enters a measurement), and NOT the resolved text's own
+    // font size when a `<size:N>` tag runs it larger (`xamule-03-jeda376`:
+    // arrow block stays 13, text resolves to 30). `mergeLR` sums width,
+    // maxes height (`XDimension2D.java:108-112`). A bare token's
+    // `marginLabel` skip lives in {@link withLabelMargin}, not here.
     return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
   }
   const vis = applyVisibilityIcon(label, classAttributeIconSize);
