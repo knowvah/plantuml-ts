@@ -5,6 +5,7 @@ import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { ACTION_HEIGHT, ACTION_H_PAD } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 const V_PAD = 8;
 const ACTION_MIN_WIDTH = 120;
@@ -25,13 +26,25 @@ export class GtileAction extends TileLeaf {
     const isCodeBlock = /^<code>$/i.test(allLines[0]?.trim() ?? '');
     const lines = allLines.filter((l) => !/^<\/?code>$/i.test(l.trim()));
     const lineCount = lines.length;
-    const lineHeight = bounder.getDimension('M', theme.fontSize).height * 1.4;
+    // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361).
+    // Every BoxStyle -- plain and SDL alike -- is an `FtileBox`, and every
+    // `FtileBox` resolves `SName.activity`
+    // (`ftile/vertical/FtileBox.java:97-99`, `:146`).
+    const fontSize = activityFontSize(theme, 'activity');
+    // The per-line baseline ADVANCE is EXACTLY 1x the font size, which is
+    // what the RENDERER has advanced at since `activity-element-granularity`
+    // T3 (`activity-renderer-shapes.ts`'s ASCENT_FRACTION block):
+    // `calculateDimension`'s returned height is `size`, unconditionally --
+    // `klimt/drawing/font/StringBounderFromWidthTable.java:71`. This sizer
+    // used `* 1.4` until `activity-style-defaults` D6, an unsourced constant
+    // that reserved 40% more height than the renderer then drew into.
+    const lineHeight = bounder.getDimension('M', fontSize).height;
     // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
     // indented code lines because space glyphs are narrower than code chars.
-    const monoCharWidth = theme.fontSize * 0.6;
+    const monoCharWidth = fontSize * 0.6;
     const maxWidth = isCodeBlock
       ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
-      : Math.max(...lines.map((l) => bounder.getDimension(l, theme.fontSize).width));
+      : Math.max(...lines.map((l) => bounder.getDimension(l, fontSize).width));
     this.width = Math.max(maxWidth + 2 * ACTION_H_PAD, ACTION_MIN_WIDTH);
     this.height = Math.max(lineHeight * lineCount + 2 * V_PAD, ACTION_HEIGHT);
   }

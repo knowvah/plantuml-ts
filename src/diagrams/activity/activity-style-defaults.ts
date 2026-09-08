@@ -101,17 +101,35 @@ export const SWIMLANE_FONT_SIZE = 18;
  * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:323 */
 export const NOTE_FONT_SIZE = 13;
 
-const FONT_SIZE_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
+/**
+ * `undefined` means the kind declares NO FontSize anywhere upstream and so
+ * inherits the ROOT block's `FontSize 14` (`plantuml.skin:10`) — which this
+ * port already carries as `theme.fontSize`, and which a user's `skinparam
+ * defaultFontSize` moves. Reading the theme there rather than restating 14
+ * is the difference between inheriting the root and pinning a copy of it.
+ *
+ * Three kinds are in that position, each confirmed against its own upstream
+ * signature rather than assumed:
+ *   - `composite` — `activityDiagram { composite { ... } }`
+ *     (`plantuml.skin:364-368`) declares LineColor, BackgroundColor and
+ *     LineThickness only. A group/partition title resolves
+ *     `of(root, element, activityDiagram, <symbol>, composite)`
+ *     (`ftile/vcompact/FtileGroup.java:89-92`).
+ *   - `circle` — the bare root `circle { }` block is EMPTY
+ *     (`plantuml.skin:331-332`), and the `activityDiagram { circle { ... }
+ *     }` block declares only thickness and colour. The connector spot's
+ *     label resolves `of(..., circle, spot)`
+ *     (`ftile/vcompact/VCompactFactory.java:103-105`,
+ *     `gtile/GtileCircleSpot.java:66`).
+ *   - `activityBar` — declares only a BackgroundColor (`:387`), and the
+ *     fork/join bar draws no text at all.
+ */
+const FONT_SIZE_DEFAULTS: Readonly<Record<ActivitySName, number | undefined>> = {
   activity: ACTIVITY_FONT_SIZE,
-  // `activityBar` (the fork/join bar) and `composite` declare no FontSize
-  // upstream; neither draws text of its own. They resolve the action box's
-  // size so a caller that asks is never handed a fabricated number.
-  activityBar: ACTIVITY_FONT_SIZE,
+  activityBar: undefined,
   arrow: ARROW_FONT_SIZE,
-  // `circle` (start/stop/end terminals) declares no FontSize and draws no
-  // text; same reasoning as `activityBar`.
-  circle: ACTIVITY_FONT_SIZE,
-  composite: ACTIVITY_FONT_SIZE,
+  circle: undefined,
+  composite: undefined,
   diamond: DIAMOND_FONT_SIZE,
   note: NOTE_FONT_SIZE,
 };
@@ -127,9 +145,11 @@ export function swimlaneFontSize(theme: Theme): number {
 }
 
 /** The resolved text size for one activity element kind: the user's bucket
- * override if any, else this module's `plantuml.skin` default (D2). */
+ * override if any, else this module's `plantuml.skin` default, else — for a
+ * kind that declares none upstream — the inherited root `theme.fontSize`
+ * (D2). Always a number; supplying the fallback is this module's job. */
 export function activityFontSize(theme: Theme, sname: ActivitySName): number {
-  return resolveElementFontSize(theme, bucketKey(sname), 'title') ?? FONT_SIZE_DEFAULTS[sname];
+  return resolveElementFontSize(theme, bucketKey(sname), 'title') ?? FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
 }
 
 // ---------------------------------------------------------------------------

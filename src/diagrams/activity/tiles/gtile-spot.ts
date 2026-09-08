@@ -13,6 +13,7 @@ interface ActivitySpot {
 }
 
 import { CONNECTOR_SPOT_RADIUS as RADIUS } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 export class GtileSpot extends TileLeaf {
   readonly kind = 'gtile-spot' as const;
@@ -28,7 +29,13 @@ export class GtileSpot extends TileLeaf {
     let width = RADIUS * 2;
     const height = RADIUS * 2;
     if (node.name) {
-      const m = bounder.getDimension(node.name, theme.fontSize - 2);
+      // The connector spot resolves `of(root, element, activityDiagram,
+      // circle, spot)` (`ftile/vcompact/VCompactFactory.java:103-105`,
+      // `gtile/GtileCircleSpot.java:66`). The bare root `circle { }` block
+      // is EMPTY (plantuml.skin:331-332) and the `activityDiagram { circle
+      // { ... } }` block declares only thickness and colour, so the label
+      // inherits the root `FontSize 14`. The previous `- 2` was unsourced.
+      const m = bounder.getDimension(node.name, activityFontSize(theme, 'circle'));
       width = Math.max(width, m.width + 8);
     }
     this.width = width;

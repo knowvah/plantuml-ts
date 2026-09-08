@@ -1,7 +1,7 @@
 {
-  "$comment": "PRE-CHANGE STYLE CENSUS for the activity-style-defaults mission (T0). GATED by tests/oracle/svg-conformance/activity.style-baseline.test.ts -- read that file's doc comment for what each field means and why an EQUALITY pin (not a ratchet) is the right instrument for a histogram. Population: all 373 fixtures of test-results/dot-cache/activity/, partitioned exactly as oracle/goldens/svg-activity/diff-baseline.json partitions them -- 268 baseline / 82 error / 23 jar-error. Every number is a pure function of the committed corpus at measuredAgainstCommit, measured through the IDENTICAL seams the ratchet gate uses: renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), then normalizeSvg (tests/oracle/svg-conformance/normalize.ts) -- NORMALIZED, not raw, so a style=\"font-size:12px\" declaration and a font-size attribute count as one value, not two. `(absent)` counts elements carrying no such attribute; an absence that vanished from a histogram would otherwise read as no change. `error` and `jar-error` entries carry NO census at all (D8/D12, plans/activity-oracle-harness/decisions.md): an unrenderable fixture and a jar error page both carry no meaningful style values and must never read as an empty histogram. Corpus-wide over the 268 baselined fixtures, font-size OURS is {14:1577, 10:4, 19:4, 8:3} against the JAR's {12:996, 11:614, 18:135, 13:102, 14:16, ...} -- we emit a flat root default where the jar resolves a per-element size from plantuml.skin:358-385. That gap is what this mission closes; T7 re-pins this file and the histogram DIFF is the mission's evidence.",
+  "$comment": "PRE-CHANGE STYLE CENSUS for the activity-style-defaults mission (T0). GATED by tests/oracle/svg-conformance/activity.style-baseline.test.ts -- read that file's doc comment for what each field means and why an EQUALITY pin (not a ratchet) is the right instrument for a histogram. Population: all 373 fixtures of test-results/dot-cache/activity/, partitioned exactly as oracle/goldens/svg-activity/diff-baseline.json partitions them -- 268 baseline / 82 error / 23 jar-error. Every number is a pure function of the committed corpus at measuredAgainstCommit, measured through the IDENTICAL seams the ratchet gate uses: renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), then normalizeSvg (tests/oracle/svg-conformance/normalize.ts) -- NORMALIZED, not raw, so a style=\"font-size:12px\" declaration and a font-size attribute count as one value, not two. `(absent)` counts elements carrying no such attribute; an absence that vanished from a histogram would otherwise read as no change. `error` and `jar-error` entries carry NO census at all (D8/D12, plans/activity-oracle-harness/decisions.md): an unrenderable fixture and a jar error page both carry no meaningful style values and must never read as an empty histogram. Corpus-wide over the 268 baselined fixtures, font-size OURS is {14:1577, 10:4, 19:4, 8:3} against the JAR's {12:996, 11:614, 18:135, 13:102, 14:16, ...} -- we emit a flat root default where the jar resolves a per-element size from plantuml.skin:358-385. That gap is what this mission closes. RE-PINNED PER TASK, not once at the end: T3-T6 each break this equality gate by design, and leaving it red across four commits would make an UNINTENDED break indistinguishable from the intended one. Attribution is preserved by recording each task’s delta in plans/activity-style-defaults/decision-journal.md and by git history -- the T0 floor is commit e7f33681. T3 (live sizer, tiles/): font-size histogram UNCHANGED (the renderer still emits theme.fontSize; that is T5/T6), textCount unchanged at 1588, but 120 of 268 fixtures moved their canvas, and aggregate weightedScore fell 61677 -> 61644 with ZERO risers.",
   "measuredAt": "2026-09-08",
-  "measuredAgainstCommit": "2afd01ea",
+  "measuredAgainstCommit": "42c5de90",
   "fixtures": [
     {
       "type": "activity",
@@ -16,8 +16,8 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "174",
-        "height": "79"
+        "width": "157",
+        "height": "64"
       },
       "jar": {
         "fontSize": {
@@ -34,7 +34,7 @@
         "height": "84"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -51,8 +51,8 @@
           "8": 3
         },
         "textCount": 12,
-        "width": "482",
-        "height": "382"
+        "width": "517",
+        "height": "354"
       },
       "jar": {
         "fontSize": {
@@ -70,7 +70,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -78,7 +78,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -114,7 +114,7 @@
         "height": "377"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -152,7 +152,7 @@
         "height": "533"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -188,7 +188,7 @@
         "height": "229"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -205,7 +205,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "222",
+        "width": "212",
         "height": "224"
       },
       "jar": {
@@ -225,7 +225,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -265,7 +265,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -282,8 +282,8 @@
           "8": 2
         },
         "textCount": 5,
-        "width": "462",
-        "height": "227"
+        "width": "427",
+        "height": "212"
       },
       "jar": {
         "fontSize": {
@@ -301,7 +301,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -341,7 +341,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -377,7 +377,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -394,8 +394,8 @@
           "8": 3
         },
         "textCount": 8,
-        "width": "1080",
-        "height": "381"
+        "width": "973",
+        "height": "343"
       },
       "jar": {
         "fontSize": {
@@ -414,7 +414,7 @@
         "height": "391"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -456,7 +456,7 @@
         "height": "265"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -474,8 +474,8 @@
           "7.5": 1
         },
         "textCount": 5,
-        "width": "330",
-        "height": "273"
+        "width": "339",
+        "height": "274"
       },
       "jar": {
         "fontSize": {
@@ -496,7 +496,7 @@
         "height": "222"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -513,8 +513,8 @@
           "8": 2
         },
         "textCount": 7,
-        "width": "193",
-        "height": "316"
+        "width": "173",
+        "height": "271"
       },
       "jar": {
         "fontSize": {
@@ -533,7 +533,7 @@
         "height": "280"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -550,7 +550,7 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "341",
+        "width": "303",
         "height": "180"
       },
       "jar": {
@@ -569,7 +569,7 @@
         "height": "196"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -605,7 +605,7 @@
         "height": "340"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -624,7 +624,7 @@
           "(absent)": 3
         },
         "textCount": 6,
-        "width": "519",
+        "width": "500",
         "height": "116"
       },
       "jar": {
@@ -646,7 +646,7 @@
         "height": "145"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -677,7 +677,7 @@
         "height": "415"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -694,7 +694,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "154",
+        "width": "144",
         "height": "272"
       },
       "jar": {
@@ -714,7 +714,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -732,7 +732,7 @@
         },
         "textCount": 10,
         "width": "304",
-        "height": "600"
+        "height": "605"
       },
       "jar": {
         "fontSize": {
@@ -751,7 +751,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -759,7 +759,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -776,8 +776,8 @@
           "8": 19
         },
         "textCount": 29,
-        "width": "1113",
-        "height": "1011"
+        "width": "1025",
+        "height": "996"
       },
       "jar": {
         "fontSize": {
@@ -795,7 +795,7 @@
         "height": "1126"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -812,8 +812,8 @@
           "8": 3
         },
         "textCount": 25,
-        "width": "336",
-        "height": "690"
+        "width": "296",
+        "height": "516"
       },
       "jar": {
         "fontSize": {
@@ -831,7 +831,7 @@
         "height": "419"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -848,7 +848,7 @@
           "8": 3
         },
         "textCount": 5,
-        "width": "359",
+        "width": "330",
         "height": "344"
       },
       "jar": {
@@ -868,7 +868,7 @@
         "height": "332"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -887,7 +887,7 @@
           "(absent)": 3
         },
         "textCount": 7,
-        "width": "519",
+        "width": "500",
         "height": "212"
       },
       "jar": {
@@ -908,7 +908,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -946,7 +946,7 @@
         "height": "385"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -965,7 +965,7 @@
           "(absent)": 1
         },
         "textCount": 5,
-        "width": "188",
+        "width": "172",
         "height": "284"
       },
       "jar": {
@@ -987,7 +987,7 @@
         "height": "323"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1005,8 +1005,8 @@
           "(absent)": 2
         },
         "textCount": 5,
-        "width": "326",
-        "height": "316"
+        "width": "340",
+        "height": "317"
       },
       "jar": {
         "fontSize": {
@@ -1025,7 +1025,7 @@
         "height": "268"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1033,7 +1033,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1041,7 +1041,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1058,7 +1058,7 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "202",
+        "width": "189",
         "height": "208"
       },
       "jar": {
@@ -1077,7 +1077,7 @@
         "height": "241"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1085,7 +1085,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1121,7 +1121,7 @@
         "height": "495"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1139,7 +1139,7 @@
           "(absent)": 2
         },
         "textCount": 5,
-        "width": "381",
+        "width": "366",
         "height": "420"
       },
       "jar": {
@@ -1159,7 +1159,7 @@
         "height": "407"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1195,7 +1195,7 @@
         "height": "171"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1203,7 +1203,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1220,7 +1220,7 @@
           "8": 3
         },
         "textCount": 4,
-        "width": "242",
+        "width": "227",
         "height": "252"
       },
       "jar": {
@@ -1239,7 +1239,7 @@
         "height": "247"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1258,7 +1258,7 @@
           "(absent)": 1
         },
         "textCount": 9,
-        "width": "312",
+        "width": "275",
         "height": "400"
       },
       "jar": {
@@ -1280,7 +1280,7 @@
         "height": "456"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1297,7 +1297,7 @@
           "8": 5
         },
         "textCount": 5,
-        "width": "440",
+        "width": "385",
         "height": "324"
       },
       "jar": {
@@ -1315,7 +1315,7 @@
         "height": "315"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1351,7 +1351,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1389,7 +1389,7 @@
         "height": "276"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1397,7 +1397,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1405,7 +1405,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1413,7 +1413,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1430,7 +1430,7 @@
           "8": 1
         },
         "textCount": 3,
-        "width": "249",
+        "width": "234",
         "height": "328"
       },
       "jar": {
@@ -1449,7 +1449,7 @@
         "height": "353"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1484,7 +1484,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1502,7 +1502,7 @@
         },
         "textCount": 5,
         "width": "304",
-        "height": "227"
+        "height": "212"
       },
       "jar": {
         "fontSize": {
@@ -1520,7 +1520,7 @@
         "height": "234"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1538,7 +1538,7 @@
         },
         "textCount": 10,
         "width": "144",
-        "height": "615"
+        "height": "600"
       },
       "jar": {
         "fontSize": {
@@ -1555,7 +1555,7 @@
         "height": "577"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1573,7 +1573,7 @@
         },
         "textCount": 2,
         "width": "144",
-        "height": "156"
+        "height": "157"
       },
       "jar": {
         "fontSize": {
@@ -1591,7 +1591,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1627,7 +1627,7 @@
         "height": "404"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1644,7 +1644,7 @@
           "8": 13
         },
         "textCount": 13,
-        "width": "301",
+        "width": "266",
         "height": "732"
       },
       "jar": {
@@ -1662,7 +1662,7 @@
         "height": "692"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1677,8 +1677,8 @@
         },
         "rx": {},
         "textCount": 2,
-        "width": "120",
-        "height": "256"
+        "width": "122",
+        "height": "257"
       },
       "jar": {
         "fontSize": {
@@ -1694,7 +1694,7 @@
         "height": "210"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1731,7 +1731,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1748,7 +1748,7 @@
           "8": 3
         },
         "textCount": 5,
-        "width": "168",
+        "width": "164",
         "height": "352"
       },
       "jar": {
@@ -1767,7 +1767,7 @@
         "height": "394"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1798,7 +1798,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1833,7 +1833,7 @@
         "height": "848"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1869,7 +1869,7 @@
         "height": "379"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1877,7 +1877,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1920,7 +1920,7 @@
         "height": "398"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1928,7 +1928,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1936,7 +1936,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1971,7 +1971,7 @@
         "height": "328"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -1988,8 +1988,8 @@
           "8": 4
         },
         "textCount": 12,
-        "width": "226",
-        "height": "482"
+        "width": "240",
+        "height": "463"
       },
       "jar": {
         "fontSize": {
@@ -2007,7 +2007,7 @@
         "height": "343"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2042,7 +2042,7 @@
         "height": "276"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2077,7 +2077,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2108,7 +2108,7 @@
         "height": "319"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2126,7 +2126,7 @@
         },
         "textCount": 7,
         "width": "304",
-        "height": "432"
+        "height": "434"
       },
       "jar": {
         "fontSize": {
@@ -2145,7 +2145,7 @@
         "height": "330"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2163,7 +2163,7 @@
         },
         "textCount": 3,
         "width": "212",
-        "height": "264"
+        "height": "284"
       },
       "jar": {
         "fontSize": {
@@ -2182,7 +2182,7 @@
         "height": "301"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2218,7 +2218,7 @@
         "height": "521"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2226,7 +2226,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2263,7 +2263,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2278,8 +2278,8 @@
           "8": 1
         },
         "textCount": 3,
-        "width": "215",
-        "height": "98"
+        "width": "193",
+        "height": "76"
       },
       "jar": {
         "fontSize": {
@@ -2294,7 +2294,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2313,7 +2313,7 @@
           "(absent)": 1
         },
         "textCount": 9,
-        "width": "154",
+        "width": "144",
         "height": "340"
       },
       "jar": {
@@ -2334,7 +2334,7 @@
         "height": "353"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2369,7 +2369,7 @@
         "height": "110"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2405,7 +2405,7 @@
         "height": "199"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2420,7 +2420,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "181",
+        "width": "163",
         "height": "60"
       },
       "jar": {
@@ -2436,7 +2436,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2471,7 +2471,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2479,7 +2479,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2514,7 +2514,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2531,8 +2531,8 @@
           "8": 3
         },
         "textCount": 5,
-        "width": "500",
-        "height": "387"
+        "width": "462",
+        "height": "372"
       },
       "jar": {
         "fontSize": {
@@ -2551,7 +2551,7 @@
         "height": "368"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2568,7 +2568,7 @@
           "8": 4
         },
         "textCount": 5,
-        "width": "396",
+        "width": "370",
         "height": "232"
       },
       "jar": {
@@ -2587,7 +2587,7 @@
         "height": "236"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2628,7 +2628,7 @@
         "height": "301"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2645,7 +2645,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "164",
+        "width": "149",
         "height": "148"
       },
       "jar": {
@@ -2663,7 +2663,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2699,7 +2699,7 @@
         "height": "316"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2714,7 +2714,7 @@
         },
         "rx": {},
         "textCount": 7,
-        "width": "315",
+        "width": "312",
         "height": "532"
       },
       "jar": {
@@ -2730,7 +2730,7 @@
         "height": "709"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2747,8 +2747,8 @@
           "8": 1
         },
         "textCount": 12,
-        "width": "259",
-        "height": "363"
+        "width": "230",
+        "height": "272"
       },
       "jar": {
         "fontSize": {
@@ -2765,7 +2765,7 @@
         "height": "203"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2773,7 +2773,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2815,7 +2815,7 @@
         "height": "468"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2850,7 +2850,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2886,7 +2886,7 @@
         "height": "207"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2894,7 +2894,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2929,7 +2929,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2944,7 +2944,7 @@
         },
         "rx": {},
         "textCount": 1,
-        "width": "90",
+        "width": "87",
         "height": "192"
       },
       "jar": {
@@ -2960,7 +2960,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -2978,7 +2978,7 @@
           "(absent)": 2
         },
         "textCount": 4,
-        "width": "1122",
+        "width": "983",
         "height": "228"
       },
       "jar": {
@@ -2997,7 +2997,7 @@
         "height": "228"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3033,7 +3033,7 @@
         "height": "247"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3068,7 +3068,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3103,7 +3103,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3141,7 +3141,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3158,7 +3158,7 @@
           "8": 10
         },
         "textCount": 10,
-        "width": "245",
+        "width": "218",
         "height": "564"
       },
       "jar": {
@@ -3176,7 +3176,7 @@
         "height": "536"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3184,7 +3184,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3192,7 +3192,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3229,7 +3229,7 @@
         "height": "497"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3265,7 +3265,7 @@
         "height": "312"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3283,7 +3283,7 @@
         },
         "textCount": 7,
         "width": "304",
-        "height": "432"
+        "height": "434"
       },
       "jar": {
         "fontSize": {
@@ -3302,7 +3302,7 @@
         "height": "330"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3339,7 +3339,7 @@
         "height": "253"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3356,7 +3356,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "263",
+        "width": "233",
         "height": "148"
       },
       "jar": {
@@ -3374,7 +3374,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3409,7 +3409,7 @@
         "height": "432"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3445,7 +3445,7 @@
         "height": "448"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3480,7 +3480,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3488,7 +3488,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3507,7 +3507,7 @@
           "(absent)": 3
         },
         "textCount": 7,
-        "width": "501",
+        "width": "454",
         "height": "252"
       },
       "jar": {
@@ -3530,7 +3530,7 @@
         "height": "316"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3538,7 +3538,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3577,7 +3577,7 @@
         "height": "235"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3594,7 +3594,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "191",
+        "width": "172",
         "height": "100"
       },
       "jar": {
@@ -3612,7 +3612,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3620,7 +3620,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3658,7 +3658,7 @@
         "height": "362"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3698,7 +3698,7 @@
         "height": "427"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3713,8 +3713,8 @@
           "8": 1
         },
         "textCount": 3,
-        "width": "215",
-        "height": "98"
+        "width": "193",
+        "height": "76"
       },
       "jar": {
         "fontSize": {
@@ -3729,7 +3729,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3747,7 +3747,7 @@
         },
         "textCount": 3,
         "width": "164",
-        "height": "284"
+        "height": "285"
       },
       "jar": {
         "fontSize": {
@@ -3766,7 +3766,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3774,7 +3774,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3805,7 +3805,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3840,7 +3840,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3857,7 +3857,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "188",
+        "width": "172",
         "height": "284"
       },
       "jar": {
@@ -3876,7 +3876,7 @@
         "height": "296"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3884,7 +3884,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3902,7 +3902,7 @@
         },
         "textCount": 6,
         "width": "144",
-        "height": "245"
+        "height": "200"
       },
       "jar": {
         "fontSize": {
@@ -3919,7 +3919,7 @@
         "height": "191"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3959,7 +3959,7 @@
         "height": "386"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -3976,7 +3976,7 @@
           "8": 7
         },
         "textCount": 8,
-        "width": "813",
+        "width": "748",
         "height": "328"
       },
       "jar": {
@@ -3995,7 +3995,7 @@
         "height": "339"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4003,7 +4003,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4020,8 +4020,8 @@
           "8": 3
         },
         "textCount": 12,
-        "width": "324",
-        "height": "468"
+        "width": "303",
+        "height": "400"
       },
       "jar": {
         "fontSize": {
@@ -4040,7 +4040,7 @@
         "height": "547"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4080,7 +4080,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4088,7 +4088,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4096,7 +4096,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4114,7 +4114,7 @@
         },
         "textCount": 4,
         "width": "304",
-        "height": "264"
+        "height": "265"
       },
       "jar": {
         "fontSize": {
@@ -4133,7 +4133,7 @@
         "height": "226"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4141,7 +4141,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4158,7 +4158,7 @@
           "8": 3
         },
         "textCount": 4,
-        "width": "222",
+        "width": "212",
         "height": "232"
       },
       "jar": {
@@ -4178,7 +4178,7 @@
         "height": "215"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4197,7 +4197,7 @@
           "(absent)": 3
         },
         "textCount": 14,
-        "width": "646",
+        "width": "644",
         "height": "376"
       },
       "jar": {
@@ -4220,7 +4220,7 @@
         "height": "395"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4228,7 +4228,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4263,7 +4263,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4281,7 +4281,7 @@
         },
         "textCount": 3,
         "width": "184",
-        "height": "216"
+        "height": "217"
       },
       "jar": {
         "fontSize": {
@@ -4300,7 +4300,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4318,7 +4318,7 @@
         },
         "textCount": 5,
         "width": "184",
-        "height": "328"
+        "height": "329"
       },
       "jar": {
         "fontSize": {
@@ -4337,7 +4337,7 @@
         "height": "312"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4372,7 +4372,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4380,7 +4380,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4388,7 +4388,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4396,7 +4396,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4438,7 +4438,7 @@
         "height": "292"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4479,7 +4479,7 @@
         "height": "653"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4487,7 +4487,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4495,7 +4495,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4533,7 +4533,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4550,7 +4550,7 @@
           "8": 11
         },
         "textCount": 72,
-        "width": "7508",
+        "width": "7926",
         "height": "748"
       },
       "jar": {
@@ -4570,7 +4570,7 @@
         "height": "1390"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4607,7 +4607,7 @@
         "height": "269"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4626,7 +4626,7 @@
           "(absent)": 1
         },
         "textCount": 5,
-        "width": "887",
+        "width": "771",
         "height": "284"
       },
       "jar": {
@@ -4649,7 +4649,7 @@
         "height": "321"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4687,7 +4687,7 @@
         "height": "303"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4707,7 +4707,7 @@
         },
         "textCount": 6,
         "width": "144",
-        "height": "228"
+        "height": "230"
       },
       "jar": {
         "fontSize": {
@@ -4728,7 +4728,7 @@
         "height": "151"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4736,7 +4736,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4744,7 +4744,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4761,8 +4761,8 @@
           "8": 2
         },
         "textCount": 4,
-        "width": "375",
-        "height": "235"
+        "width": "304",
+        "height": "217"
       },
       "jar": {
         "fontSize": {
@@ -4780,7 +4780,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4788,7 +4788,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4823,7 +4823,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4831,7 +4831,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4850,7 +4850,7 @@
           "(absent)": 1
         },
         "textCount": 7,
-        "width": "423",
+        "width": "370",
         "height": "348"
       },
       "jar": {
@@ -4872,7 +4872,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4889,8 +4889,8 @@
           "8": 2
         },
         "textCount": 4,
-        "width": "738",
-        "height": "224"
+        "width": "781",
+        "height": "225"
       },
       "jar": {
         "fontSize": {
@@ -4909,7 +4909,7 @@
         "height": "173"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4917,7 +4917,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4934,7 +4934,7 @@
           "8": 4
         },
         "textCount": 5,
-        "width": "188",
+        "width": "172",
         "height": "476"
       },
       "jar": {
@@ -4953,7 +4953,7 @@
         "height": "426"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -4976,7 +4976,7 @@
         "height": "55"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5011,7 +5011,7 @@
         "height": "380"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5042,7 +5042,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5061,7 +5061,7 @@
           "(absent)": 1
         },
         "textCount": 8,
-        "width": "171",
+        "width": "164",
         "height": "364"
       },
       "jar": {
@@ -5083,7 +5083,7 @@
         "height": "355"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5118,7 +5118,7 @@
         "height": "328"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5156,7 +5156,7 @@
         "height": "243"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5192,7 +5192,7 @@
         "height": "303"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5209,7 +5209,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "295",
+        "width": "274",
         "height": "264"
       },
       "jar": {
@@ -5228,7 +5228,7 @@
         "height": "302"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5263,7 +5263,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5271,7 +5271,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 11 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5288,7 +5288,7 @@
           "8": 3
         },
         "textCount": 3,
-        "width": "261",
+        "width": "232",
         "height": "172"
       },
       "jar": {
@@ -5306,7 +5306,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5342,7 +5342,7 @@
         "height": "334"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5350,7 +5350,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5389,7 +5389,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5406,8 +5406,8 @@
           "8": 3
         },
         "textCount": 7,
-        "width": "200",
-        "height": "290"
+        "width": "185",
+        "height": "252"
       },
       "jar": {
         "fontSize": {
@@ -5426,7 +5426,7 @@
         "height": "320"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5463,7 +5463,7 @@
         "height": "274"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5480,8 +5480,8 @@
           "8": 1
         },
         "textCount": 4,
-        "width": "313",
-        "height": "309"
+        "width": "333",
+        "height": "311"
       },
       "jar": {
         "fontSize": {
@@ -5501,7 +5501,7 @@
         "height": "199"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5532,7 +5532,7 @@
         "height": "130"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5540,7 +5540,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5579,7 +5579,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5614,7 +5614,7 @@
         "height": "796"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5631,8 +5631,8 @@
           "8": 3
         },
         "textCount": 12,
-        "width": "1488",
-        "height": "381"
+        "width": "1310",
+        "height": "343"
       },
       "jar": {
         "fontSize": {
@@ -5651,7 +5651,7 @@
         "height": "413"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5688,7 +5688,7 @@
         "height": "387"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5724,7 +5724,7 @@
         "height": "147"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5760,7 +5760,7 @@
         "height": "297"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5801,7 +5801,7 @@
         "height": "229"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5809,7 +5809,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5826,7 +5826,7 @@
           "8": 4
         },
         "textCount": 6,
-        "width": "361",
+        "width": "346",
         "height": "324"
       },
       "jar": {
@@ -5846,7 +5846,7 @@
         "height": "356"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5887,7 +5887,7 @@
         "height": "507"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5906,7 +5906,7 @@
           "(absent)": 1
         },
         "textCount": 6,
-        "width": "188",
+        "width": "172",
         "height": "340"
       },
       "jar": {
@@ -5928,7 +5928,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -5970,7 +5970,7 @@
         "height": "271"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6012,7 +6012,7 @@
         "height": "466"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6053,7 +6053,7 @@
         "height": "367"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6061,7 +6061,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6069,7 +6069,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6084,8 +6084,8 @@
         },
         "rx": {},
         "textCount": 4,
-        "width": "295",
-        "height": "204"
+        "width": "314",
+        "height": "206"
       },
       "jar": {
         "fontSize": {
@@ -6100,7 +6100,7 @@
         "height": "189"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6108,7 +6108,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6149,7 +6149,7 @@
         "height": "279"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6157,7 +6157,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6174,8 +6174,8 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "210",
-        "height": "167"
+        "width": "188",
+        "height": "152"
       },
       "jar": {
         "fontSize": {
@@ -6193,7 +6193,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6235,7 +6235,7 @@
         "height": "265"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6243,7 +6243,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6251,7 +6251,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6259,7 +6259,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6294,7 +6294,7 @@
         "height": "692"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6330,7 +6330,7 @@
         "height": "393"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6338,7 +6338,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6373,7 +6373,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6404,7 +6404,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6423,8 +6423,8 @@
           "(absent)": 1
         },
         "textCount": 18,
-        "width": "234",
-        "height": "979"
+        "width": "211",
+        "height": "964"
       },
       "jar": {
         "fontSize": {
@@ -6446,7 +6446,7 @@
         "height": "1050"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6454,7 +6454,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6473,7 +6473,7 @@
           "(absent)": 1
         },
         "textCount": 4,
-        "width": "235",
+        "width": "209",
         "height": "204"
       },
       "jar": {
@@ -6494,7 +6494,7 @@
         "height": "227"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6531,7 +6531,7 @@
         "height": "193"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6549,7 +6549,7 @@
         },
         "textCount": 3,
         "width": "184",
-        "height": "176"
+        "height": "177"
       },
       "jar": {
         "fontSize": {
@@ -6568,7 +6568,7 @@
         "height": "183"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6587,7 +6587,7 @@
           "(absent)": 1
         },
         "textCount": 9,
-        "width": "312",
+        "width": "275",
         "height": "400"
       },
       "jar": {
@@ -6609,7 +6609,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6617,7 +6617,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6632,8 +6632,8 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "174",
-        "height": "79"
+        "width": "157",
+        "height": "64"
       },
       "jar": {
         "fontSize": {
@@ -6650,7 +6650,7 @@
         "height": "84"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6685,7 +6685,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6721,7 +6721,7 @@
         "height": "418"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6729,7 +6729,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6737,7 +6737,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6754,7 +6754,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "263",
+        "width": "233",
         "height": "148"
       },
       "jar": {
@@ -6772,7 +6772,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6789,8 +6789,8 @@
           "8": 2
         },
         "textCount": 7,
-        "width": "353",
-        "height": "511"
+        "width": "374",
+        "height": "513"
       },
       "jar": {
         "fontSize": {
@@ -6810,7 +6810,7 @@
         "height": "419"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6818,7 +6818,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6860,7 +6860,7 @@
         "height": "383"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6868,7 +6868,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6885,7 +6885,7 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "511",
+        "width": "449",
         "height": "228"
       },
       "jar": {
@@ -6905,7 +6905,7 @@
         "height": "174"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6936,7 +6936,7 @@
         "height": "227"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6954,7 +6954,7 @@
         },
         "textCount": 2,
         "width": "144",
-        "height": "204"
+        "height": "205"
       },
       "jar": {
         "fontSize": {
@@ -6972,7 +6972,7 @@
         "height": "150"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6980,7 +6980,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -6997,7 +6997,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "206",
+        "width": "187",
         "height": "196"
       },
       "jar": {
@@ -7016,7 +7016,7 @@
         "height": "205"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7057,7 +7057,7 @@
         "height": "398"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7065,7 +7065,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7092,7 +7092,7 @@
         "height": "97"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7100,7 +7100,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7142,7 +7142,7 @@
         "height": "381"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7181,7 +7181,7 @@
         "height": "317"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7198,8 +7198,8 @@
           "8": 1
         },
         "textCount": 9,
-        "width": "588",
-        "height": "156"
+        "width": "632",
+        "height": "157"
       },
       "jar": {
         "fontSize": {
@@ -7218,7 +7218,7 @@
         "height": "180"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7258,7 +7258,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7299,7 +7299,7 @@
         "height": "225"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7307,7 +7307,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7343,7 +7343,7 @@
         "height": "407"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7351,7 +7351,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7387,7 +7387,7 @@
         "height": "183"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7404,7 +7404,7 @@
           "8": 1
         },
         "textCount": 1,
-        "width": "263",
+        "width": "233",
         "height": "148"
       },
       "jar": {
@@ -7422,7 +7422,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7458,7 +7458,7 @@
         "height": "418"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7499,7 +7499,7 @@
         "height": "343"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7514,8 +7514,8 @@
         },
         "rx": {},
         "textCount": 8,
-        "width": "495",
-        "height": "320"
+        "width": "525",
+        "height": "323"
       },
       "jar": {
         "fontSize": {
@@ -7532,7 +7532,7 @@
         "height": "188"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7549,8 +7549,8 @@
           "8": 2
         },
         "textCount": 5,
-        "width": "462",
-        "height": "227"
+        "width": "427",
+        "height": "212"
       },
       "jar": {
         "fontSize": {
@@ -7568,7 +7568,7 @@
         "height": "236"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7603,7 +7603,7 @@
         "height": "162"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7639,7 +7639,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7647,7 +7647,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7664,7 +7664,7 @@
           "8": 3
         },
         "textCount": 3,
-        "width": "191",
+        "width": "172",
         "height": "212"
       },
       "jar": {
@@ -7682,7 +7682,7 @@
         "height": "211"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7700,7 +7700,7 @@
         },
         "textCount": 9,
         "width": "464",
-        "height": "492"
+        "height": "494"
       },
       "jar": {
         "fontSize": {
@@ -7719,7 +7719,7 @@
         "height": "417"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7737,8 +7737,8 @@
           "(absent)": 4
         },
         "textCount": 7,
-        "width": "420",
-        "height": "484"
+        "width": "434",
+        "height": "486"
       },
       "jar": {
         "fontSize": {
@@ -7757,7 +7757,7 @@
         "height": "333"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7789,7 +7789,7 @@
         "height": "127"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7829,7 +7829,7 @@
         "height": "237"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7837,7 +7837,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7845,7 +7845,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7864,7 +7864,7 @@
           "(absent)": 1
         },
         "textCount": 6,
-        "width": "214",
+        "width": "192",
         "height": "280"
       },
       "jar": {
@@ -7886,7 +7886,7 @@
         "height": "323"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7894,7 +7894,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7902,7 +7902,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7942,7 +7942,7 @@
         "height": "130"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -7977,7 +7977,7 @@
         "height": "107"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8018,7 +8018,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8026,7 +8026,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8034,7 +8034,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8051,8 +8051,8 @@
           "8": 2
         },
         "textCount": 4,
-        "width": "343",
-        "height": "264"
+        "width": "353",
+        "height": "265"
       },
       "jar": {
         "fontSize": {
@@ -8071,7 +8071,7 @@
         "height": "213"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8107,7 +8107,7 @@
         "height": "306"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8143,7 +8143,7 @@
         "height": "160"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8179,7 +8179,7 @@
         "height": "410"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8187,7 +8187,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8229,7 +8229,7 @@
         "height": "381"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8237,7 +8237,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8245,7 +8245,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8263,7 +8263,7 @@
         },
         "textCount": 8,
         "width": "184",
-        "height": "507"
+        "height": "492"
       },
       "jar": {
         "fontSize": {
@@ -8281,7 +8281,7 @@
         "height": "528"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8289,7 +8289,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8306,7 +8306,7 @@
           "8": 4
         },
         "textCount": 4,
-        "width": "182",
+        "width": "164",
         "height": "228"
       },
       "jar": {
@@ -8324,7 +8324,7 @@
         "height": "224"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8332,7 +8332,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8374,7 +8374,7 @@
         "height": "558"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8382,7 +8382,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 30 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8397,8 +8397,8 @@
           "8": 1
         },
         "textCount": 3,
-        "width": "219",
-        "height": "98"
+        "width": "196",
+        "height": "76"
       },
       "jar": {
         "fontSize": {
@@ -8413,7 +8413,7 @@
         "height": "92"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8430,7 +8430,7 @@
           "8": 1
         },
         "textCount": 2,
-        "width": "184",
+        "width": "174",
         "height": "228"
       },
       "jar": {
@@ -8450,7 +8450,7 @@
         "height": "174"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8458,7 +8458,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8499,7 +8499,7 @@
         "height": "607"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8507,7 +8507,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8549,7 +8549,7 @@
         "height": "251"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8585,7 +8585,7 @@
         "height": "305"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8621,7 +8621,7 @@
         "height": "386"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8657,7 +8657,7 @@
         "height": "477"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8665,7 +8665,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8700,7 +8700,7 @@
         "height": "149"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8708,7 +8708,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8725,8 +8725,8 @@
           "8": 2
         },
         "textCount": 8,
-        "width": "266",
-        "height": "336"
+        "width": "280",
+        "height": "338"
       },
       "jar": {
         "fontSize": {
@@ -8745,7 +8745,7 @@
         "height": "269"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8785,7 +8785,7 @@
         "height": "136"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8823,7 +8823,7 @@
         "height": "187"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8858,7 +8858,7 @@
         "height": "255"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8866,7 +8866,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8902,7 +8902,7 @@
         "height": "287"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8919,8 +8919,8 @@
           "8": 5
         },
         "textCount": 15,
-        "width": "642",
-        "height": "498"
+        "width": "677",
+        "height": "470"
       },
       "jar": {
         "fontSize": {
@@ -8939,7 +8939,7 @@
         "height": "396"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -8977,7 +8977,7 @@
         "height": "116"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9018,7 +9018,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9036,7 +9036,7 @@
         },
         "textCount": 3,
         "width": "144",
-        "height": "186"
+        "height": "164"
       },
       "jar": {
         "fontSize": {
@@ -9053,7 +9053,7 @@
         "height": "173"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9061,7 +9061,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9097,7 +9097,7 @@
         "height": "281"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9133,7 +9133,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9150,7 +9150,7 @@
           "8": 2
         },
         "textCount": 2,
-        "width": "191",
+        "width": "172",
         "height": "156"
       },
       "jar": {
@@ -9168,7 +9168,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9176,7 +9176,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9212,7 +9212,7 @@
         "height": "563"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9243,7 +9243,7 @@
         "height": "68"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9283,7 +9283,7 @@
         "height": "185"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9300,7 +9300,7 @@
           "8": 3
         },
         "textCount": 4,
-        "width": "242",
+        "width": "227",
         "height": "252"
       },
       "jar": {
@@ -9319,7 +9319,7 @@
         "height": "252"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9327,7 +9327,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9335,7 +9335,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9343,7 +9343,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9387,7 +9387,7 @@
         "height": "637"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9395,7 +9395,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9430,7 +9430,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9449,8 +9449,8 @@
           "(absent)": 1
         },
         "textCount": 10,
-        "width": "630",
-        "height": "388"
+        "width": "650",
+        "height": "390"
       },
       "jar": {
         "fontSize": {
@@ -9472,7 +9472,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9480,7 +9480,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9497,7 +9497,7 @@
           "8": 3
         },
         "textCount": 4,
-        "width": "225",
+        "width": "206",
         "height": "455"
       },
       "jar": {
@@ -9518,7 +9518,7 @@
         "height": "402"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9535,7 +9535,7 @@
           "8": 2
         },
         "textCount": 3,
-        "width": "155",
+        "width": "146",
         "height": "264"
       },
       "jar": {
@@ -9554,7 +9554,7 @@
         "height": "212"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9590,7 +9590,7 @@
         "height": "352"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9607,7 +9607,7 @@
           "8": 10
         },
         "textCount": 16,
-        "width": "524",
+        "width": "488",
         "height": "892"
       },
       "jar": {
@@ -9626,7 +9626,7 @@
         "height": "906"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9634,7 +9634,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9642,7 +9642,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9683,7 +9683,7 @@
         "height": "441"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9691,7 +9691,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9727,7 +9727,7 @@
         "height": "170"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9744,8 +9744,8 @@
           "8": 1
         },
         "textCount": 5,
-        "width": "272",
-        "height": "156"
+        "width": "290",
+        "height": "157"
       },
       "jar": {
         "fontSize": {
@@ -9763,7 +9763,7 @@
         "height": "116"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9780,8 +9780,8 @@
           "8": 2
         },
         "textCount": 9,
-        "width": "439",
-        "height": "365"
+        "width": "419",
+        "height": "320"
       },
       "jar": {
         "fontSize": {
@@ -9800,7 +9800,7 @@
         "height": "379"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9808,7 +9808,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9827,7 +9827,7 @@
         },
         "textCount": 3,
         "width": "324",
-        "height": "212"
+        "height": "213"
       },
       "jar": {
         "fontSize": {
@@ -9846,7 +9846,7 @@
         "height": "159"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9864,7 +9864,7 @@
         },
         "textCount": 2,
         "width": "144",
-        "height": "116"
+        "height": "117"
       },
       "jar": {
         "fontSize": {
@@ -9882,7 +9882,7 @@
         "height": "110"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9918,7 +9918,7 @@
         "height": "364"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9935,8 +9935,8 @@
           "8": 3
         },
         "textCount": 13,
-        "width": "522",
-        "height": "442"
+        "width": "557",
+        "height": "414"
       },
       "jar": {
         "fontSize": {
@@ -9955,7 +9955,7 @@
         "height": "369"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -9972,7 +9972,7 @@
           "8": 1
         },
         "textCount": 3,
-        "width": "195",
+        "width": "178",
         "height": "308"
       },
       "jar": {
@@ -9991,7 +9991,7 @@
         "height": "310"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10008,7 +10008,7 @@
           "8": 3
         },
         "textCount": 5,
-        "width": "300",
+        "width": "280",
         "height": "312"
       },
       "jar": {
@@ -10027,7 +10027,7 @@
         "height": "357"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10046,7 +10046,7 @@
           "(absent)": 1
         },
         "textCount": 8,
-        "width": "208",
+        "width": "192",
         "height": "288"
       },
       "jar": {
@@ -10068,7 +10068,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10085,7 +10085,7 @@
           "8": 10
         },
         "textCount": 16,
-        "width": "524",
+        "width": "488",
         "height": "892"
       },
       "jar": {
@@ -10104,7 +10104,7 @@
         "height": "936"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10140,7 +10140,7 @@
         "height": "508"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10158,7 +10158,7 @@
           "(absent)": 2
         },
         "textCount": 4,
-        "width": "507",
+        "width": "491",
         "height": "260"
       },
       "jar": {
@@ -10177,7 +10177,7 @@
         "height": "256"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10185,7 +10185,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10221,7 +10221,7 @@
         "height": "277"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10229,7 +10229,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10237,7 +10237,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10245,7 +10245,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10253,7 +10253,7 @@
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10272,7 +10272,7 @@
           "(absent)": 1
         },
         "textCount": 9,
-        "width": "206",
+        "width": "187",
         "height": "508"
       },
       "jar": {
@@ -10295,7 +10295,7 @@
         "height": "509"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10303,7 +10303,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10311,7 +10311,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10319,7 +10319,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10336,7 +10336,7 @@
           "8": 3
         },
         "textCount": 3,
-        "width": "261",
+        "width": "232",
         "height": "172"
       },
       "jar": {
@@ -10354,7 +10354,7 @@
         "height": "172"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10389,7 +10389,7 @@
         "height": "120"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10397,7 +10397,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10414,8 +10414,8 @@
           "8": 2
         },
         "textCount": 5,
-        "width": "206",
-        "height": "174"
+        "width": "184",
+        "height": "136"
       },
       "jar": {
         "fontSize": {
@@ -10432,7 +10432,7 @@
         "height": "156"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10440,7 +10440,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10477,7 +10477,7 @@
         "height": "516"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10520,7 +10520,7 @@
         "height": "560"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10555,7 +10555,7 @@
         "height": "341"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10563,7 +10563,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10601,7 +10601,7 @@
         "height": "474"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10638,7 +10638,7 @@
         "height": "254"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10646,7 +10646,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10654,7 +10654,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10662,7 +10662,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10698,7 +10698,7 @@
         "height": "543"
       },
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     },
     {
       "type": "activity",
@@ -10706,7 +10706,7 @@
       "status": "error",
       "reason": "activity parser refused this source at line 9 (syntax): Syntax Error?",
       "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "2afd01ea"
+      "measuredAgainstCommit": "42c5de90"
     }
   ]
 }

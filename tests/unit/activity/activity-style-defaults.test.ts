@@ -129,6 +129,21 @@ describe('activityFontSize — default tier', () => {
     expect(swimlaneFontSize(DEFAULT)).toBe(18);
   });
 
+  it('a kind declaring no FontSize inherits the ROOT `theme.fontSize`, not a copy of 14', () => {
+    // `composite` (plantuml.skin:364-368), `circle` (the bare block at
+    // :331-332 is EMPTY) and `activityBar` (:387) declare no FontSize
+    // anywhere upstream. Inheriting the theme rather than restating 14
+    // means a user's `skinparam defaultFontSize` moves them, as it does
+    // upstream.
+    for (const sname of ['composite', 'circle', 'activityBar'] as const) {
+      expect(activityFontSize(DEFAULT, sname)).toBe(DEFAULT.fontSize);
+      expect(activityFontSize({ ...DEFAULT, fontSize: 20 }, sname)).toBe(20);
+    }
+    // ...while a kind that DOES declare one is unmoved by the root.
+    expect(activityFontSize({ ...DEFAULT, fontSize: 20 }, 'activity')).toBe(12);
+    expect(activityFontSize({ ...DEFAULT, fontSize: 20 }, 'diamond')).toBe(11);
+  });
+
   it('never returns undefined — supplying the default is this module s job', () => {
     for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
       expect(typeof activityFontSize(DEFAULT, sname)).toBe('number');
