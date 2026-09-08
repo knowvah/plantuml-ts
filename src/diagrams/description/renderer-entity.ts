@@ -241,7 +241,10 @@ function buildEntityParams(
       // shared `getStyle().getShadowing()` read. Jar-verified
       // malado-53-noso561.
       deltaShadow: resolveElementShadowing(theme, node.symbol),
-      stroke: overrideStroke(override.lineStyle, resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH),
+      stroke: overrideStroke(
+        override.lineStyle,
+        resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH,
+      ),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
       titleAlignment: HorizontalAlignment.CENTER,
@@ -422,11 +425,7 @@ function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, 
         const y = node.portLabelAbove === true ? -(node.height + dimDesc.getHeight()) : node.height;
         desc.drawU(inner.apply(new UTranslate(x, y)));
         const rect = URectangle.build(node.width, node.height);
-        inner
-          .apply(new Fore(border))
-          .apply(new Back(fill))
-          .apply(UStroke.withThickness(PORT_STROKE_WIDTH))
-          .draw(rect);
+        inner.apply(new Fore(border)).apply(new Back(fill)).apply(UStroke.withThickness(PORT_STROKE_WIDTH)).draw(rect);
       },
     },
     { withComment: false },
@@ -449,8 +448,14 @@ export function drawEntity(
   sprites?: SpriteRegistry,
 ): void {
   const translated = ug.apply(new UTranslate(node.x, node.y));
-  if (node.symbol === 'note') { drawNoteFallback(translated, node, theme, uid, sprites); return; }
-  if (node.symbol === 'port') { drawPortFallback(translated, node, theme, uid); return; }
+  if (node.symbol === 'note') {
+    drawNoteFallback(translated, node, theme, uid, sprites);
+    return;
+  }
+  if (node.symbol === 'port') {
+    drawPortFallback(translated, node, theme, uid);
+    return;
+  }
   const params = buildEntityParams(node, theme, sprites);
   new EntityImageDescription({ ...params, entity: { ...params.entity, uid } }).drawU(translated);
 }

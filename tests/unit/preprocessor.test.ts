@@ -5,10 +5,7 @@ import { preprocess } from '../../src/core/preprocessor.js';
  * Helper: build a source string from an array of lines, then run preprocess.
  * Returns the resulting lines array.
  */
-function run(
-  lines: string[],
-  defines?: ReadonlyMap<string, string>,
-): readonly string[] {
+function run(lines: string[], defines?: ReadonlyMap<string, string>): readonly string[] {
   return preprocess(lines.join('\n'), defines).lines;
 }
 
@@ -44,13 +41,7 @@ describe('preprocessor', () => {
   });
 
   it('!ifdef includes block when token is defined', () => {
-    const result = run([
-      '!define DEBUG',
-      '!ifdef DEBUG',
-      'note debug',
-      '!endif',
-      'Alice -> Bob',
-    ]);
+    const result = run(['!define DEBUG', '!ifdef DEBUG', 'note debug', '!endif', 'Alice -> Bob']);
     expect(result).toEqual(['note debug', 'Alice -> Bob']);
   });
 
@@ -65,25 +56,12 @@ describe('preprocessor', () => {
   });
 
   it('!ifndef skips block when token is defined', () => {
-    const result = run([
-      '!define PROD',
-      '!ifndef PROD',
-      'note dev only',
-      '!endif',
-    ]);
+    const result = run(['!define PROD', '!ifndef PROD', 'note dev only', '!endif']);
     expect(result).toEqual([]);
   });
 
   it('nested !ifdef works correctly', () => {
-    const result = run([
-      '!define A',
-      '!define B',
-      '!ifdef A',
-      '!ifdef B',
-      'both',
-      '!endif',
-      '!endif',
-    ]);
+    const result = run(['!define A', '!define B', '!ifdef A', '!ifdef B', 'both', '!endif', '!endif']);
     expect(result).toEqual(['both']);
   });
 
@@ -128,17 +106,13 @@ describe('preprocessor', () => {
   });
 
   it('extracts a single <style> block and excludes it from lines', () => {
-    const { lines, styles } = preprocess(
-      '<style>\nbackground: red\n</style>\nAlice -> Bob',
-    );
+    const { lines, styles } = preprocess('<style>\nbackground: red\n</style>\nAlice -> Bob');
     expect(lines).toEqual(['Alice -> Bob']);
     expect(styles).toEqual(['background: red']);
   });
 
   it('collects multiple <style> blocks as separate entries', () => {
-    const { styles } = preprocess(
-      '<style>\ncolor: blue\n</style>\nnote\n<style>\nfont: bold\n</style>',
-    );
+    const { styles } = preprocess('<style>\ncolor: blue\n</style>\nnote\n<style>\nfont: bold\n</style>');
     expect(styles).toHaveLength(2);
     expect(styles[0]).toBe('color: blue');
     expect(styles[1]).toBe('font: bold');
@@ -148,33 +122,25 @@ describe('preprocessor', () => {
     // Upstream substitutes !define/$var tokens inside <style> blocks
     // (CommandStyleMultilinesCSS dispatches over the post-substitution stream,
     // same as skinparam) -- see preprocessor.ts#collectStyleLine.
-    const { styles } = preprocess(
-      '!define BG red\n<style>\nbackground: BG\n</style>',
-    );
+    const { styles } = preprocess('!define BG red\n<style>\nbackground: BG\n</style>');
     expect(styles).toEqual(['background: red']);
     const affect = preprocess('!$c = "#1a66c2"\n<style>\nBackgroundColor $c\n</style>');
     expect(affect.styles).toEqual(['BackgroundColor #1a66c2']);
   });
 
   it('style block with multi-line content joins lines with newline', () => {
-    const { styles } = preprocess(
-      '<style>\nline one\nline two\n</style>',
-    );
+    const { styles } = preprocess('<style>\nline one\nline two\n</style>');
     expect(styles).toEqual(['line one\nline two']);
   });
 
   it('<style> tag matching is case-insensitive', () => {
-    const { lines, styles } = preprocess(
-      '<STYLE>\nbold\n</STYLE>\nAlice -> Bob',
-    );
+    const { lines, styles } = preprocess('<STYLE>\nbold\n</STYLE>\nAlice -> Bob');
     expect(lines).toEqual(['Alice -> Bob']);
     expect(styles).toEqual(['bold']);
   });
 
   it('style block inside inactive !ifdef is discarded (not collected)', () => {
-    const { styles } = preprocess(
-      '!ifdef NOPE\n<style>\ncolor: red\n</style>\n!endif',
-    );
+    const { styles } = preprocess('!ifdef NOPE\n<style>\ncolor: red\n</style>\n!endif');
     expect(styles).toEqual([]);
   });
 
@@ -185,15 +151,13 @@ describe('preprocessor', () => {
 
   // ── stylePositions: readonly (number | undefined)[] (G2 N39) ──────────────
 
-  it('records the 0-indexed source line of a single <style> block\'s opening tag', () => {
+  it("records the 0-indexed source line of a single <style> block's opening tag", () => {
     const { stylePositions } = preprocess('Alice -> Bob\n<style>\nbg: red\n</style>');
     expect(stylePositions).toEqual([1]);
   });
 
   it('records one position per block, in source order, for multiple blocks', () => {
-    const { stylePositions } = preprocess(
-      '<style>\ncolor: blue\n</style>\nnote\nnote\n<style>\nfont: bold\n</style>',
-    );
+    const { stylePositions } = preprocess('<style>\ncolor: blue\n</style>\nnote\nnote\n<style>\nfont: bold\n</style>');
     expect(stylePositions).toEqual([0, 5]);
   });
 
@@ -205,14 +169,7 @@ describe('preprocessor', () => {
   // ── !else clause ─────────────────────────────────────────────────────────
 
   it('!ifdef with !else: includes if-branch when token is defined', () => {
-    const result = run([
-      '!define X',
-      '!ifdef X',
-      'yes',
-      '!else',
-      'no',
-      '!endif',
-    ]);
+    const result = run(['!define X', '!ifdef X', 'yes', '!else', 'no', '!endif']);
     expect(result).toEqual(['yes']);
   });
 
@@ -227,14 +184,7 @@ describe('preprocessor', () => {
   });
 
   it('!ifndef with !else: includes else-branch when token is defined', () => {
-    const result = run([
-      '!define X',
-      '!ifndef X',
-      'yes',
-      '!else',
-      'no',
-      '!endif',
-    ]);
+    const result = run(['!define X', '!ifndef X', 'yes', '!else', 'no', '!endif']);
     expect(result).toEqual(['no']);
   });
 
@@ -246,9 +196,7 @@ describe('preprocessor', () => {
   // renders: `renderSync` draws the error diagram (see
   // tests/integration/error-diagram.test.ts). Live-oracle verified.
   it('!else with no enclosing conditional is an error, as upstream has it', () => {
-    expect(() => run(['Alice -> Bob', '!else', 'Carol -> Dave'])).toThrow(
-      'No if related to this else',
-    );
+    expect(() => run(['Alice -> Bob', '!else', 'Carol -> Dave'])).toThrow('No if related to this else');
   });
 
   it('!endif with no enclosing conditional is an error', () => {
@@ -270,26 +218,17 @@ describe('preprocessor', () => {
   // ── parametric macros ────────────────────────────────────────────────────
 
   it('single-param macro expands ##param## in body', () => {
-    const result = run([
-      '!define BOLD(x) <b>##x##</b>',
-      'BOLD(hello)',
-    ]);
+    const result = run(['!define BOLD(x) <b>##x##</b>', 'BOLD(hello)']);
     expect(result).toEqual(['<b>hello</b>']);
   });
 
   it('two-param macro substitutes both params', () => {
-    const result = run([
-      '!define PAIR(a,b) ##a## and ##b##',
-      'PAIR(cats,dogs)',
-    ]);
+    const result = run(['!define PAIR(a,b) ##a## and ##b##', 'PAIR(cats,dogs)']);
     expect(result).toEqual(['cats and dogs']);
   });
 
   it('adjacent ##param## tokens produce concatenated output', () => {
-    const result = run([
-      '!define CONCAT(a,b) ##a####b##',
-      'CONCAT(foo,bar)',
-    ]);
+    const result = run(['!define CONCAT(a,b) ##a####b##', 'CONCAT(foo,bar)']);
     expect(result).toEqual(['foobar']);
   });
 
@@ -300,52 +239,33 @@ describe('preprocessor', () => {
   // now so does this port. The DOCUMENT still renders: `renderSync` draws that
   // error diagram (tests/integration/error-diagram.test.ts).
   it('a known macro called with an arity no overload covers is an error', () => {
-    expect(() => run(['!define BOLD(x) <b>##x##</b>', 'BOLD(x,y)'])).toThrow(
-      'Function not found BOLD',
-    );
+    expect(() => run(['!define BOLD(x) <b>##x##</b>', 'BOLD(x,y)'])).toThrow('Function not found BOLD');
   });
 
   it('parametric macro with space-padded args trims correctly', () => {
-    const result = run([
-      '!define PAIR(a,b) ##a## and ##b##',
-      'PAIR( cats , dogs )',
-    ]);
+    const result = run(['!define PAIR(a,b) ##a## and ##b##', 'PAIR( cats , dogs )']);
     expect(result).toEqual(['cats and dogs']);
   });
 
   it('multiple call-sites on one line are all expanded', () => {
-    const result = run([
-      '!define BOLD(x) <b>##x##</b>',
-      'BOLD(one) and BOLD(two)',
-    ]);
+    const result = run(['!define BOLD(x) <b>##x##</b>', 'BOLD(one) and BOLD(two)']);
     expect(result).toEqual(['<b>one</b> and <b>two</b>']);
   });
 
   it('!undefine removes a parametric macro', () => {
-    const result = run([
-      '!define BOLD(x) <b>##x##</b>',
-      '!undefine BOLD',
-      'BOLD(hello)',
-    ]);
+    const result = run(['!define BOLD(x) <b>##x##</b>', '!undefine BOLD', 'BOLD(hello)']);
     expect(result).toEqual(['BOLD(hello)']);
   });
 
   it('simple define still works after a parametric define is added (regression)', () => {
-    const result = run([
-      '!define FOO bar',
-      '!define WRAP(x) [##x##]',
-      'FOO',
-      'WRAP(baz)',
-    ]);
+    const result = run(['!define FOO bar', '!define WRAP(x) [##x##]', 'FOO', 'WRAP(baz)']);
     expect(result).toEqual(['bar', '[baz]']);
   });
 
   // ── skinparam: ReadonlyMap<string, string> ───────────────────────────────
 
   it('single-line skinparam is collected with lowercase key', () => {
-    const { skinparam, lines } = preprocess(
-      'skinparam backgroundColor #FF0000\nAlice -> Bob',
-    );
+    const { skinparam, lines } = preprocess('skinparam backgroundColor #FF0000\nAlice -> Bob');
     expect(skinparam.get('backgroundcolor')).toBe('#FF0000');
     expect(lines).not.toContain('skinparam backgroundColor #FF0000');
     expect(lines).toContain('Alice -> Bob');
@@ -364,23 +284,17 @@ describe('preprocessor', () => {
   // whitespace), silently dropping the whole line. Diagnosed `ragona-89-
   // fadi984`.
   it('single-line skinparam key accepts a directly-appended <<stereotype>> suffix', () => {
-    const { skinparam } = preprocess(
-      'skinparam classBorderThickness<<stereo>> 5',
-    );
+    const { skinparam } = preprocess('skinparam classBorderThickness<<stereo>> 5');
     expect(skinparam.get('classborderthickness<<stereo>>')).toBe('5');
   });
 
   it('block-form skinparam entry accepts a directly-appended <<stereotype>> suffix', () => {
-    const { skinparam } = preprocess(
-      'skinparam {\n  classBorderThickness<<stereo>> 5\n}',
-    );
+    const { skinparam } = preprocess('skinparam {\n  classBorderThickness<<stereo>> 5\n}');
     expect(skinparam.get('classborderthickness<<stereo>>')).toBe('5');
   });
 
   it('block-form skinparam collects all entries', () => {
-    const { skinparam, lines } = preprocess(
-      'skinparam {\n  backgroundColor red\n  borderColor blue\n}',
-    );
+    const { skinparam, lines } = preprocess('skinparam {\n  backgroundColor red\n  borderColor blue\n}');
     expect(skinparam.get('backgroundcolor')).toBe('red');
     expect(skinparam.get('bordercolor')).toBe('blue');
     // Neither the block lines nor the braces should appear in output.
@@ -388,30 +302,22 @@ describe('preprocessor', () => {
   });
 
   it('block-form skinparam line is not emitted to outputLines', () => {
-    const { lines } = preprocess(
-      'skinparam {\n  fontSize 14\n}\nAlice -> Bob',
-    );
+    const { lines } = preprocess('skinparam {\n  fontSize 14\n}\nAlice -> Bob');
     expect(lines).toEqual(['Alice -> Bob']);
   });
 
   it('duplicate skinparam key: last value wins', () => {
-    const { skinparam } = preprocess(
-      'skinparam foo a\nskinparam foo b',
-    );
+    const { skinparam } = preprocess('skinparam foo a\nskinparam foo b');
     expect(skinparam.get('foo')).toBe('b');
   });
 
   it('skinparam inside inactive !ifdef is skipped (not collected)', () => {
-    const { skinparam } = preprocess(
-      '!ifdef X\nskinparam foo bar\n!endif',
-    );
+    const { skinparam } = preprocess('!ifdef X\nskinparam foo bar\n!endif');
     expect(skinparam.size).toBe(0);
   });
 
   it('skinparam block inside inactive !ifdef is skipped (not collected)', () => {
-    const { skinparam } = preprocess(
-      '!ifdef X\nskinparam {\n  foo bar\n}\n!endif',
-    );
+    const { skinparam } = preprocess('!ifdef X\nskinparam {\n  foo bar\n}\n!endif');
     expect(skinparam.size).toBe(0);
   });
 
@@ -431,16 +337,12 @@ describe('preprocessor', () => {
   });
 
   it('block-form skinparam duplicate key last wins', () => {
-    const { skinparam } = preprocess(
-      'skinparam foo a\nskinparam {\n  foo b\n}',
-    );
+    const { skinparam } = preprocess('skinparam foo a\nskinparam {\n  foo b\n}');
     expect(skinparam.get('foo')).toBe('b');
   });
 
   it('mixed single-line and block skinparam both collected', () => {
-    const { skinparam } = preprocess(
-      'skinparam backgroundColor red\nskinparam {\n  borderColor blue\n}',
-    );
+    const { skinparam } = preprocess('skinparam backgroundColor red\nskinparam {\n  borderColor blue\n}');
     expect(skinparam.get('backgroundcolor')).toBe('red');
     expect(skinparam.get('bordercolor')).toBe('blue');
   });

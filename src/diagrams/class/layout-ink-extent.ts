@@ -163,10 +163,7 @@ export interface ClassDocumentDims {
  * corner overrides) are NOT modeled, zero corpus reach for either
  * (`theme.ts#diagramBorderColor`'s own doc comment).
  */
-export function computeClassBorderRectDims(
-  rawDims: ClassDocumentDims,
-  thickness: number,
-): ClassDocumentDims {
+export function computeClassBorderRectDims(rawDims: ClassDocumentDims, thickness: number): ClassDocumentDims {
   const marginedWidth = rawDims.width + DOCUMENT_MARGIN_LEFT + DOCUMENT_MARGIN_RIGHT;
   const marginedHeight = rawDims.height + DOCUMENT_MARGIN_TOP + DOCUMENT_MARGIN_BOTTOM;
   return { width: marginedWidth - thickness, height: marginedHeight - thickness };

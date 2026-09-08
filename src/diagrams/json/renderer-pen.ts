@@ -31,7 +31,10 @@ import type { HandPoint } from '../../core/klimt/drawing/hand/HandJiggle.js';
 
 /** The extent a `LimitFinder` pass would record for what this pen drew. */
 export interface PenInk {
-  minX: number; minY: number; maxX: number; maxY: number;
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
 }
 
 export interface JsonPen {
@@ -89,12 +92,15 @@ function handwrittenPen(): JsonPen {
   const rnd = (): JavaRandom => new JavaRandom(HANDWRITTEN_SEED);
   let ink: PenInk | undefined;
   const addPoint = (x: number, y: number): void => {
-    ink = ink === undefined
-      ? { minX: x, minY: y, maxX: x, maxY: y }
-      : {
-          minX: Math.min(ink.minX, x), minY: Math.min(ink.minY, y),
-          maxX: Math.max(ink.maxX, x), maxY: Math.max(ink.maxY, y),
-        };
+    ink =
+      ink === undefined
+        ? { minX: x, minY: y, maxX: x, maxY: y }
+        : {
+            minX: Math.min(ink.minX, x),
+            minY: Math.min(ink.minY, y),
+            maxX: Math.max(ink.maxX, x),
+            maxY: Math.max(ink.maxY, y),
+          };
   };
   /** `LimitFinder#drawUPolygon` (`:171-177`) — a polygon's ink reaches
    *  {@link HACK_X_FOR_POLYGON} beyond its bounds on each side IN X ONLY. */
@@ -146,9 +152,7 @@ function handwrittenPen(): JsonPen {
     path(segments, _d, style) {
       const runs = pathHand(segments, rnd());
       for (const r of runs) addPathInk([r.move, ...r.lines]);
-      const data = runs
-        .map((r) => polylineData([r.move, ...r.lines]))
-        .join(' ');
+      const data = runs.map((r) => polylineData([r.move, ...r.lines])).join(' ');
       return path(data, style);
     },
   };

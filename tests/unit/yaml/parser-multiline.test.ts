@@ -19,7 +19,8 @@ describe('YAML parser — multiline values', () => {
 
   it('block scalar stops at a line with less or equal indentation', () => {
     expect(parse(['text: |', '  line1', '  line2', 'key: val'])).toEqual({
-      text: 'line1\nline2\n', key: 'val',
+      text: 'line1\nline2\n',
+      key: 'val',
     });
   });
 
@@ -48,9 +49,7 @@ describe('YAML parser — multiline values', () => {
   it('block scalar inside list item (content at deeper indent than key)', () => {
     // '- text: |' → key indent=2 (0 + 2 for list item prefix)
     // content at 4-space indent: 4 > 2 → captured
-    expect(parse(['- text: |', '    line1', '    line2'])).toEqual([
-      { text: 'line1\nline2\n' },
-    ]);
+    expect(parse(['- text: |', '    line1', '    line2'])).toEqual([{ text: 'line1\nline2\n' }]);
   });
 
   it('block scalar: leading whitespace trimmed from each content line', () => {

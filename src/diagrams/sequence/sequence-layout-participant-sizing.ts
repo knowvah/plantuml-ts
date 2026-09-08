@@ -63,21 +63,14 @@ const DB_TEXT_PADDING_X = 3;
  * - `collections` — not here: it is the plain participant rule plus
  *   `getDeltaCollection()`, applied by the caller.
  */
-export function symbolPreferredWidth(
-  type: ParticipantType,
-  blockWidth: number,
-  theme: Theme,
-): number | undefined {
+export function symbolPreferredWidth(type: ParticipantType, blockWidth: number, theme: Theme): number | undefined {
   switch (type) {
     case 'actor':
     case 'database':
     case 'boundary':
     case 'control':
     case 'entity':
-      return Math.max(
-        measureParticipantSymbol(type, theme).width,
-        blockWidth + DB_TEXT_PADDING_X * 2,
-      );
+      return Math.max(measureParticipantSymbol(type, theme).width, blockWidth + DB_TEXT_PADDING_X * 2);
     case 'queue':
       return measureParticipantSymbol('queue', theme).width + blockWidth;
     default:
@@ -90,11 +83,7 @@ export function symbolPreferredWidth(
  *  padding of 0 for the four stacked kinds
  *  (`ComponentRoseDatabase.java:62-63,:96-99`) and the queue margin's own
  *  5 + 5 for `queue` (`USymbolQueue.java:131`). */
-export function symbolPreferredHeight(
-  type: ParticipantType,
-  blockHeight: number,
-  theme: Theme,
-): number | undefined {
+export function symbolPreferredHeight(type: ParticipantType, blockHeight: number, theme: Theme): number | undefined {
   switch (type) {
     case 'actor':
     case 'database':

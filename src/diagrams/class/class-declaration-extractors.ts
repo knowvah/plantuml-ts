@@ -21,7 +21,10 @@ export function extractBody(rest: string): {
     const bodyContent = inlineBodyMatch[1]!.trim();
     const inlineMembers =
       bodyContent.length > 0
-        ? bodyContent.split(';').map((s) => s.trim()).filter((s) => s !== '')
+        ? bodyContent
+            .split(';')
+            .map((s) => s.trim())
+            .filter((s) => s !== '')
         : [];
     return {
       rest: rest.slice(0, inlineBodyMatch.index).trimEnd(),
@@ -29,8 +32,7 @@ export function extractBody(rest: string): {
       opensBody: false,
     };
   }
-  if (rest.endsWith('{'))
-    return { rest: rest.slice(0, -1).trimEnd(), inlineMembers: [], opensBody: true };
+  if (rest.endsWith('{')) return { rest: rest.slice(0, -1).trimEnd(), inlineMembers: [], opensBody: true };
   return { rest, inlineMembers: [], opensBody: false };
 }
 
@@ -82,10 +84,7 @@ export function extractDecorations(rest: string): {
   const stereoMatch = /<<\s*(.+)\s*>>/.exec(out);
   if (stereoMatch !== null) {
     stereotype = stereoMatch[1]!.trim(); // greedy `.+` can absorb trailing `\s*`
-    out = (
-      out.slice(0, stereoMatch.index) +
-      out.slice(stereoMatch.index + stereoMatch[0].length)
-    ).trim();
+    out = (out.slice(0, stereoMatch.index) + out.slice(stereoMatch.index + stereoMatch[0].length)).trim();
   }
   // Tags are stripped after the stereotype (so its `<< >>` delimiters no
   // longer shield an adjacent tag from the token-boundary lookarounds) and
@@ -137,16 +136,14 @@ export function extractDecorations(rest: string): {
 // function's reported CCN/NLOC. The regex engine resolves \x22 to the
 // double-quote character when this string is compiled via new RegExp in
 // buildInheritanceRe.
-const INHERITANCE_SEP =
-  '(?:\\\\{2}|::|[^\\p{L}\\p{N}\\s_$#:{}<>\\x22\'‘’“”])';
+const INHERITANCE_SEP = "(?:\\\\{2}|::|[^\\p{L}\\p{N}\\s_$#:{}<>\\x22'‘’“”])";
 /**
  * A parent code: an optional namespace-separator-joined chain of
  * word/`$`/digit segments (mirrors upstream CODE — `Instruction$Visitor`,
  * `a.b.C`, `App\\Http\\Controllers\\Controller` under a custom `\\`
  * separator — `CommandCreateClassMultilines.CODE`).
  */
-const INHERITANCE_CODE =
-  INHERITANCE_SEP + '?[\\p{L}\\p{N}_$]+(?:' + INHERITANCE_SEP + '[\\p{L}\\p{N}_$]+)*';
+const INHERITANCE_CODE = INHERITANCE_SEP + '?[\\p{L}\\p{N}_$]+(?:' + INHERITANCE_SEP + '[\\p{L}\\p{N}_$]+)*';
 /** Comma-separated parent codes (upstream CommandCreateClassMultilines.CODES). */
 const INHERITANCE_CODES = INHERITANCE_CODE + '(?:\\s*,\\s*' + INHERITANCE_CODE + ')*';
 
@@ -163,8 +160,7 @@ const INHERITANCE_CODES = INHERITANCE_CODE + '(?:\\s*,\\s*' + INHERITANCE_CODE +
  */
 function buildInheritanceRe(keyword: 'extends' | 'implements'): RegExp {
   return new RegExp(
-    `\\s+${keyword}\\s+(?:(${INHERITANCE_CODES})|"([^"]+)")` +
-      `(?:\\s*<${GENERIC_BODY_PATTERN}>)?\\s*$`,
+    `\\s+${keyword}\\s+(?:(${INHERITANCE_CODES})|"([^"]+)")` + `(?:\\s*<${GENERIC_BODY_PATTERN}>)?\\s*$`,
     'iu',
   );
 }
@@ -172,7 +168,10 @@ const EXTENDS_RE = buildInheritanceRe('extends');
 const IMPLEMENTS_RE = buildInheritanceRe('implements');
 
 function splitCodes(raw: string): string[] {
-  return raw.split(',').map((s) => s.trim()).filter((s) => s !== '');
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s !== '');
 }
 
 /**
@@ -229,9 +228,11 @@ export function extractInheritance(rest: string): {
  * carries no trailing `<...>` clause -- zero behavior change for the
  * overwhelmingly common case.
  */
-function extractGenericFromDisplay(
-  display: string,
-): { display: string; typeParams: string[]; typeParamsRawText?: string } {
+function extractGenericFromDisplay(display: string): {
+  display: string;
+  typeParams: string[];
+  typeParamsRawText?: string;
+} {
   const m = /^([^\s<>]+)(<.*>)$/.exec(display.trim());
   if (m === null) return { display, typeParams: [] };
   const genericMatch = GENERIC_CLAUSE_RE.exec(m[2]!);
@@ -264,7 +265,9 @@ export function parseIdDisplay(rest: string): {
   if (quotedAlias !== null) {
     const { display, typeParams, typeParamsRawText } = extractGenericFromDisplay(quotedAlias[1]!);
     return {
-      display, id: quotedAlias[2]!, typeParams,
+      display,
+      id: quotedAlias[2]!,
+      typeParams,
       ...(typeParamsRawText !== undefined ? { typeParamsRawText } : {}),
     };
   }
@@ -287,8 +290,7 @@ export function parseIdDisplay(rest: string): {
   // doc comment above) — NOT the upstream-correct id/display assignment.
   // G2 N32: NOT run through `extractGenericFromDisplay`, same reasoning.
   const unquotedAlias = /^(\S+)\s+as\s+(\S+)$/.exec(rest);
-  if (unquotedAlias !== null)
-    return { display: unquotedAlias[1]!, id: unquotedAlias[2]!, typeParams: [] };
+  if (unquotedAlias !== null) return { display: unquotedAlias[1]!, id: unquotedAlias[2]!, typeParams: [] };
 
   // `id<generic>` — upstream's CODE never includes `<`/`>` (it stops at the
   // first `<`), so the id is split off first; the remaining `<...>` suffix is
@@ -301,7 +303,9 @@ export function parseIdDisplay(rest: string): {
     if (genericMatch !== null) {
       const typeParams = splitTopLevelCommas(genericMatch[1]!);
       return {
-        display: idThenGeneric[1]!, id: idThenGeneric[1]!, typeParams,
+        display: idThenGeneric[1]!,
+        id: idThenGeneric[1]!,
+        typeParams,
         typeParamsRawText: genericMatch[1]!,
       };
     }
@@ -320,8 +324,7 @@ export function parseIdDisplay(rest: string): {
   // `quotedAlias` only (an explicit, separately-named alias — stripping its
   // OWN display can never collide with another entity's id).
   const quoted = /^"([^"]+)"$/.exec(rest.trim());
-  if (quoted !== null)
-    return { display: quoted[1]!, id: quoted[1]!, typeParams: [] };
+  if (quoted !== null) return { display: quoted[1]!, id: quoted[1]!, typeParams: [] };
 
   return { display: rest.trim(), id: rest.trim(), typeParams: [] };
 }

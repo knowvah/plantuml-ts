@@ -26,12 +26,7 @@ import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../../src/core/tim/StdlibStore.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-  SIZE_CONFORMANCE_TOLERANCE_IN,
-} from './svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural, SIZE_CONFORMANCE_TOLERANCE_IN } from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 import {
   assertBacklogFailures,
@@ -45,10 +40,7 @@ import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
 import { combineAssetStores } from '../../src/core/asset-store.js';
 
-const GOLDENS = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../oracle/goldens/description',
-);
+const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens/description');
 
 /** Per-slug structural backlog (NOT a skip -- see dot-parity-backlogs.ts):
  *  D7 `label-size-backlog.json`, edge-label BOX SIZE only (edge-label-box,

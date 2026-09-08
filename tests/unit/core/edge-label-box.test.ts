@@ -107,9 +107,7 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
   it('the oracle numbers depend on stripping — unstripped text measures far wider', () => {
     const raw = String.raw`<color:green>Purchase Price\n<color:green>Payment of $100`;
     const unstripped = splitDisplayLines(raw).lines;
-    const widestUnstripped = Math.max(
-      ...unstripped.map((l) => measurer.measure(l, ARROW_FONT).width),
-    );
+    const widestUnstripped = Math.max(...unstripped.map((l) => measurer.measure(l, ARROW_FONT).width));
     const stripped = computeReservedLabelBox(raw, ARROW_FONT, measurer, false);
     expect(widestUnstripped).toBeGreaterThan(stripped.reservedWidth * 1.5);
   });

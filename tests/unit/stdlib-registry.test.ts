@@ -170,9 +170,7 @@ describe('stdlibRegistry -- module shapes the generators really emit', () => {
     // with no files, plus the concrete payload, in the SAME module. Returning
     // only the export named after the requested bundle yields files:{} and
     // <bootstrap/bi-globe> resolves to nothing.
-    const thunk = vi.fn(async () =>
-      Promise.resolve({ bootstrap: ALIAS, bootstrap1_13_1: CONCRETE }),
-    );
+    const thunk = vi.fn(async () => Promise.resolve({ bootstrap: ALIAS, bootstrap1_13_1: CONCRETE }));
     const registry = stdlibRegistry({ bootstrap: thunk });
 
     const requested = await registry.resolve('bootstrap');
@@ -447,10 +445,7 @@ describe('public surface (criterion 5)', () => {
     expect(typeof publicApi.stdlibStore).toBe('function');
     expect(typeof publicApi.withStdlib).toBe('function');
 
-    const store = publicApi.withStdlib(
-      { get: () => undefined, has: () => false },
-      publicApi.stdlibStore(C4_DOC),
-    );
+    const store = publicApi.withStdlib({ get: () => undefined, has: () => false }, publicApi.stdlibStore(C4_DOC));
     expect(store.getPumlResource?.('c4/c4')).toBe('class Included');
   });
 });

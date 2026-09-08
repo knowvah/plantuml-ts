@@ -8,9 +8,7 @@ export function renderChronology(geo: ChronologyGeometry, theme: Theme): RenderF
 
   // Header row day ticks (y = 0 to headerHeight = 30)
   for (const tick of geo.dayTicks) {
-    parts.push(
-      line(tick.x, 0, tick.x, 8, { stroke: '#888888', strokeWidth: 1 }),
-    );
+    parts.push(line(tick.x, 0, tick.x, 8, { stroke: '#888888', strokeWidth: 1 }));
     parts.push(
       text(tick.x + 2, 10, tick.label, {
         fontFamily: 'sans-serif',

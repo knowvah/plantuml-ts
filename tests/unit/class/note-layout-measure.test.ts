@@ -15,15 +15,13 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 const measurer = new WidthTableMeasurer();
 const F13 = { family: defaultTheme.fontFamily, size: 13 };
 const w = (s: string): number => measurer.measure(s, F13).width;
-const wBold = (s: string): number =>
-  measurer.measure(s, { ...F13, weight: 'bold' }).width;
+const wBold = (s: string): number => measurer.measure(s, { ...F13, weight: 'bold' }).width;
 
 /** `Opale.java` margins — text width + 6 + 15, text height + 2*5. */
 const MX = 21;
 const MY = 10;
 
-const note = (text: string): ReturnType<typeof measureNote> =>
-  measureNote(text, defaultTheme, measurer);
+const note = (text: string): ReturnType<typeof measureNote> => measureNote(text, defaultTheme, measurer);
 
 describe('A4 — creole bullet lines in notes (Bullet atom header)', () => {
   // Bullet.java:72-76: order 0 -> XDimension2D(12, 5); text = trin(group(2))
@@ -144,12 +142,7 @@ describe('A11 — --/---- block separators in notes (BodyEnhanced2)', () => {
   });
 
   it('matches sodizo-26 (12 text rows + 2 hlines) height exactly', () => {
-    const lines = [
-      'A0',
-      'A', '----', 'B', 'loop', 'C', 'loop',
-      'A', '----', 'B', 'loop', 'C', 'loop',
-      'A1',
-    ];
+    const lines = ['A0', 'A', '----', 'B', 'loop', 'C', 'loop', 'A', '----', 'B', 'loop', 'C', 'loop', 'A1'];
     const m = note(lines.join('\n'));
     expect(m.width / 72).toBeCloseTo(0.633594, 4);
     expect(m.height / 72).toBeCloseTo(2.527778, 4);

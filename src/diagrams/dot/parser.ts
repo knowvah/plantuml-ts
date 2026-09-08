@@ -49,8 +49,14 @@ function preprocess(source: string): PreprocessResult {
     if (/^@startdot\s*$/i.test(trimmed) || /^@enddot\s*$/i.test(trimmed)) continue;
     const noComment = rawLine.replace(/\/\/.*$/, '');
     const t = noComment.trim();
-    if (t === '') { keepLines.push(''); continue; }
-    if (/^skinparam\s/i.test(t)) { skinparamLines.push(t); continue; }
+    if (t === '') {
+      keepLines.push('');
+      continue;
+    }
+    if (/^skinparam\s/i.test(t)) {
+      skinparamLines.push(t);
+      continue;
+    }
 
     // title/caption/legend/header/footer/mainframe (mission G0b/T8) — title
     // routes through the same shared chrome matcher as the other five.

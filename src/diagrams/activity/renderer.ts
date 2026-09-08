@@ -13,7 +13,6 @@ import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
 
-
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -27,18 +26,11 @@ import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
  *  class/state/description/json each declare for the same purpose. */
 const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 
-
 // ---------------------------------------------------------------------------
 // Label helpers
 // ---------------------------------------------------------------------------
 
-function arrowTip(
-  x: number,
-  y: number,
-  dx: number,
-  dy: number,
-  color: string,
-): string {
+function arrowTip(x: number, y: number, dx: number, dy: number, color: string): string {
   const len = Math.sqrt(dx * dx + dy * dy);
   if (len === 0) return '';
   const udx = dx / len;
@@ -50,7 +42,14 @@ function arrowTip(
   const y1 = y - udy * size + py;
   const x2 = x - udx * size - px;
   const y2 = y - udy * size - py;
-  return polygon([{ x, y }, { x: x1, y: y1 }, { x: x2, y: y2 }], { fill: color });
+  return polygon(
+    [
+      { x, y },
+      { x: x1, y: y1 },
+      { x: x2, y: y2 },
+    ],
+    { fill: color },
+  );
 }
 
 /**
@@ -60,13 +59,7 @@ function arrowTip(
  * Pill dimensions: width = approx label char count × (fontSize × 0.6) + 8px
  * padding; height = fontSize + 4px padding.
  */
-function renderEdgeLabel(
-  label: string,
-  midX: number,
-  midY: number,
-  color: string | undefined,
-  theme: Theme,
-): string {
+function renderEdgeLabel(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
   if (color !== undefined) {
     const textWidth = label.length * (theme.fontSize * 0.6);
     const pillW = textWidth + 8;
@@ -128,10 +121,7 @@ function renderEdgeLabel(
  * one `ULine` per segment -- per-segment lines are what an output-size-
  * conscious upstream chose. Do not re-introduce a polyline "optimisation".
  */
-function renderEdgeSegments(
-  pts: ReadonlyArray<{ x: number; y: number }>,
-  edgeColor: string,
-): string {
+function renderEdgeSegments(pts: ReadonlyArray<{ x: number; y: number }>, edgeColor: string): string {
   let out = '';
   for (let i = 0; i < pts.length - 1; i++) {
     const p1 = pts[i]!;
@@ -144,7 +134,6 @@ function renderEdgeSegments(
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
-
 
   const edgeColor = theme.colors.arrow;
   const segments = renderEdgeSegments(pts, edgeColor);
@@ -165,7 +154,10 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
       const p0 = pts[i - 1]!;
       const p1 = pts[i]!;
       const len = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2);
-      if (len > maxLen) { maxLen = len; maxI = i; }
+      if (len > maxLen) {
+        maxLen = len;
+        maxI = i;
+      }
     }
     const segStart = pts[maxI - 1]!;
     const segEnd = pts[maxI]!;
@@ -189,21 +181,23 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 // Swimlane renderer
 // ---------------------------------------------------------------------------
 
-function renderSwimlanes(
-  swimlanes: readonly SwimlaneGeo[],
-  totalHeight: number,
-  theme: Theme,
-): string {
+function renderSwimlanes(swimlanes: readonly SwimlaneGeo[], totalHeight: number, theme: Theme): string {
   if (swimlanes.length === 0) return '';
 
   const parts: string[] = [];
 
   // Header band background
   parts.push(
-    rect(0, 0, swimlanes.reduce((acc, s) => acc + s.width, 0), SWIMLANE_HEADER_H, {
-      fill: theme.colors.background,
-      stroke: theme.colors.border,
-    }),
+    rect(
+      0,
+      0,
+      swimlanes.reduce((acc, s) => acc + s.width, 0),
+      SWIMLANE_HEADER_H,
+      {
+        fill: theme.colors.background,
+        stroke: theme.colors.border,
+      },
+    ),
   );
 
   for (const lane of swimlanes) {

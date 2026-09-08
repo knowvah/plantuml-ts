@@ -45,14 +45,7 @@ export type * from './geo-message.js';
 export type * from './geo-frame.js';
 export type * from './geo-annotation.js';
 
-export type EventGeo =
-  | MessageGeo
-  | NoteGeo
-  | ActivationGeo
-  | FrameGeo
-  | DividerGeo
-  | SpaceGeo
-  | NewpageGeo;
+export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo;
 
 export interface SequenceGeometry {
   totalWidth: number;

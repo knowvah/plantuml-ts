@@ -82,10 +82,7 @@ function collectTouched(ast: ClassDiagramAST): Set<string> {
  * get square-chained, while the oracle emits no magma edges for them
  * (gatula-10-bifu561: `package foo {}` / `namespace bar {}` / `class qux {}`).
  */
-export function buildClassMagmaEdges(
-  ast: ClassDiagramAST,
-  anchors: Map<string, string>,
-): DotInputEdge[] {
+export function buildClassMagmaEdges(ast: ClassDiagramAST, anchors: Map<string, string>): DotInputEdge[] {
   const touched = collectTouched(ast);
 
   const inNamespace = new Set(ast.namespaces.flatMap((n) => n.classifiers));
@@ -112,9 +109,7 @@ export function buildClassMagmaEdges(
     ...ast.notes.filter((n) => n.namespace === undefined).map((n) => n.id),
   ].filter(isMagmaLeaf);
 
-  const groups: MagmaGroupInput[] = [
-    { astId: undefined, parentAstId: undefined, leafDotIds: rootLeaves },
-  ];
+  const groups: MagmaGroupInput[] = [{ astId: undefined, parentAstId: undefined, leafDotIds: rootLeaves }];
   for (const ns of ast.namespaces) {
     groups.push({
       astId: ns.id,

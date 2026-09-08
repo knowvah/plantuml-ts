@@ -269,7 +269,9 @@ function layoutPlainDividerRows(
   const dasharrayField = separatorStrokeDasharray(char);
   const partsOut: EnhancedBodyPart[] = [
     {
-      kind: 'divider', y: dividerY, strokeWidth: separatorStrokeWidth(char),
+      kind: 'divider',
+      y: dividerY,
+      strokeWidth: separatorStrokeWidth(char),
       ...(dasharrayField !== undefined ? { strokeDasharray: dasharrayField } : {}),
       ...(separatorIsDouble(char) ? { doubleLine: true as const } : {}),
     },

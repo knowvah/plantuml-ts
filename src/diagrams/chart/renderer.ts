@@ -30,8 +30,13 @@ import { drawBar } from './renderers/bar.js';
 import { drawLine } from './renderers/line.js';
 import { drawArea } from './renderers/area.js';
 import { drawScatter } from './renderers/scatter.js';
-import { drawHorizontalGridLines, drawVerticalGridLines, drawHAxis, drawVAxis, TICK_LABEL_FONT_SIZE } from './chart-renderer-axes.js';
-
+import {
+  drawHorizontalGridLines,
+  drawVerticalGridLines,
+  drawHAxis,
+  drawVAxis,
+  TICK_LABEL_FONT_SIZE,
+} from './chart-renderer-axes.js';
 
 // ---------------------------------------------------------------------------
 // Layout constants (mirrors ChartRenderer.java)
@@ -150,18 +155,13 @@ function drawLegend(legend: LegendGeometry, theme: Theme): string {
     }
     // Label text to the right of the swatch
     parts.push(
-      text(
-        pe.x + LEGEND_SWATCH_SIZE + LEGEND_SWATCH_TEXT_GAP,
-        pe.y + LEGEND_SWATCH_SIZE / 2,
-        pe.name,
-        {
-          fontFamily: theme.fontFamily,
-          fontSize: TICK_LABEL_FONT_SIZE,
-          fill: theme.colors.text,
-          textAnchor: 'start',
-          dominantBaseline: 'middle',
-        },
-      ),
+      text(pe.x + LEGEND_SWATCH_SIZE + LEGEND_SWATCH_TEXT_GAP, pe.y + LEGEND_SWATCH_SIZE / 2, pe.name, {
+        fontFamily: theme.fontFamily,
+        fontSize: TICK_LABEL_FONT_SIZE,
+        fill: theme.colors.text,
+        textAnchor: 'start',
+        dominantBaseline: 'middle',
+      }),
     );
   }
 
@@ -254,10 +254,7 @@ function renderErrorDiagram(errors: string[]): string {
  * plugin's layoutSync wrapper in index.ts from the AST). When errors are
  * present the function short-circuits to a visually distinct error SVG.
  */
-export function renderChart(
-  geo: ChartGeometry & { errors?: readonly string[] },
-  theme: Theme,
-): AssembledSvg {
+export function renderChart(geo: ChartGeometry & { errors?: readonly string[] }, theme: Theme): AssembledSvg {
   // Error path — surface parse/validation errors. This inline emitter
   // bypasses svgRoot entirely (no arrow-marker defs / viewBox needed for a
   // fixed-size error box), so it returns the `completeSvg` escape hatch

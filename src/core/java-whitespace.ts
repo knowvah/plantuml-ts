@@ -22,13 +22,29 @@
  * @see java.lang.Character#isWhitespace(char)
  */
 const JAVA_WHITESPACE: ReadonlySet<number> = new Set([
-  0x09, 0x0a, 0x0b, 0x0c, 0x0d, // TAB, LF, VT, FF, CR
-  0x1c, 0x1d, 0x1e, 0x1f, // FILE, GROUP, RECORD, UNIT SEPARATOR
+  0x09,
+  0x0a,
+  0x0b,
+  0x0c,
+  0x0d, // TAB, LF, VT, FF, CR
+  0x1c,
+  0x1d,
+  0x1e,
+  0x1f, // FILE, GROUP, RECORD, UNIT SEPARATOR
   0x20, // SPACE
   0x1680, // OGHAM SPACE MARK
-  0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, // Zs run, minus
-  0x2008, 0x2009, 0x200a, //                              U+2007 (non-breaking)
-  0x2028, 0x2029, // LINE / PARAGRAPH SEPARATOR
+  0x2000,
+  0x2001,
+  0x2002,
+  0x2003,
+  0x2004,
+  0x2005,
+  0x2006, // Zs run, minus
+  0x2008,
+  0x2009,
+  0x200a, //                              U+2007 (non-breaking)
+  0x2028,
+  0x2029, // LINE / PARAGRAPH SEPARATOR
   0x205f, // MEDIUM MATHEMATICAL SPACE
   0x3000, // IDEOGRAPHIC SPACE
 ]);

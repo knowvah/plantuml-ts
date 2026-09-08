@@ -53,12 +53,7 @@ function readPixel(scanlines: Buffer, width: number, x: number, y: number): read
   const rowStart = y * rowBytes;
   expect(scanlines[rowStart]).toBe(0); // filter type 0 (None)
   const pixelStart = rowStart + 1 + x * RGBA_BYTES;
-  return [
-    scanlines[pixelStart]!,
-    scanlines[pixelStart + 1]!,
-    scanlines[pixelStart + 2]!,
-    scanlines[pixelStart + 3]!,
-  ];
+  return [scanlines[pixelStart]!, scanlines[pixelStart + 1]!, scanlines[pixelStart + 2]!, scanlines[pixelStart + 3]!];
 }
 
 /** A fixed-grid `SpriteLike` for handmade test fixtures. */

@@ -100,8 +100,13 @@ export function splinePathD(points: ReadonlyArray<{ readonly x: number; readonly
  */
 export function roundedTopRectD(x0: number, y0: number, x1: number, y1: number, r: number): string {
   return [
-    moveTo(x0 + r, y0), lineTo(x1 - r, y0), arcTo(x1, y0 + r, r, 0, 1),
-    lineTo(x1, y1), lineTo(x0, y1), lineTo(x0, y0 + r), arcTo(x0 + r, y0, r, 0, 1),
+    moveTo(x0 + r, y0),
+    lineTo(x1 - r, y0),
+    arcTo(x1, y0 + r, r, 0, 1),
+    lineTo(x1, y1),
+    lineTo(x0, y1),
+    lineTo(x0, y0 + r),
+    arcTo(x0 + r, y0, r, 0, 1),
   ].join(' ');
 }
 
@@ -111,8 +116,13 @@ export function roundedTopRectD(x0: number, y0: number, x1: number, y1: number, 
  */
 export function roundedBottomRectD(x0: number, yTop: number, x1: number, y1: number, r: number): string {
   return [
-    moveTo(x0, yTop), lineTo(x1, yTop), lineTo(x1, y1 - r), arcTo(x1 - r, y1, r, 0, 1),
-    lineTo(x0 + r, y1), arcTo(x0, y1 - r, r, 0, 1), lineTo(x0, yTop),
+    moveTo(x0, yTop),
+    lineTo(x1, yTop),
+    lineTo(x1, y1 - r),
+    arcTo(x1 - r, y1, r, 0, 1),
+    lineTo(x0 + r, y1),
+    arcTo(x0, y1 - r, r, 0, 1),
+    lineTo(x0, yTop),
   ].join(' ');
 }
 
@@ -125,7 +135,6 @@ export function cubicTo(
   c2: { readonly x: number; readonly y: number },
   end: { readonly x: number; readonly y: number },
 ): string {
-  const p = (pt: { readonly x: number; readonly y: number }): string =>
-    `${fmt(pt.x)},${fmt(pt.y)}`;
+  const p = (pt: { readonly x: number; readonly y: number }): string => `${fmt(pt.x)},${fmt(pt.y)}`;
   return `C${p(c1)} ${p(c2)} ${p(end)}`;
 }

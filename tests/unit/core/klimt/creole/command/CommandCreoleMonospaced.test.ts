@@ -56,9 +56,7 @@ describe('CommandCreoleMonospaced', () => {
 
   test('nests inside an active bold run (outer styles preserved)', () => {
     const atoms = buildStripeAtoms('**""mono bold""**', PLAIN);
-    expect(atoms.map(textOf)).toEqual([
-      { text: 'mono bold', family: MONOSPACED, size: 14, styles: [FontStyle.BOLD] },
-    ]);
+    expect(atoms.map(textOf)).toEqual([{ text: 'mono bold', family: MONOSPACED, size: 14, styles: [FontStyle.BOLD] }]);
   });
 
   test('font state is restored after the run (style command still applies later)', () => {

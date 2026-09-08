@@ -15,7 +15,12 @@ import { startNewPage } from './parser.js';
  */
 export const DIRECTIVE_COMMANDS: readonly Command[] = [
   // 1. Ignore: comments starting with '
-  { pattern: /^'/, execute() { /* no-op */ } },
+  {
+    pattern: /^'/,
+    execute() {
+      /* no-op */
+    },
+  },
 
   // 1b. `left to right direction` → rankdir LR (upstream CommandRankDir).
   //     `top to bottom direction` is a no-op (TB is the default). Both must
@@ -26,7 +31,12 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
       state.ast.rankdir = 'LR';
     },
   },
-  { pattern: /^top\s+to\s+bottom\s+direction\b/i, execute() { /* no-op — TB default */ } },
+  {
+    pattern: /^top\s+to\s+bottom\s+direction\b/i,
+    execute() {
+      /* no-op — TB default */
+    },
+  },
 
   // 2. Ignore: skinparam, scale lines (scale is global/structurally inert).
   //    `title` is NOT ignored here -- it is claimed by the shared annotation
@@ -35,7 +45,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //    `state.ast.annotations.title` instead of being silently dropped.
   {
     pattern: /^(skinparam|scale\b)/i,
-    execute() { /* no-op */ },
+    execute() {
+      /* no-op */
+    },
   },
 
   // 2a. allow_mixing / allowmixing — upstream `CommandAllowMixing` flips a
@@ -47,7 +59,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     `class Foo` + `actor Bob`, this port rendered a diagram.
   {
     pattern: /^allow_?mixing\s*$/i,
-    execute(state) { state.allowMixing = true; },
+    execute(state) {
+      state.allowMixing = true;
+    },
   },
 
   // 2a-bis. `layout_new_line` (CommandLayoutNewLine) — registered right after
@@ -65,7 +79,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     @see ~/git/plantuml/.../classdiagram/command/CommandLayoutNewLine.java:55-59,71-74
   {
     pattern: /^layout_new_line\s*$/i,
-    execute() { /* recognised, no modeled effect -- see comment above */ },
+    execute() {
+      /* recognised, no modeled effect -- see comment above */
+    },
   },
 
   // 2b. Namespace separator directive: `set namespaceSeparator ::`,
@@ -113,7 +129,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     @see ~/git/plantuml/.../command/CommonCommands.java:63
   {
     pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
-    execute() { /* ignored -- see rule 2c-bis's doc comment */ },
+    execute() {
+      /* ignored -- see rule 2c-bis's doc comment */
+    },
   },
 
   // 2c-ter. `rotate` (CommandRotate) / `!assume transparent (dark|light)`
@@ -142,19 +160,27 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     @see ~/git/plantuml/.../command/CommandPage.java:54-63,83-95
   {
     pattern: /^rotate\s*$/i,
-    execute() { /* upstream no-op -- see rule 2c-ter's doc comment */ },
+    execute() {
+      /* upstream no-op -- see rule 2c-ter's doc comment */
+    },
   },
   {
     pattern: /^!assume\s+transparent\s+(?:dark|light)\s*$/i,
-    execute() { /* upstream no-op -- see rule 2c-ter's doc comment */ },
+    execute() {
+      /* upstream no-op -- see rule 2c-ter's doc comment */
+    },
   },
   {
     pattern: /^minwidth\s+\d+\s*$/i,
-    execute() { /* upstream no-op -- see rule 2c-ter's doc comment */ },
+    execute() {
+      /* upstream no-op -- see rule 2c-ter's doc comment */
+    },
   },
   {
     pattern: /^page\s+\d+\s*x*\s*\d+\s*$/i,
-    execute() { /* no representation in a single-SVG renderer -- see rule 2c-ter's doc comment */ },
+    execute() {
+      /* no representation in a single-SVG renderer -- see rule 2c-ter's doc comment */
+    },
   },
 
   // 2d. `newpage` (CommandNewpage) — finalize the current page and start an

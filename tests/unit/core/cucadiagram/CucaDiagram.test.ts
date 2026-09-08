@@ -49,7 +49,13 @@ class TestDiagram extends CucaDiagram {
 }
 
 function leaf(d: TestDiagram, name: string, type: LeafType = LeafType.CLASS): Entity {
-  return d.reallyCreateLeaf(undefined, d.quarkInContext(true, name), Display.getWithNewlines(d.getPragma(), name), type, undefined);
+  return d.reallyCreateLeaf(
+    undefined,
+    d.quarkInContext(true, name),
+    Display.getWithNewlines(d.getPragma(), name),
+    type,
+    undefined,
+  );
 }
 
 function link(d: TestDiagram, e1: Entity, e2: Entity, single = false): Link {
@@ -114,7 +120,12 @@ describe('quarkInContext — with namespace separator', () => {
   it('plain names land in the current group; reuseExistingChild returns a unique same-named quark', () => {
     const d = new TestDiagram();
     d.setNamespaceSeparator('.');
-    d.gotoGroup(undefined, d.quarkInContext(false, 'p'), Display.getWithNewlines(d.getPragma(), 'p'), GroupType.PACKAGE);
+    d.gotoGroup(
+      undefined,
+      d.quarkInContext(false, 'p'),
+      Display.getWithNewlines(d.getPragma(), 'p'),
+      GroupType.PACKAGE,
+    );
     const inP = d.quarkInContext(false, 'X');
     expect(inP.getQualifiedName()).toBe('p.X');
     // X is unique in the whole plasma — reuse finds it from anywhere
@@ -129,7 +140,12 @@ describe('quarkInContext — with namespace separator', () => {
   it('a qualified name whose first package exists resolves from the root; a leaf first segment is an error', () => {
     const d = new TestDiagram();
     d.setNamespaceSeparator('.');
-    d.gotoGroup(undefined, d.quarkInContext(false, 'p'), Display.getWithNewlines(d.getPragma(), 'p'), GroupType.PACKAGE);
+    d.gotoGroup(
+      undefined,
+      d.quarkInContext(false, 'p'),
+      Display.getWithNewlines(d.getPragma(), 'p'),
+      GroupType.PACKAGE,
+    );
     d.endGroup();
     const q = d.quarkInContext(true, 'p.X');
     expect(q.getQualifiedName()).toBe('p.X');
@@ -194,7 +210,12 @@ describe('group stack', () => {
   it('startingPass resets lastEntity, cpt2, and trims the stack to the root frame', () => {
     const d = new TestDiagram();
     d.gotoTogether();
-    d.gotoGroup(undefined, d.quarkInContext(false, 'p'), Display.getWithNewlines(d.getPragma(), 'p'), GroupType.PACKAGE);
+    d.gotoGroup(
+      undefined,
+      d.quarkInContext(false, 'p'),
+      Display.getWithNewlines(d.getPragma(), 'p'),
+      GroupType.PACKAGE,
+    );
     leaf(d, 'A');
     d.getUniqueSequence2('x');
     d.startingPass(ParserPass.TWO);
@@ -222,11 +243,17 @@ describe('reallyCreateLeaf', () => {
     const d = new TestDiagram();
     const a = leaf(d, 'A');
     expect(() =>
-      d.reallyCreateLeaf(undefined, a.getQuark(), Display.getWithNewlines(d.getPragma(), 'A'), LeafType.CLASS, undefined),
+      d.reallyCreateLeaf(
+        undefined,
+        a.getQuark(),
+        Display.getWithNewlines(d.getPragma(), 'A'),
+        LeafType.CLASS,
+        undefined,
+      ),
     ).toThrow('IllegalStateException');
-    expect(() => d.reallyCreateLeaf(undefined, d.quarkInContext(true, 'B'), Display.NULL, LeafType.CLASS, undefined)).toThrow(
-      'IllegalArgumentException',
-    );
+    expect(() =>
+      d.reallyCreateLeaf(undefined, d.quarkInContext(true, 'B'), Display.NULL, LeafType.CLASS, undefined),
+    ).toThrow('IllegalArgumentException');
   });
 
   it('MAP and JSON leaves get their dedicated bodiers', () => {
@@ -407,7 +434,12 @@ describe('hide / remove machinery (real HideOrShow folds)', () => {
   it('fixWhat prefixes the current group qualified name when a separator is set', () => {
     const d = new TestDiagram();
     d.setNamespaceSeparator('.');
-    d.gotoGroup(undefined, d.quarkInContext(false, 'p'), Display.getWithNewlines(d.getPragma(), 'p'), GroupType.PACKAGE);
+    d.gotoGroup(
+      undefined,
+      d.quarkInContext(false, 'p'),
+      Display.getWithNewlines(d.getPragma(), 'p'),
+      GroupType.PACKAGE,
+    );
     const x = d.reallyCreateLeaf(
       undefined,
       d.quarkInContext(false, 'X'),
@@ -536,7 +568,13 @@ describe('misc surface', () => {
     const q = d.quarkInContext(false, 'p');
     const g = d.createGroup(undefined, q, GroupType.PACKAGE);
     expect(d.isEmpty(g)).toBe(true);
-    d.reallyCreateLeaf(undefined, q.child('X'), Display.getWithNewlines(d.getPragma(), 'X'), LeafType.USECASE, undefined);
+    d.reallyCreateLeaf(
+      undefined,
+      q.child('X'),
+      Display.getWithNewlines(d.getPragma(), 'X'),
+      LeafType.USECASE,
+      undefined,
+    );
     expect(d.isEmpty(g)).toBe(false);
   });
 

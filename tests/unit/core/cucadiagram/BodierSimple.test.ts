@@ -112,7 +112,9 @@ describe('BodierAbstract.getBestMatch scoring (BodierAbstract.java:68-127)', () 
 
   it('null guards mirror upstream (java:50-52, :94-95, :130-131, :139-140)', () => {
     const nullString = null as unknown as string;
-    expect(() => new BodierSimple(new MockSkinParam()).setLeaf(null as unknown as Parameters<BodierSimple['setLeaf']>[0])).toThrow('NullPointerException');
+    expect(() =>
+      new BodierSimple(new MockSkinParam()).setLeaf(null as unknown as Parameters<BodierSimple['setLeaf']>[0]),
+    ).toThrow('NullPointerException');
     expect(() => BodierAbstract.matchScore(nullString, 'x')).toThrow('IllegalArgumentException');
     expect(() => BodierAbstract.matchScore('x', nullString)).toThrow('IllegalArgumentException');
     expect(BodierAbstract.startsWith(nullString, 0, 'x')).toBe(false);

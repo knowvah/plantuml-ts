@@ -150,10 +150,7 @@ class SentinelToken {
 // Parser functions — port of HclParser parsing methods
 // ---------------------------------------------------------------------------
 
-function getFunctionData(
-  functionName: string,
-  cursor: TokenCursor,
-): unknown {
+function getFunctionData(functionName: string, cursor: TokenCursor): unknown {
   const parenOpen = next(cursor);
   if (parenOpen.type !== 'PARENTHESIS_OPEN') {
     throw new Error('Expected PARENTHESIS_OPEN after FUNCTION_NAME');
@@ -278,10 +275,7 @@ function parseTerms(terms: HclTerm[]): unknown {
   if (isFlatAssignment(terms)) {
     // Synthesize a CURLY_BRACKET_CLOSE sentinel at the end so getBracketData
     // terminates correctly, then parse as a bracket block.
-    const syntheticTerms: HclTerm[] = [
-      ...terms,
-      { type: 'CURLY_BRACKET_CLOSE' },
-    ];
+    const syntheticTerms: HclTerm[] = [...terms, { type: 'CURLY_BRACKET_CLOSE' }];
     const cursor: TokenCursor = { terms: syntheticTerms, idx: 0 };
     return getBracketData(cursor);
   }
@@ -328,8 +322,14 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
     if (/^@starthcl\s*$/i.test(t) || /^@endhcl\s*$/i.test(t)) continue;
 
     // Strip <style> blocks
-    if (t === '<style>') { inStyleBlock = true; continue; }
-    if (inStyleBlock) { if (t === '</style>') inStyleBlock = false; continue; }
+    if (t === '<style>') {
+      inStyleBlock = true;
+      continue;
+    }
+    if (inStyleBlock) {
+      if (t === '</style>') inStyleBlock = false;
+      continue;
+    }
 
     // Strip comment lines (D2)
     if (t.startsWith('#')) continue;
@@ -356,10 +356,7 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
     }
 
     // Strip other known directive lines before body
-    if (
-      bodyLines.length === 0 &&
-      /^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)
-    ) {
+    if (bodyLines.length === 0 && /^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) {
       // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
       // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
       // path because both factories construct a JsonDiagram.
@@ -390,6 +387,13 @@ export function parseHcl(source: UmlSource): JsonDiagramAST {
   // #lizard forgives -- pre-existing faithful port of the HCL entry point
   // (already over threshold before mission G0b/T6 added the annotation-
   // matcher check above).
-  return { root, parseError: false, diagramLabel: 'HCL' as const, highlights: [], annotations, sprites,
-    ...(scale === undefined ? {} : { scale }) };
+  return {
+    root,
+    parseError: false,
+    diagramLabel: 'HCL' as const,
+    highlights: [],
+    annotations,
+    sprites,
+    ...(scale === undefined ? {} : { scale }),
+  };
 }

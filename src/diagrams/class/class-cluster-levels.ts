@@ -44,9 +44,7 @@ export type ClusterWrapperLevel = 1 | 2;
  * for the class/object AST's flat relationship + note lists.
  */
 function isLinkFromOrToGroup(nsId: string, ast: ClassDiagramAST): boolean {
-  const inRelationships = ast.relationships.some(
-    (rel) => rel.from === nsId || rel.to === nsId,
-  );
+  const inRelationships = ast.relationships.some((rel) => rel.from === nsId || rel.to === nsId);
   if (inRelationships) return true;
   return ast.notes.some((note) => note.target === nsId);
 }
@@ -59,9 +57,6 @@ function isLinkFromOrToGroup(nsId: string, ast: ClassDiagramAST): boolean {
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:91-115
  */
-export function clusterWrapperLevel(
-  nsId: string,
-  ast: ClassDiagramAST,
-): ClusterWrapperLevel {
+export function clusterWrapperLevel(nsId: string, ast: ClassDiagramAST): ClusterWrapperLevel {
   return isLinkFromOrToGroup(nsId, ast) ? 2 : 1;
 }

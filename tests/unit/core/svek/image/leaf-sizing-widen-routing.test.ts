@@ -28,7 +28,11 @@
  *   produces the IDENTICAL dimension the legacy fallback used to.
  */
 import { describe, it, expect } from 'vitest';
-import { measureLeafNode, measureUsecase, measureUsecaseOrActorLeaf } from '../../../../../src/core/svek/image/leaf-sizing.js';
+import {
+  measureLeafNode,
+  measureUsecase,
+  measureUsecaseOrActorLeaf,
+} from '../../../../../src/core/svek/image/leaf-sizing.js';
 import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
@@ -69,7 +73,7 @@ function usecaseNode(display: string): DescriptiveNode {
 }
 
 describe('T3 widened routing — usecase + <$sprite>', () => {
-  it('a single-line sprite display routes through measureEntityLeaf and matches measureUsecase\'s own ink-fit math for a lone atom', () => {
+  it("a single-line sprite display routes through measureEntityLeaf and matches measureUsecase's own ink-fit math for a lone atom", () => {
     const display = '<$icon>';
     const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
@@ -111,7 +115,7 @@ describe('T3 widened routing — usecase + <$sprite>', () => {
   });
 });
 
-describe('SI10 — measureUsecaseOrActorLeaf matches the description engine\'s own faithful path (ADR-2)', () => {
+describe("SI10 — measureUsecaseOrActorLeaf matches the description engine's own faithful path (ADR-2)", () => {
   it('usecase: the exported entry point returns the same Dim as measureLeafNode for an equivalent node', () => {
     const display = 'Hello World';
     const sprites = svgIconSprite(SHRUNK_INK_SVG);
@@ -169,16 +173,28 @@ describe('T3 coverage restoration — measureLegacyBoxFallback via <latex> (the 
 
   it('a stereotype adds its own line + STEREO_MARGIN on top of the <latex> content', () => {
     const withStereo: DescriptiveNode = {
-      id: 'r', display: '<latex>x^2</latex>', symbol: 'rectangle', stereotype: ['Foo'], children: [],
+      id: 'r',
+      display: '<latex>x^2</latex>',
+      symbol: 'rectangle',
+      stereotype: ['Foo'],
+      children: [],
     };
-    const withoutStereo: DescriptiveNode = { id: 'r', display: '<latex>x^2</latex>', symbol: 'rectangle', children: [] };
+    const withoutStereo: DescriptiveNode = {
+      id: 'r',
+      display: '<latex>x^2</latex>',
+      symbol: 'rectangle',
+      children: [],
+    };
     expect(measureLeafNode(withStereo, fontSpec, measurer)).toEqual({ width: 61.725, height: 48 });
     expect(measureLeafNode(withoutStereo, fontSpec, measurer)).toEqual({ width: 20, height: 34 });
   });
 
-  it('skinparam wrapWidth word-wraps a <latex>-guarded box (measureTextBlock\'s wrapped path)', () => {
+  it("skinparam wrapWidth word-wraps a <latex>-guarded box (measureTextBlock's wrapped path)", () => {
     const node: DescriptiveNode = {
-      id: 'r', display: '<latex>x^2</latex> plus some words here', symbol: 'rectangle', children: [],
+      id: 'r',
+      display: '<latex>x^2</latex> plus some words here',
+      symbol: 'rectangle',
+      children: [],
     };
     const wrapped = measureLeafNode(node, fontSpec, measurer, { wrapWidth: 40 });
     const unwrapped = measureLeafNode(node, fontSpec, measurer);

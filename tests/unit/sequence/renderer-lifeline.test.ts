@@ -134,9 +134,7 @@ describe('renderActivation', () => {
 
   it('centres a 10-wide bar on the lifeline', () => {
     // `getPreferredWidth` is 10 (`ComponentRoseActiveLine.java:114-116`).
-    expect(renderActivation(activation(), theme)).toContain(
-      '<rect x="17" y="50" width="10" height="34"',
-    );
+    expect(renderActivation(activation(), theme)).toContain('<rect x="17" y="50" width="10" height="34"');
   });
 
   /**
@@ -188,8 +186,7 @@ describe('renderActivation', () => {
 });
 
 describe('renderLifelinePass', () => {
-  const p = (id: string, centerX: number): ParticipantGeo =>
-    participant({ id, display: id, centerX, x: centerX - 12 });
+  const p = (id: string, centerX: number): ParticipantGeo => participant({ id, display: id, centerX, x: centerX - 12 });
   const act = (participantId: string, lifelineX: number, y: number): ActivationGeo => ({
     kind: 'activation',
     level: 1,

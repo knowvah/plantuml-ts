@@ -23,8 +23,7 @@ const stubStringBounder: StringBounder = { calculateDimension: () => new XDimens
 /** Minimal UGraphic that only composes translates — all ULayoutGroup#drawU needs. */
 function translatingUGraphic(translate: UTranslate = UTranslate.none()): UGraphic {
   const ug: UGraphic = {
-    apply: (change: UChange) =>
-      change instanceof UTranslate ? translatingUGraphic(translate.compose(change)) : ug,
+    apply: (change: UChange) => (change instanceof UTranslate ? translatingUGraphic(translate.compose(change)) : ug),
     draw: () => undefined,
     getParam: () => {
       throw new Error('not needed');

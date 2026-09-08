@@ -14,19 +14,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  SEQUENCE_COMMANDS,
-  type SequenceCommand,
-} from '../../../src/diagrams/sequence/sequence-command-registry.js';
-import {
-  arrowCommand,
-  decoratedArrowCommand,
-  returnCommand,
-} from '../../../src/diagrams/sequence/command-arrow.js';
-import {
-  exoArrowLeftCommand,
-  exoArrowRightCommand,
-} from '../../../src/diagrams/sequence/command-exo-arrow.js';
+import { SEQUENCE_COMMANDS, type SequenceCommand } from '../../../src/diagrams/sequence/sequence-command-registry.js';
+import { arrowCommand, decoratedArrowCommand, returnCommand } from '../../../src/diagrams/sequence/command-arrow.js';
+import { exoArrowLeftCommand, exoArrowRightCommand } from '../../../src/diagrams/sequence/command-exo-arrow.js';
 import {
   autonumberCommand,
   autonumberIncrementCommand,
@@ -73,14 +63,8 @@ import {
   noteOnArrowCommand,
   styledNoteCommand,
 } from '../../../src/diagrams/sequence/command-note-factory.js';
-import {
-  minwidthOrPagingCommand,
-  newpageCommand,
-} from '../../../src/diagrams/sequence/command-page.js';
-import {
-  createCommand,
-  participantCommand,
-} from '../../../src/diagrams/sequence/command-participant.js';
+import { minwidthOrPagingCommand, newpageCommand } from '../../../src/diagrams/sequence/command-page.js';
+import { createCommand, participantCommand } from '../../../src/diagrams/sequence/command-participant.js';
 
 /**
  * One registry entry: the command itself, the name it is dispatched under,
@@ -181,9 +165,7 @@ const KNOWN_DESCENTS: readonly (readonly [string, string])[] = [
 
 /** Adjacent pairs whose upstream registration line goes DOWN, skipping the
  *  entries that have no upstream counterpart to compare against. */
-function measureDescents(
-  entries: readonly RegistryEntry[],
-): readonly (readonly [string, string])[] {
+function measureDescents(entries: readonly RegistryEntry[]): readonly (readonly [string, string])[] {
   const known = entries.filter((e) => e.upstreamLine !== null);
   const descents: (readonly [string, string])[] = [];
   for (let i = 1; i < known.length; i++) {
@@ -232,9 +214,7 @@ describe('sequence command registry — frozen registration order', () => {
     // decline is asserted rather than assumed.
     const iExoLeft = SEQUENCE_COMMANDS.indexOf(exoArrowLeftCommand);
     const iExoRight = SEQUENCE_COMMANDS.indexOf(exoArrowRightCommand);
-    expect(SEQUENCE_COMMANDS.indexOf(arrowCommand)).toBeLessThan(
-      SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand),
-    );
+    expect(SEQUENCE_COMMANDS.indexOf(arrowCommand)).toBeLessThan(SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand));
     expect(SEQUENCE_COMMANDS.indexOf(decoratedArrowCommand)).toBeLessThan(iExoLeft);
     expect(iExoLeft).toBeLessThan(iExoRight);
     expect(arrowCommand.pattern.test('[-> Bob')).toBe(false);

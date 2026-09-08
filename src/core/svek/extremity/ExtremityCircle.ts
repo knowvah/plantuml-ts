@@ -46,7 +46,9 @@ export class ExtremityCircle extends Extremity {
   drawU(ug: UGraphic): void {
     const r = ExtremityCircle.RADIUS;
     let applied = ug.apply(UStroke.withThickness(1.5));
-    applied = this.fill ? applied.apply(new Back(applied.getParam().getColor())) : applied.apply(new Back(this.backgroundColor));
+    applied = this.fill
+      ? applied.apply(new Back(applied.getParam().getColor()))
+      : applied.apply(new Back(this.backgroundColor));
     applied.apply(new UTranslate(this.dest.x - r, this.dest.y - r)).draw(UEllipse.build(r * 2, r * 2));
   }
 

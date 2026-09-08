@@ -32,41 +32,56 @@ function parse(source: string): ReturnType<typeof parseClass> {
 }
 
 describe('relationship-endpoint auto-creation order (G2 N59)', () => {
-  it('extension (`<|--`) with BOTH endpoints undeclared: the LEFT (child) ' +
-     'text creates first, even though it is semantically `to` (swapDirection ' +
-     'reorders `from`/`to` but not creation order) — jar-verified ' +
-     'bicabi-42-coto932 (`MainWindow <|-- Gtk::Window`: MainWindow ent0001, ' +
-     'Gtk ent0002)', () => {
-    const ast = parse('MainWindow <|-- Gtk::Window');
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['MainWindow', 'Gtk']);
-    expect(ast.classifiers[0]).toMatchObject({ id: 'MainWindow', creationIndex: 1 });
-    expect(ast.classifiers[1]).toMatchObject({ id: 'Gtk', creationIndex: 2 });
-    expect(ast.relationships[0]).toMatchObject({ from: 'Gtk', to: 'MainWindow', type: 'extension' });
-  });
+  it(
+    'extension (`<|--`) with BOTH endpoints undeclared: the LEFT (child) ' +
+      'text creates first, even though it is semantically `to` (swapDirection ' +
+      'reorders `from`/`to` but not creation order) — jar-verified ' +
+      'bicabi-42-coto932 (`MainWindow <|-- Gtk::Window`: MainWindow ent0001, ' +
+      'Gtk ent0002)',
+    () => {
+      const ast = parse('MainWindow <|-- Gtk::Window');
+      expect(ast.classifiers.map((c) => c.id)).toEqual(['MainWindow', 'Gtk']);
+      expect(ast.classifiers[0]).toMatchObject({ id: 'MainWindow', creationIndex: 1 });
+      expect(ast.classifiers[1]).toMatchObject({ id: 'Gtk', creationIndex: 2 });
+      expect(ast.relationships[0]).toMatchObject({ from: 'Gtk', to: 'MainWindow', type: 'extension' });
+    },
+  );
 
-  it('implementation (`<|..`) with both endpoints undeclared also creates ' +
-     'left-to-right (same swapDirection=true family as extension)', () => {
-    const ast = parse('Impl <|.. IFace');
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['Impl', 'IFace']);
-  });
+  it(
+    'implementation (`<|..`) with both endpoints undeclared also creates ' +
+      'left-to-right (same swapDirection=true family as extension)',
+    () => {
+      const ast = parse('Impl <|.. IFace');
+      expect(ast.classifiers.map((c) => c.id)).toEqual(['Impl', 'IFace']);
+    },
+  );
 
-  it('association (`--`, swapDirection=false) already created left-to-right ' +
-     'before this fix — unaffected, confirms no regression on the common case', () => {
-    const ast = parse('A -- B');
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
-    expect(ast.relationships[0]).toMatchObject({ from: 'A', to: 'B' });
-  });
+  it(
+    'association (`--`, swapDirection=false) already created left-to-right ' +
+      'before this fix — unaffected, confirms no regression on the common case',
+    () => {
+      const ast = parse('A -- B');
+      expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
+      expect(ast.relationships[0]).toMatchObject({ from: 'A', to: 'B' });
+    },
+  );
 
-  it('a PRE-DECLARED endpoint is reused, not recreated, regardless of ' +
-     'swapDirection — creation order only matters for the FIRST reference', () => {
-    const ast = parse('class MainWindow\nMainWindow <|-- Gtk');
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['MainWindow', 'Gtk']);
-    expect(ast.classifiers[0]!.creationIndex).toBe(1);
-  });
+  it(
+    'a PRE-DECLARED endpoint is reused, not recreated, regardless of ' +
+      'swapDirection — creation order only matters for the FIRST reference',
+    () => {
+      const ast = parse('class MainWindow\nMainWindow <|-- Gtk');
+      expect(ast.classifiers.map((c) => c.id)).toEqual(['MainWindow', 'Gtk']);
+      expect(ast.classifiers[0]!.creationIndex).toBe(1);
+    },
+  );
 
-  it('mixed: extension right-endpoint already exists, left does not — left ' +
-     'still creates in its own textual position (only one auto-create needed)', () => {
-    const ast = parse('class Gtk\nMainWindow <|-- Gtk');
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['Gtk', 'MainWindow']);
-  });
+  it(
+    'mixed: extension right-endpoint already exists, left does not — left ' +
+      'still creates in its own textual position (only one auto-create needed)',
+    () => {
+      const ast = parse('class Gtk\nMainWindow <|-- Gtk');
+      expect(ast.classifiers.map((c) => c.id)).toEqual(['Gtk', 'MainWindow']);
+    },
+  );
 });

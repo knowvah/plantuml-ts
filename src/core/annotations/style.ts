@@ -138,9 +138,7 @@ export function resolveAnnotationStyles(
 /** `Theme.styleOverrides`'s plain-object form as the `StyleMap` the override
  *  resolver takes. `undefined` in, `undefined` out — themes without a
  *  `document { … }` block cost nothing. */
-function toStyleMap(
-  overrides: Record<string, Record<string, string>> | undefined,
-): StyleMap | undefined {
+function toStyleMap(overrides: Record<string, Record<string, string>> | undefined): StyleMap | undefined {
   if (overrides === undefined) return undefined;
   const map: StyleMap = new Map();
   for (const [selector, decls] of Object.entries(overrides)) {

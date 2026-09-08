@@ -95,20 +95,43 @@ export function emptyBucketCounts(): BucketCounts {
 /** `NUMERIC_ATTRS` (`compare.ts:47`) plus the four attributes the comparator
  * gives its own numeric handling to. See boundary note 3 in the header. */
 const GEOMETRY_ATTRS: ReadonlySet<string> = new Set([
-  'x', 'y', 'cx', 'cy', 'rx', 'ry',
-  'width', 'height',
-  'x1', 'y1', 'x2', 'y2',
-  'dx', 'dy', 'r',
-  'd', 'points', 'viewBox', 'transform',
+  'x',
+  'y',
+  'cx',
+  'cy',
+  'rx',
+  'ry',
+  'width',
+  'height',
+  'x1',
+  'y1',
+  'x2',
+  'y2',
+  'dx',
+  'dy',
+  'r',
+  'd',
+  'points',
+  'viewBox',
+  'transform',
 ]);
 
 /** Attributes whose value is produced by text measurement or text layout.
  * See boundary note 4 in the header. */
 const TEXT_ATTRS: ReadonlySet<string> = new Set([
-  'textLength', 'lengthAdjust',
-  'font-size', 'font-family', 'font-weight', 'font-style', 'font-variant',
-  'letter-spacing', 'word-spacing',
-  'text-anchor', 'dominant-baseline', 'alignment-baseline', 'baseline-shift',
+  'textLength',
+  'lengthAdjust',
+  'font-size',
+  'font-family',
+  'font-weight',
+  'font-style',
+  'font-variant',
+  'letter-spacing',
+  'word-spacing',
+  'text-anchor',
+  'dominant-baseline',
+  'alignment-baseline',
+  'baseline-shift',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -199,7 +222,6 @@ export function tallyDiffs(diffs: readonly Diff[]): BucketCounts {
 // Census over the committed corpus
 // ---------------------------------------------------------------------------
 
-
 export interface FixtureRef {
   readonly type: string;
   readonly slug: string;
@@ -223,8 +245,7 @@ export interface Census {
 }
 
 type FixtureOutcome =
-  | { readonly ok: true; readonly fixture: CensusFixture }
-  | { readonly ok: false; readonly error: CensusError };
+  { readonly ok: true; readonly fixture: CensusFixture } | { readonly ok: false; readonly error: CensusError };
 
 /** Renders one fixture through T1's helper, compares it with the shared
  * comparator (D1, unchanged) and tallies the result. Never throws: a render

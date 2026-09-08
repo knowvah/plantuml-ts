@@ -60,7 +60,10 @@ import type { StringBounder as DriverStringBounder } from '../../../../src/core/
 import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { ActorStyle } from '../../../../src/core/skin/ActorStyle.js';
 import { ComponentStyle } from '../../../../src/core/decoration/symbol/USymbols.js';
-import { EntityImageDescription, type EntityImageDescriptionParams } from '../../../../src/core/svek/image/EntityImageDescription.js';
+import {
+  EntityImageDescription,
+  type EntityImageDescriptionParams,
+} from '../../../../src/core/svek/image/EntityImageDescription.js';
 
 const TITLE_FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 const STEREO_FONT: FontConfiguration = {

@@ -17,9 +17,9 @@ describe('parseYamlLines', () => {
 
   // 2. Nested map via KEY_ONLY + indented children
   it('parses nested map from KEY_ONLY with indented children', () => {
-    expect(
-      parse(['metadata:', '  name: foo', '  namespace: bar']),
-    ).toEqual({ metadata: { name: 'foo', namespace: 'bar' } });
+    expect(parse(['metadata:', '  name: foo', '  namespace: bar'])).toEqual({
+      metadata: { name: 'foo', namespace: 'bar' },
+    });
   });
 
   // 3. KEY_ONLY with list children
@@ -31,13 +31,9 @@ describe('parseYamlLines', () => {
 
   // 4. List of maps (Ansible-style)
   it('parses a list of maps with nested keys', () => {
-    expect(
-      parse([
-        '- hosts: webservers',
-        '  vars:',
-        '    http_port: 80',
-      ]),
-    ).toEqual([{ hosts: 'webservers', vars: { http_port: '80' } }]);
+    expect(parse(['- hosts: webservers', '  vars:', '    http_port: 80'])).toEqual([
+      { hosts: 'webservers', vars: { http_port: '80' } },
+    ]);
   });
 
   // 5. KEY_ONLY with no subsequent line → empty string value
@@ -76,14 +72,7 @@ describe('parseYamlLines', () => {
 
   // 11. Multiple list-of-map entries
   it('parses multiple list-of-map entries correctly', () => {
-    expect(
-      parse([
-        '- name: Alice',
-        '  age: 30',
-        '- name: Bob',
-        '  age: 25',
-      ]),
-    ).toEqual([
+    expect(parse(['- name: Alice', '  age: 30', '- name: Bob', '  age: 25'])).toEqual([
       { name: 'Alice', age: '30' },
       { name: 'Bob', age: '25' },
     ]);
@@ -107,9 +96,7 @@ describe('parseYamlLines', () => {
 
   // 15. Block scalar followed by a sibling key
   it('terminates block scalar at the next sibling key', () => {
-    expect(
-      parse(['key: |', '  block1', '  block2', 'next: val']),
-    ).toEqual({ key: 'block1\nblock2\n', next: 'val' });
+    expect(parse(['key: |', '  block1', '  block2', 'next: val'])).toEqual({ key: 'block1\nblock2\n', next: 'val' });
   });
 
   // Bonus: bare text at root level throws YamlSyntaxError

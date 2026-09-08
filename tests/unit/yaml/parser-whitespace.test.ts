@@ -29,7 +29,8 @@ describe('YAML parser — comments + whitespace', () => {
 
   it('strips multiple full-line comments between entries', () => {
     expect(parse(['# header', 'a: 1', '# between', 'b: 2', '# footer'])).toEqual({
-      a: '1', b: '2',
+      a: '1',
+      b: '2',
     });
   });
 

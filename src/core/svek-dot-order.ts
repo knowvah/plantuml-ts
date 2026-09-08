@@ -66,9 +66,7 @@ interface WalkCtx {
  *  narrows to one kind (kermor emits source and sink at different points);
  *  omit it for `ClusterDotString.printRanks`, which emits both up front. */
 function rankIds(c: DotInputCluster, rank?: 'source' | 'sink'): string[] {
-  return (c.portRanks ?? [])
-    .filter((r) => rank === undefined || r.rank === rank)
-    .flatMap((r) => r.nodeIds);
+  return (c.portRanks ?? []).filter((r) => rank === undefined || r.rank === rank).flatMap((r) => r.nodeIds);
 }
 
 /** `ClusterDotStringKermor.printRanks` (`:231-245`): the `{rank=X;…}` group

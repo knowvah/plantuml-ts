@@ -175,8 +175,14 @@ describe('applyDecorTrim', () => {
   });
 
   it('shifts only the single start/end point on a plain 2-point secant', () => {
-    const secant = [{ x: 70, y: 70 }, { x: 70, y: 140 }];
+    const secant = [
+      { x: 70, y: 70 },
+      { x: 70, y: 140 },
+    ];
     const result = applyDecorTrim(secant, { x: 0, y: 5 }, { x: 0, y: -5 });
-    expect(result).toEqual([{ x: 70, y: 75 }, { x: 70, y: 135 }]);
+    expect(result).toEqual([
+      { x: 70, y: 75 },
+      { x: 70, y: 135 },
+    ]);
   });
 });

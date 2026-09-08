@@ -103,11 +103,7 @@ function countColumns(rows: Array<Array<TableCell>>): number {
 }
 
 /** Per-column max content pixel width (before padding), across all rows. */
-function computeContentColWidths(
-  rows: Array<Array<TableCell>>,
-  numCols: number,
-  charWidth: number,
-): number[] {
+function computeContentColWidths(rows: Array<Array<TableCell>>, numCols: number, charWidth: number): number[] {
   const colWidths: number[] = Array.from({ length: numCols }, () => 0);
   for (const row of rows) {
     for (let c = 0; c < row.length; c++) {
@@ -145,7 +141,7 @@ export function measureTable(
   const colWidths = computeContentColWidths(token.rows, numCols, charWidth);
 
   // Add horizontal padding to each column
-  const paddedColWidths = colWidths.map(w => w + CELL_PADDING * 2);
+  const paddedColWidths = colWidths.map((w) => w + CELL_PADDING * 2);
 
   // Total width: sum of column widths + (cols+1) border strokes
   const totalWidth = paddedColWidths.reduce((sum, w) => sum + w, 0) + (numCols + 1) * BORDER_STROKE;
@@ -214,8 +210,8 @@ function renderRow(params: RenderRowParams): string {
         ['text-anchor', 'middle'],
         ['dominant-baseline', 'central'],
       ] as const)}>` +
-      tspan(content) +
-      `</text>`,
+        tspan(content) +
+        `</text>`,
     );
 
     cellX += colW + BORDER_STROKE;

@@ -1,12 +1,5 @@
 import type { GPoint, HookName } from './points.js';
-import {
-  EAST_HOOK,
-  NORTH_BORDER,
-  NORTH_HOOK,
-  SOUTH_BORDER,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from './points.js';
+import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
@@ -25,12 +18,7 @@ export class GtileGroup extends TileComposite {
   readonly bodyOffsetX: number;
   readonly bodyOffsetY: number;
 
-  constructor(
-    title: string,
-    body: Tile,
-    bounder: StringBounder,
-    theme: Theme,
-  ) {
+  constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme) {
     super();
     this.children = [body];
     const titleMeasured = bounder.getDimension(title, theme.fontSize);

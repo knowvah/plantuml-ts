@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
-import {
-  NORTH_HOOK,
-  SOUTH_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -34,10 +31,7 @@ function stubDiamond(width: number, height: number): GtileDiamond {
 const diamond = stubDiamond(60, 40);
 const branch0 = stubTile(80, 60);
 const branch1 = stubTile(80, 60);
-const branches = [
-  { tile: branch0 },
-  { tile: branch1 },
-];
+const branches = [{ tile: branch0 }, { tile: branch1 }];
 
 describe('GtileIf — 2 branches, no merge', () => {
   // branchTotalWidth = 80 + 40 + 80 = 200

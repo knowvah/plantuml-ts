@@ -29,11 +29,7 @@ import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
 import { UStroke } from '../../klimt/UStroke.js';
 import { GUILLEMET_DEFAULT } from '../../text/Guillemet.js';
 import { resolveSvgSpriteAtom } from '../../creole-atoms-image-resolver.js';
-import {
-  upstreamKeyword,
-  mapComponentStyle,
-  resolveActorStyle,
-} from '../../decoration/symbol/usymbol-resolve.js';
+import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from '../../decoration/symbol/usymbol-resolve.js';
 import { type BoxSizingOpts, type Dim, DEFAULT_SIZING_STROKE_THICKNESS } from './leaf-sizing-consts.js';
 
 /** No style flags -- `StringBounder.calculateDimension`'s font param is narrowed to `family`/`size` only. */
@@ -251,11 +247,19 @@ function buildSizingEntityParams(
 /** The margin+icon-only baseline `measureEntityLeaf`'s `MinimumWidth` floor
  *  needs: the SAME symbol at zero content/stereotype/minimumWidth, so its
  *  width is exactly the fixed allowance real content adds on top. */
-function minWidthFloorBaseline(node: LeafSizingSubject, fontSpec: FontSpec, ctx: EntityLeafCtx, bounder: MeasurerStringBounder): number {
+function minWidthFloorBaseline(
+  node: LeafSizingSubject,
+  fontSpec: FontSpec,
+  ctx: EntityLeafCtx,
+  bounder: MeasurerStringBounder,
+): number {
   // `stereotype` omitted, not set to `undefined` (`exactOptionalPropertyTypes`).
   const { stereotype: _dropped, ...rest } = node;
   const baselineNode: LeafSizingSubject = { ...rest, display: '' };
-  const baselineCtx: EntityLeafCtx = { ...ctx, opts: ctx.opts === undefined ? undefined : { ...ctx.opts, minimumWidth: 0 } };
+  const baselineCtx: EntityLeafCtx = {
+    ...ctx,
+    opts: ctx.opts === undefined ? undefined : { ...ctx.opts, minimumWidth: 0 },
+  };
   const params = buildSizingEntityParams(baselineNode, fontSpec, baselineCtx);
   return new EntityImageDescription(params).calculateDimensionSlow(bounder).getWidth();
 }

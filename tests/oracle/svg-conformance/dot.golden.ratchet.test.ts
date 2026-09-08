@@ -38,14 +38,9 @@ interface RatchetManifest {
   fixtures: RatchetFixture[];
 }
 
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-dot',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-dot');
 
-const manifest = JSON.parse(
-  readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8'),
-) as RatchetManifest;
+const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
 function readGolden(f: RatchetFixture): string {
   return readFileSync(join(GOLDENS_ROOT, f.slug, 'golden.svg'), 'utf8');
@@ -66,11 +61,7 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 describe('svg-dot conformance ratchet (AC1)', () => {
   for (const f of manifest.fixtures) {
     it(`dot/${f.slug}: stays zero-diff against the pinned golden`, () => {
-      const { pass, diffs } = compareSvg(
-        renderSync(readSource(f)),
-        readGolden(f),
-        'deterministic',
-      );
+      const { pass, diffs } = compareSvg(renderSync(readSource(f)), readGolden(f), 'deterministic');
       expect(
         pass,
         `dot/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
@@ -98,10 +89,9 @@ describe('svg-dot conformance ratchet — tamper detection (AC2)', () => {
 
     // Confirm the untampered pair really is zero-diff first, so the tampered
     // failure below is attributable to the mutation alone.
-    expect(
-      compareSvg(ours, golden, 'deterministic').pass,
-      `dot/${target.slug}: expected zero-diff baseline`,
-    ).toBe(true);
+    expect(compareSvg(ours, golden, 'deterministic').pass, `dot/${target.slug}: expected zero-diff baseline`).toBe(
+      true,
+    );
 
     // Mutate a numeric attribute in-memory — never touches disk. graphviz
     // writes ellipse centres, so shift one well outside tolerance.

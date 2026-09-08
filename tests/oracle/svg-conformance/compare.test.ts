@@ -177,9 +177,7 @@ describe('compareSvg', () => {
     const reference = `<svg xmlns="http://www.w3.org/2000/svg" width="100"/>`;
     const { pass, diffs } = compareSvg(actual, reference, 'deterministic');
     expect(pass).toBe(false);
-    expect(diffs).toEqual([
-      { path: 'svg/@width', actual: 'auto', expected: '100', tolerance: 0.01 },
-    ]);
+    expect(diffs).toEqual([{ path: 'svg/@width', actual: 'auto', expected: '100', tolerance: 0.01 }]);
   });
 
   test('path `d` with no command letters is compared via the empty-commands fallback', () => {
@@ -199,9 +197,7 @@ describe('compareSvg', () => {
     const reference = `<svg xmlns="http://www.w3.org/2000/svg"><rect fill="red" opacity="0.5"/></svg>`;
     const { pass, diffs } = compareSvg(actual, reference, 'deterministic');
     expect(pass).toBe(false);
-    expect(diffs).toEqual([
-      { path: 'svg/rect[1]/@opacity', actual: '', expected: '0.5', tolerance: 0.01 },
-    ]);
+    expect(diffs).toEqual([{ path: 'svg/rect[1]/@opacity', actual: '', expected: '0.5', tolerance: 0.01 }]);
   });
 
   test('non-numeric attribute mismatch (e.g. fill color) fails exactly', () => {
@@ -434,11 +430,7 @@ describe('compareSvg — short-circuit weights', () => {
   // elements, while this fires on a text NODE aligned against an element.
   // units(text node) = 1, units(rect{x,y}) = 3.
   test('a node-type mismatch is weighted units(actual) + units(expected)', () => {
-    const { diffs } = compareSvg(
-      svg('hello<g/>'),
-      svg('<rect x="1" y="2"/><g/>'),
-      'deterministic',
-    );
+    const { diffs } = compareSvg(svg('hello<g/>'), svg('<rect x="1" y="2"/><g/>'), 'deterministic');
     expect(diffs).toHaveLength(1);
     expect(diffs[0]?.actual).toBe('text');
     expect(diffs[0]?.expected).toBe('element');
@@ -447,22 +439,14 @@ describe('compareSvg — short-circuit weights', () => {
 
   // AC3.
   test('an attribute diff carries no weight and scores 1', () => {
-    const { diffs } = compareSvg(
-      svg('<rect x="1"/>'),
-      svg('<rect x="9"/>'),
-      'deterministic',
-    );
+    const { diffs } = compareSvg(svg('<rect x="1"/>'), svg('<rect x="9"/>'), 'deterministic');
     expect(diffs).toHaveLength(1);
     expect(diffs[0]?.weight).toBeUndefined();
     expect(weightedScore(diffs)).toBe(1);
   });
 
   test('a text diff carries no weight and scores 1', () => {
-    const { diffs } = compareSvg(
-      svg('<text>a</text>'),
-      svg('<text>b</text>'),
-      'deterministic',
-    );
+    const { diffs } = compareSvg(svg('<text>a</text>'), svg('<text>b</text>'), 'deterministic');
     expect(diffs).toHaveLength(1);
     expect(diffs[0]?.weight).toBeUndefined();
     expect(weightedScore(diffs)).toBe(1);
@@ -477,11 +461,7 @@ describe('compareSvg — weighted score is monotone in alignment', () => {
   const tagExpected = svg('<g><text fill="green" stroke="black">hi</text></g>');
 
   test('aligning a mismatched TAG cannot raise the weighted score', () => {
-    const before = compareSvg(
-      svg('<g><rect fill="red" stroke="blue"/></g>'),
-      tagExpected,
-      'deterministic',
-    ).diffs;
+    const before = compareSvg(svg('<g><rect fill="red" stroke="blue"/></g>'), tagExpected, 'deterministic').diffs;
     const after = compareSvg(
       svg('<g><text fill="red" stroke="blue">bye</text></g>'),
       tagExpected,
@@ -498,16 +478,8 @@ describe('compareSvg — weighted score is monotone in alignment', () => {
 
   test('aligning a mismatched CHILD COUNT cannot raise the weighted score', () => {
     const expected = svg('<g><rect x="9"/><line x1="0"/></g>');
-    const before = compareSvg(
-      svg('<g><rect x="1"/></g>'),
-      expected,
-      'deterministic',
-    ).diffs;
-    const after = compareSvg(
-      svg('<g><rect x="1"/><line x1="5"/></g>'),
-      expected,
-      'deterministic',
-    ).diffs;
+    const before = compareSvg(svg('<g><rect x="1"/></g>'), expected, 'deterministic').diffs;
+    const after = compareSvg(svg('<g><rect x="1"/><line x1="5"/></g>'), expected, 'deterministic').diffs;
 
     // `before`: actual=[rect{x=1}] vs expected=[rect{x=9},line{x1=0}] (1v2,
     // takes the childCount branch). `rect` LCS-matches `rect` and recurses
@@ -534,7 +506,6 @@ describe('compareSvg — weighted score is monotone in alignment', () => {
     expect(after).toHaveLength(0);
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // LCS-aligned child-count charging -- svg-comparator-alignment D1.

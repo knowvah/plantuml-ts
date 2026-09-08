@@ -32,10 +32,7 @@
  * that arrowheads follow the clipped path (D3, `SvekEdge.java:679-684`).
  */
 import { describe, it, expect } from 'vitest';
-import {
-  clusterAnchorRectsOf,
-  clipTransitionSpline,
-} from '../../../src/diagrams/state/state-transition-clip.js';
+import { clusterAnchorRectsOf, clipTransitionSpline } from '../../../src/diagrams/state/state-transition-clip.js';
 import { newInkBox, addTransitionInk } from '../../../src/diagrams/state/layout-ink-transition.js';
 import { buildLevelTransitionGeos } from '../../../src/diagrams/state/state-composite-pass.js';
 import { transitionArrowheadInk } from '../../../src/diagrams/state/renderer-arrowhead.js';
@@ -72,7 +69,9 @@ const maxXOf = (pts: readonly { x: number }[]): number => Math.max(...pts.map((p
  *  and the single edge `edge-0` carries {@link SPLINE}. */
 function result(overrides: Partial<DotLayoutResult> = {}): DotLayoutResult {
   return {
-    nodes: [], width: 200, height: 200,
+    nodes: [],
+    width: 200,
+    height: 200,
     edges: [{ id: 'edge-0', points: spline() }],
     clusters: [{ id: 'cluster0', ...A_RECT }],
     ...overrides,
@@ -155,7 +154,9 @@ describe('clipTransitionSpline (SvekEdge.java:671-672)', () => {
  *  `perpendicularOffsetLabel(points)` on (D1'a's whole reason to exist). */
 function accumulator(label?: string): PassAccumulator {
   return {
-    nodes: [], clusters: CLUSTERS_WITH_ANCHOR, edges: [{ id: 'edge-0', from: zaentId('A'), to: 'Y' }],
+    nodes: [],
+    clusters: CLUSTERS_WITH_ANCHOR,
+    edges: [{ id: 'edge-0', from: zaentId('A'), to: 'Y' }],
     edgeSources: [{ t: { from: 'A', to: 'Y', ...(label !== undefined ? { label } : {}) }, edgeId: 'edge-0' }],
   };
 }
@@ -173,12 +174,23 @@ describe('buildLevelTransitionGeos — solve()’s own edge loop (DotStringFacto
     // port's measurer-less fallback IS point-derived, so it must keep seeing
     // the pre-clip list or the clip would move labels.
     const [geo] = buildLevelTransitionGeos(accumulator('go'), result());
-    const unclipped = attachTransitionLabel({ from: 'A', to: 'Y', label: 'go' }, spline(), undefined, undefined, undefined);
+    const unclipped = attachTransitionLabel(
+      { from: 'A', to: 'Y', label: 'go' },
+      spline(),
+      undefined,
+      undefined,
+      undefined,
+    );
     expect(geo!.label).toEqual(unclipped);
     // ...and that is genuinely a different answer from the clipped list, so
     // the assertion above is not vacuous.
     const clippedLabel = attachTransitionLabel(
-      { from: 'A', to: 'Y', label: 'go' }, clipSplineStart(spline(), A_RECT), undefined, undefined, undefined);
+      { from: 'A', to: 'Y', label: 'go' },
+      clipSplineStart(spline(), A_RECT),
+      undefined,
+      undefined,
+      undefined,
+    );
     expect(clippedLabel).not.toEqual(unclipped);
   });
 
@@ -226,8 +238,15 @@ describe('arrowheads derive from the clipped path (D3 — SvekEdge.java:679-684)
 // End to end: the renderer's own points are clipped
 // ---------------------------------------------------------------------------
 
-const st = (id: string, o: Partial<State> = {}): State =>
-  ({ id, display: id, kind: 'normal', children: [], concurrentRegions: [], transitions: [], ...o });
+const st = (id: string, o: Partial<State> = {}): State => ({
+  id,
+  display: id,
+  kind: 'normal',
+  children: [],
+  concurrentRegions: [],
+  transitions: [],
+  ...o,
+});
 
 /** T1's own reachability case: a NON-autarkic composite (`Inner`) classified
  *  `'cluster'`, so `resolveEndpoint` rewrites `P --> Inner` to
@@ -235,7 +254,13 @@ const st = (id: string, o: Partial<State> = {}): State =>
  *  in `Outer`'s own pass. */
 function nestedClusterDiagram(): StateDiagramAST {
   const inner = st('Inner', { children: [st('I1'), st('I2')], transitions: [{ from: 'I1', to: 'I2' }] });
-  const outer = st('Outer', { children: [inner, st('P')], transitions: [{ from: 'I1', to: 'P' }, { from: 'P', to: 'Inner' }] });
+  const outer = st('Outer', {
+    children: [inner, st('P')],
+    transitions: [
+      { from: 'I1', to: 'P' },
+      { from: 'P', to: 'Inner' },
+    ],
+  });
   return { states: [outer], transitions: [] };
 }
 

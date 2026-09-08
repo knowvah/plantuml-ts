@@ -69,8 +69,7 @@ export class TrieImpl implements Trie {
       if (s.length === p) return current.brothers.has(END_OF_WORD) ? result : '';
 
       const child = current.brothers.get(s.charAt(p));
-      if (child === undefined || child.brothers.size === 0)
-        return current.brothers.has(END_OF_WORD) ? result : '';
+      if (child === undefined || child.brothers.size === 0) return current.brothers.has(END_OF_WORD) ? result : '';
 
       result += s.charAt(p);
       current = child;

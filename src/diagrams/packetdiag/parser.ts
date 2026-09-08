@@ -20,8 +20,7 @@ const RE_SCALE_INTERVAL = /^\s*scale_interval\s*=\s*(\d+)\s*;?\s*$/i;
 const RE_SAME_HEIGHT = /^\s*same_height\s*=\s*(true|false)\s*;?\s*$/i;
 
 // Field line: (<start>-<end>|<bit>|*):? <desc> [attrs]
-const RE_FIELD =
-  /^\s*(?:(\d{1,7})-(\d{1,7})|(\d{1,7})|\*):?\s+(.*?)(?:\s*\[(.*?)\])?\s*$/;
+const RE_FIELD = /^\s*(?:(\d{1,7})-(\d{1,7})|(\d{1,7})|\*):?\s+(.*?)(?:\s*\[(.*?)\])?\s*$/;
 
 function parseAttrs(raw: string | undefined): Map<string, string> {
   const m = new Map<string, string>();
@@ -55,7 +54,7 @@ export function parsePacket(source: UmlSource): PacketDiagramAST | ParseRefusal 
   const sprites = createSpriteRegistry();
   const lines = source.lines;
 
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     const t = lines[i]!.trim();
     i++;
     if (t === '') continue;

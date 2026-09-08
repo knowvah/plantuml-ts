@@ -43,9 +43,15 @@ const CODE = '[^\\s{}\x22<>]+';
  */
 const NAME_AND_CODE =
   '(?:' +
-  '\x22([^\x22]*)\x22\\s+as\\s+(' + CODE + ')' +
-  '|(' + CODE + ')\\s+as\\s+\x22([^\x22]*)\x22' +
-  '|(' + CODE + ')' +
+  '\x22([^\x22]*)\x22\\s+as\\s+(' +
+  CODE +
+  ')' +
+  '|(' +
+  CODE +
+  ')\\s+as\\s+\x22([^\x22]*)\x22' +
+  '|(' +
+  CODE +
+  ')' +
   '|\x22([^\x22]+)\x22' +
   ')';
 
@@ -129,7 +135,16 @@ function parseJsonString(c: Cursor): string {
     const ch = c.text[c.pos]!;
     if (ch === '\\') {
       const esc = c.text[c.pos + 1];
-      const map: Record<string, string> = { '"': QUOTE, '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' };
+      const map: Record<string, string> = {
+        '"': QUOTE,
+        '\\': '\\',
+        '/': '/',
+        b: '\b',
+        f: '\f',
+        n: '\n',
+        r: '\r',
+        t: '\t',
+      };
       if (esc !== undefined && esc in map) {
         out += map[esc];
         c.pos += 2;
@@ -173,8 +188,14 @@ function parseJsonObject(c: Cursor): JsonNode {
     skipWs(c);
     entries.push({ key, value: parseJsonValue(c) });
     skipWs(c);
-    if (c.text[c.pos] === ',') { c.pos++; continue; }
-    if (c.text[c.pos] === '}') { c.pos++; break; }
+    if (c.text[c.pos] === ',') {
+      c.pos++;
+      continue;
+    }
+    if (c.text[c.pos] === '}') {
+      c.pos++;
+      break;
+    }
     throw new Error('expected , or }');
   }
   return { kind: 'object', entries };
@@ -192,8 +213,14 @@ function parseJsonArray(c: Cursor): JsonNode {
     skipWs(c);
     items.push(parseJsonValue(c));
     skipWs(c);
-    if (c.text[c.pos] === ',') { c.pos++; continue; }
-    if (c.text[c.pos] === ']') { c.pos++; break; }
+    if (c.text[c.pos] === ',') {
+      c.pos++;
+      continue;
+    }
+    if (c.text[c.pos] === ']') {
+      c.pos++;
+      break;
+    }
     throw new Error('expected , or ]');
   }
   return { kind: 'array', items };
@@ -205,9 +232,18 @@ function parseJsonValue(c: Cursor): JsonNode {
   if (ch === '{') return parseJsonObject(c);
   if (ch === '[') return parseJsonArray(c);
   if (ch === QUOTE) return { kind: 'scalar', value: parseJsonString(c) };
-  if (c.text.startsWith('true', c.pos)) { c.pos += 4; return { kind: 'scalar', value: true }; }
-  if (c.text.startsWith('false', c.pos)) { c.pos += 5; return { kind: 'scalar', value: false }; }
-  if (c.text.startsWith('null', c.pos)) { c.pos += 4; return { kind: 'scalar', value: null }; }
+  if (c.text.startsWith('true', c.pos)) {
+    c.pos += 4;
+    return { kind: 'scalar', value: true };
+  }
+  if (c.text.startsWith('false', c.pos)) {
+    c.pos += 5;
+    return { kind: 'scalar', value: false };
+  }
+  if (c.text.startsWith('null', c.pos)) {
+    c.pos += 4;
+    return { kind: 'scalar', value: null };
+  }
   return { kind: 'scalar', value: parseJsonNumber(c) };
 }
 
@@ -245,10 +281,7 @@ export function parseJsonNode(text: string): JsonNode | null {
  * removes it on failure (`CommandExecutionResult.error("Bad data")`, no
  * `setJson` call) — mirrored by simply leaving `entity.jsonValue` unset.
  */
-export function finalizeJsonBody<E extends { jsonValue?: JsonNode }>(
-  entity: E,
-  rawLines: readonly string[],
-): void {
+export function finalizeJsonBody<E extends { jsonValue?: JsonNode }>(entity: E, rawLines: readonly string[]): void {
   const body = rawLines.join('');
   const wrapped = parseJsonNode('{' + body + '}');
   const value = wrapped ?? parseJsonNode(body);

@@ -67,9 +67,7 @@ function stripUrlSuffix(line: string): { line: string; ownUrl: UrlInfo | undefin
   if (match === null) return { line, ownUrl: undefined };
   const bracket = match[1]!.trim();
   const ownUrl =
-    bracket.startsWith('[[[') && bracket.endsWith(']]]')
-      ? parseUrlBracket(bracket.slice(1, -1))
-      : undefined;
+    bracket.startsWith('[[[') && bracket.endsWith(']]]') ? parseUrlBracket(bracket.slice(1, -1)) : undefined;
   return { line: line.replace(TRAILING_URL_RE, ''), ownUrl };
 }
 
@@ -179,7 +177,13 @@ function tryParseMethod(line: string, base: MemberBase): Omit<Member, 'visibilit
   const name = methodMatch[1]!;
   const rawParams = methodMatch[2]!.trim();
   const returnType = methodMatch[4];
-  const params = rawParams === '' ? [] : rawParams.split(',').map((p) => p.trim()).filter((p) => p !== '');
+  const params =
+    rawParams === ''
+      ? []
+      : rawParams
+          .split(',')
+          .map((p) => p.trim())
+          .filter((p) => p !== '');
   return {
     visibility: base.visibility,
     name,

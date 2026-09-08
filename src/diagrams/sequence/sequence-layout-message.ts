@@ -17,12 +17,7 @@
 
 import type { ActivationEvent, MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
-import {
-  activationLevel,
-  emitActivation,
-  openActivation,
-  pushActivation,
-} from './sequence-layout-events.js';
+import { activationLevel, emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
 import { arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import {
   ARROW_LABEL_HEAD_CLEARANCE,
@@ -46,12 +41,7 @@ export function handleMessageEvent(
   // 204`); `dealWith` is participant1-or-participant2 membership.
   ctx.lastMessageParticipants = [event.from, event.to];
 
-  const endpoints = liveOffsetEndpoints(
-    resolveMessageEndpoints(event, fromGeo, toGeo, ctx),
-    event,
-    ctx,
-    bound,
-  );
+  const endpoints = liveOffsetEndpoints(resolveMessageEndpoints(event, fromGeo, toGeo, ctx), event, ctx, bound);
   // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
   // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
   // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to
@@ -102,10 +92,7 @@ export function handleMessageEvent(
  * `inclination1`/`inclination2` are the `A ->(30) B` slanted forms, which this
  * port does not model; both are 0 for every other message.
  */
-export function messageTileAdvance(
-  blockH: number,
-  isSelf: boolean,
-): { arrowY: number; tileHeight: number } {
+export function messageTileAdvance(blockH: number, isSelf: boolean): { arrowY: number; tileHeight: number } {
   const textHeight = blockH + 2 * ARROW_TEXT_PADDING_Y;
   const arrowY = textHeight + ARROW_PADDING_Y;
   const loop = isSelf ? SELF_ARROW_ONLY_HEIGHT : 0;
@@ -194,8 +181,7 @@ function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
   // the renderer applies upstream's own `start += getArrowDeltaX() / 2` shift
   // for a FULL NORMAL head (`ComponentRoseArrow.java:129-133`) itself.
   const start = Math.min(endpoints.fromX, endpoints.toX);
-  const leftEnd =
-    endpoints.arrowDirection === 'left' ? event.arrow.dressing2 : event.arrow.dressing1;
+  const leftEnd = endpoints.arrowDirection === 'left' ? event.arrow.dressing2 : event.arrow.dressing1;
   const clearance = leftEnd.head === 'NONE' ? 0 : ARROW_LABEL_HEAD_CLEARANCE;
   return start + ARROW_LABEL_PADDING_X1 + clearance;
 }
@@ -208,7 +194,12 @@ function buildMessageGeo(
   ctx: EventProcessingContext,
 ): MessageGeo {
   const block = messageLabelBlock(
-    event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx.theme, ctx.measurer,
+    event.label,
+    numberTextOf(event),
+    labelLeftOf(event, endpoints),
+    y,
+    ctx.theme,
+    ctx.measurer,
   );
   return {
     labelLines: block.lines,
@@ -249,8 +240,7 @@ function liveLevelAt(
 ): number {
   let level = activationLevel(ctx.activationStart, participantId);
   if (event.activates === participantId) level++;
-  for (const life of bound)
-    if (life.kind === 'activate' && life.participantId === participantId) level++;
+  for (const life of bound) if (life.kind === 'activate' && life.participantId === participantId) level++;
   return level;
 }
 
@@ -299,8 +289,7 @@ function liveOffsetEndpoints(
   ctx: EventProcessingContext,
   bound: readonly ActivationEvent[],
 ): MessageEndpoints {
-  if (endpoints.arrowDirection === 'self')
-    return liveOffsetSelf(endpoints, event, ctx, bound);
+  if (endpoints.arrowDirection === 'self') return liveOffsetSelf(endpoints, event, ctx, bound);
   const level1 = liveLevelAt(event.from, event, ctx, bound);
   const level2 = liveLevelAt(event.to, event, ctx, bound);
   let { fromX, toX } = endpoints;
@@ -341,12 +330,8 @@ function levelAfterBoundEvents(
   // `++--`; deactivate-then-activate is taken, which is `--++`, the form the
   // corpus writes. Recorded rather than silently assumed.
   const own: ActivationEvent[] = [
-    ...(event.deactivates === participantId
-      ? [{ kind: 'deactivate' as const, participantId }]
-      : []),
-    ...(event.activates === participantId
-      ? [{ kind: 'activate' as const, participantId }]
-      : []),
+    ...(event.deactivates === participantId ? [{ kind: 'deactivate' as const, participantId }] : []),
+    ...(event.activates === participantId ? [{ kind: 'activate' as const, participantId }] : []),
   ];
 
   let level = activationLevel(ctx.activationStart, participantId);
@@ -416,8 +401,7 @@ function liveOffsetSelf(
   const levelConsidere = levelAfterBoundEvents(event.from, event, ctx, bound);
 
   let base = endpoints.fromX + LIVE_DELTA_SIZE * levelIgnore;
-  if (levelIgnore < levelConsidere)
-    base += LIVE_DELTA_SIZE * (levelConsidere - levelIgnore);
+  if (levelIgnore < levelConsidere) base += LIVE_DELTA_SIZE * (levelConsidere - levelIgnore);
 
   const deltaX1 = (levelIgnore - levelConsidere) * LIVE_DELTA_SIZE;
   const fromX = base + (deltaX1 < 0 ? deltaX1 : 0);
@@ -491,10 +475,7 @@ function applyMessageActivation(
     // activate and deactivate land at the same y), fall back to the
     // post-spacing cursor.y so the bar is always visible.
     const deactStartY = openActivation(ctx.activationStart, event.deactivates)?.y;
-    const deactEndY =
-      deactStartY !== undefined && messageGeo.y <= deactStartY
-        ? cursor.y
-        : messageGeo.y;
+    const deactEndY = deactStartY !== undefined && messageGeo.y <= deactStartY ? cursor.y : messageGeo.y;
     emitActivation(event.deactivates, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   }
 }

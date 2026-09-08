@@ -61,7 +61,7 @@ describe('renderFiles', () => {
     // Both use x attribute on their text element
     const xMatches = [...svg.matchAll(/x="(\d+)"/g)].map((m) => Number(m[1]));
     const shallowX = 0 + 10; // PADDING
-    const deepX = 40 + 10;   // entry.x + PADDING
+    const deepX = 40 + 10; // entry.x + PADDING
     expect(xMatches).toContain(shallowX);
     expect(xMatches).toContain(deepX);
     expect(deepX).toBeGreaterThan(shallowX);
@@ -91,7 +91,9 @@ describe('renderFiles', () => {
   it('AC7: empty geometry renders without throwing and produces valid SVG', () => {
     const geo = makeGeo([]);
     let svg: string;
-    expect(() => { svg = assembleSvg(renderFiles(geo, theme)); }).not.toThrow();
+    expect(() => {
+      svg = assembleSvg(renderFiles(geo, theme));
+    }).not.toThrow();
     expect(svg!).toMatch(/^<svg/);
     expect(svg!).toContain('</svg>');
   });

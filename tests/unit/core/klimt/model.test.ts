@@ -103,9 +103,7 @@ describe('klimt UGraphic model core', () => {
     it('accumulates a background color change independently of stroke', () => {
       const root = new TestUGraphic();
 
-      const withBack = root
-        .apply(new UStroke(0, 0, 2))
-        .apply(new Back('#00ff00'));
+      const withBack = root.apply(new UStroke(0, 0, 2)).apply(new Back('#00ff00'));
 
       const param = withBack.getParam();
       expect(param.getBackcolor()).toBe('#00ff00');
@@ -116,9 +114,7 @@ describe('klimt UGraphic model core', () => {
       const root = new TestUGraphic();
       const withColor = root.apply(new Fore('#123456'));
 
-      const copied = withColor.apply(
-        new CopyForegroundColorToBackgroundColor(),
-      );
+      const copied = withColor.apply(new CopyForegroundColorToBackgroundColor());
 
       expect(copied.getParam().getBackcolor()).toBe('#123456');
       // Foreground is unchanged by the copy.
@@ -154,9 +150,7 @@ describe('klimt UGraphic model core', () => {
     it('reflects accumulated stroke/color state in the param passed to the driver', () => {
       const root = new TestUGraphic();
       const stroke = new UStroke(1, 1, 5);
-      const ready = root
-        .apply(stroke)
-        .apply(new Fore('#abcdef')) as TestUGraphic;
+      const ready = root.apply(stroke).apply(new Fore('#abcdef')) as TestUGraphic;
 
       ready.draw(new TestShape('styled'));
 
@@ -167,9 +161,7 @@ describe('klimt UGraphic model core', () => {
 
     it('throws when no driver is registered for the shape class', () => {
       const root = new TestUGraphic();
-      expect(() => root.draw(new OtherShape())).toThrow(
-        /No driver registered for shape OtherShape/,
-      );
+      expect(() => root.draw(new OtherShape())).toThrow(/No driver registered for shape OtherShape/);
     });
   });
 });

@@ -57,11 +57,7 @@ const FALLBACK_STOPS_PER_EM = 4;
  * `fontSize * 4` when that measures zero (which it always does under the
  * deterministic table, since a space is 0 wide there).
  */
-export function tabStopWidth(
-  measure: (s: string) => number,
-  fontSize: number,
-  tabSize: number | undefined,
-): number {
+export function tabStopWidth(measure: (s: string) => number, fontSize: number, tabSize: number | undefined): number {
   const width = measure(tabString(tabSize));
   return width === 0 ? fontSize * FALLBACK_STOPS_PER_EM : width;
 }
@@ -96,11 +92,7 @@ export function hasTab(text: string): boolean {
  * `AtomText#getWidth` — walk the tokens, advancing to the next stop on a tab
  * and by the measured width otherwise.
  */
-export function tabAwareWidth(
-  text: string,
-  measure: (s: string) => number,
-  tabStop: number,
-): number {
+export function tabAwareWidth(text: string, measure: (s: string) => number, tabStop: number): number {
   let x = 0;
   for (const token of splitOnTabs(text)) {
     x = token.isTab ? x + tabStop - (x % tabStop) : x + measure(token.text);
@@ -119,12 +111,7 @@ export interface TabRun {
  * x, and NOTHING for a tab. A text of only tabs yields an empty array, which
  * is how the jar draws no `<text>` for `json/nujuke`'s `\t` row.
  */
-export function walkTabs(
-  text: string,
-  measure: (s: string) => number,
-  tabStop: number,
-  startDx = 0,
-): TabRun[] {
+export function walkTabs(text: string, measure: (s: string) => number, tabStop: number, startDx = 0): TabRun[] {
   const runs: TabRun[] = [];
   let x = startDx;
   for (const token of splitOnTabs(text)) {

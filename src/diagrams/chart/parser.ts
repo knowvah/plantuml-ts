@@ -19,8 +19,18 @@ import type { StyleMap } from '../../core/skinparam.js';
 import { refuse } from '../../core/parse-refusal.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import {
-  tryArea, tryBar, tryChartAnnotation, tryChartLegend, tryGrid, tryHAxis, tryLine,
-  tryOrientation, tryScatter, tryStackMode, tryV2Axis, tryVAxis,
+  tryArea,
+  tryBar,
+  tryChartAnnotation,
+  tryChartLegend,
+  tryGrid,
+  tryHAxis,
+  tryLine,
+  tryOrientation,
+  tryScatter,
+  tryStackMode,
+  tryV2Axis,
+  tryVAxis,
 } from './line-handlers.js';
 
 /** Uniform shape every dispatch-chain handler is called through: `(ast,
@@ -33,7 +43,14 @@ import {
 type ChartLineHandler = (ast: ChartDiagramAST, line: string, styleMap: StyleMap) => boolean;
 
 const PRIMARY_HANDLERS: readonly ChartLineHandler[] = [
-  tryV2Axis, tryVAxis, tryHAxis, tryGrid, tryBar, tryLine, tryArea, tryScatter,
+  tryV2Axis,
+  tryVAxis,
+  tryHAxis,
+  tryGrid,
+  tryBar,
+  tryLine,
+  tryArea,
+  tryScatter,
   tryChartLegend,
 ];
 
@@ -114,7 +131,7 @@ export function parseChart(source: UmlSource): ChartDiagramAST | ParseRefusal {
   // is no constant offset to add here; chart is single-candidate (T10
   // read-set), so this score never breaks a cross-engine tie regardless.
   let consumed = 0;
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     const line = lines[i]!.trim();
     if (line === '') {
       i++;

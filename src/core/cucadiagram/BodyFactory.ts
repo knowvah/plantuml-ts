@@ -54,7 +54,11 @@ export const BodyFactory = {
    *  `BodierSimple`. The `MAP` rejection upstream keeps lives in
    *  `BodierLikeClassOrObject`'s own constructor (java:74-76 there),
    *  unreachable through this routing — exactly as upstream. */
-  createLeaf(skinParam: ISkinParam, type: LeafType, hideVisibilityModifier: ReadonlySet<VisibilityModifier> | null): Bodier {
+  createLeaf(
+    skinParam: ISkinParam,
+    type: LeafType,
+    hideVisibilityModifier: ReadonlySet<VisibilityModifier> | null,
+  ): Bodier {
     if (isLikeClass(type) || type === LeafType.OBJECT) return new BodierLikeClassOrObject(type, hideVisibilityModifier);
 
     return new BodierSimple(skinParam);
@@ -90,7 +94,9 @@ export const BodyFactory = {
       {
         skinParam: seamSkinParam,
         align,
-        ...(seamStyle.nestedDiagramRenderer !== undefined && { nestedDiagramRenderer: seamStyle.nestedDiagramRenderer }),
+        ...(seamStyle.nestedDiagramRenderer !== undefined && {
+          nestedDiagramRenderer: seamStyle.nestedDiagramRenderer,
+        }),
       },
       entity,
       seamStyle,
@@ -118,7 +124,9 @@ export const BodyFactory = {
       {
         skinParam: seamSkinParam,
         align,
-        ...(seamStyle.nestedDiagramRenderer !== undefined && { nestedDiagramRenderer: seamStyle.nestedDiagramRenderer }),
+        ...(seamStyle.nestedDiagramRenderer !== undefined && {
+          nestedDiagramRenderer: seamStyle.nestedDiagramRenderer,
+        }),
       },
       entity,
       seamStyle,
@@ -131,7 +139,12 @@ export const BodyFactory = {
    *  already-grouped constructor (`skinParam`/`align`/`fc`-as-`titleConfig`/
    *  `lineBreakStrategy` -> {@link BodyEnhanced2Config}, `style` -> {@link
    *  BodyEnhanced2StyleValues}) -- see `BodyEnhanced2.ts`'s doc comment. */
-  create3(rawBody: Display, config: BodyEnhanced2Config, styleValues: BodyEnhanced2StyleValues, atomOps: AtomOps): TextBlock {
+  create3(
+    rawBody: Display,
+    config: BodyEnhanced2Config,
+    styleValues: BodyEnhanced2StyleValues,
+    atomOps: AtomOps,
+  ): TextBlock {
     return new BodyEnhanced2(rawBody, config, styleValues, atomOps);
   },
 };

@@ -35,9 +35,7 @@ export class Monomorph {
 
   setValue(value: string): void {
     if (this._type === 'LIST' || this._type === 'MAP') {
-      throw new Error(
-        `Cannot setValue on a Monomorph of type ${this._type}`,
-      );
+      throw new Error(`Cannot setValue on a Monomorph of type ${this._type}`);
     }
     this._value = value;
     this._list = null;
@@ -50,9 +48,7 @@ export class Monomorph {
       this._list = [];
       this._type = 'LIST';
     } else if (this._type !== 'LIST') {
-      throw new Error(
-        `Cannot addInList on a Monomorph of type ${this._type}`,
-      );
+      throw new Error(`Cannot addInList on a Monomorph of type ${this._type}`);
     }
     this._list!.push(el);
   }
@@ -62,9 +58,7 @@ export class Monomorph {
       this._map = new Map<string, Monomorph>();
       this._type = 'MAP';
     } else if (this._type !== 'MAP') {
-      throw new Error(
-        `Cannot putInMap on a Monomorph of type ${this._type}`,
-      );
+      throw new Error(`Cannot putInMap on a Monomorph of type ${this._type}`);
     }
     this._map!.set(key, val);
   }

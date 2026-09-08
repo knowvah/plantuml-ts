@@ -48,7 +48,8 @@ export class SheetBlock2 implements TextBlock, Atom, WithPorts {
   enlargeMe(delta1: number, delta2: number): SheetBlock2 {
     const stencil = this.stencil;
     const newStencil: Stencil = {
-      getStartingX: (stringBounder: StringBounder, y: number): number => stencil.getStartingX(stringBounder, y) - delta1,
+      getStartingX: (stringBounder: StringBounder, y: number): number =>
+        stencil.getStartingX(stringBounder, y) - delta1,
       getEndingX: (stringBounder: StringBounder, y: number): number => stencil.getEndingX(stringBounder, y) + delta2,
     };
     return new SheetBlock2(this.block, newStencil, this.defaultStroke);

@@ -127,7 +127,11 @@ function closeDiamondPoints(markup: string): string {
   const m = /points="([^"]*)"/.exec(markup);
   if (m === null) return markup;
   const pts = m[1]!;
-  const first = pts.trim().split(/[\s,]+/).slice(0, 2).join(',');
+  const first = pts
+    .trim()
+    .split(/[\s,]+/)
+    .slice(0, 2)
+    .join(',');
   return markup.replace(`points="${pts}"`, `points="${pts} ${first}"`);
 }
 

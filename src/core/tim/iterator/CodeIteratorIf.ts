@@ -19,14 +19,7 @@ import type { TContext } from '../TFunction.js';
 import { AbstractCodeIterator } from './AbstractCodeIterator.js';
 import type { CodeIterator } from './CodeIterator.js';
 
-const CONDITIONAL_DIRECTIVES: ReadonlySet<TLineType> = new Set([
-  'IF',
-  'IFDEF',
-  'IFNDEF',
-  'ELSE',
-  'ELSEIF',
-  'ENDIF',
-]);
+const CONDITIONAL_DIRECTIVES: ReadonlySet<TLineType> = new Set(['IF', 'IFDEF', 'IFNDEF', 'ELSE', 'ELSEIF', 'ENDIF']);
 
 /**
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/iterator/CodeIteratorIf.java
@@ -174,8 +167,7 @@ export class CodeIteratorIf extends AbstractCodeIterator {
    */
   private getRequiredIfContext(s: StringLocated, directive: string): ExecutionContextIf {
     const poll = this.memory.peekIf();
-    if (poll === undefined)
-      throw new EaterException(`No if related to this ${directive}`, s);
+    if (poll === undefined) throw new EaterException(`No if related to this ${directive}`, s);
 
     return poll;
   }

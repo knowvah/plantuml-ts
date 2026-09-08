@@ -119,7 +119,10 @@ export function computeContainerBbox(directChildren: DescriptionNodeGeo[]): Bbox
   if (directChildren.length === 0) {
     return { x: 0, y: 0, width: EMPTY_CONTAINER_WIDTH, height: EMPTY_CONTAINER_HEIGHT };
   }
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
   for (const c of directChildren) {
     if (c.x < minX) minX = c.x;
     if (c.y < minY) minY = c.y;
@@ -129,8 +132,8 @@ export function computeContainerBbox(directChildren: DescriptionNodeGeo[]): Bbox
   return {
     x: minX - CONTAINER_PADDING,
     y: minY - CONTAINER_TOP_PAD,
-    width: (maxX - minX) + 2 * CONTAINER_PADDING,
-    height: (maxY - minY) + CONTAINER_TOP_PAD + CONTAINER_PADDING,
+    width: maxX - minX + 2 * CONTAINER_PADDING,
+    height: maxY - minY + CONTAINER_TOP_PAD + CONTAINER_PADDING,
   };
 }
 
@@ -168,9 +171,7 @@ export function insideBbox(p: { x: number; y: number }, b: Bbox): boolean {
 // Node-geo index (flat id → geo, including descendants)
 // ---------------------------------------------------------------------------
 
-export function buildNodeGeoIndex(
-  geos: readonly DescriptionNodeGeo[],
-): Map<string, DescriptionNodeGeo> {
+export function buildNodeGeoIndex(geos: readonly DescriptionNodeGeo[]): Map<string, DescriptionNodeGeo> {
   const map = new Map<string, DescriptionNodeGeo>();
   function index(list: readonly DescriptionNodeGeo[]): void {
     for (const g of list) {
@@ -227,8 +228,7 @@ export function degenerateSingleLeaf(
   // Emoji artwork rides into the sizer on `BoxSizingOpts` so the ellipse fit
   // draws the real glyph — the RENDERER resolves the same store off the same
   // registry (`renderer-entity.ts`), keeping the two in lock-step.
-  const sizingOpts =
-    emojiArtwork === undefined ? boxOpts : { ...(boxOpts ?? {}), emojiArtwork };
+  const sizingOpts = emojiArtwork === undefined ? boxOpts : { ...(boxOpts ?? {}), emojiArtwork };
   const dims = measureLeafNode(visibleNode, fontSpec, measurer, sizingOpts, sprites);
   const geo: DescriptionNodeGeo = {
     id: node.id,

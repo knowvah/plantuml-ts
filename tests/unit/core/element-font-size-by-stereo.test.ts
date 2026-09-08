@@ -103,9 +103,7 @@ describe('preprocessor — nested `<<label>> {` scope inside a selector block', 
   });
 
   it('closes only the stereotype scope on the inner `}` — entries after it stay outer', () => {
-    const { skinparam } = preprocess(
-      'skinparam object {\n  <<foo>> {\n    FontSize 8\n  }\n  FontSize 16\n}',
-    );
+    const { skinparam } = preprocess('skinparam object {\n  <<foo>> {\n    FontSize 8\n  }\n  FontSize 16\n}');
     expect(skinparam.get('objectfontsize<<foo>>')).toBe('8');
     expect(skinparam.get('objectfontsize')).toBe('16');
   });
@@ -113,10 +111,7 @@ describe('preprocessor — nested `<<label>> {` scope inside a selector block', 
 
 describe('skinparam front-end — <sname>FontSize<<label>>', () => {
   it('routes the flat key to the element bucket’s fontSizeByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['objectfontsize<<x>>', '20']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['objectfontsize<<x>>', '20']]), defaultTheme);
     expect(theme.colors.elements?.['object']).toEqual({ fontSizeByStereo: { x: 20 } });
     expect(unknown).toEqual([]);
   });
@@ -142,10 +137,7 @@ describe('skinparam front-end — <sname>FontSize<<label>>', () => {
     // `^(\w+)fontsize<<(.+)>>$` matches `statefontsize<<foo>>` with
     // `sname=state`, and `state` IS in ELEMENT_BUCKET_SNAMES — so this matcher
     // has to run after the whole STEREO_KEY_MATCHERS table, not before it.
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statefontsize<<foo>>', '30']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statefontsize<<foo>>', '30']]), defaultTheme);
     expect(theme.colors.graph.stateFontSizeByStereo).toEqual({ foo: 30 });
     expect(theme.colors.elements?.['state']).toBeUndefined();
     expect(unknown).toEqual([]);

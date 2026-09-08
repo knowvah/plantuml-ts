@@ -62,6 +62,8 @@ export function splitMemberDisplayLines(s: string): readonly string[] {
  *  pre-existing single-row convention of storing the member's own display
  *  text there). */
 export function atomsToPlainText(atoms: readonly MemberRenderAtom[]): string {
-  return atoms.filter((a): a is Extract<MemberRenderAtom, { kind: 'text' }> => a.kind === 'text')
-    .map((a) => a.text).join('');
+  return atoms
+    .filter((a): a is Extract<MemberRenderAtom, { kind: 'text' }> => a.kind === 'text')
+    .map((a) => a.text)
+    .join('');
 }

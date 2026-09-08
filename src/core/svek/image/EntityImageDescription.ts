@@ -334,13 +334,7 @@ export class EntityImageDescription {
       params.paint.titleAlignment,
       params.atomImageResolverFor?.(params.paint.fontTitle),
     );
-    this.desc = buildDesc(
-      this.symbol,
-      params.labels,
-      params.paint,
-      params.atomImageResolverFor,
-      params.emojiArtwork,
-    );
+    this.desc = buildDesc(this.symbol, params.labels, params.paint, params.atomImageResolverFor, params.emojiArtwork);
     this.stereo = buildStereo(
       params.labels.stereotypeLabels,
       params.paint.fontStereo,
@@ -416,7 +410,9 @@ export class EntityImageDescription {
 
   private drawHexagon(ug: UGraphic): void {
     if (this.hexagonPolygon === undefined) {
-      throw new Error('EntityImageDescription.drawHexagon: no hexagon geometry supplied (upstream: bibliotekon == null)');
+      throw new Error(
+        'EntityImageDescription.drawHexagon: no hexagon geometry supplied (upstream: bibliotekon == null)',
+      );
     }
     if (this.hexagonPolygon === null) return;
     this.hexagonPolygon.setDeltaShadow(this.ctx.getDeltaShadow());
@@ -429,7 +425,12 @@ export class EntityImageDescription {
   private drawHiddenTextOverlay(ug: UGraphic): void {
     const HIDE_TEXT_SPACE = 8;
     const stringBounder = ug.getStringBounder();
-    const { posx1, posx2, dimSmall, dimDesc, dimStereo } = hideTextOffsets(this.asSmall, this.desc, this.stereo, stringBounder);
+    const { posx1, posx2, dimSmall, dimDesc, dimStereo } = hideTextOffsets(
+      this.asSmall,
+      this.desc,
+      this.stereo,
+      stringBounder,
+    );
 
     const dimSmallHeight = dimSmall.getHeight();
     let ugDesc = ug.apply(new UTranslate(posx1, HIDE_TEXT_SPACE + dimSmallHeight));

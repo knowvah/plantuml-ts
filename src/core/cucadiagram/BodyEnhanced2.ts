@@ -208,7 +208,10 @@ export class BodyEnhanced2 extends BodyEnhancedAbstract {
   private getTitle(s: string): TextBlock | undefined {
     if (s.length <= 4) return undefined;
     const inner = trin(s.slice(2, s.length - 2));
-    return Display.getWithNewlines(this.skinParam.getPragma(), inner).create(this.renderContext(), HorizontalAlignment.LEFT);
+    return Display.getWithNewlines(this.skinParam.getPragma(), inner).create(
+      this.renderContext(),
+      HorizontalAlignment.LEFT,
+    );
   }
 
   private renderContext(): CreoleRenderContext {

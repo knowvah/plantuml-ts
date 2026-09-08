@@ -26,11 +26,7 @@ import { renderSync } from '../../src/index.js';
 import { WidthTableMeasurer } from '../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-} from './svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural } from './svek-dot.js';
 import {
   assertBacklogFailures,
   expectedBacklogFailures,
@@ -39,10 +35,7 @@ import {
   type BacklogFile,
 } from './dot-parity-backlogs.js';
 
-const GOLDENS = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../oracle/goldens/object',
-);
+const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens/object');
 
 /** Both of object's structural backlogs are now closed and their files
  *  deleted: `port-backlog.json` by SI20's T3 once `rozuxo-44-fudi093` reached

@@ -26,10 +26,7 @@ import {
   exoArrowLeftCommand,
   exoArrowRightCommand,
 } from '../../../src/diagrams/sequence/command-exo-arrow.js';
-import {
-  makeDefaultAST,
-  type ParseState,
-} from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -125,10 +122,7 @@ describe('getMessageExoType', () => {
       for (const border of ['[', ']']) {
         const state = freshState();
         expect(() =>
-          command.execute(
-            state,
-            fabricatedMatch({ PARTICIPANT: 'Bob', ARROW_SUPPCIRCLE2: border }),
-          ),
+          command.execute(state, fabricatedMatch({ PARTICIPANT: 'Bob', ARROW_SUPPCIRCLE2: border })),
         ).not.toThrow();
         expect(state.ast.events).toEqual([]);
         expect(state.ast.participants).toEqual([]);
@@ -351,9 +345,6 @@ describe('dispatch', () => {
   it('mixes with ordinary messages in source order', () => {
     const all = events('Alice -> Bob : hi', '[-> Bob : from the left', 'Bob ->] : and out');
     expect(all.map((e) => e.kind)).toEqual(['message', 'messageExo', 'messageExo']);
-    expect(parsed('Alice -> Bob : hi', '[-> Bob').participants.map((p) => p.id)).toEqual([
-      'Alice',
-      'Bob',
-    ]);
+    expect(parsed('Alice -> Bob : hi', '[-> Bob').participants.map((p) => p.id)).toEqual(['Alice', 'Bob']);
   });
 });

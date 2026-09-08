@@ -140,7 +140,9 @@ describe('USymbolRectangle', () => {
     const symbol = new USymbolRectangle('rectangle');
     const label = spyLabel();
     const root = newRoot();
-    symbol.asSmall(EMPTY_STEREOTYPE, label.tb, EMPTY_STEREOTYPE, defaultContext(), HorizontalAlignment.CENTER).drawU(root.apply(ORIGIN));
+    symbol
+      .asSmall(EMPTY_STEREOTYPE, label.tb, EMPTY_STEREOTYPE, defaultContext(), HorizontalAlignment.CENTER)
+      .drawU(root.apply(ORIGIN));
     const { pass, diffs } = compareSvg(root.getSvgString(), GOLDEN, 'deterministic');
     expect(pass, JSON.stringify(diffs[0])).toBe(true);
   });
@@ -468,7 +470,15 @@ describe('asBig — USymbolRectangle', () => {
     const stereo = spyBlock(20, 8);
     const root = newRoot();
     new USymbolRectangle('rectangle')
-      .asBig(spyBlock(30, 12).tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.RIGHT)
+      .asBig(
+        spyBlock(30, 12).tb,
+        HorizontalAlignment.CENTER,
+        stereo.tb,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.RIGHT,
+      )
       .drawU(root.apply(ORIGIN));
     expect(stereo.translate()?.getDx()).toBe(7 + 100 - 20 - 5);
     expect(stereo.translate()?.getDy()).toBe(7 + 5);
@@ -478,7 +488,15 @@ describe('asBig — USymbolRectangle', () => {
     const title = spyBlock(30, 12);
     const root = newRoot();
     new USymbolRectangle('rectangle')
-      .asBig(title.tb, HorizontalAlignment.LEFT, EMPTY_STEREOTYPE, 100, 50, defaultContext(), HorizontalAlignment.CENTER)
+      .asBig(
+        title.tb,
+        HorizontalAlignment.LEFT,
+        EMPTY_STEREOTYPE,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     expect(title.translate()?.getDx()).toBe(7 + 3);
   });
@@ -487,7 +505,15 @@ describe('asBig — USymbolRectangle', () => {
     const title = spyBlock(30, 12);
     const root = newRoot();
     new USymbolRectangle('rectangle')
-      .asBig(title.tb, HorizontalAlignment.RIGHT, EMPTY_STEREOTYPE, 100, 50, defaultContext(), HorizontalAlignment.CENTER)
+      .asBig(
+        title.tb,
+        HorizontalAlignment.RIGHT,
+        EMPTY_STEREOTYPE,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     expect(title.translate()?.getDx()).toBe(7 + 100 - 30 - 3);
   });
@@ -496,7 +522,15 @@ describe('asBig — USymbolRectangle', () => {
     const diagonalContext = new SymbolContext('#F1F1F1', '#181818', UStroke.withThickness(0.5), 0, 0, 10);
     const root = newRoot();
     new USymbolRectangle('rectangle')
-      .asBig(spyBlock(30, 12).tb, HorizontalAlignment.CENTER, EMPTY_STEREOTYPE, 100, 50, diagonalContext, HorizontalAlignment.CENTER)
+      .asBig(
+        spyBlock(30, 12).tb,
+        HorizontalAlignment.CENTER,
+        EMPTY_STEREOTYPE,
+        100,
+        50,
+        diagonalContext,
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     expect(root.getSvgString()).toContain('<path');
     expect(root.getSvgString()).not.toContain('<rect');
@@ -508,7 +542,15 @@ describe('asBig — USymbolCard', () => {
     const title = spyBlock(30, 12);
     const stereo = spyBlock(20, 8);
     const root = newRoot();
-    const tb = new USymbolCard().asBig(title.tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER);
+    const tb = new USymbolCard().asBig(
+      title.tb,
+      HorizontalAlignment.CENTER,
+      stereo.tb,
+      100,
+      50,
+      defaultContext(),
+      HorizontalAlignment.CENTER,
+    );
     tb.drawU(root.apply(ORIGIN));
     const dim = tb.calculateDimension(STUB_STRING_BOUNDER as never);
     expect(dim.getWidth()).toBe(100);
@@ -528,7 +570,15 @@ describe('asBig — USymbolAction', () => {
     const title = spyBlock(30, 12);
     const stereo = spyBlock(20, 8);
     const root = newRoot();
-    const tb = new USymbolAction('action').asBig(title.tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER);
+    const tb = new USymbolAction('action').asBig(
+      title.tb,
+      HorizontalAlignment.CENTER,
+      stereo.tb,
+      100,
+      50,
+      defaultContext(),
+      HorizontalAlignment.CENTER,
+    );
     tb.drawU(root.apply(ORIGIN));
     const dim = tb.calculateDimension(STUB_STRING_BOUNDER as never);
     expect(dim.getWidth()).toBe(100);
@@ -544,7 +594,15 @@ describe('asBig — USymbolAction', () => {
     const stereo = spyBlock(20, 8);
     const root = newRoot();
     new USymbolAction('action')
-      .asBig(EMPTY_STEREOTYPE, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER)
+      .asBig(
+        EMPTY_STEREOTYPE,
+        HorizontalAlignment.CENTER,
+        stereo.tb,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     expect(stereo.translate()?.getDy()).toBe(7 + 2 + 10);
   });
@@ -555,7 +613,15 @@ describe('asBig — USymbolLabel', () => {
     const title = spyBlock(30, 12);
     const stereo = spyBlock(20, 8);
     const root = newRoot();
-    const tb = new USymbolLabel().asBig(title.tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER);
+    const tb = new USymbolLabel().asBig(
+      title.tb,
+      HorizontalAlignment.CENTER,
+      stereo.tb,
+      100,
+      50,
+      defaultContext(),
+      HorizontalAlignment.CENTER,
+    );
     tb.drawU(root.apply(ORIGIN));
     const dim = tb.calculateDimension(STUB_STRING_BOUNDER as never);
     expect(dim.getWidth()).toBe(100);
@@ -582,7 +648,15 @@ describe('asBig — USymbolLabel', () => {
     const title = spyBlock(30, 12);
     const root = newRoot();
     new USymbolLabel()
-      .asBig(title.tb, HorizontalAlignment.LEFT, EMPTY_STEREOTYPE, 100, 50, defaultContext(), HorizontalAlignment.CENTER)
+      .asBig(
+        title.tb,
+        HorizontalAlignment.LEFT,
+        EMPTY_STEREOTYPE,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     expect(title.translate()?.getDx()).toBe(7 + 3);
   });
@@ -593,7 +667,15 @@ describe('asBig — USymbolCollections', () => {
     const title = spyBlock(30, 12);
     const stereo = spyBlock(20, 8);
     const root = newRoot();
-    const tb = new USymbolCollections().asBig(title.tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER);
+    const tb = new USymbolCollections().asBig(
+      title.tb,
+      HorizontalAlignment.CENTER,
+      stereo.tb,
+      100,
+      50,
+      defaultContext(),
+      HorizontalAlignment.CENTER,
+    );
     tb.drawU(root.apply(ORIGIN));
     const dim = tb.calculateDimension(STUB_STRING_BOUNDER as never);
     expect(dim.getWidth()).toBe(100);
@@ -608,7 +690,15 @@ describe('asBig — USymbolCollections', () => {
     const stereo = spyBlock(20, 8);
     const root = newRoot();
     new USymbolCollections()
-      .asBig(spyBlock(30, 12).tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.RIGHT)
+      .asBig(
+        spyBlock(30, 12).tb,
+        HorizontalAlignment.CENTER,
+        stereo.tb,
+        100,
+        50,
+        defaultContext(),
+        HorizontalAlignment.RIGHT,
+      )
       .drawU(root.apply(ORIGIN));
     expect(stereo.translate()?.getDx()).toBe(7 + 100 - 20 - 5);
   });
@@ -619,7 +709,15 @@ describe('asBig — USymbolStack', () => {
     const title = spyBlock(30, 12);
     const stereo = spyBlock(20, 8);
     const root = newRoot();
-    const tb = new USymbolStack().asBig(title.tb, HorizontalAlignment.CENTER, stereo.tb, 100, 50, defaultContext(), HorizontalAlignment.CENTER);
+    const tb = new USymbolStack().asBig(
+      title.tb,
+      HorizontalAlignment.CENTER,
+      stereo.tb,
+      100,
+      50,
+      defaultContext(),
+      HorizontalAlignment.CENTER,
+    );
     tb.drawU(root.apply(ORIGIN));
     const dim = tb.calculateDimension(STUB_STRING_BOUNDER as never);
     expect(dim.getWidth()).toBe(100);
@@ -634,7 +732,15 @@ describe('asBig — USymbolStack', () => {
     const squareContext = new SymbolContext('#F1F1F1', '#181818', UStroke.withThickness(0.5), 0, 0, 0);
     const root = newRoot();
     new USymbolStack()
-      .asBig(spyBlock(30, 12).tb, HorizontalAlignment.CENTER, EMPTY_STEREOTYPE, 100, 50, squareContext, HorizontalAlignment.CENTER)
+      .asBig(
+        spyBlock(30, 12).tb,
+        HorizontalAlignment.CENTER,
+        EMPTY_STEREOTYPE,
+        100,
+        50,
+        squareContext,
+        HorizontalAlignment.CENTER,
+      )
       .drawU(root.apply(ORIGIN));
     const svg = root.getSvgString();
     expect(svg).toContain('<path');

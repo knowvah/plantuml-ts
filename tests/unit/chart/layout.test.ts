@@ -64,11 +64,7 @@ const MEASURER = new FixedMeasurer(8, 12);
 // Default axis helpers
 // ---------------------------------------------------------------------------
 
-function numericAxis(
-  min: number,
-  max: number,
-  gridMode: 'off' | 'major' = 'off',
-): ChartAxisDef {
+function numericAxis(min: number, max: number, gridMode: 'off' | 'major' = 'off'): ChartAxisDef {
   return {
     title: '',
     min,
@@ -644,9 +640,7 @@ describe('annotation geometry', () => {
     const ast = makeAST({
       hAxis: categoricalAxis(['A', 'B']),
       vAxis: numericAxis(0, 100),
-      annotations: [
-        { text: 'note', xPos: 'A', yPos: 50, hasArrow: true },
-      ],
+      annotations: [{ text: 'note', xPos: 'A', yPos: 50, hasArrow: true }],
     });
     const geo = layoutChart(ast, TEST_THEME, MEASURER);
     const ann = geo.annotations[0]!;
@@ -947,9 +941,7 @@ describe('annotation with numeric xPos', () => {
     const ast = makeAST({
       hAxis: numericAxis(0, 10),
       vAxis: numericAxis(0, 100),
-      annotations: [
-        { text: 'mid', xPos: 5, yPos: 50, hasArrow: true },
-      ],
+      annotations: [{ text: 'mid', xPos: 5, yPos: 50, hasArrow: true }],
     });
 
     const geo = layoutChart(ast, TEST_THEME, MEASURER);
@@ -1022,7 +1014,7 @@ describe('stacked area with unequal series lengths', () => {
         {
           name: 'Short',
           type: 'area',
-          values: [10, 20],  // only 2 values
+          values: [10, 20], // only 2 values
           xValues: null,
           color: null,
           useSecondaryAxis: false,
@@ -1033,7 +1025,7 @@ describe('stacked area with unequal series lengths', () => {
         {
           name: 'Long',
           type: 'area',
-          values: [30, 40, 50],  // 3 values — triggers the extra-values branch
+          values: [30, 40, 50], // 3 values — triggers the extra-values branch
           xValues: null,
           color: null,
           useSecondaryAxis: false,

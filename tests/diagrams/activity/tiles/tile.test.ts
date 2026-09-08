@@ -21,11 +21,16 @@ class FixedLeaf extends TileLeaf {
 
   override getCoord(hook: HookName): GPoint {
     switch (hook) {
-      case NORTH_HOOK:   return gpoint(this.width / 2, 0);
-      case SOUTH_HOOK:   return gpoint(this.width / 2, this.height);
-      case EAST_HOOK:    return gpoint(this.width, this.height / 2);
-      case WEST_HOOK:    return gpoint(0, this.height / 2);
-      default:           return gpoint(this.width / 2, this.height / 2);
+      case NORTH_HOOK:
+        return gpoint(this.width / 2, 0);
+      case SOUTH_HOOK:
+        return gpoint(this.width / 2, this.height);
+      case EAST_HOOK:
+        return gpoint(this.width, this.height / 2);
+      case WEST_HOOK:
+        return gpoint(0, this.height / 2);
+      default:
+        return gpoint(this.width / 2, this.height / 2);
     }
   }
 }
@@ -44,7 +49,7 @@ class SimpleTwoChildComposite extends TileComposite {
   }
 
   override get width(): number {
-    return Math.max(...this.children.map(c => c.width));
+    return Math.max(...this.children.map((c) => c.width));
   }
 
   override get height(): number {
@@ -53,9 +58,12 @@ class SimpleTwoChildComposite extends TileComposite {
 
   override getCoord(hook: HookName): GPoint {
     switch (hook) {
-      case NORTH_HOOK: return gpoint(this.width / 2, 0);
-      case SOUTH_HOOK: return gpoint(this.width / 2, this.height);
-      default:         return gpoint(this.width / 2, this.height / 2);
+      case NORTH_HOOK:
+        return gpoint(this.width / 2, 0);
+      case SOUTH_HOOK:
+        return gpoint(this.width / 2, this.height);
+      default:
+        return gpoint(this.width / 2, this.height / 2);
     }
   }
 }
@@ -94,8 +102,8 @@ describe('TileLeaf — FixedLeaf (100×50)', () => {
 // ---------------------------------------------------------------------------
 
 describe('TileComposite — SimpleTwoChildComposite', () => {
-  const leafA = new FixedLeaf();                            // 100×50
-  const leafB = new FixedLeaf();                            // 100×50
+  const leafA = new FixedLeaf(); // 100×50
+  const leafB = new FixedLeaf(); // 100×50
   const composite = new SimpleTwoChildComposite(leafA, leafB);
 
   it('exposes children array containing both tiles', () => {

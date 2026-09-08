@@ -12,14 +12,7 @@
  * @see net/sourceforge/plantuml/style/SName.java
  */
 export type SName =
-  | 'root'
-  | 'element'
-  | 'visibilityIcon'
-  | 'IEMandatory'
-  | 'public_'
-  | 'private_'
-  | 'protected_'
-  | 'package_';
+  'root' | 'element' | 'visibilityIcon' | 'IEMandatory' | 'public_' | 'private_' | 'protected_' | 'package_';
 
 /**
  * StyleSignatureBasic — minimal consumed interface for the unported

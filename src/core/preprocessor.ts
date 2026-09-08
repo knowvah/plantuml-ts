@@ -236,8 +236,7 @@ class StyleAndSkinparamCollector {
 
     if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed, substitute);
 
-    if (this.skinparamStack.length > 0)
-      return this.collectSkinparamBlockEntry(trimmed, substitute);
+    if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed, substitute);
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
@@ -252,11 +251,7 @@ class StyleAndSkinparamCollector {
     return this.openSkinparam(trimmed, substitute);
   }
 
-  private collectStyleLine(
-    raw: string,
-    trimmed: string,
-    substitute: (text: string) => string,
-  ): boolean {
+  private collectStyleLine(raw: string, trimmed: string, substitute: (text: string) => string): boolean {
     if (RE_STYLE_CLOSE.test(trimmed)) {
       this.styles.push(this.styleBuffer.join('\n'));
       this.styleBuffer.length = 0;
@@ -360,9 +355,7 @@ class StyleAndSkinparamCollector {
  * `BodierLikeClassOrObject.java:114-172`). Dropping them here silently
  * deleted note/body lines before any parser ran (vivifa-42-mire839).
  */
-function flatten(
-  resultList: readonly StringLocated[],
-): { lines: string[]; positions: (number | undefined)[] } {
+function flatten(resultList: readonly StringLocated[]): { lines: string[]; positions: (number | undefined)[] } {
   const lines: string[] = [];
   const positions: (number | undefined)[] = [];
   for (const located of resultList) {
@@ -516,10 +509,7 @@ export function preprocessLinesOrError(
 }
 
 /** @see ~/git/plantuml/.../tim/TimLoader.java#changeLastLine */
-function markLastLine(
-  debug: readonly StringLocated[],
-  message: string,
-): readonly StringLocated[] {
+function markLastLine(debug: readonly StringLocated[], message: string): readonly StringLocated[] {
   const num = debug.length - 1;
   if (num < 0) return debug;
 

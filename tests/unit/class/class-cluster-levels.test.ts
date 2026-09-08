@@ -26,10 +26,7 @@ import type { ClassDiagramAST, Namespace } from '../../../src/diagrams/class/ast
 import { clusterWrapperLevel } from '../../../src/diagrams/class/class-cluster-levels.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 
-const DOT_CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache',
-);
+const DOT_CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache');
 
 interface Fixture {
   engine: 'class' | 'object';
@@ -63,7 +60,9 @@ function loadFixtures(engine: 'class' | 'object'): Fixture[] {
     let goldenType = '';
     try {
       goldenType = /data-diagram-type="([^"]*)"/.exec(readFileSync(join(root, slug, 'in.svg'), 'utf8'))?.[1] ?? '';
-    } catch { continue; }
+    } catch {
+      continue;
+    }
     // Both families stamp CLASS -- `ObjectDiagram extends ClassDiagram`
     // upstream, so an object golden carries `data-diagram-type="CLASS"` too.
     // The filter exists to drop fixtures the jar rendered as a DIFFERENT

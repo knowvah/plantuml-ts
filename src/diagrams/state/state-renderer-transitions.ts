@@ -14,7 +14,12 @@ import { INITIAL_ID, FINAL_ID } from './state-dot-graph.js';
 import {} from './renderer-uid.js';
 import type { StateUidPlan } from './renderer-uid.js';
 import { wrapLink } from './renderer-group.js';
-import { buildTransitionArrowhead, applyHeadTrim, buildCircleEndMarkup, buildCrossStartMarkup } from './renderer-arrowhead.js';
+import {
+  buildTransitionArrowhead,
+  applyHeadTrim,
+  buildCircleEndMarkup,
+  buildCrossStartMarkup,
+} from './renderer-arrowhead.js';
 import {} from './renderer-pseudostate.js';
 import {} from './renderer-box.js';
 import { resolveStateArrowLineColor, resolveStateArrowHeadColor } from './state-render-colors.js';
@@ -72,10 +77,7 @@ export function buildPathD(points: ReadonlyArray<{ x: number; y: number }>): str
  *  (owner-level, unqualified already), `*start*toutou9-to-leo` (nested
  *  composite, unqualified already), `*start*CONC1-to-toutou9` (region,
  *  qualified `s7_2::CONC1` stripped to `CONC1`). */
-function svgEndpointId(
-  nodeId: string,
-  concurrentGlobalIds: ReadonlyMap<string, number>,
-): string {
+function svgEndpointId(nodeId: string, concurrentGlobalIds: ReadonlyMap<string, number>): string {
   if (nodeId === INITIAL_ID) return '*start*';
   if (nodeId === FINAL_ID) return '*end*';
   const scopedInit = /^__init_(.*)$/.exec(nodeId);
@@ -205,12 +207,10 @@ function buildTransitionInnerMarkup(
   });
 
   const decorBackground = resolveColorToSvgHex(theme.colors.background);
-  const circleEndEl = transition.circleEnd === true
-    ? buildCircleEndMarkup(transition, arrowHeadColor, decorBackground)
-    : '';
-  const crossStartEl = transition.crossStart === true
-    ? buildCrossStartMarkup(transition, arrowHeadColor, decorBackground)
-    : '';
+  const circleEndEl =
+    transition.circleEnd === true ? buildCircleEndMarkup(transition, arrowHeadColor, decorBackground) : '';
+  const crossStartEl =
+    transition.crossStart === true ? buildCrossStartMarkup(transition, arrowHeadColor, decorBackground) : '';
 
   const labelEl = buildTransitionLabelMarkup(transition, theme);
 

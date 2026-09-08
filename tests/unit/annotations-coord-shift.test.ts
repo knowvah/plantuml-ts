@@ -32,16 +32,12 @@ describe('shiftFragmentBody — simple position attributes', () => {
 
   it('does NOT shift dx/dy (relative nudges) or r (radius, a dimension)', () => {
     const body = '<text x="1" y="2" dx="1" dy="1"><circleref r="4"/></text>';
-    expect(shiftFragmentBody(body, 10, 10)).toBe(
-      '<text x="11" y="12" dx="1" dy="1"><circleref r="4"/></text>',
-    );
+    expect(shiftFragmentBody(body, 10, 10)).toBe('<text x="11" y="12" dx="1" dy="1"><circleref r="4"/></text>');
   });
 
   it('does not confuse x1/cx/rx with the bare x/y attribute (word-boundary safety)', () => {
     const body = '<rect x="1" rx="2"/><line x1="3" y1="4" x2="5" y2="6"/>';
-    expect(shiftFragmentBody(body, 100, 0)).toBe(
-      '<rect x="101" rx="2"/><line x1="103" y1="4" x2="105" y2="6"/>',
-    );
+    expect(shiftFragmentBody(body, 100, 0)).toBe('<rect x="101" rx="2"/><line x1="103" y1="4" x2="105" y2="6"/>');
   });
 });
 
@@ -92,9 +88,7 @@ describe('shiftFragmentBody — transform composition', () => {
 
   it('shifts the pivot of rotate(deg,cx,cy), leaving the angle untouched', () => {
     const body = '<text transform="rotate(-90,5,5)" x="5" y="5">X</text>';
-    expect(shiftFragmentBody(body, 10, 20)).toBe(
-      '<text transform="rotate(-90,15,25)" x="15" y="25">X</text>',
-    );
+    expect(shiftFragmentBody(body, 10, 20)).toBe('<text transform="rotate(-90,15,25)" x="15" y="25">X</text>');
   });
 });
 

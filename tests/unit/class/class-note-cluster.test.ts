@@ -38,7 +38,9 @@ function parse(source: string): ReturnType<typeof parseClass> {
 function captureDotGraph(source: string): { ast: ReturnType<typeof parseClass>; graph: DotInputGraph } {
   const ast = parse(source);
   let g: DotInputGraph | undefined;
-  setLayoutInputObserver((x) => { g = x; });
+  setLayoutInputObserver((x) => {
+    g = x;
+  });
   try {
     layoutClass(ast, defaultTheme, measurer);
   } finally {
@@ -69,9 +71,7 @@ describe('note-in-package cluster membership', () => {
   });
 
   it('(b) a note outside any package stays top-level (unchanged)', () => {
-    const { ast, graph } = captureDotGraph(
-      ['class A', 'note as N', 'hi', 'end note'].join('\n'),
-    );
+    const { ast, graph } = captureDotGraph(['class A', 'note as N', 'hi', 'end note'].join('\n'));
     const note = ast.notes.find((n) => n.id === 'N');
     expect(note?.namespace).toBeUndefined();
     // No cluster references N — the note node has no package membership.
@@ -105,9 +105,7 @@ describe('note-in-package cluster membership', () => {
   });
 
   it('(d) an attached `note left of A: x` inside a package lands in the SAME cluster as A', () => {
-    const { ast, graph } = captureDotGraph(
-      ['package p {', '  class A', '  note left of A: x', '}'].join('\n'),
-    );
+    const { ast, graph } = captureDotGraph(['package p {', '  class A', '  note left of A: x', '}'].join('\n'));
     const note = ast.notes[0];
     expect(note).toMatchObject({ target: 'A', position: 'left', text: 'x', namespace: 'p' });
 

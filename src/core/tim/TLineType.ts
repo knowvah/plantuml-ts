@@ -102,10 +102,7 @@ const PATTERN_FOREACH = simpleKeyword('!foreach');
 
 const PATTERN_ENDFOREACH = simpleKeyword('!endfor');
 
-const PATTERN_END_FUNCTION = new RegExp(
-  `^${SPACE_CLASS}*!end${SPACE_CLASS}*(function|definelong|procedure)\\b`,
-  'u',
-);
+const PATTERN_END_FUNCTION = new RegExp(`^${SPACE_CLASS}*!end${SPACE_CLASS}*(function|definelong|procedure)\\b`, 'u');
 
 const PATTERN_RETURN = simpleKeyword('!return');
 

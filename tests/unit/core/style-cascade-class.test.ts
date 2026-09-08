@@ -20,9 +20,7 @@ function styleMap(spec: Record<string, Record<string, string>>): StyleMap {
 
 describe('computeClassStyleCascadeOverrides (G2 N36)', () => {
   it('resolves a bare classDiagram {} BackGroundColor to hex (cilaba-36-zogi212 shape)', () => {
-    const override = computeClassStyleCascadeOverrides(
-      styleMap({ classdiagram: { backgroundcolor: 'Green' } }),
-    );
+    const override = computeClassStyleCascadeOverrides(styleMap({ classdiagram: { backgroundcolor: 'Green' } }));
     expect(override.classCascadeBackground).toBe('#008000');
   });
 
@@ -62,9 +60,7 @@ describe('computeClassStyleCascadeOverrides (G2 N36)', () => {
   });
 
   it('an arrow-scoped nested selector under classDiagram sets classCascadeArrowColor (rakici-44-tivo701 shape)', () => {
-    const override = computeClassStyleCascadeOverrides(
-      styleMap({ 'classdiagram.arrow': { linecolor: 'blue' } }),
-    );
+    const override = computeClassStyleCascadeOverrides(styleMap({ 'classdiagram.arrow': { linecolor: 'blue' } }));
     expect(override.classCascadeArrowColor).toBe('#0000FF');
   });
 
@@ -90,10 +86,8 @@ describe('computeClassStyleCascadeOverrides -- unresolvable color guard (G2 N36 
   // a PRE-fix-encoded test, not a live regression -- both fixtures cited
   // in their own titles, `xalaco-64-vuzu312`/(unnamed), now render
   // zero-diff against the real jar oracle with these exact values).
-  it('resolves jar\'s `#?black:white` conditional-color ternary against the DEFAULT classifier background (xalaco-64-vuzu312 shape, no BackgroundColor override -- light, not dark -- picks colorLight)', () => {
-    const override = computeClassStyleCascadeOverrides(
-      styleMap({ root: { fontcolor: '#?black:white' } }),
-    );
+  it("resolves jar's `#?black:white` conditional-color ternary against the DEFAULT classifier background (xalaco-64-vuzu312 shape, no BackgroundColor override -- light, not dark -- picks colorLight)", () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ root: { fontcolor: '#?black:white' } }));
     expect(override.classCascadeFontColor).toBe('#000000');
   });
 
@@ -106,13 +100,10 @@ describe('computeClassStyleCascadeOverrides -- unresolvable color guard (G2 N36 
   });
 
   it('still resolves the transparent keyword (not swallowed by the unresolvable-color guard)', () => {
-    const override = computeClassStyleCascadeOverrides(
-      styleMap({ classdiagram: { backgroundcolor: 'transparent' } }),
-    );
+    const override = computeClassStyleCascadeOverrides(styleMap({ classdiagram: { backgroundcolor: 'transparent' } }));
     expect(override.classCascadeBackground).toBe('#00000000');
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // `.tagname` stereotype sub-selector cascade + ancestor-only RoundCorner
@@ -298,14 +289,20 @@ describe('resolveClassTagCascadeEntry (G2 N37)', () => {
   const cascade = { mystyle: { background: '#00FFFF' }, other: { background: '#FF0000' } };
 
   it('returns the entry for the first matching label', () => {
-    const theme = { ...defaultTheme, colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } } };
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } },
+    };
     expect(resolveClassTagCascadeEntry(theme, ['mystyle'])?.background).toBe('#00FFFF');
     expect(resolveClassTagCascadeEntry(theme, ['nomatch', 'other'])?.background).toBe('#FF0000');
   });
 
   it('returns undefined when no cascade exists or labels is undefined', () => {
     expect(resolveClassTagCascadeEntry(defaultTheme, ['mystyle'])).toBeUndefined();
-    const theme = { ...defaultTheme, colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } } };
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } },
+    };
     expect(resolveClassTagCascadeEntry(theme, undefined)).toBeUndefined();
   });
 
@@ -340,7 +337,10 @@ describe('resolveClassTagCascadeEntry (G2 N37)', () => {
       },
     };
     expect(resolveClassTagCascadeEntry(withGenerations, ['a'])?.background).toBe('#98FB98');
-    const theme = { ...defaultTheme, colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } } };
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, classTagCascade: cascade } },
+    };
     expect(resolveClassTagCascadeEntry(theme, ['mystyle'], 0)?.background).toBe('#00FFFF');
   });
 });
@@ -363,10 +363,7 @@ describe('computeClassTagCascadeGenerations (G2 N39)', () => {
   });
 
   it('carries an UNRELATED selector forward across a later block that does not touch it', () => {
-    const generations = computeClassTagCascadeGenerations([
-      '.a {BackGroundColor pink}',
-      '.b {BackGroundColor yellow}',
-    ]);
+    const generations = computeClassTagCascadeGenerations(['.a {BackGroundColor pink}', '.b {BackGroundColor yellow}']);
     expect(generations![1]?.['a']?.background).toBe('#FFC0CB');
     expect(generations![2]?.['a']?.background).toBe('#FFC0CB');
     expect(generations![2]?.['b']?.background).toBe('#FFFF00');
@@ -473,7 +470,7 @@ describe('computeCardinalityFontOverride (T1, D3)', () => {
     expect(override).toEqual({});
   });
 
-  it('non-numeric FontSize is dropped, matching every sibling cascade\'s guard', () => {
+  it("non-numeric FontSize is dropped, matching every sibling cascade's guard", () => {
     const override = computeCardinalityFontOverride(styleMap({ arrow: { fontsize: 'not-a-number' } }));
     expect(override.cardinalityFontSize).toBeUndefined();
   });
@@ -496,16 +493,12 @@ describe('computeArrowFontOverride (T2, D3)', () => {
   });
 
   it('camuna shape: arrow { FontSize 14  FontStyle bold } resolves size/style, no family', () => {
-    const override = computeArrowFontOverride(
-      styleMap({ arrow: { fontsize: '14', fontstyle: 'bold' } }),
-    );
+    const override = computeArrowFontOverride(styleMap({ arrow: { fontsize: '14', fontstyle: 'bold' } }));
     expect(override).toEqual({ arrowFontSize: 14, arrowFontStyle: 'bold' });
   });
 
-  it("arrow { cardinality { FontSize 10 } } alone (no plain arrow FontSize) does NOT leak into the arrow font", () => {
-    const override = computeArrowFontOverride(
-      styleMap({ 'arrow.cardinality': { fontsize: '10' } }),
-    );
+  it('arrow { cardinality { FontSize 10 } } alone (no plain arrow FontSize) does NOT leak into the arrow font', () => {
+    const override = computeArrowFontOverride(styleMap({ 'arrow.cardinality': { fontsize: '10' } }));
     expect(override).toEqual({});
   });
 
@@ -534,7 +527,7 @@ describe('computeArrowFontOverride (T2, D3)', () => {
     expect(computeArrowFontOverride(styleMap({ class: { fontsize: '30' } }))).toEqual({});
   });
 
-  it('non-numeric FontSize is dropped, matching every sibling cascade\'s guard', () => {
+  it("non-numeric FontSize is dropped, matching every sibling cascade's guard", () => {
     const override = computeArrowFontOverride(styleMap({ arrow: { fontsize: 'not-a-number' } }));
     expect(override.arrowFontSize).toBeUndefined();
   });
@@ -557,7 +550,7 @@ describe('computeArrowFontOverride / computeCardinalityFontOverride -- FontColor
     expect(computeCardinalityFontOverride(map).cardinalityFontColor).toBe('#0000FF');
   });
 
-  it("camuna: arrow { FontColor Blue ... cardinality { FontColor red } } -> #0000FF and #FF0000", () => {
+  it('camuna: arrow { FontColor Blue ... cardinality { FontColor red } } -> #0000FF and #FF0000', () => {
     const map = styleMap({
       arrow: { fontcolor: 'Blue', fontsize: '14', fontstyle: 'bold' },
       'arrow.cardinality': { fontcolor: 'red', fontsize: '10', fontstyle: 'italic' },

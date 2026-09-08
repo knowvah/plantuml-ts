@@ -14,13 +14,24 @@ const METRICS = { baselineOffset: 10, rowHeight: 13 };
 
 function tip(id: string, member: string, position: 'left' | 'right', x: number, y = 0): NoteGeo {
   return {
-    id, kind: 'tips', x, y, width: 80, height: 40, lines: ['hi'], lineWidths: [10], connector: [],
-    target: 'A', tipRequest: { member, position, ...METRICS },
+    id,
+    kind: 'tips',
+    x,
+    y,
+    width: 80,
+    height: 40,
+    lines: ['hi'],
+    lineWidths: [10],
+    connector: [],
+    target: 'A',
+    tipRequest: { member, position, ...METRICS },
   };
 }
 
 const classicHost: ClassifierAnchor = {
-  id: 'A', x: 100, y: 50,
+  id: 'A',
+  x: 100,
+  y: 50,
   rows: [
     { text: 'A', y: 20, indent: 0 },
     { text: 'member1', y: 46.8889, width: 59.0625, indent: 6 },
@@ -29,7 +40,18 @@ const classicHost: ClassifierAnchor = {
 
 describe('resolveTips -- EntityImageTips#drawU at draw time', () => {
   it('ignores NOTE leaves entirely (returns no entry for them)', () => {
-    const plain: NoteGeo = { id: 'n', kind: 'note', x: 0, y: 0, width: 1, height: 1, lines: [], lineWidths: [], connector: [], target: 'A' };
+    const plain: NoteGeo = {
+      id: 'n',
+      kind: 'note',
+      x: 0,
+      y: 0,
+      width: 1,
+      height: 1,
+      lines: [],
+      lineWidths: [],
+      connector: [],
+      target: 'A',
+    };
     expect(resolveTips([plain], [classicHost]).size).toBe(0);
   });
 
@@ -52,10 +74,13 @@ describe('resolveTips -- EntityImageTips#drawU at draw time', () => {
 
   it('G2 N47: an enhanced-body host matches against its `enhancedBody` rows and tree rows, not the classic `rows`', () => {
     const enhancedHost: ClassifierAnchor = {
-      id: 'A', x: 100, y: 50,
+      id: 'A',
+      x: 100,
+      y: 50,
       rows: [{ text: 'A', y: 20, indent: 0 }], // header only -- no member content here
       enhancedBody: {
-        width: 0, height: 0,
+        width: 0,
+        height: 0,
         parts: [
           { kind: 'divider', y: 30, strokeWidth: 1 },
           { kind: 'rows', rows: [{ text: 'attr', y: 46, width: 20, indent: 6 }] },

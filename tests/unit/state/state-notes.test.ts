@@ -48,7 +48,7 @@ describe('single-line attached note', () => {
   });
 
   it('quoted note target', () => {
-    const ast = parse('state \'My State\' as MS\nnote bottom of MS : quoted target note');
+    const ast = parse("state 'My State' as MS\nnote bottom of MS : quoted target note");
     expect(ast.notes?.[0]?.target).toBe('MS');
   });
 });

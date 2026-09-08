@@ -3,9 +3,9 @@ import { hclPlugin } from '../../../src/diagrams/hcl/index.js';
 import { renderSync } from '../../../src/index.js';
 
 describe('hclPlugin', () => {
-  it('has type hcl', () => { expect(hclPlugin.type).toBe('hcl'); });
-
-
+  it('has type hcl', () => {
+    expect(hclPlugin.type).toBe('hcl');
+  });
 
   it('renders a flat key-value HCL block to SVG', () => {
     const svg = renderSync('@starthcl\nregion = "us-east-1"\n@endhcl');

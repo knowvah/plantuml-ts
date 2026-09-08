@@ -27,11 +27,7 @@ export type NoteLinkStrategy = (typeof NoteLinkStrategy)[keyof typeof NoteLinkSt
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/NoteLinkStrategy.java:43-51
  */
-export function computeDimension(
-  strategy: NoteLinkStrategy,
-  width: number,
-  height: number,
-): XDimension2D {
+export function computeDimension(strategy: NoteLinkStrategy, width: number, height: number): XDimension2D {
   if (strategy === NoteLinkStrategy.HALF_PRINTED_FULL) return new XDimension2D(width / 2, height);
 
   if (strategy === NoteLinkStrategy.HALF_NOT_PRINTED) return new XDimension2D(0, 0);

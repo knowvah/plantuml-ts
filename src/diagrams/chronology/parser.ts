@@ -3,8 +3,7 @@ import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-comm
 import type { ChronologyDiagramAST, ChronologyEvent } from './ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 
-const EVENT_RE =
-  /^\[([^\]]+)\]\s+happens\s+(?:at|on|the)?\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?/;
+const EVENT_RE = /^\[([^\]]+)\]\s+happens\s+(?:at|on|the)?\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?/;
 
 /** Builds a `ChronologyEvent` from a matched `EVENT_RE` result. */
 function eventFromMatch(m: RegExpExecArray): ChronologyEvent {
@@ -26,7 +25,7 @@ export function parseChronology(source: UmlSource): ChronologyDiagramAST {
   const sprites = createSpriteRegistry();
   const lines = source.lines;
 
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     const t = lines[i]!.trim();
     if (t === '') {
       i++;

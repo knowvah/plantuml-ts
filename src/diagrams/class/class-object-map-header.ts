@@ -204,7 +204,9 @@ function buildUnderlinedNameRows(
   if (match === null) {
     return [
       {
-        text: display, y, indent,
+        text: display,
+        y,
+        indent,
         width: measurer.measure(display, nameFontSpec).width,
         underline: true,
         ...fontSizeField,
@@ -365,7 +367,10 @@ export function headerRows(
     );
   } else {
     rows.push({
-      text: displayText, y: nameY, indent: nameIndent, width: nameWidth,
+      text: displayText,
+      y: nameY,
+      indent: nameIndent,
+      width: nameWidth,
       ...(nameFontSizeOverride !== undefined ? { fontSize: nameFontSizeOverride } : {}),
     });
   }

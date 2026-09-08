@@ -126,12 +126,7 @@ export class DecorateEntityImage implements TextBlock {
     this.text2 = parts.text2;
   }
 
-  static addTop(
-    group: UGroup,
-    original: TextBlock,
-    text: TextBlock,
-    horizontal: HorizontalAlignment,
-  ): TextBlock {
+  static addTop(group: UGroup, original: TextBlock, text: TextBlock, horizontal: HorizontalAlignment): TextBlock {
     return new DecorateEntityImage({
       original,
       group1: group,
@@ -143,12 +138,7 @@ export class DecorateEntityImage implements TextBlock {
     });
   }
 
-  static addBottom(
-    group: UGroup,
-    original: TextBlock,
-    text: TextBlock,
-    horizontal: HorizontalAlignment,
-  ): TextBlock {
+  static addBottom(group: UGroup, original: TextBlock, text: TextBlock, horizontal: HorizontalAlignment): TextBlock {
     return new DecorateEntityImage({
       original,
       group1: null,
@@ -167,7 +157,8 @@ export class DecorateEntityImage implements TextBlock {
     horizontal: HorizontalAlignment,
     verticalAlignment: VerticalAlignment,
   ): TextBlock {
-    if (verticalAlignment === VerticalAlignment.TOP) return DecorateEntityImage.addTop(group, original, text, horizontal);
+    if (verticalAlignment === VerticalAlignment.TOP)
+      return DecorateEntityImage.addTop(group, original, text, horizontal);
     return DecorateEntityImage.addBottom(group, original, text, horizontal);
   }
 

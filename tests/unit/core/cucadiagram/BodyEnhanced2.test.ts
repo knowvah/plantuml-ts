@@ -24,7 +24,11 @@ import { ClockwiseTopRightBottomLeft } from '../../../../src/core/klimt/geom/Clo
 import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
 import { LineBreakStrategy } from '../../../../src/core/klimt/LineBreakStrategy.js';
 import { Pragma } from '../../../../src/core/skin/Pragma.js';
-import { BodyEnhanced2, type BodyEnhanced2Config, type BodyEnhanced2StyleValues } from '../../../../src/core/cucadiagram/BodyEnhanced2.js';
+import {
+  BodyEnhanced2,
+  type BodyEnhanced2Config,
+  type BodyEnhanced2StyleValues,
+} from '../../../../src/core/cucadiagram/BodyEnhanced2.js';
 import { BodyFactory } from '../../../../src/core/cucadiagram/BodyFactory.js';
 
 const CHAR_WIDTH = 2;
@@ -90,7 +94,12 @@ function fakeSkin(): ISkinSimple {
 }
 
 function makeConfig(): BodyEnhanced2Config {
-  return { skinParam: fakeSkin(), align: HorizontalAlignment.LEFT, titleConfig: FONT, lineBreakStrategy: LineBreakStrategy.NONE };
+  return {
+    skinParam: fakeSkin(),
+    align: HorizontalAlignment.LEFT,
+    titleConfig: FONT,
+    lineBreakStrategy: LineBreakStrategy.NONE,
+  };
 }
 
 function makeStyleValues(minimumWidth = 0): BodyEnhanced2StyleValues {
@@ -270,4 +279,3 @@ describe('BodyFactory.create3 (java:78-81)', () => {
     expect(viaFactory.calculateDimension(sb)).toEqual(new XDimension2D(14, 10));
   });
 });
-

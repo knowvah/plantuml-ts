@@ -15,11 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { layoutDescription } from '../../../src/diagrams/description/layout.js';
-import type {
-  DescriptionDiagramAST,
-  DescriptiveNode,
-  DescriptiveLink,
-} from '../../../src/diagrams/description/ast.js';
+import type { DescriptionDiagramAST, DescriptiveNode, DescriptiveLink } from '../../../src/diagrams/description/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
@@ -73,11 +69,7 @@ function usecase(id: string, display = id): DescriptiveNode {
   return node(id, 'usecase', display);
 }
 
-function container(
-  id: string,
-  symbol: DescriptiveNode['symbol'],
-  children: DescriptiveNode[],
-): DescriptiveNode {
+function container(id: string, symbol: DescriptiveNode['symbol'], children: DescriptiveNode[]): DescriptiveNode {
   return node(id, symbol, id, children);
 }
 
@@ -94,13 +86,7 @@ function solid(from: string, to: string, label?: string, length = 2): Descriptiv
   };
 }
 
-function dashed(
-  from: string,
-  to: string,
-  stereotype?: string,
-  label?: string,
-  length = 2,
-): DescriptiveLink {
+function dashed(from: string, to: string, stereotype?: string, label?: string, length = 2): DescriptiveLink {
   return {
     from,
     to,
@@ -111,28 +97,30 @@ function dashed(
   };
 }
 
-function makeAst(
-  nodes: DescriptiveNode[],
-  links: DescriptiveLink[],
-): DescriptionDiagramAST {
+function makeAst(nodes: DescriptiveNode[], links: DescriptiveLink[]): DescriptionDiagramAST {
   return { nodes, links };
 }
 
 /** True when two axis-aligned rectangles overlap. */
 function overlaps(
-  aX: number, aY: number, aW: number, aH: number,
-  bX: number, bY: number, bW: number, bH: number,
+  aX: number,
+  aY: number,
+  aW: number,
+  aH: number,
+  bX: number,
+  bY: number,
+  bW: number,
+  bH: number,
 ): boolean {
   return aX < bX + bW && aX + aW > bX && aY < bY + bH && aY + aH > bY;
 }
 
 /** Capture the DotInputGraph layoutDescription hands to layoutGraph(). */
-function captureGraphInput(
-  ast: DescriptionDiagramAST,
-  m: StringMeasurer = measurer,
-): DotInputGraph {
+function captureGraphInput(ast: DescriptionDiagramAST, m: StringMeasurer = measurer): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured = g; });
+  setLayoutInputObserver((g) => {
+    captured = g;
+  });
   try {
     layoutDescription(ast, defaultTheme, m);
   } finally {
@@ -177,10 +165,7 @@ describe('layoutDescription — empty AST', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutDescription — 3 components and 2 links', () => {
-  const ast = makeAst(
-    [comp('A'), comp('B'), comp('C')],
-    [solid('A', 'B'), solid('B', 'C')],
-  );
+  const ast = makeAst([comp('A'), comp('B'), comp('C')], [solid('A', 'B'), solid('B', 'C')]);
 
   it('returns 3 nodes', () => {
     expect(layoutDescription(ast, defaultTheme, measurer).nodes).toHaveLength(3);
@@ -274,8 +259,12 @@ describe('layoutDescription — link styles', () => {
 describe('layoutDescription — bracket style-override passthrough (G1 I-linkstyle)', () => {
   it('thicknessOverride and colorOverride copy straight through to the edge geo', () => {
     const link: DescriptiveLink = {
-      from: 'P', to: 'Q', style: 'dashed', length: 2,
-      thicknessOverride: 8, colorOverride: 'red',
+      from: 'P',
+      to: 'Q',
+      style: 'dashed',
+      length: 2,
+      thicknessOverride: 8,
+      colorOverride: 'red',
     };
     const ast = makeAst([comp('P'), comp('Q')], [link]);
     const edge = layoutDescription(ast, defaultTheme, measurer).edges[0]!;
@@ -343,10 +332,7 @@ describe('layoutDescription — package containing 2 components', () => {
 
 describe('layoutDescription — interface node', () => {
   it('interface symbol is preserved in geo', () => {
-    const ast = makeAst(
-      [iface('iA', 'IMyService'), comp('cA', 'MyComp')],
-      [solid('cA', 'iA')],
-    );
+    const ast = makeAst([iface('iA', 'IMyService'), comp('cA', 'MyComp')], [solid('cA', 'iA')]);
     const geo = layoutDescription(ast, defaultTheme, measurer);
     expect(geo.nodes.find((n) => n.id === 'iA')?.symbol).toBe('interface');
   });
@@ -359,8 +345,7 @@ describe('layoutDescription — interface node', () => {
 describe('layoutDescription — edge points', () => {
   it('connected edges have at least 2 points', () => {
     const ast = makeAst([comp('S'), comp('T')], [solid('S', 'T')]);
-    expect(layoutDescription(ast, defaultTheme, measurer).edges[0]?.points.length)
-      .toBeGreaterThanOrEqual(2);
+    expect(layoutDescription(ast, defaultTheme, measurer).edges[0]?.points.length).toBeGreaterThanOrEqual(2);
   });
 
   it('edge point coordinates are numbers', () => {
@@ -407,8 +392,7 @@ describe('layoutDescription — box node minimum width', () => {
 
   it('long display name produces width > 80', () => {
     const ast = makeAst([comp('longName', 'A Very Long Component Name Here')], []);
-    expect(layoutDescription(ast, defaultTheme, measurer).nodes[0]?.width)
-      .toBeGreaterThan(80);
+    expect(layoutDescription(ast, defaultTheme, measurer).nodes[0]?.width).toBeGreaterThan(80);
   });
 });
 
@@ -513,12 +497,19 @@ describe('layoutDescription — coordinate normalisation', () => {
     const ast = makeAst(
       [
         pkg('Frontend', [comp('Browser', 'Web Browser'), comp('Mobile', 'Mobile App')], 'Frontend'),
-        pkg('Backend', [comp('API', 'API Gateway'), comp('Auth', 'Auth Service'), comp('Data', 'Data Service')], 'Backend'),
+        pkg(
+          'Backend',
+          [comp('API', 'API Gateway'), comp('Auth', 'Auth Service'), comp('Data', 'Data Service')],
+          'Backend',
+        ),
         node('DB', 'database', 'PostgreSQL'),
       ],
       [
-        solid('Browser', 'API'), solid('Mobile', 'API'),
-        solid('API', 'Auth'), solid('API', 'Data'), solid('Data', 'DB'),
+        solid('Browser', 'API'),
+        solid('Mobile', 'API'),
+        solid('API', 'Auth'),
+        solid('API', 'Data'),
+        solid('Data', 'DB'),
       ],
     );
     const geo = layoutDescription(ast, defaultTheme, measurer);
@@ -539,8 +530,13 @@ describe('layoutDescription — coordinate normalisation', () => {
 
 describe('layoutDescription — basic actor+usecase diagram (AC 1)', () => {
   const ast = makeAst(
-    [actor('user', 'User'), actor('admin', 'Admin'),
-     usecase('login', 'Login'), usecase('logout', 'Logout'), usecase('manage', 'Manage Users')],
+    [
+      actor('user', 'User'),
+      actor('admin', 'Admin'),
+      usecase('login', 'Login'),
+      usecase('logout', 'Logout'),
+      usecase('manage', 'Manage Users'),
+    ],
     [solid('user', 'login'), solid('user', 'logout'), solid('admin', 'manage')],
   );
 
@@ -795,7 +791,10 @@ describe('layoutDescription — hideShowRules -> DescriptionNodeGeo.hidden (G1 I
     const b = container('b', 'component', [bSub]);
     const ast: DescriptionDiagramAST = {
       ...makeAst([a, b], []),
-      hideShowRules: [{ what: 'a', show: false }, { what: 'b_sub', show: false }],
+      hideShowRules: [
+        { what: 'a', show: false },
+        { what: 'b_sub', show: false },
+      ],
     };
     const geo = layoutDescription(ast, defaultTheme, measurer);
     const aGeo = geo.nodes.find((n) => n.id === 'a')!;
@@ -848,7 +847,10 @@ describe('layoutDescription — hideShowRules -> DescriptionNodeGeo.hidden (G1 I
     const parent = container('a', 'component', [child]);
     const ast: DescriptionDiagramAST = {
       ...makeAst([parent], []),
-      hideShowRules: [{ what: 'a', show: false }, { what: 'a_sub', show: true }],
+      hideShowRules: [
+        { what: 'a', show: false },
+        { what: 'a_sub', show: true },
+      ],
     };
     const geo = layoutDescription(ast, defaultTheme, measurer);
     const aGeo = geo.nodes.find((n) => n.id === 'a')!;
@@ -962,10 +964,7 @@ describe('layoutDescription — diagram dimensions', () => {
 
 describe('layoutDescription — package container (use-case children)', () => {
   it('package container with children returns children in node geo', () => {
-    const ast = makeAst(
-      [container('pkg', 'package', [usecase('uc1', 'Feature A'), usecase('uc2', 'Feature B')])],
-      [],
-    );
+    const ast = makeAst([container('pkg', 'package', [usecase('uc1', 'Feature A'), usecase('uc2', 'Feature B')])], []);
     const pkgGeo = layoutDescription(ast, defaultTheme, measurer).nodes[0]!;
     expect(pkgGeo.symbol).toBe('package');
     expect(pkgGeo.children).toHaveLength(2);
@@ -1006,8 +1005,14 @@ describe('layoutDescription — actor outside container (AC 7)', () => {
     // placed above the container rather than to its left.
     expect(
       overlaps(
-        actorGeo.x, actorGeo.y, actorGeo.width, actorGeo.height,
-        containerGeo.x, containerGeo.y, containerGeo.width, containerGeo.height,
+        actorGeo.x,
+        actorGeo.y,
+        actorGeo.width,
+        actorGeo.height,
+        containerGeo.x,
+        containerGeo.y,
+        containerGeo.width,
+        containerGeo.height,
       ),
     ).toBe(false);
     expect(actorGeo.y + actorGeo.height).toBeLessThanOrEqual(containerGeo.y);
@@ -1016,7 +1021,8 @@ describe('layoutDescription — actor outside container (AC 7)', () => {
   it('two top-level actors are both above a sibling container (TB default)', () => {
     const ast = makeAst(
       [
-        actor('c', 'Customer'), actor('sa', 'Support Agent'),
+        actor('c', 'Customer'),
+        actor('sa', 'Support Agent'),
         container('sys', 'rectangle', [usecase('uc1', 'Browse'), usecase('uc2', 'Checkout'), usecase('uc3', 'Track')]),
       ],
       [solid('c', 'uc1'), solid('c', 'uc2'), solid('sa', 'uc3')],
@@ -1176,10 +1182,7 @@ describe('layoutDescription — port label position (portLabelAbove)', () => {
       node('p2', 'port', 'p2'),
       node('p3', 'port', 'p3'),
     ]);
-    const ast = makeAst(
-      [comp('hub'), parent],
-      [solid('hub', 'p1'), solid('hub', 'p2'), solid('hub', 'p3')],
-    );
+    const ast = makeAst([comp('hub'), parent], [solid('hub', 'p1'), solid('hub', 'p2'), solid('hub', 'p3')]);
     const geo = layoutDescription(ast, defaultTheme, measurer);
     const parentGeo = geo.nodes.find((n) => n.id === 'parent')!;
     const centerY = parentGeo.y + parentGeo.height / 2;
@@ -1191,10 +1194,7 @@ describe('layoutDescription — port label position (portLabelAbove)', () => {
   });
 
   it('a non-port child of the same container never gets portLabelAbove set', () => {
-    const parent = container('parent', 'component', [
-      node('p1', 'port', 'p1'),
-      comp('leaf1'),
-    ]);
+    const parent = container('parent', 'component', [node('p1', 'port', 'p1'), comp('leaf1')]);
     const geo = layoutDescription(makeAst([parent], []), defaultTheme, measurer);
     const parentGeo = geo.nodes.find((n) => n.id === 'parent')!;
     const leaf = parentGeo.children.find((c) => c.id === 'leaf1')!;
@@ -1266,10 +1266,7 @@ describe('layoutDescription — latex label sizing', () => {
 
   it('diagram with latex usecase and plain usecase has all positive geometry', () => {
     const ast = makeAst(
-      [
-        node('latex-uc', 'usecase', '<latex>\\sum_{i=1}^{n} i</latex>'),
-        node('plain-uc', 'usecase', 'Check Out'),
-      ],
+      [node('latex-uc', 'usecase', '<latex>\\sum_{i=1}^{n} i</latex>'), node('plain-uc', 'usecase', 'Check Out')],
       [solid('latex-uc', 'plain-uc')],
     );
     const geo = layoutDescription(ast, defaultTheme, measurer);
@@ -1318,13 +1315,7 @@ describe('layoutDescription — spline edge points', () => {
   });
 
   it('cross-container edge between leaf nodes in different clusters has >2 points', () => {
-    const ast = makeAst(
-      [
-        pkg('P1', [comp('A')], 'Left'),
-        pkg('P2', [comp('B')], 'Right'),
-      ],
-      [solid('A', 'B')],
-    );
+    const ast = makeAst([pkg('P1', [comp('A')], 'Left'), pkg('P2', [comp('B')], 'Right')], [solid('A', 'B')]);
     const edge = layoutDescription(ast, defaultTheme, measurer).edges[0]!;
     expect(edge.points.length).toBeGreaterThan(2);
   });
@@ -1380,10 +1371,7 @@ describe('layoutDescription — container endpoint edges', () => {
   });
 
   it('link to empty container (no descendants) is skipped gracefully', () => {
-    const ast = makeAst(
-      [comp('A'), container('empty', 'rectangle', [])],
-      [solid('A', 'empty')],
-    );
+    const ast = makeAst([comp('A'), container('empty', 'rectangle', [])], [solid('A', 'empty')]);
     // 'empty' has no children, so it's a leaf; the edge should be included
     // (empty container becomes a DotInputNode, so endpoint is valid)
     const geo = layoutDescription(ast, defaultTheme, measurer);
@@ -1420,7 +1408,7 @@ describe('layoutDescription — group-anchor point nodes (DotInputGraph)', () =>
     expect(input.edges[0]!.from).toBe(anchor!.id);
   });
 
-  it('the anchor node is a direct member of the target container\'s cluster', () => {
+  it("the anchor node is a direct member of the target container's cluster", () => {
     const ast = makeAst(
       [actor('u', 'User'), container('sys', 'rectangle', [usecase('uc1', 'Login')])],
       [solid('u', 'sys')],
@@ -1433,11 +1421,7 @@ describe('layoutDescription — group-anchor point nodes (DotInputGraph)', () =>
 
   it('two edges to the same group share ONE anchor node, not one per edge', () => {
     const ast = makeAst(
-      [
-        actor('u1', 'User1'),
-        actor('u2', 'User2'),
-        container('sys', 'rectangle', [usecase('uc1', 'Login')]),
-      ],
+      [actor('u1', 'User1'), actor('u2', 'User2'), container('sys', 'rectangle', [usecase('uc1', 'Login')])],
       [solid('u1', 'sys'), solid('u2', 'sys')],
     );
     const input = captureGraphInput(ast);
@@ -1449,10 +1433,7 @@ describe('layoutDescription — group-anchor point nodes (DotInputGraph)', () =>
   });
 
   it('edge to an empty container does NOT create an anchor point (plain leaf)', () => {
-    const ast = makeAst(
-      [comp('A'), container('empty', 'rectangle', [])],
-      [solid('A', 'empty')],
-    );
+    const ast = makeAst([comp('A'), container('empty', 'rectangle', [])], [solid('A', 'empty')]);
     const input = captureGraphInput(ast);
     expect(input.nodes.some((n) => n.shape === 'point')).toBe(false);
     expect(input.edges[0]!.to).toBe('empty');
@@ -1556,7 +1537,9 @@ describe('layoutDescription -- notes as svek leaf entities', () => {
     // basetu-75-xevi153: `component dummy` + `note as tott / toto / end note`.
     const ast = makeAst([comp('dummy'), node('tott', 'note', 'toto')], []);
     let captured = 0;
-    setLayoutInputObserver(() => { captured++; });
+    setLayoutInputObserver(() => {
+      captured++;
+    });
     try {
       const geo = layoutDescription(ast, defaultTheme, measurer);
       expect(geo.nodes).toHaveLength(2);
@@ -1628,8 +1611,12 @@ function parseLine(line: string): DescriptionDiagramAST {
 describe('layoutDescription — link-grammar wiring', () => {
   it('firstLabel/secondLabel measure into tail/head label dimensions', () => {
     const link: DescriptiveLink = {
-      from: 'A', to: 'B', style: 'solid', length: 2,
-      firstLabel: '1', secondLabel: '0..*',
+      from: 'A',
+      to: 'B',
+      style: 'solid',
+      length: 2,
+      firstLabel: '1',
+      secondLabel: '0..*',
     };
     const ast = makeAst([comp('A'), comp('B')], [link]);
     const input = captureGraphInput(ast);
@@ -1723,7 +1710,9 @@ describe('layoutDescription -- interface shield/plaintext (EntityImageDescriptio
   it('single leaf, no links, no groups -> degenerate: no graph fed to layout', () => {
     const ast = makeAst([iface('I')], []);
     let captured = 0;
-    setLayoutInputObserver(() => { captured++; });
+    setLayoutInputObserver(() => {
+      captured++;
+    });
     try {
       const geo = layoutDescription(ast, defaultTheme, measurer);
       expect(geo.nodes).toHaveLength(1);
@@ -1760,8 +1749,13 @@ describe('layoutDescription -- interface shield/plaintext (EntityImageDescriptio
     // hasSomeHorizontalLinkDoubleDecorated: length===1 && tailDecor && headDecor,
     // no `!hidden` guard -- fires even though the link is hidden.
     const link: DescriptiveLink = {
-      from: 'A', to: 'I', style: 'solid', length: 1, hidden: true,
-      tailDecor: '<|', headDecor: '|>',
+      from: 'A',
+      to: 'I',
+      style: 'solid',
+      length: 1,
+      hidden: true,
+      tailDecor: '<|',
+      headDecor: '|>',
     };
     const ast = makeAst([comp('A'), iface('I')], [link]);
     const input = captureGraphInput(ast);
@@ -1769,10 +1763,7 @@ describe('layoutDescription -- interface shield/plaintext (EntityImageDescriptio
   });
 
   it('two links to the same other entity suppress the shield (isThereADoubleLink) -> rect', () => {
-    const ast = makeAst(
-      [comp('A'), iface('I')],
-      [solid('A', 'I', undefined, 2), solid('A', 'I', 'second', 2)],
-    );
+    const ast = makeAst([comp('A'), iface('I')], [solid('A', 'I', undefined, 2), solid('A', 'I', 'second', 2)]);
     const input = captureGraphInput(ast);
     expect(input.nodes.find((n) => n.id === 'I')!.shape).toBeUndefined();
   });
@@ -1825,8 +1816,13 @@ describe('layoutDescription — main edge label pass-through', () => {
 
   it('stereotype-only link still carries a label (guillemets)', () => {
     const link: DescriptiveLink = {
-      from: 'A', to: 'B', style: 'dashed', arrowHead: 'open', length: 2,
-      stereotype: 'include', stereotypeIsLinkLabel: true,
+      from: 'A',
+      to: 'B',
+      style: 'dashed',
+      arrowHead: 'open',
+      length: 2,
+      stereotype: 'include',
+      stereotypeIsLinkLabel: true,
     };
     const ast = makeAst([comp('A'), comp('B')], [link]);
     const input = captureGraphInput(ast);
@@ -1845,7 +1841,11 @@ describe('layoutDescription — main edge label pass-through', () => {
   // doc comment).
   it('a pre-colon stereotype contributes NO label attribute when the link has no other label', () => {
     const link: DescriptiveLink = {
-      from: 'A', to: 'B', style: 'solid', arrowHead: 'none', length: 2,
+      from: 'A',
+      to: 'B',
+      style: 'solid',
+      arrowHead: 'none',
+      length: 2,
       stereotype: 'v1.0',
     };
     const ast = makeAst([comp('A'), comp('B')], [link]);
@@ -1857,11 +1857,20 @@ describe('layoutDescription — main edge label pass-through', () => {
 
   it('a pre-colon stereotype alongside a real post-colon label contributes ONLY the label text, not the stereotype', () => {
     const withStereo: DescriptiveLink = {
-      from: 'A', to: 'B', style: 'solid', arrowHead: 'none', length: 2,
-      stereotype: 'v1.0', label: 'plain text',
+      from: 'A',
+      to: 'B',
+      style: 'solid',
+      arrowHead: 'none',
+      length: 2,
+      stereotype: 'v1.0',
+      label: 'plain text',
     };
     const withoutStereo: DescriptiveLink = {
-      from: 'A', to: 'B', style: 'solid', arrowHead: 'none', length: 2,
+      from: 'A',
+      to: 'B',
+      style: 'solid',
+      arrowHead: 'none',
+      length: 2,
       label: 'plain text',
     };
     const inputWith = captureGraphInput(makeAst([comp('A'), comp('B')], [withStereo]));
@@ -1887,8 +1896,7 @@ describe('layoutDescription — main edge label pass-through', () => {
 // ===========================================================================
 
 describe('layoutDescription — magma standalone chaining', () => {
-  const invisEdges = (input: DotInputGraph): DotInputEdge[] =>
-    input.edges.filter((e) => e.attributes?.invis === true);
+  const invisEdges = (input: DotInputGraph): DotInputEdge[] => input.edges.filter((e) => e.attributes?.invis === true);
 
   it('6 unlinked leaves → 5 invisible edges in a 3-wide grid (betidu oracle)', () => {
     const ast = makeAst(
@@ -1926,7 +1934,10 @@ describe('layoutDescription — magma standalone chaining', () => {
   });
 
   it('4 standalones use branch 2 (perfect square)', () => {
-    const ast = makeAst(['A', 'B', 'C', 'D'].map((id) => comp(id)), []);
+    const ast = makeAst(
+      ['A', 'B', 'C', 'D'].map((id) => comp(id)),
+      [],
+    );
     const invis = invisEdges(captureGraphInput(ast));
     expect(invis.map((e) => [e.from, e.to, e.attributes?.minLen])).toEqual([
       ['A', 'B', 0],
@@ -1950,8 +1961,14 @@ describe('layoutDescription — fixCircleLabelOverlapping shield', () => {
       [{ from: 'I', to: 'A', style: 'solid', arrowHead: 'none', length: 1 }],
     );
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
-    try { layoutDescription(ast, theme, measurer); } finally { setLayoutInputObserver(undefined); }
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
+    try {
+      layoutDescription(ast, theme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
     expect(captured!.nodes.find((n) => n.id === 'I')!.shape).toBe('plaintext');
   });
 
@@ -1961,8 +1978,14 @@ describe('layoutDescription — fixCircleLabelOverlapping shield', () => {
       [{ from: 'I', to: 'A', style: 'solid', arrowHead: 'none', length: 1 }],
     );
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
-    try { layoutDescription(ast, defaultTheme, measurer); } finally { setLayoutInputObserver(undefined); }
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
+    try {
+      layoutDescription(ast, defaultTheme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
     expect(captured!.nodes.find((n) => n.id === 'I')!.shape).toBeUndefined();
   });
 });

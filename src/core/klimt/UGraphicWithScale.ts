@@ -242,13 +242,7 @@ export class UGraphicWithScale {
   private readonly scale: number;
   private readonly colorResolver: ColorResolver;
 
-  private constructor(
-    ug: UGraphic,
-    colorResolver: ColorResolver,
-    at: XAffineTransform,
-    angle: number,
-    scale: number,
-  ) {
+  private constructor(ug: UGraphic, colorResolver: ColorResolver, at: XAffineTransform, angle: number, scale: number) {
     this.ug = ug;
     this.colorResolver = colorResolver;
     this.at = at;

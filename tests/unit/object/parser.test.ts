@@ -77,12 +77,7 @@ describe('parseClass (object diagram) — quoted display and alias', () => {
 
 describe('parseClass (object diagram) — multi-line body', () => {
   it('parses field = value members', () => {
-    const ast = parseClass(src([
-      'object Alice {',
-      '  firstName = Alice',
-      '  age = 30',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Alice {', '  firstName = Alice', '  age = 30', '}']));
     expect(ast.classifiers).toHaveLength(1);
     const c = ast.classifiers[0]!;
     expect(c.members).toHaveLength(2);
@@ -96,11 +91,7 @@ describe('parseClass (object diagram) — multi-line body', () => {
   });
 
   it('parses bare field name with no value', () => {
-    const ast = parseClass(src([
-      'object Thing {',
-      '  name',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Thing {', '  name', '}']));
     const c = ast.classifiers[0]!;
     expect(c.members).toHaveLength(1);
     expect(c.members[0]!.name).toBe('name');
@@ -143,11 +134,7 @@ describe('parseClass (object diagram) — divergent plugin-era syntax is no long
 
 describe('parseClass (object diagram) — relationships', () => {
   it('parses --> association between two objects', () => {
-    const ast = parseClass(src([
-      'object Alice',
-      'object Bob',
-      'Alice --> Bob : knows',
-    ]));
+    const ast = parseClass(src(['object Alice', 'object Bob', 'Alice --> Bob : knows']));
     expect(ast.relationships).toHaveLength(1);
     const rel = ast.relationships[0]!;
     expect(rel.from).toBe('Alice');
@@ -266,12 +253,7 @@ describe('parseClass (object diagram) — ignored lines', () => {
 
 describe('parseClass (object diagram) — non-structured field lines', () => {
   it('keeps a line with no "=" and no matching bare-name shape as a raw display row', () => {
-    const ast = parseClass(src([
-      'object Foo {',
-      '  valid = yes',
-      '  foo bar',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Foo {', '  valid = yes', '  foo bar', '}']));
     // 'valid = yes' parses structured; 'foo bar' (a space, no '=') falls back
     // to a raw display row instead of being dropped.
     expect(ast.classifiers[0]!.members).toHaveLength(2);
@@ -299,24 +281,26 @@ describe('parseClass (object diagram) — empty input', () => {
 
 describe('parseClass (object diagram) — canonical example', () => {
   it('parses all three objects and two relationships', () => {
-    const ast = parseClass(src([
-      'object "User : Alice" as alice {',
-      '  firstName = Alice',
-      '  lastName = Wonderland',
-      '  age = 30',
-      '}',
-      'object "User : Bob" as bob {',
-      '  firstName = Bob',
-      '  lastName = Hope',
-      '  age = 45',
-      '}',
-      'object Address {',
-      '  street = 123 Main St',
-      '  city = Springfield',
-      '}',
-      'alice --> bob : knows',
-      'alice --> Address : livesAt',
-    ]));
+    const ast = parseClass(
+      src([
+        'object "User : Alice" as alice {',
+        '  firstName = Alice',
+        '  lastName = Wonderland',
+        '  age = 30',
+        '}',
+        'object "User : Bob" as bob {',
+        '  firstName = Bob',
+        '  lastName = Hope',
+        '  age = 45',
+        '}',
+        'object Address {',
+        '  street = 123 Main St',
+        '  city = Springfield',
+        '}',
+        'alice --> bob : knows',
+        'alice --> Address : livesAt',
+      ]),
+    );
 
     expect(ast.classifiers).toHaveLength(3);
     expect(ast.classifiers.find((c) => c.id === 'alice')!.display).toBe('User : Alice');

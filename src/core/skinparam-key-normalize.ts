@@ -43,10 +43,7 @@ export function normaliseKey(raw: string): string {
   // Step 2: collapse sequenceparticipant / sequenceactor prefix
   key = key.replace(/sequence(participant|actor)/g, '$1');
   // Step 3: collapse diagram-type arrow prefixes to plain "arrow"
-  key = key.replace(
-    /(?:activity|class|component|object|sequence|state|usecase)arrow/g,
-    'arrow',
-  );
+  key = key.replace(/(?:activity|class|component|object|sequence|state|usecase)arrow/g, 'arrow');
   // Step 4: normalise "align" suffix to "alignment"
   key = key.replace(/align$/, 'alignment');
   return key;

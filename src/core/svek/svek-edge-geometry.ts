@@ -31,9 +31,7 @@ import { DotPath } from '../klimt/shape/DotPath.js';
  */
 export function buildDotPathFromSplinePoints(points: readonly Point2D[]): DotPath {
   if (points.length < 4 || (points.length - 1) % 3 !== 0) {
-    throw new Error(
-      `buildDotPathFromSplinePoints: expected 1 + 3*n points (n>=1), got ${points.length}`,
-    );
+    throw new Error(`buildDotPathFromSplinePoints: expected 1 + 3*n points (n>=1), got ${points.length}`);
   }
   let path = DotPath.fromBeziers([]);
   const first = points[0]!;

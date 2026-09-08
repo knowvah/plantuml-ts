@@ -21,10 +21,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { MONOSPACED } from '../../../src/core/klimt/creole/Parser.js';
 import { linkWrap } from '../../../src/core/svg.js';
-import {
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-} from '../../../src/diagrams/sequence/sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from '../../../src/diagrams/sequence/sequence-creole.js';
 import { sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
@@ -89,10 +86,7 @@ describe('sequenceCreoleRuns — fonts', () => {
     const runs = runsOf('a<size:20>big</size>');
     expect(runs.map((r) => r.fontSize)).toEqual([ARROW_FONT.size, 20]);
     // Measured at the run OWN size, not the ambient one.
-    expect(runs[1]!.textWidth).toBeCloseTo(
-      measurer.measure('big', { family: ARROW_FONT.family, size: 20 }).width,
-      10,
-    );
+    expect(runs[1]!.textWidth).toBeCloseTo(measurer.measure('big', { family: ARROW_FONT.family, size: 20 }).width, 10);
   });
 
   it('starts from the caller bold/italic font spec', () => {
@@ -117,9 +111,7 @@ describe('sequenceCreoleRuns — measurement identity', () => {
       expect(run.text).toBe(line);
       expect(run.textWidth).toBe(measurer.measure(line, ARROW_FONT).width);
       expect(run.textLineHeight).toBe(measurer.measure(line, ARROW_FONT).height);
-      expect(run.textAscent).toBe(
-        measurer.measure(line, ARROW_FONT).height - measurer.getDescent(ARROW_FONT, line),
-      );
+      expect(run.textAscent).toBe(measurer.measure(line, ARROW_FONT).height - measurer.getDescent(ARROW_FONT, line));
     }
   });
 
@@ -340,6 +332,10 @@ describe('guillemets', () => {
   });
 
   it('leaves a line with no guillemet run untouched', () => {
-    expect(runsOf('a < b').map((r) => r.text).join('')).toBe('a < b');
+    expect(
+      runsOf('a < b')
+        .map((r) => r.text)
+        .join(''),
+    ).toBe('a < b');
   });
 });

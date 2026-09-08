@@ -1,7 +1,7 @@
 /**
  * T13 (mission dispatch-by-parse-attempt): unit coverage for the commands
  *  ported across the `command-*.ts` family modules, registered in
-  * `sequence-command-registry.ts`, to close the sequence
+ * `sequence-command-registry.ts`, to close the sequence
  * engine's refusal-coverage bucket. Each `describe` block cites the
  * upstream `Command` it exercises.
  */
@@ -103,13 +103,7 @@ describe('page/layout no-ops', () => {
   });
 
   it('recognises minwidth, ignorenewpage, autonewpage, set separator', () => {
-    const ast = parse([
-      'minwidth 600',
-      'ignorenewpage',
-      'autonewpage 140',
-      'set separator none',
-      'Alice -> Bob : hi',
-    ]);
+    const ast = parse(['minwidth 600', 'ignorenewpage', 'autonewpage 140', 'set separator none', 'Alice -> Bob : hi']);
     expect(messages(ast.events)).toHaveLength(1);
   });
 });

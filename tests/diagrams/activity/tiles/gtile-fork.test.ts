@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
-import {
-  NORTH_HOOK,
-  SOUTH_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
 // Constants mirroring the implementation

@@ -38,9 +38,7 @@ describe('=-body arrows (CommandLinkClass ARROW_BODY [-=.])', () => {
   });
 
   it('parses map-row port links (lafemo-98-ruri220 shape)', () => {
-    const ast = parse(
-      'map Foo {\nabc => 123\n}\nmap Bar {\ndef => 456\n}\nFoo::abc => Bar::def',
-    );
+    const ast = parse('map Foo {\nabc => 123\n}\nmap Bar {\ndef => 456\n}\nFoo::abc => Bar::def');
     expect(ast.relationships).toHaveLength(1);
     const rel = ast.relationships[0]!;
     expect(rel.from).toBe('Foo');

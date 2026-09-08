@@ -6,10 +6,7 @@
  * out of class-commands.ts to stay under the line cap; order preserved
  * (spread fourth in COMMANDS, right after the relationship group).
  */
-import {
-  applyClassifierDecl,
-  parseClassifierDecl,
-} from './class-declaration-parser.js';
+import { applyClassifierDecl, parseClassifierDecl } from './class-declaration-parser.js';
 import { OBJECT_COMMANDS } from './class-object-commands.js';
 import { MAP_COMMANDS } from './class-map-commands.js';
 import { JSON_COMMANDS } from './class-json-commands.js';

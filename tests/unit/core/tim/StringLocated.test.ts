@@ -72,17 +72,17 @@ describe('StringLocated#append (batch 2b addition)', () => {
 });
 
 describe('StringLocated#removeInnerComment (batch 2b addition)', () => {
-  it('strips a leading /\'...\'/ comment', () => {
+  it("strips a leading /'...'/ comment", () => {
     const sl = new StringLocated("/' hidden '/ rest", undefined);
     expect(sl.removeInnerComment().getString()).toBe(' rest');
   });
 
-  it('strips a trailing /\'...\'/ comment', () => {
+  it("strips a trailing /'...'/ comment", () => {
     const sl = new StringLocated("rest /' hidden '/", undefined);
     expect(sl.removeInnerComment().getString()).toBe('rest ');
   });
 
-  it('strips a triple-quoted /\'\'\'...\'\'\'/ fenced comment', () => {
+  it("strips a triple-quoted /'''...'''/ fenced comment", () => {
     const sl = new StringLocated("before /'''note'''/ after", undefined);
     expect(sl.removeInnerComment().getString()).toBe('before  after');
   });

@@ -41,10 +41,7 @@ describe('JarMeasurer — jar-faithful AWT string measurer (D12)', () => {
     });
 
     it('12pt spot-check matches README: W = 10.265625px', () => {
-      expect(m.measure('W', { family: 'SansSerif', size: 12 }).width).toBeCloseTo(
-        10.265625,
-        6,
-      );
+      expect(m.measure('W', { family: 'SansSerif', size: 12 }).width).toBeCloseTo(10.265625, 6);
     });
   });
 
@@ -69,15 +66,11 @@ describe('JarMeasurer — jar-faithful AWT string measurer (D12)', () => {
 
   describe('italic reuses the plain table (empirically verified: no advance change)', () => {
     it('italic-only measures identically to plain', () => {
-      expect(m.measure('Hello World', italic14)).toEqual(
-        m.measure('Hello World', plain14),
-      );
+      expect(m.measure('Hello World', italic14)).toEqual(m.measure('Hello World', plain14));
     });
 
     it('bold+italic measures identically to bold alone', () => {
-      expect(m.measure('Hello World', boldItalic14)).toEqual(
-        m.measure('Hello World', bold14),
-      );
+      expect(m.measure('Hello World', boldItalic14)).toEqual(m.measure('Hello World', bold14));
     });
   });
 
@@ -165,10 +158,7 @@ describe('JarMeasurer — jar-faithful AWT string measurer (D12)', () => {
   describe('empty string', () => {
     it('measures zero width, but height/descent are still style-derived constants', () => {
       expect(m.measure('', plain14).width).toBe(0);
-      expect(m.measure('', plain14).height).toBeCloseTo(
-        (0.9667969 + 0.2109375) * 14,
-        5,
-      );
+      expect(m.measure('', plain14).height).toBeCloseTo((0.9667969 + 0.2109375) * 14, 5);
     });
   });
 });

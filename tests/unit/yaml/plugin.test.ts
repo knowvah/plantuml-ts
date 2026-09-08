@@ -5,20 +5,4 @@ describe('yamlPlugin', () => {
   it('has type yaml', () => {
     expect(yamlPlugin.type).toBe('yaml');
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 });

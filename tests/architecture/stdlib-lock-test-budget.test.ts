@@ -384,7 +384,11 @@ function checkFile(file: string, defaultMaxWaitMs: number): string[] {
   const analysis: FileAnalysis = {
     stripped,
     lockSites: findLockCallSites(stripped, defaultMaxWaitMs),
-    helperThresholds: resolveHelperThresholds(stripped, findAllFunctionDeclarations(stripped), findLockCallSites(stripped, defaultMaxWaitMs)),
+    helperThresholds: resolveHelperThresholds(
+      stripped,
+      findAllFunctionDeclarations(stripped),
+      findLockCallSites(stripped, defaultMaxWaitMs),
+    ),
   };
 
   const violations: string[] = [];

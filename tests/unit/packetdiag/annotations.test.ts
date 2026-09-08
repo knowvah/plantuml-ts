@@ -18,9 +18,7 @@ function src(lines: string[]): UmlSource {
 function parseOk(lines: string[]): PacketDiagramAST {
   const parsed = parsePacket(src(lines));
   if ('refused' in parsed) {
-    throw new Error(
-      `packetdiag refused at line ${String(parsed.line)} (${parsed.kind}): ${parsed.message}`,
-    );
+    throw new Error(`packetdiag refused at line ${String(parsed.line)} (${parsed.kind}): ${parsed.message}`);
   }
   return parsed;
 }

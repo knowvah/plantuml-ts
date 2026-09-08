@@ -14,11 +14,7 @@
 
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type {
-  DotInputNode,
-  DotInputEdge,
-  DotInputCluster,
-} from '../../core/graph-layout.js';
+import type { DotInputNode, DotInputEdge, DotInputCluster } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import {
   type DescriptionNodeGeo,
@@ -95,7 +91,10 @@ function buildPortNode(
   measurer: StringMeasurer,
 ): DotInputNode {
   const dotNode: DotInputNode = {
-    id, width: dims.width, height: dims.height, isPort: true,
+    id,
+    width: dims.width,
+    height: dims.height,
+    isPort: true,
     attributes: { rank: node.position === 'portout' ? 'sink' : 'source' },
   };
   if (isPortLabelWide(node, fontSpec, measurer)) {
@@ -169,7 +168,9 @@ export function buildDotNodes(
     // (`visibleStereotypeLabels`'s own doc comment).
     const sizedNode = nodeWithVisibleStereotype(node, stereotypeRules);
     const dims = measureLeafNode(
-      sizedNode, fontSpec, measurer,
+      sizedNode,
+      fontSpec,
+      measurer,
       {
         componentStyle: ctx.componentStyle,
         actorStyle: ctx.actorStyle,
@@ -210,8 +211,13 @@ export function buildDotNodes(
     if (c === undefined) continue;
     result.push(
       buildAnchorNode(
-        clusterId, c.display, c.symbol, portClusterIds.has(clusterId),
-        groupAnchorClusterIds.has(clusterId), fontSpec, measurer,
+        clusterId,
+        c.display,
+        c.symbol,
+        portClusterIds.has(clusterId),
+        groupAnchorClusterIds.has(clusterId),
+        fontSpec,
+        measurer,
       ),
     );
   }
@@ -265,9 +271,7 @@ export function buildDotEdges(
   const dotEdgeToLinkIdx = new Map<string, number>();
   const edgeContainerEndpoints = new Map<string, EdgeContainerEndpoints>();
   const groupAnchorClusterIds = new Set<string>();
-  const clusterIdByContainerAstId = new Map(
-    ctx.containers.map((c) => [c.astId, c.clusterId]),
-  );
+  const clusterIdByContainerAstId = new Map(ctx.containers.map((c) => [c.astId, c.clusterId]));
 
   for (let i = 0; i < links.length; i++) {
     const link = links[i]!;
@@ -278,11 +282,17 @@ export function buildDotEdges(
     // `removed` node-id set (runLayout's dotEdges.filter below).
     if (link.removed === true) continue;
     const fromRes = resolveEndpoint(
-      link.from, ctx.leafIdSet, ctx.astNodeById, clusterIdByContainerAstId,
+      link.from,
+      ctx.leafIdSet,
+      ctx.astNodeById,
+      clusterIdByContainerAstId,
       ctx.qualifiedPathToDotKey,
     );
     const toRes = resolveEndpoint(
-      link.to, ctx.leafIdSet, ctx.astNodeById, clusterIdByContainerAstId,
+      link.to,
+      ctx.leafIdSet,
+      ctx.astNodeById,
+      clusterIdByContainerAstId,
       ctx.qualifiedPathToDotKey,
     );
     if (fromRes === undefined || toRes === undefined) continue;
@@ -363,11 +373,20 @@ function buildGeoNode(
   // instead of the jar's single leaf-styled `b` box).
   if (!isEffectiveCluster(astNode, removed)) {
     const pos = leafPosMap.get(key) ?? {
-      x: 0, y: 0, width: EMPTY_CONTAINER_WIDTH, height: EMPTY_CONTAINER_HEIGHT,
+      x: 0,
+      y: 0,
+      width: EMPTY_CONTAINER_WIDTH,
+      height: EMPTY_CONTAINER_HEIGHT,
     };
     const geo: DescriptionNodeGeo = {
-      id: key, symbol: astNode.symbol, display: astNode.display,
-      x: pos.x, y: pos.y, width: pos.width, height: pos.height, children: [],
+      id: key,
+      symbol: astNode.symbol,
+      display: astNode.display,
+      x: pos.x,
+      y: pos.y,
+      width: pos.width,
+      height: pos.height,
+      children: [],
     };
     const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
     if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
@@ -388,20 +407,24 @@ function buildGeoNode(
   // `isEffectiveCluster` check.
   const children = astNode.children
     .filter((c) => !removed.has(c.id))
-    .map((c) => buildGeoNode(
-      c, leafPosMap, childAncestors, collidingIds, removed, hidden, stereotypeRules, portClusterCtx,
-    ));
+    .map((c) =>
+      buildGeoNode(c, leafPosMap, childAncestors, collidingIds, removed, hidden, stereotypeRules, portClusterCtx),
+    );
   // G1b/J2 (mechanism B): a cluster with port children gets its box from
   // `FrontierCalculator`/`manageEntryExitPoint`, not the plain padded-union
   // formula -- see frontier-cluster-bbox.ts's doc comment.
   const portInfo = portClusterCtx.infoByAstId.get(key);
-  const bbox = portInfo === undefined
-    ? computeContainerBbox(children)
-    : computePortClusterBbox(children, portInfo, portClusterCtx.spacing);
+  const bbox =
+    portInfo === undefined
+      ? computeContainerBbox(children)
+      : computePortClusterBbox(children, portInfo, portClusterCtx.spacing);
   applyPortLabelPositions(children, bbox);
   const geo: DescriptionNodeGeo = {
-    id: key, symbol: astNode.symbol, display: astNode.display,
-    ...bbox, children,
+    id: key,
+    symbol: astNode.symbol,
+    display: astNode.display,
+    ...bbox,
+    children,
   };
   const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
   if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
@@ -446,9 +469,7 @@ export function buildGeoTree(
   return astNodes
     .filter((n) => !removed.has(n.id))
     .filter((n) => leafPosMap.has(dotKeyFor([], n.id, collidingIds)) || isEffectiveCluster(n, removed))
-    .map((n) => buildGeoNode(
-      n, leafPosMap, [], collidingIds, removed, hidden, stereotypeRules, portClusterCtx,
-    ));
+    .map((n) => buildGeoNode(n, leafPosMap, [], collidingIds, removed, hidden, stereotypeRules, portClusterCtx));
   // #lizard forgives -- pre-existing (7 params): the cohesive geo-tree
   // build context threaded from buildGeoAndEdges's own single call site --
   // mission G5/C1 500-line split (pure move), not introduced here.

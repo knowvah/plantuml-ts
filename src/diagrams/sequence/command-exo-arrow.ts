@@ -235,8 +235,7 @@ function getArrowPart(dressing: string, type: MessageExoType): ArrowPart {
  * @see ~/git/plantuml/.../skin/ArrowConfiguration.java:152-159
  */
 function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfiguration {
-  if (config.dressing2.head !== 'NONE')
-    return { ...config, dressing2: { ...config.dressing2, part } };
+  if (config.dressing2.head !== 'NONE') return { ...config, dressing2: { ...config.dressing2, part } };
   return { ...config, dressing1: { ...config.dressing1, part } };
 }
 
@@ -247,14 +246,9 @@ function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfigurati
  * it; hoisting it into `sequence-parse-helpers.ts` is a follow-on.
  * @see ~/git/plantuml/.../command/CommandArrow.java:480-505
  */
-function applyStyle(
-  arrowStyle: string | undefined,
-  config: ArrowConfiguration,
-): ArrowConfiguration {
+function applyStyle(arrowStyle: string | undefined, config: ArrowConfiguration): ArrowConfiguration {
   if (arrowStyle === undefined) return config;
-  const dotted = arrowStyle
-    .split(',')
-    .some((s) => s.toLowerCase() === 'dashed' || s.toLowerCase() === 'dotted');
+  const dotted = arrowStyle.split(',').some((s) => s.toLowerCase() === 'dashed' || s.toLowerCase() === 'dotted');
   return dotted ? { ...config, dashed: true } : config;
 }
 
@@ -398,9 +392,7 @@ function exoArrowConfiguration(g: Groups, type: MessageExoType, dressing: string
  * matched and dropped as they are for `CommandArrow`.
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:138-147
  */
-function exoOptionalFields(
-  g: Groups,
-): Pick<MessageExoEvent, 'url' | 'lifeColor' | 'parallel' | 'anchor'> {
+function exoOptionalFields(g: Groups): Pick<MessageExoEvent, 'url' | 'lifeColor' | 'parallel' | 'anchor'> {
   const url = urlOf(g['URL']);
   const lifeColor = g['LIFECOLOR'];
   const anchorName = g['ANCHOR1'];
@@ -416,10 +408,7 @@ function exoOptionalFields(
  *  alternative captures its own quotes, hence the strip.
  *  @see ~/git/plantuml/.../command/CommandExoArrowAny.java:76-78 */
 function getOrCreateParticipant(state: ParseState, g: Groups): string {
-  const code = eventuallyRemoveStartingAndEndingDoubleQuote(
-    g['PARTICIPANT'] ?? '',
-    '"([:',
-  ) as string;
+  const code = eventuallyRemoveStartingAndEndingDoubleQuote(g['PARTICIPANT'] ?? '', '"([:') as string;
   ensureParticipant(state, code);
   return code;
 }
@@ -428,12 +417,7 @@ function getOrCreateParticipant(state: ParseState, g: Groups): string {
  *  isShortArrow(arg), location)`, plus the URL and the two teoz-only fields
  *  upstream sets on it immediately after (`:138-147`).
  *  @see ~/git/plantuml/.../command/CommandExoArrowAny.java:136-147 */
-function messageExoOf(
-  state: ParseState,
-  g: Groups,
-  type: MessageExoType,
-  participant: string,
-): MessageExoEvent {
+function messageExoOf(state: ParseState, g: Groups, type: MessageExoType, participant: string): MessageExoEvent {
   const arrow = exoArrowConfiguration(g, type, g['ARROW_DRESSING1'] ?? g['ARROW_DRESSING2'] ?? '');
   return {
     kind: 'messageExo',
@@ -459,19 +443,14 @@ function messageExoOf(
  * message has no defined answer to give them.
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:71-184
  */
-function executeExoArrow(
-  state: ParseState,
-  match: RegExpExecArray,
-  getMessageExoType: GetMessageExoType,
-): void {
+function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageExoType: GetMessageExoType): void {
   const g: Groups = match.groups ?? {};
   const type = getMessageExoType(g);
   if (type === undefined) return;
 
   const participant = getOrCreateParticipant(state, g);
   const activation = g['ACTIVATION'];
-  if (activation?.startsWith('*') === true)
-    emit(state, { kind: 'activate', participantId: participant });
+  if (activation?.startsWith('*') === true) emit(state, { kind: 'activate', participantId: participant });
 
   const msg = messageExoOf(state, g, type, participant);
   emit(state, msg);

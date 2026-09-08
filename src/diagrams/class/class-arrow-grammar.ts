@@ -181,18 +181,36 @@ type DecorKind =
 // they get their own kinds that simply fall through to the default arm,
 // exactly like 'notNavigable'/'plus' today.
 const HEAD1_KIND: Record<string, DecorKind> = {
-  '': 'none', '<|': 'extends', '<_': 'arrow', '<': 'arrow',
-  '*': 'composition', 'o': 'aggregation', 'x': 'notNavigable',
-  '+': 'plus', ')': 'lollipop',
-  '<||': 'extends', '<|:': 'extends', '^': 'extends',
-  '#': 'square', '}o': 'crowfoot',
+  '': 'none',
+  '<|': 'extends',
+  '<_': 'arrow',
+  '<': 'arrow',
+  '*': 'composition',
+  o: 'aggregation',
+  x: 'notNavigable',
+  '+': 'plus',
+  ')': 'lollipop',
+  '<||': 'extends',
+  '<|:': 'extends',
+  '^': 'extends',
+  '#': 'square',
+  '}o': 'crowfoot',
 };
 const HEAD2_KIND: Record<string, DecorKind> = {
-  '': 'none', '|>': 'extends', '_>': 'arrow', '>': 'arrow',
-  '*': 'composition', 'o': 'aggregation', 'x': 'notNavigable',
-  '+': 'plus', '(': 'lollipop',
-  '||>': 'extends', ':|>': 'extends', '^': 'extends',
-  '#': 'square', 'o{': 'crowfoot',
+  '': 'none',
+  '|>': 'extends',
+  '_>': 'arrow',
+  '>': 'arrow',
+  '*': 'composition',
+  o: 'aggregation',
+  x: 'notNavigable',
+  '+': 'plus',
+  '(': 'lollipop',
+  '||>': 'extends',
+  ':|>': 'extends',
+  '^': 'extends',
+  '#': 'square',
+  'o{': 'crowfoot',
 };
 
 /**
@@ -352,9 +370,7 @@ export function parseArrowDecors(
   const { head1, head2 } = splitCanonicalHeads(canonicalizeArrow(rawArrow));
   const d1 = headToDecor(head1);
   const d2 = headToDecor(head2);
-  return swapDirection
-    ? { targetDecor: d1, sourceDecor: d2 }
-    : { sourceDecor: d1, targetDecor: d2 };
+  return swapDirection ? { targetDecor: d1, sourceDecor: d2 } : { sourceDecor: d1, targetDecor: d2 };
 }
 
 /**
@@ -491,13 +507,24 @@ export function parseArrowStyleOverrides(rawArrow: string): ArrowStyleOverrides 
       const token = rawToken.trim();
       if (token.length === 0) continue;
       const lower = token.toLowerCase();
-      if (lower === 'dashed') { result.lineStyle = 'dashed'; delete result.thickness; }
-      else if (lower === 'dotted') { result.lineStyle = 'dotted'; delete result.thickness; }
-      else if (lower === 'bold') { result.lineStyle = 'bold'; delete result.thickness; }
-      else if (lower === 'single') { result.single = true; } // goSingle() -- add-time dedup flag
-      else if (lower === 'norank') { result.norank = true; } // goNorank() -- constraint=false
-      else if (NON_COLOR_KEYWORDS.has(lower)) { /* upstream no-op / DOT-only, see doc comment */ }
-      else {
+      if (lower === 'dashed') {
+        result.lineStyle = 'dashed';
+        delete result.thickness;
+      } else if (lower === 'dotted') {
+        result.lineStyle = 'dotted';
+        delete result.thickness;
+      } else if (lower === 'bold') {
+        result.lineStyle = 'bold';
+        delete result.thickness;
+      } else if (lower === 'single') {
+        result.single = true;
+      } // goSingle() -- add-time dedup flag
+      else if (lower === 'norank') {
+        result.norank = true;
+      } // goNorank() -- constraint=false
+      else if (NON_COLOR_KEYWORDS.has(lower)) {
+        /* upstream no-op / DOT-only, see doc comment */
+      } else {
         const m = CLASS_THICKNESS_TOKEN_RE.exec(lower);
         if (m !== null) {
           result.thickness = Number(m[1]);

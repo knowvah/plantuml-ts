@@ -232,7 +232,13 @@ describe('USymbolComponent1 (T6, AC1/AC2) — UML1 legacy-tab notation', () => {
   test('asSmall renders conformant vs. the jar fragment ([Foo], componentStyle uml1)', () => {
     const symbol = new USymbolComponent1();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_COMPONENT1_FOO);
   });
 
@@ -245,7 +251,13 @@ describe('USymbolComponent2 (T6, AC1/AC2) — UML2 plug-icon notation', () => {
   test('asSmall renders conformant vs. the jar fragment ([Foo], componentStyle uml2)', () => {
     const symbol = new USymbolComponent2();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_COMPONENT2_FOO);
   });
 
@@ -257,9 +269,21 @@ describe('USymbolComponent2 (T6, AC1/AC2) — UML2 plug-icon notation', () => {
 describe('USymbolComponent1 vs USymbolComponent2 (AC2) — distinct jar shapes', () => {
   test('componentStyle uml1 and uml2 produce two different fragments for the same label', () => {
     const ctx1 = fooSymbolContext();
-    const asSmall1 = new USymbolComponent1().asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx1, HorizontalAlignment.CENTER);
+    const asSmall1 = new USymbolComponent1().asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx1,
+      HorizontalAlignment.CENTER,
+    );
     const ctx2 = fooSymbolContext();
-    const asSmall2 = new USymbolComponent2().asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx2, HorizontalAlignment.CENTER);
+    const asSmall2 = new USymbolComponent2().asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx2,
+      HorizontalAlignment.CENTER,
+    );
 
     const svg1 = render(asSmall1);
     const svg2 = render(asSmall2);
@@ -278,11 +302,17 @@ describe('USymbolNode (T6, AC1/AC3) — 3D-box notation', () => {
   test('asSmall renders conformant vs. the jar fragment (node Foo)', () => {
     const symbol = new USymbolNode();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_NODE_FOO);
   });
 
-  test('AC3: the 3D-offset polygon points match USymbolNode.java\'s constants exactly', () => {
+  test("AC3: the 3D-offset polygon points match USymbolNode.java's constants exactly", () => {
     // USymbolNode.java#drawNode: addPoint(0,10); (10,0); (width,0);
     // (width,height-10); (width-10,height); (0,height); (0,10) — for
     // width=64.7051, height=46.4883 (this fixture's real jar dimension).
@@ -313,7 +343,13 @@ describe('USymbolArtifact (T6, AC1) — dog-ear corner notation', () => {
   test('asSmall renders conformant vs. the jar fragment (artifact Foo)', () => {
     const symbol = new USymbolArtifact();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ARTIFACT_FOO);
   });
 
@@ -326,7 +362,13 @@ describe('USymbolFile (T6, AC1) — dog-ear page-fold notation', () => {
   test('asSmall renders conformant vs. the jar fragment (file Foo)', () => {
     const symbol = new USymbolFile();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_FILE_FOO);
   });
 
@@ -339,7 +381,13 @@ describe('USymbolFrame (T6, AC1) — name-tab notation', () => {
   test('asSmall renders conformant vs. the jar fragment (frame Foo)', () => {
     const symbol = new USymbolFrame('frame');
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_FRAME_FOO);
   });
 
@@ -392,12 +440,28 @@ describe('USymbolComponent1/asBig — delegates to USymbolComponent2', () => {
     const title = fixedTextBlock(20, 10);
     const stereo = fixedTextBlock(16, 8);
     const ctx1 = fooBigContext();
-    const big1 = new USymbolComponent1().asBig(title, HorizontalAlignment.CENTER, stereo, WIDTH, HEIGHT, ctx1, HorizontalAlignment.CENTER);
+    const big1 = new USymbolComponent1().asBig(
+      title,
+      HorizontalAlignment.CENTER,
+      stereo,
+      WIDTH,
+      HEIGHT,
+      ctx1,
+      HorizontalAlignment.CENTER,
+    );
     const ug1 = newGraphic();
     big1.drawU(ug1);
 
     const ctx2 = fooBigContext();
-    const big2 = new USymbolComponent2().asBig(title, HorizontalAlignment.CENTER, stereo, WIDTH, HEIGHT, ctx2, HorizontalAlignment.CENTER);
+    const big2 = new USymbolComponent2().asBig(
+      title,
+      HorizontalAlignment.CENTER,
+      stereo,
+      WIDTH,
+      HEIGHT,
+      ctx2,
+      HorizontalAlignment.CENTER,
+    );
     const ug2 = newGraphic();
     big2.drawU(ug2);
 
@@ -511,7 +575,13 @@ describe('USymbolFile/asSmall — roundCorner=0 branch', () => {
   test('draws a plain UPolygon outline (not the arced UPath) when roundCorner is 0', () => {
     const symbol = new USymbolFile();
     const ctx = new SymbolContext('#F1F1F1', '#181818', UStroke.withThickness(0.5), 0, 0, 0);
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ug = newGraphic();
     asSmall.drawU(ug);
     const svg = ug.getSvgString();

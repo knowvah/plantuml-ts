@@ -58,10 +58,7 @@
  */
 import type { FontConfiguration } from './klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './creole-atoms.js';
-import {
-  measureInlineAtom,
-  spriteAtomScale,
-} from './creole-atoms-measure.js';
+import { measureInlineAtom, spriteAtomScale } from './creole-atoms-measure.js';
 import type { SpriteRegistry } from './sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from './sprite-commands.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from './klimt/sprite/sprite-raster.js';
@@ -267,7 +264,12 @@ export function resolveSvgSpriteAtom(
   // draws at a different size than it measures.
   const scale = spriteAtomScale(atom, font.size);
   const collector = SpritePrimitiveCollector.create();
-  new SvgNanoParser(svg).drawU(collector, scale, resolveOptionalColor(font.color), resolveOptionalColor(atom.forcedColor));
+  new SvgNanoParser(svg).drawU(
+    collector,
+    scale,
+    resolveOptionalColor(font.color),
+    resolveOptionalColor(atom.forcedColor),
+  );
   return { kind: 'drawable', primitives: [...collector.collected()], width: dims.width, height: dims.height };
 }
 

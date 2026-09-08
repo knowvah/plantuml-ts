@@ -11,12 +11,7 @@
 
 import { refuse } from '../../src/core/parse-refusal.js';
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  DiagramRegistry,
-  type SyncPlugin,
-  type AsyncPlugin,
-  type DiagramPlugin,
-} from '../../src/core/dispatcher.js';
+import { DiagramRegistry, type SyncPlugin, type AsyncPlugin, type DiagramPlugin } from '../../src/core/dispatcher.js';
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
@@ -34,9 +29,7 @@ function makeSyncPlugin(): SyncPlugin & { layoutSyncCalled: boolean } {
     type: 'sequence',
     layoutSyncCalled: false,
     parse: (source: UmlSource) =>
-      source.lines.some((l) => l.includes('sync'))
-        ? { kind: 'sync-ast' }
-        : refuse('syntax', 0, 0, 'Syntax Error?'),
+      source.lines.some((l) => l.includes('sync')) ? { kind: 'sync-ast' } : refuse('syntax', 0, 0, 'Syntax Error?'),
     layoutSync: (_ast: unknown, _theme, _measurer) => {
       plugin.layoutSyncCalled = true;
       return { kind: 'sync-geo' };
@@ -54,9 +47,7 @@ function makeAsyncPlugin(): AsyncPlugin & { layoutCalled: boolean } {
     type: 'class',
     layoutCalled: false,
     parse: (source: UmlSource) =>
-      source.lines.some((l) => l.includes('async'))
-        ? { kind: 'async-ast' }
-        : refuse('syntax', 0, 0, 'Syntax Error?'),
+      source.lines.some((l) => l.includes('async')) ? { kind: 'async-ast' } : refuse('syntax', 0, 0, 'Syntax Error?'),
     layout: (_ast: unknown, _theme, _measurer): Promise<unknown> => {
       plugin.layoutCalled = true;
       return Promise.resolve({ kind: 'async-geo' });

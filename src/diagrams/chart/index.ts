@@ -15,7 +15,6 @@ type ChartGeoWithErrors = ChartGeometry & { errors?: readonly string[] };
 export const chartPlugin: SyncPlugin<ChartDiagramAST, ChartGeoWithErrors> = {
   type: 'chart',
 
-
   parse(source) {
     return parseChart(source);
   },

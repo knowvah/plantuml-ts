@@ -28,9 +28,7 @@ function parse(source: string): ClassDiagramAST {
 
 describe('stacked stereotypes on object/map declarations', () => {
   it('parses fafozi-27-reja300 shape: class + object each with <<Bar>> <<Foo>>', () => {
-    const ast = parse(
-      'class "Class1" as node1 <<Bar>> <<Foo>>\nobject "Object1" as node2 <<Bar>> <<Foo>>',
-    );
+    const ast = parse('class "Class1" as node1 <<Bar>> <<Foo>>\nobject "Object1" as node2 <<Bar>> <<Foo>>');
     expect(ast.classifiers.map((c) => ({ id: c.id, kind: c.kind }))).toEqual([
       { id: 'node1', kind: 'class' },
       { id: 'node2', kind: 'object' },

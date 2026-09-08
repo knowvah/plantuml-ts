@@ -74,16 +74,10 @@ export function splitTopLevelCommas(raw: string): string[] {
  * `nsId` resolved to null (dropped from its cluster) because the guard saw
  * the package's own `<`/`>` markup in the fully-qualified id.
  */
-export function splitOnSeparator(
-  id: string,
-  sep: string | null,
-  trustedPrefix?: string,
-): string[] | null {
+export function splitOnSeparator(id: string, sep: string | null, trustedPrefix?: string): string[] | null {
   if (sep === null || sep === '' || !id.includes(sep)) return null;
   const scanFrom =
-    trustedPrefix !== undefined && id.startsWith(trustedPrefix + sep)
-      ? trustedPrefix.length + sep.length
-      : 0;
+    trustedPrefix !== undefined && id.startsWith(trustedPrefix + sep) ? trustedPrefix.length + sep.length : 0;
   for (let i = scanFrom; i < id.length; i++) {
     if (NON_QUALIFIED_ID_CHARS.includes(id[i]!)) return null;
   }
@@ -225,11 +219,7 @@ function leafName(id: string, sep: string | null): string {
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:923-925
  * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:104-108
  */
-export function countByName(
-  classifiers: Classifier[],
-  sep: string | null,
-  name: string,
-): number {
+export function countByName(classifiers: Classifier[], sep: string | null, name: string): number {
   return classifiers.filter((c) => leafName(c.id, sep) === name).length;
 }
 

@@ -3,11 +3,7 @@ import { parseClass } from './parse-helper.js';
 import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
 import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import type {
-  Classifier,
-  Member,
-  Relationship,
-} from '../../../src/diagrams/class/ast.js';
+import type { Classifier, Member, Relationship } from '../../../src/diagrams/class/ast.js';
 
 // ---------------------------------------------------------------------------
 // Helper
@@ -169,9 +165,7 @@ describe('class body members', () => {
   });
 
   it('parses method with parameters', () => {
-    const c = firstClassifier(
-      'class Foo {\n  +doIt(x: int, y: String): void\n}',
-    );
+    const c = firstClassifier('class Foo {\n  +doIt(x: int, y: String): void\n}');
     const m = c.members[0] as Member;
     expect(m.name).toBe('doIt');
     expect(m.params).toEqual(['x: int', 'y: String']);
@@ -186,9 +180,7 @@ describe('class body members', () => {
   });
 
   it('parses {abstract} modifier', () => {
-    const c = firstClassifier(
-      'abstract class Base {\n  {abstract} +draw(): void\n}',
-    );
+    const c = firstClassifier('abstract class Base {\n  {abstract} +draw(): void\n}');
     const m = c.members[0] as Member;
     expect(m.isAbstract).toBe(true);
     expect(m.name).toBe('draw');
@@ -202,9 +194,7 @@ describe('class body members', () => {
   });
 
   it('collects multiple members in order', () => {
-    const c = firstClassifier(
-      'class Foo {\n  -id: int\n  +getName(): String\n}',
-    );
+    const c = firstClassifier('class Foo {\n  -id: int\n  +getName(): String\n}');
     expect(c.members).toHaveLength(2);
     expect(c.members[0]?.name).toBe('id');
     expect(c.members[1]?.name).toBe('getName');
@@ -293,14 +283,10 @@ describe('association-class couple — (A,B) .. C', () => {
     const circle = ast.classifiers.find((c) => c.kind === 'assoc-circle')!;
     // The explicit A--B edge is gone; only the 3 couple edges remain.
     expect(ast.relationships).toHaveLength(3);
-    expect(
-      ast.relationships.some((r) => r.from === 'A' && r.to === 'B'),
-    ).toBe(false);
+    expect(ast.relationships.some((r) => r.from === 'A' && r.to === 'B')).toBe(false);
     // Multiplicities move to the tail (A→circle) and head (circle→B) edges.
-    expect(ast.relationships.find((r) => r.from === 'A' && r.to === circle.id)?.fromMultiplicity)
-      .toBe('0..*');
-    expect(ast.relationships.find((r) => r.from === circle.id && r.to === 'B')?.toMultiplicity)
-      .toBe('1');
+    expect(ast.relationships.find((r) => r.from === 'A' && r.to === circle.id)?.fromMultiplicity).toBe('0..*');
+    expect(ast.relationships.find((r) => r.from === circle.id && r.to === 'B')?.toMultiplicity).toBe('1');
   });
 
   it('a self-couple (A,A) places the class-link one rank down (length 2)', () => {
@@ -567,9 +553,7 @@ describe('namespaces', () => {
     expect(ast.classifiers.find((c) => c.id === 'issues.Rabbit')).toBeDefined();
     // Both endpoints resolve to their qualified ids (arrow orders from/to).
     const rel = ast.relationships[0];
-    expect([rel?.from, rel?.to].sort()).toEqual(
-      ['issues.Rabbit', 'issues.f1.function.Fox'].sort(),
-    );
+    expect([rel?.from, rel?.to].sort()).toEqual(['issues.Rabbit', 'issues.f1.function.Fox'].sort());
   });
 
   it('dotted ref is absolute when first segment is an existing ns (bivevo)', () => {
@@ -599,9 +583,7 @@ describe('namespaces', () => {
     );
     // No `classic` ns → relative → nested under net.sourceforge.plantuml.
     expect(
-      ast.classifiers.find(
-        (c) => c.id === 'net.sourceforge.plantuml.classic.collections.ArrayList',
-      ),
+      ast.classifiers.find((c) => c.id === 'net.sourceforge.plantuml.classic.collections.ArrayList'),
     ).toBeDefined();
     // Self-prefixed ref → the leaf in the current namespace (absolute-to-self).
     expect(ast.classifiers.find((c) => c.id === 'net.sourceforge.plantuml.ArrayList')).toBeDefined();
@@ -609,8 +591,7 @@ describe('namespaces', () => {
 
   it('same short name in two namespaces are distinct nodes (lozijo)', () => {
     const ast = parse(
-      'namespace issues {\n  f1.function.Fox <|-- Rabbit\n}\n' +
-        'namespace f1.function {\n  class Fox\n}',
+      'namespace issues {\n  f1.function.Fox <|-- Rabbit\n}\n' + 'namespace f1.function {\n  class Fox\n}',
     );
     expect(ast.classifiers.find((c) => c.id === 'issues.f1.function.Fox')).toBeDefined();
     expect(ast.classifiers.find((c) => c.id === 'f1.function.Fox')).toBeDefined();
@@ -839,9 +820,7 @@ describe('hide/show directives — parsing', () => {
 
 describe('hide/show directives — effect on AST', () => {
   it('hide members marks all members hidden on a class with members', () => {
-    const ast = parse(
-      'hide members\nclass Foo {\n  +name: String\n  +run(): void\n}',
-    );
+    const ast = parse('hide members\nclass Foo {\n  +name: String\n  +run(): void\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.members).toHaveLength(2);
     expect(c.members[0]?.hidden).toBe(true);
@@ -861,26 +840,20 @@ describe('hide/show directives — effect on AST', () => {
   });
 
   it('hide empty members does not mark members hidden when class has members', () => {
-    const ast = parse(
-      'hide empty members\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('hide empty members\nclass Foo {\n  +name: String\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.members[0]?.hidden).toBeUndefined();
   });
 
   it('show after hide — last directive wins for the same target', () => {
-    const ast = parse(
-      'hide members\nshow members\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('hide members\nshow members\nclass Foo {\n  +name: String\n}');
     const c = ast.classifiers[0] as Classifier;
     // show wins — members should not be hidden
     expect(c.members[0]?.hidden).toBeUndefined();
   });
 
   it('hide after show — last directive wins for the same target', () => {
-    const ast = parse(
-      'show members\nhide members\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('show members\nhide members\nclass Foo {\n  +name: String\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.members[0]?.hidden).toBe(true);
   });
@@ -898,18 +871,14 @@ describe('hide/show directives — effect on AST', () => {
   });
 
   it('hide circle does not affect member hidden flags', () => {
-    const ast = parse(
-      'hide circle\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('hide circle\nclass Foo {\n  +name: String\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.hideCircle).toBe(true);
     expect(c.members[0]?.hidden).toBeUndefined();
   });
 
   it('hide empty fields marks attributes hidden when class has no attributes', () => {
-    const ast = parse(
-      'hide empty fields\nclass Foo {\n  +run(): void\n}',
-    );
+    const ast = parse('hide empty fields\nclass Foo {\n  +run(): void\n}');
     // Foo has only a method, no attributes — but hide empty fields does not affect
     // methods; the class has no fields to hide so nothing gets marked hidden
     const c = ast.classifiers[0] as Classifier;
@@ -917,9 +886,7 @@ describe('hide/show directives — effect on AST', () => {
   });
 
   it('hide empty methods marks methods hidden when class has no methods', () => {
-    const ast = parse(
-      'hide empty methods\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('hide empty methods\nclass Foo {\n  +name: String\n}');
     // Foo has only an attribute, no methods — but hide empty methods does not
     // affect attributes; the class has no methods to hide
     const c = ast.classifiers[0] as Classifier;
@@ -927,9 +894,7 @@ describe('hide/show directives — effect on AST', () => {
   });
 
   it('hide members combined with hide circle — both applied independently', () => {
-    const ast = parse(
-      'hide members\nhide circle\nclass Foo {\n  +name: String\n}',
-    );
+    const ast = parse('hide members\nhide circle\nclass Foo {\n  +name: String\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.hideCircle).toBe(true);
     expect(c.members[0]?.hidden).toBe(true);
@@ -940,27 +905,21 @@ describe('hide/show directives — effect on AST', () => {
   // unlike `hide empty fields`/`hide empty methods`; no entity-id gate,
   // unlike G2 N26's entity-scoped `hide <entity> fields`).
   it('hide fields marks every field hidden, methods untouched', () => {
-    const ast = parse(
-      'hide fields\nclass Foo {\n  +name: String\n  +run(): void\n}',
-    );
+    const ast = parse('hide fields\nclass Foo {\n  +name: String\n  +run(): void\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.members[0]?.hidden).toBe(true); // +name: String (field)
     expect(c.members[1]?.hidden).toBeUndefined(); // +run(): void (method)
   });
 
   it('hide methods marks every method hidden, fields untouched', () => {
-    const ast = parse(
-      'hide methods\nclass Foo {\n  +name: String\n  +run(): void\n}',
-    );
+    const ast = parse('hide methods\nclass Foo {\n  +name: String\n  +run(): void\n}');
     const c = ast.classifiers[0] as Classifier;
     expect(c.members[0]?.hidden).toBeUndefined(); // +name: String (field)
     expect(c.members[1]?.hidden).toBe(true); // +run(): void (method)
   });
 
   it('hide fields applies across every classifier, unlike entity-scoped hide', () => {
-    const ast = parse(
-      'hide fields\nclass Foo {\n  +a: int\n}\nclass Bar {\n  +b: int\n}',
-    );
+    const ast = parse('hide fields\nclass Foo {\n  +a: int\n}\nclass Bar {\n  +b: int\n}');
     expect((ast.classifiers[0] as Classifier).members[0]?.hidden).toBe(true);
     expect((ast.classifiers[1] as Classifier).members[0]?.hidden).toBe(true);
   });
@@ -977,9 +936,7 @@ describe('notes on entity', () => {
   });
 
   it('each position parses (right/top/bottom)', () => {
-    const ast = parse(
-      'class A\nnote right of A : r\nnote top of A : t\nnote bottom of A : b',
-    );
+    const ast = parse('class A\nnote right of A : r\nnote top of A : t\nnote bottom of A : b');
     expect(ast.notes.map((n) => n.position)).toEqual(['right', 'top', 'bottom']);
   });
 
@@ -991,9 +948,7 @@ describe('notes on entity', () => {
   });
 
   it('coexists with classifiers and relationships (does not eat the edge)', () => {
-    const ast = parse(
-      'class User\nnote right of User\nbody\nend note\nclass Role\nUser -- Role',
-    );
+    const ast = parse('class User\nnote right of User\nbody\nend note\nclass Role\nUser -- Role');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['User', 'Role']);
     expect(ast.relationships).toHaveLength(1);
     expect(ast.notes).toHaveLength(1);
@@ -1049,11 +1004,7 @@ describe('relationships — Class::member port syntax', () => {
     const ast = parse(
       'class pack.ClassA {\na\n}\nClassB::b <-- pack.ClassA::a\npack.ClassC::c <-- ClassB::b\npack.ClassC::c <-- pack.ClassA::a',
     );
-    expect(ast.classifiers.map((c) => c.id)).toEqual([
-      'pack.ClassA',
-      'ClassB',
-      'pack.ClassC',
-    ]);
+    expect(ast.classifiers.map((c) => c.id)).toEqual(['pack.ClassA', 'ClassB', 'pack.ClassC']);
     expect(ast.relationships).toHaveLength(3);
   });
 });
@@ -1077,9 +1028,7 @@ describe('notes — freestanding (note as ALIAS ... end note)', () => {
   });
 
   it('a later relationship line referencing the alias does not create a phantom classifier', () => {
-    const ast = parse(
-      'class DrawableAdapter\nnote as N4\nbody\nend note\nN4 .> DrawableAdapter',
-    );
+    const ast = parse('class DrawableAdapter\nnote as N4\nbody\nend note\nN4 .> DrawableAdapter');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['DrawableAdapter']);
     expect(ast.relationships).toHaveLength(1);
     expect(ast.relationships[0]).toMatchObject({
@@ -1185,9 +1134,7 @@ namespace ns {
 }`);
     // The edge must exist (previously dropped because the endpoint regex rejected
     // a leading dot) and connect the root BaseClass to ns.Person.
-    const edge = ast.relationships.find(
-      (r) => r.type === 'extension' && r.to === 'BaseClass',
-    );
+    const edge = ast.relationships.find((r) => r.type === 'extension' && r.to === 'BaseClass');
     expect(edge).toBeDefined();
     expect(edge!.from).toBe('ns.Person');
     expect(edge!.to).toBe('BaseClass');
@@ -1230,12 +1177,7 @@ CLASS *-- f1
 CLASS o--> f3
 CLASS <|-- f4`);
     // 4 classifiers: CLASS, f1, f3, f4 — NOT a classifier named "*-- f1"
-    expect(ast.classifiers.map((c) => c.id).sort()).toEqual([
-      'CLASS',
-      'f1',
-      'f3',
-      'f4',
-    ]);
+    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['CLASS', 'f1', 'f3', 'f4']);
     // 3 relationships, all anchored on CLASS
     expect(ast.relationships).toHaveLength(3);
     const types = ast.relationships.map((r) => r.type).sort();
@@ -1339,9 +1281,7 @@ describe('descriptive containers (rectangle/stack/component)', () => {
 
 describe('nested containers + URL links', () => {
   it('nests brace containers via a namespace stack (package > rectangle > class)', () => {
-    const ast = parse(
-      'package "P" as XXY {\nrectangle "R" as XYY {\nclass "C" as AAB\n}\n}',
-    );
+    const ast = parse('package "P" as XXY {\nrectangle "R" as XYY {\nclass "C" as AAB\n}\n}');
     const nsIds = ast.namespaces.map((n) => n.id).sort();
     expect(nsIds).toEqual(['XXY', 'XXY.XYY']);
     expect(ast.namespaces.find((n) => n.id === 'XXY.XYY')?.parentId).toBe('XXY');
@@ -1371,9 +1311,7 @@ describe('() interface lollipop and crow-foot links', () => {
   it('parses crow-foot links, auto-creating their endpoints', () => {
     const ast = parse('A |o--o| B\nC ||--|| D\nE }o--o{ F\nG }|--|{ H\nfoo1 }-- foo2');
     // all endpoints created
-    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(
-      ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'foo1', 'foo2'],
-    );
+    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'foo1', 'foo2']);
     expect(ast.relationships).toHaveLength(5);
     expect(ast.relationships.every((r) => r.type === 'association')).toBe(true);
   });
@@ -1501,9 +1439,7 @@ function parseKeepBlanks(source: string): ReturnType<typeof parseClass> {
 
 describe('A3 — interior blank lines in multiline constructs', () => {
   it('keeps an interior blank line inside a multiline note (vivifa-42 shape)', () => {
-    const ast = parseKeepBlanks(
-      'class foo\nnote top of foo\nsome\n\nnotes\nend note',
-    );
+    const ast = parseKeepBlanks('class foo\nnote top of foo\nsome\n\nnotes\nend note');
     expect(ast.notes).toHaveLength(1);
     expect(ast.notes[0]!.text).toBe('some\n\nnotes');
   });
@@ -1576,10 +1512,10 @@ describe('A6 — singular/alias global hide targets', () => {
   });
 
   it('parses `hide member` and `hide empty method` via the same aliases', () => {
-    expect(parse('class M\nhide member').directives)
-      .toEqual([{ kind: 'hideshow', action: 'hide', target: 'members' }]);
-    expect(parse('class M\nhide empty method').directives)
-      .toEqual([{ kind: 'hideshow', action: 'hide', target: 'empty methods' }]);
+    expect(parse('class M\nhide member').directives).toEqual([{ kind: 'hideshow', action: 'hide', target: 'members' }]);
+    expect(parse('class M\nhide empty method').directives).toEqual([
+      { kind: 'hideshow', action: 'hide', target: 'empty methods' },
+    ]);
   });
 });
 

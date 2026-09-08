@@ -237,7 +237,11 @@ export function getStrokeInternal(specificLineStroke: UStroke | null, styleStrok
  * caller's resolved style default, else "nothing painted" (upstream:
  * `HColors.transparent()`).
  */
-export function resolveBackColor(isRoot: boolean, backColorOverride: Paint | null, backGroundColorDefault: Paint | null): Paint {
+export function resolveBackColor(
+  isRoot: boolean,
+  backColorOverride: Paint | null,
+  backGroundColorDefault: Paint | null,
+): Paint {
   if (isRoot) return NONE_PAINT;
   const backColor = backColorOverride ?? backGroundColorDefault;
   if (backColor === null || isTransparentPaint(backColor)) return NONE_PAINT;
@@ -308,9 +312,20 @@ export class Cluster {
     const rounded = resolveRoundCorner(this.style.roundCorner, this.style.strictUmlStyle);
     const packageStyle = this.symbolInfo.packageStyle ?? this.symbolInfo.defaultPackageStyle;
     const stroke = getStrokeInternal(this.group.specificLineStroke, this.style.strokeDefault);
-    const backColor = resolveBackColor(this.group.isRoot, this.group.backColorOverride, this.style.backGroundColorDefault);
+    const backColor = resolveBackColor(
+      this.group.isRoot,
+      this.group.backColorOverride,
+      this.style.backGroundColorDefault,
+    );
 
-    const decoration = new ClusterDecoration(packageStyle, this.symbolInfo.symbol, this.header.title, this.header.stereo, this.geometry, stroke);
+    const decoration = new ClusterDecoration(
+      packageStyle,
+      this.symbolInfo.symbol,
+      this.header.title,
+      this.header.stereo,
+      this.geometry,
+      stroke,
+    );
 
     decoration.drawU(
       ug,

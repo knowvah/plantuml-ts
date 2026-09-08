@@ -28,9 +28,7 @@ function renderFileOrFolder(entry: EntryGeometry): string {
 function renderNote(entry: EntryGeometry): string {
   const lines = entry.noteLines ?? [];
   const n = lines.length;
-  const boxHeight = n === 0
-    ? NOTE_PAD * 2
-    : NOTE_PAD * 2 + (n - 1) * NOTE_LINE_H + NOTE_FONT;
+  const boxHeight = n === 0 ? NOTE_PAD * 2 : NOTE_PAD * 2 + (n - 1) * NOTE_LINE_H + NOTE_FONT;
   const rawWidth = entry.labelWidth > 0 ? entry.labelWidth : NOTE_FALLBACK_WIDTH;
   const boxWidth = rawWidth + NOTE_PAD * 2;
 
@@ -40,17 +38,12 @@ function renderNote(entry: EntryGeometry): string {
   const box = noteBox(bx, by, boxWidth, boxHeight, { stroke: NOTE_STROKE });
 
   const lineEls = lines.map((line, i) =>
-    text(
-      entry.x + PADDING + NOTE_PAD,
-      entry.y + 2 + NOTE_PAD + i * NOTE_LINE_H,
-      line,
-      {
-        fontSize: NOTE_FONT,
-        fontFamily: 'sans-serif',
-        dominantBaseline: 'hanging',
-        fill: '#000000',
-      },
-    ),
+    text(entry.x + PADDING + NOTE_PAD, entry.y + 2 + NOTE_PAD + i * NOTE_LINE_H, line, {
+      fontSize: NOTE_FONT,
+      fontFamily: 'sans-serif',
+      dominantBaseline: 'hanging',
+      fill: '#000000',
+    }),
   );
 
   return box + lineEls.join('');

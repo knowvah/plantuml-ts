@@ -105,7 +105,16 @@ describe('buildFlatNoteGeos', () => {
     };
     const posMap = new Map([['__note_0', { id: '__note_0', x: 0, y: 0, width: 60, height: 30 }]]);
     const edgePosMap = new Map([
-      ['__noteedge___note_0', { id: '__noteedge___note_0', points: [{ x: 0, y: 15 }, { x: 100, y: 15 }] }],
+      [
+        '__noteedge___note_0',
+        {
+          id: '__noteedge___note_0',
+          points: [
+            { x: 0, y: 15 },
+            { x: 100, y: 15 },
+          ],
+        },
+      ],
     ]);
     const geos = buildFlatNoteGeos(ast, ctx({ posMap, edgePosMap }));
     expect(geos).toHaveLength(1);
@@ -130,7 +139,7 @@ describe('buildFlatNoteGeos', () => {
     expect(buildFlatNoteGeos(ast, ctx())).toHaveLength(0);
   });
 
-  it('threads a note\'s #color override onto the materialized StateNodeGeo (mission G4 S12)', () => {
+  it("threads a note's #color override onto the materialized StateNodeGeo (mission G4 S12)", () => {
     const ast: StateDiagramAST = {
       states: [],
       transitions: [],
@@ -183,7 +192,10 @@ describe('renderStateNoteFreestanding', () => {
   it('draws one <text> per noteLines entry, stacked by NOTE_FONT_SIZE (13)', () => {
     const geo = baseNoteGeo({
       height: 46,
-      noteLines: [{ text: 'line one', width: 40 }, { text: 'line two', width: 42 }],
+      noteLines: [
+        { text: 'line one', width: 40 },
+        { text: 'line two', width: 42 },
+      ],
     });
     const markup = renderStateNoteFreestanding(geo, defaultTheme);
     expect(markup).toContain('line one');
@@ -213,10 +225,13 @@ describe('renderStateNoteOpale', () => {
     expect(markup).toContain('fill="#FEFFDD"');
   });
 
-  it.each(['left', 'right', 'up', 'down'] as const)('dispatches direction %s to its own opale outline fn', (direction) => {
-    const geo = baseNoteGeo({ noteOpale: { direction, pp1: { x: 5, y: 5 }, pp2: { x: 50, y: 15 } } });
-    expect(() => renderStateNoteOpale(geo, defaultTheme)).not.toThrow();
-  });
+  it.each(['left', 'right', 'up', 'down'] as const)(
+    'dispatches direction %s to its own opale outline fn',
+    (direction) => {
+      const geo = baseNoteGeo({ noteOpale: { direction, pp1: { x: 5, y: 5 }, pp2: { x: 50, y: 15 } } });
+      expect(() => renderStateNoteOpale(geo, defaultTheme)).not.toThrow();
+    },
+  );
 
   it('mission G4 S12: a #color override replaces BOTH path fills', () => {
     const geo = baseNoteGeo({

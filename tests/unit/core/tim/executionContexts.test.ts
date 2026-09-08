@@ -6,7 +6,11 @@
  * edge cases directly.
  */
 import { describe, expect, it } from 'vitest';
-import { ExecutionContextForeach, ExecutionContextIf, ExecutionContextWhile } from '../../../../src/core/tim/TMemory.js';
+import {
+  ExecutionContextForeach,
+  ExecutionContextIf,
+  ExecutionContextWhile,
+} from '../../../../src/core/tim/TMemory.js';
 import { TokenStack } from '../../../../src/core/tim/expression/TokenStack.js';
 
 describe('ExecutionContextIf', () => {

@@ -8,14 +8,7 @@
  */
 import type { NotePosition } from './ast.js';
 import { parseTagTokens } from './class-declaration-parser.js';
-import {
-  addFreestandingNote,
-  addNote,
-  NOTE_STEREO_CAPTURE,
-  NOTE_COLOR,
-  NOTE_URL,
-  NOTE_TARGET,
-} from './class-notes.js';
+import { addFreestandingNote, addNote, NOTE_STEREO_CAPTURE, NOTE_COLOR, NOTE_URL, NOTE_TARGET } from './class-notes.js';
 import { parseUrlBracket } from './class-url.js';
 import type { Command } from './class-command-types.js';
 
@@ -43,7 +36,9 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //     still fall through to 6b.
   {
     pattern: new RegExp(
-      '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+' + NOTE_TARGET + ')?' +
+      '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+' +
+        NOTE_TARGET +
+        ')?' +
         NOTE_TAGS +
         NOTE_STEREO_CAPTURE +
         NOTE_TAGS +
@@ -80,7 +75,9 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //      :293-301 (idShort==null -> getLastEntity(); null -> no-op here)
   {
     pattern: new RegExp(
-      '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+' + NOTE_TARGET + ')?' +
+      '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+' +
+        NOTE_TARGET +
+        ')?' +
         NOTE_TAGS +
         NOTE_STEREO_CAPTURE +
         NOTE_TAGS +
@@ -151,11 +148,7 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //      (executeInternal), :210 (addTags)
   {
     pattern: new RegExp(
-      '^note\\s+"([^"]+)"\\s+as\\s+(\\w+|"[^"]+")' +
-        NOTE_TAGS_CAPTURE +
-        NOTE_STEREO_CAPTURE +
-        NOTE_COLOR +
-        '\\s*$',
+      '^note\\s+"([^"]+)"\\s+as\\s+(\\w+|"[^"]+")' + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
       'i',
     ),
     execute(state, match) {

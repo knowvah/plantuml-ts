@@ -33,10 +33,7 @@ export function buildSwimlaneCtx(
   };
 }
 
-export function buildSwimlaneGeos(
-  swimlanes: readonly string[],
-  ctx: LayoutCtx,
-): SwimlaneGeo[] {
+export function buildSwimlaneGeos(swimlanes: readonly string[], ctx: LayoutCtx): SwimlaneGeo[] {
   if (swimlanes.length === 0) return [];
   return swimlanes.map((name) => ({
     name,

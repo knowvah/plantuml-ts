@@ -23,18 +23,14 @@ function styleMap(spec: Record<string, Record<string, string>>): StyleMap {
 
 describe('collectElementStyleBuckets (T5 / D4)', () => {
   it('routes a database style block into the database bucket, not a class field (AC1)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ database: { backgroundcolor: '#334455' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ database: { backgroundcolor: '#334455' } }));
     expect(buckets.database?.background).toBe('#334455');
     // Nothing class-scoped was produced.
     expect(buckets.class).toBeUndefined();
   });
 
   it('parses a gradient in an element style block into a Gradient Paint (AC2)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ node: { backgroundcolor: '#aabbcc\\#112233' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ node: { backgroundcolor: '#aabbcc\\#112233' } }));
     expect(buckets.node?.background).toEqual({
       color1: '#aabbcc',
       color2: '#112233',
@@ -72,9 +68,7 @@ describe('collectElementStyleBuckets (T5 / D4)', () => {
   // (no new style-map-theme.ts/style-map-element.ts code needed). Jar-
   // verified `gekofe-43-lufa479`.
   it('routes a spotClass style block into the spotclass bucket (G2 N32)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ spotclass: { backgroundcolor: 'blue', fontcolor: 'red' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ spotclass: { backgroundcolor: 'blue', fontcolor: 'red' } }));
     expect(buckets.spotclass).toEqual({ background: 'blue', font: 'red' });
   });
 
@@ -89,18 +83,19 @@ describe('collectElementStyleBuckets (T5 / D4)', () => {
   // for every object-kind classifier's fill/text color). Selector path
   // "objectdiagram.object" (parseStyleBlock's dot-joined nesting) routes
   // into the SAME `object` bucket a bare `object { ... }` block would.
-  it('routes a diagram-type-nested element block ("objectdiagram.object") ' +
-    'into the SAME bucket as a bare "object" selector (G3/O2)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'objectdiagram.object': { backgroundcolor: 'yellow', fontcolor: 'blue' } }),
-    );
-    expect(buckets.object).toEqual({ background: 'yellow', font: 'blue' });
-  });
+  it(
+    'routes a diagram-type-nested element block ("objectdiagram.object") ' +
+      'into the SAME bucket as a bare "object" selector (G3/O2)',
+    () => {
+      const buckets = collectElementStyleBuckets(
+        styleMap({ 'objectdiagram.object': { backgroundcolor: 'yellow', fontcolor: 'blue' } }),
+      );
+      expect(buckets.object).toEqual({ background: 'yellow', font: 'blue' });
+    },
+  );
 
   it('does NOT route an unrecognized nested selector into any bucket', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'objectdiagram.widget': { backgroundcolor: '#000000' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ 'objectdiagram.widget': { backgroundcolor: '#000000' } }));
     expect(Object.keys(buckets)).toHaveLength(0);
   });
 });
@@ -119,22 +114,21 @@ describe('collectElementStyleBuckets -- nested "<sname>.header" selector (G3/O4)
       }),
     );
     expect(buckets.object).toEqual({
-      background: 'yellow', font: 'blue',
-      headerBackground: 'red', headerFont: 'green', headerFontSize: 20,
+      background: 'yellow',
+      font: 'blue',
+      headerBackground: 'red',
+      headerFont: 'green',
+      headerFontSize: 20,
     });
   });
 
   it('does NOT route "widget.header" (widget is not an ELEMENT_BUCKET_SNAMES member)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'widget.header': { backgroundcolor: 'red' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ 'widget.header': { backgroundcolor: 'red' } }));
     expect(Object.keys(buckets)).toHaveLength(0);
   });
 
   it('leaves an "object.header" block with no recognized declarations a no-op', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'object.header': { linecolor: 'red' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ 'object.header': { linecolor: 'red' } }));
     expect(buckets.object).toBeUndefined();
   });
 });
@@ -152,9 +146,7 @@ describe('collectElementStyleBuckets — font-size buckets (G1 I4b)', () => {
   });
 
   it('routes <sname> { stereotype { FontSize N } } into stereotypeFontSize, not fontSize (kuciku-99-tedu217)', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'node.stereotype': { fontsize: '20' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ 'node.stereotype': { fontsize: '20' } }));
     expect(buckets.node).toEqual({ stereotypeFontSize: 20 });
   });
 
@@ -169,19 +161,14 @@ describe('collectElementStyleBuckets — font-size buckets (G1 I4b)', () => {
   });
 
   it('ignores a stereotype sub-selector under a non-bucket SName', () => {
-    const buckets = collectElementStyleBuckets(
-      styleMap({ 'widget.stereotype': { fontsize: '99' } }),
-    );
+    const buckets = collectElementStyleBuckets(styleMap({ 'widget.stereotype': { fontsize: '99' } }));
     expect(Object.keys(buckets)).toHaveLength(0);
   });
 });
 
 describe('applyStyleMap element-bucket integration (T5)', () => {
   it('surfaces a database style block on theme.colors.elements', () => {
-    const theme = applyStyleMap(
-      styleMap({ database: { backgroundcolor: '#654321' } }),
-      defaultTheme,
-    );
+    const theme = applyStyleMap(styleMap({ database: { backgroundcolor: '#654321' } }), defaultTheme);
     expect(theme.colors.elements?.database?.background).toBe('#654321');
     // Base theme untouched.
     expect(defaultTheme.colors.elements).toBeUndefined();
@@ -195,9 +182,7 @@ describe('applyStyleMap element-bucket integration (T5)', () => {
 
 describe('resolveDocumentBackground (relocated from applyStyleMap)', () => {
   it('reads the bare document selector background', () => {
-    expect(resolveDocumentBackground(styleMap({ document: { backgroundcolor: '#abcdef' } }))).toBe(
-      '#abcdef',
-    );
+    expect(resolveDocumentBackground(styleMap({ document: { backgroundcolor: '#abcdef' } }))).toBe('#abcdef');
   });
 
   it('lets a diagram-scoped document variant win over the bare one', () => {
@@ -234,11 +219,7 @@ describe('resolveStyleCascade (G2 N36)', () => {
   });
 
   it('a bare root {} selector cascades down to a classifier query', () => {
-    const value = resolveStyleCascade(
-      styleMap({ root: { backgroundcolor: 'Red' } }),
-      CLASS_SNAMES,
-      'backgroundcolor',
-    );
+    const value = resolveStyleCascade(styleMap({ root: { backgroundcolor: 'Red' } }), CLASS_SNAMES, 'backgroundcolor');
     expect(value).toBe('Red');
   });
 
@@ -343,7 +324,6 @@ describe('resolveStyleCascade (G2 N36)', () => {
     expect(resolveStyleCascade(m, arrowSnames, 'backgroundcolor')).toBeUndefined();
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // resolveStyleCascade `.tagname` sub-selector support (G2 N37) --
@@ -455,9 +435,9 @@ describe('computeShowStereotypeByTag', () => {
   // A nested `participant { .dummy1 {} }` block is keyed `participant..dummy1`
   // -- `parseTagSelector` splits the sname path from the tag on `..` (:301-303).
   it('reads the participant-scoped form too', () => {
-    expect(
-      computeShowStereotypeByTag(styleMap({ 'participant..dummy1': { showstereotype: 'false' } })).dummy1,
-    ).toBe(false);
+    expect(computeShowStereotypeByTag(styleMap({ 'participant..dummy1': { showstereotype: 'false' } })).dummy1).toBe(
+      false,
+    );
   });
 
   it('rides applyStyleMap onto the theme', () => {

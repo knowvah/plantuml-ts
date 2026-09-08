@@ -8,12 +8,7 @@ import { test, expect, type Page } from '@playwright/test';
  * Click a nav button and wait for the preview SVG to contain the expected
  * text, confirming the async ELK-backed render completed for the new type.
  */
-async function clickAndWait(
-  page: Page,
-  dataType: string,
-  waitForText: string,
-  timeout = 10_000,
-): Promise<void> {
+async function clickAndWait(page: Page, dataType: string, waitForText: string, timeout = 10_000): Promise<void> {
   await page.locator(`[data-type="${dataType}"]`).click();
   await expect(page.locator('#preview svg')).toContainText(waitForText, {
     timeout,
@@ -24,15 +19,9 @@ async function clickAndWait(
  * Click a nav button and wait for the preview SVG innerHTML to be non-empty,
  * confirming the render pipeline ran (even if it produced an error SVG).
  */
-async function clickAndWaitForRender(
-  page: Page,
-  dataType: string,
-  timeout = 10_000,
-): Promise<void> {
+async function clickAndWaitForRender(page: Page, dataType: string, timeout = 10_000): Promise<void> {
   await page.locator(`[data-type="${dataType}"]`).click();
-  await expect
-    .poll(() => page.locator('#preview svg').textContent(), { timeout })
-    .toBeTruthy();
+  await expect.poll(() => page.locator('#preview svg').textContent(), { timeout }).toBeTruthy();
 }
 
 // ---------------------------------------------------------------------------
@@ -112,9 +101,7 @@ test.describe('Theme switching', () => {
     await page.locator('#theme').selectOption('dark');
 
     // The re-rendered SVG should contain the dark background color
-    await expect
-      .poll(() => page.locator('#preview').innerHTML(), { timeout: 7000 })
-      .toContain('#1E1E1E');
+    await expect.poll(() => page.locator('#preview').innerHTML(), { timeout: 7000 }).toContain('#1E1E1E');
   });
 });
 
@@ -164,9 +151,6 @@ test.describe('Text overflow', () => {
       return null;
     });
 
-    expect(
-      overflowDescription,
-      'a text element clips outside the SVG viewport',
-    ).toBeNull();
+    expect(overflowDescription, 'a text element clips outside the SVG viewport').toBeNull();
   });
 });

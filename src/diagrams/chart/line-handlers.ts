@@ -23,10 +23,28 @@ import type {
 } from './ast.js';
 import type { StyleMap } from '../../core/skinparam.js';
 import {
-  RE_AREA, RE_BAR, RE_GRID, RE_HAXIS, RE_LEGEND, RE_LINE, RE_ORIENTATION, RE_SCATTER,
-  RE_STACKMODE, RE_V2AXIS, RE_VAXIS, RE_ANNOTATION,
-  addSeries, colorFromStereo, makeAxis, markerShapeFromStereo, markerSizeFromStereo,
-  parseCoordinatePairs, parseCustomTicks, parseLabels, parseYValues, resolveSeriesColor,
+  RE_AREA,
+  RE_BAR,
+  RE_GRID,
+  RE_HAXIS,
+  RE_LEGEND,
+  RE_LINE,
+  RE_ORIENTATION,
+  RE_SCATTER,
+  RE_STACKMODE,
+  RE_V2AXIS,
+  RE_VAXIS,
+  RE_ANNOTATION,
+  addSeries,
+  colorFromStereo,
+  makeAxis,
+  markerShapeFromStereo,
+  markerSizeFromStereo,
+  parseCoordinatePairs,
+  parseCustomTicks,
+  parseLabels,
+  parseYValues,
+  resolveSeriesColor,
   stereoToMarker,
 } from './parse-helpers.js';
 
@@ -165,7 +183,8 @@ export function tryBar(ast: ChartDiagramAST, line: string, styleMap: StyleMap): 
   const colorRaw = m[4];
   const secondary = m[5];
   const showLabels = m[6] !== undefined;
-  const color = colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'bar') ?? null);
+  const color =
+    colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'bar') ?? null);
 
   const series: ChartSeriesDef = {
     name,
@@ -224,11 +243,16 @@ export function tryLine(ast: ChartDiagramAST, line: string, styleMap: StyleMap):
   const data = m[3] ?? '';
   const colorRaw = m[4];
   const name = m[2] !== undefined ? m[2] : `line${ast.series.length}`;
-  const color = colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'line') ?? null);
+  const color =
+    colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'line') ?? null);
 
   const series = buildDataSeries(ast, 'line', data, {
-    name, color, useSecondaryAxis: m[5] !== undefined, showLabels: m[6] !== undefined,
-    markerShape: stereoToMarker(stereo), markerSize: null,
+    name,
+    color,
+    useSecondaryAxis: m[5] !== undefined,
+    showLabels: m[6] !== undefined,
+    markerShape: stereoToMarker(stereo),
+    markerSize: null,
   });
   if (series !== null) addSeries(ast, series);
   return true;
@@ -249,7 +273,8 @@ export function tryArea(ast: ChartDiagramAST, line: string, styleMap: StyleMap):
   const colorRaw = m[4];
   const secondary = m[5];
   const showLabels = m[6] !== undefined;
-  const color = colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'area') ?? null);
+  const color =
+    colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'area') ?? null);
 
   const series: ChartSeriesDef = {
     name,
@@ -266,7 +291,11 @@ export function tryArea(ast: ChartDiagramAST, line: string, styleMap: StyleMap):
   return true;
 }
 
-function scatterMarkerShape(stereo: string | undefined, markerStr: string | undefined, styleMap: StyleMap): MarkerShape {
+function scatterMarkerShape(
+  stereo: string | undefined,
+  markerStr: string | undefined,
+  styleMap: StyleMap,
+): MarkerShape {
   if (markerStr !== undefined) {
     const ml = markerStr.toLowerCase();
     return ml === 'square' ? 'square' : ml === 'triangle' ? 'triangle' : 'circle';
@@ -283,11 +312,16 @@ export function tryScatter(ast: ChartDiagramAST, line: string, styleMap: StyleMa
   const data = m[3] ?? '';
   const colorRaw = m[4];
   const name = m[2] !== undefined ? m[2] : `scatter${ast.series.length}`;
-  const color = colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'scatter') ?? null);
+  const color =
+    colorRaw !== undefined ? resolveSeriesColor(colorRaw) : (colorFromStereo(stereo, styleMap, 'scatter') ?? null);
 
   const series = buildDataSeries(ast, 'scatter', data, {
-    name, color, useSecondaryAxis: m[5] !== undefined, showLabels: m[6] !== undefined,
-    markerShape: scatterMarkerShape(stereo, m[7], styleMap), markerSize: markerSizeFromStereo(stereo, styleMap),
+    name,
+    color,
+    useSecondaryAxis: m[5] !== undefined,
+    showLabels: m[6] !== undefined,
+    markerShape: scatterMarkerShape(stereo, m[7], styleMap),
+    markerSize: markerSizeFromStereo(stereo, styleMap),
   });
   if (series !== null) addSeries(ast, series);
   return true;

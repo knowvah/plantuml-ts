@@ -230,9 +230,7 @@ describe('scanLineForAtoms — sprite markup variants', () => {
 
   it('parses an in-block `{color=red}` when no forced-color prefix is present', () => {
     const { atoms } = scanLineForAtoms('<$DynamoDBItems{color=red}>');
-    expect(atoms).toEqual<InlineAtomToken[]>([
-      { kind: 'sprite', name: 'DynamoDBItems', scale: 1, forcedColor: 'red' },
-    ]);
+    expect(atoms).toEqual<InlineAtomToken[]>([{ kind: 'sprite', name: 'DynamoDBItems', scale: 1, forcedColor: 'red' }]);
   });
 
   it('the forced-color prefix wins over an in-block color when both are present', () => {

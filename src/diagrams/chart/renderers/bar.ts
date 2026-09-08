@@ -68,9 +68,7 @@ function formatValue(value: number): string {
  */
 export function drawBar(geo: BarSeriesGeo, theme: Theme): string {
   const fill = geo.color;
-  const stroke = /^#[0-9a-fA-F]{6}$/.test(fill)
-    ? darkenHex(fill, 0.8, theme.colors.border)
-    : theme.colors.border;
+  const stroke = /^#[0-9a-fA-F]{6}$/.test(fill) ? darkenHex(fill, 0.8, theme.colors.border) : theme.colors.border;
 
   const parts: string[] = [];
 
@@ -93,16 +91,11 @@ export function drawBar(geo: BarSeriesGeo, theme: Theme): string {
         // x = right edge + 4, y = vertical center of bar + 4 (approximate text baseline).
         // Mirrors drawLabelHorizontal(): x = barWidth + 5, y = y + barHeight / 2
         parts.push(
-          svgText(
-            r.x + r.width + 4,
-            r.y + r.height / 2 + 4,
-            label,
-            {
-              fontSize: 10,
-              fill: '#000000',
-              textAnchor: 'start',
-            },
-          ),
+          svgText(r.x + r.width + 4, r.y + r.height / 2 + 4, label, {
+            fontSize: 10,
+            fill: '#000000',
+            textAnchor: 'start',
+          }),
         );
       } else {
         // Vertical bar:
@@ -116,16 +109,11 @@ export function drawBar(geo: BarSeriesGeo, theme: Theme): string {
         // so "above the bar" is r.y - offset and "below the bar" is r.y + r.height + offset.
         const labelY = r.value < 0 ? r.y + r.height + 4 : r.y - 4;
         parts.push(
-          svgText(
-            r.x + r.width / 2,
-            labelY,
-            label,
-            {
-              fontSize: 10,
-              fill: '#000000',
-              textAnchor: 'middle',
-            },
-          ),
+          svgText(r.x + r.width / 2, labelY, label, {
+            fontSize: 10,
+            fill: '#000000',
+            textAnchor: 'middle',
+          }),
         );
       }
     }

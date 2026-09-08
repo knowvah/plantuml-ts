@@ -246,7 +246,8 @@ export class SvgGraphicsElements extends SvgGraphicsShadow {
   private applyTextLengthAdjust(elt: XmlNode, text: string, textLength: number): void {
     if (
       text.length > 1 &&
-      (this.option.lengthAdjust === LengthAdjust.SPACING || this.option.lengthAdjust === LengthAdjust.SPACING_AND_GLYPHS)
+      (this.option.lengthAdjust === LengthAdjust.SPACING ||
+        this.option.lengthAdjust === LengthAdjust.SPACING_AND_GLYPHS)
     ) {
       elt.setAttribute('textLength', this.format(textLength));
     }

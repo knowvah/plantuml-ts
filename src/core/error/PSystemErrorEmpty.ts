@@ -12,11 +12,7 @@ import type { ErrorUml } from './ErrorUml.js';
 import { PSystemError } from './PSystemError.js';
 
 export class PSystemErrorEmpty extends PSystemError {
-  constructor(
-    source: readonly StringLocated[],
-    trace: readonly StringLocated[],
-    singleError: ErrorUml,
-  ) {
+  constructor(source: readonly StringLocated[], trace: readonly StringLocated[], singleError: ErrorUml) {
     super(source, trace, singleError);
   }
 }

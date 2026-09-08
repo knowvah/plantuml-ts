@@ -105,10 +105,11 @@ export class VariableManager {
           inBracket += str.charAt(i);
           i++;
         }
-        const nbString = this.context.applyFunctionsAndVariables(
-          this.memory,
-          new StringLocated(inBracket, this.location.getLocation()),
-        ) ?? '';
+        const nbString =
+          this.context.applyFunctionsAndVariables(
+            this.memory,
+            new StringLocated(inBracket, this.location.getLocation()),
+          ) ?? '';
         if (Array.isArray(jsonValue)) {
           const nb = Number.parseInt(nbString, 10);
           jsonValue = jsonValue[nb];

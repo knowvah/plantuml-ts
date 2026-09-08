@@ -9,8 +9,26 @@ import type {} from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 
 import { valueToPixel } from './chart-layout-core.js';
-import type { PlotArea, BarRect, DataPoint, LegendEntry, LegendGeometry, PointContext, BarSpec, LegendSpec, AreaBaselineSpec } from './chart-layout-core.js';
-import { CHART_MARGIN, LEGEND_MARGIN, LEGEND_SYMBOL_SIZE, LEGEND_TEXT_SPACING, LEGEND_ITEM_SPACING, BAR_WIDTH_RATIO, AXIS_LABEL_SPACE } from './chart-layout-core.js';
+import type {
+  PlotArea,
+  BarRect,
+  DataPoint,
+  LegendEntry,
+  LegendGeometry,
+  PointContext,
+  BarSpec,
+  LegendSpec,
+  AreaBaselineSpec,
+} from './chart-layout-core.js';
+import {
+  CHART_MARGIN,
+  LEGEND_MARGIN,
+  LEGEND_SYMBOL_SIZE,
+  LEGEND_TEXT_SPACING,
+  LEGEND_ITEM_SPACING,
+  BAR_WIDTH_RATIO,
+  AXIS_LABEL_SPACE,
+} from './chart-layout-core.js';
 
 // ---------------------------------------------------------------------------
 // Module-private param/return bundles.
@@ -57,10 +75,7 @@ interface StackedBarCumulative {
 // Legend geometry
 // ---------------------------------------------------------------------------
 
-export function buildLegendGeometry(
-  ast: ChartDiagramAST,
-  spec: LegendSpec,
-): LegendGeometry | undefined {
+export function buildLegendGeometry(ast: ChartDiagramAST, spec: LegendSpec): LegendGeometry | undefined {
   if (ast.legendPosition === 'none' || ast.series.length === 0) return undefined;
 
   const entries = buildLegendEntries(ast, spec.colors);
@@ -76,9 +91,7 @@ function buildLegendEntries(ast: ChartDiagramAST, colors: string[]): LegendEntry
     name: s.name,
     color: colors[i]!,
     seriesType: s.type,
-    ...(s.type === 'scatter'
-      ? { markerShape: s.markerShape, markerSize: s.markerSize ?? 8 }
-      : {}),
+    ...(s.type === 'scatter' ? { markerShape: s.markerShape, markerSize: s.markerSize ?? 8 } : {}),
   }));
 }
 
@@ -99,8 +112,7 @@ function measureLegendEntries(
       maxLabelWidth = Math.max(maxLabelWidth, dim.width);
       totalItemHeight += dim.height + LEGEND_ITEM_SPACING;
     } else {
-      totalItemWidth +=
-        dim.width + LEGEND_SYMBOL_SIZE + LEGEND_TEXT_SPACING + LEGEND_ITEM_SPACING;
+      totalItemWidth += dim.width + LEGEND_SYMBOL_SIZE + LEGEND_TEXT_SPACING + LEGEND_ITEM_SPACING;
       maxLabelHeight = Math.max(maxLabelHeight, dim.height);
     }
   }
@@ -141,10 +153,7 @@ function computeLegendPosition(
 function computeGroupedZeroY(plotArea: PlotArea, vAxisMin: number, vAxisMax: number): number {
   const zeroYRelative = Math.max(
     0,
-    Math.min(
-      plotArea.height,
-      plotArea.height - ((0 - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height,
-    ),
+    Math.min(plotArea.height, plotArea.height - ((0 - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height),
   );
   return plotArea.y + zeroYRelative;
 }
@@ -159,8 +168,7 @@ function clampedBarGeometry(
 ): { clampedY: number; clampedHeight: number } {
   const plotBottom = plotArea.y + plotArea.height;
   const plotTop = plotArea.y;
-  const valueYRelative =
-    plotArea.height - ((value - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
+  const valueYRelative = plotArea.height - ((value - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
   const valueY = plotArea.y + valueYRelative;
 
   const barY = Math.min(zeroY, valueY);
@@ -182,10 +190,7 @@ export function buildBarRectsGrouped(spec: BarSpec): BarRect[] {
   for (let i = 0; i < Math.min(values.length, categoryCount); i++) {
     const value = values[i]!;
     const x =
-      plotArea.x +
-      i * categoryWidth +
-      ((1 - BAR_WIDTH_RATIO) / 2) * categoryWidth +
-      seriesIndex * groupBarWidth;
+      plotArea.x + i * categoryWidth + ((1 - BAR_WIDTH_RATIO) / 2) * categoryWidth + seriesIndex * groupBarWidth;
 
     const { clampedY, clampedHeight } = clampedBarGeometry(value, zeroY, plotArea, vAxisMin, vAxisMax);
 
@@ -209,8 +214,7 @@ function computeStackedBarRect(
   const { plotArea, vAxisMin, vAxisMax, barWidth, zeroYAbsolute } = layout;
   const plotBottom = plotArea.y + plotArea.height;
   const plotTop = plotArea.y;
-  const valueYRelative =
-    plotArea.height - ((value - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
+  const valueYRelative = plotArea.height - ((value - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
   const valueY = plotArea.y + valueYRelative;
   const barHeight = Math.abs(valueY - zeroYAbsolute);
 
@@ -260,8 +264,7 @@ export function buildBarRectsStacked(
 
   // One rect array per series
   const result: BarRect[][] = barSeriesValues.map(() => []);
-  const zeroYRelative =
-    plotArea.height - ((0 - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
+  const zeroYRelative = plotArea.height - ((0 - vAxisMin) / (vAxisMax - vAxisMin)) * plotArea.height;
   const layout: StackedBarLayout = {
     categoryWidth,
     barWidth,
@@ -298,9 +301,7 @@ export function buildBarRectsHorizontal(
   for (let i = 0; i < Math.min(values.length, categoryCount); i++) {
     const value = values[i]!;
     const y = plotArea.y + i * categoryHeight + barOffset;
-    const barWidth = Math.abs(
-      ((value - hAxisMin) / (hAxisMax - hAxisMin)) * plotArea.width,
-    );
+    const barWidth = Math.abs(((value - hAxisMin) / (hAxisMax - hAxisMin)) * plotArea.width);
     const x = plotArea.x;
     rects.push({ x, y, width: barWidth, height: barThickness, value });
   }
@@ -312,11 +313,7 @@ export function buildBarRectsHorizontal(
 // Line / Scatter / Area point geometry
 // ---------------------------------------------------------------------------
 
-export function buildDataPoints(
-  values: number[],
-  xValues: number[] | null,
-  ctx: PointContext,
-): DataPoint[] {
+export function buildDataPoints(values: number[], xValues: number[] | null, ctx: PointContext): DataPoint[] {
   const { categoryCount, plotArea, vAxis, hAxis } = ctx;
   const points: DataPoint[] = [];
 

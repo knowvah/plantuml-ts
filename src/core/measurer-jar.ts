@@ -46,11 +46,7 @@
  */
 
 import type { FontSpec, StringMeasurer } from './measurer.js';
-import {
-  JAR_SANS_SERIF_METRICS,
-  JAR_SANS_SERIF_BOLD_METRICS,
-  type JarFontMetrics,
-} from './measurer-jar.data.js';
+import { JAR_SANS_SERIF_METRICS, JAR_SANS_SERIF_BOLD_METRICS, type JarFontMetrics } from './measurer-jar.data.js';
 
 /**
  * Selects the jar-measured metrics table for a font style.

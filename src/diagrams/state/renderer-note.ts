@@ -234,13 +234,14 @@ export function renderStateNoteFreestanding(node: StateNodeGeo, theme: Theme): s
   const c = NOTE_FOLD;
   const fill = resolveStateFill(node, NOTE_FILL);
   const outline = [
-    moveTo(x, y), lineTo(x, y + h), lineTo(x + w, y + h),
-    lineTo(x + w, y + c), lineTo(x + w - c, y), lineTo(x, y),
+    moveTo(x, y),
+    lineTo(x, y + h),
+    lineTo(x + w, y + h),
+    lineTo(x + w, y + c),
+    lineTo(x + w - c, y),
+    lineTo(x, y),
   ].join(' ');
-  const corner = [
-    moveTo(x + w - c, y), lineTo(x + w - c, y + c),
-    lineTo(x + w, y + c), lineTo(x + w - c, y),
-  ].join(' ');
+  const corner = [moveTo(x + w - c, y), lineTo(x + w - c, y + c), lineTo(x + w, y + c), lineTo(x + w - c, y)].join(' ');
   return (
     path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
     path(corner, { fill, stroke: theme.colors.border, strokeWidth: NOTE_CORNER_DEFAULT_STROKE_WIDTH }) +
@@ -331,12 +332,18 @@ export function renderNoteOnLink(
   const ph = box.height - 2 * ROSE_NOTE_PADDING;
   const c = NOTE_FOLD;
   const outline = [
-    moveTo(px, py), lineTo(px, py + ph), lineTo(px + pw, py + ph),
-    lineTo(px + pw, py + c), lineTo(px + pw - c, py), lineTo(px, py),
+    moveTo(px, py),
+    lineTo(px, py + ph),
+    lineTo(px + pw, py + ph),
+    lineTo(px + pw, py + c),
+    lineTo(px + pw - c, py),
+    lineTo(px, py),
   ].join(' ');
   const corner = [
-    moveTo(px + pw - c, py), lineTo(px + pw - c, py + c),
-    lineTo(px + pw, py + c), lineTo(px + pw - c, py),
+    moveTo(px + pw - c, py),
+    lineTo(px + pw - c, py + c),
+    lineTo(px + pw, py + c),
+    lineTo(px + pw - c, py),
   ].join(' ');
   const shapeMarkup =
     path(outline, { fill: NOTE_FILL, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
@@ -352,12 +359,7 @@ export function renderNoteOnLink(
  *  the SAME way `renderNoteTextLines` does — this label's own producer
  *  (`state-composite-edge-label.ts#measureLinkNoteDim`'s
  *  `state-note-layout.ts#measureNote` reuse) already builds the styled shape. */
-function renderNoteOnLinkTextLines(
-  px: number,
-  py: number,
-  lines: readonly StateTextLine[],
-  theme: Theme,
-): string {
+function renderNoteOnLinkTextLines(px: number, py: number, lines: readonly StateTextLine[], theme: Theme): string {
   const styled = styledLines(lines, NOTE_FONT_SIZE);
   const parts: string[] = [];
   let lineTop = py + NOTE_MARGIN_Y;

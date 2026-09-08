@@ -111,7 +111,15 @@ describe('renderActivity — action node', () => {
   });
 
   it('renders multiline label as one <text> per line, left-aligned (aeg-T3)', () => {
-    const node = makeNode({ kind: 'action', id: 'action-0', label: 'A\non\nseveral\nlines', x: 50, y: 50, width: 80, height: 80 });
+    const node = makeNode({
+      kind: 'action',
+      id: 'action-0',
+      label: 'A\non\nseveral\nlines',
+      x: 50,
+      y: 50,
+      width: 80,
+      height: 80,
+    });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
@@ -231,7 +239,15 @@ describe('renderActivity — note node', () => {
   });
 
   it('renders multiline note content as one <text> per line (aeg-T3)', () => {
-    const node = makeNode({ kind: 'note', id: 'note-0', label: 'line one\nline two\nline three', x: 50, y: 50, width: 200, height: 80 });
+    const node = makeNode({
+      kind: 'note',
+      id: 'note-0',
+      label: 'line one\nline two\nline three',
+      x: 50,
+      y: 50,
+      width: 200,
+      height: 80,
+    });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
@@ -626,9 +642,14 @@ describe('renderActivity — activity theme colors', () => {
 
   it('edges use arrow color (activityArrowColor)', () => {
     const geo = makeGeo({
-      edges: [{
-        points: [{ x: 10, y: 10 }, { x: 10, y: 50 }],
-      }],
+      edges: [
+        {
+          points: [
+            { x: 10, y: 10 },
+            { x: 10, y: 50 },
+          ],
+        },
+      ],
     });
     const svg = assembleSvg(renderActivity(geo, activityTheme));
     expect(svg).toContain('stroke="#F00"');

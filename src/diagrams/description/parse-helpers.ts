@@ -10,10 +10,7 @@
  * chars appear inside /regex/ literals inside function bodies.
  */
 
-import {
-  KEYWORD_TO_SYMBOL,
-  type USymbol,
-} from '../../core/descriptive-keywords.js';
+import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptiveNode } from './ast.js';
 import {
   cleanId,
@@ -127,20 +124,19 @@ interface IdDisplay {
 // delimiters if they were captured.
 const RE_DQ_AS_ALIAS = /^("[^"]+")\s*as\s+(\S+)$/;
 const RE_SQ_AS_ALIAS = /^'([^']+)'\s+as\s+(\S+)$/;
-const RE_ID_AS_DQ   = /^(\S+)\s+as\s+("[^"]+")$/;
-const RE_ID_AS_SQ   = /^(\S+)\s+as\s+'([^']+)'$/;
+const RE_ID_AS_DQ = /^(\S+)\s+as\s+("[^"]+")$/;
+const RE_ID_AS_SQ = /^(\S+)\s+as\s+'([^']+)'$/;
 const RE_PAREN_ALIAS = /^\(([^)]+)\)\s+as\s+(\S+|\([^)]+\)|:[^:]+:)$/;
 // `()bareword` / `()"quoted"` (interface shorthand -- CommandCreateElementFull
 // CODE_CORE's `\(\)[%s]*[%pLN_.]+` / `\(\)[%s]*[%g][^%g]+[%g]` alternatives,
 // java:126) is tried BEFORE the bare-paren alternative since it also starts
 // with `(`; `cleanId` (parseAliasForms's m5b branch) already strips the `()`
 // prefix and any quotes.
-const RE_DQ_AS_WRAPPED =
-  /^("[^"]+")\s*as\s+(\(\)\s*(?:"[^"]+"|\S+)|\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
+const RE_DQ_AS_WRAPPED = /^("[^"]+")\s*as\s+(\(\)\s*(?:"[^"]+"|\S+)|\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
 // CODE as :wrapped: — bare code, colon/paren/bracket-wrapped display
 // (`Admin as :Main Admin:`). Display keeps its notation stripped by cleanId.
 const RE_ID_AS_WRAPPED = /^(\S+)\s+as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
-const RE_PAREN_ONLY  = /^\(([^)]+)\)$/;
+const RE_PAREN_ONLY = /^\(([^)]+)\)$/;
 const RE_PLAIN_ALIAS = /^(\S+)\s+as\s+(\S+)$/;
 
 // parseNameSection — quoted-only form
@@ -196,7 +192,10 @@ function parseAliasForms(remainder: string): IdDisplay | undefined {
   if (m5c !== null) return { id: m5c[1]!, display: cleanId(m5c[2]!) };
 
   const m6 = RE_PAREN_ONLY.exec(remainder);
-  if (m6 !== null) { const n = m6[1]!.trim(); return { id: n, display: n }; }
+  if (m6 !== null) {
+    const n = m6[1]!.trim();
+    return { id: n, display: n };
+  }
 
   const m7 = RE_PLAIN_ALIAS.exec(remainder);
   if (m7 !== null) return { id: cleanId(m7[2]!), display: m7[1]! };
@@ -269,7 +268,10 @@ export function parseNameSection(rest: string): NameSection {
   remainder = tr.remainder;
 
   const cr = extractColor(remainder);
-  if (cr !== undefined) { color = cr.color; remainder = cr.remainder.trim(); }
+  if (cr !== undefined) {
+    color = cr.color;
+    remainder = cr.remainder.trim();
+  }
 
   // Re-attach the quoted display the extractors were kept away from. The
   // separator space must survive: `stripTrailingUrl` deliberately preserves
@@ -348,16 +350,10 @@ const ALL_KW_ALT = [...KEYWORD_TO_SYMBOL.keys()]
   .join('|');
 
 /** Container keyword + inline body: package P { [A] [B] } */
-export const CONTAINER_INLINE_RE = new RegExp(
-  `^(${CONTAINER_KW_ALT})\\s+(.*?)\\s*\\{([^}]*)\\}\\s*$`,
-  'i',
-);
+export const CONTAINER_INLINE_RE = new RegExp(`^(${CONTAINER_KW_ALT})\\s+(.*?)\\s*\\{([^}]*)\\}\\s*$`, 'i');
 
 /** Container keyword opening a multi-line block: package P { */
-export const CONTAINER_OPEN_RE = new RegExp(
-  `^(${CONTAINER_KW_ALT})\\s+(.*?)\\s*\\{\\s*$`,
-  'i',
-);
+export const CONTAINER_OPEN_RE = new RegExp(`^(${CONTAINER_KW_ALT})\\s+(.*?)\\s*\\{\\s*$`, 'i');
 
 /** Any keyword followed by at least one space and a name rest. */
 export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
@@ -381,8 +377,7 @@ export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
  * row unmeasured (fariba-82-xolu802). Callers split the captured run with
  * the same `extractNodeStereotype`/`extractColor` the single-line path uses.
  */
-const ELEMENT_DECORATION_RUN =
-  '((?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*)';
+const ELEMENT_DECORATION_RUN = '((?:\\s*(?:<<[^>]+>>|\\[\\[[^\\]]*\\]\\]|#[\\w:;.#\\\\/|-]+))*)';
 
 /** `%g` — the four characters upstream treats as a double quote: ASCII `"`,
  *  the two typographic quotes, and `Jaws.BLOCK_E1_INVISIBLE_QUOTE`.
@@ -396,9 +391,7 @@ const QUOTE_CHARS = '"\\u201c\\u201d\\ue121';
  *  own `DESC` tail (everything after the `[`).
  *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:110-122 */
 export const ELEMENT_MULTILINE_OPEN_RE = new RegExp(
-  `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` +
-    ELEMENT_DECORATION_RUN +
-    '\\s*\\[([^\\[]*)$',
+  `^(${ALL_KW_ALT})\\s+([\\p{L}\\p{N}_.]+)` + ELEMENT_DECORATION_RUN + '\\s*\\[([^\\[]*)$',
   'iu',
 );
 

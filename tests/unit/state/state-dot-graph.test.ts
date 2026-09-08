@@ -23,16 +23,15 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/state',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
 const measurer = new WidthTableMeasurer();
 
 function captureFirst(puml: string): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured ??= g; });
+  setLayoutInputObserver((g) => {
+    captured ??= g;
+  });
   try {
     renderSync(puml, { measurer });
   } finally {

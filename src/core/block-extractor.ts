@@ -12,10 +12,7 @@
 
 import { stripSpriteRegions } from './descriptive-keywords.js';
 
-import {
-  DiagramType as UpstreamDiagramType,
-  findStartTypes,
-} from './diagram-type-set.js';
+import { DiagramType as UpstreamDiagramType, findStartTypes } from './diagram-type-set.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -189,10 +186,7 @@ const RE_LEFT_ARROW = /<<?-/u;
  * Collect the first N non-empty trimmed lines for detection probes.
  * This is called once and shared across all probes.
  */
-function firstNonEmptyLines(
-  lines: readonly string[],
-  n: number,
-): readonly string[] {
+function firstNonEmptyLines(lines: readonly string[], n: number): readonly string[] {
   const result: string[] = [];
   for (const line of lines) {
     const trimmed = line.trim();
@@ -227,11 +221,7 @@ function probeSequence(lines: readonly string[]): boolean {
 
     // Keyword-starts
     const firstWord = line.split(/\s+/u)[0]?.toLowerCase() ?? '';
-    if (
-      SEQUENCE_ACTOR_KEYWORDS.has(firstWord) ||
-      SEQUENCE_ACTIVATION_KEYWORDS.has(firstWord)
-    )
-      return true;
+    if (SEQUENCE_ACTOR_KEYWORDS.has(firstWord) || SEQUENCE_ACTIVATION_KEYWORDS.has(firstWord)) return true;
   }
   return false;
 }
@@ -340,10 +330,7 @@ export function finalizeBlock(
   contentPositions?: readonly (number | undefined)[],
 ): UmlSource {
   const trimmed = trimBlankLines([...contentLines]);
-  const type: DiagramType =
-    suffix === 'uml'
-      ? detectUmlType(trimmed)
-      : (START_SUFFIX_MAP[suffix] ?? 'unknown');
+  const type: DiagramType = suffix === 'uml' ? detectUmlType(trimmed) : (START_SUFFIX_MAP[suffix] ?? 'unknown');
   const types = candidateTypes(suffix, type);
   if (contentPositions === undefined) return { lines: trimmed, type, types };
   return {
@@ -406,10 +393,7 @@ export function upstreamTypeOf(type: DiagramType): UpstreamDiagramType {
  * removing it would move fixtures, and this task's whole property is that it
  * moves none. No corpus fixture uses any of the eight; four test sources do.
  */
-function candidateTypes(
-  suffix: string,
-  type: DiagramType,
-): ReadonlySet<UpstreamDiagramType> {
+function candidateTypes(suffix: string, type: DiagramType): ReadonlySet<UpstreamDiagramType> {
   const upstream = findStartTypes(`@start${suffix}`);
   if (!upstream.has(UpstreamDiagramType.UNKNOWN)) return upstream;
   return new Set([upstreamTypeOf(type)]);

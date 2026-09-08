@@ -38,10 +38,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
-import type {
-  SequenceDiagramAST,
-  SequenceEvent,
-} from '../../../src/diagrams/sequence/ast.js';
+import type { SequenceDiagramAST, SequenceEvent } from '../../../src/diagrams/sequence/ast.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 // Markup AND golden both come from the committed `dot-cache`, never from
@@ -60,10 +57,7 @@ function dimsOf(svg: string): { width: number; height: number } {
 }
 
 function oursFor(slug: string): string {
-  return renderFixtureSequence(
-    readFileSync(join(CACHE, slug, 'in.puml'), 'utf8'),
-    new DeterministicMeasurer(),
-  );
+  return renderFixtureSequence(readFileSync(join(CACHE, slug, 'in.puml'), 'utf8'), new DeterministicMeasurer());
 }
 
 function goldenOf(slug: string): string {
@@ -219,7 +213,10 @@ describe('one tile, one height', () => {
     // `NoteTile:167-171` -> `ComponentRoseNote#getPreferredHeight:88-91` =
     // `getTextHeight + 2 * getPaddingY`, padding 5 (`:67-70`, `Rose:66`).
     const note: SequenceEvent = {
-      kind: 'note', position: 'over', participants: ['A'], text: 'n',
+      kind: 'note',
+      position: 'over',
+      participants: ['A'],
+      text: 'n',
     };
     expect(addedBy([note])).toBe(LINE + 20);
     const geo = layoutSequence(astOf([note]), defaultTheme, measurer);
@@ -253,13 +250,9 @@ describe('one tile, one height', () => {
   it('an `activate`/`deactivate` pair reserves nothing', () => {
     // `LifeEventTile#getPreferredHeight:128-138` returns 0 for everything but
     // a destroy with no message.
-    expect(
-      addedBy([
-        { kind: 'activate', participantId: 'A' },
-        MSG,
-        { kind: 'deactivate', participantId: 'A' },
-      ]),
-    ).toBe(addedBy([MSG]));
+    expect(addedBy([{ kind: 'activate', participantId: 'A' }, MSG, { kind: 'deactivate', participantId: 'A' }])).toBe(
+      addedBy([MSG]),
+    );
   });
 });
 
@@ -271,17 +264,13 @@ describe('a destroy with no message reserves the cross', () => {
     // Upstream's own worked example, from the comment at
     // `SequenceDiagram.java:382-387`: `X -> X` then `destroy Y`.
     const selfOnA: SequenceEvent = { ...MSG, to: 'A' };
-    expect(
-      addedBy([selfOnA, { kind: 'deactivate', participantId: 'B', destroy: true }]),
-    ).toBe(addedBy([selfOnA]) + 18);
+    expect(addedBy([selfOnA, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([selfOnA]) + 18);
   });
 
   it('reserves nothing when the last message DID deal with it', () => {
     // `lastEventWithDeactivate.dealWith(p)` passes and it is an
     // `AbstractMessage`, so `setMessage` binds the life event (`:395-398`).
-    expect(
-      addedBy([MSG, { kind: 'deactivate', participantId: 'B', destroy: true }]),
-    ).toBe(addedBy([MSG]));
+    expect(addedBy([MSG, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([MSG]));
   });
 
   it('reserves 18 after a group `end`, which is not a message', () => {
@@ -289,17 +278,17 @@ describe('a destroy with no message reserves the cross', () => {
     // `GroupingLeaf` (`:438`), which fails the `instanceof AbstractMessage`
     // test at `:396`.
     const group: SequenceEvent = {
-      kind: 'frame', frameType: 'opt', label: 'o', branches: [[MSG]], branchLabels: [''],
+      kind: 'frame',
+      frameType: 'opt',
+      label: 'o',
+      branches: [[MSG]],
+      branchLabels: [''],
     };
-    expect(
-      addedBy([group, { kind: 'deactivate', participantId: 'B', destroy: true }]),
-    ).toBe(addedBy([group]) + 18);
+    expect(addedBy([group, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([group]) + 18);
   });
 
   it('reserves nothing for a plain `deactivate`, flag absent', () => {
-    expect(
-      addedBy([{ kind: 'deactivate', participantId: 'B' }]),
-    ).toBe(0);
+    expect(addedBy([{ kind: 'deactivate', participantId: 'B' }])).toBe(0);
   });
 });
 

@@ -87,7 +87,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
     connector: [],
   };
 
-  it('draws one <text> per atom run, x-advancing by the PRIOR atom\'s own width (jar: tenobo-24-liga464)', () => {
+  it("draws one <text> per atom run, x-advancing by the PRIOR atom's own width (jar: tenobo-24-liga464)", () => {
     const svg = renderNote(boldNote, defaultTheme);
     const texts = [...svg.matchAll(/<text x="([^"]*)"[^>]*>([^<]*)<\/text>/g)];
     expect(texts).toHaveLength(2);
@@ -113,7 +113,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
     expect(texts[1]).toContain('font-weight="700"');
   });
 
-  it('an atom\'s OWN resolved color overrides the hardcoded #000000 default', () => {
+  it("an atom's OWN resolved color overrides the hardcoded #000000 default", () => {
     const coloredNote: NoteGeo = {
       ...boldNote,
       lineAtoms: [[{ kind: 'text', text: 'warning', font: { ...plainFont, color: '#FF0000' }, width: 40 }]],
@@ -188,7 +188,6 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   });
 });
 
-
 // G2 N56: per-atom baseline within a mixed-size line -- jar-verified against
 // `fogexa-30-zupo141`'s real golden SVG: "In java," @ y=26.1111 (13pt),
 // "every" @ y=25 (18pt, `<size:18>`), " "/"class" @ y=26.1111 (13pt) again --
@@ -222,7 +221,7 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
     connector: [],
   };
 
-  it('the 18pt run\'s baseline sits ABOVE the 13pt runs\' baseline on the SAME line', () => {
+  it("the 18pt run's baseline sits ABOVE the 13pt runs' baseline on the SAME line", () => {
     const svg = renderNote(mixedNote, defaultTheme);
     const ys = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)"/g)].map((m) => Number(m[1]));
     expect(ys).toHaveLength(4);

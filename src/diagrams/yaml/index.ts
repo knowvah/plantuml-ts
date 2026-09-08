@@ -32,7 +32,6 @@ const DIAGRAM_TYPE_YAML = 'YAML';
 export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'yaml',
 
-
   parse(source) {
     return parseYaml(source);
   },

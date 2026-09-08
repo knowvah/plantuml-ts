@@ -34,7 +34,7 @@ describe('error diagram — an orphan !endif (jar: "No if related to this endif"
     expect(svg.trimStart()).toMatch(/^<svg/);
   });
 
-  it('reports the jar\'s message', () => {
+  it("reports the jar's message", () => {
     expectErrorDiagram(renderSync(ORPHAN_ENDIF, opts), 'No if related to this endif');
   });
 

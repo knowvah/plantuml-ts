@@ -98,7 +98,10 @@ export function subdivide(cubic: Cubic): [Cubic, Cubic] {
   const lc12 = mid(lc1, center);
   const rc21 = mid(rc2, center);
   const m = mid(lc12, rc21);
-  return [[p0, lc1, lc12, m], [m, rc21, rc2, p3]];
+  return [
+    [p0, lc1, lc12, m],
+    [m, rc21, rc2, p3],
+  ];
 }
 
 /** Split a `1 + 3*n` point list into its `n` cubic segments. */

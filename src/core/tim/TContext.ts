@@ -472,7 +472,10 @@ export class TContext implements TContextInterface {
     const idx = first.getString().indexOf(' ');
     if (idx === -1) return undefined;
 
-    return first.getString().substring(idx + 1).trim();
+    return first
+      .getString()
+      .substring(idx + 1)
+      .trim();
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#getPreprocessingArtifact */

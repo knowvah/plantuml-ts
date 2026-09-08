@@ -174,18 +174,21 @@ describe('buildOpenIconicPathD -- F1-c full-set extension, byte-exact against 7 
     );
   });
 
-  it('euro glyph -- reproduces the upstream regex bug: source declares transform="translate(-1)" but the jar' +
-    ' drops it (no translateX applied)', () => {
-    expect(buildOpenIconicPathD('euro', factor, originX, originY)).toBe(
-      'M40.575,18.167 C38.405,18.167 36.608,19.66 36.095,21.667 L33.867,21.667 L33.575,22.833 L35.92,22.833 ' +
-        'C35.92,23.242 36.002,23.627 36.107,24 L33.808,24 L33.587,25.167 L36.573,25.167 C37.39,26.555 ' +
-        '38.872,27.5 40.587,27.5 C41.438,27.5 42.232,27.255 42.92,26.847 L42.92,25.423 C42.302,25.983 ' +
-        '41.497,26.333 40.587,26.333 C39.548,26.333 38.638,25.878 37.997,25.167 L40.587,25.167 ' +
-        'L40.773,24 L37.308,24 C37.18,23.627 37.087,23.253 37.087,22.833 L40.983,22.833 L41.17,21.667 ' +
-        'L37.308,21.667 C37.787,20.313 39.07,19.333 40.587,19.333 C41.357,19.333 42.057,19.578 ' +
-        '42.628,19.987 L42.815,18.75 C42.15,18.388 41.403,18.167 40.587,18.167',
-    );
-  });
+  it(
+    'euro glyph -- reproduces the upstream regex bug: source declares transform="translate(-1)" but the jar' +
+      ' drops it (no translateX applied)',
+    () => {
+      expect(buildOpenIconicPathD('euro', factor, originX, originY)).toBe(
+        'M40.575,18.167 C38.405,18.167 36.608,19.66 36.095,21.667 L33.867,21.667 L33.575,22.833 L35.92,22.833 ' +
+          'C35.92,23.242 36.002,23.627 36.107,24 L33.808,24 L33.587,25.167 L36.573,25.167 C37.39,26.555 ' +
+          '38.872,27.5 40.587,27.5 C41.438,27.5 42.232,27.255 42.92,26.847 L42.92,25.423 C42.302,25.983 ' +
+          '41.497,26.333 40.587,26.333 C39.548,26.333 38.638,25.878 37.997,25.167 L40.587,25.167 ' +
+          'L40.773,24 L37.308,24 C37.18,23.627 37.087,23.253 37.087,22.833 L40.983,22.833 L41.17,21.667 ' +
+          'L37.308,21.667 C37.787,20.313 39.07,19.333 40.587,19.333 C41.357,19.333 42.057,19.578 ' +
+          '42.628,19.987 L42.815,18.75 C42.15,18.388 41.403,18.167 40.587,18.167',
+      );
+    },
+  );
 
   it('media-play glyph, both X and Y translate (transform="translate(1 1)")', () => {
     expect(buildOpenIconicPathD('media-play', factor, originX, originY)).toBe(
@@ -238,7 +241,7 @@ describe('buildOpenIconicPathD -- F1-c full-set extension, byte-exact against 7 
     );
   });
 
-  it('total glyph count is upstream\'s full 223-icon OpenIconic resource set', () => {
+  it("total glyph count is upstream's full 223-icon OpenIconic resource set", () => {
     // `~/git/plantuml/src/main/resources/openiconic/*.svg` -- 223 files;
     // `all.txt` (the directory's only other entry) is not an icon.
     expect(Object.keys(RAW_GLYPHS).length).toBe(223);

@@ -48,9 +48,7 @@ export class ExtremityCircleLine extends Extremity {
 
     drawLineSegment(ug, this.contact, base, middle);
     const stroke = UStroke.withThickness(thickness);
-    ug.apply(
-      new UTranslate(this.contact.x + circleBase.x - radius, this.contact.y + circleBase.y - radius),
-    )
+    ug.apply(new UTranslate(this.contact.x + circleBase.x - radius, this.contact.y + circleBase.y - radius))
       .apply(stroke)
       .draw(UEllipse.build(2 * radius, 2 * radius));
     drawLineSegment(ug.apply(stroke), this.contact, lineTop, lineBottom);

@@ -185,7 +185,7 @@ describe('link-hoisting — declared at the top scope, real endpoints nested ins
   });
 });
 
-describe('link-hoisting — composite\'s OWN transitions self-reference its own id (autonom re-entry proxy)', () => {
+describe("link-hoisting — composite's OWN transitions self-reference its own id (autonom re-entry proxy)", () => {
   // giniti-22-fexo000 (mission A4 Phase L iter 18): `Radio_Configuring`,
   // written as `state Radio_Configuring { ... Radio_Configuring --> X ... }`,
   // is itself classified AUTONOM — its two outgoing transitions have
@@ -212,10 +212,7 @@ describe('link-hoisting — composite\'s OWN transitions self-reference its own 
 
   it("Radio_Configuring's own content pass carries neither self-referencing transition", () => {
     const ownPass = captured[0]!;
-    expect(ownPass.nodes.map((n) => n.id).sort()).toEqual([
-      'Vendor_Radio_Configuring',
-      '__init_Radio_Configuring',
-    ]);
+    expect(ownPass.nodes.map((n) => n.id).sort()).toEqual(['Vendor_Radio_Configuring', '__init_Radio_Configuring']);
     expect(ownPass.edges).toHaveLength(1);
     expect(ownPass.edges[0]).toMatchObject({
       from: '__init_Radio_Configuring',
@@ -223,7 +220,7 @@ describe('link-hoisting — composite\'s OWN transitions self-reference its own 
     });
   });
 
-  it('the top-level pass carries both of Radio_Configuring\'s cross-composite transitions', () => {
+  it("the top-level pass carries both of Radio_Configuring's cross-composite transitions", () => {
     const top = captured[2]!;
     const topNodeIds = new Set(top.nodes.map((n) => n.id));
     expect(topNodeIds.has('Radio_Configuring')).toBe(true);

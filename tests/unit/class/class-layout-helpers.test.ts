@@ -38,7 +38,7 @@ describe('edgeLabelAttrs — multi-line label sizing (G2 item 43)', () => {
     expect(attrs.labelHeight).toBe(16); // 14 + 2
   });
 
-  it('reserves the WIDEST line\'s width and the stacked height for a multi-line label', () => {
+  it("reserves the WIDEST line's width and the stacked height for a multi-line label", () => {
     // Lines: 'this is' (7), 'on several' (10), 'lines' (5) -- widths *7.
     const attrs = edgeLabelAttrs(rel('this is\\non several\\nlines'), font, font, measurer);
     expect(attrs.label).toBe('this is\\non several\\nlines');
@@ -86,7 +86,7 @@ describe('edgeLabelAttrs — per-line magic arrows, D6 (SvekEdge.java:290-297)',
     expect(attrs.labelHeight).toBe(30); // 14 * 2 lines + 2
   });
 
-  it('a single line with a token stays on T12c\'s whole-label path, unchanged', () => {
+  it("a single line with a token stays on T12c's whole-label path, unchanged", () => {
     const attrs = edgeLabelAttrs(rel('> foo'), font, font, measurer);
     // hasSeveralGuideLines requires >= 2 lines -- single-line labels never
     // reach computeGuideLinesBox regardless of token presence.
@@ -123,19 +123,14 @@ describe('edgeLabelAttrs — magic-arrow label sizing (G2 item 44 / M4 cause D)'
   });
 });
 
-
 describe('wrapPlainTextLine (G2 N65 item 35 -- MaximumWidth word-wrap)', () => {
   // 7px/char, matching this file's own shared `measurer` mock above.
   it('returns the line unchanged when maxWidth is 0 (no MaximumWidth cascade)', () => {
-    expect(wrapPlainTextLine('a very long line indeed', font, 0, measurer)).toEqual([
-      'a very long line indeed',
-    ]);
+    expect(wrapPlainTextLine('a very long line indeed', font, 0, measurer)).toEqual(['a very long line indeed']);
   });
 
   it('returns the line unchanged when maxWidth is negative', () => {
-    expect(wrapPlainTextLine('a very long line indeed', font, -5, measurer)).toEqual([
-      'a very long line indeed',
-    ]);
+    expect(wrapPlainTextLine('a very long line indeed', font, -5, measurer)).toEqual(['a very long line indeed']);
   });
 
   // Jar-verified shape against `nucite-98-kuga991`'s own `MaximumWidth 150`
@@ -150,9 +145,7 @@ describe('wrapPlainTextLine (G2 N65 item 35 -- MaximumWidth word-wrap)', () => {
   });
 
   it('a single word wider than maxWidth is kept whole on its own line (no mid-word break)', () => {
-    expect(wrapPlainTextLine('supercalifragilistic', font, 10, measurer)).toEqual([
-      'supercalifragilistic',
-    ]);
+    expect(wrapPlainTextLine('supercalifragilistic', font, 10, measurer)).toEqual(['supercalifragilistic']);
   });
 
   it('a line that already fits maxWidth is returned as a single unchanged line', () => {

@@ -56,13 +56,15 @@ describe('A8: package stereotype reaches the collapsed-empty-package leaf', () =
   });
 
   it('multi-line empty package keeps the stereotype through the final collapse (dojanu-92 p3 shape)', () => {
-    const ast = collapseEmptyNamespacesFinal(parse(`
+    const ast = collapseEmptyNamespacesFinal(
+      parse(`
       package p1 <<Dummy>> {
       class Foo1 <<Other>>
       }
       package p3 <<Dummy>> {
       }
-    `));
+    `),
+    );
     const p3 = ast.classifiers.find((c) => c.id === 'p3');
     expect(p3).toBeDefined();
     expect(p3!.stereotype).toBe('Dummy');

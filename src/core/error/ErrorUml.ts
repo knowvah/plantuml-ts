@@ -60,8 +60,7 @@ export class ErrorUml {
 
   /** @see ~/git/plantuml/.../ErrorUml.java#getError */
   getError(): string {
-    if (this.diagramType !== undefined)
-      return `${this.error} (Assumed diagram type: ${this.diagramType})`;
+    if (this.diagramType !== undefined) return `${this.error} (Assumed diagram type: ${this.diagramType})`;
 
     return this.error;
   }

@@ -5,7 +5,9 @@
  */
 import { describe, test, expect } from 'vitest';
 import {
-  computePortClusterBbox, type PortClusterInfo, type ClusterSpacing,
+  computePortClusterBbox,
+  type PortClusterInfo,
+  type ClusterSpacing,
 } from '../../../src/diagrams/description/frontier-cluster-bbox.js';
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
 
@@ -20,20 +22,20 @@ function leafGeo(id: string, x: number, y: number, width: number, height: number
 const TB_SPACING: ClusterSpacing = { nodeSep: 35, rankSep: 60, rankdir: 'TB' };
 
 describe('computePortClusterBbox (insides empty — gafegu-06-nito976 shape)', () => {
-  test('matches jar\'s exact 177x99 result once shifted to this cluster\'s own already-resolved port positions', () => {
+  test("matches jar's exact 177x99 result once shifted to this cluster's own already-resolved port positions", () => {
     // Mirrors gafegu-06's real, already-resolved (raw, pre-ink-shift) port
     // x positions -- relative spacing (gaps of 47 = nodesep 35 + width 12)
     // is what the real pipeline already gets right; only the cluster's own
     // box needed FrontierCalculator. y arbitrary (23, distinct from the
     // shadow calc's own internal frame -- the alignment step must not
     // assume they coincide).
-    const children = [
-      portGeo('p80', 23, 23), portGeo('p81', 70, 23),
-      portGeo('p82', 117, 23), portGeo('p83', 164, 23),
-    ];
+    const children = [portGeo('p80', 23, 23), portGeo('p81', 70, 23), portGeo('p82', 117, 23), portGeo('p83', 164, 23)];
     const info: PortClusterInfo = {
       ranks: [{ rank: 'source', nodeIds: ['p80', 'p81', 'p82', 'p83'] }],
-      anchorWidth: 50, anchorHeight: 17, titleWidth: 50, titleHeight: 17,
+      anchorWidth: 50,
+      anchorHeight: 17,
+      titleWidth: 50,
+      titleHeight: 17,
     };
     const bbox = computePortClusterBbox(children, info, TB_SPACING);
     expect(bbox.width).toBe(177);
@@ -41,14 +43,14 @@ describe('computePortClusterBbox (insides empty — gafegu-06-nito976 shape)', (
   });
 
   test('is translation-invariant: shifting every port by the same (dx,dy) shifts the bbox by the same amount, not the size', () => {
-    const base = [
-      portGeo('p80', 23, 23), portGeo('p81', 70, 23),
-      portGeo('p82', 117, 23), portGeo('p83', 164, 23),
-    ];
+    const base = [portGeo('p80', 23, 23), portGeo('p81', 70, 23), portGeo('p82', 117, 23), portGeo('p83', 164, 23)];
     const shifted = base.map((c) => ({ ...c, x: c.x + 1000, y: c.y + 500 }));
     const info: PortClusterInfo = {
       ranks: [{ rank: 'source', nodeIds: ['p80', 'p81', 'p82', 'p83'] }],
-      anchorWidth: 50, anchorHeight: 17, titleWidth: 50, titleHeight: 17,
+      anchorWidth: 50,
+      anchorHeight: 17,
+      titleWidth: 50,
+      titleHeight: 17,
     };
     const bboxBase = computePortClusterBbox(base, info, TB_SPACING);
     const bboxShifted = computePortClusterBbox(shifted, info, TB_SPACING);
@@ -62,8 +64,10 @@ describe('computePortClusterBbox (insides empty — gafegu-06-nito976 shape)', (
     const children = [portGeo('p0', 0, 0)];
     const info: PortClusterInfo = {
       ranks: [{ rank: 'source', nodeIds: ['p0'] }],
-      anchorWidth: 40, anchorHeight: 16,
-      titleWidth: 500, titleHeight: 16, // far wider than a single 12px port could drive
+      anchorWidth: 40,
+      anchorHeight: 16,
+      titleWidth: 500,
+      titleHeight: 16, // far wider than a single 12px port could drive
     };
     const bbox = computePortClusterBbox(children, info, TB_SPACING);
     expect(bbox.width).toBeGreaterThanOrEqual(510); // titleWidth + 10 (java:427-428)
@@ -77,13 +81,13 @@ describe('computePortClusterBbox (fallback cases)', () => {
     // diffs when routed through the (approximated) shadow-calc path; see
     // frontier-cluster-bbox.ts's own doc comment for why this case is
     // scoped OUT of mechanism B for now.
-    const children = [
-      leafGeo('api', 20, 20, 100, 40),
-      portGeo('httpout', 150, 20),
-    ];
+    const children = [leafGeo('api', 20, 20, 100, 40), portGeo('httpout', 150, 20)];
     const info: PortClusterInfo = {
       ranks: [{ rank: 'sink', nodeIds: ['httpout'] }],
-      anchorWidth: 40, anchorHeight: 16, titleWidth: 40, titleHeight: 16,
+      anchorWidth: 40,
+      anchorHeight: 16,
+      titleWidth: 40,
+      titleHeight: 16,
     };
     const bbox = computePortClusterBbox(children, info, TB_SPACING);
     // computeContainerBbox's own padded-union formula (layout-helpers.ts):
@@ -95,7 +99,10 @@ describe('computePortClusterBbox (fallback cases)', () => {
     const children = [leafGeo('only', 0, 0, 50, 30)];
     const info: PortClusterInfo = {
       ranks: [{ rank: 'source', nodeIds: ['missing-port'] }],
-      anchorWidth: 40, anchorHeight: 16, titleWidth: 0, titleHeight: 0,
+      anchorWidth: 40,
+      anchorHeight: 16,
+      titleWidth: 0,
+      titleHeight: 0,
     };
     const bbox = computePortClusterBbox(children, info, TB_SPACING);
     expect(bbox).toEqual({ x: -16, y: -28, width: 82, height: 74 });

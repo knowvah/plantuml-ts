@@ -36,10 +36,7 @@ import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { descriptionAst } from './parse-description-ast.js';
 
-const GOLDENS = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/description',
-);
+const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/description');
 
 const measurer = new WidthTableMeasurer();
 
@@ -71,26 +68,16 @@ function ourSplinesLine(slug: string): string | undefined {
 
 describe('description/layout.ts runLayout — forwards theme.linetype ?? ast.linetype', () => {
   it('carries linetype: "ortho" on the DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype ortho',
-      'component A',
-      'component B',
-      'A --> B',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype ortho', 'component A', 'component B', 'A --> B', '@enduml'].join(
+      '\n',
+    );
     expect(captureFirst(puml).linetype).toBe('ortho');
   });
 
   it('carries linetype: "polyline" on the DotInputGraph', () => {
-    const puml = [
-      '@startuml',
-      'skinparam linetype polyline',
-      'component A',
-      'component B',
-      'A --> B',
-      '@enduml',
-    ].join('\n');
+    const puml = ['@startuml', 'skinparam linetype polyline', 'component A', 'component B', 'A --> B', '@enduml'].join(
+      '\n',
+    );
     expect(captureFirst(puml).linetype).toBe('polyline');
   });
 
@@ -106,10 +93,12 @@ describe('D3 fallback — routes ortho from ast.linetype ALONE, theme.linetype u
       lines: ['component A', 'component B', 'A --> B'],
       type: 'description',
     };
-    const ast = descriptionAst(parseDescription({
-      lines: ['skinparam linetype ortho', ...source.lines],
-      type: 'description',
-    }));
+    const ast = descriptionAst(
+      parseDescription({
+        lines: ['skinparam linetype ortho', ...source.lines],
+        type: 'description',
+      }),
+    );
     // Sanity: the fallback is genuinely exercised, not bypassed -- the
     // description command table diverts `skinparam linetype` into
     // `ast.linetype` (command-table-directives.ts:108-111) rather than the
@@ -119,7 +108,9 @@ describe('D3 fallback — routes ortho from ast.linetype ALONE, theme.linetype u
     expect(ast.linetype).toBe('ortho');
 
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutDescription(ast, defaultTheme, new FormulaMeasurer());
     } finally {

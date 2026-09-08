@@ -193,7 +193,9 @@ describe('F1-a / C4 — a run whose font is not the note font contributes ITS he
 // ---------------------------------------------------------------------------
 
 /** `xufexu-38-fola855`'s first note, as source. */
-const NOTE_SOURCE = ['note as N', 'foo', '--', 'foo2', '==toto==', 'meu', '==', 'ya', '--', 'zz', 'end note'].join('\n');
+const NOTE_SOURCE = ['note as N', 'foo', '--', 'foo2', '==toto==', 'meu', '==', 'ya', '--', 'zz', 'end note'].join(
+  '\n',
+);
 
 function render(style: string): string {
   // A second element + an edge is mandatory: a single-entity diagram emits no

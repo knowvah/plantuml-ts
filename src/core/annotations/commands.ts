@@ -285,11 +285,7 @@ function scanMultilineBlock(
   return null;
 }
 
-function matchTitleMultiline(
-  lines: readonly string[],
-  i: number,
-  a: DiagramAnnotations,
-): { consumed: number } | null {
+function matchTitleMultiline(lines: readonly string[], i: number, a: DiagramAnnotations): { consumed: number } | null {
   const block = scanMultilineBlock(lines, i, TITLE_START_RE, TITLE_END_RE);
   if (!block) return null;
   const body = removeEmptyColumns(block.body);
@@ -322,11 +318,7 @@ function matchCaptionMultiline(
 /** VALIGN (top|bottom, default BOTTOM) before ALIGN (left|right|center,
  *  default CENTER) -- both optional, in that order, on the opening line.
  * @see CommandMultilinesLegend.java:65-78,111-132 */
-function matchLegendMultiline(
-  lines: readonly string[],
-  i: number,
-  a: DiagramAnnotations,
-): { consumed: number } | null {
+function matchLegendMultiline(lines: readonly string[], i: number, a: DiagramAnnotations): { consumed: number } | null {
   const block = scanMultilineBlock(lines, i, LEGEND_START_RE, LEGEND_END_RE);
   if (!block) return null;
   const body = removeEmptyColumns(block.body);
@@ -345,11 +337,7 @@ function matchLegendMultiline(
  *  documented asymmetry it is, not normalized to match Title/Caption/
  *  Legend's behavior.
  * @see CommandMultilinesHeader.java:85-106 */
-function matchHeaderMultiline(
-  lines: readonly string[],
-  i: number,
-  a: DiagramAnnotations,
-): { consumed: number } | null {
+function matchHeaderMultiline(lines: readonly string[], i: number, a: DiagramAnnotations): { consumed: number } | null {
   const block = scanMultilineBlock(lines, i, HEADER_START_RE, HEADER_END_RE);
   if (!block) return null;
   const body = block.body.map((l) => l.trim());
@@ -362,11 +350,7 @@ function matchHeaderMultiline(
 }
 
 /** @see CommandMultilinesFooter.java:85-106 (same asymmetry as header) */
-function matchFooterMultiline(
-  lines: readonly string[],
-  i: number,
-  a: DiagramAnnotations,
-): { consumed: number } | null {
+function matchFooterMultiline(lines: readonly string[], i: number, a: DiagramAnnotations): { consumed: number } | null {
   const block = scanMultilineBlock(lines, i, FOOTER_START_RE, FOOTER_END_RE);
   if (!block) return null;
   const body = block.body.map((l) => l.trim());
@@ -388,11 +372,7 @@ function matchFooterMultiline(
  *  single function -- the project's complexity hook treats each `??` as
  *  two branch points -- despite being a flat, unconditional priority
  *  list; a loop over data is both lower-complexity and easier to extend). */
-type AnnotationMatcher = (
-  lines: readonly string[],
-  i: number,
-  a: DiagramAnnotations,
-) => { consumed: number } | null;
+type AnnotationMatcher = (lines: readonly string[], i: number, a: DiagramAnnotations) => { consumed: number } | null;
 
 /** Registration order mirrors `CommonCommands.addTitleCommands` exactly:
  *  Title, Mainframe, Caption, MultilinesCaption, MultilinesTitle,

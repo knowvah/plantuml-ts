@@ -154,7 +154,14 @@ describe('applyVisibilityHideShow', () => {
           typeParams: [],
           members: [
             { visibility: '-', name: 'field1', isStatic: false, isAbstract: false, visibilityExplicit: true },
-            { visibility: '-', name: 'method1', params: [], isStatic: false, isAbstract: false, visibilityExplicit: true },
+            {
+              visibility: '-',
+              name: 'method1',
+              params: [],
+              isStatic: false,
+              isAbstract: false,
+              visibilityExplicit: true,
+            },
           ],
         },
       ],
@@ -219,7 +226,12 @@ describe('applyVisibilityHideShow', () => {
       namespaces: [],
       directives: [],
       hideVisibilityDirectives: [
-        { kind: 'hideshowvisibility', action: 'hide', visibilities: ['private', 'public', 'protected', 'package'], portion: 'member' },
+        {
+          kind: 'hideshowvisibility',
+          action: 'hide',
+          visibilities: ['private', 'public', 'protected', 'package'],
+          portion: 'member',
+        },
       ],
       notes: [],
     };
@@ -235,9 +247,7 @@ describe('applyVisibilityHideShow', () => {
           display: 'Foo',
           kind: 'class',
           typeParams: [],
-          members: [
-            { visibility: '-', name: 'b', isStatic: false, isAbstract: false, visibilityExplicit: true },
-          ],
+          members: [{ visibility: '-', name: 'b', isStatic: false, isAbstract: false, visibilityExplicit: true }],
         },
       ],
       relationships: [],
@@ -302,8 +312,7 @@ describe('hide <visibility> members/fields/methods — end to end (G2 N12)', () 
       }
       hide private,public members
     `);
-    const byName = (n: string): boolean | undefined =>
-      ast.classifiers[0]!.members.find((m) => m.name === n)?.hidden;
+    const byName = (n: string): boolean | undefined => ast.classifiers[0]!.members.find((m) => m.name === n)?.hidden;
     expect(byName('fooH')).toBe(true); // public
     expect(byName('dummyH')).toBe(true); // private
     expect(byName('other')).toBeUndefined(); // protected -- untouched
@@ -328,8 +337,7 @@ describe('hide <visibility> members/fields/methods — end to end (G2 N12)', () 
       hide public member
       hide protected methods
     `);
-    const byName = (n: string): boolean | undefined =>
-      ast.classifiers[0]!.members.find((m) => m.name === n)?.hidden;
+    const byName = (n: string): boolean | undefined => ast.classifiers[0]!.members.find((m) => m.name === n)?.hidden;
     expect(byName('dummyH')).toBe(true); // private field -- hidden
     expect(byName('dummy2')).toBeUndefined(); // private METHOD -- untouched (fields only)
     expect(byName('fooH')).toBe(true); // public field -- hidden (public member = both)
@@ -340,18 +348,18 @@ describe('hide <visibility> members/fields/methods — end to end (G2 N12)', () 
     expect(byName('last2')).toBeUndefined();
   });
 
-// ---------------------------------------------------------------------------
-// G2 N43: hide <visibility> members + the enhanced-body render path
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // G2 N43: hide <visibility> members + the enhanced-body render path
+  // ---------------------------------------------------------------------------
 
-describe('hide <visibility> members + enhanced body (G2 N43)', () => {
-  it('an UNINDENTED block separator triggers isEnhancedBody, and a hidden-by-visibility member is dropped from rawBodyLines', () => {
-    // Unlike the `benemi-22-dufo622`/`xosiza-60-sobu480` cached fixtures
-    // (both INDENTED, so `isBlockSeparatorLine`'s raw-untrimmed check never
-    // triggers `isEnhancedBody` for them -- see `ledger.md` N43), this test
-    // uses the harness's own `parse()` (every line `.trim()`-ed) to actually
-    // exercise the enhanced-body path end to end.
-    const ast = parse(`
+  describe('hide <visibility> members + enhanced body (G2 N43)', () => {
+    it('an UNINDENTED block separator triggers isEnhancedBody, and a hidden-by-visibility member is dropped from rawBodyLines', () => {
+      // Unlike the `benemi-22-dufo622`/`xosiza-60-sobu480` cached fixtures
+      // (both INDENTED, so `isBlockSeparatorLine`'s raw-untrimmed check never
+      // triggers `isEnhancedBody` for them -- see `ledger.md` N43), this test
+      // uses the harness's own `parse()` (every line `.trim()`-ed) to actually
+      // exercise the enhanced-body path end to end.
+      const ast = parse(`
       class class1 {
         + public_member
         --
@@ -359,8 +367,8 @@ describe('hide <visibility> members + enhanced body (G2 N43)', () => {
       }
       hide private members
     `);
-    const classifier = ast.classifiers[0]!;
-    expect(classifier.rawBodyLines).toEqual(['+ public_member', '--']);
+      const classifier = ast.classifiers[0]!;
+      expect(classifier.rawBodyLines).toEqual(['+ public_member', '--']);
+    });
   });
-});
 });

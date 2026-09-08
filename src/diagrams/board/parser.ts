@@ -15,12 +15,7 @@ function countLeadingPlus(t: string): number {
 /** Inserts one `+`-prefixed board node: a new root activity when
  *  `plusCount === 0`, otherwise a child of the deepest stack entry whose
  *  `stage` is less than `plusCount`. Mutates `activities`/`stack` in place. */
-function insertBoardNode(
-  activities: BoardActivity[],
-  stack: BoardNode[],
-  plusCount: number,
-  label: string,
-): void {
+function insertBoardNode(activities: BoardActivity[], stack: BoardNode[], plusCount: number, label: string): void {
   if (plusCount === 0) {
     const root: BoardNode = { name: label, stage: 0, children: [] };
     activities.push({ name: label, root });
@@ -44,7 +39,7 @@ export function parseBoard(source: UmlSource): BoardDiagramAST | ParseRefusal {
   const sprites = createSpriteRegistry();
   const lines = source.lines;
 
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     const t = lines[i]!.trim();
     if (t === '') {
       i++;

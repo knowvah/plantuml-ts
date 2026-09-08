@@ -67,7 +67,13 @@ import { buildNoteGraphPartsByScope, sweepOrphanNoteEdges } from './state-note-l
 // sorting moved to ./state-composite-pseudo.ts (500-line file-cap
 // compliance) -- re-exported so every pre-existing EXTERNAL importer of
 // THIS module keeps working unchanged.
-import { scopedPseudoIds, sortSpecsByCreationIndex, sortSpecsByDocumentOrder, addLocalPseudoNodes, levelEndpointId } from './state-composite-pseudo.js';
+import {
+  scopedPseudoIds,
+  sortSpecsByCreationIndex,
+  sortSpecsByDocumentOrder,
+  addLocalPseudoNodes,
+  levelEndpointId,
+} from './state-composite-pseudo.js';
 export { scopedPseudoIds, sortSpecsByCreationIndex, sortSpecsByDocumentOrder, addLocalPseudoNodes, levelEndpointId };
 
 // Edge/note accumulation -- imported for `buildTopLevelPass`'s own use below
@@ -75,7 +81,14 @@ export { scopedPseudoIds, sortSpecsByCreationIndex, sortSpecsByDocumentOrder, ad
 // `nextClusterId`/`resetEdgeCounter`) so every pre-existing EXTERNAL
 // importer of THIS module keeps working unchanged. `collectRegularTransitions`
 // was never externally exported, so it's imported for internal use only.
-import { addScopeNotes, addLevelEdges, collectRegularTransitions, sweepOrphanEdges, nextClusterId, resetEdgeCounter } from './state-composite-pass-edges.js';
+import {
+  addScopeNotes,
+  addLevelEdges,
+  collectRegularTransitions,
+  sweepOrphanEdges,
+  nextClusterId,
+  resetEdgeCounter,
+} from './state-composite-pass-edges.js';
 export { addScopeNotes, addLevelEdges, sweepOrphanEdges, nextClusterId, resetEdgeCounter };
 
 import type { DiagramCtx, GeoSpec, PassAccumulator } from './state-composite-pass-types.js';
@@ -84,7 +97,6 @@ import type { DiagramCtx, GeoSpec, PassAccumulator } from './state-composite-pas
 // keeps working unchanged after the types-leaf split (this file's own doc
 // comment above).
 export type { DiagramCtx, GeoSpec, PassAccumulator };
-
 
 /** Zero-size placeholder — Svek's `.01in` synthetic anchor node
  *  (ClusterDotString.empty()), converted to our px convention (0.01in*72px).
@@ -100,7 +112,14 @@ export const ANCHOR_SIZE = 0.72;
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 
 export function newAccumulator(labelFont?: FontSpec, measurer?: StringMeasurer): PassAccumulator {
-  return { nodes: [], edges: [], clusters: [], edgeSources: [], ...(labelFont !== undefined ? { labelFont } : {}), ...(measurer !== undefined ? { measurer } : {}) };
+  return {
+    nodes: [],
+    edges: [],
+    clusters: [],
+    edgeSources: [],
+    ...(labelFont !== undefined ? { labelFont } : {}),
+    ...(measurer !== undefined ? { measurer } : {}),
+  };
 }
 
 /** One composite MEMBER at any nesting depth: dispatches leaf / autonom /
@@ -166,7 +185,8 @@ function resolvesSouthCapInk(s: State, theme: Theme): boolean {
   // not a `UPath`, so `drawRectangle`'s `-1` inset applies and there is no
   // extra px. `Cluster.java:321` reads the radius off `PName.RoundCorner`
   // and `Cluster.java:323-324` forces it to 0 under `strictUmlStyle()`.
-  const rounded = theme.strictUml === true ? 0 : (theme.colors.graph.stateCascadeRoundCorner ?? STATE_DEFAULT_ROUND_CORNER);
+  const rounded =
+    theme.strictUml === true ? 0 : (theme.colors.graph.stateCascadeRoundCorner ?? STATE_DEFAULT_ROUND_CORNER);
   if (rounded === 0) return false;
   const resolved = resolveSouthBackColor(s, theme);
   return resolved !== undefined && !isTransparentColor(resolved);
@@ -199,7 +219,12 @@ function withSouthCapInk(spec: GeoSpec, southCap: boolean): GeoSpec {
   return { ...spec, southCapInk: true };
 }
 
-export function resolveMember(s: State, acc: PassAccumulator, ctx: DiagramCtx, parentClusterId: string | undefined): GeoSpec {
+export function resolveMember(
+  s: State,
+  acc: PassAccumulator,
+  ctx: DiagramCtx,
+  parentClusterId: string | undefined,
+): GeoSpec {
   // `hasLocalContent`, not bare children.length -- mission A4 Phase L
   // iter 5, its doc (state-composite-detect.ts) has the full mechanism
   // (GroupMakerState.getImage()'s countChildren()==0 leaf fallback).
@@ -207,7 +232,10 @@ export function resolveMember(s: State, acc: PassAccumulator, ctx: DiagramCtx, p
   if (!isComposite) {
     acc.nodes.push(buildLeafNode(s, ctx));
     return {
-      kind: 'state', id: s.id, stateKind: s.kind, display: s.display,
+      kind: 'state',
+      id: s.id,
+      stateKind: s.kind,
+      display: s.display,
       ...buildStateGeoTextFields(s, ctx.theme, ctx.measurer, ctx.hideEmptyDescription),
       ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
     };
@@ -372,7 +400,9 @@ export function buildLevelTransitionGeos(acc: PassAccumulator, result: DotLayout
     // feeding it the clipped path would invent a dependency upstream has not.
     const label = attachTransitionLabel(t, geo.points, edgeResult, acc.labelFont, acc.measurer);
     geos.push({
-      from, to, points: clipTransitionSpline(geo.points, from, to, anchorRects),
+      from,
+      to,
+      points: clipTransitionSpline(geo.points, from, to, anchorRects),
       ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
       ...(t.crossStart !== undefined ? { crossStart: t.crossStart } : {}),
@@ -396,9 +426,18 @@ export function buildTopLevelPass(
   const noteParts = buildNoteGraphPartsByScope(ast.notes ?? [], theme, measurer, rankdir);
   const notePool = [...noteParts.values()].flatMap((p) => p.candidates);
   const ctx: DiagramCtx = {
-    theme, measurer, rankdir, classify, pool, consumed: new Set(),
-    noteParts, notePool, consumedNotes: new Set(), resolvedAutonom: new Map(),
-    resolvedRegions: new Map(), hideEmptyDescription: ast.hideEmptyDescription ?? false,
+    theme,
+    measurer,
+    rankdir,
+    classify,
+    pool,
+    consumed: new Set(),
+    noteParts,
+    notePool,
+    consumedNotes: new Set(),
+    resolvedAutonom: new Map(),
+    resolvedRegions: new Map(),
+    hideEmptyDescription: ast.hideEmptyDescription ?? false,
     pseudoCreationIndex: ast.pseudoCreationIndex ?? new Map(),
   };
   resolveAllAutonomPasses(ctx);

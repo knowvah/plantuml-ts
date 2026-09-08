@@ -20,10 +20,7 @@ describe('mergeEndingBackslashLines', () => {
 
   it('does not merge a line ending in an escaped double backslash', () => {
     // `StringUtils.java:454-456`: endsWith("\\") && !endsWith("\\\\").
-    expect(mergedText('set namespaceSeparator \\\\\nclass A')).toEqual([
-      'set namespaceSeparator \\\\',
-      'class A',
-    ]);
+    expect(mergedText('set namespaceSeparator \\\\\nclass A')).toEqual(['set namespaceSeparator \\\\', 'class A']);
   });
 
   it('does not merge when trailing spaces follow the backslash', () => {

@@ -56,9 +56,7 @@ describe('scripts/svg-overlay-report', () => {
     });
 
     it('throws a descriptive error for an arg with no "/"', () => {
-      expect(() => parseFixtureArgs(['not-a-ref'])).toThrow(
-        'Expected "<type>/<slug>", got "not-a-ref"',
-      );
+      expect(() => parseFixtureArgs(['not-a-ref'])).toThrow('Expected "<type>/<slug>", got "not-a-ref"');
     });
   });
 
@@ -174,9 +172,7 @@ describe('scripts/svg-overlay-report', () => {
 
     it('throws a descriptive error when the cache entry is missing', () => {
       const ref: FixtureRef = { type: 'component', slug: 'missing-01' };
-      expect(() => generateReport(cacheDir, outDir, ref)).toThrow(
-        /No cached fixture markup for component\/missing-01/,
-      );
+      expect(() => generateReport(cacheDir, outDir, ref)).toThrow(/No cached fixture markup for component\/missing-01/);
     });
   });
 
@@ -202,10 +198,7 @@ describe('scripts/svg-overlay-report', () => {
       const written = runReports(cacheDir, outDir, refs);
 
       expect(written).toHaveLength(2);
-      expect(written).toEqual([
-        join(outDir, 'div-a.html'),
-        join(outDir, 'div-b.html'),
-      ]);
+      expect(written).toEqual([join(outDir, 'div-a.html'), join(outDir, 'div-b.html')]);
       expect(existsSync(join(outDir, 'div-a.html'))).toBe(true);
       expect(existsSync(join(outDir, 'div-b.html'))).toBe(true);
     });
@@ -220,9 +213,7 @@ describe('scripts/svg-overlay-report', () => {
       const written = runReports(cacheDir, outDir, [missing, good]);
 
       expect(written).toEqual([join(outDir, 'good-01.html')]);
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('component/nope-01'),
-      );
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('component/nope-01'));
       errorSpy.mockRestore();
     });
   });

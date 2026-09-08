@@ -184,7 +184,12 @@ describe('SheetBlock1.drawU', () => {
       getStartingAltitude: () => 0,
       drawU: (_a, ug) => drawnAt.push(ug.getTranslate()),
     };
-    const block = new SheetBlock1(sheet, LineBreakStrategy.NONE, ops, ClockwiseTopRightBottomLeft.topRightBottomLeft(2, 0, 0, 3));
+    const block = new SheetBlock1(
+      sheet,
+      LineBreakStrategy.NONE,
+      ops,
+      ClockwiseTopRightBottomLeft.topRightBottomLeft(2, 0, 0, 3),
+    );
     block.drawU(new RecordingUGraphic());
     expect(drawnAt).toHaveLength(1);
     // padding.left=3, padding.top=2; the atom's own Sea position is (0,0)

@@ -32,8 +32,15 @@ import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.j
  *  the no-divider describe block at the bottom of this file. */
 function leaf(shadowing?: number): StateNodeGeo {
   return {
-    id: 's1', kind: 'normal', display: 's1', x: 0, y: 0, width: 100, height: 50,
-    children: [], transitions: [],
+    id: 's1',
+    kind: 'normal',
+    display: 's1',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 50,
+    children: [],
+    transitions: [],
     headerLines: [{ text: 's1', width: 20 }],
     ...(shadowing !== undefined ? { shadowing } : {}),
   };
@@ -76,9 +83,25 @@ describe('addStateBoxInk shadow reservation — computeSvekResultGeometry (the n
 describe('addStateBoxInk shadow reservation — composite (children.length > 0) box shares the same rule', () => {
   function composite(shadowing?: number): StateNodeGeo {
     return {
-      id: 'c1', kind: 'normal', display: 'c1', x: 0, y: 0, width: 100, height: 50,
+      id: 'c1',
+      kind: 'normal',
+      display: 'c1',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 50,
       children: [
-        { id: 'child', kind: 'normal', display: 'child', x: 10, y: 10, width: 20, height: 20, children: [], transitions: [] },
+        {
+          id: 'child',
+          kind: 'normal',
+          display: 'child',
+          x: 10,
+          y: 10,
+          width: 20,
+          height: 20,
+          children: [],
+          transitions: [],
+        },
       ],
       transitions: [],
       ...(shadowing !== undefined ? { shadowing } : {}),
@@ -112,7 +135,17 @@ describe('addStateBoxInk shadow reservation — composite (children.length > 0) 
  *     which yields the jar's document width 361 exactly (was 362).
  */
 describe('addStateBoxInk divider-line precondition on the uninset max-X', () => {
-  const base = { id: 's1', kind: 'normal' as const, display: 's1', x: 0, y: 0, width: 100, height: 50, children: [], transitions: [] };
+  const base = {
+    id: 's1',
+    kind: 'normal' as const,
+    display: 's1',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 50,
+    children: [],
+    transitions: [],
+  };
 
   it('uses the uninset x+w when the box draws a divider (headerLines present)', () => {
     const withDivider: StateNodeGeo = { ...base, headerLines: [{ text: 's1', width: 20 }] };

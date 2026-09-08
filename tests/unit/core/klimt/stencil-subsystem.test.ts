@@ -179,4 +179,3 @@ describe('AbstractUGraphicHorizontalLine (base horizontal-line interception)', (
     expect(ug.getSvgString()).toContain('<rect x="2" y="3" width="4" height="4"');
   });
 });
-

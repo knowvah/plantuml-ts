@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
-import {
-  EAST_HOOK,
-  NORTH_HOOK,
-  SOUTH_HOOK,
-  WEST_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 

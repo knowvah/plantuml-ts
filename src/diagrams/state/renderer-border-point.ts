@@ -87,11 +87,15 @@ function drawSymbol(node: StateNodeGeo, pos: EntityPositionKind, fill: string, s
     // `rect` names the SVG attribute in camelCase; `ellipse`/`line` take the
     // paint bag, which is keyed by the attribute's own hyphenated name.
     return rect(node.x, node.y, RADIUS * 2, RADIUS * 2, {
-      fill, stroke, strokeWidth: BORDER_POINT_STROKE_WIDTH,
+      fill,
+      stroke,
+      strokeWidth: BORDER_POINT_STROKE_WIDTH,
     });
   }
   const circle = ellipse(node.x + RADIUS, node.y + RADIUS, RADIUS, RADIUS, {
-    fill, stroke, 'stroke-width': BORDER_POINT_STROKE_WIDTH,
+    fill,
+    stroke,
+    'stroke-width': BORDER_POINT_STROKE_WIDTH,
   });
   return pos === 'exitpoint' ? circle + exitCross(node, stroke) : circle;
 }
@@ -115,8 +119,7 @@ export function renderBorderPoint(node: StateNodeGeo, theme: Theme): string {
   if (lines.length === 0) return symbol;
   const fontSize = resolveStateFontSize(node, theme, theme.fontSize);
   const descHeight = lines.length * fontSize;
-  const labelTop =
-    node.borderPointLabelAbove === true ? node.y - 2 * RADIUS - descHeight : node.y + 2 * RADIUS;
+  const labelTop = node.borderPointLabelAbove === true ? node.y - 2 * RADIUS - descHeight : node.y + 2 * RADIUS;
   const fontColor = resolveStateFontColor(node, theme, '#000000');
   let out = symbol;
   lines.forEach((ln, i) => {

@@ -61,16 +61,14 @@ function buildThemeForFixture(
   const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
 
-  const styleMap = preprocessed.styles
-    .map(parseStyleBlock)
-    .reduce<StyleMap>((acc, m) => {
-      m.forEach((props, selector) => {
-        const existing = acc.get(selector) ?? new Map<string, string>();
-        props.forEach((v, k) => existing.set(k, v));
-        acc.set(selector, existing);
-      });
-      return acc;
-    }, new Map());
+  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
+    m.forEach((props, selector) => {
+      const existing = acc.get(selector) ?? new Map<string, string>();
+      props.forEach((v, k) => existing.set(k, v));
+      acc.set(selector, existing);
+    });
+    return acc;
+  }, new Map());
 
   const flatRoot = styleMap.get('') ?? new Map<string, string>();
   const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
@@ -110,11 +108,7 @@ function shellTypeFor(block: UmlSource): string {
  * `layoutJson`/`renderJson`. `options` passes through to `buildBlockUmls`
  * verbatim. Throws if the markup contains no diagram block.
  */
-export function renderFixtureJson(
-  markup: string,
-  measurer: StringMeasurer,
-  options?: PreprocessOptions,
-): string {
+export function renderFixtureJson(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');

@@ -13,8 +13,16 @@ import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-edge-labels.js';
 import type { InkBox } from './class-ink-shapes.js';
 import {
-  newInkBox, addPoint, addRectInk, HACK_X_FOR_POLYGON, addRectInkEmptyShownBody, addEllipseInk,
-  addPlainInk, addFolderPolygonInk, addNamespaceRectInk, addClassicRectInk,
+  newInkBox,
+  addPoint,
+  addRectInk,
+  HACK_X_FOR_POLYGON,
+  addRectInkEmptyShownBody,
+  addEllipseInk,
+  addPlainInk,
+  addFolderPolygonInk,
+  addNamespaceRectInk,
+  addClassicRectInk,
 } from './class-ink-shapes.js';
 export type { InkBox } from './class-ink-shapes.js';
 
@@ -137,9 +145,7 @@ function addVisibilityIconInk(box: InkBox, c: ClassifierGeo, iconSize: number): 
   // lists have to be scanned or a `{method} # …` member's icon is invisible
   // to this walk -- `filoxo-23-fafi328`'s `Doer` has exactly one entry in
   // `rows` (its header) and both its icon-bearing members in `enhancedBody`.
-  const enhanced = (c.enhancedBody?.parts ?? []).some(
-    (p) => p.kind === 'rows' && hasPolygonIcon(p.rows),
-  );
+  const enhanced = (c.enhancedBody?.parts ?? []).some((p) => p.kind === 'rows' && hasPolygonIcon(p.rows));
   if (!hasPolygonIcon(c.rows) && !enhanced) return;
   const left = c.x + ROW_TEXT_LEFT_MARGIN + 1;
   const right = left + (iconSize - 2);
@@ -260,10 +266,7 @@ function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
  */
 const TEXT_INK_BASELINE_DROP = 1.5;
 
-function addEdgeTextInk(
-  box: InkBox,
-  label: { x: number; y: number; width: number },
-): void {
+function addEdgeTextInk(box: InkBox, label: { x: number; y: number; width: number }): void {
   addPoint(box, label.x, label.y - CARDINALITY_FONT_SIZE + TEXT_INK_BASELINE_DROP);
   addPoint(box, label.x + label.width, label.y + TEXT_INK_BASELINE_DROP);
 }
@@ -348,4 +351,3 @@ export function buildInkBox(
   }
   return box;
 }
-

@@ -38,8 +38,7 @@ import { splitDisplayLines } from './klimt/creole/DisplayNewlines.js';
  * shrink every label carrying an icon. None of their names appears in the
  * alternation below, which is what keeps the atom scan intact.
  */
-const CREOLE_FORMAT_TAG_SOURCE =
-  '</?(?:color|back|size|font|plain|w|b|i|u|s)(?::[^>]*|\\s[^>]*)?>';
+const CREOLE_FORMAT_TAG_SOURCE = '</?(?:color|back|size|font|plain|w|b|i|u|s)(?::[^>]*|\\s[^>]*)?>';
 
 /**
  * Strip inline creole formatting to the text a measurer should see.
@@ -340,11 +339,7 @@ function stripLeadingEscapedChar(line: string): string {
  * `font` is the resolved CARDINALITY font — the caller (T6/T7) reads it
  * through the style cascade.
  */
-export function computeQuantifierBox(
-  text: string,
-  font: FontSpec,
-  measurer: StringMeasurer,
-): QuantifierBox {
+export function computeQuantifierBox(text: string, font: FontSpec, measurer: StringMeasurer): QuantifierBox {
   const { lines: rawLines } = splitDisplayLines(text);
   const lines = rawLines.map(stripLeadingEscapedChar);
   const measuredWidth = Math.max(...lines.map((l) => measurer.measure(l, font).width));

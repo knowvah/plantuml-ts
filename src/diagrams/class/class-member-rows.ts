@@ -205,9 +205,7 @@ export function buildSectionRows(
       indent,
       width: build.width,
       atoms: build.atoms,
-      ...(showIcon
-        ? { visibilityIcon: member.visibility, visibilityIsField: isMethodMember(member) === false }
-        : {}),
+      ...(showIcon ? { visibilityIcon: member.visibility, visibilityIsField: isMethodMember(member) === false } : {}),
       ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
     });
   }

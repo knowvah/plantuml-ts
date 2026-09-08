@@ -105,11 +105,7 @@ function shift(band: PageBand, y: number): number {
  * `if (height <= 0) return` (`:71-73`) — the CLAMP rule, for the kinds whose
  * ink is a rectangle. `undefined` is that `return`.
  */
-function clampSpan(
-  band: PageBand,
-  y: number,
-  height: number,
-): { y: number; height: number } | undefined {
+function clampSpan(band: PageBand, y: number, height: number): { y: number; height: number } | undefined {
   const y1 = Math.max(y, band.top);
   const y2 = Math.min(y + height, band.bottom);
   if (y2 - y1 <= 0) return undefined;
@@ -156,16 +152,13 @@ function clampSpan(
  * exactly `DriverTextSvg:88-90`.
  */
 function clipMessage(m: MessageGeo, band: PageBand): MessageGeo | undefined {
-  if (!inBand(band, m.y - ARROW_DELTA_Y) || !inBand(band, m.y + ARROW_DELTA_Y))
-    return undefined;
+  if (!inBand(band, m.y - ARROW_DELTA_Y) || !inBand(band, m.y + ARROW_DELTA_Y)) return undefined;
   const { labelNumber, ...rest } = m;
   const keepNumber = labelNumber !== undefined && inBand(band, labelNumber.y);
   return {
     ...rest,
     y: shift(band, m.y),
-    labelLines: m.labelLines
-      .filter((r) => inBand(band, r.y))
-      .map((r) => ({ ...r, y: shift(band, r.y) })),
+    labelLines: m.labelLines.filter((r) => inBand(band, r.y)).map((r) => ({ ...r, y: shift(band, r.y) })),
     ...(keepNumber ? { labelNumber: { ...labelNumber, y: shift(band, labelNumber.y) } } : {}),
   };
 }
@@ -232,9 +225,7 @@ function clipFrame(f: FrameGeo, band: PageBand): FrameGeo | undefined {
     ...f,
     y: span.y,
     height: span.height,
-    branchSeparators: f.branchSeparators
-      .filter((s) => inBand(band, s.y))
-      .map((s) => ({ ...s, y: shift(band, s.y) })),
+    branchSeparators: f.branchSeparators.filter((s) => inBand(band, s.y)).map((s) => ({ ...s, y: shift(band, s.y) })),
     refBody: headerClipped ? [] : f.refBody,
     ...(headerClipped ? { headerClipped: true } : {}),
   };
@@ -319,10 +310,7 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
   // because this port's body starts below the head row -- decisions.md D1.
   const ymin = index === 0 ? geo.headHeight : tiles[index - 1]!.y;
   const tile = tiles[index];
-  const ymax =
-    tile === undefined
-      ? geo.lifelineEndY
-      : Math.min(tile.y + tile.height, geo.lifelineEndY);
+  const ymax = tile === undefined ? geo.lifelineEndY : Math.min(tile.y + tile.height, geo.lifelineEndY);
 
   const band: PageBand = { top: ymin, bottom: ymax + 1, dy: geo.headHeight - ymin };
 
@@ -339,9 +327,7 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
 
   return {
     ...geo,
-    events: geo.events
-      .map((e) => clipEvent(e, band))
-      .filter((e): e is EventGeo => e !== undefined),
+    events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
     footerShapeY: geo.footerShapeY + delta,
     totalHeight,
@@ -360,13 +346,8 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
  *  `DisplayPositioned.single(location, strings, CENTER, TOP)`, or
  *  `Display.NULL` when the command carried no LABEL (`:90-92`). */
 function newpageTitle(event: NewpageEvent): DisplayPositioned {
-  if (event.title === undefined)
-    return noneDisplayPositioned(HorizontalAlignment.CENTER, VerticalAlignment.TOP);
-  return singleDisplayPositioned(
-    event.title,
-    HorizontalAlignment.CENTER,
-    VerticalAlignment.TOP,
-  );
+  if (event.title === undefined) return noneDisplayPositioned(HorizontalAlignment.CENTER, VerticalAlignment.TOP);
+  return singleDisplayPositioned(event.title, HorizontalAlignment.CENTER, VerticalAlignment.TOP);
 }
 
 /** `SequenceDiagram#titles`, in the order `newpage(...)` appended them —
@@ -376,8 +357,7 @@ function newpageTitlesOf(events: readonly SequenceEvent[]): DisplayPositioned[] 
   const titles: DisplayPositioned[] = [];
   for (const event of events) {
     if (event.kind === 'newpage') titles.push(newpageTitle(event));
-    else if (event.kind === 'frame')
-      for (const branch of event.branches) titles.push(...newpageTitlesOf(branch));
+    else if (event.kind === 'frame') for (const branch of event.branches) titles.push(...newpageTitlesOf(branch));
   }
   return titles;
 }
@@ -394,10 +374,7 @@ function newpageTitlesOf(events: readonly SequenceEvent[]): DisplayPositioned[] 
  * Returns the input unchanged for page 0, for a document with no chrome at
  * all, and for an index past the last `newpage`.
  */
-export function sequencePageAst(
-  ast: SequenceDiagramAST,
-  pageIndex: number,
-): SequenceDiagramAST {
+export function sequencePageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {
   const annotations = ast.annotations;
   if (pageIndex <= 0 || annotations === undefined) return ast;
   const title = newpageTitlesOf(ast.events)[pageIndex - 1];

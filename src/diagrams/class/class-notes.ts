@@ -302,13 +302,21 @@ export function finalizePendingNote(
   const text = note.textLines.join('\n');
   if (note.kind === 'attached') {
     if (note.target === undefined) return undefined;
-    return addNote(ast, note.position, note.target, text, {
-      namespace: note.namespace,
-      implicitTarget: note.implicitTarget,
-      ...(note.color !== undefined ? { color: note.color } : {}),
-      ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
-      ...(note.url !== undefined ? { url: note.url } : {}),
-    }, counter, tipGroupsSeen);
+    return addNote(
+      ast,
+      note.position,
+      note.target,
+      text,
+      {
+        namespace: note.namespace,
+        implicitTarget: note.implicitTarget,
+        ...(note.color !== undefined ? { color: note.color } : {}),
+        ...(note.stereotype !== undefined ? { stereotype: note.stereotype } : {}),
+        ...(note.url !== undefined ? { url: note.url } : {}),
+      },
+      counter,
+      tipGroupsSeen,
+    );
   }
   if (note.kind === 'link') {
     applyNoteOnLink(ast, note.position, text);
@@ -346,9 +354,7 @@ const NOTE_ON_LINK_COLOR_PART2 =
   String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)` +
   String.raw`(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
 const NOTE_ON_LINK_COLOR =
-  String.raw`(?:\s*(` +
-  `(?:${NOTE_ON_LINK_COLOR_PART2})|(?:${NOTE_ON_LINK_COLOR_REGEXP})` +
-  String.raw`))?`;
+  String.raw`(?:\s*(` + `(?:${NOTE_ON_LINK_COLOR_PART2})|(?:${NOTE_ON_LINK_COLOR_REGEXP})` + String.raw`))?`;
 
 /**
  * `note [pos] on|of link [#color] : text` (CommandFactoryNoteOnLink,
@@ -364,9 +370,7 @@ const NOTE_ON_LINK_COLOR =
  * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:76-91
  */
 export const NOTE_ON_LINK_RE = new RegExp(
-  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` +
-    NOTE_ON_LINK_COLOR +
-    String.raw`\s*:\s*(.+)$`,
+  String.raw`^note\s+(left|right|top|bottom)?\s*(?:on|of)\s+link` + NOTE_ON_LINK_COLOR + String.raw`\s*:\s*(.+)$`,
   'i',
 );
 
@@ -423,9 +427,7 @@ export function applyNoteOnLink(ast: ClassDiagramAST, position: NotePosition, te
 export const CONSTRAINT_ON_LINKS_RE = /^constraint\s*on\s+links\s*(?:#\w+\s*)?:\s*(.*)$/i;
 
 export function applyConstraintOnLinks(ast: ClassDiagramAST): void {
-  const links = ast.relationships.filter(
-    (r) => !isNoteId(ast, r.from) && !isNoteId(ast, r.to),
-  );
+  const links = ast.relationships.filter((r) => !isNoteId(ast, r.from) && !isNoteId(ast, r.to));
   if (links.length < 2) return;
   links[links.length - 1]!.linkConstraint = true;
   links[links.length - 2]!.linkConstraint = true;

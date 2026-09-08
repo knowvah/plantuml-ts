@@ -8,9 +8,7 @@ import type { UmlSource } from '../../core/block-extractor.js';
 // ---------------------------------------------------------------------------
 
 function getOrCreateFolder(node: FileEntry, name: string): FileEntry {
-  const existing = node.children.find(
-    (c) => c.type === 'folder' && c.name === name,
-  );
+  const existing = node.children.find((c) => c.type === 'folder' && c.name === name);
   if (existing !== undefined) return existing;
   const child: FileEntry = { type: 'folder', name, children: [] };
   node.children.push(child);
@@ -44,10 +42,7 @@ function addRawEntry(node: FileEntry, raw: string): FileEntry | null {
  * Walk the tree to find the direct parent of `target`.
  * Returns null when target is null or not found (attaches note to root).
  */
-function findParentOf(
-  node: FileEntry,
-  target: FileEntry | null,
-): FileEntry | null {
+function findParentOf(node: FileEntry, target: FileEntry | null): FileEntry | null {
   if (target === null) return null;
   for (const child of node.children) {
     if (child === target) return node;

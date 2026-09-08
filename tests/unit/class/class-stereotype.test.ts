@@ -62,8 +62,11 @@ describe('splitStereotypeLabels', () => {
   it('recovers STACKED labels from the greedy declaration-parser capture', () => {
     // Mirrors `class-declaration-parser.ts#extractDecorations`'s own doc
     // comment: `<<A>><<B>><<C>>` captures as "A>><<B>><<C" (one blob).
-    expect(splitStereotypeLabels('Singleton >>  << Startup >>  << Stateless Session Bean'))
-      .toEqual(['Singleton', 'Startup', 'Stateless Session Bean']);
+    expect(splitStereotypeLabels('Singleton >>  << Startup >>  << Stateless Session Bean')).toEqual([
+      'Singleton',
+      'Startup',
+      'Stateless Session Bean',
+    ]);
   });
 
   it('strips a circled-char decoration prefix, keeping only residual text', () => {
@@ -233,8 +236,20 @@ describe('buildStereoRows', () => {
       italic: true,
     });
     expect(result.rows).toHaveLength(2);
-    expect(result.rows[0]).toMatchObject({ text: '«A»', italic: true, width: 10, fontFamily: 'sans-serif', fontSize: CLASS_STEREOTYPE_FONT_SIZE });
-    expect(result.rows[1]).toMatchObject({ text: '«BB»', italic: true, width: 20, fontFamily: 'sans-serif', fontSize: CLASS_STEREOTYPE_FONT_SIZE });
+    expect(result.rows[0]).toMatchObject({
+      text: '«A»',
+      italic: true,
+      width: 10,
+      fontFamily: 'sans-serif',
+      fontSize: CLASS_STEREOTYPE_FONT_SIZE,
+    });
+    expect(result.rows[1]).toMatchObject({
+      text: '«BB»',
+      italic: true,
+      width: 20,
+      fontFamily: 'sans-serif',
+      fontSize: CLASS_STEREOTYPE_FONT_SIZE,
+    });
     // second line's top is exactly CLASS_STEREOTYPE_FONT_SIZE below the first
     expect(result.rows[1]!.y - result.rows[0]!.y).toBe(CLASS_STEREOTYPE_FONT_SIZE);
     // nameTop stacks after the whole block
@@ -309,19 +324,23 @@ describe('stereoBlockDim / buildStereoRows — 10px line-height floor (AtomText.
 describe('parseHideStereotypeDirective', () => {
   it('a bare "hide stereotype" matches with no pattern', () => {
     expect(parseHideStereotypeDirective('hide stereotype')).toEqual({
-      kind: 'hidestereotype', action: 'hide',
+      kind: 'hidestereotype',
+      action: 'hide',
     });
   });
 
   it('a bare "show stereotypes" (plural) matches', () => {
     expect(parseHideStereotypeDirective('show stereotypes')).toEqual({
-      kind: 'hidestereotype', action: 'show',
+      kind: 'hidestereotype',
+      action: 'show',
     });
   });
 
   it('"hide <<pattern>> stereotype" captures the trimmed pattern', () => {
     expect(parseHideStereotypeDirective('hide <<stereo1>> stereotype')).toEqual({
-      kind: 'hidestereotype', action: 'hide', pattern: 'stereo1',
+      kind: 'hidestereotype',
+      action: 'hide',
+      pattern: 'stereo1',
     });
   });
 
@@ -347,9 +366,7 @@ describe('isStereotypeLabelHidden', () => {
   });
 
   it('a patterned hide only hides the matching label', () => {
-    const directives: HideStereotypeDirective[] = [
-      { kind: 'hidestereotype', action: 'hide', pattern: 'stereo1' },
-    ];
+    const directives: HideStereotypeDirective[] = [{ kind: 'hidestereotype', action: 'hide', pattern: 'stereo1' }];
     expect(isStereotypeLabelHidden('stereo1', directives)).toBe(true);
     expect(isStereotypeLabelHidden('stereo2', directives)).toBe(false);
   });
@@ -402,9 +419,7 @@ describe('applyStereotypeHideShow', () => {
 describe('layoutClass — stereotype row', () => {
   it('a classifier with a stereotype gets an extra row above the header, and headerRowCount reflects it', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [], stereotype: 'Test' },
-      ],
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [], stereotype: 'Test' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const geo = classifierLeaves(result.leaves)[0]!;
@@ -459,19 +474,22 @@ describe('layoutClass — stereotype row', () => {
     expect(geo.rows[0]).not.toHaveProperty('bold');
   });
 
-  it('a fully-suppressed (member-less, hide members) stereotyped classifier has ' +
-     'box height exactly equal to headerRowHeight (no +4 fallback)', () => {
-    const ast = makeAST({
-      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [], stereotype: 'Test' }],
-      directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
-    });
-    const result = layoutClass(ast, defaultTheme, measurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    const nameH = measurer.measure('C', { family: defaultTheme.fontFamily, size: defaultTheme.fontSize }).height;
-    const expectedHeaderRowHeight = Math.max(32, CLASS_STEREOTYPE_FONT_SIZE + nameH + 10);
-    expect(geo.height).toBe(expectedHeaderRowHeight);
-    expect(geo.dividerYs).toEqual([]);
-  });
+  it(
+    'a fully-suppressed (member-less, hide members) stereotyped classifier has ' +
+      'box height exactly equal to headerRowHeight (no +4 fallback)',
+    () => {
+      const ast = makeAST({
+        classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [], stereotype: 'Test' }],
+        directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
+      });
+      const result = layoutClass(ast, defaultTheme, measurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      const nameH = measurer.measure('C', { family: defaultTheme.fontFamily, size: defaultTheme.fontSize }).height;
+      const expectedHeaderRowHeight = Math.max(32, CLASS_STEREOTYPE_FONT_SIZE + nameH + 10);
+      expect(geo.height).toBe(expectedHeaderRowHeight);
+      expect(geo.dividerYs).toEqual([]);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -487,41 +505,50 @@ describe('layoutClass — stereotype row', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutClass — item 45, multi-line classifier display-name header', () => {
-  it('splits the header into one row per `\\n` line, headerRowCount ' +
-     'reflects it, and headerRowHeight stacks `lines.length * headerFont.size` ' +
-     '-- jar-verified against dofima-22-kofe334 (`hide circle`, `class ' +
-     '"User\\n(User in our system)" as user`)', () => {
-    const detMeasurer = new DeterministicMeasurer();
-    const ast = makeAST({
-      classifiers: [{
-        id: 'user', display: 'User\\n(User in our system)', kind: 'class',
-        typeParams: [], members: [], hideCircle: true,
-      }],
-      directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
-    });
-    const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.headerRowCount).toBe(2);
-    expect(geo.rows).toHaveLength(2);
-    expect(geo.rows[0]!.text).toBe('User');
-    expect(geo.rows[1]!.text).toBe('(User in our system)');
-    // jar's real divider offset from box top on dofima's golden SVG is
-    // 45 - 7 = 38 = 2 lines * 14pt headerFont.size + 10 (HeaderLayout
-    // #getDimension's own additive term) — was 24 (1-line formula) pre-fix.
-    expect(geo.height).toBe(38);
-    expect(geo.dividerYs).toEqual([]);
-    // member-less box width == headerWidth exactly (no member area), so
-    // h1 === h2 === 0 (computeHeaderSlack's own suppWith === 0 case): the
-    // WIDEST line ("(User in our system)") sits flush at the block's own
-    // left edge (indent === NAME_LEFT_MARGIN === 3); the narrower "User"
-    // line CENTERS within that same block width — jar-verified x delta
-    // (dofima's golden `75.3 - 32.95 === 42.35`).
-    expect(geo.rows[1]!.indent).toBe(3);
-    expect(geo.rows[0]!.indent).toBeCloseTo(3 + (114.275 - 29.575) / 2, 4);
-    // per-line y stacks by exactly headerFont.size (14) — jar-verified
-    // (dofima's golden `36.8889 - 22.8889 === 14`).
-    expect(geo.rows[1]!.y - geo.rows[0]!.y).toBeCloseTo(14, 4);
-  });
+  it(
+    'splits the header into one row per `\\n` line, headerRowCount ' +
+      'reflects it, and headerRowHeight stacks `lines.length * headerFont.size` ' +
+      '-- jar-verified against dofima-22-kofe334 (`hide circle`, `class ' +
+      '"User\\n(User in our system)" as user`)',
+    () => {
+      const detMeasurer = new DeterministicMeasurer();
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'user',
+            display: 'User\\n(User in our system)',
+            kind: 'class',
+            typeParams: [],
+            members: [],
+            hideCircle: true,
+          },
+        ],
+        directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
+      });
+      const result = layoutClass(ast, defaultTheme, detMeasurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.headerRowCount).toBe(2);
+      expect(geo.rows).toHaveLength(2);
+      expect(geo.rows[0]!.text).toBe('User');
+      expect(geo.rows[1]!.text).toBe('(User in our system)');
+      // jar's real divider offset from box top on dofima's golden SVG is
+      // 45 - 7 = 38 = 2 lines * 14pt headerFont.size + 10 (HeaderLayout
+      // #getDimension's own additive term) — was 24 (1-line formula) pre-fix.
+      expect(geo.height).toBe(38);
+      expect(geo.dividerYs).toEqual([]);
+      // member-less box width == headerWidth exactly (no member area), so
+      // h1 === h2 === 0 (computeHeaderSlack's own suppWith === 0 case): the
+      // WIDEST line ("(User in our system)") sits flush at the block's own
+      // left edge (indent === NAME_LEFT_MARGIN === 3); the narrower "User"
+      // line CENTERS within that same block width — jar-verified x delta
+      // (dofima's golden `75.3 - 32.95 === 42.35`).
+      expect(geo.rows[1]!.indent).toBe(3);
+      expect(geo.rows[0]!.indent).toBeCloseTo(3 + (114.275 - 29.575) / 2, 4);
+      // per-line y stacks by exactly headerFont.size (14) — jar-verified
+      // (dofima's golden `36.8889 - 22.8889 === 14`).
+      expect(geo.rows[1]!.y - geo.rows[0]!.y).toBeCloseTo(14, 4);
+    },
+  );
 
   it('a single-line display name is unaffected (headerRowCount stays undefined, one row)', () => {
     const detMeasurer = new DeterministicMeasurer();
@@ -534,42 +561,60 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
     expect(geo.rows[0]!.text).toBe('C');
   });
 
-  it('`\\l` sets LEFT alignment for every line (last-wins, matches item 43\'s ' +
-     '`splitEdgeLabelLines` alignment rule) -- both lines share the SAME left indent', () => {
-    const detMeasurer = new DeterministicMeasurer();
-    const ast = makeAST({
-      classifiers: [{
-        id: 'x', display: 'Short\\lA much longer second line', kind: 'class',
-        typeParams: [], members: [], hideCircle: true,
-      }],
-      directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
-    });
-    const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.rows[0]!.indent).toBe(geo.rows[1]!.indent);
-  });
+  it(
+    "`\\l` sets LEFT alignment for every line (last-wins, matches item 43's " +
+      '`splitEdgeLabelLines` alignment rule) -- both lines share the SAME left indent',
+    () => {
+      const detMeasurer = new DeterministicMeasurer();
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'x',
+            display: 'Short\\lA much longer second line',
+            kind: 'class',
+            typeParams: [],
+            members: [],
+            hideCircle: true,
+          },
+        ],
+        directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
+      });
+      const result = layoutClass(ast, defaultTheme, detMeasurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.rows[0]!.indent).toBe(geo.rows[1]!.indent);
+    },
+  );
 
-  it('a stereotype-bearing classifier with a multi-line name stacks BOTH ' +
-     'mechanisms: stereo row(s), then N name-line rows, headerRowCount === sum', () => {
-    const detMeasurer = new DeterministicMeasurer();
-    const ast = makeAST({
-      classifiers: [{
-        id: 'C', display: 'Line1\\nLine2', kind: 'class', typeParams: [], members: [],
-        stereotype: 'Test',
-      }],
-    });
-    const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.headerRowCount).toBe(3);
-    expect(geo.rows[0]!.text).toBe('«Test»');
-    expect(geo.rows[1]!.text).toBe('Line1');
-    expect(geo.rows[2]!.text).toBe('Line2');
-    // badge indent lives on the LAST name row, never a stereo row or an
-    // earlier name-line row.
-    expect(geo.rows[2]).toHaveProperty('badgeIndent');
-    expect(geo.rows[0]).not.toHaveProperty('badgeIndent');
-    expect(geo.rows[1]).not.toHaveProperty('badgeIndent');
-  });
+  it(
+    'a stereotype-bearing classifier with a multi-line name stacks BOTH ' +
+      'mechanisms: stereo row(s), then N name-line rows, headerRowCount === sum',
+    () => {
+      const detMeasurer = new DeterministicMeasurer();
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'C',
+            display: 'Line1\\nLine2',
+            kind: 'class',
+            typeParams: [],
+            members: [],
+            stereotype: 'Test',
+          },
+        ],
+      });
+      const result = layoutClass(ast, defaultTheme, detMeasurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.headerRowCount).toBe(3);
+      expect(geo.rows[0]!.text).toBe('«Test»');
+      expect(geo.rows[1]!.text).toBe('Line1');
+      expect(geo.rows[2]!.text).toBe('Line2');
+      // badge indent lives on the LAST name row, never a stereo row or an
+      // earlier name-line row.
+      expect(geo.rows[2]).toHaveProperty('badgeIndent');
+      expect(geo.rows[0]).not.toHaveProperty('badgeIndent');
+      expect(geo.rows[1]).not.toHaveProperty('badgeIndent');
+    },
+  );
 
   // G2 N64 (item 45 corollary): `class-declaration-parser.ts
   // #extractGenericFromDisplay`'s `^([^\s<>]+)(<.*>)$` generic-tag capture
@@ -584,30 +629,38 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
   // to a genuinely EMPTY string, which N57's own `MemberRenderAtom` port
   // deliberately excluded -- zero corpus reach for an empty creole text
   // atom at the time, unlike a header line).
-  it('a trailing blank line (post `<Generic>` extraction leaves `\\n` at ' +
-     'the end of the base display) renders as a lone NBSP, LAYOUT-positioned ' +
-     'at its raw (zero) width -- jar-verified against julixi-10-jide878\'s ' +
-     '`csprob2dtd`', () => {
-    const detMeasurer = new DeterministicMeasurer();
-    const ast = makeAST({
-      classifiers: [{
-        id: 'csprob2dtd', display: 'CuttingStockPrb\\n', kind: 'class',
-        typeParams: ['two_dims_td'], members: [],
-      }],
-    });
-    const result = layoutClass(ast, defaultTheme, detMeasurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.headerRowCount).toBe(2);
-    expect(geo.rows[0]!.text).toBe('CuttingStockPrb');
-    // U+00A0 (NBSP), not a plain space or an empty string.
-    expect(geo.rows[1]!.text).toBe('\u00A0');
-    // jar's own drawn textLength for the NBSP glyph -- NOT 0 (the raw
-    // empty-string width the LAYOUT/indent math below still uses).
-    expect(geo.rows[1]!.width).toBeCloseTo(3.85, 4);
-    // jar-verified x delta (julixi's own golden: 242.955 - 192.38 = 50.575)
-    // -- computed from the RAW (zero) layout width, not the NBSP glyph's.
-    expect(geo.rows[1]!.indent - geo.rows[0]!.indent).toBeCloseTo(50.575, 4);
-  });
+  it(
+    'a trailing blank line (post `<Generic>` extraction leaves `\\n` at ' +
+      'the end of the base display) renders as a lone NBSP, LAYOUT-positioned ' +
+      "at its raw (zero) width -- jar-verified against julixi-10-jide878's " +
+      '`csprob2dtd`',
+    () => {
+      const detMeasurer = new DeterministicMeasurer();
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'csprob2dtd',
+            display: 'CuttingStockPrb\\n',
+            kind: 'class',
+            typeParams: ['two_dims_td'],
+            members: [],
+          },
+        ],
+      });
+      const result = layoutClass(ast, defaultTheme, detMeasurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.headerRowCount).toBe(2);
+      expect(geo.rows[0]!.text).toBe('CuttingStockPrb');
+      // U+00A0 (NBSP), not a plain space or an empty string.
+      expect(geo.rows[1]!.text).toBe('\u00A0');
+      // jar's own drawn textLength for the NBSP glyph -- NOT 0 (the raw
+      // empty-string width the LAYOUT/indent math below still uses).
+      expect(geo.rows[1]!.width).toBeCloseTo(3.85, 4);
+      // jar-verified x delta (julixi's own golden: 242.955 - 192.38 = 50.575)
+      // -- computed from the RAW (zero) layout width, not the NBSP glyph's.
+      expect(geo.rows[1]!.indent - geo.rows[0]!.indent).toBeCloseTo(50.575, 4);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -632,7 +685,6 @@ describe('hide|show [<<pattern>>] stereotype(s) — full parser integration', ()
   });
 });
 
-
 // ---------------------------------------------------------------------------
 // G2 N32: `class Foo<T>`/`class Bar<P, Q>` generic type-parameter tag box --
 // `measureGenericTagDim`/`buildGenericTagGeo`. Jar-verified end-to-end
@@ -647,22 +699,29 @@ describe('measureGenericTagDim (G2 N32)', () => {
     expect(measureGenericTagDim([], 'sans-serif', measurer)).toBeUndefined();
   });
 
-  it('measures a single type parameter -- width/height fold in BOTH ' +
-    '`withMargin(_, 1, 1)` applications (4px total per axis)', () => {
-    const dim = measureGenericTagDim(['Param'], 'sans-serif', new DeterministicMeasurer());
-    const rawTextWidth = new DeterministicMeasurer()
-      .measure('Param', { family: 'sans-serif', size: CLASS_STEREOTYPE_FONT_SIZE }).width;
-    expect(dim).toEqual({
-      width: rawTextWidth + 4,
-      height: CLASS_STEREOTYPE_FONT_SIZE + 4,
-      rawTextWidth,
-    });
-  });
+  it(
+    'measures a single type parameter -- width/height fold in BOTH ' +
+      '`withMargin(_, 1, 1)` applications (4px total per axis)',
+    () => {
+      const dim = measureGenericTagDim(['Param'], 'sans-serif', new DeterministicMeasurer());
+      const rawTextWidth = new DeterministicMeasurer().measure('Param', {
+        family: 'sans-serif',
+        size: CLASS_STEREOTYPE_FONT_SIZE,
+      }).width;
+      expect(dim).toEqual({
+        width: rawTextWidth + 4,
+        height: CLASS_STEREOTYPE_FONT_SIZE + 4,
+        rawTextWidth,
+      });
+    },
+  );
 
   it('joins multiple type parameters with ", "', () => {
     const dim = measureGenericTagDim(['P', 'Q'], 'sans-serif', new DeterministicMeasurer());
-    const rawTextWidth = new DeterministicMeasurer()
-      .measure('P, Q', { family: 'sans-serif', size: CLASS_STEREOTYPE_FONT_SIZE }).width;
+    const rawTextWidth = new DeterministicMeasurer().measure('P, Q', {
+      family: 'sans-serif',
+      size: CLASS_STEREOTYPE_FONT_SIZE,
+    }).width;
     expect(dim?.rawTextWidth).toBe(rawTextWidth);
   });
 
@@ -671,9 +730,17 @@ describe('measureGenericTagDim (G2 N32)', () => {
   // rejoins the captured generic clause, so a no-space source ("K,V")
   // must measure/render VERBATIM, not as "K, V".
   it('uses the verbatim rawText override instead of re-joining typeParams when provided', () => {
-    const dim = measureGenericTagDim(['K', 'V'], 'sans-serif', new DeterministicMeasurer(), CLASS_STEREOTYPE_FONT_SIZE, 'K,V');
-    const rawTextWidth = new DeterministicMeasurer()
-      .measure('K,V', { family: 'sans-serif', size: CLASS_STEREOTYPE_FONT_SIZE }).width;
+    const dim = measureGenericTagDim(
+      ['K', 'V'],
+      'sans-serif',
+      new DeterministicMeasurer(),
+      CLASS_STEREOTYPE_FONT_SIZE,
+      'K,V',
+    );
+    const rawTextWidth = new DeterministicMeasurer().measure('K,V', {
+      family: 'sans-serif',
+      size: CLASS_STEREOTYPE_FONT_SIZE,
+    }).width;
     expect(dim?.rawTextWidth).toBe(rawTextWidth);
     // Proves rawText overrides the re-join by measuring the VERBATIM "K,V"
     // string, not "K, V" -- confirmed via the text passed to the measurer
@@ -693,23 +760,26 @@ describe('measureGenericTagDim (G2 N32)', () => {
 });
 
 describe('buildGenericTagGeo (G2 N32)', () => {
-  it('positions the tag box against the classifier\'s FINAL box width -- ' +
-    'jar-verified `caboco-62-jula911` ("Param" on "Foo", boxWidth 95.475)', () => {
-    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
-    const geo = buildGenericTagGeo(['Param'], dim, 95.475, 'sans-serif', 9.8889);
-    expect(geo.rectX).toBeCloseTo(61.15, 4); // 95.475 - 39.325 + 4 + 1
-    expect(geo.rectY).toBe(-3); // -4 + 1
-    expect(geo.rectWidth).toBeCloseTo(37.325, 4); // 39.325 - 2
-    expect(geo.rectHeight).toBe(14); // 16 - 2
-    expect(geo.textX).toBeCloseTo(62.15, 4); // rectX + 1
-    expect(geo.textY).toBeCloseTo(7.8889, 4); // rectY + 1 + baselineOffset
-    expect(geo.textWidth).toBe(35.325);
-    expect(geo.text).toBe('Param');
-    // Default font metadata (no override): 12pt, plain weight, always italic.
-    expect(geo.fontSize).toBe(CLASS_STEREOTYPE_FONT_SIZE);
-    expect(geo.bold).toBeUndefined();
-    expect(geo.italic).toBe(true);
-  });
+  it(
+    "positions the tag box against the classifier's FINAL box width -- " +
+      'jar-verified `caboco-62-jula911` ("Param" on "Foo", boxWidth 95.475)',
+    () => {
+      const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
+      const geo = buildGenericTagGeo(['Param'], dim, 95.475, 'sans-serif', 9.8889);
+      expect(geo.rectX).toBeCloseTo(61.15, 4); // 95.475 - 39.325 + 4 + 1
+      expect(geo.rectY).toBe(-3); // -4 + 1
+      expect(geo.rectWidth).toBeCloseTo(37.325, 4); // 39.325 - 2
+      expect(geo.rectHeight).toBe(14); // 16 - 2
+      expect(geo.textX).toBeCloseTo(62.15, 4); // rectX + 1
+      expect(geo.textY).toBeCloseTo(7.8889, 4); // rectY + 1 + baselineOffset
+      expect(geo.textWidth).toBe(35.325);
+      expect(geo.text).toBe('Param');
+      // Default font metadata (no override): 12pt, plain weight, always italic.
+      expect(geo.fontSize).toBe(CLASS_STEREOTYPE_FONT_SIZE);
+      expect(geo.bold).toBeUndefined();
+      expect(geo.italic).toBe(true);
+    },
+  );
 
   // G2 N39: `skinparam classStereotypeFontSize`/`FontStyle` overrides --
   // jar-verified `datugo-88-sote552` (`font-weight="700"`, NO `font-style`
@@ -728,33 +798,43 @@ describe('buildGenericTagGeo (G2 N32)', () => {
   // sibling test for the jar-verified mechanism.
   it('renders the verbatim rawText override instead of typeParams.join when provided', () => {
     const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
-    const geo = buildGenericTagGeo(['K', 'V'], dim, 95.475, 'sans-serif', 9.8889, CLASS_STEREOTYPE_FONT_SIZE, false, true, 'K,V');
+    const geo = buildGenericTagGeo(
+      ['K', 'V'],
+      dim,
+      95.475,
+      'sans-serif',
+      9.8889,
+      CLASS_STEREOTYPE_FONT_SIZE,
+      false,
+      true,
+      'K,V',
+    );
     expect(geo.text).toBe('K,V');
   });
 });
 
 describe('layoutClass — generic type-parameter tag box end-to-end (G2 N32)', () => {
-  it('caboco-62-jula911: `class Foo<Param>` -- box widens by genericDim.width, ' +
-    'tag box geometry byte-exact', () => {
-    const ast = parse('class Foo<Param>');
-    const det = new DeterministicMeasurer();
-    const result = layoutClass(ast, defaultTheme, det);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.width).toBeCloseTo(95.475, 4);
-    expect(geo.genericTag).toBeDefined();
-    expect(geo.genericTag?.text).toBe('Param');
-    expect(geo.genericTag?.rectWidth).toBeCloseTo(37.325, 4);
-    expect(geo.genericTag?.rectHeight).toBe(14);
-  });
+  it(
+    'caboco-62-jula911: `class Foo<Param>` -- box widens by genericDim.width, ' + 'tag box geometry byte-exact',
+    () => {
+      const ast = parse('class Foo<Param>');
+      const det = new DeterministicMeasurer();
+      const result = layoutClass(ast, defaultTheme, det);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.width).toBeCloseTo(95.475, 4);
+      expect(geo.genericTag).toBeDefined();
+      expect(geo.genericTag?.text).toBe('Param');
+      expect(geo.genericTag?.rectWidth).toBeCloseTo(37.325, 4);
+      expect(geo.genericTag?.rectHeight).toBe(14);
+    },
+  );
 
-  it('a classifier with no type parameters gets no genericTag field ' +
-    '(zero behavior change)', () => {
+  it('a classifier with no type parameters gets no genericTag field ' + '(zero behavior change)', () => {
     const ast = parse('class Foo');
     const result = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
     expect(classifierLeaves(result.leaves)[0]!.genericTag).toBeUndefined();
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // G2 N65 item 35: `<style> class { MaximumWidth N } }` header word-wrap --
@@ -765,16 +845,19 @@ describe('layoutClass — generic type-parameter tag box end-to-end (G2 N32)', (
 // `<style> class { MaximumWidth 100 } }`).
 // ---------------------------------------------------------------------------
 describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
-  it('wraps a long header name into 4 lines at MaximumWidth 100, matching ' +
-     'nucite-98-kuga991\'s jar-verified box width/height exactly', () => {
-    const ast = parse('class "Long Long Long Long Long Long Long Long Long Long **class**" as C1');
-    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeHeaderMaximumWidth: 100 } } });
-    const result = layoutClass(ast, theme, new DeterministicMeasurer());
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.headerRowCount).toBe(4);
-    expect(geo.width).toBeCloseTo(125.45000000000003, 4);
-    expect(geo.height).toBe(82);
-  });
+  it(
+    'wraps a long header name into 4 lines at MaximumWidth 100, matching ' +
+      "nucite-98-kuga991's jar-verified box width/height exactly",
+    () => {
+      const ast = parse('class "Long Long Long Long Long Long Long Long Long Long **class**" as C1');
+      const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeHeaderMaximumWidth: 100 } } });
+      const result = layoutClass(ast, theme, new DeterministicMeasurer());
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.headerRowCount).toBe(4);
+      expect(geo.width).toBeCloseTo(125.45000000000003, 4);
+      expect(geo.height).toBe(82);
+    },
+  );
 
   it('classCascadeHeaderMaximumWidth unset (0) leaves the header on one line (zero behavior change)', () => {
     const ast = parse('class "Long Long Long Long Long Long Long Long Long Long class" as C1');
@@ -793,22 +876,23 @@ describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
 // `<style> class { MaximumWidth 150 } }`).
 // ---------------------------------------------------------------------------
 describe('layoutClass — item 35, MaximumWidth member-row word-wrap', () => {
-  it('wraps a long method row into 4 rows at MaximumWidth 150, matching ' +
-     'nucite-98-kuga991\'s jar-verified box width/height exactly', () => {
-    const ast = parse(
-      'class C2 {\nLong Long Long Long Long Long Long Long Long **Method()**\n}',
-    );
-    // nucite's own `<style>` block sets `class { MaximumWidth 100 }`.
-    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeMaximumWidth: 100 } } });
-    const result = layoutClass(ast, theme, new DeterministicMeasurer());
-    const geo = classifierLeaves(result.leaves)[0]!;
-    // jar's real golden: <rect width="105.45" height="104"/>.
-    expect(geo.width).toBeCloseTo(105.45, 4);
-    expect(geo.height).toBe(104);
-    // header row + 4 wrapped body rows (3 "Long Long Long" lines + 1 bold
-    // "Method()" line).
-    expect(geo.rows).toHaveLength(5);
-  });
+  it(
+    'wraps a long method row into 4 rows at MaximumWidth 150, matching ' +
+      "nucite-98-kuga991's jar-verified box width/height exactly",
+    () => {
+      const ast = parse('class C2 {\nLong Long Long Long Long Long Long Long Long **Method()**\n}');
+      // nucite's own `<style>` block sets `class { MaximumWidth 100 }`.
+      const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeMaximumWidth: 100 } } });
+      const result = layoutClass(ast, theme, new DeterministicMeasurer());
+      const geo = classifierLeaves(result.leaves)[0]!;
+      // jar's real golden: <rect width="105.45" height="104"/>.
+      expect(geo.width).toBeCloseTo(105.45, 4);
+      expect(geo.height).toBe(104);
+      // header row + 4 wrapped body rows (3 "Long Long Long" lines + 1 bold
+      // "Method()" line).
+      expect(geo.rows).toHaveLength(5);
+    },
+  );
 
   it('classCascadeMaximumWidth unset (0) leaves the row on one line (zero behavior change)', () => {
     const ast = parse('class C2 {\nLong Long Long Long Long Long Long Long Long Method()\n}');

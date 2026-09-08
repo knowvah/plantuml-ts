@@ -43,11 +43,6 @@ interface Dim {
   height: number;
 }
 
-
-
-
-
-
 /** FontParam.OBJECT_STEREOTYPE's hardcoded size (12, italic) — shared by
  *  every EntityImage* header formula; independent of theme.fontSize. */
 const STEREO_FONT_SIZE = 12;
@@ -89,7 +84,11 @@ function scalarText(node: { kind: 'scalar'; value: string | number | boolean | n
 }
 
 /** `TextBlockArray#calculateDimensionSlow`: width = max, height = sum. */
-function measureArrayNode(node: JsonNode & { kind: 'array' }, fontSpec: FontSpec, measurer: StringMeasurer): JsonDimNode {
+function measureArrayNode(
+  node: JsonNode & { kind: 'array' },
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+): JsonDimNode {
   const items = node.items.map((i) => measureJsonNode(i, fontSpec, measurer));
   const width = items.length === 0 ? 0 : Math.max(...items.map((i) => i.width));
   const height = items.reduce((sum, i) => sum + i.height, 0);
@@ -99,7 +98,11 @@ function measureArrayNode(node: JsonNode & { kind: 'array' }, fontSpec: FontSpec
 /** `TextBlockJson#calculateDimensionSlow`: width = width1 (max key cell
  *  width) + width2 (max value cell/sub-table width); height = sum of
  *  per-member `max(keyDim.height, valueDim.height)`. */
-function measureObjectNode(node: JsonNode & { kind: 'object' }, fontSpec: FontSpec, measurer: StringMeasurer): JsonDimNode {
+function measureObjectNode(
+  node: JsonNode & { kind: 'object' },
+  fontSpec: FontSpec,
+  measurer: StringMeasurer,
+): JsonDimNode {
   const members = node.entries.map((e) => ({
     keyDim: measureJsonCell(e.key, fontSpec, measurer),
     value: measureJsonNode(e.value, fontSpec, measurer),

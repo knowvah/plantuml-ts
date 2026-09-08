@@ -113,7 +113,11 @@ describe('finalizeJsonBody', () => {
     finalizeJsonBody(entity, ['[1,2,3]']);
     expect(entity.jsonValue).toEqual({
       kind: 'array',
-      items: [{ kind: 'scalar', value: 1 }, { kind: 'scalar', value: 2 }, { kind: 'scalar', value: 3 }],
+      items: [
+        { kind: 'scalar', value: 1 },
+        { kind: 'scalar', value: 2 },
+        { kind: 'scalar', value: 3 },
+      ],
     });
   });
 });
@@ -139,7 +143,11 @@ function makeMockHost() {
     resolve(rawId, _rawDisplay, stereotype, color, reuseExisting) {
       resolveCalls.push(reuseExisting);
       if (entities.has(rawId)) return undefined; // mirrors class's duplicate rejection
-      const entity: MockEntity = { id: rawId, ...(stereotype !== undefined ? { stereotype } : {}), ...(color !== undefined ? { color } : {}) };
+      const entity: MockEntity = {
+        id: rawId,
+        ...(stereotype !== undefined ? { stereotype } : {}),
+        ...(color !== undefined ? { color } : {}),
+      };
       entities.set(rawId, entity);
       return entity;
     },
@@ -207,7 +215,12 @@ describe('jsonCommands — single-line (CommandCreateJsonSingleLine#executeArg0,
     const match = JSON_SINGLE_LINE_RE.exec('json Foo <<s>> #red 42')!;
     singleLine!.execute(undefined, match);
     expect(resolveCalls).toEqual([false]);
-    expect(entities.get('Foo')).toEqual({ id: 'Foo', stereotype: 's', color: '#red', jsonValue: { kind: 'scalar', value: 42 } });
+    expect(entities.get('Foo')).toEqual({
+      id: 'Foo',
+      stereotype: 's',
+      color: '#red',
+      jsonValue: { kind: 'scalar', value: 42 },
+    });
   });
 
   it('a duplicate id is a silent no-op — setJsonValue is never called (java:131-135, "JSON already exists")', () => {

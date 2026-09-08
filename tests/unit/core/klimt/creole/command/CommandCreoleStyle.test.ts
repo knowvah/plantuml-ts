@@ -83,9 +83,7 @@ describe('extended-color activation arm — UNDERLINE / WAVE / STRIKE', () => {
   });
 
   test('a non-hex6, non-word color arg ("<u:#FF00>x</u>") does not match — raw text', () => {
-    expect(textAtoms(buildStripeAtoms('<u:#FF00>x</u>', PLAIN))).toEqual([
-      { text: '<u:#FF00>x</u>', styles: [] },
-    ]);
+    expect(textAtoms(buildStripeAtoms('<u:#FF00>x</u>', PLAIN))).toEqual([{ text: '<u:#FF00>x</u>', styles: [] }]);
   });
 });
 

@@ -1,10 +1,4 @@
-import type {
-  BoardDiagramAST,
-  BoardNode,
-  BoardGeometry,
-  ActivityGeometry,
-  CardGeometry,
-} from './ast.js';
+import type { BoardDiagramAST, BoardNode, BoardGeometry, ActivityGeometry, CardGeometry } from './ast.js';
 
 const CELL_W = 170;
 const CELL_H = 90;

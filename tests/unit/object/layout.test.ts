@@ -46,12 +46,7 @@ describe('layoutClass with object diagram — classifier kind', () => {
 
 describe('layoutClass with object diagram — member row format', () => {
   it('formats member rows as "name = value" without visibility icon', () => {
-    const ast = parseClass(src([
-      'object Alice {',
-      '  firstName = Alice',
-      '  age = 30',
-      '}',
-    ]));
+    const ast = parseClass(src(['object Alice {', '  firstName = Alice', '  age = 30', '}']));
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
 
@@ -74,11 +69,7 @@ describe('layoutClass with object diagram — member row format', () => {
   });
 
   it('formats bare field name (no value) without = separator', () => {
-    const ast = parseClass(src([
-      'object X {',
-      '  name',
-      '}',
-    ]));
+    const ast = parseClass(src(['object X {', '  name', '}']));
     const geo = layoutClass(ast, theme, measurer);
     const memberRow = classifierLeaves(geo.leaves)[0]!.rows[1]!;
     expect(memberRow.text).toBe('name');
@@ -91,11 +82,7 @@ describe('layoutClass with object diagram — member row format', () => {
 
 describe('layoutClass with object diagram — multiple objects', () => {
   it('lays out two objects with non-overlapping positions', () => {
-    const ast = parseClass(src([
-      'object Alice',
-      'object Bob',
-      'Alice --> Bob',
-    ]));
+    const ast = parseClass(src(['object Alice', 'object Bob', 'Alice --> Bob']));
     const geo = layoutClass(ast, theme, measurer);
     expect(classifierLeaves(geo.leaves)).toHaveLength(2);
     expect(geo.edges).toHaveLength(1);
@@ -105,8 +92,10 @@ describe('layoutClass with object diagram — multiple objects', () => {
     const aRight = a!.x + a!.width;
     const bRight = b!.x + b!.width;
     const nonOverlap =
-      aRight <= b!.x || bRight <= a!.x || // horizontal separation
-      a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y; // vertical separation
+      aRight <= b!.x ||
+      bRight <= a!.x || // horizontal separation
+      a!.y + a!.height <= b!.y ||
+      b!.y + b!.height <= a!.y; // vertical separation
     expect(nonOverlap).toBe(true);
   });
 });
@@ -132,24 +121,26 @@ describe('layoutClass with object diagram — empty', () => {
 
 describe('layoutClass with object diagram — canonical example', () => {
   it('produces 3 classifiers and 2 edges from the canonical diagram', () => {
-    const ast = parseClass(src([
-      'object "User : Alice" as alice {',
-      '  firstName = Alice',
-      '  lastName = Wonderland',
-      '  age = 30',
-      '}',
-      'object "User : Bob" as bob {',
-      '  firstName = Bob',
-      '  lastName = Hope',
-      '  age = 45',
-      '}',
-      'object Address {',
-      '  street = 123 Main St',
-      '  city = Springfield',
-      '}',
-      'alice --> bob : knows',
-      'alice --> Address : livesAt',
-    ]));
+    const ast = parseClass(
+      src([
+        'object "User : Alice" as alice {',
+        '  firstName = Alice',
+        '  lastName = Wonderland',
+        '  age = 30',
+        '}',
+        'object "User : Bob" as bob {',
+        '  firstName = Bob',
+        '  lastName = Hope',
+        '  age = 45',
+        '}',
+        'object Address {',
+        '  street = 123 Main St',
+        '  city = Springfield',
+        '}',
+        'alice --> bob : knows',
+        'alice --> Address : livesAt',
+      ]),
+    );
     const geo = layoutClass(ast, theme, measurer);
     expect(classifierLeaves(geo.leaves)).toHaveLength(3);
     expect(geo.edges).toHaveLength(2);

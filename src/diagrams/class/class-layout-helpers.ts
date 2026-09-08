@@ -35,16 +35,9 @@ import { measureMapClassifier } from './class-map-sizing.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { measureJsonClassifier } from './class-json-sizing.js';
 import { isCollapsedGroup } from './class-magma.js';
-import {
-  measureEmptyPackageLeafDim,
-  type EmptyPackageLeafDim,
-} from './class-namespace-shape.js';
+import { measureEmptyPackageLeafDim, type EmptyPackageLeafDim } from './class-namespace-shape.js';
 import { resolveBadgeRadius } from './class-badge.js';
-import {
-  resolveStyleStereotypeTags,
-  resolveVisibleStereotypeLabels,
-  type GenericTagGeo,
-} from './class-stereotype.js';
+import { resolveStyleStereotypeTags, resolveVisibleStereotypeLabels, type GenericTagGeo } from './class-stereotype.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
 import { ROW_TEXT_LEFT_MARGIN, isMethodMember, type FlatMemberRows } from './class-member-rows.js';
@@ -78,10 +71,7 @@ export { ROW_TEXT_LEFT_MARGIN, isMethodMember };
 // used to live here -- `class-edge-geo.ts` (this re-export's only other
 // consumer) now imports `splitDisplayLines` from
 // `core/klimt/creole/DisplayNewlines.ts` directly.
-export {
-  CARDINALITY_FONT_SIZE, wrapPlainTextLine, edgeLabelAttrs,
-  type NoteBoxContext,
-};
+export { CARDINALITY_FONT_SIZE, wrapPlainTextLine, edgeLabelAttrs, type NoteBoxContext };
 
 /**
  * Format a member text string for class/interface/enum members (no
@@ -98,18 +88,21 @@ export {
  * reconstruction point that must reproduce that same "nothing typed,
  * nothing shown" behavior.
  */
-export function formatMemberText(member: {
-  visibility: string;
-  visibilityExplicit?: boolean;
-  name: string;
-  type?: string;
-  /** G2 N31: the raw separator between name/params and `type`, when the
-   *  source used something other than the canonical `': '` -- see
-   *  `ast.ts#Member.typeSeparator`'s doc comment. */
-  typeSeparator?: string;
-  params?: string[];
-  rawDisplay?: string;
-}, keepVisibilityChar = false): string {
+export function formatMemberText(
+  member: {
+    visibility: string;
+    visibilityExplicit?: boolean;
+    name: string;
+    type?: string;
+    /** G2 N31: the raw separator between name/params and `type`, when the
+     *  source used something other than the canonical `': '` -- see
+     *  `ast.ts#Member.typeSeparator`'s doc comment. */
+    typeSeparator?: string;
+    params?: string[];
+    rawDisplay?: string;
+  },
+  keepVisibilityChar = false,
+): string {
   // A13 (`classAttributeIconSize 0`): `MethodsOrFieldsArea#createTextBlock`'s
   // `withVisibilityChar` path (java:244-246) -- `m.getDisplay(true)`
   // re-prepends the member's OWN explicit char (Member.java:161-178;
@@ -281,14 +274,19 @@ function tryMeasureNonGenericClassifier(
   // stereotype before collapse (plumbing gap, see the F-D report).
   if (isCollapsedGroup(classifier)) {
     const dim = measureEmptyPackageLeafDim(
-      measurer, theme, classifier.display, resolveVisibleStereotypeLabels(classifier),
+      measurer,
+      theme,
+      classifier.display,
+      resolveVisibleStereotypeLabels(classifier),
     );
     // `rows[0].text` carries the label for `renderer.ts#renderEmptyPackageLeaf`
     // (mirrors `tryRenderUSymbol`'s identical `rows[0]?.text ?? id` convention)
     // -- no `y`/`indent` meaning here since this leaf never draws through the
     // generic `renderRow` path.
     return {
-      width: dim.width, height: dim.height, dividerYs: [],
+      width: dim.width,
+      height: dim.height,
+      dividerYs: [],
       rows: [{ text: classifier.display, y: 0, indent: 0 }],
       folderTab: dim,
     };
@@ -299,7 +297,8 @@ function tryMeasureNonGenericClassifier(
   // methods compartment concept (`BodierLikeClassOrObject#getFieldsToDisplay`
   // routes EVERY object member into "fields" regardless of method-like
   // syntax) — only `suppress.fields` is meaningful for them.
-  if (classifier.kind === 'object') return measureObjectClassifier(classifier, theme, measurer, suppress.fields, sprites);
+  if (classifier.kind === 'object')
+    return measureObjectClassifier(classifier, theme, measurer, suppress.fields, sprites);
   if (classifier.kind === 'map') return measureMapClassifier(classifier, theme, measurer);
   if (classifier.kind === 'json') return measureJsonClassifier(classifier, theme, measurer);
   const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
@@ -340,11 +339,9 @@ function tryMeasureNonGenericClassifier(
  */
 function resolveMeasureFonts(classifier: Classifier, theme: Theme) {
   const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const styleTags = classifier.stereotype !== undefined
-    ? resolveStyleStereotypeTags(classifier) : undefined;
-  const tagCascadeEntry = styleTags !== undefined
-    ? resolveClassTagCascadeEntry(theme, styleTags, classifier.styleGeneration)
-    : undefined;
+  const styleTags = classifier.stereotype !== undefined ? resolveStyleStereotypeTags(classifier) : undefined;
+  const tagCascadeEntry =
+    styleTags !== undefined ? resolveClassTagCascadeEntry(theme, styleTags, classifier.styleGeneration) : undefined;
   const attributeFont = resolveAttributeFont(theme, fontSpec, tagCascadeEntry, styleTags);
   const headerFont = resolveHeaderFont(theme, attributeFont, tagCascadeEntry, styleTags);
   return { attributeFont, headerFont };
@@ -379,16 +376,17 @@ export function measureClassifier(
   // is only available at this level), matching `badgeRadius`/`stereoFont`'s
   // own "resolve once, pass down" precedent above -- see
   // `theme.ts#classCascadeMaximumWidth`'s doc comment.
-  return measureGenericClassifier(
-    classifier, { header: headerFont, attribute: attributeFont }, measurer, suppress,
-    {
-      sprites, guillemet, badgeRadius, stereoFont, strictUml: theme.strictUml === true,
-      headerMaxWidth: theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0,
-      memberMaxWidth: theme.colors.graph.classCascadeMaximumWidth ?? 0,
-      minClassWidth: resolveMinClassWidth(theme, classifier.kind),
-      classAttributeIconSize: theme.classAttributeIconSize,
-    },
-  );
+  return measureGenericClassifier(classifier, { header: headerFont, attribute: attributeFont }, measurer, suppress, {
+    sprites,
+    guillemet,
+    badgeRadius,
+    stereoFont,
+    strictUml: theme.strictUml === true,
+    headerMaxWidth: theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0,
+    memberMaxWidth: theme.colors.graph.classCascadeMaximumWidth ?? 0,
+    minClassWidth: resolveMinClassWidth(theme, classifier.kind),
+    classAttributeIconSize: theme.classAttributeIconSize,
+  });
 }
 
 /**
@@ -401,7 +399,7 @@ export function measureClassifier(
  * `theme.minimumWidth`, theme-element-resolve.ts:104).
  */
 function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
-  return LIKE_CLASS_KINDS.has(kind) ? resolveElementMinimumWidth(theme, 'class') ?? 0 : 0;
+  return LIKE_CLASS_KINDS.has(kind) ? (resolveElementMinimumWidth(theme, 'class') ?? 0) : 0;
 }
 
 /**
@@ -422,6 +420,11 @@ function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
  * .java:110-116).
  */
 export const LIKE_CLASS_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
-  'class', 'abstract', 'interface', 'enum', 'annotation', 'entity', 'protocol',
+  'class',
+  'abstract',
+  'interface',
+  'enum',
+  'annotation',
+  'entity',
+  'protocol',
 ]);
-

@@ -37,11 +37,7 @@ import { foldEffectiveActions } from './class-directives-removal.js';
 import { collapseEmptyNamespacesFinal } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
-import {
-  measureClassifier,
-  isMethodMember,
-  type MeasuredClassifier,
-} from './class-layout-helpers.js';
+import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
 import { buildDotGraph } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
@@ -53,13 +49,26 @@ import {
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
 import {
-  isNoteGeo, type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type ClassLeafGeo,
+  isNoteGeo,
+  type ClassifierGeo,
+  type EdgeGeo,
+  type NamespaceGeo,
+  type ClassGeometry,
+  type ClassLeafGeo,
 } from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
 export {
-  isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves,
-  type ClassifierGeo, type EdgeGeo, type NamespaceGeo, type ClassGeometry, type JsonBodyItem, type ClassLeafGeo,
+  isNoteGeo,
+  isClassifierGeo,
+  classifierLeaves,
+  noteLeaves,
+  type ClassifierGeo,
+  type EdgeGeo,
+  type NamespaceGeo,
+  type ClassGeometry,
+  type JsonBodyItem,
+  type ClassLeafGeo,
 } from './class-geo-types.js';
 
 // ---------------------------------------------------------------------------
@@ -94,9 +103,9 @@ function preMeasureClassifiers(
     // (CommandHideShowByGender.java:272-273's byPackage AND; see
     // class-directives-removal.ts#directiveAppliesTo).
     const effectiveActions = foldEffectiveActions(ast.directives, classifier);
-    const hideMembers      = effectiveActions.get('members')       === 'hide';
+    const hideMembers = effectiveActions.get('members') === 'hide';
     const hideEmptyMembers = effectiveActions.get('empty members') === 'hide';
-    const hideEmptyFields  = effectiveActions.get('empty fields')  === 'hide';
+    const hideEmptyFields = effectiveActions.get('empty fields') === 'hide';
     const hideEmptyMethods = effectiveActions.get('empty methods') === 'hide';
     // A2s F-A / A5: global `hide fields`/`hide methods` (G2 N27) suppress the
     // WHOLE compartment, not just its rows -- upstream's `getBody` returns the
@@ -104,8 +113,8 @@ function preMeasureClassifiers(
     // at all for the hidden portion (jar-verified `vegubu-29-bomu147`: `hide
     // methods` box is 40px, not 40px + the empty-compartment chrome).
     // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:240-244
-    const hideFields       = effectiveActions.get('fields')        === 'hide';
-    const hideMethods      = effectiveActions.get('methods')       === 'hide';
+    const hideFields = effectiveActions.get('fields') === 'hide';
+    const hideMethods = effectiveActions.get('methods') === 'hide';
     const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
     // Object leaves route EVERY member into "fields" regardless of
     // method-like syntax (`BodierLikeClassOrObject#getFieldsToDisplay`'s
@@ -119,17 +128,19 @@ function preMeasureClassifiers(
     // methods` (`class-directives.ts#applyHideShowEntityDirectives`) already
     // stamped these two flags directly onto the classifier post-parse --
     // OR'd in alongside the diagram-global targets above.
-    const suppressFields  =
-      hideMembers || hideFields  || ((hideEmptyMembers || hideEmptyFields)  && fieldsEmpty) ||
+    const suppressFields =
+      hideMembers ||
+      hideFields ||
+      ((hideEmptyMembers || hideEmptyFields) && fieldsEmpty) ||
       classifier.suppressFields === true;
     const suppressMethods =
-      hideMembers || hideMethods || ((hideEmptyMembers || hideEmptyMethods) && methodsEmpty) ||
+      hideMembers ||
+      hideMethods ||
+      ((hideEmptyMembers || hideEmptyMethods) && methodsEmpty) ||
       classifier.suppressMethods === true;
     measuredMap.set(
       classifier.id,
-      measureClassifier(
-        classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites,
-      ),
+      measureClassifier(classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites),
     );
   }
   // #lizard forgives -- pre-existing hide/show directive resolution (4
@@ -165,20 +176,18 @@ function shiftEdgeGeo(edge: EdgeGeo, dx: number, dy: number): EdgeGeo {
   return {
     ...edge,
     points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-    ...(edge.label !== undefined
-      ? { label: { ...edge.label, x: edge.label.x + dx, y: edge.label.y + dy } }
-      : {}),
+    ...(edge.label !== undefined ? { label: { ...edge.label, x: edge.label.x + dx, y: edge.label.y + dy } } : {}),
     ...(edge.labelLines !== undefined
       ? {
-        labelLines: edge.labelLines.map((l) => ({
-          ...l,
-          x: l.x + dx,
-          y: l.y + dy,
-          ...(l.glyph !== undefined
-            ? { glyph: { points: l.glyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
-            : {}),
-        })),
-      }
+          labelLines: edge.labelLines.map((l) => ({
+            ...l,
+            x: l.x + dx,
+            y: l.y + dy,
+            ...(l.glyph !== undefined
+              ? { glyph: { points: l.glyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
+              : {}),
+          })),
+        }
       : {}),
     ...(edge.arrowGlyph !== undefined
       ? { arrowGlyph: { points: edge.arrowGlyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
@@ -239,11 +248,7 @@ function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]):
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-function layoutSinglePage(
-  ast: ClassDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): ClassGeometry {
+function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   // Empty diagram (isDegeneratedWithFewEntities(0): 0 groups, 0 links, 0
   // leafs — leafs includes notes, so a lone freestanding note must NOT hit
   // this shortcut or it would be silently dropped) — zero-size result.
@@ -282,8 +287,12 @@ function layoutSinglePage(
   const effAst = filterRemovedEntities(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } =
-    buildDotGraph(effAst, measuredMap, theme, measurer);
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } = buildDotGraph(
+    effAst,
+    measuredMap,
+    theme,
+    measurer,
+  );
 
   const result = layout(dotGraph);
 
@@ -300,9 +309,13 @@ function layoutSinglePage(
   // tail/head cardinality labels stay at `theme.fontFamily` (see
   // `class-edge-geo.ts#EdgeGeoTextContext`).
   const edges = buildEdgeGeos(
-    effAst, result, swappedEdges,
+    effAst,
+    result,
+    swappedEdges,
     { measurer, labelFont: resolveArrowLabelFont(theme), fontFamily: theme.fontFamily },
-    posMap, anchors, theme.colors.graph.arrowThickness,
+    posMap,
+    anchors,
+    theme.colors.graph.arrowThickness,
   );
   // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
   // member-tip (`::member`) note's notch is resolved inside the draw passes
@@ -319,21 +332,15 @@ function layoutSinglePage(
   // resolve (degenerate spline) keeps its ordinary edge draw, the same
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
   const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
-  const notes: NoteGeo[] = mapNoteGeos(
-    effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors,
-  );
+  const notes: NoteGeo[] = mapNoteGeos(effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors);
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
-    [...freestandingConnectors.entries()]
-      .filter(([noteId]) => opaleNoteIds.has(noteId))
-      .map(([, edge]) => edge.id),
+    [...freestandingConnectors.entries()].filter(([noteId]) => opaleNoteIds.has(noteId)).map(([, edge]) => edge.id),
   );
   // NOT filtered out of `edges` -- `EdgeGeo.consumedByOpaleNote`'s own doc
   // comment: `renderer-uid.ts` still needs every edge's `creationIndex`
   // slot counted in the dense-renumbering merge, even one that never draws.
-  const markedEdges = edges.map((e) =>
-    consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e,
-  );
+  const markedEdges = edges.map((e) => (consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e));
 
   const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
@@ -424,11 +431,7 @@ const NEWPAGE_GAP = 20;
  * ever sees it; this is a SEPARATE, purely additive y-only offset (`dx=0`)
  * stacked on top.
  */
-function layoutMultiPage(
-  pages: ClassDiagramAST[],
-  theme: Theme,
-  measurer: StringMeasurer,
-): ClassGeometry {
+function layoutMultiPage(pages: ClassDiagramAST[], theme: Theme, measurer: StringMeasurer): ClassGeometry {
   const leaves: ClassLeafGeo[] = [];
   const edges: EdgeGeo[] = [];
   const namespaces: NamespaceGeo[] = [];
@@ -476,11 +479,7 @@ function layoutMultiPage(
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-export function layoutClass(
-  ast: ClassDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): ClassGeometry {
+export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   if (ast.pages !== undefined) return layoutMultiPage(ast.pages, theme, measurer);
   return layoutSinglePage(ast, theme, measurer);
 }

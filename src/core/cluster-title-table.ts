@@ -70,6 +70,11 @@ function titleAndAttributeHeight(titleLines: number, stereoLines: number, attrLi
  * fontSize=14`): `(0+1)*14 - 5 = 9`.
  */
 const DOT_TITLE_TABLE_HEIGHT_OFFSET = 5;
-export function computeTitleTableHeight(titleLines: number, stereoLines: number, attrLines: number, fontSize: number): number {
+export function computeTitleTableHeight(
+  titleLines: number,
+  stereoLines: number,
+  attrLines: number,
+  fontSize: number,
+): number {
   return titleAndAttributeHeight(titleLines, stereoLines, attrLines, fontSize) - DOT_TITLE_TABLE_HEIGHT_OFFSET;
 }

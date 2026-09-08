@@ -60,13 +60,7 @@ export class FontConfiguration {
         'deferred per SI1/ADR-2: FontConfiguration.create(ISkinParam, Style) needs the style value-resolution machinery (style/Style#value, PName) not yet ported',
       );
     }
-    return new FontConfiguration(
-      a,
-      b,
-      hyperlinkColor,
-      hyperlinkUnderlineStroke as UStroke,
-      tabSize as number,
-    );
+    return new FontConfiguration(a, b, hyperlinkColor, hyperlinkUnderlineStroke as UStroke, tabSize as number);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java (getFont) */

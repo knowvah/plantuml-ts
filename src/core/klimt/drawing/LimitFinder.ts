@@ -183,7 +183,10 @@ export class LimitFinder extends UGraphicNo {
   /** The `-1` min-corner inset + `deltaShadow * 2` max-corner growth — upstream quirks, preserved. */
   private drawRectangle(x: number, y: number, shape: URectangle): void {
     this.addPoint(x - 1, y - 1);
-    this.addPoint(x + shape.getWidth() - 1 + shape.getDeltaShadow() * 2, y + shape.getHeight() - 1 + shape.getDeltaShadow() * 2);
+    this.addPoint(
+      x + shape.getWidth() - 1 + shape.getDeltaShadow() * 2,
+      y + shape.getHeight() - 1 + shape.getDeltaShadow() * 2,
+    );
   }
 
   private drawDotPath(x: number, y: number, shape: DotPath): void {
@@ -202,7 +205,10 @@ export class LimitFinder extends UGraphicNo {
 
   private drawEllipse(x: number, y: number, shape: UEllipse): void {
     this.addPoint(x, y);
-    this.addPoint(x + shape.getWidth() - 1 + shape.getDeltaShadow() * 2, y + shape.getHeight() - 1 + shape.getDeltaShadow() * 2);
+    this.addPoint(
+      x + shape.getWidth() - 1 + shape.getDeltaShadow() * 2,
+      y + shape.getHeight() - 1 + shape.getDeltaShadow() * 2,
+    );
   }
 
   /** The `dim.height - 1.5` baseline shift before the four-corner add — upstream quirk, preserved. */

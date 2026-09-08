@@ -38,11 +38,7 @@
  * against `lojepe-37-liri985`'s golden triangle `<polygon>`.
  */
 
-import {
-  type MagicArrowDirection,
-  type MagicArrowLabel,
-  parseMagicArrowLabel,
-} from '../../core/edge-label-box.js';
+import { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel } from '../../core/edge-label-box.js';
 // T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
 // `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
 // comment.
@@ -66,9 +62,7 @@ export { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel };
  */
 export function hasSeveralGuideLines(lines: readonly string[]): boolean {
   if (lines.length <= 1) return false;
-  return lines.some(
-    (l) => l.startsWith('< ') || l.startsWith('> ') || l.endsWith(' <') || l.endsWith(' >'),
-  );
+  return lines.some((l) => l.startsWith('< ') || l.startsWith('> ') || l.endsWith(' <') || l.endsWith(' >'));
 }
 
 /**
@@ -110,11 +104,7 @@ export interface GuideLine {
  * enters a measurement, the same rule the single-line magic-arrow path
  * already follows).
  */
-export function splitGuideLines(
-  lines: readonly string[],
-  font: FontSpec,
-  measurer: StringMeasurer,
-): GuideLine[] {
+export function splitGuideLines(lines: readonly string[], font: FontSpec, measurer: StringMeasurer): GuideLine[] {
   return lines.map((line) => {
     const magic = parseMagicArrowLabel(line);
     const text = magic === undefined ? line : (magic.text ?? '');

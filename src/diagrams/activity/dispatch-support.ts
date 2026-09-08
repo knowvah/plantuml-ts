@@ -63,8 +63,7 @@ export const RE_NOTE_MULTI = /^note(?:\s+(left|right))?\s*$/i;
  * Capture group 1: optional color value (e.g. "red", "#FF0000")
  * Capture group 2: label text
  */
-export const RE_ARROW_LABEL =
-  /^->(?:<(?:back|color):([^>]+)>)?\s*(.*?)\s*;?\s*$/i;
+export const RE_ARROW_LABEL = /^->(?:<(?:back|color):([^>]+)>)?\s*(.*?)\s*;?\s*$/i;
 
 /** `repeat` head, optionally followed by an inline action on the same
  *  line (`repeat :foo;`). Built via `new RegExp` (not a `/.../ ` literal):
@@ -78,9 +77,7 @@ export const RE_REPEAT_HEAD = new RegExp('^repeat(?:\\s+(.*))?$', 'i');
  *  same lizard brace-depth workaround as {@link RE_REPEAT_HEAD} above, and
  *  additionally contains `<`/`>`, which the project's regex-hoisting
  *  convention also requires building from a string. */
-export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(
-  ';\\s*(?:<<[^>]*>>)?\\s*(?:#\\w+)?\\s*$',
-);
+export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(';\\s*(?:<<[^>]*>>)?\\s*(?:#\\w+)?\\s*$');
 
 /** Literal `\n` (backslash-n) escape inside an action label -> real
  *  newline. Hoisted alongside the constants above for the same lizard
@@ -139,12 +136,8 @@ export function setCurrentSwimlane(ctx: ParseContext, name: string): void {
   }
 }
 
-export function swimlaneSpread(
-  ctx: ParseContext,
-): { swimlane: string } | Record<string, never> {
-  return ctx.currentSwimlane !== undefined
-    ? { swimlane: ctx.currentSwimlane }
-    : {};
+export function swimlaneSpread(ctx: ParseContext): { swimlane: string } | Record<string, never> {
+  return ctx.currentSwimlane !== undefined ? { swimlane: ctx.currentSwimlane } : {};
 }
 
 // ---------------------------------------------------------------------------

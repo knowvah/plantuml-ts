@@ -82,9 +82,14 @@ export class ActorStickMan implements TextBlock {
     const applied = this.fashion.apply(ug);
     applied.apply(new UTranslate(startX, this.thickness())).draw(head);
     if (this.actorBusiness) {
-      this.specialBusiness(applied.apply(new UTranslate(startX + this.headDiam / 2, this.thickness() + this.headDiam / 2)));
+      this.specialBusiness(
+        applied.apply(new UTranslate(startX + this.headDiam / 2, this.thickness() + this.headDiam / 2)),
+      );
     }
-    applied.apply(new UTranslate(centerX, this.headDiam + this.thickness())).apply(new Back('none')).draw(path);
+    applied
+      .apply(new UTranslate(centerX, this.headDiam + this.thickness()))
+      .apply(new Back('none'))
+      .draw(path);
   }
 
   private specialBusiness(ug: UGraphic): void {

@@ -96,9 +96,7 @@ describe('parseLatexLabel', () => {
   });
 
   it('handles multiple latex spans', () => {
-    const spans = parseLatexLabel(
-      '<latex>a</latex> and <latex>b</latex>',
-    );
+    const spans = parseLatexLabel('<latex>a</latex> and <latex>b</latex>');
     expect(spans).toHaveLength(3);
     expect(spans.map((s) => s.kind)).toEqual(['latex', 'text', 'latex']);
   });
@@ -134,16 +132,12 @@ describe('measureLatex', () => {
   });
 
   it('returns width >= 120 for a complex expression', () => {
-    const { width } = measureLatex(
-      '\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}',
-    );
+    const { width } = measureLatex('\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}');
     expect(width).toBeGreaterThanOrEqual(120);
   });
 
   it('returns height > 40 for an expression with \\frac', () => {
-    const { height } = measureLatex(
-      '\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}',
-    );
+    const { height } = measureLatex('\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}');
     expect(height).toBeGreaterThan(40);
   });
 
@@ -205,9 +199,7 @@ describe('renderLatexMathML', () => {
 
   it('does not throw for malformed LaTeX (throwOnError: false)', () => {
     // \badcommand is not a valid LaTeX command
-    expect(() =>
-      renderLatexMathML('\\badcommand{x}', 0, 0, 120, 40, '#000'),
-    ).not.toThrow();
+    expect(() => renderLatexMathML('\\badcommand{x}', 0, 0, 120, 40, '#000')).not.toThrow();
   });
 
   it('still returns a valid foreignObject for malformed LaTeX', () => {
@@ -218,14 +210,7 @@ describe('renderLatexMathML', () => {
 
   it('strips <latex>…</latex> wrapper tags from the expression', () => {
     // Both wrapped and unwrapped should produce equivalent MathML output
-    const wrapped = renderLatexMathML(
-      '<latex>x^2</latex>',
-      0,
-      0,
-      120,
-      40,
-      '#000',
-    );
+    const wrapped = renderLatexMathML('<latex>x^2</latex>', 0, 0, 120, 40, '#000');
     const plain = renderLatexMathML('x^2', 0, 0, 120, 40, '#000');
     expect(wrapped).toBe(plain);
   });

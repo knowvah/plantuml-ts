@@ -39,7 +39,13 @@ describe('assembleSvg — routing', () => {
   });
 
   it('routes a diagramType-carrying fragment through assembleDocumentShell, carrying every root attribute svgRoot omits', () => {
-    const svg = assembleSvg({ body: '<g/>', width: 100, height: 50, background: '#FFFFFF', diagramType: 'DESCRIPTION' });
+    const svg = assembleSvg({
+      body: '<g/>',
+      width: 100,
+      height: 50,
+      background: '#FFFFFF',
+      diagramType: 'DESCRIPTION',
+    });
     expect(svg).toContain('xmlns:xlink="http://www.w3.org/1999/xlink"');
     expect(svg).toContain('version="1.1"');
     expect(svg).toContain('data-diagram-type="DESCRIPTION"');
@@ -50,24 +56,42 @@ describe('assembleSvg — routing', () => {
   });
 
   it('folds background into the root style attribute, not a separate <rect> (matches finalizeRootAttributes)', () => {
-    const svg = assembleSvg({ body: '<g/>', width: 100, height: 50, background: '#FF0000', diagramType: 'DESCRIPTION' });
+    const svg = assembleSvg({
+      body: '<g/>',
+      width: 100,
+      height: 50,
+      background: '#FF0000',
+      diagramType: 'DESCRIPTION',
+    });
     expect(svg).toContain('style="width:100px;height:50px;background:#FF0000;"');
     expect(svg).not.toContain('<rect');
   });
 
   it('omits the background segment of style for a transparent background', () => {
-    const svg = assembleSvg({ body: '<g/>', width: 100, height: 50, background: 'transparent', diagramType: 'DESCRIPTION' });
+    const svg = assembleSvg({
+      body: '<g/>',
+      width: 100,
+      height: 50,
+      background: 'transparent',
+      diagramType: 'DESCRIPTION',
+    });
     expect(svg).toContain('style="width:100px;height:50px;"');
     expect(svg).not.toContain('background:');
   });
 
-  it('defaults background to #FFFFFF when omitted (matches svgRoot\'s own default)', () => {
+  it("defaults background to #FFFFFF when omitted (matches svgRoot's own default)", () => {
     const svg = assembleSvg({ body: '<g/>', width: 100, height: 50, diagramType: 'DESCRIPTION' });
     expect(svg).toContain('background:#FFFFFF;');
   });
 
   it('emits width/height/viewBox truncated to integers (Math.trunc, matching finalizeRootAttributes)', () => {
-    const svg = assembleSvg({ body: '<g/>', width: 100.7, height: 50.2, background: '#FFFFFF', diagramType: 'DESCRIPTION' });
+    const svg = assembleSvg({
+      body: '<g/>',
+      width: 100.7,
+      height: 50.2,
+      background: '#FFFFFF',
+      diagramType: 'DESCRIPTION',
+    });
     expect(svg).toContain('width="100px"');
     expect(svg).toContain('height="50px"');
     expect(svg).toContain('viewBox="0 0 100 50"');
@@ -75,8 +99,12 @@ describe('assembleSvg — routing', () => {
 
   it('splices extraDefs into the single <defs> block with no ALL_ARROW_TYPES marker injection', () => {
     const svg = assembleSvg({
-      body: '<g/>', width: 10, height: 10, background: '#FFFFFF',
-      extraDefs: '<linearGradient id="g0"/>', diagramType: 'DESCRIPTION',
+      body: '<g/>',
+      width: 10,
+      height: 10,
+      background: '#FFFFFF',
+      extraDefs: '<linearGradient id="g0"/>',
+      diagramType: 'DESCRIPTION',
     });
     expect(svg).toContain('<defs><linearGradient id="g0"/></defs>');
     expect(svg).not.toContain('arrow-sync');
@@ -182,25 +210,21 @@ describe('assembleSvg — CLASS diagramBorderColor splice (G2 N66)', () => {
   });
 
   it('puts the border rect BEFORE the background rect (drawn first)', () => {
-    const svg = assembleSvg(
-      chromedClassFragment({ diagramBorderColor: '#FF0000', documentBackgroundRect: '#EEEEEE' }),
-    );
+    const svg = assembleSvg(chromedClassFragment({ diagramBorderColor: '#FF0000', documentBackgroundRect: '#EEEEEE' }));
     expect(rootGroupChildren(svg)).toMatch(/^<rect [^>]*fill="none"[^>]*\/><rect /);
   });
 
   it('still no-ops when chrome inflated the canvas past the class body', () => {
-    const svg = assembleSvg(
-      chromedClassFragment({ diagramBorderColor: '#FF0000', height: FINAL_DIMS.height + 30 }),
-    );
+    const svg = assembleSvg(chromedClassFragment({ diagramBorderColor: '#FF0000', height: FINAL_DIMS.height + 30 }));
     expect(svg).not.toContain('fill="none"');
   });
 });
 
 describe('assembleSvg — CLASS: a lost <g> wrapper cannot fail quietly', () => {
   it('throws instead of silently dropping the background rect', () => {
-    expect(() =>
-      assembleSvg(chromedClassFragment({ body: INNER, documentBackgroundRect: '#EEEEEE' })),
-    ).toThrow(/not wrapped in an outer <g> element/);
+    expect(() => assembleSvg(chromedClassFragment({ body: INNER, documentBackgroundRect: '#EEEEEE' }))).toThrow(
+      /not wrapped in an outer <g> element/,
+    );
   });
 });
 
@@ -237,14 +261,22 @@ describe('assembleSvg — JSON background rect (isSolidNonDefault)', () => {
 
   it('draws no rect for a transparent background', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: 'transparent', diagramType: 'JSON',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'transparent',
+      diagramType: 'JSON',
     });
     expect(svg).not.toContain('<rect x="0" y="0"');
   });
 
   it('draws no rect for white spelled as a theme name ("white" canonicalizes to #FFFFFF)', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: 'white', diagramType: 'JSON',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'white',
+      diagramType: 'JSON',
     });
     expect(svg).not.toContain('<rect x="0" y="0"');
     // canonicalized into the root style too, not left as the literal theme string
@@ -253,14 +285,22 @@ describe('assembleSvg — JSON background rect (isSolidNonDefault)', () => {
 
   it('draws the rect for a non-default background, sized to the final canvas, stroke:none only', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: '#0B58A8', diagramType: 'JSON',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: '#0B58A8',
+      diagramType: 'JSON',
     });
     expect(svg).toContain('<rect x="0" y="0" width="50" height="30" fill="#0B58A8" stroke="none"/>');
   });
 
   it('positions the rect as the FIRST child when the body is unwrapped', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: '#0B58A8', diagramType: 'JSON',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: '#0B58A8',
+      diagramType: 'JSON',
     });
     const rectIdx = svg.indexOf('<rect x="0" y="0"');
     const innerIdx = svg.indexOf(INNER);
@@ -285,7 +325,11 @@ describe('assembleSvg — JSON background rect (isSolidNonDefault)', () => {
 
   it('routes HCL through the same finalize path as JSON/YAML', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: '#0B58A8', diagramType: 'HCL',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: '#0B58A8',
+      diagramType: 'HCL',
     });
     expect(svg).toContain('data-diagram-type="HCL"');
     expect(svg).toContain('fill="#0B58A8"');
@@ -319,9 +363,7 @@ describe('assembleSvg — SEQUENCE root <g> shape (AC1)', () => {
   });
 
   it('leaves an already-wrapped (chrome-present) body’s own <g> in place', () => {
-    const svg = assembleSvg(
-      sequenceFragment({ body: ROOT_GROUP_OPEN + INNER + '</g>', bodyWrapped: true }),
-    );
+    const svg = assembleSvg(sequenceFragment({ body: ROOT_GROUP_OPEN + INNER + '</g>', bodyWrapped: true }));
     expect(svg).toContain('<defs/>' + ROOT_GROUP_OPEN + INNER + '</g></svg>');
   });
 
@@ -408,7 +450,8 @@ describe('assembleSvg — SEQUENCE background rect (AC2/AC3/AC4)', () => {
 // the dispatch switch.
 // ---------------------------------------------------------------------------
 
-const SHELL_HEAD = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type=';
+const SHELL_HEAD =
+  '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type=';
 
 /** `<svg …>…<defs/>` prolog for one diagram type at one canvas size. */
 function pinnedPrologue(type: string, w: number, h: number, style: string): string {
@@ -440,7 +483,11 @@ describe('assembleSvg — AC5: the other diagram types are byte-unchanged', () =
 
   it('STATE (non-default background, unwrapped body)', () => {
     const svg = assembleSvg({
-      body: INNER, width: 100, height: 80, background: '#808080', diagramType: 'STATE',
+      body: INNER,
+      width: 100,
+      height: 80,
+      background: '#808080',
+      diagramType: 'STATE',
     });
     expect(svg).toBe(
       pinnedPrologue('STATE', 100, 80, 'width:100px;height:80px;background:#808080;') +
@@ -453,18 +500,28 @@ describe('assembleSvg — AC5: the other diagram types are byte-unchanged', () =
 
   it('JSON (theme-named white canonicalizes, no rect)', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: 'white', diagramType: 'JSON',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'white',
+      diagramType: 'JSON',
     });
     expect(svg).toBe(
       pinnedPrologue('JSON', 50, 30, 'width:50px;height:30px;background:#FFFFFF;') +
-        ROOT_GROUP_OPEN + INNER + '</g></svg>',
+        ROOT_GROUP_OPEN +
+        INNER +
+        '</g></svg>',
     );
   });
 
   it('YAML (chrome-wrapped body, rect spliced in)', () => {
     const svg = assembleSvg({
       body: ROOT_GROUP_OPEN + INNER + '</g>',
-      width: 50, height: 30, background: '#0B58A8', bodyWrapped: true, diagramType: 'YAML',
+      width: 50,
+      height: 30,
+      background: '#0B58A8',
+      bodyWrapped: true,
+      diagramType: 'YAML',
     });
     expect(svg).toBe(
       pinnedPrologue('YAML', 50, 30, 'width:50px;height:30px;background:#0B58A8;') +
@@ -477,7 +534,11 @@ describe('assembleSvg — AC5: the other diagram types are byte-unchanged', () =
 
   it('HCL (same finalize as JSON/YAML)', () => {
     const svg = assembleSvg({
-      body: INNER, width: 50, height: 30, background: '#0B58A8', diagramType: 'HCL',
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: '#0B58A8',
+      diagramType: 'HCL',
     });
     expect(svg).toBe(
       pinnedPrologue('HCL', 50, 30, 'width:50px;height:30px;background:#0B58A8;') +

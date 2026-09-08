@@ -216,8 +216,7 @@ function errorBlock(system: PSystemError): Block {
     });
   });
 
-  for (const s of system.getTextError())
-    lines.push({ runs: [{ content: s, font: fc2, fill: RED }] });
+  for (const s of system.getTextError()) lines.push({ runs: [{ content: s, font: fc2, fill: RED }] });
 
   return { background: BLACK, lines };
 }
@@ -273,12 +272,7 @@ function blockHeight(block: Block): number {
 }
 
 /** Draw one block's background band and its lines, at `top`, `width` wide. */
-function drawBlock(
-  block: Block,
-  top: number,
-  width: number,
-  measurer: StringMeasurer,
-): string[] {
+function drawBlock(block: Block, top: number, width: number, measurer: StringMeasurer): string[] {
   const svg: string[] = [
     rect(0, top, width, blockHeight(block), {
       fill: block.background,
@@ -317,18 +311,14 @@ function drawBlocks(blocks: readonly Block[], measurer: StringMeasurer): string 
  */
 export function renderPSystemError(system: PSystemError, measurer: StringMeasurer): string {
   const blocks: Block[] = [];
-  if (system.getTotalLineCountLessThan5())
-    blocks.push(blackOnWhite(new PSystemWelcome().getStrings()));
+  if (system.getTotalLineCountLessThan5()) blocks.push(blackOnWhite(new PSystemWelcome().getStrings()));
 
   blocks.push(errorBlock(system));
   return drawBlocks(blocks, measurer);
 }
 
 /** @see ~/git/plantuml/.../error/PSystemUnsupported.java#getTextBlock */
-export function renderPSystemUnsupported(
-  system: PSystemUnsupported,
-  measurer: StringMeasurer,
-): string {
+export function renderPSystemUnsupported(system: PSystemUnsupported, measurer: StringMeasurer): string {
   return drawBlocks([blackOnWhite(system.getStrings())], measurer);
 }
 

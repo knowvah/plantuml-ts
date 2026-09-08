@@ -1,10 +1,5 @@
 import type { ActivityDiagramAST } from '../ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityGeometry,
-  ActivityNodeGeo,
-  SwimlaneGeo,
-} from '../layout.old.js';
+import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo, SwimlaneGeo } from '../layout.old.js';
 import type { Tile } from '../tiles/tile.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { StringBounder } from '../tiles/tile.js';
@@ -35,13 +30,7 @@ interface Out {
   nextId: (prefix: string) => string;
 }
 
-function walkTile(
-  tile: Tile,
-  x: number,
-  y: number,
-  kindHint: string | null,
-  out: Out,
-): void {
+function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out: Out): void {
   switch (tile.kind) {
     case 'gtile-start':
       out.nodes.push({ id: out.nextId('start'), kind: 'start', x, y, width: tile.width, height: tile.height });
@@ -65,7 +54,15 @@ function walkTile(
 
     case 'gtile-action': {
       const t = tile as unknown as GtileAction;
-      const node: ActivityNodeGeo = { id: out.nextId('action'), kind: 'action', x, y, width: t.width, height: t.height, label: t.label };
+      const node: ActivityNodeGeo = {
+        id: out.nextId('action'),
+        kind: 'action',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.label,
+      };
       if (t.color !== undefined) node.color = t.color;
       out.nodes.push(node);
       return;
@@ -73,7 +70,16 @@ function walkTile(
 
     case 'gtile-note': {
       const t = tile as unknown as GtileNote;
-      out.nodes.push({ id: out.nextId('note'), kind: 'note', x, y, width: t.width, height: t.height, label: t.text, notePosition: t.side });
+      out.nodes.push({
+        id: out.nextId('note'),
+        kind: 'note',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.text,
+        notePosition: t.side,
+      });
       return;
     }
 
@@ -179,7 +185,7 @@ function walkTile(
       // Back: body south → header north, going right
       const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
       const backTo = { x: hX + header.getCoord(NORTH_HOOK).x, y: hY + header.getCoord(NORTH_HOOK).y };
-      const rightMargin = (x + t.backEdgeRightX) - backFrom.x;
+      const rightMargin = x + t.backEdgeRightX - backFrom.x;
       out.edges.push({ points: new GConnectionVerticalDownThenBack(rightMargin).getPoints(backFrom, backTo) });
       return;
     }
@@ -235,7 +241,14 @@ function walkTile(
       out.nodes.push({ id: out.nextId(topKind), kind: topKind, x, y, width: t.barWidth, height: BAR_HEIGHT });
 
       const joinBarY = y + tile.height - BAR_HEIGHT;
-      out.nodes.push({ id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: BAR_HEIGHT });
+      out.nodes.push({
+        id: out.nextId('join-bar'),
+        kind: 'join-bar',
+        x,
+        y: joinBarY,
+        width: t.barWidth,
+        height: BAR_HEIGHT,
+      });
 
       const barCenterX = x + t.barWidth / 2;
       for (let i = 0; i < t.children.length; i++) {
@@ -335,7 +348,7 @@ export function assignCoordinates(
   if (ast.swimlanes.length > 0) {
     const laneWidth = Math.max(SWIMLANE_MIN_WIDTH, root.width / ast.swimlanes.length);
     const contexts = buildSwimlaneContexts(ast.swimlanes, baseX, laneWidth);
-    swimlanes = contexts.map(ctx => ({ name: ctx.name, x: ctx.x, width: ctx.width }));
+    swimlanes = contexts.map((ctx) => ({ name: ctx.name, x: ctx.x, width: ctx.width }));
   }
 
   let maxX = baseX + root.width;

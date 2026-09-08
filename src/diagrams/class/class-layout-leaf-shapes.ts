@@ -77,7 +77,10 @@ export function measureUsecaseOrActor(
     italic: false,
   };
   return {
-    width: dim.width, height: dim.height, rows: [row], dividerYs: [],
+    width: dim.width,
+    height: dim.height,
+    rows: [row],
+    dividerYs: [],
     ...(symbolInk !== undefined ? { symbolInk } : {}),
   };
 }

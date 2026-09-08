@@ -50,9 +50,7 @@ describe('object multi-line body — field parsing', () => {
   it('parses "name = value" into a member with type = the raw value', () => {
     const c = findClassifier('object user1 {\nname = "x"\n}', 'user1');
     expect(c.kind).toBe('object');
-    expect(c.members).toEqual([
-      { visibility: '+', name: 'name', type: '"x"', isStatic: false, isAbstract: false },
-    ]);
+    expect(c.members).toEqual([{ visibility: '+', name: 'name', type: '"x"', isStatic: false, isAbstract: false }]);
   });
 
   it('drops a blank line inside the body (member count unchanged)', () => {
@@ -62,9 +60,7 @@ describe('object multi-line body — field parsing', () => {
 
   it('parses a bare field name with no type', () => {
     const c = findClassifier('object user1 {\nflag\n}', 'user1');
-    expect(c.members).toEqual([
-      { visibility: '+', name: 'flag', isStatic: false, isAbstract: false },
-    ]);
+    expect(c.members).toEqual([{ visibility: '+', name: 'flag', isStatic: false, isAbstract: false }]);
   });
 
   it('captures all header parts on the multiline form: quoted display, alias, stereotype, color', () => {
@@ -110,9 +106,7 @@ describe('object "X : field" post-hoc member form', () => {
   it('appends a member to an existing object leaf via object field semantics', () => {
     const c = findClassifier('object user1\nuser1 : age = 30', 'user1');
     expect(c.kind).toBe('object');
-    expect(c.members).toEqual([
-      { visibility: '+', name: 'age', type: '30', isStatic: false, isAbstract: false },
-    ]);
+    expect(c.members).toEqual([{ visibility: '+', name: 'age', type: '30', isStatic: false, isAbstract: false }]);
   });
 
   it('creates a missing target as a class (not object) via class member parsing', () => {

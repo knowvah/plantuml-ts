@@ -25,7 +25,7 @@ describe('CodeIteratorAffectation', () => {
     const base = new CodeIteratorImpl([
       line('!$obj = {', 'AFFECTATION'),
       line('"a": 1,'),
-      line('"b": 2', ),
+      line('"b": 2'),
       line('}'),
       line('next content'),
     ]);

@@ -249,7 +249,11 @@ function buildMapRowGeo(
  * entirely and always returns the full row table (`hide members` / `hide
  * empty members` have no effect on a map's body, matching upstream).
  */
-export function measureMapClassifier(classifier: Classifier, theme: Theme, measurer: StringMeasurer): MeasuredClassifier {
+export function measureMapClassifier(
+  classifier: Classifier,
+  theme: Theme,
+  measurer: StringMeasurer,
+): MeasuredClassifier {
   const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
   const nameM = measurer.measure(classifier.display, fontSpec);
   const nameDim: Dim = { width: nameM.width + MAP_NAME_MARGIN * 2, height: nameM.height + MAP_NAME_MARGIN * 2 };
@@ -269,8 +273,7 @@ export function measureMapClassifier(classifier: Classifier, theme: Theme, measu
 
   // B25/M27: `EntityImageMap.java:127-130` clamps here, identically to
   // object/json/class -- see `floorAtMinimumWidth`'s own doc comment.
-  const width = floorAtMinimumWidth(
-    Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2), theme, 'map');
+  const width = floorAtMinimumWidth(Math.max(colA + colB, title.width + MAP_X_MARGIN_CIRCLE * 2), theme, 'map');
   // getMethodOrFieldHeight's empty-substitution never fires for MAP
   // (leafType === MAP is excluded in the upstream condition) — height is
   // titleHeight + the raw (possibly zero, for an empty map body) fields height.

@@ -194,11 +194,7 @@ function connectToNode(result: BranchResultInternal, state: SequenceState): void
   const toNode = state.outNodes.find((n) => n.id === result.firstId);
   if (toNode === undefined) return;
   const prevExits =
-    state.lastExitIds !== undefined
-      ? state.lastExitIds
-      : state.lastId !== undefined
-        ? [state.lastId]
-        : [];
+    state.lastExitIds !== undefined ? state.lastExitIds : state.lastId !== undefined ? [state.lastId] : [];
   for (const exitId of prevExits) {
     const fromNode = state.outNodes.find((n) => n.id === exitId);
     if (fromNode !== undefined) {
@@ -239,8 +235,7 @@ function finalizeSequenceResult(state: SequenceState, startY: number): BranchRes
   const width = state.outNodes.length > 0 ? maxRight - minLeft : 0;
 
   // Propagate exitIds if the last node had multiple open exits
-  const resultExitIds =
-    state.lastExitIds !== undefined && state.lastExitIds.length > 1 ? state.lastExitIds : undefined;
+  const resultExitIds = state.lastExitIds !== undefined && state.lastExitIds.length > 1 ? state.lastExitIds : undefined;
 
   return {
     nodes: state.outNodes,
@@ -298,12 +293,7 @@ function isCompositeNode(node: ActivityNode): node is CompositeNode {
   );
 }
 
-function layoutCompositeNode(
-  node: CompositeNode,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResult {
+function layoutCompositeNode(node: CompositeNode, startY: number, centerX: number, ctx: LayoutCtx): BranchResult {
   switch (node.kind) {
     case 'if':
       return layoutIf(node, startY, centerX, ctx);
@@ -381,12 +371,7 @@ function toLayoutActionParams(
  * their cases exist only for type exhaustiveness (see layoutStandaloneNote
  * / layoutArrowLabelStub).
  */
-function layoutLeafNode(
-  node: LeafNode,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResultInternal {
+function layoutLeafNode(node: LeafNode, startY: number, centerX: number, ctx: LayoutCtx): BranchResultInternal {
   switch (node.kind) {
     case 'start':
       return layoutStart(node.swimlane, startY, centerX, ctx);
@@ -412,12 +397,7 @@ function layoutLeafNode(
  * Returns the placed node(s), generated edges, the bottom y, and
  * the first/last node ids for edge connection purposes.
  */
-function layoutNode(
-  node: ActivityNode,
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-): BranchResultInternal {
+function layoutNode(node: ActivityNode, startY: number, centerX: number, ctx: LayoutCtx): BranchResultInternal {
   if (isCompositeNode(node)) {
     return layoutCompositeNode(node, startY, centerX, ctx);
   }

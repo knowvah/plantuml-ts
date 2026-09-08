@@ -24,10 +24,8 @@ export class EaterIncludeSprites extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!include_sprites');
     this.skipSpaces();
-    this.what = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    this.what =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
   }
 
   getWhat(): string {

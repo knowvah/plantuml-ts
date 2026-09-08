@@ -37,12 +37,52 @@ export function buildDecorAlt(tokens: readonly string[]): string {
 
 // LinkDecor.java: every decors1()/decors2() call across all 20 enum entries.
 export const DECORS1_TOKENS = [
-  '<|', '^', '*', 'o', 'x', '<||', '<|:', '}', '}o', '|o', '||', '}|',
-  '<', '<_', '<<', '0', '@', '0)', ')', '#', '+',
+  '<|',
+  '^',
+  '*',
+  'o',
+  'x',
+  '<||',
+  '<|:',
+  '}',
+  '}o',
+  '|o',
+  '||',
+  '}|',
+  '<',
+  '<_',
+  '<<',
+  '0',
+  '@',
+  '0)',
+  ')',
+  '#',
+  '+',
 ];
 export const DECORS2_TOKENS = [
-  '|>', '^', '*', 'o', 'x', '||>', ':|>', '{', 'o{', 'o|', '||', '|{',
-  '>', '_>', '>>', '0', '@', '(0', '(', '#', '+', '\\\\', '//',
+  '|>',
+  '^',
+  '*',
+  'o',
+  'x',
+  '||>',
+  ':|>',
+  '{',
+  'o{',
+  'o|',
+  '||',
+  '|{',
+  '>',
+  '_>',
+  '>>',
+  '0',
+  '@',
+  '(0',
+  '(',
+  '#',
+  '+',
+  '\\\\',
+  '//',
 ];
 
 export const DECORS1_ALT = buildDecorAlt(DECORS1_TOKENS);
@@ -112,8 +152,7 @@ export const LINK_ENT_ALT =
  */
 export const COLOR_TOKEN = '\\w+[-\\\\|/]?\\w+';
 export const COLOR_KEY_ALT = 'text|back|header|line|line\\.dashed|line\\.dotted|line\\.bold|shadowing';
-export const COLOR_PART2 =
-  `(?:${COLOR_TOKEN};)?(?:(?:${COLOR_KEY_ALT})(?::${COLOR_TOKEN})?(?:;|(?![\\w;:.])))+`;
+export const COLOR_PART2 = `(?:${COLOR_TOKEN};)?(?:(?:${COLOR_KEY_ALT})(?::${COLOR_TOKEN})?(?:;|(?![\\w;:.])))+`;
 export const COLORS_BODY_ALT = `(?:${COLOR_PART2})|(?:${COLOR_TOKEN})`;
 
 export const LINK_LINE_SOURCE =

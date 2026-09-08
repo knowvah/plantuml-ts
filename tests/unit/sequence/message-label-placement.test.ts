@@ -36,9 +36,7 @@ const ORACLE = join(
 );
 
 /** Every 13pt `<text>` — the arrow font, so message labels and nothing else. */
-function messageLabels(
-  svg: string,
-): Array<{ x: string; textLength?: string; fontFamily?: string; text: string }> {
+function messageLabels(svg: string): Array<{ x: string; textLength?: string; fontFamily?: string; text: string }> {
   const out: Array<{ x: string; textLength?: string; fontFamily?: string; text: string }> = [];
   for (const m of svg.matchAll(/<text([^>]*font-size="13"[^>]*)>([^<]*)<\/text>/g)) {
     const attrs = m[1]!;
@@ -150,8 +148,7 @@ describe('creole in a message label (C3)', () => {
   });
 
   it('bolds ONLY the <b> run', () => {
-    const bold = (t: string): boolean =>
-      new RegExp(`<text[^>]*font-weight="700"[^>]*>${t}</text>`).test(svg);
+    const bold = (t: string): boolean => new RegExp(`<text[^>]*font-weight="700"[^>]*>${t}</text>`).test(svg);
     expect(bold('bold')).toBe(true);
     expect(bold('label')).toBe(false);
     expect(bold(String.raw`\[001\]`)).toBe(false);
@@ -220,8 +217,6 @@ describe('bakuba-09-fica741 monospace labels', () => {
     expect(mono).toHaveLength(12);
     expect(mono[0]!.text).toBe('x->');
     expect(mono[0]!.textLength).toBe('18.444');
-    expect(mono.map((l) => l.text).slice(0, 6)).toEqual([
-      'x->', '&lt;->', 'o&lt;->o', '&lt;->o', 'x&lt;->x', 'x->o',
-    ]);
+    expect(mono.map((l) => l.text).slice(0, 6)).toEqual(['x->', '&lt;->', 'o&lt;->o', '&lt;->o', 'x&lt;->x', 'x->o']);
   });
 });

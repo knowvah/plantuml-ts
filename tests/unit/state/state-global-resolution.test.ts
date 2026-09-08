@@ -151,7 +151,7 @@ describe('global state-name resolution -- quarkInContext/firstWithName port', ()
     expect(run?.children.map((c) => c.id)).toEqual(['Chg_Sector']);
   });
 
-  it('a state declared inside TWO different composites with the SAME name resolves to ONE shared entity, nested wherever it was first created (verified against the real plantuml.jar: the second composite renders empty, only one \'X\' label appears)', () => {
+  it("a state declared inside TWO different composites with the SAME name resolves to ONE shared entity, nested wherever it was first created (verified against the real plantuml.jar: the second composite renders empty, only one 'X' label appears)", () => {
     // Empirically confirmed via -DPLANTUML_DUMP_DOT + rendered SVG text
     // content for this exact fixture: only the labels 'A', 'X', 'B'
     // appear -- B has no 'X' child of its own. `reuseExistingChild` is
@@ -178,7 +178,7 @@ describe('global state-name resolution -- quarkInContext/firstWithName port', ()
     expect(ast.states.some((s) => s.id === 'X')).toBe(false);
   });
 
-  it('an id equal to the enclosing composite\'s own name self-loops to that composite, not a nested duplicate (CommandLinkStateCommon#getEntity self-check)', () => {
+  it("an id equal to the enclosing composite's own name self-loops to that composite, not a nested duplicate (CommandLinkStateCommon#getEntity self-check)", () => {
     const ast = parse(`
       state Foo {
         Foo --> Bar
@@ -311,7 +311,7 @@ describe('two-pass parsing -- ParserPass ONE/TWO port', () => {
     expect(s?.concurrentRegions[0]?.map((st) => st.id)).toEqual(['C', 'D']);
   });
 
-  it('a note attached with no explicit `of <State>` falls back to `lastEntity` as of pass TWO\'s OWN walk position, not pass ONE\'s', () => {
+  it("a note attached with no explicit `of <State>` falls back to `lastEntity` as of pass TWO's OWN walk position, not pass ONE's", () => {
     // `lastEntity` is a diagram-level running field that is NOT reset
     // between passes (matches upstream's single persistent diagram
     // object) -- but a note's REAL resolution only happens when it is

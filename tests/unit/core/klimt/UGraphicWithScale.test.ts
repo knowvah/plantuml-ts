@@ -213,7 +213,7 @@ describe('UGraphicWithScale', () => {
       expect(root.getAffineTransform().getTranslateX()).toBe(0);
     });
 
-    it('applyMatrix leaves a preceding applyRotate\'s angle untouched on the returned instance', () => {
+    it("applyMatrix leaves a preceding applyRotate's angle untouched on the returned instance", () => {
       const resolver = new FakeColorResolver('#000000', '#000000');
       const rotated = UGraphicWithScale.create(new FakeUGraphic(), resolver, 1).applyRotate(15, 0, 0);
 

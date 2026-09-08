@@ -155,7 +155,7 @@ describe('drawAtoms — the `drawable` variant (T7, ADR-2)', () => {
     expect(ds[1]).toBe('M17,1 L21,1 L21,5 L17,5');
   });
 
-  test('calculateDimension reports the DECLARED width, matching drawU\'s own advance', () => {
+  test("calculateDimension reports the DECLARED width, matching drawU's own advance", () => {
     const resolve = drawableResolver([inkSquarePath()]);
     const bounder = new MeasurerStringBounder(measurer);
     const dim = buildTextBlock(`<img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, resolve).calculateDimension(
@@ -167,9 +167,7 @@ describe('drawAtoms — the `drawable` variant (T7, ADR-2)', () => {
   test('two-line display: line 2 stacks on the DECLARED height (16), not the ink height (4)', () => {
     const ug = newGraphic();
     const resolve = drawableResolver([inkSquarePath()]);
-    buildTextBlock(`<img:${TINY_PNG_URI}>\n<img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, resolve).drawU(
-      ug,
-    );
+    buildTextBlock(`<img:${TINY_PNG_URI}>\n<img:${TINY_PNG_URI}>`, FONT, HorizontalAlignment.LEFT, resolve).drawU(ug);
     const ds = pathDs(ug.getSvgString());
     expect(ds).toHaveLength(2);
     expect(ds[0]).toBe('M1,1 L5,1 L5,5 L1,5');

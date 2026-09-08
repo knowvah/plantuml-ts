@@ -30,10 +30,7 @@ import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
-import {
-  ClassifierBodyGeometry,
-  ELEMENT_DEFAULT_LINE_THICKNESS,
-} from './class-body-enhanced-geometry.js';
+import { ClassifierBodyGeometry, ELEMENT_DEFAULT_LINE_THICKNESS } from './class-body-enhanced-geometry.js';
 import {
   buildMemberAtoms,
   resolveMemberAtoms,
@@ -114,7 +111,12 @@ export interface NoteMeasurement {
  * text block itself is the `BodyEnhanced2` assembly (module doc comment):
  * display-line split -> block-separator walk -> per-block creole rows.
  */
-export function measureNote(text: string, theme: Theme, measurer: StringMeasurer, sprites?: SpriteRegistry): NoteMeasurement {
+export function measureNote(
+  text: string,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): NoteMeasurement {
   const ctx = resolveNoteFontContext(theme);
   const buildCtx: NoteLineBuildContext = { ...ctx, measurer, sprites };
   const displayLines = splitNoteDisplayLines(text);
@@ -252,9 +254,7 @@ function appendDecoratedBlock(
   const decorated = NOTE_BODY_GEOMETRY.deriveHeightOffsets(innerH, separator.charAt(0), title?.height);
   const sepWidth = title === undefined ? 0 : title.width + TITLED_SEPARATOR_TITLE_PAD;
   out.rows.push({ text: separator, width: sepWidth, atoms: [], height: decorated.totalHeight - innerH });
-  out.blockWidths.push(
-    title === undefined ? innerW : Math.max(innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth),
-  );
+  out.blockWidths.push(title === undefined ? innerW : Math.max(innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth));
   out.rows.push(...blockRows);
 }
 
@@ -280,9 +280,12 @@ function appendDecoratedBlock(
  * overwhelming majority of notes) short-circuits every line to the SAME
  * single-build result the pre-N66 direct call produced, byte-identical.
  */
-function resolveNoteFontContext(
-  theme: Theme,
-): { fontSize: number; fontSpec: { family: string; size: number }; font: FontConfiguration; maxWidth: number } {
+function resolveNoteFontContext(theme: Theme): {
+  fontSize: number;
+  fontSpec: { family: string; size: number };
+  font: FontConfiguration;
+  maxWidth: number;
+} {
   const fontSize = theme.colors.elements?.['note']?.fontSize ?? NOTE_FONT_SIZE;
   const fontSpec = { family: theme.fontFamily, size: fontSize };
   const font = memberBaseFont(fontSpec, {});
@@ -387,9 +390,10 @@ function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineB
 function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
   const { font, fontSpec, measurer, maxWidth, fontSize, sprites } = ctx;
   const ln = resolveTextEscapes(rawLine);
-  const builds = maxWidth > 0
-    ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth, sprites)
-    : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
+  const builds =
+    maxWidth > 0
+      ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth, sprites)
+      : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
   return builds.map((build) => ({
     text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
     width: build.width,
@@ -397,4 +401,3 @@ function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
     height: noteLineHeight(build.atoms, fontSize),
   }));
 }
-

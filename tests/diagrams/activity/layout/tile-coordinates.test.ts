@@ -103,7 +103,7 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
 
   it('back-edge has >= 4 waypoints', () => {
     // forward edge has 2 points; back-edge has 4
-    const backEdge = geo.edges.find(e => e.points.length >= 4);
+    const backEdge = geo.edges.find((e) => e.points.length >= 4);
     expect(backEdge).toBeDefined();
     expect(backEdge!.points.length).toBeGreaterThanOrEqual(4);
   });

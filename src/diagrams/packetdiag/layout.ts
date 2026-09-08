@@ -126,11 +126,7 @@ function buildGrid(
   return grid;
 }
 
-function buildIndicators(
-  colWidth: number,
-  scaleInterval: number,
-  scaleDirection: ScaleDirection,
-): PacketIndicator[] {
+function buildIndicators(colWidth: number, scaleInterval: number, scaleDirection: ScaleDirection): PacketIndicator[] {
   const fullInterval = fullIndicatorInterval(colWidth);
   const indicators: PacketIndicator[] = [];
 
@@ -158,9 +154,7 @@ export function layoutPacket(ast: PacketDiagramAST): PacketGeometry {
 
   // Effective scaleInterval based on ORIGINAL colWidth (before adjustColWidth)
   const effectiveScaleInterval =
-    userScaleInterval !== null
-      ? Math.min(userScaleInterval, initialColWidth)
-      : Math.floor(initialColWidth / 2);
+    userScaleInterval !== null ? Math.min(userScaleInterval, initialColWidth) : Math.floor(initialColWidth / 2);
 
   const grid = buildGrid(items, initialColWidth, sameHeight, scaleDirection);
 

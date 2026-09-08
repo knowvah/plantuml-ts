@@ -73,12 +73,7 @@ function hasParticipantGlyph(type: ParticipantType): type is GlyphParticipantTyp
  *
  * @see ~/git/plantuml/.../skin/rose/Rose.java:137-190
  */
-function renderSymbolShape(
-  p: ParticipantGeo,
-  blockTopY: number,
-  head: boolean,
-  theme: ScaledTheme,
-): string {
+function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
   if (!hasParticipantGlyph(p.type)) return '';
   return renderParticipantSymbol(
     p.type,
@@ -182,8 +177,7 @@ function renderBadge(badge: ParticipantBadge, x: number, cy: number, theme: Scal
 
 function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
   const badge = participantBadgeGeo(p.badge, p.x, p.width, theme);
-  const badgeEl =
-    badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
+  const badgeEl = badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
   // The runs were placed against the HEAD's own centre; every other row of the
   // diagram draws the same text translated. `dy` is a difference of two
   // `participantLabelCy` values rather than of two block tops, because a
@@ -194,7 +188,6 @@ function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): str
   const dy = cy - participantLabelCy(p.type, p.height, p.y, true, theme);
   return badgeEl + p.labelRuns.map((run) => renderLabelRun(run, dy, theme)).join('');
 }
-
 
 /** `ComponentRoseParticipant#drawInternalU:97` — the FRONT rectangle of a
  *  `collections` stack. The back one is the glyph the seam draws; this is the
@@ -215,12 +208,7 @@ function collectionsFrontBox(p: ParticipantGeo, blockTopY: number): string {
  * (`Rose.java#createComponentParticipant`), which every glyph-bearing
  * `ComponentRose*` threads into `drawInternalU` to flip the glyph/text order.
  */
-function renderParticipantBlock(
-  p: ParticipantGeo,
-  blockTopY: number,
-  head: boolean,
-  theme: ScaledTheme,
-): string {
+function renderParticipantBlock(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
   const label = renderNameBlock(p, participantLabelCy(p.type, p.height, blockTopY, head, theme), theme);
   if (hasParticipantGlyph(p.type)) {
     const glyph = renderSymbolShape(p, blockTopY, head, theme);

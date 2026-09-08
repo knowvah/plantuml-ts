@@ -102,13 +102,10 @@ export function renderLifeline(
   // sits ABOVE its own `startGroup`.)
   const hover =
     height > 0
-      ? rect(
-          p.centerX + (LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2,
-          startY,
-          HOVER_TARGET_WIDTH,
-          height,
-          { fill: '#000', fillOpacity: 0 },
-        )
+      ? rect(p.centerX + (LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2, startY, HOVER_TARGET_WIDTH, height, {
+          fill: '#000',
+          fillOpacity: 0,
+        })
       : '';
 
   const vline = line(p.centerX, startY, p.centerX, lifelineEndY, {

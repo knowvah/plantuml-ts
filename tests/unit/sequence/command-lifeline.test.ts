@@ -20,10 +20,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { ActivationEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
-import {
-  activateCommand,
-  deactivateShortCommand,
-} from '../../../src/diagrams/sequence/command-lifeline.js';
+import { activateCommand, deactivateShortCommand } from '../../../src/diagrams/sequence/command-lifeline.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 
 function parse(lines: string[]): SequenceDiagramAST {

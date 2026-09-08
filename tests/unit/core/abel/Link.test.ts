@@ -325,9 +325,7 @@ describe('Link ports', () => {
     const pin = makeLeaf(world, 'pin', LeafType.PORTIN);
     const link = makeLink(world, a, b);
     link.setPortMembers('myport', undefined);
-    expect(link.getEntityPort1(mockBibliotekon).getFullString()).toBe(
-      'uid_a:' + Ports.encodePortNameToId('myport'),
-    );
+    expect(link.getEntityPort1(mockBibliotekon).getFullString()).toBe('uid_a:' + Ports.encodePortNameToId('myport'));
     expect(link.getEntityPort2(mockBibliotekon).getFullString()).toBe('uid_b');
     const pinLink = makeLink(world, pin, b);
     expect(pinLink.getEntityPort1(mockBibliotekon).getFullString()).toBe('uid_pin:P');

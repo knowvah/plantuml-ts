@@ -36,7 +36,6 @@ import { renderSync } from '../../../src/index.js';
  */
 const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
 
-
 const ERR = "Use 'allowmixing' if you want to mix classes and other UML elements.";
 const ERROR_BANNER = 'plantuml-ts version';
 
@@ -76,7 +75,7 @@ describe('a descriptive LEAF in a class diagram is refused without allowmixing',
     expect(isRefused(render(body))).toBe(true);
   });
 
-  it('names the offending requirement in upstream\'s own words', () => {
+  it("names the offending requirement in upstream's own words", () => {
     expect(deNbsp(render('class Foo\nactor Bob'))).toContain(ERR);
   });
 

@@ -28,7 +28,7 @@ describe('CoordinateChange', () => {
     expect(perp.getY()).toBeCloseTo(3, 6);
   });
 
-  test('throws on a zero-length segment (matching upstream\'s IllegalArgumentException)', () => {
+  test("throws on a zero-length segment (matching upstream's IllegalArgumentException)", () => {
     expect(() => new CoordinateChange(1, 1, 1, 1)).toThrow(/zero-length/);
     expect(() => CoordinateChange.create(new XPoint2D(2, 2), new XPoint2D(2, 2))).toThrow(/zero-length/);
   });

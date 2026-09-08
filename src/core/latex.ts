@@ -55,10 +55,7 @@ export function measureNodeLabel(
 const KATEX_MACROS: Readonly<Record<string, string>> = { '\\mbox': '\\text' };
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
@@ -118,12 +115,7 @@ function measureMixedLabel(spans: LabelSpan[]): { width: number; height: number 
  * @param cy     - Vertical centre of the label.
  * @param theme  - Theme for font and color values.
  */
-export function renderNodeLabel(
-  label: string,
-  cx: number,
-  cy: number,
-  theme: Theme,
-): string {
+export function renderNodeLabel(label: string, cx: number, cy: number, theme: Theme): string {
   if (!label.includes('<latex>')) {
     return text(cx, cy, label, {
       textAnchor: 'middle',
@@ -174,9 +166,7 @@ export function renderNodeLabel(
 // Types
 // ---------------------------------------------------------------------------
 
-export type LabelSpan =
-  | { kind: 'text'; content: string }
-  | { kind: 'latex'; expr: string };
+export type LabelSpan = { kind: 'text'; content: string } | { kind: 'latex'; expr: string };
 
 // ---------------------------------------------------------------------------
 // parseLatexLabel
@@ -235,13 +225,7 @@ export function parseLatexLabel(raw: string): LabelSpan[] {
 // ---------------------------------------------------------------------------
 
 /** Structural markers that add height to a LaTeX expression. */
-const STRUCTURAL_MARKERS = [
-  '\\frac',
-  '\\sum',
-  '\\int',
-  '\\prod',
-  '\\sqrt',
-] as const;
+const STRUCTURAL_MARKERS = ['\\frac', '\\sum', '\\int', '\\prod', '\\sqrt'] as const;
 
 /**
  * Count "semantic atoms" in a LaTeX expression: each `\command` counts as
@@ -261,7 +245,7 @@ function countAtoms(expr: string): number {
       // Consume the command name; each named command → one atom
       let j = i + 1;
       while (j < expr.length && /[a-zA-Z]/.test(expr[j]!)) j++;
-      if (j > i + 1) count++;  // named command (e.g. \frac, \lambda)
+      if (j > i + 1) count++; // named command (e.g. \frac, \lambda)
       // bare backslash-symbol (e.g. \\) → skip silently
       i = j;
     } else if (ch === '{' || ch === '}' || ch === '^' || ch === '_') {
@@ -321,14 +305,7 @@ export function measureLatex(raw: string): { width: number; height: number } {
  * @param color  - Text fill color (applied as CSS `color` on the wrapper div).
  * @returns SVG string containing `<foreignObject …>…</foreignObject>`.
  */
-export function renderLatexMathML(
-  expr: string,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  color: string,
-): string {
+export function renderLatexMathML(expr: string, x: number, y: number, w: number, h: number, color: string): string {
   // Strip <latex>…</latex> wrapper if present.
   const stripped = expr.replace(/^<latex>([\s\S]*?)<\/latex>$/i, '$1').trim();
 

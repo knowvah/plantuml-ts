@@ -7,190 +7,124 @@ import { defaultTheme, deepMergeTheme } from '../../src/core/theme.js';
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — direct key matches', () => {
   it('maps backgroundcolor to colors.background', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['backgroundcolor', '#FF0000']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['backgroundcolor', '#FF0000']]), defaultTheme);
     expect(theme.colors.background).toBe('#FF0000');
     expect(unknown).toEqual([]);
   });
 
   it('maps bordercolor to colors.border', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['bordercolor', '#AABBCC']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['bordercolor', '#AABBCC']]), defaultTheme);
     expect(theme.colors.border).toBe('#AABBCC');
     expect(unknown).toEqual([]);
   });
 
   it('maps fontcolor to colors.text', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['fontcolor', '#112233']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['fontcolor', '#112233']]), defaultTheme);
     expect(theme.colors.text).toBe('#112233');
     expect(unknown).toEqual([]);
   });
 
   it('maps defaultfontcolor to colors.text', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['defaultfontcolor', '#223344']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['defaultfontcolor', '#223344']]), defaultTheme);
     expect(theme.colors.text).toBe('#223344');
     expect(unknown).toEqual([]);
   });
 
   it('maps arrowcolor to colors.arrow', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['arrowcolor', '#334455']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['arrowcolor', '#334455']]), defaultTheme);
     expect(theme.colors.arrow).toBe('#334455');
     expect(unknown).toEqual([]);
   });
 
   it('maps defaultarrowcolor to colors.arrow', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['defaultarrowcolor', '#445566']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['defaultarrowcolor', '#445566']]), defaultTheme);
     expect(theme.colors.arrow).toBe('#445566');
     expect(unknown).toEqual([]);
   });
 
   it('maps notebackgroundcolor to colors.noteBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['notebackgroundcolor', '#FAFAFA']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['notebackgroundcolor', '#FAFAFA']]), defaultTheme);
     expect(theme.colors.noteBackground).toBe('#FAFAFA');
     expect(unknown).toEqual([]);
   });
 
   it('maps fontname to fontFamily', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['fontname', 'Courier New']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['fontname', 'Courier New']]), defaultTheme);
     expect(theme.fontFamily).toBe('Courier New');
     expect(unknown).toEqual([]);
   });
 
   it('maps defaultfontname to fontFamily (same as fontname)', () => {
-    const { theme: t1 } = resolveSkinparam(
-      new Map([['fontname', 'Georgia']]),
-      defaultTheme,
-    );
-    const { theme: t2 } = resolveSkinparam(
-      new Map([['defaultfontname', 'Georgia']]),
-      defaultTheme,
-    );
+    const { theme: t1 } = resolveSkinparam(new Map([['fontname', 'Georgia']]), defaultTheme);
+    const { theme: t2 } = resolveSkinparam(new Map([['defaultfontname', 'Georgia']]), defaultTheme);
     expect(t1.fontFamily).toBe(t2.fontFamily);
   });
 
   it('maps fontsize to fontSize as number', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['fontsize', '18']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['fontsize', '18']]), defaultTheme);
     expect(theme.fontSize).toBe(18);
     expect(unknown).toEqual([]);
   });
 
   it('maps defaultfontsize to fontSize (same as fontsize)', () => {
-    const { theme: t1 } = resolveSkinparam(
-      new Map([['fontsize', '16']]),
-      defaultTheme,
-    );
-    const { theme: t2 } = resolveSkinparam(
-      new Map([['defaultfontsize', '16']]),
-      defaultTheme,
-    );
+    const { theme: t1 } = resolveSkinparam(new Map([['fontsize', '16']]), defaultTheme);
+    const { theme: t2 } = resolveSkinparam(new Map([['defaultfontsize', '16']]), defaultTheme);
     expect(t1.fontSize).toBe(t2.fontSize);
   });
 
   it('maps classbackgroundcolor to colors.graph.classBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classbackgroundcolor', '#AABBCC']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classbackgroundcolor', '#AABBCC']]), defaultTheme);
     expect(theme.colors.graph.classBackground).toBe('#AABBCC');
     expect(unknown).toEqual([]);
   });
 
   it('maps interfacebackgroundcolor to colors.graph.interfaceBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['interfacebackgroundcolor', '#112233']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['interfacebackgroundcolor', '#112233']]), defaultTheme);
     expect(theme.colors.graph.interfaceBackground).toBe('#112233');
     expect(unknown).toEqual([]);
   });
 
   it('maps enumbackgroundcolor to colors.graph.enumBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['enumbackgroundcolor', '#BBCCDD']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['enumbackgroundcolor', '#BBCCDD']]), defaultTheme);
     expect(theme.colors.graph.enumBackground).toBe('#BBCCDD');
     expect(unknown).toEqual([]);
   });
 
   it('maps actorbordercolor to colors.graph.actorStroke', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['actorbordercolor', '#CCDDEE']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['actorbordercolor', '#CCDDEE']]), defaultTheme);
     expect(theme.colors.graph.actorStroke).toBe('#CCDDEE');
     expect(unknown).toEqual([]);
   });
 
   it('maps packagebackgroundcolor to colors.graph.packageBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['packagebackgroundcolor', '#DDEEFF']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['packagebackgroundcolor', '#DDEEFF']]), defaultTheme);
     expect(theme.colors.graph.packageBackground).toBe('#DDEEFF');
     expect(unknown).toEqual([]);
   });
 
   it('maps packagebordercolor to colors.graph.packageBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['packagebordercolor', '#EEFF00']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['packagebordercolor', '#EEFF00']]), defaultTheme);
     expect(theme.colors.graph.packageBorder).toBe('#EEFF00');
     expect(unknown).toEqual([]);
   });
 
   // G2 N18
   it('maps packageborderthickness to colors.graph.packageBorderThickness', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['packageborderthickness', '4']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['packageborderthickness', '4']]), defaultTheme);
     expect(theme.colors.graph.packageBorderThickness).toBe(4);
     expect(unknown).toEqual([]);
   });
 
   // G2 N51
   it('maps classbordercolor to colors.graph.classBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classbordercolor', '#FF00FF']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classbordercolor', '#FF00FF']]), defaultTheme);
     expect(theme.colors.graph.classBorder).toBe('#FF00FF');
     expect(unknown).toEqual([]);
   });
 
   // G2 N51
   it('maps classborderthickness to colors.graph.classBorderThickness', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classborderthickness', '.5']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classborderthickness', '.5']]), defaultTheme);
     expect(theme.colors.graph.classBorderThickness).toBe(0.5);
     expect(unknown).toEqual([]);
   });
@@ -199,10 +133,7 @@ describe('resolveSkinparam — direct key matches', () => {
   // stereotype-qualified value lookup, NOT the <<`.tagname`>> <style>
   // cascade -- see theme.ts#classBorderThicknessByStereo's doc comment.
   it('maps classborderthickness<<stereo>> to colors.graph.classBorderThicknessByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classborderthickness<<stereo>>', '5']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classborderthickness<<stereo>>', '5']]), defaultTheme);
     expect(theme.colors.graph.classBorderThicknessByStereo).toEqual({ stereo: 5 });
     expect(unknown).toEqual([]);
   });
@@ -227,10 +158,7 @@ describe('resolveSkinparam — direct key matches', () => {
   // a<<meblue>>` -- box `rect`/divider `line` both render `stroke="#0000FF"`,
   // children keep the plain `#181818` default).
   it('maps statebordercolor<<stereo>> to colors.graph.stateBorderColorByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statebordercolor<<meblue>>', 'blue']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statebordercolor<<meblue>>', 'blue']]), defaultTheme);
     expect(theme.colors.graph.stateBorderColorByStereo).toEqual({ meblue: 'blue' });
     expect(unknown).toEqual([]);
   });
@@ -240,19 +168,13 @@ describe('resolveSkinparam — direct key matches', () => {
   // `<<MeBlue>>` skinparam key must still be retrievable via the lowercased
   // label a state's own `stereotype` field carries.
   it('lowercases the stereotype label in statebordercolor<<X>>', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['statebordercolor<<MeBlue>>', '#0000FF']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['statebordercolor<<MeBlue>>', '#0000FF']]), defaultTheme);
     expect(theme.colors.graph.stateBorderColorByStereo).toEqual({ meblue: '#0000FF' });
   });
 
   // G2 N51
   it('maps arrowthickness to colors.graph.arrowThickness', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['arrowthickness', '0.4']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['arrowthickness', '0.4']]), defaultTheme);
     expect(theme.colors.graph.arrowThickness).toBe(0.4);
     expect(unknown).toEqual([]);
   });
@@ -286,13 +208,19 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(h.theme.colors.graph.arrowFontColor).toBe('#FF0000');
     expect(h.unknown).toEqual([]);
     const b = resolveSkinparam(
-      new Map([['arrowfontcolor', 'green'], ['defaultfontcolor', 'red']]),
+      new Map([
+        ['arrowfontcolor', 'green'],
+        ['defaultfontcolor', 'red'],
+      ]),
       defaultTheme,
     );
     expect(b.theme.colors.graph.arrowFontColor).toBe('#FF0000');
     expect(b.theme.colors.text).toBe('red'); // raw, as before -- only arrowFontColor is pre-resolved
     const g = resolveSkinparam(
-      new Map([['defaultfontcolor', 'red'], ['arrowfontcolor', 'green']]),
+      new Map([
+        ['defaultfontcolor', 'red'],
+        ['arrowfontcolor', 'green'],
+      ]),
       defaultTheme,
     );
     expect(g.theme.colors.graph.arrowFontColor).toBe('#008000');
@@ -306,7 +234,10 @@ describe('resolveSkinparam — direct key matches', () => {
   // a non-colour string in `fill`. Named divergence: the jar draws it white.
   it('leaves arrowFontColor unset for an unresolvable colour token', () => {
     const r = resolveSkinparam(
-      new Map([['arrowfontcolor', 'ARROWFONTCOLOR'], ['defaultfontcolor', 'NOTACOLOUR']]),
+      new Map([
+        ['arrowfontcolor', 'ARROWFONTCOLOR'],
+        ['defaultfontcolor', 'NOTACOLOUR'],
+      ]),
       defaultTheme,
     );
     expect(r.theme.colors.graph.arrowFontColor).toBeUndefined();
@@ -364,22 +295,19 @@ describe('resolveSkinparam — direct key matches', () => {
   // G2 N32: `classAttributeFontStyle`/`classFontSize`/`classFontName`/
   // `classFontStyle` -- the header-vs-attribute font-role split
   // (`theme.ts#classFontSize`'s doc comment).
-  it('maps classattributefontstyle to colors.graph.classAttributeFontBold/Italic ' +
-    '(substring match, both may be set)', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classattributefontstyle', 'italic']]),
-      defaultTheme,
-    );
-    expect(theme.colors.graph.classAttributeFontBold).toBe(false);
-    expect(theme.colors.graph.classAttributeFontItalic).toBe(true);
-    expect(unknown).toEqual([]);
-  });
+  it(
+    'maps classattributefontstyle to colors.graph.classAttributeFontBold/Italic ' +
+      '(substring match, both may be set)',
+    () => {
+      const { theme, unknown } = resolveSkinparam(new Map([['classattributefontstyle', 'italic']]), defaultTheme);
+      expect(theme.colors.graph.classAttributeFontBold).toBe(false);
+      expect(theme.colors.graph.classAttributeFontItalic).toBe(true);
+      expect(unknown).toEqual([]);
+    },
+  );
 
   it('maps classattributefontstyle "bold italic" to BOTH flags true', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classattributefontstyle', 'bold italic']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classattributefontstyle', 'bold italic']]), defaultTheme);
     expect(theme.colors.graph.classAttributeFontBold).toBe(true);
     expect(theme.colors.graph.classAttributeFontItalic).toBe(true);
     expect(unknown).toEqual([]);
@@ -421,10 +349,7 @@ describe('resolveSkinparam — direct key matches', () => {
   });
 
   it('is case-insensitive for the classStereotypeFontSize spelling (datugo-88-sote552 shape)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['classstereotypefontsize', '20']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['classstereotypefontsize', '20']]), defaultTheme);
     expect(theme.colors.graph.classStereotypeFontSize).toBe(20);
   });
 
@@ -447,12 +372,8 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(unknown).toEqual([]);
   });
 
-  it('circledcharacterfontsize alone (no radius override) leaves ' +
-    'circledCharacterRadius unset', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['circledcharacterfontsize', '20']]),
-      defaultTheme,
-    );
+  it('circledcharacterfontsize alone (no radius override) leaves ' + 'circledCharacterRadius unset', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['circledcharacterfontsize', '20']]), defaultTheme);
     expect(theme.colors.graph.circledCharacterFontSize).toBe(20);
     expect(theme.colors.graph.circledCharacterRadius).toBeUndefined();
     expect(unknown).toEqual([]);
@@ -462,8 +383,7 @@ describe('resolveSkinparam — direct key matches', () => {
   // A/C/E/I/N) -- the badge spot-color legacy flat-key form, routed into
   // the SAME `theme.colors.elements['spot<Kind>']` bucket `<style>
   // spotClass { ... }` uses (jar-verified `bisisi-31-xasa026`).
-  it('maps stereotypeCBackgroundColor/stereotypeCBorderColor to ' +
-    "colors.elements['spotclass']", () => {
+  it('maps stereotypeCBackgroundColor/stereotypeCBorderColor to ' + "colors.elements['spotclass']", () => {
     const { theme, unknown } = resolveSkinparam(
       new Map([
         ['stereotypecbackgroundcolor', '#FFF'],
@@ -493,19 +413,13 @@ describe('resolveSkinparam — direct key matches', () => {
   // by `class-badge.test.ts`'s render-level tests instead.
 
   it('maps "skinparam style strictuml" to theme.strictUml', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['style', 'strictuml']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['style', 'strictuml']]), defaultTheme);
     expect(theme.strictUml).toBe(true);
     expect(unknown).toEqual([]);
   });
 
   it('leaves theme.strictUml unset for an unrecognized style value', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['style', 'handwritten']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['style', 'handwritten']]), defaultTheme);
     expect(theme.strictUml).toBeUndefined();
     // The key itself is still consumed by the 'style' case (not pushed to
     // unknown) -- only the VALUE is unrecognized this iteration, matching
@@ -547,10 +461,7 @@ describe('resolveSkinparam — direct key matches', () => {
 //                             defaults to "«"/"»".
 describe('resolveSkinparam — guillemet (G2 N27)', () => {
   it('maps "skinparam guillemet << >>" to the literal << >> tokens', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['guillemet', '<< >>']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['guillemet', '<< >>']]), defaultTheme);
     expect(theme.colors.graph.guillemetStart).toBe('<<');
     expect(theme.colors.graph.guillemetEnd).toBe('>>');
     expect(unknown).toEqual([]);
@@ -581,10 +492,7 @@ describe('resolveSkinparam — guillemet (G2 N27)', () => {
   });
 
   it('leaves guillemetStart/End unset for a spaceless, unrecognized value (default GUILLEMET)', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['guillemet', 'garbage']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['guillemet', 'garbage']]), defaultTheme);
     expect(theme.colors.graph.guillemetStart).toBeUndefined();
     expect(theme.colors.graph.guillemetEnd).toBeUndefined();
     expect(unknown).toEqual([]);
@@ -596,117 +504,78 @@ describe('resolveSkinparam — guillemet (G2 N27)', () => {
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — activity skinparam keys', () => {
   it('maps ActivityBackgroundColor to colors.graph.activity.background', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityBackgroundColor', '#aabbcc']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityBackgroundColor', '#aabbcc']]), defaultTheme);
     expect(theme.colors.graph.activity?.background).toBe('#aabbcc');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityBorderColor to colors.graph.activity.border', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityBorderColor', '#001122']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityBorderColor', '#001122']]), defaultTheme);
     expect(theme.colors.graph.activity?.border).toBe('#001122');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityBarColor to colors.graph.activity.barColor', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityBarColor', '#001122']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityBarColor', '#001122']]), defaultTheme);
     expect(theme.colors.graph.activity?.barColor).toBe('#001122');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityDiamondBackgroundColor to colors.graph.activity.diamondBackground', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityDiamondBackgroundColor', '#112233']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityDiamondBackgroundColor', '#112233']]), defaultTheme);
     expect(theme.colors.graph.activity?.diamondBackground).toBe('#112233');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityDiamondForegroundColor to colors.graph.activity.diamondBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityDiamondForegroundColor', '#ff0000']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityDiamondForegroundColor', '#ff0000']]), defaultTheme);
     expect(theme.colors.graph.activity?.diamondBorder).toBe('#ff0000');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityDiamondBorderColor to colors.graph.activity.diamondBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityDiamondBorderColor', '#ff0000']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityDiamondBorderColor', '#ff0000']]), defaultTheme);
     expect(theme.colors.graph.activity?.diamondBorder).toBe('#ff0000');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityStartColor to colors.graph.activity.startColor', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityStartColor', '#223344']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityStartColor', '#223344']]), defaultTheme);
     expect(theme.colors.graph.activity?.startColor).toBe('#223344');
     expect(unknown).toEqual([]);
   });
 
   it('maps ActivityEndColor to colors.graph.activity.endColor', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['ActivityEndColor', '#334455']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityEndColor', '#334455']]), defaultTheme);
     expect(theme.colors.graph.activity?.endColor).toBe('#334455');
     expect(unknown).toEqual([]);
   });
 
   it('maps SwimlaneHeaderBackgroundColor to colors.graph.activity.swimlaneBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['SwimlaneHeaderBackgroundColor', '#334455']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneHeaderBackgroundColor', '#334455']]), defaultTheme);
     expect(theme.colors.graph.activity?.swimlaneBorder).toBe('#334455');
     expect(unknown).toEqual([]);
   });
 
   it('maps SwimlaneBorderColor to colors.graph.activity.swimlaneBorder', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['SwimlaneBorderColor', '#445566']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneBorderColor', '#445566']]), defaultTheme);
     expect(theme.colors.graph.activity?.swimlaneBorder).toBe('#445566');
     expect(unknown).toEqual([]);
   });
 
   it('unknown key WeirdKey still appears in result.unknown', () => {
-    const { unknown } = resolveSkinparam(
-      new Map([['WeirdKey', 'value']]),
-      defaultTheme,
-    );
+    const { unknown } = resolveSkinparam(new Map([['WeirdKey', 'value']]), defaultTheme);
     expect(unknown).toContain('weirdkey');
   });
 
   it('BackgroundColor still maps to colors.background (regression)', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['BackgroundColor', '#ffffff']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['BackgroundColor', '#ffffff']]), defaultTheme);
     expect(theme.colors.background).toBe('#ffffff');
     expect(unknown).toEqual([]);
   });
 
   it('activity subobject is undefined when no activity keys are set', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['backgroundcolor', '#ffffff']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['backgroundcolor', '#ffffff']]), defaultTheme);
     // deepMergeTheme spreads activity from base (undefined) — result is an
     // empty object rather than undefined, but all fields are absent.
     const act = theme.colors.graph.activity;
@@ -715,16 +584,9 @@ describe('resolveSkinparam — activity skinparam keys', () => {
   });
 
   it('preserves existing graph fields when only activity keys are set', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['ActivityBackgroundColor', '#aabbcc']]),
-      defaultTheme,
-    );
-    expect(theme.colors.graph.classBackground).toBe(
-      defaultTheme.colors.graph.classBackground,
-    );
-    expect(theme.colors.graph.packageBorder).toBe(
-      defaultTheme.colors.graph.packageBorder,
-    );
+    const { theme } = resolveSkinparam(new Map([['ActivityBackgroundColor', '#aabbcc']]), defaultTheme);
+    expect(theme.colors.graph.classBackground).toBe(defaultTheme.colors.graph.classBackground);
+    expect(theme.colors.graph.packageBorder).toBe(defaultTheme.colors.graph.packageBorder);
   });
 });
 
@@ -743,12 +605,8 @@ describe('deepMergeTheme — nested activity override', () => {
       },
     });
     expect(result.colors.graph.activity?.background).toBe('x');
-    expect(result.colors.graph.classBackground).toBe(
-      defaultTheme.colors.graph.classBackground,
-    );
-    expect(result.colors.graph.packageBorder).toBe(
-      defaultTheme.colors.graph.packageBorder,
-    );
+    expect(result.colors.graph.classBackground).toBe(defaultTheme.colors.graph.classBackground);
+    expect(result.colors.graph.packageBorder).toBe(defaultTheme.colors.graph.packageBorder);
   });
 
   it('merges partial activity override without losing sibling activity fields', () => {
@@ -783,19 +641,13 @@ describe('deepMergeTheme — nested activity override', () => {
 describe('resolveSkinparam — key normalisation', () => {
   it('normalises classArrowColor to arrowcolor (arrow prefix collapse)', () => {
     // "classArrowColor" → normalise → "arrowcolor" → maps to colors.arrow
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classArrowColor', '#AAAAAA']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classArrowColor', '#AAAAAA']]), defaultTheme);
     expect(theme.colors.arrow).toBe('#AAAAAA');
     expect(unknown).toEqual([]);
   });
 
   it('normalises sequenceArrowColor to arrowcolor (same slot as classArrowColor)', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['sequenceArrowColor', '#BBBBBB']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['sequenceArrowColor', '#BBBBBB']]), defaultTheme);
     expect(theme.colors.arrow).toBe('#BBBBBB');
     expect(unknown).toEqual([]);
   });
@@ -820,36 +672,21 @@ describe('resolveSkinparam — key normalisation', () => {
   });
 
   it('classarrowcolor and sequencearrowcolor map to the same property as arrowcolor', () => {
-    const { theme: t1 } = resolveSkinparam(
-      new Map([['arrowcolor', '#CCCCCC']]),
-      defaultTheme,
-    );
-    const { theme: t2 } = resolveSkinparam(
-      new Map([['classarrowcolor', '#CCCCCC']]),
-      defaultTheme,
-    );
-    const { theme: t3 } = resolveSkinparam(
-      new Map([['sequencearrowcolor', '#CCCCCC']]),
-      defaultTheme,
-    );
+    const { theme: t1 } = resolveSkinparam(new Map([['arrowcolor', '#CCCCCC']]), defaultTheme);
+    const { theme: t2 } = resolveSkinparam(new Map([['classarrowcolor', '#CCCCCC']]), defaultTheme);
+    const { theme: t3 } = resolveSkinparam(new Map([['sequencearrowcolor', '#CCCCCC']]), defaultTheme);
     expect(t1.colors.arrow).toBe(t2.colors.arrow);
     expect(t2.colors.arrow).toBe(t3.colors.arrow);
   });
 
   it('strips underscores: class_background_color → classbackgroundcolor', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['class_background_color', '#AABBCC']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['class_background_color', '#AABBCC']]), defaultTheme);
     expect(theme.colors.graph.classBackground).toBe('#AABBCC');
     expect(unknown).toEqual([]);
   });
 
   it('strips dots from key', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['class.background.color', '#AABBCC']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['class.background.color', '#AABBCC']]), defaultTheme);
     expect(theme.colors.graph.classBackground).toBe('#AABBCC');
     expect(unknown).toEqual([]);
   });
@@ -873,19 +710,13 @@ describe('resolveSkinparam — key normalisation', () => {
 
   it('normalises sequenceMessageAlign to sequencemessagealignment', () => {
     // "align" suffix → "alignment"
-    const { unknown } = resolveSkinparam(
-      new Map([['sequenceMessageAlign', 'left']]),
-      defaultTheme,
-    );
+    const { unknown } = resolveSkinparam(new Map([['sequenceMessageAlign', 'left']]), defaultTheme);
     // No Theme slot — goes to unknown
     expect(unknown).toContain('sequencemessagealignment');
   });
 
   it('routes a bare participantbackgroundcolor to the same bucket', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['participantbackgroundcolor', '#FFCCDD']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['participantbackgroundcolor', '#FFCCDD']]), defaultTheme);
     expect(unknown).not.toContain('participantbackgroundcolor');
     expect(theme.colors.elements?.['participant']?.background).toBe('#FFCCDD');
   });
@@ -898,39 +729,23 @@ describe('resolveSkinparam — unknown keys', () => {
   it('collects an unrecognised key in unknown[]', () => {
     // `handwritten` used to stand in for "unrecognised" here. It is a real
     // skinparam now (mission H1), so this needs a key that genuinely is not.
-    const { unknown } = resolveSkinparam(
-      new Map([['notaskinparam', 'true']]),
-      defaultTheme,
-    );
+    const { unknown } = resolveSkinparam(new Map([['notaskinparam', 'true']]), defaultTheme);
     expect(unknown).toContain('notaskinparam');
   });
 
   it('recognises handwritten, and does not report it as unknown', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['handwritten', 'true']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['handwritten', 'true']]), defaultTheme);
     expect(theme.handwritten).toBe(true);
     expect(unknown).not.toContain('handwritten');
   });
 
   it('does not throw for unknown keys', () => {
-    expect(() =>
-      resolveSkinparam(new Map([['totally_unknown_key', 'value']]), defaultTheme),
-    ).not.toThrow();
+    expect(() => resolveSkinparam(new Map([['totally_unknown_key', 'value']]), defaultTheme)).not.toThrow();
   });
 
   it('collects stereotype-qualified key in unknown[] without throwing', () => {
-    expect(() =>
-      resolveSkinparam(
-        new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]),
-        defaultTheme,
-      ),
-    ).not.toThrow();
-    const { unknown } = resolveSkinparam(
-      new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]),
-      defaultTheme,
-    );
+    expect(() => resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme)).not.toThrow();
+    const { unknown } = resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme);
     expect(unknown.some((k) => k.includes('<<'))).toBe(true);
   });
 
@@ -971,10 +786,7 @@ describe('resolveSkinparam — unknown keys', () => {
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — base theme behaviour', () => {
   it('retains all unaffected base values when one key is set', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['backgroundcolor', '#FF0000']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['backgroundcolor', '#FF0000']]), defaultTheme);
     expect(theme.fontFamily).toBe(defaultTheme.fontFamily);
     expect(theme.fontSize).toBe(defaultTheme.fontSize);
     expect(theme.colors.border).toBe(defaultTheme.colors.border);
@@ -991,10 +803,7 @@ describe('resolveSkinparam — base theme behaviour', () => {
   });
 
   it('returns a new theme object (not the base reference)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['backgroundcolor', '#FF0000']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['backgroundcolor', '#FF0000']]), defaultTheme);
     expect(theme).not.toBe(defaultTheme);
   });
 
@@ -1074,14 +883,7 @@ describe('parseStyleBlock', () => {
   });
 
   it('handles multiple selector blocks — each gets its own path', () => {
-    const raw = [
-      'element {',
-      '  backgroundColor: red',
-      '}',
-      'note {',
-      '  backgroundColor: yellow',
-      '}',
-    ].join('\n');
+    const raw = ['element {', '  backgroundColor: red', '}', 'note {', '  backgroundColor: yellow', '}'].join('\n');
     const result = parseStyleBlock(raw);
     expect(result.get('element')!.get('backgroundcolor')).toBe('red');
     expect(result.get('note')!.get('backgroundcolor')).toBe('yellow');
@@ -1228,19 +1030,13 @@ describe('resolveSkinparam — element buckets + gradients', () => {
   });
 
   it('keeps classBackgroundColor in the class field, not the database bucket (AC2)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['classBackgroundColor', '#FEFECE']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['classBackgroundColor', '#FEFECE']]), defaultTheme);
     expect(theme.colors.graph.classBackground).toBe('#FEFECE');
     expect(theme.colors.elements?.database).toBeUndefined();
   });
 
   it('stores a solid element color as a plain string Paint, not a Gradient (AC3)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['componentBackgroundColor', '#123456']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['componentBackgroundColor', '#123456']]), defaultTheme);
     expect(theme.colors.elements?.component?.background).toBe('#123456');
   });
 
@@ -1262,10 +1058,7 @@ describe('resolveSkinparam — element buckets + gradients', () => {
 
   it('does not treat a non-bucket element name as a bucket key', () => {
     // `widgetBackgroundColor` is not a known bucket SName → stays unknown.
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['widgetBackgroundColor', '#abcdef']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['widgetBackgroundColor', '#abcdef']]), defaultTheme);
     expect(theme.colors.elements).toBeUndefined();
     expect(unknown).toContain('widgetbackgroundcolor');
   });
@@ -1289,18 +1082,12 @@ describe('resolveSkinparam — element font-size buckets (G1 I4b)', () => {
   });
 
   it('routes packageFontSize (block form) into the package bucket (xagino-11-vazo768)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['packagefontsize', '40']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['packagefontsize', '40']]), defaultTheme);
     expect(theme.colors.elements?.package?.fontSize).toBe(40);
   });
 
   it('routes nodeStereotypeFontSize into the node bucket, distinct from fontSize (mavicu-17-mago821)', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['nodestereotypefontsize', '20']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['nodestereotypefontsize', '20']]), defaultTheme);
     expect(theme.colors.elements?.node?.stereotypeFontSize).toBe(20);
     expect(theme.colors.elements?.node?.fontSize).toBeUndefined();
   });
@@ -1317,10 +1104,7 @@ describe('resolveSkinparam — element font-size buckets (G1 I4b)', () => {
   });
 
   it('non-numeric font-size values are recorded as unknown, not silently dropped', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['componentfontsize', 'not-a-number']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['componentfontsize', 'not-a-number']]), defaultTheme);
     expect(theme.colors.elements).toBeUndefined();
     expect(unknown).toContain('componentfontsize');
   });
@@ -1347,10 +1131,7 @@ describe('resolveSkinparam — shadowing', () => {
   });
 
   it('routes databaseShadowing into the database element bucket (malado-53-noso561)', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['databaseshadowing', 'true']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['databaseshadowing', 'true']]), defaultTheme);
     expect(theme.colors.elements?.database?.shadowing).toBe(3);
     expect(theme.shadowing).toBeUndefined();
     expect(unknown).toEqual([]);

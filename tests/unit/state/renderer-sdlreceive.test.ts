@@ -79,5 +79,4 @@ describe('<<sdlreceive>> folded-frame shape (mission G4 S14)', () => {
     expect(Number(textMatch![1])).toBeCloseTo(x + 21, 5);
     expect(Number(textMatch![2])).toBeCloseTo(y + 20 + 10.8889, 3);
   });
-
 });

@@ -87,9 +87,7 @@ describe('mismatchesForGraph', () => {
   it('reports a size mismatch tagged by the DOT attr name', () => {
     const oracle = graph([edge({ headLabelBox: '23x10' })]);
     const candidate = graph([edge({ headLabelBox: '31x13' })]);
-    expect(mismatchesForGraph(oracle, candidate)).toEqual([
-      { kind: 'headlabel', oracle: '23x10', ours: '31x13' },
-    ]);
+    expect(mismatchesForGraph(oracle, candidate)).toEqual([{ kind: 'headlabel', oracle: '23x10', ours: '31x13' }]);
   });
 
   it('tags tail and xlabel boxes correctly', () => {
@@ -104,18 +102,12 @@ describe('mismatchesForGraph', () => {
   it('reports an oracle box with no counterpart against "-"', () => {
     const oracle = graph([edge({ labelBox: '10x5' }), edge({ labelBox: '20x8' })]);
     const candidate = graph([edge({ labelBox: '10x5' })]);
-    expect(mismatchesForGraph(oracle, candidate)).toEqual([
-      { kind: 'label', oracle: '20x8', ours: '-' },
-    ]);
+    expect(mismatchesForGraph(oracle, candidate)).toEqual([{ kind: 'label', oracle: '20x8', ours: '-' }]);
   });
 
   it('orders combined mismatches label, taillabel, headlabel, xlabel', () => {
-    const oracle = graph([
-      edge({ xLabelBox: '1x1', headLabelBox: '2x2', labelBox: '3x3', tailLabelBox: '4x4' }),
-    ]);
-    const candidate = graph([
-      edge({ xLabelBox: '9x9', headLabelBox: '8x8', labelBox: '7x7', tailLabelBox: '6x6' }),
-    ]);
+    const oracle = graph([edge({ xLabelBox: '1x1', headLabelBox: '2x2', labelBox: '3x3', tailLabelBox: '4x4' })]);
+    const candidate = graph([edge({ xLabelBox: '9x9', headLabelBox: '8x8', labelBox: '7x7', tailLabelBox: '6x6' })]);
     expect(mismatchesForGraph(oracle, candidate).map((m) => m.kind)).toEqual([
       'label',
       'taillabel',
@@ -135,9 +127,7 @@ describe('renderMismatchLine', () => {
 describe('renderSlugLines', () => {
   it('reports CLEARABLE for a slug whose boxes now match', () => {
     const r: SlugReport = { clearable: true, mismatches: [] };
-    expect(renderSlugLines('class', 'bitove-03-sanu160', r)).toEqual([
-      'class/bitove-03-sanu160   CLEARABLE',
-    ]);
+    expect(renderSlugLines('class', 'bitove-03-sanu160', r)).toEqual(['class/bitove-03-sanu160   CLEARABLE']);
   });
 
   it('reports COUNT-MISMATCH before checking mismatches, with the detail', () => {
@@ -170,9 +160,7 @@ describe('renderSlugLines', () => {
 describe('statsFromReports / formatStats', () => {
   it('counts an empty report set as all zeros', () => {
     expect(statsFromReports([])).toEqual({ slugs: 0, clearable: 0, mismatchBoxes: 0 });
-    expect(formatStats('class', statsFromReports([]))).toBe(
-      'class: 0 slugs, 0 clearable, 0 mismatched box(es)',
-    );
+    expect(formatStats('class', statsFromReports([]))).toBe('class: 0 slugs, 0 clearable, 0 mismatched box(es)');
   });
 
   it('tallies slugs, clearable, and total mismatched boxes', () => {
@@ -186,8 +174,6 @@ describe('statsFromReports / formatStats', () => {
       },
     ];
     expect(statsFromReports(reports)).toEqual({ slugs: 3, clearable: 1, mismatchBoxes: 1 });
-    expect(formatStats('TOTAL', statsFromReports(reports))).toBe(
-      'TOTAL: 3 slugs, 1 clearable, 1 mismatched box(es)',
-    );
+    expect(formatStats('TOTAL', statsFromReports(reports))).toBe('TOTAL: 3 slugs, 1 clearable, 1 mismatched box(es)');
   });
 });

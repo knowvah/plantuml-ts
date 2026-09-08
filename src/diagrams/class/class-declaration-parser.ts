@@ -77,7 +77,9 @@ const DECL_KIND_RE = new RegExp(
   // T14 (dispatch-by-parse-attempt): `protocol` added -- see `ClassifierKind`'s
   // `'protocol'` member doc (class-classifier-ast.ts) for the citation.
   '^(abstract\\s+class|abstract|class|interface|enum|annotation|entity|circle|protocol|' +
-    '(?:mix_)?(?:' + ALL_DESCRIPTIVE_LEAF + ')' +
+    '(?:mix_)?(?:' +
+    ALL_DESCRIPTIVE_LEAF +
+    ')' +
     ')\\s+(.+)$',
   'i',
 );
@@ -93,8 +95,7 @@ function resolveDeclKind(rawKind: string): {
 } {
   if (USECASE_LEAF_RE.test(rawKind)) return { kind: 'usecase' };
   if (rawKind === STATE_LEAF_KEYWORD) return { kind: 'state' };
-  if (DESCRIPTIVE_LEAF_RE.test(rawKind))
-    return { kind: 'descriptive', usymbol: rawKind };
+  if (DESCRIPTIVE_LEAF_RE.test(rawKind)) return { kind: 'descriptive', usymbol: rawKind };
   if (rawKind === 'abstract class') return { kind: 'abstract' };
   return { kind: rawKind as ClassifierKind };
 }
@@ -107,14 +108,11 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   const rawKind = kindMatch[1]!.replace(/\s+/, ' ').toLowerCase().replace(/^mix_/, '');
   const { kind, usymbol } = resolveDeclKind(rawKind);
 
-  const { inlineMembers, opensBody, rest: body } = extractBody(
-    kindMatch[2]!.trim(),
-  );
+  const { inlineMembers, opensBody, rest: body } = extractBody(kindMatch[2]!.trim());
   // EXTENDS/IMPLEMENTS sit to the right of COLOR/LINECOLOR in the grammar
   // (CommandCreateClass.java:99-108), so they must be stripped first — color
   // extraction is anchored to the current end of the remainder.
-  const { rest: afterInheritance, extendsIds, implementsIds } =
-    extractInheritance(body);
+  const { rest: afterInheritance, extendsIds, implementsIds } = extractInheritance(body);
   const { rest, stereotype, color, tags, url } = extractDecorations(afterInheritance);
   const { id, display, typeParams, typeParamsRawText } = parseIdDisplay(rest);
   if (id === '' || display === '') return null;
@@ -214,11 +212,7 @@ export function parseTagTokens(raw: string): string[] {
  * @see ~/git/plantuml/.../classdiagram/command/CommandCreateElementFull2.java:254
  *      (reallyCreateLeaf only — no explicit setLastEntity)
  */
-export function applyClassifierDecl(
-  state: ParseState,
-  decl: ClassifierDecl,
-  alwaysSetLastEntity: boolean,
-): void {
+export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alwaysSetLastEntity: boolean): void {
   const classifier = ensureClassifier(state, decl.id, decl.kind, decl.display);
   if (alwaysSetLastEntity) state.lastEntity = classifier.id;
   classifier.kind = decl.kind;
@@ -260,7 +254,9 @@ function applyInheritanceClauses(state: ParseState, childId: string, decl: Class
     // own id.
     state.creationCounter.value += 1;
     state.ast.relationships.push({
-      from: childId, to: p.id, type: parent.relType,
+      from: childId,
+      to: p.id,
+      type: parent.relType,
       creationIndex: state.creationCounter.value,
       // `manageExtends` builds `Link(cl1 = parent, cl2 = child)` and never
       // reverses it (see the jar-verified note below), so the parent leads

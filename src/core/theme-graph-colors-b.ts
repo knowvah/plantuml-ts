@@ -131,14 +131,19 @@ export interface ThemeGraphColorsB {
    *  differently-overridden labels on one classifier, so exact upstream
    *  cross-tag registration-order fidelity is out of this iteration's
    *  scope. */
-  classTagCascade?: Readonly<Record<string, {
-    background?: string;
-    border?: string;
-    fontColor?: string;
-    roundCorner?: number;
-    fontBold?: boolean;
-    fontItalic?: boolean;
-  }>>;
+  classTagCascade?: Readonly<
+    Record<
+      string,
+      {
+        background?: string;
+        border?: string;
+        fontColor?: string;
+        roundCorner?: number;
+        fontBold?: boolean;
+        fontItalic?: boolean;
+      }
+    >
+  >;
   /** G2 N39: `classTagCascade`, snapshotted PER `<style>`-block boundary
    *  -- index `g` is the cascade as resolved from only the FIRST `g`
    *  `<style>` blocks in source order (index 0 = no blocks applied yet,
@@ -158,14 +163,22 @@ export interface ThemeGraphColorsB {
    *  (zero behavior change). Read by `style-cascade-class.ts
    *  #resolveClassTagCascadeEntry` via a classifier's own `Classifier
    *  .styleGeneration` (`ast.ts`'s doc comment). */
-  classTagCascadeGenerations?: readonly (Readonly<Record<string, {
-    background?: string;
-    border?: string;
-    fontColor?: string;
-    roundCorner?: number;
-    fontBold?: boolean;
-    fontItalic?: boolean;
-  }>> | undefined)[];
+  classTagCascadeGenerations?: readonly (
+    | Readonly<
+        Record<
+          string,
+          {
+            background?: string;
+            border?: string;
+            fontColor?: string;
+            roundCorner?: number;
+            fontBold?: boolean;
+            fontItalic?: boolean;
+          }
+        >
+      >
+    | undefined
+  )[];
   /**
    * B7/M8: per-`.tagname` ARROW style, keyed by cleaned tag token.
    *
@@ -186,10 +199,15 @@ export interface ThemeGraphColorsB {
    * actually carry an arrow-relevant declaration; absent otherwise, so every
    * diagram with no `<style>` tag selector is unchanged.
    */
-  arrowTagCascade?: Readonly<Record<string, {
-    color?: string;
-    thickness?: number;
-  }>>;
+  arrowTagCascade?: Readonly<
+    Record<
+      string,
+      {
+        color?: string;
+        thickness?: number;
+      }
+    >
+  >;
   /** G2 N27: `skinparam guillemet <value>` -- `Guillemet.
    *  fromDescription`'s resolved start/end wrapper strings for
    *  stereotype text (`«Foo»` by default). Both unset means the
@@ -301,14 +319,14 @@ export interface ThemeGraphColorsB {
   // (USymbolUsecase.java with isBusiness=true).
   businessUsecaseFill: string;
   activity?: {
-    background?: string;        // ActivityBackgroundColor — action box fill
-    border?: string;            // ActivityBorderColor — action box stroke
-    barColor?: string;          // ActivityBarColor — fork/join bar fill
+    background?: string; // ActivityBackgroundColor — action box fill
+    border?: string; // ActivityBorderColor — action box stroke
+    barColor?: string; // ActivityBarColor — fork/join bar fill
     diamondBackground?: string; // ActivityDiamondBackgroundColor
-    diamondBorder?: string;     // ActivityDiamondBorderColor
-    startColor?: string;        // ActivityStartColor — filled start circle
-    endColor?: string;          // ActivityEndColor — end/terminate circle
-    swimlaneBorder?: string;    // SwimlaneHeaderBackgroundColor — lane header
+    diamondBorder?: string; // ActivityDiamondBorderColor
+    startColor?: string; // ActivityStartColor — filled start circle
+    endColor?: string; // ActivityEndColor — end/terminate circle
+    swimlaneBorder?: string; // SwimlaneHeaderBackgroundColor — lane header
   };
   json?: {
     keyText?: string;
@@ -364,11 +382,14 @@ export interface ThemeGraphColorsB {
     /** Highlighted row font italic */
     highlightFontItalic?: boolean;
     /** Per-class highlight overrides keyed by style class name (e.g. "h1") */
-    highlightClasses?: Record<string, {
-      background?: string;
-      fontColor?: string;
-      fontBold?: boolean;
-      fontItalic?: boolean;
-    }>;
+    highlightClasses?: Record<
+      string,
+      {
+        background?: string;
+        fontColor?: string;
+        fontBold?: boolean;
+        fontItalic?: boolean;
+      }
+    >;
   };
 }

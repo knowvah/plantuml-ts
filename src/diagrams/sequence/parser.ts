@@ -47,10 +47,7 @@ import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
  * unterminated block absorbs every remaining line rather than failing
  * (java's `while (it.hasNext())` simply falls through to `return lines`).
  */
-function scanEmbeddedBlock(
-  lines: readonly string[],
-  i: number,
-): { block: readonly string[]; consumed: number } {
+function scanEmbeddedBlock(lines: readonly string[], i: number): { block: readonly string[]; consumed: number } {
   let nested = 1;
   for (let j = i + 1; j < lines.length; j++) {
     const s = lines[j] ?? '';
@@ -136,11 +133,7 @@ function handlePendingRef(state: ParseState, line: string): boolean {
  * the number of trimmed lines consumed (>1 for a multi-line sprite block),
  * or `null` when neither matcher claimed the line.
  */
-function dispatchAnnotationOrSprite(
-  state: ParseState,
-  trimmedLines: readonly string[],
-  i: number,
-): number | null {
+function dispatchAnnotationOrSprite(state: ParseState, trimmedLines: readonly string[], i: number): number | null {
   // makeDefaultAST() always sets annotations; the field is optional on
   // SequenceDiagramAST only so hand-authored literal fixtures elsewhere
   // compile unchanged.
@@ -191,9 +184,7 @@ function dispatchCommand(state: ParseState, line: string): boolean {
  * its position in this filtered view.
  */
 function trimNonBlank(lines: readonly string[]): { text: string; origIndex: number }[] {
-  return lines
-    .map((l, origIndex) => ({ text: l.trim(), origIndex }))
-    .filter((e) => e.text !== '');
+  return lines.map((l, origIndex) => ({ text: l.trim(), origIndex })).filter((e) => e.text !== '');
 }
 
 /**

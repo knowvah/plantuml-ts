@@ -98,7 +98,11 @@ describe('edgeLabelAttrs — note-on-link merge, activated via noteCtx (T10)', (
   });
 
   it('merges at position=right: mergeLR(label, note) -- same totals as left (commutative)', () => {
-    const r = rel({ label: 'Another link', linkNote: 'this is my note on right link\nand in blue', linkNotePosition: 'right' });
+    const r = rel({
+      label: 'Another link',
+      linkNote: 'this is my note on right link\nand in blue',
+      linkNotePosition: 'right',
+    });
     const attrs = edgeLabelAttrs(r, font, font, measurer, noteCtx);
     const labelDim = labelOperand('Another link');
     const noteDim = noteOperand('this is my note on right link\nand in blue');
@@ -125,22 +129,25 @@ describe('edgeLabelAttrs — note-on-link merge, activated via noteCtx (T10)', (
     expect(attrs.labelHeight).not.toBe(10);
   });
 
-  it("lozego-15-coci435's shape: the <$test> sprite atom measures 0x0 " +
-      '(no SpriteDimsLookup threaded), so the box stays BELOW the oracle 137x135', () => {
-    // Orchestrator finding (2026-08-16): creole-atoms-measure.ts:49-50
-    // returns {width:0, height:0} for a sprite atom absent a
-    // SpriteDimsLookup. Sprite threading is explicitly NOT authorized for
-    // this task -- this test pins the gap rather than closing it.
-    const r = rel({ label: 'Items', linkNote: '<$test>Note on rel' });
-    const attrs = edgeLabelAttrs(r, font, font, measurer, noteCtx);
-    const withoutSprite = measureNote('Note on rel', defaultTheme, measurer);
-    const withSpriteToken = measureNote('<$test>Note on rel', defaultTheme, measurer);
-    // The sprite token contributes nothing beyond what its own (zero-width)
-    // atom would -- i.e. no wider than the bare text alone.
-    expect(withSpriteToken.width).toBeLessThanOrEqual(withoutSprite.width + 1);
-    expect(attrs.labelWidth).toBeLessThan(137);
-    expect(attrs.labelHeight).toBeLessThan(135);
-  });
+  it(
+    "lozego-15-coci435's shape: the <$test> sprite atom measures 0x0 " +
+      '(no SpriteDimsLookup threaded), so the box stays BELOW the oracle 137x135',
+    () => {
+      // Orchestrator finding (2026-08-16): creole-atoms-measure.ts:49-50
+      // returns {width:0, height:0} for a sprite atom absent a
+      // SpriteDimsLookup. Sprite threading is explicitly NOT authorized for
+      // this task -- this test pins the gap rather than closing it.
+      const r = rel({ label: 'Items', linkNote: '<$test>Note on rel' });
+      const attrs = edgeLabelAttrs(r, font, font, measurer, noteCtx);
+      const withoutSprite = measureNote('Note on rel', defaultTheme, measurer);
+      const withSpriteToken = measureNote('<$test>Note on rel', defaultTheme, measurer);
+      // The sprite token contributes nothing beyond what its own (zero-width)
+      // atom would -- i.e. no wider than the bare text alone.
+      expect(withSpriteToken.width).toBeLessThanOrEqual(withoutSprite.width + 1);
+      expect(attrs.labelWidth).toBeLessThan(137);
+      expect(attrs.labelHeight).toBeLessThan(135);
+    },
+  );
 });
 
 describe('edgeLabelAttrs — multi-line creole strip, T4 (vuresa-33-kumu160)', () => {

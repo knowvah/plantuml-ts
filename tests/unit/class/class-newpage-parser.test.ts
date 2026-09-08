@@ -85,10 +85,7 @@ describe('newpage — two pages', () => {
     const pages = ast.pages!;
     expect(pages).toHaveLength(2);
 
-    const [page1, page2] = pages as [
-      ReturnType<typeof parse>,
-      ReturnType<typeof parse>,
-    ];
+    const [page1, page2] = pages as [ReturnType<typeof parse>, ReturnType<typeof parse>];
 
     expect(page1.classifiers.map((c) => c.id)).toEqual(['A', 'C']);
     expect(page1.relationships).toHaveLength(1);
@@ -162,11 +159,7 @@ describe('newpage — three pages', () => {
 
     const pages = ast.pages!;
     expect(pages).toHaveLength(3);
-    expect(pages.map((p) => p.classifiers.map((c) => c.id))).toEqual([
-      ['A'],
-      ['B'],
-      ['C'],
-    ]);
+    expect(pages.map((p) => p.classifiers.map((c) => c.id))).toEqual([['A'], ['B'], ['C']]);
   });
 
   it('applies hide/show directives independently per page', () => {

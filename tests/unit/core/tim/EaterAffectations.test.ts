@@ -23,9 +23,9 @@ describe('EaterAffectation', () => {
     // Matches TMemoryGlobal#putVariable's own guard -- LOCAL only makes
     // sense inside a forked TMemoryLocal call frame.
     const memory = new TMemoryGlobal();
-    expect(() =>
-      new EaterAffectation(new StringLocated('!local $x = 1', LOC)).analyze(fakeContext(), memory),
-    ).toThrow('Cannot use local variable here');
+    expect(() => new EaterAffectation(new StringLocated('!local $x = 1', LOC)).analyze(fakeContext(), memory)).toThrow(
+      'Cannot use local variable here',
+    );
   });
 
   it('assigns a !global-scoped variable', () => {

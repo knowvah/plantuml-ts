@@ -176,14 +176,12 @@ const NOTE_TAB_SIZE_NB = 8;
  * `StateTextLine` cannot carry without a `state-geo-types.ts` change outside
  * this task's write-set.
  */
-function buildRenderLines(
-  text: string,
-  theme: Theme,
-  measurer: StringMeasurer,
-): readonly StateStyledTextLine[] {
+function buildRenderLines(text: string, theme: Theme, measurer: StringMeasurer): readonly StateStyledTextLine[] {
   const font: FontSpec = { family: theme.fontFamily, size: NOTE_FONT_SIZE };
   return creoleTextLines(text, font, measurer).map((ln) =>
-    ln.kind === 'table-row' ? tableRowRenderLine(ln, font, measurer) : toStyledLine(ln, font, measurer, NOTE_TAB_SIZE_NB),
+    ln.kind === 'table-row'
+      ? tableRowRenderLine(ln, font, measurer)
+      : toStyledLine(ln, font, measurer, NOTE_TAB_SIZE_NB),
   );
 }
 
@@ -203,21 +201,22 @@ function tokenizeByPipe(line: string): string[] {
  *  named gap), joined with two spaces standing in for jar's real column
  *  rules, wrapped as ONE run at the note's own font size (`dy: 0` — a table
  *  row line is never a `<sup>`/`<sub>` in this corpus). */
-function tableRowRenderLine(
-  ln: CreoleTextLine,
-  font: FontSpec,
-  measurer: StringMeasurer,
-): StateStyledTextLine {
+function tableRowRenderLine(ln: CreoleTextLine, font: FontSpec, measurer: StringMeasurer): StateStyledTextLine {
   const raw = ln.runs[0]?.text ?? '';
   const cells = tokenizeByPipe(raw).map((cell) => (cell.startsWith('=') ? cell.slice(1) : cell));
-  const visible = cells.map((cell) => toStyledLine(creoleTextLines(cell, font, measurer)[0] ?? emptyLine(), font, measurer, NOTE_TAB_SIZE_NB).text);
+  const visible = cells.map(
+    (cell) =>
+      toStyledLine(creoleTextLines(cell, font, measurer)[0] ?? emptyLine(), font, measurer, NOTE_TAB_SIZE_NB).text,
+  );
   const joined = visible.join('  ');
   const width = measurer.measure(joined, font).width;
   return {
     text: joined,
     width,
     height: font.size,
-    runs: [{ text: joined, width, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 }],
+    runs: [
+      { text: joined, width, bold: false, italic: false, underline: false, strike: false, size: font.size, dy: 0 },
+    ],
   };
 }
 
@@ -335,7 +334,11 @@ export interface ScopeNoteParts {
   candidates: NoteEdgeCandidate[];
 }
 
-function measureAllNotes(notes: readonly StateNote[], theme: Theme, measurer: StringMeasurer): Map<string, NoteMeasurement> {
+function measureAllNotes(
+  notes: readonly StateNote[],
+  theme: Theme,
+  measurer: StringMeasurer,
+): Map<string, NoteMeasurement> {
   const measurements = new Map<string, NoteMeasurement>();
   for (const note of notes) measurements.set(note.id, measureNote(note.text, theme, measurer));
   return measurements;

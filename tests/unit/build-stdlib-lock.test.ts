@@ -27,7 +27,16 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,9 +48,7 @@ import { acquireBuildLock } from '../../scripts/build-stdlib-packages/build-lock
 import { LOCK_PRESSURE_BUDGET_MS } from '../helpers/lock-pressure-budget.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const BUILD_LOCK_MODULE_URL = pathToFileURL(
-  join(REPO_ROOT, 'scripts', 'build-stdlib-packages', 'build-lock.ts'),
-).href;
+const BUILD_LOCK_MODULE_URL = pathToFileURL(join(REPO_ROOT, 'scripts', 'build-stdlib-packages', 'build-lock.ts')).href;
 /** stdlib-lock-sharing T1 -- `build-lock.ts` gained a relative import
  * (`./reader-registry.ts`) once shared mode landed. Worker scripts below
  * live under a `mkdtempSync` scratch dir OUTSIDE this repo's `node_modules`
@@ -269,31 +276,35 @@ describe('acquireBuildLock -- on-disk representation', () => {
   // The 120s budget is for the same reason: this test acquires the REAL
   // default lock, so it can legitimately queue behind those eight readers,
   // and `maxWaitMs` alone is 30s -- well past vitest's 5s default.
-  it('creates a lock file while held and removes it on release, at a deterministic default path', () => {
-    const digest = createHash('sha256').update(REPO_ROOT).digest('hex').slice(0, 16);
-    const defaultLockPath = join(tmpdir(), `plantuml-ts-stdlib-build-${digest}.lock`);
-    const ownerPidAt = (path: string): number | undefined => {
-      if (!existsSync(path)) {
-        return undefined;
-      }
-      try {
-        return (JSON.parse(readFileSync(path, 'utf8')) as { pid?: number }).pid;
-      } catch {
-        return undefined;
-      }
-    };
+  it(
+    'creates a lock file while held and removes it on release, at a deterministic default path',
+    () => {
+      const digest = createHash('sha256').update(REPO_ROOT).digest('hex').slice(0, 16);
+      const defaultLockPath = join(tmpdir(), `plantuml-ts-stdlib-build-${digest}.lock`);
+      const ownerPidAt = (path: string): number | undefined => {
+        if (!existsSync(path)) {
+          return undefined;
+        }
+        try {
+          return (JSON.parse(readFileSync(path, 'utf8')) as { pid?: number }).pid;
+        } catch {
+          return undefined;
+        }
+      };
 
-    const release = acquireBuildLock(REPO_ROOT);
-    expect(existsSync(defaultLockPath)).toBe(true);
-    expect(ownerPidAt(defaultLockPath)).toBe(process.pid);
+      const release = acquireBuildLock(REPO_ROOT);
+      expect(existsSync(defaultLockPath)).toBe(true);
+      expect(ownerPidAt(defaultLockPath)).toBe(process.pid);
 
-    release();
+      release();
 
-    // Either the file is gone, or a contending worker acquired it in the
-    // gap -- in which case it is no longer ours. Both prove OUR lock was
-    // released; neither is satisfiable if `release()` were a no-op.
-    expect(ownerPidAt(defaultLockPath)).not.toBe(process.pid);
-  }, LOCK_PRESSURE_BUDGET_MS);
+      // Either the file is gone, or a contending worker acquired it in the
+      // gap -- in which case it is no longer ours. Both prove OUR lock was
+      // released; neither is satisfiable if `release()` were a no-op.
+      expect(ownerPidAt(defaultLockPath)).not.toBe(process.pid);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
   it('costs no measurable overhead when uncontended', () => {
     const dir = makeTempDir('build-stdlib-lock-cost-');
@@ -351,77 +362,69 @@ describe('acquireBuildLock -- bounded wait', () => {
 // ---------------------------------------------------------------------------
 
 describe('acquireBuildLock -- stale recovery', () => {
-  it(
-    'reclaims a lock left behind by a dead process and does not hang',
-    async () => {
-      const dir = makeTempDir('build-stdlib-lock-dead-');
-      const lockPath = join(dir, 'dead.lock');
+  it('reclaims a lock left behind by a dead process and does not hang', async () => {
+    const dir = makeTempDir('build-stdlib-lock-dead-');
+    const lockPath = join(dir, 'dead.lock');
 
-      const deadChild = spawn(process.execPath, ['-e', 'process.exit(0)']);
-      const deadPid = deadChild.pid;
-      expect(deadPid).toBeDefined();
-      await new Promise<void>((resolve) => deadChild.on('exit', () => resolve()));
+    const deadChild = spawn(process.execPath, ['-e', 'process.exit(0)']);
+    const deadPid = deadChild.pid;
+    expect(deadPid).toBeDefined();
+    await new Promise<void>((resolve) => deadChild.on('exit', () => resolve()));
 
-      writeFileSync(lockPath, JSON.stringify({ pid: deadPid, acquiredAt: Date.now() }), 'utf8');
+    writeFileSync(lockPath, JSON.stringify({ pid: deadPid, acquiredAt: Date.now() }), 'utf8');
 
-      const logs: string[] = [];
-      const start = Date.now();
-      const release = acquireBuildLock(REPO_ROOT, {
-        lockPath,
-        maxWaitMs: 5000,
-        pollIntervalMs: 5,
-        log: (message) => logs.push(message),
-      });
-      const elapsed = Date.now() - start;
+    const logs: string[] = [];
+    const start = Date.now();
+    const release = acquireBuildLock(REPO_ROOT, {
+      lockPath,
+      maxWaitMs: 5000,
+      pollIntervalMs: 5,
+      log: (message) => logs.push(message),
+    });
+    const elapsed = Date.now() - start;
 
-      // Well under maxWaitMs -- proves it reclaimed rather than waited out
-      // the timeout.
-      expect(elapsed).toBeLessThan(1000);
-      expect(logs.some((m) => m.includes('reclaiming stale lock'))).toBe(true);
-      expect(logs.some((m) => m.includes(String(deadPid)))).toBe(true);
-      // Tidied sequencing: a reclaim retries immediately, so a run that
-      // never had to wait on a live holder must never log "waiting" --
-      // logging it here would misreport a reclaim-and-proceed as a block.
-      expect(logs.some((m) => m.includes('waiting for the stdlib build lock'))).toBe(false);
+    // Well under maxWaitMs -- proves it reclaimed rather than waited out
+    // the timeout.
+    expect(elapsed).toBeLessThan(1000);
+    expect(logs.some((m) => m.includes('reclaiming stale lock'))).toBe(true);
+    expect(logs.some((m) => m.includes(String(deadPid)))).toBe(true);
+    // Tidied sequencing: a reclaim retries immediately, so a run that
+    // never had to wait on a live holder must never log "waiting" --
+    // logging it here would misreport a reclaim-and-proceed as a block.
+    expect(logs.some((m) => m.includes('waiting for the stdlib build lock'))).toBe(false);
 
-      release();
-      expect(existsSync(lockPath)).toBe(false);
-    },
-    10_000,
-  );
+    release();
+    expect(existsSync(lockPath)).toBe(false);
+  }, 10_000);
 
-  it(
-    'reclaims a corrupt (unparseable) lock file and proceeds without hanging',
-    () => {
-      const dir = makeTempDir('build-stdlib-lock-corrupt-');
-      const lockPath = join(dir, 'corrupt.lock');
-      // Truncated JSON -- exactly what a crash or a full disk mid-`write()`
-      // leaves behind. Before this fix, `readLockContents` caught the
-      // `JSON.parse` failure and returned `undefined`, which `reclaimIfStale`
-      // treated as "nothing to reclaim" -- an unparseable lock was NEVER
-      // stale, so it wedged every future run permanently.
-      writeFileSync(lockPath, '{"pid":12345,"acqui', 'utf8');
+  it('reclaims a corrupt (unparseable) lock file and proceeds without hanging', () => {
+    const dir = makeTempDir('build-stdlib-lock-corrupt-');
+    const lockPath = join(dir, 'corrupt.lock');
+    // Truncated JSON -- exactly what a crash or a full disk mid-`write()`
+    // leaves behind. Before this fix, `readLockContents` caught the
+    // `JSON.parse` failure and returned `undefined`, which `reclaimIfStale`
+    // treated as "nothing to reclaim" -- an unparseable lock was NEVER
+    // stale, so it wedged every future run permanently.
+    writeFileSync(lockPath, '{"pid":12345,"acqui', 'utf8');
 
-      const logs: string[] = [];
-      const start = Date.now();
-      const release = acquireBuildLock(REPO_ROOT, {
-        lockPath,
-        maxWaitMs: 5000,
-        pollIntervalMs: 10,
-        staleUnparseableGraceMs: 50,
-        log: (message) => logs.push(message),
-      });
-      const elapsed = Date.now() - start;
+    const logs: string[] = [];
+    const start = Date.now();
+    const release = acquireBuildLock(REPO_ROOT, {
+      lockPath,
+      maxWaitMs: 5000,
+      pollIntervalMs: 10,
+      staleUnparseableGraceMs: 50,
+      log: (message) => logs.push(message),
+    });
+    const elapsed = Date.now() - start;
 
-      expect(elapsed).toBeLessThan(1000);
-      expect(logs.some((m) => m.includes('reclaiming stale lock'))).toBe(true);
-      expect(logs.some((m) => m.includes('unparseable content'))).toBe(true);
+    expect(elapsed).toBeLessThan(1000);
+    expect(logs.some((m) => m.includes('reclaiming stale lock'))).toBe(true);
+    expect(logs.some((m) => m.includes('unparseable content'))).toBe(true);
 
-      release();
-      expect(existsSync(lockPath)).toBe(false);
-    },
-    10_000,
-  );
+    release();
+    expect(existsSync(lockPath)).toBe(false);
+  }, 10_000);
 
   it('does not steal a corrupt lock that is still within its unparseable grace period', () => {
     const dir = makeTempDir('build-stdlib-lock-grace-');
@@ -513,52 +516,48 @@ describe('acquireBuildLock -- ownership-safe release (hazard 1)', () => {
 // ---------------------------------------------------------------------------
 
 describe('acquireBuildLock -- composed with the real up-to-date predicate', () => {
-  it(
-    'a second builder waits for a held lock, then finds the tree up to date and performs no rmSync',
-    async () => {
-      const buildDir = makeTempDir('build-stdlib-lock-build-');
-      const outputPath = join(buildDir, 'output.txt');
-      const expectedContent = 'expected-fresh-output';
-      writeFileSync(outputPath, expectedContent, 'utf8');
-      const originalIno = statSync(outputPath).ino;
+  it('a second builder waits for a held lock, then finds the tree up to date and performs no rmSync', async () => {
+    const buildDir = makeTempDir('build-stdlib-lock-build-');
+    const outputPath = join(buildDir, 'output.txt');
+    const expectedContent = 'expected-fresh-output';
+    writeFileSync(outputPath, expectedContent, 'utf8');
+    const originalIno = statSync(outputPath).ino;
 
-      const scratch = makeTempDir('build-stdlib-lock-scratch-');
-      const holderScriptPath = join(scratch, 'holder.mjs');
-      writeFileSync(holderScriptPath, holderWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const readySentinelPath = join(scratch, 'holder-ready');
-      const holdMs = 200;
+    const scratch = makeTempDir('build-stdlib-lock-scratch-');
+    const holderScriptPath = join(scratch, 'holder.mjs');
+    writeFileSync(holderScriptPath, holderWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const readySentinelPath = join(scratch, 'holder-ready');
+    const holdMs = 200;
 
-      const holder = spawnWorker(holderScriptPath, [
-        JITI_MODULE_URL,
-        BUILD_LOCK_MODULE_URL,
-        lockPath,
-        readySentinelPath,
-        String(holdMs),
-      ]);
-      liveChildren = [holder];
+    const holder = spawnWorker(holderScriptPath, [
+      JITI_MODULE_URL,
+      BUILD_LOCK_MODULE_URL,
+      lockPath,
+      readySentinelPath,
+      String(holdMs),
+    ]);
+    liveChildren = [holder];
 
-      await waitForFile(readySentinelPath, 5000);
+    await waitForFile(readySentinelPath, 5000);
 
-      const waitStart = Date.now();
-      const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
-      const waited = Date.now() - waitStart;
-      expect(waited).toBeGreaterThanOrEqual(holdMs * 0.5);
+    const waitStart = Date.now();
+    const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
+    const waited = Date.now() - waitStart;
+    expect(waited).toBeGreaterThanOrEqual(holdMs * 0.5);
 
-      const upToDate = isGeneratedDirUpToDate(buildDir, new Map([['output.txt', expectedContent]]));
-      expect(upToDate).toBe(true);
-      if (!upToDate) {
-        rmSync(buildDir, { recursive: true, force: true });
-      }
-      release();
+    const upToDate = isGeneratedDirUpToDate(buildDir, new Map([['output.txt', expectedContent]]));
+    expect(upToDate).toBe(true);
+    if (!upToDate) {
+      rmSync(buildDir, { recursive: true, force: true });
+    }
+    release();
 
-      expect(statSync(outputPath).ino).toBe(originalIno);
-      expect(readFileSync(outputPath, 'utf8')).toBe(expectedContent);
+    expect(statSync(outputPath).ino).toBe(originalIno);
+    expect(readFileSync(outputPath, 'utf8')).toBe(expectedContent);
 
-      await new Promise<void>((resolve) => holder.once('exit', () => resolve()));
-    },
-    15_000,
-  );
+    await new Promise<void>((resolve) => holder.once('exit', () => resolve()));
+  }, 15_000);
 });
 
 // ---------------------------------------------------------------------------
@@ -567,38 +566,34 @@ describe('acquireBuildLock -- composed with the real up-to-date predicate', () =
 // ---------------------------------------------------------------------------
 
 describe('acquireBuildLock -- concurrent builders', () => {
-  it(
-    'given 3 concurrent builders, exactly one builds, none errors, and output matches a single-builder run',
-    async () => {
-      const parent = makeTempDir('build-stdlib-lock-concurrent-');
-      const buildDir = join(parent, 'generated');
-      const scratch = makeTempDir('build-stdlib-lock-scratch-');
-      const workerScriptPath = join(scratch, 'worker.mjs');
-      writeFileSync(workerScriptPath, buildWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const expectedContent = 'expected-fresh-output-concurrent';
+  it('given 3 concurrent builders, exactly one builds, none errors, and output matches a single-builder run', async () => {
+    const parent = makeTempDir('build-stdlib-lock-concurrent-');
+    const buildDir = join(parent, 'generated');
+    const scratch = makeTempDir('build-stdlib-lock-scratch-');
+    const workerScriptPath = join(scratch, 'worker.mjs');
+    writeFileSync(workerScriptPath, buildWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const expectedContent = 'expected-fresh-output-concurrent';
 
-      const children = Array.from({ length: 3 }, () =>
-        spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, buildDir, expectedContent]),
-      );
-      liveChildren = children;
+    const children = Array.from({ length: 3 }, () =>
+      spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, buildDir, expectedContent]),
+    );
+    liveChildren = children;
 
-      const results = await Promise.all(children.map((child) => collectExit(child)));
+    const results = await Promise.all(children.map((child) => collectExit(child)));
 
-      for (const result of results) {
-        expect(result.exitCode).toBe(0);
-      }
-      const buildCount = results.filter((r) => r.stdout.includes('BUILD')).length;
-      const skipCount = results.filter((r) => r.stdout.includes('SKIP')).length;
-      expect(buildCount).toBe(1);
-      expect(skipCount).toBe(2);
+    for (const result of results) {
+      expect(result.exitCode).toBe(0);
+    }
+    const buildCount = results.filter((r) => r.stdout.includes('BUILD')).length;
+    const skipCount = results.filter((r) => r.stdout.includes('SKIP')).length;
+    expect(buildCount).toBe(1);
+    expect(skipCount).toBe(2);
 
-      expect(readFileSync(join(buildDir, 'output.txt'), 'utf8')).toBe(expectedContent);
-      expect(readFileSync(join(buildDir, 'build-count.txt'), 'utf8')).toBe('1');
-      expect(existsSync(lockPath)).toBe(false);
-    },
-    20_000,
-  );
+    expect(readFileSync(join(buildDir, 'output.txt'), 'utf8')).toBe(expectedContent);
+    expect(readFileSync(join(buildDir, 'build-count.txt'), 'utf8')).toBe('1');
+    expect(existsSync(lockPath)).toBe(false);
+  }, 20_000);
 });
 
 // ---------------------------------------------------------------------------
@@ -608,78 +603,82 @@ describe('acquireBuildLock -- concurrent builders', () => {
 // ---------------------------------------------------------------------------
 
 describe('acquireBuildLock -- shared mode: concurrency (D1)', () => {
-  it(
-    'two shared acquisitions in DIFFERENT processes both proceed concurrently, neither waiting on the other',
-    async () => {
-      const scratch = makeTempDir('build-stdlib-lock-shared-concurrent-');
-      const workerScriptPath = join(scratch, 'shared-reader.mjs');
-      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const holdMs = 400;
-      const readyA = join(scratch, 'ready-a');
-      const readyB = join(scratch, 'ready-b');
+  it('two shared acquisitions in DIFFERENT processes both proceed concurrently, neither waiting on the other', async () => {
+    const scratch = makeTempDir('build-stdlib-lock-shared-concurrent-');
+    const workerScriptPath = join(scratch, 'shared-reader.mjs');
+    writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const holdMs = 400;
+    const readyA = join(scratch, 'ready-a');
+    const readyB = join(scratch, 'ready-b');
 
-      const start = Date.now();
-      const workerA = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readyA, String(holdMs)]);
-      const workerB = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readyB, String(holdMs)]);
-      liveChildren = [workerA, workerB];
+    const start = Date.now();
+    const workerA = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      BUILD_LOCK_MODULE_URL,
+      lockPath,
+      readyA,
+      String(holdMs),
+    ]);
+    const workerB = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      BUILD_LOCK_MODULE_URL,
+      lockPath,
+      readyB,
+      String(holdMs),
+    ]);
+    liveChildren = [workerA, workerB];
 
-      const [resultA, resultB] = await Promise.all([collectExit(workerA), collectExit(workerB)]);
-      const elapsed = Date.now() - start;
+    const [resultA, resultB] = await Promise.all([collectExit(workerA), collectExit(workerB)]);
+    const elapsed = Date.now() - start;
 
-      expect(resultA.exitCode).toBe(0);
-      expect(resultB.exitCode).toBe(0);
-      // Serialised acquisition would take at least 2*holdMs; concurrent
-      // holding completes in about one holdMs plus process-spawn overhead.
-      expect(elapsed).toBeLessThan(holdMs * 1.6);
+    expect(resultA.exitCode).toBe(0);
+    expect(resultB.exitCode).toBe(0);
+    // Serialised acquisition would take at least 2*holdMs; concurrent
+    // holding completes in about one holdMs plus process-spawn overhead.
+    expect(elapsed).toBeLessThan(holdMs * 1.6);
 
-      const acquiredA = Number(readFileSync(readyA, 'utf8'));
-      const acquiredB = Number(readFileSync(readyB, 'utf8'));
-      // Each holder's [acquired, acquired+holdMs] window must overlap the
-      // other's -- proof neither waited for the other to release.
-      expect(acquiredA).toBeLessThan(acquiredB + holdMs);
-      expect(acquiredB).toBeLessThan(acquiredA + holdMs);
-    },
-    20_000,
-  );
+    const acquiredA = Number(readFileSync(readyA, 'utf8'));
+    const acquiredB = Number(readFileSync(readyB, 'utf8'));
+    // Each holder's [acquired, acquired+holdMs] window must overlap the
+    // other's -- proof neither waited for the other to release.
+    expect(acquiredA).toBeLessThan(acquiredB + holdMs);
+    expect(acquiredB).toBeLessThan(acquiredA + holdMs);
+  }, 20_000);
 
-  it(
-    'a writer waits for a held shared lock to drain, then proceeds',
-    async () => {
-      const scratch = makeTempDir('build-stdlib-lock-shared-drain-');
-      const workerScriptPath = join(scratch, 'shared-reader.mjs');
-      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const readySentinelPath = join(scratch, 'reader-ready');
-      const holdMs = 200;
+  it('a writer waits for a held shared lock to drain, then proceeds', async () => {
+    const scratch = makeTempDir('build-stdlib-lock-shared-drain-');
+    const workerScriptPath = join(scratch, 'shared-reader.mjs');
+    writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const readySentinelPath = join(scratch, 'reader-ready');
+    const holdMs = 200;
 
-      const reader = spawnWorker(workerScriptPath, [
-        JITI_MODULE_URL,
-        BUILD_LOCK_MODULE_URL,
-        lockPath,
-        readySentinelPath,
-        String(holdMs),
-      ]);
-      liveChildren = [reader];
+    const reader = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      BUILD_LOCK_MODULE_URL,
+      lockPath,
+      readySentinelPath,
+      String(holdMs),
+    ]);
+    liveChildren = [reader];
 
-      await waitForFile(readySentinelPath, 5000);
+    await waitForFile(readySentinelPath, 5000);
 
-      const waitStart = Date.now();
-      const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
-      const waited = Date.now() - waitStart;
-      expect(waited).toBeGreaterThanOrEqual(holdMs * 0.5);
+    const waitStart = Date.now();
+    const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
+    const waited = Date.now() - waitStart;
+    expect(waited).toBeGreaterThanOrEqual(holdMs * 0.5);
 
-      // The reader's presence entry must be gone by the time the writer
-      // holds -- proof the writer actually drained rather than racing past.
-      const readersDir = `${lockPath}.readers`;
-      const remaining = existsSync(readersDir) ? readdirSync(readersDir) : [];
-      expect(remaining).toEqual([]);
+    // The reader's presence entry must be gone by the time the writer
+    // holds -- proof the writer actually drained rather than racing past.
+    const readersDir = `${lockPath}.readers`;
+    const remaining = existsSync(readersDir) ? readdirSync(readersDir) : [];
+    expect(remaining).toEqual([]);
 
-      release();
-      await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
-    },
-    15_000,
-  );
+    release();
+    await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
+  }, 15_000);
 });
 
 describe('acquireBuildLock -- shared mode: writer priority (D3)', () => {
@@ -789,37 +788,39 @@ describe('acquireBuildLock -- shared mode: bounded wait', () => {
 });
 
 describe('acquireBuildLock -- shared mode: stale reader reclamation', () => {
-  it(
-    'reclaims a reader entry left behind by a dead process and does not wedge a draining writer',
-    async () => {
-      const scratch = makeTempDir('build-stdlib-lock-reader-dead-');
-      const workerScriptPath = join(scratch, 'shared-reader.mjs');
-      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const readySentinelPath = join(scratch, 'reader-ready');
+  it('reclaims a reader entry left behind by a dead process and does not wedge a draining writer', async () => {
+    const scratch = makeTempDir('build-stdlib-lock-reader-dead-');
+    const workerScriptPath = join(scratch, 'shared-reader.mjs');
+    writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const readySentinelPath = join(scratch, 'reader-ready');
 
-      // Long hold -- this worker is killed before it ever releases, so the
-      // value only matters in that it never elapses naturally.
-      const reader = spawnWorker(workerScriptPath, [JITI_MODULE_URL, BUILD_LOCK_MODULE_URL, lockPath, readySentinelPath, '30000']);
-      liveChildren = [reader];
-      await waitForFile(readySentinelPath, 5000);
-      reader.kill('SIGKILL');
-      await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
+    // Long hold -- this worker is killed before it ever releases, so the
+    // value only matters in that it never elapses naturally.
+    const reader = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      BUILD_LOCK_MODULE_URL,
+      lockPath,
+      readySentinelPath,
+      '30000',
+    ]);
+    liveChildren = [reader];
+    await waitForFile(readySentinelPath, 5000);
+    reader.kill('SIGKILL');
+    await new Promise<void>((resolve) => reader.once('exit', () => resolve()));
 
-      const readersDir = `${lockPath}.readers`;
-      expect(readdirSync(readersDir).length).toBe(1);
+    const readersDir = `${lockPath}.readers`;
+    expect(readdirSync(readersDir).length).toBe(1);
 
-      const start = Date.now();
-      const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
-      const elapsed = Date.now() - start;
+    const start = Date.now();
+    const release = acquireBuildLock(REPO_ROOT, { lockPath, maxWaitMs: 5000, pollIntervalMs: 10 });
+    const elapsed = Date.now() - start;
 
-      // Well under maxWaitMs -- proves reclaim, not a timed-out wait.
-      expect(elapsed).toBeLessThan(2000);
-      release();
-      expect(existsSync(readersDir) ? readdirSync(readersDir).length : 0).toBe(0);
-    },
-    15_000,
-  );
+    // Well under maxWaitMs -- proves reclaim, not a timed-out wait.
+    expect(elapsed).toBeLessThan(2000);
+    release();
+    expect(existsSync(readersDir) ? readdirSync(readersDir).length : 0).toBe(0);
+  }, 15_000);
 });
 
 describe('acquireBuildLock -- shared mode: ownership-safe reader release', () => {

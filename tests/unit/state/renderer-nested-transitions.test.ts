@@ -42,7 +42,11 @@ function makeTransition(overrides: Partial<TransitionGeo> = {}): TransitionGeo {
   return {
     from: 'A',
     to: 'B',
-    points: [{ x: 10, y: 20 }, { x: 10, y: 80 }, { x: 100, y: 80 }],
+    points: [
+      { x: 10, y: 20 },
+      { x: 10, y: 80 },
+      { x: 100, y: 80 },
+    ],
     ...overrides,
   };
 }

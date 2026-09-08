@@ -7,7 +7,11 @@
  */
 import { describe, test, expect } from 'vitest';
 import {
-  frontierCalculator, ensureMinWidth, toRect, fromRect, type Box,
+  frontierCalculator,
+  ensureMinWidth,
+  toRect,
+  fromRect,
+  type Box,
 } from '../../../src/diagrams/state/state-composite-frontier.js';
 
 describe('toRect / fromRect', () => {

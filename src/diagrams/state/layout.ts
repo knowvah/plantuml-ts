@@ -91,12 +91,34 @@ function buildPseudoNodeGeos(
   const initial = posMap.get(INITIAL_ID);
   if (initial !== undefined) {
     const ci = pseudoCreationIndex.get(pseudoTickKey('', 'start'));
-    geos.push({ id: INITIAL_ID, kind: 'initial', display: '', x: initial.x, y: initial.y, width: initial.width, height: initial.height, children: [], transitions: [], ...(ci !== undefined ? { creationIndex: ci } : {}) });
+    geos.push({
+      id: INITIAL_ID,
+      kind: 'initial',
+      display: '',
+      x: initial.x,
+      y: initial.y,
+      width: initial.width,
+      height: initial.height,
+      children: [],
+      transitions: [],
+      ...(ci !== undefined ? { creationIndex: ci } : {}),
+    });
   }
   const final = posMap.get(FINAL_ID);
   if (final !== undefined) {
     const ci = pseudoCreationIndex.get(pseudoTickKey('', 'end'));
-    geos.push({ id: FINAL_ID, kind: 'final', display: '', x: final.x, y: final.y, width: final.width, height: final.height, children: [], transitions: [], ...(ci !== undefined ? { creationIndex: ci } : {}) });
+    geos.push({
+      id: FINAL_ID,
+      kind: 'final',
+      display: '',
+      x: final.x,
+      y: final.y,
+      width: final.width,
+      height: final.height,
+      children: [],
+      transitions: [],
+      ...(ci !== undefined ? { creationIndex: ci } : {}),
+    });
   }
   return geos;
 }
@@ -114,14 +136,20 @@ function buildFlatStateGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): StateNod
     const pos = posMap.get(s.id);
     if (pos === undefined) continue;
     geos.push({
-      id: s.id, kind: s.kind, display: s.display, x: pos.x, y: pos.y, width: pos.width, height: pos.height,
-      children: [], transitions: [], ...buildStateGeoTextFields(s, theme, measurer, hideEmptyDescription),
+      id: s.id,
+      kind: s.kind,
+      display: s.display,
+      x: pos.x,
+      y: pos.y,
+      width: pos.width,
+      height: pos.height,
+      children: [],
+      transitions: [],
+      ...buildStateGeoTextFields(s, theme, measurer, hideEmptyDescription),
       ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
       // see state-composite-geo.ts#materializeSpecs's identical gate/doc
       // comment for why `<<sdlreceive>>` is excluded despite kind==='normal'.
-      ...(shadowing > 0
-        && (s.kind === 'normal' || s.kind === 'json')
-        && s.stereotype?.toLowerCase() !== 'sdlreceive'
+      ...(shadowing > 0 && (s.kind === 'normal' || s.kind === 'json') && s.stereotype?.toLowerCase() !== 'sdlreceive'
         ? { shadowing }
         : {}),
     });
@@ -175,7 +203,9 @@ function buildFlatTransitionGeos(
     const from = endpointId(t.from, true);
     const to = endpointId(t.to, false);
     geos.push({
-      from, to, points: clipTransitionSpline(edgeResult.points, from, to, anchorRects),
+      from,
+      to,
+      points: clipTransitionSpline(edgeResult.points, from, to, anchorRects),
       ...(label !== undefined ? { label } : {}),
       ...(t.creationIndex !== undefined ? { creationIndex: t.creationIndex } : {}),
       ...(t.crossStart !== undefined ? { crossStart: t.crossStart } : {}),
@@ -236,7 +266,14 @@ function shiftStateNode(g: StateNodeGeo, dx: number, dy: number): StateNodeGeo {
       ? { concurrentRegions: resliceStateRegions(g.concurrentRegions, children, transitions) }
       : {}),
     ...(g.separators !== undefined
-      ? { separators: g.separators.map((sep) => ({ x1: sep.x1 + dx, y1: sep.y1 + dy, x2: sep.x2 + dx, y2: sep.y2 + dy })) }
+      ? {
+          separators: g.separators.map((sep) => ({
+            x1: sep.x1 + dx,
+            y1: sep.y1 + dy,
+            x2: sep.x2 + dx,
+            y2: sep.y2 + dy,
+          })),
+        }
       : {}),
   };
 }
@@ -284,11 +321,7 @@ function applyStateDocumentMargin(geo: StateGeometry): StateGeometry {
   };
 }
 
-export function layoutState(
-  ast: StateDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): StateGeometry {
+export function layoutState(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer): StateGeometry {
   // remove/restore exclusion at the layout-input boundary -- the port's
   // equivalent of upstream's export-time isRemoved() skips. Same object
   // back when no remove directives exist (the common path); everything

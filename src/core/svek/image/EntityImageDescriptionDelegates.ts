@@ -11,6 +11,10 @@
  * project's established "500-line splits" workaround, same precedent as
  * the original `EntityImageDescription.ts`/`EntityImageDescriptionSupport
  * .ts` split.
+ *
+ * The three link-scanning helpers were further split out to
+ * `EntityImageDescriptionLinkScan.ts` (same 500-line reason), re-exported
+ * here unchanged for `EntityImageDescription.ts`'s own import.
  */
 import type { UGraphic } from '../../klimt/UGraphic.js';
 import type { StringBounder } from '../../klimt/font/StringBounder.js';
@@ -36,9 +40,14 @@ import { drawEmojiAtom, type EmojiArtworkResolver } from './EntityImageDescripti
 import type {
   EntityImageDescriptionLabels,
   EntityImageDescriptionPaint,
-  EntityImageDescriptionLinkInfo,
   EntityImageDescriptionStereotypeSprite,
 } from './EntityImageDescription.js';
+import {
+  hasSomeHorizontalLinkVisible,
+  isThereADoubleLink,
+  hasSomeHorizontalLinkDoubleDecorated,
+} from './EntityImageDescriptionLinkScan.js';
+export { hasSomeHorizontalLinkVisible, isThereADoubleLink, hasSomeHorizontalLinkDoubleDecorated };
 import { BodyFactory } from '../../cucadiagram/BodyFactory.js';
 import { Display } from '../../klimt/creole/Display.js';
 import { Pragma } from '../../skin/Pragma.js';
@@ -270,8 +279,7 @@ function descAtomOps(
         // identical fix) -- `DriverPathSvg` collapses `fore === back` to a
         // strokeless flat fill on its own. @see SvgNanoParser.java#drawU
         for (const primitive of resolved.primitives) {
-          ug
-            .apply(primitive.translate)
+          ug.apply(primitive.translate)
             .apply(new Fore(primitive.fore))
             .apply(new Back(primitive.back))
             .apply(primitive.stroke)
@@ -350,7 +358,9 @@ export function buildDesc(
   // `isBlockSeparator`).
   const rawBody = Display.create(labels.displayText.split('\n'));
   const lineBreakStrategy =
-    paint.wrapWidth !== undefined && paint.wrapWidth > 0 ? new LineBreakStrategy(String(paint.wrapWidth)) : LineBreakStrategy.NONE;
+    paint.wrapWidth !== undefined && paint.wrapWidth > 0
+      ? new LineBreakStrategy(String(paint.wrapWidth))
+      : LineBreakStrategy.NONE;
   return BodyFactory.create3(
     rawBody,
     { skinParam, align: paint.titleAlignment, titleConfig: font, lineBreakStrategy },
@@ -433,29 +443,14 @@ export function buildStereo(
   return TextBlockUtils.withMargin(block, 1, 1, 0, 0);
 }
 
-/** Upstream: `EntityImageDescription#hasSomeHorizontalLinkVisible`. */
-export function hasSomeHorizontalLinkVisible(links: readonly EntityImageDescriptionLinkInfo[]): boolean {
-  return links.some((link) => link.length === 1 && !link.isInvis);
-}
-
-/** Upstream: `EntityImageDescription#isThereADoubleLink`. */
-export function isThereADoubleLink(links: readonly EntityImageDescriptionLinkInfo[]): boolean {
-  const seen = new Set<string>();
-  for (const link of links) {
-    if (seen.has(link.otherEntityId)) return true;
-    seen.add(link.otherEntityId);
-  }
-  return false;
-}
-
-/** Upstream: `EntityImageDescription#hasSomeHorizontalLinkDoubleDecorated`. */
-export function hasSomeHorizontalLinkDoubleDecorated(links: readonly EntityImageDescriptionLinkInfo[]): boolean {
-  return links.some((link) => link.length === 1 && link.isDoubleDecorated);
-}
-
 /** Upstream: the dimension math inside `getShield` (after the four
  *  early-return guards). */
-export function computeShieldMargins(stereo: TextBlock, desc: TextBlock, asSmall: TextBlock, stringBounder: StringBounder): Margins {
+export function computeShieldMargins(
+  stereo: TextBlock,
+  desc: TextBlock,
+  asSmall: TextBlock,
+  stringBounder: StringBounder,
+): Margins {
   const dimStereo = stereo.calculateDimension(stringBounder);
   const dimDesc = desc.calculateDimension(stringBounder);
   const dimSmall = asSmall.calculateDimension(stringBounder);

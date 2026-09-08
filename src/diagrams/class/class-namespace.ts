@@ -8,12 +8,7 @@
  * parser's mutable state.
  */
 
-import type {
-  Classifier,
-  ClassifierKind,
-  ClassDiagramAST,
-  Namespace,
-} from './ast.js';
+import type { Classifier, ClassifierKind, ClassDiagramAST, Namespace } from './ast.js';
 
 /**
  * Register an id (classifier or note) as a direct member of the given
@@ -22,11 +17,7 @@ import type {
  * `Namespace.classifiers`, the sole source `buildDotClusters` (class-dot-graph.ts)
  * reads for cluster membership.
  */
-export function registerInNamespace(
-  namespaces: Namespace[],
-  nsId: string | null,
-  id: string,
-): void {
+export function registerInNamespace(namespaces: Namespace[], nsId: string | null, id: string): void {
   if (nsId === null) return;
   const ns = namespaces.find((n) => n.id === nsId);
   if (ns !== undefined) {
@@ -168,8 +159,15 @@ export function collapseEmptyNamespacesFinal(ast: ClassDiagramAST): ClassDiagram
 // Namespace-qualified id parsing & reference resolution moved to a sibling
 // module (line cap); re-exported so `from './class-namespace.js'` is unchanged.
 export {
-  splitTopLevelCommas, splitOnSeparator, ensureNamespaceChain, qualifiedId,
-  countByName, firstWithName, resolveReference, normalizeSameConnectionLengths,
-  GENERIC_BODY_PATTERN, GENERIC_CLAUSE_RE,
+  splitTopLevelCommas,
+  splitOnSeparator,
+  ensureNamespaceChain,
+  qualifiedId,
+  countByName,
+  firstWithName,
+  resolveReference,
+  normalizeSameConnectionLengths,
+  GENERIC_BODY_PATTERN,
+  GENERIC_CLAUSE_RE,
 } from './class-namespace-resolve.js';
 export type { ResolveInput, ResolvedRef } from './class-namespace-resolve.js';

@@ -358,7 +358,10 @@ export function hasSeveralGuideLinesOfString(s: string): boolean {
  * engine's inverted `core/` -> `diagrams/class/` import
  * (`edge-label-box-backlog` T5) that motivated this mission.
  */
-export function splitDisplayLines(text: string): { readonly lines: readonly string[]; readonly align: 'center' | 'left' | 'right' } {
+export function splitDisplayLines(text: string): {
+  readonly lines: readonly string[];
+  readonly align: 'center' | 'left' | 'right';
+} {
   // `text` is a `string`, never `null` here -- `parseWithNewlines` only
   // returns `null` for a `null` input (java:263-264), which this adapter's
   // signature does not accept.

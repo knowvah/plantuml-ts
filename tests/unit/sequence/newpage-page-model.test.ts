@@ -114,8 +114,7 @@ describe('newpage — layout', () => {
   it('pushes everything after it down by exactly the tile height', () => {
     const without = layout(['Alice -> Bob : a', 'Alice -> Bob : b']);
     const with_ = layout(['Alice -> Bob : a', 'newpage', 'Alice -> Bob : b']);
-    const yOf = (g: SequenceGeometry, i: number) =>
-      g.events.filter((e) => e.kind === 'message')[i]!.y;
+    const yOf = (g: SequenceGeometry, i: number) => g.events.filter((e) => e.kind === 'message')[i]!.y;
     expect(yOf(with_, 0)).toBe(yOf(without, 0));
     expect(yOf(with_, 1)).toBe(yOf(without, 1) + NEWPAGE_TILE_HEIGHT);
     expect(with_.totalHeight).toBe(without.totalHeight + NEWPAGE_TILE_HEIGHT);

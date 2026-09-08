@@ -79,8 +79,10 @@ export class SymbolContext {
   }
 
   toString(): string {
-    return `SymbolContext backColor=${SymbolContext.paintToString(this.backColor)}` +
-      ` foreColor=${SymbolContext.paintToString(this.foreColor)}`;
+    return (
+      `SymbolContext backColor=${SymbolContext.paintToString(this.backColor)}` +
+      ` foreColor=${SymbolContext.paintToString(this.foreColor)}`
+    );
   }
 
   /** `Paint | null` has no upstream `HColor#toString()` analog to defer
@@ -111,27 +113,69 @@ export class SymbolContext {
   }
 
   withShadow(deltaShadow2: number): SymbolContext {
-    return new SymbolContext(this.backColor, this.foreColor, this.stroke, deltaShadow2, this.roundCorner, this.diagonalCorner);
+    return new SymbolContext(
+      this.backColor,
+      this.foreColor,
+      this.stroke,
+      deltaShadow2,
+      this.roundCorner,
+      this.diagonalCorner,
+    );
   }
 
   withDeltaShadow(deltaShadow2: number): SymbolContext {
-    return new SymbolContext(this.backColor, this.foreColor, this.stroke, deltaShadow2, this.roundCorner, this.diagonalCorner);
+    return new SymbolContext(
+      this.backColor,
+      this.foreColor,
+      this.stroke,
+      deltaShadow2,
+      this.roundCorner,
+      this.diagonalCorner,
+    );
   }
 
   withStroke(newStroke: UStroke): SymbolContext {
-    return new SymbolContext(this.backColor, this.foreColor, newStroke, this.deltaShadow, this.roundCorner, this.diagonalCorner);
+    return new SymbolContext(
+      this.backColor,
+      this.foreColor,
+      newStroke,
+      this.deltaShadow,
+      this.roundCorner,
+      this.diagonalCorner,
+    );
   }
 
   withBackColor(backColor: Paint | null): SymbolContext {
-    return new SymbolContext(backColor, this.foreColor, this.stroke, this.deltaShadow, this.roundCorner, this.diagonalCorner);
+    return new SymbolContext(
+      backColor,
+      this.foreColor,
+      this.stroke,
+      this.deltaShadow,
+      this.roundCorner,
+      this.diagonalCorner,
+    );
   }
 
   withForeColor(foreColor: Paint | null): SymbolContext {
-    return new SymbolContext(this.backColor, foreColor, this.stroke, this.deltaShadow, this.roundCorner, this.diagonalCorner);
+    return new SymbolContext(
+      this.backColor,
+      foreColor,
+      this.stroke,
+      this.deltaShadow,
+      this.roundCorner,
+      this.diagonalCorner,
+    );
   }
 
   withCorner(roundCorner: number, diagonalCorner: number): SymbolContext {
-    return new SymbolContext(this.backColor, this.foreColor, this.stroke, this.deltaShadow, roundCorner, diagonalCorner);
+    return new SymbolContext(
+      this.backColor,
+      this.foreColor,
+      this.stroke,
+      this.deltaShadow,
+      roundCorner,
+      diagonalCorner,
+    );
   }
 
   getBackColor(): Paint | null {

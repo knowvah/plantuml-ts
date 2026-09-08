@@ -213,11 +213,11 @@ function renderUsecase(asSmall: TextBlock): string {
 // thickness=0.5) AND the label's `labelY=60` (dimStickMan.height,
 // getPreferredHeight()) + baseline 13.5352 -- both agree on the SAME
 // (10.71, 5.5) constant.
-const JAR_ACTOR_ELLIPSE = '<ellipse cx="13.5" cy="8.5" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_ACTOR_ELLIPSE =
+  '<ellipse cx="13.5" cy="8.5" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_PATH =
   '<path d="M13.5,16.5 L13.5,43.5 M0.5,24.5 L26.5,24.5 M13.5,43.5 L0.5,58.5 M13.5,43.5 L26.5,58.5" style="stroke:#181818;stroke-width:0.5;" fill="none"/>';
-const JAR_ACTOR_TEXT =
-  '<text x="1.148" y="73.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
+const JAR_ACTOR_TEXT = '<text x="1.148" y="73.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_PATH + JAR_ACTOR_TEXT;
 
 // Source: `actor/ Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: SAME
@@ -241,11 +241,11 @@ const JAR_ACTOR_BUSINESS_FOO = JAR_ACTOR_ELLIPSE + JAR_ACTOR_BUSINESS_LINE + JAR
 // (27.5,16.5)) AND the label's own math (labelX=(55-24.7051)/2=15.14745,
 // labelY=getPreferredHeight()=61 + baseline 13.5352=74.5352) -- both agree
 // on the SAME (5.5, 5.5) constant.
-const JAR_ACTOR_AWESOME_ELLIPSE = '<ellipse cx="27.5" cy="16.5" rx="16" ry="16" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_ACTOR_AWESOME_ELLIPSE =
+  '<ellipse cx="27.5" cy="16.5" rx="16" ry="16" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_AWESOME_PATH =
   '<path d="M27.5,36.5 C31.5,36.5 34.5,36.5 38.5,32.5 C46.5,32.5 54.5,40.5 54.5,48.5 L54.5,52.5 C54.5,56.5 50.5,60.5 46.5,60.5 L8.5,60.5 C4.5,60.5 0.5,56.5 0.5,52.5 L0.5,48.5 C0.5,40.5 8.5,32.5 16.5,32.5 C20.5,36.5 23.5,36.5 27.5,36.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
-const JAR_ACTOR_AWESOME_TEXT =
-  '<text x="15.148" y="74.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
+const JAR_ACTOR_AWESOME_TEXT = '<text x="15.148" y="74.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_AWESOME_FOO = JAR_ACTOR_AWESOME_ELLIPSE + JAR_ACTOR_AWESOME_PATH + JAR_ACTOR_AWESOME_TEXT;
 
 // Source (T7): `skinparam actorStyle hollow\nactor Foo\nusecase Bar\nFoo
@@ -260,11 +260,11 @@ const JAR_ACTOR_AWESOME_FOO = JAR_ACTOR_AWESOME_ELLIPSE + JAR_ACTOR_AWESOME_PATH
 // (labelX=(26-24.7051)/2=0.64745, labelY=getPreferredHeight()=33 +
 // baseline 13.5352=46.5352) -- both agree on the SAME (11.21, 5.5)
 // constant.
-const JAR_ACTOR_HOLLOW_ELLIPSE = '<ellipse cx="13" cy="5" rx="4.5" ry="4.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_ACTOR_HOLLOW_ELLIPSE =
+  '<ellipse cx="13" cy="5" rx="4.5" ry="4.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
 const JAR_ACTOR_HOLLOW_PATH =
   '<path d="M0.5,11.5 L0.5,16.5 L10,16.5 L10,18.757 L0.5,28.257 L4.7426,32.5 L13,24.243 L21.2574,32.5 L25.5,28.257 L16,18.757 L16,16.5 L25.5,16.5 L25.5,11.5 L0.5,11.5" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>';
-const JAR_ACTOR_HOLLOW_TEXT =
-  '<text x="0.648" y="46.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
+const JAR_ACTOR_HOLLOW_TEXT = '<text x="0.648" y="46.535" fill="#000" font-size="14" textLength="24.705">Foo</text>';
 const JAR_ACTOR_HOLLOW_FOO = JAR_ACTOR_HOLLOW_ELLIPSE + JAR_ACTOR_HOLLOW_PATH + JAR_ACTOR_HOLLOW_TEXT;
 
 // Source: `person Foo\nusecase Bar\nFoo --> Bar` -- entity Foo: raw
@@ -327,7 +327,8 @@ const JAR_ENTITY_DOMAIN_FOO =
 // to 0 (dimTotal == dimStickMan == (18,18)), so `CircleInterface2`'s own
 // icon draws at local (0,0) -- `margin=1, radius=8` places its center at
 // local (9, 9) exactly.
-const JAR_INTERFACE_FOO = '<ellipse cx="9" cy="9" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
+const JAR_INTERFACE_FOO =
+  '<ellipse cx="9" cy="9" rx="8" ry="8" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>';
 
 // Source: `usecase Foo\nactor Bar\nBar --> Foo` -- entity Foo: raw
 // ellipse cx="26.4691" cy="156.649" rx="20.4691" ry="14.659"; text
@@ -363,7 +364,13 @@ describe('USymbolActor (T9, AC1) -- stick-figure stickman', () => {
   test('asSmall renders conformant vs. the jar fragment (actor Foo)', () => {
     const symbol = new USymbolActor(ActorStyle.STICKMAN);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ACTOR_FOO);
   });
 
@@ -374,14 +381,26 @@ describe('USymbolActor (T9, AC1) -- stick-figure stickman', () => {
   test('asSmall renders conformant vs. the jar fragment (actor Foo, actorStyle awesome)', () => {
     const symbol = new USymbolActor(ActorStyle.AWESOME);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ACTOR_AWESOME_FOO);
   });
 
   test('asSmall renders conformant vs. the jar fragment (actor Foo, actorStyle hollow)', () => {
     const symbol = new USymbolActor(ActorStyle.HOLLOW);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ACTOR_HOLLOW_FOO);
   });
 });
@@ -390,7 +409,13 @@ describe('USymbolActorBusiness (T9, AC1/AC2) -- stickman with a slash', () => {
   test('asSmall renders conformant vs. the jar fragment (actor/ Foo)', () => {
     const symbol = new USymbolActorBusiness();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ACTOR_BUSINESS_FOO);
   });
 
@@ -410,7 +435,13 @@ describe('USymbolActor vs USymbolActorBusiness (AC2) -- the slash is the only de
       HorizontalAlignment.CENTER,
     );
     const ctx2 = fooSymbolContext();
-    const businessAsSmall = new USymbolActorBusiness().asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx2, HorizontalAlignment.CENTER);
+    const businessAsSmall = new USymbolActorBusiness().asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx2,
+      HorizontalAlignment.CENTER,
+    );
 
     const actorSvg = render(actorAsSmall);
     const businessSvg = render(businessAsSmall);
@@ -426,7 +457,13 @@ describe('USymbolPerson (T9, AC1) -- rounded-figure variant', () => {
   test('asSmall renders conformant vs. the jar fragment (person Foo)', () => {
     const symbol = new USymbolPerson();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_PERSON_FOO);
   });
 
@@ -438,7 +475,15 @@ describe('USymbolPerson (T9, AC1) -- rounded-figure variant', () => {
     const symbol = new USymbolPerson();
     const ctx = fooSymbolContext();
     expect(() =>
-      symbol.asBig(fooLabelTextBlock(), HorizontalAlignment.CENTER, emptyTextBlock, 100, 50, ctx, HorizontalAlignment.CENTER),
+      symbol.asBig(
+        fooLabelTextBlock(),
+        HorizontalAlignment.CENTER,
+        emptyTextBlock,
+        100,
+        50,
+        ctx,
+        HorizontalAlignment.CENTER,
+      ),
     ).toThrow();
   });
 });
@@ -447,7 +492,13 @@ describe('USymbolBoundary (T9, AC1/AC3) -- robustness-diagram boundary icon', ()
   test('asSmall renders conformant vs. the jar fragment (boundary Foo)', () => {
     const symbol = new USymbolBoundary();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_BOUNDARY_FOO);
   });
 
@@ -469,7 +520,13 @@ describe('USymbolControl (T9, AC1/AC3) -- robustness-diagram control icon', () =
   test('asSmall renders conformant vs. the jar fragment (control Foo)', () => {
     const symbol = new USymbolControl();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_CONTROL_FOO);
   });
 
@@ -492,7 +549,13 @@ describe('USymbolEntityDomain (T9, AC1/AC3) -- robustness-diagram entity icon', 
   test('asSmall renders conformant vs. the jar fragment (entity Foo)', () => {
     const symbol = new USymbolEntityDomain();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_ENTITY_DOMAIN_FOO);
   });
 
@@ -527,7 +590,13 @@ describe('USymbolUsecase (T9, AC1) -- ellipse fitted around its content', () => 
   test('asSmall renders conformant vs. the jar fragment (usecase Foo)', () => {
     const symbol = new USymbolUsecase(false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(renderUsecase(asSmall), JAR_USECASE_FOO);
   });
 
@@ -539,7 +608,15 @@ describe('USymbolUsecase (T9, AC1) -- ellipse fitted around its content', () => 
     const symbol = new USymbolUsecase(false);
     const ctx = fooSymbolContext();
     expect(() =>
-      symbol.asBig(fooLabelTextBlock(), HorizontalAlignment.CENTER, emptyTextBlock, 100, 50, ctx, HorizontalAlignment.CENTER),
+      symbol.asBig(
+        fooLabelTextBlock(),
+        HorizontalAlignment.CENTER,
+        emptyTextBlock,
+        100,
+        50,
+        ctx,
+        HorizontalAlignment.CENTER,
+      ),
     ).toThrow();
   });
 });
@@ -548,7 +625,13 @@ describe('USymbolUsecase business variant (T9, AC1) -- wider ellipse + diagonal 
   test('asSmall renders conformant vs. the jar fragment (usecase/ Foo)', () => {
     const symbol = new USymbolUsecase(true);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(renderUsecase(asSmall), JAR_USECASE_BUSINESS_FOO);
   });
 
@@ -571,9 +654,23 @@ function shadowedSymbolContext(): SymbolContext {
 
 describe('Robustness trio + Interface: shadow branch (isShadowing() true -> deltaShadow=4)', () => {
   test('USymbolBoundary: shadowed render differs from unshadowed and carries a filter', () => {
-    const plain = render(new USymbolBoundary().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, fooSymbolContext(), HorizontalAlignment.CENTER));
+    const plain = render(
+      new USymbolBoundary().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        fooSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
+    );
     const shadowed = render(
-      new USymbolBoundary().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, shadowedSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolBoundary().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        shadowedSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     expect(shadowed).not.toBe(plain);
     expect(shadowed).toContain('filter=');
@@ -581,9 +678,23 @@ describe('Robustness trio + Interface: shadow branch (isShadowing() true -> delt
   });
 
   test('USymbolControl: shadowed render differs from unshadowed and carries a filter', () => {
-    const plain = render(new USymbolControl().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, fooSymbolContext(), HorizontalAlignment.CENTER));
+    const plain = render(
+      new USymbolControl().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        fooSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
+    );
     const shadowed = render(
-      new USymbolControl().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, shadowedSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolControl().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        shadowedSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     expect(shadowed).not.toBe(plain);
     expect(shadowed).toContain('filter=');
@@ -591,19 +702,45 @@ describe('Robustness trio + Interface: shadow branch (isShadowing() true -> delt
 
   test('USymbolEntityDomain: shadowed render differs from unshadowed and carries a filter', () => {
     const plain = render(
-      new USymbolEntityDomain().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, fooSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolEntityDomain().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        fooSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     const shadowed = render(
-      new USymbolEntityDomain().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, shadowedSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolEntityDomain().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        shadowedSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     expect(shadowed).not.toBe(plain);
     expect(shadowed).toContain('filter=');
   });
 
   test('USymbolInterface: shadowed render differs from unshadowed and carries a filter', () => {
-    const plain = render(new USymbolInterface().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, fooSymbolContext(), HorizontalAlignment.CENTER));
+    const plain = render(
+      new USymbolInterface().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        fooSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
+    );
     const shadowed = render(
-      new USymbolInterface().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, shadowedSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolInterface().asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        shadowedSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     expect(shadowed).not.toBe(plain);
     expect(shadowed).toContain('filter=');
@@ -613,26 +750,42 @@ describe('Robustness trio + Interface: shadow branch (isShadowing() true -> delt
 describe('ActorStickMan: shadow branch (fashion.getDeltaShadow() !== 0)', () => {
   test('shadowed stickman render differs from unshadowed and carries a filter', () => {
     const plain = render(
-      new USymbolActor(ActorStyle.STICKMAN).asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, fooSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolActor(ActorStyle.STICKMAN).asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        fooSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     const shadowed = render(
-      new USymbolActor(ActorStyle.STICKMAN).asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, shadowedSymbolContext(), HorizontalAlignment.CENTER),
+      new USymbolActor(ActorStyle.STICKMAN).asSmall(
+        emptyTextBlock,
+        emptyTextBlock,
+        emptyTextBlock,
+        shadowedSymbolContext(),
+        HorizontalAlignment.CENTER,
+      ),
     );
     expect(shadowed).not.toBe(plain);
     expect(shadowed).toContain('filter=');
   });
 });
 
-describe('CircleInterface2 / Control: null-color seam (Paint | null ?? \'none\')', () => {
+describe("CircleInterface2 / Control: null-color seam (Paint | null ?? 'none')", () => {
   test('USymbolInterface with null back/fore colors renders the SVG "none" paint keyword', () => {
     const ctx = new SymbolContext(null, null, UStroke.withThickness(0.5), 0, 0, 0);
-    const svg = render(new USymbolInterface().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER));
+    const svg = render(
+      new USymbolInterface().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER),
+    );
     expect(svg).toContain('fill="none"');
   });
 
   test('USymbolControl with a null foreColor renders the SVG "none" paint keyword for the wing polygon', () => {
     const ctx = new SymbolContext('#F1F1F1', null, UStroke.withThickness(0.5), 0, 0, 0);
-    const svg = render(new USymbolControl().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER));
+    const svg = render(
+      new USymbolControl().asSmall(emptyTextBlock, emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER),
+    );
     expect(svg).toContain('fill="none"');
   });
 });
@@ -641,7 +794,13 @@ describe('USymbolUsecase: calculateDimension + UHorizontalLine clip path (covera
   test('calculateDimension reports the fitted ellipse dimension directly (no drawU)', () => {
     const symbol = new USymbolUsecase(false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const dim = asSmall.calculateDimension(REAL_FOO_BOUNDER);
     // Matches JAR_USECASE_FOO's fitted radii: rx=20.4691, ry=14.659 -> width/height = 2*rx, 2*ry.
     expect(dim.getWidth()).toBeCloseTo(40.9382, 2);
@@ -664,7 +823,13 @@ describe('USymbolUsecase: calculateDimension + UHorizontalLine clip path (covera
   test('a horizontal-rule label clips to the fitted ellipse boundary without error', () => {
     const symbol = new USymbolUsecase(false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, horizontalRuleLabel(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      horizontalRuleLabel(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const svg = renderUsecase(asSmall);
     // The ellipse itself, plus at least one clipped <line> for the rule.
     expect(svg).toContain('<ellipse');

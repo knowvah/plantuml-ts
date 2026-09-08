@@ -28,11 +28,7 @@ describe('parseHcl — acceptance criteria', () => {
     // Java behavior: single-entry map → unwrap to the value (inner object).
     // The block name "resource \"aws_s3_bucket\" \"b\"" is correct but gets
     // unwrapped since it is the only top-level entry.
-    const src = makeSource([
-      'resource "aws_s3_bucket" "b" {',
-      '  bucket = "test"',
-      '}',
-    ]);
+    const src = makeSource(['resource "aws_s3_bucket" "b" {', '  bucket = "test"', '}']);
     const ast = parseHcl(src);
     // Single-entry map → unwrapped → inner object
     expect(ast.root).toEqual({ bucket: 'test' });
@@ -45,11 +41,7 @@ describe('parseHcl — acceptance criteria', () => {
   });
 
   it('AC4a: function with args is stored as { "fn()": [...args] }', () => {
-    const src = makeSource([
-      'resource "x" {',
-      '  result = fn("a", "b")',
-      '}',
-    ]);
+    const src = makeSource(['resource "x" {', '  result = fn("a", "b")', '}']);
     const ast = parseHcl(src);
     // Single-entry map → unwrapped → the inner bracket object
     const inner = ast.root as Record<string, unknown>;
@@ -58,11 +50,7 @@ describe('parseHcl — acceptance criteria', () => {
   });
 
   it('AC4b: no-arg function is stored as string "fn()"', () => {
-    const src = makeSource([
-      'resource "x" {',
-      '  result = noop()',
-      '}',
-    ]);
+    const src = makeSource(['resource "x" {', '  result = noop()', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['result']).toBe('noop()');
@@ -70,11 +58,7 @@ describe('parseHcl — acceptance criteria', () => {
 
   it('AC5: for expression inside array produces empty array []', () => {
     // The for-expression tokens are all STRING_SIMPLE (silently ignored)
-    const src = makeSource([
-      'resource "x" {',
-      '  tags = [for k in list : k]',
-      '}',
-    ]);
+    const src = makeSource(['resource "x" {', '  tags = [for k in list : k]', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['tags']).toEqual([]);
@@ -87,12 +71,7 @@ describe('parseHcl — acceptance criteria', () => {
   });
 
   it('AC7: <style> blocks are stripped before parsing', () => {
-    const src = makeSource([
-      '<style>',
-      'node { color: red }',
-      '</style>',
-      'key = "val"',
-    ]);
+    const src = makeSource(['<style>', 'node { color: red }', '</style>', 'key = "val"']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'val' });
   });
@@ -122,21 +101,14 @@ describe('parseHcl — additional cases', () => {
   });
 
   it('single top-level block with one child → root is the child object directly (unwrapped)', () => {
-    const src = makeSource([
-      'module "vpc" {',
-      '  cidr = "10.0.0.0/8"',
-      '}',
-    ]);
+    const src = makeSource(['module "vpc" {', '  cidr = "10.0.0.0/8"', '}']);
     const ast = parseHcl(src);
     // map has exactly 1 entry → value returned directly (not wrapped)
     expect(ast.root).toEqual({ cidr: '10.0.0.0/8' });
   });
 
   it('multiple top-level blocks → root is an object with block names as keys', () => {
-    const src = makeSource([
-      'module "a" { x = "1" }',
-      'module "b" { y = "2" }',
-    ]);
+    const src = makeSource(['module "a" { x = "1" }', 'module "b" { y = "2" }']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({
       'module "a"': { x: '1' },
@@ -145,55 +117,35 @@ describe('parseHcl — additional cases', () => {
   });
 
   it('nested object value obj = { a = "1" }', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  obj = { a = "1" }',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  obj = { a = "1" }', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['obj']).toEqual({ a: '1' });
   });
 
   it('array of strings list = ["a", "b"]', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  list = ["a", "b"]',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  list = ["a", "b"]', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['list']).toEqual(['a', 'b']);
   });
 
   it('array of objects items = [{ name = "x" }]', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  items = [{ name = "x" }]',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  items = [{ name = "x" }]', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['items']).toEqual([{ name: 'x' }]);
   });
 
   it('variable reference var.bucket_name → stored as string', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  path = var.bucket_name',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  path = var.bucket_name', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['path']).toBe('var.bucket_name');
   });
 
   it('string interpolation "${var.host}/path" → stored verbatim', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  url = "${var.host}/path"',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  url = "${var.host}/path"', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['url']).toBe('${var.host}/path');
@@ -201,11 +153,7 @@ describe('parseHcl — additional cases', () => {
 
   it('ternary expression causes parse failure → root is null', () => {
     // cond ? "a" : "b" — PARENTHESIS_OPEN with empty pending → throw → null
-    const src = makeSource([
-      'resource "r" {',
-      '  x = cond ? "a" : "b"',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  x = cond ? "a" : "b"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
     expect(ast.parseError).toBe(false);
@@ -223,42 +171,27 @@ describe('parseHcl — additional cases', () => {
   });
 
   it('key with colon separator (TWO_POINTS) instead of equals', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  key : "value"',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  key : "value"', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['key']).toBe('value');
   });
 
   it('multiple flat key=value pairs produce a flat object', () => {
-    const src = makeSource([
-      'a = "1"',
-      'b = "2"',
-      'c = "3"',
-    ]);
+    const src = makeSource(['a = "1"', 'b = "2"', 'c = "3"']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ a: '1', b: '2', c: '3' });
   });
 
   it('skinparam directive before body is stripped', () => {
-    const src = makeSource([
-      'skinparam backgroundColor white',
-      'key = "val"',
-    ]);
+    const src = makeSource(['skinparam backgroundColor white', 'key = "val"']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'val' });
   });
 
   it('blank lines within body are preserved (do not restart)', () => {
     // Body already started; blank lines between blocks should not affect parsing
-    const src = makeSource([
-      'module "a" { x = "1" }',
-      '',
-      'module "b" { y = "2" }',
-    ]);
+    const src = makeSource(['module "a" { x = "1" }', '', 'module "b" { y = "2" }']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({
       'module "a"': { x: '1' },
@@ -268,11 +201,7 @@ describe('parseHcl — additional cases', () => {
 
   it('function with multiple args — COMMA sentinel handled correctly', () => {
     // Tests the COMMA sentinel branch inside getFunctionData
-    const src = makeSource([
-      'resource "r" {',
-      '  result = format("hello %s", "world")',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  result = format("hello %s", "world")', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['result']).toEqual({ 'format()': ['hello %s', 'world'] });
@@ -280,22 +209,14 @@ describe('parseHcl — additional cases', () => {
 
   it('top-level block with only a quoted name part (STRING_QUOTED in getModuleOrSomething)', () => {
     // Exercise the STRING_QUOTED branch in getModuleOrSomething
-    const src = makeSource([
-      '"myblock" {',
-      '  x = "1"',
-      '}',
-    ]);
+    const src = makeSource(['"myblock" {', '  x = "1"', '}']);
     const ast = parseHcl(src);
     // Single entry → unwrapped
     expect(ast.root).toEqual({ x: '1' });
   });
 
   it('escaped quote in string value', () => {
-    const src = makeSource([
-      'resource "r" {',
-      '  msg = "say \\"hello\\""',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  msg = "say \\"hello\\""', '}']);
     const ast = parseHcl(src);
     const inner = ast.root as Record<string, unknown>;
     expect(inner['msg']).toBe('say "hello"');
@@ -337,22 +258,14 @@ describe('parseHcl — additional cases', () => {
   it('unexpected token type in getValue throws → parse failure', () => {
     // A CURLY_BRACKET_CLOSE appearing where a value is expected triggers
     // the throw in getValue (line 203). Construct: key = } (malformed block).
-    const src = makeSource([
-      'resource "r" {',
-      '  key = }',
-      '}',
-    ]);
+    const src = makeSource(['resource "r" {', '  key = }', '}']);
     const ast = parseHcl(src);
     // CURLY_BRACKET_CLOSE is handled by getBracketData, not getValue,
     // so this will actually end the bracket early. Let's try a different
     // approach: SQUARE_BRACKET_CLOSE as a value.
     // Actually CURLY_BRACKET_CLOSE closes the bracket — no error.
     // Use TWO_POINTS as the value: key = : — TWO_POINTS hits the throw.
-    const src2 = makeSource([
-      'resource "r" {',
-      '  key = :',
-      '}',
-    ]);
+    const src2 = makeSource(['resource "r" {', '  key = :', '}']);
     const ast2 = parseHcl(src2);
     expect(ast2.root).toBeNull();
     // Suppress unused src/ast

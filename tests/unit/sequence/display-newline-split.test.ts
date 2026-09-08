@@ -37,10 +37,7 @@ import {
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/sequence',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/sequence');
 
 /** The literal two-character escape, written as a TS escape of a backslash so
  *  the source of THIS file is unambiguous about which of the two it means. */
@@ -110,27 +107,13 @@ describe('message labels split on the escape', () => {
   });
 
   it('emits one run per escaped line, each with its own width', () => {
-    const block = messageLabelBlock(
-      `one${ESC}two`,
-      undefined,
-      LEFT_X,
-      ARROW_Y,
-      defaultTheme,
-      measurer(),
-    );
+    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
     expect(block.lines.map((r) => r.text)).toEqual(['one', 'two']);
     expect(block.lines[0]!.textWidth).not.toBe(block.lines[1]!.textWidth);
   });
 
   it('puts consecutive baselines one textLineHeight apart', () => {
-    const block = messageLabelBlock(
-      `one${ESC}two`,
-      undefined,
-      LEFT_X,
-      ARROW_Y,
-      defaultTheme,
-      measurer(),
-    );
+    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
     const [first, second] = block.lines;
     expect(second!.y - first!.y).toBeCloseTo(first!.textLineHeight, 10);
   });
@@ -140,14 +123,7 @@ describe('message labels split on the escape', () => {
     // (`ComponentRoseArrow.java:141-148`): the block's BOTTOM is pinned to
     // the arrow, so the last baseline is the same however many rows there are.
     const one = messageLabelBlock('one', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
-    const two = messageLabelBlock(
-      `one${ESC}two`,
-      undefined,
-      LEFT_X,
-      ARROW_Y,
-      defaultTheme,
-      measurer(),
-    );
+    const two = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
     expect(two.lines.at(-1)!.y).toBeCloseTo(one.lines.at(-1)!.y, 10);
   });
 });
@@ -160,10 +136,7 @@ describe('a ref body splits on the escape', () => {
 });
 
 describe('butali-53-kige134 — a two-line participant head, against the jar', () => {
-  const svg = renderFixtureSequence(
-    readFileSync(join(CACHE, 'butali-53-kige134', 'in.puml'), 'utf8'),
-    measurer(),
-  );
+  const svg = renderFixtureSequence(readFileSync(join(CACHE, 'butali-53-kige134', 'in.puml'), 'utf8'), measurer());
   // The head font is `participant { FontSize 14 }`; the message labels beside
   // it are 13, so this selects heads and nothing else.
   const heads = textsAt(svg, 14);

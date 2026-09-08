@@ -15,10 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
-import {
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-} from '../../../src/diagrams/sequence/sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns } from '../../../src/diagrams/sequence/sequence-creole.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const CACHE = join(ROOT, 'test-results/dot-cache/sequence');
@@ -234,12 +231,7 @@ describe('box group labels', () => {
   it('leaves a plain box label byte-identical, one run at the raw width', () => {
     const measurer = new DeterministicMeasurer();
     const font = { family: 'sans-serif', size: 11 };
-    const runs = sequenceCreoleRuns(
-      'Services',
-      sequenceCreoleFont(font),
-      { leftX: 14, baselineY: 15 },
-      measurer,
-    );
+    const runs = sequenceCreoleRuns('Services', sequenceCreoleFont(font), { leftX: 14, baselineY: 15 }, measurer);
     expect(runs).toHaveLength(1);
     expect(runs[0]?.text).toBe('Services');
     expect(runs[0]?.textWidth).toBeCloseTo(measurer.measure('Services', font).width, 10);

@@ -118,9 +118,7 @@ export function drawArea(geo: AreaSeriesGeo, _theme: Theme): string {
     // Single-point degenerate case: draw a vertical line from baseline to point.
     const p = geo.points[0]!;
     const b = geo.baselinePoints[0] ?? { x: p.x, y: p.y };
-    parts.push(
-      line(p.x, b.y, p.x, p.y, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }),
-    );
+    parts.push(line(p.x, b.y, p.x, p.y, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }));
 
     if (geo.showLabels) {
       parts.push(drawLabel(p));
@@ -131,15 +129,11 @@ export function drawArea(geo: AreaSeriesGeo, _theme: Theme): string {
 
   // --- Filled area polygon ---
   const fillD = buildFillPath(geo.points, geo.baselinePoints);
-  parts.push(
-    path(fillD, { fill: geo.color, fillOpacity: FILL_OPACITY, stroke: 'none' }),
-  );
+  parts.push(path(fillD, { fill: geo.color, fillOpacity: FILL_OPACITY, stroke: 'none' }));
 
   // --- Top-edge stroke ---
   const strokeD = buildStrokePath(geo.points);
-  parts.push(
-    path(strokeD, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }),
-  );
+  parts.push(path(strokeD, { stroke: geo.color, strokeWidth: TOP_EDGE_STROKE_WIDTH }));
 
   // --- Optional data labels ---
   if (geo.showLabels) {

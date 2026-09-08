@@ -59,7 +59,12 @@ import { compareSvg } from '../../../oracle/svg-conformance/compare.js';
 // ---------------------------------------------------------------------------
 
 const PLAIN_FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
-const BOLD_FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set([FontStyle.BOLD]) };
+const BOLD_FONT: FontConfiguration = {
+  family: 'sans-serif',
+  size: 14,
+  color: '#000000',
+  styles: new Set([FontStyle.BOLD]),
+};
 
 const FOO_LABEL_WIDTH = 24.7051;
 const FOO_LABEL_HEIGHT = 16.4883;
@@ -300,22 +305,46 @@ describe('USymbolCloud (T8, AC1/AC2) — bump-generated cloud frontier', () => {
   test('asSmall renders conformant vs. the jar fragment (cloud Foo, SIMPLE branch)', () => {
     const symbol = new USymbolCloud();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_CLOUD_SMALL_FOO);
   });
 
   test('asSmall renders conformant vs. the jar fragment (6-line cloud label, COMPLEX branch)', () => {
     const symbol = new USymbolCloud();
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, multiLineLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      multiLineLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_CLOUD_BIG_FOO);
   });
 
   test('AC2: the two fixtures produce a different bump-segment COUNT (8 vs. 36 cubic curves)', () => {
     const ctx1 = fooSymbolContext();
-    const small = new USymbolCloud().asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx1, HorizontalAlignment.CENTER);
+    const small = new USymbolCloud().asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx1,
+      HorizontalAlignment.CENTER,
+    );
     const ctx2 = fooSymbolContext();
-    const big = new USymbolCloud().asSmall(emptyTextBlock, multiLineLabelTextBlock(), emptyTextBlock, ctx2, HorizontalAlignment.CENTER);
+    const big = new USymbolCloud().asSmall(
+      emptyTextBlock,
+      multiLineLabelTextBlock(),
+      emptyTextBlock,
+      ctx2,
+      HorizontalAlignment.CENTER,
+    );
 
     const smallSvg = render(small);
     const bigSvg = render(big);
@@ -329,7 +358,7 @@ describe('USymbolCloud (T8, AC1/AC2) — bump-generated cloud frontier', () => {
     expect(new USymbolCloud().getSNames()).toEqual(['cloud']);
   });
 
-  test('coverage: a tiny cloud (empty label) exercises bubbleLine\'s nb===0 fallback', () => {
+  test("coverage: a tiny cloud (empty label) exercises bubbleLine's nb===0 fallback", () => {
     // width=height=30 (margin 15*2 + an empty 0x0 label) puts every one
     // of the four sides' half-segments (post `specialLine` split) well
     // under `bubbleSize` (11), forcing `USymbolCloud.java#bubbleLine`'s
@@ -348,7 +377,13 @@ describe('USymbolFolder (T8, AC1/AC3) — folder (showTitle=false)', () => {
   test('asSmall renders conformant vs. the jar fragment (folder Foo)', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall), JAR_FOLDER_FOO);
   });
 
@@ -365,7 +400,13 @@ describe('USymbolFolder (T8, AC1/AC3) — package (showTitle=true)', () => {
   test('asSmall renders conformant vs. the jar fragment (package Foo)', () => {
     const symbol = new USymbolFolder('package', true);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(packageTitleTextBlock(), emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      packageTitleTextBlock(),
+      emptyTextBlock,
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     expectConformant(render(asSmall, packageStringBounder), JAR_PACKAGE_FOO);
   });
 
@@ -378,7 +419,13 @@ describe('USymbolFolder/asSmall — roundCorner=0 branch (coverage)', () => {
   test('draws a plain UPolygon outline (not the arced UPath) when roundCorner is 0', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = new SymbolContext('#F1F1F1', '#181818', UStroke.withThickness(0.5), 0, 0, 0);
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const ug = newGraphic();
     asSmall.drawU(ug);
     const svg = ug.getSvgString();
@@ -394,9 +441,26 @@ describe('USymbolFolder/asSmall — roundCorner=0 branch (coverage)', () => {
 describe('USymbolFolder vs USymbolCloud (AC2) — distinct jar shapes', () => {
   test('folder and package produce two different fragments for the same real jar geometry', () => {
     const ctx1 = fooSymbolContext();
-    const folderSvg = render(new USymbolFolder('folder', false).asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx1, HorizontalAlignment.CENTER));
+    const folderSvg = render(
+      new USymbolFolder('folder', false).asSmall(
+        emptyTextBlock,
+        fooLabelTextBlock(),
+        emptyTextBlock,
+        ctx1,
+        HorizontalAlignment.CENTER,
+      ),
+    );
     const ctx2 = fooSymbolContext();
-    const packageSvg = render(new USymbolFolder('package', true).asSmall(packageTitleTextBlock(), emptyTextBlock, emptyTextBlock, ctx2, HorizontalAlignment.CENTER), packageStringBounder);
+    const packageSvg = render(
+      new USymbolFolder('package', true).asSmall(
+        packageTitleTextBlock(),
+        emptyTextBlock,
+        emptyTextBlock,
+        ctx2,
+        HorizontalAlignment.CENTER,
+      ),
+      packageStringBounder,
+    );
 
     expect(folderSvg).not.toBe(packageSvg);
     expectConformant(folderSvg, JAR_FOLDER_FOO);
@@ -416,7 +480,13 @@ describe('USymbolFolder tab-dimension formulas (AC3)', () => {
   test('showTitle=false: wtitle/htitle come from the (40,15) fallback + marginTitleX1/X2/Y1/Y2 (3,3,3,3)', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const dim = asSmall.calculateDimension({} as never);
     // wtitle = 40+3+3 = 46; htitle = 15+3+3 = 21; the hline's own
     // dx/dy (JAR_FOLDER_FOO) directly encode wtitle+7 / htitle.
@@ -427,7 +497,13 @@ describe('USymbolFolder tab-dimension formulas (AC3)', () => {
   test('showTitle=true: wtitle/htitle come from the REAL title dimension + marginTitleX1/X2/Y1/Y2', () => {
     const symbol = new USymbolFolder('package', true);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(packageTitleTextBlock(), emptyTextBlock, emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      packageTitleTextBlock(),
+      emptyTextBlock,
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const dim = asSmall.calculateDimension({} as never);
     // wtitle = 37.9219+3+3 = 43.9219; htitle = 16.4883+3+3 = 22.4883.
     expect(dim.getWidth()).toBeCloseTo(67.9219, 4);
@@ -439,7 +515,13 @@ describe('USymbolFolder#getMagneticBorder (AC3, behavioral — not jar-rendered:
   test('pulls a point inside the tab straight down by htitle', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const border = textBlockMagneticBorder(asSmall);
     // wtitle=46, htitle=21 (see the dimension test above). A point at
     // x=50 (>=wtitle), y=10 (inside [0,htitle]) sits ABOVE the tab's
@@ -452,7 +534,13 @@ describe('USymbolFolder#getMagneticBorder (AC3, behavioral — not jar-rendered:
   test('linearly ramps the force across the slanted tab edge (marginTitleX3=7 zone)', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const border = textBlockMagneticBorder(asSmall);
     // wtitle=46, marginTitleX3=7 -> ramp zone is x in [39, 46], y<=0.
     // Halfway (x=42.5, delta=3.5, how=3.5/14=0.25) -> dy = htitle*0.25.
@@ -464,7 +552,13 @@ describe('USymbolFolder#getMagneticBorder (AC3, behavioral — not jar-rendered:
   test('exerts no force far outside the tab', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const border = textBlockMagneticBorder(asSmall);
     const force = border.getForceAt({ x: 5, y: 30 }, {} as never);
     expect(force.getDx()).toBe(0);
@@ -474,7 +568,13 @@ describe('USymbolFolder#getMagneticBorder (AC3, behavioral — not jar-rendered:
   test('throws if called without a stringBounder (this implementation genuinely needs one to re-measure)', () => {
     const symbol = new USymbolFolder('folder', false);
     const ctx = fooSymbolContext();
-    const asSmall = symbol.asSmall(emptyTextBlock, fooLabelTextBlock(), emptyTextBlock, ctx, HorizontalAlignment.CENTER);
+    const asSmall = symbol.asSmall(
+      emptyTextBlock,
+      fooLabelTextBlock(),
+      emptyTextBlock,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     const border = textBlockMagneticBorder(asSmall);
     expect(() => border.getForceAt({ x: 0, y: 0 })).toThrow(/stringBounder/);
   });

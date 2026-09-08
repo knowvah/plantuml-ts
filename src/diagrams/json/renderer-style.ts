@@ -191,9 +191,7 @@ function canonicalizeColors(style: NodeStyleJson): NodeStyleJson {
       border: canonicalColor(box.border),
       sepColor: canonicalColor(box.sepColor),
       hlBg: canonicalColor(box.hlBg),
-      ...(box.highlightClasses === undefined
-        ? {}
-        : { highlightClasses: canonicalizeClasses(box.highlightClasses) }),
+      ...(box.highlightClasses === undefined ? {} : { highlightClasses: canonicalizeClasses(box.highlightClasses) }),
     },
     text: {
       ...text,
@@ -210,9 +208,7 @@ function opt(key: 'fontColor' | 'hlFontColor', v: string | undefined) {
   return c === undefined ? {} : { [key]: c };
 }
 
-function canonicalizeClasses(
-  classes: Record<string, HighlightClassStyle>,
-): Record<string, HighlightClassStyle> {
+function canonicalizeClasses(classes: Record<string, HighlightClassStyle>): Record<string, HighlightClassStyle> {
   const out: Record<string, HighlightClassStyle> = {};
   for (const [name, cls] of Object.entries(classes)) {
     const bg = canonicalColorOpt(cls.background);

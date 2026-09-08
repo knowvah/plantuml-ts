@@ -27,13 +27,7 @@
 
 import type { Classifier, MapRow, Relationship } from './ast.js';
 import { MAP_POINT_SENTINEL } from './ast.js';
-import {
-  countByName,
-  firstWithName,
-  qualifiedId,
-  resolveReference,
-  splitOnSeparator,
-} from './class-namespace.js';
+import { countByName, firstWithName, qualifiedId, resolveReference, splitOnSeparator } from './class-namespace.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 
 // ---------------------------------------------------------------------------
@@ -308,10 +302,7 @@ function computeMapLink(line: string): MapLink | null {
  */
 function resolveExistingId(state: ParseState, rawName: string): string | undefined {
   const sep = state.namespaceSeparator;
-  if (
-    splitOnSeparator(rawName, sep) === null &&
-    countByName(state.ast.classifiers, sep, rawName) === 1
-  ) {
+  if (splitOnSeparator(rawName, sep) === null && countByName(state.ast.classifiers, sep, rawName) === 1) {
     return firstWithName(state.ast.classifiers, sep, rawName)!.id;
   }
   const id = qualifiedId(rawName, state.activeNamespace, sep, state.ast.namespaces);

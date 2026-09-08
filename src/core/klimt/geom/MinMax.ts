@@ -63,12 +63,7 @@ export class MinMax {
 
   addPoint(...args: [number, number] | [XPoint2D]): MinMax {
     const [x, y] = args.length === 1 ? [args[0].getX(), args[0].getY()] : args;
-    return new MinMax(
-      Math.min(x, this.minX),
-      Math.min(y, this.minY),
-      Math.max(x, this.maxX),
-      Math.max(y, this.maxY),
-    );
+    return new MinMax(Math.min(x, this.minX), Math.min(y, this.minY), Math.max(x, this.maxX), Math.max(y, this.maxY));
   }
 
   addMinMax(other: MinMax): MinMax {

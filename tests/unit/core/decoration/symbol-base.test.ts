@@ -71,7 +71,15 @@ describe('USymbol base + SymbolContext (T3, AC1)', () => {
     const ctx = new SymbolContext('#FF0000', '#0000FF').withStroke(UStroke.withThickness(2));
     const symbol = new TrivialSymbol();
 
-    const big = symbol.asBig(emptyTextBlock, HorizontalAlignment.CENTER, emptyTextBlock, 40, 20, ctx, HorizontalAlignment.CENTER);
+    const big = symbol.asBig(
+      emptyTextBlock,
+      HorizontalAlignment.CENTER,
+      emptyTextBlock,
+      40,
+      20,
+      ctx,
+      HorizontalAlignment.CENTER,
+    );
     big.drawU(ug);
 
     expect(ug.getSvgString()).toContain(
@@ -82,7 +90,15 @@ describe('USymbol base + SymbolContext (T3, AC1)', () => {
   it('calculateDimension reports the requested width/height', () => {
     const symbol = new TrivialSymbol();
     const ctx = new SymbolContext(null, null);
-    const big = symbol.asBig(emptyTextBlock, HorizontalAlignment.LEFT, emptyTextBlock, 40, 20, ctx, HorizontalAlignment.LEFT);
+    const big = symbol.asBig(
+      emptyTextBlock,
+      HorizontalAlignment.LEFT,
+      emptyTextBlock,
+      40,
+      20,
+      ctx,
+      HorizontalAlignment.LEFT,
+    );
     const dim = big.calculateDimension({} as StringBounder);
     expect(dim.getWidth()).toBe(40);
     expect(dim.getHeight()).toBe(20);
@@ -92,7 +108,9 @@ describe('USymbol base + SymbolContext (T3, AC1)', () => {
     const ug = newGraphic();
     const ctx = new SymbolContext(null, null);
     const symbol = new TrivialSymbol();
-    symbol.asBig(emptyTextBlock, HorizontalAlignment.CENTER, emptyTextBlock, 10, 10, ctx, HorizontalAlignment.CENTER).drawU(ug);
+    symbol
+      .asBig(emptyTextBlock, HorizontalAlignment.CENTER, emptyTextBlock, 10, 10, ctx, HorizontalAlignment.CENTER)
+      .drawU(ug);
     expect(ug.getSvgString()).toContain('fill="none"');
   });
 
@@ -160,10 +178,7 @@ describe('SymbolContext copy-on-write semantics (T3, AC2)', () => {
 
   it('toString reports null colors and formats gradient paints', () => {
     expect(new SymbolContext(null, null).toString()).toContain('backColor=null');
-    const gradientCtx = new SymbolContext(
-      { color1: '#111111', color2: '#222222', policy: '/' },
-      null,
-    );
+    const gradientCtx = new SymbolContext({ color1: '#111111', color2: '#222222', policy: '/' }, null);
     expect(gradientCtx.toString()).toContain('backColor=#111111/#222222');
   });
 });
@@ -251,7 +266,11 @@ describe('XDimension2D', () => {
   });
 
   it('mergeLayoutT12B3 stacks two tops and a bottom: max width, summed height', () => {
-    const merged = XDimension2D.mergeLayoutT12B3(new XDimension2D(5, 1), new XDimension2D(9, 2), new XDimension2D(3, 4));
+    const merged = XDimension2D.mergeLayoutT12B3(
+      new XDimension2D(5, 1),
+      new XDimension2D(9, 2),
+      new XDimension2D(3, 4),
+    );
     expect(merged.getWidth()).toBe(9);
     expect(merged.getHeight()).toBe(7);
   });

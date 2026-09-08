@@ -222,11 +222,7 @@ function moveLabelToXlabel(attrs: NonNullable<DotInputEdge['attributes']>): void
   delete attrs.labelHeight;
 }
 
-function buildDotEdges(
-  ast: StateDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): DotInputEdge[] {
+function buildDotEdges(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer): DotInputEdge[] {
   const font = resolveArrowLabelFont(theme);
   return ast.transitions.map((t, i) => {
     // minlen = arrow dash-count - 1 (SvekEdge.java) — shared convention with
@@ -309,11 +305,7 @@ function addNotes(
   // single call site, not new here (mission G5/C1).
 }
 
-export function buildDotGraph(
-  ast: StateDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): DotInputGraph {
+export function buildDotGraph(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer): DotInputGraph {
   const rankdir: 'TB' | 'LR' = ast.rankdir === 'left-to-right' ? 'LR' : 'TB';
   const nodes = buildDotNodes(ast, theme, measurer, rankdir);
   const edges = buildDotEdges(ast, theme, measurer);

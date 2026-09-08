@@ -56,10 +56,7 @@ function ptSegDistSq(segStart: Point2D, segEnd: Point2D, pt: Point2D): number {
 function bezierFlatnessSq(b: Bezier): number {
   const p1 = { x: b.x1, y: b.y1 };
   const p2 = { x: b.x2, y: b.y2 };
-  return Math.max(
-    ptSegDistSq(p1, p2, { x: b.ctrlx1, y: b.ctrly1 }),
-    ptSegDistSq(p1, p2, { x: b.ctrlx2, y: b.ctrly2 }),
-  );
+  return Math.max(ptSegDistSq(p1, p2, { x: b.ctrlx1, y: b.ctrly1 }), ptSegDistSq(p1, p2, { x: b.ctrlx2, y: b.ctrly2 }));
 }
 
 // Named tuple aliases so lizard's (brace/comma-based) complexity

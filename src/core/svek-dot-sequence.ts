@@ -31,11 +31,7 @@
 // plans/s1l-tail-fix/findings/svek-node-id-alignment.md carries the
 // predictions and the oracle values they were checked against.
 
-import type {
-  DotInputCluster,
-  DotInputGraph,
-  DotInputNode,
-} from './graph-layout.types.js';
+import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 
 /** Svek's ColorSequence: a counter whose value is both the `sh####` id suffix
  *  and the `color="#……"` back-reference tag. Upstream's first value is 2. */

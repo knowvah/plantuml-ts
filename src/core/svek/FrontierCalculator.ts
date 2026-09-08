@@ -70,27 +70,42 @@ function buildRect(minX: number, minY: number, maxX: number, maxY: number): Rect
 /** `RectangleArea#merge(RectangleArea)`. */
 function mergeRect(a: RectangleArea, b: RectangleArea): RectangleArea {
   return buildRect(
-    Math.min(a.minX, b.minX), Math.min(a.minY, b.minY),
-    Math.max(a.maxX, b.maxX), Math.max(a.maxY, b.maxY),
+    Math.min(a.minX, b.minX),
+    Math.min(a.minY, b.minY),
+    Math.max(a.maxX, b.maxX),
+    Math.max(a.maxY, b.maxY),
   );
 }
 
 /** `RectangleArea#merge(XPoint2D)`. */
 function mergePoint(a: RectangleArea, p: Point): RectangleArea {
-  return buildRect(
-    Math.min(a.minX, p.x), Math.min(a.minY, p.y),
-    Math.max(a.maxX, p.x), Math.max(a.maxY, p.y),
-  );
+  return buildRect(Math.min(a.minX, p.x), Math.min(a.minY, p.y), Math.max(a.maxX, p.x), Math.max(a.maxY, p.y));
 }
 
-function withMinX(r: RectangleArea, d: number): RectangleArea { return { ...r, minX: d }; }
-function withMaxX(r: RectangleArea, d: number): RectangleArea { return { ...r, maxX: d }; }
-function withMinY(r: RectangleArea, d: number): RectangleArea { return { ...r, minY: d }; }
-function withMaxY(r: RectangleArea, d: number): RectangleArea { return { ...r, maxY: d }; }
-function addMinX(r: RectangleArea, d: number): RectangleArea { return { ...r, minX: r.minX + d }; }
-function addMaxX(r: RectangleArea, d: number): RectangleArea { return { ...r, maxX: r.maxX + d }; }
-function addMinY(r: RectangleArea, d: number): RectangleArea { return { ...r, minY: r.minY + d }; }
-function addMaxY(r: RectangleArea, d: number): RectangleArea { return { ...r, maxY: r.maxY + d }; }
+function withMinX(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, minX: d };
+}
+function withMaxX(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, maxX: d };
+}
+function withMinY(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, minY: d };
+}
+function withMaxY(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, maxY: d };
+}
+function addMinX(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, minX: r.minX + d };
+}
+function addMaxX(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, maxX: r.maxX + d };
+}
+function addMinY(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, minY: r.minY + d };
+}
+function addMaxY(r: RectangleArea, d: number): RectangleArea {
+  return { ...r, maxY: r.maxY + d };
+}
 
 /** `DotStringFactory`'s `Rankdir` — only the two values `FrontierCalculator`
  *  branches on (svek/FrontierCalculator.java:120). */
@@ -175,11 +190,7 @@ export function frontierCalculator(
 
 /** Faithful port of `FrontierCalculator#ensureMinWidth`
  *  (svek/FrontierCalculator.java:154-167). */
-export function ensureMinWidth(
-  core: RectangleArea,
-  initial: RectangleArea,
-  minWidth: number,
-): RectangleArea {
+export function ensureMinWidth(core: RectangleArea, initial: RectangleArea, minWidth: number): RectangleArea {
   const delta = core.maxX - core.minX - minWidth;
   if (delta >= 0) return core;
   let newMinX = core.minX + delta / 2;

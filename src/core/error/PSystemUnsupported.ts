@@ -20,9 +20,7 @@ export class PSystemUnsupported {
   constructor(directive: string) {
     this.strings.push('<b>Diagram not supported by this release of PlantUML');
     this.strings.push(' ');
-    this.strings.push(
-      `Sorry, but the following directive ""${directive}"" is not recognized.`,
-    );
+    this.strings.push(`Sorry, but the following directive ""${directive}"" is not recognized.`);
     this.strings.push(' ');
     this.strings.push('Possible causes:');
     this.strings.push('- Typo in the directive or incorrect syntax.');

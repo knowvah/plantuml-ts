@@ -20,10 +20,7 @@ import type {
   SequenceDiagramAST,
   SequenceEvent,
 } from './ast.js';
-import type {
-  ArrowConfiguration,
-  ArrowHeadKind,
-} from './sequence-arrowhead.js';
+import type { ArrowConfiguration, ArrowHeadKind } from './sequence-arrowhead.js';
 import type { Command as CoreCommand } from '../../core/command/Command.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
@@ -130,19 +127,13 @@ export function emit(state: ParseState, event: SequenceEvent): void {
  * CURRENT value, then advance by `step` (`DottedNumber#incrementMinor`,
  * `DottedNumber.java:75-79` — the last segment only).
  */
-export function applyAutonumber(
-  state: ParseState,
-  msg: MessageEvent,
-): MessageEvent {
+export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEvent {
   const auto = state.ast.autonumber;
   if (!auto.enabled) return msg;
   const num = auto.current;
   auto.current += auto.step;
   const dottedLabel = auto.prefix === '' ? undefined : `${auto.prefix}${String(num)}`;
-  const label =
-    auto.format !== undefined
-      ? formatAutonumber(auto.format, num, auto.prefix)
-      : dottedLabel;
+  const label = auto.format !== undefined ? formatAutonumber(auto.format, num, auto.prefix) : dottedLabel;
   return {
     ...msg,
     sequenceNumber: num,
@@ -214,11 +205,8 @@ export interface ArrowSpec {
  */
 export function arrowConfigurationOf(spec: ArrowSpec): ArrowConfiguration {
   const head1: ArrowHeadKind =
-    spec.cross1 === true ? 'CROSSX'
-      : spec.async1 === true ? 'ASYNC'
-        : spec.both === true ? 'NORMAL' : 'NONE';
-  const head2: ArrowHeadKind =
-    spec.cross2 === true ? 'CROSSX' : spec.async2 === true ? 'ASYNC' : 'NORMAL';
+    spec.cross1 === true ? 'CROSSX' : spec.async1 === true ? 'ASYNC' : spec.both === true ? 'NORMAL' : 'NONE';
+  const head2: ArrowHeadKind = spec.cross2 === true ? 'CROSSX' : spec.async2 === true ? 'ASYNC' : 'NORMAL';
   return {
     dressing1: { head: head1, part: 'FULL' },
     dressing2: { head: head2, part: 'FULL' },
@@ -284,16 +272,25 @@ function stripParticipantTail(rest: string): {
   let stereotype: string | undefined;
   let url: string | undefined;
   const color1 = /^(.*?)\s+(#\w+)$/.exec(head);
-  if (color1 !== null) { head = color1[1]!.trim(); color = color1[2]; }
+  if (color1 !== null) {
+    head = color1[1]!.trim();
+    color = color1[2];
+  }
   // B3: the `[[...]]` run is CAPTURED now, not just peeled off. It was
   // discarded here and in both callers, which is why all 89 `<a>` elements in
   // the corpus were missing.
   const urlRun = /^(.*?)\s*(\[\[.*\]\])$/.exec(head);
-  if (urlRun !== null) { head = urlRun[1]!.trim(); url = urlRun[2]; }
+  if (urlRun !== null) {
+    head = urlRun[1]!.trim();
+    url = urlRun[2];
+  }
   const order = /^(.*?)\s+order\s+-?\d{1,7}$/i.exec(head);
   if (order !== null) head = order[1]!.trim();
   const stereo = /^(.*?)\s*(<<.+?>>)$/.exec(head);
-  if (stereo !== null) { head = stereo[1]!.trim(); stereotype = stereo[2]; }
+  if (stereo !== null) {
+    head = stereo[1]!.trim();
+    stereotype = stereo[2];
+  }
   return { head, color, stereotype, url };
 }
 
@@ -420,17 +417,12 @@ export function autoActivationFlags(
   to: string,
 ): { activates?: string; deactivates?: string } {
   if (state.ast.options.autoactivate !== true || spec.trim() !== '') return {};
-  const head =
-    arrow.dressing2.head !== 'NONE' ? arrow.dressing2.head : arrow.dressing1.head;
+  const head = arrow.dressing2.head !== 'NONE' ? arrow.dressing2.head : arrow.dressing1.head;
   if (head !== 'NORMAL' && head !== 'ASYNC') return {};
   return arrow.dashed ? { deactivates: from } : { activates: to };
 }
 
-export function activationFlags(
-  spec: string,
-  from: string,
-  to: string,
-): { activates?: string; deactivates?: string } {
+export function activationFlags(spec: string, from: string, to: string): { activates?: string; deactivates?: string } {
   const trimmed = spec.trim();
   const flags: { activates?: string; deactivates?: string } = {};
   switch (trimmed.charAt(0)) {
@@ -518,8 +510,7 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
   } else if (event.kind === 'activate' || event.kind === 'deactivate') {
     linked.add(event.participantId);
   } else if (event.kind === 'frame') {
-    for (const branch of event.branches)
-      for (const inner of branch) collectLinkedIds(inner, linked);
+    for (const branch of event.branches) for (const inner of branch) collectLinkedIds(inner, linked);
   }
 }
 

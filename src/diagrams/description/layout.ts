@@ -9,21 +9,22 @@
  * positions from result.nodes, container bboxes as a bottom-up padded union
  * of children, edge points from result.edges (real graphviz splines),
  * cross-container endpoints clipped at the container bbox. No DOM/SVG/async.
+ *
+ * Phase 1 AST classification (`classifyAst`/`isEffectiveCluster`/
+ * `countRawContainers`) was split out to `layout-classify.ts` (500-line
+ * cap), re-exporting `isEffectiveCluster` unchanged for
+ * `layout-dot-tree.ts`'s own import.
  */
 
-import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
+import type { DescriptionDiagramAST, DescriptiveLink } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type {
-  DotInputGraph,
-  DotLayoutResult,
-} from '../../core/graph-layout.js';
+import type { DotInputGraph, DotLayoutResult } from '../../core/graph-layout.js';
 import { layoutGraph } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import {
   type DescriptionNodeGeo,
-  isClusterNode,
   shiftGeo,
   buildNodeGeoIndex,
   measureTitleLabel,
@@ -32,11 +33,7 @@ import {
   type DescriptionGeometry,
   degenerateSingleLeaf,
 } from './layout-helpers.js';
-import {
-  type EdgeMapping,
-  buildEdgeGeos,
-  computeTotalDimensions,
-} from './layout-geo-post.js';
+import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layout-geo-post.js';
 import { computeInkShift } from './layout-ink-shift.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
 import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
@@ -45,12 +42,7 @@ import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
-import {
-  buildNamespaceGroups,
-  findCollidingIds,
-  dotKeyFor,
-  scopedKey,
-} from './namespace-groups.js';
+import { buildNamespaceGroups, findCollidingIds } from './namespace-groups.js';
 import {
   computePortRanksByCluster,
   buildDotNodes,
@@ -59,96 +51,22 @@ import {
   buildGeoTree,
   type PortClusterCtx,
 } from './layout-dot-tree.js';
+import { classifyAst, countRawContainers, isEffectiveCluster } from './layout-classify.js';
+export { isEffectiveCluster };
 
-export type {
-  DescriptionNodeGeo,
-  DescriptionEdgeGeo,
-  DescriptionGeometry,
-} from './layout-helpers.js';
+export type { DescriptionNodeGeo, DescriptionEdgeGeo, DescriptionGeometry } from './layout-helpers.js';
 
 // ── Public output types ──
 
 // ── Internal types ── (moved to `layout-types.ts`, 500-line split;
 // re-exported below so every existing `from './layout.js'` import works)
-import type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
+import type { ClassifyCtx, EdgeDotBuildResult } from './layout-types.js';
 export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-types.js';
 
 /** D3/D4: the arrow-label font resolver -- `layoutDescription`'s
  *  `edgeFontSpec` construction (below) is its measurement-site wiring;
  *  `renderer-edge.ts#arrowLabelFontConfig` is the matching SVG-text site. */
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
-
-
-// ── Phase 1: AST classification ──
-
-function classifyAsCluster(
-  node: DescriptiveNode,
-  ctx: ClassifyCtx,
-  removed: ReadonlySet<string>,
-  key: string,
-  ancestorIds: readonly string[],
-  parentAstId?: string,
-): void {
-  const clusterId = `cluster${ctx.counter.n++}`;
-  const childAncestors = [...ancestorIds, node.id];
-  const directLeafAstIds = node.children
-    .filter((c) => !isEffectiveCluster(c, removed))
-    .map((c) => dotKeyFor(childAncestors, c.id, ctx.collidingIds));
-  const desc: ContainerDesc = {
-    clusterId, astId: key, symbol: node.symbol,
-    display: node.display, directLeafAstIds,
-  };
-  if (parentAstId !== undefined) desc.parentAstId = parentAstId;
-  if (node.stereotype !== undefined) desc.stereotype = node.stereotype;
-  ctx.containers.push(desc);
-  ctx.containerById.set(key, desc);
-  classifyAst(node.children, ctx, removed, childAncestors, key);
-  // #lizard forgives -- pre-existing (6 params): the cohesive AST-
-  // classification context (node/ctx/removed/key/ancestorIds/parentAstId)
-  // threaded from classifyAst's own recursive call, not new here
-  // (mission G5/C1 500-line split -- pure move, full-file rescan surfaced
-  // it, not introduced).
-}
-
-/** Unfiltered container count (declaration view) — the degenerate check
- *  (DotData.isDegeneratedWithFewEntities) counts groups BEFORE removal. */
-function countRawContainers(nodes: readonly DescriptiveNode[]): number {
-  let n = 0;
-  for (const node of nodes) {
-    if (isClusterNode(node)) n += 1 + countRawContainers(node.children);
-  }
-  return n;
-}
-
-/** Removal-aware cluster predicate: GraphvizImageBuilder's empty-group
- *  demotion (java:416-418) applies to the removal-FILTERED view — a group
- *  whose visible children are all removed becomes a LEAF (gezemu-34 oracle:
- *  `frame l3 { component D }` + `remove D` renders l3 as a rect). */
-export function isEffectiveCluster(node: DescriptiveNode, removed: ReadonlySet<string>): boolean {
-  return (
-    isClusterNode(node) && node.children.some((c) => !removed.has(c.id))
-  );
-}
-
-function classifyAst(
-  nodes: readonly DescriptiveNode[],
-  ctx: ClassifyCtx,
-  removed: ReadonlySet<string>,
-  ancestorIds: readonly string[] = [],
-  parentAstId?: string,
-): void {
-  for (const node of nodes) {
-    const key = dotKeyFor(ancestorIds, node.id, ctx.collidingIds);
-    ctx.astNodeById.set(key, node);
-    ctx.qualifiedPathToDotKey.set(scopedKey([...ancestorIds, node.id]), key);
-    if (isEffectiveCluster(node, removed)) {
-      classifyAsCluster(node, ctx, removed, key, ancestorIds, parentAstId);
-    } else {
-      ctx.leafIdSet.add(key);
-    }
-  }
-}
-
 
 // ── Public API helpers ──
 
@@ -188,8 +106,11 @@ function buildPortClusterInfoByAstId(
     const title = measureTitleLabel(c.display, c.symbol, fontSpec, measurer);
     const anchor = measureShadowAnchorDims(c.display, fontSpec, measurer);
     out.set(c.astId, {
-      ranks, anchorWidth: anchor.width, anchorHeight: anchor.height,
-      titleWidth: title.width, titleHeight: title.height,
+      ranks,
+      anchorWidth: anchor.width,
+      anchorHeight: anchor.height,
+      titleWidth: title.width,
+      titleHeight: title.height,
     });
   }
   return out;
@@ -209,10 +130,11 @@ function runLayout(
   removed: ReadonlySet<string>,
   fixCircle: boolean,
 ): {
-  result: DotLayoutResult; edgeDotBuild: EdgeDotBuildResult;
-  portClusterInfoByAstId: Map<string, PortClusterInfo>; spacing: ClusterSpacing;
+  result: DotLayoutResult;
+  edgeDotBuild: EdgeDotBuildResult;
+  portClusterInfoByAstId: Map<string, PortClusterInfo>;
+  spacing: ClusterSpacing;
 } {
-
   // Edges first: buildDotClusters/buildDotNodes need to know which clusters
   // require a group-anchor node — either a direct group-edge
   // (edgeDotBuild.groupAnchorClusterIds, P2/i5) or port children
@@ -220,12 +142,11 @@ function runLayout(
   const edgeDotBuild = buildDotEdges(ast.links, ctx, edgeFonts, measurer, linetype);
   // applySingleStrategy: standalone leaves square-chain with invisible
   // links per group (magma.ts).
-  edgeDotBuild.dotEdges.push(...buildMagmaEdges(magmaGroups(ctx),
-    new Set(edgeDotBuild.dotEdges.flatMap((e) => [e.from, e.to]))));
+  edgeDotBuild.dotEdges.push(
+    ...buildMagmaEdges(magmaGroups(ctx), new Set(edgeDotBuild.dotEdges.flatMap((e) => [e.from, e.to]))),
+  );
   if (removed.size > 0) {
-    edgeDotBuild.dotEdges = edgeDotBuild.dotEdges.filter(
-      (e) => !removed.has(e.from) && !removed.has(e.to),
-    );
+    edgeDotBuild.dotEdges = edgeDotBuild.dotEdges.filter((e) => !removed.has(e.from) && !removed.has(e.to));
   }
   const portRanksByCluster = computePortRanksByCluster(ctx);
   const portClusterIds = new Set(portRanksByCluster.keys());
@@ -240,17 +161,26 @@ function runLayout(
   const anchorClusterIds = kermor
     ? new Set(edgeDotBuild.groupAnchorClusterIds)
     : new Set([...edgeDotBuild.groupAnchorClusterIds, ...portClusterIds]);
-  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor)
-    .map((c) => ({ ...c, nodeIds: c.nodeIds.filter((id) => !removed.has(id)) }));
+  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor).map((c) => ({
+    ...c,
+    nodeIds: c.nodeIds.filter((id) => !removed.has(id)),
+  }));
   const { nodeSep, rankSep } = computeGraphSpacing(ast.links, edgeFonts.label, measurer, kermor, ctx.sprites);
   const input: DotInputGraph = {
     nodes: buildDotNodes(
-      ctx, fontSpec, measurer, anchorClusterIds, portClusterIds,
-      edgeDotBuild.groupAnchorClusterIds, ast.links, fixCircle,
+      ctx,
+      fontSpec,
+      measurer,
+      anchorClusterIds,
+      portClusterIds,
+      edgeDotBuild.groupAnchorClusterIds,
+      ast.links,
+      fixCircle,
       ast.stereotypeVisibilityRules ?? [],
     ).filter((n) => !removed.has(n.id)),
     edges: edgeDotBuild.dotEdges,
-    nodeSep, rankSep,
+    nodeSep,
+    rankSep,
     // I9 (path/@d): description draws every arrowhead itself (SvekEdge /
     // extremity/*.ts), matching the Svek-DOT emitter's own universal
     // `arrowhead=none` — see `DotInputGraph.manualArrowheads`'s doc comment.
@@ -265,9 +195,7 @@ function runLayout(
   if (ast.rankdir === 'LR') input.rankDir = 'LR';
   if (dotClusters.length > 0) input.clusters = dotClusters;
   if (kermor) input.kermor = true;
-  const portClusterInfoByAstId = buildPortClusterInfoByAstId(
-    ctx, portRanksByCluster, fontSpec, measurer, kermor,
-  );
+  const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, fontSpec, measurer, kermor);
   const spacing: ClusterSpacing = { nodeSep, rankSep, rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1
   // 500-line split, pure move); 8 params after this iteration's own
@@ -301,9 +229,12 @@ function withLinkNoteDrawn(links: readonly DescriptiveLink[]): readonly Descript
   return links.map((link) => {
     if (link.linkNote === undefined) return link;
     const noteFirst = link.linkNotePosition === 'left' || link.linkNotePosition === 'top';
-    const parts = link.label === undefined
-      ? [link.linkNote]
-      : noteFirst ? [link.linkNote, link.label] : [link.label, link.linkNote];
+    const parts =
+      link.label === undefined
+        ? [link.linkNote]
+        : noteFirst
+          ? [link.linkNote, link.label]
+          : [link.label, link.linkNote];
     return { ...link, label: parts.join('\n') };
   });
 }
@@ -325,9 +256,7 @@ function buildGeoAndEdges(
   const hidden = effectiveHiddenIds(ast.nodes, ast.hideShowRules ?? []);
   const stereotypeRules = ast.stereotypeVisibilityRules ?? [];
   const leafPosMap = new Map(result.nodes.map((n) => [n.id, n]));
-  const rawNodes = buildGeoTree(
-    ast.nodes, leafPosMap, collidingIds, removed, hidden, stereotypeRules, portClusterCtx,
-  );
+  const rawNodes = buildGeoTree(ast.nodes, leafPosMap, collidingIds, removed, hidden, stereotypeRules, portClusterCtx);
   const geoIndex = buildNodeGeoIndex(rawNodes);
   // G1b/J1 (mechanism C): build edges ONCE at (dx=0,dy=0) -- the RAW,
   // fully-resolved (spline-clipped, labeled) draw shape `computeInkShift`'s
@@ -337,15 +266,15 @@ function buildGeoAndEdges(
     dotEdgeToLinkIdx: edgeDotBuild.dotEdgeToLinkIdx,
     edgeContainerEndpoints: edgeDotBuild.edgeContainerEndpoints,
     geoIndex,
-    dx: 0, dy: 0,
+    dx: 0,
+    dy: 0,
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
   const rawEdges = buildEdgeGeos(drawLinks, result.edges, rawMapping, hidden);
   const { dx, dy } = computeInkShift(rawNodes, rawEdges, theme, measurer, ast.sprites);
   const nodes = rawNodes.map((n) => shiftGeo(n, dx, dy));
-  const edges = (dx === 0 && dy === 0)
-    ? rawEdges
-    : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
+  const edges =
+    dx === 0 && dy === 0 ? rawEdges : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
   // #lizard forgives -- pre-existing (8 params): the cohesive geo-tree +
   // edge-geometry assembly context threaded from layoutDescription's own
   // single call site -- mission G5/C1 500-line split (pure move), not
@@ -364,7 +293,10 @@ export function layoutDescription(
 ): DescriptionGeometry {
   if (ast.nodes.length === 0) {
     return {
-      totalWidth: 0, totalHeight: 0, nodes: [], edges: [],
+      totalWidth: 0,
+      totalHeight: 0,
+      nodes: [],
+      edges: [],
       ...(ast.seed !== undefined ? { seed: ast.seed } : {}),
       ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
     };
@@ -419,8 +351,11 @@ export function layoutDescription(
   // collision. See namespace-groups.ts's `dotKeyFor` doc.
   const collidingIds = findCollidingIds(ast.nodes);
   const ctx: ClassifyCtx = {
-    leafIdSet: new Set(), containers: [],
-    containerById: new Map(), astNodeById: new Map(), counter: { n: 0 },
+    leafIdSet: new Set(),
+    containers: [],
+    containerById: new Map(),
+    astNodeById: new Map(),
+    counter: { n: 0 },
     componentStyle: theme.componentStyle,
     actorStyle: theme.actorStyle,
     minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
@@ -432,7 +367,8 @@ export function layoutDescription(
       start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
       end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
     },
-    collidingIds, qualifiedPathToDotKey: new Map(),
+    collidingIds,
+    qualifiedPathToDotKey: new Map(),
     sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
     // Separate channel from `sprites` above — `spriteDimsLookupFor` keeps only
     // sprite DIMS and drops the registry's emoji store. See `ClassifyCtx
@@ -470,16 +406,25 @@ export function layoutDescription(
     };
   }
   const { result, edgeDotBuild, portClusterInfoByAstId, spacing } = runLayout(
-    ast, ctx, fontSpec, edgeFonts, measurer, theme.linetype ?? ast.linetype, removed,
+    ast,
+    ctx,
+    fontSpec,
+    edgeFonts,
+    measurer,
+    theme.linetype ?? ast.linetype,
+    removed,
     theme.fixCircleLabelOverlapping === true,
   );
-  const { nodes, edges } = buildGeoAndEdges(
-    ast, result, edgeDotBuild, collidingIds, removed, theme, measurer,
-    { infoByAstId: portClusterInfoByAstId, spacing },
-  );
+  const { nodes, edges } = buildGeoAndEdges(ast, result, edgeDotBuild, collidingIds, removed, theme, measurer, {
+    infoByAstId: portClusterInfoByAstId,
+    spacing,
+  });
   const { totalWidth, totalHeight } = computeTotalDimensions(nodes, edges);
   return {
-    totalWidth, totalHeight, nodes, edges,
+    totalWidth,
+    totalHeight,
+    nodes,
+    edges,
     ...(ast.seed !== undefined ? { seed: ast.seed } : {}),
     ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
     ...(ast.scale !== undefined ? { scale: ast.scale } : {}),

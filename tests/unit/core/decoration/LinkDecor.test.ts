@@ -68,12 +68,7 @@ describe('per-value data (java:71-100 constructor args)', () => {
 
   it('fill matches upstream (true only for COMPOSITION, CROWFOOT, ARROW, ARROW_TRIANGLE)', () => {
     const fills = Object.values(LinkDecor).filter((d) => isFill(d));
-    expect(fills).toEqual([
-      LinkDecor.COMPOSITION,
-      LinkDecor.CROWFOOT,
-      LinkDecor.ARROW,
-      LinkDecor.ARROW_TRIANGLE,
-    ]);
+    expect(fills).toEqual([LinkDecor.COMPOSITION, LinkDecor.CROWFOOT, LinkDecor.ARROW, LinkDecor.ARROW_TRIANGLE]);
   });
 
   it('arrow sizes match upstream (PARENTHESIS 1.0 — USE_INTERFACE_EYE2 is false)', () => {
@@ -128,7 +123,28 @@ describe('lookupDecors1/lookupDecors2 (java:226-236)', () => {
 describe('getRegexDecors1/getRegexDecors2 (java:238-264)', () => {
   it('produces an optional group that matches every token', () => {
     const re1 = new RegExp('^' + getRegexDecors1() + '$');
-    for (const tok of ['<|', '^', '*', 'x', '<||', '<|:', '}', '}o', '|o', '||', '}|', '<', '<_', '<<', '0', '@', '0)', ')', '#', '+']) {
+    for (const tok of [
+      '<|',
+      '^',
+      '*',
+      'x',
+      '<||',
+      '<|:',
+      '}',
+      '}o',
+      '|o',
+      '||',
+      '}|',
+      '<',
+      '<_',
+      '<<',
+      '0',
+      '@',
+      '0)',
+      ')',
+      '#',
+      '+',
+    ]) {
       expect(re1.test(tok), tok).toBe(true);
     }
     expect(re1.test('')).toBe(true); // the whole group is optional: (...)?

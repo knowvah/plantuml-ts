@@ -140,7 +140,7 @@ describe('visibilityIconOriginY', () => {
 });
 
 describe('VISIBILITY_ICON_SIZE', () => {
-  it('matches classAttributeIconSize()\'s default (10)', () => {
+  it("matches classAttributeIconSize()'s default (10)", () => {
     expect(VISIBILITY_ICON_SIZE).toBe(10);
   });
 });
@@ -207,13 +207,12 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
  */
 describe('renderVisibilityIcon — classAttributeIconSize (ledger M5)', () => {
   /** `VisibilityModifier#drawSquare`: evened size, minus 4. */
-  const squareEdgeFor = (iconSize: number): number => (iconSize - (iconSize % 2)) - 4;
+  const squareEdgeFor = (iconSize: number): number => iconSize - (iconSize % 2) - 4;
 
-  const themeWith = (classAttributeIconSize: number): Theme =>
-    ({ ...defaultTheme, classAttributeIconSize });
+  const themeWith = (classAttributeIconSize: number): Theme => ({ ...defaultTheme, classAttributeIconSize });
 
   it.each([
-    [10, 6],  // the default — must stay byte-identical to pre-B4 output
+    [10, 6], // the default — must stay byte-identical to pre-B4 output
     [12, 8],
     [14, 10],
     [16, 12],
@@ -227,12 +226,12 @@ describe('renderVisibilityIcon — classAttributeIconSize (ledger M5)', () => {
 
   it('evens an ODD size before drawing, per ensureEven', () => {
     // 15 → 14 → edge 10, the SAME glyph as an explicit 14.
-    expect(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(15)))
-      .toBe(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(14)));
+    expect(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(15))).toBe(
+      renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(14)),
+    );
   });
 
   it('leaves the default output unchanged when no override is set', () => {
-    expect(renderVisibilityIcon('-', true, 0, 0))
-      .toBe(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(10)));
+    expect(renderVisibilityIcon('-', true, 0, 0)).toBe(renderVisibilityIcon('-', true, 0, 0, undefined, themeWith(10)));
   });
 });

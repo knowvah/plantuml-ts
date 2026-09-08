@@ -20,27 +20,13 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ClassifierGeo } from './layout.js';
-import { formatMemberText, type MeasuredClassifier, type MemberSuppression } from './class-layout-helpers.js';
+import type { MeasuredClassifier, MemberSuppression } from './class-layout-helpers.js';
 import { resolveVisibleStereotypeLabels, type GuillemetPair } from './class-stereotype.js';
 import { measureLeafNode } from '../../core/svek/image/leaf-sizing.js';
 import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
-import {
-  resolveElementFontSize,
-  resolveElementMinimumWidth,
-} from '../../core/theme-element-resolve.js';
-import {
-  isMethodMember,
-  sectionHeight,
-  buildSectionRows,
-  sectionWidth,
-  rowIconZoneWidth,
-  buildWrappedSectionRowBuilds,
-  type FlatMemberRows,
-  type SectionRowContext,
-} from './class-member-rows.js';
-import { isEnhancedBody } from './class-body-enhanced.js';
-import { measureEnhancedBody } from './class-body-enhanced-layout.js';
+import { resolveElementFontSize, resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
+import { buildSectionRows, type FlatMemberRows, type SectionRowContext } from './class-member-rows.js';
 import {
   computeHeaderNameGeo,
   computeStereoAndTagGeo,
@@ -49,6 +35,10 @@ import {
   type CommonHeaderFields,
 } from './class-layout-header-geo.js';
 import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js';
+// Member-section geometry (computeMemberSectionsGeo / computeEnhancedBodyGeo)
+// split out to a sibling module — 500-line cap; a pure move, zero behavior
+// change (see that file's own doc comment).
+import { computeMemberSectionsGeo, computeEnhancedBodyGeo } from './class-layout-generic-classifier-sections.js';
 
 export type { ClassFontSpecs };
 
@@ -92,18 +82,24 @@ export function tryMeasureDescriptionLeaf(
   if (classifier.members.some((m) => m.hidden !== true)) return undefined;
   const stereotype = resolveVisibleStereotypeLabels(classifier);
   const node: LeafSizingSubject = {
-    id: classifier.id, display: classifier.display, symbol,
+    id: classifier.id,
+    display: classifier.display,
+    symbol,
     ...(stereotype.length > 0 ? { stereotype } : {}),
   };
   const dim = measureLeafNode(
-    node, { family: theme.fontFamily, size: theme.fontSize }, measurer,
+    node,
+    { family: theme.fontFamily, size: theme.fontSize },
+    measurer,
     buildDescriptionLeafOpts(theme, symbol),
     sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined,
   );
   // Same single-row composition as `measureUsecaseOrActor` -- the renderer's
   // `tryRenderUSymbol` path reads `rows[0].text` for the drawn label.
   return {
-    width: dim.width, height: dim.height, dividerYs: [],
+    width: dim.width,
+    height: dim.height,
+    dividerYs: [],
     rows: [{ text: classifier.display, y: dim.height / 2, indent: 0, italic: false }],
   };
 }
@@ -124,107 +120,6 @@ function buildDescriptionLeafOpts(theme: Theme, symbol: LeafSizingSubject['symbo
     },
     fontSize: resolveElementFontSize(theme, symbol, 'title'),
   };
-}
-
-/** Params bundle for {@link computeMemberSectionsGeo} -- kept under the
- *  project's per-function param cap. */
-interface MemberSectionsOptions {
-  suppress: MemberSuppression;
-  memberMaxWidth: number;
-  sprites: SpriteRegistry | undefined;
-  /** A13 -- see {@link MeasureGenericClassifierOptions.classAttributeIconSize}. */
-  classAttributeIconSize?: number | undefined;
-  /** A2s R2f -- the resolved badge radius ({@link
-   *  MeasureGenericClassifierOptions.badgeRadius}); the per-section
-   *  visibility-icon zone is `radius + 3` (`rowIconZoneWidth`), never a
-   *  fixed 14 (puvono-84-doro361 / sekame-22-meze147:
-   *  `skinparam CircledCharacterRadius 8` -> zone 11).
-   * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:155-157 */
-  badgeRadius: number;
-}
-
-/**
- * Field/method compartment row-building + width/height sizing, INDEPENDENT
- * of whether the classifier's body is ultimately drawn as an "enhanced
- * body" (the caller decides which width/height to actually use). Split out
- * of `measureGenericClassifier` purely to keep that function's NLOC/CCN
- * under the project's per-function caps -- see that function's own doc
- * comment for the upstream derivation of every field below.
- */
-function computeMemberSectionsGeo(
-  classifier: Classifier,
-  fontSpec: { family: string; size: number },
-  measurer: StringMeasurer,
-  options: MemberSectionsOptions,
-) {
-  const { suppress, memberMaxWidth, sprites } = options;
-  // A2s F-G mechanism A13: `classAttributeIconSize 0` --
-  // `MethodsOrFieldsArea#hasSmallIcon()` (java:125-127) returns false
-  // before scanning any member, and `#createTextBlock` (java:244-246)
-  // keeps the visibility char in the member text instead.
-  const noIcon = options.classAttributeIconSize === 0;
-  // Only include visible (non-hidden) members in layout; split into the two
-  // upstream compartments (fields first, then methods — declaration order
-  // preserved within each).
-  const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
-  const fields = visibleMembers.filter((m) => !isMethodMember(m));
-  const methods = visibleMembers.filter(isMethodMember);
-  const fieldTexts = fields.map((m) => formatMemberText(m, noIcon));
-  const methodTexts = methods.map((m) => formatMemberText(m, noIcon));
-  // G2 N22/N65 item 35: each member's creole build is computed ONCE here and
-  // reused for BOTH the section max-width scan and the stored row, and now
-  // also word-wraps each member into 1+ rows when `memberMaxWidth` is set.
-  const fieldFlat = buildWrappedSectionRowBuilds(fields, fieldTexts, fontSpec, measurer, memberMaxWidth, sprites);
-  const methodFlat = buildWrappedSectionRowBuilds(methods, methodTexts, fontSpec, measurer, memberMaxWidth, sprites);
-  // G2 N14: hasIcon is a per-SECTION scan, fields and methods independent.
-  // A13: `hasSmallIcon`'s `classAttributeIconSize() == 0` early-false wins
-  // over any explicit member.
-  const fieldsHasIcon = !noIcon && fields.some((m) => m.visibilityExplicit === true);
-  const methodsHasIcon = !noIcon && methods.some((m) => m.visibilityExplicit === true);
-  // A2s R2f: the icon zone follows the RESOLVED badge radius (`radius + 3`,
-  // MethodsOrFieldsArea.java:157) for both the width reserve here and the
-  // row indent (`buildSectionRows` via `SectionRowContext.iconZoneWidth`).
-  const iconZoneWidth = rowIconZoneWidth(options.badgeRadius);
-  // G2 N26: a SUPPRESSED compartment must not contribute to the box width
-  // either -- jar-verified `nujiga-81-peno983`.
-  const sectionsWidth = Math.max(
-    suppress.fields ? 0 : sectionWidth(fieldFlat.builds, fieldsHasIcon, iconZoneWidth),
-    suppress.methods ? 0 : sectionWidth(methodFlat.builds, methodsHasIcon, iconZoneWidth),
-  );
-  // G2 N10: each compartment (fields, methods) is suppressed INDEPENDENTLY.
-  // G2 N65 item 35: total FLAT row count (may exceed `fields.length`/
-  // `methods.length` when a member wraps into multiple rows).
-  // A2s R2i (lozego-15-coci435): per-row heights summed off each build
-  // (`sectionHeight`'s own doc comment) -- `memberRowHeight` no longer
-  // parameterizes section heights (every atom-free row's own height equals
-  // it, so the sum is identical for the common case).
-  const fieldsH = suppress.fields ? 0 : sectionHeight(fieldFlat.builds);
-  const methodsH = suppress.methods ? 0 : sectionHeight(methodFlat.builds);
-  return { fieldFlat, methodFlat, fieldsHasIcon, methodsHasIcon, sectionsWidth, fieldsH, methodsH, iconZoneWidth };
-}
-
-/**
- * G2 N42: upstream's "enhanced body" render strategy (`--`/`==`/`..`/`__`
- * block separator or a `|_` tree-list line anywhere in the raw body)
- * REPLACES the classic fields/methods split entirely. G2 N44 (regression
- * guard, `nirija-04-veti140`): a classifier whose whole member section is
- * suppressed (BOTH `suppress.fields` AND `suppress.methods`) draws NO body
- * at all, not the full enhanced-body content. Split out of
- * `measureGenericClassifier` purely to keep that function's NLOC/CCN under
- * the project's per-function caps.
- */
-function computeEnhancedBodyGeo(
-  classifier: Classifier,
-  fontSpec: { family: string; size: number },
-  measurer: StringMeasurer,
-  stereoGeo: ReturnType<typeof computeStereoAndTagGeo>,
-  options: { sprites: SpriteRegistry | undefined; suppress: MemberSuppression },
-) {
-  const { sprites, suppress } = options;
-  if (!isEnhancedBody(classifier.rawBodyLines) || (suppress.fields && suppress.methods)) return undefined;
-  return measureEnhancedBody(classifier.rawBodyLines!, {
-    fontSpec, measurer, sprites, baselineOffset: stereoGeo.memberBaselineOffset, bodyTop: stereoGeo.headerRowHeight,
-  });
 }
 
 /** Every field `measureGenericClassifier` threads down to size the
@@ -307,17 +202,27 @@ function computeClassifierGeoPipeline(
   // a header NAME can carry `<$sprite>`/`<:emoji:>` atoms and the R2i badge
   // sprite `<<($name)>>` sizes off the registry) -- both option shapes are
   // owned by class-layout-header-geo.ts.
-  const headerNameGeo =
-    computeHeaderNameGeo(classifier, headerFont, fontSpec, measurer, { strictUml, headerMaxWidth, sprites });
-  const stereoGeo =
-    computeStereoAndTagGeo(classifier, fonts, measurer, headerNameGeo, { guillemet, badgeRadius, stereoFont });
+  const headerNameGeo = computeHeaderNameGeo(classifier, headerFont, fontSpec, measurer, {
+    strictUml,
+    headerMaxWidth,
+    sprites,
+  });
+  const stereoGeo = computeStereoAndTagGeo(classifier, fonts, measurer, headerNameGeo, {
+    guillemet,
+    badgeRadius,
+    stereoFont,
+  });
   const enhancedBody = computeEnhancedBodyGeo(classifier, fontSpec, measurer, stereoGeo, { sprites, suppress });
-  const memberSections = enhancedBody !== undefined
-    ? undefined
-    : computeMemberSectionsGeo(
-        classifier, fontSpec, measurer,
-        { suppress, memberMaxWidth, sprites, classAttributeIconSize: options.classAttributeIconSize, badgeRadius },
-      );
+  const memberSections =
+    enhancedBody !== undefined
+      ? undefined
+      : computeMemberSectionsGeo(classifier, fontSpec, measurer, {
+          suppress,
+          memberMaxWidth,
+          sprites,
+          classAttributeIconSize: options.classAttributeIconSize,
+          badgeRadius,
+        });
   const memberAreaWidth = enhancedBody !== undefined ? enhancedBody.width : memberSections!.sectionsWidth;
   // A2s F-D mechanism A7: `EntityImageClass#calculateDimensionSlow`'s
   // `if (width < minClassWidth) width = minClassWidth` floor (EntityImageClass
@@ -327,9 +232,11 @@ function computeClassifierGeoPipeline(
   // Jar-verified: novaro-13-socu897 (`skinparam minClassWidth 70` -> `class a`
   // emits width 0.972222in = 70px exactly).
   const width = Math.max(Math.max(stereoGeo.headerWidth, memberAreaWidth), minClassWidth);
-  const headerRowsGeo = computeHeaderRowsGeo(
-    classifier, fonts, { headerNameGeo, stereoGeo }, width, { guillemet, badgeRadius, stereoFont },
-  );
+  const headerRowsGeo = computeHeaderRowsGeo(classifier, fonts, { headerNameGeo, stereoGeo }, width, {
+    guillemet,
+    badgeRadius,
+    stereoFont,
+  });
   const commonFields = buildCommonHeaderFields(headerNameGeo, headerRowsGeo);
   return { headerNameGeo, stereoGeo, enhancedBody, memberSections, width, headerRowsGeo, commonFields };
 }
@@ -343,8 +250,11 @@ function buildCommonHeaderFields(
   headerRowsGeo: ReturnType<typeof computeHeaderRowsGeo>,
 ): CommonHeaderFields {
   return {
-    ...headerRowsGeo.headerRowCountField, ...headerRowsGeo.nameRowCountField,
-    ...headerNameGeo.badgeCharField, ...headerNameGeo.badgeColorField, ...headerRowsGeo.genericTagField,
+    ...headerRowsGeo.headerRowCountField,
+    ...headerRowsGeo.nameRowCountField,
+    ...headerNameGeo.badgeCharField,
+    ...headerNameGeo.badgeColorField,
+    ...headerRowsGeo.genericTagField,
   };
 }
 
@@ -374,11 +284,14 @@ function buildEnhancedBodyResult(
   commonFields: CommonHeaderFields,
 ): MeasuredClassifier {
   return {
-    width, height: stereoGeo.headerRowHeight + enhancedBody.height, rows: headerRowsGeo.rows,
+    width,
+    height: stereoGeo.headerRowHeight + enhancedBody.height,
+    rows: headerRowsGeo.rows,
     // `dividerYs[0]` is consulted by `renderer-classifier-box.ts
     // #renderBadge` for the header's own height (badge vertical center).
     dividerYs: [stereoGeo.headerRowHeight],
-    enhancedBody, ...commonFields,
+    enhancedBody,
+    ...commonFields,
   };
 }
 
@@ -406,7 +319,11 @@ export function measureGenericClassifier(
   }
 
   return buildNormalClassifierResult(
-    width, { headerNameGeo, stereoGeo, headerRowsGeo }, memberSections!, suppress, commonFields,
+    width,
+    { headerNameGeo, stereoGeo, headerRowsGeo },
+    memberSections!,
+    suppress,
+    commonFields,
   );
 }
 
@@ -463,11 +380,21 @@ function buildNormalClassifierResult(
     iconZoneWidth: memberSections.iconZoneWidth,
   };
   if (!suppress.fields) {
-    appendMemberSectionRows(acc, memberSections.fieldFlat, stereoGeo.headerRowHeight, memberSections.fieldsHasIcon, rowCtx);
+    appendMemberSectionRows(
+      acc,
+      memberSections.fieldFlat,
+      stereoGeo.headerRowHeight,
+      memberSections.fieldsHasIcon,
+      rowCtx,
+    );
   }
   if (!suppress.methods) {
     appendMemberSectionRows(
-      acc, memberSections.methodFlat, stereoGeo.headerRowHeight + fieldsH, memberSections.methodsHasIcon, rowCtx,
+      acc,
+      memberSections.methodFlat,
+      stereoGeo.headerRowHeight + fieldsH,
+      memberSections.methodsHasIcon,
+      rowCtx,
     );
   }
   // T2 (SI17), publish-only: surface the ALREADY-COMPUTED headerRowHeight +

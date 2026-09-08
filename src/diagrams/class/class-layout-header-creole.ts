@@ -109,7 +109,10 @@ export function buildHeaderLineMetrics(
   sprites: SpriteRegistry | undefined,
 ): { headerLineWidths: number[]; headerDisplayLines: string[]; nameBlockHeight: number } {
   const font: FontConfiguration = {
-    family: headerFont.family, size: headerFont.size, color: null, styles: new Set(),
+    family: headerFont.family,
+    size: headerFont.size,
+    color: null,
+    styles: new Set(),
   };
   const builds = headerLines.map((l) => buildHeaderLine(l, font, measurer, sprites));
   return {

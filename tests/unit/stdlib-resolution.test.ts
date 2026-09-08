@@ -204,11 +204,7 @@ describe('withStdlib() wiring -- IncludeExecutor consults the store before throw
     // show dedup either way -- use a bundle whose content is a plain content
     // line instead, which DOES emit output, to make re-inclusion observable.
     const twice: BundleData = { name: 'twice', files: { thing: 'class B' } };
-    const lines = run(
-      ['!include <twice/thing>', '!include <twice/thing>'],
-      new MapIncludeStore(),
-      stdlibStore(twice),
-    );
+    const lines = run(['!include <twice/thing>', '!include <twice/thing>'], new MapIncludeStore(), stdlibStore(twice));
     expect(lines).toEqual(['class B', 'class B']);
   });
 });

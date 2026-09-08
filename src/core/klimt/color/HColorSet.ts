@@ -169,9 +169,7 @@ export function parseConditionalColor(raw: string): ConditionalColorSpec | undef
   if (parts.length < 2 || parts.length > 3) return undefined;
   const [light, dark, transparent] = parts;
   if (light === undefined || light === '' || dark === undefined || dark === '') return undefined;
-  return transparent !== undefined && transparent !== ''
-    ? { light, dark, transparent }
-    : { light, dark };
+  return transparent !== undefined && transparent !== '' ? { light, dark, transparent } : { light, dark };
 }
 
 /**
@@ -213,8 +211,7 @@ export function resolveConditionalColor(raw: string, localBackgroundHex: string)
   const spec = parseConditionalColor(raw);
   if (spec === undefined) return undefined;
 
-  const isTransparent =
-    localBackgroundHex.toLowerCase() === 'transparent' || localBackgroundHex === '#00000000';
+  const isTransparent = localBackgroundHex.toLowerCase() === 'transparent' || localBackgroundHex === '#00000000';
   if (isTransparent) return resolveColorToSvgHex(spec.transparent ?? spec.light);
 
   const bg = parseSimpleColor(localBackgroundHex);

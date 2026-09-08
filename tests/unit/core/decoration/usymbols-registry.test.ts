@@ -139,7 +139,9 @@ describe('USymbols registry — record() singletons', () => {
     );
     // A hyphen, by contrast, IS \\W and gets stripped — so it does NOT
     // reproduce the underscore-joined registry key.
-    expect(fromString('Component-Rectangle', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, DEFAULT_PACKAGE_STYLE)).toBeNull();
+    expect(
+      fromString('Component-Rectangle', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, DEFAULT_PACKAGE_STYLE),
+    ).toBeNull();
     expect(fromString('  ', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, DEFAULT_PACKAGE_STYLE)).toBeNull();
   });
 
@@ -169,7 +171,13 @@ describe('fromString(s, actorStyle, componentStyle, packageStyle) — overload 1
     expect(fromString('package', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, packageStyle)).toBe(expected);
   });
 
-  it.each([PackageStyle.AGENT, PackageStyle.STORAGE, PackageStyle.COMPONENT1, PackageStyle.COMPONENT2, PackageStyle.ARTIFACT] as const)(
+  it.each([
+    PackageStyle.AGENT,
+    PackageStyle.STORAGE,
+    PackageStyle.COMPONENT1,
+    PackageStyle.COMPONENT2,
+    PackageStyle.ARTIFACT,
+  ] as const)(
     '"package" + PackageStyle.%s resolves to null (no branch in PackageStyle#toUSymbol())',
     (packageStyle) => {
       expect(fromString('package', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, packageStyle)).toBeNull();
@@ -206,7 +214,9 @@ describe('fromString(s, actorStyle, componentStyle, packageStyle) — overload 1
   });
 
   it('an unregistered code resolves to null', () => {
-    expect(fromString('not-a-real-symbol', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, DEFAULT_PACKAGE_STYLE)).toBeNull();
+    expect(
+      fromString('not-a-real-symbol', DEFAULT_ACTOR_STYLE, DEFAULT_COMPONENT_STYLE, DEFAULT_PACKAGE_STYLE),
+    ).toBeNull();
   });
 });
 

@@ -62,9 +62,7 @@ function makeNode(overrides: Partial<JsonNodeGeo> = {}): JsonNodeGeo {
     height: 60,
     keyColWidth: 80,
     valueColWidth: 120,
-    rows: [
-      makeRow({ key: 'name', value: 'Alice', valueType: 'string', y: 4, height: 20 }),
-    ],
+    rows: [makeRow({ key: 'name', value: 'Alice', valueType: 'string', y: 4, height: 20 })],
     ...overrides,
   };
 }
@@ -81,7 +79,10 @@ function makeGeo(overrides: Partial<JsonGeometry> = {}): JsonGeometry {
 
 function makeEdge(overrides: Partial<JsonEdgeGeo> = {}): JsonEdgeGeo {
   return {
-    points: [{ x: 100, y: 50 }, { x: 200, y: 50 }],
+    points: [
+      { x: 100, y: 50 },
+      { x: 200, y: 50 },
+    ],
     spline: false,
     ...overrides,
   };
@@ -180,7 +181,10 @@ describe('renderJson — AC #3: edge produces a path with d="M"', () => {
     const nodeA = makeNode({ id: 'n0', x: 0, y: 0 });
     const nodeB = makeNode({ id: 'n1', x: 300, y: 0 });
     const edge = makeEdge({
-      points: [{ x: 200, y: 30 }, { x: 300, y: 30 }],
+      points: [
+        { x: 200, y: 30 },
+        { x: 300, y: 30 },
+      ],
     });
     const geo = makeGeo({ nodes: [nodeA, nodeB], edges: [edge] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
@@ -244,10 +248,7 @@ describe('renderJson — structural', () => {
   });
 
   it('each node produces a <g transform="translate( element', () => {
-    const nodes = [
-      makeNode({ id: 'n0', x: 10, y: 20 }),
-      makeNode({ id: 'n1', x: 300, y: 50 }),
-    ];
+    const nodes = [makeNode({ id: 'n0', x: 10, y: 20 }), makeNode({ id: 'n1', x: 300, y: 50 })];
     const geo = makeGeo({ nodes });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
@@ -335,9 +336,9 @@ describe('renderJson — structural', () => {
     const edge = makeEdge({
       spline: true,
       points: [
-        { x: 0,   y: 0  },
-        { x: 50,  y: 0  },
-        { x: 50,  y: 50 },
+        { x: 0, y: 0 },
+        { x: 50, y: 0 },
+        { x: 50, y: 50 },
         { x: 100, y: 50 },
       ],
     });
@@ -361,7 +362,10 @@ describe('renderJson — structural', () => {
   it('a 2-point edge is stub + line, with no invented curve', () => {
     const edge = makeEdge({
       spline: false,
-      points: [{ x: 10, y: 20 }, { x: 90, y: 60 }],
+      points: [
+        { x: 10, y: 20 },
+        { x: 90, y: 60 },
+      ],
     });
     const geo = makeGeo({
       nodes: [makeNode({ id: 'n0' }), makeNode({ id: 'n1', x: 200, y: 0 })],
@@ -381,7 +385,10 @@ describe('renderJson — structural', () => {
   // point of the 5-point head path is `ep` verbatim.
   it('draws the arrowhead tip AT ep, not one arrow-length past the spline', () => {
     const edge = makeEdge({
-      points: [{ x: 0, y: 0 }, { x: 100, y: 0 }],
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
       // Deliberately NOT 7.5 past the last point: a fabricated tip would land
       // at x=107.5, so this value can only be reproduced by reading `ep`.
       ep: { x: 130, y: 0 },
@@ -402,7 +409,12 @@ describe('renderJson — structural', () => {
   // it on the same condition (C `eflag`), so absence means NO arrow — not a
   // fallback to the retired extrapolation.
   it('draws no arrowhead at all when the engine reported no ep', () => {
-    const edge = makeEdge({ points: [{ x: 0, y: 0 }, { x: 100, y: 0 }] });
+    const edge = makeEdge({
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+    });
     const geo = makeGeo({
       nodes: [makeNode({ id: 'n0' }), makeNode({ id: 'n1', x: 200, y: 0 })],
       edges: [edge],
@@ -477,7 +489,10 @@ describe('renderJson — branch coverage', () => {
   it('spline=true with only 2 points falls back to stub+bezier path', () => {
     const edge = makeEdge({
       spline: true,
-      points: [{ x: 10, y: 10 }, { x: 90, y: 90 }],
+      points: [
+        { x: 10, y: 10 },
+        { x: 90, y: 90 },
+      ],
     });
     const geo = makeGeo({
       nodes: [makeNode()],
@@ -515,13 +530,13 @@ describe('renderJson — branch coverage', () => {
     const edge = makeEdge({
       spline: true,
       points: [
-        { x: 0,   y: 0  },
-        { x: 10,  y: 0  },
-        { x: 20,  y: 0  },
-        { x: 30,  y: 0  },
-        { x: 40,  y: 0  },
-        { x: 50,  y: 0  },
-        { x: 60,  y: 0  },
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 20, y: 0 },
+        { x: 30, y: 0 },
+        { x: 40, y: 0 },
+        { x: 50, y: 0 },
+        { x: 60, y: 0 },
       ],
     });
     const geo = makeGeo({
@@ -537,11 +552,11 @@ describe('renderJson — branch coverage', () => {
 
   it('renders all value types when theme has no json color overrides (uses ?? defaults)', () => {
     const rows: JsonRowGeo[] = [
-      makeRow({ key: 'a', value: 'hello',   valueType: 'string',  y: 4,  height: 20 }),
-      makeRow({ key: 'b', value: '42',      valueType: 'number',  y: 24, height: 20 }),
-      makeRow({ key: 'c', value: '☑ true',  valueType: 'boolean', y: 44, height: 20 }),
-      makeRow({ key: 'd', value: '␀',       valueType: 'null',    y: 64, height: 20, highlight: '' }),
-      makeRow({ key: 'e', value: '{...}',   valueType: 'nested',  y: 84, height: 20 }),
+      makeRow({ key: 'a', value: 'hello', valueType: 'string', y: 4, height: 20 }),
+      makeRow({ key: 'b', value: '42', valueType: 'number', y: 24, height: 20 }),
+      makeRow({ key: 'c', value: '☑ true', valueType: 'boolean', y: 44, height: 20 }),
+      makeRow({ key: 'd', value: '␀', valueType: 'null', y: 64, height: 20, highlight: '' }),
+      makeRow({ key: 'e', value: '{...}', valueType: 'nested', y: 84, height: 20 }),
     ];
     const node = makeNode({ rows });
     const edge = makeEdge();
@@ -554,8 +569,8 @@ describe('renderJson — branch coverage', () => {
     // per-type value styling, so there is nothing for the arms to differ on.
     // These four lines used to assert four distinct IDE-palette colors.
     expect(body).toContain('fill="#000"');
-    expect(body).toContain('fill="#CCFF02"');   // highlightBackground (plantuml.skin default)
-    expect(body).toContain('fill="#FFF"');   // background → noJsonTheme.colors.background
+    expect(body).toContain('fill="#CCFF02"'); // highlightBackground (plantuml.skin default)
+    expect(body).toContain('fill="#FFF"'); // background → noJsonTheme.colors.background
     // headerBackground inherits from bg (#FFFFFF) — no longer a distinct hard-coded color
     // Edge still renders with theme.colors.arrow fallback
     expect(body).toContain('<path');
@@ -619,9 +634,7 @@ describe('renderJson — branch coverage', () => {
 describe('renderJson — built-in theme colors', () => {
   it('!theme amiga: node background, borders, and all text use the amiga palette', () => {
     const amigaTheme = resolveTheme('amiga');
-    const rows: JsonRowGeo[] = [
-      makeRow({ key: 'fruit', value: 'Apple', valueType: 'string', y: 0, height: 20 }),
-    ];
+    const rows: JsonRowGeo[] = [makeRow({ key: 'fruit', value: 'Apple', valueType: 'string', y: 0, height: 20 })];
     const node = makeNode({ rows });
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, amigaTheme));
@@ -660,14 +673,12 @@ describe('renderJson — node-level style cascade', () => {
           ...defaultTheme.colors.graph,
           json: {
             ...defaultTheme.colors.graph.json,
-            nodeFontColor: '#FF7F50',  // Coral
+            nodeFontColor: '#FF7F50', // Coral
           },
         },
       },
     };
-    const rows: JsonRowGeo[] = [
-      makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 }),
-    ];
+    const rows: JsonRowGeo[] = [makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 })];
     const node = makeNode({ rows });
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, theme));
@@ -690,9 +701,7 @@ describe('renderJson — node-level style cascade', () => {
         },
       },
     };
-    const rows: JsonRowGeo[] = [
-      makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 }),
-    ];
+    const rows: JsonRowGeo[] = [makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 })];
     const node = makeNode({ rows });
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, theme));
@@ -716,9 +725,7 @@ describe('renderJson — node-level style cascade', () => {
         },
       },
     };
-    const rows: JsonRowGeo[] = [
-      makeRow({ key: 'k', value: 'v', valueType: 'string', y: 0, height: 20 }),
-    ];
+    const rows: JsonRowGeo[] = [makeRow({ key: 'k', value: 'v', valueType: 'string', y: 0, height: 20 })];
     const node = makeNode({ rows });
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, theme));

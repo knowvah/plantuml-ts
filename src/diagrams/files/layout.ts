@@ -8,11 +8,11 @@ const FONT_SIZE = 14;
 const FONT_FAMILY = 'sans-serif';
 
 // Note sizing — must stay in sync with renderer.ts
-const NOTE_Y_OFFSET = 2;  // renderer draws box at entry.y + NOTE_Y_OFFSET
+const NOTE_Y_OFFSET = 2; // renderer draws box at entry.y + NOTE_Y_OFFSET
 const NOTE_PAD = 6;
 const NOTE_LINE_H = 16;
 const NOTE_FONT = 12;
-const NOTE_MARGIN = 4;  // gap between bottom of note box and top of next entry
+const NOTE_MARGIN = 4; // gap between bottom of note box and top of next entry
 
 function noteAdvance(lines: string[]): number {
   const n = lines.length;

@@ -24,15 +24,16 @@ const measurer = new FormulaMeasurer();
 
 /** Return true when two axis-aligned rectangles overlap. */
 function overlaps(
-  aX: number, aY: number, aW: number, aH: number,
-  bX: number, bY: number, bW: number, bH: number,
+  aX: number,
+  aY: number,
+  aW: number,
+  aH: number,
+  bX: number,
+  bY: number,
+  bW: number,
+  bH: number,
 ): boolean {
-  return (
-    aX < bX + bW &&
-    aX + aW > bX &&
-    aY < bY + bH &&
-    aY + aH > bY
-  );
+  return aX < bX + bW && aX + aW > bX && aY < bY + bH && aY + aH > bY;
 }
 
 /** Build a minimal ClassDiagramAST with no relationships or namespaces. */
@@ -101,7 +102,9 @@ describe('layoutClass — graph-attr parity (ADR-6)', () => {
 
   it('feeds nodeSep=35 and rankSep=60 into the DOT input graph', () => {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -127,7 +130,9 @@ describe('layoutClass — edge label attributes (labelOk)', () => {
 
   it('emits label + tail/head label sizes from label and multiplicities', () => {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -144,7 +149,9 @@ describe('layoutClass — edge label attributes (labelOk)', () => {
 describe('layoutClass — qualifier/port nodes render as plaintext (shapeOk)', () => {
   function captureNodes(ast: ClassDiagramAST) {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -235,7 +242,9 @@ describe('layoutClass — class ::member port rows wired end-to-end (T2, SI17)',
 
   function captureGraph(ast: ClassDiagramAST): DotInputGraph {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -248,7 +257,10 @@ describe('layoutClass — class ::member port rows wired end-to-end (T2, SI17)',
     const ast = makeAST({
       classifiers: [
         {
-          id: 'A', display: 'A', kind: 'class', typeParams: [],
+          id: 'A',
+          display: 'A',
+          kind: 'class',
+          typeParams: [],
           members: [
             { visibility: '+', name: 'ID', type: 'int', isStatic: false, isAbstract: false },
             { visibility: '+', name: 'OSM_ID', type: 'int', isStatic: false, isAbstract: false },
@@ -275,22 +287,24 @@ describe('layoutClass — class ::member port rows wired end-to-end (T2, SI17)',
     const ast = makeAST({
       classifiers: [
         {
-          id: 'Foo', display: 'Foo', kind: 'class', typeParams: [],
+          id: 'Foo',
+          display: 'Foo',
+          kind: 'class',
+          typeParams: [],
           members: [
             { visibility: '+', name: 'field1', isStatic: false, isAbstract: false },
             { visibility: '+', name: 'field2', isStatic: false, isAbstract: false },
           ],
         },
         {
-          id: 'Bar', display: 'Bar', kind: 'class', typeParams: [],
-          members: [
-            { visibility: '+', name: 'field3', isStatic: false, isAbstract: false },
-          ],
+          id: 'Bar',
+          display: 'Bar',
+          kind: 'class',
+          typeParams: [],
+          members: [{ visibility: '+', name: 'field3', isStatic: false, isAbstract: false }],
         },
       ],
-      relationships: [
-        { from: 'Foo', to: 'Bar', type: 'association', fromPort: 'field1', toPort: 'field3' },
-      ],
+      relationships: [{ from: 'Foo', to: 'Bar', type: 'association', fromPort: 'field1', toPort: 'field3' }],
     });
     const g = captureGraph(ast);
     const foo = g.nodes.find((n) => n.id === 'Foo');
@@ -358,8 +372,14 @@ describe('layoutClass — package used as a relationship endpoint (zaent anchor)
 
   function capture() {
     let g: DotInputGraph | undefined;
-    setLayoutInputObserver((x) => { g = x; });
-    try { layoutClass(ast, defaultTheme, measurer); } finally { setLayoutInputObserver(undefined); }
+    setLayoutInputObserver((x) => {
+      g = x;
+    });
+    try {
+      layoutClass(ast, defaultTheme, measurer);
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
     return g!;
   }
 
@@ -378,7 +398,7 @@ describe('layoutClass — package used as a relationship endpoint (zaent anchor)
   // G2 N18: the anchor is a REAL dot-laid-out node occupying a rank slot
   // above the classifier -- the namespace footprint must enclose it, not
   // just `ns.classifiers` (ledger.md N17/N18's 41px vs 33px pair).
-  it('folds the anchor\'s own dot position into the namespace footprint (N18)', () => {
+  it("folds the anchor's own dot position into the namespace footprint (N18)", () => {
     const result = layoutClass(ast, defaultTheme, measurer);
     const nsGeo = result.namespaces.find((n) => n.id === 'P');
     const cGeo = classifierLeaves(result.leaves).find((c) => c.id === 'C');
@@ -404,9 +424,7 @@ describe('layoutClass — 3 classes with 2 relationships', () => {
         display: 'Animal',
         kind: 'class',
         typeParams: [],
-        members: [
-          { visibility: '+', name: 'name', type: 'String', isStatic: false, isAbstract: false },
-        ],
+        members: [{ visibility: '+', name: 'name', type: 'String', isStatic: false, isAbstract: false }],
       },
       {
         id: 'Dog',
@@ -553,9 +571,7 @@ describe('layoutClass — namespace containing 2 classes', () => {
         namespace: 'NS',
       },
     ],
-    namespaces: [
-      { id: 'NS', display: 'MyNamespace', classifiers: ['Alpha', 'Beta'] },
-    ],
+    namespaces: [{ id: 'NS', display: 'MyNamespace', classifiers: ['Alpha', 'Beta'] }],
   });
 
   it('returns 1 NamespaceGeo', () => {
@@ -604,7 +620,9 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       ],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -620,12 +638,12 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
         { id: 'Beta', display: 'Beta', kind: 'class', typeParams: [], members: [], namespace: 'NS' },
         { id: 'Gamma', display: 'Gamma', kind: 'class', typeParams: [], members: [] },
       ],
-      namespaces: [
-        { id: 'NS', display: 'MyNamespace', classifiers: ['Alpha', 'Beta'] },
-      ],
+      namespaces: [{ id: 'NS', display: 'MyNamespace', classifiers: ['Alpha', 'Beta'] }],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -649,7 +667,9 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       ],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -670,12 +690,12 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
         { id: 'Alpha', display: 'Alpha', kind: 'class', typeParams: [], members: [], namespace: 'NS' },
         { id: 'Beta', display: 'Beta', kind: 'class', typeParams: [], members: [] },
       ],
-      namespaces: [
-        { id: 'NS', display: 'NS', classifiers: ['Alpha'] },
-      ],
+      namespaces: [{ id: 'NS', display: 'NS', classifiers: ['Alpha'] }],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => { captured = g; });
+    setLayoutInputObserver((g) => {
+      captured = g;
+    });
     try {
       layoutClass(ast, defaultTheme, measurer);
     } finally {
@@ -775,21 +795,22 @@ describe('layoutClass — edge decoration per relationship type', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutClass — Relationship.dashed override (G2 N8)', () => {
-  it('an explicit `dashed: true` override wins over the type-derived ' +
-    '(association -> dashed=false) default', () => {
-    const ast = makeAST({
-      classifiers: [
-        { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
-        { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
-      ],
-      relationships: [{ from: 'A', to: 'B', type: 'association', dashed: true }],
-    });
-    const result = layoutClass(ast, defaultTheme, measurer);
-    expect(result.edges[0]!.dashed).toBe(true);
-  });
+  it(
+    'an explicit `dashed: true` override wins over the type-derived ' + '(association -> dashed=false) default',
+    () => {
+      const ast = makeAST({
+        classifiers: [
+          { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
+          { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
+        ],
+        relationships: [{ from: 'A', to: 'B', type: 'association', dashed: true }],
+      });
+      const result = layoutClass(ast, defaultTheme, measurer);
+      expect(result.edges[0]!.dashed).toBe(true);
+    },
+  );
 
-  it('an explicit `dashed: false` override wins over the type-derived ' +
-    '(usage -> dashed=true) default', () => {
+  it('an explicit `dashed: false` override wins over the type-derived ' + '(usage -> dashed=true) default', () => {
     const ast = makeAST({
       classifiers: [
         { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
@@ -803,24 +824,27 @@ describe('layoutClass — Relationship.dashed override (G2 N8)', () => {
 });
 
 describe('layoutClass — invis relationship suppression (G2 N8)', () => {
-  it('an `invis: true` relationship produces NO EdgeGeo at all (jar never ' +
-    'draws it, SvekEdge#drawU/#solveLine both early-return)', () => {
-    const ast = makeAST({
-      classifiers: [
-        { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
-        { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
-        { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] },
-      ],
-      relationships: [
-        { from: 'A', to: 'B', type: 'association' },
-        { from: 'B', to: 'C', type: 'association', invis: true },
-      ],
-    });
-    const result = layoutClass(ast, defaultTheme, measurer);
-    expect(result.edges).toHaveLength(1);
-    expect(result.edges[0]!.from).toBe('A');
-    expect(result.edges[0]!.to).toBe('B');
-  });
+  it(
+    'an `invis: true` relationship produces NO EdgeGeo at all (jar never ' +
+      'draws it, SvekEdge#drawU/#solveLine both early-return)',
+    () => {
+      const ast = makeAST({
+        classifiers: [
+          { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
+          { id: 'B', display: 'B', kind: 'class', typeParams: [], members: [] },
+          { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] },
+        ],
+        relationships: [
+          { from: 'A', to: 'B', type: 'association' },
+          { from: 'B', to: 'C', type: 'association', invis: true },
+        ],
+      });
+      const result = layoutClass(ast, defaultTheme, measurer);
+      expect(result.edges).toHaveLength(1);
+      expect(result.edges[0]!.from).toBe('A');
+      expect(result.edges[0]!.to).toBe('B');
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -830,9 +854,7 @@ describe('layoutClass — invis relationship suppression (G2 N8)', () => {
 describe('layoutClass — classifier kind field and header italic', () => {
   it('interface classifier has kind="interface" on ClassifierGeo', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.kind).toBe('interface');
@@ -840,9 +862,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('interface header row text is just the display name (no «interface» prefix)', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.text).toBe('Repo');
@@ -850,9 +870,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('interface header row has italic=true', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'IRepo', display: 'Repo', kind: 'interface', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.italic).toBe(true);
@@ -860,9 +878,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('abstract classifier has kind="abstract" on ClassifierGeo', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'AbstractBase', display: 'Base', kind: 'abstract', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'AbstractBase', display: 'Base', kind: 'abstract', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.kind).toBe('abstract');
@@ -870,9 +886,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('abstract header row has italic=true', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'AbstractBase', display: 'Base', kind: 'abstract', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'AbstractBase', display: 'Base', kind: 'abstract', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.italic).toBe(true);
@@ -880,9 +894,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('class header row does not have italic set', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.italic).toBeFalsy();
@@ -890,9 +902,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('enum classifier has kind="enum" on ClassifierGeo', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Color', display: 'Color', kind: 'enum', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Color', display: 'Color', kind: 'enum', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.kind).toBe('enum');
@@ -900,9 +910,7 @@ describe('layoutClass — classifier kind field and header italic', () => {
 
   it('annotation classifier header text carries NO @ literal (A2s F-D/A1: upstream shows the circled char only)', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Override', display: 'Override', kind: 'annotation', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Override', display: 'Override', kind: 'annotation', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.text).toBe('Override');
@@ -917,45 +925,51 @@ describe('layoutClass — classifier kind field and header italic', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutClass — lollipop display-label row (G2 N20)', () => {
-  it('produces exactly one row: the display text, positioned via ' +
-    'SIZE/2 - textWidth/2 (indent) and SIZE + baselineOffset (y)', () => {
-    const ast = makeAST({
-      classifiers: [
-        { id: '__lol0', display: 'Foo', kind: 'lollipop', typeParams: [], members: [] },
-      ],
-    });
-    const result = layoutClass(ast, defaultTheme, measurer);
-    const geo = classifierLeaves(result.leaves)[0]!;
-    expect(geo.rows).toHaveLength(1);
-    expect(geo.dividerYs).toEqual([]);
+  it(
+    'produces exactly one row: the display text, positioned via ' +
+      'SIZE/2 - textWidth/2 (indent) and SIZE + baselineOffset (y)',
+    () => {
+      const ast = makeAST({
+        classifiers: [{ id: '__lol0', display: 'Foo', kind: 'lollipop', typeParams: [], members: [] }],
+      });
+      const result = layoutClass(ast, defaultTheme, measurer);
+      const geo = classifierLeaves(result.leaves)[0]!;
+      expect(geo.rows).toHaveLength(1);
+      expect(geo.dividerYs).toEqual([]);
 
-    const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
-    const textWidth = measurer.measure('Foo', fontSpec).width;
-    const baselineOffset = fontSpec.size - measurer.getDescent(fontSpec, '');
+      const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
+      const textWidth = measurer.measure('Foo', fontSpec).width;
+      const baselineOffset = fontSpec.size - measurer.getDescent(fontSpec, '');
 
-    const row = geo.rows[0]!;
-    expect(row.text).toBe('Foo');
-    expect(row.width).toBe(textWidth);
-    expect(row.indent).toBeCloseTo(LOLLIPOP_SIZE / 2 - textWidth / 2, 6);
-    expect(row.y).toBeCloseTo(LOLLIPOP_SIZE + baselineOffset, 6);
-  });
+      const row = geo.rows[0]!;
+      expect(row.text).toBe('Foo');
+      expect(row.width).toBe(textWidth);
+      expect(row.indent).toBeCloseTo(LOLLIPOP_SIZE / 2 - textWidth / 2, 6);
+      expect(row.y).toBeCloseTo(LOLLIPOP_SIZE + baselineOffset, 6);
+    },
+  );
 
-  it('the half-circle lollipopKind measures the SAME label row as the ' +
-    'full circle (label geometry is independent of the socket shape)', () => {
-    const full = layoutClass(
-      makeAST({ classifiers: [{ id: '__lol0', display: 'Bar', kind: 'lollipop', typeParams: [], members: [] }] }),
-      defaultTheme, measurer,
-    );
-    const half = layoutClass(
-      makeAST({
-        classifiers: [
-          { id: '__lol0', display: 'Bar', kind: 'lollipop', lollipopKind: 'half', typeParams: [], members: [] },
-        ],
-      }),
-      defaultTheme, measurer,
-    );
-    expect(classifierLeaves(half.leaves)[0]!.rows).toEqual(classifierLeaves(full.leaves)[0]!.rows);
-  });
+  it(
+    'the half-circle lollipopKind measures the SAME label row as the ' +
+      'full circle (label geometry is independent of the socket shape)',
+    () => {
+      const full = layoutClass(
+        makeAST({ classifiers: [{ id: '__lol0', display: 'Bar', kind: 'lollipop', typeParams: [], members: [] }] }),
+        defaultTheme,
+        measurer,
+      );
+      const half = layoutClass(
+        makeAST({
+          classifiers: [
+            { id: '__lol0', display: 'Bar', kind: 'lollipop', lollipopKind: 'half', typeParams: [], members: [] },
+          ],
+        }),
+        defaultTheme,
+        measurer,
+      );
+      expect(classifierLeaves(half.leaves)[0]!.rows).toEqual(classifierLeaves(full.leaves)[0]!.rows);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -978,8 +992,22 @@ describe('layoutClass — member row visibilityIcon', () => {
           typeParams: [],
           members: [
             { visibility: '+', name: 'pub', type: 'int', isStatic: false, isAbstract: false, visibilityExplicit: true },
-            { visibility: '-', name: 'priv', type: 'int', isStatic: false, isAbstract: false, visibilityExplicit: true },
-            { visibility: '#', name: 'prot', type: 'int', isStatic: false, isAbstract: false, visibilityExplicit: true },
+            {
+              visibility: '-',
+              name: 'priv',
+              type: 'int',
+              isStatic: false,
+              isAbstract: false,
+              visibilityExplicit: true,
+            },
+            {
+              visibility: '#',
+              name: 'prot',
+              type: 'int',
+              isStatic: false,
+              isAbstract: false,
+              visibilityExplicit: true,
+            },
           ],
         },
       ],
@@ -998,9 +1026,7 @@ describe('layoutClass — member row visibilityIcon', () => {
           display: 'C',
           kind: 'class',
           typeParams: [],
-          members: [
-            { visibility: '+', name: 'implicit', type: 'int', isStatic: false, isAbstract: false },
-          ],
+          members: [{ visibility: '+', name: 'implicit', type: 'int', isStatic: false, isAbstract: false }],
         },
       ],
     });
@@ -1010,9 +1036,7 @@ describe('layoutClass — member row visibilityIcon', () => {
 
   it('header row does not have a visibilityIcon', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.rows[0]!.visibilityIcon).toBeUndefined();
@@ -1046,9 +1070,7 @@ describe('layoutClass — member row icon-zone reservation is per-SECTION (G2 N1
           kind: 'class',
           typeParams: [],
           hideCircle: true,
-          members: [
-            { visibility: '+', name: 'symmetric', isStatic: false, isAbstract: false },
-          ],
+          members: [{ visibility: '+', name: 'symmetric', isStatic: false, isAbstract: false }],
         },
       ],
     });
@@ -1106,47 +1128,48 @@ describe('layoutClass — member row icon-zone reservation is per-SECTION (G2 N1
     expect(rows[2]!.visibilityIcon).toBeUndefined(); // no glyph drawn for the unmarked row
   });
 
-  it('skinparam class { AttributeFontSize/AttributeFontName } (G2 N23) ' +
-    'overrides BOTH the header text AND member rows -- jar-verified ' +
-    '`jisanu-32-gado231`', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          classAttributeFontSize: 16,
-          classAttributeFontFamily: 'Courier',
+  it(
+    'skinparam class { AttributeFontSize/AttributeFontName } (G2 N23) ' +
+      'overrides BOTH the header text AND member rows -- jar-verified ' +
+      '`jisanu-32-gado231`',
+    () => {
+      const theme = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: {
+            ...defaultTheme.colors.graph,
+            classAttributeFontSize: 16,
+            classAttributeFontFamily: 'Courier',
+          },
         },
-      },
-    };
-    const ast = makeAST({
-      classifiers: [
-        {
-          id: 'FontSizeIssue',
-          display: 'FontSizeIssue',
-          kind: 'class',
-          typeParams: [],
-          members: [
-            { visibility: '+', name: 'attribute1', type: 'int', isStatic: false, isAbstract: false },
-          ],
-        },
-      ],
-    });
-    const result = layoutClass(ast, theme, measurer);
-    const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
-    const memberRow = classifierLeaves(result.leaves)[0]!.rows[1]!;
-    // Header row: NOT the default theme font -- the overridden one.
-    expect(headerRow.fontFamily).toBe('Courier');
-    expect(headerRow.fontSize).toBe(16);
-    // Member row: measured/rendered via its own creole atom, same override.
-    const atom = memberRow.atoms?.[0];
-    expect(atom?.kind).toBe('text');
-    if (atom?.kind === 'text') {
-      expect(atom.font.family).toBe('Courier');
-      expect(atom.font.size).toBe(16);
-    }
-  });
+      };
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'FontSizeIssue',
+            display: 'FontSizeIssue',
+            kind: 'class',
+            typeParams: [],
+            members: [{ visibility: '+', name: 'attribute1', type: 'int', isStatic: false, isAbstract: false }],
+          },
+        ],
+      });
+      const result = layoutClass(ast, theme, measurer);
+      const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
+      const memberRow = classifierLeaves(result.leaves)[0]!.rows[1]!;
+      // Header row: NOT the default theme font -- the overridden one.
+      expect(headerRow.fontFamily).toBe('Courier');
+      expect(headerRow.fontSize).toBe(16);
+      // Member row: measured/rendered via its own creole atom, same override.
+      const atom = memberRow.atoms?.[0];
+      expect(atom?.kind).toBe('text');
+      if (atom?.kind === 'text') {
+        expect(atom.font.family).toBe('Courier');
+        expect(atom.font.size).toBe(16);
+      }
+    },
+  );
 
   // G2 N32: the header-vs-attribute font-role split N23 didn't need to
   // resolve (its ONLY fixture, `jisanu-32-gado231` above, has no
@@ -1155,142 +1178,147 @@ describe('layoutClass — member row icon-zone reservation is per-SECTION (G2 N1
   // `xabije-20-xusi569`: BOTH pairs set, to DIFFERENT values -- header uses
   // its OWN `classFontSize`/`classFontStyle`, members use
   // `classAttributeFontSize`/`classAttributeFontStyle`, independently.
-  it('skinparam classFontSize/classFontStyle (G2 N32) overrides the HEADER ' +
-    'ONLY, independent of classAttributeFontSize/classAttributeFontStyle ' +
-    'on the SAME classifier -- jar-verified `xabije-20-xusi569`', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          classAttributeFontSize: 18,
-          classAttributeFontItalic: true,
-          classFontSize: 14,
-          classFontBold: true,
-          // Real `skinparam classFontStyle bold` (`skinparam.ts`'s parser)
-          // sets BOTH flags together whenever the key is present at all --
-          // "bold" alone means italic is explicitly false, not "unset/
-          // cascade from attribute". Set explicitly here to match that
-          // real-world invariant (a hand-built partial theme would
-          // otherwise under-specify the header selector).
-          classFontItalic: false,
+  it(
+    'skinparam classFontSize/classFontStyle (G2 N32) overrides the HEADER ' +
+      'ONLY, independent of classAttributeFontSize/classAttributeFontStyle ' +
+      'on the SAME classifier -- jar-verified `xabije-20-xusi569`',
+    () => {
+      const theme = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: {
+            ...defaultTheme.colors.graph,
+            classAttributeFontSize: 18,
+            classAttributeFontItalic: true,
+            classFontSize: 14,
+            classFontBold: true,
+            // Real `skinparam classFontStyle bold` (`skinparam.ts`'s parser)
+            // sets BOTH flags together whenever the key is present at all --
+            // "bold" alone means italic is explicitly false, not "unset/
+            // cascade from attribute". Set explicitly here to match that
+            // real-world invariant (a hand-built partial theme would
+            // otherwise under-specify the header selector).
+            classFontItalic: false,
+          },
         },
-      },
-    };
-    const ast = makeAST({
-      classifiers: [
-        {
-          id: 'Class',
-          display: 'Class',
-          kind: 'class',
-          typeParams: [],
-          members: [
-            { visibility: '-', name: 'attr1', isStatic: false, isAbstract: false },
-          ],
-        },
-      ],
-    });
-    const result = layoutClass(ast, theme, measurer);
-    const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
-    const memberRow = classifierLeaves(result.leaves)[0]!.rows[1]!;
-    // Header: its OWN classFontSize/classFontStyle (14, bold), NOT the
-    // attribute override (18, italic).
-    expect(headerRow.fontSize).toBe(14);
-    expect(headerRow.bold).toBe(true);
-    expect(headerRow.italic).toBeFalsy();
-    // Member: its OWN classAttributeFontSize/Style (18, italic), NOT the
-    // header override (14, bold).
-    const atom = memberRow.atoms?.[0];
-    expect(atom?.kind).toBe('text');
-    if (atom?.kind === 'text') {
-      expect(atom.font.size).toBe(18);
-      expect(atom.font.styles.has(FontStyle.ITALIC)).toBe(true);
-      expect(atom.font.styles.has(FontStyle.BOLD)).toBe(false);
-    }
-  });
+      };
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'Class',
+            display: 'Class',
+            kind: 'class',
+            typeParams: [],
+            members: [{ visibility: '-', name: 'attr1', isStatic: false, isAbstract: false }],
+          },
+        ],
+      });
+      const result = layoutClass(ast, theme, measurer);
+      const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
+      const memberRow = classifierLeaves(result.leaves)[0]!.rows[1]!;
+      // Header: its OWN classFontSize/classFontStyle (14, bold), NOT the
+      // attribute override (18, italic).
+      expect(headerRow.fontSize).toBe(14);
+      expect(headerRow.bold).toBe(true);
+      expect(headerRow.italic).toBeFalsy();
+      // Member: its OWN classAttributeFontSize/Style (18, italic), NOT the
+      // header override (14, bold).
+      const atom = memberRow.atoms?.[0];
+      expect(atom?.kind).toBe('text');
+      if (atom?.kind === 'text') {
+        expect(atom.font.size).toBe(18);
+        expect(atom.font.styles.has(FontStyle.ITALIC)).toBe(true);
+        expect(atom.font.styles.has(FontStyle.BOLD)).toBe(false);
+      }
+    },
+  );
 
-  it('skinparam classAttributeFontSize alone (no classFontSize) CASCADES ' +
-    'to the header too -- re-confirms `jisanu-32-gado231` under the new ' +
-    'split (regression guard for the N23 fallback case)', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          classAttributeFontSize: 16,
-          classAttributeFontFamily: 'Courier',
+  it(
+    'skinparam classAttributeFontSize alone (no classFontSize) CASCADES ' +
+      'to the header too -- re-confirms `jisanu-32-gado231` under the new ' +
+      'split (regression guard for the N23 fallback case)',
+    () => {
+      const theme = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: {
+            ...defaultTheme.colors.graph,
+            classAttributeFontSize: 16,
+            classAttributeFontFamily: 'Courier',
+          },
         },
-      },
-    };
-    const ast = makeAST({
-      classifiers: [
-        {
-          id: 'FontSizeIssue',
-          display: 'FontSizeIssue',
-          kind: 'class',
-          typeParams: [],
-          members: [
-            { visibility: '+', name: 'attribute1', type: 'int', isStatic: false, isAbstract: false },
-          ],
-        },
-      ],
-    });
-    const result = layoutClass(ast, theme, measurer);
-    const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
-    expect(headerRow.fontFamily).toBe('Courier');
-    expect(headerRow.fontSize).toBe(16);
-  });
+      };
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'FontSizeIssue',
+            display: 'FontSizeIssue',
+            kind: 'class',
+            typeParams: [],
+            members: [{ visibility: '+', name: 'attribute1', type: 'int', isStatic: false, isAbstract: false }],
+          },
+        ],
+      });
+      const result = layoutClass(ast, theme, measurer);
+      const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
+      expect(headerRow.fontFamily).toBe('Courier');
+      expect(headerRow.fontSize).toBe(16);
+    },
+  );
 
-  it("wider-box header centering (G2 N23): badge moves by h1, text moves by " +
-    "h1+h2 (asymmetric, NOT a shared centerOffset) when member content " +
-    "widens the box past the header's own natural width", () => {
-    const ast = makeAST({
-      classifiers: [
-        {
-          id: 'C',
-          display: 'C',
-          kind: 'class',
-          typeParams: [],
-          members: [
-            {
-              visibility: '+',
-              name: 'aVeryLongMemberNameThatForcesTheBoxWiderThanTheHeader',
-              isStatic: false,
-              isAbstract: false,
-            },
-          ],
-        },
-      ],
-    });
-    const result = layoutClass(ast, defaultTheme, measurer);
-    const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
-    const headerTextWidth = measurer.measure('C', fontSpec).width;
-    const BADGE_BOX_WIDTH = 26; // BADGE_RADIUS(11)*2 + BADGE_LEFT_MARGIN(4)
-    const headerWidth = BADGE_BOX_WIDTH + headerTextWidth + 6; // + NAME_MARGIN_TOTAL
-    const boxWidth = classifierLeaves(result.leaves)[0]!.width;
-    const suppWith = Math.max(0, boxWidth - headerWidth);
-    // The member name is deliberately long enough that suppWith*0.1 exceeds
-    // BADGE_BOX_WIDTH/4 (6.5) -- the SAME "h2 hits its cap" regime every
-    // jar-verified corpus sample landed this iteration hit (ledger.md N23).
-    expect(suppWith * 0.1).toBeGreaterThan(6.5);
-    const h2 = 6.5;
-    const h1 = (suppWith - h2) / 2;
-    const expectedIndent = BADGE_BOX_WIDTH + h1 + h2 + 3; // + NAME_LEFT_MARGIN
-    const expectedBadgeIndent = h1 + 4 + 11; // + BADGE_LEFT_MARGIN + BADGE_RADIUS
+  it(
+    'wider-box header centering (G2 N23): badge moves by h1, text moves by ' +
+      'h1+h2 (asymmetric, NOT a shared centerOffset) when member content ' +
+      "widens the box past the header's own natural width",
+    () => {
+      const ast = makeAST({
+        classifiers: [
+          {
+            id: 'C',
+            display: 'C',
+            kind: 'class',
+            typeParams: [],
+            members: [
+              {
+                visibility: '+',
+                name: 'aVeryLongMemberNameThatForcesTheBoxWiderThanTheHeader',
+                isStatic: false,
+                isAbstract: false,
+              },
+            ],
+          },
+        ],
+      });
+      const result = layoutClass(ast, defaultTheme, measurer);
+      const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
+      const headerTextWidth = measurer.measure('C', fontSpec).width;
+      const BADGE_BOX_WIDTH = 26; // BADGE_RADIUS(11)*2 + BADGE_LEFT_MARGIN(4)
+      const headerWidth = BADGE_BOX_WIDTH + headerTextWidth + 6; // + NAME_MARGIN_TOTAL
+      const boxWidth = classifierLeaves(result.leaves)[0]!.width;
+      const suppWith = Math.max(0, boxWidth - headerWidth);
+      // The member name is deliberately long enough that suppWith*0.1 exceeds
+      // BADGE_BOX_WIDTH/4 (6.5) -- the SAME "h2 hits its cap" regime every
+      // jar-verified corpus sample landed this iteration hit (ledger.md N23).
+      expect(suppWith * 0.1).toBeGreaterThan(6.5);
+      const h2 = 6.5;
+      const h1 = (suppWith - h2) / 2;
+      const expectedIndent = BADGE_BOX_WIDTH + h1 + h2 + 3; // + NAME_LEFT_MARGIN
+      const expectedBadgeIndent = h1 + 4 + 11; // + BADGE_LEFT_MARGIN + BADGE_RADIUS
 
-    const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
-    expect(headerRow.indent).toBeCloseTo(expectedIndent, 6);
-    expect(headerRow.badgeIndent).toBeCloseTo(expectedBadgeIndent, 6);
-    // The two are NOT derived from the SAME shared offset (the pre-N23 bug's
-    // own premise) -- badge moves by h1 alone while text moves by h1+h2;
-    // the OLD (buggy) formula would have given both indent AND badgeIndent
-    // the same centerOffset-derived value, which this asserts against.
-    const naiveCenterOffset = suppWith / 2;
-    expect(headerRow.indent).not.toBeCloseTo(BADGE_BOX_WIDTH + naiveCenterOffset + 3, 1);
-    expect(headerRow.badgeIndent).not.toBeCloseTo(naiveCenterOffset + 4 + 11, 1);
-  });
+      const headerRow = classifierLeaves(result.leaves)[0]!.rows[0]!;
+      expect(headerRow.indent).toBeCloseTo(expectedIndent, 6);
+      expect(headerRow.badgeIndent).toBeCloseTo(expectedBadgeIndent, 6);
+      // The two are NOT derived from the SAME shared offset (the pre-N23 bug's
+      // own premise) -- badge moves by h1 alone while text moves by h1+h2;
+      // the OLD (buggy) formula would have given both indent AND badgeIndent
+      // the same centerOffset-derived value, which this asserts against.
+      const naiveCenterOffset = suppWith / 2;
+      expect(headerRow.indent).not.toBeCloseTo(BADGE_BOX_WIDTH + naiveCenterOffset + 3, 1);
+      expect(headerRow.badgeIndent).not.toBeCloseTo(naiveCenterOffset + 4 + 11, 1);
+    },
+  );
 
   it('fields and methods compartments are independent (icon in fields does not widen methods)', () => {
     const ast = makeAST({
@@ -1330,9 +1358,7 @@ describe('layoutClass — dividerYs structure', () => {
           display: 'MyClass',
           kind: 'class',
           typeParams: [],
-          members: [
-            { visibility: '+', name: 'x', type: 'int', isStatic: false, isAbstract: false },
-          ],
+          members: [{ visibility: '+', name: 'x', type: 'int', isStatic: false, isAbstract: false }],
         },
       ],
     });
@@ -1557,9 +1583,7 @@ describe('layoutClass — minimum node width', () => {
   // with a badge is well under 100px.
   it('a single-character class is NOT floored to 100px (matches upstream: no MinimumWidth default)', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.width).toBeLessThan(100);
@@ -1580,7 +1604,7 @@ describe('layoutClass — hierarchical layout direction', () => {
   // `D ..|> I` on the TOP rank, where the jar ranks it below.
   const twoClasses = [
     { id: 'Animal', display: 'Animal', kind: 'class' as const, typeParams: [], members: [] },
-    { id: 'Dog',    display: 'Dog',    kind: 'class' as const, typeParams: [], members: [] },
+    { id: 'Dog', display: 'Dog', kind: 'class' as const, typeParams: [], members: [] },
   ];
 
   it('parent-first source (`Animal <|-- Dog`, `class Dog extends Animal`) ranks the parent above', () => {
@@ -1590,7 +1614,7 @@ describe('layoutClass — hierarchical layout direction', () => {
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
   });
 
@@ -1601,7 +1625,7 @@ describe('layoutClass — hierarchical layout direction', () => {
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
     expect(dog.y).toBeLessThan(animal.y);
   });
 
@@ -1633,15 +1657,20 @@ describe('layoutClass — hierarchical layout direction', () => {
       classifiers: twoClasses,
       // `<--` normalizes to from=Dog/to=Animal here, but upstream's Link is
       // (cl1=Animal, cl2=Dog) — unreversed, because `<--` reduces to `--`.
-      relationships: [{
-        from: 'Dog', to: 'Animal', type: 'association',
-        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
-        dotEdgeReversed: true,
-      }],
+      relationships: [
+        {
+          from: 'Dog',
+          to: 'Animal',
+          type: 'association',
+          idEntity1FullId: 'Animal',
+          idEntity2FullId: 'Dog',
+          dotEdgeReversed: true,
+        },
+      ],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
   });
 
@@ -1656,35 +1685,45 @@ describe('layoutClass — hierarchical layout direction', () => {
   it('a left-headed association still inverts when endpoints were namespace-resolved', () => {
     const nsClasses = [
       { id: 'net.sourceforge.Animal', display: 'Animal', kind: 'class' as const, typeParams: [], members: [] },
-      { id: 'net.sourceforge.Dog',    display: 'Dog',    kind: 'class' as const, typeParams: [], members: [] },
+      { id: 'net.sourceforge.Dog', display: 'Dog', kind: 'class' as const, typeParams: [], members: [] },
     ];
     const ast: ClassDiagramAST = makeAST({
       classifiers: nsClasses,
-      relationships: [{
-        // Resolved ids on from/to; RAW ids on the FullId pair — exactly the
-        // mismatch resolution produces.
-        from: 'net.sourceforge.Dog', to: 'net.sourceforge.Animal', type: 'association',
-        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
-        dotEdgeReversed: true,
-      }],
+      relationships: [
+        {
+          // Resolved ids on from/to; RAW ids on the FullId pair — exactly the
+          // mismatch resolution produces.
+          from: 'net.sourceforge.Dog',
+          to: 'net.sourceforge.Animal',
+          type: 'association',
+          idEntity1FullId: 'Animal',
+          idEntity2FullId: 'Dog',
+          dotEdgeReversed: true,
+        },
+      ],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'net.sourceforge.Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'net.sourceforge.Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'net.sourceforge.Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
   });
 
   it('a right-headed association (`Animal --> Dog`) keeps source order', () => {
     const ast: ClassDiagramAST = makeAST({
       classifiers: twoClasses,
-      relationships: [{
-        from: 'Animal', to: 'Dog', type: 'association',
-        idEntity1FullId: 'Animal', idEntity2FullId: 'Dog',
-      }],
+      relationships: [
+        {
+          from: 'Animal',
+          to: 'Dog',
+          type: 'association',
+          idEntity1FullId: 'Animal',
+          idEntity2FullId: 'Dog',
+        },
+      ],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
   });
 
@@ -1698,7 +1737,7 @@ describe('layoutClass — hierarchical layout direction', () => {
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     const animal = classifierLeaves(result.leaves).find((c) => c.id === 'Animal')!;
-    const dog    = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
+    const dog = classifierLeaves(result.leaves).find((c) => c.id === 'Dog')!;
     expect(animal.y).toBeLessThan(dog.y);
   });
 });
@@ -1716,9 +1755,7 @@ describe('layoutClass — hide/show directives', () => {
           display: 'Foo',
           kind: 'class',
           typeParams: [],
-          members: [
-            { visibility: '+', name: 'x', type: 'int', isStatic: false, isAbstract: false, hidden: true },
-          ],
+          members: [{ visibility: '+', name: 'x', type: 'int', isStatic: false, isAbstract: false, hidden: true }],
         },
       ],
       directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
@@ -1740,7 +1777,9 @@ describe('layoutClass — hide/show directives', () => {
       directives: [],
     });
     const astHideMembers = makeAST({
-      classifiers: [{ id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [{ ...memberSpec, hidden: true }] }],
+      classifiers: [
+        { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [{ ...memberSpec, hidden: true }] },
+      ],
       directives: [{ kind: 'hideshow', action: 'hide', target: 'members' }],
     });
     const heightWith = classifierLeaves(layoutClass(astWithMembers, defaultTheme, measurer).leaves)[0]!.height;
@@ -1750,9 +1789,7 @@ describe('layoutClass — hide/show directives', () => {
 
   it('hide empty members: dividerYs is empty when classifier has no members', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Empty', display: 'Empty', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Empty', display: 'Empty', kind: 'class', typeParams: [], members: [] }],
       directives: [{ kind: 'hideshow', action: 'hide', target: 'empty members' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
@@ -1858,9 +1895,7 @@ describe('layoutClass — hide/show directives', () => {
 
   it('no directives: dividerYs has two entries for an empty class (empty fields + empty methods compartments)', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Empty', display: 'Empty', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Empty', display: 'Empty', kind: 'class', typeParams: [], members: [] }],
       directives: [],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
@@ -1871,39 +1906,40 @@ describe('layoutClass — hide/show directives', () => {
 
   it('hide circle: hideCircle is propagated to ClassifierGeo', () => {
     const ast = makeAST({
-      classifiers: [
-        { id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [], hideCircle: true },
-      ],
+      classifiers: [{ id: 'Foo', display: 'Foo', kind: 'class', typeParams: [], members: [], hideCircle: true }],
       directives: [{ kind: 'hideshow', action: 'hide', target: 'circle' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
     expect(classifierLeaves(result.leaves)[0]!.hideCircle).toBe(true);
   });
 
-  it("G2 N58 item 40: theme.strictUml suppresses the circled-character badge " +
-    "-- CucaDiagram#showPortion's unconditional CIRCLED_CHARACTER guard, jar-" +
-    "verified against fogexa-30-zupo141 ('dummy' class: badge-off width " +
-    "51.85 exactly matches headerTextWidth+NAME_MARGIN_TOTAL(6), no badge " +
-    "reservation)", () => {
-    const ast = makeAST({
-      classifiers: [
-        { id: 'dummy', display: 'dummy', kind: 'class', typeParams: [], members: [] },
-      ],
-    });
-    const strictTheme = { ...defaultTheme, strictUml: true };
-    const plainResult = layoutClass(ast, defaultTheme, measurer);
-    const strictResult = layoutClass(ast, strictTheme, measurer);
-    const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
-    const headerTextWidth = measurer.measure('dummy', fontSpec).width;
-    const NAME_MARGIN_TOTAL = 6;
-    // No badge reservation at all -- narrower than the badge-shown box, and
-    // exactly the bare name-text width (no BADGE_BOX_WIDTH term).
-    // ADR-1: layout no longer pre-rounds (emission formats numeric
-    // attributes to 3 decimals, T5) -- `toBeCloseTo` guards only against
-    // unrelated floating-point drift, not a rounding step.
-    expect(classifierLeaves(strictResult.leaves)[0]!.width).toBeCloseTo(headerTextWidth + NAME_MARGIN_TOTAL, 3);
-    expect(classifierLeaves(strictResult.leaves)[0]!.width).toBeLessThan(classifierLeaves(plainResult.leaves)[0]!.width);
-  });
+  it(
+    'G2 N58 item 40: theme.strictUml suppresses the circled-character badge ' +
+      "-- CucaDiagram#showPortion's unconditional CIRCLED_CHARACTER guard, jar-" +
+      "verified against fogexa-30-zupo141 ('dummy' class: badge-off width " +
+      '51.85 exactly matches headerTextWidth+NAME_MARGIN_TOTAL(6), no badge ' +
+      'reservation)',
+    () => {
+      const ast = makeAST({
+        classifiers: [{ id: 'dummy', display: 'dummy', kind: 'class', typeParams: [], members: [] }],
+      });
+      const strictTheme = { ...defaultTheme, strictUml: true };
+      const plainResult = layoutClass(ast, defaultTheme, measurer);
+      const strictResult = layoutClass(ast, strictTheme, measurer);
+      const fontSpec = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
+      const headerTextWidth = measurer.measure('dummy', fontSpec).width;
+      const NAME_MARGIN_TOTAL = 6;
+      // No badge reservation at all -- narrower than the badge-shown box, and
+      // exactly the bare name-text width (no BADGE_BOX_WIDTH term).
+      // ADR-1: layout no longer pre-rounds (emission formats numeric
+      // attributes to 3 decimals, T5) -- `toBeCloseTo` guards only against
+      // unrelated floating-point drift, not a rounding step.
+      expect(classifierLeaves(strictResult.leaves)[0]!.width).toBeCloseTo(headerTextWidth + NAME_MARGIN_TOTAL, 3);
+      expect(classifierLeaves(strictResult.leaves)[0]!.width).toBeLessThan(
+        classifierLeaves(plainResult.leaves)[0]!.width,
+      );
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -1913,9 +1949,7 @@ describe('layoutClass — hide/show directives', () => {
 describe('layoutClass — note on entity', () => {
   it('produces a NoteGeo with text lines, resolved via the general opalisable mechanism (G2/N14)', () => {
     const ast: ClassDiagramAST = makeAST({
-      classifiers: [
-        { id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'A', display: 'A', kind: 'class', typeParams: [], members: [] }],
       notes: [{ id: '__note_0', target: 'A', position: 'right', text: 'hi\nthere' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
@@ -1940,9 +1974,7 @@ describe('layoutClass — note on entity', () => {
 describe('layoutClass — freestanding note + relationship (G2/N16 Kind B)', () => {
   it('resolves via the opalisable mechanism and suppresses the connecting edge (isOpalisable, exactly one connection)', () => {
     const ast: ClassDiagramAST = makeAST({
-      classifiers: [
-        { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] }],
       notes: [{ id: 'N1', text: 'A note' }],
       relationships: [{ from: 'N1', to: 'Bar', type: 'dependency' }],
     });
@@ -1982,9 +2014,7 @@ describe('layoutClass — freestanding note + relationship (G2/N16 Kind B)', () 
 
   it('keeps the ordinary edge draw when a freestanding note has NO connection at all', () => {
     const ast: ClassDiagramAST = makeAST({
-      classifiers: [
-        { id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] },
-      ],
+      classifiers: [{ id: 'Bar', display: 'Bar', kind: 'class', typeParams: [], members: [] }],
       notes: [{ id: 'N1', text: 'A note' }],
     });
     const result = layoutClass(ast, defaultTheme, measurer);
@@ -2004,25 +2034,39 @@ describe('layoutClass — freestanding note + relationship (G2/N16 Kind B)', () 
 describe('layoutClass — global hide fields/methods compartment suppression (A5)', () => {
   const field = { visibility: '+' as const, name: 'a', type: 'int', isStatic: false, isAbstract: false };
   const method = {
-    visibility: '+' as const, name: 'm', params: [] as string[], isStatic: false, isAbstract: false,
+    visibility: '+' as const,
+    name: 'm',
+    params: [] as string[],
+    isStatic: false,
+    isAbstract: false,
   };
 
   it('`hide methods` suppresses the compartment exactly like the jar-verified entity-scoped flag (vegubu-29 shape)', () => {
     const withGlobal = makeAST({
-      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] }],
+      classifiers: [
+        { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] },
+      ],
       directives: [{ kind: 'hideshow', action: 'hide', target: 'methods' }],
     });
     // Entity-scoped suppression (G2 N26, jar-verified nirija-04-veti140)
     // already drops the whole compartment -- the global form must match it,
     // and both must be SHORTER than the row-hidden-only rendering.
     const withFlag = makeAST({
-      classifiers: [{
-        id: 'C', display: 'C', kind: 'class', typeParams: [],
-        members: [field, { ...method, hidden: true }], suppressMethods: true,
-      }],
+      classifiers: [
+        {
+          id: 'C',
+          display: 'C',
+          kind: 'class',
+          typeParams: [],
+          members: [field, { ...method, hidden: true }],
+          suppressMethods: true,
+        },
+      ],
     });
     const rowsOnly = makeAST({
-      classifiers: [{ id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] }],
+      classifiers: [
+        { id: 'C', display: 'C', kind: 'class', typeParams: [], members: [field, { ...method, hidden: true }] },
+      ],
     });
     const a = classifierLeaves(layoutClass(withGlobal, defaultTheme, measurer).leaves)[0]!;
     const b = classifierLeaves(layoutClass(withFlag, defaultTheme, measurer).leaves)[0]!;
@@ -2033,10 +2077,18 @@ describe('layoutClass — global hide fields/methods compartment suppression (A5
 
   it('`hide fields` + `hide methods` collapses to the header-only box (gabejo-44 shape)', () => {
     const bothHidden = makeAST({
-      classifiers: [{
-        id: 'C', display: 'C', kind: 'class', typeParams: [],
-        members: [{ ...field, hidden: true }, { ...method, hidden: true }],
-      }],
+      classifiers: [
+        {
+          id: 'C',
+          display: 'C',
+          kind: 'class',
+          typeParams: [],
+          members: [
+            { ...field, hidden: true },
+            { ...method, hidden: true },
+          ],
+        },
+      ],
       directives: [
         { kind: 'hideshow', action: 'hide', target: 'fields' },
         { kind: 'hideshow', action: 'hide', target: 'methods' },

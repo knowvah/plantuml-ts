@@ -233,7 +233,14 @@ describe('Eater#eatDeclareFunction / eatDeclareProcedure / eatDeclareReturnFunct
   it('parses a zero-arg declaration with parentheses', () => {
     const e = eaterFor('foo()');
     const memory = new TMemoryGlobal();
-    const fn = e.publicEatDeclareFunction(fakeContext(), memory, false, e.getStringLocated(), false, TFunctionType.PROCEDURE);
+    const fn = e.publicEatDeclareFunction(
+      fakeContext(),
+      memory,
+      false,
+      e.getStringLocated(),
+      false,
+      TFunctionType.PROCEDURE,
+    );
     expect(fn.getSignature().getFunctionName()).toBe('foo');
     expect(fn.getSignature().getNbArg()).toBe(0);
   });
@@ -241,7 +248,14 @@ describe('Eater#eatDeclareFunction / eatDeclareProcedure / eatDeclareReturnFunct
   it('parses positional parameters, including a defaulted one', () => {
     const e = eaterFor('foo($a, $b=1)');
     const memory = new TMemoryGlobal();
-    const fn = e.publicEatDeclareFunction(fakeContext(), memory, false, e.getStringLocated(), false, TFunctionType.PROCEDURE);
+    const fn = e.publicEatDeclareFunction(
+      fakeContext(),
+      memory,
+      false,
+      e.getStringLocated(),
+      false,
+      TFunctionType.PROCEDURE,
+    );
     expect(fn.getSignature().getNbArg()).toBe(2);
     expect(fn.canCover(1, new Set())).toBe(true);
   });
@@ -249,7 +263,14 @@ describe('Eater#eatDeclareFunction / eatDeclareProcedure / eatDeclareReturnFunct
   it('requires an opening parenthesis unless allowNoParenthesis is set', () => {
     const e = eaterFor('foo');
     expect(() =>
-      e.publicEatDeclareFunction(fakeContext(), new TMemoryGlobal(), false, e.getStringLocated(), false, TFunctionType.PROCEDURE),
+      e.publicEatDeclareFunction(
+        fakeContext(),
+        new TMemoryGlobal(),
+        false,
+        e.getStringLocated(),
+        false,
+        TFunctionType.PROCEDURE,
+      ),
     ).toThrow('Missing opening parenthesis');
   });
 
@@ -261,7 +282,12 @@ describe('Eater#eatDeclareFunction / eatDeclareProcedure / eatDeclareReturnFunct
 
   it('eatDeclareReturnFunctionWithOptionalReturn captures an inline "return expr"', () => {
     const e = eaterFor('myFunc() return 1+2');
-    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(fakeContext(), new TMemoryGlobal(), false, e.getStringLocated());
+    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(
+      fakeContext(),
+      new TMemoryGlobal(),
+      false,
+      e.getStringLocated(),
+    );
     expect(fn.getFunctionType()).toBe(TFunctionType.RETURN_FUNCTION);
     expect(fn.hasBody()).toBe(true);
     expect(fn.doesContainReturn()).toBe(true);
@@ -269,13 +295,23 @@ describe('Eater#eatDeclareFunction / eatDeclareProcedure / eatDeclareReturnFunct
 
   it('eatDeclareReturnFunctionWithOptionalReturn captures an inline "!return expr"', () => {
     const e = eaterFor('myFunc() !return 1+2');
-    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(fakeContext(), new TMemoryGlobal(), false, e.getStringLocated());
+    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(
+      fakeContext(),
+      new TMemoryGlobal(),
+      false,
+      e.getStringLocated(),
+    );
     expect(fn.doesContainReturn()).toBe(true);
   });
 
   it('eatDeclareReturnFunctionWithOptionalReturn with no inline return leaves the body empty', () => {
     const e = eaterFor('myFunc()');
-    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(fakeContext(), new TMemoryGlobal(), false, e.getStringLocated());
+    const fn = e.publicEatDeclareReturnFunctionWithOptionalReturn(
+      fakeContext(),
+      new TMemoryGlobal(),
+      false,
+      e.getStringLocated(),
+    );
     expect(fn.hasBody()).toBe(false);
   });
 });

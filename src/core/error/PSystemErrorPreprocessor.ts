@@ -26,16 +26,6 @@ export class PSystemErrorPreprocessor extends PSystemError {
    */
   constructor(input: readonly StringLocated[], trace: readonly StringLocated[]) {
     const lastLine = trace[trace.length - 1];
-    super(
-      input,
-      trace,
-      new ErrorUml(
-        'SYNTAX_ERROR',
-        lastLine?.getPreprocessorError() ?? '',
-        0,
-        lastLine,
-        undefined,
-      ),
-    );
+    super(input, trace, new ErrorUml('SYNTAX_ERROR', lastLine?.getPreprocessorError() ?? '', 0, lastLine, undefined));
   }
 }

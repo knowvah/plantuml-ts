@@ -168,10 +168,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
   });
 
   it("buveco-86-tibo673: TIM cascade collapsing to a bare 'title Test SVG' line renders a CLASS-typed diagram containing the title", () => {
-    const source = readFileSync(
-      join(REPO_ROOT, 'tests/fixtures/corpus/sequence/buveco-86-tibo673.puml'),
-      'utf-8',
-    );
+    const source = readFileSync(join(REPO_ROOT, 'tests/fixtures/corpus/sequence/buveco-86-tibo673.puml'), 'utf-8');
 
     // Mission's own routing assertion (SI7 default: an @startuml block with
     // no diagram-specific content falls back to the CLASS plugin, not
@@ -203,8 +200,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     //   of the document's content <g>, i.e. drawn BEFORE the class boxes,
     //   x close to the canvas's own left edge (VerticalAlignment.TOP +
     //   HorizontalAlignment.LEFT).
-    const source =
-      '@startuml\nlegend top left\n  a legend\nend legend\nclass A\nclass B\nA --> B\n@enduml';
+    const source = '@startuml\nlegend top left\n  a legend\nend legend\nclass A\nclass B\nA --> B\n@enduml';
     const svg = renderSync(source, { measurer: MEASURER });
 
     expect(svg).toContain('class="legend"');
@@ -293,8 +289,7 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     //   class="caption" sits at a LARGER y than the title/diagram block
     //   (bottom placement -- addCaption uses decorateEntityImage(original,
     //   null, slot), the text2/"after" position).
-    const source =
-      '@startuml\ntitle Line One\\nLine Two\ncaption a caption\nclass A\nclass B\nA --> B\n@enduml';
+    const source = '@startuml\ntitle Line One\\nLine Two\ncaption a caption\nclass A\nclass B\nA --> B\n@enduml';
     const svg = renderSync(source, { measurer: MEASURER });
 
     // G1d: class="title" now wraps its <text> lines DIRECTLY (no nested
@@ -381,18 +376,15 @@ describe('T7 pipeline integration — annotation chrome end to end', () => {
     const untitled = renderSync('@startuml\ncomponent A\ncomponent B\nA --> B\n@enduml', {
       measurer: MEASURER,
     });
-    const titled = renderSync(
-      '@startuml\ntitle My Component Diagram\ncomponent A\ncomponent B\nA --> B\n@enduml',
-      { measurer: MEASURER },
-    );
+    const titled = renderSync('@startuml\ntitle My Component Diagram\ncomponent A\ncomponent B\nA --> B\n@enduml', {
+      measurer: MEASURER,
+    });
 
     expect(titled).toContain('class="title"');
     expect(titled).toContain('My Component Diagram');
     // klimt content (entity groups) survives the unwrap -- not swallowed
     // or duplicated.
-    expect((titled.match(/class="entity"/g) ?? []).length).toBe(
-      (untitled.match(/class="entity"/g) ?? []).length,
-    );
+    expect((titled.match(/class="entity"/g) ?? []).length).toBe((untitled.match(/class="entity"/g) ?? []).length);
 
     const untitledDims = dims(untitled);
     const titledDims = dims(titled);

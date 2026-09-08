@@ -37,7 +37,12 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { scanLineForAtoms, type AtomImageResolver, type DrawablePrimitive, type InlineAtomToken } from '../../src/core/creole-atoms.js';
+import {
+  scanLineForAtoms,
+  type AtomImageResolver,
+  type DrawablePrimitive,
+  type InlineAtomToken,
+} from '../../src/core/creole-atoms.js';
 import { measureInlineAtom, spriteScale } from '../../src/core/creole-atoms-measure.js';
 import { createSpriteRegistry, addSprite } from '../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -130,7 +135,12 @@ function buildSpriteRegistryWithSvg(name: string, svg: string): ReturnType<typeo
  *  `primitive.translate` is folded in (T9's positioning fix): a `UPath`'s own
  *  is always `(0,0)` (see `SpritePrimitiveCollector`'s doc comment), but
  *  asserting the fold here rather than assuming it keeps this helper honest. */
-function primitivesBBox(primitives: readonly DrawablePrimitive[]): { minX: number; minY: number; maxX: number; maxY: number } {
+function primitivesBBox(primitives: readonly DrawablePrimitive[]): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+} {
   let minX = Number.POSITIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
   let maxX = Number.NEGATIVE_INFINITY;
@@ -179,7 +189,11 @@ describe('makeAtomImageResolverFor — SVG sprite atoms resolve to kind: "drawab
     const result = resolve(atom);
     if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
 
-    const dims = measureInlineAtom(atom, { get: (name) => (name === 'sq' ? { width: 10, height: 10 } : undefined) }, FONT.size);
+    const dims = measureInlineAtom(
+      atom,
+      { get: (name) => (name === 'sq' ? { width: 10, height: 10 } : undefined) },
+      FONT.size,
+    );
     expect(result.width).toBe(dims.width);
     expect(result.height).toBe(dims.height);
     expect(result.width).toBeCloseTo(10 * (14 / 13), 10); // 10 * scale(1) * size/13, S1L-f
@@ -312,7 +326,7 @@ describe('makeAtomImageResolverFor — SVG sprite atoms resolve to kind: "drawab
     expect(resolve({ kind: 'sprite', name: 'sq', scale: 1 })?.kind).toBe('drawable');
   });
 
-  test('buildTextBlock draws the SVG sprite\'s decomposed primitives as <path> elements, not <image>', () => {
+  test("buildTextBlock draws the SVG sprite's decomposed primitives as <path> elements, not <image>", () => {
     const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
     const ug = newGraphic();
     const resolve = makeAtomImageResolverFor(registry)(FONT);
@@ -376,7 +390,14 @@ describe('makeAtomImageResolverFor', () => {
     const atom: InlineAtomToken = { kind: 'img', dataUri: TINY_PNG_URI, scale: 1, width: 2, height: 2 };
     // SI15 T1 (ADR-1): img atoms now also carry their native IHDR raster
     // dims (here 2x2 -- scale 1, so raster == declared).
-    expect(resolve(atom)).toEqual({ kind: 'image', href: TINY_PNG_URI, width: 2, height: 2, rasterWidth: 2, rasterHeight: 2 });
+    expect(resolve(atom)).toEqual({
+      kind: 'image',
+      href: TINY_PNG_URI,
+      width: 2,
+      height: 2,
+      rasterWidth: 2,
+      rasterHeight: 2,
+    });
   });
 
   test('sprite atom: resolves via the registry to a tinted PNG data URI, dims agree with measureInlineAtom (D9)', () => {
@@ -430,12 +451,7 @@ describe('makeAtomImageResolverFor', () => {
     const sprite = new SpriteMonochrome(4, 4, 16);
     for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) sprite.setGray(x, y, (x + y) % 16);
     // Same scale the resolver now passes: requested 1 * FONT.size / 13.
-    const direct = spriteToPngDataUri(
-      spriteMonochromeAsLike(sprite),
-      '#FF0000',
-      undefined,
-      spriteScale(1, FONT.size),
-    );
+    const direct = spriteToPngDataUri(spriteMonochromeAsLike(sprite), '#FF0000', undefined, spriteScale(1, FONT.size));
     expect(result!.width).toBe(direct.width);
     expect(result!.height).toBe(direct.height);
   });
@@ -524,7 +540,16 @@ describe('AtomImageResolver — optional ink fields (T3-seams, ADR-2)', () => {
       return { kind: 'image', href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 };
     };
     const atom: InlineAtomToken = { kind: 'sprite', name: 'bi-globe', scale: 1 };
-    expect(resolve(atom)).toEqual({ kind: 'image', href: 'data:x', width: 16, height: 16, inkX: 1, inkY: 2, inkWidth: 12, inkHeight: 10 });
+    expect(resolve(atom)).toEqual({
+      kind: 'image',
+      href: 'data:x',
+      width: 16,
+      height: 16,
+      inkX: 1,
+      inkY: 2,
+      inkWidth: 12,
+      inkHeight: 10,
+    });
   });
 
   test('omitting the ink fields is still a valid AtomImageResolver return -- ADR-2 additive shape', () => {

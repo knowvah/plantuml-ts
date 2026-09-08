@@ -18,11 +18,7 @@ export interface VerifyMismatch {
 
 /** Re-hash every file listed in `manifest` for one bundle; return every
  * mismatch found (empty array = bundle verified clean). */
-export function verifyBundle(
-  bundleName: string,
-  manifest: BundleManifest,
-  assetsStdlibDir: string,
-): VerifyMismatch[] {
+export function verifyBundle(bundleName: string, manifest: BundleManifest, assetsStdlibDir: string): VerifyMismatch[] {
   const mismatches: VerifyMismatch[] = [];
   const bundleDir = join(assetsStdlibDir, bundleName);
 

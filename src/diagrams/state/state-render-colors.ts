@@ -100,10 +100,7 @@ function resolveStateBucketFontColor(theme: Theme): string | undefined {
  *  inline override, above the bare `state`-element bucket). Keyed by the
  *  node's OWN lowercased stereotype, mirroring `resolveStateBorder`'s
  *  identical lookup shape. */
-function resolveStateBackgroundByStereo(
-  node: Pick<StateNodeGeo, 'stereotype'>,
-  theme: Theme,
-): string | undefined {
+function resolveStateBackgroundByStereo(node: Pick<StateNodeGeo, 'stereotype'>, theme: Theme): string | undefined {
   if (node.stereotype === undefined) return undefined;
   const override = theme.colors.graph.stateBackgroundColorByStereo?.[node.stereotype.toLowerCase()];
   return override !== undefined ? resolveColorToSvgHex(override) : undefined;
@@ -152,10 +149,7 @@ export function resolveStateFillBucketed(
  * the plain `theme.colors.border` default, matching {@link
  * resolveStateFillBucketed}'s own precedence shape.
  */
-export function resolveStateBorder(
-  node: Pick<StateNodeGeo, 'stereotype'>,
-  theme: Theme,
-): string {
+export function resolveStateBorder(node: Pick<StateNodeGeo, 'stereotype'>, theme: Theme): string {
   if (node.stereotype !== undefined) {
     const override = theme.colors.graph.stateBorderColorByStereo?.[node.stereotype.toLowerCase()];
     if (override !== undefined) return resolveColorToSvgHex(override);
@@ -173,11 +167,7 @@ export function resolveStateBorder(
  * over `fallback` (the box's pre-existing hardcoded `#000000` text default),
  * matching {@link resolveStateFillBucketed}'s own precedence shape.
  */
-export function resolveStateFontColor(
-  node: Pick<StateNodeGeo, 'stereotype'>,
-  theme: Theme,
-  fallback: string,
-): string {
+export function resolveStateFontColor(node: Pick<StateNodeGeo, 'stereotype'>, theme: Theme, fallback: string): string {
   if (node.stereotype !== undefined) {
     const override = theme.colors.graph.stateFontColorByStereo?.[node.stereotype.toLowerCase()];
     if (override !== undefined) return resolveColorToSvgHex(override);

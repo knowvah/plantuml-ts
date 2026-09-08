@@ -16,19 +16,24 @@ import { describe, test, expect } from 'vitest';
 import { computePortClusterInitialRect } from '../../../src/diagrams/description/frontier-shadow-layout.js';
 
 describe('computePortClusterInitialRect', () => {
-  test('reproduces gafegu-06\'s exact cluster bb and port centers (converted to y-DOWN)', () => {
+  test("reproduces gafegu-06's exact cluster bb and port centers (converted to y-DOWN)", () => {
     const result = computePortClusterInitialRect({
-      ranks: [{
-        rank: 'source',
-        ports: [
-          { id: 'p80', width: 12, height: 12 },
-          { id: 'p81', width: 12, height: 12 },
-          { id: 'p82', width: 12, height: 12 },
-          { id: 'p83', width: 12, height: 12 },
-        ],
-      }],
-      anchorWidth: 50, anchorHeight: 17,
-      nodeSep: 35, rankSep: 60, rankdir: 'TB',
+      ranks: [
+        {
+          rank: 'source',
+          ports: [
+            { id: 'p80', width: 12, height: 12 },
+            { id: 'p81', width: 12, height: 12 },
+            { id: 'p82', width: 12, height: 12 },
+            { id: 'p83', width: 12, height: 12 },
+          ],
+        },
+      ],
+      anchorWidth: 50,
+      anchorHeight: 17,
+      nodeSep: 35,
+      rankSep: 60,
+      rankdir: 'TB',
     });
 
     // Width/height are frame-invariant (unaffected by the native-y-up ->
@@ -61,8 +66,11 @@ describe('computePortClusterInitialRect', () => {
         { rank: 'source', ports: [{ id: 'in0', width: 12, height: 12 }] },
         { rank: 'sink', ports: [{ id: 'out0', width: 12, height: 12 }] },
       ],
-      anchorWidth: 40, anchorHeight: 16,
-      nodeSep: 20, rankSep: 40, rankdir: 'TB',
+      anchorWidth: 40,
+      anchorHeight: 16,
+      nodeSep: 20,
+      rankSep: 40,
+      rankdir: 'TB',
     });
     const inY = result.portCenters.get('in0')!.y;
     const outY = result.portCenters.get('out0')!.y;
@@ -76,15 +84,20 @@ describe('computePortClusterInitialRect', () => {
     // `srv1.br0`/`srv2.br0` ids before the synthetic-safe-id fix -- see
     // decision-journal.md's J2 entry).
     const result = computePortClusterInitialRect({
-      ranks: [{
-        rank: 'source',
-        ports: [
-          { id: 'srv1.br0', width: 12, height: 12 },
-          { id: 'srv2.br0', width: 12, height: 12 },
-        ],
-      }],
-      anchorWidth: 40, anchorHeight: 16,
-      nodeSep: 35, rankSep: 60, rankdir: 'TB',
+      ranks: [
+        {
+          rank: 'source',
+          ports: [
+            { id: 'srv1.br0', width: 12, height: 12 },
+            { id: 'srv2.br0', width: 12, height: 12 },
+          ],
+        },
+      ],
+      anchorWidth: 40,
+      anchorHeight: 16,
+      nodeSep: 35,
+      rankSep: 60,
+      rankdir: 'TB',
     });
     expect(result.portCenters.has('srv1.br0')).toBe(true);
     expect(result.portCenters.has('srv2.br0')).toBe(true);
@@ -92,10 +105,15 @@ describe('computePortClusterInitialRect', () => {
   });
 
   test('rankdir=LR is accepted without throwing', () => {
-    expect(() => computePortClusterInitialRect({
-      ranks: [{ rank: 'source', ports: [{ id: 'a', width: 12, height: 12 }] }],
-      anchorWidth: 40, anchorHeight: 16,
-      nodeSep: 20, rankSep: 40, rankdir: 'LR',
-    })).not.toThrow();
+    expect(() =>
+      computePortClusterInitialRect({
+        ranks: [{ rank: 'source', ports: [{ id: 'a', width: 12, height: 12 }] }],
+        anchorWidth: 40,
+        anchorHeight: 16,
+        nodeSep: 20,
+        rankSep: 40,
+        rankdir: 'LR',
+      }),
+    ).not.toThrow();
   });
 });

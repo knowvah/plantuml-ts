@@ -33,11 +33,7 @@ const NO_BLOCK_SOURCE = `this is not a valid plantuml diagram`;
  * Fill the source editor and wait until the preview SVG contains the given
  * text — confirming the re-render from our source completed (not stale).
  */
-async function fillAndWait(
-  page: Page,
-  source: string,
-  waitFor: string,
-): Promise<void> {
+async function fillAndWait(page: Page, source: string, waitFor: string): Promise<void> {
   await page.locator('#source').fill(source);
   await expect(page.locator('#preview svg')).toContainText(waitFor, { timeout: 5000 });
 }
@@ -61,8 +57,7 @@ test.describe('SVG rendering correctness', () => {
       const boxes = [...svgEl.querySelectorAll('rect')]
         .filter(
           (r) =>
-            parseFloat(r.getAttribute('y') ?? '1') === 0 &&
-            parseFloat(r.getAttribute('width') ?? '0') < svgWidth * 0.9,
+            parseFloat(r.getAttribute('y') ?? '1') === 0 && parseFloat(r.getAttribute('width') ?? '0') < svgWidth * 0.9,
         )
         .map((r) => r.getBoundingClientRect())
         .sort((a, b) => a.left - b.left);
@@ -85,35 +80,25 @@ test.describe('SVG rendering correctness', () => {
     await expect(page.locator('#preview svg')).toBeVisible({ timeout: 5000 });
 
     // Default theme — white background encoded in SVG fill attributes
-    await expect
-      .poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 })
-      .toContain('#FFFFFF');
+    await expect.poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 }).toContain('#FFFFFF');
 
     // Switch to dark theme and wait for re-render
     await page.locator('#theme').selectOption('dark');
-    await expect
-      .poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 })
-      .toContain('#1E1E1E');
+    await expect.poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 }).toContain('#1E1E1E');
 
     // Switch back to default
     await page.locator('#theme').selectOption('default');
-    await expect
-      .poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 })
-      .toContain('#FFFFFF');
+    await expect.poll(() => page.locator('#preview').innerHTML(), { timeout: 5000 }).toContain('#FFFFFF');
   });
 
   test('SVG height grows with more messages', async ({ page }) => {
     await page.goto('/');
 
     await fillAndWait(page, SIMPLE_DIAGRAM, 'Hello');
-    const shortHeight = parseFloat(
-      (await page.locator('#preview svg').getAttribute('height')) ?? '0',
-    );
+    const shortHeight = parseFloat((await page.locator('#preview svg').getAttribute('height')) ?? '0');
 
     await fillAndWait(page, MANY_MESSAGES_DIAGRAM, 'message 4');
-    const tallHeight = parseFloat(
-      (await page.locator('#preview svg').getAttribute('height')) ?? '0',
-    );
+    const tallHeight = parseFloat((await page.locator('#preview svg').getAttribute('height')) ?? '0');
 
     expect(tallHeight).toBeGreaterThan(shortHeight);
   });
@@ -141,8 +126,7 @@ test.describe('SVG rendering correctness', () => {
       // Header boxes: y=0, not the full-width background rect
       const headers = rects.filter(
         (r) =>
-          parseFloat(r.getAttribute('y') ?? '1') === 0 &&
-          parseFloat(r.getAttribute('width') ?? '0') < svgWidth * 0.9,
+          parseFloat(r.getAttribute('y') ?? '1') === 0 && parseFloat(r.getAttribute('width') ?? '0') < svgWidth * 0.9,
       );
 
       for (const header of headers) {

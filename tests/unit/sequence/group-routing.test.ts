@@ -34,9 +34,7 @@ import { activityPlugin } from '../../../src/diagrams/activity/index.js';
 import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
 
 function textRuns(svg: string): string[] {
-  return [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)]
-    .map((m) => (m[1] as string).trim())
-    .filter((t) => t !== '');
+  return [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => (m[1] as string).trim()).filter((t) => t !== '');
 }
 
 const GROUPED = {
@@ -80,8 +78,6 @@ describe('sequence grouping constructs are not stolen by the activity engine', (
       expect(parseRefusalOf(sequencePlugin.parse(block))).toBeUndefined();
     },
   );
-
-
 });
 
 describe('alt/else branch conditions survive to the SVG', () => {
@@ -99,10 +95,7 @@ describe('alt/else branch conditions survive to the SVG', () => {
     if ('refused' in ast) throw new Error(`sequence refused at line ${String(ast.line)}: ${ast.message}`);
     const frame = ast.events.find((e) => e.kind === 'frame');
     expect(frame).toBeDefined();
-    expect(frame?.kind === 'frame' ? frame.branchLabels : undefined).toEqual([
-      'first case',
-      'other case',
-    ]);
+    expect(frame?.kind === 'frame' ? frame.branchLabels : undefined).toEqual(['first case', 'other case']);
   });
 
   it('renders the frame type and BOTH bracketed conditions, matching the jar', () => {

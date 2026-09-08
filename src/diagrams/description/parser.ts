@@ -165,9 +165,7 @@ function continueElementBlock(
   trimmed: string,
 ): LineOutcome {
   const end =
-    pending.terminator === 'quote'
-      ? ELEMENT_MULTILINE_END0_RE.exec(trimmed)
-      : ELEMENT_MULTILINE_END1_RE.exec(trimmed);
+    pending.terminator === 'quote' ? ELEMENT_MULTILINE_END0_RE.exec(trimmed) : ELEMENT_MULTILINE_END1_RE.exec(trimmed);
   if (end === null) {
     pushElementBody(pending, raw);
     return 1;
@@ -182,11 +180,7 @@ function continueElementBlock(
  *  TYPE0-only: TYPE0's color slot sits before `as` and has no single-line
  *  equivalent, whereas TYPE1's color is a separate, unmeasured gap (see this
  *  task's decision-journal row). */
-function applyElementDecorations(
-  node: DescriptiveNode,
-  run: string,
-  withColor: boolean,
-): void {
+function applyElementDecorations(node: DescriptiveNode, run: string, withColor: boolean): void {
   if (run.trim() === '') return;
   const sr = extractNodeStereotype(run);
   if (sr !== undefined) {
@@ -248,12 +242,7 @@ function tryElementBlockType1(state: ParseState, line: string): LineOutcome {
  * `continue`s to the next command, so the opener must fall through to the
  * single-line rule rather than swallow the rest of the diagram.
  */
-function tryElementBlockType0(
-  state: ParseState,
-  lines: readonly string[],
-  i: number,
-  line: string,
-): LineOutcome {
+function tryElementBlockType0(state: ParseState, lines: readonly string[], i: number, line: string): LineOutcome {
   const open = ELEMENT_MULTILINE_OPEN_TYPE0_RE.exec(line);
   if (open === null) return null;
   let closerFound = false;
@@ -271,12 +260,7 @@ function tryElementBlockType0(
  *  outright, else TYPE1 then TYPE0 are offered it (upstream registers TYPE0
  *  at `DescriptionDiagramFactory.java:122` and TYPE1 at `:123`; the two
  *  openers are mutually exclusive, so order is immaterial). */
-function tryElementBlock(
-  state: ParseState,
-  lines: readonly string[],
-  i: number,
-  line: string,
-): LineOutcome {
+function tryElementBlock(state: ParseState, lines: readonly string[], i: number, line: string): LineOutcome {
   const pending = state.pendingElement;
   if (pending !== undefined) return continueElementBlock(state, pending, lines[i]!, line);
   const type1 = tryElementBlockType1(state, line);
@@ -338,8 +322,7 @@ function tryArchimate(state: ParseState, line: string): LineOutcome {
   if (symbol === undefined) return null;
   const color = m[1]!;
   const { id, display, stereotype, tags, stereotypeSprite } = parseNameSection(m[2]!);
-  const finalDisplay =
-    display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
+  const finalDisplay = display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
   emitNode(state, makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite));
   return 1;
 }
@@ -472,7 +455,7 @@ export function parseDescription(
   const state = makeInitialState(internalSprites, internalEmoji);
   const lines = block.lines;
 
-  for (let i = 0; i < lines.length; ) {
+  for (let i = 0; i < lines.length;) {
     if (lines[i]!.trim() === '') {
       i++;
       continue;

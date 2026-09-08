@@ -74,16 +74,16 @@ function rotateLeft32(value: number, bits: number): number {
  *  (RFC 1321 §3.4) — computed rather than transcribed, to keep this table
  *  provably correct against the spec instead of a 64-entry literal that
  *  could silently typo. */
-const MD5_K: readonly number[] = Array.from({ length: 64 }, (_unused, i) =>
-  Math.floor(Math.abs(Math.sin(i + 1)) * 2 ** 32) >>> 0,
+const MD5_K: readonly number[] = Array.from(
+  { length: 64 },
+  (_unused, i) => Math.floor(Math.abs(Math.sin(i + 1)) * 2 ** 32) >>> 0,
 );
 
 /** Upstream: RFC 1321 §3.4's per-round left-rotate amounts, 4 values
  *  repeated 4 times per round. */
 const MD5_S: readonly number[] = [
-  7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
-  4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15,
-  21,
+  7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4,
+  11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
 ];
 
 /** RFC 1321 §3.1-3.2: pads `bytes` to a multiple of 64 bytes — a single

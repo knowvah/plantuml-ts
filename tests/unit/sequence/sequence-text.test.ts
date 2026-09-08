@@ -69,14 +69,12 @@ describe('sequenceText', () => {
   });
 
   it('carries fontWeight and textDecoration through when given', () => {
-    const attrs = attributesOf(
-      sequenceText({ ...JOBADI_BOB, fontWeight: '700', textDecoration: 'wavy underline' }),
-    );
+    const attrs = attributesOf(sequenceText({ ...JOBADI_BOB, fontWeight: '700', textDecoration: 'wavy underline' }));
     expect(attrs['font-weight']).toBe('700');
     expect(attrs['text-decoration']).toBe('wavy underline');
   });
 
-  it("omits both when absent, rather than emitting an empty attribute", () => {
+  it('omits both when absent, rather than emitting an empty attribute', () => {
     const attrs = attributesOf(sequenceText(JOBADI_BOB));
     expect(attrs['font-weight']).toBeUndefined();
     expect(attrs['text-decoration']).toBeUndefined();

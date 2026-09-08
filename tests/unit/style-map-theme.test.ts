@@ -26,17 +26,13 @@ describe('applyStyleMap -- root/element universal-selector cascade (D3)', () => 
   });
 
   it('a LATER element {} Shadowing declaration overrides an EARLIER root {} one', () => {
-    const styleMap = parseStyleBlock(
-      'root {\n  Shadowing 0.0\n}\nelement {\n  Shadowing 4.0\n}',
-    );
+    const styleMap = parseStyleBlock('root {\n  Shadowing 0.0\n}\nelement {\n  Shadowing 4.0\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.shadowing).toBe(4);
   });
 
   it('an EARLIER element {} Shadowing declaration is overridden by a LATER root {} one', () => {
-    const styleMap = parseStyleBlock(
-      'element {\n  Shadowing 4.0\n}\nroot {\n  Shadowing 0.0\n}',
-    );
+    const styleMap = parseStyleBlock('element {\n  Shadowing 4.0\n}\nroot {\n  Shadowing 0.0\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.shadowing).toBe(0);
   });
@@ -68,9 +64,7 @@ describe('applyStyleMap -- root/element universal-selector cascade (D3)', () => 
   });
 
   it('a document {} BackgroundColor still wins the canvas field over a root {} one', () => {
-    const styleMap = parseStyleBlock(
-      'root {\n  BackGroundColor red\n}\ndocument {\n  BackGroundColor white\n}',
-    );
+    const styleMap = parseStyleBlock('root {\n  BackGroundColor red\n}\ndocument {\n  BackGroundColor white\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.colors.background).toBe('white');
     expect(theme.colors.graph.rootElementBackground).toBe('red');
@@ -159,9 +153,7 @@ describe('applyStyleMap -- per-signature element-bucket merge (F4-e / M1)', () =
  */
 describe('applyStyleMap -- cardinality font fold (T14, D3)', () => {
   it("camuna-58-veca254's arrow { cardinality { FontSize 10 } } resolves theme.cardinalityFontSize to 10", () => {
-    const styleMap = parseStyleBlock(
-      'arrow {\n  FontSize 14\n  cardinality {\n    FontSize 10\n  }\n}',
-    );
+    const styleMap = parseStyleBlock('arrow {\n  FontSize 14\n  cardinality {\n    FontSize 10\n  }\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.cardinalityFontSize).toBe(10);
   });
@@ -203,7 +195,7 @@ describe('applyStyleMap -- arrow-label font fold (T2, T6, D3, D4)', () => {
     expect(theme.colors.graph.arrowFontFamily).toBe('Courier');
   });
 
-  it("arrow { cardinality { FontStyle italic } } alone does NOT set the arrow-level font", () => {
+  it('arrow { cardinality { FontStyle italic } } alone does NOT set the arrow-level font', () => {
     const styleMap = parseStyleBlock('arrow {\n  cardinality {\n    FontStyle italic\n  }\n}');
     const theme = applyStyleMap(styleMap, defaultTheme);
     expect(theme.colors.graph.arrowFontStyle).toBeUndefined();

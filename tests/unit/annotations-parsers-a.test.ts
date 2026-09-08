@@ -28,8 +28,7 @@ import { astOrThrow } from '../helpers/parse-ast.js';
 
 /** The sequence engine's AST arm; throws naming the refusal. Every source
  *  below is upstream-recognised throughout and must never refuse. */
-const seq = (lines: readonly string[]): SequenceDiagramAST =>
-  astOrThrow(parseSequence(lines), 'sequence');
+const seq = (lines: readonly string[]): SequenceDiagramAST => astOrThrow(parseSequence(lines), 'sequence');
 
 // Pinned copies, not the gitignored tests/corpus tree — see
 // tests/fixtures/corpus/README.md. Reading the regenerable tree made these
@@ -95,9 +94,7 @@ describe('class — annotation commands land in ast.annotations', () => {
 
   it('annotation-free input: annotations is empty and classifiers/relationships are unaffected', () => {
     const source = readFileSync(join(CORPUS, 'class/bajotu-30-soku184.puml'), 'utf8');
-    const bodyLines = source
-      .split('\n')
-      .filter((l) => !/^@(start|end)uml/i.test(l.trim()));
+    const bodyLines = source.split('\n').filter((l) => !/^@(start|end)uml/i.test(l.trim()));
     const ast = parseClassSource(bodyLines.join('\n'));
     expect(isEmpty(ast.annotations!)).toBe(true);
     expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['cl2', 'p1', 'p1.cl1']);
@@ -136,9 +133,7 @@ describe('state — annotation commands land in ast.annotations', () => {
 
   it('annotation-free input: annotations is empty and states are unaffected', () => {
     const source = readFileSync(join(CORPUS, 'state/fuxavu-11-goco024.puml'), 'utf8');
-    const bodyLines = source
-      .split('\n')
-      .filter((l) => !/^@(start|end)uml/i.test(l.trim()));
+    const bodyLines = source.split('\n').filter((l) => !/^@(start|end)uml/i.test(l.trim()));
     const ast = parseStateSource(bodyLines.join('\n'));
     expect(isEmpty(ast.annotations!)).toBe(true);
     expect(ast.states.map((s) => s.id)).toEqual(['single1', 'single2']);
@@ -165,12 +160,7 @@ describe('sequence — annotation commands land in ast.annotations', () => {
   });
 
   it('`note over A` containing a `title inside` line keeps it as note text — annotations.title stays null (D3)', () => {
-    const ast = seq([
-      'participant A',
-      'note over A',
-      'title not a title',
-      'end note',
-    ]);
+    const ast = seq(['participant A', 'note over A', 'title not a title', 'end note']);
     expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(true);
     const noteEvents = ast.events.filter((e) => e.kind === 'note');
     expect(noteEvents).toHaveLength(1);
@@ -179,9 +169,7 @@ describe('sequence — annotation commands land in ast.annotations', () => {
 
   it('annotation-free input: annotations is empty and participants/events are unaffected', () => {
     const source = readFileSync(join(CORPUS, 'sequence/A0001_Test.puml'), 'utf8');
-    const bodyLines = source
-      .split('\n')
-      .filter((l) => !/^@(start|end)uml/i.test(l.trim()));
+    const bodyLines = source.split('\n').filter((l) => !/^@(start|end)uml/i.test(l.trim()));
     const ast = seq(bodyLines);
     expect(isEmpty(ast.annotations!)).toBe(true);
     expect(ast.participants.map((p) => p.id)).toEqual(['Bob', 'Alice']);

@@ -119,11 +119,18 @@ export function forceFont(fc: FontConfiguration, override: StereotypeFontOverrid
     // here, ITALIC is never PLAIN), so this is just "add ITALIC if absent".
     return { ...fc, styles: new Set(fc.styles).add(FontStyle.ITALIC) };
   }
-  return { family: override.font.family, size: override.font.size, color: override.color ?? fc.color, styles: fc.styles };
+  return {
+    family: override.font.family,
+    size: override.font.size,
+    color: override.color ?? fc.color,
+    styles: fc.styles,
+  };
 }
 
 function blockedOnCircledCharacter(reason: string): Error {
-  return new Error(`Display.createStereotype: building the stereotype's circled-character/sprite decoration is blocked -- ${reason}`);
+  return new Error(
+    `Display.createStereotype: building the stereotype's circled-character/sprite decoration is blocked -- ${reason}`,
+  );
 }
 
 const SPOTTED_BLOCKED_REASON =
@@ -180,7 +187,14 @@ function getCreole(
   // implementation next (T2b) -- see this task's own report.
   const sheet = builder.createSheet(display) as unknown as Sheet<CreoleAtom>;
   const padding = ctx.spriteContainer === null ? ClockwiseTopRightBottomLeft.none() : ctx.spriteContainer.getPadding();
-  const sheetBlock1 = new SheetBlock1(sheet, params.maxMessageSize, ctx.atomOps, padding, margins.marginX1 ?? 0, margins.marginX2 ?? 0);
+  const sheetBlock1 = new SheetBlock1(
+    sheet,
+    params.maxMessageSize,
+    ctx.atomOps,
+    padding,
+    margins.marginX1 ?? 0,
+    margins.marginX2 ?? 0,
+  );
   return new SheetBlock2(sheetBlock1, sheetBlock1, UStroke.withThickness(SHEET_BLOCK2_THICKNESS));
 }
 

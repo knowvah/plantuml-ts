@@ -67,7 +67,13 @@ function edgeStyle(edge: DescriptionEdgeGeo): SvekLinkStyle {
   return edge.style;
 }
 
-function buildInput(edge: DescriptionEdgeGeo, theme: Theme, uid: string, fromUid: string, toUid: string): SvekEdgeInput {
+function buildInput(
+  edge: DescriptionEdgeGeo,
+  theme: Theme,
+  uid: string,
+  fromUid: string,
+  toUid: string,
+): SvekEdgeInput {
   const headDecor = edge.headDecor ?? (edge.tailDecor === undefined ? fallbackHeadToken(edge.arrowHead) : undefined);
   // G1 I5e: only the POST-colon-embedded stereotype form is ever drawn as
   // visible edge text upstream -- see `DescriptiveLink.stereotypeIsLinkLabel`'s

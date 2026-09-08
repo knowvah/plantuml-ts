@@ -182,7 +182,9 @@ export function measureLeafNode(
         return measureLegacyBoxFallback(node, fontSpec, { measurer, opts, sprites, defaultFont: baseFont });
       }
       return measureEntityLeaf(
-        node, fontSpec, { opts, sprites, measurer },
+        node,
+        fontSpec,
+        { opts, sprites, measurer },
         FOLDER_FAMILY_SHOW_TITLE[node.symbol] === undefined,
       );
   }

@@ -15,14 +15,11 @@ import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
 import type { DescriptionDiagramAST } from '../../../src/diagrams/description/ast.js';
 
-export function descriptionAst(
-  result: DescriptionDiagramAST | ParseRefusal,
-): DescriptionDiagramAST {
+export function descriptionAst(result: DescriptionDiagramAST | ParseRefusal): DescriptionDiagramAST {
   const refusal = parseRefusalOf(result);
   if (refusal !== undefined) {
     throw new Error(
-      `description parser refused line ${String(refusal.line)} ` +
-        `(${refusal.kind}): ${refusal.message}`,
+      `description parser refused line ${String(refusal.line)} ` + `(${refusal.kind}): ${refusal.message}`,
     );
   }
   // `parseRefusalOf` takes `unknown` (see its own doc comment) and so

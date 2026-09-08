@@ -98,8 +98,7 @@ export function getLeafType(type: string): LeafType {
   if (type.startsWith('STATIC')) return LeafType.CLASS;
 
   const value = (LeafType as Record<string, LeafType>)[type];
-  if (value === undefined)
-    throw new Error(`No enum constant LeafType.${type}`);
+  if (value === undefined) throw new Error(`No enum constant LeafType.${type}`);
   return value;
 }
 

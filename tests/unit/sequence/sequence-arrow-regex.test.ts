@@ -35,13 +35,10 @@ const anchored = (source: string): RegExp => new RegExp(`^${source}$`, 'iu');
 function groupsOf(re: RegExp, input: string): Record<string, string> {
   const m = re.exec(input);
   expect(m, `expected ${JSON.stringify(input)} to match`).not.toBeNull();
-  return Object.fromEntries(
-    Object.entries(m!.groups ?? {}).filter(([, v]) => v !== undefined),
-  );
+  return Object.fromEntries(Object.entries(m!.groups ?? {}).filter(([, v]) => v !== undefined));
 }
 
-const skeleton = (input: string): Record<string, string> =>
-  groupsOf(ARROW_SKELETON_RE, input);
+const skeleton = (input: string): Record<string, string> => groupsOf(ARROW_SKELETON_RE, input);
 
 // ---------------------------------------------------------------------------
 // ANCHOR -- CommandArrow.java:78
@@ -133,14 +130,11 @@ describe('colorOrStylePattern(name)', () => {
 // ---------------------------------------------------------------------------
 
 describe('ARROW_DRESSING1', () => {
-  it.each([' o', ' x', '<', '<<', '<_', ' o<', ' x<', '(5)<', '/', '//', '\\', '\\\\'])(
-    'captures %j',
-    (input) => {
-      expect(groupsOf(anchored(ARROW_DRESSING1), input)).toEqual({
-        ARROW_DRESSING1: input,
-      });
-    },
-  );
+  it.each([' o', ' x', '<', '<<', '<_', ' o<', ' x<', '(5)<', '/', '//', '\\', '\\\\'])('captures %j', (input) => {
+    expect(groupsOf(anchored(ARROW_DRESSING1), input)).toEqual({
+      ARROW_DRESSING1: input,
+    });
+  });
 
   it('is optional', () => {
     expect(anchored(ARROW_DRESSING1).exec('')?.groups?.ARROW_DRESSING1).toBeUndefined();
@@ -156,14 +150,11 @@ describe('ARROW_DRESSING1', () => {
 });
 
 describe('ARROW_DRESSING2', () => {
-  it.each(['>', '>>', '_>', '>o ', '>x ', '>(5)', '/', '//', '\\', '\\\\', 'o ', 'x '])(
-    'captures %j',
-    (input) => {
-      expect(groupsOf(anchored(ARROW_DRESSING2), input)).toEqual({
-        ARROW_DRESSING2: input,
-      });
-    },
-  );
+  it.each(['>', '>>', '_>', '>o ', '>x ', '>(5)', '/', '//', '\\', '\\\\', 'o ', 'x '])('captures %j', (input) => {
+    expect(groupsOf(anchored(ARROW_DRESSING2), input)).toEqual({
+      ARROW_DRESSING2: input,
+    });
+  });
 
   it('is optional', () => {
     expect(anchored(ARROW_DRESSING2).exec('')?.groups?.ARROW_DRESSING2).toBeUndefined();
@@ -269,23 +260,17 @@ describe('PART1 / PART2', () => {
 // ---------------------------------------------------------------------------
 
 describe('ARROW_SUPPCIRCLE fragments', () => {
-  it.each(['[', ']', '?', '[o', ']x', '?o'])(
-    'ARROW_SUPPCIRCLE2_LEFT captures the leading %j',
-    (input) => {
-      expect(groupsOf(anchored(ARROW_SUPPCIRCLE2_LEFT), input)).toEqual({
-        ARROW_SUPPCIRCLE2: input,
-      });
-    },
-  );
+  it.each(['[', ']', '?', '[o', ']x', '?o'])('ARROW_SUPPCIRCLE2_LEFT captures the leading %j', (input) => {
+    expect(groupsOf(anchored(ARROW_SUPPCIRCLE2_LEFT), input)).toEqual({
+      ARROW_SUPPCIRCLE2: input,
+    });
+  });
 
-  it.each(['o[', 'x]', 'o?', '[', ']', '?'])(
-    'ARROW_SUPPCIRCLE2_RIGHT captures the trailing %j',
-    (input) => {
-      expect(groupsOf(anchored(ARROW_SUPPCIRCLE2_RIGHT), input)).toEqual({
-        ARROW_SUPPCIRCLE2: input,
-      });
-    },
-  );
+  it.each(['o[', 'x]', 'o?', '[', ']', '?'])('ARROW_SUPPCIRCLE2_RIGHT captures the trailing %j', (input) => {
+    expect(groupsOf(anchored(ARROW_SUPPCIRCLE2_RIGHT), input)).toEqual({
+      ARROW_SUPPCIRCLE2: input,
+    });
+  });
 
   it('ARROW_SUPPCIRCLE1_LEFT puts the decoration before the space', () => {
     expect(groupsOf(anchored(ARROW_SUPPCIRCLE1_LEFT), 'o ')).toEqual({

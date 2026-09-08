@@ -12,15 +12,21 @@
  */
 import { describe, test, expect } from 'vitest';
 import {
-  frontierCalculator, ensureMinWidth, ENTITY_POSITION_RADIUS,
-  type RectangleArea, type Point,
+  frontierCalculator,
+  ensureMinWidth,
+  ENTITY_POSITION_RADIUS,
+  type RectangleArea,
+  type Point,
 } from '../../../../src/core/svek/FrontierCalculator.js';
 
 describe('frontierCalculator (insides empty — port-only container)', () => {
-  test('reproduces jar\'s exact 177x99 result for component/gafegu-06-nito976 (raw graphviz-native y-up frame)', () => {
+  test("reproduces jar's exact 177x99 result for component/gafegu-06-nito976 (raw graphviz-native y-up frame)", () => {
     const initial: RectangleArea = { minX: 8, minY: 8, maxX: 177, maxY: 121 };
     const points: Point[] = [
-      { x: 22, y: 107 }, { x: 69, y: 107 }, { x: 116, y: 107 }, { x: 163, y: 107 },
+      { x: 22, y: 107 },
+      { x: 69, y: 107 },
+      { x: 116, y: 107 },
+      { x: 163, y: 107 },
     ];
     const core = frontierCalculator(initial, [], points, 'TB');
     expect(core).toEqual({ minX: 4, minY: 8, maxX: 181, maxY: 107 });
@@ -28,14 +34,16 @@ describe('frontierCalculator (insides empty — port-only container)', () => {
     expect(core.maxY - core.minY).toBe(99);
   });
 
-  test('reproduces the SAME 177x99 result in jar\'s final SVG (y-down) frame', () => {
+  test("reproduces the SAME 177x99 result in jar's final SVG (y-down) frame", () => {
     // Same fixture, screen (y-down) coordinates: ports sit at the cluster's
     // TOP (screen minY), matching the native-frame maxY-touch/push-excluded
     // corner case flipping to a screen-minY touch.
     const initial: RectangleArea = { minX: 8, minY: 152.78 - 121, maxX: 177, maxY: 152.78 - 8 };
     const points: Point[] = [
-      { x: 22, y: 152.78 - 107 }, { x: 69, y: 152.78 - 107 },
-      { x: 116, y: 152.78 - 107 }, { x: 163, y: 152.78 - 107 },
+      { x: 22, y: 152.78 - 107 },
+      { x: 69, y: 152.78 - 107 },
+      { x: 116, y: 152.78 - 107 },
+      { x: 163, y: 152.78 - 107 },
     ];
     const core = frontierCalculator(initial, [], points, 'TB');
     expect(core.maxX - core.minX).toBe(177);
@@ -45,7 +53,10 @@ describe('frontierCalculator (insides empty — port-only container)', () => {
   test('touches all four edges when ports surround the seed box (no push, insides empty)', () => {
     const initial: RectangleArea = { minX: 0, minY: 0, maxX: 10, maxY: 10 };
     const points: Point[] = [
-      { x: -50, y: 5 }, { x: 50, y: 5 }, { x: 5, y: -50 }, { x: 5, y: 50 },
+      { x: -50, y: 5 },
+      { x: 50, y: 5 },
+      { x: 5, y: -50 },
+      { x: 5, y: 50 },
     ];
     const core = frontierCalculator(initial, [], points, 'TB');
     // Every edge is touched directly by a point -- no snap-back to `initial`,
@@ -61,7 +72,10 @@ describe('frontierCalculator (insides empty — port-only container)', () => {
     // (java:120-122); pushMaxX/pushMinY/pushMaxY are all NOT corner cases
     // here (no point ever touches core.maxX) so they still fire.
     const initial: RectangleArea = { minX: 0, minY: 0, maxX: 10, maxY: 10 };
-    const points: Point[] = [{ x: 4, y: -20 }, { x: 4, y: 20 }];
+    const points: Point[] = [
+      { x: 4, y: -20 },
+      { x: 4, y: 20 },
+    ];
     const core = frontierCalculator(initial, [], points, 'LR');
     expect(core).toEqual({ minX: 4, minY: -38, maxX: 28, maxY: 38 });
   });
@@ -72,7 +86,10 @@ describe('frontierCalculator (insides empty — port-only container)', () => {
     // core.maxX(6) instead of minX, so pushMaxX (not pushMinX) is the one
     // excluded this time.
     const initial: RectangleArea = { minX: 0, minY: 0, maxX: 10, maxY: 10 };
-    const points: Point[] = [{ x: 6, y: -20 }, { x: 6, y: 20 }];
+    const points: Point[] = [
+      { x: 6, y: -20 },
+      { x: 6, y: 20 },
+    ];
     const core = frontierCalculator(initial, [], points, 'LR');
     expect(core).toEqual({ minX: -18, minY: -38, maxX: 6, maxY: 38 });
   });
@@ -84,7 +101,10 @@ describe('frontierCalculator (insides empty — port-only container)', () => {
     // confirming the corner-exclusion branch is rankdir-dependent, not a
     // no-op either way.
     const initial: RectangleArea = { minX: 0, minY: 0, maxX: 10, maxY: 10 };
-    const points: Point[] = [{ x: 4, y: -20 }, { x: 4, y: 20 }];
+    const points: Point[] = [
+      { x: 4, y: -20 },
+      { x: 4, y: 20 },
+    ];
     const core = frontierCalculator(initial, [], points, 'TB');
     expect(core).toEqual({ minX: -14, minY: -20, maxX: 28, maxY: 20 });
   });
@@ -158,7 +178,10 @@ describe('frontierCalculator (insides empty — state-diagram border-point fixtu
   // point sitting on the (minX,maxY) corner.
   test('AA-shaped case: pushMinX survives, pushMaxY is corner-excluded (TB)', () => {
     const initial: RectangleArea = {
-      minX: 478.01875, minY: 185.64, maxX: 478.01875 + 71, maxY: 185.64 + 132.72,
+      minX: 478.01875,
+      minY: 185.64,
+      maxX: 478.01875 + 71,
+      maxY: 185.64 + 132.72,
     };
     const points: Point[] = [{ x: 492.01875, y: 302 }];
     const core = frontierCalculator(initial, [], points, 'TB');

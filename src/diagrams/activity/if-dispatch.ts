@@ -8,8 +8,14 @@
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityElseIf, ActivityIf, ActivityNode } from './ast.js';
 import {
-  RE_ELSE, RE_ELSEIF, RE_IF, isRefusal, swimlaneSpread,
-  type DispatchResult, type ParseContext, type StopKeywords,
+  RE_ELSE,
+  RE_ELSEIF,
+  RE_IF,
+  isRefusal,
+  swimlaneSpread,
+  type DispatchResult,
+  type ParseContext,
+  type StopKeywords,
 } from './dispatch-support.js';
 import { parseNodes } from './node-dispatch.js';
 
@@ -140,7 +146,10 @@ function consumeIfClauses(ctx: ParseContext, startIdx: number, ifInnerStops: Sto
     if (isRefusal(step)) return step;
     cursor = step.cursor;
     if (step.kind === 'endif') break;
-    if (step.kind === 'elseif') { elseIfBranches.push(step.branch); continue; }
+    if (step.kind === 'elseif') {
+      elseIfBranches.push(step.branch);
+      continue;
+    }
     if (step.kind === 'else') {
       elseBranch = step.branch;
       elseLabel = step.label;
@@ -181,4 +190,3 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
   };
   return { idx: cursor, node: ifNode };
 }
-

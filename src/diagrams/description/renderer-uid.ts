@@ -59,9 +59,7 @@ export interface UidPlan {
 // ---------------------------------------------------------------------------
 
 function everyNodeHasIndex(nodes: readonly DescriptionNodeGeo[]): boolean {
-  return nodes.every(
-    (n) => n.creationIndex !== undefined && everyNodeHasIndex(n.children),
-  );
+  return nodes.every((n) => n.creationIndex !== undefined && everyNodeHasIndex(n.children));
 }
 
 function assignFromCreationIndex(nodes: readonly DescriptionNodeGeo[], nodeUid: Map<string, string>): void {

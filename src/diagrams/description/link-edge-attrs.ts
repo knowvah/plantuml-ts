@@ -27,13 +27,8 @@ import {
 } from '../../core/edge-label-box.js';
 // T1: the ONE `Display#getWithNewlines` port (retires `splitCreoleLines`).
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
-import {
-  type SpriteDimsLookup,
-} from '../../core/creole-atoms.js';
-import {
-  measureLineWithAtoms,
-  lineAtomHeightExcess,
-} from '../../core/creole-atoms-measure.js';
+import { type SpriteDimsLookup } from '../../core/creole-atoms.js';
+import { measureLineWithAtoms, lineAtomHeightExcess } from '../../core/creole-atoms-measure.js';
 
 // ---------------------------------------------------------------------------
 // Graph spacing (nodesep / ranksep) — DotStringFactory.createDotString +
@@ -195,7 +190,11 @@ export function computeGraphSpacing(
   // `dzetaTexts`). Filled with `fontSpec` only to satisfy `MeasureCtx`'s
   // shape -- never read.
   const ctx: MeasureCtx = {
-    fontSpec, cardinalityFontSpec: fontSpec, measurer, sprites, theme: undefined,
+    fontSpec,
+    cardinalityFontSpec: fontSpec,
+    measurer,
+    sprites,
+    theme: undefined,
   };
   let maxHorizontal = 0;
   let maxVertical = 0;
@@ -258,11 +257,7 @@ function mainLabelText(link: DescriptiveLink): string | undefined {
  * stays in one place; only the atom-aware measurement is redone here,
  * because the helper measures plain text and an icon occupies real width.
  */
-function measureMainLabelBox(
-  text: string,
-  isSelfLoop: boolean,
-  ctx: MeasureCtx,
-): { width: number; height: number } {
+function measureMainLabelBox(text: string, isSelfLoop: boolean, ctx: MeasureCtx): { width: number; height: number } {
   const box = computeReservedLabelBox(text, ctx.fontSpec, ctx.measurer, isSelfLoop);
   const widest = Math.max(
     ...box.lines.map((l) => measureLineWithAtoms(l, ctx.fontSpec, ctx.measurer, ctx.sprites).width),
@@ -306,9 +301,8 @@ function computeMainLabelDims(
   isSelfLoop: boolean,
   ctx: MeasureCtx,
 ): { width: number; height: number } {
-  const magic = splitDisplayLines(resolvedLabelText).lines.length === 1
-    ? parseMagicArrowLabel(resolvedLabelText)
-    : undefined;
+  const magic =
+    splitDisplayLines(resolvedLabelText).lines.length === 1 ? parseMagicArrowLabel(resolvedLabelText) : undefined;
   if (magic === undefined) return measureMainLabelBox(resolvedLabelText, isSelfLoop, ctx);
   if (magic.text === undefined || magic.text === '') {
     return { width: ctx.fontSpec.size, height: ctx.fontSpec.size };
@@ -377,15 +371,17 @@ function applyMainLabel(
   linetype: 'ortho' | 'polyline' | undefined,
 ): void {
   const labelText = mainLabelText(link);
-  const noteDim = link.linkNote !== undefined && ctx.theme !== undefined
-    ? measureLinkNoteDim(link.linkNote, ctx.theme, ctx.measurer)
-    : undefined;
+  const noteDim =
+    link.linkNote !== undefined && ctx.theme !== undefined
+      ? measureLinkNoteDim(link.linkNote, ctx.theme, ctx.measurer)
+      : undefined;
   if (labelText === undefined && noteDim === undefined) return;
   const resolvedLabelText = labelText === undefined ? '' : resolveInlineLinks(labelText);
   const sizingText = resolvedLabelText.replace(/\n/g, '\\n');
-  const m = noteDim !== undefined
-    ? computeNoteMergedDims(sizingText, noteDim, link, ctx)
-    : computeMainLabelDims(sizingText, link.from === link.to, ctx);
+  const m =
+    noteDim !== undefined
+      ? computeNoteMergedDims(sizingText, noteDim, link, ctx)
+      : computeMainLabelDims(sizingText, link.from === link.to, ctx);
   if (linetype === 'ortho') {
     attrs.xlabel = resolvedLabelText;
     attrs.xlabelWidth = m.width;
@@ -468,7 +464,10 @@ export function buildLinkEdgeAttributes(
   sprites?: SpriteDimsLookup,
 ): NonNullable<DotInputEdge['attributes']> {
   const ctx: MeasureCtx = {
-    fontSpec: fonts.label, cardinalityFontSpec: fonts.cardinality, measurer, sprites,
+    fontSpec: fonts.label,
+    cardinalityFontSpec: fonts.cardinality,
+    measurer,
+    sprites,
     theme: fonts.noteTheme,
   };
   const attrs: NonNullable<DotInputEdge['attributes']> = { minLen: link.length - 1 };

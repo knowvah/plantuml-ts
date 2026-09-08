@@ -43,10 +43,7 @@ function resolveCascadedFontFlag(
  * `renderer-classifier-colors.ts#classBorderStrokeWidth`'s pre-existing
  * `classBorderThicknessByStereo` lookup.
  */
-function attributeFontSizeByStereo(
-  theme: Theme,
-  stereotypeLabels: readonly string[] | undefined,
-): number | undefined {
+function attributeFontSizeByStereo(theme: Theme, stereotypeLabels: readonly string[] | undefined): number | undefined {
   const byStereo = theme.colors.graph.classAttributeFontSizeByStereo;
   if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
   for (const label of stereotypeLabels) {
@@ -76,8 +73,8 @@ export function resolveAttributeFont(
 ) {
   return {
     family: theme.colors.graph.classAttributeFontFamily ?? fontSpec.family,
-    size: attributeFontSizeByStereo(theme, stereotypeLabels)
-      ?? theme.colors.graph.classAttributeFontSize ?? fontSpec.size,
+    size:
+      attributeFontSizeByStereo(theme, stereotypeLabels) ?? theme.colors.graph.classAttributeFontSize ?? fontSpec.size,
     bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classAttributeFontBold, false),
     italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classAttributeFontItalic, false),
   };
@@ -94,10 +91,7 @@ export function resolveAttributeFont(
  * {@link attributeFontSizeByStereo}; see `theme-graph-colors-a.ts
  * #classFontSizeByStereo` for the `tabaxa-70-pomu341` jar evidence.
  */
-function headerFontSizeByStereo(
-  theme: Theme,
-  stereotypeLabels: readonly string[] | undefined,
-): number | undefined {
+function headerFontSizeByStereo(theme: Theme, stereotypeLabels: readonly string[] | undefined): number | undefined {
   const byStereo = theme.colors.graph.classFontSizeByStereo;
   if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
   for (const label of stereotypeLabels) {
@@ -141,12 +135,18 @@ export function resolveHeaderFont(
     // over every unstereotyped value at the same signature
     // ({@link headerFontSizeByStereo}), mirroring where
     // `attributeFontSizeByStereo` sits in `resolveAttributeFont` above.
-    size: headerFontSizeByStereo(theme, stereotypeLabels)
-      ?? theme.colors.graph.classCascadeHeaderFontSize
-      ?? theme.colors.elements?.['class']?.headerFontSize
-      ?? theme.colors.graph.classFontSize ?? attributeFont.size,
+    size:
+      headerFontSizeByStereo(theme, stereotypeLabels) ??
+      theme.colors.graph.classCascadeHeaderFontSize ??
+      theme.colors.elements?.['class']?.headerFontSize ??
+      theme.colors.graph.classFontSize ??
+      attributeFont.size,
     bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classFontBold, attributeFont.bold),
-    italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classFontItalic, attributeFont.italic),
+    italic: resolveCascadedFontFlag(
+      tagCascadeEntry?.fontItalic,
+      theme.colors.graph.classFontItalic,
+      attributeFont.italic,
+    ),
   };
 }
 
@@ -172,8 +172,7 @@ export function resolveGuillemetOption(theme: Theme): GuillemetPair | undefined 
  * CCN cap (same rationale as {@link resolveCascadedFontFlag}).
  */
 function resolveStereoFontSize(theme: Theme): number {
-  return theme.colors.graph.classStereotypeFontSize
-    ?? theme.defaultFontSize ?? CLASS_STEREOTYPE_FONT_SIZE;
+  return theme.colors.graph.classStereotypeFontSize ?? theme.defaultFontSize ?? CLASS_STEREOTYPE_FONT_SIZE;
 }
 
 /**

@@ -128,12 +128,24 @@ export function addLocalPseudoNodes(
   if (start) {
     acc.nodes.push({ id: initialId, width: CIRCLE_START_SIZE, height: CIRCLE_START_SIZE, shape: 'circle' });
     const ci = pseudoCreationIndex.get(pseudoTickKey(scopeId, 'start'));
-    specs.push({ kind: 'state', id: initialId, stateKind: 'initial', display: '', ...(ci !== undefined ? { creationIndex: ci } : {}) });
+    specs.push({
+      kind: 'state',
+      id: initialId,
+      stateKind: 'initial',
+      display: '',
+      ...(ci !== undefined ? { creationIndex: ci } : {}),
+    });
   }
   if (end) {
     acc.nodes.push({ id: finalId, width: CIRCLE_END_SIZE, height: CIRCLE_END_SIZE, shape: 'circle' });
     const ci = pseudoCreationIndex.get(pseudoTickKey(scopeId, 'end'));
-    specs.push({ kind: 'state', id: finalId, stateKind: 'final', display: '', ...(ci !== undefined ? { creationIndex: ci } : {}) });
+    specs.push({
+      kind: 'state',
+      id: finalId,
+      stateKind: 'final',
+      display: '',
+      ...(ci !== undefined ? { creationIndex: ci } : {}),
+    });
   }
   return specs;
 }
@@ -216,7 +228,11 @@ export function pushLocalNodesInCreationOrder(
   const memberSpecs = states.map((s) => {
     const from = acc.nodes.length;
     const spec = resolveOne(s);
-    memberRuns.push({ from, to: acc.nodes.length, ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}) });
+    memberRuns.push({
+      from,
+      to: acc.nodes.length,
+      ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
+    });
     return spec;
   });
   const pseudoAt = acc.nodes.length;

@@ -61,9 +61,7 @@ describe('isMethodMember — forcedBucket consulted first', () => {
   });
 
   it('forcedBucket=field beats the raw-display paren scan', () => {
-    expect(
-      isMethodMember({ ...base, name: 'b()x', rawDisplay: 'b()x', forcedBucket: 'field' }),
-    ).toBe(false);
+    expect(isMethodMember({ ...base, name: 'b()x', rawDisplay: 'b()x', forcedBucket: 'field' })).toBe(false);
   });
 
   it('without forcedBucket the pre-existing rules are unchanged', () => {

@@ -59,10 +59,7 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
   };
 }
 
-function exo(
-  exoType: MessageExoType,
-  overrides: Partial<MessageExoEvent> = {},
-): MessageExoEvent {
+function exo(exoType: MessageExoType, overrides: Partial<MessageExoEvent> = {}): MessageExoEvent {
   return {
     kind: 'messageExo',
     participant: 'Bob',
@@ -221,9 +218,7 @@ describe('exo layout: short arrows', () => {
   const LONG = 'a rather long exo label';
 
   it('sizes a short TO_RIGHT arrow at preferredWidth, not at the border', () => {
-    const ast = makeAst(['Bob', 'a very wide participant indeed'], [
-      exo('TO_RIGHT', { shortArrow: true }),
-    ]);
+    const ast = makeAst(['Bob', 'a very wide participant indeed'], [exo('TO_RIGHT', { shortArrow: true })]);
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const msg = onlyMessage(geo);
     expect(msg.toX - msg.fromX).toBe(preferredWidthOf('hi'));
@@ -255,16 +250,12 @@ describe('exo layout: activation bars', () => {
 
   it('ends a left-border arrow at the left edge of an open activation bar', () => {
     const geo = layoutWith([activate, exo('FROM_LEFT')]);
-    expect(span(onlyMessage(geo)).right).toBe(
-      geo.participants[0]!.centerX - LIVE_DELTA_SIZE,
-    );
+    expect(span(onlyMessage(geo)).right).toBe(geo.participants[0]!.centerX - LIVE_DELTA_SIZE);
   });
 
   it('starts a right-border arrow at the right edge of an open bar', () => {
     const geo = layoutWith([activate, exo('TO_RIGHT')]);
-    expect(span(onlyMessage(geo)).left).toBe(
-      geo.participants[0]!.centerX + LIVE_DELTA_SIZE,
-    );
+    expect(span(onlyMessage(geo)).left).toBe(geo.participants[0]!.centerX + LIVE_DELTA_SIZE);
   });
 
   // The T13 contract: an exo message's `+`/`-` becomes a separate
@@ -279,9 +270,7 @@ describe('exo layout: activation bars', () => {
     ]);
     const bar = geo.events.find((e) => e.kind === 'activation');
     expect(bar).toBeDefined();
-    expect(bar && bar.kind === 'activation' ? bar.y : undefined).toBe(
-      onlyMessage(geo).y,
-    );
+    expect(bar && bar.kind === 'activation' ? bar.y : undefined).toBe(onlyMessage(geo).y);
   });
 });
 
@@ -308,9 +297,7 @@ describe('exo layout: label and carried data', () => {
   });
 
   it('sizes the arrow from the autonumber run as well as the label', () => {
-    const numbered = layoutWith([
-      exo('TO_RIGHT', { sequenceNumber: 7, sequenceLabel: '[007]' }),
-    ]);
+    const numbered = layoutWith([exo('TO_RIGHT', { sequenceNumber: 7, sequenceLabel: '[007]' })]);
     const bare = layoutWith([exo('TO_RIGHT')]);
     // 5 characters plus the 4px number margin (`Display.java:706`).
     expect(numbered.totalWidth - bare.totalWidth).toBe(5 * CHAR_W + 4);
@@ -321,23 +308,17 @@ describe('exo layout: label and carried data', () => {
     const msg = onlyMessage(numbered);
     expect(msg.labelNumber?.text).toBe('12');
     // Two digits plus the number margin, over the undecorated width.
-    expect(numbered.totalWidth - layoutWith([exo('TO_RIGHT')]).totalWidth).toBe(
-      2 * CHAR_W + 4,
-    );
+    expect(numbered.totalWidth - layoutWith([exo('TO_RIGHT')]).totalWidth).toBe(2 * CHAR_W + 4);
   });
 
   it('carries the stereotype and lifecolor through untouched', () => {
-    const msg = onlyMessage(
-      layoutWith([exo('TO_LEFT', { stereotype: '<<x>>', lifeColor: '#red' })]),
-    );
+    const msg = onlyMessage(layoutWith([exo('TO_LEFT', { stereotype: '<<x>>', lifeColor: '#red' })]));
     expect(msg.stereotype).toBe('<<x>>');
     expect(msg.lifeColor).toBe('#red');
   });
 
   it('carries the exo type, short flag and url through to the geometry', () => {
-    const msg = onlyMessage(
-      layoutWith([exo('FROM_RIGHT', { shortArrow: true, url: 'http://x' })]),
-    );
+    const msg = onlyMessage(layoutWith([exo('FROM_RIGHT', { shortArrow: true, url: 'http://x' })]));
     expect(msg.exoType).toBe('FROM_RIGHT');
     expect(msg.shortArrow).toBe(true);
     expect(msg.url).toBe('http://x');

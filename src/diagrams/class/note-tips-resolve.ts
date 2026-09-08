@@ -105,7 +105,13 @@ function resolveTipDirection(position: NotePosition, hostX: number, noteX: numbe
  * pair.
  * @see ~/git/plantuml/.../svek/image/EntityImageTips.java#drawU
  */
-function tipAnchor(host: ClassifierAnchor, note: NoteGeo, req: TipRequest, row: AnchorRow, direction: 'left' | 'right'): OpalePoint {
+function tipAnchor(
+  host: ClassifierAnchor,
+  note: NoteGeo,
+  req: TipRequest,
+  row: AnchorRow,
+  direction: 'left' | 'right',
+): OpalePoint {
   const rowCenterY = row.y - req.baselineOffset + req.rowHeight / 2;
   const rowMinX = ROW_TEXT_LEFT_MARGIN;
   const rowMaxX = row.indent + (row.width ?? 0);

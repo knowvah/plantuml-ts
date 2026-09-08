@@ -140,9 +140,7 @@ export function getArrowSize(decor: LinkDecor): number {
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkDecor.java:164-166 */
 export function isExtendsLike(decor: LinkDecor): boolean {
-  return (
-    decor === LinkDecor.EXTENDS || decor === LinkDecor.REDEFINES || decor === LinkDecor.DEFINEDBY
-  );
+  return decor === LinkDecor.EXTENDS || decor === LinkDecor.REDEFINES || decor === LinkDecor.DEFINEDBY;
 }
 
 /**
@@ -237,9 +235,7 @@ const LEGACY_FACTORIES: Partial<Record<LinkDecor, (bg: Paint) => ExtremityFactor
   },
   ARROW: () => new ExtremityFactoryArrow(),
   ARROW_AND_CIRCLE: () => {
-    throw new Error(
-      'ExtremityFactoryArrowAndCircle not ported (SI1/T2 blocked member — see report)',
-    );
+    throw new Error('ExtremityFactoryArrowAndCircle not ported (SI1/T2 blocked member — see report)');
   },
   NOT_NAVIGABLE: () => new ExtremityFactoryNotNavigable(),
   AGGREGATION: () => new ExtremityFactoryDiamond(false),
@@ -257,10 +253,7 @@ const LEGACY_FACTORIES: Partial<Record<LinkDecor, (bg: Paint) => ExtremityFactor
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkDecor.java:168-173
  */
-export function getExtremityFactoryComplete(
-  decor: LinkDecor,
-  backgroundColor: Paint,
-): ExtremityFactory | null {
+export function getExtremityFactoryComplete(decor: LinkDecor, backgroundColor: Paint): ExtremityFactory | null {
   if (decor === LinkDecor.EXTENDS)
     return new ExtremityFactoryTriangle({
       backgroundColor: null,
@@ -279,10 +272,7 @@ export function getExtremityFactoryComplete(
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkDecor.java:175-224
  */
-export function getExtremityFactoryLegacy(
-  decor: LinkDecor,
-  backgroundColor: Paint,
-): ExtremityFactory | null {
+export function getExtremityFactoryLegacy(decor: LinkDecor, backgroundColor: Paint): ExtremityFactory | null {
   const builder = LEGACY_FACTORIES[decor];
   return builder === undefined ? null : builder(backgroundColor);
 }

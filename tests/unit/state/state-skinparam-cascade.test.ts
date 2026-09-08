@@ -31,19 +31,13 @@ import { defaultTheme } from '../../../src/core/theme.js';
 
 describe('resolveSkinparam — statebackgroundcolor<<X>>/statefontcolor<<X>> (mission G4 S15)', () => {
   it('maps statebackgroundcolor<<stereo>> to colors.graph.stateBackgroundColorByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statebackgroundcolor<<Foo>>', 'red']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statebackgroundcolor<<Foo>>', 'red']]), defaultTheme);
     expect(theme.colors.graph.stateBackgroundColorByStereo).toEqual({ foo: 'red' });
     expect(unknown).toEqual([]);
   });
 
   it('maps statefontcolor<<stereo>> to colors.graph.stateFontColorByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statefontcolor<<Foo>>', 'yellow']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statefontcolor<<Foo>>', 'yellow']]), defaultTheme);
     expect(theme.colors.graph.stateFontColorByStereo).toEqual({ foo: 'yellow' });
     expect(unknown).toEqual([]);
   });
@@ -73,37 +67,25 @@ describe('resolveSkinparam — statebackgroundcolor<<X>>/statefontcolor<<X>> (mi
   });
 
   it('an unrecognized stereotype-qualified key outside these two forms stays unknown', () => {
-    const { unknown } = resolveSkinparam(
-      new Map([['statesomethingelse<<Foo>>', 'red']]),
-      defaultTheme,
-    );
+    const { unknown } = resolveSkinparam(new Map([['statesomethingelse<<Foo>>', 'red']]), defaultTheme);
     expect(unknown).toEqual(['statesomethingelse<<foo>>']);
   });
 });
 
 describe('resolveSkinparam — statefontsize<<X>> (mission G4 S16)', () => {
   it('maps statefontsize<<stereo>> to colors.graph.stateFontSizeByStereo', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statefontsize<<Foo>>', '30']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statefontsize<<Foo>>', '30']]), defaultTheme);
     expect(theme.colors.graph.stateFontSizeByStereo).toEqual({ foo: 30 });
     expect(unknown).toEqual([]);
   });
 
   it('lowercases the stereotype label in statefontsize<<X>>', () => {
-    const { theme } = resolveSkinparam(
-      new Map([['statefontsize<<MeBlue>>', '18']]),
-      defaultTheme,
-    );
+    const { theme } = resolveSkinparam(new Map([['statefontsize<<MeBlue>>', '18']]), defaultTheme);
     expect(theme.colors.graph.stateFontSizeByStereo).toEqual({ meblue: 18 });
   });
 
   it('ignores a non-numeric statefontsize<<X>> value', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['statefontsize<<Foo>>', 'notanumber']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['statefontsize<<Foo>>', 'notanumber']]), defaultTheme);
     expect(theme.colors.graph.stateFontSizeByStereo).toBeUndefined();
     expect(unknown).toEqual([]);
   });

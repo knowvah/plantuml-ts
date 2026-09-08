@@ -21,7 +21,9 @@ const LEFT = HorizontalAlignment.LEFT;
 describe('createLeaf routing (java:58-63)', () => {
   it('class-like types and OBJECT get BodierLikeClassOrObject', () => {
     expect(BodyFactory.createLeaf(new MockSkinParam(), LeafType.CLASS, null)).toBeInstanceOf(BodierLikeClassOrObject);
-    expect(BodyFactory.createLeaf(new MockSkinParam(), LeafType.INTERFACE, null)).toBeInstanceOf(BodierLikeClassOrObject);
+    expect(BodyFactory.createLeaf(new MockSkinParam(), LeafType.INTERFACE, null)).toBeInstanceOf(
+      BodierLikeClassOrObject,
+    );
     expect(BodyFactory.createLeaf(new MockSkinParam(), LeafType.OBJECT, null)).toBeInstanceOf(BodierLikeClassOrObject);
   });
 
@@ -77,7 +79,7 @@ describe('create1/create2 → BodyEnhanced1 (java:69-77)', () => {
     expect(dim.getHeight()).toBe(LINE_HEIGHT);
   });
 
-  it('an undefined entity throws upstream\'s NPE (entity.getColors() in the super call)', () => {
+  it("an undefined entity throws upstream's NPE (entity.getColors() in the super call)", () => {
     expect(() => BodyFactory.create1(LEFT, [], fakeSkin(), undefined, undefined, makeBodyStyle())).toThrow(
       'NullPointerException',
     );

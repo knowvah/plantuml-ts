@@ -45,12 +45,8 @@ function reconstructSourceForSeed(block: UmlSource): string {
   return ['@startuml', ...block.lines, '@enduml'].join('\n');
 }
 
-export const descriptionPlugin: SyncPlugin<
-  DescriptionDiagramAST,
-  DescriptionGeometry
-> = {
+export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeometry> = {
   type: 'description',
-
 
   parse(block, options) {
     // F4-f piece 1: ADR-2's asset channel reaches the parser here and

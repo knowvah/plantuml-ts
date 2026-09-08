@@ -55,11 +55,7 @@ type EdgeAttrs = NonNullable<DotInputEdge['attributes']>;
 
 /** Explicit skinparam overrides skip the minimum floor
  *  (DotStringFactory.java:117-133); computed defaults keep it. */
-function resolveSep(
-  value: number | undefined,
-  explicit: boolean | undefined,
-  floorPx: number,
-): number {
+function resolveSep(value: number | undefined, explicit: boolean | undefined, floorPx: number): number {
   if (explicit) return value ?? floorPx;
   return Math.max(value ?? 0, floorPx);
 }
@@ -169,13 +165,10 @@ function edgeLine(edge: DotInputEdge, fromSh: string, toSh: string, c: EdgeColor
   return `${fromSh}->${toSh}[${parts.join(',')}];`;
 }
 
-
 function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
   // Port nodes' ranks are emitted inside their cluster (portRankGroups) —
   // ClusterDotString.printRanks, not a top-level rank group.
-  const portIds = new Set(
-    (input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)),
-  );
+  const portIds = new Set((input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)));
   const groups = new Map<string, string[]>();
   for (const n of input.nodes) {
     const r = n.attributes?.rank;

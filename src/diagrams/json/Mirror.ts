@@ -27,9 +27,7 @@ let onBadValue: (v: number, max: number) => void = () => {
 
 /** Test seam for the `BAD VALUE IN Mirror` diagnostic. Returns the previous
  *  handler so a caller can restore it. */
-export function setMirrorBadValueHandler(
-  handler: (v: number, max: number) => void,
-): (v: number, max: number) => void {
+export function setMirrorBadValueHandler(handler: (v: number, max: number) => void): (v: number, max: number) => void {
   const previous = onBadValue;
   onBadValue = handler;
   return previous;

@@ -28,18 +28,7 @@ import { fileURLToPath } from 'node:url';
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 /** Elements that carry geometry or paint -- the emitters' exclusive domain. */
-const SHAPE_ELEMENTS = [
-  'rect',
-  'circle',
-  'ellipse',
-  'line',
-  'polyline',
-  'polygon',
-  'path',
-  'text',
-  'tspan',
-  'image',
-];
+const SHAPE_ELEMENTS = ['rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'path', 'text', 'tspan', 'image'];
 
 /**
  * The emission seam itself, plus the klimt `SvgGraphics` port. These are the
@@ -69,9 +58,7 @@ function tsFiles(dir: string): string[] {
  * stripped -- never string contents, so a real emission site cannot hide.
  */
 function stripComments(src: string): string {
-  const noBlocks = src.replace(new RegExp('/\\*[^]*?\\*/', 'g'), (m) =>
-    m.replace(new RegExp('[^\\n]', 'g'), ' '),
-  );
+  const noBlocks = src.replace(new RegExp('/\\*[^]*?\\*/', 'g'), (m) => m.replace(new RegExp('[^\\n]', 'g'), ' '));
   return noBlocks
     .split('\n')
     .map((l) => (l.trimStart().startsWith('//') ? '' : l))

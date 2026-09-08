@@ -50,11 +50,7 @@ class FakeUGraphic implements UGraphic {
   readonly drawnChanges: (readonly UChange[])[];
   readonly applied: readonly UChange[];
 
-  constructor(
-    drawn: UShape[] = [],
-    drawnChanges: (readonly UChange[])[] = [],
-    applied: readonly UChange[] = [],
-  ) {
+  constructor(drawn: UShape[] = [], drawnChanges: (readonly UChange[])[] = [], applied: readonly UChange[] = []) {
     this.drawn = drawn;
     this.drawnChanges = drawnChanges;
     this.applied = applied;
@@ -171,7 +167,7 @@ describe('SvgNanoParser#drawU -- drawPath (acceptance criteria 3 and 4)', () => 
     expect(path.getMaxY()).toBeCloseTo(box!.maxY, 9);
   });
 
-  it('reproduces svgInkBox\'s union-of-paths box for bi-bootstrap-fill (2 paths, no <g>)', () => {
+  it("reproduces svgInkBox's union-of-paths box for bi-bootstrap-fill (2 paths, no <g>)", () => {
     const parser = new SvgNanoParser(BI_BOOTSTRAP_FILL_SVG);
     const ug = new FakeUGraphic();
     parser.drawU(ug, 1, undefined, undefined);
@@ -267,11 +263,7 @@ describe('SvgNanoParser#drawU -- <g> push/pop stack discipline (acceptance crite
 
   it('handles a plain <g> (no attributes) push/pop identically to <g transform=...>', () => {
     const svg =
-      `<svg width="16" height="16">\n` +
-      `  <g>\n` +
-      `    <path d="${BI_GLOBE_D}"/>\n` +
-      `  </g>\n` +
-      `</svg>`;
+      `<svg width="16" height="16">\n` + `  <g>\n` + `    <path d="${BI_GLOBE_D}"/>\n` + `  </g>\n` + `</svg>`;
 
     const parser = new SvgNanoParser(svg);
     const ug = new FakeUGraphic();
@@ -298,10 +290,7 @@ describe('SvgNanoParser -- unrecognised elements are ignored, not thrown (accept
 
   it('ignores a stray closing tag with no matching opener (getData\'s "ignored2" branch)', () => {
     const svg =
-      `<svg width="16" height="16">\n` +
-      `  <title>bi-globe</title>\n` +
-      `  <path d="${BI_GLOBE_D}"/>\n` +
-      `</svg>`;
+      `<svg width="16" height="16">\n` + `  <title>bi-globe</title>\n` + `  <path d="${BI_GLOBE_D}"/>\n` + `</svg>`;
 
     const parser = new SvgNanoParser(svg);
     const ug = new FakeUGraphic();
@@ -311,7 +300,7 @@ describe('SvgNanoParser -- unrecognised elements are ignored, not thrown (accept
 });
 
 describe('SvgNanoParser#drawCircle (T8, acceptance criterion 1)', () => {
-  it('emits a UEllipse whose bounds match upstream\'s own circle formula (edgy bIdentityLogo)', () => {
+  it("emits a UEllipse whose bounds match upstream's own circle formula (edgy bIdentityLogo)", () => {
     // Verbatim structure from assets/stdlib/edgy/edgy.puml `sprite $bIdentityLogo`:
     // <g fill="#00ea4e"><circle cx="17" cy="14" r="10"/>...</g>.
     const svg =
@@ -465,7 +454,7 @@ describe('SvgNanoParser#drawText (T8, acceptance criterion 6)', () => {
     expect(utext.getFontConfiguration().size).toBe(14);
   });
 
-  it('falls back to white when no fill= is present anywhere (getColorOrWhite\'s undefined-code branch)', () => {
+  it("falls back to white when no fill= is present anywhere (getColorOrWhite's undefined-code branch)", () => {
     const svg = `<svg viewBox="0 0 32 32">\n  <text x="0" y="0" font-size="10">NoFill</text>\n</svg>`;
 
     const parser = new SvgNanoParser(svg);
@@ -625,7 +614,7 @@ describe('SvgNanoParser#applyTransform (T8, acceptance criterion 4)', () => {
     expect(path.getMaxY()).toBeCloseTo(6, 9);
   });
 
-  it('warns and leaves the transform unchanged for a malformed rotate(...) (upstream\'s WARNING branch)', () => {
+  it("warns and leaves the transform unchanged for a malformed rotate(...) (upstream's WARNING branch)", () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const svg = `<svg width="10" height="10">\n  <g transform="rotate(bogus)">\n    <path d="${BI_GLOBE_D}"/>\n  </g>\n</svg>`;
     const parser = new SvgNanoParser(svg);
@@ -639,7 +628,7 @@ describe('SvgNanoParser#applyTransform (T8, acceptance criterion 4)', () => {
     warnSpy.mockRestore();
   });
 
-  it('warns and leaves the transform unchanged for a malformed matrix(...) (upstream\'s WARNING branch)', () => {
+  it("warns and leaves the transform unchanged for a malformed matrix(...) (upstream's WARNING branch)", () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const svg = `<svg width="10" height="10">\n  <g transform="matrix(bogus)">\n    <path d="${BI_GLOBE_D}"/>\n  </g>\n</svg>`;
     const parser = new SvgNanoParser(svg);
@@ -689,7 +678,7 @@ describe('SvgNanoParser -- GrayLevelRange (constructor/minGray/maxGray fields)',
     expect(parser.getMaxGrayLevel()).toBe(255);
   });
 
-  it('scans fill on <g>/<circle>/<ellipse> elements, not just <path> (computeMinMaxGray\'s full tag set)', () => {
+  it("scans fill on <g>/<circle>/<ellipse> elements, not just <path> (computeMinMaxGray's full tag set)", () => {
     const svg =
       `<svg width="16" height="16">\n` +
       `  <g fill="#000000">\n` +

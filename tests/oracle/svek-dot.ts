@@ -119,8 +119,7 @@ export interface StructuralGraph {
   forcelabels: boolean;
 }
 
-const attr = (attrs: string, name: string): string | undefined =>
-  new RegExp(`\\b${name}=([0-9.]+)`).exec(attrs)?.[1];
+const attr = (attrs: string, name: string): string | undefined => new RegExp(`\\b${name}=([0-9.]+)`).exec(attrs)?.[1];
 
 /** `attr` above only accepts a NUMERIC value, so it silently returns
  *  undefined for `sametail=ent0001` — on BOTH sides, which made an early
@@ -214,8 +213,7 @@ interface ClusterFrame {
  *  (Svek's protection wrappers clusterNp0/p1/a/i are skipped); a cluster's
  *  members are all leaf node ids in its subtree; its label is its title TABLE. */
 function parseClusters(dot: string): StructuralCluster[] {
-  const tokenRe =
-    /subgraph\s+(\w+)\s*\{|(\})|label=<<TABLE[^>]*?WIDTH="(\d+)"\s+HEIGHT="(\d+)"|(\w+)\s*\[shape=/g;
+  const tokenRe = /subgraph\s+(\w+)\s*\{|(\})|label=<<TABLE[^>]*?WIDTH="(\d+)"\s+HEIGHT="(\d+)"|(\w+)\s*\[shape=/g;
   const stack: ClusterFrame[] = [];
   const out: StructuralCluster[] = [];
   for (let m = tokenRe.exec(dot); m !== null; m = tokenRe.exec(dot)) {
@@ -313,10 +311,8 @@ const degreeSequenceDirected = (g: StructuralGraph): string[] => {
   return [...ids].map((id) => `${inDeg.get(id) ?? 0}:${outDeg.get(id) ?? 0}`).sort();
 };
 
-const eqNum = (a: number[], b: number[]): boolean =>
-  a.length === b.length && a.every((v, i) => v === b[i]);
-const eqStr = (a: string[], b: string[]): boolean =>
-  a.length === b.length && a.every((v, i) => v === b[i]);
+const eqNum = (a: number[], b: number[]): boolean => a.length === b.length && a.every((v, i) => v === b[i]);
+const eqStr = (a: string[], b: string[]): boolean => a.length === b.length && a.every((v, i) => v === b[i]);
 
 const sortedShapes = (g: StructuralGraph): string[] => g.nodes.map((n) => n.shape).sort();
 const sortedMinlens = (g: StructuralGraph): number[] => g.edges.map((e) => e.minlen).sort((a, b) => a - b);
@@ -348,10 +344,12 @@ const flagCounts = (g: StructuralGraph): number[] => [
 
 /** Sorted multiset of the `sametail` VALUES present, absent edges skipped. */
 const sortedSametails = (g: StructuralGraph): string[] =>
-  g.edges.map((e) => e.sametail).filter((v): v is string => v !== undefined).sort();
+  g.edges
+    .map((e) => e.sametail)
+    .filter((v): v is string => v !== undefined)
+    .sort();
 
-const sortedClusterSizes = (g: StructuralGraph): number[] =>
-  g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
+const sortedClusterSizes = (g: StructuralGraph): number[] => g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
 
 /** Sorted multiset of every edge ENDPOINT's port id, `-` for "no port". Node
  *  ids are synthetic and deliberately not compared, so the ports are gathered
@@ -477,10 +475,7 @@ function medianSizeDelta(oracle: StructuralGraph, candidate: StructuralGraph): n
   return deltas.length % 2 === 0 ? (deltas[mid - 1]! + deltas[mid]!) / 2 : deltas[mid]!;
 }
 
-export function compareStructural(
-  oracle: StructuralGraph,
-  candidate: StructuralGraph,
-): StructuralDiff {
+export function compareStructural(oracle: StructuralGraph, candidate: StructuralGraph): StructuralDiff {
   const od = degreeSequence(oracle);
   const cd = degreeSequence(candidate);
 

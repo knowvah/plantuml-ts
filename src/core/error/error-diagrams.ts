@@ -40,10 +40,7 @@ function errorMeasurer(options?: RenderOptions): StringMeasurer {
  * on its last line.
  * @see ~/git/plantuml/.../BlockUml.java#getDiagram
  */
-export function preprocessorErrorSvg(
-  failure: PreprocessorFailure,
-  options?: RenderOptions,
-): string {
+export function preprocessorErrorSvg(failure: PreprocessorFailure, options?: RenderOptions): string {
   const system = new PSystemErrorPreprocessor(umlSourceOf(failure.input), failure.trace);
   return renderPSystemError(system, errorMeasurer(options));
 }
@@ -91,18 +88,11 @@ export function errorSvg(source: string, err: unknown, options?: RenderOptions):
   // source "up to and including the offending line" -- attributing to line N
   // while listing past it would show source the diagram never reached.
   const refusal = err instanceof DiagramRefusal ? err : undefined;
-  const at =
-    refusal?.line !== undefined && refusal.line < trace.length
-      ? refusal.line
-      : trace.length - 1;
+  const at = refusal?.line !== undefined && refusal.line < trace.length ? refusal.line : trace.length - 1;
   const listing = trace.slice(0, at + 1);
-  const error = new ErrorUml(
-    'EXECUTION_ERROR', errorMessage(err), 0, trace[at], refusal?.assumedDiagramType,
-  );
+  const error = new ErrorUml('EXECUTION_ERROR', errorMessage(err), 0, trace[at], refusal?.assumedDiagramType);
   const system =
-    trace.length === 0
-      ? new PSystemErrorEmpty(trace, trace, error)
-      : new PSystemErrorV2(trace, listing, error, err);
+    trace.length === 0 ? new PSystemErrorEmpty(trace, trace, error) : new PSystemErrorV2(trace, listing, error, err);
   return renderPSystemError(system, errorMeasurer(options));
 }
 

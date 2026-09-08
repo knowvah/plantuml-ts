@@ -50,11 +50,7 @@ import { COMMANDS } from './state-commands.js';
 import { finalizePendingNote, isNoteCloser, type PendingNote } from './state-notes.js';
 import { isJsonCloser } from './state-json-commands.js';
 import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
-import {
-  createAnnotations,
-  matchAnnotationCommand,
-  type DiagramAnnotations,
-} from '../../core/annotations/index.js';
+import { createAnnotations, matchAnnotationCommand, type DiagramAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand, type SpriteRegistry } from '../../core/sprite-commands.js';
 import {
   type ParseState,

@@ -21,7 +21,10 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
-  const lines = source.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
+  const lines = source
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
   return parseClass({ lines, type: 'class' } satisfies UmlSource);
 }
 

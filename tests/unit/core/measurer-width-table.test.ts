@@ -32,10 +32,7 @@ describe('WidthTableMeasurer — faithful port of StringBounderFromWidthTable', 
   it('reproduces the table quirk: space = 0 width', () => {
     expect(m.measure(' ', font).width).toBe(0);
     // "My comp" therefore measures identically to "Mycomp".
-    expect(m.measure('My comp', font).width).toBeCloseTo(
-      m.measure('Mycomp', font).width,
-      6,
-    );
+    expect(m.measure('My comp', font).width).toBeCloseTo(m.measure('Mycomp', font).width, 6);
   });
 
   it('sums codepoints: "Ai" = A + i', () => {

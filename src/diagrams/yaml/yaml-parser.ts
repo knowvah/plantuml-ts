@@ -101,10 +101,7 @@ export function parseYamlLines(lines: string[]): Monomorph {
 
     // 2. Bare text at root level (not a list item) is a syntax error.
     //    Port of the Java YamlSyntaxException for NO_KEY_ONLY_TEXT.
-    if (
-      yamlLine.type === YamlLineType.NO_KEY_ONLY_TEXT &&
-      yamlLine.listItem === false
-    ) {
+    if (yamlLine.type === YamlLineType.NO_KEY_ONLY_TEXT && yamlLine.listItem === false) {
       throw new YamlSyntaxError('YamlLineType.NO_KEY_ONLY_TEXT');
     }
 
@@ -130,10 +127,7 @@ export function parseYamlLines(lines: string[]): Monomorph {
           builder.onListItemKeyAndValue(yamlLine.key!, yamlLine.value!);
           break;
         case YamlLineType.KEY_AND_FLOW_SEQUENCE:
-          builder.onListItemKeyAndFlowSequence(
-            yamlLine.key!,
-            [...yamlLine.values!],
-          );
+          builder.onListItemKeyAndFlowSequence(yamlLine.key!, [...yamlLine.values!]);
           break;
         case YamlLineType.KEY_AND_BLOCK_STYLE: {
           const blockStr = getBlockStyleString(yamlLine.indent);
@@ -147,9 +141,7 @@ export function parseYamlLines(lines: string[]): Monomorph {
         /* c8 ignore next 4 */
         default:
           // Unreachable: all list-item YamlLineType values are handled above.
-          throw new YamlSyntaxError(
-            `Unexpected line type in list context: ${yamlLine.type as string}`,
-          );
+          throw new YamlSyntaxError(`Unexpected line type in list context: ${yamlLine.type as string}`);
       }
     } else {
       // 6. Dispatch non-list-item lines
@@ -184,9 +176,7 @@ export function parseYamlLines(lines: string[]): Monomorph {
         default:
           // Unreachable: EMPTY_LINE, NO_KEY_ONLY_TEXT, PLAIN_DASH are all
           // handled before reaching this switch.
-          throw new YamlSyntaxError(
-            `Unexpected line type: ${yamlLine.type as string}`,
-          );
+          throw new YamlSyntaxError(`Unexpected line type: ${yamlLine.type as string}`);
       }
     }
   }

@@ -18,11 +18,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
-import type {
-  StateDiagramAST,
-  State,
-  Transition,
-} from '../../../src/diagrams/state/ast.js';
+import type { StateDiagramAST, State, Transition } from '../../../src/diagrams/state/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
@@ -35,10 +31,7 @@ const theme = defaultTheme;
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeState(
-  id: string,
-  overrides: Partial<State> = {},
-): State {
+function makeState(id: string, overrides: Partial<State> = {}): State {
   return {
     id,
     display: id,
@@ -50,11 +43,7 @@ function makeState(
   };
 }
 
-function makeTransition(
-  from: string,
-  to: string,
-  overrides: Partial<Transition> = {},
-): Transition {
+function makeTransition(from: string, to: string, overrides: Partial<Transition> = {}): Transition {
   return { from, to, ...overrides };
 }
 
@@ -159,11 +148,7 @@ describe('layoutState — state stereotype threading', () => {
 describe('layoutState — [*] → A → B → [*] ordering', () => {
   const ast: StateDiagramAST = {
     states: [makeState('A'), makeState('B')],
-    transitions: [
-      makeTransition('[*]', 'A'),
-      makeTransition('A', 'B'),
-      makeTransition('B', '[*]'),
-    ],
+    transitions: [makeTransition('[*]', 'A'), makeTransition('A', 'B'), makeTransition('B', '[*]')],
   };
 
   it('resolves without error', () => {
@@ -364,7 +349,12 @@ describe('layoutState -- composite headerLines/bodyLines (mechanism 6)', () => {
     };
     const result = layoutState(ast, theme, measurer);
     const comp = result.states.find((s) => s.id === 'Composite');
-    expect(comp?.headerLines).toEqual([{ text: 'Composite', width: measurer.measure('Composite', { family: theme.fontFamily, size: theme.fontSize }).width }]);
+    expect(comp?.headerLines).toEqual([
+      {
+        text: 'Composite',
+        width: measurer.measure('Composite', { family: theme.fontFamily, size: theme.fontSize }).width,
+      },
+    ]);
     expect(comp?.clusterHeaderHeight).toBe(19);
   });
 });
@@ -425,7 +415,7 @@ describe('layoutState -- top-level document order hoists cluster composites (G5 
 // ---------------------------------------------------------------------------
 
 describe('layoutState -- concurrent regions (mechanisms 13/14)', () => {
-  it('each concurrent region\'s own [*] pseudo-node gets a DISTINCT id -- no cross-region collision', () => {
+  it("each concurrent region's own [*] pseudo-node gets a DISTINCT id -- no cross-region collision", () => {
     // Per diagnosis.md (S5 ledger): `buildConcurrentRegionPass` passed
     // `owner.id` (not a per-region scope id) as the `scopeId` param, so
     // EVERY region's own `[*]` pseudo-anchor collapsed onto the SAME
@@ -474,9 +464,7 @@ describe('layoutState — fork pseudostate sizing', () => {
 describe('layoutState — transition with label', () => {
   const ast: StateDiagramAST = {
     states: [makeState('A'), makeState('B')],
-    transitions: [
-      makeTransition('A', 'B', { label: 'go' }),
-    ],
+    transitions: [makeTransition('A', 'B', { label: 'go' })],
   };
 
   it('TransitionGeo has label.text set', () => {
@@ -748,9 +736,7 @@ describe('layoutState — transition label at middle waypoint', () => {
     const labelX = t!.label!.x;
     const labelY = t!.label!.y;
     // Label must be some distance from the start point
-    const distFromStart = Math.sqrt(
-      (labelX - startPoint.x) ** 2 + (labelY - startPoint.y) ** 2,
-    );
+    const distFromStart = Math.sqrt((labelX - startPoint.x) ** 2 + (labelY - startPoint.y) ** 2);
     expect(distFromStart).toBeGreaterThan(5);
   });
 });
@@ -855,10 +841,7 @@ describe('layoutState — parallel transitions between same states', () => {
   it('two transitions between same state pair produce edges with >=2 waypoints', () => {
     const ast: StateDiagramAST = {
       states: [makeState('P'), makeState('Q')],
-      transitions: [
-        makeTransition('P', 'Q', { label: 'event1' }),
-        makeTransition('P', 'Q', { label: 'event2' }),
-      ],
+      transitions: [makeTransition('P', 'Q', { label: 'event1' }), makeTransition('P', 'Q', { label: 'event2' })],
     };
     const result = layoutState(ast, theme, measurer);
     expect(result.transitions).toHaveLength(2);

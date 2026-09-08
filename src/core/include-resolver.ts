@@ -37,12 +37,7 @@
  *   - CORS: the remote server must send Access-Control-Allow-Origin; CSP changes won't help.
  */
 
-import {
-  MapIncludeStore,
-  StdlibNotBundledError,
-  stdlibPathOf,
-  type IncludeStore,
-} from './tim/IncludeStore.js';
+import { MapIncludeStore, StdlibNotBundledError, stdlibPathOf, type IncludeStore } from './tim/IncludeStore.js';
 import { stdlibContentFor } from './stdlib-content.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 
@@ -72,8 +67,8 @@ export class CspIncludeError extends Error {
     const directive = `connect-src 'self' ${origin}`;
     super(
       `CSP blocked !include fetch from ${url}.\n` +
-      `Add the following to your Content-Security-Policy to allow it:\n` +
-      `  Content-Security-Policy: ${directive}`,
+        `Add the following to your Content-Security-Policy to allow it:\n` +
+        `  Content-Security-Policy: ${directive}`,
     );
     this.name = 'CspIncludeError';
     this.url = url;
@@ -92,12 +87,12 @@ export class CorsIncludeError extends Error {
   constructor(url: string) {
     super(
       `CORS error fetching !include from ${url}.\n` +
-      `The server does not send Access-Control-Allow-Origin headers; browsers block the response.\n` +
-      `Updating your Content-Security-Policy will not help — this is a server-side CORS issue.\n` +
-      `Options:\n` +
-      `  • Bundle the include content at build time using a local resolver\n` +
-      `  • Host the file on a server that sends CORS headers\n` +
-      `  • Use a CORS proxy service`,
+        `The server does not send Access-Control-Allow-Origin headers; browsers block the response.\n` +
+        `Updating your Content-Security-Policy will not help — this is a server-side CORS issue.\n` +
+        `Options:\n` +
+        `  • Bundle the include content at build time using a local resolver\n` +
+        `  • Host the file on a server that sends CORS headers\n` +
+        `  • Use a CORS proxy service`,
     );
     this.name = 'CorsIncludeError';
     this.url = url;
@@ -126,9 +121,7 @@ export class CircularIncludeError extends Error {
   readonly chain: readonly string[];
 
   constructor(url: string, chain: string[]) {
-    super(
-      `Circular !include detected: ${[...chain, url].join(' → ')}`,
-    );
+    super(`Circular !include detected: ${[...chain, url].join(' → ')}`);
     this.name = 'CircularIncludeError';
     this.url = url;
     this.chain = chain;
@@ -170,8 +163,7 @@ function originOf(url: string): string {
  * servers do not send Access-Control-Allow-Origin headers.
  */
 export async function fetchInclude(url: string): Promise<string> {
-  const inBrowser =
-    typeof window !== 'undefined' && typeof window.addEventListener === 'function';
+  const inBrowser = typeof window !== 'undefined' && typeof window.addEventListener === 'function';
 
   let cspViolationOrigin: string | null = null;
 
@@ -215,10 +207,7 @@ export async function fetchInclude(url: string): Promise<string> {
     // T1 edits a different function in this file. Each branch is one distinct,
     // differentiated failure mode (CSP / CORS / HTTP / generic) whose whole
     // point is a separate remediation message.
-    throw new IncludeResolveError(
-      `Failed to fetch !include ${url}: ${(err as Error).message ?? String(err)}`,
-      url,
-    );
+    throw new IncludeResolveError(`Failed to fetch !include ${url}: ${(err as Error).message ?? String(err)}`, url);
   } finally {
     if (inBrowser) {
       window.removeEventListener('securitypolicyviolation', cspHandler);
@@ -278,11 +267,7 @@ interface PrefetchWalk {
 // si11a T4: run `work` for `url` once per walk (no `await` before the
 // check-then-set, so concurrent callers can't race past each other).
 // Dropped on rejection so a failure is not cached forever.
-function dedupeInFlight(
-  inFlight: Map<string, Promise<void>>,
-  url: string,
-  work: () => Promise<void>,
-): Promise<void> {
+function dedupeInFlight(inFlight: Map<string, Promise<void>>, url: string, work: () => Promise<void>): Promise<void> {
   const existing = inFlight.get(url);
   if (existing !== undefined) return existing;
   const pending = work().catch((err: unknown): never => {
@@ -321,9 +306,8 @@ async function prefetchInner(
         if (store.getPumlResource(stdlib) !== undefined) return;
         // THIRD channel (si8 ADR-4), reached only once both eager ones miss.
         await dedupeInFlight(inFlight, url, async () => {
-          const bundled = registry === undefined
-            ? undefined
-            : await stdlibContentFor(registry, stdlib, source, extraSpriteNames);
+          const bundled =
+            registry === undefined ? undefined : await stdlibContentFor(registry, stdlib, source, extraSpriteNames);
           if (bundled === undefined) {
             throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
           }
@@ -418,10 +402,7 @@ export interface IncludeWarmupOptions {
  * its chunk failed to load — fix the bundler/CDN, not a plantuml-ts bug);
  * `CircularIncludeError` (the `!include` chain loops — break it in the source).
  */
-export async function prepareIncludeStore(
-  source: string,
-  options?: IncludeWarmupOptions,
-): Promise<IncludeStore> {
+export async function prepareIncludeStore(source: string, options?: IncludeWarmupOptions): Promise<IncludeStore> {
   return startPrefetchWalk(
     source,
     options?.fetcher ?? fetchInclude,

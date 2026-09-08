@@ -61,9 +61,7 @@ export class UStroke implements UChange {
 
   equals(other: UStroke): boolean {
     return (
-      this.dashVisible === other.dashVisible &&
-      this.dashSpace === other.dashSpace &&
-      this.thickness === other.thickness
+      this.dashVisible === other.dashVisible && this.dashSpace === other.dashSpace && this.thickness === other.thickness
     );
   }
 

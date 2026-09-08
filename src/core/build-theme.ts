@@ -62,10 +62,7 @@ export function buildTheme(
   documentRawSourceLines?: readonly string[],
 ): ResolvedThemeAndStyles {
   // Stage 1: named base theme
-  const themeName =
-    typeof options?.theme === 'string'
-      ? options.theme
-      : (preprocessed.theme ?? 'default');
+  const themeName = typeof options?.theme === 'string' ? options.theme : (preprocessed.theme ?? 'default');
   const base = resolveTheme(themeName);
 
   // Stage 1.5: apply a `skin <name>` directive's own base layer (D6,
@@ -81,16 +78,14 @@ export function buildTheme(
 
   // Stage 3: apply <style> blocks from source
   // 3a. Merge all StyleMaps (last writer wins per selector+property)
-  const styleMap = preprocessed.styles
-    .map(parseStyleBlock)
-    .reduce<StyleMap>((acc, m) => {
-      m.forEach((props, selector) => {
-        const existing = acc.get(selector) ?? new Map<string, string>();
-        props.forEach((v, k) => existing.set(k, v));
-        acc.set(selector, existing);
-      });
-      return acc;
-    }, new Map());
+  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
+    m.forEach((props, selector) => {
+      const existing = acc.get(selector) ?? new Map<string, string>();
+      props.forEach((v, k) => existing.set(k, v));
+      acc.set(selector, existing);
+    });
+    return acc;
+  }, new Map());
 
   // 3b. Top-level bare declarations ("" key) → resolveSkinparam (existing behavior)
   const flatRoot = styleMap.get('') ?? new Map<string, string>();

@@ -35,10 +35,7 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureState } from '../../oracle/svg-conformance/render-fixture-state.js';
 
-const CACHE = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../test-results/dot-cache/state',
-);
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
 const measurer = new WidthTableMeasurer();
 

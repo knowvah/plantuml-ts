@@ -223,18 +223,14 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
 
   it('emits a <polygon>, not a <path>, when theme.strictUml is true', () => {
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
-    expect(svg).toContain(
-      '<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"',
-    );
+    expect(svg).toContain('<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"');
     expect(svg).not.toContain('<path');
   });
 
   it('emits fill="none" plus the exact style string (stroke, stroke-width, linejoin, miterlimit)', () => {
     const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
     expect(svg).toContain('fill="none"');
-    expect(svg).toContain(
-      'style="stroke:#000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"',
-    );
+    expect(svg).toContain('style="stroke:#000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"');
   });
 
   it('draws the default rounded <path> when theme.strictUml is false/absent', () => {

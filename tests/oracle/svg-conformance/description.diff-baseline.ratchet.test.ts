@@ -86,7 +86,8 @@ function hasCachedFixture(f: Pick<BaselineFixture, 'type' | 'slug'>): boolean {
   return existsSync(join(dir, 'in.puml')) && existsSync(join(dir, 'in.svg'));
 }
 
-type MeasureResult = { readonly errored: false; readonly diffCount: number } | { readonly errored: true; readonly message: string };
+type MeasureResult =
+  { readonly errored: false; readonly diffCount: number } | { readonly errored: true; readonly message: string };
 
 /** Renders a fixture through the same low-level pipeline + measurer as the
  * sibling golden ratchet and compares it against the cached jar oracle SVG.

@@ -133,15 +133,13 @@ function assignSafeIds(ranks: readonly ShadowRankSpec[]): SafeRank[] {
 /** Adds a fixed-size, label-less rect node -- matching `graph-layout.ts
  *  #addNodes`' own convention (`fixedsize:true`+empty label means graphviz
  *  uses exactly the declared width/height, no auto-grow-to-content). */
-function addFixedNode(
-  b: ReturnType<typeof createGraph>,
-  id: string,
-  width: number,
-  height: number,
-): void {
+function addFixedNode(b: ReturnType<typeof createGraph>, id: string, width: number, height: number): void {
   b.addNode(id, {
-    shape: 'rect', fixedsize: 'true', label: '',
-    width: inches(width), height: inches(height),
+    shape: 'rect',
+    fixedsize: 'true',
+    label: '',
+    width: inches(width),
+    height: inches(height),
   });
 }
 
@@ -166,10 +164,7 @@ function addRankChain(
  *  fixed-size port + anchor nodes, ports ranked at the cluster's own level
  *  with an ordering chain to the anchor, anchor nested one level down in
  *  `${id}ee`. */
-function buildShadowGraph(
-  input: ShadowLayoutInput,
-  safeRanks: readonly SafeRank[],
-): ReturnType<typeof createGraph> {
+function buildShadowGraph(input: ShadowLayoutInput, safeRanks: readonly SafeRank[]): ReturnType<typeof createGraph> {
   const b = createGraph({ directed: true });
   b.setAttr('nodesep', inches(input.nodeSep));
   b.setAttr('ranksep', inches(input.rankSep));

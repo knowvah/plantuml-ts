@@ -87,7 +87,11 @@ const KIND_SHAPE: Partial<Record<ClassifierKind, DotInputNode['shape']>> = {
  * as row-target metadata; it must not flip this flag even though
  * shieldedClassifierIds sees the same relationship.
  */
-function shouldMarkPort(shape: DotInputNode['shape'] | undefined, isShieldedPort: boolean, kind: ClassifierKind): boolean {
+function shouldMarkPort(
+  shape: DotInputNode['shape'] | undefined,
+  isShieldedPort: boolean,
+  kind: ClassifierKind,
+): boolean {
   return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
 
@@ -166,9 +170,10 @@ function classFamilyPortRows(
   portShortNames: ReadonlySet<string>,
   kind: ClassifierKind,
 ): DotInputPortRow[] {
-  const compartments = measured.portMemberSections !== undefined
-    ? toPortCompartments(measured.portMemberSections, electionTextFor(kind))
-    : [];
+  const compartments =
+    measured.portMemberSections !== undefined
+      ? toPortCompartments(measured.portMemberSections, electionTextFor(kind))
+      : [];
   return classPortRows(compartments, portShortNames, measured.portMemberSections?.headerHeight ?? 0);
 }
 

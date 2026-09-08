@@ -159,7 +159,7 @@ describe('renderClass() on an object diagram geometry', () => {
 // ---------------------------------------------------------------------------
 
 describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
-  it('tints an object classifier\'s box fill (plain, no stereotype)', () => {
+  it("tints an object classifier's box fill (plain, no stereotype)", () => {
     const { theme: t } = resolveSkinparam(new Map([['objectbackgroundcolor', 'red']]), defaultTheme);
     const ast = parseClass(src(['object Foo']));
     const geo = layoutClass(ast, t, measurer);
@@ -167,7 +167,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     expect(svg).toContain('fill="#F00"');
   });
 
-  it('tints a map classifier\'s box fill independently of objectBackgroundColor', () => {
+  it("tints a map classifier's box fill independently of objectBackgroundColor", () => {
     const { theme: t } = resolveSkinparam(new Map([['mapbackgroundcolor', 'blue']]), defaultTheme);
     const ast = parseClass(src(['map M {', 'k => v', '}']));
     const geo = layoutClass(ast, t, measurer);
@@ -175,7 +175,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     expect(svg).toContain('fill="#00F"');
   });
 
-  it('tints a json classifier\'s box fill independently of objectBackgroundColor', () => {
+  it("tints a json classifier's box fill independently of objectBackgroundColor", () => {
     const { theme: t } = resolveSkinparam(new Map([['jsonbackgroundcolor', 'green']]), defaultTheme);
     const ast = parseClass(src(['json J {', '"a": 1', '}']));
     const geo = layoutClass(ast, t, measurer);
@@ -183,7 +183,7 @@ describe('skinparam {object,map,json}BackgroundColor (G3/O1)', () => {
     expect(svg).toContain('fill="#008000"');
   });
 
-  it('does NOT tint a plain class classifier (object/map/json buckets are independent of class\'s own cascade)', () => {
+  it("does NOT tint a plain class classifier (object/map/json buckets are independent of class's own cascade)", () => {
     const { theme: t } = resolveSkinparam(new Map([['objectbackgroundcolor', 'red']]), defaultTheme);
     const ast = parseClass(src(['class C']));
     const geo = layoutClass(ast, t, measurer);
@@ -247,38 +247,52 @@ describe('theme.colors.elements.{object,map,json}.font (G3/O2)', () => {
   // regressing this already-zero-diff fixture (caught by a full census
   // re-run, not by this test suite in isolation -- backfilled here so the
   // regression can never resurface silently).
-  it('falls through to classCascadeFontColor for a root-level (non-object-specific) ' +
-    'style override -- no elements.object bucket set at all', () => {
-    const t = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: { ...defaultTheme.colors.graph, classCascadeFontColor: '#FF0000', classCascadeHeaderFontColor: '#FF0000' },
-      },
-    };
-    const ast = parseClass(src(['object Foo {', 'field', '}']));
-    const geo = layoutClass(ast, t, measurer);
-    const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#F00"');
-    expect(svg).not.toContain('fill="#000000"');
-  });
+  it(
+    'falls through to classCascadeFontColor for a root-level (non-object-specific) ' +
+      'style override -- no elements.object bucket set at all',
+    () => {
+      const t = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: {
+            ...defaultTheme.colors.graph,
+            classCascadeFontColor: '#FF0000',
+            classCascadeHeaderFontColor: '#FF0000',
+          },
+        },
+      };
+      const ast = parseClass(src(['object Foo {', 'field', '}']));
+      const geo = layoutClass(ast, t, measurer);
+      const svg = assembleSvg(renderClass(geo, t));
+      expect(svg).toContain('fill="#F00"');
+      expect(svg).not.toContain('fill="#000000"');
+    },
+  );
 
-  it('an object-specific elements.object.font bucket wins over classCascadeFontColor ' +
-    'when BOTH are set (object-specific override has priority)', () => {
-    const t = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: { ...defaultTheme.colors.graph, classCascadeFontColor: '#FF0000', classCascadeHeaderFontColor: '#FF0000' },
-        elements: { ...defaultTheme.colors.elements, object: { font: '#0000FF' } },
-      },
-    };
-    const ast = parseClass(src(['object Foo']));
-    const geo = layoutClass(ast, t, measurer);
-    const svg = assembleSvg(renderClass(geo, t));
-    expect(svg).toContain('fill="#00F"');
-    expect(svg).not.toContain('fill="#F00"');
-  });
+  it(
+    'an object-specific elements.object.font bucket wins over classCascadeFontColor ' +
+      'when BOTH are set (object-specific override has priority)',
+    () => {
+      const t = {
+        ...defaultTheme,
+        colors: {
+          ...defaultTheme.colors,
+          graph: {
+            ...defaultTheme.colors.graph,
+            classCascadeFontColor: '#FF0000',
+            classCascadeHeaderFontColor: '#FF0000',
+          },
+          elements: { ...defaultTheme.colors.elements, object: { font: '#0000FF' } },
+        },
+      };
+      const ast = parseClass(src(['object Foo']));
+      const geo = layoutClass(ast, t, measurer);
+      const svg = assembleSvg(renderClass(geo, t));
+      expect(svg).toContain('fill="#00F"');
+      expect(svg).not.toContain('fill="#F00"');
+    },
+  );
 });
 
 describe('renderClass() — multiple object classifiers', () => {
@@ -290,15 +304,7 @@ describe('renderClass() — multiple object classifiers', () => {
   });
 
   it('renders correctly with multiple objects and an edge label', () => {
-    const ast = parseClass(src([
-      'object A {',
-      'x = 1',
-      '}',
-      'object B {',
-      'y = 2',
-      '}',
-      'A --> B : link',
-    ]));
+    const ast = parseClass(src(['object A {', 'x = 1', '}', 'object B {', 'y = 2', '}', 'A --> B : link']));
     const geo = layoutClass(ast, theme, measurer);
     const svg = assembleSvg(renderClass(geo, theme));
     expect(svg).toContain('link');
@@ -319,7 +325,13 @@ describe('theme.colors.elements.object.header* (G3/O4, soxufi-98-nita528)', () =
         ...defaultTheme.colors,
         elements: {
           ...defaultTheme.colors.elements,
-          object: { background: '#FFFF00', font: '#0000FF', headerBackground: '#FF0000', headerFont: '#008000', headerFontSize: 20 },
+          object: {
+            background: '#FFFF00',
+            font: '#0000FF',
+            headerBackground: '#FF0000',
+            headerFont: '#008000',
+            headerFontSize: 20,
+          },
         },
       },
     };

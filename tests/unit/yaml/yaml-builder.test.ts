@@ -65,10 +65,7 @@ describe('YamlBuilder', () => {
     b.onListItemKeyAndValue('name', 'Mark');
     b.adjustIndentation(2);
     b.onListItemKeyAndValue('hr', '65');
-    expect(monomorphToJson(b.getResult())).toEqual([
-      { name: 'Mark' },
-      { hr: '65' },
-    ]);
+    expect(monomorphToJson(b.getResult())).toEqual([{ name: 'Mark' }, { hr: '65' }]);
   });
 
   // 8. List item with only key (nested structure)
@@ -78,9 +75,7 @@ describe('YamlBuilder', () => {
     b.onListItemOnlyKey('name');
     b.adjustIndentation(4);
     b.onKeyAndValue('first', 'John');
-    expect(monomorphToJson(b.getResult())).toEqual([
-      { name: { first: 'John' } },
-    ]);
+    expect(monomorphToJson(b.getResult())).toEqual([{ name: { first: 'John' } }]);
   });
 
   // 9. Indent decrease pops stack — subsequent events go to root level

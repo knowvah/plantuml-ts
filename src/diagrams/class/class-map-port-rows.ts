@@ -40,10 +40,7 @@ const MAP_ROW_PORT_SCORE = 100;
  * `title.height + fieldsHeight` with nothing below the final row
  * (`class-map-sizing.ts#measureMapClassifier`).
  */
-export function mapPortRows(
-  classifier: Classifier,
-  measured: MeasuredClassifier,
-): DotInputPortRow[] {
+export function mapPortRows(classifier: Classifier, measured: MeasuredClassifier): DotInputPortRow[] {
   const rows = classifier.rows ?? [];
   const tops = measured.dividerYs;
   const ports = new Ports();

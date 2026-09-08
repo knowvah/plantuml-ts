@@ -94,7 +94,8 @@ export class MethodsOrFieldsArea extends TextBlockMemoized implements WithPorts 
   private readonly memberFontConfig: FontConfiguration;
   private readonly lineThickness: number;
   private readonly wrapWidth: LineBreakStrategy;
-  private readonly resolveVisibilityStyle: ((modifier: VisibilityModifier) => VisibilityModifierStyleValues) | undefined;
+  private readonly resolveVisibilityStyle:
+    ((modifier: VisibilityModifier) => VisibilityModifierStyleValues) | undefined;
   private readonly atomOps: AtomOps;
 
   /** Both upstream constructors (java:97-123) — see the class doc
@@ -378,7 +379,12 @@ export class MethodsOrFieldsArea extends TextBlockMemoized implements WithPorts 
     if (result !== undefined && this.hasSmallIcon()) {
       // Extend the inner position to include the visibility modifier on its left
       const smallIcon = this.skinParam.getCircledCharacterRadius() + 3;
-      return new XRectangle2D(result.getMinX() - smallIcon, result.getMinY(), result.getWidth() + smallIcon, result.getHeight());
+      return new XRectangle2D(
+        result.getMinX() - smallIcon,
+        result.getMinY(),
+        result.getWidth() + smallIcon,
+        result.getHeight(),
+      );
     }
     return result;
   }
@@ -393,7 +399,9 @@ export class MethodsOrFieldsArea extends TextBlockMemoized implements WithPorts 
   private getLayout(stringBounder: StringBounder): ULayoutGroup {
     let group: ULayoutGroup;
     if (this.hasSmallIcon()) {
-      group = new ULayoutGroup(new PlacementStrategyVisibility(stringBounder, this.skinParam.getCircledCharacterRadius() + 3));
+      group = new ULayoutGroup(
+        new PlacementStrategyVisibility(stringBounder, this.skinParam.getCircledCharacterRadius() + 3),
+      );
       for (const cs of this.members.asList()) {
         const block = this.createTextBlock(cs);
         // if (cs instanceof EmbeddedDiagram) { group.add(getUBlock(null, null)); } else {
@@ -406,7 +414,8 @@ export class MethodsOrFieldsArea extends TextBlockMemoized implements WithPorts 
     } else {
       let placementStrategy: PlacementStrategy;
       if (this.align === HorizontalAlignment.LEFT) placementStrategy = new PlacementStrategyY1Y2Left(stringBounder);
-      else if (this.align === HorizontalAlignment.CENTER) placementStrategy = new PlacementStrategyY1Y2Center(stringBounder);
+      else if (this.align === HorizontalAlignment.CENTER)
+        placementStrategy = new PlacementStrategyY1Y2Center(stringBounder);
       else placementStrategy = new PlacementStrategyY1Y2Right(stringBounder);
 
       group = new ULayoutGroup(placementStrategy);

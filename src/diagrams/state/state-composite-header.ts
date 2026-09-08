@@ -24,7 +24,11 @@ import type { DiagramCtx } from './state-composite-pass.js';
  *  than imported — neither module exports it, and it is small enough that
  *  duplicating beats widening either module's public surface for one
  *  extra caller). */
-export function measureLines(lines: readonly string[], font: FontSpec, ctx: DiagramCtx): { width: number; height: number } {
+export function measureLines(
+  lines: readonly string[],
+  font: FontSpec,
+  ctx: DiagramCtx,
+): { width: number; height: number } {
   let width = 0;
   let height = 0;
   for (const line of lines) {
@@ -40,7 +44,10 @@ export function measureLines(lines: readonly string[], font: FontSpec, ctx: Diag
  *  (G5 C3) gates `CLUSTER_TITLE_TABLE_HEIGHT`/`CLUSTER_HEADER_HEIGHT`
  *  eligibility (state-composite-cluster.ts) — jar-verified ONLY for a
  *  single-line title. */
-export function measureClusterTitle(display: string, ctx: DiagramCtx): { width: number; height: number; lineCount: number } {
+export function measureClusterTitle(
+  display: string,
+  ctx: DiagramCtx,
+): { width: number; height: number; lineCount: number } {
   const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
   const lines = splitStateDisplayLines(display);
   const dim = measureLines(lines, font, ctx);

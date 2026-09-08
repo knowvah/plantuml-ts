@@ -304,12 +304,20 @@ export function attachPortLabels(
   const headMultiplicity = swap ? rel.fromMultiplicity : rel.toMultiplicity;
   if (tailMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
     edgeGeo.tailLabel = portLabelAnchor(
-      tailMultiplicity, { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY }, measurer, cardinalityFont, nodes,
+      tailMultiplicity,
+      { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY },
+      measurer,
+      cardinalityFont,
+      nodes,
     );
   }
   if (headMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
     edgeGeo.headLabel = portLabelAnchor(
-      headMultiplicity, { x: edgeResult.headLabelX, y: edgeResult.headLabelY }, measurer, cardinalityFont, nodes,
+      headMultiplicity,
+      { x: edgeResult.headLabelX, y: edgeResult.headLabelY },
+      measurer,
+      cardinalityFont,
+      nodes,
     );
   }
 }

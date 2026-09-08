@@ -130,7 +130,14 @@ export class USymbolHexagon extends USymbol {
         const stringBounder = ug.getStringBounder();
         const dim = calculateDimension(stringBounder);
         ug = symbolContext.apply(ug);
-        drawRect(ug, dim.getWidth(), dim.getHeight(), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner(), 0);
+        drawRect(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+          0,
+        );
 
         const dimStereo = stereotype.calculateDimension(stringBounder);
         let posStereoX: number;

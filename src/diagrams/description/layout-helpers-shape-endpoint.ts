@@ -72,8 +72,7 @@ export function resolveEndpoint(
   clusterIdByContainerAstId: Map<string, string>,
   qualifiedPathToDotKey?: ReadonlyMap<string, string>,
 ): ResolvedEndpoint | undefined {
-  const key =
-    leafIdSet.has(id) || astNodeById.has(id) ? id : (qualifiedPathToDotKey?.get(id) ?? id);
+  const key = leafIdSet.has(id) || astNodeById.has(id) ? id : (qualifiedPathToDotKey?.get(id) ?? id);
   if (leafIdSet.has(key)) return { dotNodeId: key, containerAstId: undefined };
   const node = astNodeById.get(key);
   if (node === undefined) return undefined;
@@ -127,19 +126,12 @@ export function isInterfaceShielded(
   }
   // (b) hasSomeHorizontalLinkVisible — non-hidden length-1 link; suppresses
   //     only when fixCircleLabelOverlapping is false.
-  if (
-    !fixCircleLabelOverlapping &&
-    touching.some((l) => l.length === 1 && l.hidden !== true)
-  ) {
+  if (!fixCircleLabelOverlapping && touching.some((l) => l.length === 1 && l.hidden !== true)) {
     return false;
   }
   // (c) hasSomeHorizontalLinkDoubleDecorated — length-1, decor on both ends
   //     (no !hidden guard); always suppresses.
-  if (
-    touching.some(
-      (l) => l.length === 1 && l.tailDecor !== undefined && l.headDecor !== undefined,
-    )
-  ) {
+  if (touching.some((l) => l.length === 1 && l.tailDecor !== undefined && l.headDecor !== undefined)) {
     return false;
   }
   return true;
@@ -163,9 +155,7 @@ export function shapeForNode(
   // `circle` leaf renders shape=plaintext, not rect. `circle` shares the
   // interface shield mechanism byte-for-byte.
   if (node.symbol === 'interface' || node.symbol === 'circle') {
-    return isInterfaceShielded(node.id, links, fixCircleLabelOverlapping)
-      ? 'plaintext'
-      : undefined;
+    return isInterfaceShielded(node.id, links, fixCircleLabelOverlapping) ? 'plaintext' : undefined;
   }
   return symbolBaseShape(node.symbol);
 }
@@ -178,22 +168,14 @@ export function shapeForNode(
 /** SvekNode.appendLabelHtmlSpecialForPort: `getMaxWidthFromLabelForEntryExit
  *  (stringBounder) > 40` switches a port leaf from the plain small
  *  `shape=rect` square to the `shape=plaintext` PORT="P" HTML table. */
-export function isPortLabelWide(
-  node: DescriptiveNode,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-): boolean {
+export function isPortLabelWide(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): boolean {
   return measurer.measure(node.display, fontSpec).width > PORT_LABEL_WIDE_THRESHOLD;
 }
 
 /** appendLabelHtmlSpecialForPortHtml's `fullWidth` (`width2 - 40`, floored
  *  at 10) — the blank cell width flanking the PORT="P" cell. Only called
  *  once {@link isPortLabelWide} is true. */
-export function portTablePad(
-  node: DescriptiveNode,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-): number {
+export function portTablePad(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): number {
   const width2 = measurer.measure(node.display, fontSpec).width;
   return Math.max(PORT_TABLE_PAD_FLOOR, width2 - PORT_LABEL_WIDE_THRESHOLD);
 }

@@ -61,11 +61,7 @@
 
 import type { MessageEvent } from './ast.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
-import {
-  ARROW_DRESSING1,
-  ARROW_SKELETON_SOURCE,
-  LIFECOLOR,
-} from './sequence-arrow-regex.js';
+import { ARROW_DRESSING1, ARROW_SKELETON_SOURCE, LIFECOLOR } from './sequence-arrow-regex.js';
 import {
   activationFlags,
   autoActivationFlags,
@@ -198,9 +194,7 @@ export const UNDRESSED_ARROW_SOURCE = ARROW_SOURCE.replace(ARROW_DRESSING1, '');
  * The fragment is exactly `(?:…)?`, so dropping its final character is the
  * `RegexOr` inside the `RegexOptional`.
  */
-export const DRESSED_ARROW_SOURCE = ARROW_SOURCE.replace(ARROW_DRESSING1, () =>
-  ARROW_DRESSING1.slice(0, -1),
-);
+export const DRESSED_ARROW_SOURCE = ARROW_SOURCE.replace(ARROW_DRESSING1, () => ARROW_DRESSING1.slice(0, -1));
 
 /** `i` because upstream compiles every command with `Pattern.CASE_INSENSITIVE`
  *  (`regex/Pattern2.java:114`); `u` for `\p{L}`/`\p{N}`. */
@@ -269,10 +263,7 @@ function getLength(g: Groups): number {
  *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:480-505
  */
-function applyStyle(
-  arrowStyle: string | undefined,
-  config: ArrowConfiguration,
-): ArrowConfiguration {
+function applyStyle(arrowStyle: string | undefined, config: ArrowConfiguration): ArrowConfiguration {
   if (arrowStyle === undefined) return config;
   const tokens = arrowStyle.split(',').map((s) => s.trim().toLowerCase());
   const dotted = tokens.some((s) => s === 'dashed' || s === 'dotted');
@@ -295,8 +286,7 @@ function applyStyle(
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/ArrowConfiguration.java:149-156
  */
 export function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfiguration {
-  if (config.dressing2.head !== 'NONE')
-    return { ...config, dressing2: { ...config.dressing2, part } };
+  if (config.dressing2.head !== 'NONE') return { ...config, dressing2: { ...config.dressing2, part } };
   return { ...config, dressing1: { ...config.dressing1, part } };
 }
 
@@ -445,10 +435,8 @@ function arrowOf(g: Groups, facts: DressingFacts): ArrowConfiguration {
     g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
     arrowConfigurationOf(arrowSpecOf(facts, getLength(g) > 1)),
   );
-  if (facts.dressing2.includes('\\') || facts.dressing1.includes('/'))
-    config = withPart(config, 'TOP_PART');
-  if (facts.dressing2.includes('/') || facts.dressing1.includes('\\'))
-    config = withPart(config, 'BOTTOM_PART');
+  if (facts.dressing2.includes('\\') || facts.dressing1.includes('/')) config = withPart(config, 'TOP_PART');
+  if (facts.dressing2.includes('/') || facts.dressing1.includes('\\')) config = withPart(config, 'BOTTOM_PART');
   const sum = getInclination(g['ARROW_DRESSING1']) + getInclination(g['ARROW_DRESSING2']);
   return sum === 0 ? config : { ...config, inclination: sum };
 }
@@ -507,10 +495,7 @@ function optionalFields(state: ParseState, g: Groups): OptionalMessageFields {
  */
 function executeArrow(state: ParseState, match: RegExpExecArray): void {
   const g: Groups = match.groups ?? {};
-  const facts = resolveDressings(
-    getDressing(g['ARROW_DRESSING1']),
-    getDressing(g['ARROW_DRESSING2']),
-  );
+  const facts = resolveDressings(getDressing(g['ARROW_DRESSING1']), getDressing(g['ARROW_DRESSING2']));
   if (facts === null) return;
 
   const part1 = endpointOf(g, 'PART1');

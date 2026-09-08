@@ -384,14 +384,8 @@ export class XmlNode implements XmlContent {
 // lookup sets so the method below reads as a short if-chain rather than a
 // 14-case switch (kept the complexity checker's CCN budget for the
 // method; behavior is unchanged from a straight switch port).
-const ENTITY_1_KEYS: ReadonlySet<UGroupType> = new Set([
-  UGroupType.DATA_PARTICIPANT_1,
-  UGroupType.DATA_ENTITY_1_UID,
-]);
-const ENTITY_2_KEYS: ReadonlySet<UGroupType> = new Set([
-  UGroupType.DATA_PARTICIPANT_2,
-  UGroupType.DATA_ENTITY_2_UID,
-]);
+const ENTITY_1_KEYS: ReadonlySet<UGroupType> = new Set([UGroupType.DATA_PARTICIPANT_1, UGroupType.DATA_ENTITY_1_UID]);
+const ENTITY_2_KEYS: ReadonlySet<UGroupType> = new Set([UGroupType.DATA_PARTICIPANT_2, UGroupType.DATA_ENTITY_2_UID]);
 const SVG_KEY_ATTR_KEYS: ReadonlySet<UGroupType> = new Set([
   UGroupType.CLASS,
   UGroupType.DATA_SOURCE_LINE,

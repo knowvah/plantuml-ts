@@ -42,12 +42,7 @@ function removeYamlComment(s: string): string {
       }
     }
 
-    if (
-      inQuoteChar === '\0' &&
-      i < s.length - 1 &&
-      c === ' ' &&
-      s.charAt(i + 1) === '#'
-    ) {
+    if (inQuoteChar === '\0' && i < s.length - 1 && c === ' ' && s.charAt(i + 1) === '#') {
       return s.substring(0, i);
     }
   }
@@ -109,11 +104,7 @@ function toList(rawValue: string): string[] {
       }
     } else {
       // Outside a quoted string
-      if (
-        !fieldStartWithQuote &&
-        current.trim() === '' &&
-        (c === "'" || c === '"')
-      ) {
+      if (!fieldStartWithQuote && current.trim() === '' && (c === "'" || c === '"')) {
         inQuotedString = c;
         fieldStartWithQuote = true;
         current = '';

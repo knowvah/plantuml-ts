@@ -113,7 +113,7 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
   });
 
   it(
-    'resolves reddress\'s unconditional !define FONTNAME (skin-reddress-variants ' +
+    "resolves reddress's unconditional !define FONTNAME (skin-reddress-variants " +
       'Fix 1 -- skinparam VALUES now run through TIM substitution; the ' +
       'macro-substitution gap tracked in .agent-notes/skin-batch4-preproc.md ' +
       'is fixed for the skinparam-line path)',
@@ -139,16 +139,13 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
     },
   );
 
-  it('threads a bare `!define DARKBLUE` from the document into reddress\'s own `!ifdef` gate', () => {
+  it("threads a bare `!define DARKBLUE` from the document into reddress's own `!ifdef` gate", () => {
     // `!ifdef DARKBLUE` only checks EXISTENCE (EaterIfdef#isTrue). Both the
     // gate AND the value now resolve (Fix 1): `skinparam backgroundColor 777`
     // (a literal) and `skinparam stereotypeCBackgroundColor ACCENT` (a macro
     // reference resolved via the SAME DARKBLUE-branch `!define ACCENT
     // 1a66c2`) both land.
-    const withThreading = applySkinLayer({ skin: 'reddress' }, defaultTheme, [
-      '!define DARKBLUE',
-      'skin reddress',
-    ]);
+    const withThreading = applySkinLayer({ skin: 'reddress' }, defaultTheme, ['!define DARKBLUE', 'skin reddress']);
     // `documentRawSourceLines` omitted -- gate never fires, root theme
     // background is untouched (default, `undefined` background override).
     const untouched = applySkinLayer({ skin: 'reddress' }, defaultTheme);
@@ -157,16 +154,13 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
   });
 
   it(
-    'resolves reddress\'s DARKBLUE-branch !define ACCENT into ' +
+    "resolves reddress's DARKBLUE-branch !define ACCENT into " +
       'stereotypeCBackgroundColor (skin-reddress-variants Fix 1 -- the ' +
       '!ifdef GATE alone was already threaded by Batch 4; this proves the ' +
-      "VALUE macro reference inside the selected branch now resolves too, " +
-      "not just literal tokens)",
+      'VALUE macro reference inside the selected branch now resolves too, ' +
+      'not just literal tokens)',
     () => {
-      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme, [
-        '!define DARKBLUE',
-        'skin reddress',
-      ]);
+      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme, ['!define DARKBLUE', 'skin reddress']);
       // `resolveSkinparam` maps `stereotypeCBackgroundColor` to the "spot C"
       // class-stereotype element bucket.
       expect(result.colors.elements?.spotclass?.background).toBe('1a66c2');

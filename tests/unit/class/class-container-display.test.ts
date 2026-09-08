@@ -42,25 +42,14 @@ describe('nested container quoted display (A2s R2d, rakuci-96-tuti371)', () => {
   });
 
   it('keeps the quoted display on a NON-empty nested rectangle cluster', () => {
-    const ast = parse([
-      'package " XY " as XXY {',
-      'rectangle " YX " as XYY {',
-      'class " AB " as AAB',
-      '}',
-      '}',
-    ]);
+    const ast = parse(['package " XY " as XXY {', 'rectangle " YX " as XYY {', 'class " AB " as AAB', '}', '}']);
     const ns = ast.namespaces.find((n) => n.id === 'XXY.XYY');
     expect(ns).toBeDefined();
     expect(ns!.display).toBe(' YX ');
   });
 
   it('keeps the quoted display for a nested `namespace "Display" as alias`', () => {
-    const ast = parse([
-      'package outer {',
-      'namespace "My Space" as ms {',
-      '}',
-      '}',
-    ]);
+    const ast = parse(['package outer {', 'namespace "My Space" as ms {', '}', '}']);
     const ns = ast.namespaces.find((n) => n.id === 'outer.ms');
     // Still open-then-closed empty plain namespace: collapse is deferred, so
     // it survives as a namespace here — display must be the quoted text.

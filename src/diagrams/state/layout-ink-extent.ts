@@ -88,12 +88,7 @@
 import type { StateNodeGeo, TransitionGeo } from './state-geo-types.js';
 import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
 import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
-import {
-  type InkBox,
-  newInkBox,
-  addPoint,
-  addTransitionInk,
-} from './layout-ink-transition.js';
+import { type InkBox, newInkBox, addPoint, addTransitionInk } from './layout-ink-transition.js';
 import { positionFromStereotype, usesPortShape } from './state-entity-position.js';
 import { textAscent } from './state-render-colors.js';
 
@@ -293,12 +288,7 @@ function addSouthCapInk(box: InkBox, node: StateNodeGeo): void {
  *  covered before the restructuring (previously via a flat
  *  `outTransitions` accumulator merged into the top-level `transitions`
  *  array by the caller). */
-function addNodeInk(
-  box: InkBox,
-  node: StateNodeGeo,
-  labelInk: boolean,
-  arrowheadInk: 'always' | 'self-loop',
-): void {
+function addNodeInk(box: InkBox, node: StateNodeGeo, labelInk: boolean, arrowheadInk: 'always' | 'self-loop'): void {
   if (node.children.length > 0) {
     // A composite's own outer box draws no divider line, but this call is
     // deliberately left at the pre-existing `hasDivider: true` ink: the

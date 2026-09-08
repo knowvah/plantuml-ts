@@ -84,11 +84,17 @@ describe('json multiline declaration (CommandCreateJson)', () => {
             kind: 'object',
             entries: [
               { key: 'b', value: { kind: 'scalar', value: 1 } },
-              { key: 'c', value: { kind: 'array', items: [
-                { kind: 'scalar', value: 1 },
-                { kind: 'scalar', value: 2 },
-                { kind: 'scalar', value: 3 },
-              ] } },
+              {
+                key: 'c',
+                value: {
+                  kind: 'array',
+                  items: [
+                    { kind: 'scalar', value: 1 },
+                    { kind: 'scalar', value: 2 },
+                    { kind: 'scalar', value: 3 },
+                  ],
+                },
+              },
             ],
           },
         },
@@ -141,7 +147,11 @@ describe('json multiline declaration (CommandCreateJson)', () => {
     `);
     expect(findState(ast, 'arr')?.jsonValue).toEqual({
       kind: 'array',
-      items: [{ kind: 'scalar', value: 1 }, { kind: 'scalar', value: 2 }, { kind: 'scalar', value: 3 }],
+      items: [
+        { kind: 'scalar', value: 1 },
+        { kind: 'scalar', value: 2 },
+        { kind: 'scalar', value: 3 },
+      ],
     });
   });
 
@@ -171,7 +181,10 @@ describe('json multiline declaration (CommandCreateJson)', () => {
     `);
     const matches = ast.states.filter((s) => s.id === 'once');
     expect(matches).toHaveLength(1);
-    expect(matches[0]?.jsonValue).toEqual({ kind: 'object', entries: [{ key: 'a', value: { kind: 'scalar', value: 1 } }] });
+    expect(matches[0]?.jsonValue).toEqual({
+      kind: 'object',
+      entries: [{ key: 'a', value: { kind: 'scalar', value: 1 } }],
+    });
   });
 });
 
@@ -183,7 +196,18 @@ describe('json single-line declaration (CommandCreateJsonSingleLine)', () => {
     ['negativeNumber', '-7', { kind: 'scalar', value: -7 }],
     ['nullLit', 'null', { kind: 'scalar', value: null }],
     ['stringVal', '"hello"', { kind: 'scalar', value: 'hello' }],
-    ['arrayVal', '[1,2,3]', { kind: 'array', items: [{ kind: 'scalar', value: 1 }, { kind: 'scalar', value: 2 }, { kind: 'scalar', value: 3 }] }],
+    [
+      'arrayVal',
+      '[1,2,3]',
+      {
+        kind: 'array',
+        items: [
+          { kind: 'scalar', value: 1 },
+          { kind: 'scalar', value: 2 },
+          { kind: 'scalar', value: 3 },
+        ],
+      },
+    ],
     ['objectVal', '{"k": "v"}', { kind: 'object', entries: [{ key: 'k', value: { kind: 'scalar', value: 'v' } }] }],
   ] as const)('json %s value %s parses to %j', (name, literal, expected) => {
     const ast = parse(`json ${name} ${literal}`);

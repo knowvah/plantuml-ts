@@ -72,11 +72,7 @@ export type PureNoteTextMeasurer = (text: string, measurer: StringMeasurer) => P
  * Kept verbatim as the default strategy so the fontFamily-only call shape
  * reproduces byte-identically (acceptance criterion 3).
  */
-function naivePureTextDim(
-  text: string,
-  font: { readonly family: string },
-  measurer: StringMeasurer,
-): PureNoteTextDim {
+function naivePureTextDim(text: string, font: { readonly family: string }, measurer: StringMeasurer): PureNoteTextDim {
   const lines = text.split('\n');
   let maxW = 0;
   for (const ln of lines) {

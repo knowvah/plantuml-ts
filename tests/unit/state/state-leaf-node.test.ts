@@ -28,8 +28,12 @@ const measurer = new WidthTableMeasurer();
 
 function makeState(overrides: Partial<State> = {}): State {
   return {
-    id: 'entry1', display: 'entry1', kind: 'normal',
-    children: [], concurrentRegions: [], transitions: [],
+    id: 'entry1',
+    display: 'entry1',
+    kind: 'normal',
+    children: [],
+    concurrentRegions: [],
+    transitions: [],
     ...overrides,
   };
 }
@@ -40,7 +44,9 @@ function makeCtx(overrides: Partial<LeafNodeCtx> = {}): LeafNodeCtx {
 
 function captureFirst(puml: string): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured ??= g; });
+  setLayoutInputObserver((g) => {
+    captured ??= g;
+  });
   try {
     renderSync(puml, { measurer });
   } finally {

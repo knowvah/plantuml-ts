@@ -6,13 +6,13 @@
 import type { NotePosition } from './class-note-decl-ast.js';
 
 export type RelationshipType =
-  | 'extension'      // <|--
+  | 'extension' // <|--
   | 'implementation' // <|..
-  | 'composition'    // *--
-  | 'aggregation'    // o--
-  | 'dependency'     // ..>
-  | 'association'    // -->
-  | 'usage';         // ..
+  | 'composition' // *--
+  | 'aggregation' // o--
+  | 'dependency' // ..>
+  | 'association' // -->
+  | 'usage'; // ..
 
 /**
  * The decoration drawn at one end of a link, mirroring upstream's LinkDecor:

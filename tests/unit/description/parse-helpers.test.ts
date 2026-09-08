@@ -50,26 +50,16 @@ describe('resolveInlineLinks', () => {
 
 describe('parseNameSection -- quote-aware URL stripping', () => {
   it('keeps an inline [[url]] link embedded WITHIN the quotes as part of id/display', () => {
-    const section = parseNameSection(
-      '"something\\nclick the image:[[http://plantuml.com before <$database> after]]"',
-    );
-    expect(section.id).toBe(
-      'something\\nclick the image:[[http://plantuml.com before <$database> after]]',
-    );
+    const section = parseNameSection('"something\\nclick the image:[[http://plantuml.com before <$database> after]]"');
+    expect(section.id).toBe('something\\nclick the image:[[http://plantuml.com before <$database> after]]');
     // I4c: resolveNewlineEscapes splits the literal `\\n` (outside the
     // `[[...]]` span) into a real newline -- id keeps the raw text.
-    expect(section.display).toBe(
-      'something\nclick the image:[[http://plantuml.com before <$database> after]]',
-    );
+    expect(section.display).toBe('something\nclick the image:[[http://plantuml.com before <$database> after]]');
   });
 
   it('gives two labels differing only inside their embedded link DIFFERENT ids (no dedup)', () => {
-    const a = parseNameSection(
-      '"something\\nclick the image:[[http://plantuml.com before <$database*0.31> after]]"',
-    );
-    const b = parseNameSection(
-      '"something\\nclick the image:[[http://plantuml.com before <$database> after]]"',
-    );
+    const a = parseNameSection('"something\\nclick the image:[[http://plantuml.com before <$database*0.31> after]]"');
+    const b = parseNameSection('"something\\nclick the image:[[http://plantuml.com before <$database> after]]"');
     expect(a.id).not.toBe(b.id);
   });
 
@@ -183,4 +173,3 @@ describe('parseNameSection -- a quoted DISPLAY group is unwrapped exactly once (
     expect(section.display).toBe('Hello World');
   });
 });
-

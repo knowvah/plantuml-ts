@@ -155,9 +155,5 @@ export function isPort(position: EntityPosition): boolean {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/EntityPosition.java:186-188
  */
 export function usePortP(position: EntityPosition): boolean {
-  return (
-    isPort(position) ||
-    position === EntityPosition.EXIT_POINT ||
-    position === EntityPosition.ENTRY_POINT
-  );
+  return isPort(position) || position === EntityPosition.EXIT_POINT || position === EntityPosition.ENTRY_POINT;
 }

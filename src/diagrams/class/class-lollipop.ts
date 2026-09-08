@@ -77,9 +77,7 @@ function lollipopKindOf(parens: string): 'full' | 'half' {
  * third+ horizontal (same-rank) lollipop down a rank so it does not overlap.
  */
 function countHorizontalLollipopLinks(ast: ClassDiagramAST, normalEntityId: string): number {
-  const lollipopIds = new Set(
-    ast.classifiers.filter((c) => c.kind === 'lollipop').map((c) => c.id),
-  );
+  const lollipopIds = new Set(ast.classifiers.filter((c) => c.kind === 'lollipop').map((c) => c.id));
   let count = 0;
   for (const r of ast.relationships) {
     if (r.length !== 1) continue;

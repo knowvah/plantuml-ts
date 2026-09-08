@@ -51,7 +51,7 @@ function innerPassNodeIds(src: string): string[] {
 describe('composite pass node declaration order', () => {
   afterEach(() => setLayoutInputObserver(undefined));
 
-  it('declares an autonom composite\'s [*] circle first when [*] is referenced first', () => {
+  it("declares an autonom composite's [*] circle first when [*] is referenced first", () => {
     // kejabo-83-vinu490's own shape, verbatim.
     const inner = innerPassNodeIds(`@startuml
 skinparam linetype polyline
@@ -70,7 +70,7 @@ Shooting --> NotShooting : EvShutterHalf
     expect(inner).toEqual(['__init_NotShooting', 'Idle', 'Configuring']);
   });
 
-  it('declares an autonom composite\'s members first when a member is referenced first', () => {
+  it("declares an autonom composite's members first when a member is referenced first", () => {
     const inner = innerPassNodeIds(`@startuml
 [*] --> NotShooting
 
@@ -85,7 +85,7 @@ NotShooting --> Shooting
     expect(inner).toEqual(['Idle', 'Configuring', '__final_NotShooting']);
   });
 
-  it('declares a concurrent region\'s [*] circle in creation order too', () => {
+  it("declares a concurrent region's [*] circle in creation order too", () => {
     const passes = capturePasses(`@startuml
 [*] --> Active
 

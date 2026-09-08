@@ -362,22 +362,16 @@ describe('horizontalAlignmentFromString', () => {
 describe('horizontalAlignmentFromStringOrDefault', () => {
   it('falls back to the default for null/undefined/unrecognized input', async () => {
     const { horizontalAlignmentFromStringOrDefault } = await import('../../src/core/annotations/model.js');
-    expect(horizontalAlignmentFromStringOrDefault(null, HorizontalAlignment.RIGHT)).toBe(
-      HorizontalAlignment.RIGHT,
-    );
+    expect(horizontalAlignmentFromStringOrDefault(null, HorizontalAlignment.RIGHT)).toBe(HorizontalAlignment.RIGHT);
     expect(horizontalAlignmentFromStringOrDefault(undefined, HorizontalAlignment.CENTER)).toBe(
       HorizontalAlignment.CENTER,
     );
-    expect(horizontalAlignmentFromStringOrDefault('diagonal', HorizontalAlignment.LEFT)).toBe(
-      HorizontalAlignment.LEFT,
-    );
+    expect(horizontalAlignmentFromStringOrDefault('diagonal', HorizontalAlignment.LEFT)).toBe(HorizontalAlignment.LEFT);
   });
 
   it('returns the parsed alignment when recognized', async () => {
     const { horizontalAlignmentFromStringOrDefault } = await import('../../src/core/annotations/model.js');
-    expect(horizontalAlignmentFromStringOrDefault('left', HorizontalAlignment.RIGHT)).toBe(
-      HorizontalAlignment.LEFT,
-    );
+    expect(horizontalAlignmentFromStringOrDefault('left', HorizontalAlignment.RIGHT)).toBe(HorizontalAlignment.LEFT);
   });
 });
 

@@ -21,10 +21,7 @@ import {
   parseNameSection,
 } from './parse-helpers.js';
 import { parseBracketDeclaration } from './element-grammar.js';
-import {
-  RE_BARE_DECORATED_DECL,
-  RE_BARE_QUOTED_DECL,
-} from './element-grammar-nosymbol.js';
+import { RE_BARE_DECORATED_DECL, RE_BARE_QUOTED_DECL } from './element-grammar-nosymbol.js';
 import { emitNode, nextCreationIndex } from './parse-state.js';
 import { leafDisplayName } from './namespace-groups.js';
 
@@ -56,7 +53,10 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
     pattern: new RegExp('^\\[([^\\]]+)\\]' + BRACKET_TRAILER + '$'),
     execute(state, match) {
       const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
-      emitNode(state, makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite));
+      emitNode(
+        state,
+        makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite),
+      );
     },
   },
 
@@ -64,10 +64,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   //     itself be wrapped ((uc1), :a:, [c]); parseNameSection + cleanId
   //     normalize it (cimare-47: `(another use case) as (uc1)`).
   {
-    pattern: new RegExp(
-      '^(\\([^)]+\\)(?:\\s+as\\s+(?:\\([^)]+\\)|:[^:]+:|\\S+))?)' +
-        SHORTHAND_TRAILER + '$',
-    ),
+    pattern: new RegExp('^(\\([^)]+\\)(?:\\s+as\\s+(?:\\([^)]+\\)|:[^:]+:|\\S+))?)' + SHORTHAND_TRAILER + '$'),
     execute(state, match) {
       shorthandNode(state, match[1]!.trim(), 'usecase', match[2]);
     },
@@ -83,14 +80,17 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   //      with `(`.
   {
     pattern: new RegExp(
-      '^("[^"]+"\\s+as\\s+(\\(\\)\\s*(?:"[^"]+"|\\S+)|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' +
-        SHORTHAND_TRAILER + '$',
+      '^("[^"]+"\\s+as\\s+(\\(\\)\\s*(?:"[^"]+"|\\S+)|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]))' + SHORTHAND_TRAILER + '$',
     ),
     execute(state, match) {
       const alias = match[2]!;
       const symbol = alias.startsWith('()')
         ? 'interface'
-        : alias.startsWith('(') ? 'usecase' : alias.startsWith(':') ? 'actor' : 'component';
+        : alias.startsWith('(')
+          ? 'usecase'
+          : alias.startsWith(':')
+            ? 'actor'
+            : 'component';
       shorthandNode(state, match[1]!.trim(), symbol, match[3]);
     },
   },
@@ -190,15 +190,17 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const bracketAs = /^\[([^\]]*)\]\s+(as\s+.+)$/i.exec(match[2]!.trim());
       if (bracketAs !== null) {
         const bdecl = parseBracketDeclaration(bracketAs[1]!.trim(), bracketAs[2]!);
-        emitNode(state, makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite));
+        emitNode(
+          state,
+          makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite),
+        );
         return;
       }
       const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!);
       // CommandCreateElementFull.java:317-318: `display = quark.getName()`
       // when no explicit alias/display was given — the LEAF segment only,
       // not the full dotted path, once `set separator` is active.
-      const finalDisplay =
-        display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
+      const finalDisplay = display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
       const decl = makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite);
       if (symbol === 'port') decl.position = kw === 'portout' ? 'portout' : 'portin';
       emitNode(state, decl);

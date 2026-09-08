@@ -143,7 +143,7 @@ describe('parseCreole', () => {
   it('parses nested markup: bold inside italic', () => {
     const spans = parseCreole('//**bold-italic**//');
     // The inner **…** produces a bold+italic span
-    const boldItalic = spans.find(s => s.bold && s.italic);
+    const boldItalic = spans.find((s) => s.bold && s.italic);
     expect(boldItalic).toBeDefined();
     expect(boldItalic?.text).toBe('bold-italic');
   });
@@ -158,7 +158,7 @@ describe('parseCreole', () => {
 
   it('does not emit zero-length spans', () => {
     const spans = parseCreole('**bold**');
-    expect(spans.every(s => s.text.length > 0)).toBe(true);
+    expect(spans.every((s) => s.text.length > 0)).toBe(true);
   });
 
   // ---- Orphan close tags treated as literal text ----
@@ -468,8 +468,14 @@ describe('measureTable', () => {
   const twoByTwo: TableToken = {
     kind: 'table',
     rows: [
-      [{ header: false, content: 'A' }, { header: false, content: 'B' }],
-      [{ header: false, content: 'C' }, { header: false, content: 'D' }],
+      [
+        { header: false, content: 'A' },
+        { header: false, content: 'B' },
+      ],
+      [
+        { header: false, content: 'C' },
+        { header: false, content: 'D' },
+      ],
     ],
   };
 
@@ -496,8 +502,14 @@ describe('measureTable', () => {
     const table: TableToken = {
       kind: 'table',
       rows: [
-        [{ header: false, content: 'short' }, { header: false, content: 'x' }],
-        [{ header: false, content: 'a' }, { header: false, content: 'very long content' }],
+        [
+          { header: false, content: 'short' },
+          { header: false, content: 'x' },
+        ],
+        [
+          { header: false, content: 'a' },
+          { header: false, content: 'very long content' },
+        ],
       ],
     };
     const { colWidths } = measureTable(table, 14);
@@ -514,7 +526,10 @@ describe('measureTable', () => {
     const table: TableToken = {
       kind: 'table',
       rows: [
-        [{ header: false, content: 'AB' }, { header: false, content: 'CD' }],
+        [
+          { header: false, content: 'AB' },
+          { header: false, content: 'CD' },
+        ],
         [{ header: false, content: 'X' }],
       ],
     };
@@ -541,8 +556,14 @@ describe('tableTokenToSvg', () => {
   const twoByTwo: TableToken = {
     kind: 'table',
     rows: [
-      [{ header: false, content: 'A' }, { header: false, content: 'B' }],
-      [{ header: false, content: 'C' }, { header: false, content: 'D' }],
+      [
+        { header: false, content: 'A' },
+        { header: false, content: 'B' },
+      ],
+      [
+        { header: false, content: 'C' },
+        { header: false, content: 'D' },
+      ],
     ],
   };
 
@@ -567,8 +588,14 @@ describe('tableTokenToSvg', () => {
     const table: TableToken = {
       kind: 'table',
       rows: [
-        [{ header: true, content: 'H1' }, { header: true, content: 'H2' }],
-        [{ header: false, content: 'C1' }, { header: false, content: 'C2' }],
+        [
+          { header: true, content: 'H1' },
+          { header: true, content: 'H2' },
+        ],
+        [
+          { header: false, content: 'C1' },
+          { header: false, content: 'C2' },
+        ],
       ],
     };
     const svg = tableTokenToSvg(table, 0, 0, 14);
@@ -606,7 +633,10 @@ describe('tableTokenToSvg', () => {
     const table: TableToken = {
       kind: 'table',
       rows: [
-        [{ header: false, content: 'A' }, { header: false, content: 'B' }],
+        [
+          { header: false, content: 'A' },
+          { header: false, content: 'B' },
+        ],
         [{ header: false, content: 'C' }],
       ],
     };

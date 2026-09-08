@@ -100,10 +100,7 @@ describe('drawLine — data labels', () => {
   });
 
   it('AC5: showLabels=true renders one label per point', () => {
-    const svg = drawLine(
-      makeGeo([10, 20, 30], { showLabels: true }),
-      THEME,
-    );
+    const svg = drawLine(makeGeo([10, 20, 30], { showLabels: true }), THEME);
     const matches = svg.match(/<text /g);
     expect(matches).not.toBeNull();
     expect(matches!.length).toBe(3);

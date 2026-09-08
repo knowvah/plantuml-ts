@@ -14,9 +14,7 @@ function makeSource(lines: string[]): UmlSource {
 
 describe('parseChronology — annotation commands (mission G0b/T6)', () => {
   it('single-line `title X` populates annotations.title, not an event', () => {
-    const ast = parseChronology(
-      makeSource(['title My Timeline', '[Event1] happens at 2023-11-24 10:11:50.750']),
-    );
+    const ast = parseChronology(makeSource(['title My Timeline', '[Event1] happens at 2023-11-24 10:11:50.750']));
     expect(ast.annotations?.title.display).toEqual(['My Timeline']);
     expect(ast.events.length).toBe(1);
     expect(ast.events[0]!.name).toBe('Event1');

@@ -316,7 +316,11 @@ export class EmbeddedDiagram extends TextBlockMemoized implements Line, Atom {
   }
 
   /** java:117-119. */
-  static from(skinParam: ISkinSimple | null, lines: readonly string[], renderer: NestedDiagramRenderer): EmbeddedDiagram {
+  static from(
+    skinParam: ISkinSimple | null,
+    lines: readonly string[],
+    renderer: NestedDiagramRenderer,
+  ): EmbeddedDiagram {
     return new EmbeddedDiagram(skinParam, lines, renderer);
   }
 

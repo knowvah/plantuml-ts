@@ -7,27 +7,14 @@
  * size cap; behavior is unchanged (pure move).
  */
 
-import type {
-  Classifier,
-  ClassDiagramAST,
-  Namespace,
-} from './ast.js';
+import type { Classifier, ClassDiagramAST, Namespace } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type {
-  DotInputCluster,
-  DotInputGraph,
-  DotInputNode,
-  DotInputEdge,
-} from '../../core/graph-layout.js';
+import type { DotInputCluster, DotInputGraph, DotInputNode, DotInputEdge } from '../../core/graph-layout.js';
 import { buildNoteGraphParts } from './note-layout.js';
 import { buildClassMagmaEdges } from './class-magma.js';
 import { buildClassUidPlan, classUidPlanInputFromAst } from './renderer-uid.js';
-import {
-  LIKE_CLASS_KINDS,
-  type MeasuredClassifier,
-  type NoteBoxContext,
-} from './class-layout-helpers.js';
+import { LIKE_CLASS_KINDS, type MeasuredClassifier, type NoteBoxContext } from './class-layout-helpers.js';
 import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
@@ -130,8 +117,7 @@ function buildDotClusters(
       cluster.titleTableWidth = dims.width;
       cluster.titleTableHeight = dims.height;
     }
-    const parentClusterId =
-      ns.parentId !== undefined ? clusterIdByNs.get(ns.parentId) : undefined;
+    const parentClusterId = ns.parentId !== undefined ? clusterIdByNs.get(ns.parentId) : undefined;
     if (parentClusterId !== undefined) cluster.parentId = parentClusterId;
     return cluster;
   });
@@ -149,11 +135,15 @@ const PROTECTED_BORDER = 20;
  *  groupInheritance N` is not yet parsed into `Theme`, so this field is
  *  read structurally and the mechanism is inert in production until the
  *  skinparam pipeline populates it. */
-export interface ThemeGroupInheritance { groupInheritance?: number }
+export interface ThemeGroupInheritance {
+  groupInheritance?: number;
+}
 
 /** Same pending-plumbing seam as {@link ThemeGroupInheritance}, for
  *  `skinparam sameClassWidth true|false` (SkinParam.java:994). */
-export interface ThemeSameClassWidth { sameClassWidth?: boolean }
+export interface ThemeSameClassWidth {
+  sameClassWidth?: boolean;
+}
 
 /**
  * A2s F-D mechanism B7: `skinparam sameClassWidth true` floors EVERY
@@ -268,8 +258,7 @@ function computeGroupInheritance(
  *  renderer-side gap filed in the F-D report. `EntityImageProtected` only
  *  ever wraps `EntityImageClass`, hence the isLikeClass gate. */
 function protectedPad(classifier: Classifier, protectedIds: ReadonlySet<string>): number {
-  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind)
-    ? 2 * PROTECTED_BORDER : 0;
+  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind) ? 2 * PROTECTED_BORDER : 0;
 }
 
 /** Build one dot node for a single classifier — split out of buildDotNodes
@@ -319,9 +308,9 @@ function buildDotNodes(
   const shielded = shieldedClassifierIds(ast);
   const nodes = ast.classifiers
     .filter((classifier) => !anchors.has(classifier.id))
-    .map((classifier) => buildOneDotNode(
-      classifier, measuredMap, shielded, protectedIds, classPortShortNames.get(classifier.id),
-    ));
+    .map((classifier) =>
+      buildOneDotNode(classifier, measuredMap, shielded, protectedIds, classPortShortNames.get(classifier.id)),
+    );
   for (const anchorId of anchors.values()) {
     // Width/height are ignored by the point emitter (hardcoded .01in).
     nodes.push({ id: anchorId, width: 1, height: 1, shape: 'point' });
@@ -364,12 +353,8 @@ function buildDotNodesAndEdges(
   // `renderer-uid.ts#ClassUidPlanInput` for why that projection is sound only
   // where it is (and the test that pins it).
   const uidPlan = buildClassUidPlan(classUidPlanInputFromAst(ast));
-  const groupInheritance = computeGroupInheritance(ast, theme, (id) =>
-    uidPlan.classifierUid.get(id),
-  );
-  const dotNodes = buildDotNodes(
-    ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames,
-  );
+  const groupInheritance = computeGroupInheritance(ast, theme, (id) => uidPlan.classifierUid.get(id));
+  const dotNodes = buildDotNodes(ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames);
   // D3/D4: resolved arrow-label font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`). No override -> byte-identical to the prior
   // `{family:theme.fontFamily,size:ARROW_LABEL_FONT_SIZE}` literal (see the
@@ -398,7 +383,12 @@ function buildDotNodesAndEdges(
   // Magma standalone-chaining edges appended after the real relationship edges.
   const dotEdges = [
     ...buildDotEdges(ast, anchors, {
-      font: labelFont, cardinalityFont, measurer, linetype: theme.linetype, noteCtx, classPortShortNames,
+      font: labelFont,
+      cardinalityFont,
+      measurer,
+      linetype: theme.linetype,
+      noteCtx,
+      classPortShortNames,
       sametailByRelIndex: groupInheritance.sametailByRelIndex,
     }),
     ...buildClassMagmaEdges(ast, anchors),
@@ -420,11 +410,7 @@ function buildDotNodesAndEdges(
  * out of `buildDotGraph` for the project's per-function NLOC cap.
  */
 function computeSwappedEdges(ast: ClassDiagramAST): Set<number> {
-  return new Set(
-    ast.relationships
-      .map((rel, i) => (dotEdgeRunsReversed(rel) ? i : -1))
-      .filter((i) => i >= 0),
-  );
+  return new Set(ast.relationships.map((rel, i) => (dotEdgeRunsReversed(rel) ? i : -1)).filter((i) => i >= 0));
 }
 
 /**
@@ -467,7 +453,8 @@ export function buildDotGraph(
     // on DotInputGraph rather than becoming an explicit `undefined`. Merged
     // onto one physical line with `sepAttrs` (not a new line) to keep
     // `buildDotGraph` under the per-function NLOC cap without an extraction.
-    ...sepAttrs(theme), ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
+    ...sepAttrs(theme),
+    ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
     ...(clusterParts !== undefined ? { clusters: clusterParts.clusters } : {}),
     // G2/N29: class's renderer draws EVERY edge decoration as an inline
     // extremity polygon (`renderer-arrowhead.ts`, landed N1 mechanism 2 --

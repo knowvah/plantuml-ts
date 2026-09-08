@@ -70,9 +70,10 @@ export class MapIncludeStore implements IncludeStore {
   constructor(initial?: Iterable<readonly [string, string]> | Readonly<Record<string, string>>) {
     if (initial === undefined) return;
 
-    const pairs = Symbol.iterator in Object(initial)
-      ? (initial as Iterable<readonly [string, string]>)
-      : Object.entries(initial as Readonly<Record<string, string>>);
+    const pairs =
+      Symbol.iterator in Object(initial)
+        ? (initial as Iterable<readonly [string, string]>)
+        : Object.entries(initial as Readonly<Record<string, string>>);
     for (const [path, content] of pairs) this.entries.set(path, content);
   }
 

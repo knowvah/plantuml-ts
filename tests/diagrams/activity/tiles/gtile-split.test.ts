@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
-import {
-  NORTH_HOOK,
-  SOUTH_HOOK,
-} from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
 const BAR_OVERHANG = 10;

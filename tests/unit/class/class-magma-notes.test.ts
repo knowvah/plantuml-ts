@@ -12,10 +12,8 @@ function ast(partial: Partial<ClassDiagramAST>): ClassDiagramAST {
     ...partial,
   };
 }
-const leaf = (id: string) =>
-  ({ id, display: id, kind: 'class', typeParams: [], members: [] }) as never;
-const note = (id: string, target?: string): ClassNote =>
-  ({ id, target, text: '' }) as never;
+const leaf = (id: string) => ({ id, display: id, kind: 'class', typeParams: [], members: [] }) as never;
+const note = (id: string, target?: string): ClassNote => ({ id, target, text: '' }) as never;
 
 describe('buildClassMagmaEdges — note connectors count as links', () => {
   it('excludes a classifier touched only by an attached note (< 3 remain standalone)', () => {

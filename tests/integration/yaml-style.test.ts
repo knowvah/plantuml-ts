@@ -5,9 +5,7 @@ import yamlFixtures from '../visual/data/yaml.json';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 
 function getMarkup(prefix: string): string {
-  const f = (yamlFixtures as Array<{ slug: string; markup: string }>).find(
-    (x) => x.slug.startsWith(prefix),
-  );
+  const f = (yamlFixtures as Array<{ slug: string; markup: string }>).find((x) => x.slug.startsWith(prefix));
   if (!f) throw new Error(`Fixture not found: ${prefix}`);
   return f.markup;
 }

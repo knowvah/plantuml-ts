@@ -63,7 +63,11 @@ export function buildLeafNode(s: State, ctx: LeafNodeCtx): DotInputNode {
     const font: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
     const labelWidth = ctx.measurer.measure(s.display, font).width;
     const node: DotInputNode = {
-      id: s.id, width: BORDER_POINT_SIZE, height: BORDER_POINT_SIZE, isPort: true, shape: 'rect',
+      id: s.id,
+      width: BORDER_POINT_SIZE,
+      height: BORDER_POINT_SIZE,
+      isPort: true,
+      shape: 'rect',
     };
     if (labelWidth > PORT_LABEL_WIDE_THRESHOLD) {
       node.shape = 'plaintext';

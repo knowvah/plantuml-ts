@@ -14,9 +14,21 @@ import type { CreoleAtom } from '../../../../../../src/core/klimt/creole/atom/At
 
 const PLAIN: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
-function textOf(atom: CreoleAtom): { text: string; size: number; color: string | null; family: string; styles: FontStyle[] } {
+function textOf(atom: CreoleAtom): {
+  text: string;
+  size: number;
+  color: string | null;
+  family: string;
+  styles: FontStyle[];
+} {
   if (atom.kind !== 'text') throw new Error('expected a text atom');
-  return { text: atom.text, size: atom.font.size, color: atom.font.color, family: atom.font.family, styles: [...atom.font.styles] };
+  return {
+    text: atom.text,
+    size: atom.font.size,
+    color: atom.font.color,
+    family: atom.font.family,
+    styles: [...atom.font.styles],
+  };
 }
 
 describe('CommandCreoleSizeChange', () => {
@@ -57,12 +69,16 @@ describe('CommandCreoleColorChange', () => {
 
   test('bracketed form resolves a hex color', () => {
     const atoms = buildStripeAtoms('<color:#00FF00>green</color>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'green', size: 14, color: '#00FF00', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'green', size: 14, color: '#00FF00', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('EOL form (no closing tag) resolves to end of line', () => {
     const atoms = buildStripeAtoms('<color:blue>rest of line', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'rest of line', size: 14, color: '#0000FF', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'rest of line', size: 14, color: '#0000FF', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('an unresolvable color token leaves the font unchanged (upstream: NoSuchColorException swallowed)', () => {
@@ -100,17 +116,23 @@ describe('CommandCreoleColorAndSizeChange (<font size=/color=>)', () => {
 
   test('size attr only', () => {
     const atoms = buildStripeAtoms('<font size=20>only size</font>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'only size', size: 20, color: '#000000', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'only size', size: 20, color: '#000000', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('color attr only', () => {
     const atoms = buildStripeAtoms('<font color=green>only color</font>', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'only color', size: 14, color: '#008000', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'only color', size: 14, color: '#008000', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('EOL form (no closing tag)', () => {
     const atoms = buildStripeAtoms('<font size=16>rest of line', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'rest of line', size: 16, color: '#000000', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'rest of line', size: 16, color: '#000000', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('quoted hex color attr', () => {
@@ -132,7 +154,9 @@ describe('CommandCreoleFontFamilyChange (registered AFTER ColorAndSizeChange, sa
 
   test('EOL form (no closing tag)', () => {
     const atoms = buildStripeAtoms('<font:Times>rest of line', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'rest of line', size: 14, color: '#000000', family: 'Times', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'rest of line', size: 14, color: '#000000', family: 'Times', styles: [] },
+    ]);
   });
 
   test('a size=/color= attr form is claimed by ColorAndSizeChange, not this command', () => {
@@ -154,7 +178,9 @@ describe('CommandCreoleLatex', () => {
 
   test('an unterminated <latex> tag (no closing tag) falls through as literal text', () => {
     const atoms = buildStripeAtoms('<latex>no closing tag', PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: '<latex>no closing tag', size: 14, color: '#000000', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: '<latex>no closing tag', size: 14, color: '#000000', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   test('surrounding text is preserved around a latex atom', () => {
@@ -171,7 +197,13 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
   test('a bare url resolves the label to the url itself', () => {
     const atoms = buildStripeAtoms('[[http://www.google.com]]', PLAIN);
     expect(atoms.map(textOf)).toEqual([
-      { text: 'http://www.google.com', size: 14, color: '#0000FF', family: 'sans-serif', styles: [FontStyle.UNDERLINE] },
+      {
+        text: 'http://www.google.com',
+        size: 14,
+        color: '#0000FF',
+        family: 'sans-serif',
+        styles: [FontStyle.UNDERLINE],
+      },
     ]);
   });
 
@@ -191,7 +223,9 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
 
   test('surrounding text is preserved around a url atom', () => {
     const atoms = buildStripeAtoms('You can click\n[[http://www.google.com]] <$maxime>'.split('\n')[0]!, PLAIN);
-    expect(atoms.map(textOf)).toEqual([{ text: 'You can click', size: 14, color: '#000000', family: 'sans-serif', styles: [] }]);
+    expect(atoms.map(textOf)).toEqual([
+      { text: 'You can click', size: 14, color: '#000000', family: 'sans-serif', styles: [] },
+    ]);
   });
 
   /**
@@ -207,11 +241,7 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
    */
   test('an outer bracket is not swallowed into the link', () => {
     const atoms = buildStripeAtoms('[[[http://www.google.com]]]', PLAIN);
-    expect(atoms.map((a) => (a.kind === 'text' ? a.text : a.kind))).toEqual([
-      '[',
-      'http://www.google.com',
-      ']',
-    ]);
+    expect(atoms.map((a) => (a.kind === 'text' ? a.text : a.kind))).toEqual(['[', 'http://www.google.com', ']']);
     const linked = atoms.filter((a) => a.kind === 'text' && a.url !== undefined);
     expect(linked).toHaveLength(1);
     expect(linked[0]?.kind === 'text' ? linked[0].url?.url : undefined).toBe('http://www.google.com');

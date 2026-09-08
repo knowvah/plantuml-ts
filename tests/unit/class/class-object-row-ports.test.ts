@@ -99,14 +99,10 @@ describe('SI20 T2 — object member-row port bands (rozuxo-44-fudi093)', () => {
 
     // Oracle sh0006: rows 36 / 14(PORT=pf75d91…) / 18 -> band at 36.
     expect(nodeById(graphs, 'CC').shape).toBe('plaintext');
-    expect(nodeById(graphs, 'CC').portRows).toEqual([
-      { id: PORT_USA, position: 36, height: ROW_HEIGHT },
-    ]);
+    expect(nodeById(graphs, 'CC').portRows).toEqual([{ id: PORT_USA, position: 36, height: ROW_HEIGHT }]);
     // Oracle sh0007: rows 50 / 14(PORT=peccbc87…) / 4 -> band at 50.
     expect(nodeById(graphs, 'users').shape).toBe('plaintext');
-    expect(nodeById(graphs, 'users').portRows).toEqual([
-      { id: PORT_3, position: 50, height: ROW_HEIGHT },
-    ]);
+    expect(nodeById(graphs, 'users').portRows).toEqual([{ id: PORT_3, position: 50, height: ROW_HEIGHT }]);
   });
 
   it('retires the `:P` compass shield on both endpoints (ADR-5)', () => {
@@ -127,7 +123,7 @@ describe('SI20 T2 — object member-row port bands (rozuxo-44-fudi093)', () => {
 });
 
 describe('SI20 T2 — classPortShortNamesById covers object leaves', () => {
-  it('collects an object leaf\'s declared `::member` port names', () => {
+  it("collects an object leaf's declared `::member` port names", () => {
     expect(classPortShortNamesById(astWith('object')).get('Foo')).toEqual(new Set(['USA']));
   });
 
@@ -135,7 +131,7 @@ describe('SI20 T2 — classPortShortNamesById covers object leaves', () => {
     expect(classPortShortNamesById(astWith('class')).get('Foo')).toEqual(new Set(['USA']));
   });
 
-  it('ADR-4: still EXCLUDES map, whose bands are mapPortRows\' own flat-sizer concern', () => {
+  it("ADR-4: still EXCLUDES map, whose bands are mapPortRows' own flat-sizer concern", () => {
     expect(classPortShortNamesById(astWith('map')).has('Foo')).toBe(false);
     expect(classPortShortNamesById(astWith('json')).has('Foo')).toBe(false);
   });
@@ -256,11 +252,26 @@ describe('SI20 T2 — skinparam minClassWidth suppresses every object band', () 
  */
 describe('SI20 review -- suppressed vs empty-but-shown reaches the DOT node', () => {
   const SHOWN_EMPTY = [
-    '@startuml', 'object Shown {', '}', 'object Peer {', ' x', '}', 'Shown --> Peer', '@enduml',
+    '@startuml',
+    'object Shown {',
+    '}',
+    'object Peer {',
+    ' x',
+    '}',
+    'Shown --> Peer',
+    '@enduml',
   ].join('\n');
   const SUPPRESSED = [
-    '@startuml', 'hide Hidden members', 'object Hidden {', ' alpha', '}',
-    'object Peer {', ' x', '}', 'Hidden --> Peer', '@enduml',
+    '@startuml',
+    'hide Hidden members',
+    'object Hidden {',
+    ' alpha',
+    '}',
+    'object Peer {',
+    ' x',
+    '}',
+    'Hidden --> Peer',
+    '@enduml',
   ].join('\n');
 
   it('reserves TextBlockEmpty(10,16) for an empty-but-SHOWN field list', () => {
@@ -271,7 +282,7 @@ describe('SI20 review -- suppressed vs empty-but-shown reaches the DOT node', ()
     expect(nodeById(captureAll(SUPPRESSED), 'Hidden').height).toBe(18);
   });
 
-  it('suppresses only the named object, leaving its peer\'s body intact', () => {
+  it("suppresses only the named object, leaving its peer's body intact", () => {
     // Guards the control itself: if `hide Hidden members` were diagram-wide,
     // Peer would also collapse and the comparison above would prove nothing.
     expect(nodeById(captureAll(SUPPRESSED), 'Peer').height).toBe(40);

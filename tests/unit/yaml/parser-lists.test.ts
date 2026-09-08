@@ -13,17 +13,25 @@ function parse(lines: string[]) {
 describe('YAML parser — list items', () => {
   it('sudabi-56: simple scalar list under a key', () => {
     expect(parse(['fruit: Apple', 'size: Large', 'color:', ' - Red', ' - Green'])).toEqual({
-      fruit: 'Apple', size: 'Large', color: ['Red', 'Green'],
+      fruit: 'Apple',
+      size: 'Large',
+      color: ['Red', 'Green'],
     });
   });
 
   it('gatuva-87: list of objects', () => {
-    expect(parse([
-      '  - name: Mark McGwire', '    hr:   65', '    avg:  0.278',
-      '  - name: Sammy Sosa',   '    hr:   63', '    avg:  0.288',
-    ])).toEqual([
+    expect(
+      parse([
+        '  - name: Mark McGwire',
+        '    hr:   65',
+        '    avg:  0.278',
+        '  - name: Sammy Sosa',
+        '    hr:   63',
+        '    avg:  0.288',
+      ]),
+    ).toEqual([
       { name: 'Mark McGwire', hr: '65', avg: '0.278' },
-      { name: 'Sammy Sosa',   hr: '63', avg: '0.288' },
+      { name: 'Sammy Sosa', hr: '63', avg: '0.288' },
     ]);
   });
 
@@ -36,12 +44,9 @@ describe('YAML parser — list items', () => {
   });
 
   it('Ansible-style: list with nested map and deeper nesting', () => {
-    expect(parse([
-      '- hosts: webservers',
-      '  vars:',
-      '    http_port: 80',
-      '    max_clients: 200',
-    ])).toEqual([{ hosts: 'webservers', vars: { http_port: '80', max_clients: '200' } }]);
+    expect(parse(['- hosts: webservers', '  vars:', '    http_port: 80', '    max_clients: 200'])).toEqual([
+      { hosts: 'webservers', vars: { http_port: '80', max_clients: '200' } },
+    ]);
   });
 
   it('nested list inside map', () => {
@@ -51,8 +56,6 @@ describe('YAML parser — list items', () => {
   });
 
   it('polela-38 style: plain dash then map', () => {
-    expect(parse(['  -', '    name: Mark McGwire', '    hr:   65'])).toEqual([
-      { name: 'Mark McGwire', hr: '65' },
-    ]);
+    expect(parse(['  -', '    name: Mark McGwire', '    hr:   65'])).toEqual([{ name: 'Mark McGwire', hr: '65' }]);
   });
 });

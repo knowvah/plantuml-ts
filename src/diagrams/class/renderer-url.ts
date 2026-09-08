@@ -87,11 +87,7 @@ export function wrapClassifierBody(_geo: ClassifierGeo, primitives: readonly Url
     }
     const url = primitives[i]!.url;
     let body = '';
-    while (
-      i < primitives.length &&
-      primitives[i]!.preWrapped !== true &&
-      urlsEqual(primitives[i]!.url, url)
-    ) {
+    while (i < primitives.length && primitives[i]!.preWrapped !== true && urlsEqual(primitives[i]!.url, url)) {
       body += primitives[i]!.body;
       i++;
     }

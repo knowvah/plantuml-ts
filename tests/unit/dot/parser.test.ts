@@ -42,7 +42,7 @@ describe('parseDot — DOT body passthrough', () => {
     expect(parseDot(wrap(body)).dotContent.trim()).toBe(body);
   });
 
-  it('does not throw on malformed DOT — surfacing that is the engine\'s job at layout', () => {
+  it("does not throw on malformed DOT — surfacing that is the engine's job at layout", () => {
     expect(() => parseDot(wrap('digraph { a ->'))).not.toThrow();
   });
 });

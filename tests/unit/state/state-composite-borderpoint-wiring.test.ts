@@ -97,7 +97,10 @@ describe('resolveClusterComposite -- border-point rank-branch structure (G7 T14b
     const ext = makeState('External');
     const ast: StateDiagramAST = {
       states: [c, ext],
-      transitions: [{ from: 'inPoint', to: 'outPoint' }, { from: 'outPoint', to: 'External' }],
+      transitions: [
+        { from: 'inPoint', to: 'outPoint' },
+        { from: 'outPoint', to: 'External' },
+      ],
     };
     const graph = captureFirst(ast);
     const cluster = graph.clusters?.find((cl) => cl.label === 'C');
@@ -169,10 +172,7 @@ describe('borderPointAncestorWrap -- gated on isGroupTouched, NOT the broader ne
     const closing = makeState('Closing');
     const ast: StateDiagramAST = {
       states: [aa, closing],
-      transitions: [
-        makeTransition('[*]', 'AA'),
-        makeTransition('AA', 'Closing'),
-      ],
+      transitions: [makeTransition('[*]', 'AA'), makeTransition('AA', 'Closing')],
     };
     const graph = captureFirst(ast);
     const cluster = graph.clusters?.find((cl) => cl.label === 'AA');

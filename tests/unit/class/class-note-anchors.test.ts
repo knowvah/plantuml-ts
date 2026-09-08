@@ -43,7 +43,9 @@ function parse(source: string): ReturnType<typeof parseClass> {
 function captureDotGraph(source: string): DotInputGraph {
   const ast = parse(source);
   let g: DotInputGraph | undefined;
-  setLayoutInputObserver((x) => { g = x; });
+  setLayoutInputObserver((x) => {
+    g = x;
+  });
   try {
     layoutClass(ast, defaultTheme, measurer);
   } finally {
@@ -122,9 +124,7 @@ describe('(b) Class::member note targets', () => {
 
 describe('(c) note-of-package point anchor', () => {
   it('routes a note-of-package edge to the zaent point anchor inside the package cluster', () => {
-    const graph = captureDotGraph(
-      ['package p {', '  class cl1', '}', 'note top of p : bar'].join('\n'),
-    );
+    const graph = captureDotGraph(['package p {', '  class cl1', '}', 'note top of p : bar'].join('\n'));
     const cluster = graph.clusters?.find((c) => c.label === 'p');
     expect(cluster).toBeDefined();
     expect(cluster!.nodeIds).toContain('zaent-p');

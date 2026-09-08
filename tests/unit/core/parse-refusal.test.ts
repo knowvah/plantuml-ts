@@ -7,12 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  refuse,
-  refusalScore,
-  mergeRefusals,
-  type ParseRefusal,
-} from '../../../src/core/parse-refusal.js';
+import { refuse, refusalScore, mergeRefusals, type ParseRefusal } from '../../../src/core/parse-refusal.js';
 
 describe('parse-refusal — refuse', () => {
   it('builds a syntax refusal with commandScore 0 by default', () => {

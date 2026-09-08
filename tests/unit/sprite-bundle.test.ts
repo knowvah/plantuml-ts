@@ -11,10 +11,7 @@ import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 
 import { combineAssetStores } from '../../src/core/asset-store.js';
-import {
-  internalSpriteAssetKey,
-  internalSpriteStoreFrom,
-} from '../../src/core/internal-sprite-store.js';
+import { internalSpriteAssetKey, internalSpriteStoreFrom } from '../../src/core/internal-sprite-store.js';
 import { isSpriteSvg } from '../../src/core/klimt/sprite/SpriteSvg.js';
 import { createSpriteRegistry, getSprite, matchSpriteCommand } from '../../src/core/sprite-commands.js';
 import { SPRITES_DIR, SPRITES_MANIFEST, UPSTREAM_SHA, verifyTree } from '../../scripts/vendor-sprites.js';

@@ -171,11 +171,7 @@ interface RiseCheckResult {
  * `undefined` for an entry that carries no `weightedScore` pin -- an
  * unpinned entry FAILS rather than falling back to `diffCount`, which
  * measures a different quantity. */
-function checkNoRise(
-  f: FixtureRef,
-  baseline: number | undefined,
-  live: number,
-): RiseCheckResult {
+function checkNoRise(f: FixtureRef, baseline: number | undefined, live: number): RiseCheckResult {
   if (baseline === undefined) {
     return {
       ok: false,
@@ -429,7 +425,10 @@ describe('svg-activity weighted-score baseline ratchet — promotion is never au
 
   it('no fixture is recorded as already promoted', () => {
     const promoted = baselineFixtures.filter((f) => f.diffCount === 0);
-    expect(promoted.map((f) => f.slug), 'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion').toEqual([]);
+    expect(
+      promoted.map((f) => f.slug),
+      'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion',
+    ).toEqual([]);
   });
 
   it('ratchet.json ships empty -- the promotion path exists but starts empty', () => {

@@ -10,20 +10,12 @@ describe('smoke: TestTContext harness', () => {
   });
 
   it('runs !if true branch', () => {
-    const { memory } = runBody([
-      line('!if 1', 'IF'),
-      line('!$x = 10', 'AFFECTATION'),
-      line('!endif', 'ENDIF'),
-    ]);
+    const { memory } = runBody([line('!if 1', 'IF'), line('!$x = 10', 'AFFECTATION'), line('!endif', 'ENDIF')]);
     expect(memory.getVariable('$x')?.toInt()).toBe(10);
   });
 
   it('runs !if false branch (skipped)', () => {
-    const { memory } = runBody([
-      line('!if 0', 'IF'),
-      line('!$x = 10', 'AFFECTATION'),
-      line('!endif', 'ENDIF'),
-    ]);
+    const { memory } = runBody([line('!if 0', 'IF'), line('!$x = 10', 'AFFECTATION'), line('!endif', 'ENDIF')]);
     expect(memory.getVariable('$x')).toBeUndefined();
   });
 
@@ -51,11 +43,7 @@ describe('smoke: TestTContext harness', () => {
   });
 
   it('runs a return function', () => {
-    const { result } = runBody(
-      [line('!return 42', 'RETURN')],
-      TFunctionType.RETURN_FUNCTION,
-      true,
-    );
+    const { result } = runBody([line('!return 42', 'RETURN')], TFunctionType.RETURN_FUNCTION, true);
     expect(result).toBeInstanceOf(TValue);
     expect(result?.toInt()).toBe(42);
   });

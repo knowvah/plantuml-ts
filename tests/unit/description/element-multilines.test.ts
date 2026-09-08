@@ -39,9 +39,7 @@ function nodeById(ast: DescriptionDiagramAST, id: string): DescriptiveNode | und
 
 describe('CommandCreateElementMultilines TYPE0 — open-quote form (G1)', () => {
   it('joins the opener DESC, the body lines and the closer prefix (pecupa-75)', () => {
-    const ast = parseRaw(
-      'usecase UC5 #red as "My usecase5\nis on several lines\nand finished"',
-    );
+    const ast = parseRaw('usecase UC5 #red as "My usecase5\nis on several lines\nand finished"');
     const uc5 = nodeById(ast, 'UC5');
     expect(uc5?.display).toBe('My usecase5\nis on several lines\nand finished');
     expect(uc5?.symbol).toBe('usecase');
@@ -53,12 +51,8 @@ describe('CommandCreateElementMultilines TYPE0 — open-quote form (G1)', () => 
   });
 
   it('keeps a `----` body line as its own display row (tajadu-40)', () => {
-    const ast = parseRaw(
-      'artifact foo2 as "This artifact\nis defined\n----\non several lines"',
-    );
-    expect(nodeById(ast, 'foo2')?.display).toBe(
-      'This artifact\nis defined\n----\non several lines',
-    );
+    const ast = parseRaw('artifact foo2 as "This artifact\nis defined\n----\non several lines"');
+    expect(nodeById(ast, 'foo2')?.display).toBe('This artifact\nis defined\n----\non several lines');
   });
 
   it('a closer line that is bare `"` contributes no display row (nixura-77)', () => {

@@ -242,9 +242,7 @@ export class UPath implements UShape {
     this.add([x, y], USegmentType.SEG_LINETO);
   }
 
-  cubicTo(
-    ...args: [number, number, number, number, number, number] | [Point2D, Point2D, Point2D]
-  ): void {
+  cubicTo(...args: [number, number, number, number, number, number] | [Point2D, Point2D, Point2D]): void {
     if (args.length === 3) {
       const [p1, p2, p] = args;
       this.add([p1.x, p1.y, p2.x, p2.y, p.x, p.y], USegmentType.SEG_CUBICTO);
@@ -264,11 +262,7 @@ export class UPath implements UShape {
     this.add([ctrlx, ctrly, ctrlx, ctrly, x2, y2], USegmentType.SEG_CUBICTO);
   }
 
-  arcTo(
-    ...args:
-      | [number, number, number, number, number, number, number]
-      | [Point2D, number, number, number]
-  ): void {
+  arcTo(...args: [number, number, number, number, number, number, number] | [Point2D, number, number, number]): void {
     if (args.length === 4) {
       const [pt, radius, largeArcFlag, sweepFlag] = args;
       this.add([radius, radius, 0, largeArcFlag, sweepFlag, pt.x, pt.y], USegmentType.SEG_ARCTO);

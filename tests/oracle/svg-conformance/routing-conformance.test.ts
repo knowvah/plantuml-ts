@@ -169,9 +169,7 @@ function readHead(path: string): string {
 type FixtureRef = Pick<BaselineFixture, 'tree' | 'type' | 'slug'>;
 
 function fixtureDir(f: FixtureRef): string {
-  return f.tree === 'dot-cache'
-    ? join(CACHE_ROOT, f.type, f.slug)
-    : join(GOLDENS_ROOT, f.type, f.slug);
+  return f.tree === 'dot-cache' ? join(CACHE_ROOT, f.type, f.slug) : join(GOLDENS_ROOT, f.type, f.slug);
 }
 
 function goldenPath(f: FixtureRef): string {
@@ -198,9 +196,7 @@ function hasCachedFixture(f: FixtureRef): boolean {
  *  `svg-skin/rose/<slug>/` nest one level deeper — 52 fixtures that a
  *  single-level `readdir` silently drops. */
 function walk(typeRoot: string, dir: string, tree: Tree, type: string, out: FixtureRef[]): void {
-  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
   for (const e of entries) {
     if (!e.isDirectory()) continue;
     const child = join(dir, e.name);
@@ -212,9 +208,7 @@ function walk(typeRoot: string, dir: string, tree: Tree, type: string, out: Fixt
 
 function collectTree(root: string, tree: Tree, keep: (name: string) => boolean): FixtureRef[] {
   const out: FixtureRef[] = [];
-  for (const e of readdirSync(root, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )) {
+  for (const e of readdirSync(root, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     if (!e.isDirectory() || !keep(e.name)) continue;
     walk(join(root, e.name), join(root, e.name), tree, e.name, out);
   }
@@ -361,10 +355,7 @@ export function progressNote(f: BaselineFixture, now: RoutingPair): string | und
  * completeness gate above already fails on it, and failing twice for one
  * cause names the same fixture in two places.
  */
-export function checkJarErrorClassification(
-  f: BaselineFixture,
-  now: LiveRouting | undefined,
-): CheckResult {
+export function checkJarErrorClassification(f: BaselineFixture, now: LiveRouting | undefined): CheckResult {
   const at = `${f.tree} ${f.type}/${f.slug}`;
   if (now === undefined) return { ok: true, message: `${at}: absent; owned by the walk gate.` };
   const pinned = f.status === 'jar-error';
@@ -482,9 +473,7 @@ describe('routing conformance — no fixture newly misroutes', () => {
       .map((f) => ({ f, result: checkNoNewMisroute(f, seen.get(keyOf(f))) }))
       .filter(({ result }) => !result.ok);
 
-    const moved = broken
-      .map(({ f }) => seen.get(keyOf(f)))
-      .filter((r): r is LiveRouting => r !== undefined);
+    const moved = broken.map(({ f }) => seen.get(keyOf(f))).filter((r): r is LiveRouting => r !== undefined);
     const detail =
       broken.length === 0
         ? ''
@@ -538,9 +527,7 @@ describe('routing conformance — pinned misroutes', () => {
 describe('routing conformance — jar-error classification', () => {
   it('every pin matches what its own golden says about the jar erroring', () => {
     const seen = live();
-    const wrong = manifest.fixtures
-      .map((f) => checkJarErrorClassification(f, seen.get(keyOf(f))))
-      .filter((r) => !r.ok);
+    const wrong = manifest.fixtures.map((f) => checkJarErrorClassification(f, seen.get(keyOf(f)))).filter((r) => !r.ok);
     expect(
       wrong.map((r) => r.message),
       `${wrong.length} fixture(s) are pinned inconsistently with their golden's own content.`,
@@ -656,9 +643,7 @@ describe('routing conformance — jar-error classification', () => {
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }
-    expect(
-      [...pinnedAgree, ...pinnedMisroutes].filter((f) => f.jarErrored !== undefined),
-    ).toEqual([]);
+    expect([...pinnedAgree, ...pinnedMisroutes].filter((f) => f.jarErrored !== undefined)).toEqual([]);
   });
 
   it('no jar-error fixture is counted in the misroute total', () => {
@@ -749,24 +734,18 @@ describe('routing conformance — branch discrimination', () => {
       'PlantUML version $version$ / $git.commit.id$ [Unknown compile time]</text>';
     expect(isJarErrorPage(banner)).toBe(true);
     // The same phrase INSIDE a longer label is a diagram, not a banner.
-    expect(isJarErrorPage('<text x="5">Upgrade to PlantUML version 1.2024 [see wiki] now</text>')).toBe(
-      false,
-    );
+    expect(isJarErrorPage('<text x="5">Upgrade to PlantUML version 1.2024 [see wiki] now</text>')).toBe(false);
   });
 
   it('recognises the crash page, and does not fire on a label that merely mentions it', () => {
-    expect(
-      isJarErrorPage('<text x="5" y="14">An error has occurred : java.lang.NullPointerException</text>'),
-    ).toBe(true);
-    expect(isJarErrorPage('<text x="5">Retry when An error has occurred : then log</text>')).toBe(
-      false,
+    expect(isJarErrorPage('<text x="5" y="14">An error has occurred : java.lang.NullPointerException</text>')).toBe(
+      true,
     );
+    expect(isJarErrorPage('<text x="5">Retry when An error has occurred : then log</text>')).toBe(false);
   });
 
   it('a plain diagram with no root attribute is NOT an error page', () => {
-    expect(isJarErrorPage('<svg width="10"><text x="5">Alice</text><text x="5">Bob</text>')).toBe(
-      false,
-    );
+    expect(isJarErrorPage('<svg width="10"><text x="5">Alice</text><text x="5">Bob</text>')).toBe(false);
   });
 
   const JAR_ERROR_SAMPLE: BaselineFixture = {

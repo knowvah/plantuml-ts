@@ -187,7 +187,6 @@ export function finalizePendingNote(
   });
 }
 
-
 /**
  * `note [pos] on|of link [#color] : text` (CommandFactoryNoteOnLink,
  * single-line form) — a note attached to the LAST transition parsed, not to

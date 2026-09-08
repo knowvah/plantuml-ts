@@ -5,7 +5,11 @@ import { TVariableScope } from '../../../../src/core/tim/TVariableScope.js';
 import { EaterException } from '../../../../src/core/tim/EaterException.js';
 import { StringLocated } from '../../../../src/core/tim/StringLocated.js';
 import { TValue } from '../../../../src/core/tim/expression/TValue.js';
-import { ExecutionContextIf, ExecutionContextWhile, ExecutionContextForeach } from '../../../../src/core/tim/TMemory.js';
+import {
+  ExecutionContextIf,
+  ExecutionContextWhile,
+  ExecutionContextForeach,
+} from '../../../../src/core/tim/TMemory.js';
 import { TokenStack } from '../../../../src/core/tim/expression/TokenStack.js';
 
 const LOC = new StringLocated('!$x = 1', undefined);

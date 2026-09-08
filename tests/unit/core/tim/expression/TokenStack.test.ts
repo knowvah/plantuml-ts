@@ -86,9 +86,7 @@ describe('TokenStack.eatUntilCloseParenthesisOrComma(TokenIterator, location)', 
     const stack = stackOf(NUM('1'));
     const it = stack.tokenIterator();
     it.nextToken();
-    expect(() => TokenStack.eatUntilCloseParenthesisOrComma(it, LOC)).toThrow(
-      'IndexOutOfBoundsException',
-    );
+    expect(() => TokenStack.eatUntilCloseParenthesisOrComma(it, LOC)).toThrow('IndexOutOfBoundsException');
   });
 });
 

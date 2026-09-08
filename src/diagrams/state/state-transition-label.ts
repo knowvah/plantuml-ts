@@ -74,20 +74,12 @@ interface MeasuredLabel {
   readonly ascent: number;
 }
 
-function measureLabel(
-  text: string,
-  font: FontSpec,
-  measurer: StringMeasurer,
-  isSelfLoop: boolean,
-): MeasuredLabel {
+function measureLabel(text: string, font: FontSpec, measurer: StringMeasurer, isSelfLoop: boolean): MeasuredLabel {
   const box = computeReservedLabelBox(text, font, measurer, isSelfLoop);
   return { box, ascent: font.size - measurer.getDescent(font, box.lines[0]!) };
 }
 
-function anchorFromCentre(
-  centre: { x: number; y: number },
-  { box, ascent }: MeasuredLabel,
-): { x: number; y: number } {
+function anchorFromCentre(centre: { x: number; y: number }, { box, ascent }: MeasuredLabel): { x: number; y: number } {
   return {
     x: centre.x - box.reservedWidth / 2 + box.marginLabel,
     y: centre.y - box.measuredHeight / 2 + ascent,
@@ -265,10 +257,7 @@ function measureNoteBox(
  *  sole target fixture (tumaba-64-tosu281) never exercises -- out of scope,
  *  same `DIVERGENCES.md`-worthy residue `computeMergedLabelBox`'s own doc
  *  comment already flags for the merge-order term. */
-function noteAnchorFromCentre(
-  centre: { x: number; y: number },
-  box: ReservedLabelBox,
-): { x: number; y: number } {
+function noteAnchorFromCentre(centre: { x: number; y: number }, box: ReservedLabelBox): { x: number; y: number } {
   return { x: centre.x - box.reservedWidth / 2, y: centre.y - box.reservedHeight / 2 };
 }
 

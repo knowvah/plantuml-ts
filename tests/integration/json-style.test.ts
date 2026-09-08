@@ -4,9 +4,7 @@ import { parseJson } from '../../src/diagrams/json/parser.js';
 import jsonFixtures from '../visual/data/json.json';
 
 function getMarkup(prefix: string): string {
-  const f = (jsonFixtures as Array<{ slug: string; markup: string }>).find(
-    (x) => x.slug.startsWith(prefix),
-  );
+  const f = (jsonFixtures as Array<{ slug: string; markup: string }>).find((x) => x.slug.startsWith(prefix));
   if (!f) throw new Error(`Fixture not found: ${prefix}`);
   return f.markup;
 }
@@ -91,9 +89,7 @@ describe('JSON style: highlight BackGroundColor override', () => {
   });
 
   it('default highlight: no <style> block uses #CCFF02 for highlighted rows', () => {
-    const svg = renderSync(
-      '@startjson\n#highlight "key"\n{"key": "value", "other": "x"}\n@endjson',
-    );
+    const svg = renderSync('@startjson\n#highlight "key"\n{"key": "value", "other": "x"}\n@endjson');
     expect(svg).toContain('#CCFF02');
   });
 });
@@ -136,10 +132,10 @@ describe('JSON style: #highlight path separator variants', () => {
   it('mixed separators: "a"/"b" and "c" / "d" both resolve correctly', () => {
     const svg = renderSync(
       '@startjson\n' +
-      '#highlight "a"/"b"\n' +
-      '#highlight "a" / "c"\n' +
-      '{"a": {"b": 1, "c": 2, "d": 3}}\n' +
-      '@endjson',
+        '#highlight "a"/"b"\n' +
+        '#highlight "a" / "c"\n' +
+        '{"a": {"b": 1, "c": 2, "d": 3}}\n' +
+        '@endjson',
     );
     // Two highlighted rows → highlight color appears twice
     const count = (svg.match(/#CCFF02/g) ?? []).length;
@@ -169,8 +165,7 @@ describe('JSON: array rows match upstream (index-key divergence retired)', () =>
     const object = renderSync('@startjson\n{"a": "alpha", "b": "beta"}\n@endjson');
     // The object node has a vertical divider; the array node must not.
     const verticals = (svg: string): number =>
-      [...svg.matchAll(/<line[^>]*x1="([\d.]+)"[^>]*x2="([\d.]+)"/g)]
-        .filter((m) => m[1] === m[2]).length;
+      [...svg.matchAll(/<line[^>]*x1="([\d.]+)"[^>]*x2="([\d.]+)"/g)].filter((m) => m[1] === m[2]).length;
     expect(verticals(object)).toBeGreaterThan(0);
     expect(verticals(array)).toBe(0);
   });

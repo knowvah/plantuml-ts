@@ -33,11 +33,7 @@ import {
   DIVIDER_PADDING,
   DIVIDER_LABEL_DELTA_X,
 } from '../../../src/diagrams/sequence/divider-style.js';
-import {
-  HEADER_PADDING,
-  HEADER_FONT_SIZE,
-  GROUP_FONT_SIZE,
-} from '../../../src/diagrams/sequence/frame-style.js';
+import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -49,7 +45,10 @@ function decodeRgba(png: Buffer): Array<[number, number, number, number]> {
   while (i < png.length) {
     const len = png.readUInt32BE(i);
     const type = png.toString('ascii', i + 4, i + 8);
-    if (type === 'IHDR') { width = png.readUInt32BE(i + 8); height = png.readUInt32BE(i + 12); }
+    if (type === 'IHDR') {
+      width = png.readUInt32BE(i + 8);
+      height = png.readUInt32BE(i + 12);
+    }
     if (type === 'IDAT') idat = Buffer.concat([idat, png.subarray(i + 8, i + 8 + len)]);
     i += 12 + len;
   }
@@ -83,14 +82,16 @@ function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
   const ascent = lineHeight - measurer.getDescent(spec, 'M');
   const cy = participantLabelCy(p.type, p.height, p.y, true, defaultTheme);
   const textWidth = measurer.measure(p.display, spec).width;
-  return [{
-    text: p.display,
-    x: p.centerX - textWidth / 2,
-    y: cy - lineHeight / 2 + ascent,
-    textWidth,
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  }];
+  return [
+    {
+      text: p.display,
+      x: p.centerX - textWidth / 2,
+      y: cy - lineHeight / 2 + ascent,
+      textWidth,
+      textAscent: ascent,
+      textLineHeight: lineHeight,
+    },
+  ];
 }
 
 /** A `ParticipantGeo` with its `labelRuns` derived from the rest of it. */
@@ -164,8 +165,30 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
     totalHeight: 300,
     showFootbox: true,
     participants: [
-      participantGeo({ id: 'Alice', display: 'Alice', type: 'participant', x: 30, y: 0, width: 100, height: 36, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
-      participantGeo({ id: 'Bob', display: 'Bob', type: 'participant', x: 170, y: 0, width: 100, height: 36, centerX: 220, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+      participantGeo({
+        id: 'Alice',
+        display: 'Alice',
+        type: 'participant',
+        x: 30,
+        y: 0,
+        width: 100,
+        height: 36,
+        centerX: 80,
+        background: defaultTheme.colors.background,
+        border: defaultTheme.colors.border,
+      }),
+      participantGeo({
+        id: 'Bob',
+        display: 'Bob',
+        type: 'participant',
+        x: 170,
+        y: 0,
+        width: 100,
+        height: 36,
+        centerX: 220,
+        background: defaultTheme.colors.background,
+        border: defaultTheme.colors.border,
+      }),
     ],
     events: [],
     headHeight: 36,
@@ -205,8 +228,12 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
   // real run placement rather than a hand-written stub that renders nothing.
   const number = base.sequenceLabel ?? (base.sequenceNumber === undefined ? undefined : String(base.sequenceNumber));
   const block = messageLabelBlock(
-    base.label, number, (base.fromX + base.toX) / 2, base.y - 5,
-    defaultTheme, new FormulaMeasurer(),
+    base.label,
+    number,
+    (base.fromX + base.toX) / 2,
+    base.y - 5,
+    defaultTheme,
+    new FormulaMeasurer(),
   );
   return {
     ...base,
@@ -455,36 +482,28 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
 
 /** Every arrow the spike's enumerated token table could produce, by its
  *  pre-T6 `MessageStyle` name. */
-const ALL_MESSAGE_STYLES: readonly RenderStyle[] = [
-  'sync', 'async', 'reply', 'replyAsync', 'lost', 'found',
-];
+const ALL_MESSAGE_STYLES: readonly RenderStyle[] = ['sync', 'async', 'reply', 'replyAsync', 'lost', 'found'];
 
 describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
-  it.each(ALL_MESSAGE_STYLES)(
-    'a %s message emits no <marker, markerEnd or markerStart token',
-    (style) => {
-      const geo = makeGeo({ events: [makeSyncMessage({ arrow: arrowOf(style) })] });
-      const svg = assembleSvg(renderSequence(geo, defaultTheme));
-      expect(svg).not.toContain('<marker');
-      expect(svg).not.toContain('markerEnd');
-      expect(svg).not.toContain('markerStart');
-      expect(svg).not.toContain('marker-end');
-      expect(svg).not.toContain('marker-start');
-    },
-  );
+  it.each(ALL_MESSAGE_STYLES)('a %s message emits no <marker, markerEnd or markerStart token', (style) => {
+    const geo = makeGeo({ events: [makeSyncMessage({ arrow: arrowOf(style) })] });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('<marker');
+    expect(svg).not.toContain('markerEnd');
+    expect(svg).not.toContain('markerStart');
+    expect(svg).not.toContain('marker-end');
+    expect(svg).not.toContain('marker-start');
+  });
 
-  it.each(ALL_MESSAGE_STYLES)(
-    'a self %s message emits no marker reference either',
-    (style) => {
-      const geo = makeGeo({
-        events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: 80, toX: 110 })],
-      });
-      const svg = assembleSvg(renderSequence(geo, defaultTheme));
-      expect(svg).not.toContain('<marker');
-      expect(svg).not.toContain('markerEnd');
-      expect(svg).not.toContain('marker-end');
-    },
-  );
+  it.each(ALL_MESSAGE_STYLES)('a self %s message emits no marker reference either', (style) => {
+    const geo = makeGeo({
+      events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: 80, toX: 110 })],
+    });
+    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    expect(svg).not.toContain('<marker');
+    expect(svg).not.toContain('markerEnd');
+    expect(svg).not.toContain('marker-end');
+  });
 });
 
 describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () => {
@@ -497,17 +516,13 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
 
   function jarGeo(overrides?: Partial<MessageGeo>): SequenceGeometry {
     return makeGeo({
-      events: [
-        makeSyncMessage({ fromX: BOB_X, toX: ALICE_X, y: MESSAGE_Y, ...overrides }),
-      ],
+      events: [makeSyncMessage({ fromX: BOB_X, toX: ALICE_X, y: MESSAGE_Y, ...overrides })],
     });
   }
 
   it('puts a sync head tip at pos2 = width - 2, matching the jar exactly', () => {
     const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
-    expect(svg).toContain(
-      '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66"',
-    );
+    expect(svg).toContain('<polygon points="121.231,62,131.231,66,121.231,70,125.231,66"');
   });
 
   it('trims the line by arrowDeltaX / 2, matching the jar exactly', () => {
@@ -522,14 +537,10 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
     // head moves to pos1 = 1 and points left; the line starts at
     // start = arrowDeltaX / 2 (`ComponentRoseArrow.java:129-131`).
     const geo = makeGeo({
-      events: [
-        makeSyncMessage({ fromX: ALICE_X, toX: BOB_X, y: MESSAGE_Y, arrowDirection: 'left' }),
-      ],
+      events: [makeSyncMessage({ fromX: ALICE_X, toX: BOB_X, y: MESSAGE_Y, arrowDirection: 'left' })],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
-    expect(svg).toContain(
-      '<polygon points="92.538,62,82.538,66,92.538,70,88.538,66"',
-    );
+    expect(svg).toContain('<polygon points="92.538,62,82.538,66,92.538,70,88.538,66"');
     expect(svg).toContain('<line x1="86.538" y1="66" x2="132.231" y2="66"');
   });
 
@@ -558,9 +569,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
 
   it('drops the nice-arrow notch under skinparam style strictuml', () => {
     // `Rose.java:340` passes `param.strictUmlStyle() == false` as niceArrow.
-    const svg = assembleSvg(
-      renderSequence(jarGeo(), { ...defaultTheme, strictUml: true }),
-    );
+    const svg = assembleSvg(renderSequence(jarGeo(), { ...defaultTheme, strictUml: true }));
     expect(svg).toContain('<polygon points="121.231,62,131.231,66,121.231,70"');
   });
 });
@@ -595,17 +604,13 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     expect(svg).not.toContain('arrow-sync');
   });
 
-  it('still draws the loop itself, as upstream\'s three strokes', () => {
+  it("still draws the loop itself, as upstream's three strokes", () => {
     const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
     // Out, down, and back -- the third running left-to-right from the
     // returning x, which is `hline(xRight - x2)` translated to `x2`.
     expect(svg).toContain(`<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`);
-    expect(svg).toContain(
-      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
-    );
-    expect(svg).toContain(
-      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
-    );
+    expect(svg).toContain(`<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`);
+    expect(svg).toContain(`<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`);
   });
 
   it('draws a self async head as two open strokes', () => {
@@ -626,8 +631,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
       `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
     ]) {
       expect(svg).toContain(
-        `${seg} stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` +
-          'stroke-dasharray="5,5"',
+        `${seg} stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` + 'stroke-dasharray="5,5"',
       );
     }
   });
@@ -665,11 +669,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
 
     // Three titled groups lead: Alice's lifeline, Alice's livebox (empty
     // title, per `ComponentRoseActiveLine`), then Bob's lifeline.
-    expect([...body.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual([
-      'Alice',
-      '',
-      'Bob',
-    ]);
+    expect([...body.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual(['Alice', '', 'Bob']);
 
     // Four head/footbox rects (two participants x head + foot) all precede
     // the first arrow.
@@ -678,10 +678,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
   });
 
   it('suppresses the footbox row without disturbing the other passes', () => {
-    const { body } = renderSequence(
-      makeGeo({ showFootbox: false, events: [makeSyncMessage()] }),
-      defaultTheme,
-    );
+    const { body } = renderSequence(makeGeo({ showFootbox: false, events: [makeSyncMessage()] }), defaultTheme);
 
     const upToArrow = body.slice(0, body.indexOf('<polygon'));
     // Two lifeline hover rects + two head rects, and no footbox row.
@@ -711,11 +708,7 @@ describe('renderSequence -- fragment shape (T3 AC4)', () => {
 });
 
 describe('renderSequence -- the document shell (T3 AC5)', () => {
-  const SHELL_FIXTURE = [
-    '@startuml',
-    'Bob -> Alice : hello',
-    '@enduml',
-  ].join('\n');
+  const SHELL_FIXTURE = ['@startuml', 'Bob -> Alice : hello', '@enduml'].join('\n');
 
   it('carries every shell root attribute and an empty defs block', () => {
     const svg = renderFixtureSequence(SHELL_FIXTURE, new DeterministicMeasurer());
@@ -921,7 +914,11 @@ describe('renderSequence — frames', () => {
       branchSeparators: [],
       refBody: [],
       tabRuns: tabRunsFor({
-        x: 30, y: 60, tabText: 'opt', tabComment: 'condition', tabWidth: 69,
+        x: 30,
+        y: 60,
+        tabText: 'opt',
+        tabComment: 'condition',
+        tabWidth: 69,
       }),
       tabText: 'opt',
       tabComment: 'condition',
@@ -949,7 +946,15 @@ describe('renderSequence — background pass (T6)', () => {
       events: [
         { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
         makeSyncMessage(),
-        { kind: 'note', x: 40, y: 120, width: 80, height: 30, text: 'hi', textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }) },
+        {
+          kind: 'note',
+          x: 40,
+          y: 120,
+          width: 80,
+          height: 30,
+          text: 'hi',
+          textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }),
+        },
         {
           kind: 'divider',
           labelRuns: dividerRunsFor(['step']),
@@ -1094,10 +1099,7 @@ describe('renderSequence — [hidden] arrows', () => {
   // leaves the placed text stale.
   const msgWith = (extra?: Partial<MessageGeo>): MessageGeo => makeSyncMessage(extra);
   function bodyFor(m: MessageGeo): string {
-    return renderSequence(
-      makeGeo({ events: [m], participants: [], showFootbox: false }),
-      defaultTheme,
-    ).body;
+    return renderSequence(makeGeo({ events: [m], participants: [], showFootbox: false }), defaultTheme).body;
   }
 
   it('draws nothing at all -- not the line, not the heads, not the label', () => {
@@ -1158,10 +1160,7 @@ describe('renderSequence — dividers', () => {
   /** Only the divider's own output: `makeGeo`'s default participants and
    *  footbox contribute rects and texts of their own. */
   function bodyFor(d: DividerGeo): string {
-    return renderSequence(
-      makeGeo({ events: [d], participants: [], showFootbox: false }),
-      defaultTheme,
-    ).body;
+    return renderSequence(makeGeo({ events: [d], participants: [], showFootbox: false }), defaultTheme).body;
   }
 
   it('emits the band, its two rules, the label box and the text', () => {
@@ -1279,9 +1278,7 @@ describe('sequencePlugin layout', () => {
       type: 'sequence',
     });
     const sync = syncPlugin.layoutSync(ast, defaultTheme, measurer);
-    const async_ = await Promise.resolve(
-      layoutSequence(ast, defaultTheme, measurer),
-    );
+    const async_ = await Promise.resolve(layoutSequence(ast, defaultTheme, measurer));
     expect(sync).toEqual(async_);
   });
 });
@@ -1321,7 +1318,18 @@ describe('renderSequence — actor participant shape', () => {
   it('renders an ellipse head and a single four-segment path for actor participants', () => {
     const geo = makeGeo({
       participants: [
-        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+        participantGeo({
+          id: 'U',
+          display: 'User',
+          type: 'actor',
+          x: 30,
+          y: 0,
+          width: 80,
+          height: 70,
+          centerX: 70,
+          background: defaultTheme.colors.background,
+          border: defaultTheme.colors.border,
+        }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1339,7 +1347,18 @@ describe('renderSequence — actor participant shape', () => {
   it('renders display name below the stick figure', () => {
     const geo = makeGeo({
       participants: [
-        participantGeo({ id: 'U', display: 'User', type: 'actor', x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+        participantGeo({
+          id: 'U',
+          display: 'User',
+          type: 'actor',
+          x: 30,
+          y: 0,
+          width: 80,
+          height: 70,
+          centerX: 70,
+          background: defaultTheme.colors.background,
+          border: defaultTheme.colors.border,
+        }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1352,7 +1371,18 @@ describe('renderSequence — skinparam actorStyle', () => {
     return makeGeo({
       showFootbox: false,
       participants: [
-        participantGeo({ id: 'U', display: 'User', type: 'actor' as const, x: 30, y: 0, width: 80, height: 70, centerX: 70, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+        participantGeo({
+          id: 'U',
+          display: 'User',
+          type: 'actor' as const,
+          x: 30,
+          y: 0,
+          width: 80,
+          height: 70,
+          centerX: 70,
+          background: defaultTheme.colors.background,
+          border: defaultTheme.colors.border,
+        }),
       ],
     });
   }
@@ -1388,8 +1418,7 @@ describe('renderSequence — skinparam actorStyle', () => {
     // (body, arms, left leg, right leg -- `ActorStickMan.java:77-85`), while
     // `ActorAwesome` and `ActorHollow` are each ONE closed silhouette
     // (`ActorAwesome.java`'s six cubics, `ActorHollow.java`'s 13 lineTos).
-    const subpaths = (svg: string): number =>
-      ((/<path d="([^"]*)"/.exec(svg)?.[1] ?? '').match(/M/g) ?? []).length;
+    const subpaths = (svg: string): number => ((/<path d="([^"]*)"/.exec(svg)?.[1] ?? '').match(/M/g) ?? []).length;
     expect(subpaths(stickman)).toBe(4);
     expect(subpaths(awesome)).toBe(1);
     expect(subpaths(hollow)).toBe(1);
@@ -1398,7 +1427,18 @@ describe('renderSequence — skinparam actorStyle', () => {
 
 describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
   function participantOf(type: 'collections' | 'queue' | 'entity' | 'boundary' | 'control' | 'participant') {
-    return participantGeo({ id: 'P', display: 'Foo', type, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
+    return participantGeo({
+      id: 'P',
+      display: 'Foo',
+      type,
+      x: 30,
+      y: 0,
+      width: 100,
+      height: 50,
+      centerX: 80,
+      background: defaultTheme.colors.background,
+      border: defaultTheme.colors.border,
+    });
   }
   /** The bare body, not `assembleSvg`'s document: the shell adds a background
    *  `<rect>` of its own that would inflate every rectangle count here. */
@@ -1464,7 +1504,18 @@ describe('renderSequence — database participant shape', () => {
     const geo = makeGeo({
       showFootbox: false,
       participants: [
-        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+        participantGeo({
+          id: 'DB',
+          display: 'PostgreSQL',
+          type: 'database',
+          x: 30,
+          y: 0,
+          width: 100,
+          height: 50,
+          centerX: 80,
+          background: defaultTheme.colors.background,
+          border: defaultTheme.colors.border,
+        }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1477,7 +1528,18 @@ describe('renderSequence — database participant shape', () => {
   });
 
   it('places the head glyph at the top of the block and the tail glyph at its bottom', () => {
-    const participant = participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database' as const, x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border });
+    const participant = participantGeo({
+      id: 'DB',
+      display: 'PostgreSQL',
+      type: 'database' as const,
+      x: 30,
+      y: 0,
+      width: 100,
+      height: 50,
+      centerX: 80,
+      background: defaultTheme.colors.background,
+      border: defaultTheme.colors.border,
+    });
     const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
     const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
     // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
@@ -1491,7 +1553,18 @@ describe('renderSequence — database participant shape', () => {
   it('renders display name for database participant', () => {
     const geo = makeGeo({
       participants: [
-        participantGeo({ id: 'DB', display: 'PostgreSQL', type: 'database', x: 30, y: 0, width: 100, height: 50, centerX: 80, background: defaultTheme.colors.background, border: defaultTheme.colors.border }),
+        participantGeo({
+          id: 'DB',
+          display: 'PostgreSQL',
+          type: 'database',
+          x: 30,
+          y: 0,
+          width: 100,
+          height: 50,
+          centerX: 80,
+          background: defaultTheme.colors.background,
+          border: defaultTheme.colors.border,
+        }),
       ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
@@ -1526,10 +1599,17 @@ describe('renderSequence — box backgrounds', () => {
     const geo = makeGeo({
       // A5: the label is a placed, measured run resolved by
       // `layout.ts#boxLabelRuns`; a hand-built `BoxGeo` supplies them.
-      boxes: [{
-        x: 10, y: 0, width: 200, height: 300, label: 'Services', color: '#pink',
-        labelRuns: [boxRunFor('Services', 10)],
-      }],
+      boxes: [
+        {
+          x: 10,
+          y: 0,
+          width: 200,
+          height: 300,
+          label: 'Services',
+          color: '#pink',
+          labelRuns: [boxRunFor('Services', 10)],
+        },
+      ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme));
     expect(svg).toContain('Services');
@@ -1577,12 +1657,7 @@ describe('renderSequence — box backgrounds', () => {
 
 describe('renderSequence — box integration', () => {
   it('box with label and color renders correctly end-to-end', () => {
-    const ast = parseSequence([
-      'box "Frontend" #LightBlue',
-      'participant Alice',
-      'end box',
-      'Alice -> Alice: self',
-    ]);
+    const ast = parseSequence(['box "Frontend" #LightBlue', 'participant Alice', 'end box', 'Alice -> Alice: self']);
     // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
     // (D1); this fixture is a complete, valid diagram, so refusal is a
     // test defect.
@@ -1604,8 +1679,7 @@ describe('renderSequence — box integration', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — participant stereotype', () => {
-  const render = (src: string): string =>
-    renderFixtureSequence(src, new DeterministicMeasurer());
+  const render = (src: string): string => renderFixtureSequence(src, new DeterministicMeasurer());
 
   // `CommandParticipant` stores the stereotype on the Participant rather than
   // in its code (`:174-181`), and the jar draws it on its own line -- the
@@ -1646,9 +1720,7 @@ describe('renderSequence — participant stereotype', () => {
   // spec that introduced it (`:143-182`). birocu-87-xubi808's golden shows
   // `«APIGateway»` for `<< ($APIGateway, #CC2264) APIGateway >>`.
   it('drops a sprite badge spec from the displayed label', () => {
-    const svg = render(
-      '@startuml\nparticipant P as p << ($APIGateway, #CC2264) APIGateway >>\np -> B: hi\n@enduml',
-    );
+    const svg = render('@startuml\nparticipant P as p << ($APIGateway, #CC2264) APIGateway >>\np -> B: hi\n@enduml');
     expect(svg).toContain('>«APIGateway»</text>');
     expect(svg).not.toContain('CC2264');
   });
@@ -1739,8 +1811,7 @@ describe('renderSequence — participant stereotype', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — participant colours', () => {
-  const render = (src: string): string =>
-    renderFixtureSequence(src, new DeterministicMeasurer());
+  const render = (src: string): string => renderFixtureSequence(src, new DeterministicMeasurer());
 
   // `Participant#getUsedStyles` merges the kind's signature -- `root,
   // element, sequenceDiagram, <kind>` (`ParticipantType.java:55-80`) -- and
@@ -1787,8 +1858,7 @@ describe('renderSequence — participant colours', () => {
 function messageBodies(svg: string): Array<[number, number]> {
   const out: Array<[number, number]> = [];
   for (const tag of svg.match(/<line[^>]*>/g) ?? []) {
-    const n = (a: string): number =>
-      Number(new RegExp(`${a}="([-\\d.]+)"`).exec(tag)?.[1]);
+    const n = (a: string): number => Number(new RegExp(`${a}="([-\\d.]+)"`).exec(tag)?.[1]);
     if (n('y1') === n('y2') && n('x1') !== n('x2')) out.push([n('x1'), n('x2')]);
   }
   return out;
@@ -1806,9 +1876,7 @@ function headTips(svg: string): number[] {
 
 /** The dashed lifeline x of every participant, in document order. */
 function lifelines(svg: string): number[] {
-  return (svg.match(/<line[^>]*stroke-dasharray[^>]*>/g) ?? []).map((tag) =>
-    Number(/x1="([-\d.]+)"/.exec(tag)?.[1]),
-  );
+  return (svg.match(/<line[^>]*stroke-dasharray[^>]*>/g) ?? []).map((tag) => Number(/x1="([-\d.]+)"/.exec(tag)?.[1]));
 }
 
 function docWidth(svg: string): number {
@@ -1816,8 +1884,7 @@ function docWidth(svg: string): number {
 }
 
 describe('renderSequence — exogenous arrows', () => {
-  const render = (src: string): string =>
-    renderFixtureSequence(src, new DeterministicMeasurer());
+  const render = (src: string): string => renderFixtureSequence(src, new DeterministicMeasurer());
 
   // `CommunicationExoTile#getPoint1Value` returns `tileArguments.getBorder1()`
   // for a non-short left-border message (`:213-217`), and the component then
@@ -1893,9 +1960,7 @@ describe('renderSequence — exogenous arrows', () => {
   // one 4.5 left of the body start, one half a pixel left of the lifeline.
   it('draws both circles when an exo is decorated on both sides', () => {
     const svg = render('@startuml\nparticipant Bob\n[o->o Bob : hello\n@enduml');
-    const centres = (svg.match(/<ellipse[^>]*>/g) ?? []).map((t) =>
-      Number(/cx="([-\d.]+)"/.exec(t)?.[1]),
-    );
+    const centres = (svg.match(/<ellipse[^>]*>/g) ?? []).map((t) => Number(/cx="([-\d.]+)"/.exec(t)?.[1]));
     const [body] = messageBodies(svg);
     expect(centres).toEqual([body![0] - 4.5, lifelines(svg)[0]! - 0.5]);
   });

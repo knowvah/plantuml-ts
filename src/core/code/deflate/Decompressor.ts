@@ -114,7 +114,7 @@ export class Decompressor {
 
     // Read the main code lengths and handle runs
     const codeLens = (new Array(numLitLenCodes + numDistCodes) as number[]).fill(0);
-    for (let codeLensIndex = 0; codeLensIndex < codeLens.length; ) {
+    for (let codeLensIndex = 0; codeLensIndex < codeLens.length;) {
       const sym = codeLenCode.decodeNextSymbol(this.input);
       if (sym >= 0 && sym <= 15) {
         codeLens[codeLensIndex] = sym;

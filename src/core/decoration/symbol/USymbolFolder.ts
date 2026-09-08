@@ -51,7 +51,10 @@ function drawFolder(
   const wtitle = getWTitle(width, dimName);
   const htitle = getHTitle(dimName);
 
-  const shape = roundCorner === 0 ? folderPolygon(wtitle, htitle, width, height) : folderPath(wtitle, htitle, width, height, roundCorner);
+  const shape =
+    roundCorner === 0
+      ? folderPolygon(wtitle, htitle, width, height)
+      : folderPath(wtitle, htitle, width, height, roundCorner);
   shape.setDeltaShadow(shadowing);
 
   ug.draw(shape);
@@ -103,10 +106,14 @@ function folderPath(wtitle: number, htitle: number, width: number, height: numbe
  * per-function complexity budget without changing either call site's
  * observable behavior).
  */
-function folderMagneticBorder(getDim: (sb: StringBounder) => XDimension2D, getDimTitle: (sb: StringBounder) => XDimension2D): MagneticBorder {
+function folderMagneticBorder(
+  getDim: (sb: StringBounder) => XDimension2D,
+  getDimTitle: (sb: StringBounder) => XDimension2D,
+): MagneticBorder {
   return {
     getForceAt(position: { readonly x: number; readonly y: number }, stringBounder?: StringBounder): UTranslate {
-      if (stringBounder === undefined) throw new Error('USymbolFolder MagneticBorder.getForceAt: stringBounder is required');
+      if (stringBounder === undefined)
+        throw new Error('USymbolFolder MagneticBorder.getForceAt: stringBounder is required');
       const dim = getDim(stringBounder);
       const dimTitle = getDimTitle(stringBounder);
       const wtitle = getWTitle(dim.getWidth(), dimTitle);
@@ -188,7 +195,14 @@ export class USymbolFolder extends USymbol {
         ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
         const dimTitle = getDimTitle(ug.getStringBounder());
-        drawFolder(ug, dim.getWidth(), dim.getHeight(), dimTitle, symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawFolder(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          dimTitle,
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
         if (showTitle) title.drawU(ug.apply(new UTranslate(4, 3)));
@@ -221,7 +235,14 @@ export class USymbolFolder extends USymbol {
         const dim = calculateDimension(stringBounder);
         ug = symbolContext.apply(ug);
         const dimTitle = title.calculateDimension(stringBounder);
-        drawFolder(ug, dim.getWidth(), dim.getHeight(), dimTitle, symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawFolder(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          dimTitle,
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         title.drawU(ug.apply(new UTranslate(4, 2)));
         const dimStereo = stereotype.calculateDimension(stringBounder);
         const dimStereoWidth = dimStereo.getWidth();

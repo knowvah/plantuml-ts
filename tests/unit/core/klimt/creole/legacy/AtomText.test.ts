@@ -41,7 +41,7 @@ describe('the premise: the deterministic width table measures spaces at zero', (
     expect(measurer.measure('a', font).width).toBeGreaterThan(0);
   });
 
-  test('TAB_STRING is upstream tabString()\'s 8-space default', () => {
+  test("TAB_STRING is upstream tabString()'s 8-space default", () => {
     expect(TAB_STRING).toBe('        ');
     expect(TAB_STRING).toHaveLength(8);
   });

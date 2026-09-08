@@ -391,14 +391,11 @@ describe('note-only concurrent region sizes from SvekResult margin, not raw canv
     { scope: 12, axis: 'height', idx: 0 },
   ];
 
-  it.each(TARGET_ROWS)(
-    'scope$scope $axis idx$idx: our declared size matches jar exactly',
-    ({ scope, axis, idx }) => {
-      const jar = sortedAxis(jarScope(scope), axis)[idx]!;
-      const ours = sortedAxis(ourScope(scope), axis)[idx]!;
-      expect(Math.abs(ours - jar)).toBeLessThan(EXACT_EPSILON);
-    },
-  );
+  it.each(TARGET_ROWS)('scope$scope $axis idx$idx: our declared size matches jar exactly', ({ scope, axis, idx }) => {
+    const jar = sortedAxis(jarScope(scope), axis)[idx]!;
+    const ours = sortedAxis(ourScope(scope), axis)[idx]!;
+    expect(Math.abs(ours - jar)).toBeLessThan(EXACT_EPSILON);
+  });
 
   // Regression guard for the non-degenerate path (D3/acceptance: "byte-
   // identical to before this change"). Every OTHER scope in this fixture
@@ -447,7 +444,7 @@ describe('concurrent-region PassAccumulator carries labelFont/measurer (G21, zac
     }
   `;
 
-  it('every resolved region pass\'s accumulator carries both labelFont and measurer', () => {
+  it("every resolved region pass's accumulator carries both labelFont and measurer", () => {
     const ast = parse(MARKUP);
     const measurer = new WidthTableMeasurer();
     const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);
@@ -458,7 +455,7 @@ describe('concurrent-region PassAccumulator carries labelFont/measurer (G21, zac
     }
   });
 
-  it('the region accumulator\'s labelFont matches resolveArrowLabelFont(theme), like both sibling call sites', () => {
+  it("the region accumulator's labelFont matches resolveArrowLabelFont(theme), like both sibling call sites", () => {
     const ast = parse(MARKUP);
     const measurer = new WidthTableMeasurer();
     const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);

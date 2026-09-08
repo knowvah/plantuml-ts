@@ -52,9 +52,7 @@ const QUOTED = new RegExp(`^${START}"([^"]+)"(?:\\s*\\{([^{}]*)\\})?(?:\\s([^\\s
 // 2. `[[{tooltip}]]` -- tooltip only, url is empty.
 const ONLY_TOOLTIP = new RegExp(`^${START}\\{(.*)\\}${END}$`);
 // 3. `[[{tooltip} label]]` -- tooltip + label, url is empty.
-const ONLY_TOOLTIP_AND_LABEL = new RegExp(
-  `^${START}\\{([^{}]*)\\}\\s*([^\\s{}[\\]][^[\\]]*)${END}$`,
-);
+const ONLY_TOOLTIP_AND_LABEL = new RegExp(`^${START}\\{([^{}]*)\\}\\s*([^\\s{}[\\]][^[\\]]*)${END}$`);
 // 4. `[[link{tooltip}]]` -- bare (unquoted) link, mandatory tooltip, no label.
 const LINK_TOOLTIP_NOLABEL = new RegExp(`^${START}([^\\s"{}[\\]]+?)\\s*\\{(.+)\\}${END}$`);
 // 5. `[[link{tooltip} label]]` -- bare link, optional tooltip, optional label.

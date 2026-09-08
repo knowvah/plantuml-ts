@@ -143,11 +143,14 @@ describe('withStdlibBuildLock -- sync callback (default shared mode)', () => {
     let readerCountDuringCall = -1;
     let mutexExistedDuringCall = false;
 
-    const result = withStdlibBuildLock(() => {
-      readerCountDuringCall = readerCount(readersDir);
-      mutexExistedDuringCall = existsSync(lockPath);
-      return 42;
-    }, { lockPath });
+    const result = withStdlibBuildLock(
+      () => {
+        readerCountDuringCall = readerCount(readersDir);
+        mutexExistedDuringCall = existsSync(lockPath);
+        return 42;
+      },
+      { lockPath },
+    );
 
     expect(readerCountDuringCall).toBe(1);
     expect(mutexExistedDuringCall).toBe(false);
@@ -163,14 +166,17 @@ describe('withStdlibBuildLock -- async callback (default shared mode)', () => {
     const readersDir = readersDirFor(lockPath);
     let readerCountAfterAwait = -1;
 
-    const result = await withStdlibBuildLock(async () => {
-      // Mirrors T4's real call sites: `await import(...)` inside the
-      // critical section -- the reader entry must still be registered
-      // after the await.
-      await new Promise((resolve) => setTimeout(resolve, 5));
-      readerCountAfterAwait = readerCount(readersDir);
-      return 'done';
-    }, { lockPath });
+    const result = await withStdlibBuildLock(
+      async () => {
+        // Mirrors T4's real call sites: `await import(...)` inside the
+        // critical section -- the reader entry must still be registered
+        // after the await.
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        readerCountAfterAwait = readerCount(readersDir);
+        return 'done';
+      },
+      { lockPath },
+    );
 
     expect(readerCountAfterAwait).toBe(1);
     expect(result).toBe('done');
@@ -185,9 +191,12 @@ describe('withStdlibBuildLock -- release on throw (default shared mode)', () => 
     const readersDir = readersDirFor(lockPath);
 
     expect(() =>
-      withStdlibBuildLock(() => {
-        throw new Error('sync boom');
-      }, { lockPath }),
+      withStdlibBuildLock(
+        () => {
+          throw new Error('sync boom');
+        },
+        { lockPath },
+      ),
     ).toThrow('sync boom');
 
     expect(readerCount(readersDir)).toBe(0);
@@ -199,10 +208,13 @@ describe('withStdlibBuildLock -- release on throw (default shared mode)', () => 
     const readersDir = readersDirFor(lockPath);
 
     await expect(
-      withStdlibBuildLock(async () => {
-        await Promise.resolve();
-        throw new Error('async boom');
-      }, { lockPath }),
+      withStdlibBuildLock(
+        async () => {
+          await Promise.resolve();
+          throw new Error('async boom');
+        },
+        { lockPath },
+      ),
     ).rejects.toThrow('async boom');
 
     expect(readerCount(readersDir)).toBe(0);
@@ -217,16 +229,19 @@ describe('withStdlibBuildLock -- release after reclaim (hazard 1, shared mode)',
     const reclaimerContent = JSON.stringify({ pid: 999_997, acquiredAt: Date.now() });
     let entryPath = '';
 
-    withStdlibBuildLock(() => {
-      // Simulates hazard 1's real trigger: this reader entry aged past
-      // `staleAgeMs` while still notionally held, another process's stale-
-      // entry reclaim deleted it and wrote its own entry at the same path
-      // -- ownership has genuinely moved before this helper's release()
-      // runs.
-      const [entryName] = readdirSync(readersDir);
-      entryPath = join(readersDir, entryName as string);
-      writeFileSync(entryPath, reclaimerContent, 'utf8');
-    }, { lockPath });
+    withStdlibBuildLock(
+      () => {
+        // Simulates hazard 1's real trigger: this reader entry aged past
+        // `staleAgeMs` while still notionally held, another process's stale-
+        // entry reclaim deleted it and wrote its own entry at the same path
+        // -- ownership has genuinely moved before this helper's release()
+        // runs.
+        const [entryName] = readdirSync(readersDir);
+        entryPath = join(readersDir, entryName as string);
+        writeFileSync(entryPath, reclaimerContent, 'utf8');
+      },
+      { lockPath },
+    );
 
     // Proves the helper relies on `acquireBuildLock`'s ownership-safe
     // shared release (`unregisterPresenceIfOwned`) rather than an
@@ -250,10 +265,13 @@ describe('withStdlibBuildLock -- explicit mode override', () => {
     let mutexHeldDuringCall = false;
     let readerCountDuringCall = -1;
 
-    withStdlibBuildLock(() => {
-      mutexHeldDuringCall = existsSync(lockPath);
-      readerCountDuringCall = readerCount(readersDir);
-    }, { lockPath, mode: 'exclusive' });
+    withStdlibBuildLock(
+      () => {
+        mutexHeldDuringCall = existsSync(lockPath);
+        readerCountDuringCall = readerCount(readersDir);
+      },
+      { lockPath, mode: 'exclusive' },
+    );
 
     expect(mutexHeldDuringCall).toBe(true);
     expect(readerCountDuringCall).toBe(0);
@@ -273,69 +291,77 @@ describe('withStdlibBuildLock -- explicit mode override', () => {
 // ---------------------------------------------------------------------------
 
 describe('withStdlibBuildLock -- shared mode across processes (D1)', () => {
-  it(
-    'two default (no explicit mode) acquisitions in DIFFERENT processes both proceed concurrently',
-    async () => {
-      const scratch = makeTempDir('with-stdlib-build-lock-shared-concurrent-');
-      const workerScriptPath = join(scratch, 'shared-reader.mjs');
-      writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
-      const lockPath = join(scratch, 'shared.lock');
-      const holdMs = 400;
-      const readyA = join(scratch, 'ready-a');
-      const readyB = join(scratch, 'ready-b');
+  it('two default (no explicit mode) acquisitions in DIFFERENT processes both proceed concurrently', async () => {
+    const scratch = makeTempDir('with-stdlib-build-lock-shared-concurrent-');
+    const workerScriptPath = join(scratch, 'shared-reader.mjs');
+    writeFileSync(workerScriptPath, sharedReaderWorkerSource(), 'utf8');
+    const lockPath = join(scratch, 'shared.lock');
+    const holdMs = 400;
+    const readyA = join(scratch, 'ready-a');
+    const readyB = join(scratch, 'ready-b');
 
-      const start = Date.now();
-      const workerA = spawnWorker(workerScriptPath, [JITI_MODULE_URL, HELPER_MODULE_URL, lockPath, readyA, String(holdMs)]);
-      const workerB = spawnWorker(workerScriptPath, [JITI_MODULE_URL, HELPER_MODULE_URL, lockPath, readyB, String(holdMs)]);
-      liveChildren = [workerA, workerB];
+    const start = Date.now();
+    const workerA = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      HELPER_MODULE_URL,
+      lockPath,
+      readyA,
+      String(holdMs),
+    ]);
+    const workerB = spawnWorker(workerScriptPath, [
+      JITI_MODULE_URL,
+      HELPER_MODULE_URL,
+      lockPath,
+      readyB,
+      String(holdMs),
+    ]);
+    liveChildren = [workerA, workerB];
 
-      const [resultA, resultB] = await Promise.all([collectExit(workerA), collectExit(workerB)]);
-      const elapsed = Date.now() - start;
+    const [resultA, resultB] = await Promise.all([collectExit(workerA), collectExit(workerB)]);
+    const elapsed = Date.now() - start;
 
-      expect(resultA.exitCode).toBe(0);
-      expect(resultB.exitCode).toBe(0);
+    expect(resultA.exitCode).toBe(0);
+    expect(resultB.exitCode).toBe(0);
 
-      const acquiredA = Number(readFileSync(readyA, 'utf8'));
-      const acquiredB = Number(readFileSync(readyB, 'utf8'));
+    const acquiredA = Number(readFileSync(readyA, 'utf8'));
+    const acquiredB = Number(readFileSync(readyB, 'utf8'));
 
-      // Serialised acquisition would take at least 2*holdMs; concurrent
-      // holding completes in about one holdMs.
-      //
-      // Measured from the FIRST acquisition, not from `start`, and that
-      // distinction is the whole point. Each worker boots node, imports
-      // jiti, and has jiti TRANSPILE the helper module before it can
-      // acquire anything -- startup cost that has nothing to do with the
-      // lock. Timing from `start` charges that to the lock and makes the
-      // threshold a measure of the runner's CPU: this assertion read
-      // `expect(elapsed).toBeLessThan(holdMs * 1.6)` and failed on CI three
-      // consecutive runs at 660, 769 and 793 ms while passing locally at
-      // 483 ms, because startup costs ~64 ms on a 12-core dev machine and
-      // 260-390 ms on a 2-core runner -- consuming the entire 240 ms of
-      // slack the 1.6 multiplier leaves above holdMs.
-      //
-      // The concurrent phase itself is load-independent, which is what
-      // makes it the right thing to bound. Instrumented locally
-      // (`.agent-notes/shared-mode-timing-is-spawn-bound.md`): 420 ms quiet
-      // at load1 16, and 413/430/413 ms at load1 41-50, while spawn moved
-      // 64 -> 79-100 ms over the same range.
-      //
-      // Discrimination is unchanged: serialisation puts the second acquire
-      // after the first release, so this quantity becomes ~2*holdMs and
-      // still blows the same 1.6*holdMs threshold. Narrowing WHAT is timed
-      // is not a loosening -- the serialisation floor it must stay under is
-      // identical, and the overlap assertions below remain the rigorous
-      // proof in any case.
-      const firstAcquired = Math.min(acquiredA, acquiredB);
-      const concurrentPhaseMs = elapsed - (firstAcquired - start);
-      expect(concurrentPhaseMs).toBeLessThan(holdMs * 1.6);
-      // Each holder's [acquired, acquired+holdMs] window must overlap the
-      // other's -- proof neither waited for the other, with no `lockPath`-
-      // adjacent `mode` override anywhere in this worker script.
-      expect(acquiredA).toBeLessThan(acquiredB + holdMs);
-      expect(acquiredB).toBeLessThan(acquiredA + holdMs);
-    },
-    20_000,
-  );
+    // Serialised acquisition would take at least 2*holdMs; concurrent
+    // holding completes in about one holdMs.
+    //
+    // Measured from the FIRST acquisition, not from `start`, and that
+    // distinction is the whole point. Each worker boots node, imports
+    // jiti, and has jiti TRANSPILE the helper module before it can
+    // acquire anything -- startup cost that has nothing to do with the
+    // lock. Timing from `start` charges that to the lock and makes the
+    // threshold a measure of the runner's CPU: this assertion read
+    // `expect(elapsed).toBeLessThan(holdMs * 1.6)` and failed on CI three
+    // consecutive runs at 660, 769 and 793 ms while passing locally at
+    // 483 ms, because startup costs ~64 ms on a 12-core dev machine and
+    // 260-390 ms on a 2-core runner -- consuming the entire 240 ms of
+    // slack the 1.6 multiplier leaves above holdMs.
+    //
+    // The concurrent phase itself is load-independent, which is what
+    // makes it the right thing to bound. Instrumented locally
+    // (`.agent-notes/shared-mode-timing-is-spawn-bound.md`): 420 ms quiet
+    // at load1 16, and 413/430/413 ms at load1 41-50, while spawn moved
+    // 64 -> 79-100 ms over the same range.
+    //
+    // Discrimination is unchanged: serialisation puts the second acquire
+    // after the first release, so this quantity becomes ~2*holdMs and
+    // still blows the same 1.6*holdMs threshold. Narrowing WHAT is timed
+    // is not a loosening -- the serialisation floor it must stay under is
+    // identical, and the overlap assertions below remain the rigorous
+    // proof in any case.
+    const firstAcquired = Math.min(acquiredA, acquiredB);
+    const concurrentPhaseMs = elapsed - (firstAcquired - start);
+    expect(concurrentPhaseMs).toBeLessThan(holdMs * 1.6);
+    // Each holder's [acquired, acquired+holdMs] window must overlap the
+    // other's -- proof neither waited for the other, with no `lockPath`-
+    // adjacent `mode` override anywhere in this worker script.
+    expect(acquiredA).toBeLessThan(acquiredB + holdMs);
+    expect(acquiredB).toBeLessThan(acquiredA + holdMs);
+  }, 20_000);
 });
 
 // ---------------------------------------------------------------------------

@@ -29,10 +29,13 @@ describe('CodeIteratorSub', () => {
     expect(it.peek()?.getString()).toBe('after');
 
     expect([...it.getSubs().keys()]).toEqual(['BLOCK']);
-    expect(it.getSubs().get('BLOCK')!.lines().map((l) => l.getString())).toEqual([
-      'captured line 1',
-      'captured line 2',
-    ]);
+    expect(
+      it
+        .getSubs()
+        .get('BLOCK')!
+        .lines()
+        .map((l) => l.getString()),
+    ).toEqual(['captured line 1', 'captured line 2']);
   });
 
   it('throws EaterException on a nested !startsub', () => {
@@ -55,10 +58,7 @@ describe('CodeIteratorSub', () => {
   });
 
   it('a captured Sub has a readable toString', () => {
-    const base = new CodeIteratorImpl([
-      line('!startsub NAMED', 'STARTSUB'),
-      line('!endsub', 'ENDSUB'),
-    ]);
+    const base = new CodeIteratorImpl([line('!startsub NAMED', 'STARTSUB'), line('!endsub', 'ENDSUB')]);
     const it = new CodeIteratorSub(base, new Map<string, Sub>(), fakeContext(), new TMemoryGlobal());
     it.peek();
     expect(it.getSubs().get('NAMED')!.toString()).toBe('Sub NAMED');

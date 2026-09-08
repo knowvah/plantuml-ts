@@ -261,7 +261,6 @@ describe('layoutState composite — bitaxo-18-tamo974 (entry/exit border point)'
   });
 });
 
-
 // ---------------------------------------------------------------------------
 // darime-88-moda428 / lumamo-63-zupa263 — concurrent-region DUMP order
 // (Phase L iteration 4): region 0 (S's own pre-separator children) is NOT a

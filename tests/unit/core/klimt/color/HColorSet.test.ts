@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  parseSimpleColor,
-  toSvgHex,
-  resolveColorToSvgHex,
-} from '../../../../../src/core/klimt/color/HColorSet.js';
+import { parseSimpleColor, toSvgHex, resolveColorToSvgHex } from '../../../../../src/core/klimt/color/HColorSet.js';
 
 describe('parseSimpleColor', () => {
   it('parses the 1/3/6/8-hex-digit forms, with or without a leading #', () => {

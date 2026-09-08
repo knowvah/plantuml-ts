@@ -106,7 +106,9 @@ function newMethodsOrFieldsArea(
     {
       lineThickness: seamStyle.lineThickness,
       wrapWidth: seamStyle.wrapWidth,
-      ...(seamStyle.resolveVisibilityStyle !== undefined && { resolveVisibilityStyle: seamStyle.resolveVisibilityStyle }),
+      ...(seamStyle.resolveVisibilityStyle !== undefined && {
+        resolveVisibilityStyle: seamStyle.resolveVisibilityStyle,
+      }),
     },
     seamStyle.atomOps,
   );
@@ -207,7 +209,10 @@ export class BodierLikeClassOrObject extends BodierAbstract {
         if (s.length === 0 && this.methodsToDisplay.length === 0) continue;
 
         const m = Member.method(s);
-        if (this.hideVisibilityModifier === null || setContains(this.hideVisibilityModifier, m.getVisibilityModifier()) === false)
+        if (
+          this.hideVisibilityModifier === null ||
+          setContains(this.hideVisibilityModifier, m.getVisibilityModifier()) === false
+        )
           this.methodsToDisplay.push(m);
       }
       this.removeFinalEmptyMembers(this.methodsToDisplay);
@@ -225,7 +230,10 @@ export class BodierLikeClassOrObject extends BodierAbstract {
         if (s.length === 0 && this.fieldsToDisplay.length === 0) continue;
 
         const m = Member.field(s);
-        if (this.hideVisibilityModifier === null || setContains(this.hideVisibilityModifier, m.getVisibilityModifier()) === false)
+        if (
+          this.hideVisibilityModifier === null ||
+          setContains(this.hideVisibilityModifier, m.getVisibilityModifier()) === false
+        )
           this.fieldsToDisplay.push(m);
       }
       this.removeFinalEmptyMembers(this.fieldsToDisplay);
@@ -237,7 +245,8 @@ export class BodierLikeClassOrObject extends BodierAbstract {
    *  local `trin`; a `' '` blank-fallback display trims to empty here.
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodierLikeClassOrObject.java:166-170 */
   private removeFinalEmptyMembers(result: Member[]): void {
-    while (result.length > 0 && trin((result[result.length - 1] as Member).getDisplay(false)).length === 0) result.pop();
+    while (result.length > 0 && trin((result[result.length - 1] as Member).getDisplay(false)).length === 0)
+      result.pop();
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodierLikeClassOrObject.java:172-190 */

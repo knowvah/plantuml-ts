@@ -54,7 +54,10 @@ describe('Mirror — the BAD VALUE diagnostic', () => {
     const m = new Mirror(100);
     expect(m.inv(-5)).toBe(105);
     expect(m.inv(150)).toBe(-50);
-    expect(seen).toEqual([[-5, 100], [150, 100]]);
+    expect(seen).toEqual([
+      [-5, 100],
+      [150, 100],
+    ]);
   });
 
   it('stays silent for in-range values', () => {

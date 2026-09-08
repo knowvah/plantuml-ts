@@ -76,11 +76,7 @@ import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
  */
 const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
 
-
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-class',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-class');
 
 function readSource(slug: string): string {
   return readFileSync(join(GOLDENS_ROOT, slug, 'in.puml'), 'utf8');
@@ -161,12 +157,10 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
    * exists (`class-descriptive-leaf-command.ts#adjudicateAllowMixing`), so the
    * user-visible result is a refusal carrying upstream's own wording.
    */
-  it('is REFUSED, as upstream refuses it, with upstream\'s own message', () => {
+  it("is REFUSED, as upstream refuses it, with upstream's own message", () => {
     const svg = renderSync(readSource(slug));
     expect(deNbsp(svg)).toContain('plantuml-ts version');
-    expect(deNbsp(svg)).toContain(
-      "Use 'allowmixing' if you want to mix classes and other UML elements.",
-    );
+    expect(deNbsp(svg)).toContain("Use 'allowmixing' if you want to mix classes and other UML elements.");
     // The element the jar rejects must NOT be drawn.
     expect(svg).not.toMatch(/>Bob</);
   });
@@ -197,7 +191,7 @@ describe('class-actor-bare-no-allowmixing (actor, no allowmixing, alongside clas
    * with upstream's own words. The two tests above already cover what users
    * see.
    */
-  it('the low-level pipeline refuses it as well, in upstream\'s words', () => {
+  it("the low-level pipeline refuses it as well, in upstream's words", () => {
     expect(() => renderFixtureClass(readSource(slug), new DeterministicMeasurer())).toThrow(
       /Use 'allowmixing' if you want to mix classes and other UML elements\./,
     );

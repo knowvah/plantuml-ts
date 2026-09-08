@@ -93,11 +93,7 @@ export class LinkType {
    * with `===`.
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkType.java:106-109 */
   equals(other: LinkType): boolean {
-    return (
-      this.decor1 === other.decor1 &&
-      this.decor2 === other.decor2 &&
-      this.linkStyle === other.linkStyle
-    );
+    return this.decor1 === other.decor1 && this.decor2 === other.decor2 && this.linkStyle === other.linkStyle;
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkType.java:111-113 */
@@ -117,12 +113,7 @@ export class LinkType {
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkType.java:123-125 */
   goThickness(thickness: number): LinkType {
-    return new LinkType(
-      this.decor1,
-      this.decor2,
-      this.middleDecor,
-      this.linkStyle.goThickness(thickness),
-    );
+    return new LinkType(this.decor1, this.decor2, this.middleDecor, this.linkStyle.goThickness(thickness));
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/LinkType.java:127-129 */
@@ -282,11 +273,9 @@ export class LinkType {
 
     if (this.has(LinkDecor.NOT_NAVIGABLE)) return 'not_navigable';
 
-    if (this.hasAny(LinkDecor.CROWFOOT, LinkDecor.CIRCLE_CROWFOOT, LinkDecor.LINE_CROWFOOT))
-      return 'crowfoot';
+    if (this.hasAny(LinkDecor.CROWFOOT, LinkDecor.CIRCLE_CROWFOOT, LinkDecor.LINE_CROWFOOT)) return 'crowfoot';
 
-    if (this.hasAny(LinkDecor.CIRCLE_LINE, LinkDecor.DOUBLE_LINE) || this.bothNone())
-      return 'association';
+    if (this.hasAny(LinkDecor.CIRCLE_LINE, LinkDecor.DOUBLE_LINE) || this.bothNone()) return 'association';
 
     if (this.has(LinkDecor.PLUS)) return 'nested';
 

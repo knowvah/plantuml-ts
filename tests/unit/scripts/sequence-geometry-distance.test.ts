@@ -128,10 +128,7 @@ describe('distanceOf', () => {
   it('leaves `d` whole, because no index rule splits a path', () => {
     // Its commands have varying arities, so a flat argument index has no
     // fixed parity. It is reported as mixed rather than charged to an axis.
-    const { byAttribute } = distanceOf([
-      numeric('svg/g[1]/path/@d[0]', 2),
-      numeric('svg/g[1]/path/@d[1]', 3),
-    ]);
+    const { byAttribute } = distanceOf([numeric('svg/g[1]/path/@d[0]', 2), numeric('svg/g[1]/path/@d[1]', 3)]);
     expect(byAttribute['d']).toEqual({ distance: 5, count: 2 });
     expect(axisOf('d')).toBe('mixed');
   });
@@ -311,7 +308,11 @@ describe('corpus wiring', () => {
   });
 
   it('captures a render failure as null rather than as a distance of zero', () => {
-    const measured = measureFixture(join(CACHE, 'no-such-fixture'), 'no-such-fixture', requireIncludeStore(fixtureIncludeStore));
+    const measured = measureFixture(
+      join(CACHE, 'no-such-fixture'),
+      'no-such-fixture',
+      requireIncludeStore(fixtureIncludeStore),
+    );
     expect(measured.distance).toBeNull();
     expect(measured.error).toBeDefined();
   });

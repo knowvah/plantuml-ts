@@ -48,8 +48,7 @@ export interface HeaderInfo {
  * identical delta on 7 fixtures, e.g. gojatu-01-jibo986). */
 export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
   const headerText = classifier.display;
-  const headerItalic =
-    classifier.kind === 'interface' || classifier.kind === 'abstract';
+  const headerItalic = classifier.kind === 'interface' || classifier.kind === 'abstract';
   return { headerText, headerItalic };
 }
 
@@ -152,11 +151,8 @@ export function buildHeaderRows(input: {
   const lastIndex = lines.length - 1;
   return lines.map((line, i) => {
     const lineWidth = lineWidths[i] ?? 0;
-    const lineOffset = align === 'left'
-      ? 0
-      : align === 'right'
-        ? headerTextWidth - lineWidth
-        : (headerTextWidth - lineWidth) / 2;
+    const lineOffset =
+      align === 'left' ? 0 : align === 'right' ? headerTextWidth - lineWidth : (headerTextWidth - lineWidth) / 2;
     // G2 N64 (item 45 corollary, jar-verified `julixi-10-jide878`'s own
     // golden -- a `class "Name\n<Generic>" as x` declaration's generic-tag
     // extraction (`extractGenericFromDisplay`) leaves a TRAILING `\n` on
@@ -289,9 +285,7 @@ export function measureGenericTagDim(
   // 4*10+4 = 44, the AtomText 10px line floor). Single-line input reduces
   // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
   const lines = splitDisplayLines(text).lines;
-  const rawTextWidth = Math.max(
-    ...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width),
-  );
+  const rawTextWidth = Math.max(...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width));
   return {
     width: rawTextWidth + GENERIC_TAG_MARGIN,
     height: lines.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,

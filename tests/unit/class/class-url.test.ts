@@ -7,17 +7,18 @@ import { describe, it, expect } from 'vitest';
 import { parseUrlBracket } from '../../../src/diagrams/class/class-url.js';
 
 describe('parseUrlBracket', () => {
-  it('bare link, no tooltip/label -- label and tooltip default to the url ' +
-     '(jar-verified cokeje-99-gede231)', () => {
-    expect(parseUrlBracket('[[http://plantuml.com]]')).toEqual({
-      url: 'http://plantuml.com',
-      tooltip: 'http://plantuml.com',
-      label: 'http://plantuml.com',
-    });
-  });
+  it(
+    'bare link, no tooltip/label -- label and tooltip default to the url ' + '(jar-verified cokeje-99-gede231)',
+    () => {
+      expect(parseUrlBracket('[[http://plantuml.com]]')).toEqual({
+        url: 'http://plantuml.com',
+        tooltip: 'http://plantuml.com',
+        label: 'http://plantuml.com',
+      });
+    },
+  );
 
-  it('bare link + label, tooltip defaults to the url (jar-verified ' +
-     'cokeje-99-gede231)', () => {
+  it('bare link + label, tooltip defaults to the url (jar-verified ' + 'cokeje-99-gede231)', () => {
     expect(parseUrlBracket('[[http://plantuml.com our web site]]')).toEqual({
       url: 'http://plantuml.com',
       tooltip: 'http://plantuml.com',
@@ -25,11 +26,8 @@ describe('parseUrlBracket', () => {
     });
   });
 
-  it('bare link + tooltip + label, all three explicit (jar-verified ' +
-     'cokeje-99-gede231)', () => {
-    expect(
-      parseUrlBracket('[[http://plantuml.com{This is a tip} our web site]]'),
-    ).toEqual({
+  it('bare link + tooltip + label, all three explicit (jar-verified ' + 'cokeje-99-gede231)', () => {
+    expect(parseUrlBracket('[[http://plantuml.com{This is a tip} our web site]]')).toEqual({
       url: 'http://plantuml.com',
       tooltip: 'This is a tip',
       label: 'our web site',

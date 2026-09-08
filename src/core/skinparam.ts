@@ -52,10 +52,7 @@ export { parseStyleBlock } from './skinparam-style-block.js';
  *
  * Key normalisation follows SkinParam.cleanForKeySlow (see normaliseKey).
  */
-export function resolveSkinparam(
-  skinparams: ReadonlyMap<string, string>,
-  base: Theme,
-): SkinparamResult {
+export function resolveSkinparam(skinparams: ReadonlyMap<string, string>, base: Theme): SkinparamResult {
   const acc = createSkinparamAccumulator();
 
   for (const [rawKey, value] of skinparams) {

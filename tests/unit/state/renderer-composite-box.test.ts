@@ -21,7 +21,17 @@ function makeComposite(overrides: Partial<StateNodeGeo> = {}): StateNodeGeo {
     width: 100,
     height: 100,
     children: [
-      { id: 'child1', kind: 'normal', display: 'Child', x: 10, y: 40, width: 50, height: 50, children: [], transitions: [] },
+      {
+        id: 'child1',
+        kind: 'normal',
+        display: 'Child',
+        x: 10,
+        y: 40,
+        width: 50,
+        height: 50,
+        children: [],
+        transitions: [],
+      },
     ],
     transitions: [],
     ...overrides,
@@ -131,13 +141,17 @@ describe('renderComposite — measured shape, WITH body/action lines (Do_Sector-
     let cursor = 0;
     for (const fragment of order) {
       const idx = out.indexOf(fragment, cursor);
-      expect(idx, `expected to find ${JSON.stringify(fragment)} after position ${cursor}`).toBeGreaterThanOrEqual(cursor);
+      expect(idx, `expected to find ${JSON.stringify(fragment)} after position ${cursor}`).toBeGreaterThanOrEqual(
+        cursor,
+      );
       cursor = idx + fragment.length;
     }
   });
 
   it('draws the action-zone background with fill=stroke=the resolved fill color, stroke-width 1', () => {
-    expect(out).toContain('<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>');
+    expect(out).toContain(
+      '<rect x="130.719" y="276" width="242.5" height="33" fill="#F1F1F1" stroke="#F1F1F1" stroke-width="1"/>',
+    );
   });
 
   it('draws exactly TWO divider lines (header/body + action-zone bottom)', () => {
@@ -206,7 +220,9 @@ describe('renderComposite — shadow (mission skin-file-loading Batch 2)', () =>
     const out = renderComposite(makeMeasuredComposite({ shadowing: 4 }), defaultTheme);
     // Two <rect ...> occurrences with the SAME geometry: one filtered (shadow), one not (outline).
     const rectMatches = [...out.matchAll(/<rect[^>]*\/>/g)].map((m) => m[0]);
-    const outlineRects = rectMatches.filter((r) => r.includes('x="7"') && r.includes('y="144"') && !r.includes('filter='));
+    const outlineRects = rectMatches.filter(
+      (r) => r.includes('x="7"') && r.includes('y="144"') && !r.includes('filter='),
+    );
     expect(outlineRects).toHaveLength(1);
   });
 

@@ -143,10 +143,7 @@ const TREE_MARKER_RE = /^\s*\|_/;
  * base indent, not the source file's column 0) before extracting each
  * cell's level + display text.
  */
-function buildTreeRun(
-  rawLines: readonly string[],
-  startIdx: number,
-): { cells: EnhancedTreeCell[]; consumed: number } {
+function buildTreeRun(rawLines: readonly string[], startIdx: number): { cells: EnhancedTreeCell[]; consumed: number } {
   const first = rawLines[startIdx]!;
   const indentMatch = LEADING_WHITESPACE_RE.exec(first);
   const start = indentMatch?.[1] ?? '';

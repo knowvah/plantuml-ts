@@ -155,7 +155,11 @@ class MyUGraphicDatabase extends AbstractUGraphicHorizontalLine {
     const translated = ug.apply(translate);
     translated.apply(line.getStroke()).apply(new Back('none')).apply(UTranslate.dy(-15)).draw(closing);
     if (line.isDouble()) {
-      translated.apply(line.getStroke()).apply(new Back('none')).apply(UTranslate.dy(-15 + 2)).draw(closing);
+      translated
+        .apply(line.getStroke())
+        .apply(new Back('none'))
+        .apply(UTranslate.dy(-15 + 2))
+        .draw(closing);
     }
     line.drawTitleInternal(translated, 0, this.endingX, 0, true);
   }

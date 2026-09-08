@@ -120,4 +120,3 @@ export const deactivateShortCommand: Command = {
     emit(state, ev);
   },
 };
-

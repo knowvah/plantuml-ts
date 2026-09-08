@@ -94,20 +94,16 @@ export function withSameContainerConstraints(input: DotInputGraph): DotInputGrap
   // `constraint=false` edges (`sh0030->sh0023:P`, `sh0024:P->sh0030`) each
   // have one port end and one plain end, and its three other edges -- one
   // port-free, two port-to-port -- correctly have none.
-  const kermorXor = (from: string, to: string): boolean =>
-    input.kermor === true && ports.has(from) !== ports.has(to);
+  const kermorXor = (from: string, to: string): boolean => input.kermor === true && ports.has(from) !== ports.has(to);
 
-  const qualifies = (from: string, to: string): boolean =>
-    sameContainer(from, to) || kermorXor(from, to);
+  const qualifies = (from: string, to: string): boolean => sameContainer(from, to) || kermorXor(from, to);
 
   if (!input.edges.some((e) => qualifies(e.from, e.to))) return input;
 
   return {
     ...input,
     edges: input.edges.map((e) =>
-      qualifies(e.from, e.to)
-        ? { ...e, attributes: { ...e.attributes, constraint: false as const } }
-        : e,
+      qualifies(e.from, e.to) ? { ...e, attributes: { ...e.attributes, constraint: false as const } } : e,
     ),
   };
 }

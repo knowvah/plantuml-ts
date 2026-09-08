@@ -24,7 +24,7 @@ describe('renderDot — no chrome (the conformance path)', () => {
     expect('completeSvg' in out).toBe(true);
   });
 
-  it('passes graphviz\'s bytes through verbatim — not one character altered', () => {
+  it("passes graphviz's bytes through verbatim — not one character altered", () => {
     const geo = layoutDot(parseDot('@startdot\ndigraph G { a -> b; }\n@enddot'));
     const out = renderDot(geo) as CompleteSvg;
     expect(out.completeSvg).toBe(geo.svg);
@@ -37,7 +37,7 @@ describe('renderDot — no chrome (the conformance path)', () => {
     expect(out.completeSvg.trimEnd().endsWith('</svg>')).toBe(true);
   });
 
-  it('adds no <defs> of this port\'s own — arrowheads come from graphviz', () => {
+  it("adds no <defs> of this port's own — arrowheads come from graphviz", () => {
     const out = renderOf('digraph G { a -> b; }') as CompleteSvg;
     // This port's shared shell auto-embeds arrowhead marker <defs>; the
     // passthrough must never acquire them, since the jar's output has none.
@@ -52,7 +52,7 @@ describe('renderDot — chrome present (the divergence path)', () => {
     expect('completeSvg' in out).toBe(false);
   });
 
-  it('the fragment body is graphviz\'s inner markup, with the root <svg> peeled off', () => {
+  it("the fragment body is graphviz's inner markup, with the root <svg> peeled off", () => {
     const out = renderOf('title My Graph\ndigraph G { a -> b; }') as RenderFragment;
     expect(out.body).not.toContain('<svg');
     expect(out.body).not.toContain('</svg>');
@@ -62,7 +62,7 @@ describe('renderDot — chrome present (the divergence path)', () => {
     expect(out.body).toMatch(/translate\(/);
   });
 
-  it('the fragment carries the engine\'s dimensions', () => {
+  it("the fragment carries the engine's dimensions", () => {
     const geo = layoutDot(parseDot('@startdot\ntitle My Graph\ndigraph G { a -> b; }\n@enddot'));
     const out = renderDot(geo) as RenderFragment;
     expect(out.width).toBe(geo.width);

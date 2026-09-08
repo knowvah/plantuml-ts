@@ -18,8 +18,8 @@ const measurer = new FormulaMeasurer();
 const FONT12: FontConfiguration = { family: 'sans-serif', size: 12, color: null, styles: new Set() };
 const ROW_Y = 100;
 
-describe('renderRowAtoms — <sup>/<sub> draws the sizer\'s own muted size + dy (SI30 T4)', () => {
-  test('x<sup>2</sup>: the drawn sup run has font-size 9 and y = rowY + the sizer\'s own dy', () => {
+describe("renderRowAtoms — <sup>/<sub> draws the sizer's own muted size + dy (SI30 T4)", () => {
+  test("x<sup>2</sup>: the drawn sup run has font-size 9 and y = rowY + the sizer's own dy", () => {
     const atoms = buildMemberAtoms('x<sup>2</sup>', FONT12);
     const build = resolveMemberAtoms(atoms, FONT12, measurer);
     const svg = renderRowAtoms(build.atoms, 0, ROW_Y, defaultTheme);
@@ -42,7 +42,7 @@ describe('renderRowAtoms — <sup>/<sub> draws the sizer\'s own muted size + dy 
     expect(sup.dy).not.toBe(x.dy);
   });
 
-  test('H<sub>2</sub>O: every drawn run\'s y matches ROW_Y + its own dy from the sizer', () => {
+  test("H<sub>2</sub>O: every drawn run's y matches ROW_Y + its own dy from the sizer", () => {
     const atoms = buildMemberAtoms('H<sub>2</sub>O', FONT12);
     const build = resolveMemberAtoms(atoms, FONT12, measurer);
     const svg = renderRowAtoms(build.atoms, 0, ROW_Y, defaultTheme);

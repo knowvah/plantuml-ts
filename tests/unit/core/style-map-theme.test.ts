@@ -33,18 +33,12 @@ function styleMap(spec: Record<string, Record<string, string>>): StyleMap {
 
 describe('applyStyleMap — statediagram.arrow (mission G4 S16)', () => {
   it('maps LineColor to colors.graph.stateArrowLineColor', () => {
-    const theme = applyStyleMap(
-      styleMap({ 'statediagram.arrow': { linecolor: 'blue' } }),
-      defaultTheme,
-    );
+    const theme = applyStyleMap(styleMap({ 'statediagram.arrow': { linecolor: 'blue' } }), defaultTheme);
     expect(theme.colors.graph.stateArrowLineColor).toBe('blue');
   });
 
   it('maps HeadColor to colors.graph.stateArrowHeadColor', () => {
-    const theme = applyStyleMap(
-      styleMap({ 'statediagram.arrow': { headcolor: 'red' } }),
-      defaultTheme,
-    );
+    const theme = applyStyleMap(styleMap({ 'statediagram.arrow': { headcolor: 'red' } }), defaultTheme);
     expect(theme.colors.graph.stateArrowHeadColor).toBe('red');
   });
 
@@ -66,18 +60,12 @@ describe('applyStyleMap — statediagram.arrow (mission G4 S16)', () => {
 
 describe('applyStyleMap — activitybar..fork/activitybar..join (mission G4 S16)', () => {
   it('maps activitybar..fork BackGroundColor to colors.graph.activityBarForkColor', () => {
-    const theme = applyStyleMap(
-      styleMap({ 'activitybar..fork': { backgroundcolor: 'green' } }),
-      defaultTheme,
-    );
+    const theme = applyStyleMap(styleMap({ 'activitybar..fork': { backgroundcolor: 'green' } }), defaultTheme);
     expect(theme.colors.graph.activityBarForkColor).toBe('green');
   });
 
   it('maps activitybar..join BackGroundColor to colors.graph.activityBarJoinColor', () => {
-    const theme = applyStyleMap(
-      styleMap({ 'activitybar..join': { backgroundcolor: 'orange' } }),
-      defaultTheme,
-    );
+    const theme = applyStyleMap(styleMap({ 'activitybar..join': { backgroundcolor: 'orange' } }), defaultTheme);
     expect(theme.colors.graph.activityBarJoinColor).toBe('orange');
   });
 

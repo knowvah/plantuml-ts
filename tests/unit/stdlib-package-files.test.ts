@@ -191,10 +191,7 @@ describe('acceptance 2: every emitted manifest path is inside the resolved packa
   it.each(MANIFEST_PACKAGING_CASES)(
     '$label',
     async ({ packageDir, manifestModuleFile, manifestExportName, assetFolder, ceilingMb }) => {
-      const manifestModule = await importGenerated<Record<string, RemoteManifestLike>>(
-        packageDir,
-        manifestModuleFile,
-      );
+      const manifestModule = await importGenerated<Record<string, RemoteManifestLike>>(packageDir, manifestModuleFile);
       const manifest = manifestModule[manifestExportName];
       expect(manifest).toBeDefined();
       const keys = Object.keys(manifest?.files ?? {});
@@ -227,24 +224,33 @@ describe('acceptance 2: every emitted manifest path is inside the resolved packa
 // ---------------------------------------------------------------------------
 
 describe('acceptance 5: manifest modules parse with the expected shape', () => {
-  it('awslib14Remote (concrete) has non-empty files', async () => {
-    const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib14.remote.js');
-    expect(mod.awslib14Remote?.name).toBe('awslib14');
-    expect(Object.keys(mod.awslib14Remote?.files ?? {}).length).toBeGreaterThan(0);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'awslib14Remote (concrete) has non-empty files',
+    async () => {
+      const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib14.remote.js');
+      expect(mod.awslib14Remote?.name).toBe('awslib14');
+      expect(Object.keys(mod.awslib14Remote?.files ?? {}).length).toBeGreaterThan(0);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('awslibRemote (alias) carries aliasOf and empty files', async () => {
-    const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib.remote.js');
-    expect(mod.awslibRemote?.aliasOf).toBe('awslib14');
-    expect(Object.keys(mod.awslibRemote?.files ?? { placeholder: '' })).toHaveLength(0);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'awslibRemote (alias) carries aliasOf and empty files',
+    async () => {
+      const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-aws', 'awslib.remote.js');
+      expect(mod.awslibRemote?.aliasOf).toBe('awslib14');
+      expect(Object.keys(mod.awslibRemote?.files ?? { placeholder: '' })).toHaveLength(0);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('tupadr3Remote (concrete) has non-empty files', async () => {
-    const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-tupadr3', 'tupadr3.remote.js');
-    expect(mod.tupadr3Remote?.name).toBe('tupadr3');
-    expect(Object.keys(mod.tupadr3Remote?.files ?? {}).length).toBeGreaterThan(0);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'tupadr3Remote (concrete) has non-empty files',
+    async () => {
+      const mod = await importGenerated<Record<string, RemoteManifestLike>>('stdlib-tupadr3', 'tupadr3.remote.js');
+      expect(mod.tupadr3Remote?.name).toBe('tupadr3');
+      expect(Object.keys(mod.tupadr3Remote?.files ?? {}).length).toBeGreaterThan(0);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });

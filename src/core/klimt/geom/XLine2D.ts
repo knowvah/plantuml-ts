@@ -126,7 +126,7 @@ export class XLine2D implements UDrawable {
         // dotprod is the length of the px,py vector
         // projected on the x2,y2=>x1,y1 vector times the
         // length of the x2,y2=>x1,y1 vector
-        projlenSq = dotprod * dotprod / (rx2 * rx2 + ry2 * ry2);
+        projlenSq = (dotprod * dotprod) / (rx2 * rx2 + ry2 * ry2);
       }
     }
     // Distance to line is now the length of the relative point

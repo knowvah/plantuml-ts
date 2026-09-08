@@ -265,7 +265,12 @@ export function measureShownFolderTitle(
   opts: BoxSizingOpts | undefined,
   sprites: SpriteDimsLookup | undefined,
 ): readonly [number, number] {
-  const font: FontConfiguration = { family: fontSpec.family, size: fontSpec.size, color: null, styles: SIZING_FONT_STYLES };
+  const font: FontConfiguration = {
+    family: fontSpec.family,
+    size: fontSpec.size,
+    color: null,
+    styles: SIZING_FONT_STYLES,
+  };
   const atomOps = titleAtomOps(sizingAtomImageResolverFor(sprites)(font));
   const skinParam = buildTitleSkinParam(opts?.guillemet, atomOps);
   // `codeDisplay = Display.getWithNewlines(getSkinParam().getPragma(),

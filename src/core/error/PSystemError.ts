@@ -67,11 +67,7 @@ export abstract class PSystemError {
    */
   protected readonly source: readonly StringLocated[];
 
-  protected constructor(
-    source: readonly StringLocated[],
-    trace: readonly StringLocated[],
-    singleError: ErrorUml,
-  ) {
+  protected constructor(source: readonly StringLocated[], trace: readonly StringLocated[], singleError: ErrorUml) {
     this.source = source;
     this.trace = trace;
     this.singleError = singleError;
@@ -186,9 +182,7 @@ export abstract class PSystemError {
 
 /** @see ~/git/plantuml/.../error/PSystemError.java#append */
 function append(result: string[], lineLocation: LineLocation): void {
-  result.push(
-    `[From ${lineLocation.getDescription()} (line ${String(lineLocation.getPosition() + 1)}) ]`,
-  );
+  result.push(`[From ${lineLocation.getDescription()} (line ${String(lineLocation.getPosition() + 1)}) ]`);
 }
 
 /** @see ~/git/plantuml/.../error/PSystemError.java#addToResult */

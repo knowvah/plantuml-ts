@@ -14,7 +14,10 @@
 import { describe, it, expect } from 'vitest';
 import { parseCircledCharDecoration } from '../../../src/diagrams/class/class-stereotype.js';
 import {
-  resolveBadgeFill, resolveBadgeLetter, badgeGlyphPath, badgeFill,
+  resolveBadgeFill,
+  resolveBadgeLetter,
+  badgeGlyphPath,
+  badgeFill,
 } from '../../../src/diagrams/class/class-badge.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
@@ -28,7 +31,8 @@ const measurer = new DeterministicMeasurer();
 describe('parseCircledCharDecoration', () => {
   it('extracts char + color from a labeled decoration', () => {
     expect(parseCircledCharDecoration('(S,#FF7700)Stereotype')).toEqual({
-      char: 'S', color: '#FF7700',
+      char: 'S',
+      color: '#FF7700',
     });
   });
 
@@ -58,7 +62,8 @@ describe('parseCircledCharDecoration', () => {
     // stacked `<<A>><<B>>` declaration reconstructs into ONE raw blob
     // spanning the first `<<` to the last `>>`.
     expect(parseCircledCharDecoration('(A,red)First>> <<(B,blue)Second')).toEqual({
-      char: 'B', color: 'blue',
+      char: 'B',
+      color: 'blue',
     });
   });
 });
@@ -99,7 +104,7 @@ describe('resolveBadgeLetter', () => {
 });
 
 describe('badgeGlyphPath — custom char threading', () => {
-  it('draws the custom letter\'s own glyph when it is one of the 5 known letters', () => {
+  it("draws the custom letter's own glyph when it is one of the 5 known letters", () => {
     const withOverride = badgeGlyphPath('class', 22, 23, 'a');
     const kindDefault = badgeGlyphPath('class', 22, 23);
     const letterA = badgeGlyphPath('interface', 22, 23); // interface kind -> 'A'? no, 'I' -- use abstract instead

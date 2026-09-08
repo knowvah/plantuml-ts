@@ -60,7 +60,7 @@ describe('makeNodeFsFetcher — path traversal protection', () => {
 
   it('error message contains "escapes" for single-level traversal', async () => {
     const fetcher = makeNodeFsFetcher(BASE, vi.fn());
-    const err = await fetcher('../secret').catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetcher('../secret').catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.message).toContain('escapes');
   });
 
@@ -71,13 +71,13 @@ describe('makeNodeFsFetcher — path traversal protection', () => {
 
   it('error message contains "escapes" for deep traversal', async () => {
     const fetcher = makeNodeFsFetcher(BASE, vi.fn());
-    const err = await fetcher('../../etc/passwd').catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetcher('../../etc/passwd').catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.message).toContain('escapes');
   });
 
   it('IncludeResolveError.url is the original target for traversal errors', async () => {
     const fetcher = makeNodeFsFetcher(BASE, vi.fn());
-    const err = await fetcher('../secret').catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetcher('../secret').catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.url).toBe('../secret');
   });
 
@@ -100,7 +100,7 @@ describe('makeNodeFsFetcher — readFile ENOENT', () => {
     const enoent = Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT' });
     const readFile = vi.fn().mockRejectedValue(enoent);
     const fetcher = makeNodeFsFetcher(BASE, readFile);
-    const err = await fetcher('missing.puml').catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetcher('missing.puml').catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.message).toContain('ENOENT');
   });
 
@@ -108,7 +108,7 @@ describe('makeNodeFsFetcher — readFile ENOENT', () => {
     const enoent = Object.assign(new Error('ENOENT: no such file'), { code: 'ENOENT' });
     const readFile = vi.fn().mockRejectedValue(enoent);
     const fetcher = makeNodeFsFetcher(BASE, readFile);
-    const err = await fetcher('missing.puml').catch((e: unknown) => e) as IncludeResolveError;
+    const err = (await fetcher('missing.puml').catch((e: unknown) => e)) as IncludeResolveError;
     expect(err.url).toBe('missing.puml');
   });
 });

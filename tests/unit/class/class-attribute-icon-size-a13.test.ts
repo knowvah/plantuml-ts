@@ -81,8 +81,16 @@ describe('A13: classAttributeIconSize 0 sizing (zakufi-53-sofe736 classe1)', () 
     const m = measureClassifier(classe1(), themed, measurer, SUPPRESS);
     const texts = m.rows.slice(1).map((r) => r.text);
     expect(texts).toEqual([
-      '-field1', '~field2', 'field3', '#field4', '+field5',
-      '-method1()', '~method2()', 'method3()', '#method4()', '+method5()',
+      '-field1',
+      '~field2',
+      'field3',
+      '#field4',
+      '+field5',
+      '-method1()',
+      '~method2()',
+      'method3()',
+      '#method4()',
+      '+method5()',
     ]);
   });
 

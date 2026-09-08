@@ -4,12 +4,7 @@
  */
 
 import type { ActivityBreak } from './ast.js';
-import type {
-  ActivityNodeGeo,
-  BranchResult,
-  BranchResultInternal,
-  LayoutCtx,
-} from './activity-layout-types.js';
+import type { ActivityNodeGeo, BranchResult, BranchResultInternal, LayoutCtx } from './activity-layout-types.js';
 import { DIAMOND_MIN, START_STOP_RADIUS, STOP_OUTER_RADIUS } from './activity-layout-constants.js';
 import { actionSize, nextId, nodeCenterX, parallelogramSize } from './activity-layout-helpers.js';
 

@@ -100,12 +100,7 @@ function decodeBase64Prefix(input: string, maxBytes: number): Uint8Array | undef
  * a state that cannot occur given that invariant.
  */
 function readUint32BE(bytes: Uint8Array, offset: number): number {
-  return (
-    bytes[offset]! * 16777216 +
-    bytes[offset + 1]! * 65536 +
-    bytes[offset + 2]! * 256 +
-    bytes[offset + 3]!
-  );
+  return bytes[offset]! * 16777216 + bytes[offset + 1]! * 65536 + bytes[offset + 2]! * 256 + bytes[offset + 3]!;
 }
 
 function matchesBytes(bytes: Uint8Array, expected: readonly number[], offset: number): boolean {

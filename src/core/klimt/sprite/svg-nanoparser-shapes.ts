@@ -121,11 +121,7 @@ export function getFillString(s: string, stackG: readonly string[] | null): stri
  * carries no methods of its own, matching every other klimt seam
  * (`UBackground.ts`/`UForeground.ts`).
  */
-export function applyFillAndStroke(
-  ugs: UGraphicWithScale,
-  s: string,
-  stackG: readonly string[],
-): UGraphicWithScale {
+export function applyFillAndStroke(ugs: UGraphicWithScale, s: string, stackG: readonly string[]): UGraphicWithScale {
   const fillString = getFillString(s, stackG);
   const strokeString = extract(DATA_STROKE, s);
 

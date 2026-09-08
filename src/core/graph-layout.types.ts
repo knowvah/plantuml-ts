@@ -330,7 +330,6 @@ export interface DotInputEdge {
 
 export type { DotInputCluster };
 
-
 export interface DotInputGraph {
   nodes: DotInputNode[];
   edges: DotInputEdge[];

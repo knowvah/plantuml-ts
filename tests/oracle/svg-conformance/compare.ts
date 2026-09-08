@@ -33,10 +33,10 @@ export const TOLERANCES: Record<string, number> = {
 // ---------------------------------------------------------------------------
 
 export interface Diff {
-  path: string;    // XPath-like: e.g. "svg/g[2]/ellipse/@cx"
+  path: string; // XPath-like: e.g. "svg/g[2]/ellipse/@cx"
   actual: string;
   expected: string;
-  delta?: number;  // for numeric diffs only
+  delta?: number; // for numeric diffs only
   tolerance: number;
   /**
    * How much of the document this one diff stands for, defaulting to 1 when
@@ -50,10 +50,21 @@ export interface Diff {
 // ---------------------------------------------------------------------------
 
 const NUMERIC_ATTRS = new Set([
-  'x', 'y', 'cx', 'cy', 'rx', 'ry',
-  'width', 'height',
-  'x1', 'y1', 'x2', 'y2',
-  'dx', 'dy', 'r',
+  'x',
+  'y',
+  'cx',
+  'cy',
+  'rx',
+  'ry',
+  'width',
+  'height',
+  'x1',
+  'y1',
+  'x2',
+  'y2',
+  'dx',
+  'dy',
+  'r',
 ]);
 
 function parseNumber(s: string): number | null {
@@ -107,7 +118,7 @@ function extractNumbers(s: string): number[] {
 }
 
 function extractPathCommands(d: string): string[] {
-  return (d.match(/[MmZzLlHhVvCcSsQqTtAa]/g) ?? []);
+  return d.match(/[MmZzLlHhVvCcSsQqTtAa]/g) ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -341,10 +352,7 @@ function compareNodes(
     /* v8 ignore next 2 */
     const actualAttrs = actual.attrs ?? {};
     const expectedAttrs = expected.attrs ?? {};
-    const allAttrNames = new Set([
-      ...Object.keys(actualAttrs),
-      ...Object.keys(expectedAttrs),
-    ]);
+    const allAttrNames = new Set([...Object.keys(actualAttrs), ...Object.keys(expectedAttrs)]);
 
     for (const name of [...allAttrNames].sort()) {
       const attrPath = `${path}/@${name}`;
@@ -580,7 +588,8 @@ export function compareSvg(
     toleranceOverride ??
     TOLERANCES[toleranceClass] ??
     /* v8 ignore next */
-    (TOLERANCES['deterministic'] ?? 0.01);
+    TOLERANCES['deterministic'] ??
+    0.01;
   const diffs: Diff[] = [];
 
   const actualNorm = normalizeSvg(actual);
@@ -618,8 +627,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const [, , actualPath, refPath, toleranceClass] = process.argv;
   if (!actualPath || !refPath || !toleranceClass) {
     process.stderr.write(
-      'Usage: node dist/tests/oracle/svg-conformance/compare.js ' +
-        '<actualPath> <refPath> <toleranceClass>\n',
+      'Usage: node dist/tests/oracle/svg-conformance/compare.js ' + '<actualPath> <refPath> <toleranceClass>\n',
     );
     process.exit(2);
   }

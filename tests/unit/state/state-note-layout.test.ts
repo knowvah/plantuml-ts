@@ -37,9 +37,7 @@ function note(overrides: Partial<StateNote> & Pick<StateNote, 'id' | 'text' | 's
 
 describe('buildNoteGraphPartsByScope — LR rotation', () => {
   it('rotates right->bottom under left to right direction (minlen stays 1, not 0)', () => {
-    const notes: StateNote[] = [
-      note({ id: '__note_0', target: 'X', position: 'right', text: 'hi', scopeId: '' }),
-    ];
+    const notes: StateNote[] = [note({ id: '__note_0', target: 'X', position: 'right', text: 'hi', scopeId: '' })];
     const parts = buildNoteGraphPartsByScope(notes, defaultTheme, measurer, 'LR').get('')!;
     expect(parts.candidates).toHaveLength(1);
     // right -> bottom under LR: fromNote=false, minLen=1 (bottom's row, not right's).
@@ -47,17 +45,13 @@ describe('buildNoteGraphPartsByScope — LR rotation', () => {
   });
 
   it('rotates left->top under left to right direction (fromNote stays true, minlen becomes 1)', () => {
-    const notes: StateNote[] = [
-      note({ id: '__note_0', target: 'X', position: 'left', text: 'hi', scopeId: '' }),
-    ];
+    const notes: StateNote[] = [note({ id: '__note_0', target: 'X', position: 'left', text: 'hi', scopeId: '' })];
     const parts = buildNoteGraphPartsByScope(notes, defaultTheme, measurer, 'LR').get('')!;
     expect(parts.candidates[0]).toMatchObject({ fromNote: true, minLen: 1 });
   });
 
   it('TB (default) leaves right/left minlen at 0 — no rotation', () => {
-    const notes: StateNote[] = [
-      note({ id: '__note_0', target: 'X', position: 'right', text: 'hi', scopeId: '' }),
-    ];
+    const notes: StateNote[] = [note({ id: '__note_0', target: 'X', position: 'right', text: 'hi', scopeId: '' })];
     const parts = buildNoteGraphPartsByScope(notes, defaultTheme, measurer, 'TB').get('')!;
     expect(parts.candidates[0]).toMatchObject({ fromNote: false, minLen: 0 });
   });
@@ -126,9 +120,7 @@ describe('sweepOrphanNoteEdges — opportunistic per-pass attach', () => {
   });
 
   it('a candidate already consumed at an earlier pass is skipped on a later sweep', () => {
-    const notes: StateNote[] = [
-      note({ id: '__note_0', target: 'X', position: 'right', text: 'x', scopeId: '' }),
-    ];
+    const notes: StateNote[] = [note({ id: '__note_0', target: 'X', position: 'right', text: 'x', scopeId: '' })];
     const parts = buildNoteGraphPartsByScope(notes, defaultTheme, measurer, 'TB').get('')!;
     const acc = { nodes: [{ id: '__note_0' }, { id: 'X' }], edges: [] as { id: string; from: string; to: string }[] };
     const consumed = new Set<(typeof parts.candidates)[number]>();
@@ -151,7 +143,7 @@ describe('sweepOrphanNoteEdges — opportunistic per-pass attach', () => {
  * `parseState`-direct convention (`state-decl-grammar.test.ts` precedent).
  */
 describe('measureNote — creole/table body sizing (T7, SI28 findings/note.md)', () => {
-  it('fatupo-62-bemu777: table body sizes via AtomTable\'s column/row-max grid, not raw pipe syntax', () => {
+  it("fatupo-62-bemu777: table body sizes via AtomTable's column/row-max grid, not raw pipe syntax", () => {
     const ast = parse(`
 state X
 note right of X #FFF
@@ -261,4 +253,3 @@ describe('measureNote / renderStateNoteFreestanding — <sub> per-run size+dy (S
     expect(oY).toBe(hY);
   });
 });
-

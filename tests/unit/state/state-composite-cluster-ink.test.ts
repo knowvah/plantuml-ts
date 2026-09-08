@@ -125,12 +125,8 @@ describe('nested cluster ink inside an autonom pass (SI29 F7)', () => {
     // The outermost scope holds `Track_FSM` plus the two `[*]` pseudo-
     // circles (0.277778 / 0.305556 in) — the widest node is the composite.
     const composite = [...outer.nodes].sort((a, b) => b.width - a.width)[0]!;
-    expect(Math.abs(composite.width - JAR_TRACK_FSM.width) * PX_PER_INCH).toBeLessThan(
-      RESIDUAL_TOLERANCE_PX,
-    );
-    expect(Math.abs(composite.height - JAR_TRACK_FSM.height) * PX_PER_INCH).toBeLessThan(
-      RESIDUAL_TOLERANCE_PX,
-    );
+    expect(Math.abs(composite.width - JAR_TRACK_FSM.width) * PX_PER_INCH).toBeLessThan(RESIDUAL_TOLERANCE_PX);
+    expect(Math.abs(composite.height - JAR_TRACK_FSM.height) * PX_PER_INCH).toBeLessThan(RESIDUAL_TOLERANCE_PX);
   });
 
   it('draws both nested cluster rectangles exactly where jar drew them', () => {

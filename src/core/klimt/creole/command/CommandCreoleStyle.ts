@@ -140,8 +140,7 @@ const ACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.UNDERLINE]: `^<[uU]${EXTENDED_COLOR_ARM}>`,
   [FontStyle.STRIKE]: `^<(?:strike|STRIKE|s|S|del|DEL)${EXTENDED_COLOR_ARM}>`,
   [FontStyle.WAVE]: `^<[wW]${EXTENDED_COLOR_ARM}>`,
-  [FontStyle.BACKCOLOR]:
-    '^<[bB][aA][cC][kK](?::(?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?)?>',
+  [FontStyle.BACKCOLOR]: '^<[bB][aA][cC][kK](?::(?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?)?>',
 };
 
 const DEACTIVATION_SOURCE: Record<string, string> = {

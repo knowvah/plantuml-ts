@@ -8,8 +8,11 @@
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ClassDiagramAST, Classifier, ClassifierKind } from './ast.js';
 import {
-  applyDirectives, applyHideShowEntityDirectives, applyHideShowKindDirectives,
-  applyVisibilityHideShow, applyStereotypeHideShow,
+  applyDirectives,
+  applyHideShowEntityDirectives,
+  applyHideShowKindDirectives,
+  applyVisibilityHideShow,
+  applyStereotypeHideShow,
 } from './class-directives.js';
 import { finalizePendingNote, isNoteCloser } from './class-notes.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
@@ -39,7 +42,6 @@ import { refuse } from '../../core/parse-refusal.js';
 import type { ParseState } from './class-parse-state.js';
 import { adjudicateAllowMixing } from './class-descriptive-leaf-command.js';
 export type { ParseState };
-
 
 function makeDefaultAST(): ClassDiagramAST {
   return {
@@ -95,7 +97,11 @@ export function ensureClassifier(
   display?: string,
   reuseExistingChild = false,
 ): Classifier {
-  const { id, nsId, display: disp } = resolveReference({
+  const {
+    id,
+    nsId,
+    display: disp,
+  } = resolveReference({
     namespaces: state.ast.namespaces,
     sep: state.namespaceSeparator,
     activeNamespace: state.activeNamespace,
@@ -276,8 +282,7 @@ function handlePendingBodyLine(state: ParseState, line: string): boolean {
         // Object bodies (`object Foo { ... }`) collect raw field lines under
         // different semantics than class member lines — route by kind. See
         // class-object-commands.ts#parseObjectField's doc for why.
-        const member =
-          classifier.kind === 'object' ? parseObjectField(line) : parseMemberLine(line);
+        const member = classifier.kind === 'object' ? parseObjectField(line) : parseMemberLine(line);
         if (member !== null) {
           classifier.members.push(member);
         } else if (line === '' && classifier.kind !== 'object') {

@@ -52,7 +52,10 @@ describe('hide/show directive package scope — parse capture', () => {
     `);
     expect(ast.directives).toHaveLength(1);
     expect(ast.directives[0]).toMatchObject({
-      kind: 'hideshow', action: 'hide', target: 'methods', scopeNsId: 'example',
+      kind: 'hideshow',
+      action: 'hide',
+      target: 'methods',
+      scopeNsId: 'example',
     });
   });
 
@@ -74,7 +77,10 @@ describe('hide/show directive package scope — parse capture', () => {
     `);
     expect(ast.hideKindDirectives).toHaveLength(1);
     expect(ast.hideKindDirectives![0]).toMatchObject({
-      kind: 'hideshowkind', classifierKind: 'enum', target: 'fields', scopeNsId: 'example',
+      kind: 'hideshowkind',
+      classifierKind: 'enum',
+      target: 'fields',
+      scopeNsId: 'example',
     });
   });
 
@@ -89,7 +95,9 @@ describe('hide/show directive package scope — parse capture', () => {
     `);
     expect(ast.hideEntityDirectives).toHaveLength(1);
     expect(ast.hideEntityDirectives![0]).toMatchObject({
-      kind: 'hideshowentity', target: 'methods', scopeNsId: 'example',
+      kind: 'hideshowentity',
+      target: 'methods',
+      scopeNsId: 'example',
     });
   });
 

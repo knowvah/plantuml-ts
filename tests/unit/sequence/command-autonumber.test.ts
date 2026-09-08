@@ -36,7 +36,11 @@ function freshState(): ParseState {
   };
 }
 
-function run(command: { pattern: RegExp; execute(s: ParseState, m: RegExpExecArray): void }, state: ParseState, line: string): void {
+function run(
+  command: { pattern: RegExp; execute(s: ParseState, m: RegExpExecArray): void },
+  state: ParseState,
+  line: string,
+): void {
   const match = command.pattern.exec(line);
   if (match === null) throw new Error(`pattern did not match: ${line}`);
   command.execute(state, match);

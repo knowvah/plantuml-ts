@@ -17,13 +17,13 @@ function drain(it: { peek(): StringLocated | null; next(): void }): string[] {
 }
 
 describe('CodeIteratorInnerComment', () => {
-  it('strips a leading /\'...\'/ inline comment', () => {
+  it("strips a leading /'...'/ inline comment", () => {
     const base = new CodeIteratorImpl([line("/' hidden '/ visible text")]);
     const it = new CodeIteratorInnerComment(base);
     expect(it.peek()?.getString()).toBe(' visible text');
   });
 
-  it('strips a trailing /\'...\'/ inline comment', () => {
+  it("strips a trailing /'...'/ inline comment", () => {
     const base = new CodeIteratorImpl([line("visible text /' hidden '/")]);
     const it = new CodeIteratorInnerComment(base);
     expect(it.peek()?.getString()).toBe('visible text ');
@@ -53,7 +53,7 @@ describe('CodeIteratorShortComment', () => {
 });
 
 describe('CodeIteratorLongComment', () => {
-  it('consumes everything between /\' and a line ending in \'/, logging both', () => {
+  it("consumes everything between /' and a line ending in '/, logging both", () => {
     const logs: StringLocated[] = [];
     const base = new CodeIteratorImpl([
       line("/'", 'COMMENT_LONG_START'),

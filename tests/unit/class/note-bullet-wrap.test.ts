@@ -43,7 +43,11 @@ describe('R2h — Fission counts the Bullet header on every wrapped stripe', () 
   });
 
   it('indents every wrapped continuation row by the bullet width', () => {
-    const m = measureNote('* here is a very long sentence which should be wrapped. I can make it even longer by adding more words', wrapTheme, measurer);
+    const m = measureNote(
+      '* here is a very long sentence which should be wrapped. I can make it even longer by adding more words',
+      wrapTheme,
+      measurer,
+    );
     expect(m.lineAtoms.length).toBeGreaterThan(1);
     for (const atoms of m.lineAtoms) {
       // B22/M21: the header is a real `bullet` atom now, not a width-only
@@ -54,9 +58,7 @@ describe('R2h — Fission counts the Bullet header on every wrapped stripe', () 
     // Every row's stored width includes the header (blank(header) on
     // continuations — Fission.java:88-89).
     for (let i = 0; i < m.lineWidths.length; i++) {
-      const textWidth = m.lineAtoms[i]!.slice(1).reduce(
-        (sum, a) => sum + ('width' in a ? a.width : 0), 0,
-      );
+      const textWidth = m.lineAtoms[i]!.slice(1).reduce((sum, a) => sum + ('width' in a ? a.width : 0), 0);
       expect(m.lineWidths[i]).toBeCloseTo(12 + textWidth, 3);
     }
   });

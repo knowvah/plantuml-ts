@@ -92,7 +92,13 @@ function copiedNoteFields(note: ClassNote): Pick<NoteGeo, 'target' | 'color' | '
  */
 function tipNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }, req: TipRequest): NoteGeo {
   return {
-    id: note.id, kind: 'tips', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines,
+    id: note.id,
+    kind: 'tips',
+    x: origin.x,
+    y: origin.y,
+    width: m.width,
+    height: m.height,
+    lines: m.lines,
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
@@ -104,9 +110,21 @@ function tipNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y:
 
 /** A plain (non-tip) note's geo — the shared shape both the tip and
  *  non-tip stacking branches would otherwise repeat inline. */
-function plainNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; y: number }, connector: Array<{ x: number; y: number }>): NoteGeo {
+function plainNoteGeo(
+  note: ClassNote,
+  m: NoteMeasurement,
+  origin: { x: number; y: number },
+  connector: Array<{ x: number; y: number }>,
+): NoteGeo {
   return {
-    id: note.id, kind: 'note', x: origin.x, y: origin.y, width: m.width, height: m.height, lines: m.lines, lineWidths: m.lineWidths,
+    id: note.id,
+    kind: 'note',
+    x: origin.x,
+    y: origin.y,
+    width: m.width,
+    height: m.height,
+    lines: m.lines,
+    lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
     connector,
@@ -123,9 +141,7 @@ function plainNoteGeo(note: ClassNote, m: NoteMeasurement, origin: { x: number; 
  * which shape ends up drawn.
  */
 function withTipGroupPhantom(geo: NoteGeo, note: ClassNote): NoteGeo {
-  return note.tipGroupPhantomIndex !== undefined
-    ? { ...geo, tipGroupPhantomIndex: note.tipGroupPhantomIndex }
-    : geo;
+  return note.tipGroupPhantomIndex !== undefined ? { ...geo, tipGroupPhantomIndex: note.tipGroupPhantomIndex } : geo;
 }
 
 /** A singleton group's real-connector geo — try the general opalisable
@@ -191,7 +207,16 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
     const note = data.notes[i]!;
     const m = data.measurements.get(note.id)!;
     const origin = { x: pos.x, y: pos.y + yOffset };
-    const step = resolveGroupStep({ memberOrder, note, m, origin, isSingleton, connectorPoints, tipMetrics, strictUml });
+    const step = resolveGroupStep({
+      memberOrder,
+      note,
+      m,
+      origin,
+      isSingleton,
+      connectorPoints,
+      tipMetrics,
+      strictUml,
+    });
     out.push(step.geo);
     yOffset += step.advance;
   }

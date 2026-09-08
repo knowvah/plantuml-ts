@@ -103,19 +103,25 @@ const SEVEN_SHAPES: ReadonlyArray<{
 describe('usecase ellipse-fit parity — retired data-based mechanism vs real Footprint#getEllipse (SI14/ADR-3)', () => {
   const sprites = biGlobeSprites();
 
-  it.each(SEVEN_SHAPES)('$name: real Footprint#getEllipse matches the retired implementation to 5e-4px', ({ display, retired }) => {
-    const real = measureUsecaseOrActorLeaf(display, 'usecase', fontSpec, measurer, sprites);
-    expect(Math.abs(real.width - retired.width)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
-    expect(Math.abs(real.height - retired.height)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
-  });
+  it.each(SEVEN_SHAPES)(
+    '$name: real Footprint#getEllipse matches the retired implementation to 5e-4px',
+    ({ display, retired }) => {
+      const real = measureUsecaseOrActorLeaf(display, 'usecase', fontSpec, measurer, sprites);
+      expect(Math.abs(real.width - retired.width)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
+      expect(Math.abs(real.height - retired.height)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
+    },
+  );
 
-  it.each(SEVEN_SHAPES)('$name: measureUsecase (its delegation target, post-retirement) matches too', ({ display, retired }) => {
-    const viaMeasureUsecase = measureUsecase(display, fontSpec, measurer, sprites);
-    expect(Math.abs(viaMeasureUsecase.width - retired.width)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
-    expect(Math.abs(viaMeasureUsecase.height - retired.height)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
-  });
+  it.each(SEVEN_SHAPES)(
+    '$name: measureUsecase (its delegation target, post-retirement) matches too',
+    ({ display, retired }) => {
+      const viaMeasureUsecase = measureUsecase(display, fontSpec, measurer, sprites);
+      expect(Math.abs(viaMeasureUsecase.width - retired.width)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
+      expect(Math.abs(viaMeasureUsecase.height - retired.height)).toBeLessThanOrEqual(PARITY_TOLERANCE_PX);
+    },
+  );
 
-  it('sprite+text / text+sprite reproduce the exact order-dependent pair usecase-footprint.ts\'s header cited', () => {
+  it("sprite+text / text+sprite reproduce the exact order-dependent pair usecase-footprint.ts's header cited", () => {
     // "<$bi-globe>\nbi-globe" = 66.026×43.587, "bi-globe\n<$bi-globe>" = 69.791×45.945 (jar, per the header) —
     // same lines, swapped order, different result; both paths must still agree with each other on each.
     const spriteFirst = measureUsecaseOrActorLeaf('<$bi-globe>\nbi-globe', 'usecase', fontSpec, measurer, sprites);

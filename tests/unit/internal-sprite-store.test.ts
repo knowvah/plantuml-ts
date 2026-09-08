@@ -26,8 +26,8 @@ const ARCHIMATE_SVG =
   'viewBox="0 0 19.995 19.928"><path d="M 2,2 L 18,2 L 18,18 L 2,18 Z"/></svg>';
 
 const PNG_1X1 = new Uint8Array([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52,
-  0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0,
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0,
+  0, 0,
 ]);
 
 function storeOf(entries: Readonly<Record<string, AssetPayload>>): AssetStore {

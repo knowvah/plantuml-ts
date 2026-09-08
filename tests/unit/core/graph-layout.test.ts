@@ -87,11 +87,7 @@ describe('layoutGraph — node and edge geometry', () => {
 describe('layoutGraph — rank constraints', () => {
   it('places same-rank nodes on the same row', () => {
     const g: DotInputGraph = {
-      nodes: [
-        { ...box('a'), attributes: { rank: 'same' } },
-        { ...box('b'), attributes: { rank: 'same' } },
-        box('c'),
-      ],
+      nodes: [{ ...box('a'), attributes: { rank: 'same' } }, { ...box('b'), attributes: { rank: 'same' } }, box('c')],
       edges: [
         { id: 'e0', from: 'a', to: 'c' },
         { id: 'e1', from: 'b', to: 'c' },
@@ -602,29 +598,22 @@ describe('layoutGraph — plaintext row-port node padding (M4)', () => {
     });
     return [r.nodes[0]!, r.nodes[1]!];
   };
-  const centre = (n: OutNode): readonly [number, number] =>
-    [n.x + n.width / 2, n.y + n.height / 2];
+  const centre = (n: OutNode): readonly [number, number] => [n.x + n.width / 2, n.y + n.height / 2];
 
-  it.each(GRAPHVIZ_PADDED)(
-    'spaces a %sx%s label as a %sx%s node',
-    (labelW, labelH, nodeW, nodeH) => {
-      // same rank, no edge: the horizontal gap carries the padded WIDTH
-      const [sa, sb] = pair(labelW, labelH, false);
-      expect(centre(sb)[0] - centre(sa)[0]).toBeCloseTo(nodeW + NODESEP, 6);
-      // one edge, two ranks: the vertical gap carries the padded HEIGHT
-      const [ra, rb] = pair(labelW, labelH, true);
-      expect(Math.abs(centre(rb)[1] - centre(ra)[1])).toBeCloseTo(nodeH + RANKSEP, 6);
-    },
-  );
+  it.each(GRAPHVIZ_PADDED)('spaces a %sx%s label as a %sx%s node', (labelW, labelH, nodeW, nodeH) => {
+    // same rank, no edge: the horizontal gap carries the padded WIDTH
+    const [sa, sb] = pair(labelW, labelH, false);
+    expect(centre(sb)[0] - centre(sa)[0]).toBeCloseTo(nodeW + NODESEP, 6);
+    // one edge, two ranks: the vertical gap carries the padded HEIGHT
+    const [ra, rb] = pair(labelW, labelH, true);
+    expect(Math.abs(centre(rb)[1] - centre(ra)[1])).toBeCloseTo(nodeH + RANKSEP, 6);
+  });
 
-  it.each(GRAPHVIZ_PADDED)(
-    'still REPORTS a %sx%s label at its own size, not the %sx%s node',
-    (labelW, labelH) => {
-      const [a] = pair(labelW, labelH, false);
-      expect(a.width).toBe(labelW);
-      expect(a.height).toBe(labelH);
-    },
-  );
+  it.each(GRAPHVIZ_PADDED)('still REPORTS a %sx%s label at its own size, not the %sx%s node', (labelW, labelH) => {
+    const [a] = pair(labelW, labelH, false);
+    expect(a.width).toBe(labelW);
+    expect(a.height).toBe(labelH);
+  });
 
   it('leaves a plaintext node WITHOUT portRows on the unpadded fixedsize fold', () => {
     // description's circle/interface leaves and state's json states keep their

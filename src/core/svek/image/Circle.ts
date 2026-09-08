@@ -38,7 +38,9 @@ export class Circle {
       p2.getX() * p2.getX() * (-p1.getY() + p3.getY());
     const den1 =
       2 *
-      (p3.getX() * (p1.getY() - p2.getY()) + p1.getX() * (p2.getY() - p3.getY()) + p2.getX() * (-p1.getY() + p3.getY()));
+      (p3.getX() * (p1.getY() - p2.getY()) +
+        p1.getX() * (p2.getY() - p3.getY()) +
+        p2.getX() * (-p1.getY() + p3.getY()));
     const x = num1 / den1;
     const den2 = p3.getY() - p2.getY();
     const y = (p2.getY() + p3.getY()) / 2 - ((p3.getX() - p2.getX()) / den2) * (x - (p2.getX() + p3.getX()) / 2);

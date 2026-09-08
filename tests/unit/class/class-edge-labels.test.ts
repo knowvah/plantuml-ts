@@ -44,7 +44,9 @@ function makeAST(overrides?: Partial<ClassDiagramAST>): ClassDiagramAST {
 
 function captureGraph(ast: ClassDiagramAST, theme = defaultTheme): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => { captured = g; });
+  setLayoutInputObserver((g) => {
+    captured = g;
+  });
   try {
     layoutClass(ast, theme, measurer);
   } finally {
@@ -78,9 +80,7 @@ describe('G13 — linetype ortho edge label (bujedi-30-cize673, jakapi-64-tine25
 
   it('leaves taillabel/headlabel as label (never xlabel) under ortho', () => {
     const withMult = makeAST({
-      relationships: [
-        { from: 'A', to: 'B', type: 'composition', fromMultiplicity: '1', toMultiplicity: '*' },
-      ],
+      relationships: [{ from: 'A', to: 'B', type: 'composition', fromMultiplicity: '1', toMultiplicity: '*' }],
     });
     const attrs = captureGraph(withMult, { ...defaultTheme, linetype: 'ortho' }).edges[0]!.attributes!;
     expect(attrs.tailLabelWidth).toBeGreaterThan(0);
@@ -204,20 +204,23 @@ describe('SI25 — guide-line label: DOT box and geo ink agree at the resolved a
   const oracleMeasurer = new DeterministicMeasurer();
   const guideRel: Relationship = { from: 'A', to: 'B', type: 'association', label: 'ab >\\ncd <\\n< ef\\n> gh' };
 
-  it.each([13, 20])('at arrow FontSize %i the reserved box width is the geo merged block width + 2*marginLabel', (size) => {
-    const theme = deepMergeTheme(defaultTheme, { colors: { graph: { arrowFontSize: size } } });
-    const font = { family: theme.fontFamily, size };
-    // The DOT side: `edgeLabelAttrs` measures via `computeGuideLinesBox`
-    // (`class-layout-edge-labels.ts`) then adds `2 * marginLabel` (1 each side).
-    const attrs = edgeLabelAttrs(guideRel, font, { family: theme.fontFamily, size: 13 }, oracleMeasurer);
-    // The ink side: `buildEdgeGeos` -> `guideLinesAnchor` over `splitGuideLines`.
-    const geo = layoutClass(makeAST({ relationships: [guideRel] }), theme, oracleMeasurer);
-    const lines = geo.edges[0]!.labelLines!;
-    expect(lines).toHaveLength(4);
-    const merged = Math.max(...lines.map((l) => l.x + l.width)) - Math.min(...lines.map((l) => l.x - size));
-    expect(attrs.labelWidth!).toBeCloseTo(merged + 2, 6);
-    expect(attrs.labelHeight!).toBeCloseTo(4 * size + 2, 6);
-    // Every line carries a glyph whose slot is `size` wide (text = left + size).
-    for (const l of lines) expect(l.glyph).toBeDefined();
-  });
+  it.each([13, 20])(
+    'at arrow FontSize %i the reserved box width is the geo merged block width + 2*marginLabel',
+    (size) => {
+      const theme = deepMergeTheme(defaultTheme, { colors: { graph: { arrowFontSize: size } } });
+      const font = { family: theme.fontFamily, size };
+      // The DOT side: `edgeLabelAttrs` measures via `computeGuideLinesBox`
+      // (`class-layout-edge-labels.ts`) then adds `2 * marginLabel` (1 each side).
+      const attrs = edgeLabelAttrs(guideRel, font, { family: theme.fontFamily, size: 13 }, oracleMeasurer);
+      // The ink side: `buildEdgeGeos` -> `guideLinesAnchor` over `splitGuideLines`.
+      const geo = layoutClass(makeAST({ relationships: [guideRel] }), theme, oracleMeasurer);
+      const lines = geo.edges[0]!.labelLines!;
+      expect(lines).toHaveLength(4);
+      const merged = Math.max(...lines.map((l) => l.x + l.width)) - Math.min(...lines.map((l) => l.x - size));
+      expect(attrs.labelWidth!).toBeCloseTo(merged + 2, 6);
+      expect(attrs.labelHeight!).toBeCloseTo(4 * size + 2, 6);
+      // Every line carries a glyph whose slot is `size` wide (text = left + size).
+      for (const l of lines) expect(l.glyph).toBeDefined();
+    },
+  );
 });

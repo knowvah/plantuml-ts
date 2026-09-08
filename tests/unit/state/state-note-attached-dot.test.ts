@@ -161,7 +161,7 @@ describe('note ... on link (T4, state-declared-size-fix)', () => {
     expect(svg).toContain('<text x="60.213" y="330.111" font-size="13" fill="#000" textLength="17.388">hi1</text>');
   });
 
-  it('tumaba-64-tosu281: SubState (the composite host) reserves the note\'s real width', () => {
+  it("tumaba-64-tosu281: SubState (the composite host) reserves the note's real width", () => {
     // findings/note.md#tumaba-64-tosu281's own mechanism: `SubState`'s DOT
     // node width was undersized by exactly the note's own reserved
     // labelWidth (48px) before this task -- assert the rect the harness

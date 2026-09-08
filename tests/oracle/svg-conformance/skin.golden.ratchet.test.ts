@@ -38,14 +38,9 @@ interface SkinRatchetManifest {
   fixtures: SkinRatchetFixture[];
 }
 
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-skin',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-skin');
 
-const manifest = JSON.parse(
-  readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8'),
-) as SkinRatchetManifest;
+const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as SkinRatchetManifest;
 
 function fixtureDir(f: SkinRatchetFixture): string {
   return join(GOLDENS_ROOT, f.skin, f.slug);
@@ -67,25 +62,22 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 // AC1 — every locked skin fixture stays byte-exact against its golden.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-skin conformance ratchet (AC1)',
-  () => {
-    for (const f of manifest.fixtures) {
-      it(`${f.skin}/${f.slug}: stays zero-diff against the pinned golden`, () => {
-        const golden = readGolden(f);
-        const markup = readSource(f);
-        const ours = renderFixture(markup, new DeterministicMeasurer());
-        const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-        expect(
-          pass,
-          `${f.skin}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-            ` — ${JSON.stringify(diffs[0])}`,
-        ).toBe(true);
-        expect(diffs).toEqual([]);
-      });
-    }
-  },
-);
+describe.skipIf(manifest.fixtures.length === 0)('svg-skin conformance ratchet (AC1)', () => {
+  for (const f of manifest.fixtures) {
+    it(`${f.skin}/${f.slug}: stays zero-diff against the pinned golden`, () => {
+      const golden = readGolden(f);
+      const markup = readSource(f);
+      const ours = renderFixture(markup, new DeterministicMeasurer());
+      const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+      expect(
+        pass,
+        `${f.skin}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+          ` — ${JSON.stringify(diffs[0])}`,
+      ).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+  }
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-skin goldens yet (skip gracefully, not a failure)', () => {

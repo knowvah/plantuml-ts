@@ -24,10 +24,7 @@
  *      generic above → 44 = 4*10 + 4).
  */
 import { describe, it, expect } from 'vitest';
-import {
-  measureGenericTagDim,
-  CLASS_STEREOTYPE_FONT_SIZE,
-} from '../../../src/diagrams/class/class-stereotype.js';
+import { measureGenericTagDim, CLASS_STEREOTYPE_FONT_SIZE } from '../../../src/diagrams/class/class-stereotype.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
@@ -64,8 +61,7 @@ describe('measureGenericTagDim with \\n line breaks (R2c item 1)', () => {
     expect(dim?.width).toBeCloseTo(Math.max(w1, w2) + 4, 4);
   });
 
-  it('stacks one 12px line per split line + the 4px double margin ' +
-    '(jar g4 probe: 4 lines -> 52)', () => {
+  it('stacks one 12px line per split line + the 4px double margin ' + '(jar g4 probe: 4 lines -> 52)', () => {
     const raw = 'aaaa,\\nbbbb,\\ncccc,\\ndddd';
     const dim = measureGenericTagDim(['x'], 'sans-serif', measurer, undefined, raw);
     expect(dim?.height).toBe(4 * CLASS_STEREOTYPE_FONT_SIZE + 4);
@@ -76,12 +72,14 @@ describe('measureGenericTagDim with \\n line breaks (R2c item 1)', () => {
     expect(dim?.height).toBe(CLASS_STEREOTYPE_FONT_SIZE + 4);
   });
 
-  it('floors each line at 10px below a 10pt font (AtomText.java:180-181; ' +
-    'jar g4f probe: 4 lines at 6pt -> 44)', () => {
-    const raw = 'aaaa,\\nbbbb,\\ncccc,\\ndddd';
-    const dim = measureGenericTagDim(['x'], 'sans-serif', measurer, 6, raw);
-    expect(dim?.height).toBe(4 * 10 + 4);
-  });
+  it(
+    'floors each line at 10px below a 10pt font (AtomText.java:180-181; ' + 'jar g4f probe: 4 lines at 6pt -> 44)',
+    () => {
+      const raw = 'aaaa,\\nbbbb,\\ncccc,\\ndddd';
+      const dim = measureGenericTagDim(['x'], 'sans-serif', measurer, 6, raw);
+      expect(dim?.height).toBe(4 * 10 + 4);
+    },
+  );
 });
 
 describe('julixi-10/rulite-35 contenty node (capture-vs-golden pin)', () => {
@@ -127,7 +125,10 @@ describe('member-row / header-line 10px atom floor (R2c item 4a)', () => {
       colors: { graph: { classFontSize: 6 } },
     });
     const classifier = makeClassifier({
-      id: 'foo', display: 'foo', hideCircle: true, members: [member],
+      id: 'foo',
+      display: 'foo',
+      hideCircle: true,
+      members: [member],
     });
     const m = measureClassifier(classifier, theme, measurer, { fields: false, methods: false });
     // header (10 + 10) + fields (8 + 14) + methods 8.

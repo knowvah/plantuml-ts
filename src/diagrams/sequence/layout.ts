@@ -26,10 +26,7 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import {
-  computeParticipantLayout,
-  type ParticipantLayoutResult,
-} from './sequence-layout-participants.js';
+import { computeParticipantLayout, type ParticipantLayoutResult } from './sequence-layout-participants.js';
 import {
   flushOpenActivations,
   processEvents,
@@ -52,11 +49,7 @@ import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 // Public API
 // ---------------------------------------------------------------------------
 
-export function layoutSequence(
-  ast: SequenceDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-): SequenceGeometry {
+export function layoutSequence(ast: SequenceDiagramAST, theme: Theme, measurer: StringMeasurer): SequenceGeometry {
   if (ast.participants.length === 0) {
     return emptyGeometry();
   }
@@ -120,11 +113,12 @@ function assembleGeometry(
   const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
-  const { lifelineEndY, footerShapeY, totalHeight } =
-    computeVerticalTotals(maxParticipantHeight, currentY, showFootbox);
-  flushOpenActivations(
-    eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos,
+  const { lifelineEndY, footerShapeY, totalHeight } = computeVerticalTotals(
+    maxParticipantHeight,
+    currentY,
+    showFootbox,
   );
+  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
@@ -177,8 +171,7 @@ function runEventLayout(
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
   // head row, and NOT one `messageSpacing`: teoz has no such term at all
   // (`findings/vertical-terms.md` §1.4).
-  const startY =
-    TOP_MARGIN + participantLayout.maxParticipantHeight + PLAYING_SPACE_STARTING_Y;
+  const startY = TOP_MARGIN + participantLayout.maxParticipantHeight + PLAYING_SPACE_STARTING_Y;
   const currentY = processEvents(ast.events, startY, ctx);
 
   return {
@@ -307,11 +300,7 @@ interface VerticalTotals {
  * from `lifelineEndY` and derives each kind's glyph offset itself, so the
  * field survives only for `sequence-page.ts`/`scale-geo.ts`.
  */
-function computeVerticalTotals(
-  maxParticipantHeight: number,
-  currentY: number,
-  showFootbox: boolean,
-): VerticalTotals {
+function computeVerticalTotals(maxParticipantHeight: number, currentY: number, showFootbox: boolean): VerticalTotals {
   const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
   // `factor` in `calculateDimensionSlow:83-84` — 2 with a footbox, 1 without.
   const footBand = showFootbox ? maxParticipantHeight : 0;
@@ -365,15 +354,9 @@ function computeTotalWidth(
 
   for (const geo of eventGeos) {
     if (geo.kind !== 'message') continue;
-    const labelText =
-      geo.sequenceNumber !== undefined
-        ? `${geo.sequenceNumber}: ${geo.label}`
-        : geo.label;
+    const labelText = geo.sequenceNumber !== undefined ? `${geo.sequenceNumber}: ${geo.label}` : geo.label;
     const labelWidth = measurer.measure(labelText, fontSpec).width;
-    const midX =
-      geo.arrowDirection === 'self'
-        ? geo.fromX + 20
-        : (geo.fromX + geo.toX) / 2;
+    const midX = geo.arrowDirection === 'self' ? geo.fromX + 20 : (geo.fromX + geo.toX) / 2;
     const labelRightEdge = midX + labelWidth / 2 + RIGHT_MARGIN;
     if (labelRightEdge > totalWidth) {
       totalWidth = labelRightEdge;
@@ -440,11 +423,7 @@ function exoContentRight(eventGeos: EventGeo[]): number {
  * band used to run edge to edge, which is wider than the jar's on every
  * fixture.
  */
-function backfillDividerWidth(
-  dividerGeos: DividerGeo[],
-  totalWidth: number,
-  originX: number,
-): void {
+function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number, originX: number): void {
   for (const d of dividerGeos) {
     // `originX`, not `LEFT_MARGIN`: `border1` is the playing space's own left
     // border, which upstream shifts along with everything else when the body
@@ -475,11 +454,7 @@ function backfillDividerWidth(
  * `x1="44.959" x2="190.003"`, the same left edge as its own participant row
  * and the same right edge its widest message reaches.
  */
-function backfillNewpageWidth(
-  newpageGeos: NewpageGeo[],
-  totalWidth: number,
-  originX: number,
-): void {
+function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number, originX: number): void {
   for (const n of newpageGeos) {
     n.bandX = originX;
     n.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
@@ -506,12 +481,7 @@ function backfillNewpageWidth(
  * does not yet port, so it is a task of its own rather than a side effect of
  * routing the text through the emitter.
  */
-function boxLabelRuns(
-  label: string,
-  boxX: number,
-  theme: Theme,
-  measurer: StringMeasurer,
-): readonly TextRun[] {
+function boxLabelRuns(label: string, boxX: number, theme: Theme, measurer: StringMeasurer): readonly TextRun[] {
   const font: FontSpec = { family: theme.fontFamily, size: BOX_LABEL_FONT_SIZE };
   // C6: `ComponentRoseEnglober` extends `AbstractTextualComponent` and builds
   // its label through the same `create0` every other sequence text uses
@@ -561,8 +531,7 @@ function computeBoxGeos(
       height: totalHeight,
       label: box.label,
       color: box.color,
-      labelRuns:
-        box.label === '' ? [] : boxLabelRuns(box.label, leftEdge - BOX_PAD, theme, measurer),
+      labelRuns: box.label === '' ? [] : boxLabelRuns(box.label, leftEdge - BOX_PAD, theme, measurer),
     });
   }
 

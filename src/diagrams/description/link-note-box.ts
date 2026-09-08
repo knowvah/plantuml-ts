@@ -62,11 +62,7 @@ function linkNoteFont(theme: Theme): FontConfiguration {
 
 /** `text` is the RAW `DescriptiveLink.linkNote` value -- creole markup
  *  included, since `buildNoteBody` is a real creole block and handles it. */
-export function measureLinkNoteDim(
-  text: string,
-  theme: Theme,
-  measurer: StringMeasurer,
-): RoseNoteDim {
+export function measureLinkNoteDim(text: string, theme: Theme, measurer: StringMeasurer): RoseNoteDim {
   const font = linkNoteFont(theme);
   return coreMeasureLinkNoteDim(text, { family: font.family }, measurer, (t, m) => {
     const block = buildNoteBody(t, font);

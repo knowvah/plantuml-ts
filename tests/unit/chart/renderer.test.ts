@@ -29,7 +29,6 @@ import { parseAst } from '../../helpers/parse-ast.js';
  */
 const deNbsp = (svg: string): string => svg.split('\u00a0').join(' ');
 
-
 // ---------------------------------------------------------------------------
 // Shared test fixtures
 // ---------------------------------------------------------------------------
@@ -47,13 +46,7 @@ function src(lines: string[]): UmlSource {
  * Callers can override any field via layoutChart or direct construction.
  */
 function makeMinimalGeo(): ChartGeometry {
-  const ast = parseChartAst(
-    src([
-      'h-axis ["A","B","C"]',
-      'v-axis "Y" 0 --> 100',
-      'bar [10, 50, 30]',
-    ]),
-  );
+  const ast = parseChartAst(src(['h-axis ["A","B","C"]', 'v-axis "Y" 0 --> 100', 'bar [10, 50, 30]']));
   return layoutChart(ast, theme, measurer);
 }
 
@@ -65,12 +58,12 @@ describe('AC1: bar + line chart renders both <rect> and <line>', () => {
   it('renderSync produces SVG with rect and line elements', () => {
     const svg = renderSync(
       '@startchart\n' +
-      'h-axis ["Jan","Feb","Mar"]\n' +
-      'v-axis "Y" 0-->100\n' +
-      'bar "sales" [10,50,30]\n' +
-      'line "trend" [5,40,60]\n' +
-      'legend left\n' +
-      '@endchart',
+        'h-axis ["Jan","Feb","Mar"]\n' +
+        'v-axis "Y" 0-->100\n' +
+        'bar "sales" [10,50,30]\n' +
+        'line "trend" [5,40,60]\n' +
+        'legend left\n' +
+        '@endchart',
     );
     expect(svg).toContain('<rect');
     expect(svg).toContain('<line');
@@ -79,14 +72,7 @@ describe('AC1: bar + line chart renders both <rect> and <line>', () => {
   });
 
   it('renderChart with bar and line geo contains rect and line', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->50',
-        'bar [10,20]',
-        'line [5,25]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->50', 'bar [10,20]', 'line [5,25]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('<rect');
@@ -100,12 +86,7 @@ describe('AC1: bar + line chart renders both <rect> and <line>', () => {
 
 describe('AC2: v-axis grid produces horizontal grid lines', () => {
   it('grid on v-axis → horizontal <line> elements at tick y positions', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"]',
-        'v-axis "Y" 0-->100 grid',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B","C"]', 'v-axis "Y" 0-->100 grid']));
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.vAxis.gridPixels.length).toBeGreaterThan(0);
 
@@ -133,12 +114,7 @@ describe('AC2: v-axis grid produces horizontal grid lines', () => {
 describe('AC3: legend right positions legend beyond right edge of plot', () => {
   it('legend rect x > plotArea.x + plotArea.width', () => {
     const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"]',
-        'v-axis "Y" 0-->100',
-        'bar "series1" [10,20,30]',
-        'legend right',
-      ]),
+      src(['h-axis ["A","B","C"]', 'v-axis "Y" 0-->100', 'bar "series1" [10,20,30]', 'legend right']),
     );
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.legend).toBeDefined();
@@ -160,12 +136,7 @@ describe('AC3: legend right positions legend beyond right edge of plot', () => {
 describe('AC4: annotation with hasArrow renders text and arrow line', () => {
   it('annotation produces text element and line toward arrow target', () => {
     const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"]',
-        'v-axis "Y" 0-->100',
-        'bar [10,50,30]',
-        'annotation "peak" at (B, 50) <<arrow>>',
-      ]),
+      src(['h-axis ["A","B","C"]', 'v-axis "Y" 0-->100', 'bar [10,50,30]', 'annotation "peak" at (B, 50) <<arrow>>']),
     );
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.annotations).toHaveLength(1);
@@ -179,12 +150,7 @@ describe('AC4: annotation with hasArrow renders text and arrow line', () => {
 
   it('annotation without arrow renders text only — no extra line from annotation', () => {
     const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-        'bar [10,20]',
-        'annotation "note" at (A, 10)',
-      ]),
+      src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100', 'bar [10,20]', 'annotation "note" at (A, 10)']),
     );
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.annotations[0]!.hasArrow).toBe(false);
@@ -259,13 +225,7 @@ describe('AC6: primary + secondary Y-axis produces two vertical axis lines', () 
 
   it('v2Axis line x2 equals plotArea.x + plotArea.width in geo', () => {
     const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y1" 0-->50',
-        'v2-axis "Y2" 0-->100',
-        'bar [10,20]',
-        'bar [50,80] v2',
-      ]),
+      src(['h-axis ["A","B"]', 'v-axis "Y1" 0-->50', 'v2-axis "Y2" 0-->100', 'bar [10,20]', 'bar [50,80] v2']),
     );
     const geo = layoutChart(ast, theme, measurer);
     const rightEdge = geo.plotArea.x + geo.plotArea.width;
@@ -285,13 +245,7 @@ describe('AC7: chartPlugin registered — renderSync handles @startchart', () =>
   it('minimal chart diagram does not throw and returns valid SVG', () => {
     let svg: string;
     expect(() => {
-      svg = renderSync(
-        '@startchart\n' +
-        'h-axis ["A","B"]\n' +
-        'v-axis "Y" 0-->100\n' +
-        'bar [10,50]\n' +
-        '@endchart',
-      );
+      svg = renderSync('@startchart\n' + 'h-axis ["A","B"]\n' + 'v-axis "Y" 0-->100\n' + 'bar [10,50]\n' + '@endchart');
     }).not.toThrow();
     expect(svg!).toMatch(/^<svg/);
     expect(svg!).toContain('</svg>');
@@ -334,13 +288,7 @@ describe('renderChart — plot area background', () => {
 
 describe('renderChart — h-axis rendering', () => {
   it('renders h-axis tick labels for categorical axis', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["Alpha","Beta","Gamma"]',
-        'v-axis "Y" 0-->100',
-        'bar [1,2,3]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["Alpha","Beta","Gamma"]', 'v-axis "Y" 0-->100', 'bar [1,2,3]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('Alpha');
@@ -349,13 +297,7 @@ describe('renderChart — h-axis rendering', () => {
   });
 
   it('renders h-axis title when set', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis "Category" ["X","Y"]',
-        'v-axis "Y" 0-->100',
-        'bar [10,20]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis "Category" ["X","Y"]', 'v-axis "Y" 0-->100', 'bar [10,20]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('Category');
@@ -364,13 +306,7 @@ describe('renderChart — h-axis rendering', () => {
 
 describe('renderChart — v-axis rendering', () => {
   it('renders v-axis tick labels for numeric axis', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-        'bar [10,50]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100', 'bar [10,50]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     // Auto-ticks produce labels like "0", "20", "40", "60", "80", "100"
@@ -379,13 +315,7 @@ describe('renderChart — v-axis rendering', () => {
   });
 
   it('renders v-axis title when set', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Revenue" 0-->100',
-        'bar [10,50]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Revenue" 0-->100', 'bar [10,50]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('Revenue');
@@ -394,13 +324,7 @@ describe('renderChart — v-axis rendering', () => {
 
 describe('renderChart — area series', () => {
   it('renders area series as a filled path', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"]',
-        'v-axis "Y" 0-->100',
-        'area [10,50,30]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B","C"]', 'v-axis "Y" 0-->100', 'area [10,50,30]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('<path');
@@ -410,13 +334,7 @@ describe('renderChart — area series', () => {
 
 describe('renderChart — scatter series', () => {
   it('renders scatter series as circle markers', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"]',
-        'v-axis "Y" 0-->100',
-        'scatter [10,50,30]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B","C"]', 'v-axis "Y" 0-->100', 'scatter [10,50,30]']));
     const geo = layoutChart(ast, theme, measurer);
     const svg = assembleSvg(renderChart(geo, theme));
     expect(svg).toContain('<circle');
@@ -425,14 +343,7 @@ describe('renderChart — scatter series', () => {
 
 describe('renderChart — legend top / bottom', () => {
   it('legend top → legend y is less than plotArea.y', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-        'bar "s1" [10,20]',
-        'legend top',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100', 'bar "s1" [10,20]', 'legend top']));
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.legend).toBeDefined();
     expect(geo.legend!.y).toBeLessThan(geo.plotArea.y);
@@ -441,14 +352,7 @@ describe('renderChart — legend top / bottom', () => {
   });
 
   it('legend bottom → legend y is greater than plotArea.y + plotArea.height', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-        'bar "s1" [10,20]',
-        'legend bottom',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100', 'bar "s1" [10,20]', 'legend bottom']));
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.legend).toBeDefined();
     expect(geo.legend!.y).toBeGreaterThan(geo.plotArea.y + geo.plotArea.height);
@@ -457,15 +361,12 @@ describe('renderChart — legend top / bottom', () => {
 
 describe('renderChart — empty series', () => {
   it('chart with no series renders without throwing', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100']));
     const geo = layoutChart(ast, theme, measurer);
     let svg: string;
-    expect(() => { svg = assembleSvg(renderChart(geo, theme)); }).not.toThrow();
+    expect(() => {
+      svg = assembleSvg(renderChart(geo, theme));
+    }).not.toThrow();
     expect(svg!).toMatch(/^<svg/);
   });
 });
@@ -488,13 +389,7 @@ describe('renderChart — SVG root structure', () => {
 
 describe('renderChart — h-axis vertical grid lines', () => {
   it('h-axis grid → vertical <line> elements with dasharray', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B","C"] grid',
-        'v-axis "Y" 0-->100',
-        'bar [10,20,30]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B","C"] grid', 'v-axis "Y" 0-->100', 'bar [10,20,30]']));
     const geo = layoutChart(ast, theme, measurer);
     expect(geo.hAxis.gridPixels.length).toBeGreaterThan(0);
     const svg = assembleSvg(renderChart(geo, theme));
@@ -512,13 +407,7 @@ describe('chartPlugin.layoutSync — error propagation', () => {
   });
 
   it('clean AST has no errors on geometry', () => {
-    const ast = parseChartAst(
-      src([
-        'h-axis ["A","B"]',
-        'v-axis "Y" 0-->100',
-        'bar [10,20]',
-      ]),
-    );
+    const ast = parseChartAst(src(['h-axis ["A","B"]', 'v-axis "Y" 0-->100', 'bar [10,20]']));
     expect(ast.errors).toHaveLength(0);
     const geo = chartPlugin.layoutSync(ast, theme, measurer);
     // errors should be undefined or empty
@@ -545,9 +434,7 @@ describe('chart diagram title (mission G0b/T8: shared chrome, not this renderer)
   });
 
   it('untitled chart has no title chrome group', () => {
-    const svg = renderSync(
-      '@startchart\nh-axis ["A","B"]\nv-axis "Y" 0-->100\nbar [10,20]\n@endchart',
-    );
+    const svg = renderSync('@startchart\nh-axis ["A","B"]\nv-axis "Y" 0-->100\nbar [10,20]\n@endchart');
     expect(svg).not.toContain('class="title"');
   });
 });

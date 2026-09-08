@@ -36,12 +36,7 @@ import { renderSync } from '../../src/index.js';
 import { WidthTableMeasurer } from '../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-  SIZE_CONFORMANCE_TOLERANCE_IN,
-} from './svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural, SIZE_CONFORMANCE_TOLERANCE_IN } from './svek-dot.js';
 import { expectNoErrorDiagram } from '../helpers/error-diagram.js';
 import {
   assertBacklogFailures,
@@ -51,10 +46,7 @@ import {
   type BacklogFile,
 } from './dot-parity-backlogs.js';
 
-const GOLDENS = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../oracle/goldens/class',
-);
+const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens/class');
 
 /** Per-slug structural backlogs (NOT skips -- see dot-parity-backlogs.ts):
  *  B31 `direction-backlog.json` (edge DIRECTION only; SI17/B2 closed class's

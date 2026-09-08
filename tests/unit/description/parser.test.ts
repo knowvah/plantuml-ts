@@ -19,11 +19,7 @@ import type { FontSpec } from '../../../src/core/measurer.js';
 import { effectiveRemovedIds } from '../../../src/diagrams/description/element-grammar.js';
 import { scopedKey } from '../../../src/diagrams/description/namespace-groups.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import type {
-  DescriptionDiagramAST,
-  DescriptiveLink,
-  DescriptiveNode,
-} from '../../../src/diagrams/description/ast.js';
+import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 import { descriptionAst } from './parse-description-ast.js';
 import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
@@ -378,18 +374,21 @@ describe('archimate keyword (CommandArchimate single-line form)', () => {
     expect(node.stereotype).toEqual(['icon']);
   });
 
-  it('the color token is mandatory grammar but this port does not enforce it '
-    + '(absent-color input degrades gracefully rather than erroring)', () => {
-    // CommandArchimate's regex requires #color; a real PlantUML source
-    // omitting it simply fails to match CommandArchimate at all (upstream
-    // reports no command matched). This port's generic KEYWORD_RE has no
-    // such requirement -- documented, not fixed (out of write-set: a
-    // missing-required-token diagnostic is a parser-wide concern, not
-    // specific to archimate).
-    const node = firstNode('archimate "Hello"');
-    expect(node.id).toBe('Hello');
-    expect(node.color).toBeUndefined();
-  });
+  it(
+    'the color token is mandatory grammar but this port does not enforce it ' +
+      '(absent-color input degrades gracefully rather than erroring)',
+    () => {
+      // CommandArchimate's regex requires #color; a real PlantUML source
+      // omitting it simply fails to match CommandArchimate at all (upstream
+      // reports no command matched). This port's generic KEYWORD_RE has no
+      // such requirement -- documented, not fixed (out of write-set: a
+      // missing-required-token diagnostic is a parser-wide concern, not
+      // specific to archimate).
+      const node = firstNode('archimate "Hello"');
+      expect(node.id).toBe('Hello');
+      expect(node.color).toBeUndefined();
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -504,14 +503,7 @@ describe('[A] ..> [B]', () => {
 // ---------------------------------------------------------------------------
 
 describe('container kinds', () => {
-  const containerSymbols = [
-    'node',
-    'folder',
-    'frame',
-    'cloud',
-    'database',
-    'storage',
-  ] as const;
+  const containerSymbols = ['node', 'folder', 'frame', 'cloud', 'database', 'storage'] as const;
 
   for (const sym of containerSymbols) {
     it(`${sym} keyword produces symbol=${sym}`, () => {
@@ -577,7 +569,7 @@ describe('parseDescription — reopening an already-declared container merges in
   it('a second `KEYWORD "..." as SameId { ... }` block adds to the SAME group', () => {
     const ast = parse(
       'cloud "local network" as LocalNet {\nnode "PC1" as PC1\n}\n' +
-      'cloud "local network" as LocalNet {\nnode "N1" as N1\n}',
+        'cloud "local network" as LocalNet {\nnode "N1" as N1\n}',
     );
     expect(ast.nodes).toHaveLength(1);
     const group = ast.nodes[0]!;
@@ -1124,13 +1116,17 @@ describe('link grammar — inline [style] brackets and hidden links', () => {
     const ast = parse('a -[#blue,dashed;#red]-> b : test');
     expect(ast.links).toHaveLength(1);
     expect(ast.links[0]).toMatchObject({
-      from: 'a', to: 'b', label: 'test', rawStyle: '#blue,dashed;#red',
+      from: 'a',
+      to: 'b',
+      label: 'test',
+      rawStyle: '#blue,dashed;#red',
       // G1 I-linkstyle: segment 0 ('#blue,dashed') is fully applied --
       // style overridden to 'dashed', color 'blue' -- segment 1 ('#red',
       // upstream's supplementary-color index i=1) is NOT wired (no
       // multi-color Rainbow in this port, see `DescriptiveLink
       // .colorOverride`'s doc comment).
-      style: 'dashed', colorOverride: 'blue',
+      style: 'dashed',
+      colorOverride: 'blue',
     });
     expect(ast.links[0]?.thicknessOverride).toBeUndefined();
   });
@@ -1271,7 +1267,11 @@ describe('link grammar — stereotype and qualifier labels', () => {
   it('LG-10: a "1" --> "0..*" b : label carries first/second qualifier labels', () => {
     const ast = parse('a "1" --> "0..*" b : label');
     expect(ast.links[0]).toMatchObject({
-      from: 'a', to: 'b', firstLabel: '1', secondLabel: '0..*', label: 'label',
+      from: 'a',
+      to: 'b',
+      firstLabel: '1',
+      secondLabel: '0..*',
+      label: 'label',
     });
   });
 });
@@ -1577,12 +1577,7 @@ describe('business element symbols', () => {
 
 describe('parseDescription — container-open keyword coverage', () => {
   it('component with quoted display + alias + braces parses as container', () => {
-    const ast = parse([
-      'component "b\\n====\\ncan be used by a" as b {',
-      '}',
-      'a -> b',
-      'actor a',
-    ].join('\n'));
+    const ast = parse(['component "b\\n====\\ncan be used by a" as b {', '}', 'a -> b', 'actor a'].join('\n'));
     const b = ast.nodes.find((n) => n.id === 'b');
     expect(b).toBeDefined();
     expect(b!.symbol).toBe('component');
@@ -1594,16 +1589,13 @@ describe('parseDescription — container-open keyword coverage', () => {
     expect(ast.links[0]!.to).toBe('b');
   });
 
-  it.each(['artifact', 'card', 'queue', 'stack', 'hexagon', 'file'])(
-    '%s opens a brace group with children',
-    (kw) => {
-      const ast = parse([`${kw} G {`, '[inner]', '}'].join('\n'));
-      const g = ast.nodes.find((n) => n.id === 'G');
-      expect(g).toBeDefined();
-      expect(g!.symbol).toBe(kw);
-      expect(g!.children.map((c) => c.id)).toEqual(['inner']);
-    },
-  );
+  it.each(['artifact', 'card', 'queue', 'stack', 'hexagon', 'file'])('%s opens a brace group with children', (kw) => {
+    const ast = parse([`${kw} G {`, '[inner]', '}'].join('\n'));
+    const g = ast.nodes.find((n) => n.id === 'G');
+    expect(g).toBeDefined();
+    expect(g!.symbol).toBe(kw);
+    expect(g!.children.map((c) => c.id)).toEqual(['inner']);
+  });
 });
 
 // ===========================================================================
@@ -1669,7 +1661,6 @@ describe('parseDescription — embedded qualifier labels (Labels.init)', () => {
   });
 });
 
-
 // ===========================================================================
 // ── NOTES AS SVEK ENTITIES — CommandFactoryNote / CommandFactoryNoteOnEntity /
 //    CommandFactoryNoteOnLink (net.sourceforge.plantuml.command.note)
@@ -1692,11 +1683,7 @@ describe('notes — floating (CommandFactoryNote)', () => {
   });
 
   it('a floating note usable as a link endpoint', () => {
-    const ast = parse([
-      'component bidon',
-      'note "This is a note" as N1',
-      'bidon . N1',
-    ].join('\n'));
+    const ast = parse(['component bidon', 'note "This is a note" as N1', 'bidon . N1'].join('\n'));
     expect(ast.links).toHaveLength(1);
     expect(ast.links[0]!.to).toBe('N1');
   });
@@ -1792,12 +1779,7 @@ describe('notes — on entity (CommandFactoryNoteOnEntity)', () => {
   });
 
   it('a note inside a container lands in that container, not top-level', () => {
-    const ast = parse([
-      'cloud "Network" as Netw {',
-      'node "PC1"',
-      'note left: i7',
-      '}',
-    ].join('\n'));
+    const ast = parse(['cloud "Network" as Netw {', 'node "PC1"', 'note left: i7', '}'].join('\n'));
     const cloud = ast.nodes.find((n) => n.id === 'Netw')!;
     const note = cloud.children.find((n) => n.symbol === 'note');
     expect(note).toBeDefined();
@@ -1852,9 +1834,7 @@ describe('notes — on link (CommandFactoryNoteOnLink, parsed and dropped)', () 
   });
 
   it('captures an explicit position and a #color from a block opener', () => {
-    const ast = parse(
-      'component a\ncomponent b\na --> b\nnote left on link #blue\ntext\nend note',
-    );
+    const ast = parse('component a\ncomponent b\na --> b\nnote left on link #blue\ntext\nend note');
     expect(ast.links[0]!.linkNotePosition).toBe('left');
     expect(ast.links[0]!.linkNote).toBe('text');
     expect(ast.links[0]!.label).toBeUndefined();
@@ -1867,26 +1847,20 @@ describe('notes — on link (CommandFactoryNoteOnLink, parsed and dropped)', () 
   });
 
   it('joins a multi-line note body with newlines', () => {
-    const ast = parse(
-      'component a\ncomponent b\na --> b\nnote on link\none\ntwo\nend note',
-    );
+    const ast = parse('component a\ncomponent b\na --> b\nnote on link\none\ntwo\nend note');
     expect(ast.links[0]!.linkNote).toBe('one\ntwo');
   });
 
   // `Link#addNote` is `this.note = note` (`abel/Link.java:332-334`) -- a
   // REPLACE, not an append: a second note on the same last link wins.
   it('a second note on the same link replaces the first, position included', () => {
-    const ast = parse(
-      'component a\ncomponent b\na --> b\nnote on link: first\nnote left on link: second',
-    );
+    const ast = parse('component a\ncomponent b\na --> b\nnote on link: first\nnote left on link: second');
     expect(ast.links[0]!.linkNote).toBe('second');
     expect(ast.links[0]!.linkNotePosition).toBe('left');
   });
 
   it('attaches to the LAST link only', () => {
-    const ast = parse(
-      'component a\ncomponent b\na --> b\nb --> a\nnote on link: text',
-    );
+    const ast = parse('component a\ncomponent b\na --> b\nb --> a\nnote on link: text');
     expect(ast.links[0]!.linkNote).toBeUndefined();
     expect(ast.links[1]!.linkNote).toBe('text');
   });
@@ -1896,7 +1870,6 @@ describe('notes — on link (CommandFactoryNoteOnLink, parsed and dropped)', () 
     expect(ast.links).toEqual([]);
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // Element declaration grammar (CommandCreateElementFull + cleanId) — P2/i12
@@ -1924,12 +1897,14 @@ describe('cleanId consistency — declaration vs link endpoint (CommandCreateEle
   });
 
   it('DE-4: cegale-42-loxa672 shape — bracket decl + interface + second bracket via links', () => {
-    const ast = parse([
-      'component [component1] #GreenYellow',
-      '()interface',
-      '[component1] -> ()interface',
-      '()interface <.. [component2]',
-    ].join('\n'));
+    const ast = parse(
+      [
+        'component [component1] #GreenYellow',
+        '()interface',
+        '[component1] -> ()interface',
+        '()interface <.. [component2]',
+      ].join('\n'),
+    );
     expect(ast.nodes).toHaveLength(3);
     expect(ast.nodes.map((n) => n.id).sort()).toEqual(['component1', 'component2', 'interface']);
   });
@@ -1983,25 +1958,14 @@ describe('Stereotag `$tag` declarations (Stereotag.pattern, CommandCreateClassMu
 
 describe('`remove $tag` (CommandRemoveRestore + HideOrShow#isApplyableTag, tag form)', () => {
   it('RT-1: kokebo-27-vafi688 shape — `remove $a` removes exactly the tagged entity', () => {
-    const ast = parse([
-      'component a $a {',
-      '}',
-      'component b {',
-      '}',
-      'remove $a',
-    ].join('\n'));
+    const ast = parse(['component a $a {', '}', 'component b {', '}', 'remove $a'].join('\n'));
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
     expect(removed.has('a')).toBe(true);
     expect(removed.has('b')).toBe(false);
   });
 
   it('RT-2: cenoja-47-rodu998 shape — `remove $tag1` removes every entity carrying it', () => {
-    const ast = parse([
-      'component foo1 $tag1',
-      'component foo2',
-      'component foo3 $tag1',
-      'remove $tag1',
-    ].join('\n'));
+    const ast = parse(['component foo1 $tag1', 'component foo2', 'component foo3 $tag1', 'remove $tag1'].join('\n'));
     expect([...effectiveRemovedIds(ast.nodes, ast.links)].sort()).toEqual(['foo1', 'foo3']);
   });
 
@@ -2018,14 +1982,9 @@ describe('`remove $tag` (CommandRemoveRestore + HideOrShow#isApplyableTag, tag f
 
 describe('remove cascades to singly-attached notes (CucaDiagram.isRemoved + isNoteWithSingleLinkAttachedTo)', () => {
   it('RT-5: kokebo-27-vafi688 full shape — `remove $a` also removes its note', () => {
-    const ast = parse([
-      'component a $a {',
-      '}',
-      'component b {',
-      '}',
-      'note right of a: test_a',
-      'remove $a',
-    ].join('\n'));
+    const ast = parse(
+      ['component a $a {', '}', 'component b {', '}', 'note right of a: test_a', 'remove $a'].join('\n'),
+    );
     // The singly-attached note cascades: it is effectively removed too
     // (CucaDiagram.isNoteWithSingleLinkAttachedTo, evaluated lazily).
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
@@ -2036,12 +1995,7 @@ describe('remove cascades to singly-attached notes (CucaDiagram.isRemoved + isNo
   });
 
   it('RT-6: a note attached to a NON-removed entity survives', () => {
-    const ast = parse([
-      'component a',
-      'component b',
-      'note right of b: keep me',
-      'remove a',
-    ].join('\n'));
+    const ast = parse(['component a', 'component b', 'note right of b: keep me', 'remove a'].join('\n'));
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
     const note = ast.nodes.find((n) => n.symbol === 'note')!;
     expect(removed.has(note.id)).toBe(false);
@@ -2069,12 +2023,7 @@ describe('remove cascades to singly-attached notes (CucaDiagram.isRemoved + isNo
 
 describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', () => {
   it('removes a node carrying the exact stereotype; untagged siblings survive', () => {
-    const ast = parse([
-      'node ServA',
-      'node ServB',
-      'node ServC <<TypeA>>',
-      'remove <<TypeA>>',
-    ].join('\n'));
+    const ast = parse(['node ServA', 'node ServB', 'node ServC <<TypeA>>', 'remove <<TypeA>>'].join('\n'));
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
     expect(removed.has('ServC')).toBe(true);
     expect(removed.has('ServA')).toBe(false);
@@ -2082,13 +2031,15 @@ describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', 
   });
 
   it('removes a link carrying the exact stereotype, independent of its endpoints', () => {
-    const ast = parse([
-      'node ServA',
-      'node ServB',
-      'ServA --> ServB <<TypeA>> : TypeA',
-      'ServA --> ServB <<TypeB>> : TypeB',
-      'remove <<TypeA>>',
-    ].join('\n'));
+    const ast = parse(
+      [
+        'node ServA',
+        'node ServB',
+        'ServA --> ServB <<TypeA>> : TypeA',
+        'ServA --> ServB <<TypeB>> : TypeB',
+        'remove <<TypeA>>',
+      ].join('\n'),
+    );
     expect(ast.links).toHaveLength(2);
     expect(ast.links[0]!.removed).toBe(true);
     expect(ast.links[1]!.removed).toBeUndefined();
@@ -2102,14 +2053,16 @@ describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', 
   });
 
   it('radiga-95-junu817 / zodare-91-rira454 shape: removes the stereotyped node AND its stereotyped link in one pass', () => {
-    const ast = parse([
-      'node ServA',
-      'node ServB',
-      'node ServC <<TypeA>>',
-      'ServA --> ServB <<TypeA>> : TypeA',
-      'ServA --> ServB <<TypeB>> : TypeB',
-      'remove <<TypeA>>',
-    ].join('\n'));
+    const ast = parse(
+      [
+        'node ServA',
+        'node ServB',
+        'node ServC <<TypeA>>',
+        'ServA --> ServB <<TypeA>> : TypeA',
+        'ServA --> ServB <<TypeB>> : TypeB',
+        'remove <<TypeA>>',
+      ].join('\n'),
+    );
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
     expect(removed.has('ServC')).toBe(true);
     expect(ast.links[0]!.removed).toBe(true);
@@ -2117,22 +2070,16 @@ describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', 
   });
 
   it('restore <<stereotype>> clears the link-removed marker', () => {
-    const ast = parse([
-      'node ServA',
-      'node ServB',
-      'ServA --> ServB <<TypeA>> : TypeA',
-      'remove <<TypeA>>',
-      'restore <<TypeA>>',
-    ].join('\n'));
+    const ast = parse(
+      ['node ServA', 'node ServB', 'ServA --> ServB <<TypeA>> : TypeA', 'remove <<TypeA>>', 'restore <<TypeA>>'].join(
+        '\n',
+      ),
+    );
     expect(ast.links[0]!.removed).toBeUndefined();
   });
 
   it('a stereotype pattern matching nothing is a silent no-op', () => {
-    const ast = parse([
-      'node ServA',
-      'ServA --> ServA <<TypeA>>',
-      'remove <<Ghost>>',
-    ].join('\n'));
+    const ast = parse(['node ServA', 'ServA --> ServA <<TypeA>>', 'remove <<Ghost>>'].join('\n'));
     expect(effectiveRemovedIds(ast.nodes, ast.links).size).toBe(0);
     expect(ast.links[0]!.removed).toBeUndefined();
   });
@@ -2142,11 +2089,7 @@ describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', 
   // `for (String label : stereotype.getMultipleLabels())` loop), not just
   // a lone exact-string tag.
   it('removes a node if the pattern matches ANY of its several stereotype tags', () => {
-    const ast = parse([
-      'node ServA <<TypeA>> <<TypeB>>',
-      'node ServB <<TypeC>>',
-      'remove <<TypeB>>',
-    ].join('\n'));
+    const ast = parse(['node ServA <<TypeA>> <<TypeB>>', 'node ServB <<TypeC>>', 'remove <<TypeB>>'].join('\n'));
     const removed = effectiveRemovedIds(ast.nodes, ast.links);
     expect(removed.has('ServA')).toBe(true);
     expect(removed.has('ServB')).toBe(false);
@@ -2161,13 +2104,15 @@ describe('remove <<stereotype>> (HideOrShow stereotype form: nodes AND links)', 
 
 describe('parseDescription — sprite blocks consumed whole', () => {
   it('block body lines create no nodes or links', () => {
-    const ast = parse([
-      'sprite $maxime [48x48/16z] {',
-      'nLRPjjiW34niWrRy_vzR3SA-QGrftwhZ91myaaOB8g_NVv3jA9NA',
-      'tsgNKRfEFl2wkd_b1t-R3xpD_nPiDVdyA6GTpXXBTub_0G00',
-      '}',
-      'actor PlantUML',
-    ].join('\n'));
+    const ast = parse(
+      [
+        'sprite $maxime [48x48/16z] {',
+        'nLRPjjiW34niWrRy_vzR3SA-QGrftwhZ91myaaOB8g_NVv3jA9NA',
+        'tsgNKRfEFl2wkd_b1t-R3xpD_nPiDVdyA6GTpXXBTub_0G00',
+        '}',
+        'actor PlantUML',
+      ].join('\n'),
+    );
     expect(ast.nodes.map((n) => n.id)).toEqual(['PlantUML']);
     expect(ast.links).toHaveLength(0);
   });
@@ -2188,14 +2133,7 @@ describe('parseDescription — sprite blocks consumed whole', () => {
   });
 
   it('container braces still work after a sprite block', () => {
-    const ast = parse([
-      'sprite $s [8x8/8] {',
-      'FF00',
-      '}',
-      'package P {',
-      '  component X',
-      '}',
-    ].join('\n'));
+    const ast = parse(['sprite $s [8x8/8] {', 'FF00', '}', 'package P {', '  component X', '}'].join('\n'));
     const pkg = ast.nodes.find((n) => n.id === 'P')!;
     expect(pkg.children.map((c) => c.id)).toEqual(['X']);
   });
@@ -2256,7 +2194,7 @@ describe('parseDescription — consecutive link stereotypes', () => {
   // .stereotypeIsLinkLabel`'s doc comment). Jar-verified against
   // component/minulo-12-bare186 ("Participant1011<<v1.0>><<v1.1>>", jar's
   // edge carries only the plain label text, no stereotype run at all).
-  it('a pre-colon endpoint stereotype is captured but NOT marked as the link\'s visible label', () => {
+  it("a pre-colon endpoint stereotype is captured but NOT marked as the link's visible label", () => {
     const ast = parse('Component -DOWN-> Participant1011<<v1.0>><<v1.1>> : v1.0 and v1.1 stereotype');
     const link = ast.links[0];
     expect(link?.stereotype).toBe('v1.0');
@@ -2267,7 +2205,7 @@ describe('parseDescription — consecutive link stereotypes', () => {
   // Contrast case: the POST-colon-embedded form (`: <<include>>` / `: text
   // <<foo>>`) IS the link's real, drawn stereotype label (jar-verified
   // usecase/cevuji-49-bile305).
-  it('a post-colon-embedded stereotype IS marked as the link\'s visible label', () => {
+  it("a post-colon-embedded stereotype IS marked as the link's visible label", () => {
     const ast = parse('A ..> B : <<include>>');
     const link = ast.links[0];
     expect(link?.stereotype).toBe('include');
@@ -2552,9 +2490,7 @@ describe('parseDescription — newpage', () => {
       Derek --> (Usecase)
     `);
     expect(ast.pages).toHaveLength(4);
-    expect(ast.pages!.map((p) => p.nodes[0]!.id)).toEqual([
-      'Alice', 'Bob', 'Charline', 'Derek',
-    ]);
+    expect(ast.pages!.map((p) => p.nodes[0]!.id)).toEqual(['Alice', 'Bob', 'Charline', 'Derek']);
   });
 
   it('each page resolves its own still-unknown mix independently (usecase-ish per page)', () => {
@@ -2584,7 +2520,6 @@ describe('parseDescription — newpage', () => {
     expect(ast.nodes.map((n) => n.id)).toEqual(['a', '__note_0', 'do']);
   });
 });
-
 
 // ---------------------------------------------------------------------------
 // `set separator` (CommandNamespaceSeparator.java) — mission
@@ -2721,9 +2656,7 @@ describe('!pragma kermor on', () => {
   });
 
   it('note top/bottom of a GROUP under kermor attaches nothing (no leaf, no link) — CommandFactoryNoteOnEntity.java:322', () => {
-    const ast = parse(
-      '!pragma kermor on\ncomponent tempSensor {\n}\nnote top of tempSensor\n  hello\nend note',
-    );
+    const ast = parse('!pragma kermor on\ncomponent tempSensor {\n}\nnote top of tempSensor\n  hello\nend note');
     expect(ast.nodes).toHaveLength(1); // only tempSensor — no note leaf
     expect(ast.links).toHaveLength(0); // no note-attachment link
   });
@@ -2746,8 +2679,6 @@ describe('!pragma kermor on', () => {
     expect(ast.links).toHaveLength(0);
   });
 });
-
-
 
 // ---------------------------------------------------------------------------
 // I3b — parse-time creation-order uid threading (creationIndex)
@@ -2848,12 +2779,9 @@ describe('`hide|show <id|$tag|*|<<stereotype>>>` entity-visibility (CommandHideS
   });
 
   it('H-2: nested container id -- mavuxi-16-jafi782 shape, two rules recorded in order', () => {
-    const ast = parse([
-      'component a { component a_sub }',
-      'component b { component b_sub }',
-      'hide a',
-      'hide b_sub',
-    ].join('\n'));
+    const ast = parse(
+      ['component a { component a_sub }', 'component b { component b_sub }', 'hide a', 'hide b_sub'].join('\n'),
+    );
     expect(ast.hideShowRules).toEqual([
       { what: 'a', show: false },
       { what: 'b_sub', show: false },
@@ -2861,12 +2789,7 @@ describe('`hide|show <id|$tag|*|<<stereotype>>>` entity-visibility (CommandHideS
   });
 
   it('H-3: `hide *` / `show $tag` -- tusugu-95-geju398 shape', () => {
-    const ast = parse([
-      'component comp1 $tag1 $tag2',
-      'hide *',
-      'show $tag2',
-      'show $tag1',
-    ].join('\n'));
+    const ast = parse(['component comp1 $tag1 $tag2', 'hide *', 'show $tag2', 'show $tag1'].join('\n'));
     expect(ast.hideShowRules).toEqual([
       { what: '*', show: false },
       { what: '$tag2', show: true },
@@ -2895,10 +2818,7 @@ describe('`hide|show [<<label>>] stereotype` per-label visibility (CommandHideSh
 
   it('H-7: `hide stereotype` then `show <<shared lib>> stereotype` -- lufiba-62-dubi670 shape, multi-word label captured verbatim', () => {
     const ast = parse('hide stereotype\nshow <<shared lib>> stereotype');
-    expect(ast.stereotypeVisibilityRules).toEqual([
-      { show: false },
-      { pattern: 'shared lib', show: true },
-    ]);
+    expect(ast.stereotypeVisibilityRules).toEqual([{ show: false }, { pattern: 'shared lib', show: true }]);
   });
 
   it('H-8: `hide <<stereo1>> stereotype` / `hide <<stereo2>> stereotype` -- mopimi-10-jaco443 shape (I5b mechanism D)', () => {
@@ -3159,9 +3079,7 @@ describe('T7 — strict refusal (dispatch-by-parse-attempt)', () => {
     const refusal = parseRefusal('portin br0');
     expect(refusal.kind).toBe('execution');
     expect(refusal.commandScore).toBe(0);
-    expect(refusal.message).toBe(
-      'Port can only be used inside an element and not at root level',
-    );
+    expect(refusal.message).toBe('Port can only be used inside an element and not at root level');
   });
 
   it('AC5 (contrast): the same portin inside a container still creates a node', () => {
@@ -3170,7 +3088,7 @@ describe('T7 — strict refusal (dispatch-by-parse-attempt)', () => {
     expect(c.children.map((n) => n.id)).toEqual(['br0']);
   });
 
-  it("isIncomplete() and checkFinalError() carry no refusal for this factory — see decision journal", () => {
+  it('isIncomplete() and checkFinalError() carry no refusal for this factory — see decision journal', () => {
     // DescriptionDiagram never overrides `isIncomplete()` (AbstractDiagram's
     // default `false` stands) and its own `checkFinalError()` override
     // (DescriptionDiagram.java:90-98) only calls the void mutators

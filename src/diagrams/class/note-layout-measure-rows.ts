@@ -14,12 +14,7 @@ import { getFont } from '../../core/klimt/shape/UText.js';
 import { FontPosition, fontPositionSpace } from '../../core/klimt/font/FontPosition.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
-import {
-  buildMemberAtoms,
-  resolveMemberAtoms,
-  memberBaseFont,
-  type MemberRenderAtom,
-} from './class-member-creole.js';
+import { buildMemberAtoms, resolveMemberAtoms, memberBaseFont, type MemberRenderAtom } from './class-member-creole.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { EmbeddedDiagram, type NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
@@ -118,7 +113,10 @@ export function noteLineHeight(atoms: readonly MemberRenderAtom[], fallbackFontS
  *  growing (mirrors `class-member-creole-sea.ts`'s identical split). */
 function noteLineHeightEntry(atom: MemberRenderAtom): { altitude: number; height: number } | undefined {
   if (atom.kind === 'text') {
-    return { altitude: fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL), height: atomTextLineHeight(getFont(atom.font).size) };
+    return {
+      altitude: fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL),
+      height: atomTextLineHeight(getFont(atom.font).size),
+    };
   }
   if (atom.kind === 'image') return { altitude: 0, height: atom.height };
   return undefined;
@@ -173,7 +171,12 @@ function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number;
     let h = 0;
     for (let s of splitTableCellLines(v)) {
       if (s.startsWith('<r>')) s = s.slice('<r>'.length);
-      const build = resolveMemberAtoms(buildMemberAtoms(resolveTextEscapes(s), cellFont), cellFont, ctx.measurer, ctx.sprites);
+      const build = resolveMemberAtoms(
+        buildMemberAtoms(resolveTextEscapes(s), cellFont),
+        cellFont,
+        ctx.measurer,
+        ctx.sprites,
+      );
       w = Math.max(w, build.width);
       h += noteLineHeight(build.atoms, ctx.fontSize);
     }
@@ -239,8 +242,7 @@ const UNWIRED_NESTED_RENDERER: NestedDiagramRenderer = {
  *  tables the rest of the note pipeline uses. */
 function embeddedStringBounder(measurer: StringMeasurer): StringBounder {
   return {
-    calculateDimension: (font, text) =>
-      new XDimension2D(measurer.measure(text, font).width, Math.max(font.size, 10)),
+    calculateDimension: (font, text) => new XDimension2D(measurer.measure(text, font).width, Math.max(font.size, 10)),
   };
 }
 

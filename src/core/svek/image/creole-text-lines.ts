@@ -387,10 +387,7 @@ function buildPhysicalLine(raw: string, ctx: MeasureCtx, wrapWidth: number): rea
   // `Fission#getSplitted` never wraps an HR (handled above); every other
   // classification wraps identically (`leaf-sizing-text.ts#measureTextBlock`
   // precedent — LITERAL/HEADING/NORMAL all reach this same call).
-  const groups =
-    wrapWidth > 0
-      ? getSplitted(built.atoms, wrapWidth, (a) => atomMeasured(a, ctx).width)
-      : [built.atoms];
+  const groups = wrapWidth > 0 ? getSplitted(built.atoms, wrapWidth, (a) => atomMeasured(a, ctx).width) : [built.atoms];
   return groups.map((atoms) => atomsToLine(atoms, ctx));
 }
 

@@ -192,7 +192,6 @@ export {
   type StdlibFolderMetadata,
 } from './TimEnvironment.js';
 
-
 /**
  * Every builtin, constructed in `TContext#addStandardFunctions`'s exact order:
  * all 74 concrete classes in upstream's `tim/builtin/` (75 files, one of which

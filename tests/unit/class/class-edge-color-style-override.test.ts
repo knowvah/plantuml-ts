@@ -15,9 +15,7 @@
  *    `test-results/dot-cache/class/<slug>/in.svg`'s own edge style string.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  parseArrowStyleOverrides,
-} from '../../../src/diagrams/class/class-arrow-grammar.js';
+import { parseArrowStyleOverrides } from '../../../src/diagrams/class/class-arrow-grammar.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
@@ -53,13 +51,15 @@ describe('parseArrowStyleOverrides', () => {
 
   it('composes a color + a style keyword from one comma-separated segment', () => {
     expect(parseArrowStyleOverrides('-[#FF0000,bold]->')).toEqual({
-      color: 'FF0000', lineStyle: 'bold',
+      color: 'FF0000',
+      lineStyle: 'bold',
     });
   });
 
   it('composes a style keyword + thickness=N from one comma-separated segment', () => {
     expect(parseArrowStyleOverrides('-[dashed,thickness=2]->')).toEqual({
-      lineStyle: 'dashed', thickness: 2,
+      lineStyle: 'dashed',
+      thickness: 2,
     });
   });
 
@@ -111,7 +111,9 @@ describe('parseRelationshipLine — bracket overrides on Relationship', () => {
   it('wires a color+bold bracket on an extension arrow', () => {
     const r = parseRelationshipLine('A <|-[#FF0000,bold]- B');
     expect(r).toMatchObject({
-      type: 'extension', colorOverride: 'FF0000', lineStyleOverride: 'bold',
+      type: 'extension',
+      colorOverride: 'FF0000',
+      lineStyleOverride: 'bold',
     });
   });
 

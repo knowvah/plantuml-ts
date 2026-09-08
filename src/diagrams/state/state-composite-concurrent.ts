@@ -235,9 +235,7 @@ export function buildConcurrentAutonomSpec(s: State, ctx: DiagramCtx): Extract<G
     s.transitions.filter((t) => ids.has(t.from) || ids.has(t.to));
 
   const ownBuild =
-    s.children.length > 0
-      ? buildConcurrentBranchAcc(s.children, transitionsFor(ownIds), s.id, s.id, ctx)
-      : undefined;
+    s.children.length > 0 ? buildConcurrentBranchAcc(s.children, transitionsFor(ownIds), s.id, s.id, ctx) : undefined;
   const ownPass: ConcurrentRegionPassResult | undefined =
     ownBuild !== undefined
       ? { acc: ownBuild.acc, result: runPass(ownBuild.acc, ctx), specs: ownBuild.specs }

@@ -22,14 +22,7 @@ import type { ArrowConfiguration } from './sequence-arrowhead.js';
 // ---------------------------------------------------------------------------
 
 export type ParticipantType =
-  | 'participant'
-  | 'actor'
-  | 'boundary'
-  | 'control'
-  | 'entity'
-  | 'database'
-  | 'collections'
-  | 'queue';
+  'participant' | 'actor' | 'boundary' | 'control' | 'entity' | 'database' | 'collections' | 'queue';
 
 export interface Participant {
   id: string;

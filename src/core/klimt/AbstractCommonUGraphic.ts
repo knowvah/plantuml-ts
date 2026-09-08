@@ -14,9 +14,7 @@ import type { StringBounder } from './font/StringBounder.js';
  * A shape's runtime constructor, used as the driver-registry key —
  * TypeScript's structural equivalent of Java's `shape.getClass()`.
  */
-export type ShapeConstructor<S extends UShape> = (abstract new (
-  ...args: never[]
-) => S) & { readonly name: string };
+export type ShapeConstructor<S extends UShape> = (abstract new (...args: never[]) => S) & { readonly name: string };
 
 /**
  * UDriver — the contract a per-shape renderer implements. `UGraphic
@@ -104,10 +102,7 @@ export abstract class AbstractCommonUGraphic implements UGraphic {
   private backColor: Paint = NONE_PAINT;
   private translate: UTranslate = UTranslate.none();
 
-  private readonly drivers = new Map<
-    ShapeConstructor<UShape>,
-    UDriver<UShape>
-  >();
+  private readonly drivers = new Map<ShapeConstructor<UShape>, UDriver<UShape>>();
 
   protected abstract copyUGraphic(): AbstractCommonUGraphic;
 
@@ -118,10 +113,7 @@ export abstract class AbstractCommonUGraphic implements UGraphic {
     this.backColor = other.backColor;
   }
 
-  protected registerDriver<S extends UShape>(
-    ctor: ShapeConstructor<S>,
-    driver: UDriver<S>,
-  ): void {
+  protected registerDriver<S extends UShape>(ctor: ShapeConstructor<S>, driver: UDriver<S>): void {
     this.drivers.set(ctor, driver);
   }
 

@@ -245,9 +245,12 @@ function toAbsoluteUpperCase(letter: string, args: readonly number[], last: Poin
     return {
       letter: 'C',
       args: [
-        last.x + args[0]!, last.y + args[1]!,
-        last.x + args[2]!, last.y + args[3]!,
-        last.x + args[4]!, last.y + args[5]!,
+        last.x + args[0]!,
+        last.y + args[1]!,
+        last.x + args[2]!,
+        last.y + args[3]!,
+        last.x + args[4]!,
+        last.y + args[5]!,
       ],
     };
   if (letter === 'q')

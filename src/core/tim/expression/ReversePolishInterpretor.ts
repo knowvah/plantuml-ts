@@ -39,7 +39,7 @@ export class ReversePolishInterpretor {
     const named = new Map<string, TValue>();
     const stack: TValue[] = [];
 
-    for (const it = queue.tokenIterator(); it.hasMoreTokens(); ) {
+    for (const it = queue.tokenIterator(); it.hasMoreTokens();) {
       // Guarded by hasMoreTokens() above, matching upstream's own
       // unchecked `it.nextToken()` call here.
       const token = it.nextToken()!;

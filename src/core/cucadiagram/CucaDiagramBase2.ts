@@ -49,7 +49,9 @@ export abstract class CucaDiagramBase2 extends CucaDiagramBase {
    * @see net/atmp/CucaDiagram.java:417-420 */
   private createFilesGraphml(suggestedFile: unknown): void {
     void suggestedFile;
-    throw new Error('deferred per SI1/ADR-2: CucaDiagramGraphmlMaker not yet ported (net/atmp/CucaDiagram.java:417-420)');
+    throw new Error(
+      'deferred per SI1/ADR-2: CucaDiagramGraphmlMaker not yet ported (net/atmp/CucaDiagram.java:417-420)',
+    );
   }
 
   /** Deferred per SI1/ADR-2: constructs the unported
@@ -91,7 +93,9 @@ export abstract class CucaDiagramBase2 extends CucaDiagramBase {
    * @see net/atmp/CucaDiagram.java:451-454 */
   private createFilesScxml(suggestedFile: unknown): void {
     void suggestedFile;
-    throw new Error('deferred per SI1/ADR-2: StateDiagramScxmlMaker not yet ported (net/atmp/CucaDiagram.java:451-454)');
+    throw new Error(
+      'deferred per SI1/ADR-2: StateDiagramScxmlMaker not yet ported (net/atmp/CucaDiagram.java:451-454)',
+    );
   }
 
   /** Deferred per SI1/ADR-2: constructs the unported
@@ -122,7 +126,9 @@ export abstract class CucaDiagramBase2 extends CucaDiagramBase {
    * `GraphvizRuntimeEnvironment` (vizjs probe + dot version probe).
    * @see net/atmp/CucaDiagram.java:482-498 */
   private dotIsAvailable(): boolean {
-    throw new Error('deferred per SI1/ADR-2: GraphvizRuntimeEnvironment not yet ported (net/atmp/CucaDiagram.java:482-498)');
+    throw new Error(
+      'deferred per SI1/ADR-2: GraphvizRuntimeEnvironment not yet ported (net/atmp/CucaDiagram.java:482-498)',
+    );
   }
 
   /** @see net/atmp/CucaDiagram.java:500-510 */

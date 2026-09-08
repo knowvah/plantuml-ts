@@ -11,10 +11,7 @@ import { isNoteId } from './class-notes.js';
 import { applyLollipop, LOLLIPOP_RE } from './class-lollipop.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
-import {
-  parseRelationshipLine,
-  REL_DISPATCH_RE,
-} from './class-relationship-parser.js';
+import { parseRelationshipLine, REL_DISPATCH_RE } from './class-relationship-parser.js';
 import type { Command } from './class-command-types.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 
@@ -36,10 +33,7 @@ function resolveRelationshipEndpoint(state: ParseState, id: string): string {
  *  live in the SAME array, and note-attachment edges (kept separately)
  *  always involve a note entity no classifier pair can equal.
  *  @see src/core/cucadiagram/linkDedup.ts */
-const relationshipConnection = (r: { from: string; to: string }): readonly [string, string] => [
-  r.from,
-  r.to,
-];
+const relationshipConnection = (r: { from: string; to: string }): readonly [string, string] => [r.from, r.to];
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -66,8 +60,7 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // (`name = value`); a missing target is created as a plain `class`
       // (CommandAddMethod always uses LeafType.CLASS) and parsed as a
       // class member line. See class-object-commands.ts#parseObjectField.
-      const member =
-        classifier.kind === 'object' ? parseObjectField(memberStr) : parseMemberLine(memberStr);
+      const member = classifier.kind === 'object' ? parseObjectField(memberStr) : parseMemberLine(memberStr);
       if (member !== null) {
         classifier.members.push(member);
       }
@@ -138,14 +131,7 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // `addLink`'s dedup ever runs, so a dropped duplicate still burns
       // its tick and both endpoints stay auto-created -- only the
       // relationship record itself is skipped.
-      if (
-        dropsAsSingleDuplicate(
-          rel.single === true,
-          state.ast.relationships,
-          rel,
-          relationshipConnection,
-        )
-      ) {
+      if (dropsAsSingleDuplicate(rel.single === true, state.ast.relationships, rel, relationshipConnection)) {
         return;
       }
       state.ast.relationships.push(rel);

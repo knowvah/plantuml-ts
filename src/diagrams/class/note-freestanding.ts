@@ -60,9 +60,7 @@ function freestandingNoteIds(notes: readonly ClassNote[]): ReadonlySet<string> {
 /** Synthetic-entity ids this mechanism must never treat as a note's "real"
  *  connection target — see the module doc comment's scope guard. */
 function excludedEntityIds(classifiers: readonly Classifier[]): ReadonlySet<string> {
-  return new Set(
-    classifiers.filter((c) => c.kind === 'assoc-circle' || c.kind === 'lollipop').map((c) => c.id),
-  );
+  return new Set(classifiers.filter((c) => c.kind === 'assoc-circle' || c.kind === 'lollipop').map((c) => c.id));
 }
 
 /**
@@ -144,5 +142,11 @@ export function findFreestandingNoteConnectors(
   const noteIds = freestandingNoteIds(notes);
   if (noteIds.size === 0) return new Map();
   const excluded = excludedEntityIds(classifiers);
-  return findUniqueTouching(edges, noteIds, excluded, (e) => [e.from, e.to], () => false);
+  return findUniqueTouching(
+    edges,
+    noteIds,
+    excluded,
+    (e) => [e.from, e.to],
+    () => false,
+  );
 }

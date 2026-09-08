@@ -64,58 +64,82 @@ describe('acceptance 1: stdlib-aws ships no eager module', () => {
     "export { awslib14Remote } from './awslib14.remote.js';\n" +
     "export { awslibRemote } from './awslib.remote.js';\n";
 
-  it('generated/index.js re-exports awslib14Remote and awslibRemote', () => {
-    const indexJs = readGeneratedText('stdlib-aws', 'index.js');
-    expect(indexJs).toBe(EXPECTED_INDEX);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'generated/index.js re-exports awslib14Remote and awslibRemote',
+    () => {
+      const indexJs = readGeneratedText('stdlib-aws', 'index.js');
+      expect(indexJs).toBe(EXPECTED_INDEX);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('generated/index.d.ts re-exports the same bindings', () => {
-    const indexDts = readGeneratedText('stdlib-aws', 'index.d.ts');
-    expect(indexDts).toBe(EXPECTED_INDEX);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'generated/index.d.ts re-exports the same bindings',
+    () => {
+      const indexDts = readGeneratedText('stdlib-aws', 'index.d.ts');
+      expect(indexDts).toBe(EXPECTED_INDEX);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('awslib14.js and awslib.js are not emitted', () => {
-    expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
-    expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
-    expect(generatedExists('stdlib-aws', 'awslib14.d.ts')).toBe(false);
-    expect(generatedExists('stdlib-aws', 'awslib.d.ts')).toBe(false);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'awslib14.js and awslib.js are not emitted',
+    () => {
+      expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
+      expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
+      expect(generatedExists('stdlib-aws', 'awslib14.d.ts')).toBe(false);
+      expect(generatedExists('stdlib-aws', 'awslib.d.ts')).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('the remote manifest siblings are emitted instead', () => {
-    expect(generatedExists('stdlib-aws', 'awslib14.remote.js')).toBe(true);
-    expect(generatedExists('stdlib-aws', 'awslib.remote.js')).toBe(true);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'the remote manifest siblings are emitted instead',
+    () => {
+      expect(generatedExists('stdlib-aws', 'awslib14.remote.js')).toBe(true);
+      expect(generatedExists('stdlib-aws', 'awslib.remote.js')).toBe(true);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });
 
 describe('acceptance 1: stdlib-tupadr3 ships no eager module', () => {
   const EXPECTED_INDEX = GENERATED_HEADER + '\n' + "export { tupadr3Remote } from './tupadr3.remote.js';\n";
 
-  it('generated/index.js re-exports tupadr3Remote', () => {
-    const indexJs = readGeneratedText('stdlib-tupadr3', 'index.js');
-    expect(indexJs).toBe(EXPECTED_INDEX);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'generated/index.js re-exports tupadr3Remote',
+    () => {
+      const indexJs = readGeneratedText('stdlib-tupadr3', 'index.js');
+      expect(indexJs).toBe(EXPECTED_INDEX);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('generated/index.d.ts re-exports the same binding', () => {
-    const indexDts = readGeneratedText('stdlib-tupadr3', 'index.d.ts');
-    expect(indexDts).toBe(EXPECTED_INDEX);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'generated/index.d.ts re-exports the same binding',
+    () => {
+      const indexDts = readGeneratedText('stdlib-tupadr3', 'index.d.ts');
+      expect(indexDts).toBe(EXPECTED_INDEX);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('tupadr3.js is not emitted', () => {
-    expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
-    expect(generatedExists('stdlib-tupadr3', 'tupadr3.d.ts')).toBe(false);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'tupadr3.js is not emitted',
+    () => {
+      expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
+      expect(generatedExists('stdlib-tupadr3', 'tupadr3.d.ts')).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('the remote manifest sibling is emitted instead', () => {
-    expect(generatedExists('stdlib-tupadr3', 'tupadr3.remote.js')).toBe(true);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'the remote manifest sibling is emitted instead',
+    () => {
+      expect(generatedExists('stdlib-tupadr3', 'tupadr3.remote.js')).toBe(true);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -157,11 +181,14 @@ const STDLIB_PINNED_DIGESTS: readonly PinnedFile[] = [
 ];
 
 describe('acceptance 2: packages/stdlib is byte-identical to before this change', () => {
-  it.each(STDLIB_PINNED_DIGESTS)('$fileName matches its pinned sha256', ({ fileName, sha256 }) => {
-    const bytes = readGeneratedBytes('stdlib', fileName);
-    expect(sha256Hex(bytes)).toBe(sha256);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it.each(STDLIB_PINNED_DIGESTS)(
+    '$fileName matches its pinned sha256',
+    ({ fileName, sha256 }) => {
+      const bytes = readGeneratedBytes('stdlib', fileName);
+      expect(sha256Hex(bytes)).toBe(sha256);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -170,18 +197,27 @@ describe('acceptance 2: packages/stdlib is byte-identical to before this change'
 // ---------------------------------------------------------------------------
 
 describe('acceptance 3: the removed eager modules do not exist', () => {
-  it('packages/stdlib-aws/generated/awslib14.js does not exist', () => {
-    expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'packages/stdlib-aws/generated/awslib14.js does not exist',
+    () => {
+      expect(generatedExists('stdlib-aws', 'awslib14.js')).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('packages/stdlib-aws/generated/awslib.js does not exist', () => {
-    expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'packages/stdlib-aws/generated/awslib.js does not exist',
+    () => {
+      expect(generatedExists('stdlib-aws', 'awslib.js')).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 
-  it('packages/stdlib-tupadr3/generated/tupadr3.js does not exist', () => {
-    expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
-  },
-    LOCK_PRESSURE_BUDGET_MS);
+  it(
+    'packages/stdlib-tupadr3/generated/tupadr3.js does not exist',
+    () => {
+      expect(generatedExists('stdlib-tupadr3', 'tupadr3.js')).toBe(false);
+    },
+    LOCK_PRESSURE_BUDGET_MS,
+  );
 });

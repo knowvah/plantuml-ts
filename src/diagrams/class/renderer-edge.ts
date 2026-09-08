@@ -141,7 +141,6 @@ export function uniqLinkId(ids: Set<string>, base: string): string {
   }
 }
 
-
 /**
  * D3/D4: the main-label `<text>` font attrs, resolved the SAME way
  * `class-dot-graph.ts` resolves the DOT-measurement font
@@ -216,17 +215,18 @@ function resolveArrowTagStyle(
  * formatted (ADR-1). Returns `undefined` for a malformed (non-3-point)
  * glyph.
  */
-function magicArrowPolygon(
-  points: ReadonlyArray<{ x: number; y: number }>,
-  color: string,
-): string | undefined {
+function magicArrowPolygon(points: ReadonlyArray<{ x: number; y: number }>, color: string): string | undefined {
   const [p0, p1, p2] = points;
   if (p0 === undefined || p1 === undefined || p2 === undefined) return undefined;
   const fmt = (n: number): string => formatDecimal(n, DEFAULT_SVG_DECIMALS);
   const pts = [p0, p1, p2, p0].map((p) => `${fmt(p.x)},${fmt(p.y)}`).join(',');
   return `<polygon${attrs([
-    ['points', pts], ['fill', color], ['stroke', color],
-    ['stroke-width', 1], ['stroke-linejoin', 'miter'], ['stroke-miterlimit', 10],
+    ['points', pts],
+    ['fill', color],
+    ['stroke', color],
+    ['stroke-width', 1],
+    ['stroke-linejoin', 'miter'],
+    ['stroke-miterlimit', 10],
   ])}/>`;
 }
 
@@ -291,16 +291,20 @@ function renderEdgeMainLabel(
     }
     parts.push(
       text(line.x, line.y, line.text, {
-        fill: labelColor, ...labelFontAttrs,
-        lengthAdjust: 'spacing', textLength: line.width,
+        fill: labelColor,
+        ...labelFontAttrs,
+        lengthAdjust: 'spacing',
+        textLength: line.width,
       }),
     );
   }
   if (geo.label !== undefined) {
     parts.push(
       text(geo.label.x, geo.label.y, geo.label.text, {
-        fill: labelColor, ...labelFontAttrs,
-        lengthAdjust: 'spacing', textLength: geo.label.width,
+        fill: labelColor,
+        ...labelFontAttrs,
+        lengthAdjust: 'spacing',
+        textLength: geo.label.width,
       }),
     );
   }
@@ -313,18 +317,17 @@ function renderEdgeMainLabel(
  * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
  * function purely to stay under the lizard NLOC/CCN caps.
  */
-function renderEdgeCardinalityLabels(
-  geo: EdgeGeo,
-  theme: Theme,
-  cardinalityColor: string,
-): string[] {
+function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
   const parts: string[] = [];
   for (const portLabel of [geo.tailLabel, geo.headLabel]) {
     if (portLabel === undefined) continue;
     parts.push(
       text(portLabel.x, portLabel.y, portLabel.text, {
-        fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily,
-        lengthAdjust: 'spacing', textLength: portLabel.width,
+        fill: cardinalityColor,
+        fontSize: CARDINALITY_FONT_SIZE,
+        fontFamily: theme.fontFamily,
+        lengthAdjust: 'spacing',
+        textLength: portLabel.width,
       }),
     );
   }
@@ -366,9 +369,10 @@ export function renderEdge(
   // order the bracket/cascade/default chain below already uses. Last tag
   // wins, mirroring the merge's own last-registered-wins rule.
   const tagStyle = resolveArrowTagStyle(geo.stereotypeTags, theme);
-  const strokeColor = geo.colorOverride !== undefined
-    ? resolveColorToSvgHex(geo.colorOverride)
-    : tagStyle?.color ?? theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow;
+  const strokeColor =
+    geo.colorOverride !== undefined
+      ? resolveColorToSvgHex(geo.colorOverride)
+      : (tagStyle?.color ?? theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow);
   const edgeStrokeWidth = geo.strokeWidth ?? tagStyle?.thickness ?? 1;
   const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, edgeStrokeWidth);
   const trimmedPoints = applyDecorTrim(geo.points, arrowheads.tailTrim, arrowheads.headTrim);
@@ -400,7 +404,9 @@ export function renderEdge(
         strokeWidth: edgeStrokeWidth,
         ...(geo.strokeDasharray !== undefined
           ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
-          : geo.dashed ? { strokeDasharray: '7,7' } : {}),
+          : geo.dashed
+            ? { strokeDasharray: '7,7' }
+            : {}),
         // G2 N9: `id`/`codeLine` -- see `linkIdForSvg`'s doc comment.
         id: linkIdForSvg(geo, ids, syntheticNames),
         ...(geo.sourceLine !== undefined ? { codeLine: String(geo.sourceLine) } : {}),

@@ -17,10 +17,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  DEFAULT_COVERAGE_REPORTS_DIRECTORY,
-  resolveCoverageReportsDirectory,
-} from './coverage-reports-directory.js';
+import { DEFAULT_COVERAGE_REPORTS_DIRECTORY, resolveCoverageReportsDirectory } from './coverage-reports-directory.js';
 
 const TMP = '/tmp-fixture';
 

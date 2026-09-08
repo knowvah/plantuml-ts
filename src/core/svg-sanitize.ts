@@ -45,8 +45,7 @@ const DANGEROUS_URI_RE =
 
 // External absolute URLs in href and xlink:href (http/https or protocol-relative)
 // Preserves #fragment, relative, and root-relative paths.
-const EXTERNAL_HREF_RE =
-  /(?:href|xlink:href)\s*=\s*(?:"(?:https?:)?\/\/[^"]*"|'(?:https?:)?\/\/[^']*')/gi;
+const EXTERNAL_HREF_RE = /(?:href|xlink:href)\s*=\s*(?:"(?:https?:)?\/\/[^"]*"|'(?:https?:)?\/\/[^']*')/gi;
 
 /**
  * Sanitize an SVG string, removing content that could execute code or

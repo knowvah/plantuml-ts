@@ -27,10 +27,7 @@ import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
 
-const A0001_PATH = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../fixtures/corpus/sequence/A0001_Test.puml',
-);
+const A0001_PATH = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/corpus/sequence/A0001_Test.puml');
 
 /** Wraps a real `DeterministicMeasurer` and counts every call reaching it,
  *  so a test can detect whether a SECOND, untracked measurer instance was
@@ -80,9 +77,7 @@ describe('renderFixtureSequence', () => {
   });
 
   it('throws a named error when the markup holds no diagram block (never falls back to renderSync)', () => {
-    expect(() => renderFixtureSequence('not a diagram', new DeterministicMeasurer())).toThrow(
-      /no diagram block found/,
-    );
+    expect(() => renderFixtureSequence('not a diagram', new DeterministicMeasurer())).toThrow(/no diagram block found/);
   });
 
   it('renders a titled fixture with the title text present in the output', () => {

@@ -61,24 +61,16 @@ interface ParityReport {
   fixtures: ParityEntry[];
 }
 
-const GOLDENS_ROOT = join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../oracle/goldens/svg-description',
-);
+const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-description');
 
-const manifest = JSON.parse(
-  readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8'),
-) as RatchetManifest;
+const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
 // Source of DOT-EQUAL truth for eligibility (AC3): the SVG-parity survey's
 // own `dotEqual` field, captured by `scripts/svg-parity-survey.ts` and
 // consumed by the census/dashboard tooling (T15/T17). This is the same
 // artifact `oracle/goldens/svg-description/README.md`'s "Add rule" cites.
 const parity = JSON.parse(
-  readFileSync(
-    join(dirname(fileURLToPath(import.meta.url)), 'parity.json'),
-    'utf8',
-  ),
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'parity.json'), 'utf8'),
 ) as ParityReport;
 
 function findParityEntry(slug: string, type: string): ParityEntry | undefined {
@@ -124,25 +116,22 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 // AC1 — every locked fixture stays conformant.
 // ---------------------------------------------------------------------------
 
-describe.skipIf(manifest.fixtures.length === 0)(
-  'svg-description conformance ratchet (AC1)',
-  () => {
-    for (const f of manifest.fixtures) {
-      it(`${f.type}/${f.slug}: stays zero-diff against the pinned golden`, () => {
-        const golden = readGolden(f);
-        const markup = readSource(f);
-        const ours = renderFixture(markup, new DeterministicMeasurer());
-        const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-        expect(
-          pass,
-          `${f.type}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-            ` — ${JSON.stringify(diffs[0])}`,
-        ).toBe(true);
-        expect(diffs).toEqual([]);
-      });
-    }
-  },
-);
+describe.skipIf(manifest.fixtures.length === 0)('svg-description conformance ratchet (AC1)', () => {
+  for (const f of manifest.fixtures) {
+    it(`${f.type}/${f.slug}: stays zero-diff against the pinned golden`, () => {
+      const golden = readGolden(f);
+      const markup = readSource(f);
+      const ours = renderFixture(markup, new DeterministicMeasurer());
+      const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+      expect(
+        pass,
+        `${f.type}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+          ` — ${JSON.stringify(diffs[0])}`,
+      ).toBe(true);
+      expect(diffs).toEqual([]);
+    });
+  }
+});
 
 if (manifest.fixtures.length === 0) {
   it('has no pinned svg-description goldens yet (skip gracefully, not a failure)', () => {
@@ -197,10 +186,9 @@ describe('svg-description conformance ratchet — eligibility (AC3)', () => {
     for (const f of manifest.fixtures) {
       const entry = findParityEntry(f.slug, f.type);
       expect(entry, `${f.type}/${f.slug}: no parity.json entry found`).toBeDefined();
-      expect(
-        entry!.dotEqual,
-        `${f.type}/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`,
-      ).toBe(true);
+      expect(entry!.dotEqual, `${f.type}/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
+        true,
+      );
     }
   });
 
@@ -221,9 +209,7 @@ describe('svg-description conformance ratchet — eligibility (AC3)', () => {
 
     function assertEligible(candidate: ParityEntry | undefined): void {
       if (!candidate || !candidate.dotEqual) {
-        throw new Error(
-          `${ineligible.type}/${ineligible.slug} is not DOT-EQUAL — rejected by the ratchet gate`,
-        );
+        throw new Error(`${ineligible.type}/${ineligible.slug} is not DOT-EQUAL — rejected by the ratchet gate`);
       }
     }
 

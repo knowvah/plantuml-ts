@@ -70,7 +70,10 @@ export function hasUnroutedBoxMarkup(display: string): boolean {
 
 /** Decoration allowance `[w, h]` for a box symbol. Only the default `uml2`
  *  component draws the corner icon; `uml1`/`rectangle` render a plain box. */
-function boxIcon(symbol: LeafSizingSubject['symbol'], componentStyle: BoxSizingOpts['componentStyle']): readonly [number, number] {
+function boxIcon(
+  symbol: LeafSizingSubject['symbol'],
+  componentStyle: BoxSizingOpts['componentStyle'],
+): readonly [number, number] {
   if (symbol === 'component' && componentStyle !== undefined && componentStyle !== 'uml2') {
     return [0, 0];
   }

@@ -79,7 +79,7 @@ describe('readStdlibAssetsStore', () => {
     return dir;
   }
 
-  it('reads a concrete bundle\'s .puml files with the Stdlib.java key transform', () => {
+  it("reads a concrete bundle's .puml files with the Stdlib.java key transform", () => {
     const assetsDir = makeAssetsDir();
     const bundleDir = join(assetsDir, 'cloudogu');
     mkdirSync(join(bundleDir, 'dogus'), { recursive: true });
@@ -120,8 +120,6 @@ describe('readStdlibAssetsStore', () => {
 
   it('throws a remediation-bearing error when the assets directory is absent', () => {
     const missing = join(tmpdir(), 'plantuml-ts-stdlib-assets-does-not-exist');
-    expect(() => readStdlibAssetsStore(missing)).toThrow(
-      /does not exist.*npx tsx scripts\/vendor-stdlib\.ts/s,
-    );
+    expect(() => readStdlibAssetsStore(missing)).toThrow(/does not exist.*npx tsx scripts\/vendor-stdlib\.ts/s);
   });
 });

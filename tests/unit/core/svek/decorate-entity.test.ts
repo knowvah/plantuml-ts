@@ -139,11 +139,7 @@ describe('decorateEntityDrawing', () => {
 
   it('drops an entity group entirely when the inner drawable draws nothing (matches upstream closeTopPendingElement)', () => {
     const root = newSvg();
-    decorateEntityDrawing(
-      root,
-      { name: 'Empty', qualifiedName: 'Empty', uid: 'ent0000' },
-      { drawU: () => undefined },
-    );
+    decorateEntityDrawing(root, { name: 'Empty', qualifiedName: 'Empty', uid: 'ent0000' }, { drawU: () => undefined });
 
     const xml = root.getSvgString();
     // Upstream `SvgGraphics#closeTopPendingElement` (SvgGraphics.java:1165-1170)
@@ -316,12 +312,7 @@ describe('DecorateEntityImage', () => {
     it('throws for an unrecognized horizontal alignment value', () => {
       const original = new RecordingTextBlock(new XDimension2D(30, 20));
       const label = new RecordingTextBlock(new XDimension2D(10, 5));
-      const deco = DecorateEntityImage.addTop(
-        labelGroup('lbl1'),
-        original,
-        label,
-        'DIAGONAL' as HorizontalAlignment,
-      );
+      const deco = DecorateEntityImage.addTop(labelGroup('lbl1'), original, label, 'DIAGONAL' as HorizontalAlignment);
 
       expect(() => deco.drawU(newSvg())).toThrow(/illegal horizontal alignment/);
     });

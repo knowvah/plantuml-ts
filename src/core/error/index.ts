@@ -26,8 +26,4 @@ export { PSystemUnsupported } from './PSystemUnsupported.js';
 export { PSystemWelcome } from './PSystemWelcome.js';
 export { buildV2, merge } from './PSystemErrorUtils.js';
 export { umlSourceOf } from './UmlSource.js';
-export {
-  renderPSystemError,
-  renderPSystemUnsupported,
-  renderPSystemWelcome,
-} from './error-renderer.js';
+export { renderPSystemError, renderPSystemUnsupported, renderPSystemWelcome } from './error-renderer.js';

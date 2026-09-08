@@ -25,8 +25,18 @@ function getYpos(dimTitle: XDimension2D): number {
   return dimTitle.getHeight() + 3;
 }
 
-function drawFrame(ug: UGraphic, width: number, height: number, dimTitle: XDimension2D, shadowing: number, roundCorner: number): void {
-  const rectangle = URectangle.build(width, height).rounded(roundCorner).ignoreForCompressionOnX().ignoreForCompressionOnY();
+function drawFrame(
+  ug: UGraphic,
+  width: number,
+  height: number,
+  dimTitle: XDimension2D,
+  shadowing: number,
+  roundCorner: number,
+): void {
+  const rectangle = URectangle.build(width, height)
+    .rounded(roundCorner)
+    .ignoreForCompressionOnX()
+    .ignoreForCompressionOnY();
   rectangle.setDeltaShadow(shadowing);
 
   ug.draw(rectangle);
@@ -119,7 +129,14 @@ export class USymbolFrame extends USymbol {
         const dim = calculateDimension(ug.getStringBounder());
         ug = UGraphicStencil.create(ug, dim);
         ug = symbolContext.apply(ug);
-        drawFrame(ug, dim.getWidth(), dim.getHeight(), new XDimension2D(0, 0), symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawFrame(
+          ug,
+          dim.getWidth(),
+          dim.getHeight(),
+          new XDimension2D(0, 0),
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
         const margin = getMargin();
         const tb = TextBlockUtils.mergeTB(stereotype, label, HorizontalAlignment.CENTER);
         tb.drawU(ug.apply(new UTranslate(margin.getX1(), margin.getY1())));
@@ -148,7 +165,14 @@ export class USymbolFrame extends USymbol {
         ug = symbolContext.apply(ug);
         const dimTitle = title.calculateDimension(stringBounder);
         const widthFull = dim.getWidth();
-        drawFrame(ug, widthFull, dim.getHeight(), dimTitle, symbolContext.getDeltaShadow(), symbolContext.getRoundCorner());
+        drawFrame(
+          ug,
+          widthFull,
+          dim.getHeight(),
+          dimTitle,
+          symbolContext.getDeltaShadow(),
+          symbolContext.getRoundCorner(),
+        );
 
         // See the module doc comment above ("`SpecialText` deviation") —
         // both of upstream's branches draw identically outside an active

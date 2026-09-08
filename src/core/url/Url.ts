@@ -129,18 +129,10 @@ export class Url implements EnsureVisible {
  *
  * @see net/sourceforge/plantuml/StringUtils.java#eventuallyRemoveStartingAndEndingDoubleQuote(String,String)
  */
-export function eventuallyRemoveStartingAndEndingDoubleQuote(
-  s: string | null,
-  format: string,
-): string | null {
+export function eventuallyRemoveStartingAndEndingDoubleQuote(s: string | null, format: string): string | null {
   if (s === null) return null;
 
-  if (
-    format.includes('\x22') &&
-    s.length > 1 &&
-    isDoubleQuote(s.charAt(0)) &&
-    isDoubleQuote(s.charAt(s.length - 1))
-  )
+  if (format.includes('\x22') && s.length > 1 && isDoubleQuote(s.charAt(0)) && isDoubleQuote(s.charAt(s.length - 1)))
     return s.substring(1, s.length - 1);
 
   if (format.includes('(') && s.startsWith('(') && s.endsWith(')')) return s.substring(1, s.length - 1);

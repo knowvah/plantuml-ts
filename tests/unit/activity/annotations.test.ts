@@ -49,14 +49,7 @@ describe('activity parser — annotation commands (mission G0b/T6)', () => {
   });
 
   it('title/legend inside an if/while/repeat body still land in annotations, not the branch', () => {
-    const ast = parse([
-      'start',
-      'if (cond?) then (yes)',
-      'title from inside if',
-      ':do something;',
-      'endif',
-      'stop',
-    ]);
+    const ast = parse(['start', 'if (cond?) then (yes)', 'title from inside if', ':do something;', 'endif', 'stop']);
     expect(ast.annotations?.title.display).toEqual(['from inside if']);
     const ifNode = ast.nodes.find((n) => n.kind === 'if');
     expect(ifNode?.kind).toBe('if');

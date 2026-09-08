@@ -56,10 +56,7 @@ describe('layoutFiles', () => {
     });
 
     it('grandchild has depth=2 and x=40', () => {
-      const geo = layoutFiles(
-        ast(folder('src', [folder('lib', [file('util.ts')])])),
-        measurer,
-      );
+      const geo = layoutFiles(ast(folder('src', [folder('lib', [file('util.ts')])])), measurer);
       const grandchild = geo.entries.find((e) => e.name === 'util.ts')!;
       expect(grandchild.depth).toBe(2);
       expect(grandchild.x).toBe(40);
@@ -77,10 +74,7 @@ describe('layoutFiles', () => {
     });
 
     it('nested DFS: src → lib → util.ts → sibling.ts', () => {
-      const geo = layoutFiles(
-        ast(folder('src', [folder('lib', [file('util.ts')]), file('sibling.ts')])),
-        measurer,
-      );
+      const geo = layoutFiles(ast(folder('src', [folder('lib', [file('util.ts')]), file('sibling.ts')])), measurer);
       const names = geo.entries.map((e) => e.name);
       expect(names.indexOf('src')).toBeLessThan(names.indexOf('lib'));
       expect(names.indexOf('lib')).toBeLessThan(names.indexOf('util.ts'));
@@ -105,10 +99,7 @@ describe('layoutFiles', () => {
 
   describe('AC5: note entry appears at its DFS position', () => {
     it('note appears between sibling entries in output order', () => {
-      const geo = layoutFiles(
-        ast(file('a.ts'), note(['This is a note']), file('b.ts')),
-        measurer,
-      );
+      const geo = layoutFiles(ast(file('a.ts'), note(['This is a note']), file('b.ts')), measurer);
       const names = geo.entries.map((e) => e.name);
       const noteIdx = geo.entries.findIndex((e) => e.type === 'note');
       const aIdx = names.indexOf('a.ts');
@@ -134,10 +125,7 @@ describe('layoutFiles', () => {
     });
 
     it('four file/folder entries → totalHeight=88', () => {
-      const geo = layoutFiles(
-        ast(folder('src', [file('a'), file('b')]), file('c')),
-        measurer,
-      );
+      const geo = layoutFiles(ast(folder('src', [file('a'), file('b')]), file('c')), measurer);
       expect(geo.totalHeight).toBe(geo.entries.length * 22);
     });
 
@@ -186,10 +174,7 @@ describe('layoutFiles', () => {
 
     it('note entry with undefined noteLines falls back to empty array (labelWidth=0)', () => {
       const bareNote: FileEntry = { type: 'note', name: '', children: [] };
-      const geo = layoutFiles(
-        { root: { type: 'folder', name: '', children: [bareNote] } },
-        measurer,
-      );
+      const geo = layoutFiles({ root: { type: 'folder', name: '', children: [bareNote] } }, measurer);
       expect(geo.entries[0]!.labelWidth).toBe(0);
     });
   });
@@ -202,10 +187,7 @@ describe('layoutFiles', () => {
     });
 
     it('totalWidth accounts for indented entries reaching further right', () => {
-      const deep = layoutFiles(
-        ast(folder('src', [folder('lib', [file('deep.ts')])])),
-        measurer,
-      );
+      const deep = layoutFiles(ast(folder('src', [folder('lib', [file('deep.ts')])])), measurer);
       const shallow = layoutFiles(ast(file('deep.ts')), measurer);
       // deeper x=40 so totalWidth should be larger
       expect(deep.totalWidth).toBeGreaterThan(shallow.totalWidth);

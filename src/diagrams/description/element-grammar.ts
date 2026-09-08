@@ -13,12 +13,7 @@
  */
 
 import type { DescriptiveLink, DescriptiveNode } from './ast.js';
-import {
-  cleanId,
-  extractColor,
-  extractNodeStereotype,
-  resolveNewlineEscapes,
-} from './parse-helpers.js';
+import { cleanId, extractColor, extractNodeStereotype, resolveNewlineEscapes } from './parse-helpers.js';
 import type { StereotypeSpriteRef } from './parse-helpers.js';
 
 // ---------------------------------------------------------------------------
@@ -74,9 +69,16 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   const stereo: { stereotype?: readonly string[] | undefined; sprite?: StereotypeSpriteRef | undefined } = {};
   let color: string | undefined;
   const sr = extractNodeStereotype(extra);
-  if (sr !== undefined) { stereo.stereotype = sr.stereotypes; stereo.sprite = sr.sprite; extra = sr.remainder.trim(); }
+  if (sr !== undefined) {
+    stereo.stereotype = sr.stereotypes;
+    stereo.sprite = sr.sprite;
+    extra = sr.remainder.trim();
+  }
   const cr = extractColor(extra);
-  if (cr !== undefined) { color = cr.color; extra = cr.remainder.trim(); }
+  if (cr !== undefined) {
+    color = cr.color;
+    extra = cr.remainder.trim();
+  }
   let id = bracketName;
   const aliasMatch = RE_BRACKET_ALIAS.exec(extra);
   if (aliasMatch !== null) id = aliasMatch[1]!.trim();
@@ -144,11 +146,7 @@ function setRemoved(node: DescriptiveNode, removed: boolean): void {
  * only — `DescriptiveLink.stereotype` stays a single string, no corpus
  * fixture exercises a multi-stereotype link).
  */
-export function removeMatching(
-  what: string,
-  nodesById: Map<string, DescriptiveNode>,
-  removed = true,
-): void {
+export function removeMatching(what: string, nodesById: Map<string, DescriptiveNode>, removed = true): void {
   // #lizard forgives -- pre-existing violation (CCN 11 vs. this repo's 10),
   // unchanged by the S1L-c RE_BARE_QUOTED_DECL edit above; the hook re-flags
   // it on any touch of this file. Each branch is one independent `remove`
@@ -191,11 +189,7 @@ export function removeMatching(
  * filtered out only at DOT-edge build time (`layout.ts#buildDotEdges`) — an
  * untagged sibling link between the same two endpoints is unaffected.
  */
-export function removeMatchingLinks(
-  what: string,
-  links: readonly DescriptiveLink[],
-  removed = true,
-): void {
+export function removeMatchingLinks(what: string, links: readonly DescriptiveLink[], removed = true): void {
   if (!(what.startsWith('<<') && what.endsWith('>>'))) return;
   const pattern = what.slice(2, -2).trim();
   for (const link of links) {
@@ -218,20 +212,12 @@ export function removeMatchingLinks(
 /** Entity.isAloneAndUnlinked:457-476 — every link touching the leaf is
  *  invisible (hidden) or its other endpoint is removed; a group qualifies
  *  when all its children do. */
-function markUnlinked(
-  all: readonly DescriptiveNode[],
-  links: readonly DescriptiveLink[],
-  removed: Set<string>,
-): void {
+function markUnlinked(all: readonly DescriptiveNode[], links: readonly DescriptiveLink[], removed: Set<string>): void {
   const aloneLeaf = (id: string): boolean =>
     links.every(
-      (l) =>
-        (l.from !== id && l.to !== id) ||
-        l.hidden === true ||
-        removed.has(l.from === id ? l.to : l.from),
+      (l) => (l.from !== id && l.to !== id) || l.hidden === true || removed.has(l.from === id ? l.to : l.from),
     );
-  const alone = (n: DescriptiveNode): boolean =>
-    n.children.length > 0 ? n.children.every(alone) : aloneLeaf(n.id);
+  const alone = (n: DescriptiveNode): boolean => (n.children.length > 0 ? n.children.every(alone) : aloneLeaf(n.id));
   for (const n of all) if (alone(n)) removed.add(n.id);
 }
 
@@ -260,9 +246,7 @@ export function effectiveRemovedIds(
     changed = false;
     for (const n of all) {
       if (n.symbol !== 'note' || removed.has(n.id)) continue;
-      const attached = links.filter(
-        (l) => l.hidden !== true && (l.from === n.id || l.to === n.id),
-      );
+      const attached = links.filter((l) => l.hidden !== true && (l.from === n.id || l.to === n.id));
       if (attached.length !== 1) continue;
       const other = attached[0]!.from === n.id ? attached[0]!.to : attached[0]!.from;
       if (removed.has(other)) {

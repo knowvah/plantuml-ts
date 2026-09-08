@@ -24,10 +24,8 @@ export class EaterImport extends Eater {
     this.skipSpaces();
     this.checkAndEatChar('!import');
     this.skipSpaces();
-    this.what = context.applyFunctionsAndVariables(
-      memory,
-      new StringLocated(this.eatAllToEnd(), this.getLineLocation()),
-    ) ?? '';
+    this.what =
+      context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
   }
 
   getWhat(): string {

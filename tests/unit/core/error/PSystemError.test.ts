@@ -15,10 +15,7 @@ import { PSystemUnsupported } from '../../../../src/core/error/PSystemUnsupporte
 import { PSystemWelcome } from '../../../../src/core/error/PSystemWelcome.js';
 import { buildV2, merge } from '../../../../src/core/error/PSystemErrorUtils.js';
 import { umlSourceOf } from '../../../../src/core/error/UmlSource.js';
-import {
-  renderPSystemError,
-  renderPSystemUnsupported,
-} from '../../../../src/core/error/error-renderer.js';
+import { renderPSystemError, renderPSystemUnsupported } from '../../../../src/core/error/error-renderer.js';
 import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
 import { readLines } from '../../../../src/core/tim/ReadLineReader.js';
 import { LineLocationImpl } from '../../../../src/core/tim/LineLocationImpl.js';
@@ -63,10 +60,7 @@ describe('PSystemErrorPreprocessor', () => {
     const inner = new LineLocationImpl('shared.iuml', outer).oneLineRead();
     const trace = [new StringLocated('!endif', inner).withErrorPreprocessor('boom')];
     const system = new PSystemErrorPreprocessor(readLines('@startuml\n@enduml'), trace);
-    expect(system.getTextFromStack()).toEqual([
-      '[From shared.iuml (line 1) ]',
-      '[From string (line 2) ]',
-    ]);
+    expect(system.getTextFromStack()).toEqual(['[From shared.iuml (line 1) ]', '[From string (line 2) ]']);
   });
 });
 
@@ -106,7 +100,7 @@ describe('ErrorUml', () => {
   });
 });
 
-describe('PSystemError#getPureAsciiFormatted — upstream\'s plain-text render', () => {
+describe("PSystemError#getPureAsciiFormatted — upstream's plain-text render", () => {
   it('is the stack, the listing, a ^^^^^ marker, then the message', () => {
     const system = failing('@startuml\nA -> B\n!endif', 'No if related to this endif');
     expect(system.getPureAsciiFormatted()).toEqual([
@@ -127,7 +121,7 @@ describe('PSystemError#getPureAsciiFormatted — upstream\'s plain-text render',
 });
 
 describe('ErrorUml — the accessors upstream reports through', () => {
-  it('hands back the line it was raised on, and that line\'s location', () => {
+  it("hands back the line it was raised on, and that line's location", () => {
     const line = new StringLocated('!endif', new LineLocationImpl('string', undefined, 2));
     const error = new ErrorUml('SYNTAX_ERROR', 'boom', 7, line);
     expect(error.getLine()).toBe(line);
@@ -174,12 +168,7 @@ describe('UmlSource — the @start…@end slice decides whether Welcome is shown
     // 4 real lines + the '' a trailing "\n" splits into. Counting that '' would
     // push the source to 5 and silently drop the Welcome block.
     const sliced = umlSourceOf(readLines('@startuml\nA -> B\n!endif\n@enduml\n'));
-    expect(sliced.map((s) => s.getString())).toEqual([
-      '@startuml',
-      'A -> B',
-      '!endif',
-      '@enduml',
-    ]);
+    expect(sliced.map((s) => s.getString())).toEqual(['@startuml', 'A -> B', '!endif', '@enduml']);
   });
 
   it('keeps everything when there is no @start at all', () => {
@@ -187,12 +176,8 @@ describe('UmlSource — the @start…@end slice decides whether Welcome is shown
   });
 
   it('a 4-line source gets the Welcome block; a 5-line one does not', () => {
-    expect(failing('@startuml\nA -> B\n!endif\n@enduml', 'boom').getTotalLineCountLessThan5()).toBe(
-      true,
-    );
-    expect(
-      failing('@startuml\nA -> B\nC -> D\n!endif\n@enduml', 'boom').getTotalLineCountLessThan5(),
-    ).toBe(false);
+    expect(failing('@startuml\nA -> B\n!endif\n@enduml', 'boom').getTotalLineCountLessThan5()).toBe(true);
+    expect(failing('@startuml\nA -> B\nC -> D\n!endif\n@enduml', 'boom').getTotalLineCountLessThan5()).toBe(false);
   });
 });
 
