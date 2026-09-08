@@ -139,6 +139,6 @@ is most of the rest.
 
 - [x] Batch 0 — T0
 - [x] Batch 1 — T1
-- [ ] Batch 2 — T2
+- [x] Batch 2 — T2
 - [ ] Batch 3 — T3, T4
 - [ ] Batch 4 — T5, T6, T7
