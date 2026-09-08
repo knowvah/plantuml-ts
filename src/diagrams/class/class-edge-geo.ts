@@ -31,6 +31,12 @@ import {
   type MagicArrowLabel,
 } from './class-magic-arrow.js';
 import { applyGuillemet } from '../../core/edge-label-box.js';
+// `AtomText.manageSpecialChars` (`klimt/creole/legacy/AtomText.java:120-133`)
+// -- decodes `<U+XXXX>`/`&#NNN;` per line, AFTER guillemet, mirroring
+// `class-layout-edge-labels.ts#computeMeasuredLabelAttrs`'s SAME ordering
+// on the SAME `rel.label` -- one shared function, called identically at
+// both sites, cannot drift (`class/nagega-30-poso418`).
+import { resolveTextEscapes } from '../../core/text-escapes.js';
 import type { EdgeGeo } from './layout.js';
 
 /**
@@ -129,12 +135,15 @@ function attachEdgeLabel(
   // comment for the jar-verified per-line layout formula. A label with no
   // line breaks keeps the EXACT pre-existing single-`<text>` path below,
   // unchanged (`EdgeGeo.label`, N62).
-  // `splitDisplayLines` returns `readonly string[]` -- materialize a
-  // mutable copy since `attachMultiLineLabel`'s downstream callee
+  // Escapes decode PER LINE, after the split -- decoding the whole string
+  // first would let a decoded `<U+000A>` (a real newline) escape this
+  // split, mirroring `StripeSimple.ts#decodeAtomEscapes`'s own established
+  // per-line ordering. `.map` already returns a fresh mutable array, which
+  // is what `attachMultiLineLabel`'s downstream callee
   // (`class-edge-label-anchor.ts#multiLineLabelAnchor`, outside T1's
-  // write-set) still declares a mutable `string[]` parameter.
+  // write-set) needs (`string[]`, not `readonly string[]`).
   const { lines: splitLines, align } = splitDisplayLines(label);
-  const lines = [...splitLines];
+  const lines = splitLines.map(resolveTextEscapes);
   if (lines.length > 1) {
     attachMultiLineLabel(edgeGeo, lines, align, (direction) => magicArrowAngle(fromToPoints, direction), ctx);
     return;
@@ -144,17 +153,19 @@ function attachEdgeLabel(
   // `>`/`<`/`"< "`/`"> "` forms) strips the arrow token and draws a small
   // triangle glyph instead -- see `attachMagicArrow`'s doc comment. A label
   // with no arrow token (`parseMagicArrowLabel` returns `undefined`) keeps
-  // the EXACT pre-existing plain-text path below, unchanged. Reads `label`
-  // (post-guillemet), not `rel.label`: harmless when both differ, since a
-  // magic-arrow token is a single `<`/`>`, never the `<<`/`>>` pair
-  // `applyGuillemet` rewrites -- no corpus fixture combines the two.
-  const magic = parseMagicArrowLabel(label);
+  // the EXACT pre-existing plain-text path below, unchanged. Reads the
+  // resolved `lines[0]` (post-guillemet, post-escape-decode), not
+  // `rel.label`: harmless when they differ, since a magic-arrow token is a
+  // single `<`/`>`, never the `<<`/`>>` pair `applyGuillemet` rewrites, nor
+  // a `<U+XXXX>` escape -- no corpus fixture combines either with the other.
+  const resolvedLabel = lines[0] ?? '';
+  const magic = parseMagicArrowLabel(resolvedLabel);
   if (magic !== undefined) {
     attachMagicArrow(edgeGeo, magic, fromToPoints, ctx);
     return;
   }
 
-  edgeGeo.label = portLabelAnchor(label, center, measurer, labelFont);
+  edgeGeo.label = portLabelAnchor(resolvedLabel, center, measurer, labelFont);
 }
 
 /**

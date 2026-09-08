@@ -61,6 +61,18 @@ describe('stripCreoleMarkup', () => {
     expect(stripCreoleMarkup('<back:#eee>q')).toBe('q');
     expect(stripCreoleMarkup('<size:9>q')).toBe('q');
   });
+
+  it('does not eat a `<U+XXXX>` unicode escape — regression guard', () => {
+    // The alternation's `u` arm is case-insensitive (`gi`), so `<U+00AB>`
+    // reaches it: after `u` matches `U`, the optional `(?::[^>]*|\s[^>]*)?`
+    // group tries `:`/whitespace (next char is `+`, neither), falls back to
+    // empty, and then requires a literal `>` immediately — but the next
+    // char is still `+`, so the whole match fails and `<U+00AB>` survives.
+    // If this ever starts failing, the alternation widened and now eats
+    // `<U+XXXX>` escapes silently — see `core/text-escapes.ts#resolveTextEscapes`,
+    // which must run on this text INSTEAD, not have it stripped away first.
+    expect(stripCreoleMarkup('<U+00AB>typedef<U+00BB>')).toBe('<U+00AB>typedef<U+00BB>');
+  });
 });
 
 /**

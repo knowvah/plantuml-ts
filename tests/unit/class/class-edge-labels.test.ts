@@ -272,3 +272,49 @@ describe('SI25 — guide-line label: DOT box and geo ink agree at the resolved a
     },
   );
 });
+
+// ---------------------------------------------------------------------------
+// fix(label-size-tag-height) -- `<U+XXXX>` unicode escapes on a relationship
+// label decode to their literal glyph, both in the DOT reservation
+// (`edgeLabelAttrs`) and in the drawn ink (`buildEdgeGeos`/`attachEdgeLabel`).
+// Jar oracle (class/nagega-30-poso418, `!define L_GUILLEMET U+00AB` /
+// `R_GUILLEMET U+00BB`, `assocStereotype(x)` -> `<L_GUILLEMET>x<R_GUILLEMET>`):
+// `«typedef»` reserves 59x15, `«alias»` reserves 43x15 -- read off this
+// repo's own `WidthTableMeasurer` at size 13: "«typedef»" = 57.0375,
+// floor(57.0375 + 2*1) = 59; "«alias»" = 41.275, floor(41.275 + 2*1) = 43.
+// ---------------------------------------------------------------------------
+
+describe('fix(label-size-tag-height) — <U+XXXX> escape decode (nagega-30-poso418)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+  const font = { family: 'sans-serif', size: 13 };
+
+  function escapeRel(label: string): Relationship {
+    return { from: 'A', to: 'B', type: 'association', label };
+  }
+
+  it('<U+00AB>typedef<U+00BB> reserves the oracle box 59x15', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>typedef<U+00BB>'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(59);
+    expect(Math.floor(attrs.labelHeight!)).toBe(15);
+  });
+
+  it('<U+00AB>alias<U+00BB> reserves the oracle box 43x15', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>alias<U+00BB>'), font, font, oracleMeasurer);
+    expect(Math.floor(attrs.labelWidth!)).toBe(43);
+    expect(Math.floor(attrs.labelHeight!)).toBe(15);
+  });
+
+  it('draws the decoded glyph, not the literal escape text', () => {
+    const theme = deepMergeTheme(defaultTheme, {});
+    const geo = layoutClass(makeAST({ relationships: [escapeRel('<U+00AB>typedef<U+00BB>')] }), theme, oracleMeasurer);
+    expect(geo.edges[0]!.label!.text).toBe('«typedef»');
+  });
+
+  it('a magic-arrow label with a trailing escape decodes its remaining text too', () => {
+    const attrs = edgeLabelAttrs(escapeRel('<U+00AB>typedef<U+00BB> >'), font, font, oracleMeasurer);
+    const textWidth = oracleMeasurer.measure('«typedef»', font).width;
+    // Text-bearing magic-arrow labels still take the normal `2 * marginLabel`
+    // (only a BARE `<`/`>` token skips it — `withLabelMargin`'s own doc comment).
+    expect(attrs.labelWidth).toBeCloseTo(font.size + textWidth + 2, 6);
+  });
+});

@@ -2764,7 +2764,7 @@
     {
       "slug": "nagega-30-poso418",
       "type": "class",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 187.00400000000002,
       "firstDiff": "svg/g[1]/g[3]/rect[1]/@fill",

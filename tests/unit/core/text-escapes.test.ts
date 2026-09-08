@@ -21,6 +21,22 @@ describe('resolveTextEscapes', () => {
     expect(resolveTextEscapes('<U+12>')).toBe('<U+12>');
   });
 
+  // Boundary cases lifted directly from `AtomText.java:120-133`'s scan: the
+  // hex run is bounded `4 <= len <= 5` AND the closing `>` must immediately
+  // follow -- neither a 3-digit run nor an unterminated 4-digit run matches.
+  it('leaves a 3-digit hex run untouched (hexLen < 4)', () => {
+    expect(resolveTextEscapes('<U+0AB>')).toBe('<U+0AB>');
+  });
+
+  it('leaves an unterminated <U+XXXX escape (no closing >) untouched', () => {
+    expect(resolveTextEscapes('<U+00AB other text')).toBe('<U+00AB other text');
+  });
+
+  it('resolves 4-digit hex case-insensitively (lowercase and mixed case)', () => {
+    expect(resolveTextEscapes('<U+00ab>')).toBe('«');
+    expect(resolveTextEscapes('<U+00Ab>')).toBe('«');
+  });
+
   it('leaves plain text with no escapes untouched', () => {
     expect(resolveTextEscapes('hello world')).toBe('hello world');
   });

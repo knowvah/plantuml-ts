@@ -22,6 +22,9 @@ import {
   stripCreoleMarkup,
   resolveLineFont,
 } from '../../core/edge-label-box.js';
+// `AtomText.manageSpecialChars` (`klimt/creole/legacy/AtomText.java:120-133`)
+// -- per-line, AFTER guillemet/format-tag resolution (`nagega-30-poso418`).
+import { resolveTextEscapes } from '../../core/text-escapes.js';
 import {
   isBareMagicArrowLabel,
   parseMagicArrowLabel,
@@ -255,6 +258,19 @@ function computeNoteMergedLabelAttrs(
   return { label: rel.label ?? '', labelWidth: box.reservedWidth, labelHeight: box.reservedHeight };
 }
 
+/** {@link computeMeasuredLabelAttrs}'s magic-arrow arm, factored out to keep
+ *  that function's NLOC under the project's per-function cap -- resolves a
+ *  leading `<size:N>` tag ({@link resolveLineFont}) then decodes escapes on
+ *  the result. `undefined` for an absent/empty remaining text. */
+function resolveMagicArrowText(
+  text: string | undefined,
+  font: { family: string; size: number },
+): { text: string; font: { family: string; size: number } } | undefined {
+  if (text === undefined || text === '') return undefined;
+  const resolved = resolveLineFont(text, font);
+  return { text: resolveTextEscapes(resolved.text), font: resolved.font };
+}
+
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
  *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
@@ -298,7 +314,9 @@ function computeMeasuredLabelAttrs(
     // .getSize2D()` and a fixed per-codepoint table alone -- no branch on
     // `FontStyle`/bold/italic exists in that class -- so stop 10 does not
     // fire here.
-    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup);
+    // Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
+    // own per-line-not-whole-string ordering (see that function's comment).
+    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup).map(resolveTextEscapes);
     const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
     const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
     return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
@@ -309,7 +327,7 @@ function computeMeasuredLabelAttrs(
     // own font ({@link resolveLineFont}) -- the arrow glyph below stays at
     // the BASE `font`, matching `addMagicArrow`'s own font argument
     // (`SvekEdge.java:304`); see the comment on `font.size` below.
-    const resolved = magic.text !== undefined && magic.text !== '' ? resolveLineFont(magic.text, font) : undefined;
+    const resolved = resolveMagicArrowText(magic.text, font);
     const m = resolved !== undefined ? measurer.measure(resolved.text, resolved.font) : { width: 0, height: 0 };
     // `TextBlockArrow2.calculateDimension` (`klimt/shape/TextBlockArrow2
     // .java:57,87`) returns `(size, size)` where `size` is the SAME font
@@ -327,7 +345,8 @@ function computeMeasuredLabelAttrs(
   // #applyGuillemet`, `Guillemet.java:78-88`) -- runs AFTER the visibility
   // strip, mirroring `Display.manageGuillemet`'s per-line order
   // (`Display.java:415-418`: strip first, guillemet second, same line).
-  const m = measurer.measure(applyGuillemet(vis.text), font);
+  // Escape decode runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
+  const m = measurer.measure(resolveTextEscapes(applyGuillemet(vis.text)), font);
   return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
 }
 
