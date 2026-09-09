@@ -3,8 +3,18 @@ import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
+import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
 
 const theme = resolveTheme('default');
+
+/** A theme carrying one `<style>`/`skinparam` bucket `FontColor` override --
+ *  standing in for `<style> activityDiagram { arrow { FontColor ... } } */
+function themeWithArrowFontColor(color: string): typeof theme {
+  return {
+    ...theme,
+    colors: { ...theme.colors, elements: { ...theme.colors.elements, arrow: { font: color } } },
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Geometry factory helpers
@@ -832,5 +842,69 @@ describe('T6 — edge stroke, arrow decoration, and swimlane title', () => {
     const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
     expect(content).toContain('font-size="18"');
     expect(content).toContain('Lane A');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T4 — edge labels resolve `activityFontColor(theme, 'arrow')` (D3),
+// never `theme.colors.text`. `ftile/vcompact/FtileFactoryDelegator.java:84`
+// resolves an activity edge label through `of(root, element,
+// activityDiagram, arrow)`, the same signature `activityFontSize(theme,
+// 'arrow')` already uses for its size.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge label colour (D3)', () => {
+  it('ACTIVITY_FONT_COLOR resolves black -- resolvePaint shortens it to #000 on emission', () => {
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+  });
+
+  it('an uncoloured edge label draws the root black, not theme.colors.text', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 50 },
+            { x: 100, y: 150 },
+          ],
+          label: 'yes',
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toContain('fill="#000"');
+  });
+
+  it('a colored-pill edge label text draws the root black, not theme.colors.text', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 50 },
+            { x: 100, y: 150 },
+          ],
+          label: 'no3',
+          color: 'red',
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toContain('fill="#000"');
+  });
+
+  it('`<style> activityDiagram { arrow { FontColor blue } }` colours the edge label', () => {
+    const arrowBlue = themeWithArrowFontColor('blue');
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 50 },
+            { x: 100, y: 150 },
+          ],
+          label: 'yes',
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, arrowBlue)));
+    expect(content).toContain('fill="#00F"');
   });
 });

@@ -28,11 +28,23 @@ import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
 import type { StringBounder as TileStringBounder } from '../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
+import type { Theme } from '../../../src/core/theme.js';
+import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
 
 const theme = resolveTheme('default');
 
 function makeNode(overrides: Partial<ActivityNodeGeo> & Pick<ActivityNodeGeo, 'kind'>): ActivityNodeGeo {
   return { id: 'node1', x: 50, y: 50, width: 20, height: 20, ...overrides };
+}
+
+/** A theme carrying one `<style>`/`skinparam` bucket `FontColor` override
+ *  (amb-T1's cascade front-end, tested end-to-end elsewhere) -- standing in
+ *  for `<style> activityDiagram { <sname> { FontColor ... } } </style>`. */
+function themeWithFontColor(sname: string, color: string): Theme {
+  return {
+    ...theme,
+    colors: { ...theme.colors, elements: { ...theme.colors.elements, [sname]: { font: color } } },
+  };
 }
 
 describe('renderStart', () => {
@@ -252,5 +264,83 @@ describe('T3 — element-tier stroke width (D4)', () => {
     const svg = renderParallelogram(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), theme);
     expect(svg).toContain('stroke-width="0.5"');
     expect(svg).not.toContain('stroke-width="1"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T4 — every activity text resolves `activityFontColor` (D3), never
+// `theme.colors.text` (#181818). Root `FontColor black` (plantuml.skin:9).
+// ---------------------------------------------------------------------------
+
+describe('T4 — text colour cascade (D3)', () => {
+  it('ACTIVITY_FONT_COLOR resolves black -- resolvePaint shortens it to #000 on emission', () => {
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+  });
+
+  // NOTE: a SINGLE-LINE action/hexagon/parallelogram label draws through the
+  // shared `renderLabel` -> `core/latex.ts#renderNodeLabel`, which still
+  // hardcodes `theme.colors.text` -- that shared helper is explicitly out of
+  // this task's write-set (`src/core/**`) and is T5's to replace (batch-5
+  // overview: "the action at :222"). Only the MULTI-LINE/code-block branches
+  // below, which build their own `<text>` calls in this file, are T4's ten
+  // sites.
+
+  it('a multi-line action label draws the resolved colour (#000, shortened), not theme.colors.text', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), theme);
+    expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
+  });
+
+  it('a <code> block action label draws the resolved colour', () => {
+    const node = makeNode({ kind: 'action', label: '<code>\nx\n</code>', width: 160, height: 60 });
+    const svg = renderAction(node, theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a diamond label draws the root black (FtileDiamondInside label)', () => {
+    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a note label (single-line, FtileWithNoteOpale.java:89) draws the root black', () => {
+    const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a multi-line note label draws the resolved colour on every line', () => {
+    const svg = renderNote(makeNode({ kind: 'note', label: 'a\nb', width: 60, height: 40 }), theme);
+    expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action, not the diamond', () => {
+    const activityRed = themeWithFontColor('activity', 'red');
+    const actionSvg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), activityRed);
+    expect(actionSvg).toContain('fill="#F00"');
+    const diamondSvg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), activityRed);
+    expect(diamondSvg).toContain('fill="#000"');
+    expect(diamondSvg).not.toContain('fill="#F00"');
+  });
+
+  it('a labelled hexagon (diamond SName, gtile-diamond.ts sizing) resolves the diamond bucket', () => {
+    const diamondBlue = themeWithFontColor('diamond', 'blue');
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), diamondBlue);
+    expect(svg).toContain('fill="#00F"');
+  });
+
+  it('a parallelogram (activity SName, FtileBox.java:97-99) resolves the activity bucket, not diamond', () => {
+    const diamondBlue = themeWithFontColor('diamond', 'blue');
+    const svg = renderParallelogram(makeNode({ kind: 'action', label: 'l1\nl2', width: 80, height: 40 }), diamondBlue);
+    expect(svg).toContain('fill="#000"');
+    expect(svg).not.toContain('fill="#00F"');
+  });
+
+  it('an SDL chevron label (activity SName) resolves the activity bucket on both lines', () => {
+    const activityGreen = themeWithFontColor('activity', 'green');
+    const single = renderChevronLeft(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), activityGreen);
+    expect(single).toContain('fill="#008000"');
+    const multi = renderChevronRight(
+      makeNode({ kind: 'action', label: 'l1\nl2', width: 60, height: 30 }),
+      activityGreen,
+    );
+    expect(multi).toContain('fill="#008000"');
   });
 });

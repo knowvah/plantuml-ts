@@ -13,6 +13,7 @@ import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityFontColor } from './activity-text-style.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -86,7 +87,7 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
       stroke: 'none',
     });
     const labelEl = text(midX, midY, label, {
-      fill: theme.colors.text,
+      fill: activityFontColor(theme, 'arrow'),
       fontFamily: theme.fontFamily,
       fontSize: size,
       textAnchor: 'middle',
@@ -97,7 +98,7 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
 
   // No color: plain text label offset slightly from the midpoint
   return text(midX + 4, midY - 4, label, {
-    fill: theme.colors.text,
+    fill: activityFontColor(theme, 'arrow'),
     fontFamily: theme.fontFamily,
     fontSize: size,
   });
