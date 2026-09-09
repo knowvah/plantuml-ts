@@ -60,8 +60,10 @@ export type ActivitySName = 'activity' | 'activityBar' | 'arrow' | 'circle' | 'c
 
 /** The bucket key for an SName. The shared bucket map is keyed by the
  * LOWERCASED sname (`skinparam-element-buckets.ts`'s own allowlist spells
- * `activitybar`), so `activityBar` must be folded before lookup. */
-function bucketKey(sname: ActivitySName): string {
+ * `activitybar`), so `activityBar` must be folded before lookup. Exported
+ * for `activity-text-style.ts` (mission `activity-min-box-width`, T1) --
+ * one folding rule, not a second copy. */
+export function bucketKey(sname: ActivitySName): string {
   return sname.toLowerCase();
 }
 
@@ -377,9 +379,11 @@ export const SWIMLANE_TITLE_FONT_COLOR = resolveColorToSvgHex('black');
  * shared `Paint` type because the bucket is a general per-SName map; no
  * corpus fixture sets a gradient `LineColor`/`FontColor` on a swimlane
  * divider or title, so a Gradient here falls through to the next cascade
- * tier rather than the resolver throwing or drawing it.
+ * tier rather than the resolver throwing or drawing it. Exported for
+ * `activity-text-style.ts`'s `activityFontColor` (mission
+ * `activity-min-box-width`, T1, D3) — same `Paint`-string-only handling.
  */
-function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
+export function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
   return typeof paint === 'string' ? resolveColorToSvgHex(paint) : undefined;
 }
 

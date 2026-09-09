@@ -41,6 +41,12 @@ import {
   swimlaneTitleFontColor,
   swimlaneTitleFontSize,
 } from '../../../src/diagrams/activity/activity-style-defaults.js';
+import {
+  ACTIVITY_FONT_COLOR,
+  activityFontColor,
+  activityHorizontalAlignment,
+  activityMinimumWidth,
+} from '../../../src/diagrams/activity/activity-text-style.js';
 
 const DEFAULT = resolveTheme('default');
 
@@ -309,5 +315,91 @@ describe('swimlane title & border resolvers (T2, D4)', () => {
     const theme = themeWithBucket('swimlane', {});
     theme.colors.elements!.swimlane = { border: { color1: '#FFF', color2: '#000', policy: '-' } };
     expect(swimlaneBorderColor(theme)).toBe(SWIMLANE_BORDER_COLOR);
+  });
+});
+
+describe('activityMinimumWidth (mission activity-min-box-width, T1, D1)', () => {
+  it('the default theme floors nothing — FtileBox.java:87 initialises the field to 0', () => {
+    expect(activityMinimumWidth(DEFAULT)).toBe(0);
+  });
+
+  it('a bare `skinparam minClassWidth 200` floors the box (FromSkinparamToStyle.java:241)', () => {
+    // `addConvert("MinClassWidth", PName.MinimumWidth)` registers with NO
+    // SName arguments, so `StyleStorage`'s empty-key match reaches the
+    // activity box too (D1) — the bare `theme.minimumWidth` tier.
+    const theme: Theme = { ...DEFAULT, minimumWidth: 200 };
+    expect(activityMinimumWidth(theme)).toBe(200);
+  });
+
+  it('a `<style> activity { MinimumWidth 150 }` bucket wins over a bare 200', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      minimumWidth: 200,
+      colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150 } } },
+    };
+    expect(activityMinimumWidth(theme)).toBe(150);
+  });
+
+  it('never returns undefined — resolveElementMinimumWidth‘s ?? 0 is this module’s job', () => {
+    expect(typeof activityMinimumWidth(DEFAULT)).toBe('number');
+  });
+});
+
+describe('activityFontColor (mission activity-min-box-width, T1, D3)', () => {
+  it('the default is the root `FontColor black` (plantuml.skin:9), same shape as swimlaneTitleFontColor', () => {
+    expect(activityFontColor(DEFAULT, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+  });
+
+  it('every ActivitySName defaults to the same black — no per-site constant (D3)', () => {
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(activityFontColor(DEFAULT, sname)).toBe('#000000');
+    }
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours only `activity`', () => {
+    const theme = themeWithBucket('activity', { font: 'red' });
+    expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'diamond')).toBe('#000000');
+  });
+
+  it('`activityBar` folds to the lowercased bucket key the allowlist spells', () => {
+    const theme = themeWithBucket('activitybar', { font: 'blue' });
+    expect(activityFontColor(theme, 'activityBar')).toBe('#0000FF');
+  });
+
+  it('a Gradient bucket Paint is not a solid colour and falls through to the constant', () => {
+    const theme = themeWithBucket('activity', {});
+    theme.colors.elements!.activity = { font: { color1: '#FFF', color2: '#000', policy: '-' } };
+    expect(activityFontColor(theme, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+
+  it('never returns undefined — supplying the default is this module’s job', () => {
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(typeof activityFontColor(DEFAULT, sname)).toBe('string');
+    }
+  });
+});
+
+describe('activityHorizontalAlignment (mission activity-min-box-width, T1, D2)', () => {
+  it('the default theme resolves the root `HorizontalAlignment left` (plantuml.skin:12)', () => {
+    expect(activityHorizontalAlignment(DEFAULT)).toBe('left');
+  });
+
+  it('is unmoved by fields the alignment cascade does not read', () => {
+    // Neither cascade tier is reachable today (filed in the module's own
+    // doc comment): `ElementColors` carries no alignment role and
+    // `skinparam defaultTextAlignment` is unparsed anywhere in `src/core`.
+    // A bucket/minimumWidth change must not accidentally move alignment.
+    const theme: Theme = {
+      ...DEFAULT,
+      minimumWidth: 200,
+      colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150, font: 'red' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('left');
+  });
+
+  it('never returns undefined — supplying the default is this module’s job', () => {
+    expect(typeof activityHorizontalAlignment(DEFAULT)).toBe('string');
   });
 });
