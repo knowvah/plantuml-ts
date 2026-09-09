@@ -107,9 +107,10 @@ describe('GtileAction — the live box uses the derivation', () => {
     expect(new GtileAction(action('hello'), bounder, themed).height).toBe(20 + 20);
   });
 
-  it('pads the width by the resolved 10 per side, not the old 16', () => {
-    // The bounder above returns 10px per character, and ACTION_MIN_WIDTH
-    // (120, this port's own unsourced floor) is cleared at 11 characters.
+  it('pads the width by the resolved 10 per side -- no floor at all by default (T2, D1)', () => {
+    // `FtileBox.java:237-243` floors the width at `MinimumWidth`, unset = 0
+    // (`ValueNull.java:61-63`); the port's own `ACTION_MIN_WIDTH = 120` was
+    // deleted, not lowered, so the default theme applies no floor here.
     const label = 'abcdefghijklmno'; // 15 chars -> 150px
     expect(new GtileAction(action(label), bounder, THEME).width).toBe(150 + 2 * 10);
   });

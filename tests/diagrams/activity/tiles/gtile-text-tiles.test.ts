@@ -63,19 +63,23 @@ const stubTheme: Theme = {
 // ---------------------------------------------------------------------------
 
 describe('GtileAction', () => {
-  it('enforces minimum width of 120 for a short label', () => {
+  it('sizes a short label to text + 2*Padding -- no 120px floor (T2, D1)', () => {
+    // `FtileBox.java:237-243` floors the width at the resolved
+    // `MinimumWidth`, unset = 0 (`ValueNull.java:61-63`); the port's own
+    // `ACTION_MIN_WIDTH = 120` was deleted, not lowered.
     const node: ActivityAction = { kind: 'action', label: 'Hi' };
     const tile = new GtileAction(node, stubBounder, stubTheme);
-    // "Hi" is 2 chars → measured width = 14px; 14 + 2*16 = 46 < 120
-    expect(tile.width).toBeGreaterThanOrEqual(120);
+    // "Hi" is 2 chars → measured width = 14px; 14 + 2*10 (activityPadding) = 34
+    expect(tile.width).toBe(34);
+    expect(tile.width).toBeLessThan(120);
   });
 
   it('uses measured width when label is wide enough', () => {
     const label = 'x'.repeat(30);
     const node: ActivityAction = { kind: 'action', label };
     const tile = new GtileAction(node, stubBounder, stubTheme);
-    // 30 chars * 7 = 210px + 2*16 = 242 > 120
-    expect(tile.width).toBeGreaterThan(120);
+    // 30 chars * 7 = 210px + 2*10 (activityPadding) = 230
+    expect(tile.width).toBe(230);
   });
 
   it('getCoord(NORTH_HOOK) returns top-center', () => {
