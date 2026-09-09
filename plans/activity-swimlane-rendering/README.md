@@ -122,7 +122,7 @@ behaviour is upstream-sourced; regenerating `docs/catalog.md` on drift.
 
 ## Progress
 
-- [ ] Batch 0 — T0
+- [x] Batch 0 — T0
 - [ ] Batch 1 — T1
 - [ ] Batch 2 — T2
 - [ ] Batch 3 — T3
