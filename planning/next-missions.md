@@ -874,6 +874,34 @@ Ordered by how ready they are, not by size.
   class). Most severe of the four filed alongside it by ratio — probably
   the first to pick up. Full evidence: `.agent-notes/aeg-T1-8-exceptions.md`.
 
+- **`activity-swimlane-rendering`** — **BRIEFED 2026-09-09**, not executed.
+  Brief at `plans/activity-swimlane-rendering/README.md`: 8 tasks over 8
+  batches, branch `feat/activity-swimlane-rendering`, baseline `ac03ad31`.
+
+  **The filing below understates it in two measured ways.** (1) "All four
+  swimlane skinparams unwired (grepped, zero matches)" is wrong:
+  `SwimlaneBorderColor` IS parsed, aliased to
+  `swimlaneheaderbackgroundcolor` (`skinparam-key-handlers-table-b.ts
+  :259-261`) and read by nobody — the parsed-but-dead variant
+  `sizer-renderer-parity.md` names. The other three are genuinely absent.
+  (2) It is not only a visual model: **nodes are never placed into lanes at
+  all.** `ast.ts` carries `swimlane?: string` on every node kind and no live
+  tile reads it; `walkTile` lays one column and lane geometry is a
+  decorative overlay. On `pakema-21-xema183` our `:b;` sits on the lane-2
+  boundary at x=132 where the jar puts it at x=201.469, inside lane B.
+  Lane widths are `max(120, root.width / n)` against the jar's
+  content-fitted 38.338 / 310.9.
+
+  Upstream located (the filing says "not yet"): `ftile/Swimlanes.java`
+  (`:285-315` titles and band height, `:357-377` band rect and
+  `CenteredText`, `:379-395` `computeDrawingWidths`) and
+  `ftile/LaneDivider.java:55-100`. Closes
+  `activity-swimlane-line-thickness` (51 of the 143 remaining
+  `line/@stroke-width` units) as a side effect of T6.
+
+  Original filing follows, unedited per this file's amend-don't-rewrite
+  convention:
+
 - **`activity-swimlane-rendering`** (NEW, unbriefed) — FILED 2026-09-03 by
   `activity-element-granularity` T1, measured. Ours draws swimlanes as a
   boxed table HEADER (`SWIMLANE_HEADER_H`,
