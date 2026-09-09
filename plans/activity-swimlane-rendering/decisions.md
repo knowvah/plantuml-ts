@@ -79,6 +79,26 @@ the same StyleSignature.
 corpus fixture exercises either key and the field is currently unread. T1
 must still assert that no other engine's resolved theme moves.
 
+**Amended at execution (2026-09-09, T1 pre-read — flagged for review).**
+`SwimlaneHeaderBackgroundColor` is NOT an upstream key: a case-insensitive
+grep of `~/git/plantuml/src` finds no `swimlaneheader*` anywhere. The key
+upstream maps to the band's `PName.BackGroundColor` is
+**`SwimlaneTitleBackgroundColor`** (`style/FromSkinparamToStyle.java:160`),
+and the corpus exercises it (`vidada-17-xuse810` sets `#EEE`; the jar's
+band rect carries `fill="#EEE"`, pinned in `swimlane-baseline.json`). The
+decision's MECHANISM — two fields, one per PName — is unchanged; only the
+key spelling is corrected. Under the push-forward item "equivalent
+spellings", T1 wires `swimlanetitlebackgroundcolor` as the band-fill key
+and KEEPS accepting the pre-existing local spelling
+`swimlaneheaderbackgroundcolor` as an alias of it (it was accepted before
+this mission; dropping it is a separate, reviewable choice). The theme
+field is named `swimlaneHeaderBackground` as the contract says, so T2/T6
+consume the name the brief wrote. The same file shows the full family the
+brief's four keys belong to: `addConFont("SwimlaneTitle", …)` (`:159`,
+which also yields `SwimlaneTitleFontName`/`FontStyle`),
+`SwimlaneBorderColor` → `LineColor` (`:161`), `SwimlaneBorderThickness` →
+`LineThickness` (`:162`).
+
 ## D5 — Titles are drawn LAST
 
 **Context.** `Swimlanes#drawU` calls the divider loop before `drawTitles`

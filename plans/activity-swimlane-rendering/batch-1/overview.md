@@ -6,4 +6,4 @@ acceptance criteria demand a proof that no other engine's theme moves.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Wire the three absent swimlane skinparams; un-alias `SwimlaneBorderColor` | typescript-pro | `src/core/skinparam-key-handlers-table-b.ts`, `src/core/skinparam-accumulator.ts`, `src/core/skinparam-theme-builder.ts`, `src/core/theme-graph-colors-b.ts`, `tests/unit/skinparam.test.ts` | — | [ ] |
+| T1 | Wire the three absent swimlane skinparams; un-alias `SwimlaneBorderColor` | typescript-pro | `src/core/skinparam-key-handlers-table-b.ts`, `src/core/skinparam-accumulator.ts`, `src/core/skinparam-theme-builder.ts`, `src/core/theme-graph-colors-b.ts`, `tests/unit/skinparam.test.ts` | — | [x] |
