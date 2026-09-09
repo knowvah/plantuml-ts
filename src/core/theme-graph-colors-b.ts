@@ -326,7 +326,28 @@ export interface ThemeGraphColorsB {
     diamondBorder?: string; // ActivityDiamondBorderColor
     startColor?: string; // ActivityStartColor — filled start circle
     endColor?: string; // ActivityEndColor — end/terminate circle
-    swimlaneBorder?: string; // SwimlaneHeaderBackgroundColor — lane header
+    // D4 amendment (T1, 2026-09-09): SwimlaneBorderColor ->
+    // PName.LineColor -- lane divider stroke.
+    // `FromSkinparamToStyle.java:161`.
+    swimlaneBorder?: string;
+    // D4 amendment: SwimlaneTitleBackgroundColor -> PName.BackGroundColor
+    // -- title-band fill. `FromSkinparamToStyle.java:160`. Also accepts
+    // the local alias `SwimlaneHeaderBackgroundColor` (NOT an upstream
+    // key -- no `swimlaneheader*` match anywhere in ~/git/plantuml/src;
+    // it was accepted for this same field before this mission, kept for
+    // compatibility). See decisions.md D4's "Amended at execution" note.
+    swimlaneHeaderBackground?: string;
+    // D4 amendment: SwimlaneBorderThickness -> PName.LineThickness.
+    // `FromSkinparamToStyle.java:162`.
+    swimlaneBorderThickness?: number;
+    // D4 amendment: SwimlaneTitleFontColor -> PName.FontColor, via
+    // `addConFont("SwimlaneTitle", SName.swimlane)`.
+    // `FromSkinparamToStyle.java:159`.
+    swimlaneTitleFontColor?: string;
+    // D4 amendment: SwimlaneTitleFontSize -> PName.FontSize, via
+    // `addConFont("SwimlaneTitle", SName.swimlane)`.
+    // `FromSkinparamToStyle.java:159`.
+    swimlaneTitleFontSize?: number;
   };
   json?: {
     keyText?: string;

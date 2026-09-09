@@ -6,7 +6,7 @@ geometry does move, the move is attributable to the task that caused it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | Thread `swimlane` from the AST onto the tiles | typescript-pro | `src/diagrams/activity/tiles/tile.ts`, `src/diagrams/activity/layout/tile-layout.ts`, `tests/diagrams/activity/layout/tile-layout.test.ts` | — | [ ] |
+| T3 | Thread `swimlane` from the AST onto the tiles | typescript-pro | `src/diagrams/activity/tiles/tile.ts`, `src/diagrams/activity/layout/tile-layout.ts`, `tests/diagrams/activity/layout/tile-layout.test.ts` | — | [x] |
 
 **Stop condition 6 applies to this task specifically:** if the aggregate
 `weightedScore` moves at all, T3 changed geometry it should not have.

@@ -1,7 +1,7 @@
 {
-  "$comment": "Residual cause census for the committed ACTIVITY oracle corpus, RE-CENSUSED by activity-style-defaults T7 after landing T1-T6 (per-element FontSize/LineThickness/RoundCorner resolution, the 1.4x->1.0x sizer advance, and the derived box height). The prior re-census was activity-element-granularity T4. Sibling of oracle/goldens/svg-sequence/diff-census.json. Every number is a pure function of the committed corpus at measuredAgainstCommit: each of the 268 status:\"baseline\" fixtures in diff-baseline.json is rendered through render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), and compared with compareSvg(ours, golden, 'deterministic'). Paths are normalised by replacing every positional index with [], so svg/g[1]/rect[3]/@x and svg/g[1]/rect[7]/@x are one family. RANKED BY WEIGHT, NOT COUNT (D2 of the prior mission): a ranking by occurrence would misdirect the next mission the same way it did before this one existed.",
-  "measuredAt": "2026-09-08",
-  "measuredAgainstCommit": "3880f37d",
+  "$comment": "Residual cause census for the committed ACTIVITY oracle corpus, RE-CENSUSED by activity-swimlane-rendering T7 (2026-09-09) after landing T1-T6 (swimlane skinparams, content-fitted lane widths, lane placement, divider-and-floating-title chrome). The prior re-census was activity-style-defaults T7. Every number is a pure function of the committed corpus at measuredAgainstCommit: each of the 268 status:\"baseline\" fixtures in diff-baseline.json is rendered through render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), and compared with compareSvg(ours, golden, 'deterministic'). Paths are normalised by replacing every positional index with [], so svg/g[1]/rect[3]/@x and svg/g[1]/rect[7]/@x are one family. RANKED BY WEIGHT, NOT COUNT. The narrative sections (exitBarFamilies, geometryResidual, childCountResidual, namedFamilies) are carried forward from the prior census unchanged except where restated below; paths and topFixturesByWeight are fresh.",
+  "measuredAt": "2026-09-09",
+  "measuredAgainstCommit": "66403a06",
   "population": {
     "total": 373,
     "censused": 268,
@@ -9,10 +9,13 @@
     "jarError": 23
   },
   "descent": {
-    "note": "The activity-style-defaults headline. Before = 61677, the figure this file was pinned at by activity-element-granularity T4 (commit 53942ff7) and which this mission stated its exit bar against. After = this measurement, post T1-T6. FOURTEEN distinct fixtures rose at intermediate checkpoints and each was ADOPTED with a stated mechanism rather than silenced -- see plans/activity-style-defaults/decision-journal.md. The mechanisms are (a) a corrected box height exposing the separate, still-wrong LAYOUT_MARGIN, and (b) compareSvg pairing elements POSITIONALLY, so a correctly-added attribute costs one more unit on a pairing that was already structurally wrong (swimlane chrome, note draw order, nested-split childCount). None of those risers is a wrong VALUE.",
-    "weightedScoreBefore": 61677,
-    "weightedScoreAfter": 52565,
-    "percentChange": -14.77
+    "note": "The activity-swimlane-rendering headline. Before = 52563, the figure activity-style-defaults T7 pinned (commit 3880f37d / ac03ad31 baseline) and which this mission stated its exit bar against. After = this measurement, post T1-T6. svg/g[][childCount] fell 24911 -> 19771 (47.4% -> 40.9% of the residual), the family the mission predicted it would move most: the transparent band rect, the n+1 dividers and the jar-mirrored draw order (band, per-lane shapes with each lane divider, all edges, titles last) pair correctly for the first time. TWO fixtures rose and were adopted with a stated mechanism (the unsourced ACTION_MIN_WIDTH=120 action-box floor now drives lane widths; see the decision journal); the 208 no-lane fixtures are byte-identical.",
+    "before": 52563,
+    "after": 48291,
+    "percentChange": -8.13,
+    "fixturesFell": 57,
+    "fixturesRose": 2,
+    "fixturesUnchanged": 209
   },
   "exitBarFamilies": {
     "note": "The two families the mission named as DIRECTLY attributable, restated against the figures its exit bar demanded.",
@@ -34,346 +37,339 @@
   "paths": [
     {
       "path": "svg/g[][childCount]",
-      "weight": 24911,
-      "weightShare": 47.39,
-      "occurrences": 206,
-      "fixtures": 206
+      "weight": 19771,
+      "weightShare": 40.94,
+      "occurrences": 201,
+      "fixtures": 201
     },
     {
       "path": "svg/g[]/line[]/@x1",
-      "weight": 2350,
-      "weightShare": 4.47,
-      "occurrences": 2350,
+      "weight": 2696,
+      "weightShare": 5.58,
+      "occurrences": 2696,
       "fixtures": 256
     },
     {
       "path": "svg/g[]/line[]/@x2",
-      "weight": 2350,
-      "weightShare": 4.47,
-      "occurrences": 2350,
-      "fixtures": 256
-    },
-    {
-      "path": "svg/g[]/line[]/@y2",
-      "weight": 2349,
-      "weightShare": 4.47,
-      "occurrences": 2349,
+      "weight": 2696,
+      "weightShare": 5.58,
+      "occurrences": 2696,
       "fixtures": 256
     },
     {
       "path": "svg/g[]/line[]/@y1",
-      "weight": 2348,
-      "weightShare": 4.47,
-      "occurrences": 2348,
+      "weight": 2694,
+      "weightShare": 5.58,
+      "occurrences": 2694,
+      "fixtures": 256
+    },
+    {
+      "path": "svg/g[]/line[]/@y2",
+      "weight": 2693,
+      "weightShare": 5.58,
+      "occurrences": 2693,
       "fixtures": 256
     },
     {
       "path": "svg/g[]/polygon[]/@points",
-      "weight": 1760,
-      "weightShare": 3.35,
-      "occurrences": 1760,
-      "fixtures": 254
+      "weight": 1735,
+      "weightShare": 3.59,
+      "occurrences": 1735,
+      "fixtures": 255
     },
     {
       "path": "svg/g[]/text[]/@y",
-      "weight": 1320,
-      "weightShare": 2.51,
-      "occurrences": 1320,
-      "fixtures": 264
+      "weight": 1428,
+      "weightShare": 2.96,
+      "occurrences": 1428,
+      "fixtures": 265
     },
     {
       "path": "svg/g[]/text[]/@x",
-      "weight": 1319,
-      "weightShare": 2.51,
-      "occurrences": 1319,
-      "fixtures": 264
+      "weight": 1427,
+      "weightShare": 2.96,
+      "occurrences": 1427,
+      "fixtures": 265
     },
     {
       "path": "svg/g[]/text[]/@fill",
-      "weight": 1318,
-      "weightShare": 2.51,
-      "occurrences": 1318,
+      "weight": 1288,
+      "weightShare": 2.67,
+      "occurrences": 1288,
       "fixtures": 263
     },
     {
+      "path": "svg/g[]/text[]/@textLength",
+      "weight": 1275,
+      "weightShare": 2.64,
+      "occurrences": 1275,
+      "fixtures": 257
+    },
+    {
       "path": "svg/g[]/text[]/@text-anchor",
-      "weight": 1283,
-      "weightShare": 2.44,
-      "occurrences": 1283,
+      "weight": 1253,
+      "weightShare": 2.59,
+      "occurrences": 1253,
       "fixtures": 261
     },
     {
-      "path": "svg/g[]/text[]/@textLength",
-      "weight": 1180,
-      "weightShare": 2.24,
-      "occurrences": 1180,
-      "fixtures": 254
-    },
-    {
       "path": "svg/g[]/rect[]/@x",
-      "weight": 874,
-      "weightShare": 1.66,
-      "occurrences": 874,
+      "weight": 914,
+      "weightShare": 1.89,
+      "occurrences": 914,
       "fixtures": 240
     },
     {
       "path": "svg/g[]/rect[]/@y",
-      "weight": 874,
-      "weightShare": 1.66,
-      "occurrences": 874,
+      "weight": 914,
+      "weightShare": 1.89,
+      "occurrences": 914,
       "fixtures": 240
     },
     {
       "path": "svg/g[]/rect[]/@stroke-width",
-      "weight": 821,
-      "weightShare": 1.56,
-      "occurrences": 821,
-      "fixtures": 238
+      "weight": 846,
+      "weightShare": 1.75,
+      "occurrences": 846,
+      "fixtures": 239
     },
     {
       "path": "svg/g[]/rect[]/@width",
-      "weight": 795,
-      "weightShare": 1.51,
-      "occurrences": 795,
+      "weight": 821,
+      "weightShare": 1.7,
+      "occurrences": 821,
       "fixtures": 228
-    },
-    {
-      "path": "svg/g[]/text[]/text()[]",
-      "weight": 609,
-      "weightShare": 1.16,
-      "occurrences": 609,
-      "fixtures": 172
     },
     {
       "path": "svg/@viewBox[]",
       "weight": 534,
-      "weightShare": 1.02,
+      "weightShare": 1.11,
       "occurrences": 534,
       "fixtures": 268
     },
     {
-      "path": "svg/g[]/line[]",
-      "weight": 428,
-      "weightShare": 0.81,
-      "occurrences": 30,
-      "fixtures": 7
+      "path": "svg/g[]/text[]/text()[]",
+      "weight": 474,
+      "weightShare": 0.98,
+      "occurrences": 474,
+      "fixtures": 151
     },
     {
       "path": "svg/g[]/ellipse[]/@cx",
-      "weight": 417,
-      "weightShare": 0.79,
-      "occurrences": 417,
-      "fixtures": 178
+      "weight": 464,
+      "weightShare": 0.96,
+      "occurrences": 464,
+      "fixtures": 190
     },
     {
       "path": "svg/g[]/ellipse[]/@cy",
-      "weight": 399,
-      "weightShare": 0.76,
-      "occurrences": 399,
-      "fixtures": 178
-    },
-    {
-      "path": "svg/g[]/polygon[]",
-      "weight": 369,
-      "weightShare": 0.7,
-      "occurrences": 26,
-      "fixtures": 7
+      "weight": 444,
+      "weightShare": 0.92,
+      "occurrences": 444,
+      "fixtures": 189
     },
     {
       "path": "svg/g[]/path[]/@d[]",
       "weight": 304,
-      "weightShare": 0.58,
+      "weightShare": 0.63,
       "occurrences": 304,
       "fixtures": 26
     },
     {
-      "path": "svg/g[]/text[]/@font-size",
+      "path": "svg/g[]/ellipse[]/@rx",
       "weight": 291,
-      "weightShare": 0.55,
+      "weightShare": 0.6,
       "occurrences": 291,
-      "fixtures": 120
+      "fixtures": 137
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@ry",
+      "weight": 291,
+      "weightShare": 0.6,
+      "occurrences": 291,
+      "fixtures": 137
+    },
+    {
+      "path": "svg/g[]/polygon[]",
+      "weight": 283,
+      "weightShare": 0.59,
+      "occurrences": 20,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/g[]/line[]",
+      "weight": 269,
+      "weightShare": 0.56,
+      "occurrences": 19,
+      "fixtures": 6
     },
     {
       "path": "svg/@height",
       "weight": 267,
-      "weightShare": 0.51,
+      "weightShare": 0.55,
       "occurrences": 267,
       "fixtures": 267
     },
     {
       "path": "svg/@width",
       "weight": 267,
-      "weightShare": 0.51,
+      "weightShare": 0.55,
       "occurrences": 267,
       "fixtures": 267
     },
     {
-      "path": "svg/g[]/ellipse[]/@rx",
-      "weight": 263,
-      "weightShare": 0.5,
-      "occurrences": 263,
-      "fixtures": 127
-    },
-    {
-      "path": "svg/g[]/ellipse[]/@ry",
-      "weight": 263,
-      "weightShare": 0.5,
-      "occurrences": 263,
-      "fixtures": 127
-    },
-    {
-      "path": "svg/g[]/text[]",
-      "weight": 238,
-      "weightShare": 0.45,
-      "occurrences": 16,
-      "fixtures": 5
+      "path": "svg/g[]/text[]/@font-size",
+      "weight": 227,
+      "weightShare": 0.47,
+      "occurrences": 227,
+      "fixtures": 97
     },
     {
       "path": "svg/g[]/polygon[]/@stroke-width",
-      "weight": 224,
-      "weightShare": 0.43,
-      "occurrences": 224,
-      "fixtures": 144
-    },
-    {
-      "path": "svg/g[]/rect[]",
-      "weight": 202,
-      "weightShare": 0.38,
-      "occurrences": 12,
-      "fixtures": 6
-    },
-    {
-      "path": "svg/g[]/ellipse[]",
-      "weight": 188,
-      "weightShare": 0.36,
-      "occurrences": 13,
-      "fixtures": 5
+      "weight": 219,
+      "weightShare": 0.45,
+      "occurrences": 219,
+      "fixtures": 141
     },
     {
       "path": "svg/g[]/line[]/@stroke-width",
-      "weight": 143,
-      "weightShare": 0.27,
-      "occurrences": 143,
-      "fixtures": 55
-    },
-    {
-      "path": "svg/g[]/rect[]/@height",
-      "weight": 130,
-      "weightShare": 0.25,
-      "occurrences": 130,
-      "fixtures": 82
+      "weight": 133,
+      "weightShare": 0.28,
+      "occurrences": 133,
+      "fixtures": 58
     },
     {
       "path": "svg/g[]/ellipse[]/@stroke",
-      "weight": 118,
-      "weightShare": 0.22,
-      "occurrences": 118,
-      "fixtures": 97
+      "weight": 130,
+      "weightShare": 0.27,
+      "occurrences": 130,
+      "fixtures": 107
     },
     {
       "path": "svg/g[]/ellipse[]/@stroke-width",
-      "weight": 112,
-      "weightShare": 0.21,
-      "occurrences": 112,
-      "fixtures": 97
+      "weight": 124,
+      "weightShare": 0.26,
+      "occurrences": 124,
+      "fixtures": 107
     },
     {
-      "path": "svg/g[]/rect[]/@fill",
+      "path": "svg/g[]/rect[]",
       "weight": 103,
-      "weightShare": 0.2,
-      "occurrences": 103,
-      "fixtures": 70
+      "weightShare": 0.21,
+      "occurrences": 6,
+      "fixtures": 4
     },
     {
-      "path": "svg/g[]/line[]/@stroke",
-      "weight": 101,
-      "weightShare": 0.19,
-      "occurrences": 101,
-      "fixtures": 39
+      "path": "svg/g[]/ellipse[]",
+      "weight": 99,
+      "weightShare": 0.21,
+      "occurrences": 7,
+      "fixtures": 3
+    },
+    {
+      "path": "svg/g[]/text[]",
+      "weight": 98,
+      "weightShare": 0.2,
+      "occurrences": 7,
+      "fixtures": 3
     },
     {
       "path": "svg/g[]/polygon[]/@points[]",
       "weight": 90,
-      "weightShare": 0.17,
+      "weightShare": 0.19,
       "occurrences": 90,
       "fixtures": 3
     },
     {
       "path": "svg/g[]/path[]",
       "weight": 88,
-      "weightShare": 0.17,
+      "weightShare": 0.18,
       "occurrences": 7,
       "fixtures": 3
     },
     {
-      "path": "svg/g[]/rect[]/@stroke",
-      "weight": 79,
-      "weightShare": 0.15,
-      "occurrences": 79,
-      "fixtures": 49
+      "path": "svg/g[]/rect[]/@height",
+      "weight": 77,
+      "weightShare": 0.16,
+      "occurrences": 77,
+      "fixtures": 35
     },
     {
       "path": "svg/g[]/path[]/@fill",
       "weight": 77,
-      "weightShare": 0.15,
+      "weightShare": 0.16,
       "occurrences": 77,
       "fixtures": 27
     },
     {
-      "path": "svg/g[]/text[]/@font-weight",
-      "weight": 66,
-      "weightShare": 0.13,
-      "occurrences": 66,
-      "fixtures": 39
+      "path": "svg/g[]/line[]/@stroke",
+      "weight": 70,
+      "weightShare": 0.14,
+      "occurrences": 70,
+      "fixtures": 34
+    },
+    {
+      "path": "svg/g[]/rect[]/@fill",
+      "weight": 50,
+      "weightShare": 0.1,
+      "occurrences": 50,
+      "fixtures": 23
+    },
+    {
+      "path": "svg/g[]/rect[]/@stroke",
+      "weight": 49,
+      "weightShare": 0.1,
+      "occurrences": 49,
+      "fixtures": 23
     },
     {
       "path": "svg/g[]/rect[]/@rx",
-      "weight": 65,
-      "weightShare": 0.12,
-      "occurrences": 65,
-      "fixtures": 39
+      "weight": 48,
+      "weightShare": 0.1,
+      "occurrences": 48,
+      "fixtures": 21
     },
     {
       "path": "svg/g[]/rect[]/@ry",
-      "weight": 65,
-      "weightShare": 0.12,
-      "occurrences": 65,
-      "fixtures": 39
+      "weight": 48,
+      "weightShare": 0.1,
+      "occurrences": 48,
+      "fixtures": 21
     },
     {
       "path": "svg/g[]/g[][childCount]",
       "weight": 42,
-      "weightShare": 0.08,
+      "weightShare": 0.09,
       "occurrences": 2,
       "fixtures": 2
     },
     {
       "path": "svg/g[]/path[]/@d",
       "weight": 39,
-      "weightShare": 0.07,
+      "weightShare": 0.08,
       "occurrences": 39,
       "fixtures": 27
     },
     {
       "path": "svg/g[]/g[]/text[]/@x",
       "weight": 22,
-      "weightShare": 0.04,
+      "weightShare": 0.05,
       "occurrences": 22,
       "fixtures": 16
     },
     {
       "path": "svg/g[]/g[]/text[]/@y",
       "weight": 22,
-      "weightShare": 0.04,
+      "weightShare": 0.05,
       "occurrences": 22,
       "fixtures": 16
     },
     {
       "path": "svg/g[]/polygon[]/@fill",
-      "weight": 16,
+      "weight": 13,
       "weightShare": 0.03,
-      "occurrences": 16,
-      "fixtures": 9
+      "occurrences": 13,
+      "fixtures": 6
     },
     {
       "path": "svg/defs[][childCount]",
@@ -388,6 +384,13 @@
       "weightShare": 0.02,
       "occurrences": 12,
       "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/text[]/@font-weight",
+      "weight": 11,
+      "weightShare": 0.02,
+      "occurrences": 11,
+      "fixtures": 7
     },
     {
       "path": "svg/g[]/polygon[]/@stroke-linejoin",
@@ -412,10 +415,10 @@
     },
     {
       "path": "svg/g[]/text[][childCount]",
-      "weight": 4,
+      "weight": 5,
       "weightShare": 0.01,
-      "occurrences": 4,
-      "fixtures": 3
+      "occurrences": 5,
+      "fixtures": 4
     },
     {
       "path": "svg/g[]/text[]/@font-family",
@@ -4576,8 +4579,8 @@
     },
     {
       "slug": "tobajo-64-mipi810",
-      "weightedScore": 888,
-      "diffCount": 428
+      "weightedScore": 832,
+      "diffCount": 471
     },
     {
       "slug": "xefalo-73-sabi101",
@@ -4590,64 +4593,29 @@
       "diffCount": 307
     },
     {
-      "slug": "navene-45-cozo466",
-      "weightedScore": 599,
-      "diffCount": 302
-    },
-    {
       "slug": "gitoke-38-beme495",
       "weightedScore": 598,
       "diffCount": 242
     },
     {
-      "slug": "ruzica-16-deli877",
-      "weightedScore": 560,
-      "diffCount": 217
+      "slug": "navene-45-cozo466",
+      "weightedScore": 525,
+      "diffCount": 317
     },
     {
       "slug": "judatu-15-xize591",
-      "weightedScore": 558,
-      "diffCount": 281
-    },
-    {
-      "slug": "rujuxa-07-neco067",
-      "weightedScore": 532,
-      "diffCount": 237
-    },
-    {
-      "slug": "jevoce-05-mumi686",
-      "weightedScore": 520,
-      "diffCount": 209
-    },
-    {
-      "slug": "nupose-71-vido428",
-      "weightedScore": 506,
-      "diffCount": 196
-    },
-    {
-      "slug": "roboja-69-susa752",
-      "weightedScore": 506,
-      "diffCount": 196
+      "weightedScore": 497,
+      "diffCount": 299
     },
     {
       "slug": "decudi-92-bisu741",
-      "weightedScore": 464,
-      "diffCount": 200
+      "weightedScore": 471,
+      "diffCount": 208
     },
     {
-      "slug": "zeporo-46-zicu301",
-      "weightedScore": 441,
-      "diffCount": 191
-    },
-    {
-      "slug": "noxasi-06-nejo322",
-      "weightedScore": 438,
-      "diffCount": 102
-    },
-    {
-      "slug": "firibi-00-puki721",
-      "weightedScore": 425,
-      "diffCount": 233
+      "slug": "ruzica-16-deli877",
+      "weightedScore": 449,
+      "diffCount": 269
     },
     {
       "slug": "vubolo-48-cubu499",
@@ -4655,19 +4623,19 @@
       "diffCount": 91
     },
     {
+      "slug": "rujuxa-07-neco067",
+      "weightedScore": 419,
+      "diffCount": 280
+    },
+    {
       "slug": "fibafo-22-foze119",
       "weightedScore": 410,
       "diffCount": 208
     },
     {
-      "slug": "maduja-30-xiri319",
-      "weightedScore": 383,
-      "diffCount": 145
-    },
-    {
-      "slug": "xovano-23-tazo278",
-      "weightedScore": 381,
-      "diffCount": 169
+      "slug": "jevoce-05-mumi686",
+      "weightedScore": 407,
+      "diffCount": 266
     },
     {
       "slug": "gacaja-15-keko600",
@@ -4675,19 +4643,54 @@
       "diffCount": 232
     },
     {
+      "slug": "maketa-43-juja264",
+      "weightedScore": 367,
+      "diffCount": 151
+    },
+    {
+      "slug": "firibi-00-puki721",
+      "weightedScore": 364,
+      "diffCount": 244
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "weightedScore": 359,
+      "diffCount": 213
+    },
+    {
       "slug": "nexitu-74-luga914",
       "weightedScore": 356,
       "diffCount": 67
     },
     {
-      "slug": "maketa-43-juja264",
-      "weightedScore": 354,
+      "slug": "nupose-71-vido428",
+      "weightedScore": 342,
+      "diffCount": 254
+    },
+    {
+      "slug": "roboja-69-susa752",
+      "weightedScore": 342,
+      "diffCount": 254
+    },
+    {
+      "slug": "lopone-15-xiki477",
+      "weightedScore": 334,
       "diffCount": 153
     },
     {
-      "slug": "racana-82-zece676",
-      "weightedScore": 353,
-      "diffCount": 185
+      "slug": "jagove-43-nako107",
+      "weightedScore": 330,
+      "diffCount": 156
+    },
+    {
+      "slug": "leduvi-16-voli986",
+      "weightedScore": 326,
+      "diffCount": 138
+    },
+    {
+      "slug": "popofi-03-momo442",
+      "weightedScore": 318,
+      "diffCount": 149
     }
   ]
 }

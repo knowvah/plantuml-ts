@@ -74,6 +74,10 @@ const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [
   ['startColor', (acc) => acc.activityStartColor],
   ['endColor', (acc) => acc.activityEndColor],
   ['swimlaneBorder', (acc) => acc.swimlaneBorder],
+  ['swimlaneHeaderBackground', (acc) => acc.swimlaneHeaderBackground],
+  ['swimlaneBorderThickness', (acc) => acc.swimlaneBorderThickness],
+  ['swimlaneTitleFontColor', (acc) => acc.swimlaneTitleFontColor],
+  ['swimlaneTitleFontSize', (acc) => acc.swimlaneTitleFontSize],
 ];
 
 const GRAPH_OVERRIDE_FIELDS: FieldTable = [

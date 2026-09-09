@@ -9,7 +9,7 @@ and T6's chrome would be individually unattributable.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Pin the pre-change swimlane census | orchestrator | `oracle/goldens/svg-activity/swimlane-baseline.json`, `tests/oracle/svg-conformance/activity.swimlane-baseline.test.ts`, `.agent-notes/asr-T0.md` | — | [ ] |
+| T0 | Pin the pre-change swimlane census | orchestrator | `oracle/goldens/svg-activity/swimlane-baseline.json`, `tests/oracle/svg-conformance/activity.swimlane-baseline.test.ts`, `.agent-notes/asr-T0.md` | — | [x] |
 
 **Orchestrator-executed.** `scripts/repin-sequence-baselines.ts:3-8`
 reserves baseline JSON writes to the orchestrator: *"Task agents never write

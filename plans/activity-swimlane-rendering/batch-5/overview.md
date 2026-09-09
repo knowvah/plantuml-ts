@@ -5,4 +5,4 @@ it is the largest geometric move in the mission.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | Lane origins from cumulative widths; place nodes into their lane | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts`, `src/diagrams/activity/activity-layout-constants.ts` | T4 | [ ] |
+| T5 | Lane origins from cumulative widths; place nodes into their lane | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts`, `src/diagrams/activity/activity-layout-constants.ts` | T4 | [x] |

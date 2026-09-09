@@ -874,7 +874,26 @@ Ordered by how ready they are, not by size.
   class). Most severe of the four filed alongside it by ratio — probably
   the first to pick up. Full evidence: `.agent-notes/aeg-T1-8-exceptions.md`.
 
-- **`activity-swimlane-rendering`** — **BRIEFED 2026-09-09**, not executed.
+- **`activity-swimlane-rendering`** — **EXECUTED + CLOSED 2026-09-09**
+  (8/8 tasks, branch `feat/activity-swimlane-rendering`, baseline
+  `ac03ad31`). Aggregate `weightedScore` 52563 -> **48291 (−8.13%)**;
+  `svg/g[][childCount]` 24911 -> 19771 (47.4% -> 40.9%); the 60 swimlane
+  fixtures 18419 -> 14147 (−23.2%); 57 fell, 2 rose with a named mechanism
+  (`decudi-92-bisu741`, `maketa-43-juja264` — the `ACTION_MIN_WIDTH = 120`
+  floor below), 208 no-lane fixtures byte-identical. Ours now draws
+  `n + 1` dividers (195, equal to the jar's 195), a transparent band of the
+  MEASURED title height, titles centred over the lane content with no
+  `text-anchor`, drawn last, in the jar's document order — and nothing at
+  all for a single lane (`Swimlanes.java:253,275`). Nodes are placed in
+  their lanes (`Swimlanes.java:396-434` ported over our own geometry, D1).
+  Full scoring in `plans/activity-swimlane-rendering/README.md` (Close-out).
+  **Premise corrected during execution:** the band-fill key is
+  `SwimlaneTitleBackgroundColor` (`FromSkinparamToStyle.java:160`);
+  `SwimlaneHeaderBackgroundColor` does not exist upstream (D4 amended; the
+  local spelling is kept as an alias). Follow-ons it filed, each measured,
+  are the `activity-swimlane-*` bullets below `activity-swimlane-line-
+  thickness`. The brief's pre-execution amendment follows, unedited.
+
   Brief at `plans/activity-swimlane-rendering/README.md`: 8 tasks over 8
   batches, branch `feat/activity-swimlane-rendering`, baseline `ac03ad31`.
 
@@ -1038,8 +1057,14 @@ Ordered by how ready they are, not by size.
   `plans/activity-style-defaults/decision-journal.md` (T4 rows),
   `.agent-notes/asd-T7.md`.
 
-- **`activity-swimlane-line-thickness`** (NEW, unbriefed) — FILED
-  2026-09-08 by `activity-style-defaults` T7, measured. The swimlane
+- **`activity-swimlane-line-thickness`** — **RESOLVED 2026-09-09 by
+  `activity-swimlane-rendering` T6.** The dividers now draw at
+  `swimlaneBorderThickness(theme)` (1.5 by default, `plantuml.skin:312`,
+  `LaneDivider.java:87-97`) and the header separator the jar never drew is
+  gone; the re-pinned style census carries one `1.5` per divider on every
+  multi-lane fixture. Original filing follows, unedited.
+
+  FILED 2026-09-08 by `activity-style-defaults` T7, measured. The swimlane
   divider and header-separator lines (`src/diagrams/activity/renderer.ts`)
   draw a hardcoded `strokeWidth: 1` where `swimlane { LineThickness 1.5 }`
   (`plantuml.skin:312`, resolved by `ftile/Swimlanes.java:127` and
@@ -1050,6 +1075,60 @@ Ordered by how ready they are, not by size.
   remaining `line/@stroke-width` residual units.** Likely one line; pair it
   with `activity-swimlane-rendering` if that runs first, since the
   divider-vs-boxed-header model may move the call site anyway.
+
+- **`activity-swimlane-width-skinparam`** (NEW, unbriefed) — FILED
+  2026-09-09 by `activity-swimlane-rendering` T4, measured. `skinparam
+  swimlaneWidth N` / `same` (`skin/SkinParam.java:1121-1130`; `same` is the
+  sentinel `ISkinParam.SWIMLANE_WIDTH_SAME = -1`, `style/ISkinParam.java:71`,
+  resolved to the max content width at `Swimlanes.java:399-403`) is NOT
+  parsed by the port. The width arithmetic already takes it as the `min`
+  parameter of `swimlane-context.ts#computeLaneWidths` with upstream's
+  semantics; only the key is missing (a `src/core` handler + one call site
+  in `layout/swimlane-placement.ts`). Two corpus fixtures use it:
+  `nikinu-06-sace939` (`swimlaneWidth 400`, jar lane 0 at x=33) and
+  `cemipu-87-dinu624` (`width same` inside `skinparam swimlane { }` — also
+  needs the block spelling routed). Small; pairs with the
+  `SwimlaneTitleFontName`/`FontStyle` keys `addConFont("SwimlaneTitle", …)`
+  (`FromSkinparamToStyle.java:159`) also yields, which T1 left unwired.
+
+- **`activity-swimlane-composite-lane`** (NEW, unbriefed) — FILED 2026-09-09
+  by `activity-swimlane-rendering` T3/T5, verified empirically. A
+  composite node's recorded `swimlane` is whichever lane was active at the
+  END of its construct: `if-dispatch.ts#tryIf` evaluates
+  `swimlaneSpread(ctx)` after the branches are parsed. Upstream's
+  `getSwimlaneIn` for an `if` is the lane its diamond was declared in
+  (`Swimable.java`). T5 places a composite's diamonds in the recorded lane
+  knowingly, so an `if` whose branches switch lanes puts its diamond in
+  the wrong lane. Parser fix plus a placement re-check; author fixtures
+  (no corpus fixture isolates it — the corpus ones mix it with the
+  `ACTION_MIN_WIDTH` residual below).
+
+- **`activity-swimlane-cross-edge-y`** (NEW, unbriefed) — FILED 2026-09-09
+  by `activity-swimlane-rendering` T5, measured. A cross-lane edge's
+  horizontal jog is at `(p1.y + p2.y) / 2`
+  (`vcompact/ConnectionVerticalDown.java:87-100`, ported) but upstream
+  computes it on the PRE-compression geometry, where
+  `FtileFactoryDelegatorAssembly#assembly` inserts a 35px spacer
+  (`vcompact/FtileFactoryDelegatorAssembly.java:58-65`) that
+  `CompressionXorYBuilder` ON_Y later removes; our fixed `NODE_MARGIN_Y =
+  20` has no such phase, so the jog lands 5px lower than the jar's on
+  `pakema-21-xema183` / `patagi-39-jone354`. Also the `line/@x1..y2`
+  families ROSE 2350 -> 2696 each in this mission: the `n + 1` dividers now
+  pair positionally with jar lines whose coordinates differ by the block
+  origin (ours `LAYOUT_MARGIN = 12`, the jar's ink starts at 20 for a
+  10 margin — `activity-canvas-bounds`). One mechanism, two symptoms; not
+  a swimlane defect. Note also that edge LABELS are not yet counted in a
+  lane's content extent (`LimitFinder` sees them upstream) — a residual in
+  `swimlane-placement.ts`, no corpus fixture isolates it.
+
+- **`activity-swimlane-hyperlink-title`** (NEW, unbriefed) — FILED
+  2026-09-09 by `activity-swimlane-rendering` T0/T7, measured. A lane title
+  carrying a creole link (`|[[www.plantuml.com First actor]] |`,
+  `nesozi-09-zezu092`) is three `<text>` elements inside an `<a>` in the
+  jar and one plain `<text>` here: post-mission census totals are 138
+  title texts (ours) vs 139 (jar), this one fixture. The creole title path
+  (`Display.create9`, `Swimlanes.java:285-293`) is the renderer's own
+  creole seam; small.
 
 - **`activity-min-box-width`** (NEW, unbriefed) — FILED 2026-09-08 by
   `activity-style-defaults` T4, measured. `ACTION_MIN_WIDTH = 120`

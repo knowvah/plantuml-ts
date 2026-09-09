@@ -37,7 +37,20 @@ function makeBounder(measurer: StringMeasurer, theme: Theme): StringBounder {
   };
 }
 
-function tileNodes(nodes: ActivityNode[], bounder: StringBounder, theme: Theme): Tile[] {
+/**
+ * Threads `ActivityNode.swimlane` (`ast.ts`) onto the tile built for it
+ * (asr-T3). See `Tile.swimlane` (`tiles/tile.ts`) for the upstream
+ * citation. Constrained on a writable-`swimlane` structural type, not on
+ * `Tile` itself, because `Tile.swimlane` is `readonly` to consumers
+ * (T4/T5) — every concrete `Gtile*` still satisfies both, since a mutable
+ * class field structurally satisfies a `readonly` interface member.
+ */
+function withSwimlane<T extends { swimlane?: string | undefined }>(tile: T, swimlane: string | undefined): T {
+  tile.swimlane = swimlane;
+  return tile;
+}
+
+export function tileNodes(nodes: ActivityNode[], bounder: StringBounder, theme: Theme): Tile[] {
   const tiles: Tile[] = [];
   for (const node of nodes) {
     const t = tileNode(node, bounder, theme);
@@ -49,21 +62,21 @@ function tileNodes(nodes: ActivityNode[], bounder: StringBounder, theme: Theme):
 function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme): Tile | null {
   switch (node.kind) {
     case 'start':
-      return new GtileStart();
+      return withSwimlane(new GtileStart(), node.swimlane);
     case 'stop':
-      return new GtileStop();
+      return withSwimlane(new GtileStop(), node.swimlane);
     case 'end':
-      return new GtileEnd();
+      return withSwimlane(new GtileEnd(), node.swimlane);
     case 'kill':
-      return new GtileKill();
+      return withSwimlane(new GtileKill(), node.swimlane);
     case 'detach':
-      return new GtileStop();
+      return withSwimlane(new GtileStop(), node.swimlane);
     case 'break':
-      return new GtileBreak();
+      return withSwimlane(new GtileBreak(), node.swimlane);
     case 'action':
-      return new GtileAction(node, bounder, theme);
+      return withSwimlane(new GtileAction(node, bounder, theme), node.swimlane);
     case 'note':
-      return new GtileNote(node, bounder, theme);
+      return withSwimlane(new GtileNote(node, bounder, theme), node.swimlane);
     case 'arrow-label':
       return null;
     case 'if':
@@ -105,21 +118,21 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme): GtileIf
   if (node.elseLabel !== undefined) elseEntry.label = node.elseLabel;
   branches.push(elseEntry);
 
-  return new GtileIf(diamond, branches, null, bounder, theme);
+  return withSwimlane(new GtileIf(diamond, branches, null, bounder, theme), node.swimlane);
 }
 
 function tileWhile(node: ActivityWhile, bounder: StringBounder, theme: Theme): GtileWhile {
   const header = new GtileDiamond(node.condition, bounder, theme);
   const bodyTiles = tileNodes(node.body, bounder, theme);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  return new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme);
+  return withSwimlane(new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme), node.swimlane);
 }
 
 function tileRepeat(node: ActivityRepeat, bounder: StringBounder, theme: Theme): GtileRepeat {
   const bodyTiles = tileNodes(node.body, bounder, theme);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const condition = new GtileDiamond(node.condition, bounder, theme);
-  return new GtileRepeat(body, condition, null, bounder, theme);
+  return withSwimlane(new GtileRepeat(body, condition, null, bounder, theme), node.swimlane);
 }
 
 function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): GtileFork {
@@ -127,7 +140,7 @@ function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): Gti
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  return new GtileFork(branches, bounder);
+  return withSwimlane(new GtileFork(branches, bounder), node.swimlane);
 }
 
 function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): GtileSplit {
@@ -135,7 +148,7 @@ function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): G
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  return new GtileSplit(branches, bounder);
+  return withSwimlane(new GtileSplit(branches, bounder), node.swimlane);
 }
 
 export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {

@@ -551,15 +551,57 @@ describe('resolveSkinparam — activity skinparam keys', () => {
     expect(unknown).toEqual([]);
   });
 
-  it('maps SwimlaneHeaderBackgroundColor to colors.graph.activity.swimlaneBorder', () => {
-    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneHeaderBackgroundColor', '#334455']]), defaultTheme);
-    expect(theme.colors.graph.activity?.swimlaneBorder).toBe('#334455');
+  it('maps SwimlaneTitleFontSize to colors.graph.activity.swimlaneTitleFontSize', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneTitleFontSize', '30']]), defaultTheme);
+    expect(theme.colors.graph.activity?.swimlaneTitleFontSize).toBe(30);
     expect(unknown).toEqual([]);
   });
 
-  it('maps SwimlaneBorderColor to colors.graph.activity.swimlaneBorder', () => {
+  it('splits SwimlaneBorderColor and SwimlaneTitleBackgroundColor into distinct fields', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([
+        ['SwimlaneBorderColor', 'red'],
+        ['SwimlaneTitleBackgroundColor', 'blue'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.activity?.swimlaneBorder).toBe('red');
+    expect(theme.colors.graph.activity?.swimlaneHeaderBackground).toBe('blue');
+    expect(unknown).toEqual([]);
+  });
+
+  it('maps the local alias SwimlaneHeaderBackgroundColor to swimlaneHeaderBackground', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneHeaderBackgroundColor', '#334455']]), defaultTheme);
+    expect(theme.colors.graph.activity?.swimlaneHeaderBackground).toBe('#334455');
+    expect(unknown).toEqual([]);
+  });
+
+  it('maps SwimlaneBorderColor alone to colors.graph.activity.swimlaneBorder', () => {
     const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneBorderColor', '#445566']]), defaultTheme);
     expect(theme.colors.graph.activity?.swimlaneBorder).toBe('#445566');
+    expect(theme.colors.graph.activity?.swimlaneHeaderBackground).toBeUndefined();
+    expect(unknown).toEqual([]);
+  });
+
+  it('maps SwimlaneBorderThickness to colors.graph.activity.swimlaneBorderThickness', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneBorderThickness', '5']]), defaultTheme);
+    expect(theme.colors.graph.activity?.swimlaneBorderThickness).toBe(5);
+    expect(unknown).toEqual([]);
+  });
+
+  it('maps SwimlaneTitleFontColor to colors.graph.activity.swimlaneTitleFontColor', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneTitleFontColor', 'red']]), defaultTheme);
+    expect(theme.colors.graph.activity?.swimlaneTitleFontColor).toBe('red');
+    expect(unknown).toEqual([]);
+  });
+
+  it('leaves every swimlane field undefined when no swimlane skinparams are set', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['ActivityStartColor', '#223344']]), defaultTheme);
+    expect(theme.colors.graph.activity?.swimlaneBorder).toBeUndefined();
+    expect(theme.colors.graph.activity?.swimlaneHeaderBackground).toBeUndefined();
+    expect(theme.colors.graph.activity?.swimlaneBorderThickness).toBeUndefined();
+    expect(theme.colors.graph.activity?.swimlaneTitleFontColor).toBeUndefined();
+    expect(theme.colors.graph.activity?.swimlaneTitleFontSize).toBeUndefined();
     expect(unknown).toEqual([]);
   });
 

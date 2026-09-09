@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
+import { layoutActivity, tileNodes } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
+import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
+import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
+import type { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
+import type { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
+import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
+import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
+import { astOrThrow } from '../../../helpers/parse-ast.js';
 
 const measurer = new FormulaMeasurer();
 // A REAL resolved theme, not a `{ fontSize, fontFamily } as unknown as
@@ -150,5 +157,72 @@ describe('layoutActivity — existing renderer tests still work', () => {
     const kinds = geo.nodes.map((n) => n.kind);
     expect(kinds).toContain('fork-bar');
     expect(kinds).toContain('join-bar');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// asr-T3: thread `ActivityNode.swimlane` onto the tiles built for it.
+// `tileNodes` is exported test-only -- `layoutActivity`'s return value
+// (`ActivityGeometry`) carries no tile objects, so this is the only seam
+// that exposes the swimlane BEFORE T4/T5 consume it.
+// ---------------------------------------------------------------------------
+
+const bounder: StringBounder = {
+  getDimension: (text: string, fontSizePt: number) =>
+    measurer.measure(text, { family: theme.fontFamily, size: fontSizePt }),
+};
+
+function parseAst(markup: string): ActivityDiagramAST {
+  const first = buildBlockUmls(markup)[0];
+  if (first === undefined) throw new Error('no diagram block');
+  if (!first.ok) throw first.failure.cause;
+  return astOrThrow(parseActivity(first.source), 'activity');
+}
+
+describe('tileNodes — swimlane threading (asr-T3)', () => {
+  it('assigns each leaf tile the swimlane its node was parsed in', () => {
+    const ast = parseAst('@startuml\n|A|\n:a;\n|B|\n:b;\n@enduml');
+    expect(ast.nodes.map((n) => n.kind)).toEqual(['action', 'action']);
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    expect(tiles).toHaveLength(2);
+    expect(tiles[0]!.swimlane).toBe('A');
+    expect(tiles[1]!.swimlane).toBe('B');
+  });
+
+  it('leaves every tile swimlane undefined when the diagram has no lanes', () => {
+    const ast = parseAst('@startuml\nstart\n:a;\nstop\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    expect(tiles).toHaveLength(3);
+    for (const t of tiles) {
+      expect(t.swimlane).toBeUndefined();
+    }
+  });
+
+  it('composite: the if tile carries its own node swimlane; the body tile carries its own', () => {
+    // `|A|` returns to A only AFTER `:in-b;`, so the if node -- whose own
+    // swimlane is read via `swimlaneSpread(ctx)` AFTER its branches are
+    // fully parsed (`if-dispatch.ts` `tryIf`) -- lands on 'A', while the
+    // body action, parsed while the lane was still 'B', lands on 'B'.
+    const ast = parseAst('@startuml\n|A|\nif (x) then (y)\n|B|\n:in-b;\n|A|\nendif\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('if');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    expect(tiles).toHaveLength(1);
+
+    const ifTile = tiles[0] as unknown as GtileIf;
+    expect(ifTile.kind).toBe('gtile-if');
+    expect(ifTile.swimlane).toBe('A');
+
+    // children = [diamond, thenBranch-wrapper]; the wrapper carries NO lane
+    // of its own -- it is a layout container over possibly-mixed-lane
+    // content, not a modeled AST node.
+    const thenWrapper = ifTile.children[1] as unknown as GtileTopDown;
+    expect(thenWrapper.kind).toBe('gtile-top-down');
+    expect(thenWrapper.swimlane).toBeUndefined();
+
+    const bodyTile = thenWrapper.children[0] as unknown as GtileAction;
+    expect(bodyTile.kind).toBe('gtile-action');
+    expect(bodyTile.label).toBe('in-b');
+    expect(bodyTile.swimlane).toBe('B');
   });
 });

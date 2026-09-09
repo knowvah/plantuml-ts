@@ -122,11 +122,89 @@ behaviour is upstream-sourced; regenerating `docs/catalog.md` on drift.
 
 ## Progress
 
-- [ ] Batch 0 — T0
-- [ ] Batch 1 — T1
-- [ ] Batch 2 — T2
-- [ ] Batch 3 — T3
-- [ ] Batch 4 — T4
-- [ ] Batch 5 — T5
-- [ ] Batch 6 — T6
-- [ ] Batch 7 — T7
+- [x] Batch 0 — T0
+- [x] Batch 1 — T1
+- [x] Batch 2 — T2
+- [x] Batch 3 — T3
+- [x] Batch 4 — T4
+- [x] Batch 5 — T5
+- [x] Batch 6 — T6
+- [x] Batch 7 — T7
+
+## Close-out (T7, 2026-09-09)
+
+Executed 2026-09-09 on `feat/activity-swimlane-rendering` from `d0a7e1bd`
+(source-identical to `ac03ad31`). **8 of 8 tasks complete**, one commit
+each plus docs commits; no stop condition halted the run. Every number
+below is a fresh measurement at the T7 commit, not an estimate.
+
+### Exit bar, scored
+
+| bar | stated | measured | met |
+|---|---|---|---|
+| aggregate `weightedScore` over 268 falls | 52563 | **48291 (−8.13%)** | yes |
+| `svg/g[][childCount]` restated | 24911 (47.4%) | **19771 (40.9%)**, −5140 — the family that moved most | yes |
+| zero UNEXPLAINED rises | — | **2 risers, both named**: `decudi-92-bisu741` 464→471, `maketa-43-juja264` 354→367 (T5 mechanism 1: the unsourced `ACTION_MIN_WIDTH = 120` floor now drives split/fork lane widths; both FELL against the pre-T6 tree, 492→471 / 382→367) | yes |
+| every re-pinned baseline diffed, every risen pin named | — | `diff-baseline.json`: 57 fell, 2 rose (above), 209 unchanged (the 208 no-lane fixtures byte-identical). `style-baseline.json`: 59 OURS censuses moved, all swimlane fixtures; `textCount` unchanged on 57 and −1 on the two single-lane fixtures (`bulasi-17-vafa634`, `katopo-68-xajo866` — the jar draws no chrome for one lane, `Swimlanes.java:253,275`); the `stroke-width` histogram gains one `1.5` per divider. `swimlane-baseline.json`: 57 of 60 re-pinned to the new model. `diff-census.json`: paths and top fixtures fresh. No JAR-side pin moved | yes |
+| sequence / state / class / description / json unmoved | — | at HEAD: sequence 1192 passed + 1 skipped, state 62, class 325, description 78, json 105. At `d0a7e1bd` (worktree): sequence, state, description, json identical; the class run in the worktree was blocked by a jsdom canvas environment error, so its "unmoved" rests on T1's before/after over the whole conformance directory (26 files / 3040 tests, identical) and on `git diff d0a7e1bd..HEAD -- src` touching no shared source after T1's four `src/core` skinparam files | yes (class: by construction) |
+| all four gates green | — | `npm test` 698 files / 18933 tests (+4 files, +192 tests over baseline), `typecheck` 0, `lint` 0, `build` ok | yes |
+
+### Swimlane census, before → after (60 measurable fixtures)
+
+| quantity | OURS before | OURS after | JAR |
+|---|---|---|---|
+| dividers | 140 | **195** | 195 |
+| title texts | 140 | **138** | 139 |
+| band rects | 59 | **57** | 57 |
+
+The one-title gap is `nesozi-09-zezu092`'s hyperlinked title (three jar
+`<text>`s inside an `<a>`), filed. The 60-fixture subset fell
+18419 → 14147 (−23.2%); it still carries 29.3% of the residual, and the
+next table says why.
+
+### Premises measured FALSE during execution
+
+- **D4 named a key that does not exist upstream.** The band-fill key is
+  `SwimlaneTitleBackgroundColor` (`FromSkinparamToStyle.java:160`);
+  `SwimlaneHeaderBackgroundColor` has no `swimlaneheader*` match anywhere
+  in `~/git/plantuml/src`. Amended in `decisions.md` before T1; the local
+  spelling is kept as an alias. Flagged for review.
+- **The brief's "~5px a side must be sourced or halt" was already
+  sourced**: it is `getHalfMissingSpace`'s literal 5
+  (`Swimlanes.java:438,444`), and the title widens the DIVIDERS, never the
+  lane (`:408`). Stop condition 4 never fired.
+- **The brief cited `Ftile.java#getSwimlaneIn`**; the accessor pair lives
+  on `Swimable.java`. And the Gtile/`GConnection` classes it pointed T5 at
+  are unreached: `Gtile.USE_GTILE` is false in the reference jar, so the
+  pinned oracles are rendered by the OLD Ftile engine
+  (`vcompact/ConnectionVerticalDown.java` draws the cross-lane jog).
+- **D2's "band height = 18 coincides with FontSize" has a real mechanism**:
+  `AtomText#calculateDimensionSlow` floors a text's height at 10
+  (`klimt/creole/legacy/AtomText.java:179-181`), which is why
+  `SwimlaneTitleFontSize 8` produces a 10px band. Ported, not special-cased.
+
+### Follow-ons filed, with measured weight (`planning/next-missions.md`)
+
+- **`activity-min-box-width`** (already filed) is now the largest swimlane
+  residual: content-fitted lanes inherit the 120px action floor, so
+  `pakema-21-xema183`'s lanes are 130 / 310.9 against the jar's 38.3 /
+  310.9 and every lane-B node sits ~100px too far right. It is the
+  mechanism of both risers.
+- **`activity-swimlane-width-skinparam`** — `swimlaneWidth N`/`same`
+  unparsed; the arithmetic already takes it as `min`. 2 fixtures.
+- **`activity-swimlane-composite-lane`** — a composite records the lane
+  active at its END, not at its diamond. Parser.
+- **`activity-swimlane-cross-edge-y`** — the jog Y model (35px spacer +
+  ON_Y compression) and the `line/@x1..y2` families' rise (2350 → 2696
+  each: `n + 1` dividers pairing against a jar block origin 8px away —
+  `activity-canvas-bounds`).
+- **`activity-swimlane-hyperlink-title`** — 1 fixture, 1 text.
+- Left where they were: `SwimlaneTitleFontName`/`FontStyle` unwired;
+  `SWIMLANE_MIN_WIDTH` and `SWIMLANE_HEADER_H` kept defined only because
+  the superseded `layout.old.ts` cluster imports them (stop condition 5).
+
+### Decisions
+
+15 journal rows; one decision amended (D4, key spelling — flagged);
+D1 recorded in `DIVERGENCES.md` as required. Notes:
+`.agent-notes/asr-T0.md`, `asr-T5.md`, `asr-T7.md`.
