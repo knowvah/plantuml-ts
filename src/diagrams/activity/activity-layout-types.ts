@@ -25,6 +25,13 @@ export interface ActivityNodeGeo {
   notePosition?: 'left' | 'right';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
+  /**
+   * The swimlane this node's source `ActivityNode` was parsed in, if any.
+   * Mirrors `Tile.swimlane` (`tiles/tile.ts`); T5 populates this in
+   * `walkTile` so `swimlane-context.ts`'s `measureLaneExtents` can bucket
+   * placed nodes by lane.
+   */
+  swimlane?: string;
 }
 
 export interface ActivityEdgeGeo {
@@ -38,6 +45,32 @@ export interface SwimlaneGeo {
   name: string;
   x: number;
   width: number;
+  /**
+   * `maxX - minX` of the lane's own content, in lane-local coordinates.
+   * `0` for a lane with no assigned content. Optional because it is
+   * populated by T5 (`tile-coordinates.ts`, via `swimlane-context.ts`'s
+   * `computeLaneWidths`) -- the two pre-existing call sites that still
+   * build a bare `{ name, x, width }` (`tile-coordinates.ts`,
+   * `activity-layout-swimlane.ts`, the superseded engine) must keep
+   * compiling.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:451-453
+   */
+  contentWidth?: number;
+  /**
+   * The lane title's bounder width at the resolved swimlane title font
+   * size (`swimlaneTitleFontSize`, `activity-style-defaults.ts`).
+   * Optional for the same reason as {@link contentWidth}.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:285-293
+   */
+  titleWidth?: number;
+  /**
+   * Lane-local `minX` of the lane's content. T5 needs this for the
+   * centring translate upstream applies when a lane's resolved width
+   * exceeds its raw content width. Optional for the same reason as
+   * {@link contentWidth}.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:427-429
+   */
+  contentMinX?: number;
 }
 
 export interface ActivityGeometry {
