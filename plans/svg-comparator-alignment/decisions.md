@@ -95,6 +95,17 @@ fixed comparator.
 **Consequences.** Two small branches instead of one; the activity mission's
 own decision journal gets an explicit "resumed" entry once this lands.
 
+> **Outcome, recorded 2026-09-09 — this plan was carried out.** The
+> comparator fix landed as `80480eac`, and `wip/aeg-T1-measured-halt`'s
+> change was reapplied on top of it and landed as `740e0167`
+> (`feat(aeg-T1): draw activity edges as one line per segment`), with
+> `activity-element-granularity`'s D11 recording the 8 documented
+> exceptions. The wip branch was therefore redundant and was deleted, local
+> and remote, on 2026-09-09; `f59c26bb` is unreachable. **Read `740e0167`,
+> not the branch** — and note the substance is on `main` regardless, in
+> `renderEdgeSegments` (`src/diagrams/activity/renderer.ts`), under the same
+> `Worm.java:134-183` citation.
+
 ## Not applicable — backwards compatibility
 
 `compare.ts` is test-only infrastructure with no external consumers; this

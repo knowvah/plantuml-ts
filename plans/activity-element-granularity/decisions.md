@@ -156,6 +156,16 @@ nothing in D1–D9 anticipated it.
 port.** T1 is preserved unmerged on `wip/aeg-T1-measured-halt` (`f59c26bb`).
 Resolving this is a choice about the instrument and belongs to the human:
 
+> **Amendment, 2026-09-09 — the branch named above no longer exists.**
+> Option 2 was taken: `svg-comparator-alignment` landed the weighting fix
+> (`80480eac`), T1 was reapplied on top of it and LANDED as `740e0167`, and
+> **D11 below records the outcome**. The work in `f59c26bb` is therefore on
+> `main` by a better route — `renderEdgeSegments`
+> (`src/diagrams/activity/renderer.ts`) draws one `<line>` per segment today,
+> carrying the same `Worm.java:134-183` citation. The wip branch, having
+> served its purpose, was deleted local and remote on 2026-09-09; `f59c26bb`
+> is unreachable. Nothing is lost: read D11 and `740e0167`, not the branch.
+
 1. **Change the gated quantity** for element-granularity work — e.g. gate on
    summed \|element delta\| or \|childCountDelta\|, both of which already show
    a large, unambiguous descent. Cheapest; leaves `compare.ts` alone; needs a

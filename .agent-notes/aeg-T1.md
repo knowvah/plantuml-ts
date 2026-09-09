@@ -5,6 +5,14 @@ Diagnosis artifact per `~/.claude/rules/diagnosis.md`. Mission
 The change itself is preserved on branch `wip/aeg-T1-measured-halt`
 (`f59c26bb`); nothing landed on the mission branch.
 
+> **Resolved, 2026-09-09.** This halt was settled by option 2: the
+> comparator's weighting was fixed (`svg-comparator-alignment`, `80480eac`)
+> and T1 was reapplied and landed as `740e0167`. The branch named above was
+> then deleted, local and remote, and `f59c26bb` is unreachable — read
+> `740e0167` instead. The diagnosis below is kept as written because its
+> subject is the INSTRUMENT, not the port, and that analysis is what
+> justified changing `compare.ts`.
+
 ## The discrepancy
 
 T1 replaced activity's single `polylineEl(pts, …)` call
