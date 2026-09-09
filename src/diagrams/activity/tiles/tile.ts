@@ -14,6 +14,18 @@ export interface Tile {
   readonly kind: string;
   readonly width: number;
   readonly height: number;
+  /**
+   * The swimlane this tile's source `ActivityNode` was parsed in, if any.
+   * Threaded from `ActivityNode.swimlane` (`ast.ts`) at tile-construction
+   * time in `tile-layout.ts`; not yet consumed by layout or rendering.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimable.java
+   *   -- `getSwimlaneIn()`/`getSwimlaneOut()`, the upstream accessor pair
+   *   every `Instruction` (the Java AST node) exposes.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:476
+   *   -- `getCurrentSwimlane()`, the parse-time "which lane am I in" the
+   *   port's `ctx.currentSwimlane` (`dispatch-support.ts`) mirrors.
+   */
+  readonly swimlane?: string;
   getCoord(hook: HookName): GPoint;
 }
 
@@ -22,6 +34,7 @@ export abstract class TileLeaf implements Tile {
   abstract readonly width: number;
   abstract readonly height: number;
   abstract getCoord(hook: HookName): GPoint;
+  swimlane?: string;
 }
 
 export abstract class TileComposite implements Tile {
@@ -30,4 +43,5 @@ export abstract class TileComposite implements Tile {
   abstract readonly height: number;
   abstract getCoord(hook: HookName): GPoint;
   abstract readonly children: readonly Tile[];
+  swimlane?: string;
 }

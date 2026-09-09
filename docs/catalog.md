@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1076 modules · 3878 exported names.
+1076 modules · 3879 exported names.
 
 ## `src/`
 
@@ -947,7 +947,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts` |  |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `assignCoordinates` |  |
-| `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `layoutActivity` |  |
+| `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 
 ## `src/diagrams/activity/routing/`
 
