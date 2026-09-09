@@ -28,6 +28,7 @@ import {
   CIRCLE_LINE_THICKNESS,
   NOTE_LINE_THICKNESS,
   activityFontSize,
+  activityLineThickness,
   activityPadding,
   activityRoundCorner,
 } from './activity-style-defaults.js';
@@ -229,7 +230,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const box = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: c.nodeBorder,
-    strokeWidth: 1,
+    strokeWidth: activityLineThickness(theme, 'activity'),
     rx: actionCornerRadius(theme),
     ry: actionCornerRadius(theme),
   });
@@ -348,7 +349,7 @@ export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
       { x: x + w, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
@@ -369,7 +370,7 @@ export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string 
       { x: x + w - dent, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
   return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
 }
@@ -388,7 +389,7 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
       { x: x + dent, y: y + h },
       { x: x, y: y + h / 2 },
     ],
-    { fill, stroke: c.diamondBorder, strokeWidth: 1 },
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
   const cx = x + w / 2;
   const cy = y + h / 2;
@@ -420,7 +421,7 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
       { x: x + w - d, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
   const cx = x + w / 2;
   const cy = y + h / 2;

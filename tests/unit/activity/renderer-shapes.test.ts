@@ -12,9 +12,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderAction,
+  renderChevronLeft,
+  renderChevronRight,
   renderDiamond,
   renderEnd,
+  renderHexagon,
   renderNote,
+  renderParallelogram,
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
@@ -217,5 +221,36 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     new GtileNote({ kind: 'note', text: 'n', position: 'right' }, bounder, theme);
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
     expect(svg).toContain(`font-size="${String(sizes[0])}"`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T3 — the `element` line-thickness tier (D4): the action box and the
+// diamond/hexagon-family shapes stroke at 0.5, not the port's old literal 1.
+// ---------------------------------------------------------------------------
+
+describe('T3 — element-tier stroke width (D4)', () => {
+  it('an action box strokes at 0.5, not the old literal 1 (FtileBox.java:208, plantuml.skin:93)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
+  });
+
+  it('a labelled hexagon condition strokes at 0.5 (FtileDiamondInside.java:88, diamond SName)', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
+  });
+
+  it('the SDL chevrons stroke at 0.5, resolving `activity` like the plain box (FtileBox.java:97-99)', () => {
+    const node = makeNode({ kind: 'action', label: 'go', width: 60, height: 30 });
+    expect(renderChevronLeft(node, theme)).toContain('stroke-width="0.5"');
+    expect(renderChevronRight(node, theme)).toContain('stroke-width="0.5"');
+  });
+
+  it('a parallelogram (SDL_SAVE) strokes at 0.5, resolving `activity` like the plain box', () => {
+    const svg = renderParallelogram(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
   });
 });

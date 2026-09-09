@@ -25,6 +25,7 @@ import {
   CIRCLE_LINE_THICKNESS,
   COMPOSITE_LINE_THICKNESS,
   DIAMOND_FONT_SIZE,
+  ELEMENT_LINE_THICKNESS,
   NOTE_FONT_SIZE,
   NOTE_LINE_THICKNESS,
   SWIMLANE_BORDER_COLOR,
@@ -115,6 +116,14 @@ describe('the ported plantuml.skin constants', () => {
     expect(NOTE_FONT_SIZE).toBe(13); // plantuml.skin:323
     expect(NOTE_LINE_THICKNESS).toBe(0.5); // plantuml.skin:325
   });
+
+  it('matches `element { LineThickness 0.5 }`, which beats the root 1.0 (D4)', () => {
+    // plantuml.skin:93. File-order OVERWRITE_EXISTING_VALUE merge
+    // (StyleStorage.java:102-116) lets `element` beat root :15 for every
+    // signature containing `SName.element`.
+    expect(ELEMENT_LINE_THICKNESS).toBe(0.5);
+    expect(ELEMENT_LINE_THICKNESS).not.toBe(1);
+  });
 });
 
 describe('the #N palette shorthands resolve through HColorSet (D5)', () => {
@@ -186,12 +195,17 @@ describe('activityLineThickness — default tier', () => {
     expect(activityLineThickness(DEFAULT, 'note')).toBe(0.5);
   });
 
-  it('an element declaring none inherits the root `LineThickness 1.0`', () => {
-    // plantuml.skin:15. `activity`, `activityBar` and `diamond` each
-    // declare only a FontSize/BackgroundColor/RoundCorner of their own.
-    expect(activityLineThickness(DEFAULT, 'activity')).toBe(1);
-    expect(activityLineThickness(DEFAULT, 'diamond')).toBe(1);
-    expect(activityLineThickness(DEFAULT, 'activityBar')).toBe(1);
+  it('an element declaring none of its own resolves the `element` tier 0.5, not the root 1.0 (D4)', () => {
+    // `activity` (FtileBox.java:97-99), `diamond`
+    // (FtileFactoryDelegator.java:80) and `activityBar`
+    // (FtileBlackBlock.java:97-99) each declare only a
+    // FontSize/BackgroundColor/RoundCorner of their own, and each
+    // signature carries `SName.element` (plantuml.skin:91-93), which beats
+    // the root's `LineThickness 1.0` (:15).
+    expect(activityLineThickness(DEFAULT, 'activity')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'diamond')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'activityBar')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'activity')).not.toBe(1);
   });
 
   it('a swimlane is 1.5', () => {
@@ -218,7 +232,7 @@ describe('the override tier wins over the default (D2)', () => {
     expect(activityFontSize(themeWithBucket('diamond', { fontSize: 40 }), 'diamond')).toBe(40);
   });
 
-  it('a user activity lineThickness of 3 beats the inherited root 1', () => {
+  it('a user activity lineThickness of 3 beats the built-in element-tier 0.5', () => {
     expect(activityLineThickness(themeWithBucket('activity', { lineThickness: 3 }), 'activity')).toBe(3);
   });
 

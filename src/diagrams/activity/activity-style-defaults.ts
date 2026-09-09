@@ -194,20 +194,25 @@ export const SWIMLANE_LINE_THICKNESS = 1.5;
  * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:325 */
 export const NOTE_LINE_THICKNESS = 0.5;
 
-/** The root block's own `LineThickness 1.0` — what an activity element that
- * declares none of its own inherits. `activity`, `activityBar` and
- * `diamond` are all in that position: each declares only a FontSize,
- * BackgroundColor or RoundCorner inside `activityDiagram { }`.
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:15 */
-export const ROOT_LINE_THICKNESS = 1;
+/** `element { LineThickness 0.5 }` — beats the root block's own
+ * `LineThickness 1.0` (`:15`) for every SName whose upstream signature
+ * contains `SName.element`, via the file-order `OVERWRITE_EXISTING_VALUE`
+ * merge (`style/StyleStorage.java:102-116`). `activity`
+ * (`ftile/vertical/FtileBox.java:97-99`), `diamond`
+ * (`ftile/FtileFactoryDelegator.java:80`) and `activityBar`
+ * (`ftile/vertical/FtileBlackBlock.java:97-99`) each declare no
+ * LineThickness of their own and each signature carries `SName.element`
+ * (D4), so all three resolve here, not to the root's 1.0.
+ * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:93 */
+export const ELEMENT_LINE_THICKNESS = 0.5;
 
 const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
-  activity: ROOT_LINE_THICKNESS,
-  activityBar: ROOT_LINE_THICKNESS,
+  activity: ELEMENT_LINE_THICKNESS,
+  activityBar: ELEMENT_LINE_THICKNESS,
   arrow: ARROW_LINE_THICKNESS,
   circle: CIRCLE_LINE_THICKNESS,
   composite: COMPOSITE_LINE_THICKNESS,
-  diamond: ROOT_LINE_THICKNESS,
+  diamond: ELEMENT_LINE_THICKNESS,
   note: NOTE_LINE_THICKNESS,
 };
 
