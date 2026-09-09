@@ -27,13 +27,19 @@ import {
   DIAMOND_FONT_SIZE,
   NOTE_FONT_SIZE,
   NOTE_LINE_THICKNESS,
+  SWIMLANE_BORDER_COLOR,
   SWIMLANE_FONT_SIZE,
   SWIMLANE_LINE_THICKNESS,
+  SWIMLANE_TITLE_FONT_COLOR,
   activityFontSize,
   activityLineThickness,
   activityRoundCorner,
+  swimlaneBorderColor,
+  swimlaneBorderThickness,
   swimlaneFontSize,
   swimlaneLineThickness,
+  swimlaneTitleFontColor,
+  swimlaneTitleFontSize,
 } from '../../../src/diagrams/activity/activity-style-defaults.js';
 
 const DEFAULT = resolveTheme('default');
@@ -41,10 +47,20 @@ const DEFAULT = resolveTheme('default');
 /** A theme carrying one hand-built bucket override, standing in for the
  * `<style>`/`skinparam` front-ends T1 wired (both of which are tested
  * end-to-end in `tests/unit/core/skinparam-element-buckets.test.ts`). */
-function themeWithBucket(sname: string, bucket: Record<string, number>): Theme {
+function themeWithBucket(sname: string, bucket: Record<string, number | string>): Theme {
   return {
     ...DEFAULT,
     colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, [sname]: bucket } },
+  };
+}
+
+/** A theme carrying T1's `graph.activity.swimlane*` fields (mission
+ * `activity-swimlane-rendering` T1, `theme-graph-colors-b.ts:321-350`) —
+ * the FIRST tier of the T2 cascade. */
+function themeWithActivitySwimlane(overrides: Partial<NonNullable<Theme['colors']['graph']['activity']>>): Theme {
+  return {
+    ...DEFAULT,
+    colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, activity: overrides } },
   };
 }
 
@@ -221,5 +237,77 @@ describe('the override tier wins over the default (D2)', () => {
     const theme = themeWithBucket('swimlane', { fontSize: 9, lineThickness: 4 });
     expect(swimlaneFontSize(theme)).toBe(9);
     expect(swimlaneLineThickness(theme)).toBe(4);
+  });
+});
+
+describe('swimlane title & border resolvers (T2, D4)', () => {
+  it('default border colour is the root `swimlane { LineColor black }` (plantuml.skin:311)', () => {
+    expect(swimlaneBorderColor(DEFAULT)).toBe('#000000');
+    expect(SWIMLANE_BORDER_COLOR).toBe('#000000');
+  });
+
+  it('default border thickness is 1.5, delegated to swimlaneLineThickness — not a second literal', () => {
+    expect(swimlaneBorderThickness(DEFAULT)).toBe(swimlaneLineThickness(DEFAULT));
+    expect(swimlaneBorderThickness(DEFAULT)).toBe(1.5);
+  });
+
+  it('default title font size is 18, delegated to swimlaneFontSize — not a second literal', () => {
+    expect(swimlaneTitleFontSize(DEFAULT)).toBe(swimlaneFontSize(DEFAULT));
+  });
+
+  it('default title font colour is the inherited ROOT `FontColor black` (plantuml.skin:9)', () => {
+    expect(swimlaneTitleFontColor(DEFAULT)).toBe('#000000');
+    expect(SWIMLANE_TITLE_FONT_COLOR).toBe('#000000');
+  });
+
+  it('never returns undefined — supplying the default is this module s job', () => {
+    expect(typeof swimlaneBorderColor(DEFAULT)).toBe('string');
+    expect(typeof swimlaneBorderThickness(DEFAULT)).toBe('number');
+    expect(typeof swimlaneTitleFontSize(DEFAULT)).toBe('number');
+    expect(typeof swimlaneTitleFontColor(DEFAULT)).toBe('string');
+  });
+
+  it('T1 field wins: swimlaneTitleFontSize 30, swimlaneBorderThickness 5', () => {
+    const theme = themeWithActivitySwimlane({ swimlaneTitleFontSize: 30, swimlaneBorderThickness: 5 });
+    expect(swimlaneTitleFontSize(theme)).toBe(30);
+    expect(swimlaneBorderThickness(theme)).toBe(5);
+  });
+
+  it('T1 field wins: swimlaneBorder resolves through resolveColorToSvgHex, not verbatim', () => {
+    const theme = themeWithActivitySwimlane({ swimlaneBorder: 'blue' });
+    expect(swimlaneBorderColor(theme)).toBe('#0000FF');
+  });
+
+  it('T1 field wins: swimlaneTitleFontColor resolves through resolveColorToSvgHex, not verbatim', () => {
+    const theme = themeWithActivitySwimlane({ swimlaneTitleFontColor: 'red' });
+    expect(swimlaneTitleFontColor(theme)).toBe('#FF0000');
+  });
+
+  it('bucket tier beats the constant when no T1 field is set', () => {
+    const theme = themeWithBucket('swimlane', { border: '#0000FF', font: '#00FF00' });
+    expect(swimlaneBorderColor(theme)).toBe('#0000FF');
+    expect(swimlaneTitleFontColor(theme)).toBe('#00FF00');
+  });
+
+  it('T1 field beats the bucket tier when both are set', () => {
+    const theme: Theme = {
+      ...themeWithBucket('swimlane', { border: '#0000FF', font: '#00FF00' }),
+      colors: {
+        ...DEFAULT.colors,
+        elements: { ...DEFAULT.colors.elements, swimlane: { border: '#0000FF', font: '#00FF00' } },
+        graph: { ...DEFAULT.colors.graph, activity: { swimlaneBorder: 'red', swimlaneTitleFontColor: 'blue' } },
+      },
+    };
+    expect(swimlaneBorderColor(theme)).toBe('#FF0000');
+    expect(swimlaneTitleFontColor(theme)).toBe('#0000FF');
+  });
+
+  it('a Gradient bucket Paint is not a solid colour and falls through to the constant', () => {
+    // No corpus fixture sets a gradient LineColor/FontColor on a swimlane;
+    // the bucket's `border`/`font` roles carry the shared `Paint` type
+    // (string | Gradient), so a Gradient value must not crash the resolver.
+    const theme = themeWithBucket('swimlane', {});
+    theme.colors.elements!.swimlane = { border: { color1: '#FFF', color2: '#000', policy: '-' } };
+    expect(swimlaneBorderColor(theme)).toBe(SWIMLANE_BORDER_COLOR);
   });
 });
