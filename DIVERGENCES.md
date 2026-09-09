@@ -1408,3 +1408,36 @@ the footbox that covers them.
 
 **Category:** aesthetic, and unobservable at the element level: no node is
 added, removed or re-ordered by it.
+
+## Swimlane widths are measured from our own geometry, not by intercepting a draw
+
+`activity-swimlane-rendering` D1, 2026-09-09.
+
+Upstream sizes lanes by measure-by-drawing: `Swimlanes#computeDrawingWidths`
+(`activitydiagram3/ftile/Swimlanes.java:379-395`) runs a real `drawU` through
+`UGraphicInterceptorAllSwimlanes`, collects a `LimitFinder` min/max per lane,
+then `swimlane.setMinMax(...)`; `computeSizeInternal` (`:396-434`) turns those
+extents into widths, divider half-spaces and per-lane translates. This port
+does not intercept a draw. `assignCoordinates`
+(`src/diagrams/activity/layout/tile-coordinates.ts`) walks the tiles once in a
+single column, buckets the placed nodes by lane
+(`layout/swimlane-context.ts#measureLaneExtents`), and then applies
+`computeSizeInternal`'s arithmetic verbatim over those extents
+(`layout/swimlane-placement.ts#computeLaneOrigins`): `max(min, contentWidth)`
+per lane (`:408`), `getHalfMissingSpace`'s literal 5 rising on title overflow
+(`:437-449`), the centring translate (`:427-429`), one `dx` per lane.
+
+**Why diverged:** upstream intercepts a draw because its ftiles expose no
+geometry; ours do. CLAUDE.md's "upstream architecture is authoritative"
+governs engine boundaries, dispatch and parser seams — not a measurement
+technique whose reason for existing is absent here. The arithmetic that
+produces the numbers is mirrored; only the way the inputs are collected is
+not.
+
+**Affects:** what counts as a lane's content. Upstream's `LimitFinder` sees
+every drawn shape in the lane, including edge labels; ours counts placed
+NODES only today (edge labels are a filed residual,
+`activity-swimlane-cross-edge-y` in `planning/next-missions.md`). Where the
+two disagree, the lane is narrower here by the label overhang.
+
+**Category:** deliberate structural divergence, arithmetic preserved.
