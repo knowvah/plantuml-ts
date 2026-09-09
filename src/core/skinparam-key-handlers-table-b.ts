@@ -255,10 +255,57 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.activityEndColor = color;
     },
   ],
+  // D4 amendment (T1, 2026-09-09): `SwimlaneBorderColor` ->
+  // `PName.LineColor` (divider stroke), `FromSkinparamToStyle.java:161`.
   [
-    ['swimlanebordercolor', 'swimlaneheaderbackgroundcolor'],
+    ['swimlanebordercolor'],
     (acc, _v, color) => {
       acc.swimlaneBorder = color;
+    },
+  ],
+  // D4 amendment: `SwimlaneTitleBackgroundColor` -> `PName.BackGroundColor`
+  // (title-band fill), `FromSkinparamToStyle.java:160` -- the key the
+  // original decision mis-cited as `SwimlaneHeaderBackgroundColor`
+  // (no `swimlaneheader*` match anywhere in ~/git/plantuml/src). The local
+  // alias `swimlaneheaderbackgroundcolor` was accepted for this SAME field
+  // before this mission and is kept for compatibility -- see
+  // decisions.md D4's "Amended at execution" paragraph.
+  [
+    ['swimlanetitlebackgroundcolor', 'swimlaneheaderbackgroundcolor'],
+    (acc, _v, color) => {
+      acc.swimlaneHeaderBackground = color;
+    },
+  ],
+  // D4 amendment: `SwimlaneBorderThickness` -> `PName.LineThickness`,
+  // `FromSkinparamToStyle.java:162`. Sibling of `classborderthickness`
+  // above -- same `parseFiniteFloat` convention.
+  [
+    ['swimlaneborderthickness'],
+    (acc, value) => {
+      const v = parseFiniteFloat(value);
+      if (v !== undefined) acc.swimlaneBorderThickness = v;
+    },
+  ],
+  // D4 amendment: `SwimlaneTitleFontColor` -> `PName.FontColor` via
+  // `addConFont("SwimlaneTitle", SName.swimlane)`,
+  // `FromSkinparamToStyle.java:159`. Stored RAW (like the neighbouring
+  // `activity*color` handlers above), not resolved to hex -- T1 does not
+  // consume the field, so there is no reader yet to dictate a form.
+  [
+    ['swimlanetitlefontcolor'],
+    (acc, _v, color) => {
+      acc.swimlaneTitleFontColor = color;
+    },
+  ],
+  // D4 amendment: `SwimlaneTitleFontSize` -> `PName.FontSize` via
+  // `addConFont("SwimlaneTitle", SName.swimlane)`,
+  // `FromSkinparamToStyle.java:159`. Sibling of `classattributefontsize`
+  // above -- same `parseFiniteNumber` convention.
+  [
+    ['swimlanetitlefontsize'],
+    (acc, value) => {
+      const v = parseFiniteNumber(value);
+      if (v !== undefined) acc.swimlaneTitleFontSize = v;
     },
   ],
   // Edge-label word-wrap, `skin/SkinParam.java:971-978`'s two source keys.

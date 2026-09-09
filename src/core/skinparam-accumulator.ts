@@ -123,6 +123,18 @@ export interface SkinparamAccumulator {
   activityStartColor: string | undefined;
   activityEndColor: string | undefined;
   swimlaneBorder: string | undefined;
+  /** D4 amendment (T1): `SwimlaneTitleBackgroundColor` -- see
+   *  `theme-graph-colors-b.ts#swimlaneHeaderBackground`'s own doc comment. */
+  swimlaneHeaderBackground: string | undefined;
+  /** D4 amendment (T1): `SwimlaneBorderThickness` -- see
+   *  `theme-graph-colors-b.ts#swimlaneBorderThickness`'s own doc comment. */
+  swimlaneBorderThickness: number | undefined;
+  /** D4 amendment (T1): `SwimlaneTitleFontColor` -- see
+   *  `theme-graph-colors-b.ts#swimlaneTitleFontColor`'s own doc comment. */
+  swimlaneTitleFontColor: string | undefined;
+  /** D4 amendment (T1): `SwimlaneTitleFontSize` -- see
+   *  `theme-graph-colors-b.ts#swimlaneTitleFontSize`'s own doc comment. */
+  swimlaneTitleFontSize: number | undefined;
   /** Per-element (SName) color buckets — decision D4. */
   elements: Record<string, ElementColors>;
   unknown: string[];
@@ -223,6 +235,10 @@ const SCALAR_FIELD_NAMES = [
   'activityStartColor',
   'activityEndColor',
   'swimlaneBorder',
+  'swimlaneHeaderBackground',
+  'swimlaneBorderThickness',
+  'swimlaneTitleFontColor',
+  'swimlaneTitleFontSize',
 ] as const satisfies ReadonlyArray<Exclude<keyof SkinparamAccumulator, 'elements' | 'unknown'>>;
 
 /** Fresh accumulator with all optional fields unset. */
