@@ -81,12 +81,39 @@ export interface SwimlaneGeo {
   contentX?: number;
 }
 
+/**
+ * The transparent (or user-coloured) title-band rect drawn behind every
+ * lane title (D3). Present only when there is chrome to draw --
+ * `swimlanes.length > 1` (`Swimlanes.java:275`'s own `size() > 1` guard; a
+ * single lane draws no band at all).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:358-367
+ */
+export interface SwimlaneBandGeo {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * The Y-range every lane divider spans: from the block's own top (the
+ * band's own `y`) to the content bottom. Same presence guard as
+ * {@link SwimlaneBandGeo}.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:423-424
+ */
+export interface SwimlaneDividerY {
+  y1: number;
+  y2: number;
+}
+
 export interface ActivityGeometry {
   totalWidth: number;
   totalHeight: number;
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   swimlanes: SwimlaneGeo[];
+  swimlaneBand?: SwimlaneBandGeo;
+  swimlaneDividerY?: SwimlaneDividerY;
 }
 
 // ---------------------------------------------------------------------------

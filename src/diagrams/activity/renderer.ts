@@ -5,14 +5,14 @@
  * No DOM, no async.
  */
 
-import type { ActivityGeometry, ActivityEdgeGeo, SwimlaneGeo } from './layout/tile-layout.js';
+import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { rect, line, text, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
-import { SWIMLANE_HEADER_H } from './activity-layout-constants.js';
-import { activityFontSize, activityLineThickness, swimlaneFontSize } from './activity-style-defaults.js';
+import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
+import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -206,75 +206,18 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 }
 
 // ---------------------------------------------------------------------------
-// Swimlane renderer
-// ---------------------------------------------------------------------------
-
-function renderSwimlanes(swimlanes: readonly SwimlaneGeo[], totalHeight: number, theme: Theme): string {
-  if (swimlanes.length === 0) return '';
-
-  const parts: string[] = [];
-
-  // Header band background
-  parts.push(
-    rect(
-      0,
-      0,
-      swimlanes.reduce((acc, s) => acc + s.width, 0),
-      SWIMLANE_HEADER_H,
-      {
-        fill: theme.colors.background,
-        stroke: theme.colors.border,
-      },
-    ),
-  );
-
-  const laneTitleSize = swimlaneFontSize(theme);
-  for (const lane of swimlanes) {
-    // Lane header text, centered
-    parts.push(
-      // The ROOT `swimlane { FontSize 18 }` block (plantuml.skin:313),
-      // resolved by `ftile/Swimlanes.java:127` and
-      // `ftile/LaneDivider.java:72`. D7 scopes this task to the FONT: the
-      // divider-line-vs-boxed-header visual model stays exactly as it is
-      // and belongs to the filed `activity-swimlane-rendering`.
-      text(lane.x + lane.width / 2, SWIMLANE_HEADER_H / 2 + laneTitleSize / 3, lane.name, {
-        textAnchor: 'middle',
-        fill: theme.colors.text,
-        fontFamily: theme.fontFamily,
-        fontSize: laneTitleSize,
-        fontWeight: 'bold',
-      }),
-    );
-
-    // Vertical divider on the left edge of this lane (skip the very first)
-    if (lane.x > 0) {
-      parts.push(
-        line(lane.x, 0, lane.x, totalHeight, {
-          stroke: theme.colors.border,
-          strokeWidth: 1,
-        }),
-      );
-    }
-  }
-
-  // Horizontal line separating header from diagram body
-  const totalWidth = swimlanes.reduce((acc, s) => acc + s.width, 0);
-  parts.push(
-    line(0, SWIMLANE_HEADER_H, totalWidth, SWIMLANE_HEADER_H, {
-      stroke: theme.colors.border,
-      strokeWidth: 1,
-    }),
-  );
-
-  return parts.join('');
-}
-
-// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 /**
  * Render an activity diagram geometry into an SVG string.
+ *
+ * Draw order (D5 of `plans/activity-swimlane-rendering/decisions.md`):
+ * with chrome (`swimlanes.length > 1`), the band/per-lane-nodes/dividers
+ * come from `renderSwimlaneChrome` (`activity-renderer-swimlanes.ts`),
+ * then every edge, then titles LAST. With zero or one lane there is no
+ * chrome to draw (`Swimlanes.java:275`) and the output is the plain
+ * node-then-edge order, byte-identical to a diagram with no swimlanes.
  */
 export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragment {
   const children: string[] = [];
@@ -288,20 +231,20 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
   // itself still reaches the document, via the root `style` attribute
   // `assembleDocumentShell` builds from `fragment.background`
   // (`SvgGraphics.java:805-806`).
+  const hasChrome = geo.swimlanes.length > 1;
 
-  // Swimlanes (drawn before nodes so nodes appear on top)
-  if (geo.swimlanes.length > 0) {
-    children.push(renderSwimlanes(geo.swimlanes, geo.totalHeight, theme));
+  if (hasChrome) {
+    children.push(renderSwimlaneChrome(geo, theme));
+  } else {
+    for (const node of geo.nodes) children.push(renderNode(node, theme));
   }
 
-  // Nodes
-  for (const node of geo.nodes) {
-    children.push(renderNode(node, theme));
-  }
-
-  // Edges
   for (const edge of geo.edges) {
     children.push(renderEdge(edge, theme));
+  }
+
+  if (hasChrome) {
+    children.push(renderSwimlaneTitles(geo, theme));
   }
 
   return {

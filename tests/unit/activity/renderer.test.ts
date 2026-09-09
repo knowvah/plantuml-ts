@@ -159,39 +159,82 @@ describe('renderActivity — fork-bar node', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 5: swimlane boundaries are vertical lines spanning diagram height
+// Test 5: swimlane chrome -- dividers, transparent band, floating titles
+// (T6, `activity-swimlane-rendering`: replaces the old boxed-header model)
 // ---------------------------------------------------------------------------
 
+/** A two-lane geometry shaped like `assignCoordinates`'s own output
+ *  (`contentX`/`contentWidth`/`titleWidth` populated, plus the derived
+ *  `swimlaneBand`/`swimlaneDividerY`) -- renderer tests exercise the
+ *  renderer given realistic layout output, not the layout engine itself. */
+function makeSwimlaneGeo(): ActivityGeometry {
+  return makeGeo({
+    swimlanes: [
+      { name: 'Alice', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 },
+      { name: 'Bob', x: 120, width: 150, contentX: 126, contentWidth: 138, titleWidth: 25 },
+    ],
+    swimlaneBand: { x: 20, y: 17.5, width: 249, height: 18 },
+    swimlaneDividerY: { y1: 17.5, y2: 182.5 },
+    totalWidth: 300,
+    totalHeight: 200,
+    nodes: [],
+    edges: [],
+  });
+}
+
 describe('renderActivity — swimlanes', () => {
-  it('renders vertical <line> elements between swimlanes', () => {
-    const geo = makeGeo({
-      swimlanes: [
-        { name: 'Alice', x: 0, width: 150 },
-        { name: 'Bob', x: 150, width: 150 },
-      ],
-      totalWidth: 300,
-      totalHeight: 200,
-      nodes: [],
-      edges: [],
-    });
-    const result = assembleSvg(renderActivity(geo, theme));
-    expect(result).toContain('<line');
+  it('renders exactly three <line> dividers for two lanes', () => {
+    const result = contentAfterDefs(assembleSvg(renderActivity(makeSwimlaneGeo(), theme)));
+    expect((result.match(/<line /g) ?? []).length).toBe(3);
   });
 
-  it('renders swimlane header names', () => {
+  it('renders a fill="none" band rect (D3) by default', () => {
+    const result = contentAfterDefs(assembleSvg(renderActivity(makeSwimlaneGeo(), theme)));
+    expect(result).toContain('<rect');
+    expect(result).toContain('fill="none"');
+  });
+
+  it('renders swimlane titles, not bold, without text-anchor', () => {
+    const result = assembleSvg(renderActivity(makeSwimlaneGeo(), theme));
+    expect(result).toContain('Alice');
+    expect(result).toContain('Bob');
+    expect(result).not.toContain('font-weight="bold"');
+  });
+
+  it('draws titles AFTER every divider and edge, in document order (D5)', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const lastDividerIdx = result.lastIndexOf('<line ');
+    const edgeIdx = result.indexOf('<line ');
+    const titleIdx = result.indexOf('Alice');
+    expect(titleIdx).toBeGreaterThan(lastDividerIdx);
+    expect(edgeIdx).toBeGreaterThan(-1);
+  });
+
+  it('a single lane draws no band, no dividers, and no titles', () => {
     const geo = makeGeo({
-      swimlanes: [
-        { name: 'Alice', x: 0, width: 150 },
-        { name: 'Bob', x: 150, width: 150 },
-      ],
-      totalWidth: 300,
-      totalHeight: 200,
+      swimlanes: [{ name: 'Solo', x: 12, width: 100, contentX: 12, contentWidth: 100, titleWidth: 20 }],
       nodes: [],
       edges: [],
     });
-    const result = assembleSvg(renderActivity(geo, theme));
-    expect(result).toContain('Alice');
-    expect(result).toContain('Bob');
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(result).not.toContain('<line');
+    expect(result).not.toContain('<rect');
+    expect(result).not.toContain('Solo');
+  });
+
+  it('zero lanes renders byte-identical output to a diagram with an empty swimlanes array', () => {
+    const withoutLanes = assembleSvg(renderActivity(makeGeo({ swimlanes: [], nodes: [], edges: [] }), theme));
+    const explicit = assembleSvg(renderActivity(makeGeo({ nodes: [], edges: [] }), theme));
+    expect(withoutLanes).toBe(explicit);
   });
 });
 
@@ -774,11 +817,18 @@ describe('T6 — edge stroke, arrow decoration, and swimlane title', () => {
     expect(content).not.toContain('font-size="13"');
   });
 
-  it('a swimlane title draws font-size 18', () => {
-    // The ROOT `swimlane { FontSize 18 }` block (plantuml.skin:313),
-    // resolved by ftile/Swimlanes.java:127. D7 scopes T6 to the FONT — the
-    // boxed-header visual model is deliberately untouched.
-    const geo = makeGeo({ swimlanes: [{ name: 'Lane A', x: 0, width: 150 }] });
+  it('a swimlane title draws font-size 18 — the ROOT swimlane { FontSize 18 } block', () => {
+    // plantuml.skin:313, resolved by ftile/Swimlanes.java:127. T6 replaced
+    // the boxed-header visual model; requires 2+ lanes to draw any chrome
+    // at all (`Swimlanes.java:275`'s own `size() > 1` guard).
+    const geo = makeGeo({
+      swimlanes: [
+        { name: 'Lane A', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 },
+        { name: 'Lane B', x: 120, width: 100, contentX: 126, contentWidth: 88, titleWidth: 30 },
+      ],
+      swimlaneBand: { x: 20, y: 17.5, width: 199, height: 18 },
+      swimlaneDividerY: { y1: 17.5, y2: 182.5 },
+    });
     const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
     expect(content).toContain('font-size="18"');
     expect(content).toContain('Lane A');

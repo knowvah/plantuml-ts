@@ -21,7 +21,14 @@ import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { BAR_HEIGHT } from '../activity-layout-constants.js';
-import { laneAt, laneIn, laneOut, placeSwimlanes } from './swimlane-placement.js';
+import {
+  computeSwimlaneChrome,
+  laneAt,
+  laneIn,
+  laneOut,
+  placeSwimlanes,
+  resolveSwimlaneVertical,
+} from './swimlane-placement.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 
 export const LAYOUT_MARGIN = 12;
@@ -422,29 +429,13 @@ function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out):
 }
 
 /**
- * SWIMLANES COUNT TOWARD THE CANVAS TOO. `assignCoordinates` returns three
- * geometry arrays -- nodes, edges and swimlanes -- and the renderer draws
- * all three, but the bounds here used to consult only the first two. A
- * lane band wider than the widest node therefore fell OUTSIDE the canvas
- * it was drawn into: 32 of the 268 baselined fixtures overflowed, by up
- * to 216px (`pakema-21-xema183`: lanes to x=252 against a totalWidth of
- * 144).
- *
- * Both extents the renderer actually draws are taken, because they are
- * not the same number: the header band and the header/body separator run
- * from x=0 to the SUM of the lane widths (`renderer.ts#renderSwimlanes`,
- * the `reduce` at its band and separator calls), while each lane's own
- * right edge is `lane.x + lane.width`, and the lanes start at `baseX`,
- * not at 0. Whether those two SHOULD agree is the swimlane visual model,
- * which `activity-swimlane-rendering` owns (D7 of
- * `plans/activity-style-defaults/decisions.md`) -- containing what is
- * drawn today is this fix's whole scope, and it must not quietly decide
- * that question by picking one. T6 removes the SUM-of-widths band term
- * once the renderer draws real lane origins instead of x=0.
- *
- * Y is deliberately untouched: a lane draws its divider from y=0 to
- * `totalHeight` and its title inside `SWIMLANE_HEADER_H`, so it can never
- * extend past a bound Y already covers.
+ * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
+ * by up to 216px, `pakema-21-xema183`). T6 replaced the boxed header with
+ * real lane origins: the band's right edge (`lanes[0].x + Σwidth - 1`,
+ * `swimlane-placement.ts#computeSwimlaneChrome`) is always `lanesRight -
+ * 1`, so `lanesRight` alone bounds every drawn X extent. Y is untouched
+ * here -- the title-band vertical reservation is folded into `baseY`
+ * BEFORE this runs (see `assignCoordinates`'s `contentY`).
  */
 function computeBounds(
   root: Tile,
@@ -465,9 +456,8 @@ function computeBounds(
     }
   }
   if (placed.swimlanes.length > 0) {
-    const bandRight = placed.swimlanes.reduce((acc, s) => acc + s.width, 0);
     const lanesRight = Math.max(...placed.swimlanes.map((s) => s.x + s.width));
-    maxX = Math.max(maxX, bandRight, lanesRight);
+    maxX = Math.max(maxX, lanesRight);
   }
   return { maxX, maxY };
 }
@@ -484,17 +474,12 @@ export function assignCoordinates(
   const edges: ActivityEdgeGeo[] = [];
   const edgeMeta: EdgeMeta[] = [];
   let idCounter = 0;
-  const out: Out = {
-    nodes,
-    edges,
-    edgeMeta,
-    nextId: (prefix: string) => `${prefix}-${++idCounter}`,
-  };
-
-  walkTile(root, baseX, baseY, { kindHint: null, lane: undefined }, out);
+  const out: Out = { nodes, edges, edgeMeta, nextId: (prefix: string) => `${prefix}-${++idCounter}` };
+  const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
+  walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
   const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, bounder, theme });
-  const { maxX, maxY } = computeBounds(root, baseX, baseY, placed);
+  const { maxX, maxY } = computeBounds(root, baseX, contentY, placed);
 
   return {
     totalWidth: maxX + LAYOUT_MARGIN,
@@ -502,5 +487,6 @@ export function assignCoordinates(
     nodes: placed.nodes,
     edges: placed.edges,
     swimlanes: placed.swimlanes,
+    ...computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, maxY),
   };
 }

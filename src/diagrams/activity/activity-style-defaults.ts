@@ -436,3 +436,21 @@ export function swimlaneBorderThickness(theme: Theme): number {
 export function swimlaneTitleFontSize(theme: Theme): number {
   return theme.colors.graph.activity?.swimlaneTitleFontSize ?? swimlaneFontSize(theme);
 }
+
+/**
+ * The resolved title-band fill (T6, D3). T1's `graph.activity
+ * .swimlaneHeaderBackground` (`SwimlaneTitleBackgroundColor` -> `PName
+ * .BackGroundColor`, D4's "Amended at execution" note) → the shared
+ * `swimlane` bucket's own `BackGroundColor` override → the ROOT
+ * `plantuml.skin:310` default (`BackGroundColor transparent`). That
+ * default is a non-null `HColor`, so `Swimlanes#drawTitlesBackground`
+ * (`:358-367`) still draws the rect and paints nothing -- `'none'`, not a
+ * resolved hex, mirroring `renderEdgeLabel`'s own `stroke: 'none'` "paint
+ * nothing" convention rather than resolving `resolveColorToSvgHex
+ * ('transparent')`'s `#00000000`, which the jar never emits for this rect.
+ */
+export function swimlaneHeaderBackground(theme: Theme): string {
+  const override = theme.colors.graph.activity?.swimlaneHeaderBackground;
+  if (override !== undefined) return resolveColorToSvgHex(override);
+  return resolveSolidBucketColor(theme.colors.elements?.['swimlane']?.background) ?? 'none';
+}

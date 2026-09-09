@@ -27,6 +27,15 @@ export const NOTE_H_PAD = 16;
 export const NOTE_FOLD = 8;
 export const NOTE_SIDE_GAP = 16;
 export const BAR_HEIGHT = 8;
+/**
+ * NOT retired despite the boxed-header model it sized being replaced
+ * (`activity-swimlane-rendering` T6) -- `layout.old.ts:53` (the superseded,
+ * off-the-render-path engine) still imports this constant, and that file is
+ * out of every task's write-set (mission stop condition 5). The live
+ * renderer (`renderer.ts` / `activity-renderer-swimlanes.ts`) no longer
+ * reads it; the divider-and-floating-title band height is measured instead
+ * (`swimlane-placement.ts#measureSwimlaneTitlesHeight`, D2).
+ */
 export const SWIMLANE_HEADER_H = 28;
 export const SWIMLANE_MIN_WIDTH = 120;
 export const DEFAULT_WIDTH = 600;

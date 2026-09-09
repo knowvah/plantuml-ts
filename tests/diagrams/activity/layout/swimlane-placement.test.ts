@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  computeSwimlaneChrome,
   laneAt,
   laneIn,
   laneOut,
+  measureSwimlaneTitlesHeight,
   placeSwimlanes,
+  resolveSwimlaneVertical,
 } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
+import type { SwimlaneGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
 import type { EdgeMeta } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import { TileLeaf } from '../../../../src/diagrams/activity/tiles/tile.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -224,5 +228,85 @@ describe('placeSwimlanes — edge routing', () => {
     const result = placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames, baseX: 12, bounder, theme });
     const stray = result.nodes.find((n) => n.id === 'stray')!;
     expect(stray.x).toBe(12);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// measureSwimlaneTitlesHeight — D2, floored at 10 by AtomText (T6)
+// ---------------------------------------------------------------------------
+
+describe('measureSwimlaneTitlesHeight', () => {
+  // `theme` here uses the default `SwimlaneTitleFontSize` (18,
+  // `activity-style-defaults.ts#swimlaneFontSize`); each fixture below
+  // overrides it via a bounder that reports that resolved size as height
+  // (mirrors `StringBounderFromWidthTable.java:71`: height === size).
+  function bounderAt(height: number) {
+    return { getDimension: () => ({ width: 0, height }) };
+  }
+
+  it('is unaffected when every lane title is already >= 10 (default 18)', () => {
+    expect(measureSwimlaneTitlesHeight(['A', 'B'], bounderAt(18), theme)).toBe(18);
+  });
+
+  it('floors a small title height at 10 (sikino-19-vuca111: FontSize 8 -> 10)', () => {
+    expect(measureSwimlaneTitlesHeight(['lane1', 'lane2'], bounderAt(8), theme)).toBe(10);
+  });
+
+  it('is unaffected by a large title height (cemipu-87-dinu624: FontSize 30 -> 30)', () => {
+    expect(measureSwimlaneTitlesHeight(['swimlane1', 'swimlane2'], bounderAt(30), theme)).toBe(30);
+  });
+
+  it('takes the MAX across lanes, not the last', () => {
+    let call = 0;
+    const bounder = { getDimension: () => ({ width: 0, height: ++call === 1 ? 8 : 22 }) };
+    expect(measureSwimlaneTitlesHeight(['short', 'tall'], bounder, theme)).toBe(22);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveSwimlaneVertical — the Swimlanes#drawU size() > 1 guard (T6)
+// ---------------------------------------------------------------------------
+
+describe('resolveSwimlaneVertical', () => {
+  const bounder = { getDimension: () => ({ width: 0, height: 18 }) };
+
+  it('reserves no vertical space for a single lane', () => {
+    expect(resolveSwimlaneVertical(['A'], 12, bounder, theme)).toEqual({ contentY: 12, titlesHeight: 0 });
+  });
+
+  it('reserves no vertical space for zero lanes', () => {
+    expect(resolveSwimlaneVertical([], 12, bounder, theme)).toEqual({ contentY: 12, titlesHeight: 0 });
+  });
+
+  it('pushes content down by titlesHeight + 5 for two or more lanes', () => {
+    expect(resolveSwimlaneVertical(['A', 'B'], 12, bounder, theme)).toEqual({ contentY: 35, titlesHeight: 18 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeSwimlaneChrome — band x/width and divider Y-range (T6)
+// ---------------------------------------------------------------------------
+
+describe('computeSwimlaneChrome', () => {
+  const lanes: SwimlaneGeo[] = [
+    { name: 'A', x: 20, width: 38.338 },
+    { name: 'B', x: 58.338, width: 310.937 },
+  ];
+
+  it('returns nothing for a single lane', () => {
+    expect(computeSwimlaneChrome([lanes[0]!], 17.5, 18, 164.5)).toEqual({});
+  });
+
+  it('bands from the first divider, width = Σ(lane.width) - 1 (pakema-21-xema183)', () => {
+    const chrome = computeSwimlaneChrome(lanes, 17.5, 18, 164.5);
+    expect(chrome.swimlaneBand?.x).toBe(20);
+    expect(chrome.swimlaneBand?.y).toBe(17.5);
+    expect(chrome.swimlaneBand?.width).toBeCloseTo(348.275, 3);
+    expect(chrome.swimlaneBand?.height).toBe(18);
+  });
+
+  it('spans the divider Y-range from the block top to the content bottom', () => {
+    const chrome = computeSwimlaneChrome(lanes, 17.5, 18, 164.5);
+    expect(chrome.swimlaneDividerY).toEqual({ y1: 17.5, y2: 164.5 });
   });
 });

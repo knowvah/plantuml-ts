@@ -31,7 +31,13 @@
 
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
-import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-layout-types.js';
+import type {
+  ActivityEdgeGeo,
+  ActivityNodeGeo,
+  SwimlaneBandGeo,
+  SwimlaneDividerY,
+  SwimlaneGeo,
+} from '../activity-layout-types.js';
 import type { GPoint } from '../tiles/points.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
@@ -91,6 +97,102 @@ export interface PlacementResult {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   swimlanes: SwimlaneGeo[];
+}
+
+/**
+ * D2: the title band's height is the MAX, over lanes, of that lane's own
+ * title `TextBlock`'s height (`Swimlanes#getTitlesHeight`, `:309-315`) --
+ * never the raw `SwimlaneTitleFontSize` constant. Each title's own height
+ * is floored at 10 by `AtomText#calculateDimensionSlow`
+ * (`klimt/creole/legacy/AtomText.java:179-181`: `if (h < 10) h = 10;`),
+ * which is why a small `SwimlaneTitleFontSize` does not shrink the band
+ * proportionally. Confirmed against three pinned fixtures:
+ * `SwimlaneTitleFontSize 8` -> band height 10 (`sikino-19-vuca111`, floored);
+ * the default 18 -> 18 (`pakema-21-xema183`, already >= 10, unaffected);
+ * `TitleFontSize 30` -> 30 (`cemipu-87-dinu624`, unaffected). Shared by
+ * `tile-coordinates.ts` (vertical content reservation) and the swimlane
+ * chrome renderer (band rect height) so both measure the exact same value
+ * -- D2 forbids a second, independent implementation of this number.
+ */
+export function measureSwimlaneTitlesHeight(
+  laneNames: readonly string[],
+  bounder: StringBounder,
+  theme: Theme,
+): number {
+  const titleFontSize = swimlaneTitleFontSize(theme);
+  let max = 0;
+  for (const name of laneNames) {
+    max = Math.max(max, bounder.getDimension(name, titleFontSize).height);
+  }
+  return Math.max(max, 10);
+}
+
+export interface SwimlaneVertical {
+  readonly contentY: number;
+  readonly titlesHeight: number;
+}
+
+/**
+ * `Swimlanes#drawU`'s own `swimlanes().size() > 1` guard (`:275`): a
+ * single lane draws no chrome and reserves no vertical space; a real
+ * multi-lane diagram pushes content down by `titlesHeight + 5`
+ * (`getTitleHeightTranslate`, `:304-307`). Called once from
+ * `assignCoordinates` before the pass-1 walk.
+ */
+export function resolveSwimlaneVertical(
+  laneNames: readonly string[],
+  baseY: number,
+  bounder: StringBounder,
+  theme: Theme,
+): SwimlaneVertical {
+  if (laneNames.length <= 1) return { contentY: baseY, titlesHeight: 0 };
+  const titlesHeight = measureSwimlaneTitlesHeight(laneNames, bounder, theme);
+  return { contentY: baseY + titlesHeight + 5, titlesHeight };
+}
+
+export interface SwimlaneChrome {
+  swimlaneBand: SwimlaneBandGeo;
+  swimlaneDividerY: SwimlaneDividerY;
+}
+
+/**
+ * Derives the band rect and the divider Y-range from the already-placed
+ * lane geometry ({@link placeSwimlanes}'s own `swimlanes` output) plus the
+ * block's own top (`baseY`) and content bottom (`contentBottomY`, the
+ * `totalHeight - LAYOUT_MARGIN` upstream's own divider height uses).
+ *
+ * Band x/width: `Swimlanes#drawTitlesBackground` (`:358-367`) draws at
+ * `ug.apply(dx(5))` with `width = swimlanesSpecial().last().getTranslate()
+ * .getDx() - 2*5 - 1`. The trailing special lane's translate is the LAST
+ * divider's own x plus `halfMissingSpace(n+1, ...)`, which is always the
+ * fixed outer-edge padding of 5 (`swimlane-context.ts#halfMissingSpace`,
+ * the `i > lanes.length` branch) -- the SAME fixed 5 the FIRST divider's
+ * own `halfMissingSpace(0, ...)` returns. Those two `+5`/`-5` terms
+ * cancel, reducing the band to `x = lanes[0].x`, `width = Σ(lane.width) -
+ * 1`. Verified against the pinned jar's `pakema-21-xema183`: dividers at
+ * 20, 58.338, 369.275 -> Σwidth = 349.275; band x = 20 (== first divider),
+ * band width = 348.275 (== Σ - 1) -- both exact matches.
+ *
+ * Divider Y-range: `LaneDivider#drawU` draws one full-height `ULine` per
+ * boundary, `height = dimensionFull.getHeight() + titleHeightTranslate
+ * .getDy()` (`Swimlanes.java:423-424`) -- from the block's own top to its
+ * content bottom.
+ */
+export function computeSwimlaneChrome(
+  swimlanes: readonly SwimlaneGeo[],
+  baseY: number,
+  titlesHeight: number,
+  contentBottomY: number,
+): Partial<SwimlaneChrome> {
+  // Same `size() > 1` guard as {@link resolveSwimlaneVertical}: a single
+  // lane draws no chrome, so there is nothing to derive.
+  if (swimlanes.length <= 1) return {};
+  const first = swimlanes[0]!;
+  const widthSum = swimlanes.reduce((acc, s) => acc + s.width, 0);
+  return {
+    swimlaneBand: { x: first.x, y: baseY, width: widthSum - 1, height: titlesHeight },
+    swimlaneDividerY: { y1: baseY, y2: contentBottomY },
+  };
 }
 
 interface LaneOrigin {
