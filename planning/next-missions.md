@@ -1130,7 +1130,22 @@ Ordered by how ready they are, not by size.
   (`Display.create9`, `Swimlanes.java:285-293`) is the renderer's own
   creole seam; small.
 
-- **`activity-min-box-width`** (NEW, unbriefed) — FILED 2026-09-08 by
+- **`activity-min-box-width`** — **BRIEFED 2026-09-09**, not executed.
+  Brief at `plans/activity-min-box-width/README.md`: 7 tasks over 7
+  batches, branch `feat/activity-min-box-width`, baseline `8aad71eb`
+  (aggregate 48291). Scope grew from the filing on measurement: the floor
+  (`rect/@width` 821; removing it alone gives −1.35% with two `split…detach`
+  risers to diagnose) plus three defects of the same box — text anchored
+  `middle` (`text/@text-anchor` 1253 + `text/@x` 1427; `FtileBox.java:220-233`
+  draws LEFT at `padding.left`), text fill `#181818` (`text/@fill` 1288;
+  root `FontColor black`, `plantuml.skin:9`), and stroke 1 (`rect/@stroke-width`
+  846; `element { LineThickness 0.5 }`, `plantuml.skin:91-93`). Also
+  measured: `skinparam minClassWidth` converts with an EMPTY signature
+  (`FromSkinparamToStyle.java:241,396-407`) and so floors activity boxes
+  upstream — the shared `resolveElementMinimumWidth` cascade is faithful.
+  Original filing follows, unedited.
+
+  FILED 2026-09-08 by
   `activity-style-defaults` T4, measured. `ACTION_MIN_WIDTH = 120`
   (`src/diagrams/activity/tiles/gtile-action.ts`) has no upstream
   counterpart: upstream's floor is `PName.MinimumWidth`, whose unset value
