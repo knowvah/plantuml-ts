@@ -124,7 +124,7 @@ behaviour is upstream-sourced; regenerating `docs/catalog.md` on drift.
 
 - [x] Batch 0 — T0
 - [x] Batch 1 — T1
-- [ ] Batch 2 — T2
+- [x] Batch 2 — T2
 - [ ] Batch 3 — T3
 - [ ] Batch 4 — T4
 - [ ] Batch 5 — T5
