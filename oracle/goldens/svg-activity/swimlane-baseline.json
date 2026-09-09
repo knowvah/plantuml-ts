@@ -1,0 +1,5405 @@
+{
+  "$comment": "NOT a golden manifest. Pre-change SWIMLANE census (activity-swimlane-rendering / T0, 2026-09-09): for every committed activity fixture whose SOURCE has a swimlane line (CommandSwimlane.java:59-67 needle, never a slug list), records for OURS and for the JAR golden the lane dividers (x, document order), the title band rect, the title texts (font-size / x / text-anchor, document order), the per-lane extents (ours from ActivityGeometry.swimlanes; jar from consecutive ascending dividers), and the root canvas -- plus laneCount from our AST. Measured by tests/oracle/svg-conformance/swimlane-census.ts through the same seams the ratchet uses (renderFixtureActivity + DeterministicMeasurer + fixtureIncludeStore), over the NORMALIZED tree. Partition 60 baseline / 24 error / 8 jar-error of 92, the same three-way discrimination the sibling gates carry. Totals at the pin: OURS 140 dividers / 140 titles / 59 bands; JAR 195 dividers / 139 titles / 57 bands. An EQUALITY pin, not a ratchet: T7 re-pins ONCE from a fresh measurement and the diff of this file is the mission's evidence. Never hand-edit an entry.",
+  "measuredAt": "2026-09-09",
+  "measuredAgainstCommit": "d0a7e1bd",
+  "fixtures": [
+    {
+      "type": "activity",
+      "slug": "becanu-19-diti597",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "328"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          81.35,
+          137.975
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.138",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "93.125",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 116.975,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 61.35
+          },
+          {
+            "x": 81.35,
+            "width": 56.625
+          }
+        ],
+        "width": "183",
+        "height": "367"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "begivo-34-sicu289",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          162
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "87",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "237",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 300,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 150
+          },
+          {
+            "x": 162,
+            "width": 150
+          }
+        ],
+        "width": "324",
+        "height": "256"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          115.163,
+          210.325
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "120.163",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 189.325,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 95.163
+          },
+          {
+            "x": 115.163,
+            "width": 95.162
+          }
+        ],
+        "width": "236",
+        "height": "277"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "bideta-97-cezo697",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "204"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          118.7,
+          241.084
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "42.294",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "152.836",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 220.084,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 98.7
+          },
+          {
+            "x": 118.7,
+            "width": 122.384
+          }
+        ],
+        "width": "267",
+        "height": "265"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "bixefi-77-moki051",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          166.725,
+          321.45
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "89.363",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "244.087",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "398.813",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 464.175,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 154.725
+          },
+          {
+            "x": 166.725,
+            "width": 154.725
+          },
+          {
+            "x": 321.45,
+            "width": 154.725
+          }
+        ],
+        "width": "488",
+        "height": "112"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          129.35,
+          236.75,
+          394.925
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "49.138",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "157.513",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "290.3",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 373.925,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109.35
+          },
+          {
+            "x": 129.35,
+            "width": 107.4
+          },
+          {
+            "x": 236.75,
+            "width": 158.175
+          }
+        ],
+        "width": "420",
+        "height": "145"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "bugaja-31-jaso630",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          166.725,
+          321.45
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "89.363",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "244.087",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "398.813",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 464.175,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 154.725
+          },
+          {
+            "x": 166.725,
+            "width": 154.725
+          },
+          {
+            "x": 321.45,
+            "width": 154.725
+          }
+        ],
+        "width": "488",
+        "height": "204"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          146.35,
+          253.75,
+          457.662
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "57.638",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "174.513",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "330.169",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 436.662,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 126.35
+          },
+          {
+            "x": 146.35,
+            "width": 107.4
+          },
+          {
+            "x": 253.75,
+            "width": 203.912
+          }
+        ],
+        "width": "483",
+        "height": "225"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "bulasi-17-vafa634",
+      "status": "baseline",
+      "laneCount": 1,
+      "ours": {
+        "dividerXs": [
+          12
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "92",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 160,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 160
+          }
+        ],
+        "width": "184",
+        "height": "360"
+      },
+      "jar": {
+        "dividerXs": [],
+        "titles": [],
+        "bandRect": null,
+        "lanes": [],
+        "width": "176",
+        "height": "385"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "bumaca-51-kece901",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "276"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          171.675,
+          266.838
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "53.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.675",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 151.675
+          },
+          {
+            "x": 171.675,
+            "width": 95.163
+          }
+        ],
+        "width": "292",
+        "height": "323"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "caburo-70-buki284",
+      "status": "error",
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "cakeca-72-kara622",
+      "status": "error",
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "cejupe-34-muti621",
+      "status": "error",
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "cemipu-87-dinu624",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "376"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          280.45,
+          406.275
+        ],
+        "titles": [
+          {
+            "fontSize": "30",
+            "x": "73.756",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "30",
+            "x": "269.894",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 20.167,
+          "width": 385.275,
+          "height": 30,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 260.45
+          },
+          {
+            "x": 280.45,
+            "width": 125.825
+          }
+        ],
+        "width": "432",
+        "height": "456"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "ciloke-34-pumi198",
+      "status": "error",
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "citire-32-mive114",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "decudi-92-bisu741",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          272
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "142",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "402",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 35,
+          "width": 520,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 260
+          },
+          {
+            "x": 272,
+            "width": 260
+          }
+        ],
+        "width": "544",
+        "height": "451"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          167.456,
+          309.469
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "51.147",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "195.881",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 52.5,
+          "width": 288.469,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 147.456
+          },
+          {
+            "x": 167.456,
+            "width": 142.013
+          }
+        ],
+        "width": "335",
+        "height": "398"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "delide-30-teva601",
+      "status": "error",
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "dupopo-44-deto131",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "316"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          134.825,
+          249.65,
+          339.862
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "37.306",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "152.131",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.65",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 318.862,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 114.825
+          },
+          {
+            "x": 134.825,
+            "width": 114.825
+          },
+          {
+            "x": 249.65,
+            "width": 90.212
+          }
+        ],
+        "width": "365",
+        "height": "353"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "fakece-07-koga025",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "felega-00-saxi785",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "280"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          114,
+          163.038
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "47.481",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "119",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 142.038,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 94
+          },
+          {
+            "x": 114,
+            "width": 49.038
+          }
+        ],
+        "width": "189",
+        "height": "301"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "firibi-00-puki721",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          242
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "127",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "357",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 460,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 230
+          },
+          {
+            "x": 242,
+            "width": 230
+          }
+        ],
+        "width": "484",
+        "height": "408"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          124.413,
+          329.238
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "56.175",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "207.25",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 308.238,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 104.413
+          },
+          {
+            "x": 124.413,
+            "width": 204.825
+          }
+        ],
+        "width": "355",
+        "height": "468"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "gesogi-81-xoma900",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          215.025
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "113.513",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "316.538",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 406.05,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 203.02500000000003
+          },
+          {
+            "x": 215.02500000000003,
+            "width": 203.02500000000003
+          }
+        ],
+        "width": "430",
+        "height": "244"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          267.413,
+          459.138
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "113.725",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "339.256",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 438.138,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 247.413
+          },
+          {
+            "x": 267.413,
+            "width": 191.725
+          }
+        ],
+        "width": "485",
+        "height": "316"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "getene-72-dido571",
+      "status": "error",
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "givanu-33-kire967",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "380"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          81.35,
+          137.975
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.138",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "93.125",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 116.975,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 61.35
+          },
+          {
+            "x": 81.35,
+            "width": 56.625
+          }
+        ],
+        "width": "183",
+        "height": "427"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "gugala-11-suce270",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          162
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "87",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "237",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 300,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 150
+          },
+          {
+            "x": 162,
+            "width": 150
+          }
+        ],
+        "width": "324",
+        "height": "356"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          111.025,
+          262.375
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "60.506",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "181.694",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 241.375,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 91.025
+          },
+          {
+            "x": 111.025,
+            "width": 151.35
+          }
+        ],
+        "width": "288",
+        "height": "386"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "jakuco-69-dari135",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "200"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          330.937,
+          367.612
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "343.256",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 346.612,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 310.937
+          },
+          {
+            "x": 330.937,
+            "width": 36.675
+          }
+        ],
+        "width": "393",
+        "height": "237"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "jevoce-05-mumi686",
+      "status": "baseline",
+      "laneCount": 6,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252,
+          372,
+          492,
+          612
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "432",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "552",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "672",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 720,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          },
+          {
+            "x": 372,
+            "width": 120
+          },
+          {
+            "x": 492,
+            "width": 120
+          },
+          {
+            "x": 612,
+            "width": 120
+          }
+        ],
+        "width": "744",
+        "height": "364"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          52.05,
+          255.175,
+          362.575,
+          745.6,
+          919.925,
+          951.975
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.588",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "297.85",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "425.444",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "821.738",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "924.925",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 930.975,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 32.05
+          },
+          {
+            "x": 52.05,
+            "width": 203.125
+          },
+          {
+            "x": 255.175,
+            "width": 107.4
+          },
+          {
+            "x": 362.575,
+            "width": 383.025
+          },
+          {
+            "x": 745.6,
+            "width": 174.325
+          },
+          {
+            "x": 919.925,
+            "width": 32.05
+          }
+        ],
+        "width": "977",
+        "height": "395"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "jucidi-98-zato093",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          232
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "122",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "342",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 220
+          },
+          {
+            "x": 232,
+            "width": 220
+          }
+        ],
+        "width": "464",
+        "height": "256"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          215.4,
+          343.2
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "104.144",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "260.738",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 322.2,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 195.4
+          },
+          {
+            "x": 215.4,
+            "width": 127.8
+          }
+        ],
+        "width": "369",
+        "height": "292"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "judatu-15-xize591",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          372
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "552",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 720,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 360
+          },
+          {
+            "x": 372,
+            "width": 360
+          }
+        ],
+        "width": "744",
+        "height": "604"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          322.175,
+          652.231
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "165.069",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "481.184",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 631.231,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 302.175
+          },
+          {
+            "x": 322.175,
+            "width": 330.056
+          }
+        ],
+        "width": "678",
+        "height": "653"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "kasadu-53-tuki533",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          379.775
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "195.887",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "563.662",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 735.55,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 367.77499999999964
+          },
+          {
+            "x": 379.77499999999964,
+            "width": 367.77499999999964
+          }
+        ],
+        "width": "759",
+        "height": "276"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          82.988,
+          808.537
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "408.187",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 787.537,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 62.988
+          },
+          {
+            "x": 82.988,
+            "width": 725.549
+          }
+        ],
+        "width": "851",
+        "height": "321"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "katopo-68-xajo866",
+      "status": "baseline",
+      "laneCount": 1,
+      "ours": {
+        "dividerXs": [
+          12
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "92",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 160,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 160
+          }
+        ],
+        "width": "184",
+        "height": "304"
+      },
+      "jar": {
+        "dividerXs": [],
+        "titles": [],
+        "bandRect": null,
+        "lanes": [],
+        "width": "162",
+        "height": "303"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "kavoro-11-jife299",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "222"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          103.238,
+          316.9
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "175.531",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 295.9,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 83.238
+          },
+          {
+            "x": 103.238,
+            "width": 213.662
+          }
+        ],
+        "width": "342",
+        "height": "151"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "kemedu-83-vipa115",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "kijazo-83-kipu485",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          179.462
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "95.731",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "263.194",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 334.925,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 167.46249999999998
+          },
+          {
+            "x": 179.46249999999998,
+            "width": 167.46249999999998
+          }
+        ],
+        "width": "358",
+        "height": "332"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          213.756,
+          558.681
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "86.334",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "327.775",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 537.681,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 193.756
+          },
+          {
+            "x": 213.756,
+            "width": 344.925
+          }
+        ],
+        "width": "584",
+        "height": "380"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "kudedo-31-pafi082",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "344"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          115.594,
+          227.644
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "42.766",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "146.588",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 206.644,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 95.594
+          },
+          {
+            "x": 115.594,
+            "width": 112.05
+          }
+        ],
+        "width": "253",
+        "height": "355"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "lefobe-62-gipe702",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "letuke-04-poza319",
+      "status": "baseline",
+      "laneCount": 0,
+      "ours": {
+        "dividerXs": [],
+        "titles": [],
+        "bandRect": null,
+        "lanes": [],
+        "width": "184",
+        "height": "256"
+      },
+      "jar": {
+        "dividerXs": [],
+        "titles": [],
+        "bandRect": null,
+        "lanes": [],
+        "width": "168",
+        "height": "320"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "lukoxa-16-cecu095",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "208"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          129,
+          234.063
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25.956",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "134",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 213.063,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109
+          },
+          {
+            "x": 129,
+            "width": 105.063
+          }
+        ],
+        "width": "260",
+        "height": "229"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "luxido-91-covi016",
+      "status": "error",
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "maduja-30-xiri319",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          152
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "82",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "222",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 280,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 140
+          },
+          {
+            "x": 152,
+            "width": 140
+          }
+        ],
+        "width": "304",
+        "height": "424"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          114,
+          206
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "26.894",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "119.894",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 185,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 94
+          },
+          {
+            "x": 114,
+            "width": 92
+          }
+        ],
+        "width": "232",
+        "height": "507"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "mafete-03-rapa918",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "328"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          144.05,
+          270.725
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "37.925",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "163.288",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 249.725,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 124.05
+          },
+          {
+            "x": 144.05,
+            "width": 126.675
+          }
+        ],
+        "width": "313",
+        "height": "333"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "maketa-43-juja264",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          272
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "142",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "402",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 520,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 260
+          },
+          {
+            "x": 272,
+            "width": 260
+          }
+        ],
+        "width": "544",
+        "height": "308"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          143,
+          285.013
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "38.919",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "171.425",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 264.013,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 123
+          },
+          {
+            "x": 143,
+            "width": 142.013
+          }
+        ],
+        "width": "311",
+        "height": "271"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "manata-12-rido730",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "440"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          93.35,
+          215.763,
+          330.881
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "30.688",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "128.569",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "246.828",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 309.881,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 73.35
+          },
+          {
+            "x": 93.35,
+            "width": 122.413
+          },
+          {
+            "x": 215.763,
+            "width": 115.118
+          }
+        ],
+        "width": "384",
+        "height": "466"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "megara-21-rumi574",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "328"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          133.831,
+          203.881,
+          273.931
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "50.928",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.869",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "212.919",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 252.931,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 113.831
+          },
+          {
+            "x": 133.831,
+            "width": 70.05
+          },
+          {
+            "x": 203.881,
+            "width": 70.05
+          }
+        ],
+        "width": "299",
+        "height": "367"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "misiji-27-buje656",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          162
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "87",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "237",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 300,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 150
+          },
+          {
+            "x": 162,
+            "width": 150
+          }
+        ],
+        "width": "324",
+        "height": "216"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          133.4,
+          246.8
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "18.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "156.069",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 225.8,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 113.4
+          },
+          {
+            "x": 133.4,
+            "width": 113.4
+          }
+        ],
+        "width": "272",
+        "height": "279"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "mojezi-43-gamu360",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "movexa-27-rexe388",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "204"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          142.384,
+          241.084
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "54.642",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "165.184",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 220.084,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 122.384
+          },
+          {
+            "x": 142.384,
+            "width": 98.7
+          }
+        ],
+        "width": "267",
+        "height": "265"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nakavu-98-pela661",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "navene-45-cozo466",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "932"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          210.519,
+          411.934,
+          584.584
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "102.266",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "270.164",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "467.716",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 563.584,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 190.519
+          },
+          {
+            "x": 210.519,
+            "width": 201.415
+          },
+          {
+            "x": 411.934,
+            "width": 172.65
+          }
+        ],
+        "width": "610",
+        "height": "1050"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nesozi-09-zezu092",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "196"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          104.925,
+          208.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "99.925",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "109.925",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 187.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 84.925
+          },
+          {
+            "x": 104.925,
+            "width": 103.825
+          }
+        ],
+        "width": "234",
+        "height": "227"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nikinu-06-sace939",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "376"
+      },
+      "jar": {
+        "dividerXs": [
+          33,
+          293.45,
+          419.275
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "115.144",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "311.281",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 16,
+          "y": 17.5,
+          "width": 402.275,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 33,
+            "width": 260.45
+          },
+          {
+            "x": 293.45,
+            "width": 125.825
+          }
+        ],
+        "width": "445",
+        "height": "441"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nikivo-06-kaxa873",
+      "status": "error",
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "ninago-40-dalo726",
+      "status": "error",
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "nojije-35-teta491",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          172
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "92",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "252",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 160
+          },
+          {
+            "x": 172,
+            "width": 160
+          }
+        ],
+        "width": "344",
+        "height": "356"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          94.3,
+          264.3
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "22.556",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "144.706",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 243.3,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 74.3
+          },
+          {
+            "x": 94.3,
+            "width": 170
+          }
+        ],
+        "width": "290",
+        "height": "383"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "notuli-49-xugi698",
+      "status": "error",
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "noxasi-06-nejo322",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          162
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "87",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "237",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 300,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 150
+          },
+          {
+            "x": 162,
+            "width": 150
+          }
+        ],
+        "width": "324",
+        "height": "356"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          84.05,
+          259.4
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "47.019",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "166.719",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 238.4,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 64.05
+          },
+          {
+            "x": 84.05,
+            "width": 175.35
+          }
+        ],
+        "width": "285",
+        "height": "398"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nupose-71-vido428",
+      "status": "baseline",
+      "laneCount": 6,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252,
+          372,
+          492,
+          612
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "432",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "552",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "672",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 720,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          },
+          {
+            "x": 372,
+            "width": 120
+          },
+          {
+            "x": 492,
+            "width": 120
+          },
+          {
+            "x": 612,
+            "width": 120
+          }
+        ],
+        "width": "744",
+        "height": "364"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          52.05,
+          269.1,
+          345.75,
+          728.775,
+          866.425,
+          898.475
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "149.55",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "296.4",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "408.619",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "786.575",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "871.425",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 877.475,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 32.05
+          },
+          {
+            "x": 52.05,
+            "width": 217.05
+          },
+          {
+            "x": 269.1,
+            "width": 76.65
+          },
+          {
+            "x": 345.75,
+            "width": 383.025
+          },
+          {
+            "x": 728.775,
+            "width": 137.65
+          },
+          {
+            "x": 866.425,
+            "width": 32.05
+          }
+        ],
+        "width": "924",
+        "height": "381"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "pakema-21-xema183",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "148"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          58.338,
+          369.275
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "33.15",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "63.338",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 348.275,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 38.338
+          },
+          {
+            "x": 58.338,
+            "width": 310.937
+          }
+        ],
+        "width": "395",
+        "height": "185"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "patagi-39-jone354",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "196"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          105.35,
+          180.725
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "39.613",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "113.563",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 159.725,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 85.35
+          },
+          {
+            "x": 105.35,
+            "width": 75.375
+          }
+        ],
+        "width": "206",
+        "height": "225"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "pezubu-98-niba240",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "308"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          59.013,
+          152.025,
+          200.375
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.5",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "100.513",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "171.194",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 179.375,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 39.013
+          },
+          {
+            "x": 59.013,
+            "width": 93.012
+          },
+          {
+            "x": 152.025,
+            "width": 48.35
+          }
+        ],
+        "width": "226",
+        "height": "343"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "povoju-50-raxi136",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "200"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          330.937,
+          641.875,
+          978.125
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "335.937",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "646.875",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 957.125,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 310.937
+          },
+          {
+            "x": 330.937,
+            "width": 310.938
+          },
+          {
+            "x": 641.875,
+            "width": 336.25
+          }
+        ],
+        "width": "1004",
+        "height": "237"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "pujozo-36-nino158",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "268"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          186.2,
+          308.244
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "69.069",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "198.678",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 287.244,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 166.2
+          },
+          {
+            "x": 186.2,
+            "width": 122.044
+          }
+        ],
+        "width": "334",
+        "height": "323"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "racana-82-zece676",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          325.333,
+          638.667
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "168.667",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "482",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "795.333",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 940,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 313.3333333333333
+          },
+          {
+            "x": 325.3333333333333,
+            "width": 313.3333333333333
+          },
+          {
+            "x": 638.6666666666666,
+            "width": 313.3333333333333
+          }
+        ],
+        "width": "964",
+        "height": "112"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          163.15,
+          295.3,
+          494.45
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "80.55",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "218.2",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "383.85",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 473.45,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 143.15
+          },
+          {
+            "x": 163.15,
+            "width": 132.15
+          },
+          {
+            "x": 295.3,
+            "width": 199.15
+          }
+        ],
+        "width": "520",
+        "height": "130"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "raruzu-62-giro837",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "376"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          134.825,
+          259.913
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "37.306",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "157.263",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 238.913,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 114.825
+          },
+          {
+            "x": 134.825,
+            "width": 125.088
+          }
+        ],
+        "width": "285",
+        "height": "441"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "razuzu-32-faje125",
+      "status": "error",
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "roboja-69-susa752",
+      "status": "baseline",
+      "laneCount": 6,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252,
+          372,
+          492,
+          612
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "432",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "552",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "672",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 720,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          },
+          {
+            "x": 372,
+            "width": 120
+          },
+          {
+            "x": 492,
+            "width": 120
+          },
+          {
+            "x": 612,
+            "width": 120
+          }
+        ],
+        "width": "744",
+        "height": "364"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          52.05,
+          269.1,
+          439.3,
+          822.325,
+          959.975,
+          992.025
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "149.55",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "274.1",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "502.169",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "880.125",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "964.975",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 971.025,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 32.05
+          },
+          {
+            "x": 52.05,
+            "width": 217.05
+          },
+          {
+            "x": 269.1,
+            "width": 170.2
+          },
+          {
+            "x": 439.3,
+            "width": 383.025
+          },
+          {
+            "x": 822.325,
+            "width": 137.65
+          },
+          {
+            "x": 959.975,
+            "width": 32.05
+          }
+        ],
+        "width": "1018",
+        "height": "381"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "roroko-26-coje324",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "rujuxa-07-neco067",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          218.667,
+          425.333
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "115.333",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "322",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "528.667",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 620,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 206.66666666666666
+          },
+          {
+            "x": 218.66666666666666,
+            "width": 206.66666666666666
+          },
+          {
+            "x": 425.3333333333333,
+            "width": 206.66666666666666
+          }
+        ],
+        "width": "644",
+        "height": "560"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          193.7,
+          334.4,
+          445.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "96.837",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.037",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "380.063",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 173.7
+          },
+          {
+            "x": 193.7,
+            "width": 140.7
+          },
+          {
+            "x": 334.4,
+            "width": 111.35
+          }
+        ],
+        "width": "471",
+        "height": "558"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "ruzazu-94-meso880",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "ruzica-16-deli877",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          172
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "92",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "252",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 320,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 160
+          },
+          {
+            "x": 172,
+            "width": 160
+          }
+        ],
+        "width": "344",
+        "height": "572"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          252.281,
+          461.213
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "88.609",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "308.203",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 440.213,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 232.281
+          },
+          {
+            "x": 252.281,
+            "width": 208.932
+          }
+        ],
+        "width": "528",
+        "height": "607"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "sadovu-51-fata536",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "samavi-13-fuku339",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          152
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "82",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "222",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 280,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 140
+          },
+          {
+            "x": 152,
+            "width": 140
+          }
+        ],
+        "width": "304",
+        "height": "204"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          144.513,
+          243.212
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "55.706",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "167.313",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 222.212,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 124.513
+          },
+          {
+            "x": 144.513,
+            "width": 98.699
+          }
+        ],
+        "width": "269",
+        "height": "251"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "sesodi-22-lupe361",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "sifite-87-ziti434",
+      "status": "error",
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "sikino-19-vuca111",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "108"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          66.65,
+          113.975
+        ],
+        "titles": [
+          {
+            "fontSize": "8",
+            "x": "33.525",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "8",
+            "x": "80.513",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 16,
+          "width": 92.975,
+          "height": 10,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 46.65
+          },
+          {
+            "x": 66.65,
+            "width": 47.325
+          }
+        ],
+        "width": "139",
+        "height": "136"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "sopape-11-laxo488",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "108"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          64,
+          93
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "35.981",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "72.481",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 72,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 44
+          },
+          {
+            "x": 64,
+            "width": 29
+          }
+        ],
+        "width": "119",
+        "height": "116"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "sucice-41-pebi088",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "376"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          255.338,
+          490.675
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "260.338",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 469.675,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 235.338
+          },
+          {
+            "x": 255.338,
+            "width": 235.337
+          }
+        ],
+        "width": "516",
+        "height": "441"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "suluni-73-lotu140",
+      "status": "error",
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "tefuga-86-xefe850",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "148"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          330.937,
+          641.875
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "335.937",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 620.875,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 310.937
+          },
+          {
+            "x": 330.937,
+            "width": 310.938
+          }
+        ],
+        "width": "667",
+        "height": "185"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "tirizu-79-niza262",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "tmp1",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "tobajo-64-mipi810",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          292,
+          572
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "152",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "432",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "712",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 35,
+          "width": 840,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 280
+          },
+          {
+            "x": 292,
+            "width": 280
+          },
+          {
+            "x": 572,
+            "width": 280
+          }
+        ],
+        "width": "864",
+        "height": "535"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          242.475,
+          474.694,
+          603.013
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "111.775",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "339.122",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "519.897",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 52.5,
+          "width": 582.013,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 222.475
+          },
+          {
+            "x": 242.475,
+            "width": 232.219
+          },
+          {
+            "x": 474.694,
+            "width": 128.319
+          }
+        ],
+        "width": "629",
+        "height": "637"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "tuneta-22-mega154",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          325.331
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "168.666",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "481.997",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 626.662,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 313.33124999999995
+          },
+          {
+            "x": 325.33124999999995,
+            "width": 313.33124999999995
+          }
+        ],
+        "width": "650",
+        "height": "382"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          395.012,
+          802.725
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "197.494",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "588.856",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 781.725,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 375.012
+          },
+          {
+            "x": 395.012,
+            "width": 407.713
+          }
+        ],
+        "width": "828",
+        "height": "341"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "vafupe-19-cima350",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "velodu-59-sada437",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)"
+    },
+    {
+      "type": "activity",
+      "slug": "vidada-17-xuse810",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "376"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          134.825,
+          259.913
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "37.306",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "157.263",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 238.913,
+          "height": 18,
+          "fill": "#EEE"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 114.825
+          },
+          {
+            "x": 134.825,
+            "width": 125.088
+          }
+        ],
+        "width": "285",
+        "height": "441"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "vodobe-33-kefa909",
+      "status": "error",
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "xarumo-26-zinu467",
+      "status": "baseline",
+      "laneCount": 3,
+      "ours": {
+        "dividerXs": [
+          12,
+          132,
+          252
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "312",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          },
+          {
+            "x": 252,
+            "width": 120
+          }
+        ],
+        "width": "384",
+        "height": "272"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          181.094,
+          307.981,
+          386.044
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "60.553",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "186.094",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "312.981",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 365.044,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 161.094
+          },
+          {
+            "x": 181.094,
+            "width": 126.887
+          },
+          {
+            "x": 307.981,
+            "width": 78.063
+          }
+        ],
+        "width": "412",
+        "height": "341"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "xidamu-85-xoti640",
+      "status": "error",
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "xizola-97-sizu458",
+      "status": "error",
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "xovano-23-tazo278",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          132
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "72",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "192",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 0,
+          "width": 240,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 120
+          },
+          {
+            "x": 132,
+            "width": 120
+          }
+        ],
+        "width": "264",
+        "height": "484"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          152.75,
+          346.725
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "47.394",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "226.731",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 325.725,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 132.75
+          },
+          {
+            "x": 152.75,
+            "width": 193.975
+          }
+        ],
+        "width": "372",
+        "height": "509"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "zeporo-46-zicu301",
+      "status": "baseline",
+      "laneCount": 2,
+      "ours": {
+        "dividerXs": [
+          12,
+          192
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "102",
+            "anchor": "middle"
+          },
+          {
+            "fontSize": "18",
+            "x": "282",
+            "anchor": "middle"
+          }
+        ],
+        "bandRect": {
+          "x": 0,
+          "y": 35,
+          "width": 360,
+          "height": 28,
+          "fill": "#FFF"
+        },
+        "lanes": [
+          {
+            "x": 12,
+            "width": 180
+          },
+          {
+            "x": 192,
+            "width": 180
+          }
+        ],
+        "width": "384",
+        "height": "503"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          157.6,
+          395.841
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "56.231",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "227.614",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 52.5,
+          "width": 374.841,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 137.6
+          },
+          {
+            "x": 157.6,
+            "width": 238.241
+          }
+        ],
+        "width": "421",
+        "height": "560"
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "zinelo-77-losu727",
+      "status": "error",
+      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?"
+    },
+    {
+      "type": "activity",
+      "slug": "zokodi-10-dexu703",
+      "status": "error",
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    }
+  ]
+}
