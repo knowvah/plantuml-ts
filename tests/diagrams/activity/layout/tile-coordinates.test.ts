@@ -8,6 +8,11 @@ import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
+import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
+import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
+import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
+import { astOrThrow } from '../../../helpers/parse-ast.js';
 
 const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 60, height: 16 }),
@@ -131,5 +136,109 @@ describe('assignCoordinates — swimlane geometry', () => {
 
   it('second swimlane name is Lane B', () => {
     expect(geo.swimlanes[1]!.name).toBe('Lane B');
+  });
+});
+
+describe('assignCoordinates — nodes are placed inside their own lane', () => {
+  function place(labelA: string, labelB: string) {
+    const a = new GtileAction({ kind: 'action' as const, label: labelA }, bounder, theme);
+    a.swimlane = 'A';
+    const b = new GtileAction({ kind: 'action' as const, label: labelB }, bounder, theme);
+    b.swimlane = 'BBBBBBBBBBBBBBBBBBBBBBBBB';
+    const root = new GtileTopDown([a, b], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'BBBBBBBBBBBBBBBBBBBBBBBBB'] };
+    return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  }
+
+  it("node 'a' sits inside lane A's bounds", () => {
+    const geo = place('a', 'b');
+    const laneA = geo.swimlanes[0]!;
+    const nodeA = geo.nodes.find((n) => n.label === 'a')!;
+    expect(nodeA.x).toBeGreaterThanOrEqual(laneA.x);
+    expect(nodeA.x + nodeA.width).toBeLessThanOrEqual(laneA.x + laneA.width);
+  });
+
+  it("node 'b' sits STRICTLY inside lane B's bounds, not on its boundary", () => {
+    const geo = place('a', 'b');
+    const laneB = geo.swimlanes[1]!;
+    const nodeB = geo.nodes.find((n) => n.label === 'b')!;
+    expect(nodeB.x).toBeGreaterThan(laneB.x);
+    expect(nodeB.x + nodeB.width).toBeLessThan(laneB.x + laneB.width);
+  });
+
+  it('lane B starts exactly where lane A ends (adjacent, no gap or overlap)', () => {
+    const geo = place('a', 'b');
+    expect(geo.swimlanes[1]!.x).toBe(geo.swimlanes[0]!.x + geo.swimlanes[0]!.width);
+  });
+});
+
+describe('assignCoordinates — cross-lane vs same-lane edge shape', () => {
+  it('an edge between two nodes in DIFFERENT lanes gets a 4-point horizontal jog', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+    b.swimlane = 'B';
+    const root = new GtileTopDown([a, b], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
+    const geo = assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(1);
+    const points = geo.edges[0]!.points;
+    expect(points.length).toBeGreaterThanOrEqual(3);
+    expect(points).toHaveLength(4);
+    expect(points[1]!.y).toBe(points[2]!.y);
+  });
+
+  it('an edge between two nodes in the SAME lane keeps its pass-1 shape (shifted only)', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const a2 = new GtileAction({ kind: 'action' as const, label: 'a2' }, bounder, theme);
+    a2.swimlane = 'A';
+    const root = new GtileTopDown([a, a2], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
+    const geo = assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(1);
+    expect(geo.edges[0]!.points).toHaveLength(2);
+  });
+});
+
+describe('assignCoordinates — no swimlanes leaves geometry byte-identical', () => {
+  it('the same tile tree produces the same node positions with and without lanes declared', () => {
+    const build = () => {
+      const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+      const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+      return new GtileTopDown([a, b], bounder, theme);
+    };
+    const withoutLanes = assignCoordinates(
+      build(),
+      { nodes: [], swimlanes: [] },
+      LAYOUT_MARGIN,
+      LAYOUT_MARGIN,
+      bounder,
+      theme,
+    );
+    const withEmptyAst = assignCoordinates(build(), emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    expect(withoutLanes.nodes).toEqual(withEmptyAst.nodes);
+    expect(withoutLanes.edges).toEqual(withEmptyAst.edges);
+    expect(withoutLanes.swimlanes).toEqual([]);
+  });
+});
+
+describe('layoutActivity — pakema-21-xema183-shaped diagram through the real pipeline', () => {
+  function layout(markup: string) {
+    const first = buildBlockUmls(markup)[0];
+    if (first === undefined) throw new Error('no diagram block');
+    if (!first.ok) throw first.failure.cause;
+    const ast = astOrThrow(parseActivity(first.source), 'activity');
+    return layoutActivity(ast, resolveTheme('default'), new DeterministicMeasurer());
+  }
+
+  it("'b' lands strictly inside lane B, not on its boundary", () => {
+    const geo = layout('@startuml\n|A|\nstart\n:a;\n|BBBBBBBBBBBBBBBBBBBBBBBBB|\n:b;\n@enduml');
+    const laneB = geo.swimlanes[1]!;
+    const nodeB = geo.nodes.find((n) => n.label === 'b')!;
+    expect(nodeB.x).toBeGreaterThan(laneB.x);
+    expect(nodeB.x + nodeB.width).toBeLessThan(laneB.x + laneB.width);
   });
 });

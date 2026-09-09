@@ -1,7 +1,8 @@
 import type { ActivityDiagramAST } from '../ast.js';
-import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo, SwimlaneGeo } from '../layout.old.js';
+import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo } from '../layout.old.js';
 import type { Tile } from '../tiles/tile.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
+import type { GPoint } from '../tiles/points.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { GtileAction } from '../tiles/gtile-action.js';
@@ -19,37 +20,68 @@ import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js
 import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical-down-then-back.js';
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
-import { buildSwimlaneContexts } from './swimlane-context.js';
-import { BAR_HEIGHT, SWIMLANE_MIN_WIDTH } from '../activity-layout-constants.js';
+import { BAR_HEIGHT } from '../activity-layout-constants.js';
+import { laneAt, laneIn, laneOut, placeSwimlanes } from './swimlane-placement.js';
+import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 
 export const LAYOUT_MARGIN = 12;
+
+/**
+ * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
+ * `while-header`, `repeat-cond`) for `ActivityNodeGeo.kind`; `lane` is the
+ * swimlane inherited from the nearest ancestor tile whose OWN
+ * `.swimlane` is set. Structural children with no AST node of their own
+ * -- a composite's condition diamond, its merge diamond, a fork/split's
+ * bars -- carry no `.swimlane` (`tile-layout.ts` only calls
+ * `withSwimlane` on AST-derived tiles), so they fall back to the
+ * composite's own resolved lane. Bundled into one object because
+ * `walkTile` is already at the file's parameter limit.
+ */
+interface WalkHints {
+  kindHint: string | null;
+  lane: string | undefined;
+}
 
 interface Out {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
+  edgeMeta: EdgeMeta[];
   nextId: (prefix: string) => string;
 }
 
-function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out: Out): void {
+function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
+  if (lane !== undefined) node.swimlane = lane;
+  out.nodes.push(node);
+}
+
+function pushEdge(out: Out, points: GPoint[], lane1: string | undefined, lane2: string | undefined): void {
+  out.edges.push({ points });
+  out.edgeMeta.push({ lane1, lane2 });
+}
+
+function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
+  const { kindHint, lane } = hints;
+  const myLane = laneAt(tile, lane);
+
   switch (tile.kind) {
     case 'gtile-start':
-      out.nodes.push({ id: out.nextId('start'), kind: 'start', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('start'), kind: 'start', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-stop':
-      out.nodes.push({ id: out.nextId('stop'), kind: 'stop', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('stop'), kind: 'stop', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-end':
-      out.nodes.push({ id: out.nextId('end'), kind: 'end', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('end'), kind: 'end', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-kill':
-      out.nodes.push({ id: out.nextId('kill'), kind: 'kill', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('kill'), kind: 'kill', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-break':
-      out.nodes.push({ id: out.nextId('break'), kind: 'break', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('break'), kind: 'break', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-action': {
@@ -64,39 +96,47 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
         label: t.label,
       };
       if (t.color !== undefined) node.color = t.color;
-      out.nodes.push(node);
+      pushNode(out, node, myLane);
       return;
     }
 
     case 'gtile-note': {
       const t = tile as unknown as GtileNote;
-      out.nodes.push({
-        id: out.nextId('note'),
-        kind: 'note',
-        x,
-        y,
-        width: t.width,
-        height: t.height,
-        label: t.text,
-        notePosition: t.side,
-      });
+      pushNode(
+        out,
+        {
+          id: out.nextId('note'),
+          kind: 'note',
+          x,
+          y,
+          width: t.width,
+          height: t.height,
+          label: t.text,
+          notePosition: t.side,
+        },
+        myLane,
+      );
       return;
     }
 
     case 'gtile-diamond': {
       const t = tile as unknown as GtileDiamond;
       const k = kindHint !== null && !kindHint.startsWith('gtile-') ? kindHint : 'diamond';
-      out.nodes.push({ id: out.nextId(k), kind: k, x, y, width: t.width, height: t.height, label: t.label });
+      pushNode(out, { id: out.nextId(k), kind: k, x, y, width: t.width, height: t.height, label: t.label }, myLane);
       return;
     }
 
     case 'gtile-spot':
-      out.nodes.push({ id: out.nextId('spot'), kind: 'spot', x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId('spot'), kind: 'spot', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-label': {
       const t = tile as unknown as GtileLabel;
-      out.nodes.push({ id: out.nextId('label'), kind: 'label', x, y, width: t.width, height: t.height, label: t.name });
+      pushNode(
+        out,
+        { id: out.nextId('label'), kind: 'label', x, y, width: t.width, height: t.height, label: t.name },
+        myLane,
+      );
       return;
     }
 
@@ -108,14 +148,19 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
         const child = t.children[i]!;
         const childY = y + t.childOffsets[i]!;
         const childX = centerX - child.width / 2;
-        walkTile(child, childX, childY, null, out);
+        walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
         if (i < t.children.length - 1) {
           const next = t.children[i + 1]!;
           const nextY = y + t.childOffsets[i + 1]!;
           const nextX = centerX - next.width / 2;
           const from = { x: childX + child.getCoord(SOUTH_HOOK).x, y: childY + child.getCoord(SOUTH_HOOK).y };
           const to = { x: nextX + next.getCoord(NORTH_HOOK).x, y: nextY + next.getCoord(NORTH_HOOK).y };
-          out.edges.push({ points: new GConnectionVerticalDown().getPoints(from, to) });
+          pushEdge(
+            out,
+            new GConnectionVerticalDown().getPoints(from, to),
+            laneOut(child, myLane),
+            laneIn(next, myLane),
+          );
         }
       }
       return;
@@ -132,31 +177,41 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
 
       const dX = centerX - diamond.width / 2;
       const dY = y + t.diamondOffsetY;
-      walkTile(diamond, dX, dY, 'if-split', out);
+      walkTile(diamond, dX, dY, { kindHint: 'if-split', lane: myLane }, out);
 
       for (let i = 0; i < branches.length; i++) {
         const branch = branches[i]!;
         const bX = x + t.branchOffsets[i]!;
         const bY = y + t.branchOffsetY;
-        walkTile(branch, bX, bY, null, out);
+        walkTile(branch, bX, bY, { kindHint: null, lane: myLane }, out);
 
         const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
         const to = { x: bX + branch.getCoord(NORTH_HOOK).x, y: bY + branch.getCoord(NORTH_HOOK).y };
-        out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(from, to) });
+        pushEdge(
+          out,
+          new GConnectionSideThenVerticalThenSide().getPoints(from, to),
+          laneOut(diamond, myLane),
+          laneIn(branch, myLane),
+        );
 
         if (mergeDiamond !== null) {
           const mX = centerX - mergeDiamond.width / 2;
           const mY = y + t.mergeOffsetY!;
           const mFrom = { x: bX + branch.getCoord(SOUTH_HOOK).x, y: bY + branch.getCoord(SOUTH_HOOK).y };
           const mTo = { x: mX + mergeDiamond.getCoord(NORTH_HOOK).x, y: mY + mergeDiamond.getCoord(NORTH_HOOK).y };
-          out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo) });
+          pushEdge(
+            out,
+            new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
+            laneOut(branch, myLane),
+            laneIn(mergeDiamond, myLane),
+          );
         }
       }
 
       if (mergeDiamond !== null) {
         const mX = centerX - mergeDiamond.width / 2;
         const mY = y + t.mergeOffsetY!;
-        walkTile(mergeDiamond, mX, mY, 'if-merge', out);
+        walkTile(mergeDiamond, mX, mY, { kindHint: 'if-merge', lane: myLane }, out);
       }
       return;
     }
@@ -171,22 +226,27 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
 
       const hX = contentCenterX - header.width / 2;
       const hY = y + t.headerOffsetY;
-      walkTile(header, hX, hY, 'while-header', out);
+      walkTile(header, hX, hY, { kindHint: 'while-header', lane: myLane }, out);
 
       const bX = contentCenterX - body.width / 2;
       const bY = y + t.bodyOffsetY;
-      walkTile(body, bX, bY, null, out);
+      walkTile(body, bX, bY, { kindHint: null, lane: myLane }, out);
 
       // Forward: header south → body north
       const fFrom = { x: hX + header.getCoord(SOUTH_HOOK).x, y: hY + header.getCoord(SOUTH_HOOK).y };
       const fTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
-      out.edges.push({ points: new GConnectionVerticalDown().getPoints(fFrom, fTo) });
+      pushEdge(out, new GConnectionVerticalDown().getPoints(fFrom, fTo), laneOut(header, myLane), laneIn(body, myLane));
 
       // Back: body south → header north, going right
       const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
       const backTo = { x: hX + header.getCoord(NORTH_HOOK).x, y: hY + header.getCoord(NORTH_HOOK).y };
       const rightMargin = x + t.backEdgeRightX - backFrom.x;
-      out.edges.push({ points: new GConnectionVerticalDownThenBack(rightMargin).getPoints(backFrom, backTo) });
+      pushEdge(
+        out,
+        new GConnectionVerticalDownThenBack(rightMargin).getPoints(backFrom, backTo),
+        laneOut(body, myLane),
+        laneIn(header, myLane),
+      );
       return;
     }
 
@@ -200,36 +260,56 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
 
       const bodyX = contentCenterX - body.width / 2;
       const bodyY = y + t.bodyOffsetY;
-      walkTile(body, bodyX, bodyY, null, out);
+      walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
 
       const condX = contentCenterX - condition.width / 2;
       const condY = y + t.conditionOffsetY;
 
       const fFrom = { x: bodyX + body.getCoord(SOUTH_HOOK).x, y: bodyY + body.getCoord(SOUTH_HOOK).y };
       const fTo = { x: condX + condition.getCoord(NORTH_HOOK).x, y: condY + condition.getCoord(NORTH_HOOK).y };
-      out.edges.push({ points: new GConnectionVerticalDown().getPoints(fFrom, fTo) });
+      pushEdge(
+        out,
+        new GConnectionVerticalDown().getPoints(fFrom, fTo),
+        laneOut(body, myLane),
+        laneIn(condition, myLane),
+      );
 
-      walkTile(condition, condX, condY, 'repeat-cond', out);
+      walkTile(condition, condX, condY, { kindHint: 'repeat-cond', lane: myLane }, out);
 
       if (backwardBody !== null) {
         const bwX = contentCenterX - backwardBody.width / 2;
         const bwY = y + t.backwardOffsetY!;
         const bwFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
         const bwTo = { x: bwX + backwardBody.getCoord(NORTH_HOOK).x, y: bwY + backwardBody.getCoord(NORTH_HOOK).y };
-        out.edges.push({ points: new GConnectionVerticalDown().getPoints(bwFrom, bwTo) });
+        pushEdge(
+          out,
+          new GConnectionVerticalDown().getPoints(bwFrom, bwTo),
+          laneOut(condition, myLane),
+          laneIn(backwardBody, myLane),
+        );
 
-        walkTile(backwardBody, bwX, bwY, null, out);
+        walkTile(backwardBody, bwX, bwY, { kindHint: null, lane: myLane }, out);
 
         const backFrom = { x: bwX + backwardBody.getCoord(SOUTH_HOOK).x, y: bwY + backwardBody.getCoord(SOUTH_HOOK).y };
         const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
         const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-        out.edges.push({ points: new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo) });
+        pushEdge(
+          out,
+          new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
+          laneOut(backwardBody, myLane),
+          laneIn(body, myLane),
+        );
       } else {
         // Back: condition south → body north, going left
         const backFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
         const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
         const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-        out.edges.push({ points: new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo) });
+        pushEdge(
+          out,
+          new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
+          laneOut(condition, myLane),
+          laneIn(body, myLane),
+        );
       }
       return;
     }
@@ -238,32 +318,29 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
     case 'gtile-split': {
       const t = tile as unknown as GtileFork;
       const topKind = tile.kind === 'gtile-fork' ? 'fork-bar' : 'split-bar';
-      out.nodes.push({ id: out.nextId(topKind), kind: topKind, x, y, width: t.barWidth, height: BAR_HEIGHT });
+      pushNode(out, { id: out.nextId(topKind), kind: topKind, x, y, width: t.barWidth, height: BAR_HEIGHT }, myLane);
 
       const joinBarY = y + tile.height - BAR_HEIGHT;
-      out.nodes.push({
-        id: out.nextId('join-bar'),
-        kind: 'join-bar',
-        x,
-        y: joinBarY,
-        width: t.barWidth,
-        height: BAR_HEIGHT,
-      });
+      pushNode(
+        out,
+        { id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: BAR_HEIGHT },
+        myLane,
+      );
 
       const barCenterX = x + t.barWidth / 2;
       for (let i = 0; i < t.children.length; i++) {
         const branch = t.children[i]!;
         const bX = x + t.branchOffsets[i]!;
         const bY = y + t.branchTopY;
-        walkTile(branch, bX, bY, null, out);
+        walkTile(branch, bX, bY, { kindHint: null, lane: myLane }, out);
 
         const fFrom = { x: barCenterX, y: y + BAR_HEIGHT };
         const fTo = { x: bX + branch.getCoord(NORTH_HOOK).x, y: bY + branch.getCoord(NORTH_HOOK).y };
-        out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(fFrom, fTo) });
+        pushEdge(out, new GConnectionSideThenVerticalThenSide().getPoints(fFrom, fTo), myLane, laneIn(branch, myLane));
 
         const jFrom = { x: bX + branch.getCoord(SOUTH_HOOK).x, y: bY + branch.getCoord(SOUTH_HOOK).y };
         const jTo = { x: barCenterX, y: joinBarY };
-        out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(jFrom, jTo) });
+        pushEdge(out, new GConnectionSideThenVerticalThenSide().getPoints(jFrom, jTo), laneOut(branch, myLane), myLane);
       }
       return;
     }
@@ -279,31 +356,41 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
 
       const dX = centerX - diamond.width / 2;
       const dY = y + t.diamondOffsetY;
-      walkTile(diamond, dX, dY, 'if-split', out);
+      walkTile(diamond, dX, dY, { kindHint: 'if-split', lane: myLane }, out);
 
       for (let i = 0; i < cases.length; i++) {
         const c = cases[i]!;
         const cX = x + t.caseOffsets[i]!;
         const cY = y + t.caseOffsetY;
-        walkTile(c, cX, cY, null, out);
+        walkTile(c, cX, cY, { kindHint: null, lane: myLane }, out);
 
         const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
         const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
-        out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(from, to) });
+        pushEdge(
+          out,
+          new GConnectionSideThenVerticalThenSide().getPoints(from, to),
+          laneOut(diamond, myLane),
+          laneIn(c, myLane),
+        );
 
         if (mergeDiamond !== null) {
           const mX = centerX - mergeDiamond.width / 2;
           const mY = y + t.mergeOffsetY!;
           const mFrom = { x: cX + c.getCoord(SOUTH_HOOK).x, y: cY + c.getCoord(SOUTH_HOOK).y };
           const mTo = { x: mX + mergeDiamond.getCoord(NORTH_HOOK).x, y: mY + mergeDiamond.getCoord(NORTH_HOOK).y };
-          out.edges.push({ points: new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo) });
+          pushEdge(
+            out,
+            new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
+            laneOut(c, myLane),
+            laneIn(mergeDiamond, myLane),
+          );
         }
       }
 
       if (mergeDiamond !== null) {
         const mX = centerX - mergeDiamond.width / 2;
         const mY = y + t.mergeOffsetY!;
-        walkTile(mergeDiamond, mX, mY, 'if-merge', out);
+        walkTile(mergeDiamond, mX, mY, { kindHint: 'if-merge', lane: myLane }, out);
       }
       return;
     }
@@ -312,17 +399,77 @@ function walkTile(tile: Tile, x: number, y: number, kindHint: string | null, out
     case 'gtile-partition': {
       const t = tile as unknown as GtileGroup;
       const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
-      out.nodes.push({ id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height });
+      pushNode(out, { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height }, myLane);
       if (t.children.length > 0) {
-        walkTile(t.children[0]!, x + t.bodyOffsetX, y + t.bodyOffsetY, null, out);
+        walkTile(t.children[0]!, x + t.bodyOffsetX, y + t.bodyOffsetY, { kindHint: null, lane: myLane }, out);
       }
       return;
     }
 
     default:
-      out.nodes.push({ id: out.nextId('unknown'), kind: tile.kind, x, y, width: tile.width, height: tile.height });
+      // #lizard forgives -- faithful port of the upstream tile-kind
+      // dispatch switch (mirrors `Ftile`/`Gtile` subtype dispatch);
+      // splitting this into per-kind functions would obscure the 1:1
+      // correspondence CLAUDE.md requires ("do not refactor while
+      // porting").
+      pushNode(
+        out,
+        { id: out.nextId('unknown'), kind: tile.kind, x, y, width: tile.width, height: tile.height },
+        myLane,
+      );
       return;
   }
+}
+
+/**
+ * SWIMLANES COUNT TOWARD THE CANVAS TOO. `assignCoordinates` returns three
+ * geometry arrays -- nodes, edges and swimlanes -- and the renderer draws
+ * all three, but the bounds here used to consult only the first two. A
+ * lane band wider than the widest node therefore fell OUTSIDE the canvas
+ * it was drawn into: 32 of the 268 baselined fixtures overflowed, by up
+ * to 216px (`pakema-21-xema183`: lanes to x=252 against a totalWidth of
+ * 144).
+ *
+ * Both extents the renderer actually draws are taken, because they are
+ * not the same number: the header band and the header/body separator run
+ * from x=0 to the SUM of the lane widths (`renderer.ts#renderSwimlanes`,
+ * the `reduce` at its band and separator calls), while each lane's own
+ * right edge is `lane.x + lane.width`, and the lanes start at `baseX`,
+ * not at 0. Whether those two SHOULD agree is the swimlane visual model,
+ * which `activity-swimlane-rendering` owns (D7 of
+ * `plans/activity-style-defaults/decisions.md`) -- containing what is
+ * drawn today is this fix's whole scope, and it must not quietly decide
+ * that question by picking one. T6 removes the SUM-of-widths band term
+ * once the renderer draws real lane origins instead of x=0.
+ *
+ * Y is deliberately untouched: a lane draws its divider from y=0 to
+ * `totalHeight` and its title inside `SWIMLANE_HEADER_H`, so it can never
+ * extend past a bound Y already covers.
+ */
+function computeBounds(
+  root: Tile,
+  baseX: number,
+  baseY: number,
+  placed: PlacementResult,
+): { maxX: number; maxY: number } {
+  let maxX = baseX + root.width;
+  let maxY = baseY + root.height;
+  for (const n of placed.nodes) {
+    maxX = Math.max(maxX, n.x + n.width);
+    maxY = Math.max(maxY, n.y + n.height);
+  }
+  for (const e of placed.edges) {
+    for (const p of e.points) {
+      maxX = Math.max(maxX, p.x);
+      maxY = Math.max(maxY, p.y);
+    }
+  }
+  if (placed.swimlanes.length > 0) {
+    const bandRight = placed.swimlanes.reduce((acc, s) => acc + s.width, 0);
+    const lanesRight = Math.max(...placed.swimlanes.map((s) => s.x + s.width));
+    maxX = Math.max(maxX, bandRight, lanesRight);
+  }
+  return { maxX, maxY };
 }
 
 export function assignCoordinates(
@@ -330,72 +477,30 @@ export function assignCoordinates(
   ast: ActivityDiagramAST,
   baseX: number,
   baseY: number,
-  _bounder: StringBounder,
-  _theme: Theme,
+  bounder: StringBounder,
+  theme: Theme,
 ): ActivityGeometry {
   const nodes: ActivityNodeGeo[] = [];
   const edges: ActivityEdgeGeo[] = [];
+  const edgeMeta: EdgeMeta[] = [];
   let idCounter = 0;
   const out: Out = {
     nodes,
     edges,
+    edgeMeta,
     nextId: (prefix: string) => `${prefix}-${++idCounter}`,
   };
 
-  walkTile(root, baseX, baseY, null, out);
+  walkTile(root, baseX, baseY, { kindHint: null, lane: undefined }, out);
 
-  let swimlanes: SwimlaneGeo[] = [];
-  if (ast.swimlanes.length > 0) {
-    const laneWidth = Math.max(SWIMLANE_MIN_WIDTH, root.width / ast.swimlanes.length);
-    const contexts = buildSwimlaneContexts(ast.swimlanes, baseX, laneWidth);
-    swimlanes = contexts.map((ctx) => ({ name: ctx.name, x: ctx.x, width: ctx.width }));
-  }
-
-  let maxX = baseX + root.width;
-  let maxY = baseY + root.height;
-  for (const n of nodes) {
-    maxX = Math.max(maxX, n.x + n.width);
-    maxY = Math.max(maxY, n.y + n.height);
-  }
-  for (const e of edges) {
-    for (const p of e.points) {
-      maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
-    }
-  }
-  // SWIMLANES COUNT TOWARD THE CANVAS TOO. This function returns three
-  // geometry arrays -- nodes, edges and swimlanes -- and the renderer draws
-  // all three, but the bounds above used to consult only the first two. A
-  // lane band wider than the widest node therefore fell OUTSIDE the canvas
-  // it was drawn into: 32 of the 268 baselined fixtures overflowed, by up
-  // to 216px (`pakema-21-xema183`: lanes to x=252 against a totalWidth of
-  // 144).
-  //
-  // Both extents the renderer actually draws are taken, because they are
-  // not the same number: the header band and the header/body separator run
-  // from x=0 to the SUM of the lane widths (`renderer.ts#renderSwimlanes`,
-  // the `reduce` at its band and separator calls), while each lane's own
-  // right edge is `lane.x + lane.width`, and the lanes start at `baseX`,
-  // not at 0. Whether those two SHOULD agree is the swimlane visual model,
-  // which `activity-swimlane-rendering` owns (D7 of
-  // `plans/activity-style-defaults/decisions.md`) -- containing what is
-  // drawn today is this fix's whole scope, and it must not quietly decide
-  // that question by picking one.
-  //
-  // Y is deliberately untouched: a lane draws its divider from y=0 to
-  // `totalHeight` and its title inside `SWIMLANE_HEADER_H`, so it can never
-  // extend past a bound Y already covers.
-  if (swimlanes.length > 0) {
-    const bandRight = swimlanes.reduce((acc, s) => acc + s.width, 0);
-    const lanesRight = Math.max(...swimlanes.map((s) => s.x + s.width));
-    maxX = Math.max(maxX, bandRight, lanesRight);
-  }
+  const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, bounder, theme });
+  const { maxX, maxY } = computeBounds(root, baseX, baseY, placed);
 
   return {
     totalWidth: maxX + LAYOUT_MARGIN,
     totalHeight: maxY + LAYOUT_MARGIN,
-    nodes,
-    edges,
-    swimlanes,
+    nodes: placed.nodes,
+    edges: placed.edges,
+    swimlanes: placed.swimlanes,
   };
 }

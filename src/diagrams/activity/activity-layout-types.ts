@@ -71,6 +71,14 @@ export interface SwimlaneGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:427-429
    */
   contentMinX?: number;
+  /**
+   * The absolute left of the lane's CONTENT (`translate.dx + minX`,
+   * `contentLeft` in `swimlane-placement.ts`'s origin loop) -- what
+   * `CenteredText` centres the title over. Optional for the same reason
+   * as {@link contentWidth}.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:373-375
+   */
+  contentX?: number;
 }
 
 export interface ActivityGeometry {
