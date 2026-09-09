@@ -56,6 +56,15 @@ renderer entirely.
 **Consequences.** A `<style> activityDiagram { activity { FontColor red } }`
 colours action text and nothing else. Rejected: per-site constants.
 
+**Amended during execution (T4, 2026-09-09, flagged for review).** A named
+theme's or a diagram `<style>`'s `root { FontColor }` is merged AFTER
+`plantuml.skin` (`StyleStorage.java:102-116`, file order,
+`OVERWRITE_EXISTING_VALUE`) and so beats the skin's root black for every
+signature. The port already carries it as `theme.styleOverrides.root.fontcolor`
+(`labala-74-juki864`, `!theme amiga`: `#FFFFFF`; the jar draws `#FFF`). The
+cascade is therefore bucket `font` → `styleOverrides.root.fontcolor` → black.
+`theme.colors.text` stays out: its default `#181818` is unsourced.
+
 ## D4 — The `element` tier is the line-thickness fallback
 
 **Context.** `element { LineThickness 0.5 }` (`plantuml.skin:91-93`) is
@@ -73,6 +82,12 @@ values.
 
 **Consequences.** `ROOT_LINE_THICKNESS` may become unused and is then
 deleted. Rejected: special-casing the action box.
+
+**Amended during execution (T3/T4, 2026-09-09, flagged for review).** The
+same file-order merge lets a theme's or `<style>`'s `root { LineThickness }`
+beat `element`'s 0.5 (`puml-theme-amiga.puml:39` → the jar draws `labala`'s
+boxes at 1). The cascade for every activity SName is bucket `lineThickness`
+→ `styleOverrides.root.linethickness` → the SName's cited default.
 
 ## D5 — A text census pins fill, anchor and box inset before anything moves
 
