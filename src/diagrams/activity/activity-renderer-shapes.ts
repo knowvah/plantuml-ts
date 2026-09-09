@@ -33,11 +33,10 @@ import {
   activityRoundCorner,
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-/** `rx` and `ry` are each HALF the resolved `RoundCorner`
- *  (`URectangle#build().rounded()`'s halving convention, D4). The port
- *  previously wrote a bare `rx = 8` with no `ry` at all; 8 was unsourced,
- *  and upstream's `activityDiagram { activity { RoundCorner 25 } }`
- *  (`plantuml.skin:362`) makes both axes 12.5. */
+/** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
+ *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
+ *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
+ *  `rx = 8` with no `ry` at all. */
 function actionCornerRadius(theme: Theme): number {
   return activityRoundCorner(theme, 'activity') / 2;
 }
@@ -91,12 +90,26 @@ function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: numbe
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
 }
 
-/** `fontSize` defaults to the ACTION box's resolved size: every call site
- *  in this file draws an activity-box label, at the value the sizer
- *  measured (`tiles/gtile-action.ts`); a DIFFERENT element passes its own
- *  resolved size rather than silently inheriting the action's. */
-export function renderLabel(label: string, cx: number, cy: number, theme: Theme, fontSize?: number): string {
-  return renderNodeLabel(label, cx, cy, theme, fontSize ?? activityFontSize(theme, 'activity'));
+/** `fontSize` defaults to the action box's size (`gtile-action.ts`); a
+ *  DIFFERENT element passes its own. `sname` picks the D3 colour bucket,
+ *  same as `renderMultilineText`. Only a `<latex>` label still delegates
+ *  to `core/latex.ts#renderNodeLabel` (`:125-133`) -- a permanent LaTeX
+ *  divergence (KaTeX, not JLaTeXMath), the sole exception here. */
+export function renderLabel(
+  label: string,
+  cx: number,
+  cy: number,
+  theme: Theme,
+  opts: { sname: 'activity' | 'diamond'; fontSize?: number },
+): string {
+  const size = opts.fontSize ?? activityFontSize(theme, 'activity');
+  if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
+  return text(cx, cy, label, {
+    textAnchor: 'middle',
+    fontFamily: theme.fontFamily,
+    fontSize: size,
+    fill: activityFontColor(theme, opts.sname),
+  });
 }
 
 export function renderMultilineText(
@@ -157,18 +170,14 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const r = node.height / 2;
-  // @see net/sourceforge/plantuml/klimt/drawing/svg/DriverEllipseSvg.java --
-  // upstream's start/end/kill circles are all UEllipse shapes (equal
-  // radii), never a dedicated circle driver.
-  //
-  // `resolvePaint` here replicates exactly what `circle()`'s own
-  // `resolvePaint(style.fill)` did -- `ellipse()`'s `extraAttrs` only
-  // shortens an ALREADY-hex string (rule 2); it does not resolve a named
-  // CSS color (e.g. "blue") to hex the way `circle()`'s pipeline did via
-  // `paintToSvg`. Pre-resolving here keeps that behaviour byte-identical.
-  // `LineThickness 1` on the start/stop/end block (plantuml.skin:378). The
-  // jar draws the start terminal with BOTH a fill and a stroke in the same
-  // colour; this port drew a fill only, so the ellipse was a hair small.
+  // @see DriverEllipseSvg.java -- upstream's start/end/kill circles are all
+  // UEllipse shapes, never a dedicated circle driver. `resolvePaint` here
+  // replicates `circle()`'s own pipeline byte-identically: `ellipse()`'s
+  // `extraAttrs` only shortens an ALREADY-hex string, not a named CSS
+  // colour, the way `circle()` did via `paintToSvg`. `LineThickness 1` on
+  // the start/stop/end block (plantuml.skin:378): the jar fills AND
+  // strokes the start terminal in the same colour; this port drew a fill
+  // only, so the ellipse was a hair small.
   const ink = resolvePaint(actColors(theme).startFill).value;
   return ellipse(cx, cy, r, r, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
@@ -181,9 +190,8 @@ export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   return (
     // `stop` takes the block's own `LineThickness 1` (plantuml.skin:378);
-    // only `end` is overridden to 1.5 one block later (:383), and upstream
-    // gives the two DISTINCT StyleSignatures
-    // (`ftile/vcompact/VCompactFactory.java:97` vs `:101`).
+    // `end` alone overrides to 1.5 (:383) -- two DISTINCT StyleSignatures
+    // (`VCompactFactory.java:97` vs `:101`).
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',
       stroke: resolvePaint(c.endFill).value,
@@ -204,9 +212,8 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
   const d = r * Math.SQRT1_2;
   const endFill = actColors(theme).endFill;
   return (
-    // `activityDiagram { circle { end { LineThickness 1.5 } } }`
-    // (plantuml.skin:383) -- the `end` terminal ALONE overrides the
-    // start/stop/end block's 1.
+    // `circle { end { LineThickness 1.5 } }` (plantuml.skin:383) -- `end`
+    // alone overrides the start/stop/end block's 1.
     ellipse(cx, cy, r, r, {
       fill: 'none',
       stroke: resolvePaint(endFill).value,
@@ -269,7 +276,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     });
     labelEl = labelText;
   } else {
-    labelEl = renderLabel(label, cx, cy + actionSize / 3, theme, actionSize);
+    labelEl = renderLabel(label, cx, cy + actionSize / 3, theme, { sname: 'activity', fontSize: actionSize });
   }
   return box + labelEl;
 }
@@ -304,10 +311,9 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
 }
 
 export function renderSignalLabel(label: string, x: number, cy: number, theme: Theme): string {
-  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it
-  // resolves `SName.activity` like the plain box does
-  // (`ftile/vertical/FtileBox.java:97-99`, `:146`) -- which is also the
-  // SName `tiles/gtile-action.ts` sizes it at.
+  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
+  // `SName.activity` like the plain box (`FtileBox.java:97-99`, `:146`) --
+  // the same SName `tiles/gtile-action.ts` sizes it at.
   const size = activityFontSize(theme, 'activity');
   const labelX = x + activityPadding('activity');
   const lines = label.split('\n');
@@ -396,13 +402,11 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const lines = (node.label ?? '').split('\n');
   const labelEl =
     lines.length > 1
-      ? // A labelled condition. `gtile/GtileIfHexagon.java:184` and
-        // `gtile/GtileHexagonInside.java:64` resolve `of(root, element,
-        // activityDiagram, activity, diamond)` -- the same SName
-        // `tiles/gtile-diamond.ts` measured it at, so `FontSize 11`
-        // (plantuml.skin:370), not the action box's 12.
+      ? // A labelled condition: `GtileIfHexagon.java:184`/`GtileHexagonInside
+        // .java:64` resolve `of(root, element, activityDiagram, activity,
+        // diamond)`, the diamond SName -- `FontSize 11` (plantuml.skin:370).
         renderMultilineText(lines, cx, cy, theme, { sname: 'diamond', fontSize: condSize })
-      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, condSize);
+      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, { sname: 'diamond', fontSize: condSize });
   return shape + labelEl;
 }
 
@@ -428,12 +432,11 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
   const lines = (node.label ?? '').split('\n');
   const labelEl =
     lines.length > 1
-      ? // `BoxStyle.SDL_SAVE` (`ftile/BoxStyle.java:73`) is still an
-        // `FtileBox`, so it resolves `SName.activity` like the plain box
-        // (`ftile/vertical/FtileBox.java:97-99`) -- the same SName
-        // `tiles/gtile-action.ts` measured it at.
+      ? // `BoxStyle.SDL_SAVE` (`BoxStyle.java:73`) is still an `FtileBox`, so
+        // it resolves `SName.activity` like the plain box (`FtileBox.java
+        // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
         renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize })
-      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, boxSize);
+      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize });
   return shape + labelEl;
 }
 
@@ -441,12 +444,10 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const noteFill = theme.colors.noteBackground;
   const stroke = theme.colors.border;
-  // The ROOT `note { FontSize 13; LineThickness 0.5 }` block
-  // (plantuml.skin:323,325). An activity note resolves `SName.note` under
-  // `activityDiagram` (`ftile/vcompact/FtileWithNoteOpale.java:89`,
-  // `ftile/vcompact/FtileNoteAlone.java:77`) and `activityDiagram { }`
-  // declares no `note` override, so the root values stand. This is the
-  // same size `tiles/gtile-note.ts` measured the box at.
+  // The ROOT `note { FontSize 13; LineThickness 0.5 }` block (plantuml.skin
+  // :323,325): an activity note resolves `SName.note` under `activityDiagram`
+  // (`FtileWithNoteOpale.java:89`, `FtileNoteAlone.java:77`), which declares
+  // no `note` override, so root stands -- the size `gtile-note.ts` measured.
   const noteSize = activityFontSize(theme, 'note');
   // Opale balloon spike geometry (matches Opale.java: delta=4, cornersize=NOTE_FOLD)
   const DELTA = 4;

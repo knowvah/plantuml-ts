@@ -17,6 +17,7 @@ import {
   renderDiamond,
   renderEnd,
   renderHexagon,
+  renderLabel,
   renderNote,
   renderParallelogram,
   renderStart,
@@ -277,13 +278,33 @@ describe('T4 — text colour cascade (D3)', () => {
     expect(ACTIVITY_FONT_COLOR).toBe('#000000');
   });
 
-  // NOTE: a SINGLE-LINE action/hexagon/parallelogram label draws through the
-  // shared `renderLabel` -> `core/latex.ts#renderNodeLabel`, which still
-  // hardcodes `theme.colors.text` -- that shared helper is explicitly out of
-  // this task's write-set (`src/core/**`) and is T5's to replace (batch-5
-  // overview: "the action at :222"). Only the MULTI-LINE/code-block branches
-  // below, which build their own `<text>` calls in this file, are T4's ten
-  // sites.
+  // `renderLabel` (single-line path) resolves its own colour locally rather
+  // than delegating to `core/latex.ts#renderNodeLabel` (which hardcodes
+  // `theme.colors.text`) -- only a `<latex>` label still delegates there.
+
+  it('a single-line action label draws the root black, not theme.colors.text', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a single-line diamond-family label (renderLabel path) draws the root black', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action, not a single-line diamond label', () => {
+    const activityRed = themeWithFontColor('activity', 'red');
+    const actionSvg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), activityRed);
+    expect(actionSvg).toContain('fill="#F00"');
+    const hexSvg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), activityRed);
+    expect(hexSvg).toContain('fill="#000"');
+    expect(hexSvg).not.toContain('fill="#F00"');
+  });
+
+  it('a <latex> label still delegates to renderNodeLabel (permanent divergence)', () => {
+    const svg = renderLabel('<latex>x^2</latex>', 60, 60, theme, { sname: 'activity' });
+    expect(svg).not.toContain('fill="#000"');
+  });
 
   it('a multi-line action label draws the resolved colour (#000, shortened), not theme.colors.text', () => {
     const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), theme);
