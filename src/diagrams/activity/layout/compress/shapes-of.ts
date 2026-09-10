@@ -16,10 +16,10 @@ import type { EdgeMeta } from '../swimlane-placement.js';
 import type { Reservation } from '../hexagon-reservations.js';
 import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
-import type { SwimlaneGeo } from '../../activity-layout-types.js';
+import type { SwimlaneBandGeo, SwimlaneGeo } from '../../activity-layout-types.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
-import { activityFontSize } from '../../activity-style-defaults.js';
+import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -35,7 +35,7 @@ export type { Reservation } from '../hexagon-reservations.js';
  * ported `SlotFinder`, not the adapter).
  */
 export interface CompressShape {
-  kind: 'rect' | 'ellipse' | 'polygon' | 'text' | 'empty';
+  kind: 'rect' | 'ellipse' | 'polygon' | 'text' | 'centeredText' | 'empty';
   x: number;
   y: number;
   width: number;
@@ -56,16 +56,25 @@ export interface ShapesOfInput {
   readonly edges: readonly ActivityEdgeGeo[];
   readonly edgeMeta: readonly EdgeMeta[];
   /**
-   * Present for interface-contract parity with the mission task spec.
-   * Divider/title-band occupancy is derived from `reservations` instead
-   * (computed upstream in `assign-coordinates-full.ts`/`swimlane-
-   * placement.ts`, where the block's own `baseY` is in scope) -- `SwimlaneGeo`
-   * alone does not carry that vertical anchor. Kept for API shape parity
-   * and for a future per-lane background colour (`Swimlanes.java:330-338`),
-   * unsupported today (no `SwimlaneGeo.backgroundColor` field exists).
+   * Read for one purpose: {@link titleShapes}'s per-lane `centeredText`
+   * position (`contentX`/`contentWidth`/`titleWidth`, mirroring
+   * `activity-renderer-swimlanes.ts#renderSwimlaneTitles:115-126`).
+   * Divider/title-BAND occupancy still comes from `reservations` instead
+   * (computed upstream where the block's own `baseY` is in scope) --
+   * `SwimlaneGeo` alone does not carry that vertical anchor. No per-lane
+   * BACKGROUND colour shape is emitted: `Swimlanes.java:330-338`'s per-lane
+   * `back` rect needs a `SwimlaneGeo.backgroundColor` field that does not
+   * exist in this port today.
    */
   readonly swimlanes: readonly SwimlaneGeo[];
   readonly reservations: readonly Reservation[];
+  /**
+   * `computeSwimlaneChrome`'s own band rect (`assign-coordinates-full.ts`),
+   * `undefined` for a single-lane diagram (`Swimlanes.java:275`'s own
+   * `size() > 1` guard -- no band, no titles). Needed only for its `y`,
+   * the title baseline's anchor (see {@link titleShapes}).
+   */
+  readonly swimlaneBand: SwimlaneBandGeo | undefined;
   readonly bounder: StringBounder;
   readonly theme: Theme;
 }
@@ -303,8 +312,60 @@ function shapeForReservation(r: Reservation): CompressShape {
 }
 
 /**
+ * `Swimlanes#drawTitles` draws ONE `CenteredText` per lane
+ * (`Swimlanes.java:369-375`), only when the band exists
+ * (`:275`'s `size() > 1` guard -- `renderSwimlaneTitles`'s own
+ * `geo.swimlaneBand === undefined` early return mirrors this). A
+ * `CenteredText` is a bare `UShape` (`ftile/CenteredText.java:26`), not a
+ * `UText` -- `SlotFinder#draw`'s dispatch chain (`SlotFinder.java:78-100`)
+ * has no branch for it, so on the ON_X pass (the raw block drawn straight
+ * into a fresh `SlotFinder`, `CompressionXorYBuilder.java:60-63`) it never
+ * occupies. But the ON_Y builder wraps the ON_X builder
+ * (`ActivityDiagram3.java:209-210`), so ON_Y's `SlotFinder` sees the raw
+ * block drawn through `UGraphicCompressOnXorY.create(ON_X, ySlotFinder,
+ * xAffine)` instead -- and that wrapper's OWN `CenteredText` branch
+ * (`UGraphicCompressOnXorY.java:100-112`) does not forward the
+ * `CenteredText` shape at all: it calls `text.drawU(...)` on the WRAPPED
+ * title `TextBlock`, which emits a genuine `UText` straight into
+ * `getUg()` -- here, `ySlotFinder` -- so the title occupies on Y exactly
+ * like {@link edgeLabelShape}'s `'text'` kind (`TextLimitFinder`'s
+ * `y - h + 1.5` shift, `collectSlots` applies it, not this adapter).
+ *
+ * Position/font mirror `activity-renderer-swimlanes.ts#renderSwimlaneTitles`
+ * (`:115-126`, read-only -- never edited by this port's compress work):
+ * `x = contentX + (contentWidth - titleWidth) / 2`, baseline `y =
+ * band.y + fontSize * (1 - 1/4.5)` (`StringBounder#getDescent`,
+ * `klimt/font/StringBounder.java:47`, the same ascent ratio the renderer
+ * already cites). The ratio is duplicated here, not imported, because the
+ * renderer module is read-only for this fix.
+ */
+const TITLE_BASELINE_ASCENT = 1 - 1 / 4.5;
+
+function titleShapes(
+  swimlanes: readonly SwimlaneGeo[],
+  band: SwimlaneBandGeo | undefined,
+  bounder: StringBounder,
+  theme: Theme,
+): CompressShape[] {
+  if (band === undefined) return [];
+  const fontSize = swimlaneTitleFontSize(theme);
+  const baselineY = band.y + fontSize * TITLE_BASELINE_ASCENT;
+  const shapes: CompressShape[] = [];
+  for (const lane of swimlanes) {
+    const contentX = lane.contentX ?? lane.x;
+    const contentWidth = lane.contentWidth ?? lane.width;
+    const titleWidth = lane.titleWidth ?? 0;
+    const titleX = contentX + (contentWidth - titleWidth) / 2;
+    const dim = bounder.getDimension(lane.name, fontSize);
+    shapes.push({ kind: 'centeredText', x: titleX, y: baselineY, width: dim.width, height: dim.height });
+  }
+  return shapes;
+}
+
+/**
  * D2: the single shape adapter feeding `collectSlots`. Combines every
- * node's, edge's, and reservation's drawn extent into one flat list.
+ * node's, edge's, reservation's, and swimlane title's drawn extent into
+ * one flat list.
  */
 export function shapesOf(input: ShapesOfInput): CompressShape[] {
   const shapes: CompressShape[] = [];
@@ -316,5 +377,6 @@ export function shapesOf(input: ShapesOfInput): CompressShape[] {
     shapes.push(...shapesForEdge(input.edges[i]!, input.edgeMeta[i]!, input.bounder, input.theme));
   }
   for (const r of input.reservations) shapes.push(shapeForReservation(r));
+  shapes.push(...titleShapes(input.swimlanes, input.swimlaneBand, input.bounder, input.theme));
   return shapes;
 }

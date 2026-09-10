@@ -79,6 +79,25 @@ describe('collectSlots — text (TextLimitFinder shift)', () => {
   });
 });
 
+/**
+ * `CenteredText` (`ftile/CenteredText.java:26`) has no `SlotFinder` branch
+ * (`SlotFinder.java:78-100`), so it never occupies on X; the ON_Y builder
+ * wraps ON_X (`ActivityDiagram3.java:209-210`) and re-emits the title as a
+ * genuine `UText` (`UGraphicCompressOnXorY.java:100-112`), so on Y it
+ * behaves exactly like `'text'`.
+ */
+describe('collectSlots — centeredText (swimlane title, no SlotFinder branch)', () => {
+  const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+
+  it('contributes NO x slot (CenteredText is not dispatched by SlotFinder#draw)', () => {
+    expect(collectSlots([title], 'x').slots()).toHaveLength(0);
+  });
+
+  it('occupies on y exactly like text: [y - height + 1.5, y + 1.5]', () => {
+    expect(collectSlots([title], 'y').slots()).toEqual([expect.objectContaining({ start: 13, end: 29 })]);
+  });
+});
+
 describe('collectSlots — empty (divider/hexagon reservation)', () => {
   it('a divider empty occupies x1+x2 wide, unconditionally', () => {
     const divider: CompressShape = { kind: 'empty', x: 15, y: 0, width: 10, height: 1 };

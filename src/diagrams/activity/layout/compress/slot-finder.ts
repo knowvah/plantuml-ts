@@ -29,6 +29,11 @@ function addIgnoredRectSlot(slots: SlotSet, mode: CompressionMode, shape: Compre
   }
 }
 
+/** `rect`/`ellipse`/`empty` all resolve to `SlotFinder#drawRectangle`/
+ *  `drawEllipse`/`drawEmpty`'s byte-identical `[x,x+w]`/`[y,y+h]` box --
+ *  see {@link addBoxSlot}. */
+const BOX_KINDS = new Set(['rect', 'ellipse', 'empty']);
+
 /** `SlotFinder#drawRectangle`/`drawEllipse`/`drawEmpty`
  *  (`SlotFinder.java:138-161`) -- byte-identical `[x, x+w]`/`[y, y+h]`
  *  dispatch, shared by every box-shaped kind. */
@@ -46,6 +51,19 @@ function addTextSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape
 }
 
 /**
+ * `CenteredText` (`ftile/CenteredText.java:26`) is a bare `UShape`, not a
+ * `UText` -- `SlotFinder#draw`'s dispatch (`SlotFinder.java:78-100`) has no
+ * branch for it, so on X it never occupies. On Y (`ActivityDiagram3.java
+ * :209-210`'s ON_Y-wraps-ON_X composition; `UGraphicCompressOnXorY.java
+ * :100-112`'s `CenteredText` branch re-emits the title as a genuine
+ * `UText`) it occupies exactly like `'text'` -- see `shapes-of.ts`'s
+ * `titleShapes` for the position/font this shape carries.
+ */
+function addCenteredTextSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  if (mode === 'y') addTextSlot(slots, mode, shape);
+}
+
+/**
  * One shape's contribution to the `SlotSet`, mirroring `SlotFinder#draw`'s
  * own dispatch (`SlotFinder.java:78-100`) including the
  * `UShapeIgnorableForCompression`/`drawWhenCompressed` branch and the
@@ -57,18 +75,19 @@ function addShape(slots: SlotSet, mode: CompressionMode, shape: CompressShape): 
     addIgnoredRectSlot(slots, mode, shape);
     return;
   }
+  if (BOX_KINDS.has(shape.kind)) {
+    addBoxSlot(slots, mode, shape);
+    return;
+  }
   switch (shape.kind) {
-    case 'rect':
-    case 'ellipse':
-    case 'empty':
-      addBoxSlot(slots, mode, shape);
-      return;
     case 'polygon':
-      if (shape.polygonSkipMode === mode) return;
-      addBoxSlot(slots, mode, shape);
+      if (shape.polygonSkipMode !== mode) addBoxSlot(slots, mode, shape);
       return;
     case 'text':
       addTextSlot(slots, mode, shape);
+      return;
+    case 'centeredText':
+      addCenteredTextSlot(slots, mode, shape);
       return;
   }
 }

@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { shapesOf } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import type { ShapesOfInput } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import type { ActivityNodeGeo, ActivityEdgeGeo } from '../../../../../src/diagrams/activity/layout.old.js';
+import type { SwimlaneGeo } from '../../../../../src/diagrams/activity/activity-layout-types.js';
 import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
+import { swimlaneTitleFontSize } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
 
 const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 6, height: 11 }) };
@@ -18,6 +20,7 @@ function baseInput(overrides: Partial<ShapesOfInput> = {}): ShapesOfInput {
     edgeMeta: [],
     swimlanes: [],
     reservations: [],
+    swimlaneBand: undefined,
     bounder,
     theme,
     ...overrides,
@@ -199,5 +202,57 @@ describe('shapesOf — reservations', () => {
     const r: Reservation = { x: 20, y: 0, width: 349.275, height: 18, ignoreX: true, ignoreY: true };
     const shapes = shapesOf(baseInput({ reservations: [r] }));
     expect(shapes).toEqual([{ kind: 'rect', x: 20, y: 0, width: 349.275, height: 18, ignoreX: true, ignoreY: true }]);
+  });
+});
+
+/**
+ * `CenteredText` (`ftile/CenteredText.java:26`) via `Swimlanes#drawTitles`
+ * (`:369-375`) -- one shape per lane title, position/font mirroring
+ * `activity-renderer-swimlanes.ts#renderSwimlaneTitles:115-126`.
+ */
+describe('shapesOf — swimlane titles (centeredText)', () => {
+  const lane: SwimlaneGeo = { name: 'Lane A', x: 20, width: 60, contentX: 25, contentWidth: 30, titleWidth: 10 };
+
+  it('no band (single-lane diagram) emits no title shapes', () => {
+    const shapes = shapesOf(baseInput({ swimlanes: [lane], swimlaneBand: undefined }));
+    expect(shapes.some((s) => s.kind === 'centeredText')).toBe(false);
+  });
+
+  it('one centeredText per lane when a band is present', () => {
+    const bandY = 12;
+    const shapes = shapesOf(baseInput({ swimlanes: [lane], swimlaneBand: { x: 20, y: bandY, width: 60, height: 18 } }));
+    const titles = shapes.filter((s) => s.kind === 'centeredText');
+    expect(titles).toHaveLength(1);
+  });
+
+  it('x = contentX + (contentWidth - titleWidth) / 2 (renderSwimlaneTitles:122-124)', () => {
+    const shapes = shapesOf(baseInput({ swimlanes: [lane], swimlaneBand: { x: 20, y: 12, width: 60, height: 18 } }));
+    const title = shapes.find((s) => s.kind === 'centeredText')!;
+    // contentX=25, contentWidth=30, titleWidth=10 -> 25 + (30-10)/2 = 35
+    expect(title.x).toBe(35);
+  });
+
+  it('y = band.y + fontSize * (1 - 1/4.5) (renderSwimlaneTitles:119)', () => {
+    const bandY = 12;
+    const shapes = shapesOf(baseInput({ swimlanes: [lane], swimlaneBand: { x: 20, y: bandY, width: 60, height: 18 } }));
+    const title = shapes.find((s) => s.kind === 'centeredText')!;
+    const fontSize = swimlaneTitleFontSize(theme);
+    expect(title.y).toBeCloseTo(bandY + fontSize * (1 - 1 / 4.5), 10);
+  });
+
+  it('width/height come from the bounder at the lane name and title font size', () => {
+    const shapes = shapesOf(baseInput({ swimlanes: [lane], swimlaneBand: { x: 20, y: 12, width: 60, height: 18 } }));
+    const title = shapes.find((s) => s.kind === 'centeredText')!;
+    const dim = bounder.getDimension('Lane A', swimlaneTitleFontSize(theme));
+    expect(title.width).toBe(dim.width);
+    expect(title.height).toBe(dim.height);
+  });
+
+  it('falls back to lane.x/width/0 when contentX/contentWidth/titleWidth are unset', () => {
+    const bare: SwimlaneGeo = { name: 'X', x: 5, width: 20 };
+    const shapes = shapesOf(baseInput({ swimlanes: [bare], swimlaneBand: { x: 5, y: 0, width: 20, height: 18 } }));
+    const title = shapes.find((s) => s.kind === 'centeredText')!;
+    // contentX ?? x = 5; contentWidth ?? width = 20; titleWidth ?? 0 = 0 -> 5 + (20-0)/2 = 15
+    expect(title.x).toBe(15);
   });
 });
