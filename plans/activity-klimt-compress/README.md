@@ -122,7 +122,7 @@ Measurement between tasks (orchestrator): the probe in
 
 ## Progress
 
-- [ ] Batch 0 — T0
+- [x] Batch 0 — T0
 - [ ] Batch 1 — T1, T2
 - [ ] Batch 2 — T3
 - [ ] Batch 3 — T4
