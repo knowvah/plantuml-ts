@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { assignCoordinates, LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
+import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
-import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
+import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
+import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
+import { NORTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
+import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
@@ -240,5 +244,101 @@ describe('layoutActivity — pakema-21-xema183-shaped diagram through the real p
     const nodeB = geo.nodes.find((n) => n.label === 'b')!;
     expect(nodeB.x).toBeGreaterThan(laneB.x);
     expect(nodeB.x + nodeB.width).toBeLessThan(laneB.x + laneB.width);
+  });
+});
+
+// D2 / `Worm#addPoint` (`Worm.java:262-266`): the one edge-construction
+// seam every `pushEdge` call passes through drops a point that equals its
+// immediate predecessor under exact `===` on both coordinates -- no
+// tolerance, so points one ulp apart both survive.
+describe('dedupeAdjacentPoints — Worm#addPoint exact-equality collapse (D2)', () => {
+  it('drops a point that exactly repeats its predecessor: [p, p, q] -> [p, q]', () => {
+    const p = { x: 10, y: 20 };
+    const q = { x: 10, y: 40 };
+    expect(dedupeAdjacentPoints([p, p, q])).toEqual([p, q]);
+  });
+
+  it('keeps two points one ulp apart', () => {
+    // `Number.EPSILON` (~2.22e-16) is the gap between 1 and its next
+    // representable double -- adding it to 10 rounds back to 10 (the gap
+    // there is larger), so the nudge must be applied near 1, not 10.
+    const p = { x: 1, y: 20 };
+    const pNudged = { x: 1 + Number.EPSILON, y: 20 };
+    expect(pNudged.x).not.toBe(p.x);
+    expect(dedupeAdjacentPoints([p, pNudged])).toEqual([p, pNudged]);
+  });
+
+  it('keeps a non-adjacent repeat (only ADJACENT duplicates collapse)', () => {
+    const p = { x: 10, y: 20 };
+    const q = { x: 30, y: 40 };
+    expect(dedupeAdjacentPoints([p, q, p])).toEqual([p, q, p]);
+  });
+
+  it('passes an empty array through unchanged', () => {
+    expect(dedupeAdjacentPoints([])).toEqual([]);
+  });
+});
+
+// D1: `ParallelBuilderSplit.ConnectionIn#drawU` (`:194-203`) and
+// `ParallelBuilderFork.ConnectionIn#drawU` (`:151-163`) draw a straight
+// vertical drop at the BRANCH's own x, not the bar's centre; `ConnectionOut
+// #drawU` (`ParallelBuilderSplit.java:246-261`, `ParallelBuilderFork.java
+// :202-216`) is gated on `geo.hasPointOut()`.
+describe('assignCoordinates — fork/split branch connectors are vertical drops at the branch x (D1)', () => {
+  const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
+  const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+
+  // North/south hooks intentionally off-centre (not width/2) so a test
+  // asserting on the LITERAL branch-x, not an accidental bar-centre
+  // coincidence, actually distinguishes the two.
+  function branchStub(width: number, height: number, hasOut: boolean): Tile {
+    return {
+      kind: 'stub-branch',
+      width,
+      height,
+      getCoord: (hook) => (hook === NORTH_HOOK ? { x: 7, y: 0 } : { x: 11, y: height }),
+      hasPointOut: () => hasOut,
+    };
+  }
+
+  it('a continuing branch gets a 2-point in-edge at its own north x and a 2-point out-edge to the join bar', () => {
+    const branch = branchStub(80, 60, true);
+    const tile = new GtileFork([branch], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(2);
+    const [inEdge, outEdge] = geo.edges;
+    const bX = LAYOUT_MARGIN + tile.branchOffsets[0]!;
+    const bY = LAYOUT_MARGIN + tile.branchTopY;
+
+    expect(inEdge!.points).toHaveLength(2);
+    expect(inEdge!.points[0]).toEqual({ x: bX + 7, y: LAYOUT_MARGIN + 8 });
+    expect(inEdge!.points[1]).toEqual({ x: bX + 7, y: bY });
+
+    const joinBarY = LAYOUT_MARGIN + tile.height - 8;
+    expect(outEdge!.points).toHaveLength(2);
+    expect(outEdge!.points[0]).toEqual({ x: bX + 11, y: bY + 60 });
+    expect(outEdge!.points[1]).toEqual({ x: bX + 11, y: joinBarY });
+  });
+
+  it('a detached branch (hasPointOut() === false) gets an in-edge and NO out-edge', () => {
+    const branch = branchStub(80, 60, false);
+    const tile = new GtileSplit([branch], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(1);
+    expect(geo.edges[0]!.points).toHaveLength(2);
+  });
+
+  it('two branches: the continuing one gets an out-edge, the detached one does not', () => {
+    const continuing = branchStub(80, 60, true);
+    const detached = branchStub(80, 80, false);
+    const tile = new GtileFork([continuing, detached], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    // 2 in-edges + 1 out-edge (continuing branch only)
+    expect(geo.edges).toHaveLength(3);
+    const twoPointEdges = geo.edges.filter((e) => e.points.length === 2);
+    expect(twoPointEdges).toHaveLength(3);
   });
 });
