@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1086 modules · 3942 exported names.
+1091 modules · 3956 exported names.
 
 ## `src/`
 
@@ -950,18 +950,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
+| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-placement.ts` | `EdgeMeta`, `EdgeShape`, `laneAt`, `laneIn`, `laneOut`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+| `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
 ## `src/diagrams/activity/layout/compress/`
 
 | Module | Exports | Purpose |
 |---|---|---|
 | `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
+| `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
+| `slot-finder.ts` | `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
 | `slot.ts` | `CompressionMode`, `compareSlotByStart`, `Slot`, `SlotSet` | slot.ts — `klimt/compress/Slot.java`, `SlotSet.java`, `CompressionMode.java` (mission `activity-klimt-compress` T2, `decisions.md` D2/D5). |
 
 ## `src/diagrams/activity/routing/`

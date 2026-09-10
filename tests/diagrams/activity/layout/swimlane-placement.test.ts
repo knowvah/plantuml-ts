@@ -123,6 +123,7 @@ describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {
       edgeMeta: [{ lane1: undefined, lane2: undefined, shape: 'default' }],
       laneNames: [],
       baseX: 12,
+      baseY: 12,
       bounder: { getDimension: () => ({ width: 0, height: 0 }) },
       theme,
     });
@@ -162,6 +163,7 @@ describe('placeSwimlanes — worked-example arithmetic (pakema-21-xema183)', () 
       edgeMeta: [],
       laneNames: ['A', 'BBBBBBBBBBBBBBBBBBBBBBBBB'],
       baseX: 0,
+      baseY: 0,
       bounder,
       theme,
     });
@@ -186,6 +188,54 @@ describe('placeSwimlanes — worked-example arithmetic (pakema-21-xema183)', () 
   });
 });
 
+/**
+ * Mission `activity-klimt-compress` T3, D5: `LaneDivider#drawU`'s own
+ * `UEmpty(x1 + x2, 1)` (`LaneDivider.java:85-97`), one per boundary
+ * (n lanes -> n + 1 dividers, `Swimlanes.java`'s own `dividers.size() ==
+ * swimlanes().size() + 1` assertion). Titles here are narrower than their
+ * lane's content (`getDimension` returns width 0), so every `x1`/`x2` is
+ * the fixed `SWIMLANE_HALF_MISSING_SPACE` (5) with no title-overflow
+ * adjustment -- keeps the arithmetic exact and independently checkable.
+ */
+describe('placeSwimlanes — divider reservations (no title overflow)', () => {
+  const bounder: StringBounder = { getDimension: () => ({ width: 0, height: 18 }) };
+  const nodes = [node('a', 0, 20, 'A'), node('b', 0, 30, 'B')];
+
+  function place(baseX: number, baseY: number) {
+    return placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames: ['A', 'B'], baseX, baseY, bounder, theme });
+  }
+
+  it('emits laneNames.length + 1 reservations', () => {
+    expect(place(0, 0).reservations).toHaveLength(3);
+  });
+
+  it('every reservation is 1 tall and sits at baseY', () => {
+    const result = place(0, 7);
+    for (const r of result.reservations) {
+      expect(r.height).toBe(1);
+      expect(r.y).toBe(7);
+    }
+  });
+
+  it('each divider is 10 wide (x1=x2=5, the fixed outer half-space)', () => {
+    for (const r of place(0, 0).reservations) expect(r.width).toBe(10);
+  });
+
+  it('reservations sit at the block origin, after lane A, and after lane B', () => {
+    const result = place(0, 0);
+    const xs = result.reservations.map((r) => r.x).sort((a, b) => a - b);
+    // lane A: content 20 + its own leading divider (10) = 30; lane B: + 30 + 10 = 70
+    expect(xs).toEqual([0, 30, 70]);
+  });
+
+  it('reservations shift by baseX exactly like the lane origins do', () => {
+    const xs = place(100, 0)
+      .reservations.map((r) => r.x)
+      .sort((a, b) => a - b);
+    expect(xs).toEqual([100, 130, 170]);
+  });
+});
+
 describe('placeSwimlanes — edge routing', () => {
   const bounder: StringBounder = { getDimension: () => ({ width: 40, height: 18 }) };
   const laneNames = ['A', 'B'];
@@ -201,7 +251,7 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[1]!.y).toBe(pts[2]!.y);
@@ -219,13 +269,22 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges: original, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges: original,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      bounder,
+      theme,
+    });
     expect(result.edges[0]!.points).toHaveLength(2);
   });
 
   it('a node whose lane is not among laneNames is left unshifted', () => {
     const nodes = [node('a', 12, 40, 'A'), node('stray', 12, 40, 'unknown-lane')];
-    const result = placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames, baseX: 12, bounder, theme });
+    const result = placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames, baseX: 12, baseY: 12, bounder, theme });
     const stray = result.nodes.find((n) => n.id === 'stray')!;
     expect(stray.x).toBe(12);
   });
@@ -246,7 +305,7 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
@@ -271,7 +330,7 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });

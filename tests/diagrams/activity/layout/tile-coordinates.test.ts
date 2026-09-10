@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { assignCoordinates, LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
+import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -122,6 +123,79 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
     const backEdge = geo.edges.find((e) => e.points.length >= 4);
     expect(backEdge).toBeDefined();
     expect(backEdge!.points.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () => {
+  const header = new GtileDiamond('loop?', bounder, theme);
+  const body = new GtileAction(actionNode, bounder, theme);
+  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const full = assignCoordinatesFull({
+    root: tile,
+    ast: emptyAst,
+    baseX: LAYOUT_MARGIN,
+    baseY: LAYOUT_MARGIN,
+    bounder,
+    theme,
+  });
+
+  it('emits exactly one reservation (FtileWhile.java:264,272)', () => {
+    expect(full.reservations).toHaveLength(1);
+  });
+
+  it('reservation is 5 wide x 12 tall (Hexagon.hexagonHalfSize)', () => {
+    expect(full.reservations[0]).toMatchObject({ width: 5, height: 12 });
+  });
+
+  it('sits at the body south exit x, y = body bottom + 12', () => {
+    const bodyNode = full.geometry.nodes.find((n) => n.kind === 'action')!;
+    // GtileAction's SOUTH_HOOK is { x: width / 2, y: height } -- the exit
+    // point IS the box's own bottom, so `Math.max(y1, getBottom())` in
+    // `FtileWhile.java:264` reduces to `getBottom()` here.
+    const backFromX = bodyNode.x + bodyNode.width / 2;
+    const expectedY = bodyNode.y + bodyNode.height + 12;
+    expect(full.reservations[0]!.x).toBeCloseTo(backFromX, 5);
+    expect(full.reservations[0]!.y).toBeCloseTo(expectedY, 5);
+  });
+});
+
+describe('assignCoordinatesFull — swimlane title band is an ignoreX/ignoreY reservation', () => {
+  it('adds the band as a reservation matching computeSwimlaneChrome exactly', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['Lane A', 'Lane B'] };
+    const full = assignCoordinatesFull({ root: tile, ast, baseX: LAYOUT_MARGIN, baseY: LAYOUT_MARGIN, bounder, theme });
+    const band = full.geometry.swimlaneBand!;
+    expect(band).toBeDefined();
+    const bandReservation = full.reservations.find((r) => r.ignoreX === true && r.ignoreY === true);
+    expect(bandReservation).toEqual({ ...band, ignoreX: true, ignoreY: true });
+  });
+
+  it('a single lane draws no band and reserves nothing for it', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+    expect(full.reservations.some((r) => r.ignoreX === true && r.ignoreY === true)).toBe(false);
+  });
+});
+
+describe('assignCoordinatesFull — no reservations for a plain action', () => {
+  it('emits an empty reservations array', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+    expect(full.reservations).toEqual([]);
   });
 });
 

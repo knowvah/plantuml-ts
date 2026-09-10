@@ -17,20 +17,15 @@ import type { GtileGroup } from '../tiles/gtile-group.js';
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
-import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical-down-then-back.js';
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
-import {
-  computeSwimlaneChrome,
-  laneAt,
-  laneIn,
-  laneOut,
-  placeSwimlanes,
-  resolveSwimlaneVertical,
-} from './swimlane-placement.js';
-import type { EdgeMeta, EdgeShape, PlacementResult } from './swimlane-placement.js';
+import { walkWhile } from './walk-while-branch.js';
+import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
+import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
+import type { Reservation } from './hexagon-reservations.js';
+import { assignCoordinatesFull } from './assign-coordinates-full.js';
 
 export const LAYOUT_MARGIN = 12;
 
@@ -54,6 +49,12 @@ export interface Out {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   edgeMeta: EdgeMeta[];
+  /**
+   * `UEmpty` compression reservations the if/while walkers emit beside a
+   * hexagon's loop-back elbow (mission `activity-klimt-compress` T3, D5).
+   * Internal to `layout/`; never part of the public `ActivityGeometry`.
+   */
+  reservations: Reservation[];
   nextId: (prefix: string) => string;
 }
 
@@ -230,39 +231,9 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
     }
 
-    case 'gtile-while': {
-      const t = tile as unknown as GtileWhile;
-      const rawChildren = t.children;
-      const header = rawChildren[0]!;
-      const body = rawChildren[1]!;
-      // Center of content area (excludes the back-edge lane)
-      const contentCenterX = x + t.getCoord(NORTH_HOOK).x;
-
-      const hX = contentCenterX - header.width / 2;
-      const hY = y + t.headerOffsetY;
-      walkTile(header, hX, hY, { kindHint: 'while-header', lane: myLane }, out);
-
-      const bX = contentCenterX - body.width / 2;
-      const bY = y + t.bodyOffsetY;
-      walkTile(body, bX, bY, { kindHint: null, lane: myLane }, out);
-
-      // Forward: header south → body north
-      const fFrom = { x: hX + header.getCoord(SOUTH_HOOK).x, y: hY + header.getCoord(SOUTH_HOOK).y };
-      const fTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
-      pushEdge(out, new GConnectionVerticalDown().getPoints(fFrom, fTo), laneOut(header, myLane), laneIn(body, myLane));
-
-      // Back: body south → header north, going right
-      const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
-      const backTo = { x: hX + header.getCoord(NORTH_HOOK).x, y: hY + header.getCoord(NORTH_HOOK).y };
-      const rightMargin = x + t.backEdgeRightX - backFrom.x;
-      pushEdge(
-        out,
-        new GConnectionVerticalDownThenBack(rightMargin).getPoints(backFrom, backTo),
-        laneOut(body, myLane),
-        laneIn(header, myLane),
-      );
+    case 'gtile-while':
+      walkWhile(tile as unknown as GtileWhile, x, y, myLane, out);
       return;
-    }
 
     case 'gtile-repeat': {
       const t = tile as unknown as GtileRepeat;
@@ -414,40 +385,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
   }
 }
 
-/**
- * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
- * by up to 216px, `pakema-21-xema183`). T6 replaced the boxed header with
- * real lane origins: the band's right edge (`lanes[0].x + Σwidth - 1`,
- * `swimlane-placement.ts#computeSwimlaneChrome`) is always `lanesRight -
- * 1`, so `lanesRight` alone bounds every drawn X extent. Y is untouched
- * here -- the title-band vertical reservation is folded into `baseY`
- * BEFORE this runs (see `assignCoordinates`'s `contentY`).
- */
-function computeBounds(
-  root: Tile,
-  baseX: number,
-  baseY: number,
-  placed: PlacementResult,
-): { maxX: number; maxY: number } {
-  let maxX = baseX + root.width;
-  let maxY = baseY + root.height;
-  for (const n of placed.nodes) {
-    maxX = Math.max(maxX, n.x + n.width);
-    maxY = Math.max(maxY, n.y + n.height);
-  }
-  for (const e of placed.edges) {
-    for (const p of e.points) {
-      maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
-    }
-  }
-  if (placed.swimlanes.length > 0) {
-    const lanesRight = Math.max(...placed.swimlanes.map((s) => s.x + s.width));
-    maxX = Math.max(maxX, lanesRight);
-  }
-  return { maxX, maxY };
-}
-
 export function assignCoordinates(
   root: Tile,
   ast: ActivityDiagramAST,
@@ -456,23 +393,5 @@ export function assignCoordinates(
   bounder: StringBounder,
   theme: Theme,
 ): ActivityGeometry {
-  const nodes: ActivityNodeGeo[] = [];
-  const edges: ActivityEdgeGeo[] = [];
-  const edgeMeta: EdgeMeta[] = [];
-  let idCounter = 0;
-  const out: Out = { nodes, edges, edgeMeta, nextId: (prefix: string) => `${prefix}-${++idCounter}` };
-  const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
-  walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
-
-  const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, bounder, theme });
-  const { maxX, maxY } = computeBounds(root, baseX, contentY, placed);
-
-  return {
-    totalWidth: maxX + LAYOUT_MARGIN,
-    totalHeight: maxY + LAYOUT_MARGIN,
-    nodes: placed.nodes,
-    edges: placed.edges,
-    swimlanes: placed.swimlanes,
-    ...computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, maxY),
-  };
+  return assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
 }
