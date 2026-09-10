@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1091 modules · 3956 exported names.
+1092 modules · 3959 exported names.
 
 ## `src/`
 
@@ -964,6 +964,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `compress-geometry.ts` | `CompressInput`, `CompressResult`, `compressGeometry` | `compressGeometry` -- `klimt/compress/CompressionXorYBuilder.java:52-69` and `UGraphicCompressOnXorY.java:86-135`, ported over `ActivityGeometry` instead of a live `UGraphic` redraw (D1). |
 | `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
 | `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
 | `slot-finder.ts` | `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
