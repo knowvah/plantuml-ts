@@ -12,9 +12,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderAction,
+  renderChevronLeft,
+  renderChevronRight,
   renderDiamond,
   renderEnd,
+  renderHexagon,
+  renderLabel,
   renderNote,
+  renderParallelogram,
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
@@ -24,11 +29,24 @@ import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
 import type { StringBounder as TileStringBounder } from '../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
+import type { Theme } from '../../../src/core/theme.js';
+import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
+import { measureLineWidth, centeredLineX } from '../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = resolveTheme('default');
 
 function makeNode(overrides: Partial<ActivityNodeGeo> & Pick<ActivityNodeGeo, 'kind'>): ActivityNodeGeo {
   return { id: 'node1', x: 50, y: 50, width: 20, height: 20, ...overrides };
+}
+
+/** A theme carrying one `<style>`/`skinparam` bucket `FontColor` override
+ *  (amb-T1's cascade front-end, tested end-to-end elsewhere) -- standing in
+ *  for `<style> activityDiagram { <sname> { FontColor ... } } </style>`. */
+function themeWithFontColor(sname: string, color: string): Theme {
+  return {
+    ...theme,
+    colors: { ...theme.colors, elements: { ...theme.colors.elements, [sname]: { font: color } } },
+  };
 }
 
 describe('renderStart', () => {
@@ -217,5 +235,191 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     new GtileNote({ kind: 'note', text: 'n', position: 'right' }, bounder, theme);
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
     expect(svg).toContain(`font-size="${String(sizes[0])}"`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T3 — the `element` line-thickness tier (D4): the action box and the
+// diamond/hexagon-family shapes stroke at 0.5, not the port's old literal 1.
+// ---------------------------------------------------------------------------
+
+describe('T3 — element-tier stroke width (D4)', () => {
+  it('an action box strokes at 0.5, not the old literal 1 (FtileBox.java:208, plantuml.skin:93)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
+  });
+
+  it('a labelled hexagon condition strokes at 0.5 (FtileDiamondInside.java:88, diamond SName)', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
+  });
+
+  it('the SDL chevrons stroke at 0.5, resolving `activity` like the plain box (FtileBox.java:97-99)', () => {
+    const node = makeNode({ kind: 'action', label: 'go', width: 60, height: 30 });
+    expect(renderChevronLeft(node, theme)).toContain('stroke-width="0.5"');
+    expect(renderChevronRight(node, theme)).toContain('stroke-width="0.5"');
+  });
+
+  it('a parallelogram (SDL_SAVE) strokes at 0.5, resolving `activity` like the plain box', () => {
+    const svg = renderParallelogram(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), theme);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).not.toContain('stroke-width="1"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T4 — every activity text resolves `activityFontColor` (D3), never
+// `theme.colors.text` (#181818). Root `FontColor black` (plantuml.skin:9).
+// ---------------------------------------------------------------------------
+
+describe('T4 — text colour cascade (D3)', () => {
+  it('ACTIVITY_FONT_COLOR resolves black -- resolvePaint shortens it to #000 on emission', () => {
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+  });
+
+  // `renderLabel` (single-line path) resolves its own colour locally rather
+  // than delegating to `core/latex.ts#renderNodeLabel` (which hardcodes
+  // `theme.colors.text`) -- only a `<latex>` label still delegates there.
+
+  it('a single-line action label draws the root black, not theme.colors.text', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a single-line diamond-family label (renderLabel path) draws the root black', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action, not a single-line diamond label', () => {
+    const activityRed = themeWithFontColor('activity', 'red');
+    const actionSvg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), activityRed);
+    expect(actionSvg).toContain('fill="#F00"');
+    const hexSvg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), activityRed);
+    expect(hexSvg).toContain('fill="#000"');
+    expect(hexSvg).not.toContain('fill="#F00"');
+  });
+
+  it('a <latex> label still delegates to renderNodeLabel (permanent divergence)', () => {
+    const svg = renderLabel('<latex>x^2</latex>', 60, 60, theme, { sname: 'activity' });
+    expect(svg).not.toContain('fill="#000"');
+  });
+
+  it('a multi-line action label draws the resolved colour (#000, shortened), not theme.colors.text', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), theme);
+    expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
+  });
+
+  it('a <code> block action label draws the resolved colour', () => {
+    const node = makeNode({ kind: 'action', label: '<code>\nx\n</code>', width: 160, height: 60 });
+    const svg = renderAction(node, theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a diamond label draws the root black (FtileDiamondInside label)', () => {
+    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a note label (single-line, FtileWithNoteOpale.java:89) draws the root black', () => {
+    const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
+    expect(svg).toContain('fill="#000"');
+  });
+
+  it('a multi-line note label draws the resolved colour on every line', () => {
+    const svg = renderNote(makeNode({ kind: 'note', label: 'a\nb', width: 60, height: 40 }), theme);
+    expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action, not the diamond', () => {
+    const activityRed = themeWithFontColor('activity', 'red');
+    const actionSvg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), activityRed);
+    expect(actionSvg).toContain('fill="#F00"');
+    const diamondSvg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), activityRed);
+    expect(diamondSvg).toContain('fill="#000"');
+    expect(diamondSvg).not.toContain('fill="#F00"');
+  });
+
+  it('a labelled hexagon (diamond SName, gtile-diamond.ts sizing) resolves the diamond bucket', () => {
+    const diamondBlue = themeWithFontColor('diamond', 'blue');
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), diamondBlue);
+    expect(svg).toContain('fill="#00F"');
+  });
+
+  it('a parallelogram (activity SName, FtileBox.java:97-99) resolves the activity bucket, not diamond', () => {
+    const diamondBlue = themeWithFontColor('diamond', 'blue');
+    const svg = renderParallelogram(makeNode({ kind: 'action', label: 'l1\nl2', width: 80, height: 40 }), diamondBlue);
+    expect(svg).toContain('fill="#000"');
+    expect(svg).not.toContain('fill="#00F"');
+  });
+
+  it('an SDL chevron label (activity SName) resolves the activity bucket on both lines', () => {
+    const activityGreen = themeWithFontColor('activity', 'green');
+    const single = renderChevronLeft(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), activityGreen);
+    expect(single).toContain('fill="#008000"');
+    const multi = renderChevronRight(
+      makeNode({ kind: 'action', label: 'l1\nl2', width: 60, height: 30 }),
+      activityGreen,
+    );
+    expect(multi).toContain('fill="#008000"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T5 — every activity text is positioned by `x` (D2), never
+// `text-anchor`. `FtileBox.java:224-233` (LEFT at `padding.left`, the only
+// reachable root tier today); `FtileDiamondInside.java:94-96` /
+// `GtileHexagonInside.java:117` (geometric centring, diamond/hexagon).
+// ---------------------------------------------------------------------------
+
+describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
+  it('a single-line action label sits at rect.x + padding (LEFT, plantuml.skin:360)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', x: 50, width: 120, height: 32 }), theme);
+    expect(svg).not.toContain('text-anchor');
+    expect(svg).toContain('x="60"');
+  });
+
+  it('a multi-line action label positions EVERY line at rect.x + padding', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', x: 50, width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('text-anchor');
+    expect((svg.match(/x="60"/g) ?? []).length).toBe(2);
+  });
+
+  it('a diamond label centres on its OWN measured width (FtileDiamondInside.java:94-96)', () => {
+    const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, width: 40, height: 40 });
+    const svg = renderDiamond(node, theme);
+    const cx = node.x + node.width / 2;
+    const fontSize = 11; // plantuml.skin:370
+    const expectedX = centeredLineX(cx, measureLineWidth(theme, fontSize, 'yes'));
+    const actualX = Number(/<text x="([\d.]+)"/.exec(svg)?.[1]);
+    expect(svg).not.toContain('text-anchor');
+    expect(actualX).toBeCloseTo(expectedX, 2);
+  });
+
+  it('a labelled hexagon condition centres each line on its own width, no text-anchor', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
+    expect(svg).not.toContain('text-anchor');
+  });
+
+  it('SDL chevron labels (single and multi-line) carry no text-anchor', () => {
+    const single = renderChevronLeft(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), theme);
+    const multi = renderChevronRight(makeNode({ kind: 'action', label: 'l1\nl2', width: 60, height: 30 }), theme);
+    expect(single).not.toContain('text-anchor');
+    expect(multi).not.toContain('text-anchor');
+  });
+
+  it('a note label carries no text-anchor and sits at x + 6 (Opale.java:56, marginX1)', () => {
+    const single = renderNote(makeNode({ kind: 'note', label: 'n', x: 50, width: 60, height: 40 }), theme);
+    const multi = renderNote(makeNode({ kind: 'note', label: 'a\nb', x: 50, width: 60, height: 40 }), theme);
+    expect(single).not.toContain('text-anchor');
+    expect(multi).not.toContain('text-anchor');
+    expect(single).toContain('x="56"');
+    expect((multi.match(/x="56"/g) ?? []).length).toBe(2);
+  });
+
+  it('renderLabel throws for an "activity" sname with no width (broken caller contract)', () => {
+    expect(() => renderLabel('go', 60, 60, theme, { sname: 'activity' } as never)).toThrow(/width is required/);
   });
 });

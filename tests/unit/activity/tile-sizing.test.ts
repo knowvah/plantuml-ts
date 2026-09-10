@@ -30,6 +30,11 @@ import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
 import { GtileSpot } from '../../../src/diagrams/activity/tiles/gtile-spot.js';
 import { GtileGroup } from '../../../src/diagrams/activity/tiles/gtile-group.js';
 import type { ActivityAction, ActivityNote } from '../../../src/diagrams/activity/ast.js';
+import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { parseActivity } from '../../../src/diagrams/activity/parser.js';
+import { layoutActivity } from '../../../src/diagrams/activity/layout/tile-layout.js';
+import { astOrThrow } from '../../helpers/parse-ast.js';
 
 const THEME = resolveTheme('default');
 
@@ -83,6 +88,43 @@ describe('GtileAction — the action box measures at activity FontSize 12', () =
     const tile = new GtileAction(action('a\nb'), bounder, themed);
     expect(new Set(sizes)).toEqual(new Set([24]));
     expect(tile.height).toBe(2 * 24 + 2 * 10);
+  });
+});
+
+describe('GtileAction — the width floor resolves through activityMinimumWidth, not a fixed 120 (T2, D1)', () => {
+  it('`:3;` laid out sizes to text + 2*Padding, not the deleted 120px floor', () => {
+    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
+    // :237-243`) floors the WIDTH at the resolved `MinimumWidth`, whose
+    // unset value is 0 (`style/ValueNull.java:61-63`) -- so the jar draws
+    // this box at exactly text + 2*Padding. The jar's own
+    // `cizixu-00-koro700` golden measures `rect width="26.675"`.
+    const first = buildBlockUmls('@startuml\n:3;\n@enduml')[0];
+    if (first === undefined) throw new Error('no diagram block');
+    if (!first.ok) throw first.failure.cause;
+    const ast = astOrThrow(parseActivity(first.source), 'activity');
+    const geo = layoutActivity(ast, resolveTheme('default'), new DeterministicMeasurer());
+    const action = geo.nodes.find((n) => n.kind === 'action');
+    if (action === undefined) throw new Error('no action node in layout result');
+    expect(action.width).toBeCloseTo(26.675, 3);
+    expect(action.width).not.toBe(120);
+  });
+
+  it('a resolved `skinparam minClassWidth 200` floors the box at 200 (D1)', () => {
+    // `activityMinimumWidth` reaches the bare `theme.minimumWidth` tier
+    // (`FromSkinparamToStyle.java:241`'s empty-signature convert) -- see
+    // `activity-text-style.ts#activityMinimumWidth`.
+    const { bounder } = recordingBounder();
+    const themed: Theme = { ...THEME, minimumWidth: 200 };
+    const tile = new GtileAction(action('Hi'), bounder, themed);
+    expect(tile.width).toBe(200);
+  });
+
+  it('a label wider than the resolved floor is unaffected by it', () => {
+    const { bounder } = recordingBounder();
+    const themed: Theme = { ...THEME, minimumWidth: 50 };
+    const label = 'x'.repeat(30); // 30 * 10 = 300px measured
+    const tile = new GtileAction(action(label), bounder, themed);
+    expect(tile.width).toBe(300 + 2 * 10);
   });
 });
 

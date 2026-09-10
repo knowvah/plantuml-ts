@@ -1130,7 +1130,57 @@ Ordered by how ready they are, not by size.
   (`Display.create9`, `Swimlanes.java:285-293`) is the renderer's own
   creole seam; small.
 
-- **`activity-min-box-width`** — **BRIEFED 2026-09-09**, not executed.
+- **`activity-min-box-width`** — **EXECUTED and CLOSED 2026-09-09**, 7 of 7
+  (+ two `fix(amb-T4)` commits), branch `feat/activity-min-box-width`,
+  unmerged at close. Aggregate **48291 -> 43977 (−8.93%)**, 263 fell, 1
+  rose with a named mechanism (`simuti-16-lece058` 217 -> 219). Families:
+  `rect/@width` 822 -> 166, `text/@text-anchor` 1253 -> **0**, `text/@fill`
+  1288 -> 8, `rect/@stroke-width` 846 -> 53; `text/@x` 1449 -> 1447 only,
+  because every activity x carries the 4 px root-margin offset
+  (`activity-canvas-margin`, below) — the new text census's INSET histogram
+  is the instrument that shows placement is right (ours `10` on 906 of 917
+  boxed texts, jar 914 of 930). D3/D4 were amended mid-mission (a theme's
+  `root { FontColor / LineThickness }` beats the skin, `StyleStorage.java
+  :102-116`; flagged for review). Sibling suites unmoved (23 files / 2167
+  passed at `8aad71eb` and at HEAD). Close-out and follow-ons in
+  `plans/activity-min-box-width/README.md`; notes in `.agent-notes/amb-T6.md`.
+  Follow-ons filed here, each measured at HEAD:
+
+  - **`activity-split-connector-float-equality`** —
+    `src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.ts:6`
+    collapses the elbow only on `from.x === to.x`; at text-fitted branch
+    widths the bar centre and the middle branch centre differ by one ulp
+    (`(3*33.35+2*40+20)/2` vs `10+33.35+40+33.35/2`), so a zero-length
+    horizontal `<line>` is emitted and the arrowhead turns horizontal.
+    Upstream dedupes consecutive equal points in `Worm#addPoint`
+    (`ftile/Worm.java:253-270`) and never compares centres. Weight: `simuti`
+    +2 over its pin, two degenerate elements; `xenofo-81-rame803` carried the
+    same at T2. Small; fix is the dedupe, not an epsilon.
+  - **`activity-diamond-stroke-width`** — the plain rhombus `renderDiamond`
+    (`activity-renderer-shapes.ts`) emits NO `stroke-width`; the jar draws
+    0.5 (`FtileDiamond.java:89`, `FtileDiamondInside.java:88` apply
+    `getStyle().getStroke()`). `polygon[]/@stroke-width` 15 on 11 fixtures.
+    One site; consume `activityLineThickness(theme, 'diamond')`.
+  - **`activity-fork-bar-stroke`** — `FtileBlackBlock#drawU`
+    (`ftile/vertical/FtileBlackBlock.java:101-110`) never applies the style
+    stroke, so the jar strokes the bar at `UStroke` default 1.0 in the bar's
+    own colour (`bixefi-77-moki051`: `stroke:#555;stroke-width:1`); ours has
+    no stroke. Measure before sizing; likely `rect[]/@stroke` units on every
+    fork fixture.
+  - **`activity-diamond-font-color-skinparam`** — `skinparam activity {
+    DiamondFontColor }` has no handler (upstream `addConFont
+    ("activityDiamond", SName.diamond)`, `FromSkinparamToStyle.java:147`);
+    `dozaxu-98-xetu961`'s red condition text stays black. A `src/core`
+    handler-table key; inside the residual `text[]/@fill` 8.
+  - **`activity-theme-root-tier`** — T4b taught `activityFontColor` and
+    `activityLineThickness` to read `theme.styleOverrides.root`; the other
+    activity resolvers (`activityRoundCorner`, `activityPadding`, the font
+    sizes) still fall from bucket straight to constant and would miss a
+    theme's `root { RoundCorner / Padding / FontSize }`. No corpus fixture
+    exercises it today; pair with the `defaultTextAlignment` parse T1 filed
+    (`activityHorizontalAlignment` has one reachable tier).
+
+  Original brief summary follows, unedited.
   Brief at `plans/activity-min-box-width/README.md`: 7 tasks over 7
   batches, branch `feat/activity-min-box-width`, baseline `8aad71eb`
   (aggregate 48291). Scope grew from the filing on measurement: the floor

@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Replace `ACTION_MIN_WIDTH` with `activityMinimumWidth`; diagnose the two risers | typescript-pro | `src/diagrams/activity/tiles/gtile-action.ts`, `tests/unit/activity/activity-box-derivation.test.ts`, `tests/unit/activity/tile-sizing.test.ts`, and only where an assertion pins the 120 floor: `tests/diagrams/activity/tiles/*.test.ts`, `tests/diagrams/activity/layout/*.test.ts` | T1 | [ ] |
+| T2 | Replace `ACTION_MIN_WIDTH` with `activityMinimumWidth`; diagnose the two risers | typescript-pro | `src/diagrams/activity/tiles/gtile-action.ts`, `tests/unit/activity/activity-box-derivation.test.ts`, `tests/unit/activity/tile-sizing.test.ts`, and only where an assertion pins the 120 floor: `tests/diagrams/activity/tiles/*.test.ts`, `tests/diagrams/activity/layout/*.test.ts` | T1 | [x] |
 
 **Stop condition 7 applies here.** The orchestrator measured the floor's
 removal alone: 48291 → 47638, 207 fall, and `simuti-16-lece058` (217 → 228)

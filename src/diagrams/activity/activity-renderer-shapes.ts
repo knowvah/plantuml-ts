@@ -2,7 +2,7 @@
  * Activity node-shape rendering: per-shape SVG emitters (start/stop/end,
  * action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the
  * renderNode dispatcher and shared label/color helpers. Split out of
- * `renderer.ts` (line cap); leaf consumed by edge/swimlane rendering.
+ * `renderer.ts` (line cap); text `x` math lives in `activity-text-placement`.
  */
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
@@ -28,15 +28,21 @@ import {
   CIRCLE_LINE_THICKNESS,
   NOTE_LINE_THICKNESS,
   activityFontSize,
-  activityPadding,
+  activityLineThickness,
   activityRoundCorner,
 } from './activity-style-defaults.js';
-
-/** `rx` and `ry` are each HALF the resolved `RoundCorner`
- *  (`URectangle#build().rounded()`'s halving convention, D4). The port
- *  previously wrote a bare `rx = 8` with no `ry` at all; 8 was unsourced,
- *  and upstream's `activityDiagram { activity { RoundCorner 25 } }`
- *  (`plantuml.skin:362`) makes both axes 12.5. */
+import { activityFontColor } from './activity-text-style.js';
+import {
+  type ActivityTextOpts,
+  activityTextLineX,
+  centeredLineX,
+  measureLineWidth,
+  measureMonoLineWidth,
+} from './activity-text-placement.js';
+/** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
+ *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
+ *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
+ *  `rx = 8` with no `ry` at all. */
 function actionCornerRadius(theme: Theme): number {
   return activityRoundCorner(theme, 'activity') / 2;
 }
@@ -51,20 +57,16 @@ function actionCornerRadius(theme: Theme): number {
  * `boxoto-53-sifo232`: the jar's two label lines sit at y=139.333 and
  * y=151.333, 12.0 apart at `font-size="12"` -- an advance of EXACTLY 1x
  * font size, not the `fontSize * 1.4` this file used before T3.
- *
  * @see net/sourceforge/plantuml/klimt/drawing/font/StringBounderFromWidthTable.java:71
  *      -- `calculateDimension`'s returned height is `size` (the raw font
  *      size), unconditionally: `final double height = size;`.
  * @see net/sourceforge/plantuml/klimt/font/StringBounder.java:47 -- the
  *      default `getDescent` is `font.getSize2D() / 4.5`.
- *
  * This port's own `WidthTableMeasurer` (`src/core/measurer.ts`) already
  * carries both as `measure(text, font).height === font.size` and
  * `getDescent(font, text) === font.size / 4.5`, and sequence's own
- * multi-line note bodies already use exactly this formula
- * (`sequence-layout-events.ts#noteBodyRuns`: `lineHeight =
- * measurer.measure('M', spec).height`, `ascent = lineHeight -
- * measurer.getDescent(spec, 'M')`). Activity's per-line label advance
+ * multi-line note bodies use exactly this formula
+ * (`sequence-layout-events.ts#noteBodyRuns`). Activity's per-line advance
  * mirrors it: `ASCENT_FRACTION = 1 - 1/4.5 = 7/9`, replacing the old
  * `lh * 0.8` approximation (0.8 was already close to 7/9 ≈ 0.7778 --
  * likely someone's earlier hand-rounding of the same ratio, never cited).
@@ -73,12 +75,10 @@ const ASCENT_FRACTION = 1 - 1 / 4.5;
 
 /**
  * One `<text>` element PER LINE, never `<tspan>` (D3). Upstream draws a
- * multi-line label as N separate `<text>` draws -- there is no "one
- * `<text>` with several `<tspan>` lines" concept for a bare label; a
- * `<tspan>` is reserved for creole's own multi-STYLE-run serialisation
- * within a single line (`src/core/creole-svg.ts`, not this function's
- * concern -- none of this file's multi-line call sites carry creole
- * markup, only `\n`-split plain strings).
+ * multi-line label as N separate `<text>` draws; `<tspan>` is reserved for
+ * creole's own multi-STYLE-run serialisation within a single line
+ * (`src/core/creole-svg.ts`, not this function's concern -- none of this
+ * file's multi-line call sites carry creole markup, only `\n`-split text).
  */
 function textLines(
   lines: readonly string[],
@@ -96,24 +96,41 @@ function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: numbe
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
 }
 
-/** `fontSize` defaults to the ACTION box's resolved size: every call site
- *  in this file draws an activity-box label, and the sizer measured them at
- *  the same value (`tiles/gtile-action.ts`). The parameter exists so a
- *  caller drawing a DIFFERENT element passes that element's own resolved
- *  size rather than silently inheriting the action's. */
-export function renderLabel(label: string, cx: number, cy: number, theme: Theme, fontSize?: number): string {
-  return renderNodeLabel(label, cx, cy, theme, fontSize ?? activityFontSize(theme, 'activity'));
-}
-
-export function renderMultilineText(lines: string[], cx: number, cy: number, theme: Theme, fontSize?: number): string {
-  const size = fontSize ?? activityFontSize(theme, 'activity');
-  const y = centeredFirstBaselineY(cy, size, lines.length);
-  return textLines(lines, cx, y, size, {
-    textAnchor: 'middle',
+/** `fontSize` defaults to the action box's size (`gtile-action.ts`); a
+ *  DIFFERENT element passes its own. `opts` (`activity-text-placement.ts`)
+ *  picks both the D3 colour bucket and the D2 `x` (LEFT/CENTER/RIGHT for
+ *  `'activity'`, geometric centre for `'diamond'`). Only a `<latex>` label
+ *  still delegates to `core/latex.ts#renderNodeLabel` -- a permanent LaTeX
+ *  divergence (KaTeX, not JLaTeXMath), the sole exception here. */
+export function renderLabel(label: string, cx: number, cy: number, theme: Theme, opts: ActivityTextOpts): string {
+  const size = opts.fontSize ?? activityFontSize(theme, 'activity');
+  if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
+  const lineWidth = measureLineWidth(theme, size, label);
+  const x = activityTextLineX(theme, cx, lineWidth, opts);
+  return text(x, cy, label, {
     fontFamily: theme.fontFamily,
     fontSize: size,
-    fill: theme.colors.text,
+    fill: activityFontColor(theme, opts.sname),
   });
+}
+
+export function renderMultilineText(
+  lines: string[],
+  cx: number,
+  cy: number,
+  theme: Theme,
+  opts: ActivityTextOpts,
+): string {
+  const size = opts.fontSize ?? activityFontSize(theme, 'activity');
+  const y = centeredFirstBaselineY(cy, size, lines.length);
+  const fill = activityFontColor(theme, opts.sname);
+  return lines
+    .map((ln, i) => {
+      const lineWidth = measureLineWidth(theme, size, ln);
+      const x = activityTextLineX(theme, cx, lineWidth, opts);
+      return text(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+    })
+    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -157,18 +174,14 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const r = node.height / 2;
-  // @see net/sourceforge/plantuml/klimt/drawing/svg/DriverEllipseSvg.java --
-  // upstream's start/end/kill circles are all UEllipse shapes (equal
-  // radii), never a dedicated circle driver.
-  //
-  // `resolvePaint` here replicates exactly what `circle()`'s own
-  // `resolvePaint(style.fill)` did -- `ellipse()`'s `extraAttrs` only
-  // shortens an ALREADY-hex string (rule 2); it does not resolve a named
-  // CSS color (e.g. "blue") to hex the way `circle()`'s pipeline did via
-  // `paintToSvg`. Pre-resolving here keeps that behaviour byte-identical.
-  // `LineThickness 1` on the start/stop/end block (plantuml.skin:378). The
-  // jar draws the start terminal with BOTH a fill and a stroke in the same
-  // colour; this port drew a fill only, so the ellipse was a hair small.
+  // @see DriverEllipseSvg.java -- upstream's start/end/kill circles are all
+  // UEllipse shapes, never a dedicated circle driver. `resolvePaint` here
+  // replicates `circle()`'s own pipeline byte-identically: `ellipse()`'s
+  // `extraAttrs` only shortens an ALREADY-hex string, not a named CSS
+  // colour, the way `circle()` did via `paintToSvg`. `LineThickness 1` on
+  // the start/stop/end block (plantuml.skin:378): the jar fills AND
+  // strokes the start terminal in the same colour; this port drew a fill
+  // only, so the ellipse was a hair small.
   const ink = resolvePaint(actColors(theme).startFill).value;
   return ellipse(cx, cy, r, r, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
@@ -181,9 +194,8 @@ export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   return (
     // `stop` takes the block's own `LineThickness 1` (plantuml.skin:378);
-    // only `end` is overridden to 1.5 one block later (:383), and upstream
-    // gives the two DISTINCT StyleSignatures
-    // (`ftile/vcompact/VCompactFactory.java:97` vs `:101`).
+    // `end` alone overrides to 1.5 (:383) -- two DISTINCT StyleSignatures
+    // (`VCompactFactory.java:97` vs `:101`).
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',
       stroke: resolvePaint(c.endFill).value,
@@ -204,9 +216,8 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
   const d = r * Math.SQRT1_2;
   const endFill = actColors(theme).endFill;
   return (
-    // `activityDiagram { circle { end { LineThickness 1.5 } } }`
-    // (plantuml.skin:383) -- the `end` terminal ALONE overrides the
-    // start/stop/end block's 1.
+    // `circle { end { LineThickness 1.5 } }` (plantuml.skin:383) -- `end`
+    // alone overrides the start/stop/end block's 1.
     ellipse(cx, cy, r, r, {
       fill: 'none',
       stroke: resolvePaint(endFill).value,
@@ -229,48 +240,38 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const box = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: c.nodeBorder,
-    strokeWidth: 1,
+    strokeWidth: activityLineThickness(theme, 'activity'),
     rx: actionCornerRadius(theme),
     ry: actionCornerRadius(theme),
   });
   const label = node.label ?? '';
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
+  const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
 
-  // <code>...</code> block — render left-aligned in monospace, strip the tags.
+  // <code>...</code> block: monospace, measured like `gtile-action.ts`'s
+  // own `monoCharWidth` sizing, not the proportional table `opts` reads.
   const codeMatch = CODE_BLOCK_RE.exec(label.trim());
   if (codeMatch !== null) {
     const codeContent = codeMatch[1]!.replace(/^\n/, '').replace(/\n$/, '');
     const codeLines = codeContent.split('\n');
-    const monoFamily = 'monospace';
-    const lh = actionSize;
-    const lineY = centeredFirstBaselineY(cy, lh, codeLines.length);
-    const labelX = node.x + activityPadding('activity');
-    const labelText = textLines(codeLines, labelX, lineY, lh, {
-      textAnchor: 'start',
-      fontFamily: monoFamily,
-      fontSize: actionSize,
-      fill: theme.colors.text,
-    });
+    const lineY = centeredFirstBaselineY(cy, actionSize, codeLines.length);
+    const codeFill = activityFontColor(theme, 'activity');
+    const labelText = codeLines
+      .map((ln, i) => {
+        const w = measureMonoLineWidth(actionSize, ln);
+        const x = activityTextLineX(theme, cx, w, opts);
+        return text(x, lineY + actionSize * i, ln, { fontFamily: 'monospace', fontSize: actionSize, fill: codeFill });
+      })
+      .join('');
     return box + labelText;
   }
 
   const lines = label.split('\n');
-  let labelEl: string;
-  if (lines.length > 1) {
-    const lh = actionSize;
-    const lineY = centeredFirstBaselineY(cy, lh, lines.length);
-    const labelX = node.x + activityPadding('activity');
-    const labelText = textLines(lines, labelX, lineY, lh, {
-      textAnchor: 'start',
-      fontFamily: theme.fontFamily,
-      fontSize: actionSize,
-      fill: theme.colors.text,
-    });
-    labelEl = labelText;
-  } else {
-    labelEl = renderLabel(label, cx, cy + actionSize / 3, theme, actionSize);
-  }
+  const labelEl =
+    lines.length > 1
+      ? renderMultilineText(lines, cx, cy, theme, opts)
+      : renderLabel(label, cx, cy + actionSize / 3, theme, opts);
   return box + labelEl;
 }
 
@@ -290,44 +291,41 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
     stroke: c.diamondBorder,
   });
   if (node.label === undefined || node.label === '') return shape;
-  const label = text(cx, cy, node.label, {
+  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
+  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
+  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
+  // dimLabel.width) / 2` in this node's own frame.
+  const fontSize = activityFontSize(theme, 'diamond');
+  const lineWidth = measureLineWidth(theme, fontSize, node.label);
+  const label = text(centeredLineX(cx, lineWidth), cy, node.label, {
     fontFamily: theme.fontFamily,
-    // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370),
-    // the same value `tiles/gtile-diamond.ts` measured it at. The former
-    // `theme.fontSize - 2` reached 12, not 11.
-    fontSize: activityFontSize(theme, 'diamond'),
-    fill: theme.colors.text,
-    textAnchor: 'middle',
+    fontSize,
+    fill: activityFontColor(theme, 'diamond'),
     dominantBaseline: 'middle',
   });
   return shape + label;
 }
 
-export function renderSignalLabel(label: string, x: number, cy: number, theme: Theme): string {
-  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it
-  // resolves `SName.activity` like the plain box does
-  // (`ftile/vertical/FtileBox.java:97-99`, `:146`) -- which is also the
-  // SName `tiles/gtile-action.ts` sizes it at.
+export function renderSignalLabel(label: string, x: number, width: number, cy: number, theme: Theme): string {
+  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
+  // `SName.activity` like the plain box (`FtileBox.java:97-99`, `:146`) --
+  // the same SName `tiles/gtile-action.ts` sizes it at, and the same
+  // LEFT/CENTER/RIGHT branch (`FtileBox.java:224-233`) the action box uses.
   const size = activityFontSize(theme, 'activity');
-  const labelX = x + activityPadding('activity');
+  const cx = x + width / 2;
+  const opts: ActivityTextOpts = { sname: 'activity', fontSize: size, width };
   const lines = label.split('\n');
   if (lines.length === 1) {
-    return text(labelX, cy, label, {
-      fill: theme.colors.text,
+    const lineWidth = measureLineWidth(theme, size, label);
+    const lx = activityTextLineX(theme, cx, lineWidth, opts);
+    return text(lx, cy, label, {
+      fill: activityFontColor(theme, 'activity'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      textAnchor: 'start',
       dominantBaseline: 'central',
     });
   }
-  const lineY = centeredFirstBaselineY(cy, size, lines.length);
-  const labelText = textLines(lines, labelX, lineY, size, {
-    textAnchor: 'start',
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-    fill: theme.colors.text,
-  });
-  return labelText;
+  return renderMultilineText(lines, cx, cy, theme, opts);
 }
 
 export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
@@ -348,9 +346,9 @@ export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
       { x: x + w, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
-  return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
+  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
 }
 
 export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string {
@@ -369,9 +367,9 @@ export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string 
       { x: x + w - dent, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
-  return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
+  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
 }
 
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
@@ -388,7 +386,7 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
       { x: x + dent, y: y + h },
       { x: x, y: y + h / 2 },
     ],
-    { fill, stroke: c.diamondBorder, strokeWidth: 1 },
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
   const cx = x + w / 2;
   const cy = y + h / 2;
@@ -396,13 +394,11 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const lines = (node.label ?? '').split('\n');
   const labelEl =
     lines.length > 1
-      ? // A labelled condition. `gtile/GtileIfHexagon.java:184` and
-        // `gtile/GtileHexagonInside.java:64` resolve `of(root, element,
-        // activityDiagram, activity, diamond)` -- the same SName
-        // `tiles/gtile-diamond.ts` measured it at, so `FontSize 11`
-        // (plantuml.skin:370), not the action box's 12.
-        renderMultilineText(lines, cx, cy, theme, condSize)
-      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, condSize);
+      ? // A labelled condition: `GtileIfHexagon.java:184`/`GtileHexagonInside
+        // .java:64` resolve `of(root, element, activityDiagram, activity,
+        // diamond)`, the diamond SName -- `FontSize 11` (plantuml.skin:370).
+        renderMultilineText(lines, cx, cy, theme, { sname: 'diamond', fontSize: condSize })
+      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, { sname: 'diamond', fontSize: condSize });
   return shape + labelEl;
 }
 
@@ -420,7 +416,7 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
       { x: x + w - d, y: y + h },
       { x: x, y: y + h },
     ],
-    { fill, stroke: c.nodeBorder, strokeWidth: 1 },
+    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
   const cx = x + w / 2;
   const cy = y + h / 2;
@@ -428,12 +424,11 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
   const lines = (node.label ?? '').split('\n');
   const labelEl =
     lines.length > 1
-      ? // `BoxStyle.SDL_SAVE` (`ftile/BoxStyle.java:73`) is still an
-        // `FtileBox`, so it resolves `SName.activity` like the plain box
-        // (`ftile/vertical/FtileBox.java:97-99`) -- the same SName
-        // `tiles/gtile-action.ts` measured it at.
-        renderMultilineText(lines, cx, cy, theme, boxSize)
-      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, boxSize);
+      ? // `BoxStyle.SDL_SAVE` (`BoxStyle.java:73`) is still an `FtileBox`, so
+        // it resolves `SName.activity` like the plain box (`FtileBox.java
+        // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
+        renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize, width: w })
+      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize, width: w });
   return shape + labelEl;
 }
 
@@ -441,12 +436,10 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const noteFill = theme.colors.noteBackground;
   const stroke = theme.colors.border;
-  // The ROOT `note { FontSize 13; LineThickness 0.5 }` block
-  // (plantuml.skin:323,325). An activity note resolves `SName.note` under
-  // `activityDiagram` (`ftile/vcompact/FtileWithNoteOpale.java:89`,
-  // `ftile/vcompact/FtileNoteAlone.java:77`) and `activityDiagram { }`
-  // declares no `note` override, so the root values stand. This is the
-  // same size `tiles/gtile-note.ts` measured the box at.
+  // The ROOT `note { FontSize 13; LineThickness 0.5 }` block (plantuml.skin
+  // :323,325): an activity note resolves `SName.note` under `activityDiagram`
+  // (`FtileWithNoteOpale.java:89`, `FtileNoteAlone.java:77`), which declares
+  // no `note` override, so root stands -- the size `gtile-note.ts` measured.
   const noteSize = activityFontSize(theme, 'note');
   // Opale balloon spike geometry (matches Opale.java: delta=4, cornersize=NOTE_FOLD)
   const DELTA = 4;
@@ -492,18 +485,20 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
 
   const label = node.label ?? '';
   const lines = label.split('\n');
-  const labelX = x + 4;
+  // `Opale.java:56` -- `marginX1 = 6`; `:127` --
+  // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
+  // unsourced `x + 4`.
+  const labelX = x + 6;
   let labelEl: string;
   if (lines.length > 1) {
     labelEl = textLines(lines, labelX, y + NOTE_FOLD + noteSize, noteSize, {
-      textAnchor: 'start',
       fontFamily: theme.fontFamily,
       fontSize: noteSize,
-      fill: theme.colors.text,
+      fill: activityFontColor(theme, 'note'),
     });
   } else {
     labelEl = text(labelX, y + NOTE_FOLD + noteSize, label, {
-      fill: theme.colors.text,
+      fill: activityFontColor(theme, 'note'),
       fontFamily: theme.fontFamily,
       fontSize: noteSize,
     });

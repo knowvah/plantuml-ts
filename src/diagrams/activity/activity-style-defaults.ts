@@ -60,8 +60,10 @@ export type ActivitySName = 'activity' | 'activityBar' | 'arrow' | 'circle' | 'c
 
 /** The bucket key for an SName. The shared bucket map is keyed by the
  * LOWERCASED sname (`skinparam-element-buckets.ts`'s own allowlist spells
- * `activitybar`), so `activityBar` must be folded before lookup. */
-function bucketKey(sname: ActivitySName): string {
+ * `activitybar`), so `activityBar` must be folded before lookup. Exported
+ * for `activity-text-style.ts` (mission `activity-min-box-width`, T1) --
+ * one folding rule, not a second copy. */
+export function bucketKey(sname: ActivitySName): string {
   return sname.toLowerCase();
 }
 
@@ -192,28 +194,54 @@ export const SWIMLANE_LINE_THICKNESS = 1.5;
  * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:325 */
 export const NOTE_LINE_THICKNESS = 0.5;
 
-/** The root block's own `LineThickness 1.0` — what an activity element that
- * declares none of its own inherits. `activity`, `activityBar` and
- * `diamond` are all in that position: each declares only a FontSize,
- * BackgroundColor or RoundCorner inside `activityDiagram { }`.
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:15 */
-export const ROOT_LINE_THICKNESS = 1;
+/** `element { LineThickness 0.5 }` — beats the root block's own
+ * `LineThickness 1.0` (`:15`) for every SName whose upstream signature
+ * contains `SName.element`, via the file-order `OVERWRITE_EXISTING_VALUE`
+ * merge (`style/StyleStorage.java:102-116`). `activity`
+ * (`ftile/vertical/FtileBox.java:97-99`), `diamond`
+ * (`ftile/FtileFactoryDelegator.java:80`) and `activityBar`
+ * (`ftile/vertical/FtileBlackBlock.java:97-99`) each declare no
+ * LineThickness of their own and each signature carries `SName.element`
+ * (D4), so all three resolve here, not to the root's 1.0.
+ * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:93 */
+export const ELEMENT_LINE_THICKNESS = 0.5;
 
 const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
-  activity: ROOT_LINE_THICKNESS,
-  activityBar: ROOT_LINE_THICKNESS,
+  activity: ELEMENT_LINE_THICKNESS,
+  activityBar: ELEMENT_LINE_THICKNESS,
   arrow: ARROW_LINE_THICKNESS,
   circle: CIRCLE_LINE_THICKNESS,
   composite: COMPOSITE_LINE_THICKNESS,
-  diamond: ROOT_LINE_THICKNESS,
+  diamond: ELEMENT_LINE_THICKNESS,
   note: NOTE_LINE_THICKNESS,
 };
 
-/** The resolved stroke width for one activity element kind. For the `end`
- * terminal specifically, use {@link CIRCLE_END_LINE_THICKNESS} — it is a
- * distinct upstream signature, not a variant of `circle`. */
+/**
+ * The resolved stroke width for one activity element kind: the user's
+ * bucket override, else a theme's or diagram `<style>`'s own `root {
+ * LineThickness ... }`, else this module's declared default.
+ *
+ * The root tier exists for the same reason {@link activityFontColor}'s does
+ * (`activity-text-style.ts`): `element { LineThickness 0.5 }`
+ * (`plantuml.skin:93`, D4) beats the skin's own root `1.0`, but a theme's or
+ * `<style>`'s `root { }` is merged AFTER `element` in file order with
+ * `OVERWRITE_EXISTING_VALUE` (`style/StyleStorage.java:102-116`) and so
+ * beats IT in turn — `puml-theme-amiga.puml:39`'s `root { LineThickness 1 }`
+ * draws `!theme amiga`'s boxes at 1, not the `element` tier's 0.5 (D4,
+ * amended). Read via `theme.styleOverrides.root.linethickness`
+ * (`theme.ts:55`), a raw string parsed with `Number.parseFloat` — an absent
+ * or non-numeric value fails `Number.isFinite` and falls through.
+ *
+ * For the `end` terminal specifically, use
+ * {@link CIRCLE_END_LINE_THICKNESS} — it is a distinct upstream signature,
+ * not a variant of `circle`.
+ */
 export function activityLineThickness(theme: Theme, sname: ActivitySName): number {
-  return resolveElementLineThickness(theme, bucketKey(sname)) ?? LINE_THICKNESS_DEFAULTS[sname];
+  const bucket = resolveElementLineThickness(theme, bucketKey(sname));
+  if (bucket !== undefined) return bucket;
+  const rootOverride = Number.parseFloat(theme.styleOverrides?.['root']?.['linethickness'] ?? '');
+  if (Number.isFinite(rootOverride)) return rootOverride;
+  return LINE_THICKNESS_DEFAULTS[sname];
 }
 
 export function swimlaneLineThickness(theme: Theme): number {
@@ -377,9 +405,11 @@ export const SWIMLANE_TITLE_FONT_COLOR = resolveColorToSvgHex('black');
  * shared `Paint` type because the bucket is a general per-SName map; no
  * corpus fixture sets a gradient `LineColor`/`FontColor` on a swimlane
  * divider or title, so a Gradient here falls through to the next cascade
- * tier rather than the resolver throwing or drawing it.
+ * tier rather than the resolver throwing or drawing it. Exported for
+ * `activity-text-style.ts`'s `activityFontColor` (mission
+ * `activity-min-box-width`, T1, D3) — same `Paint`-string-only handling.
  */
-function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
+export function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
   return typeof paint === 'string' ? resolveColorToSvgHex(paint) : undefined;
 }
 

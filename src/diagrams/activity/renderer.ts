@@ -13,6 +13,7 @@ import {} from '../../core/latex.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityFontColor } from './activity-text-style.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -85,11 +86,14 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
       fill: color,
       stroke: 'none',
     });
-    const labelEl = text(midX, midY, label, {
-      fill: theme.colors.text,
+    // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
+    // function's own padding, two lines up), so the centring offset that
+    // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
+    // algebra on the existing estimate, not a new guess.
+    const labelEl = text(pillX + 4, midY, label, {
+      fill: activityFontColor(theme, 'arrow'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      textAnchor: 'middle',
       dominantBaseline: 'central',
     });
     return background + labelEl;
@@ -97,7 +101,7 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
 
   // No color: plain text label offset slightly from the midpoint
   return text(midX + 4, midY - 4, label, {
-    fill: theme.colors.text,
+    fill: activityFontColor(theme, 'arrow'),
     fontFamily: theme.fontFamily,
     fontSize: size,
   });

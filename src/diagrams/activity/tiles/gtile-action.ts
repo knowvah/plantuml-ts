@@ -5,15 +5,7 @@ import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityBoxHeight, activityFontSize, activityPadding } from '../activity-style-defaults.js';
-
-/** This port's own minimum box width. Upstream's floor is `PName
- *  .MinimumWidth`, whose unset value is `0`
- *  (`style/ValueNull.java:61-63`), so the jar imposes no width floor on an
- *  action box at all. Left in place by `activity-style-defaults` T4, whose
- *  scope is the HEIGHT derivation (D8): removing a 120px width floor is a
- *  large independent geometric move that would confound that measurement.
- *  Unsourced, and recorded as such. */
-const ACTION_MIN_WIDTH = 120;
+import { activityMinimumWidth } from '../activity-text-style.js';
 
 export class GtileAction extends TileLeaf {
   readonly kind = 'gtile-action' as const;
@@ -58,7 +50,14 @@ export class GtileAction extends TileLeaf {
     // the jar emits (D8): 32 is what this derivation RETURNS for one line
     // at FontSize 12 and Padding 10, which is corroboration, not a source.
     const pad = activityPadding('activity');
-    this.width = Math.max(maxWidth + 2 * pad, ACTION_MIN_WIDTH);
+    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
+    // :237-243`) adds Padding to both axes and floors the WIDTH only via
+    // `dimRaw.atLeast(minimumWidth, 0)`; `minimumWidth` resolves through
+    // the shared `<style>`/`skinparam minClassWidth` cascade
+    // (`activityMinimumWidth`, D1), whose own unset default is 0
+    // (`style/ValueNull.java:61-63`) -- so by default this box imposes no
+    // width floor at all, matching the jar.
+    this.width = Math.max(maxWidth + 2 * pad, activityMinimumWidth(theme));
     this.height = activityBoxHeight(lineHeight * lineCount, 'activity');
   }
 

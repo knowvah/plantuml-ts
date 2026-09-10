@@ -7,7 +7,7 @@ its box, so T4 and T5 would be individually unattributable.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Pin the pre-change text census | orchestrator | `oracle/goldens/svg-activity/text-baseline.json`, `tests/oracle/svg-conformance/text-census.ts`, `tests/oracle/svg-conformance/activity.text-baseline.test.ts`, `.agent-notes/amb-T0.md` | — | [ ] |
+| T0 | Pin the pre-change text census | orchestrator | `oracle/goldens/svg-activity/text-baseline.json`, `tests/oracle/svg-conformance/text-census.ts`, `tests/oracle/svg-conformance/activity.text-baseline.test.ts`, `.agent-notes/amb-T0.md` | — | [x] |
 
 **Orchestrator-executed.** `scripts/repin-sequence-baselines.ts:3-8`
 reserves baseline JSON writes to the orchestrator.

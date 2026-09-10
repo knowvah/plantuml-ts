@@ -25,6 +25,7 @@ import {
   CIRCLE_LINE_THICKNESS,
   COMPOSITE_LINE_THICKNESS,
   DIAMOND_FONT_SIZE,
+  ELEMENT_LINE_THICKNESS,
   NOTE_FONT_SIZE,
   NOTE_LINE_THICKNESS,
   SWIMLANE_BORDER_COLOR,
@@ -41,6 +42,12 @@ import {
   swimlaneTitleFontColor,
   swimlaneTitleFontSize,
 } from '../../../src/diagrams/activity/activity-style-defaults.js';
+import {
+  ACTIVITY_FONT_COLOR,
+  activityFontColor,
+  activityHorizontalAlignment,
+  activityMinimumWidth,
+} from '../../../src/diagrams/activity/activity-text-style.js';
 
 const DEFAULT = resolveTheme('default');
 
@@ -62,6 +69,15 @@ function themeWithActivitySwimlane(overrides: Partial<NonNullable<Theme['colors'
     ...DEFAULT,
     colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, activity: overrides } },
   };
+}
+
+/** A theme carrying a `root { ... }` style override, standing in for the
+ * `!theme amiga`/`<style> root { ... }` merge T4b wires (D3/D4, amended):
+ * `theme.styleOverrides.root`, the same shape `themes-builtin-a-m.ts`'s
+ * `amiga` entry and `skin-loader.ts`'s `<style>` path populate — lowercase
+ * property names, raw string values (mission `activity-min-box-width`, T4b). */
+function themeWithRootStyleOverride(root: Record<string, string>): Theme {
+  return { ...DEFAULT, styleOverrides: { root } };
 }
 
 describe('the ported plantuml.skin constants', () => {
@@ -108,6 +124,14 @@ describe('the ported plantuml.skin constants', () => {
   it('matches the ROOT `note { FontSize 13; LineThickness 0.5 }` block', () => {
     expect(NOTE_FONT_SIZE).toBe(13); // plantuml.skin:323
     expect(NOTE_LINE_THICKNESS).toBe(0.5); // plantuml.skin:325
+  });
+
+  it('matches `element { LineThickness 0.5 }`, which beats the root 1.0 (D4)', () => {
+    // plantuml.skin:93. File-order OVERWRITE_EXISTING_VALUE merge
+    // (StyleStorage.java:102-116) lets `element` beat root :15 for every
+    // signature containing `SName.element`.
+    expect(ELEMENT_LINE_THICKNESS).toBe(0.5);
+    expect(ELEMENT_LINE_THICKNESS).not.toBe(1);
   });
 });
 
@@ -180,16 +204,55 @@ describe('activityLineThickness — default tier', () => {
     expect(activityLineThickness(DEFAULT, 'note')).toBe(0.5);
   });
 
-  it('an element declaring none inherits the root `LineThickness 1.0`', () => {
-    // plantuml.skin:15. `activity`, `activityBar` and `diamond` each
-    // declare only a FontSize/BackgroundColor/RoundCorner of their own.
-    expect(activityLineThickness(DEFAULT, 'activity')).toBe(1);
-    expect(activityLineThickness(DEFAULT, 'diamond')).toBe(1);
-    expect(activityLineThickness(DEFAULT, 'activityBar')).toBe(1);
+  it('an element declaring none of its own resolves the `element` tier 0.5, not the root 1.0 (D4)', () => {
+    // `activity` (FtileBox.java:97-99), `diamond`
+    // (FtileFactoryDelegator.java:80) and `activityBar`
+    // (FtileBlackBlock.java:97-99) each declare only a
+    // FontSize/BackgroundColor/RoundCorner of their own, and each
+    // signature carries `SName.element` (plantuml.skin:91-93), which beats
+    // the root's `LineThickness 1.0` (:15).
+    expect(activityLineThickness(DEFAULT, 'activity')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'diamond')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'activityBar')).toBe(0.5);
+    expect(activityLineThickness(DEFAULT, 'activity')).not.toBe(1);
   });
 
   it('a swimlane is 1.5', () => {
     expect(swimlaneLineThickness(DEFAULT)).toBe(1.5);
+  });
+});
+
+describe('activityLineThickness — root style-override tier (T4b, D4 amended)', () => {
+  it('is unmoved when no root override is set', () => {
+    expect(activityLineThickness(DEFAULT, 'activity')).toBe(0.5);
+  });
+
+  it('`root { LineThickness 1 }` beats the `element` default of 0.5 for activity/diamond/activityBar', () => {
+    // puml-theme-amiga.puml:39, merged AFTER `element` in file order
+    // (StyleStorage.java:102-116, OVERWRITE_EXISTING_VALUE).
+    const theme = themeWithRootStyleOverride({ linethickness: '1' });
+    expect(activityLineThickness(theme, 'activity')).toBe(1);
+    expect(activityLineThickness(theme, 'diamond')).toBe(1);
+    expect(activityLineThickness(theme, 'activityBar')).toBe(1);
+  });
+
+  it('a root override also reaches a kind whose OWN default is not `element` (arrow stays declared, not moved by accident)', () => {
+    // arrow's own activityDiagram { arrow { LineThickness 1 } } already
+    // resolves to 1 with no override, so this only proves the cascade path
+    // is exercised, not that arrow moved.
+    const theme = themeWithRootStyleOverride({ linethickness: '3' });
+    expect(activityLineThickness(theme, 'arrow')).toBe(3);
+  });
+
+  it('a bucket LineThickness of 3 still wins over a root override of 1', () => {
+    const theme: Theme = { ...themeWithRootStyleOverride({ linethickness: '1' }), colors: DEFAULT.colors };
+    theme.colors = { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, activity: { lineThickness: 3 } } };
+    expect(activityLineThickness(theme, 'activity')).toBe(3);
+  });
+
+  it('a non-numeric or absent root value falls through to the SName default', () => {
+    expect(activityLineThickness(themeWithRootStyleOverride({}), 'activity')).toBe(0.5);
+    expect(activityLineThickness(themeWithRootStyleOverride({ linethickness: 'bold' }), 'note')).toBe(0.5);
   });
 });
 
@@ -212,7 +275,7 @@ describe('the override tier wins over the default (D2)', () => {
     expect(activityFontSize(themeWithBucket('diamond', { fontSize: 40 }), 'diamond')).toBe(40);
   });
 
-  it('a user activity lineThickness of 3 beats the inherited root 1', () => {
+  it('a user activity lineThickness of 3 beats the built-in element-tier 0.5', () => {
     expect(activityLineThickness(themeWithBucket('activity', { lineThickness: 3 }), 'activity')).toBe(3);
   });
 
@@ -309,5 +372,122 @@ describe('swimlane title & border resolvers (T2, D4)', () => {
     const theme = themeWithBucket('swimlane', {});
     theme.colors.elements!.swimlane = { border: { color1: '#FFF', color2: '#000', policy: '-' } };
     expect(swimlaneBorderColor(theme)).toBe(SWIMLANE_BORDER_COLOR);
+  });
+});
+
+describe('activityMinimumWidth (mission activity-min-box-width, T1, D1)', () => {
+  it('the default theme floors nothing — FtileBox.java:87 initialises the field to 0', () => {
+    expect(activityMinimumWidth(DEFAULT)).toBe(0);
+  });
+
+  it('a bare `skinparam minClassWidth 200` floors the box (FromSkinparamToStyle.java:241)', () => {
+    // `addConvert("MinClassWidth", PName.MinimumWidth)` registers with NO
+    // SName arguments, so `StyleStorage`'s empty-key match reaches the
+    // activity box too (D1) — the bare `theme.minimumWidth` tier.
+    const theme: Theme = { ...DEFAULT, minimumWidth: 200 };
+    expect(activityMinimumWidth(theme)).toBe(200);
+  });
+
+  it('a `<style> activity { MinimumWidth 150 }` bucket wins over a bare 200', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      minimumWidth: 200,
+      colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150 } } },
+    };
+    expect(activityMinimumWidth(theme)).toBe(150);
+  });
+
+  it('never returns undefined — resolveElementMinimumWidth‘s ?? 0 is this module’s job', () => {
+    expect(typeof activityMinimumWidth(DEFAULT)).toBe('number');
+  });
+});
+
+describe('activityFontColor (mission activity-min-box-width, T1, D3)', () => {
+  it('the default is the root `FontColor black` (plantuml.skin:9), same shape as swimlaneTitleFontColor', () => {
+    expect(activityFontColor(DEFAULT, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+  });
+
+  it('every ActivitySName defaults to the same black — no per-site constant (D3)', () => {
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(activityFontColor(DEFAULT, sname)).toBe('#000000');
+    }
+  });
+
+  it('`<style> activityDiagram { activity { FontColor red } }` colours only `activity`', () => {
+    const theme = themeWithBucket('activity', { font: 'red' });
+    expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'diamond')).toBe('#000000');
+  });
+
+  it('`activityBar` folds to the lowercased bucket key the allowlist spells', () => {
+    const theme = themeWithBucket('activitybar', { font: 'blue' });
+    expect(activityFontColor(theme, 'activityBar')).toBe('#0000FF');
+  });
+
+  it('a Gradient bucket Paint is not a solid colour and falls through to the constant', () => {
+    const theme = themeWithBucket('activity', {});
+    theme.colors.elements!.activity = { font: { color1: '#FFF', color2: '#000', policy: '-' } };
+    expect(activityFontColor(theme, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+
+  it('never returns undefined — supplying the default is this module’s job', () => {
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(typeof activityFontColor(DEFAULT, sname)).toBe('string');
+    }
+  });
+});
+
+describe('activityFontColor — root style-override tier (T4b, D3 amended)', () => {
+  it('is unmoved when no root override is set', () => {
+    expect(activityFontColor(DEFAULT, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+
+  it('`root { FontColor #FFFFFF }` beats the skin black default for every sname', () => {
+    // puml-theme-amiga.puml:35, merged AFTER plantuml.skin in file order
+    // (StyleStorage.java:102-116, OVERWRITE_EXISTING_VALUE). The SVG
+    // emission layer's shortenColor (svg.ts#resolvePaint) is what turns
+    // this into the jar's `#FFF` at write time -- this resolver's contract
+    // is the same unshortened form every other constant here returns.
+    const theme = themeWithRootStyleOverride({ fontcolor: '#FFFFFF' });
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(activityFontColor(theme, sname)).toBe('#FFFFFF');
+    }
+  });
+
+  it('a bucket FontColor of red still wins over a root override of white', () => {
+    const theme: Theme = {
+      ...themeWithRootStyleOverride({ fontcolor: '#FFFFFF' }),
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, activity: { font: 'red' } } },
+    };
+    expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'diamond')).toBe('#FFFFFF');
+  });
+
+  it('an absent root fontcolor falls through to the skin black default', () => {
+    expect(activityFontColor(themeWithRootStyleOverride({}), 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+});
+
+describe('activityHorizontalAlignment (mission activity-min-box-width, T1, D2)', () => {
+  it('the default theme resolves the root `HorizontalAlignment left` (plantuml.skin:12)', () => {
+    expect(activityHorizontalAlignment(DEFAULT)).toBe('left');
+  });
+
+  it('is unmoved by fields the alignment cascade does not read', () => {
+    // Neither cascade tier is reachable today (filed in the module's own
+    // doc comment): `ElementColors` carries no alignment role and
+    // `skinparam defaultTextAlignment` is unparsed anywhere in `src/core`.
+    // A bucket/minimumWidth change must not accidentally move alignment.
+    const theme: Theme = {
+      ...DEFAULT,
+      minimumWidth: 200,
+      colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150, font: 'red' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('left');
+  });
+
+  it('never returns undefined — supplying the default is this module’s job', () => {
+    expect(typeof activityHorizontalAlignment(DEFAULT)).toBe('string');
   });
 });
