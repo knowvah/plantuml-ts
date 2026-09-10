@@ -127,9 +127,57 @@ Measurement between tasks (orchestrator): the probe in
 - [x] Batch 2 — T3
 - [x] Batch 3 — T4
 - [x] Batch 4 — T5 (resumed 2026-09-10 after the stop-11 amendment)
-- [ ] Batch 5 — T6
+- [x] Batch 5 — T6
 
-## Status — halted 2026-09-10 on stop 11, then RESUMED after the amendment (history kept below)
+## Close-out — 2026-09-10
+
+Executed on `feat/activity-klimt-compress` (T0–T6, 7/7). Halted once at T5 on
+stop 11; the human amended it (a new overlap counts only between two shapes
+that both occupy on the moved axis — `Worm.java:159-168`,
+`UGraphicCompressOnXorY.java:100-112`) and T5 resumed from `akc/T5-wip`.
+Two orchestrator review fixes landed on the way: `c744c255` (lane titles
+occupy on Y through the ON_X compressor's `CenteredText` expansion) and
+`99c473c4` (`overlaps()` measured text boxes from the top, not the baseline).
+
+### Exit bar, scored
+
+| bar | result |
+|---|---|
+| Σ `weightedScore` falls against 42511 | **NOT MET: 42511 → 52954 (+24.6%)**, subset 6752 → 8709. The rise is T1's alone (+10445): `ArrowsRegular` makes our heads pair per index with the jar's (up to 8 diffs each instead of one count mismatch) and every tip stays offset by the unported root margin. T5 moved the score −2 against the post-T1 state (6 rose / 14 fell / 248 unchanged). |
+| `rect[]/@x`, `text[]/@x`, `line[]/@x1`/`@x2`, `svg/@width` fall | **NOT MET on the score** (920, 1455, 2705 / 2704, 266 → 265): the comparator is blind to magnitude. **Met on magnitude**: mean \|ours − jar\| over the 32 fork/split fixtures `rect@x` 57.65 → 22.04 px, `text@x` 95.04 → 38.57, `line@x1` 170.03 → 108.03, `svg@width` 106.72 → 38.56; y families flat. `polygon[]/@points` 1722 → 230 (T1). `rect[]/@width` 149 → 132. |
+| Zero unexplained rises | Met: 253 T1 risers (pre-named), 6 T5 risers each journaled (`racana` +9, `leduvi` +5, `cifafo` +3, `fatuzu` +2, `pujozo` +2, `sopape` +1 — small Y removals crossing the positional pairing). |
+| Re-pinned baselines diffed, risers named | Met: diff 253 rose (T1 class) / 3 fell (strictuml, `ArrowsTriangle`); style census 176 moved (canvas only; 0 line-count or textCount changes; canvas width 36 toward / 48 away — the 48 were already narrower than the jar by 14–125 px for structures we do not draw, and our whitespace compressed as the jar's does); text census 20 moved (insets only); swimlane census on lane widths 18 closer / 6 farther / 36 same, 16 exact matches (farther: `maketa` and `rujuxa`/`lukoxa`/`samavi` = the parser lane-capture defect and the filed if-connector shape leaving whitespace beside our diamonds; `bideta` = the off-canvas arrowhead, widths unchanged; `ruzica` −2 on a lane already 48 off). |
+| Sibling suites unmoved | Met: 23 files / 2167 passed / 1 pending at `fa578b8a` and at HEAD, identical per file. |
+| Invariant test green on all 268 | Met (amended form): 0 throws, 0 hard violations, 7 allowed pairs pinned by fixture. |
+| Four gates green | Met: typecheck, lint, build; `npm test` 708 files / 19572 passed. |
+
+Targets: `zizaki` bar 103.4 wide with boxes at 24 / 68.7 (jar 28 / 72.7 −4
+margin), `simuti` branches 10 apart, `bixefi` lane 3 158.175 and bar 148.175
+— the jar's numbers exactly. `removed` over 268: x 5827.175 (85 fixtures),
+y 2117 (160). Gate wall-clock median 5.003 s vs T0 4.40 s (max test 419 ms).
+
+### Premises measured false
+
+- Stop 11 ("no new overlap") is not a jar invariant for non-occupying
+  shapes; amended.
+- T3's brief grouped split lines with fork bars and cited `FtileIfDown`
+  reservations for our `if`s; the Java says `ULine` (no occupancy) and a
+  bypass route our walker never builds.
+- T0 predicted `nomeco` Y −20 and `bixefi`/`pujozo` Y 0; the `while`
+  reservation splits the gap (2) and the title band's ends reserve only 2 px
+  (0 once titles occupy on Y).
+- The exit bar's score reference: after T1 the comparator regime changed;
+  the families cannot register a 57 → 22 px convergence.
+
+### Follow-ons (filed in `planning/next-missions.md`)
+
+`activity-arrows-triangle`, `activity-edge-label-width`,
+`activity-branch-vertical-pitch`, `activity-off-canvas-arrowhead`; the
+parser lane-capture defect now also owns the 7 pinned overlaps; `Recentred`
+stays with `activity-canvas-margin`.
+
+### Halt record (kept)
+
 
 **Completed:** T0–T4 (batches 0–3) on `feat/activity-klimt-compress`, plus two
 review fixes (`c744c255` lane titles occupy on Y; `99c473c4` `overlaps()`
