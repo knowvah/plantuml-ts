@@ -61,4 +61,14 @@ export class GtileSpot extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:117
+   *   -- `calculateDimensionFtile` uses the five-argument `FtileGeometry`
+   *   constructor with `outY = SIZE`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

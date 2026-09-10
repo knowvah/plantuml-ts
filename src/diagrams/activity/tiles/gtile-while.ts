@@ -52,4 +52,15 @@ export class GtileWhile extends TileComposite {
       }
     }
   }
+
+  /**
+   * Unconditionally `true`: the exit is the header diamond's own "false"
+   * path, independent of whether the loop body itself has an out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:576-591
+   *   -- `calculateDimensionFtile` unconditionally builds the five-argument
+   *   `FtileGeometry` with `outY = height`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

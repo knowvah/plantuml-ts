@@ -158,6 +158,45 @@ describe('layoutActivity — existing renderer tests still work', () => {
     expect(kinds).toContain('fork-bar');
     expect(kinds).toContain('join-bar');
   });
+
+  // apc-T3 (D4): split draws a thin LINE, not a rect bar, and its own
+  // node kinds (`split-bar`/`split-join-bar`), distinct from fork's.
+  it('split with every branch continuing produces split-bar and split-join-bar nodes', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'split',
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const kinds = geo.nodes.map((n) => n.kind);
+    expect(kinds).toContain('split-bar');
+    expect(kinds).toContain('split-join-bar');
+    expect(kinds).not.toContain('fork-bar');
+    expect(kinds).not.toContain('join-bar');
+  });
+
+  it('split with every branch detached (stop) produces split-bar but NO split-join-bar', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'split',
+          branches: [
+            [{ kind: 'action', label: 'branch A' }, { kind: 'stop' }],
+            [{ kind: 'action', label: 'branch B' }, { kind: 'stop' }],
+          ],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const kinds = geo.nodes.map((n) => n.kind);
+    expect(kinds).toContain('split-bar');
+    expect(kinds).not.toContain('split-join-bar');
+  });
 });
 
 // ---------------------------------------------------------------------------

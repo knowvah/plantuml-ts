@@ -47,6 +47,10 @@ describe('GtileStart', () => {
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
     expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 10, y: 20 });
   });
+
+  it('hasPointOut() === true (FtileCircleStart.java:91, 5-arg ctor)', () => {
+    expect(tile.hasPointOut()).toBe(true);
+  });
 });
 
 describe('GtileStop', () => {
@@ -82,6 +86,10 @@ describe('GtileStop', () => {
 
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
     expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 14, y: 28 });
+  });
+
+  it('hasPointOut() === false (FtileCircleStop.java:93, 4-arg ctor); also what detach builds', () => {
+    expect(tile.hasPointOut()).toBe(false);
   });
 });
 
@@ -119,6 +127,10 @@ describe('GtileEnd', () => {
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
     expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 14, y: 28 });
   });
+
+  it('hasPointOut() === false (FtileCircleEndCross.java:121, 4-arg ctor)', () => {
+    expect(tile.hasPointOut()).toBe(false);
+  });
 });
 
 describe('GtileBreak', () => {
@@ -155,6 +167,10 @@ describe('GtileBreak', () => {
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
     expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 10, y: 20 });
   });
+
+  it('hasPointOut() === false (FtileBreak.java:63, withoutPointOut())', () => {
+    expect(tile.hasPointOut()).toBe(false);
+  });
 });
 
 describe('GtileKill', () => {
@@ -190,5 +206,9 @@ describe('GtileKill', () => {
 
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
     expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 14, y: 28 });
+  });
+
+  it('hasPointOut() === false (FtileKilled.java:71-74, 3-arg dimension ctor)', () => {
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

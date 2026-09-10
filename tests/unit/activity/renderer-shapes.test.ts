@@ -23,6 +23,7 @@ import {
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
+import { renderBar, renderSplitLine } from '../../../src/diagrams/activity/activity-renderer-bars.js';
 import { GtileAction } from '../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileDiamond } from '../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
@@ -421,5 +422,49 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 
   it('renderLabel throws for an "activity" sname with no width (broken caller contract)', () => {
     expect(() => renderLabel('go', 60, 60, theme, { sname: 'activity' } as never)).toThrow(/width is required/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// renderBar / renderSplitLine (apc-T3, activity-renderer-bars.ts) --
+// FtileBlackBlock.java:101-110 (fork/join bar) vs FtileThinSplit.java
+// :87-96 (split top/join line): two different shapes for two different
+// upstream tiles, dispatched on node.kind by `renderNode`.
+// ---------------------------------------------------------------------------
+
+describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
+  it('renders a rounded rect, fill only, no stroke attribute', () => {
+    const svg = renderBar(makeNode({ kind: 'fork-bar', x: 10, y: 20, width: 100, height: 6 }), theme);
+    expect(svg).toContain('<rect');
+    expect(svg).toContain('x="10"');
+    expect(svg).toContain('y="20"');
+    expect(svg).toContain('width="100"');
+    expect(svg).toContain('height="6"');
+    expect(svg).toContain('rx="2.5"');
+    expect(svg).toContain('ry="2.5"');
+    expect(svg).not.toContain('stroke=');
+  });
+
+  it('fill defaults to the resolved activityBar colour, not theme.colors.border', () => {
+    const svg = renderBar(makeNode({ kind: 'join-bar', width: 50, height: 6 }), theme);
+    expect(svg).toContain('fill="#555"');
+    expect(svg).not.toContain(`fill="${theme.colors.border}"`);
+  });
+});
+
+describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
+  it('renders a <line> from x,y to x+width,y (top of its band, not centred)', () => {
+    const svg = renderSplitLine(makeNode({ kind: 'split-bar', x: 32.675, y: 55, width: 86.7 }), theme);
+    expect(svg).toContain('<line');
+    expect(svg).toContain('x1="32.675"');
+    expect(svg).toContain('y1="55"');
+    expect(svg).toContain('x2="119.375"');
+    expect(svg).toContain('y2="55"');
+  });
+
+  it('stroke-width is 1.5 (FtileThinSplit.java:95), colour is the theme arrow colour', () => {
+    const svg = renderSplitLine(makeNode({ kind: 'split-join-bar', x: 0, y: 0, width: 40 }), theme);
+    expect(svg).toContain('stroke-width="1.5"');
+    expect(svg).toContain(`stroke="${theme.colors.arrow}"`);
   });
 });

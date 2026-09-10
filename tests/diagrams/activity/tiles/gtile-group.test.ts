@@ -24,12 +24,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number): Tile {
+function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -115,5 +116,21 @@ describe('GtileGroup — hooks', () => {
 
   it('WEST_HOOK.x === 0', () => {
     expect(tile.getCoord(WEST_HOOK).x).toBe(0);
+  });
+});
+
+// FtileGroup.java:190-201 `calculateDimensionFtile`: `if
+// (orig.hasPointOut()) return ...outY...; return ...(no outY)`, i.e. a
+// group/partition frame passes its single body's hasPointOut straight
+// through.
+describe('GtileGroup — hasPointOut() passes through the body', () => {
+  it('is true when the body has an out point', () => {
+    const tile = new GtileGroup('G', makeTile(80, 40, true), bounder, theme);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is false when the body has none (e.g. ends in a stop)', () => {
+    const tile = new GtileGroup('G', makeTile(80, 40, false), bounder, theme);
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

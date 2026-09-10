@@ -28,4 +28,14 @@ export class GtileEnd extends TileLeaf {
       }
     }
   }
+
+  /**
+   * No out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:121
+   *   -- `calculateDimensionFtile` uses the four-argument `FtileGeometry`
+   *   constructor (no `outY`).
+   */
+  hasPointOut(): boolean {
+    return false;
+  }
 }

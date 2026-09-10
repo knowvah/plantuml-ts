@@ -113,6 +113,12 @@ describe('GtileAction', () => {
     const tile = new GtileAction(node, stubBounder, stubTheme);
     expect(tile.color).toBeUndefined();
   });
+
+  it('hasPointOut() === true (FtileBox.java:237-241, 5-arg ctor)', () => {
+    const node: ActivityAction = { kind: 'action', label: 'Hi' };
+    const tile = new GtileAction(node, stubBounder, stubTheme);
+    expect(tile.hasPointOut()).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -146,5 +152,11 @@ describe('GtileNote', () => {
     const tile = new GtileNote(node, stubBounder, stubTheme);
     const measuredWidth = 'A note'.length * 7; // 42
     expect(tile.width).toBe(measuredWidth + 2 * 16 + 8);
+  });
+
+  it('hasPointOut() === true (in-flow note, FtileNoteAlone.java:129-130)', () => {
+    const node: ActivityNote = { kind: 'note', text: 'A note', position: 'left' };
+    const tile = new GtileNote(node, stubBounder, stubTheme);
+    expect(tile.hasPointOut()).toBe(true);
   });
 });

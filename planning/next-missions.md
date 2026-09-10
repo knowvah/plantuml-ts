@@ -1146,10 +1146,64 @@ Ordered by how ready they are, not by size.
   `plans/activity-min-box-width/README.md`; notes in `.agent-notes/amb-T6.md`.
   Follow-ons filed here, each measured at HEAD:
 
-  - **`activity-split-connector-float-equality`** — **BRIEFED 2026-09-10 as
-    `activity-parallel-connectors`** (`plans/activity-parallel-connectors/README.md`,
-    7 tasks; scope C1: the whole fork/split half of the parallel builders pre-
-    compression, with the `klimt/compress` port filed as C2 by its T6). Filing:
+  - **`activity-split-connector-float-equality`** — **RESOLVED 2026-09-10 by
+    `activity-parallel-connectors`** (executed the same day, 7 of 7 tasks, on
+    `feat/activity-parallel-connectors`, unmerged at close). Aggregate
+    **43977 -> 42511 (−3.33%)**, the 32 split/fork fixtures **8218 -> 6752
+    (−17.84%)**; only those 32 moved (29 fell, 2 rose with journaled
+    mechanisms: `bixefi-77-moki051` 181 -> 220, `gesogi-81-xoma900` 242 -> 248).
+    Zero zero-length segments; `childCount` on the subset 3733 -> 2116; the
+    fork bar is the jar's 6-high `#555` rounded block and the split its
+    1.5-high thin line; branches are margined 14 / centred in `maxH + 40`;
+    cross-lane parallel connectors jog at `+4` / `−14`. D5 amended
+    mid-mission (the fork's join is unconditional, only a split becomes
+    `FtileKilled`; flagged). Sibling suites unmoved (23 files / 2167 passed at
+    `b7c293c6` and at HEAD). Close-out in
+    `plans/activity-parallel-connectors/README.md`; notes in
+    `.agent-notes/apc-T6.md`. Follow-ons filed here, each measured at HEAD:
+
+    - **`activity-klimt-compress` (C2)** — port `klimt/compress`
+      (`CompressionXorYBuilder`, `SlotFinder`, `SlotSet`,
+      `CompressionTransform`, `PiecewiseAffineTransform`,
+      `UGraphicCompressOnXorY`, ~1185 lines) and the drawing-interception
+      seam it needs (`ActivityDiagram3.java:209-210` wraps the whole
+      ftile draw; `ignoreForCompressionOnX` on the bar rect,
+      `FtileBlackBlock.java:101`). Collects: the inter-branch packing
+      (ours 28 = `14 + 14` per gap, `AbstractParallelFtilesBuilder.java
+      :130`; the jar shows 10 after `smaller(5.0)`, `CompressionXorYBuilder
+      .java:56-60` — exactly 18 px per gap on `simuti-16-lece058`, and every
+      `rect[]/@x`, `text[]/@x`, `line[]/@x1/@x2`, `svg/@width` right of the
+      first gap on every multi-branch fixture) and the lane-clipped bar
+      width in swimlane goldens (`bixefi`: jar bar `w=99.35` in lane 1 vs
+      ours `Σ slots`). Largest remaining activity family after this mission
+      is still `childCount` (18038 of 42511); the x families are ~6.4% each.
+    - **`activity-fork-split-lane-capture`** — `src/diagrams/activity/
+      node-dispatch.ts:261` (fork) and `:291` (split) build the node with
+      `...swimlaneSpread(ctx)` AFTER the branches have parsed, so the
+      fork/split's `swimlane` is the LAST branch's lane, not the lane
+      current at `fork`/`split` (`InstructionFork.java:89`,
+      `InstructionSplit.java` ctor). The top bar and every same-lane
+      classification of the in-connectors use it. A throwaway
+      capture-before-parse edit at T3 moved the aggregate 42500 -> 42519
+      (+19): `bixefi` 220 -> 119, `tobajo` 774 -> 725, `sopape` 96 -> 73,
+      `racana` 240 -> 217 fell; `jevoce` 369 -> 599 rose (its cross-lane
+      in-edges re-route from the start lane — mechanism unread). Needs the
+      parser in its write-set and `jevoce` diagnosed first.
+    - **`activity-if-switch-connector-shape`** — upstream's
+      `ConnectionHorizontalThenVertical` leaves the diamond's SIDE; ours
+      leaves its bottom through `GConnectionSideThenVerticalThenSide`
+      (`routing/gconnection-side-then-vertical-then-side.ts`, now always
+      three points; `pushEdge` dedupes a coincident middle). Untouched by
+      this mission (D1); `line[]` families on every if/switch fixture.
+    - **`activity-loop-label-line-gap`** — the jar breaks a while/repeat
+      back-edge's horizontal around its label (`camavo-50-kaku123`:
+      `304.45,111 -> 190.725,111` and `142.725,111 -> 29,111` with the
+      `while (ok)` text between); ours draws one line. Count-only weight
+      inside `childCount` on loop fixtures; it is why 8 of the 32 style
+      pins' line counts moved AWAY from the jar's when the fork elbows went.
+    - **`activity-fork-bar-stroke`** (below) is now sized: `rect[]/@stroke`
+      35 + `@stroke-width` 35 on the 32-fixture subset after this mission.
+      Original filing:
     `src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.ts:6`
     collapses the elbow only on `from.x === to.x`; at text-fitted branch
     widths the bar centre and the middle branch centre differ by one ulp

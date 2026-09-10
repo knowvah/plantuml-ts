@@ -67,4 +67,15 @@ export class GtileSwitch extends TileComposite {
       }
     }
   }
+
+  /**
+   * `true` iff any case has an out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileSwitch.java:177-187
+   *   -- `calculateDimensionFtile` iterates every case tile and returns
+   *   WITH an out point as soon as one `hasPointOut()`; otherwise without.
+   */
+  hasPointOut(): boolean {
+    const cases = this.children.slice(1, 1 + this.caseOffsets.length);
+    return cases.some((c) => c.hasPointOut());
+  }
 }

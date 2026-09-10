@@ -21,12 +21,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number): Tile {
+function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -38,6 +39,7 @@ function makeDiamond(width: number, height: number) {
     width,
     height,
     getCoord: (_hook: HookName): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => true,
   };
 }
 
@@ -130,5 +132,18 @@ describe('GtileWhile — hooks', () => {
 
   it('WEST_HOOK.x === 0', () => {
     expect(tile.getCoord(WEST_HOOK).x).toBe(0);
+  });
+});
+
+// FtileWhile.java:576-591 `calculateDimensionFtile` unconditionally builds
+// the 5-arg `FtileGeometry` with `outY = height` -- the exit edge is the
+// diamond's own "false" path, independent of whether the loop body
+// continues, so a while always has an out point.
+describe('GtileWhile — hasPointOut() is unconditionally true', () => {
+  it('is true even when the body has no out point (ends in a stop)', () => {
+    const header = makeDiamond(60, 40);
+    const body = makeTile(80, 80, false);
+    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    expect(tile.hasPointOut()).toBe(true);
   });
 });

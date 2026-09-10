@@ -10,23 +10,22 @@
  *   below as {@link computeLaneOrigins}.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ConnectionVerticalDown.java:87-100
  *   -- `drawTranslate`, the cross-lane edge shape ported below as
- *   {@link routeEdge}. `FtileIfDown.java:225-238,284-301`
+ *   {@link routeEdge}'s `'default'` case. `FtileIfDown.java:225-238,284-301`
  *   (`ConnectionIn`/`ConnectionOut#drawTranslate`) and
  *   `FtileWhile.java:200-214` use the byte-identical
  *   `(mp1a.y + mp2b.y) / 2` middle-Y shape, so one function covers the
  *   straight top-down case and every if/while/repeat/switch composite
- *   boundary. `ParallelBuilderFork.java:166-184,220-241` (fork/split's
- *   bar-to-branch connections) use a DIFFERENT, offset-based middle-Y
- *   (`mp1a.y + 4`, `mp2b.y - 14`) sized against that class's own
- *   `barHeight`/`justBeforeBar2` fields, which this port's single
- *   `BAR_HEIGHT` constant does not reproduce -- porting those two
- *   literals onto our differently-derived bar geometry would be exactly
- *   the unsound fitting CLAUDE.md forbids, not a faithful port. Fork/
- *   split cross-lane edges fall back to the same average-Y rule as
- *   every other connection type; a named, bounded simplification, not a
- *   tile-restructuring stop (condition 7 does not apply -- no tile
- *   shape changes, only one connector's cross-lane offset is
- *   approximated).
+ *   boundary.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:166-184
+ *   -- `ConnectionIn#drawTranslate`: `middle = mp1a.getY() + 4`, ported
+ *   below as {@link routeEdge}'s `'parallel-in'` case.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:220-241
+ *   -- `ConnectionOut#drawTranslate`: `middle = mp2b.getY() - 14`, ported
+ *   below as {@link routeEdge}'s `'parallel-out'` case.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225
+ *   -- same `+ 4` shape for the split's in-connector.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:264-285
+ *   -- same `- 14` shape for the split's out-connector.
  */
 
 import type { StringBounder, Tile } from '../tiles/tile.js';
@@ -58,7 +57,15 @@ import {
 export interface EdgeMeta {
   readonly lane1: string | undefined;
   readonly lane2: string | undefined;
+  /** D6: which cross-lane middle-Y shape {@link routeEdge} applies. Set at
+   * `pushEdge`; `'default'` is the average-Y shape every non-parallel
+   * connection uses. */
+  readonly shape: EdgeShape;
 }
+
+/** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
+ * other connection type uses. */
+export type EdgeShape = 'parallel-in' | 'parallel-out' | 'default';
 
 /** A tile's OWN lane if `tile-layout.ts` set one (`Tile.swimlane`), else
  * the inherited ambient lane. */
@@ -304,6 +311,28 @@ function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
 }
 
 /**
+ * D6's three middle-Y shapes for a cross-lane 4-point jog. `'default'` is
+ * `ConnectionVerticalDown#drawTranslate`'s average of both endpoints
+ * (`ConnectionVerticalDown.java:87-100`); `'parallel-in'`/`'parallel-out'`
+ * are the fork/split builders' bar-relative offsets (see the module doc
+ * for the four `file:line` citations) -- `mp1`/`mp2` there are always the
+ * bar-side / branch-side endpoint respectively (`pushBranchConnectors`,
+ * `walk-fork-branches.ts`, emits bar-to-branch as `[bar, branch]` and
+ * branch-to-join as `[branch, join]`, so `mp1.y`/`mp2.y` already select
+ * the right endpoint without a shape-specific swap).
+ */
+function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
+  switch (shape) {
+    case 'parallel-in':
+      return mp1.y + 4;
+    case 'parallel-out':
+      return mp2.y - 14;
+    case 'default':
+      return (mp1.y + mp2.y) / 2;
+  }
+}
+
+/**
  * Same-lane edges shift uniformly by that lane's own delta. Cross-lane
  * edges discard the pass-1 shape entirely and draw a fresh 4-point jog
  * through both lanes' own translates -- see the module doc for the
@@ -322,7 +351,7 @@ function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<st
   const p2 = edge.points[edge.points.length - 1]!;
   const mp1 = { x: p1.x + d1, y: p1.y };
   const mp2 = { x: p2.x + d2, y: p2.y };
-  const middle = (mp1.y + mp2.y) / 2;
+  const middle = crossLaneMiddleY(meta.shape, mp1, mp2);
   return {
     ...edge,
     points: [mp1, { x: mp1.x, y: middle }, { x: mp2.x, y: middle }, mp2],

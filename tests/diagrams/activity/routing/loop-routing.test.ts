@@ -60,15 +60,23 @@ describe('GConnectionDownThenUp', () => {
 });
 
 describe('GConnectionSideThenVerticalThenSide', () => {
-  it('returns 2 points when from and to share the same x', () => {
+  // D1 (`plans/activity-parallel-connectors/decisions.md`): the
+  // `from.x === to.x` collapse this class used to apply existed only to
+  // hide the fork/split bar-centre elbow the port no longer draws; the
+  // class now always returns the raw three-point shape (duplicate middle
+  // point included), and `pushEdge`'s `dedupeAdjacentPoints` (D2) is the
+  // one seam that collapses a coincident point. See
+  // `tests/diagrams/activity/routing/gconnection.test.ts` for the
+  // dedicated coverage this class now carries there.
+  it('returns 3 points, including a duplicate middle, when from and to share the same x', () => {
     const conn = new GConnectionSideThenVerticalThenSide();
     const from = { x: 50, y: 100 };
     const to = { x: 50, y: 10 };
 
     const points = conn.getPoints(from, to);
 
-    expect(points).toHaveLength(2);
-    expect(points).toEqual([from, to]);
+    expect(points).toHaveLength(3);
+    expect(points).toEqual([from, { x: 50, y: 10 }, to]);
   });
 
   it('returns 3 points when from and to have different x values', () => {

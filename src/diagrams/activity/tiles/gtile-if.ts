@@ -72,4 +72,20 @@ export class GtileIf extends TileComposite {
       }
     }
   }
+
+  /**
+   * `true` iff any branch has an out point. Our `GtileIf` always builds an
+   * else branch (`tile-layout.ts:116-119`), so this base if/else class --
+   * not the single-branch `FtileIfDown` -- is the applicable citation;
+   * neither `FtileIfWithDiamonds` nor `FtileIfWithLinks` (the concrete
+   * if/elseif/else classes) override `calculateDimensionFtile`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfNude.java:132-138
+   *   -- `calculateDimensionFtile`: `if (tile1.hasPointOut() ||
+   *   tile2.hasPointOut()) return dimTotal; return
+   *   dimTotal.withoutPointOut();`.
+   */
+  hasPointOut(): boolean {
+    const branches = this.children.slice(1, 1 + this.branchOffsets.length);
+    return branches.some((b) => b.hasPointOut());
+  }
 }

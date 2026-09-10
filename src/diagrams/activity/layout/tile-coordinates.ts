@@ -20,7 +20,8 @@ import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js
 import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical-down-then-back.js';
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
-import { BAR_HEIGHT } from '../activity-layout-constants.js';
+import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
+import { walkForkOrSplit } from './walk-fork-branches.js';
 import {
   computeSwimlaneChrome,
   laneAt,
@@ -29,7 +30,7 @@ import {
   placeSwimlanes,
   resolveSwimlaneVertical,
 } from './swimlane-placement.js';
-import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
+import type { EdgeMeta, EdgeShape, PlacementResult } from './swimlane-placement.js';
 
 export const LAYOUT_MARGIN = 12;
 
@@ -44,29 +45,35 @@ export const LAYOUT_MARGIN = 12;
  * composite's own resolved lane. Bundled into one object because
  * `walkTile` is already at the file's parameter limit.
  */
-interface WalkHints {
+export interface WalkHints {
   kindHint: string | null;
   lane: string | undefined;
 }
 
-interface Out {
+export interface Out {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   edgeMeta: EdgeMeta[];
   nextId: (prefix: string) => string;
 }
 
-function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
+export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
   if (lane !== undefined) node.swimlane = lane;
   out.nodes.push(node);
 }
 
-function pushEdge(out: Out, points: GPoint[], lane1: string | undefined, lane2: string | undefined): void {
-  out.edges.push({ points });
-  out.edgeMeta.push({ lane1, lane2 });
+export function pushEdge(
+  out: Out,
+  points: GPoint[],
+  lane1: string | undefined,
+  lane2: string | undefined,
+  shape: EdgeShape = 'default',
+): void {
+  out.edges.push({ points: dedupeAdjacentPoints(points) });
+  out.edgeMeta.push({ lane1, lane2, shape });
 }
 
-function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
+export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
   const { kindHint, lane } = hints;
   const myLane = laneAt(tile, lane);
 
@@ -323,32 +330,11 @@ function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out):
 
     case 'gtile-fork':
     case 'gtile-split': {
-      const t = tile as unknown as GtileFork;
-      const topKind = tile.kind === 'gtile-fork' ? 'fork-bar' : 'split-bar';
-      pushNode(out, { id: out.nextId(topKind), kind: topKind, x, y, width: t.barWidth, height: BAR_HEIGHT }, myLane);
-
-      const joinBarY = y + tile.height - BAR_HEIGHT;
-      pushNode(
-        out,
-        { id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: BAR_HEIGHT },
-        myLane,
-      );
-
-      const barCenterX = x + t.barWidth / 2;
-      for (let i = 0; i < t.children.length; i++) {
-        const branch = t.children[i]!;
-        const bX = x + t.branchOffsets[i]!;
-        const bY = y + t.branchTopY;
-        walkTile(branch, bX, bY, { kindHint: null, lane: myLane }, out);
-
-        const fFrom = { x: barCenterX, y: y + BAR_HEIGHT };
-        const fTo = { x: bX + branch.getCoord(NORTH_HOOK).x, y: bY + branch.getCoord(NORTH_HOOK).y };
-        pushEdge(out, new GConnectionSideThenVerticalThenSide().getPoints(fFrom, fTo), myLane, laneIn(branch, myLane));
-
-        const jFrom = { x: bX + branch.getCoord(SOUTH_HOOK).x, y: bY + branch.getCoord(SOUTH_HOOK).y };
-        const jTo = { x: barCenterX, y: joinBarY };
-        pushEdge(out, new GConnectionSideThenVerticalThenSide().getPoints(jFrom, jTo), laneOut(branch, myLane), myLane);
-      }
+      // D4: the bar/line nodes, `walkForkBranches`, and the join node
+      // all delegate to a sibling module only to keep this switch under
+      // the file's 500-line cap (mission `activity-parallel-connectors`
+      // README, "Push forward").
+      walkForkOrSplit(tile as unknown as GtileFork, x, y, myLane, out);
       return;
     }
 

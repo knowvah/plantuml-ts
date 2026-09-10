@@ -26,4 +26,14 @@ export class GtileBreak extends TileLeaf {
       }
     }
   }
+
+  /**
+   * No out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileBreak.java:63
+   *   -- `calculateDimensionFtile` returns
+   *   `calculateDimensionEmpty().withoutPointOut()`.
+   */
+  hasPointOut(): boolean {
+    return false;
+  }
 }

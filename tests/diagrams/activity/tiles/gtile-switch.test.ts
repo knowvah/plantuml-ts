@@ -21,12 +21,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number): Tile {
+function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -38,6 +39,7 @@ function makeDiamond(width: number, height: number) {
     width,
     height,
     getCoord: (_hook: HookName): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => true,
   };
 }
 
@@ -136,6 +138,36 @@ describe('GtileSwitch — hooks', () => {
 
   it('WEST_HOOK.x === 0', () => {
     expect(tile.getCoord(WEST_HOOK).x).toBe(0);
+  });
+});
+
+// FtileSwitch.java:177-187 `calculateDimensionFtile`: iterates every case
+// tile and returns WITH an out point as soon as one `hasPointOut()`;
+// otherwise without -- the same any-case-has-one semantics as GtileIf's
+// branches.
+describe('GtileSwitch — hasPointOut() is true iff any case has one', () => {
+  const diamond = makeDiamond(60, 40);
+
+  it('is true when only one case continues', () => {
+    const tile = new GtileSwitch(
+      diamond,
+      [{ tile: makeTile(80, 100, false) }, { tile: makeTile(80, 60, true) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is false when every case ends in a stop', () => {
+    const tile = new GtileSwitch(
+      diamond,
+      [{ tile: makeTile(80, 100, false) }, { tile: makeTile(80, 60, false) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.hasPointOut()).toBe(false);
   });
 });
 

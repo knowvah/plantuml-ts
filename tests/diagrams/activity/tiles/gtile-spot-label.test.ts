@@ -48,6 +48,10 @@ describe('GtileSpot — long name', () => {
   it('tile.color matches input', () => {
     expect(tile.color).toBe('#FF0000');
   });
+
+  it('hasPointOut() === true (FtileCircleSpot.java:117, 5-arg ctor)', () => {
+    expect(tile.hasPointOut()).toBe(true);
+  });
 });
 
 describe('GtileLabel', () => {
@@ -70,5 +74,9 @@ describe('GtileLabel', () => {
 
   it('tile.name matches input', () => {
     expect(tile.name).toBe('myLabel');
+  });
+
+  it('hasPointOut() === true (FtileLabel.java:40, inherits FtileEmpty.java:91-92)', () => {
+    expect(tile.hasPointOut()).toBe(true);
   });
 });
