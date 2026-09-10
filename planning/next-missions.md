@@ -1146,7 +1146,10 @@ Ordered by how ready they are, not by size.
   `plans/activity-min-box-width/README.md`; notes in `.agent-notes/amb-T6.md`.
   Follow-ons filed here, each measured at HEAD:
 
-  - **`activity-split-connector-float-equality`** —
+  - **`activity-split-connector-float-equality`** — **BRIEFED 2026-09-10 as
+    `activity-parallel-connectors`** (`plans/activity-parallel-connectors/README.md`,
+    7 tasks; scope C1: the whole fork/split half of the parallel builders pre-
+    compression, with the `klimt/compress` port filed as C2 by its T6). Filing:
     `src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.ts:6`
     collapses the elbow only on `from.x === to.x`; at text-fitted branch
     widths the bar centre and the middle branch centre differ by one ulp
