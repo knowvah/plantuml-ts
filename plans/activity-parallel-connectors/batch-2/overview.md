@@ -2,7 +2,7 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Fork/split connectors as vertical drops at branch x, `hasPointOut` gating, `pushEdge` dedupe, drop the `===` collapse | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts`, `src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.ts`, `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tests/diagrams/activity/routing/gconnection.test.ts` | T1 | [ ] |
+| T2 | Fork/split connectors as vertical drops at branch x, `hasPointOut` gating, `pushEdge` dedupe, drop the `===` collapse | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts`, `src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.ts`, `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tests/diagrams/activity/routing/gconnection.test.ts` | T1 | [x] |
 
 **Stop condition 7 applies.** The pre-planned outcome: `simuti-16-lece058`
 falls below 219 with zero zero-length segments; the 21 detach fixtures lose
