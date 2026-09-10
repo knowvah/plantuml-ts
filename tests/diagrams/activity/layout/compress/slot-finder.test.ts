@@ -136,4 +136,23 @@ describe('overlaps', () => {
     const empty: CompressShape = { kind: 'empty', x: 5, y: 5, width: 4, height: 4 };
     expect(overlaps([bar, empty])).toEqual([[0, 1]]);
   });
+
+  it('measures a text box from its BASELINE, as TextLimitFinder does (TextLimitFinder.java:82-90)', () => {
+    // A 12-high label whose baseline sits 2 px below a box's bottom edge:
+    // its glyph box is [y - h + 1.5, y + 1.5] = [21.5, 33.5] -> it DOES
+    // overlap the box ([0, 30]); with `y` read as a top it would not.
+    const box: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 30 };
+    const label: CompressShape = { kind: 'text', x: 5, y: 32, width: 20, height: 12 };
+    expect(overlaps([box, label])).toEqual([[0, 1]]);
+    // ...and a label whose baseline is 20 below the box does not: [18.5, 30.5]
+    // vs [0, 10] -> no overlap, where a top-left reading ([20, 32]) agrees.
+    const box2: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 10 };
+    const title: CompressShape = { kind: 'centeredText', x: 5, y: 30, width: 20, height: 12 };
+    expect(overlaps([box2, title])).toEqual([]);
+    // The shift is symmetric with collectSlots's text branch: a label at
+    // baseline 32 whose top-left reading [32, 44] would clear a box
+    // ending at 31 overlaps it once shifted to [21.5, 33.5].
+    const box3: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 31 };
+    expect(overlaps([box3, label])).toEqual([[0, 1]]);
+  });
 });

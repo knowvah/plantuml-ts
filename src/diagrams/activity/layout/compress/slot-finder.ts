@@ -42,12 +42,15 @@ function addBoxSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape)
   else slots.addSlot(shape.y, shape.y + shape.height);
 }
 
+/** `TextLimitFinder#drawText`'s `y -= dim.getHeight() - 1.5`
+ *  (`klimt/drawing/TextLimitFinder.java:85`): the baseline-to-box shift. */
+const TEXT_LIMIT_SHIFT = 1.5;
 /** `TextLimitFinder#drawText` (`klimt/drawing/TextLimitFinder.java:82-90`):
  *  `y -= dim.height - 1.5`, then the box is `[x, x+w] x [y', y'+h]` --
  *  i.e. `[y - h + 1.5, y + 1.5]` in the ORIGINAL `y`. */
 function addTextSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
   if (mode === 'x') slots.addSlot(shape.x, shape.x + shape.width);
-  else slots.addSlot(shape.y - shape.height + 1.5, shape.y + 1.5);
+  else slots.addSlot(shape.y - shape.height + TEXT_LIMIT_SHIFT, shape.y + TEXT_LIMIT_SHIFT);
 }
 
 /**
@@ -113,14 +116,29 @@ export function collectSlots(shapes: readonly CompressShape[], mode: Compression
  */
 export function overlaps(shapes: readonly CompressShape[]): Array<[number, number]> {
   const result: Array<[number, number]> = [];
-  for (let i = 0; i < shapes.length; i++) {
-    const a = shapes[i]!;
-    for (let j = i + 1; j < shapes.length; j++) {
-      const b = shapes[j]!;
-      const xOverlap = a.x < b.x + b.width && b.x < a.x + a.width;
-      const yOverlap = a.y < b.y + b.height && b.y < a.y + a.height;
+  const boxes = shapes.map(occupiedBox);
+  for (let i = 0; i < boxes.length; i++) {
+    const a = boxes[i]!;
+    for (let j = i + 1; j < boxes.length; j++) {
+      const b = boxes[j]!;
+      const xOverlap = a.x1 < b.x2 && b.x1 < a.x2;
+      const yOverlap = a.y1 < b.y2 && b.y1 < a.y2;
       if (xOverlap && yOverlap) result.push([i, j]);
     }
   }
   return result;
+}
+
+/**
+ * The box a shape really covers: every kind is `[x, x+width] x [y,
+ * y+height]` except the two text kinds, whose `y` is the BASELINE --
+ * `TextLimitFinder#drawText` (`klimt/drawing/TextLimitFinder.java:82-90`)
+ * shifts it by `y -= dim.getHeight() - 1.5` before taking the extents,
+ * exactly as {@link collectSlots}'s text branch does. Without this shift
+ * a label sitting just under a box reads as overlapping it.
+ */
+function occupiedBox(shape: CompressShape): { x1: number; x2: number; y1: number; y2: number } {
+  const isText = shape.kind === 'text' || shape.kind === 'centeredText';
+  const y1 = isText ? shape.y - shape.height + TEXT_LIMIT_SHIFT : shape.y;
+  return { x1: shape.x, x2: shape.x + shape.width, y1, y2: y1 + shape.height };
 }
