@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1085 modules · 3938 exported names.
+1086 modules · 3942 exported names.
 
 ## `src/`
 
@@ -936,6 +936,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `resolveSolidBucketColor`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
 | `activity-text-style.ts` | `activityMinimumWidth`, `ACTIVITY_FONT_COLOR`, `activityFontColor`, `activityHorizontalAlignment` | The unconsumed activity box-width, font-colour and horizontal-alignment resolvers (mission `activity-min-box-width`, T1, D1/D2/D3). |
+| `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular` — the default activity-diagram arrowhead decoration. |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_IF`, `RE_ELSEIF`, `RE_ELSE`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
 | `if-dispatch.ts` | `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
