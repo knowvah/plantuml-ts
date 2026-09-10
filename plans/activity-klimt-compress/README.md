@@ -126,5 +126,39 @@ Measurement between tasks (orchestrator): the probe in
 - [x] Batch 1 — T1, T2
 - [x] Batch 2 — T3
 - [x] Batch 3 — T4
-- [ ] Batch 4 — T5
+- [ ] Batch 4 — T5 — **HALTED 2026-09-10, stop 11** (work parked on `akc/T5-wip` @ `e925560e`; see Status)
 - [ ] Batch 5 — T6
+
+## Status — HALTED 2026-09-10 (stop condition 11), awaiting human input
+
+**Completed:** T0–T4 (batches 0–3) on `feat/activity-klimt-compress`, plus two
+review fixes (`c744c255` lane titles occupy on Y; `99c473c4` `overlaps()`
+text baseline). **Not landed:** T5 (parked at `e925560e` on `akc/T5-wip`,
+uncommitted-to-mission), T6.
+
+**Why halted.** T5's invariant test (stop 11) finds 7 new overlaps after
+compression on 5 fixtures. Verified by the orchestrator against the Java:
+every pair includes a shape that does not occupy on the axis that moved it —
+`polygonSkipMode:'x'` cross-lane heads (`Worm.java:159-168`) or a lane title
+re-centred by `UGraphicCompressOnXorY.java:100-112`. The jar moves those by
+design; the collisions come from the filed parser lane-capture defect. Stop 11
+as written is still triggered, so the mission stops here.
+
+**Exit bar at the halt (T5 measurement):** aggregate 52956 → 52954 against
+the post-T1 reference (T1's pre-named polygon rise was +10445), so Σ is
+**52954 vs 42511** and did not fall; `rect[]/@width` 149 → 132, other x
+families flat; the three target fixtures match exactly; laned census 14
+closer / 1 same / 2 farther; 0 throws; gate median 5.003 s.
+
+**Decisions:** 22 journal rows (T0 4, T1 4, B1 3, T2 review 1, T3 8+1, B2 3,
+T4 review, B3 2, T5 4 on the WIP branch, halt 4). Flagged for review: the
+stop-11 amendment (journal, "T5 halt" rows) and the exit-bar reference.
+
+**Quality gates at the halt (mission branch `99c473c4`):** typecheck, lint,
+build green; `npm test` 707 files, the activity ratchet the only red file
+(253, T1's pre-named risers, re-pinned at T6).
+
+**Follow-ons to file at T6:** `ArrowsTriangle` (strictuml, 3 fixtures);
+the renderer's edge-label width approximation; the in-branch vertical
+spacing gap (`zizaki` 52 vs 67); the parser lane-capture defect now blocking
+both the invariant and the laned census; `Recentred`.
