@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1083 modules · 3932 exported names.
+1085 modules · 3938 exported names.
 
 ## `src/`
 
@@ -955,6 +955,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+
+## `src/diagrams/activity/layout/compress/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
+| `slot.ts` | `CompressionMode`, `compareSlotByStart`, `Slot`, `SlotSet` | slot.ts — `klimt/compress/Slot.java`, `SlotSet.java`, `CompressionMode.java` (mission `activity-klimt-compress` T2, `decisions.md` D2/D5). |
 
 ## `src/diagrams/activity/routing/`
 
