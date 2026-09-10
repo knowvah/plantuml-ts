@@ -104,6 +104,18 @@ citation, or a filed exception where the Java disagrees.
 the 32 fixtures); `childCount` moves toward the jar. Rejected: inferring
 termination from node kind in the coordinate pass.
 
+**Amended 2026-09-10 (T1, flagged for review).** The "any branch has one"
+rule holds for split only. `ParallelBuilderFork#doStep2`
+(`ParallelBuilderFork.java:110-131`) always assembles an unconditional
+`FtileBlackBlock` join bar whose geometry is the five-argument constructor
+with `outY = height` (`FtileBlackBlock.java:94`), and `FtileAssemblySimple
+#calculateDimension` (`:124-130`) takes the LOWER tile's out point through
+`FtileGeometryMerger` (`:49-53`); the fork is never wrapped in
+`FtileKilled`. So `GtileFork.hasPointOut()` is unconditionally `true`;
+`GtileSplit` keeps `hasOut()` (`ParallelBuilderSplit.java:150-151`). Each
+BRANCH's own `hasPointOut()` still gates its join connector in both styles.
+T3's "no join node when no branch continues" applies to split only.
+
 ## D6 — Cross-lane fork/split elbows use `+4` and `−14`
 
 **Context.** `ConnectionIn#drawTranslate` puts the horizontal at
