@@ -74,7 +74,7 @@ after layout, before draw.
    `ActivityNodeGeo` / `ActivityEdgeGeo` / `SwimlaneGeo` shapes
 10. **The pass throws on any baseline fixture** (a `baseline` entry flipping
     to `error`)
-11. **The invariant test finds a new overlap** after compression on any fixture
+11. **The invariant test finds a new overlap** after compression, on any fixture, between two shapes that BOTH occupy on the moved axis (amended 2026-09-10 after the T5 halt: a pair where one shape contributes no slot on that axis — an X-skipped cross-lane head, a `CenteredText` title on X, an ignored rect's middle — is the class the jar moves by design and is pinned, not forbidden)
 12. **T5 needs lane width measurement changed** — upstream measures lanes
     before compression (`Swimlanes.java:396-449`); needing otherwise means
     the structure is wrong
@@ -126,10 +126,10 @@ Measurement between tasks (orchestrator): the probe in
 - [x] Batch 1 — T1, T2
 - [x] Batch 2 — T3
 - [x] Batch 3 — T4
-- [ ] Batch 4 — T5 — **HALTED 2026-09-10, stop 11** (work parked on `akc/T5-wip` @ `e925560e`; see Status)
+- [ ] Batch 4 — T5 (resumed 2026-09-10 after the stop-11 amendment)
 - [ ] Batch 5 — T6
 
-## Status — HALTED 2026-09-10 (stop condition 11), awaiting human input
+## Status — halted 2026-09-10 on stop 11, then RESUMED after the amendment (history kept below)
 
 **Completed:** T0–T4 (batches 0–3) on `feat/activity-klimt-compress`, plus two
 review fixes (`c744c255` lane titles occupy on Y; `99c473c4` `overlaps()`
