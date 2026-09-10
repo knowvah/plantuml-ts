@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { collectSlots, overlaps } from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
+import {
+  collectSlots,
+  occupiesOn,
+  overlaps,
+} from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
 import type { CompressShape } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 
 describe('collectSlots — fork/join bar (rect, ignoreX)', () => {
@@ -115,6 +119,58 @@ describe('collectSlots — ellipse behaves like a box', () => {
   it('occupies [x, x+width] on x', () => {
     const e: CompressShape = { kind: 'ellipse', x: 0, y: 0, width: 20, height: 20 };
     expect(collectSlots([e], 'x').slots()).toEqual([expect.objectContaining({ start: 0, end: 20 })]);
+  });
+});
+
+describe('occupiesOn', () => {
+  it('an ignored rect does not occupy on the ignored axis (URectangle.java:193-206)', () => {
+    const bar: CompressShape = { kind: 'rect', x: 12, y: 55, width: 103.4, height: 6, ignoreX: true };
+    expect(occupiesOn(bar, 'x')).toBe(false);
+    expect(occupiesOn(bar, 'y')).toBe(true);
+  });
+
+  it('an ignored rect does not occupy on Y when ignoreY is set', () => {
+    const band: CompressShape = { kind: 'rect', x: 20, y: 0, width: 349.275, height: 18, ignoreX: true, ignoreY: true };
+    expect(occupiesOn(band, 'x')).toBe(false);
+    expect(occupiesOn(band, 'y')).toBe(false);
+  });
+
+  it('a plain (non-ignored) rect occupies on both axes', () => {
+    const box: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 30 };
+    expect(occupiesOn(box, 'x')).toBe(true);
+    expect(occupiesOn(box, 'y')).toBe(true);
+  });
+
+  it('a cross-lane polygon does not occupy on its skipped axis (Worm.java:159-168)', () => {
+    const head: CompressShape = { kind: 'polygon', x: 262.425, y: 100, width: 8, height: 10, polygonSkipMode: 'x' };
+    expect(occupiesOn(head, 'x')).toBe(false);
+    expect(occupiesOn(head, 'y')).toBe(true);
+  });
+
+  it('a plain polygon (no skip mode) occupies on both axes', () => {
+    const poly: CompressShape = { kind: 'polygon', x: 10, y: 20, width: 40, height: 30 };
+    expect(occupiesOn(poly, 'x')).toBe(true);
+    expect(occupiesOn(poly, 'y')).toBe(true);
+  });
+
+  it('centeredText does not occupy on x (no SlotFinder#draw branch, SlotFinder.java:78-100)', () => {
+    const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+    expect(occupiesOn(title, 'x')).toBe(false);
+  });
+
+  it('centeredText occupies on y (re-emitted as UText, UGraphicCompressOnXorY.java:100-112)', () => {
+    const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+    expect(occupiesOn(title, 'y')).toBe(true);
+  });
+
+  it('text, empty and ellipse all occupy on both axes', () => {
+    const t: CompressShape = { kind: 'text', x: 4, y: 16, width: 12, height: 11 };
+    const e: CompressShape = { kind: 'empty', x: 15, y: 0, width: 10, height: 1 };
+    const el: CompressShape = { kind: 'ellipse', x: 0, y: 0, width: 20, height: 20 };
+    for (const s of [t, e, el]) {
+      expect(occupiesOn(s, 'x')).toBe(true);
+      expect(occupiesOn(s, 'y')).toBe(true);
+    }
   });
 });
 

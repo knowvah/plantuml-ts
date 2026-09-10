@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1092 modules · 3959 exported names.
+1092 modules · 3960 exported names.
 
 ## `src/`
 
@@ -967,7 +967,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `compress-geometry.ts` | `CompressInput`, `CompressResult`, `compressGeometry` | `compressGeometry` -- `klimt/compress/CompressionXorYBuilder.java:52-69` and `UGraphicCompressOnXorY.java:86-135`, ported over `ActivityGeometry` instead of a live `UGraphic` redraw (D1). |
 | `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
 | `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
-| `slot-finder.ts` | `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
+| `slot-finder.ts` | `occupiesOn`, `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
 | `slot.ts` | `CompressionMode`, `compareSlotByStart`, `Slot`, `SlotSet` | slot.ts — `klimt/compress/Slot.java`, `SlotSet.java`, `CompressionMode.java` (mission `activity-klimt-compress` T2, `decisions.md` D2/D5). |
 
 ## `src/diagrams/activity/routing/`

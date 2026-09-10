@@ -96,6 +96,34 @@ function addShape(slots: SlotSet, mode: CompressionMode, shape: CompressShape): 
 }
 
 /**
+ * True iff {@link collectSlots} would add the shape's FULL extent as a slot
+ * on `mode` -- i.e. the shape genuinely occupies that axis, as opposed to
+ * one of the three cases the jar itself does not treat as occupying:
+ *
+ * - a `rect` carrying the matching ignore flag: only its 2px ends occupy
+ *   (`URectangle#drawWhenCompressed`, `klimt/shape/URectangle.java:193-206`)
+ * - a `polygon` whose `polygonSkipMode === mode`: a cross-lane fork/split
+ *   decoration skipped on that one axis (`UPolygon#getCompressionMode()`,
+ *   `ftile/Worm.java:159-168`)
+ * - a `centeredText` on `'x'`: `CenteredText` has no `SlotFinder#draw`
+ *   branch (`SlotFinder.java:78-100`) and only re-emits as a real `UText`
+ *   on Y, through the ON_Y-wraps-ON_X composition
+ *   (`klimt/compress/UGraphicCompressOnXorY.java:100-112`)
+ *
+ * README stop 11 (amended 2026-09-10, after the T5 halt): a NEW overlap
+ * between a pair where one shape does not occupy on the moved axis is the
+ * class the jar itself moves by design, not a violation -- only a pair
+ * where BOTH shapes occupy on BOTH axes is a hard violation.
+ */
+export function occupiesOn(shape: CompressShape, mode: CompressionMode): boolean {
+  const ignored = (mode === 'x' && shape.ignoreX === true) || (mode === 'y' && shape.ignoreY === true);
+  if (shape.kind === 'rect' && ignored) return false;
+  if (shape.kind === 'polygon' && shape.polygonSkipMode === mode) return false;
+  if (shape.kind === 'centeredText' && mode === 'x') return false;
+  return true;
+}
+
+/**
  * `SlotFinder#draw`, ported over the flat `CompressShape[]` `shapesOf`
  * produces instead of a live `UGraphic` draw call per shape (D2).
  */

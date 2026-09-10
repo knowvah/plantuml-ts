@@ -30,6 +30,7 @@ import { LAYOUT_MARGIN, walkTile } from './tile-coordinates.js';
 import type { Out } from './tile-coordinates.js';
 import { computeSwimlaneChrome, placeSwimlanes, resolveSwimlaneVertical } from './swimlane-placement.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
+import { compressGeometry } from './compress/compress-geometry.js';
 
 /**
  * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
@@ -69,6 +70,10 @@ export interface AssignCoordinatesResult {
   geometry: ActivityGeometry;
   reservations: Reservation[];
   edgeMeta: EdgeMeta[];
+  /** D6/T4: total px removed per axis by {@link compressGeometry}'s two
+   *  passes -- an internal accessor, never merged into `ActivityGeometry`
+   *  (stop 9). */
+  removed: { x: number; y: number };
 }
 
 /** {@link assignCoordinatesFull}'s six arguments, bundled to keep it under
@@ -82,6 +87,15 @@ export interface AssignCoordinatesInput {
   baseY: number;
   bounder: StringBounder;
   theme: Theme;
+  /**
+   * `false` skips D1's compress pass and returns the pass-1 (uncompressed)
+   * geometry -- the "before" snapshot the mission's own invariant test
+   * (`tests/diagrams/activity/layout/compress/invariant.test.ts`) needs to
+   * compare against the compressed "after". Every other caller wants the
+   * default `true`. Internal-only knob on this internal accessor type --
+   * not on the public `ActivityGeometry` (stop 9).
+   */
+  compress?: boolean;
 }
 
 /**
@@ -97,8 +111,76 @@ function withBandReservation(reservations: readonly Reservation[], band: Swimlan
   return [...reservations, { ...band, ignoreX: true, ignoreY: true }];
 }
 
+/** {@link assignCoordinatesFull}'s own post-layout half, split out only to
+ *  keep that function's NLOC under the file's limit: runs D1's compress
+ *  pass over the pass-1 placement and re-derives the chrome (D6/D7) from
+ *  the RESULT, per this task's own instructions ("build the returned
+ *  geometry from the RESULT's nodes, edges, swimlanes and bounds"). */
+interface CompressAndAssembleInput {
+  placed: PlacementResult;
+  edgeMeta: EdgeMeta[];
+  reservations: Reservation[];
+  bounds: { maxX: number; maxY: number };
+  baseY: number;
+  titlesHeight: number;
+  bounder: StringBounder;
+  theme: Theme;
+}
+
+/** {@link assignCoordinatesFull}'s `compress: false` half -- the pass-1
+ *  geometry, assembled the same way `compressAndAssemble` does but with no
+ *  transform applied and `removed` zeroed. */
+function pass1Assemble(
+  placed: PlacementResult,
+  reservations: Reservation[],
+  bounds: { maxX: number; maxY: number },
+  baseY: number,
+  titlesHeight: number,
+): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+  const chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
+  return {
+    geometry: {
+      totalWidth: bounds.maxX + LAYOUT_MARGIN,
+      totalHeight: bounds.maxY + LAYOUT_MARGIN,
+      nodes: placed.nodes,
+      edges: placed.edges,
+      swimlanes: placed.swimlanes,
+      ...chrome,
+    },
+    reservations,
+    removed: { x: 0, y: 0 },
+  };
+}
+
+function compressAndAssemble(input: CompressAndAssembleInput): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+  const { placed, edgeMeta, reservations, bounds, baseY, titlesHeight, bounder, theme } = input;
+  const compressed = compressGeometry({
+    nodes: placed.nodes,
+    edges: placed.edges,
+    edgeMeta,
+    swimlanes: placed.swimlanes,
+    reservations,
+    bounds,
+    bounder,
+    theme,
+  });
+  const chrome = computeSwimlaneChrome(compressed.swimlanes, baseY, titlesHeight, compressed.bounds.maxY);
+  return {
+    geometry: {
+      totalWidth: compressed.bounds.maxX + LAYOUT_MARGIN,
+      totalHeight: compressed.bounds.maxY + LAYOUT_MARGIN,
+      nodes: compressed.nodes,
+      edges: compressed.edges,
+      swimlanes: compressed.swimlanes,
+      ...chrome,
+    },
+    reservations: compressed.reservations,
+    removed: compressed.removed,
+  };
+}
+
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
-  const { root, ast, baseX, baseY, bounder, theme } = input;
+  const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
   const nodes: ActivityNodeGeo[] = [];
   const edges: ActivityEdgeGeo[] = [];
   const edgeMeta: EdgeMeta[] = [];
@@ -109,19 +191,23 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
   const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
-  const { maxX, maxY } = computeBounds(root, baseX, contentY, placed);
-  const chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, maxY);
+  const bounds = computeBounds(root, baseX, contentY, placed);
+  const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
+  const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
 
-  return {
-    geometry: {
-      totalWidth: maxX + LAYOUT_MARGIN,
-      totalHeight: maxY + LAYOUT_MARGIN,
-      nodes: placed.nodes,
-      edges: placed.edges,
-      swimlanes: placed.swimlanes,
-      ...chrome,
-    },
-    reservations: withBandReservation([...reservations, ...placed.reservations], chrome.swimlaneBand),
+  if (!compress) {
+    const result = pass1Assemble(placed, allReservations, bounds, baseY, titlesHeight);
+    return { ...result, edgeMeta };
+  }
+  const result = compressAndAssemble({
+    placed,
     edgeMeta,
-  };
+    reservations: allReservations,
+    bounds,
+    baseY,
+    titlesHeight,
+    bounder,
+    theme,
+  });
+  return { ...result, edgeMeta };
 }
