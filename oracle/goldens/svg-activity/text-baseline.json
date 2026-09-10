@@ -1,7 +1,7 @@
 {
-  "$comment": "NOT a golden manifest. TEXT census (activity-min-box-width; T0 pinned the pre-change model, T6 re-pinned this post-change model on 2026-09-09): for every committed activity fixture records, for OURS and for the JAR golden, over the NORMALIZED tree, the fill histogram over every <text> ((absent) counted), the text-anchor histogram ((absent) counted), the inset histogram (round3(text.x - rect.x) for every <text> whose immediately preceding element sibling is a <rect>) and textCount. Post-change totals over the 268 baseline fixtures, OURS: fill #000 1561 (was #181818 1423), anchor (absent) 1586 (was middle 1133 / start 249), inset 10 on 906 of 917 (was 60 on 779 of 843); JAR: #000 1869, (absent) 1915, 10 on 914 of 930. textCount moved on NO fixture. Population and three-way status derive from each fixture's own content via text-census.ts#statusOf. An EQUALITY pin: re-pin only from a fresh measurement, never hand-edit.",
-  "measuredAt": "2026-09-09",
-  "measuredAgainstCommit": "5859712e",
+  "$comment": "NOT a golden manifest. TEXT census (activity-min-box-width; T0 pinned the pre-change model, T6 re-pinned this post-change model on 2026-09-09): for every committed activity fixture records, for OURS and for the JAR golden, over the NORMALIZED tree, the fill histogram over every <text> ((absent) counted), the text-anchor histogram ((absent) counted), the inset histogram (round3(text.x - rect.x) for every <text> whose immediately preceding element sibling is a <rect>) and textCount. Post-change totals over the 268 baseline fixtures, OURS: fill #000 1561 (was #181818 1423), anchor (absent) 1586 (was middle 1133 / start 249), inset 10 on 906 of 917 (was 60 on 779 of 843); JAR: #000 1869, (absent) 1915, 10 on 914 of 930. textCount moved on NO fixture. Population and three-way status derive from each fixture's own content via text-census.ts#statusOf. An EQUALITY pin: re-pin only from a fresh measurement, never hand-edit. RE-PINNED by activity-parallel-connectors T6 (2026-09-10): 5 fixtures moved one inset-histogram bucket (branch centring, FtileHeightFixedCentered.java:88-98); textCount, fill and anchor moved on none.",
+  "measuredAt": "2026-09-10",
+  "measuredAgainstCommit": "47b86312",
   "fixtures": [
     {
       "type": "activity",
@@ -2388,7 +2388,8 @@
           "(absent)": 11
         },
         "inset": {
-          "10": 9
+          "10": 8,
+          "9.999": 1
         },
         "textCount": 11
       },
@@ -2404,8 +2405,8 @@
         },
         "textCount": 11
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "47b86312"
     },
     {
       "type": "activity",
@@ -3379,7 +3380,8 @@
           "(absent)": 7
         },
         "inset": {
-          "10": 5
+          "10": 4,
+          "10.001": 1
         },
         "textCount": 7
       },
@@ -3395,8 +3397,8 @@
         },
         "textCount": 7
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "47b86312"
     },
     {
       "type": "activity",
@@ -3597,8 +3599,7 @@
           "(absent)": 14
         },
         "inset": {
-          "10": 6,
-          "9.999": 1
+          "10": 7
         },
         "textCount": 14
       },
@@ -3614,8 +3615,8 @@
         },
         "textCount": 14
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "47b86312"
     },
     {
       "type": "activity",
@@ -6060,8 +6061,7 @@
           "(absent)": 13
         },
         "inset": {
-          "10": 5,
-          "9.999": 1
+          "10": 6
         },
         "textCount": 13
       },
@@ -6077,8 +6077,8 @@
         },
         "textCount": 13
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "47b86312"
     },
     {
       "type": "activity",
@@ -7954,7 +7954,8 @@
           "(absent)": 23
         },
         "inset": {
-          "10": 11
+          "10": 10,
+          "9.995": 1
         },
         "textCount": 23
       },
@@ -7970,8 +7971,8 @@
         },
         "textCount": 29
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "47b86312"
     },
     {
       "type": "activity",

@@ -125,4 +125,53 @@ Measurement between tasks (orchestrator): the subset probe in
 - [x] Batch 3 — T3
 - [x] Batch 4 — T4
 - [x] Batch 5 — T5
-- [ ] Batch 6 — T6
+- [x] Batch 6 — T6
+
+## Close-out (T6, 2026-09-10)
+
+**Executed 7 of 7** (T0–T6) on `feat/activity-parallel-connectors`;
+unmerged at close. One commit per task plus one `docs(apc-TN)` commit per
+batch close. Notes in `.agent-notes/apc-T0.md` and `apc-T6.md`.
+
+### Exit bar, scored
+
+| bar | result |
+|---|---|
+| Aggregate falls, against 43977 | **42511, −3.33%**; 29 fell, 237 unchanged, 2 rose |
+| The 32-fixture subset, against 8218 | **6752, −17.84%** |
+| Subset `line[]/@x1..y2` fall | `@y1`/`@y2` 600/599 → 599/598; `@x1`/`@x2` 596/595 → **605/605 (rose)** — the C2 packing (28 vs 10), the filed lane-capture defect, and the comparator descending into fixtures it used to short-circuit on `childCount` (apc-T6 note); the gated score fell |
+| Subset `polygon[]/@points` falls | 313 → **300** |
+| `childCount` on the detach fixtures falls | the 11 with a terminator inside a branch: 2026 → **1027**; the subset 3733 → 2116 |
+| Zero UNEXPLAINED rises | two rises, `bixefi` 181 → 220 and `gesogi` 242 → 248, each journaled with a mechanism before its commit; the T2 agent's stated mechanism for 12 risers was disproved by measurement and corrected in the journal (draw order of the join bar) before T3 |
+| Every re-pin diffed, every risen pin named | five baselines diffed: `diff-baseline` 2 risen (above); `style` 32 moved, 8 line counts moved away from the jar's (loop-label gap, filed); `swimlane` 17 moved, dividers 12 closer / 5 farther (lane-capture + C2 clip); `text` 5 moved one inset bucket; the jar side moved on none |
+| Sequence, state, class, description, json unmoved | 23 files / 2167 passed + 1 skipped at `b7c293c6` and at HEAD, identical per file |
+| Four gates green | typecheck 0, lint 0, build ok, `npm test` 701 files / 19441 passed + 2 skipped + 1 todo (after `rm -rf coverage/.tmp`; the first run under-collected to 693 and carried one interference failure in `json-style` that passes alone at both commits) |
+
+### Premises measured false or incomplete
+
+- **D5's "any branch has one" is split-only**: the fork's join bar is an
+  unconditional `FtileBlackBlock` and never `FtileKilled`
+  (`ParallelBuilderFork.java:110-131`). Amended at T1, flagged.
+- **D4 omitted the `first..last` clamp**: both split steps clamp to the
+  composite's own left (`ParallelBuilderSplit.java:104-109, 171-176`), so a
+  partially detached split's join line always reaches the centre.
+- **The brief's "21 detach fixtures" is 11**: only 11 of the 32 have a
+  terminator inside a branch; the other 10 `stop` after the join.
+- **Draw order is scored**: our join bar was emitted before the branches;
+  upstream draws it after (`:101`, `:117`). Invisible until T2 removed the
+  `childCount` short-circuit, then +85 `rect[]` on `zizaki` alone.
+- **T3's test write-set pointed at the wrong file**: the bar pins live in
+  `renderer.test.ts`, `layout.test.ts`, `tile-layout.test.ts`, not
+  `renderer-shapes.test.ts`.
+- **The fork/split's parsed lane is the last branch's**
+  (`node-dispatch.ts:261/:291`), so 5 laned fixtures' bars sit in the wrong
+  lane; filed with a measured throwaway fix (+19 net, `jevoce` +230).
+
+### Follow-ons (measured weight at HEAD; filed in `planning/next-missions.md`)
+
+- C2 `klimt/compress` — 18 px per gap on every multi-branch fixture; the
+  lane-clipped bar width; `childCount` still 42% of the aggregate
+- fork/split lane capture in the parser — `bixefi` −101 alone, `jevoce` +230
+- if/switch connector shape — every if/switch fixture's `line[]` families
+- loop-label line gap — count-only, `camavo`-class
+- fork bar stroke — `rect[]/@stroke` + `@stroke-width` 35 + 35 on the subset
