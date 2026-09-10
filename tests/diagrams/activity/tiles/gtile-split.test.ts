@@ -3,7 +3,9 @@ import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
-const BAR_OVERHANG = 10;
+// `AbstractParallelFtilesBuilder.java:130` -- was the unsourced module-local
+// `BAR_OVERHANG` (10) before apc-T4.
+const PARALLEL_X_MARGIN = 14;
 
 const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 0, height: 0 }),
@@ -28,9 +30,8 @@ describe('GtileSplit — geometry (same width formula as GtileFork, own barHeigh
     expect(tile.kind).toBe('gtile-split');
   });
 
-  it('width = 220 (same formula as fork)', () => {
-    // branchTotalWidth = 80 + 40 + 80 = 200; + 2 * BAR_OVERHANG(10) = 220
-    expect(tile.width).toBe(220);
+  it('width = 2 * (14 + 80 + 14) = 216 (same formula as fork)', () => {
+    expect(tile.width).toBe(216);
   });
 
   it('height = 1.5 + 20 + 80 + 20 + 1.5 = 123 (THIN_SPLIT_HEIGHT, not BAR_HEIGHT)', () => {
@@ -47,16 +48,20 @@ describe('GtileSplit — geometry (same width formula as GtileFork, own barHeigh
     expect(tile.barHeight).toBe(1.5);
   });
 
-  it('branchTopY = 1.5 + 20 = 21.5', () => {
-    expect(tile.branchTopY).toBe(21.5);
+  it('branchTopYs[1] (max-height branch) = 1.5 + 20 = 21.5', () => {
+    expect(tile.branchTopYs[1]).toBe(21.5);
   });
 
-  it('branchOffsets[0] = 10', () => {
-    expect(tile.branchOffsets[0]).toBe(BAR_OVERHANG);
+  it('branchTopYs[0] (shorter branch) is centred: + (80-60)/2 = 31.5', () => {
+    expect(tile.branchTopYs[0]).toBe(31.5);
   });
 
-  it('branchOffsets[1] = 130', () => {
-    expect(tile.branchOffsets[1]).toBe(130);
+  it('branchOffsets[0] = PARALLEL_X_MARGIN = 14', () => {
+    expect(tile.branchOffsets[0]).toBe(PARALLEL_X_MARGIN);
+  });
+
+  it('branchOffsets[1] = 122', () => {
+    expect(tile.branchOffsets[1]).toBe(122);
   });
 
   it('NORTH_HOOK → { x: width/2, y: 0 }', () => {

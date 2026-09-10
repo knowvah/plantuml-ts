@@ -309,7 +309,7 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     expect(geo.edges).toHaveLength(2);
     const [inEdge, outEdge] = geo.edges;
     const bX = LAYOUT_MARGIN + tile.branchOffsets[0]!;
-    const bY = LAYOUT_MARGIN + tile.branchTopY;
+    const bY = LAYOUT_MARGIN + tile.branchTopYs[0]!;
 
     expect(inEdge!.points).toHaveLength(2);
     expect(inEdge!.points[0]).toEqual({ x: bX + 7, y: LAYOUT_MARGIN + tile.barHeight });

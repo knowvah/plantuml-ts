@@ -2,9 +2,35 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import { BAR_HEIGHT, NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
+import { BAR_HEIGHT, PARALLEL_X_MARGIN, SPACE_AROUND_BLACK_BAR } from '../activity-layout-constants.js';
 
-const BAR_OVERHANG = 10;
+/**
+ * Tallest in/out-link label height across every branch (`ymargin1`/
+ * `ymargin2`, computed ONCE over all branches, not per branch).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:100-125
+ *   -- `getSuppSpace1`/`getSuppSpace2`.
+ * Our fork/split AST (`../ast.ts:97-106`) carries no per-branch link
+ * labels yet, so the one call site below passes an empty array and this
+ * always returns 0 until a link-label port fills the seam.
+ */
+function tallestLabelHeight(labelHeights: readonly number[]): number {
+  return Math.max(0, ...labelHeights);
+}
+
+/**
+ * Extra right margin for a branch whose in/out link label overflows the
+ * branch's own decorated width, else 0.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:138-156
+ *   -- `getSuppForIncomingArrow`/`getXSuppForDisplay`:
+ *   `pos2 = ftileDim.getLeft() + textWidth; return pos2 > ftileDim.getWidth() ? pos2 - ftileDim.getWidth() : 0;`.
+ * Our fork/split AST tracks no label width yet, so the one call site
+ * below passes 0 and this always returns 0 until a link-label port fills
+ * the seam.
+ */
+function suppForIncomingArrow(labelWidth: number, branchLeft: number, branchWidth: number): number {
+  const pos2 = branchLeft + labelWidth;
+  return pos2 > branchWidth ? pos2 - branchWidth : 0;
+}
 
 export class GtileFork extends TileComposite {
   // Widened to `string` so subclasses (e.g. GtileSplit) can override with
@@ -14,7 +40,15 @@ export class GtileFork extends TileComposite {
   readonly height: number;
   readonly children: readonly Tile[];
   readonly branchOffsets: readonly number[];
-  readonly branchTopY: number;
+  /**
+   * Each branch's own top y within the band, centring it on the tallest
+   * branch (`FtileHeightFixedCentered`, `dy((fixedHeight - h) / 2)`) then
+   * shifting by `ymargin1` (`FtileHeightFixedMarged`, `dy(ymargin1)`) --
+   * both measured from the band's own top, i.e. `barHeight` below `y`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileHeightFixedCentered.java:88-98
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileHeightFixedMarged.java:89-96
+   */
+  readonly branchTopYs: readonly number[];
   readonly barWidth: number;
   /**
    * The top/bottom bar band's height -- `6` for fork
@@ -31,21 +65,33 @@ export class GtileFork extends TileComposite {
     super();
     this.children = branches;
     this.barHeight = barHeight;
-    const branchTotalWidth =
-      branches.reduce((s, b) => s + b.width, 0) + Math.max(0, branches.length - 1) * NODE_MARGIN_X;
-    this.width = branchTotalWidth + 2 * BAR_OVERHANG;
+
+    // getSuppSpace1/getSuppSpace2 -- no per-branch link labels tracked yet.
+    const ymargin1 = tallestLabelHeight([]);
+    const ymargin2 = tallestLabelHeight([]);
+
+    // computeNewFtile: each branch is independently margined by
+    // PARALLEL_X_MARGIN on both sides (plus the label-overflow supplement
+    // on the right), then packed with NO other gap (FtileForkInner).
+    const slots = branches.map((b) => {
+      const supp = suppForIncomingArrow(0, 0, b.width);
+      return PARALLEL_X_MARGIN + b.width + PARALLEL_X_MARGIN + supp;
+    });
+    this.width = slots.reduce((s, slot) => s + slot, 0);
     this.barWidth = this.width;
-    const maxBranchH = Math.max(0, ...branches.map((b) => b.height));
-    this.branchTopY = barHeight + NODE_MARGIN_Y;
-    this.height = barHeight + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + barHeight;
 
     const offsets: number[] = [];
-    let x = BAR_OVERHANG;
-    for (const b of branches) {
-      offsets.push(x);
-      x += b.width + NODE_MARGIN_X;
+    let x = 0;
+    for (const slot of slots) {
+      offsets.push(x + PARALLEL_X_MARGIN);
+      x += slot;
     }
     this.branchOffsets = offsets;
+
+    const maxBranchH = Math.max(0, ...branches.map((b) => b.height));
+    const fixedHeight = maxBranchH + 2 * SPACE_AROUND_BLACK_BAR;
+    this.branchTopYs = branches.map((b) => barHeight + ymargin1 + (fixedHeight - b.height) / 2);
+    this.height = barHeight + ymargin1 + fixedHeight + ymargin2 + barHeight;
   }
 
   getCoord(hook: HookName): GPoint {

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1083 modules · 3929 exported names.
+1083 modules · 3931 exported names.
 
 ## `src/`
 
@@ -919,7 +919,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `BACK_EDGE_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `BACK_EDGE_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-fork.ts` | `layoutFork`, `layoutSplit` | Fork/split (parallel-branch) layout for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-helpers.ts` | `ACTION_HEIGHT`, `ACTION_H_PAD`, `nextId`, `diamondSize`, `repeatCondSize`, `actionSize`, `parallelogramSize`, `noteSize`, `orthogonalPoints`, `nodeCenterX` | Small geometry/measurement helpers shared across the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-if.ts` | `layoutIf` | If/else-if/else layout for the activity diagram layout engine (see `layout.old.ts`). |

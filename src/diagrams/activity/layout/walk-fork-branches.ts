@@ -108,7 +108,7 @@ export function walkForkBranches(t: GtileFork, ctx: ForkBranchContext, out: Out)
   for (let i = 0; i < t.children.length; i++) {
     const branch = t.children[i]!;
     const bX = ctx.x + t.branchOffsets[i]!;
-    const bY = ctx.y + t.branchTopY;
+    const bY = ctx.y + t.branchTopYs[i]!;
     walkTile(branch, bX, bY, { kindHint: null, lane: ctx.myLane }, out);
     pushBranchConnectors(branch, bX, bY, ctx, out);
   }
