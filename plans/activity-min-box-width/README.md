@@ -112,4 +112,51 @@ Measurement between tasks (orchestrator): the aggregate probe in
 - [x] Batch 3 — T3
 - [x] Batch 4 — T4
 - [x] Batch 5 — T5
-- [ ] Batch 6 — T6
+- [x] Batch 6 — T6
+
+## Close-out (T6, 2026-09-09)
+
+**Executed 7 of 7** (T0–T6) plus two `fix(amb-T4)` commits on
+`feat/activity-min-box-width`; unmerged at close. Every commit is one task
+or one gate-required fix.
+
+### Exit bar, scored
+
+| bar | result |
+|---|---|
+| Aggregate falls, against 48291 | **43977, −8.93%**; 263 fell, 4 unchanged, 1 rose |
+| `rect[]/@width` (821) | 822 → **166** (−79.8%; the probe sums every path ending in the family, the README figure was g-scoped) |
+| `text[]/@text-anchor` (1253) | **0** |
+| `text[]/@fill` (1288) | **8** (the residual is explicit colours the port cannot reach: `DiamondFontColor`, filed) |
+| `rect[]/@stroke-width` (846) | **53** |
+| Zero UNEXPLAINED rises | one rise, `simuti-16-lece058` 217 → 219, mechanism journaled BEFORE T2's commit (routing float equality; filed) |
+| Every re-pin diffed, every risen pin named | five baselines diffed; one risen pin (`simuti`); the jar side moved on no fixture; `textCount` moved on none |
+| Sequence, state, class, description, json unmoved | 23 files / 2167 passed + 1 skipped at `8aad71eb` and at HEAD, identical per file |
+| Four gates green | typecheck 0, lint 0, build ok, full suite 701 files (see the journal's T6 row for the counts) |
+
+### Premises measured false or incomplete
+
+- **T3 as briefed moved nothing**: nothing but `arrow` consumed
+  `activityLineThickness`; the box, diamond and hexagon strokes were literal
+  `1`s in the renderer. T3's write-set was amended to include
+  `activity-renderer-shapes.ts` (journal, flagged).
+- **D4's bar reading**: the merged style for `activityBar` IS 0.5, but
+  `FtileBlackBlock#drawU:110` never applies it; the jar strokes the bar at
+  1.0. The resolver says 0.5, the bar renderer does not consume it, and the
+  missing bar stroke is filed.
+- **D3 and D4 omitted the theme root tier**: a `!theme` or `<style>` `root
+  { FontColor / LineThickness }` beats the skin; the port already held the
+  values in `theme.styleOverrides.root`. Amended mid-mission (T4b), flagged.
+- **T4's first landing missed the single-line label path** (`core/latex.ts#
+  renderNodeLabel` hard-codes `theme.colors.text`); caught by the probe,
+  fixed in the same batch.
+- **`text[]/@x` (1427) cannot fall here**: the root margin (12 vs 16) offsets
+  every x by 4; the inset census carries the placement evidence instead.
+
+### Follow-ons (measured weight at HEAD; filed in `planning/next-missions.md`)
+
+- split-connector float equality — `simuti` +2, two degenerate `<line>`s
+- plain rhombus stroke width — `polygon[]/@stroke-width` 15 on 11 fixtures
+- fork bar stroke (jar 1.0 self-coloured, ours none) — unsized
+- `DiamondFontColor` skinparam handler — inside `text[]/@fill` 8
+- theme root tier for the remaining resolvers + `defaultTextAlignment` parse
