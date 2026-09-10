@@ -1,7 +1,7 @@
 {
-  "$comment": "NOT a golden manifest. SWIMLANE census (activity-swimlane-rendering; T0 pinned the pre-change model, T7 re-pinned this post-change model on 2026-09-09): for every committed activity fixture whose SOURCE has a swimlane line (CommandSwimlane.java:59-67 needle, never a slug list), records for OURS and for the JAR golden the lane dividers (x, document order), the title band rect, the title texts (font-size / x / text-anchor, document order), the per-lane extents (ours from ActivityGeometry.swimlanes; jar from consecutive ascending dividers), and the root canvas -- plus laneCount from our AST. Measured by tests/oracle/svg-conformance/swimlane-census.ts through the same seams the ratchet uses. Partition 60 baseline / 24 error / 8 jar-error of 92. After T6 ours draws n+1 dividers per multi-lane fixture (both outer edges, Swimlanes.java:327), a transparent band (fill=none, plantuml.skin:310 / Swimlanes.java:357-367) of the MEASURED title height (AtomText.java:179-181 floor of 10), titles centred over the lane content with no text-anchor (UGraphicCompressOnXorY.java:100-112) and drawn LAST (D5), and nothing at all for a single lane (Swimlanes.java:253,275). Equality pin, not a ratchet; never hand-edit.",
+  "$comment": "NOT a golden manifest. SWIMLANE census (activity-swimlane-rendering; T0 pinned the pre-change model, T7 re-pinned this post-change model on 2026-09-09): for every committed activity fixture whose SOURCE has a swimlane line (CommandSwimlane.java:59-67 needle, never a slug list), records for OURS and for the JAR golden the lane dividers (x, document order), the title band rect, the title texts (font-size / x / text-anchor, document order), the per-lane extents (ours from ActivityGeometry.swimlanes; jar from consecutive ascending dividers), and the root canvas -- plus laneCount from our AST. Measured by tests/oracle/svg-conformance/swimlane-census.ts through the same seams the ratchet uses. Partition 60 baseline / 24 error / 8 jar-error of 92. After T6 ours draws n+1 dividers per multi-lane fixture (both outer edges, Swimlanes.java:327), a transparent band (fill=none, plantuml.skin:310 / Swimlanes.java:357-367) of the MEASURED title height (AtomText.java:179-181 floor of 10), titles centred over the lane content with no text-anchor (UGraphicCompressOnXorY.java:100-112) and drawn LAST (D5), and nothing at all for a single lane (Swimlanes.java:253,275). Equality pin, not a ratchet; never hand-edit. RE-PINNED by activity-min-box-width T6 (2026-09-09): lane extents and canvases moved on the 57 multi-lane fixtures because the 120px action-box floor no longer widens lane content; dividers/titles/bands are unchanged in count (ours 195/138/57, jar 195/139/57).",
   "measuredAt": "2026-09-09",
-  "measuredAgainstCommit": "66403a06",
+  "measuredAgainstCommit": "5859712e",
   "fixtures": [
     {
       "type": "activity",
@@ -11,39 +11,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          78.35,
+          134.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "65.463",
+            "x": "31.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "195.463",
+            "x": "90.125",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 116.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 61.349999999999994
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 78.35,
+            "width": 56.625
           }
         ],
-        "width": "289",
+        "width": "146",
         "height": "351"
       },
       "jar": {
@@ -93,39 +93,39 @@
       "ours": {
         "dividerXs": [
           17,
-          327,
-          457
+          140.35,
+          235.513
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "129.419",
+            "x": "36.094",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "349.419",
+            "x": "145.35",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439,
+          "width": 217.513,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 310
+            "width": 123.35
           },
           {
-            "x": 327,
-            "width": 130
+            "x": 140.35,
+            "width": 95.16250000000002
           }
         ],
-        "width": "469",
+        "width": "247",
         "height": "279"
       },
       "jar": {
@@ -175,39 +175,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          211.113
+          123.384,
+          187.497
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "54.944",
+            "x": "43.136",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "152",
+            "x": "128.384",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 193.113,
+          "width": 169.497,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 106.38437499999998
           },
           {
-            "x": 147,
+            "x": 123.38437499999998,
             "width": 64.11250000000001
           }
         ],
-        "width": "223",
+        "width": "199",
         "height": "227"
       },
       "jar": {
@@ -257,49 +257,49 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277,
-          751.175
+          102.35,
+          209.75,
+          616.675
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "56.463",
+            "x": "34.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "186.463",
+            "x": "130.513",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "488.55",
+            "x": "387.675",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 733.175,
+          "width": 598.675,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 85.35000000000001
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 102.35000000000001,
+            "width": 107.39999999999999
           },
           {
-            "x": 277,
-            "width": 474.17499999999995
+            "x": 209.75,
+            "width": 406.92499999999995
           }
         ],
-        "width": "763",
+        "width": "628",
         "height": "135"
       },
       "jar": {
@@ -359,49 +359,49 @@
       "ours": {
         "dividerXs": [
           17,
-          259.088,
-          389.088,
-          863.263
+          225.463,
+          332.863,
+          739.788
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "112.506",
+            "x": "95.694",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "298.55",
+            "x": "253.625",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "600.638",
+            "x": "510.788",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 845.263,
+          "width": 721.788,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 242.08749999999998
+            "width": 208.4625
           },
           {
-            "x": 259.0875,
-            "width": 130
+            "x": 225.4625,
+            "width": 107.4
           },
           {
-            "x": 389.0875,
-            "width": 474.17500000000007
+            "x": 332.8625,
+            "width": 406.925
           }
         ],
-        "width": "875",
+        "width": "751",
         "height": "227"
       },
       "jar": {
@@ -465,10 +465,10 @@
         "lanes": [
           {
             "x": 17,
-            "width": 140
+            "width": 98.19999999999999
           }
         ],
-        "width": "184",
+        "width": "136",
         "height": "360"
       },
       "jar": {
@@ -488,39 +488,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          143.675,
+          238.838
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "39.419",
+            "x": "37.756",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "169.419",
+            "x": "148.675",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 220.838,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 126.67500000000001
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 143.675,
+            "width": 95.16250000000002
           }
         ],
-        "width": "289",
+        "width": "250",
         "height": "299"
       },
       "jar": {
@@ -620,7 +620,7 @@
             "width": 151.9375
           }
         ],
-        "width": "444",
+        "width": "430",
         "height": "411"
       },
       "jar": {
@@ -682,39 +682,39 @@
       "ours": {
         "dividerXs": [
           17,
-          427,
-          957
+          195.013,
+          447.688
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "179.419",
+            "x": "63.425",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "649.419",
+            "x": "278.769",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 47,
-          "width": 939,
+          "width": 429.688,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 410
+            "width": 178.0125
           },
           {
-            "x": 427,
-            "width": 530
+            "x": 195.0125,
+            "width": 252.675
           }
         ],
-        "width": "969",
+        "width": "459",
         "height": "474"
       },
       "jar": {
@@ -770,49 +770,49 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277,
-          407
+          131.825,
+          246.65,
+          336.862
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "41.894",
+            "x": "34.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "171.894",
+            "x": "149.131",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "301.894",
+            "x": "251.65",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 389,
+          "width": 318.862,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 114.82499999999999
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 131.825,
+            "width": 114.82499999999999
           },
           {
-            "x": 277,
-            "width": 130
+            "x": 246.64999999999998,
+            "width": 90.21249999999998
           }
         ],
-        "width": "419",
+        "width": "348",
         "height": "339"
       },
       "jar": {
@@ -878,39 +878,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          67.213,
+          116.25
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "62.481",
+            "x": "22.588",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "192.481",
+            "x": "72.213",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 98.25,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 50.212500000000006
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 67.2125,
+            "width": 49.037499999999994
           }
         ],
-        "width": "289",
+        "width": "128",
         "height": "303"
       },
       "jar": {
@@ -960,39 +960,39 @@
       "ours": {
         "dividerXs": [
           17,
-          307,
-          777
+          157.438,
+          418.938
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "145.969",
+            "x": "71.188",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "522.425",
+            "x": "268.613",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 759,
+          "width": 400.938,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 290
+            "width": 140.4375
           },
           {
-            "x": 307,
-            "width": 470
+            "x": 157.4375,
+            "width": 261.5
           }
         ],
-        "width": "789",
+        "width": "430",
         "height": "431"
       },
       "jar": {
@@ -1130,39 +1130,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          78.35,
+          134.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "65.463",
+            "x": "31.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "195.463",
+            "x": "90.125",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 116.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 61.349999999999994
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 78.35,
+            "width": 56.625
           }
         ],
-        "width": "289",
+        "width": "146",
         "height": "403"
       },
       "jar": {
@@ -1212,39 +1212,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          457
+          81.05,
+          264.4
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "76.994",
+            "x": "44.019",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "296.994",
+            "x": "167.719",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439,
+          "width": 246.4,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 64.04999999999998
           },
           {
-            "x": 147,
-            "width": 310
+            "x": 81.04999999999998,
+            "width": 183.35
           }
         ],
-        "width": "469",
+        "width": "276",
         "height": "379"
       },
       "jar": {
@@ -1295,7 +1295,7 @@
         "dividerXs": [
           17,
           327.937,
-          457.937
+          364.612
         ],
         "titles": [
           {
@@ -1305,14 +1305,14 @@
           },
           {
             "fontSize": "18",
-            "x": "386.919",
+            "x": "340.256",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439.937,
+          "width": 346.612,
           "height": 18,
           "fill": "none"
         },
@@ -1323,10 +1323,10 @@
           },
           {
             "x": 327.9374999999999,
-            "width": 130
+            "width": 36.674999999999955
           }
         ],
-        "width": "469",
+        "width": "376",
         "height": "223"
       },
       "jar": {
@@ -1377,11 +1377,11 @@
         "dividerXs": [
           17,
           49.05,
-          419.05,
-          549.05,
-          932.075,
-          1562.08,
-          1594.13
+          290.813,
+          398.213,
+          781.238,
+          1210.66,
+          1242.71
         ],
         "titles": [
           {
@@ -1391,34 +1391,34 @@
           },
           {
             "fontSize": "18",
-            "x": "223.025",
+            "x": "158.906",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "473.025",
+            "x": "333.488",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "611.919",
+            "x": "461.081",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1236.05",
+            "x": "984.925",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1567.08",
+            "x": "1215.66",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1576.13,
+          "width": 1224.71,
           "height": 18,
           "fill": "none"
         },
@@ -1429,26 +1429,26 @@
           },
           {
             "x": 49.05,
-            "width": 369.99999999999994
+            "width": 241.7625
           },
           {
-            "x": 419.04999999999995,
-            "width": 130
+            "x": 290.8125,
+            "width": 107.39999999999998
           },
           {
-            "x": 549.05,
+            "x": 398.2125,
             "width": 383.025
           },
           {
-            "x": 932.0749999999999,
-            "width": 629.9999999999999
+            "x": 781.2375,
+            "width": 429.42499999999995
           },
           {
-            "x": 1562.0749999999998,
+            "x": 1210.6625,
             "width": 32.05000000000018
           }
         ],
-        "width": "1606",
+        "width": "1254",
         "height": "387"
       },
       "jar": {
@@ -1538,39 +1538,39 @@
       "ours": {
         "dividerXs": [
           17,
-          309.725,
-          559.725
+          211.85,
+          363.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "149.806",
+            "x": "100.869",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "416.163",
+            "x": "269.35",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 541.725,
+          "width": 345.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 292.725
+            "width": 194.85000000000002
           },
           {
-            "x": 309.725,
-            "width": 250
+            "x": 211.85000000000002,
+            "width": 152.125
           }
         ],
-        "width": "571",
+        "width": "375",
         "height": "279"
       },
       "jar": {
@@ -1620,39 +1620,39 @@
       "ours": {
         "dividerXs": [
           17,
-          560.413,
-          1290.41
+          413.075,
+          893.05
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "282.688",
+            "x": "209.019",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "919.394",
+            "x": "647.044",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1272.41,
+          "width": 875.05,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 543.4125
+            "width": 396.07500000000005
           },
           {
-            "x": 560.4125,
-            "width": 729.9999999999999
+            "x": 413.07500000000005,
+            "width": 479.97500000000014
           }
         ],
-        "width": "1302",
+        "width": "905",
         "height": "627"
       },
       "jar": {
@@ -1702,39 +1702,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          872.55
+          79.988,
+          805.537
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "55.506",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "472.2",
+            "x": "405.187",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 854.55,
+          "width": 787.537,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 62.98750000000001
           },
           {
-            "x": 147,
+            "x": 79.98750000000001,
             "width": 725.5499999999993
           }
         ],
-        "width": "884",
+        "width": "817",
         "height": "299"
       },
       "jar": {
@@ -1788,10 +1788,10 @@
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 91.35000000000002
           }
         ],
-        "width": "184",
+        "width": "145",
         "height": "304"
       },
       "jar": {
@@ -1811,39 +1811,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          100.238,
+          196.388
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "45.381",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "177.463",
+            "x": "113.775",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 178.388,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 130
+            "x": 17.000000000000004,
+            "width": 83.2375
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 100.2375,
+            "width": 96.14999999999999
           }
         ],
-        "width": "289",
+        "width": "208",
         "height": "245"
       },
       "jar": {
@@ -1899,39 +1899,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          491.925
+          143.75,
+          488.675
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "51.456",
+            "x": "49.831",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "261.019",
+            "x": "257.769",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 473.925,
+          "width": 470.675,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 126.75
           },
           {
-            "x": 147,
+            "x": 143.75,
             "width": 344.92499999999995
           }
         ],
-        "width": "503",
+        "width": "500",
         "height": "355"
       },
       "jar": {
@@ -1981,39 +1981,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          88.594,
+          200.644
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "56.969",
+            "x": "27.766",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "186.969",
+            "x": "119.588",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 182.644,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 71.59375
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 88.59375,
+            "width": 112.05000000000001
           }
         ],
-        "width": "289",
+        "width": "212",
         "height": "367"
       },
       "jar": {
@@ -2071,7 +2071,7 @@
         "titles": [],
         "bandRect": null,
         "lanes": [],
-        "width": "184",
+        "width": "173",
         "height": "256"
       },
       "jar": {
@@ -2091,39 +2091,39 @@
       "ours": {
         "dividerXs": [
           17,
-          131,
-          295
+          124.087,
+          229.15
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "25.456",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "165.469",
+            "x": "129.087",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 277,
+          "width": 211.15,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 114
+            "width": 107.08749999999998
           },
           {
-            "x": 131,
-            "width": 164
+            "x": 124.08749999999998,
+            "width": 105.0625
           }
         ],
-        "width": "307",
+        "width": "241",
         "height": "231"
       },
       "jar": {
@@ -2179,39 +2179,39 @@
       "ours": {
         "dividerXs": [
           17,
-          227,
-          457
+          107.212,
+          202.175
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "81.894",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "301.894",
+            "x": "114.587",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439,
+          "width": 184.175,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 210
+            "width": 90.21249999999998
           },
           {
-            "x": 227,
-            "width": 230
+            "x": 107.21249999999998,
+            "width": 94.9625
           }
         ],
-        "width": "469",
+        "width": "214",
         "height": "447"
       },
       "jar": {
@@ -2261,39 +2261,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          141.05,
+          267.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "37.9",
+            "x": "34.925",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "167.9",
+            "x": "160.288",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 249.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 124.05000000000001
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 141.05,
+            "width": 126.67500000000001
           }
         ],
-        "width": "289",
+        "width": "279",
         "height": "351"
       },
       "jar": {
@@ -2343,39 +2343,39 @@
       "ours": {
         "dividerXs": [
           17,
-          287,
-          817
+          148.338,
+          401.013
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "109.419",
+            "x": "40.088",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "509.419",
+            "x": "232.094",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 799,
+          "width": 383.013,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 270
+            "width": 131.3375
           },
           {
-            "x": 287,
-            "width": 530
+            "x": 148.3375,
+            "width": 252.67500000000004
           }
         ],
-        "width": "829",
+        "width": "413",
         "height": "331"
       },
       "jar": {
@@ -2425,49 +2425,49 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          311,
-          455.559
+          90.35,
+          197.7,
+          313.934
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "56.013",
+            "x": "27.688",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "203.013",
+            "x": "118.038",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "356.786",
+            "x": "229.323",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 437.559,
+          "width": 295.934,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 73.35
           },
           {
-            "x": 147,
-            "width": 164
+            "x": 90.35,
+            "width": 107.35
           },
           {
-            "x": 311,
-            "width": 144.559375
+            "x": 197.7,
+            "width": 116.234375
           }
         ],
-        "width": "467",
+        "width": "325",
         "height": "463"
       },
       "jar": {
@@ -2527,49 +2527,49 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277,
-          407
+          88.594,
+          158.644,
+          228.694
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "56.013",
+            "x": "26.809",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "186.013",
+            "x": "97.631",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "316.013",
+            "x": "167.681",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 389,
+          "width": 210.694,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 71.59375
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 88.59375,
+            "width": 70.05000000000001
           },
           {
-            "x": 277,
-            "width": 130
+            "x": 158.64375,
+            "width": 70.05000000000001
           }
         ],
-        "width": "419",
+        "width": "240",
         "height": "351"
       },
       "jar": {
@@ -2629,39 +2629,39 @@
       "ours": {
         "dividerXs": [
           17,
-          307,
-          617
+          143.888,
+          283.288
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "103.556",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "427.969",
+            "x": "179.556",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 599,
+          "width": 265.288,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 290
+            "width": 126.88749999999999
           },
           {
-            "x": 307,
-            "width": 310
+            "x": 143.8875,
+            "width": 139.40000000000003
           }
         ],
-        "width": "629",
+        "width": "295",
         "height": "239"
       },
       "jar": {
@@ -2718,7 +2718,7 @@
         "dividerXs": [
           17,
           80.1,
-          210.1
+          186.484
         ],
         "titles": [
           {
@@ -2728,14 +2728,14 @@
           },
           {
             "fontSize": "18",
-            "x": "118.55",
+            "x": "106.742",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 192.1,
+          "width": 168.484,
           "height": 18,
           "fill": "none"
         },
@@ -2746,10 +2746,10 @@
           },
           {
             "x": 80.1,
-            "width": 130.00000000000003
+            "width": 106.384375
           }
         ],
-        "width": "222",
+        "width": "198",
         "height": "227"
       },
       "jar": {
@@ -2806,8 +2806,8 @@
         "dividerXs": [
           17,
           182.009,
-          349.734,
-          522.384
+          347.459,
+          520.109
         ],
         "titles": [
           {
@@ -2817,19 +2817,19 @@
           },
           {
             "fontSize": "18",
-            "x": "224.809",
+            "x": "223.672",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "405.516",
+            "x": "403.241",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 504.384,
+          "width": 502.109,
           "height": 18,
           "fill": "none"
         },
@@ -2840,14 +2840,14 @@
           },
           {
             "x": 182.00937500000003,
-            "width": 167.72500000000002
+            "width": 165.45
           },
           {
-            "x": 349.73437500000006,
-            "width": 172.65000000000003
+            "x": 347.459375,
+            "width": 172.6500000000001
           }
         ],
-        "width": "534",
+        "width": "532",
         "height": "955"
       },
       "jar": {
@@ -2908,7 +2908,7 @@
         "dividerXs": [
           17,
           272.813,
-          402.813
+          376.638
         ],
         "titles": [
           {
@@ -2918,14 +2918,14 @@
           },
           {
             "fontSize": "18",
-            "x": "290.9",
+            "x": "277.813",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 384.813,
+          "width": 358.638,
           "height": 18,
           "fill": "none"
         },
@@ -2936,10 +2936,10 @@
           },
           {
             "x": 272.8125000000001,
-            "width": 130
+            "width": 103.82499999999999
           }
         ],
-        "width": "414",
+        "width": "388",
         "height": "219"
       },
       "jar": {
@@ -2995,7 +2995,7 @@
         "dividerXs": [
           17,
           266.45,
-          416.45
+          386.538
         ],
         "titles": [
           {
@@ -3005,14 +3005,14 @@
           },
           {
             "fontSize": "18",
-            "x": "298.869",
+            "x": "283.913",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 398.45,
+          "width": 368.538,
           "height": 18,
           "fill": "none"
         },
@@ -3023,10 +3023,10 @@
           },
           {
             "x": 266.45000000000005,
-            "width": 150
+            "width": 120.08749999999998
           }
         ],
-        "width": "443",
+        "width": "398",
         "height": "399"
       },
       "jar": {
@@ -3088,39 +3088,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          337
+          96.188,
+          191.163
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "47.406",
+            "x": "22",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "207.406",
+            "x": "109.081",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 319,
+          "width": 173.163,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 79.1875
           },
           {
-            "x": 147,
-            "width": 190
+            "x": 96.1875,
+            "width": 94.975
           }
         ],
-        "width": "384",
+        "width": "238",
         "height": "379"
       },
       "jar": {
@@ -3176,39 +3176,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          457
+          81.05,
+          264.4
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "76.994",
+            "x": "44.019",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "296.994",
+            "x": "167.719",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439,
+          "width": 246.4,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 64.04999999999998
           },
           {
-            "x": 147,
-            "width": 310
+            "x": 81.04999999999998,
+            "width": 183.35
           }
         ],
-        "width": "469",
+        "width": "276",
         "height": "379"
       },
       "jar": {
@@ -3259,11 +3259,11 @@
         "dividerXs": [
           17,
           49.05,
-          419.05,
-          549.05,
-          932.075,
-          1562.08,
-          1594.13
+          275.438,
+          352.088,
+          735.113,
+          1133.79,
+          1165.84
         ],
         "titles": [
           {
@@ -3273,34 +3273,34 @@
           },
           {
             "fontSize": "18",
-            "x": "223.025",
+            "x": "151.219",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "473.025",
+            "x": "302.738",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "611.919",
+            "x": "414.956",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1236.05",
+            "x": "923.425",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1567.08",
+            "x": "1138.79",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1576.13,
+          "width": 1147.84,
           "height": 18,
           "fill": "none"
         },
@@ -3311,26 +3311,26 @@
           },
           {
             "x": 49.05,
-            "width": 369.99999999999994
+            "width": 226.3875
           },
           {
-            "x": 419.04999999999995,
-            "width": 130
+            "x": 275.4375,
+            "width": 76.64999999999998
           },
           {
-            "x": 549.05,
+            "x": 352.0875,
             "width": 383.025
           },
           {
-            "x": 932.0749999999999,
-            "width": 629.9999999999999
+            "x": 735.1125,
+            "width": 398.67499999999995
           },
           {
-            "x": 1562.0749999999998,
+            "x": 1133.7875,
             "width": 32.05000000000018
           }
         ],
-        "width": "1606",
+        "width": "1177",
         "height": "387"
       },
       "jar": {
@@ -3420,39 +3420,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          457.937
+          53.675,
+          364.612
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "75.981",
+            "x": "29.319",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "152",
+            "x": "58.675",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 439.937,
+          "width": 346.612,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 36.67499999999998
           },
           {
-            "x": 147,
+            "x": 53.67499999999998,
             "width": 310.9374999999999
           }
         ],
-        "width": "469",
+        "width": "376",
         "height": "171"
       },
       "jar": {
@@ -3502,39 +3502,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          102.35,
+          177.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "58.938",
+            "x": "36.613",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "182.525",
+            "x": "110.563",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 159.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 85.35000000000001
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 102.35000000000001,
+            "width": 75.37500000000001
           }
         ],
-        "width": "289",
+        "width": "189",
         "height": "219"
       },
       "jar": {
@@ -3584,49 +3584,49 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          357,
-          527
+          55.025,
+          127.4,
+          205.763
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "76.994",
+            "x": "31.006",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "246.994",
+            "x": "86.206",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "436.994",
+            "x": "161.575",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 509,
+          "width": 187.763,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 38.02499999999999
           },
           {
-            "x": 147,
-            "width": 210
+            "x": 55.02499999999999,
+            "width": 72.37499999999999
           },
           {
-            "x": 357,
-            "width": 170
+            "x": 127.39999999999998,
+            "width": 78.36250000000001
           }
         ],
-        "width": "539",
+        "width": "217",
         "height": "331"
       },
       "jar": {
@@ -3721,10 +3721,10 @@
           },
           {
             "x": 327.9374999999999,
-            "width": 310.9374999999998
+            "width": 310.9374999999999
           },
           {
-            "x": 638.8749999999997,
+            "x": 638.8749999999998,
             "width": 336.25
           }
         ],
@@ -3789,7 +3789,7 @@
         "dividerXs": [
           17,
           183.2,
-          313.2
+          290.288
         ],
         "titles": [
           {
@@ -3799,28 +3799,28 @@
           },
           {
             "fontSize": "18",
-            "x": "199.656",
+            "x": "188.2",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 295.2,
+          "width": 272.288,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 166.20000000000005
+            "width": 166.20000000000002
           },
           {
-            "x": 183.20000000000005,
-            "width": 130
+            "x": 183.20000000000002,
+            "width": 107.0875
           }
         ],
-        "width": "360",
+        "width": "312",
         "height": "291"
       },
       "jar": {
@@ -3870,49 +3870,49 @@
       "ours": {
         "dividerXs": [
           17,
-          627,
-          1237,
-          2187
+          371.3,
+          725.6,
+          1292.05
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "310.975",
+            "x": "183.125",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "920.975",
+            "x": "537.425",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1700.97",
+            "x": "997.8",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 2169,
+          "width": 1274.05,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 610
+            "width": 354.3
           },
           {
-            "x": 627,
-            "width": 610
+            "x": 371.3,
+            "width": 354.2999999999999
           },
           {
-            "x": 1237,
-            "width": 950
+            "x": 725.5999999999999,
+            "width": 566.45
           }
         ],
-        "width": "2199",
+        "width": "1304",
         "height": "135"
       },
       "jar": {
@@ -3972,39 +3972,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          297
+          131.825,
+          251.913
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "41.894",
+            "x": "34.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "181.894",
+            "x": "151.763",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 279,
+          "width": 233.913,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 114.82499999999999
           },
           {
-            "x": 147,
-            "width": 150
+            "x": 131.825,
+            "width": 120.0875
           }
         ],
-        "width": "324",
+        "width": "264",
         "height": "399"
       },
       "jar": {
@@ -4061,11 +4061,11 @@
         "dividerXs": [
           17,
           49.05,
-          419.05,
-          589.25,
-          972.275,
-          1602.28,
-          1634.33
+          275.438,
+          445.638,
+          828.663,
+          1227.34,
+          1259.39
         ],
         "titles": [
           {
@@ -4075,34 +4075,34 @@
           },
           {
             "fontSize": "18",
-            "x": "223.025",
+            "x": "151.219",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "424.05",
+            "x": "280.438",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "652.119",
+            "x": "508.506",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1276.25",
+            "x": "1016.98",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1607.28",
+            "x": "1232.34",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1616.33,
+          "width": 1241.39,
           "height": 18,
           "fill": "none"
         },
@@ -4113,26 +4113,26 @@
           },
           {
             "x": 49.05,
-            "width": 369.99999999999994
+            "width": 226.3875
           },
           {
-            "x": 419.04999999999995,
+            "x": 275.4375,
             "width": 170.20000000000005
           },
           {
-            "x": 589.25,
+            "x": 445.63750000000005,
             "width": 383.025
           },
           {
-            "x": 972.275,
-            "width": 630.0000000000001
+            "x": 828.6625,
+            "width": 398.67500000000007
           },
           {
-            "x": 1602.275,
+            "x": 1227.3375,
             "width": 32.05000000000018
           }
         ],
-        "width": "1646",
+        "width": "1271",
         "height": "387"
       },
       "jar": {
@@ -4228,49 +4228,49 @@
       "ours": {
         "dividerXs": [
           17,
-          437,
-          807,
-          1097
+          220.375,
+          373.75,
+          490.45
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "216.988",
+            "x": "108.675",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "611.988",
+            "x": "287.05",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "941.988",
+            "x": "422.087",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1079,
+          "width": 472.45,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 420
+            "width": 203.375
           },
           {
-            "x": 437,
-            "width": 370
+            "x": 220.375,
+            "width": 153.37499999999994
           },
           {
-            "x": 807,
-            "width": 290
+            "x": 373.74999999999994,
+            "width": 116.69999999999999
           }
         ],
-        "width": "1109",
+        "width": "502",
         "height": "583"
       },
       "jar": {
@@ -4336,39 +4336,39 @@
       "ours": {
         "dividerXs": [
           17,
-          281,
-          581
+          182.303,
+          345.269
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "101.469",
+            "x": "52.12",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "382.456",
+            "x": "215.242",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 563,
+          "width": 327.269,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 264
+            "width": 165.30312500000002
           },
           {
-            "x": 281,
-            "width": 300
+            "x": 182.30312500000002,
+            "width": 162.96562500000005
           }
         ],
-        "width": "598",
+        "width": "366",
         "height": "595"
       },
       "jar": {
@@ -4424,39 +4424,39 @@
       "ours": {
         "dividerXs": [
           17,
-          181,
-          363.034
+          123.675,
+          248.384
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "72.45",
+            "x": "43.788",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "245.467",
+            "x": "159.48",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 345.034,
+          "width": 230.384,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 164
+            "width": 106.67500000000001
           },
           {
-            "x": 181,
-            "width": 182.034375
+            "x": 123.67500000000001,
+            "width": 124.70937500000002
           }
         ],
-        "width": "375",
+        "width": "260",
         "height": "227"
       },
       "jar": {
@@ -4518,39 +4518,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          277
+          63.65,
+          110.975
         ],
         "titles": [
           {
             "fontSize": "8",
-            "x": "72.2",
+            "x": "30.525",
             "anchor": "(absent)"
           },
           {
             "fontSize": "8",
-            "x": "202.2",
+            "x": "77.513",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 259,
+          "width": 92.975,
           "height": 10,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 46.650000000000006
           },
           {
-            "x": 147,
-            "width": 130
+            "x": 63.650000000000006,
+            "width": 47.325
           }
         ],
-        "width": "289",
+        "width": "122",
         "height": "123"
       },
       "jar": {
@@ -4711,7 +4711,7 @@
           },
           {
             "x": 252.3375000000001,
-            "width": 235.3375000000001
+            "width": 235.33750000000015
           }
         ],
         "width": "499",
@@ -4864,49 +4864,49 @@
       "ours": {
         "dividerXs": [
           17,
-          497,
-          867,
-          1717
+          338.425,
+          569.925,
+          1157.55
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "237.538",
+            "x": "158.25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "662.538",
+            "x": "434.713",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "1273.04",
+            "x": "844.781",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 47,
-          "width": 1699,
+          "width": 1139.55,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 480
+            "width": 321.42499999999995
           },
           {
-            "x": 497,
-            "width": 370
+            "x": 338.42499999999995,
+            "width": 231.5
           },
           {
-            "x": 867,
-            "width": 850
+            "x": 569.925,
+            "width": 587.625
           }
         ],
-        "width": "1729",
+        "width": "1169",
         "height": "558"
       },
       "jar": {
@@ -4966,39 +4966,39 @@
       "ours": {
         "dividerXs": [
           17,
-          413.662,
-          1050.33
+          370.338,
+          847.05
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "205.319",
+            "x": "183.656",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "721.981",
+            "x": "598.681",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 1032.33,
+          "width": 829.05,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 396.66249999999997
+            "width": 353.3375
           },
           {
-            "x": 413.66249999999997,
-            "width": 636.6624999999999
+            "x": 370.3375,
+            "width": 476.7125
           }
         ],
-        "width": "1062",
+        "width": "859",
         "height": "405"
       },
       "jar": {
@@ -5060,39 +5060,39 @@
       "ours": {
         "dividerXs": [
           17,
-          147,
-          297
+          131.825,
+          251.913
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "41.894",
+            "x": "34.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "181.894",
+            "x": "151.763",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 279,
+          "width": 233.913,
           "height": 18,
           "fill": "#EEE"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 130
+            "width": 114.82499999999999
           },
           {
-            "x": 147,
-            "width": 150
+            "x": 131.825,
+            "width": 120.0875
           }
         ],
-        "width": "324",
+        "width": "264",
         "height": "399"
       },
       "jar": {
@@ -5148,49 +5148,49 @@
       "ours": {
         "dividerXs": [
           17,
-          167,
-          297,
-          427
+          138.094,
+          264.981,
+          343.044
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "52.006",
+            "x": "37.553",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "173.556",
+            "x": "143.094",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "327.969",
+            "x": "269.981",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 409,
+          "width": 325.044,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 150
+            "width": 121.09375000000003
           },
           {
-            "x": 167,
-            "width": 130
+            "x": 138.09375000000003,
+            "width": 126.88749999999996
           },
           {
-            "x": 297,
-            "width": 130
+            "x": 264.98125,
+            "width": 78.06250000000006
           }
         ],
-        "width": "439",
+        "width": "355",
         "height": "295"
       },
       "jar": {
@@ -5262,39 +5262,39 @@
       "ours": {
         "dividerXs": [
           17,
-          158.375,
-          304.363
+          149.75,
+          291.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "48.706",
+            "x": "44.394",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "208.363",
+            "x": "197.731",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 286.363,
+          "width": 273.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 141.375
+            "width": 132.75
           },
           {
-            "x": 158.375,
-            "width": 145.9875
+            "x": 149.75,
+            "width": 141.97500000000002
           }
         ],
-        "width": "327",
+        "width": "318",
         "height": "507"
       },
       "jar": {
@@ -5344,39 +5344,39 @@
       "ours": {
         "dividerXs": [
           17,
-          307,
-          497
+          201.184,
+          309.397
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "129.431",
+            "x": "76.523",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "352.894",
+            "x": "206.184",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 47,
-          "width": 479,
+          "width": 291.397,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 290
+            "width": 184.184375
           },
           {
-            "x": 307,
-            "width": 190
+            "x": 201.184375,
+            "width": 108.21250000000003
           }
         ],
-        "width": "564",
+        "width": "373",
         "height": "526"
       },
       "jar": {
