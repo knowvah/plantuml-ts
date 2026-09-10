@@ -126,7 +126,7 @@ Measurement between tasks (orchestrator): the probe in
 - [x] Batch 1 — T1, T2
 - [x] Batch 2 — T3
 - [x] Batch 3 — T4
-- [ ] Batch 4 — T5 (resumed 2026-09-10 after the stop-11 amendment)
+- [x] Batch 4 — T5 (resumed 2026-09-10 after the stop-11 amendment)
 - [ ] Batch 5 — T6
 
 ## Status — halted 2026-09-10 on stop 11, then RESUMED after the amendment (history kept below)
