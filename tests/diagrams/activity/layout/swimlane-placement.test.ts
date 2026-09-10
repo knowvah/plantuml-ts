@@ -120,7 +120,7 @@ describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {
     const result = placeSwimlanes({
       nodes,
       edges,
-      edgeMeta: [{ lane1: undefined, lane2: undefined }],
+      edgeMeta: [{ lane1: undefined, lane2: undefined, shape: 'default' }],
       laneNames: [],
       baseX: 12,
       bounder: { getDimension: () => ({ width: 0, height: 0 }) },
@@ -192,7 +192,7 @@ describe('placeSwimlanes — edge routing', () => {
 
   it('a cross-lane edge becomes a 4-point path with a horizontal middle segment', () => {
     const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
-    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B' }];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'default' }];
     const edges = [
       {
         points: [
@@ -210,7 +210,7 @@ describe('placeSwimlanes — edge routing', () => {
 
   it('a same-lane edge keeps its pass-1 point count, only shifted', () => {
     const nodes = [node('a', 12, 40, 'A'), node('a2', 12, 40, 'A')];
-    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'A' }];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'A', shape: 'default' }];
     const original = [
       {
         points: [
@@ -228,6 +228,56 @@ describe('placeSwimlanes — edge routing', () => {
     const result = placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames, baseX: 12, bounder, theme });
     const stray = result.nodes.find((n) => n.id === 'stray')!;
     expect(stray.x).toBe(12);
+  });
+
+  /**
+   * D6 / `ParallelBuilderFork.java:166-184`, `ParallelBuilderSplit.java
+   * :207-225`: a bar-to-branch in-connector's horizontal sits at the
+   * BAR-side endpoint's own y plus 4, never the two endpoints' average.
+   */
+  it("a 'parallel-in' cross-lane edge puts the horizontal at the bar-side y + 4", () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'parallel-in' }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 60 },
+        ],
+      },
+    ];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const pts = result.edges[0]!.points;
+    expect(pts).toHaveLength(4);
+    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
+    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 36 });
+    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 36 });
+    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 60 });
+  });
+
+  /**
+   * D6 / `ParallelBuilderFork.java:220-241`, `ParallelBuilderSplit.java
+   * :264-285`: a branch-to-join out-connector's horizontal sits at the
+   * join-side endpoint's own y minus 14.
+   */
+  it("a 'parallel-out' cross-lane edge puts the horizontal at the join-side y - 14", () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'parallel-out' }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 80 },
+        ],
+      },
+    ];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, bounder, theme });
+    const pts = result.edges[0]!.points;
+    expect(pts).toHaveLength(4);
+    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
+    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 66 });
+    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 66 });
+    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 80 });
   });
 });
 

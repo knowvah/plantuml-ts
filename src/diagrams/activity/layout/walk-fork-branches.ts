@@ -77,6 +77,7 @@ function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBra
     ],
     ctx.myLane,
     laneIn(branch, ctx.myLane),
+    'parallel-in',
   );
 
   if (branch.hasPointOut()) {
@@ -90,6 +91,7 @@ function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBra
       ],
       laneOut(branch, ctx.myLane),
       ctx.myLane,
+      'parallel-out',
     );
   }
 }

@@ -30,7 +30,7 @@ import {
   placeSwimlanes,
   resolveSwimlaneVertical,
 } from './swimlane-placement.js';
-import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
+import type { EdgeMeta, EdgeShape, PlacementResult } from './swimlane-placement.js';
 
 export const LAYOUT_MARGIN = 12;
 
@@ -62,9 +62,15 @@ export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefin
   out.nodes.push(node);
 }
 
-export function pushEdge(out: Out, points: GPoint[], lane1: string | undefined, lane2: string | undefined): void {
+export function pushEdge(
+  out: Out,
+  points: GPoint[],
+  lane1: string | undefined,
+  lane2: string | undefined,
+  shape: EdgeShape = 'default',
+): void {
   out.edges.push({ points: dedupeAdjacentPoints(points) });
-  out.edgeMeta.push({ lane1, lane2 });
+  out.edgeMeta.push({ lane1, lane2, shape });
 }
 
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
