@@ -68,3 +68,10 @@ describe('GtileDiamond — hooks', () => {
     expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: tile.height / 2 });
   });
 });
+
+describe('GtileDiamond — hasPointOut()', () => {
+  it('is true (FtileDiamond.java:108-111, 4-arg with outY)', () => {
+    const tile = new GtileDiamond('cond', bounder, theme);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+});

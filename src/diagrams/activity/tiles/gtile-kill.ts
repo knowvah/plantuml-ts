@@ -28,4 +28,19 @@ export class GtileKill extends TileLeaf {
       }
     }
   }
+
+  /**
+   * No out point. `kill` (`tile-layout.ts:71`) builds a `GtileKill`,
+   * mirroring how upstream wraps a killed branch's tile.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileKilled.java:71-74
+   *   -- `calculateDimensionFtile` rebuilds the geometry with the
+   *   three-argument `FtileGeometry(XDimension2D, left, inY)` constructor,
+   *   which carries no `outY` and so strips the out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionSimple.java:123-126
+   *   -- `kill()` sets the `killed` flag that later triggers the
+   *   `FtileKilled` wrap (`:112-113`).
+   */
+  hasPointOut(): boolean {
+    return false;
+  }
 }

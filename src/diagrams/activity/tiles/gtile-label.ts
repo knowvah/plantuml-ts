@@ -52,4 +52,17 @@ export class GtileLabel extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point: `FtileLabel` does not override
+   * `calculateDimensionFtile`, so it inherits `FtileEmpty`'s.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileLabel.java:40
+   *   -- `class FtileLabel extends FtileEmpty` with no override.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:91-92
+   *   -- `calculateDimensionEmpty()`, five-argument `FtileGeometry` with
+   *   `outY = height`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

@@ -51,4 +51,18 @@ export class GtileTopDown extends TileComposite {
       }
     }
   }
+
+  /**
+   * The LAST child's out point, or `true` when empty.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:42-54
+   *   -- `appendBottom`'s merger: `if (geo2.hasPointOut())` takes the
+   *   LOWER (later) tile's out state; the upper tile's is discarded.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:91-92
+   *   -- an empty sequence upstream is a single `FtileEmpty`, whose
+   *   `calculateDimensionEmpty()` always has an out point.
+   */
+  hasPointOut(): boolean {
+    if (this.children.length === 0) return true;
+    return this.children[this.children.length - 1]!.hasPointOut();
+  }
 }

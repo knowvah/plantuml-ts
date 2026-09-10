@@ -17,12 +17,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function stubTile(width: number, height: number): Tile {
+function stubTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: () => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -39,6 +40,10 @@ describe('GtileTopDown — 0 children', () => {
 
   it('childOffsets === []', () => {
     expect(tile.childOffsets).toEqual([]);
+  });
+
+  it('hasPointOut() === true when empty (FtileEmpty.java:91-92)', () => {
+    expect(tile.hasPointOut()).toBe(true);
   });
 });
 
@@ -90,5 +95,22 @@ describe('GtileTopDown — hooks', () => {
 
   it('SOUTH_HOOK.y === height', () => {
     expect(tile.getCoord(SOUTH_HOOK).y).toBe(tile.height);
+  });
+});
+
+describe("GtileTopDown — hasPointOut() is the LAST child's (FtileGeometryMerger.java:42-54)", () => {
+  it('is true when the last child has an out point (an action)', () => {
+    const tile = new GtileTopDown([stubTile(100, 50, false), stubTile(80, 30, true)], bounder, theme);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is false when the last child has none (a stop)', () => {
+    const tile = new GtileTopDown([stubTile(100, 50, true), stubTile(80, 30, false)], bounder, theme);
+    expect(tile.hasPointOut()).toBe(false);
+  });
+
+  it("a single-child chain also takes that child's value", () => {
+    const tile = new GtileTopDown([stubTile(100, 50, false)], bounder, theme);
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

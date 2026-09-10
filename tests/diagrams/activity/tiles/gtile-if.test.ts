@@ -18,12 +18,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function stubTile(width: number, height: number): Tile {
+function stubTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: () => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -32,6 +33,7 @@ function stubDiamond(width: number, height: number): GtileDiamond {
     width,
     height,
     getCoord: () => ({ x: 0, y: 0 }),
+    hasPointOut: () => true,
   } as unknown as GtileDiamond;
 }
 
@@ -96,5 +98,36 @@ describe('GtileIf — hooks', () => {
 
   it('SOUTH_HOOK.y === height', () => {
     expect(tile.getCoord(SOUTH_HOOK).y).toBe(tile.height);
+  });
+});
+
+// FtileIfNude.java:132-138 (the base if/else class both FtileIfWithDiamonds
+// and FtileIfWithLinks inherit unmodified for calculateDimensionFtile):
+// `if (tile1.hasPointOut() || tile2.hasPointOut()) return dimTotal; return
+// dimTotal.withoutPointOut();` -- true iff EITHER branch has an out point.
+// Our GtileIf always builds an else branch (tile-layout.ts:116-119), so
+// this base two-branch class -- not the single-branch `FtileIfDown` -- is
+// the applicable citation.
+describe('GtileIf — hasPointOut() is true iff any branch has one', () => {
+  it('is true when only the then-branch continues', () => {
+    const tile = new GtileIf(
+      diamond,
+      [{ tile: stubTile(80, 60, true) }, { tile: stubTile(80, 60, false) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is false when every branch ends in a stop', () => {
+    const tile = new GtileIf(
+      diamond,
+      [{ tile: stubTile(80, 60, false) }, { tile: stubTile(80, 60, false) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

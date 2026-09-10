@@ -80,4 +80,14 @@ export class GtileAction extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point: an action box always continues the flow.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBox.java:237-241
+   *   -- `calculateDimensionFtile` uses the five-argument `FtileGeometry`
+   *   constructor with `outY = dimRaw.getHeight()`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

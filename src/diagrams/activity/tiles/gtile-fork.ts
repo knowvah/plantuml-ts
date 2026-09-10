@@ -56,4 +56,31 @@ export class GtileFork extends TileComposite {
       }
     }
   }
+
+  /**
+   * Unconditionally `true` -- NOT "any branch has one". A fork's join bar
+   * is an unconditional `FtileBlackBlock`, and `ParallelBuilderFork` never
+   * wraps its result in `FtileKilled` the way `ParallelBuilderSplit` does;
+   * each branch's own `hasPointOut()` only gates whether THAT branch draws
+   * a `ConnectionOut` into the bar, not whether the fork itself continues.
+   *
+   * DISCOVERED DIVERGENCE from `decisions.md` D5's "a fork/split's is 'any
+   * branch has one' (hasOut())": that generalisation holds for split (see
+   * `GtileSplit`'s override) but not fork. Filed for `decisions.md` review;
+   * not amended here (outside this task's write-set).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileForkInner.java:102-113
+   *   -- the branches' union geometry, unconditional 5-arg `FtileGeometry`
+   *   with `outY = dimTotal.getHeight()`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:94
+   *   -- the join bar, unconditional 5-arg `FtileGeometry` with
+   *   `outY = height`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileAssemblySimple.java:120-130
+   *   -- `appendBottom` takes the LOWER tile's (the bar's) hasPointOut.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java
+   *   -- `doStep1`/`doStep2` (`:87-131`) never wrap the result in
+   *   `FtileKilled`, unlike `ParallelBuilderSplit.java:150-151`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

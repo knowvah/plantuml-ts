@@ -9,12 +9,13 @@ const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 0, height: 0 }),
 };
 
-function stubTile(w: number, h: number): Tile {
+function stubTile(w: number, h: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width: w,
     height: h,
     getCoord: () => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -66,5 +67,27 @@ describe('GtileSplit — geometry (same as GtileFork, 2 branches w=80 h=60/80)',
 
   it('children contains both branches', () => {
     expect(tile.children).toHaveLength(2);
+  });
+});
+
+// Unlike fork, a split becomes `FtileKilled` (no out point) when NO branch
+// survives (vcompact/ParallelBuilderSplit.java:127-133 `hasOut()`, :150-151
+// `if (hasOut() == false) return new FtileKilled(result)`), matching
+// decisions.md D5/D4's "no join line and no out point" when every branch
+// is detached.
+describe('GtileSplit — hasPointOut() is true iff any branch has one', () => {
+  it('is true when one branch continues and one is detached', () => {
+    const tile = new GtileSplit([stubTile(80, 60, true), stubTile(80, 80, false)], bounder);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is false when every branch is detached (ParallelBuilderSplit.java:150-151)', () => {
+    const tile = new GtileSplit([stubTile(80, 60, false), stubTile(80, 80, false)], bounder);
+    expect(tile.hasPointOut()).toBe(false);
+  });
+
+  it('is false for an empty split (vacuous hasOut())', () => {
+    const tile = new GtileSplit([], bounder);
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

@@ -21,12 +21,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number): Tile {
+function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -37,6 +38,7 @@ function makeDiamond(width: number, height: number) {
     width,
     height,
     getCoord: (_hook: HookName): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => true,
   };
 }
 
@@ -155,5 +157,18 @@ describe('GtileRepeat — hooks', () => {
 
   it('WEST_HOOK.x === 0', () => {
     expect(tile.getCoord(WEST_HOOK).x).toBe(0);
+  });
+});
+
+// FtileRepeat.java:696-698 `calculateDimensionFtile` unconditionally
+// returns `new FtileGeometry(dimTotal, getLeft(...), 0,
+// dimTotal.getHeight())` -- the exit is the condition diamond's own
+// "false" path, independent of the body's own hasPointOut.
+describe('GtileRepeat — hasPointOut() is unconditionally true', () => {
+  it('is true even when the body has no out point (ends in a stop)', () => {
+    const body = makeTile(80, 60, false);
+    const condition = makeDiamond(60, 40);
+    const tile = new GtileRepeat(body, condition, null, bounder, theme);
+    expect(tile.hasPointOut()).toBe(true);
   });
 });

@@ -27,6 +27,21 @@ export interface Tile {
    */
   readonly swimlane?: string;
   getCoord(hook: HookName): GPoint;
+  /**
+   * Whether this tile has an outgoing connection point that a later
+   * sibling or wrapping composite can route a link into. Mirrors
+   * upstream's `outY == Double.MIN_NORMAL` sentinel: a tile built without
+   * an out point (a stop, kill, break, or a branch that ends in one of
+   * those) cannot be routed out of. Not yet consumed by layout or
+   * rendering -- purely threaded so T2/T3 (the parallel-connector and bar
+   * tasks) can gate on it.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:88-90
+   *   -- the four-argument constructor (width, height, left, inY)
+   *   delegates to the five-argument one with `outY = Double.MIN_NORMAL`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:141-143
+   *   -- `hasPointOut()`, `outY != Double.MIN_NORMAL`.
+   */
+  hasPointOut(): boolean;
 }
 
 export abstract class TileLeaf implements Tile {
@@ -35,6 +50,20 @@ export abstract class TileLeaf implements Tile {
   abstract readonly height: number;
   abstract getCoord(hook: HookName): GPoint;
   swimlane?: string;
+
+  /**
+   * Default `true` rather than `abstract`: every production `gtile-*.ts`
+   * leaf overrides this with its own `@see` citation, so no in-scope tile
+   * relies on the default. The default exists only so that test-only
+   * `TileLeaf` stand-ins outside this task's write-set keep compiling
+   * without also being edited here --
+   * `tests/diagrams/activity/tiles/tile.test.ts`'s `FixedLeaf` and
+   * `tests/diagrams/activity/layout/swimlane-placement.test.ts`'s
+   * `FixedTile`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }
 
 export abstract class TileComposite implements Tile {
@@ -44,4 +73,15 @@ export abstract class TileComposite implements Tile {
   abstract getCoord(hook: HookName): GPoint;
   abstract readonly children: readonly Tile[];
   swimlane?: string;
+
+  /**
+   * Default `true` for the same reason as `TileLeaf.hasPointOut` above:
+   * every production `gtile-*.ts` composite overrides this explicitly (see
+   * each file's own `@see`); the default only protects
+   * `tests/diagrams/activity/tiles/tile.test.ts`'s test-only
+   * `SimpleTwoChildComposite` from needing an edit here.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

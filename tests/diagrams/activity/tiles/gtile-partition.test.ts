@@ -24,12 +24,13 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number): Tile {
+function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
     getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -93,5 +94,15 @@ describe('GtilePartition — hooks', () => {
 
   it('WEST_HOOK.x === 0', () => {
     expect(tile.getCoord(WEST_HOOK).x).toBe(0);
+  });
+});
+
+// GtilePartition inherits GtileGroup's hasPointOut() unmodified -- upstream
+// partitions resolve through the same FtileGroup (FtileGroup.java:190-201)
+// as composite/group frames, just a different USymbol.
+describe('GtilePartition — hasPointOut() passes through the body (inherited)', () => {
+  it('is false when the body has no out point', () => {
+    const tile = new GtilePartition('Zone', makeTile(80, 40, false), bounder, theme);
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

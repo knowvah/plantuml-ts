@@ -52,4 +52,15 @@ export class GtileRepeat extends TileComposite {
       }
     }
   }
+
+  /**
+   * Unconditionally `true`: the exit is the condition diamond's own
+   * "false" path, independent of the body's own out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:696-698
+   *   -- `calculateDimensionFtile` unconditionally returns
+   *   `new FtileGeometry(dimTotal, getLeft(...), 0, dimTotal.getHeight())`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

@@ -28,4 +28,14 @@ export class GtileStart extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStart.java:91
+   *   -- `calculateDimensionFtile` uses the five-argument `FtileGeometry`
+   *   constructor with `outY = size`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

@@ -47,4 +47,15 @@ export class GtileDiamond extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamond.java:108-111
+   *   -- `calculateDimensionFtile` uses the four-argument
+   *   `FtileGeometry(XDimension2D, left, inY, outY)` constructor with
+   *   `outY = dim.getHeight()`.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }

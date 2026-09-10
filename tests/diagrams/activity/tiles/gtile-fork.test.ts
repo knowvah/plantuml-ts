@@ -13,12 +13,13 @@ const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 0, height: 0 }),
 };
 
-function stubTile(w: number, h: number): Tile {
+function stubTile(w: number, h: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width: w,
     height: h,
     getCoord: () => ({ x: 0, y: 0 }),
+    hasPointOut: () => hasPointOut,
   };
 }
 
@@ -111,5 +112,34 @@ describe('GtileFork — zero branches (empty fork)', () => {
 
   it('branchOffsets is empty', () => {
     expect(tile.branchOffsets).toHaveLength(0);
+  });
+});
+
+// The fork's join bar is an unconditional `FtileBlackBlock`
+// (vertical/FtileBlackBlock.java:94, 5-arg ctor, outY=height), assembled
+// with `appendBottom` (FtileAssemblySimple.java:120-130 ->
+// FtileGeometryMerger.java:42-54, whose result takes the LOWER tile's --
+// the bar's -- hasPointOut). Unlike ParallelBuilderSplit
+// (vcompact/ParallelBuilderSplit.java:127-133, :150-151), ParallelBuilderFork
+// never wraps its result in `FtileKilled`: every branch's own hasPointOut
+// only gates whether THAT branch draws a `ConnectionOut`
+// (ParallelBuilderFork.java:123-126), not whether the fork itself
+// continues. So a fork's hasPointOut() is unconditionally `true`, even
+// when every branch is detached -- this is a discovered divergence from
+// decisions.md D5's "any branch has one" generalisation, filed for review.
+describe('GtileFork — hasPointOut() is unconditionally true', () => {
+  it('is true when every branch continues', () => {
+    const tile = new GtileFork([stubTile(80, 60, true), stubTile(80, 80, true)], bounder);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is true when every branch is detached (no FtileKilled wrap for fork)', () => {
+    const tile = new GtileFork([stubTile(80, 60, false), stubTile(80, 80, false)], bounder);
+    expect(tile.hasPointOut()).toBe(true);
+  });
+
+  it('is true for an empty fork', () => {
+    const tile = new GtileFork([], bounder);
+    expect(tile.hasPointOut()).toBe(true);
   });
 });

@@ -59,4 +59,16 @@ export class GtileGroup extends TileComposite {
       }
     }
   }
+
+  /**
+   * Passes through the single body's out point. `GtilePartition` inherits
+   * this unmodified -- upstream partitions resolve through the same
+   * `FtileGroup` as composite/group frames, just a different `USymbol`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileGroup.java:190-201
+   *   -- `calculateDimensionFtile`: `if (orig.hasPointOut()) return
+   *   ...outY...; return ...(no outY)`.
+   */
+  hasPointOut(): boolean {
+    return this.children[0]!.hasPointOut();
+  }
 }

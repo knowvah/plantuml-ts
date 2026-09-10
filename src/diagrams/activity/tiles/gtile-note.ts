@@ -49,4 +49,19 @@ export class GtileNote extends TileLeaf {
       }
     }
   }
+
+  /**
+   * Has an out point: `tile-layout.ts:79` always builds a `GtileNote` as
+   * an in-flow node (this port has no notion of a legend-only note), which
+   * corresponds to `NoteType.NOTE` below.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileNoteAlone.java:129-130
+   *   -- `calculateDimensionFtile`'s `withOutPoint` branch, five-argument
+   *   `FtileGeometry` with `outY = dimTotal.getHeight()`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorAddNote.java:65-68
+   *   -- `withOutPoint = note.getType() == NoteType.NOTE`, the default note
+   *   kind.
+   */
+  hasPointOut(): boolean {
+    return true;
+  }
 }
