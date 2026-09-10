@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1082 modules · 3925 exported names.
+1083 modules · 3929 exported names.
 
 ## `src/`
 
@@ -919,7 +919,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `BACK_EDGE_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `BACK_EDGE_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-fork.ts` | `layoutFork`, `layoutSplit` | Fork/split (parallel-branch) layout for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-helpers.ts` | `ACTION_HEIGHT`, `ACTION_H_PAD`, `nextId`, `diamondSize`, `repeatCondSize`, `actionSize`, `parallelogramSize`, `noteSize`, `orthogonalPoints`, `nodeCenterX` | Small geometry/measurement helpers shared across the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-if.ts` | `layoutIf` | If/else-if/else layout for the activity diagram layout engine (see `layout.old.ts`). |
@@ -930,7 +930,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-layout-swimlane.ts` | `buildSwimlaneCtx`, `buildSwimlaneGeos` | Swimlane context setup for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry`, `BranchResult`, `BranchResultInternal`, `LayoutSequenceFn`, `LayoutCtx` | Shared geometry, context, and result types for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-while.ts` | `layoutWhile` | While-loop layout for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-renderer-shapes.ts` | `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderBar`, `renderDiamond`, `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderHexagon`, `renderParallelogram`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
+| `activity-renderer-shapes.ts` | `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderHexagon`, `renderParallelogram`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `resolveSolidBucketColor`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
@@ -953,7 +954,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-placement.ts` | `EdgeMeta`, `laneAt`, `laneIn`, `laneOut`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
-| `walk-fork-branches.ts` | `ForkBranchContext`, `walkForkBranches` |  |
+| `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
 
 ## `src/diagrams/activity/routing/`
 

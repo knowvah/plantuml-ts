@@ -6,7 +6,8 @@ import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tile
 // Constants mirroring the implementation
 const NODE_MARGIN_X = 40;
 const NODE_MARGIN_Y = 20;
-const BAR_HEIGHT = 8;
+// `AbstractParallelFtilesBuilder.java:64` -- was an unsourced 8 (apc-T3).
+const BAR_HEIGHT = 6;
 const BAR_OVERHANG = 10;
 
 const bounder: StringBounder = {
@@ -33,16 +34,20 @@ describe('GtileFork — geometry with 2 branches (w=80 each, h=60 and h=80)', ()
     expect(tile.width).toBe(220);
   });
 
-  it('height = BAR_HEIGHT + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + BAR_HEIGHT = 136', () => {
-    // 8 + 20 + 80 + 20 + 8 = 136
-    expect(tile.height).toBe(136);
+  it('height = BAR_HEIGHT + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + BAR_HEIGHT = 132', () => {
+    // 6 + 20 + 80 + 20 + 6 = 132
+    expect(tile.height).toBe(132);
   });
 
   it('barWidth === width', () => {
     expect(tile.barWidth).toBe(tile.width);
   });
 
-  it('branchTopY = BAR_HEIGHT + NODE_MARGIN_Y = 28', () => {
+  it('barHeight === BAR_HEIGHT (default, fork)', () => {
+    expect(tile.barHeight).toBe(BAR_HEIGHT);
+  });
+
+  it('branchTopY = BAR_HEIGHT + NODE_MARGIN_Y = 26', () => {
     expect(tile.branchTopY).toBe(BAR_HEIGHT + NODE_MARGIN_Y);
   });
 
@@ -89,8 +94,8 @@ describe('GtileFork — single branch', () => {
     expect(tile.width).toBe(80);
   });
 
-  it('height = 8 + 20 + 50 + 20 + 8 = 106', () => {
-    expect(tile.height).toBe(106);
+  it('height = 6 + 20 + 50 + 20 + 6 = 102', () => {
+    expect(tile.height).toBe(102);
   });
 
   it('branchOffsets[0] = 10', () => {
@@ -105,9 +110,9 @@ describe('GtileFork — zero branches (empty fork)', () => {
     expect(tile.width).toBe(2 * BAR_OVERHANG);
   });
 
-  it('height = BAR_HEIGHT + NODE_MARGIN_Y + 0 + NODE_MARGIN_Y + BAR_HEIGHT = 56', () => {
-    // 8 + 20 + 0 + 20 + 8 = 56
-    expect(tile.height).toBe(56);
+  it('height = BAR_HEIGHT + NODE_MARGIN_Y + 0 + NODE_MARGIN_Y + BAR_HEIGHT = 52', () => {
+    // 6 + 20 + 0 + 20 + 6 = 52
+    expect(tile.height).toBe(52);
   });
 
   it('branchOffsets is empty', () => {
@@ -141,5 +146,22 @@ describe('GtileFork — hasPointOut() is unconditionally true', () => {
   it('is true for an empty fork', () => {
     const tile = new GtileFork([], bounder);
     expect(tile.hasPointOut()).toBe(true);
+  });
+});
+
+// GtileSplit passes THIN_SPLIT_HEIGHT (1.5) as the third constructor
+// argument (`gtile-split.ts`); this exercises the parameter directly on
+// GtileFork itself, without depending on the subclass.
+describe('GtileFork — the third constructor argument overrides barHeight', () => {
+  it('a custom barHeight replaces BAR_HEIGHT in barHeight/branchTopY/height', () => {
+    const b1 = stubTile(80, 60);
+    const b2 = stubTile(80, 80);
+    const tile = new GtileFork([b1, b2], bounder, 1.5);
+
+    expect(tile.barHeight).toBe(1.5);
+    expect(tile.branchTopY).toBe(1.5 + NODE_MARGIN_Y);
+    expect(tile.height).toBe(1.5 + NODE_MARGIN_Y + 80 + NODE_MARGIN_Y + 1.5);
+    // width/barWidth/branchOffsets are NOT barHeight-derived (D3, T4's job).
+    expect(tile.width).toBe(220);
   });
 });

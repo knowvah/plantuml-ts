@@ -157,18 +157,60 @@ describe('renderActivity — action node', () => {
 
 describe('renderActivity — fork-bar node', () => {
   it('renders a <rect> for the fork bar', () => {
-    const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 8 });
+    const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 6 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('<rect');
   });
 
-  it('fork bar fill matches border color', () => {
-    const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 8 });
+  // `activityBar { BackgroundColor #5 }` (plantuml.skin:387) -- `#555555`,
+  // shortened by `svg-format.ts#shortenColor` to `#555` on emission, NOT
+  // `theme.colors.border` (`#181818`, the jar's own outline colour;
+  // apc-T3/D4). Was pinned to the wrong colour before this task.
+  it('fork bar fill is the resolved activityBar colour (#555), rounded, no stroke', () => {
+    const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 6 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
-    expect(result).toContain(`fill="${theme.colors.border}"`);
+    expect(result).toContain('fill="#555"');
+    expect(result).toContain('rx="2.5"');
+    expect(result).toContain('ry="2.5"');
+    expect(result).not.toContain('stroke=');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 4b: the split top/join line is a stroked <line>, not a <rect>
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — split-bar / split-join-bar node', () => {
+  it('renders a <line>, not a <rect>, for the split top line', () => {
+    const node = makeNode({ kind: 'split-bar', id: 'split-bar-0', x: 50, y: 55, width: 200, height: 1.5 });
+    const geo = makeGeo({ nodes: [node] });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    expect(content).toContain('<line');
+    expect(content).not.toContain('<rect');
+  });
+
+  it('the split line spans x..x+width at the SAME y (top of its band, not centred)', () => {
+    const node = makeNode({ kind: 'split-bar', id: 'split-bar-0', x: 50, y: 55, width: 200, height: 1.5 });
+    const geo = makeGeo({ nodes: [node] });
+    const result = assembleSvg(renderActivity(geo, theme));
+    expect(result).toContain('x1="50"');
+    expect(result).toContain('y1="55"');
+    expect(result).toContain('x2="250"');
+    expect(result).toContain('y2="55"');
+    expect(result).toContain('stroke-width="1.5"');
+  });
+
+  it('split-join-bar also renders a <line>, in the arrow colour', () => {
+    const node = makeNode({ kind: 'split-join-bar', id: 'split-join-bar-0', x: 76.025, y: 127, width: 43.35 });
+    const geo = makeGeo({ nodes: [node] });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    expect(content).toContain('<line');
+    expect(result).toContain(`stroke="${theme.colors.arrow}"`);
   });
 });
 
@@ -373,20 +415,13 @@ describe('renderActivity — end and kill nodes', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 10: join-bar and split-bar render a filled rect
+// Test 10: join-bar renders a filled rect, same shape as fork-bar (D4:
+// `split-bar`/`split-join-bar` are lines, covered above under Test 4b)
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — join-bar and split-bar', () => {
+describe('renderActivity — join-bar', () => {
   it('join-bar renders a filled rect', () => {
-    const node = makeNode({ kind: 'join-bar', id: 'join-bar-0', x: 50, y: 50, width: 200, height: 8 });
-    const geo = makeGeo({ nodes: [node] });
-    const result = assembleSvg(renderActivity(geo, theme));
-    const content = contentAfterDefs(result);
-    expect(content).toContain('<rect');
-  });
-
-  it('split-bar renders a filled rect', () => {
-    const node = makeNode({ kind: 'split-bar', id: 'split-bar-0', x: 50, y: 50, width: 200, height: 8 });
+    const node = makeNode({ kind: 'join-bar', id: 'join-bar-0', x: 50, y: 50, width: 200, height: 6 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);

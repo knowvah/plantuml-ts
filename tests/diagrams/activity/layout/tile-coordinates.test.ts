@@ -312,10 +312,10 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     const bY = LAYOUT_MARGIN + tile.branchTopY;
 
     expect(inEdge!.points).toHaveLength(2);
-    expect(inEdge!.points[0]).toEqual({ x: bX + 7, y: LAYOUT_MARGIN + 8 });
+    expect(inEdge!.points[0]).toEqual({ x: bX + 7, y: LAYOUT_MARGIN + tile.barHeight });
     expect(inEdge!.points[1]).toEqual({ x: bX + 7, y: bY });
 
-    const joinBarY = LAYOUT_MARGIN + tile.height - 8;
+    const joinBarY = LAYOUT_MARGIN + tile.height - tile.barHeight;
     expect(outEdge!.points).toHaveLength(2);
     expect(outEdge!.points[0]).toEqual({ x: bX + 11, y: bY + 60 });
     expect(outEdge!.points[1]).toEqual({ x: bX + 11, y: joinBarY });
@@ -340,5 +340,94 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     expect(geo.edges).toHaveLength(3);
     const twoPointEdges = geo.edges.filter((e) => e.points.length === 2);
     expect(twoPointEdges).toHaveLength(3);
+  });
+});
+
+// D4 (+ T0's clamp observation): fork draws an unconditional rect
+// top/bottom; split draws a `first..last` thin LINE, clamped to the
+// composite's own centre x, and the join line is entirely absent when no
+// branch continues.
+describe('assignCoordinates — fork/split bar and split-line geometry (D4)', () => {
+  const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
+  const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+
+  // North hook x=7, south hook x=11 for every branch -- off-centre so a
+  // span computed from the hook actually differs from a bar-centre guess.
+  function branchStub(width: number, height: number, hasOut: boolean, swimlane?: string): Tile {
+    return {
+      kind: 'stub-branch',
+      width,
+      height,
+      ...(swimlane !== undefined ? { swimlane } : {}),
+      getCoord: (hook) => (hook === NORTH_HOOK ? { x: 7, y: 0 } : { x: 11, y: height }),
+      hasPointOut: () => hasOut,
+    };
+  }
+
+  it('fork emits fork-bar then every branch then join-bar, both full barWidth, even when every branch is detached', () => {
+    const tile = new GtileFork([branchStub(80, 60, false), branchStub(80, 80, false)], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['fork-bar', 'stub-branch', 'stub-branch', 'join-bar']);
+    const forkBar = geo.nodes[0]!;
+    const joinBar = geo.nodes[3]!;
+    expect(forkBar.width).toBe(tile.barWidth);
+    expect(forkBar.height).toBe(tile.barHeight);
+    expect(joinBar.width).toBe(tile.barWidth);
+    expect(joinBar.y).toBe(LAYOUT_MARGIN + tile.height - tile.barHeight);
+  });
+
+  it('split top line spans the first..last branch north-hook x over EVERY branch, unconditional', () => {
+    const b0 = branchStub(80, 60, true);
+    const b1 = branchStub(80, 60, true);
+    const b2 = branchStub(80, 60, true);
+    const tile = new GtileSplit([b0, b1, b2], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
+    const first = LAYOUT_MARGIN + tile.branchOffsets[0]! + 7;
+    const last = LAYOUT_MARGIN + tile.branchOffsets[2]! + 7;
+    expect(splitBar.x).toBe(first);
+    expect(splitBar.width).toBeCloseTo(last - first, 9);
+    expect(splitBar.height).toBe(tile.barHeight);
+  });
+
+  it('split join line spans only the continuing branch, clamped to the centre x on the near side (simuti shape)', () => {
+    const b0 = branchStub(80, 60, false);
+    const b1 = branchStub(80, 60, false);
+    const b2 = branchStub(80, 60, true);
+    const tile = new GtileSplit([b0, b1, b2], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
+    const centreX = LAYOUT_MARGIN + tile.width / 2;
+    const b2South = LAYOUT_MARGIN + tile.branchOffsets[2]! + 11;
+    // The only continuing branch's x is on the far side of centre, so the
+    // NEAR end clamps to centreX (ParallelBuilderSplit.java:171-176) --
+    // the line still reaches the composite's own centre, not just b2's x.
+    expect(joinLine.x).toBe(centreX);
+    expect(joinLine.x + joinLine.width).toBeCloseTo(b2South, 9);
+  });
+
+  it('split with every branch detached emits no split-join-bar node and no out-edges', () => {
+    const tile = new GtileSplit([branchStub(80, 60, false), branchStub(80, 60, false)], bounder);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes.some((n) => n.kind === 'split-join-bar')).toBe(false);
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['split-bar', 'stub-branch', 'stub-branch']);
+    expect(geo.edges).toHaveLength(2); // 2 in-edges, 0 out-edges
+  });
+
+  it('split-bar sits in the FIRST branch lane; split-join-bar sits in the LAST branch lane', () => {
+    const b0 = branchStub(80, 60, true, 'LaneA');
+    const b1 = branchStub(80, 60, true, 'LaneB');
+    const tile = new GtileSplit([b0, b1], bounder);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['LaneA', 'LaneB'] };
+    const geo = assignCoordinates(tile, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
+    const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
+    expect(splitBar.swimlane).toBe('LaneA');
+    expect(joinLine.swimlane).toBe('LaneB');
   });
 });

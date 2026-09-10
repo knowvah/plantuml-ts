@@ -23,6 +23,7 @@ import {
 import { renderNodeLabel } from '../../core/latex.js';
 import { NOTE_FOLD } from './activity-layout-constants.js';
 import {
+  ACTIVITY_BAR_FILL,
   CIRCLE_END_LINE_THICKNESS,
   CIRCLE_INK,
   CIRCLE_LINE_THICKNESS,
@@ -32,6 +33,7 @@ import {
   activityRoundCorner,
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
+import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -152,7 +154,8 @@ export function actColors(theme: Theme): ActivityColors {
   return {
     nodeFill: act?.background ?? theme.colors.nodeBackground,
     nodeBorder: act?.border ?? theme.colors.border,
-    barFill: act?.barColor ?? theme.colors.border,
+    // `activityBar { BackgroundColor #5 }` (plantuml.skin:387, D4).
+    barFill: act?.barColor ?? ACTIVITY_BAR_FILL,
     // `activityDiagram { circle { start, stop, end { LineColor #2;
     // BackgroundColor #2 } } }` (plantuml.skin:379-380) -- the SAME token
     // for stroke and fill. `#2` is upstream's one-digit hex shorthand,
@@ -273,12 +276,6 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
       ? renderMultilineText(lines, cx, cy, theme, opts)
       : renderLabel(label, cx, cy + actionSize / 3, theme, opts);
   return box + labelEl;
-}
-
-export function renderBar(node: ActivityNodeGeo, theme: Theme): string {
-  return rect(node.x, node.y, node.width, node.height, {
-    fill: actColors(theme).barFill,
-  });
 }
 
 export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
@@ -527,10 +524,13 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return '';
     case 'repeat-start':
       return renderDiamond(node, theme);
+    // #lizard forgives -- one dispatch arm per node kind (D4).
     case 'fork-bar':
-    case 'split-bar':
     case 'join-bar':
       return renderBar(node, theme);
+    case 'split-bar':
+    case 'split-join-bar':
+      return renderSplitLine(node, theme);
     case 'if-split':
     case 'while-header':
       return node.label !== undefined && node.label !== '' ? renderHexagon(node, theme) : renderDiamond(node, theme);

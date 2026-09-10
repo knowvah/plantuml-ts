@@ -19,7 +19,7 @@ function stubTile(w: number, h: number, hasPointOut = true): Tile {
   };
 }
 
-describe('GtileSplit — geometry (same as GtileFork, 2 branches w=80 h=60/80)', () => {
+describe('GtileSplit — geometry (same width formula as GtileFork, own barHeight; 2 branches w=80 h=60/80)', () => {
   const b1 = stubTile(80, 60);
   const b2 = stubTile(80, 80);
   const tile = new GtileSplit([b1, b2], bounder);
@@ -33,17 +33,22 @@ describe('GtileSplit — geometry (same as GtileFork, 2 branches w=80 h=60/80)',
     expect(tile.width).toBe(220);
   });
 
-  it('height = 136 (same formula as fork)', () => {
-    // 8 + 20 + 80 + 20 + 8 = 136
-    expect(tile.height).toBe(136);
+  it('height = 1.5 + 20 + 80 + 20 + 1.5 = 123 (THIN_SPLIT_HEIGHT, not BAR_HEIGHT)', () => {
+    // GtileSplit passes THIN_SPLIT_HEIGHT(1.5) as the barHeight ctor arg
+    // (FtileThinSplit.java:61), replacing the fork's BAR_HEIGHT(6).
+    expect(tile.height).toBe(123);
   });
 
   it('barWidth === width', () => {
     expect(tile.barWidth).toBe(tile.width);
   });
 
-  it('branchTopY = 28', () => {
-    expect(tile.branchTopY).toBe(28);
+  it('barHeight === 1.5 (THIN_SPLIT_HEIGHT, overrides GtileFork default)', () => {
+    expect(tile.barHeight).toBe(1.5);
+  });
+
+  it('branchTopY = 1.5 + 20 = 21.5', () => {
+    expect(tile.branchTopY).toBe(21.5);
   });
 
   it('branchOffsets[0] = 10', () => {

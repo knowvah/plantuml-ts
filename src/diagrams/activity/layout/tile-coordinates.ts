@@ -20,9 +20,8 @@ import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js
 import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical-down-then-back.js';
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
-import { BAR_HEIGHT } from '../activity-layout-constants.js';
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
-import { walkForkBranches } from './walk-fork-branches.js';
+import { walkForkOrSplit } from './walk-fork-branches.js';
 import {
   computeSwimlaneChrome,
   laneAt,
@@ -325,22 +324,11 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
 
     case 'gtile-fork':
     case 'gtile-split': {
-      const t = tile as unknown as GtileFork;
-      const topKind = tile.kind === 'gtile-fork' ? 'fork-bar' : 'split-bar';
-      pushNode(out, { id: out.nextId(topKind), kind: topKind, x, y, width: t.barWidth, height: BAR_HEIGHT }, myLane);
-
-      const joinBarY = y + tile.height - BAR_HEIGHT;
-      pushNode(
-        out,
-        { id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: BAR_HEIGHT },
-        myLane,
-      );
-
-      // D1: per-branch connectors are straight vertical drops at the
-      // BRANCH's own north/south x -- extracted to a sibling module only
-      // to keep this switch under the file's 500-line cap (mission
-      // `activity-parallel-connectors` README, "Push forward").
-      walkForkBranches(t, { x, y, joinBarY, myLane }, out);
+      // D4: the bar/line nodes, `walkForkBranches`, and the join node
+      // all delegate to a sibling module only to keep this switch under
+      // the file's 500-line cap (mission `activity-parallel-connectors`
+      // README, "Push forward").
+      walkForkOrSplit(tile as unknown as GtileFork, x, y, myLane, out);
       return;
     }
 

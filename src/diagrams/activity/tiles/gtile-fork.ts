@@ -16,17 +16,28 @@ export class GtileFork extends TileComposite {
   readonly branchOffsets: readonly number[];
   readonly branchTopY: number;
   readonly barWidth: number;
+  /**
+   * The top/bottom bar band's height -- `6` for fork
+   * (`AbstractParallelFtilesBuilder.java:64`), `THIN_SPLIT_HEIGHT` (1.5,
+   * `FtileThinSplit.java:61`) for `GtileSplit`, which passes it through
+   * this constructor's third parameter. Exposed so the coordinate pass
+   * (`layout/tile-coordinates.ts`, `layout/walk-fork-branches.ts`) can
+   * size the bar/line nodes and the branch connectors' bar-adjacent
+   * endpoint without re-deriving which kind of tile it is walking.
+   */
+  readonly barHeight: number;
 
-  constructor(branches: Tile[], _bounder: StringBounder) {
+  constructor(branches: Tile[], _bounder: StringBounder, barHeight: number = BAR_HEIGHT) {
     super();
     this.children = branches;
+    this.barHeight = barHeight;
     const branchTotalWidth =
       branches.reduce((s, b) => s + b.width, 0) + Math.max(0, branches.length - 1) * NODE_MARGIN_X;
     this.width = branchTotalWidth + 2 * BAR_OVERHANG;
     this.barWidth = this.width;
     const maxBranchH = Math.max(0, ...branches.map((b) => b.height));
-    this.branchTopY = BAR_HEIGHT + NODE_MARGIN_Y;
-    this.height = BAR_HEIGHT + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + BAR_HEIGHT;
+    this.branchTopY = barHeight + NODE_MARGIN_Y;
+    this.height = barHeight + NODE_MARGIN_Y + maxBranchH + NODE_MARGIN_Y + barHeight;
 
     const offsets: number[] = [];
     let x = BAR_OVERHANG;
