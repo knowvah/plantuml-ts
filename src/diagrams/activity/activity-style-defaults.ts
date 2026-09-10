@@ -216,11 +216,32 @@ const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
   note: NOTE_LINE_THICKNESS,
 };
 
-/** The resolved stroke width for one activity element kind. For the `end`
- * terminal specifically, use {@link CIRCLE_END_LINE_THICKNESS} — it is a
- * distinct upstream signature, not a variant of `circle`. */
+/**
+ * The resolved stroke width for one activity element kind: the user's
+ * bucket override, else a theme's or diagram `<style>`'s own `root {
+ * LineThickness ... }`, else this module's declared default.
+ *
+ * The root tier exists for the same reason {@link activityFontColor}'s does
+ * (`activity-text-style.ts`): `element { LineThickness 0.5 }`
+ * (`plantuml.skin:93`, D4) beats the skin's own root `1.0`, but a theme's or
+ * `<style>`'s `root { }` is merged AFTER `element` in file order with
+ * `OVERWRITE_EXISTING_VALUE` (`style/StyleStorage.java:102-116`) and so
+ * beats IT in turn — `puml-theme-amiga.puml:39`'s `root { LineThickness 1 }`
+ * draws `!theme amiga`'s boxes at 1, not the `element` tier's 0.5 (D4,
+ * amended). Read via `theme.styleOverrides.root.linethickness`
+ * (`theme.ts:55`), a raw string parsed with `Number.parseFloat` — an absent
+ * or non-numeric value fails `Number.isFinite` and falls through.
+ *
+ * For the `end` terminal specifically, use
+ * {@link CIRCLE_END_LINE_THICKNESS} — it is a distinct upstream signature,
+ * not a variant of `circle`.
+ */
 export function activityLineThickness(theme: Theme, sname: ActivitySName): number {
-  return resolveElementLineThickness(theme, bucketKey(sname)) ?? LINE_THICKNESS_DEFAULTS[sname];
+  const bucket = resolveElementLineThickness(theme, bucketKey(sname));
+  if (bucket !== undefined) return bucket;
+  const rootOverride = Number.parseFloat(theme.styleOverrides?.['root']?.['linethickness'] ?? '');
+  if (Number.isFinite(rootOverride)) return rootOverride;
+  return LINE_THICKNESS_DEFAULTS[sname];
 }
 
 export function swimlaneLineThickness(theme: Theme): number {

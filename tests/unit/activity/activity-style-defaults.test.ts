@@ -71,6 +71,15 @@ function themeWithActivitySwimlane(overrides: Partial<NonNullable<Theme['colors'
   };
 }
 
+/** A theme carrying a `root { ... }` style override, standing in for the
+ * `!theme amiga`/`<style> root { ... }` merge T4b wires (D3/D4, amended):
+ * `theme.styleOverrides.root`, the same shape `themes-builtin-a-m.ts`'s
+ * `amiga` entry and `skin-loader.ts`'s `<style>` path populate — lowercase
+ * property names, raw string values (mission `activity-min-box-width`, T4b). */
+function themeWithRootStyleOverride(root: Record<string, string>): Theme {
+  return { ...DEFAULT, styleOverrides: { root } };
+}
+
 describe('the ported plantuml.skin constants', () => {
   it('matches `activityDiagram { activity { Padding 10; FontSize 12; RoundCorner 25 } }`', () => {
     expect(ACTIVITY_PADDING).toBe(10); // plantuml.skin:360
@@ -210,6 +219,40 @@ describe('activityLineThickness — default tier', () => {
 
   it('a swimlane is 1.5', () => {
     expect(swimlaneLineThickness(DEFAULT)).toBe(1.5);
+  });
+});
+
+describe('activityLineThickness — root style-override tier (T4b, D4 amended)', () => {
+  it('is unmoved when no root override is set', () => {
+    expect(activityLineThickness(DEFAULT, 'activity')).toBe(0.5);
+  });
+
+  it('`root { LineThickness 1 }` beats the `element` default of 0.5 for activity/diamond/activityBar', () => {
+    // puml-theme-amiga.puml:39, merged AFTER `element` in file order
+    // (StyleStorage.java:102-116, OVERWRITE_EXISTING_VALUE).
+    const theme = themeWithRootStyleOverride({ linethickness: '1' });
+    expect(activityLineThickness(theme, 'activity')).toBe(1);
+    expect(activityLineThickness(theme, 'diamond')).toBe(1);
+    expect(activityLineThickness(theme, 'activityBar')).toBe(1);
+  });
+
+  it('a root override also reaches a kind whose OWN default is not `element` (arrow stays declared, not moved by accident)', () => {
+    // arrow's own activityDiagram { arrow { LineThickness 1 } } already
+    // resolves to 1 with no override, so this only proves the cascade path
+    // is exercised, not that arrow moved.
+    const theme = themeWithRootStyleOverride({ linethickness: '3' });
+    expect(activityLineThickness(theme, 'arrow')).toBe(3);
+  });
+
+  it('a bucket LineThickness of 3 still wins over a root override of 1', () => {
+    const theme: Theme = { ...themeWithRootStyleOverride({ linethickness: '1' }), colors: DEFAULT.colors };
+    theme.colors = { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, activity: { lineThickness: 3 } } };
+    expect(activityLineThickness(theme, 'activity')).toBe(3);
+  });
+
+  it('a non-numeric or absent root value falls through to the SName default', () => {
+    expect(activityLineThickness(themeWithRootStyleOverride({}), 'activity')).toBe(0.5);
+    expect(activityLineThickness(themeWithRootStyleOverride({ linethickness: 'bold' }), 'note')).toBe(0.5);
   });
 });
 
@@ -392,6 +435,37 @@ describe('activityFontColor (mission activity-min-box-width, T1, D3)', () => {
     for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
       expect(typeof activityFontColor(DEFAULT, sname)).toBe('string');
     }
+  });
+});
+
+describe('activityFontColor — root style-override tier (T4b, D3 amended)', () => {
+  it('is unmoved when no root override is set', () => {
+    expect(activityFontColor(DEFAULT, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+
+  it('`root { FontColor #FFFFFF }` beats the skin black default for every sname', () => {
+    // puml-theme-amiga.puml:35, merged AFTER plantuml.skin in file order
+    // (StyleStorage.java:102-116, OVERWRITE_EXISTING_VALUE). The SVG
+    // emission layer's shortenColor (svg.ts#resolvePaint) is what turns
+    // this into the jar's `#FFF` at write time -- this resolver's contract
+    // is the same unshortened form every other constant here returns.
+    const theme = themeWithRootStyleOverride({ fontcolor: '#FFFFFF' });
+    for (const sname of ['activity', 'activityBar', 'arrow', 'circle', 'composite', 'diamond', 'note'] as const) {
+      expect(activityFontColor(theme, sname)).toBe('#FFFFFF');
+    }
+  });
+
+  it('a bucket FontColor of red still wins over a root override of white', () => {
+    const theme: Theme = {
+      ...themeWithRootStyleOverride({ fontcolor: '#FFFFFF' }),
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, activity: { font: 'red' } } },
+    };
+    expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'diamond')).toBe('#FFFFFF');
+  });
+
+  it('an absent root fontcolor falls through to the skin black default', () => {
+    expect(activityFontColor(themeWithRootStyleOverride({}), 'activity')).toBe(ACTIVITY_FONT_COLOR);
   });
 });
 

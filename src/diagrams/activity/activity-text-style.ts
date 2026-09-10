@@ -76,19 +76,39 @@ export const ACTIVITY_FONT_COLOR = resolveColorToSvgHex('black');
  * The resolved text colour for one activity element kind: the user's
  * bucket override (`<style> activityDiagram { <sname> { FontColor ... } }`
  * or `skinparam <sname>FontColor`, T1 of the previous mission) if a SOLID
- * colour, else {@link ACTIVITY_FONT_COLOR}. Shaped exactly like
- * `swimlaneTitleFontColor` (`activity-style-defaults.ts:411`): direct
- * bucket access via `theme.colors.elements`, not `resolveElementPaint`
- * (whose `font` role falls back to `theme.colors.text`, the diagram-wide
- * generic default, not this cascade's constant), and the same
+ * colour, else a theme's or diagram `<style>`'s own `root { FontColor ... }`
+ * (converted through {@link resolveColorToSvgHex}, unshortened -- the SVG
+ * emission layer's `resolvePaint`/`shortenColor` collapses `#RRGGBB` to
+ * `#RGB` at write time, matching every other constant in this cascade),
+ * else {@link ACTIVITY_FONT_COLOR}.
+ *
+ * The root tier exists because `plantuml.skin`'s own `root { FontColor
+ * black }` (`:9`) is merged FIRST and a theme's or `<style>`'s `root { }`
+ * block is merged AFTER it in file order with `OVERWRITE_EXISTING_VALUE`
+ * (`style/StyleStorage.java:102-116`) -- so it beats the skin's black for
+ * every activity signature, exactly as `puml-theme-amiga.puml:35`'s `root
+ * { FontColor #FFFFFF }` beats it for `!theme amiga` (D3, amended). The
+ * port already carries that block as `theme.styleOverrides.root.fontcolor`
+ * (`Theme.styleOverrides`, `theme.ts:55`); this resolver is the first
+ * activity reader of it.
+ *
+ * Shaped exactly like `swimlaneTitleFontColor`
+ * (`activity-style-defaults.ts:411`) for the bucket tier: direct bucket
+ * access via `theme.colors.elements`, not `resolveElementPaint` (whose
+ * `font` role falls back to `theme.colors.text`, the diagram-wide generic
+ * default, not this cascade's constant), and the same
  * `resolveSolidBucketColor` Paint-string-only handling -- a Gradient
- * `FontColor` falls through to the constant rather than crashing.
+ * `FontColor` falls through past the bucket rather than crashing.
  *
  * Always a string (never `undefined`): supplying the default is this
  * module's job, matching every other `activity*` resolver's contract.
  */
 export function activityFontColor(theme: Theme, sname: ActivitySName): string {
-  return resolveSolidBucketColor(theme.colors.elements?.[bucketKey(sname)]?.font) ?? ACTIVITY_FONT_COLOR;
+  const bucket = resolveSolidBucketColor(theme.colors.elements?.[bucketKey(sname)]?.font);
+  if (bucket !== undefined) return bucket;
+  const rootOverride = theme.styleOverrides?.['root']?.['fontcolor'];
+  if (rootOverride !== undefined) return resolveColorToSvgHex(rootOverride);
+  return ACTIVITY_FONT_COLOR;
 }
 
 // ---------------------------------------------------------------------------
