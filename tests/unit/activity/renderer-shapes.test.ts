@@ -31,6 +31,7 @@ import type { ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
+import { measureLineWidth, centeredLineX } from '../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = resolveTheme('default');
 
@@ -363,5 +364,62 @@ describe('T4 — text colour cascade (D3)', () => {
       activityGreen,
     );
     expect(multi).toContain('fill="#008000"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// amb-T5 — every activity text is positioned by `x` (D2), never
+// `text-anchor`. `FtileBox.java:224-233` (LEFT at `padding.left`, the only
+// reachable root tier today); `FtileDiamondInside.java:94-96` /
+// `GtileHexagonInside.java:117` (geometric centring, diamond/hexagon).
+// ---------------------------------------------------------------------------
+
+describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
+  it('a single-line action label sits at rect.x + padding (LEFT, plantuml.skin:360)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'go', x: 50, width: 120, height: 32 }), theme);
+    expect(svg).not.toContain('text-anchor');
+    expect(svg).toContain('x="60"');
+  });
+
+  it('a multi-line action label positions EVERY line at rect.x + padding', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', x: 50, width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('text-anchor');
+    expect((svg.match(/x="60"/g) ?? []).length).toBe(2);
+  });
+
+  it('a diamond label centres on its OWN measured width (FtileDiamondInside.java:94-96)', () => {
+    const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, width: 40, height: 40 });
+    const svg = renderDiamond(node, theme);
+    const cx = node.x + node.width / 2;
+    const fontSize = 11; // plantuml.skin:370
+    const expectedX = centeredLineX(cx, measureLineWidth(theme, fontSize, 'yes'));
+    const actualX = Number(/<text x="([\d.]+)"/.exec(svg)?.[1]);
+    expect(svg).not.toContain('text-anchor');
+    expect(actualX).toBeCloseTo(expectedX, 2);
+  });
+
+  it('a labelled hexagon condition centres each line on its own width, no text-anchor', () => {
+    const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
+    expect(svg).not.toContain('text-anchor');
+  });
+
+  it('SDL chevron labels (single and multi-line) carry no text-anchor', () => {
+    const single = renderChevronLeft(makeNode({ kind: 'action', label: 'go', width: 60, height: 30 }), theme);
+    const multi = renderChevronRight(makeNode({ kind: 'action', label: 'l1\nl2', width: 60, height: 30 }), theme);
+    expect(single).not.toContain('text-anchor');
+    expect(multi).not.toContain('text-anchor');
+  });
+
+  it('a note label carries no text-anchor and sits at x + 6 (Opale.java:56, marginX1)', () => {
+    const single = renderNote(makeNode({ kind: 'note', label: 'n', x: 50, width: 60, height: 40 }), theme);
+    const multi = renderNote(makeNode({ kind: 'note', label: 'a\nb', x: 50, width: 60, height: 40 }), theme);
+    expect(single).not.toContain('text-anchor');
+    expect(multi).not.toContain('text-anchor');
+    expect(single).toContain('x="56"');
+    expect((multi.match(/x="56"/g) ?? []).length).toBe(2);
+  });
+
+  it('renderLabel throws for an "activity" sname with no width (broken caller contract)', () => {
+    expect(() => renderLabel('go', 60, 60, theme, { sname: 'activity' } as never)).toThrow(/width is required/);
   });
 });

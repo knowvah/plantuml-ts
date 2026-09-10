@@ -2,7 +2,7 @@
  * Activity node-shape rendering: per-shape SVG emitters (start/stop/end,
  * action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the
  * renderNode dispatcher and shared label/color helpers. Split out of
- * `renderer.ts` (line cap); leaf consumed by edge/swimlane rendering.
+ * `renderer.ts` (line cap); text `x` math lives in `activity-text-placement`.
  */
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
@@ -29,10 +29,16 @@ import {
   NOTE_LINE_THICKNESS,
   activityFontSize,
   activityLineThickness,
-  activityPadding,
   activityRoundCorner,
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
+import {
+  type ActivityTextOpts,
+  activityTextLineX,
+  centeredLineX,
+  measureLineWidth,
+  measureMonoLineWidth,
+} from './activity-text-placement.js';
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -91,21 +97,17 @@ function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: numbe
 }
 
 /** `fontSize` defaults to the action box's size (`gtile-action.ts`); a
- *  DIFFERENT element passes its own. `sname` picks the D3 colour bucket,
- *  same as `renderMultilineText`. Only a `<latex>` label still delegates
- *  to `core/latex.ts#renderNodeLabel` (`:125-133`) -- a permanent LaTeX
+ *  DIFFERENT element passes its own. `opts` (`activity-text-placement.ts`)
+ *  picks both the D3 colour bucket and the D2 `x` (LEFT/CENTER/RIGHT for
+ *  `'activity'`, geometric centre for `'diamond'`). Only a `<latex>` label
+ *  still delegates to `core/latex.ts#renderNodeLabel` -- a permanent LaTeX
  *  divergence (KaTeX, not JLaTeXMath), the sole exception here. */
-export function renderLabel(
-  label: string,
-  cx: number,
-  cy: number,
-  theme: Theme,
-  opts: { sname: 'activity' | 'diamond'; fontSize?: number },
-): string {
+export function renderLabel(label: string, cx: number, cy: number, theme: Theme, opts: ActivityTextOpts): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
-  return text(cx, cy, label, {
-    textAnchor: 'middle',
+  const lineWidth = measureLineWidth(theme, size, label);
+  const x = activityTextLineX(theme, cx, lineWidth, opts);
+  return text(x, cy, label, {
     fontFamily: theme.fontFamily,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
@@ -117,16 +119,18 @@ export function renderMultilineText(
   cx: number,
   cy: number,
   theme: Theme,
-  opts: { sname: 'activity' | 'diamond'; fontSize?: number },
+  opts: ActivityTextOpts,
 ): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   const y = centeredFirstBaselineY(cy, size, lines.length);
-  return textLines(lines, cx, y, size, {
-    textAnchor: 'middle',
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-    fill: activityFontColor(theme, opts.sname),
-  });
+  const fill = activityFontColor(theme, opts.sname);
+  return lines
+    .map((ln, i) => {
+      const lineWidth = measureLineWidth(theme, size, ln);
+      const x = activityTextLineX(theme, cx, lineWidth, opts);
+      return text(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+    })
+    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -243,41 +247,31 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const label = node.label ?? '';
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
+  const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
 
-  // <code>...</code> block — render left-aligned in monospace, strip the tags.
+  // <code>...</code> block: monospace, measured like `gtile-action.ts`'s
+  // own `monoCharWidth` sizing, not the proportional table `opts` reads.
   const codeMatch = CODE_BLOCK_RE.exec(label.trim());
   if (codeMatch !== null) {
     const codeContent = codeMatch[1]!.replace(/^\n/, '').replace(/\n$/, '');
     const codeLines = codeContent.split('\n');
-    const monoFamily = 'monospace';
-    const lh = actionSize;
-    const lineY = centeredFirstBaselineY(cy, lh, codeLines.length);
-    const labelX = node.x + activityPadding('activity');
-    const labelText = textLines(codeLines, labelX, lineY, lh, {
-      textAnchor: 'start',
-      fontFamily: monoFamily,
-      fontSize: actionSize,
-      fill: activityFontColor(theme, 'activity'),
-    });
+    const lineY = centeredFirstBaselineY(cy, actionSize, codeLines.length);
+    const codeFill = activityFontColor(theme, 'activity');
+    const labelText = codeLines
+      .map((ln, i) => {
+        const w = measureMonoLineWidth(actionSize, ln);
+        const x = activityTextLineX(theme, cx, w, opts);
+        return text(x, lineY + actionSize * i, ln, { fontFamily: 'monospace', fontSize: actionSize, fill: codeFill });
+      })
+      .join('');
     return box + labelText;
   }
 
   const lines = label.split('\n');
-  let labelEl: string;
-  if (lines.length > 1) {
-    const lh = actionSize;
-    const lineY = centeredFirstBaselineY(cy, lh, lines.length);
-    const labelX = node.x + activityPadding('activity');
-    const labelText = textLines(lines, labelX, lineY, lh, {
-      textAnchor: 'start',
-      fontFamily: theme.fontFamily,
-      fontSize: actionSize,
-      fill: activityFontColor(theme, 'activity'),
-    });
-    labelEl = labelText;
-  } else {
-    labelEl = renderLabel(label, cx, cy + actionSize / 3, theme, { sname: 'activity', fontSize: actionSize });
-  }
+  const labelEl =
+    lines.length > 1
+      ? renderMultilineText(lines, cx, cy, theme, opts)
+      : renderLabel(label, cx, cy + actionSize / 3, theme, opts);
   return box + labelEl;
 }
 
@@ -297,43 +291,41 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
     stroke: c.diamondBorder,
   });
   if (node.label === undefined || node.label === '') return shape;
-  const label = text(cx, cy, node.label, {
+  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
+  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
+  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
+  // dimLabel.width) / 2` in this node's own frame.
+  const fontSize = activityFontSize(theme, 'diamond');
+  const lineWidth = measureLineWidth(theme, fontSize, node.label);
+  const label = text(centeredLineX(cx, lineWidth), cy, node.label, {
     fontFamily: theme.fontFamily,
-    // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370),
-    // the same value `tiles/gtile-diamond.ts` measured it at. The former
-    // `theme.fontSize - 2` reached 12, not 11.
-    fontSize: activityFontSize(theme, 'diamond'),
+    fontSize,
     fill: activityFontColor(theme, 'diamond'),
-    textAnchor: 'middle',
     dominantBaseline: 'middle',
   });
   return shape + label;
 }
 
-export function renderSignalLabel(label: string, x: number, cy: number, theme: Theme): string {
+export function renderSignalLabel(label: string, x: number, width: number, cy: number, theme: Theme): string {
   // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
   // `SName.activity` like the plain box (`FtileBox.java:97-99`, `:146`) --
-  // the same SName `tiles/gtile-action.ts` sizes it at.
+  // the same SName `tiles/gtile-action.ts` sizes it at, and the same
+  // LEFT/CENTER/RIGHT branch (`FtileBox.java:224-233`) the action box uses.
   const size = activityFontSize(theme, 'activity');
-  const labelX = x + activityPadding('activity');
+  const cx = x + width / 2;
+  const opts: ActivityTextOpts = { sname: 'activity', fontSize: size, width };
   const lines = label.split('\n');
   if (lines.length === 1) {
-    return text(labelX, cy, label, {
+    const lineWidth = measureLineWidth(theme, size, label);
+    const lx = activityTextLineX(theme, cx, lineWidth, opts);
+    return text(lx, cy, label, {
       fill: activityFontColor(theme, 'activity'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      textAnchor: 'start',
       dominantBaseline: 'central',
     });
   }
-  const lineY = centeredFirstBaselineY(cy, size, lines.length);
-  const labelText = textLines(lines, labelX, lineY, size, {
-    textAnchor: 'start',
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-    fill: activityFontColor(theme, 'activity'),
-  });
-  return labelText;
+  return renderMultilineText(lines, cx, cy, theme, opts);
 }
 
 export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
@@ -356,7 +348,7 @@ export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
     ],
     { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
-  return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
+  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
 }
 
 export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string {
@@ -377,7 +369,7 @@ export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string 
     ],
     { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
   );
-  return shape + renderSignalLabel(node.label ?? '', x, y + h / 2, theme);
+  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
 }
 
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
@@ -435,8 +427,8 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
       ? // `BoxStyle.SDL_SAVE` (`BoxStyle.java:73`) is still an `FtileBox`, so
         // it resolves `SName.activity` like the plain box (`FtileBox.java
         // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
-        renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize })
-      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize });
+        renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize, width: w })
+      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize, width: w });
   return shape + labelEl;
 }
 
@@ -493,11 +485,13 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
 
   const label = node.label ?? '';
   const lines = label.split('\n');
-  const labelX = x + 4;
+  // `Opale.java:56` -- `marginX1 = 6`; `:127` --
+  // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
+  // unsourced `x + 4`.
+  const labelX = x + 6;
   let labelEl: string;
   if (lines.length > 1) {
     labelEl = textLines(lines, labelX, y + NOTE_FOLD + noteSize, noteSize, {
-      textAnchor: 'start',
       fontFamily: theme.fontFamily,
       fontSize: noteSize,
       fill: activityFontColor(theme, 'note'),

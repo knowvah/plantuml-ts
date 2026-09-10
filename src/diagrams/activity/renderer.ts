@@ -86,11 +86,14 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
       fill: color,
       stroke: 'none',
     });
-    const labelEl = text(midX, midY, label, {
+    // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
+    // function's own padding, two lines up), so the centring offset that
+    // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
+    // algebra on the existing estimate, not a new guess.
+    const labelEl = text(pillX + 4, midY, label, {
       fill: activityFontColor(theme, 'arrow'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      textAnchor: 'middle',
       dominantBaseline: 'central',
     });
     return background + labelEl;

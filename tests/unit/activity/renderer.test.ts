@@ -126,7 +126,7 @@ describe('renderActivity — action node', () => {
     expect(result).toContain('Do work');
   });
 
-  it('renders multiline label as one <text> per line, left-aligned (aeg-T3)', () => {
+  it('renders multiline label as one <text> per line, positioned by x (D2, not text-anchor)', () => {
     const node = makeNode({
       kind: 'action',
       id: 'action-0',
@@ -139,7 +139,11 @@ describe('renderActivity — action node', () => {
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    expect(result).toContain('text-anchor="start"');
+    // D2 (FtileBox.java:224-233): the jar emits NO text-anchor; every line
+    // sits at `rect.x + padding` (LEFT, the only reachable tier today) --
+    // node.x (50) + activityPadding('activity') (10) = 60.
+    expect(result).not.toContain('text-anchor');
+    expect(result).toContain('x="60"');
     expect(result).not.toContain('<tspan');
     expect((content.match(/<text /g) ?? []).length).toBe(4);
     expect(result).toContain('A');
