@@ -1162,7 +1162,7 @@ Ordered by how ready they are, not by size.
     `plans/activity-parallel-connectors/README.md`; notes in
     `.agent-notes/apc-T6.md`. Follow-ons filed here, each measured at HEAD:
 
-    - **`activity-klimt-compress` (C2)** — port `klimt/compress`
+    - **`activity-klimt-compress` (C2)** — **BRIEFED 2026-09-10** (`plans/activity-klimt-compress/README.md`, 7 tasks; D3 ports `ArrowsRegular` first because occupancy depends on the jar's arrowhead extents). Filing: port `klimt/compress`
       (`CompressionXorYBuilder`, `SlotFinder`, `SlotSet`,
       `CompressionTransform`, `PiecewiseAffineTransform`,
       `UGraphicCompressOnXorY`, ~1185 lines) and the drawing-interception
