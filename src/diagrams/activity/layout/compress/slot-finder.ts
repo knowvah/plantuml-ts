@@ -1,0 +1,172 @@
+/**
+ * `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw`
+ * dispatch, ported line for line over the flat `CompressShape[]`
+ * `shapesOf` (`shapes-of.ts`) produces (D2).
+ *
+ * @see net/sourceforge/plantuml/klimt/compress/SlotFinder.java:70-140
+ * @see net/sourceforge/plantuml/klimt/shape/URectangle.java:107-113,193-217
+ * @see net/sourceforge/plantuml/klimt/drawing/TextLimitFinder.java:82-90
+ */
+
+import type { CompressionMode } from './slot.js';
+import { SlotSet } from './slot.js';
+import type { CompressShape } from './shapes-of.js';
+
+/**
+ * `URectangle#drawWhenCompressed` (`klimt/shape/URectangle.java:193-199`):
+ * ON_X reserves `UEmpty(2, h)` at each end; ON_Y (`:200-206`) reserves
+ * `UEmpty(w, 2)` at top and bottom. The `2` is this exact citation -- never
+ * fitted.
+ */
+function addIgnoredRectSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  const RESERVED = 2;
+  if (mode === 'x') {
+    slots.addSlot(shape.x, shape.x + RESERVED);
+    slots.addSlot(shape.x + shape.width - RESERVED, shape.x + shape.width);
+  } else {
+    slots.addSlot(shape.y, shape.y + RESERVED);
+    slots.addSlot(shape.y + shape.height - RESERVED, shape.y + shape.height);
+  }
+}
+
+/** `rect`/`ellipse`/`empty` all resolve to `SlotFinder#drawRectangle`/
+ *  `drawEllipse`/`drawEmpty`'s byte-identical `[x,x+w]`/`[y,y+h]` box --
+ *  see {@link addBoxSlot}. */
+const BOX_KINDS = new Set(['rect', 'ellipse', 'empty']);
+
+/** `SlotFinder#drawRectangle`/`drawEllipse`/`drawEmpty`
+ *  (`SlotFinder.java:138-161`) -- byte-identical `[x, x+w]`/`[y, y+h]`
+ *  dispatch, shared by every box-shaped kind. */
+function addBoxSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  if (mode === 'x') slots.addSlot(shape.x, shape.x + shape.width);
+  else slots.addSlot(shape.y, shape.y + shape.height);
+}
+
+/** `TextLimitFinder#drawText`'s `y -= dim.getHeight() - 1.5`
+ *  (`klimt/drawing/TextLimitFinder.java:85`): the baseline-to-box shift. */
+const TEXT_LIMIT_SHIFT = 1.5;
+/** `TextLimitFinder#drawText` (`klimt/drawing/TextLimitFinder.java:82-90`):
+ *  `y -= dim.height - 1.5`, then the box is `[x, x+w] x [y', y'+h]` --
+ *  i.e. `[y - h + 1.5, y + 1.5]` in the ORIGINAL `y`. */
+function addTextSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  if (mode === 'x') slots.addSlot(shape.x, shape.x + shape.width);
+  else slots.addSlot(shape.y - shape.height + TEXT_LIMIT_SHIFT, shape.y + TEXT_LIMIT_SHIFT);
+}
+
+/**
+ * `CenteredText` (`ftile/CenteredText.java:26`) is a bare `UShape`, not a
+ * `UText` -- `SlotFinder#draw`'s dispatch (`SlotFinder.java:78-100`) has no
+ * branch for it, so on X it never occupies. On Y (`ActivityDiagram3.java
+ * :209-210`'s ON_Y-wraps-ON_X composition; `UGraphicCompressOnXorY.java
+ * :100-112`'s `CenteredText` branch re-emits the title as a genuine
+ * `UText`) it occupies exactly like `'text'` -- see `shapes-of.ts`'s
+ * `titleShapes` for the position/font this shape carries.
+ */
+function addCenteredTextSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  if (mode === 'y') addTextSlot(slots, mode, shape);
+}
+
+/**
+ * One shape's contribution to the `SlotSet`, mirroring `SlotFinder#draw`'s
+ * own dispatch (`SlotFinder.java:78-100`) including the
+ * `UShapeIgnorableForCompression`/`drawWhenCompressed` branch and the
+ * `UPolygon#getCompressionMode()` skip.
+ */
+function addShape(slots: SlotSet, mode: CompressionMode, shape: CompressShape): void {
+  const ignored = (mode === 'x' && shape.ignoreX === true) || (mode === 'y' && shape.ignoreY === true);
+  if (shape.kind === 'rect' && ignored) {
+    addIgnoredRectSlot(slots, mode, shape);
+    return;
+  }
+  if (BOX_KINDS.has(shape.kind)) {
+    addBoxSlot(slots, mode, shape);
+    return;
+  }
+  switch (shape.kind) {
+    case 'polygon':
+      if (shape.polygonSkipMode !== mode) addBoxSlot(slots, mode, shape);
+      return;
+    case 'text':
+      addTextSlot(slots, mode, shape);
+      return;
+    case 'centeredText':
+      addCenteredTextSlot(slots, mode, shape);
+      return;
+  }
+}
+
+/**
+ * True iff {@link collectSlots} would add the shape's FULL extent as a slot
+ * on `mode` -- i.e. the shape genuinely occupies that axis, as opposed to
+ * one of the three cases the jar itself does not treat as occupying:
+ *
+ * - a `rect` carrying the matching ignore flag: only its 2px ends occupy
+ *   (`URectangle#drawWhenCompressed`, `klimt/shape/URectangle.java:193-206`)
+ * - a `polygon` whose `polygonSkipMode === mode`: a cross-lane fork/split
+ *   decoration skipped on that one axis (`UPolygon#getCompressionMode()`,
+ *   `ftile/Worm.java:159-168`)
+ * - a `centeredText` on `'x'`: `CenteredText` has no `SlotFinder#draw`
+ *   branch (`SlotFinder.java:78-100`) and only re-emits as a real `UText`
+ *   on Y, through the ON_Y-wraps-ON_X composition
+ *   (`klimt/compress/UGraphicCompressOnXorY.java:100-112`)
+ *
+ * README stop 11 (amended 2026-09-10, after the T5 halt): a NEW overlap
+ * between a pair where one shape does not occupy on the moved axis is the
+ * class the jar itself moves by design, not a violation -- only a pair
+ * where BOTH shapes occupy on BOTH axes is a hard violation.
+ */
+export function occupiesOn(shape: CompressShape, mode: CompressionMode): boolean {
+  const ignored = (mode === 'x' && shape.ignoreX === true) || (mode === 'y' && shape.ignoreY === true);
+  if (shape.kind === 'rect' && ignored) return false;
+  if (shape.kind === 'polygon' && shape.polygonSkipMode === mode) return false;
+  if (shape.kind === 'centeredText' && mode === 'x') return false;
+  return true;
+}
+
+/**
+ * `SlotFinder#draw`, ported over the flat `CompressShape[]` `shapesOf`
+ * produces instead of a live `UGraphic` draw call per shape (D2).
+ */
+export function collectSlots(shapes: readonly CompressShape[], mode: CompressionMode): SlotSet {
+  const slots = new SlotSet();
+  for (const shape of shapes) addShape(slots, mode, shape);
+  return slots;
+}
+
+/**
+ * Every index pair `[i, j]` (`i < j`) whose FULL boxes (`[x, x+width] x
+ * [y, y+height]`, ignoring any `ignoreX`/`ignoreY`/`polygonSkipMode` --
+ * this is a real-geometry overlap check, not a compression-slot query)
+ * intersect on both axes. Not a port of any upstream class: T5's own
+ * invariant that compression must never introduce a NEW overlap needs a
+ * ground-truth "did these two shapes already overlap" answer this mission
+ * defines itself.
+ */
+export function overlaps(shapes: readonly CompressShape[]): Array<[number, number]> {
+  const result: Array<[number, number]> = [];
+  const boxes = shapes.map(occupiedBox);
+  for (let i = 0; i < boxes.length; i++) {
+    const a = boxes[i]!;
+    for (let j = i + 1; j < boxes.length; j++) {
+      const b = boxes[j]!;
+      const xOverlap = a.x1 < b.x2 && b.x1 < a.x2;
+      const yOverlap = a.y1 < b.y2 && b.y1 < a.y2;
+      if (xOverlap && yOverlap) result.push([i, j]);
+    }
+  }
+  return result;
+}
+
+/**
+ * The box a shape really covers: every kind is `[x, x+width] x [y,
+ * y+height]` except the two text kinds, whose `y` is the BASELINE --
+ * `TextLimitFinder#drawText` (`klimt/drawing/TextLimitFinder.java:82-90`)
+ * shifts it by `y -= dim.getHeight() - 1.5` before taking the extents,
+ * exactly as {@link collectSlots}'s text branch does. Without this shift
+ * a label sitting just under a box reads as overlapping it.
+ */
+function occupiedBox(shape: CompressShape): { x1: number; x2: number; y1: number; y2: number } {
+  const isText = shape.kind === 'text' || shape.kind === 'centeredText';
+  const y1 = isText ? shape.y - shape.height + TEXT_LIMIT_SHIFT : shape.y;
+  return { x1: shape.x, x2: shape.x + shape.width, y1, y2: y1 + shape.height };
+}

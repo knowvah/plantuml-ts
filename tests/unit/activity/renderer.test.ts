@@ -885,6 +885,59 @@ describe('T6 — edge stroke, arrow decoration, and swimlane title', () => {
 });
 
 // ---------------------------------------------------------------------------
+// akc-T1 — the terminal and mid-segment arrowheads draw ArrowsRegular's
+// 4-point, 10-long, ±4 polygon (ArrowsRegular.java:41-86), translated to
+// the tip, replacing the port's old 3-point, 8-long, ±3.2 triangle.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — arrowhead is ArrowsRegular (akc-T1)', () => {
+  it('a downward edge draws asToDown translated to the tip (10,60)', () => {
+    // Segment (10,10) -> (10,60): dx=0, dy=50 -> down (Direction.java:118-120).
+    // asToDown relative to the tip: (-4,-10),(0,0),(4,-10),(0,-6)
+    // (ArrowsRegular.java:56-64); translated by the tip (10,60):
+    // (6,50),(10,60),(14,50),(10,54).
+    const edge = {
+      points: [
+        { x: 10, y: 10 },
+        { x: 10, y: 60 },
+      ],
+    };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,10,60,14,50,10,54');
+  });
+
+  it('a rightward edge draws asToRight translated to the tip (100,10)', () => {
+    // Segment (10,10) -> (100,10): dx=90, dy=0 -> right (Direction.java:123-125).
+    // asToRight relative to the tip: (-10,-4),(0,0),(-10,4),(-6,0)
+    // (ArrowsRegular.java:66-74); translated by the tip (100,10):
+    // (90,6),(100,10),(90,14),(94,10).
+    const edge = {
+      points: [
+        { x: 10, y: 10 },
+        { x: 100, y: 10 },
+      ],
+    };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('90,6,100,10,90,14,94,10');
+  });
+
+  it('four points, not the old triangle\'s three', () => {
+    const edge = {
+      points: [
+        { x: 10, y: 10 },
+        { x: 10, y: 60 },
+      ],
+    };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
+    expect(coordCount).toBe(8); // 4 points x (x, y)
+  });
+});
+
+// ---------------------------------------------------------------------------
 // amb-T4 — edge labels resolve `activityFontColor(theme, 'arrow')` (D3),
 // never `theme.colors.text`. `ftile/vcompact/FtileFactoryDelegator.java:84`
 // resolves an activity edge label through `of(root, element,

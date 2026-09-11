@@ -1,0 +1,214 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  collectSlots,
+  occupiesOn,
+  overlaps,
+} from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
+import type { CompressShape } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
+
+describe('collectSlots — fork/join bar (rect, ignoreX)', () => {
+  const bar: CompressShape = { kind: 'rect', x: 12, y: 55, width: 103.4, height: 6, ignoreX: true };
+
+  it('on x: two 2-wide slots at each end, none across the middle', () => {
+    const slots = collectSlots([bar], 'x').slots();
+    expect(slots).toHaveLength(2);
+    const starts = slots.map((s) => [s.start, s.end]).sort((a, b) => a[0]! - b[0]!);
+    expect(starts).toEqual([
+      [12, 14],
+      [113.4, 115.4],
+    ]);
+    // Nothing covers the middle of the bar.
+    expect(slots.some((s) => s.contains(60))).toBe(false);
+  });
+
+  it('on y: one slot over the full height (ignoreY is not set)', () => {
+    const slots = collectSlots([bar], 'y').slots();
+    expect(slots).toHaveLength(1);
+    expect(slots[0]!.start).toBe(55);
+    expect(slots[0]!.end).toBe(61);
+  });
+});
+
+describe('collectSlots — swimlane title band (rect, ignoreX AND ignoreY)', () => {
+  const band: CompressShape = { kind: 'rect', x: 20, y: 0, width: 349.275, height: 18, ignoreX: true, ignoreY: true };
+
+  it('reserves 2px slots at each end on x', () => {
+    const slots = collectSlots([band], 'x').slots();
+    expect(slots.map((s) => [s.start, s.end])).toEqual([
+      [20, 22],
+      [367.275, 369.275],
+    ]);
+  });
+
+  it('reserves 2px slots at each end on y', () => {
+    const slots = collectSlots([band], 'y').slots();
+    expect(slots.map((s) => [s.start, s.end])).toEqual([
+      [0, 2],
+      [16, 18],
+    ]);
+  });
+});
+
+describe('collectSlots — cross-lane arrowhead (polygon, polygonSkipMode: x)', () => {
+  const head: CompressShape = { kind: 'polygon', x: 262.425, y: 100, width: 8, height: 10, polygonSkipMode: 'x' };
+
+  it('contributes no x slot', () => {
+    expect(collectSlots([head], 'x').slots()).toHaveLength(0);
+  });
+
+  it('still contributes a y slot', () => {
+    const slots = collectSlots([head], 'y').slots();
+    expect(slots).toEqual([expect.objectContaining({ start: 100, end: 110 })]);
+  });
+});
+
+describe('collectSlots — plain polygon (no skip mode)', () => {
+  it('occupies on both axes', () => {
+    const poly: CompressShape = { kind: 'polygon', x: 10, y: 20, width: 40, height: 30 };
+    expect(collectSlots([poly], 'x').slots()[0]).toMatchObject({ start: 10, end: 50 });
+    expect(collectSlots([poly], 'y').slots()[0]).toMatchObject({ start: 20, end: 50 });
+  });
+});
+
+describe('collectSlots — text (TextLimitFinder shift)', () => {
+  const t: CompressShape = { kind: 'text', x: 4, y: 16, width: 12, height: 11 };
+
+  it('x occupies [x, x+width]', () => {
+    expect(collectSlots([t], 'x').slots()).toEqual([expect.objectContaining({ start: 4, end: 16 })]);
+  });
+
+  it('y occupies [y - height + 1.5, y + 1.5]', () => {
+    expect(collectSlots([t], 'y').slots()).toEqual([expect.objectContaining({ start: 6.5, end: 17.5 })]);
+  });
+});
+
+/**
+ * `CenteredText` (`ftile/CenteredText.java:26`) has no `SlotFinder` branch
+ * (`SlotFinder.java:78-100`), so it never occupies on X; the ON_Y builder
+ * wraps ON_X (`ActivityDiagram3.java:209-210`) and re-emits the title as a
+ * genuine `UText` (`UGraphicCompressOnXorY.java:100-112`), so on Y it
+ * behaves exactly like `'text'`.
+ */
+describe('collectSlots — centeredText (swimlane title, no SlotFinder branch)', () => {
+  const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+
+  it('contributes NO x slot (CenteredText is not dispatched by SlotFinder#draw)', () => {
+    expect(collectSlots([title], 'x').slots()).toHaveLength(0);
+  });
+
+  it('occupies on y exactly like text: [y - height + 1.5, y + 1.5]', () => {
+    expect(collectSlots([title], 'y').slots()).toEqual([expect.objectContaining({ start: 13, end: 29 })]);
+  });
+});
+
+describe('collectSlots — empty (divider/hexagon reservation)', () => {
+  it('a divider empty occupies x1+x2 wide, unconditionally', () => {
+    const divider: CompressShape = { kind: 'empty', x: 15, y: 0, width: 10, height: 1 };
+    expect(collectSlots([divider], 'x').slots()).toEqual([expect.objectContaining({ start: 15, end: 25 })]);
+  });
+
+  it('a hexagon reservation is 5 wide x 12 tall', () => {
+    const hex: CompressShape = { kind: 'empty', x: 100, y: 200, width: 5, height: 12 };
+    expect(collectSlots([hex], 'x').slots()).toEqual([expect.objectContaining({ start: 100, end: 105 })]);
+    expect(collectSlots([hex], 'y').slots()).toEqual([expect.objectContaining({ start: 200, end: 212 })]);
+  });
+});
+
+describe('collectSlots — ellipse behaves like a box', () => {
+  it('occupies [x, x+width] on x', () => {
+    const e: CompressShape = { kind: 'ellipse', x: 0, y: 0, width: 20, height: 20 };
+    expect(collectSlots([e], 'x').slots()).toEqual([expect.objectContaining({ start: 0, end: 20 })]);
+  });
+});
+
+describe('occupiesOn', () => {
+  it('an ignored rect does not occupy on the ignored axis (URectangle.java:193-206)', () => {
+    const bar: CompressShape = { kind: 'rect', x: 12, y: 55, width: 103.4, height: 6, ignoreX: true };
+    expect(occupiesOn(bar, 'x')).toBe(false);
+    expect(occupiesOn(bar, 'y')).toBe(true);
+  });
+
+  it('an ignored rect does not occupy on Y when ignoreY is set', () => {
+    const band: CompressShape = { kind: 'rect', x: 20, y: 0, width: 349.275, height: 18, ignoreX: true, ignoreY: true };
+    expect(occupiesOn(band, 'x')).toBe(false);
+    expect(occupiesOn(band, 'y')).toBe(false);
+  });
+
+  it('a plain (non-ignored) rect occupies on both axes', () => {
+    const box: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 30 };
+    expect(occupiesOn(box, 'x')).toBe(true);
+    expect(occupiesOn(box, 'y')).toBe(true);
+  });
+
+  it('a cross-lane polygon does not occupy on its skipped axis (Worm.java:159-168)', () => {
+    const head: CompressShape = { kind: 'polygon', x: 262.425, y: 100, width: 8, height: 10, polygonSkipMode: 'x' };
+    expect(occupiesOn(head, 'x')).toBe(false);
+    expect(occupiesOn(head, 'y')).toBe(true);
+  });
+
+  it('a plain polygon (no skip mode) occupies on both axes', () => {
+    const poly: CompressShape = { kind: 'polygon', x: 10, y: 20, width: 40, height: 30 };
+    expect(occupiesOn(poly, 'x')).toBe(true);
+    expect(occupiesOn(poly, 'y')).toBe(true);
+  });
+
+  it('centeredText does not occupy on x (no SlotFinder#draw branch, SlotFinder.java:78-100)', () => {
+    const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+    expect(occupiesOn(title, 'x')).toBe(false);
+  });
+
+  it('centeredText occupies on y (re-emitted as UText, UGraphicCompressOnXorY.java:100-112)', () => {
+    const title: CompressShape = { kind: 'centeredText', x: 35, y: 27.5, width: 40, height: 16 };
+    expect(occupiesOn(title, 'y')).toBe(true);
+  });
+
+  it('text, empty and ellipse all occupy on both axes', () => {
+    const t: CompressShape = { kind: 'text', x: 4, y: 16, width: 12, height: 11 };
+    const e: CompressShape = { kind: 'empty', x: 15, y: 0, width: 10, height: 1 };
+    const el: CompressShape = { kind: 'ellipse', x: 0, y: 0, width: 20, height: 20 };
+    for (const s of [t, e, el]) {
+      expect(occupiesOn(s, 'x')).toBe(true);
+      expect(occupiesOn(s, 'y')).toBe(true);
+    }
+  });
+});
+
+describe('overlaps', () => {
+  it('returns the index pair for two intersecting boxes', () => {
+    const a: CompressShape = { kind: 'rect', x: 0, y: 0, width: 10, height: 10 };
+    const b: CompressShape = { kind: 'rect', x: 5, y: 5, width: 10, height: 10 };
+    expect(overlaps([a, b])).toEqual([[0, 1]]);
+  });
+
+  it('returns nothing for two disjoint boxes', () => {
+    const a: CompressShape = { kind: 'rect', x: 0, y: 0, width: 10, height: 10 };
+    const b: CompressShape = { kind: 'rect', x: 20, y: 20, width: 10, height: 10 };
+    expect(overlaps([a, b])).toEqual([]);
+  });
+
+  it('includes ignored/empty shapes by their full box, ignoring compression flags', () => {
+    const bar: CompressShape = { kind: 'rect', x: 0, y: 0, width: 10, height: 10, ignoreX: true };
+    const empty: CompressShape = { kind: 'empty', x: 5, y: 5, width: 4, height: 4 };
+    expect(overlaps([bar, empty])).toEqual([[0, 1]]);
+  });
+
+  it('measures a text box from its BASELINE, as TextLimitFinder does (TextLimitFinder.java:82-90)', () => {
+    // A 12-high label whose baseline sits 2 px below a box's bottom edge:
+    // its glyph box is [y - h + 1.5, y + 1.5] = [21.5, 33.5] -> it DOES
+    // overlap the box ([0, 30]); with `y` read as a top it would not.
+    const box: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 30 };
+    const label: CompressShape = { kind: 'text', x: 5, y: 32, width: 20, height: 12 };
+    expect(overlaps([box, label])).toEqual([[0, 1]]);
+    // ...and a label whose baseline is 20 below the box does not: [18.5, 30.5]
+    // vs [0, 10] -> no overlap, where a top-left reading ([20, 32]) agrees.
+    const box2: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 10 };
+    const title: CompressShape = { kind: 'centeredText', x: 5, y: 30, width: 20, height: 12 };
+    expect(overlaps([box2, title])).toEqual([]);
+    // The shift is symmetric with collectSlots's text branch: a label at
+    // baseline 32 whose top-left reading [32, 44] would clear a box
+    // ending at 31 overlaps it once shifted to [21.5, 33.5].
+    const box3: CompressShape = { kind: 'rect', x: 0, y: 0, width: 40, height: 31 };
+    expect(overlaps([box3, label])).toEqual([[0, 1]]);
+  });
+});

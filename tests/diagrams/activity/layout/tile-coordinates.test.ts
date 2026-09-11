@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { assignCoordinates, LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
+import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -122,6 +123,86 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
     const backEdge = geo.edges.find((e) => e.points.length >= 4);
     expect(backEdge).toBeDefined();
     expect(backEdge!.points.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () => {
+  const header = new GtileDiamond('loop?', bounder, theme);
+  const body = new GtileAction(actionNode, bounder, theme);
+  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const full = assignCoordinatesFull({
+    root: tile,
+    ast: emptyAst,
+    baseX: LAYOUT_MARGIN,
+    baseY: LAYOUT_MARGIN,
+    bounder,
+    theme,
+  });
+
+  it('emits exactly one reservation (FtileWhile.java:264,272)', () => {
+    expect(full.reservations).toHaveLength(1);
+  });
+
+  it('reservation is 5 wide x 12 tall (Hexagon.hexagonHalfSize)', () => {
+    expect(full.reservations[0]).toMatchObject({ width: 5, height: 12 });
+  });
+
+  it('sits at the body south exit x, y = body bottom + 12', () => {
+    const bodyNode = full.geometry.nodes.find((n) => n.kind === 'action')!;
+    // GtileAction's SOUTH_HOOK is { x: width / 2, y: height } -- the exit
+    // point IS the box's own bottom, so `Math.max(y1, getBottom())` in
+    // `FtileWhile.java:264` reduces to `getBottom()` here.
+    const backFromX = bodyNode.x + bodyNode.width / 2;
+    const expectedY = bodyNode.y + bodyNode.height + 12;
+    expect(full.reservations[0]!.x).toBeCloseTo(backFromX, 5);
+    // T5 (compress): between the body's own bottom and this reservation's
+    // raw `y1bis` sits an empty 12px gap (the back-edge is a `ULine`, D1,
+    // and never occupies) -- `SlotSet#smaller(5)`
+    // (`CompressionXorYBuilder.java:56`) removes `12 - 2*5 = 2` from it, so
+    // the reservation (a translate-only `UEmpty`, not `isRectReservation`)
+    // shifts up by that 2. Verified against `t5-debug-fork.ts`'s GtileWhile
+    // dump: `removed: { x: 0, y: 2 }`.
+    expect(full.reservations[0]!.y).toBeCloseTo(expectedY - 2, 5);
+  });
+});
+
+describe('assignCoordinatesFull — swimlane title band is an ignoreX/ignoreY reservation', () => {
+  it('adds the band as a reservation matching computeSwimlaneChrome exactly', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['Lane A', 'Lane B'] };
+    const full = assignCoordinatesFull({ root: tile, ast, baseX: LAYOUT_MARGIN, baseY: LAYOUT_MARGIN, bounder, theme });
+    const band = full.geometry.swimlaneBand!;
+    expect(band).toBeDefined();
+    const bandReservation = full.reservations.find((r) => r.ignoreX === true && r.ignoreY === true);
+    expect(bandReservation).toEqual({ ...band, ignoreX: true, ignoreY: true });
+  });
+
+  it('a single lane draws no band and reserves nothing for it', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+    expect(full.reservations.some((r) => r.ignoreX === true && r.ignoreY === true)).toBe(false);
+  });
+});
+
+describe('assignCoordinatesFull — no reservations for a plain action', () => {
+  it('emits an empty reservations array', () => {
+    const tile = new GtileAction(actionNode, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+    expect(full.reservations).toEqual([]);
   });
 });
 
@@ -310,15 +391,26 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     const [inEdge, outEdge] = geo.edges;
     const bX = LAYOUT_MARGIN + tile.branchOffsets[0]!;
     const bY = LAYOUT_MARGIN + tile.branchTopYs[0]!;
+    // T5 (compress): the bar's own ignoreX end-reservation
+    // (`URectangle#drawWhenCompressed`'s `UEmpty(2,h)`,
+    // `klimt/shape/URectangle.java:193-199`) is a raw slot `[12,14]`; the
+    // branch's own box starts at 26 pre-compression, leaving a `[14,26]`
+    // 12px empty gap `SlotSet#smaller(5)` (`CompressionXorYBuilder.java
+    // :56`) shrinks to 2. Every x at or past the branch box but before the
+    // bar's SECOND end-reservation gap (`[106,118]`) shifts left by that 2
+    // -- including this branch's own hook connectors, both below 106.
+    // Verified against `t5-debug-fork.ts`'s single-branch-fork dump
+    // (`removed: { x: 4, y: 0 }`, one gap each side of the branch box).
+    const REMOVED_LEADING = 2;
 
     expect(inEdge!.points).toHaveLength(2);
-    expect(inEdge!.points[0]).toEqual({ x: bX + 7, y: LAYOUT_MARGIN + tile.barHeight });
-    expect(inEdge!.points[1]).toEqual({ x: bX + 7, y: bY });
+    expect(inEdge!.points[0]).toEqual({ x: bX + 7 - REMOVED_LEADING, y: LAYOUT_MARGIN + tile.barHeight });
+    expect(inEdge!.points[1]).toEqual({ x: bX + 7 - REMOVED_LEADING, y: bY });
 
     const joinBarY = LAYOUT_MARGIN + tile.height - tile.barHeight;
     expect(outEdge!.points).toHaveLength(2);
-    expect(outEdge!.points[0]).toEqual({ x: bX + 11, y: bY + 60 });
-    expect(outEdge!.points[1]).toEqual({ x: bX + 11, y: joinBarY });
+    expect(outEdge!.points[0]).toEqual({ x: bX + 11 - REMOVED_LEADING, y: bY + 60 });
+    expect(outEdge!.points[1]).toEqual({ x: bX + 11 - REMOVED_LEADING, y: joinBarY });
   });
 
   it('a detached branch (hasPointOut() === false) gets an in-edge and NO out-edge', () => {
@@ -371,10 +463,23 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     expect(geo.nodes.map((n) => n.kind)).toEqual(['fork-bar', 'stub-branch', 'stub-branch', 'join-bar']);
     const forkBar = geo.nodes[0]!;
     const joinBar = geo.nodes[3]!;
-    expect(forkBar.width).toBe(tile.barWidth);
+    // T5 (compress), X: two raw gaps between the bar's ignoreX end-
+    // reservations and the two branch boxes (`[12,14]`-to-26 and 106-to-
+    // `[214,216]`, `URectangle#drawWhenCompressed`, `klimt/shape/
+    // URectangle.java:193-199`) each shrink from 12 to 2 (`smaller(5)`,
+    // `CompressionXorYBuilder.java:56`); the one inter-branch gap
+    // (`[106,134]`, `AbstractParallelFtilesBuilder.java:129-131`'s
+    // `xMargin=14` doubled to 28) shrinks to 18. Removed = 2+18+2 = 22.
+    // T5 (compress), Y: the branch-region-to-join-bar raw gap is 20
+    // (`[118,138]`), shrinking to 10; the fork-bar-to-branch-region gap is
+    // exactly 10 and vanishes entirely (`10 - 2*5 = 0`). Verified against
+    // `t5-debug-fork2.ts`'s dump (`removed: { x: 22, y: 10 }`).
+    const REMOVED_X = 22;
+    const REMOVED_Y = 10;
+    expect(forkBar.width).toBe(tile.barWidth - REMOVED_X);
     expect(forkBar.height).toBe(tile.barHeight);
-    expect(joinBar.width).toBe(tile.barWidth);
-    expect(joinBar.y).toBe(LAYOUT_MARGIN + tile.height - tile.barHeight);
+    expect(joinBar.width).toBe(tile.barWidth - REMOVED_X);
+    expect(joinBar.y).toBe(LAYOUT_MARGIN + tile.height - tile.barHeight - REMOVED_Y);
   });
 
   it('split top line spans the first..last branch north-hook x over EVERY branch, unconditional', () => {
@@ -387,8 +492,18 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
     const first = LAYOUT_MARGIN + tile.branchOffsets[0]! + 7;
     const last = LAYOUT_MARGIN + tile.branchOffsets[2]! + 7;
+    // T5 (compress): `split-bar` is a `ULine` (T3: `FtileThinSplit.java
+    // :87-96`), so it never occupies (`NO_SHAPE_KINDS`, `shapes-of.ts`) --
+    // but it IS transformed like any other node (`RECT_WIDTH_KINDS`). Its
+    // own `x` (33) sits before both inter-branch gaps, so it is unmoved;
+    // its far edge (`x + width`) sits past both. Two 28px inter-branch
+    // gaps (`AbstractParallelFtilesBuilder.java:129-131`'s `xMargin=14`
+    // doubled) each shrink to 18 (`smaller(5)`, `CompressionXorYBuilder
+    // .java:56`) -- removed = 18+18 = 36. Verified against
+    // `t5-debug-fork.ts`'s 3-branch-split dump (`removed: { x: 36, y: 0 }`).
+    const REMOVED = 36;
     expect(splitBar.x).toBe(first);
-    expect(splitBar.width).toBeCloseTo(last - first, 9);
+    expect(splitBar.width).toBeCloseTo(last - first - REMOVED, 9);
     expect(splitBar.height).toBe(tile.barHeight);
   });
 
@@ -405,8 +520,19 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     // The only continuing branch's x is on the far side of centre, so the
     // NEAR end clamps to centreX (ParallelBuilderSplit.java:171-176) --
     // the line still reaches the composite's own centre, not just b2's x.
-    expect(joinLine.x).toBe(centreX);
-    expect(joinLine.x + joinLine.width).toBeCloseTo(b2South, 9);
+    //
+    // T5 (compress): same two 28px inter-branch gaps as the split-bar test
+    // above (`AbstractParallelFtilesBuilder.java:129-131`, each shrinking
+    // to 18 under `smaller(5)`, `CompressionXorYBuilder.java:56`).
+    // `centreX` (174, pre-compression) sits AFTER the first gap only
+    // (`[106,134]`) and before the second (`[214,242]`), so it shifts left
+    // by 18; `b2South` (253, pre-compression) sits past BOTH, shifting by
+    // 36. Verified against `t5-debug-fork.ts`'s 1-continuing-of-3 split
+    // dump (`removed: { x: 36, y: 0 }`, `split-join-bar` 174→156, 79→61).
+    const REMOVED_NEAR = 18;
+    const REMOVED_FAR = 36;
+    expect(joinLine.x).toBe(centreX - REMOVED_NEAR);
+    expect(joinLine.x + joinLine.width).toBeCloseTo(b2South - REMOVED_FAR, 9);
   });
 
   it('split with every branch detached emits no split-join-bar node and no out-edges', () => {

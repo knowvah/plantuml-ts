@@ -74,7 +74,7 @@ after layout, before draw.
    `ActivityNodeGeo` / `ActivityEdgeGeo` / `SwimlaneGeo` shapes
 10. **The pass throws on any baseline fixture** (a `baseline` entry flipping
     to `error`)
-11. **The invariant test finds a new overlap** after compression on any fixture
+11. **The invariant test finds a new overlap** after compression, on any fixture, between two shapes that BOTH occupy on the moved axis (amended 2026-09-10 after the T5 halt: a pair where one shape contributes no slot on that axis — an X-skipped cross-lane head, a `CenteredText` title on X, an ignored rect's middle — is the class the jar moves by design and is pinned, not forbidden)
 12. **T5 needs lane width measurement changed** — upstream measures lanes
     before compression (`Swimlanes.java:396-449`); needing otherwise means
     the structure is wrong
@@ -122,9 +122,91 @@ Measurement between tasks (orchestrator): the probe in
 
 ## Progress
 
-- [ ] Batch 0 — T0
-- [ ] Batch 1 — T1, T2
-- [ ] Batch 2 — T3
-- [ ] Batch 3 — T4
-- [ ] Batch 4 — T5
-- [ ] Batch 5 — T6
+- [x] Batch 0 — T0
+- [x] Batch 1 — T1, T2
+- [x] Batch 2 — T3
+- [x] Batch 3 — T4
+- [x] Batch 4 — T5 (resumed 2026-09-10 after the stop-11 amendment)
+- [x] Batch 5 — T6
+
+## Close-out — 2026-09-10
+
+Executed on `feat/activity-klimt-compress` (T0–T6, 7/7). Halted once at T5 on
+stop 11; the human amended it (a new overlap counts only between two shapes
+that both occupy on the moved axis — `Worm.java:159-168`,
+`UGraphicCompressOnXorY.java:100-112`) and T5 resumed from `akc/T5-wip`.
+Two orchestrator review fixes landed on the way: `c744c255` (lane titles
+occupy on Y through the ON_X compressor's `CenteredText` expansion) and
+`99c473c4` (`overlaps()` measured text boxes from the top, not the baseline).
+
+### Exit bar, scored
+
+| bar | result |
+|---|---|
+| Σ `weightedScore` falls against 42511 | **NOT MET: 42511 → 52954 (+24.6%)**, subset 6752 → 8709. The rise is T1's alone (+10445): `ArrowsRegular` makes our heads pair per index with the jar's (up to 8 diffs each instead of one count mismatch) and every tip stays offset by the unported root margin. T5 moved the score −2 against the post-T1 state (6 rose / 14 fell / 248 unchanged). |
+| `rect[]/@x`, `text[]/@x`, `line[]/@x1`/`@x2`, `svg/@width` fall | **NOT MET on the score** (920, 1455, 2705 / 2704, 266 → 265): the comparator is blind to magnitude. **Met on magnitude**: mean \|ours − jar\| over the 32 fork/split fixtures `rect@x` 57.65 → 22.04 px, `text@x` 95.04 → 38.57, `line@x1` 170.03 → 108.03, `svg@width` 106.72 → 38.56; y families flat. `polygon[]/@points` 1722 → 230 (T1). `rect[]/@width` 149 → 132. |
+| Zero unexplained rises | Met: 253 T1 risers (pre-named), 6 T5 risers each journaled (`racana` +9, `leduvi` +5, `cifafo` +3, `fatuzu` +2, `pujozo` +2, `sopape` +1 — small Y removals crossing the positional pairing). |
+| Re-pinned baselines diffed, risers named | Met: diff 253 rose (T1 class) / 3 fell (strictuml, `ArrowsTriangle`); style census 176 moved (canvas only; 0 line-count or textCount changes; canvas width 36 toward / 48 away — the 48 were already narrower than the jar by 14–125 px for structures we do not draw, and our whitespace compressed as the jar's does); text census 20 moved (insets only); swimlane census on lane widths 18 closer / 6 farther / 36 same, 16 exact matches (farther: `maketa` and `rujuxa`/`lukoxa`/`samavi` = the parser lane-capture defect and the filed if-connector shape leaving whitespace beside our diamonds; `bideta` = the off-canvas arrowhead, widths unchanged; `ruzica` −2 on a lane already 48 off). |
+| Sibling suites unmoved | Met: 23 files / 2167 passed / 1 pending at `fa578b8a` and at HEAD, identical per file. |
+| Invariant test green on all 268 | Met (amended form): 0 throws, 0 hard violations, 7 allowed pairs pinned by fixture. |
+| Four gates green | Met: typecheck, lint, build; `npm test` 708 files / 19572 passed. |
+
+Targets: `zizaki` bar 103.4 wide with boxes at 24 / 68.7 (jar 28 / 72.7 −4
+margin), `simuti` branches 10 apart, `bixefi` lane 3 158.175 and bar 148.175
+— the jar's numbers exactly. `removed` over 268: x 5827.175 (85 fixtures),
+y 2117 (160). Gate wall-clock median 5.003 s vs T0 4.40 s (max test 419 ms).
+
+### Premises measured false
+
+- Stop 11 ("no new overlap") is not a jar invariant for non-occupying
+  shapes; amended.
+- T3's brief grouped split lines with fork bars and cited `FtileIfDown`
+  reservations for our `if`s; the Java says `ULine` (no occupancy) and a
+  bypass route our walker never builds.
+- T0 predicted `nomeco` Y −20 and `bixefi`/`pujozo` Y 0; the `while`
+  reservation splits the gap (2) and the title band's ends reserve only 2 px
+  (0 once titles occupy on Y).
+- The exit bar's score reference: after T1 the comparator regime changed;
+  the families cannot register a 57 → 22 px convergence.
+
+### Follow-ons (filed in `planning/next-missions.md`)
+
+`activity-arrows-triangle`, `activity-edge-label-width`,
+`activity-branch-vertical-pitch`, `activity-off-canvas-arrowhead`; the
+parser lane-capture defect now also owns the 7 pinned overlaps; `Recentred`
+stays with `activity-canvas-margin`.
+
+### Halt record (kept)
+
+
+**Completed:** T0–T4 (batches 0–3) on `feat/activity-klimt-compress`, plus two
+review fixes (`c744c255` lane titles occupy on Y; `99c473c4` `overlaps()`
+text baseline). **Not landed:** T5 (parked at `e925560e` on `akc/T5-wip`,
+uncommitted-to-mission), T6.
+
+**Why halted.** T5's invariant test (stop 11) finds 7 new overlaps after
+compression on 5 fixtures. Verified by the orchestrator against the Java:
+every pair includes a shape that does not occupy on the axis that moved it —
+`polygonSkipMode:'x'` cross-lane heads (`Worm.java:159-168`) or a lane title
+re-centred by `UGraphicCompressOnXorY.java:100-112`. The jar moves those by
+design; the collisions come from the filed parser lane-capture defect. Stop 11
+as written is still triggered, so the mission stops here.
+
+**Exit bar at the halt (T5 measurement):** aggregate 52956 → 52954 against
+the post-T1 reference (T1's pre-named polygon rise was +10445), so Σ is
+**52954 vs 42511** and did not fall; `rect[]/@width` 149 → 132, other x
+families flat; the three target fixtures match exactly; laned census 14
+closer / 1 same / 2 farther; 0 throws; gate median 5.003 s.
+
+**Decisions:** 22 journal rows (T0 4, T1 4, B1 3, T2 review 1, T3 8+1, B2 3,
+T4 review, B3 2, T5 4 on the WIP branch, halt 4). Flagged for review: the
+stop-11 amendment (journal, "T5 halt" rows) and the exit-bar reference.
+
+**Quality gates at the halt (mission branch `99c473c4`):** typecheck, lint,
+build green; `npm test` 707 files, the activity ratchet the only red file
+(253, T1's pre-named risers, re-pinned at T6).
+
+**Follow-ons to file at T6:** `ArrowsTriangle` (strictuml, 3 fixtures);
+the renderer's edge-label width approximation; the in-branch vertical
+spacing gap (`zizaki` 52 vs 67); the parser lane-capture defect now blocking
+both the invariant and the laned census; `Recentred`.

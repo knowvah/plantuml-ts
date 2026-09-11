@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1083 modules · 3932 exported names.
+1092 modules · 3960 exported names.
 
 ## `src/`
 
@@ -936,6 +936,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `resolveSolidBucketColor`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
 | `activity-text-style.ts` | `activityMinimumWidth`, `ACTIVITY_FONT_COLOR`, `activityFontColor`, `activityHorizontalAlignment` | The unconsumed activity box-width, font-colour and horizontal-alignment resolvers (mission `activity-min-box-width`, T1, D1/D2/D3). |
+| `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular` — the default activity-diagram arrowhead decoration. |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_IF`, `RE_ELSEIF`, `RE_ELSE`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
 | `if-dispatch.ts` | `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
@@ -949,12 +950,25 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
+| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-placement.ts` | `EdgeMeta`, `EdgeShape`, `laneAt`, `laneIn`, `laneOut`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+| `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
+
+## `src/diagrams/activity/layout/compress/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `compress-geometry.ts` | `CompressInput`, `CompressResult`, `compressGeometry` | `compressGeometry` -- `klimt/compress/CompressionXorYBuilder.java:52-69` and `UGraphicCompressOnXorY.java:86-135`, ported over `ActivityGeometry` instead of a live `UGraphic` redraw (D1). |
+| `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
+| `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
+| `slot-finder.ts` | `occupiesOn`, `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
+| `slot.ts` | `CompressionMode`, `compareSlotByStart`, `Slot`, `SlotSet` | slot.ts — `klimt/compress/Slot.java`, `SlotSet.java`, `CompressionMode.java` (mission `activity-klimt-compress` T2, `decisions.md` D2/D5). |
 
 ## `src/diagrams/activity/routing/`
 

@@ -1162,7 +1162,28 @@ Ordered by how ready they are, not by size.
     `plans/activity-parallel-connectors/README.md`; notes in
     `.agent-notes/apc-T6.md`. Follow-ons filed here, each measured at HEAD:
 
-    - **`activity-klimt-compress` (C2)** — **BRIEFED 2026-09-10** (`plans/activity-klimt-compress/README.md`, 7 tasks; D3 ports `ArrowsRegular` first because occupancy depends on the jar's arrowhead extents). Filing: port `klimt/compress`
+    - **`activity-klimt-compress` (C2)** — **EXECUTED + CLOSED 2026-09-10**
+      (`plans/activity-klimt-compress/README.md`, 7 tasks, branch
+      `feat/activity-klimt-compress`; halted once at T5 on stop 11 and
+      resumed after the human amended it — the jar moves X-skipped heads
+      and `CenteredText` titles by design, so the invariant is "no new
+      overlap between two shapes that both occupy on the moved axis").
+      Landed: `ArrowsRegular` as the shared head; `Slot`/`SlotSet`/
+      `CompressionTransform`; `shapesOf` + a line-for-line `SlotFinder`
+      with the bar-end, hexagon-while, divider and title-band
+      reservations; `compressGeometry` ON_X then ON_Y wired into
+      `assignCoordinatesFull`. Result: `zizaki` bar 103.4, `simuti`
+      branches 10 apart, `bixefi` lane 3 158.175 — the jar's numbers
+      exactly; mean |ours − jar| on the 32 fork/split fixtures `rect@x`
+      57.65 → 22.04 px, `svg@width` 106.72 → 38.56, `text@x` 95.04 →
+      38.57; `removed` x 5827 (85 fixtures) / y 2117 (160). The gated
+      `weightedScore` went UP, 42511 → 52954, entirely at T1: heads now
+      pair per index (8 diffs each instead of one count mismatch) and
+      every tip stays offset by the unported root margin, so the score is
+      blind to the convergence (`.agent-notes/akc-T6.md`). Filed below:
+      `ArrowsTriangle`, the edge-label width approximation, the in-branch
+      vertical pitch, the off-canvas arrowhead on `bideta`. Original
+      filing: port `klimt/compress`
       (`CompressionXorYBuilder`, `SlotFinder`, `SlotSet`,
       `CompressionTransform`, `PiecewiseAffineTransform`,
       `UGraphicCompressOnXorY`, ~1185 lines) and the drawing-interception
@@ -1177,6 +1198,38 @@ Ordered by how ready they are, not by size.
       width in swimlane goldens (`bixefi`: jar bar `w=99.35` in lane 1 vs
       ours `Σ slots`). Largest remaining activity family after this mission
       is still `childCount` (18038 of 42511); the x families are ~6.4% each.
+    - **`activity-arrows-triangle`** — FILED 2026-09-10 by
+      `activity-klimt-compress` T1. `SkinParam.java:1305-1308` returns
+      `ArrowsTriangle` (3 points) under `strictUmlStyle()`; ours always
+      draws `ArrowsRegular`. Exactly the corpus's three `skinparam style
+      strictuml` fixtures: `perate-09-gale335` 161 → 126, `ribapo-84-
+      xudu593` 161 → 126, `rarodo-65-fudu505` 20 → 16 — they FELL at T1
+      only because a 4-vs-3 count mismatch short-circuits the comparator;
+      the true residual is every head on them.
+    - **`activity-edge-label-width`** — FILED 2026-09-10 by
+      `activity-klimt-compress` T3. `renderer.ts#renderEdgeLabel` sizes a
+      label pill as `label.length × 0.6 × size` while the slot finder
+      measures the same label with the bounder (`TextLimitFinder.java:
+      82-90`); the two disagree by the bounder's per-glyph widths on every
+      labelled edge. Weight: the `rect[]/@width` of label pills on
+      labelled-edge fixtures (unmeasured; `text[]/@textLength` 1280
+      aggregate is the neighbouring family).
+    - **`activity-branch-vertical-pitch`** — FILED 2026-09-10 by
+      `activity-klimt-compress` T0. Stacked actions inside a fork branch
+      sit 52 apart in ours and 67 in the jar (`zizaki-04-guvi945`: gap 20
+      vs 35), a `FtileForkInner`/`FtileAssemblySimple` spacing this mission
+      did not touch; Y compression cannot close it because the arrowheads
+      fill our 20-px gaps. Weight on `zizaki`: ≤ 33 of 121 (`rect[]/@y` 7,
+      `line[]/@y1`/`@y2` 7 + 7, `text[]/@y` 5, part of `polygon`).
+    - **`activity-off-canvas-arrowhead`** — FILED 2026-09-10 by
+      `activity-klimt-compress` T6. `bideta-97-cezo697` (a laned `if` whose
+      `then` branch is empty and whose `else` moves to the FIRST lane)
+      routes an edge to `x = −6.32`: its arrowhead polygon spans
+      `[−10.32, −0.32]`, left of the canvas (`LAYOUT_MARGIN` 12), so the
+      compress pass finds a 12.32-px gap before the band's left reservation
+      and shifts the whole block 2.32 px left. `canvas-bounds.test.ts`
+      asserts containment of nodes/lanes, not edge points. One fixture
+      measured; grep the corpus for `points="-` before scoping.
     - **`activity-fork-split-lane-capture`** — `src/diagrams/activity/
       node-dispatch.ts:261` (fork) and `:291` (split) build the node with
       `...swimlaneSpread(ctx)` AFTER the branches have parsed, so the
@@ -1188,7 +1241,12 @@ Ordered by how ready they are, not by size.
       (+19): `bixefi` 220 -> 119, `tobajo` 774 -> 725, `sopape` 96 -> 73,
       `racana` 240 -> 217 fell; `jevoce` 369 -> 599 rose (its cross-lane
       in-edges re-route from the start lane — mechanism unread). Needs the
-      parser in its write-set and `jevoce` diagnosed first.
+      parser in its write-set and `jevoce` diagnosed first. Since
+      `activity-klimt-compress` (2026-09-10) it is also what makes the
+      compress pass collapse both cross-lane elbows of `bixefi`, `bugaja`,
+      `racana`, `tobajo` onto one point (the 7 pinned allowed overlaps in
+      `tests/diagrams/activity/layout/compress/invariant.test.ts`) and
+      spill `maketa`'s lane-1 title; fixing it should empty that pin list.
     - **`activity-if-switch-connector-shape`** — upstream's
       `ConnectionHorizontalThenVertical` leaves the diamond's SIDE; ours
       leaves its bottom through `GConnectionSideThenVerticalThenSide`

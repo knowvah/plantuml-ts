@@ -14,6 +14,7 @@ import { renderNode } from './activity-renderer-shapes.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
+import { arrowDirection, arrowHeadPoints } from './arrows-regular.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -32,24 +33,19 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 // Label helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Draw the `ArrowsRegular` decoration (`arrows-regular.ts`) at the tip
+ * `(x, y)`, oriented by the segment direction `(dx, dy)`.
+ *
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:154-168
+ * (`drawInternalOneColor`'s `startDecoration`/`endDecoration` draw).
+ */
 function arrowTip(x: number, y: number, dx: number, dy: number, color: string): string {
-  const len = Math.sqrt(dx * dx + dy * dy);
-  if (len === 0) return '';
-  const udx = dx / len;
-  const udy = dy / len;
-  const size = 8;
-  const px = -udy * size * 0.4;
-  const py = udx * size * 0.4;
-  const x1 = x - udx * size + px;
-  const y1 = y - udy * size + py;
-  const x2 = x - udx * size - px;
-  const y2 = y - udy * size - py;
+  if (dx === 0 && dy === 0) return '';
+  const dir = arrowDirection(dx, dy);
+  const points = arrowHeadPoints(dir).map((p) => ({ x: x + p.x, y: y + p.y }));
   return polygon(
-    [
-      { x, y },
-      { x: x1, y: y1 },
-      { x: x2, y: y2 },
-    ],
+    points,
     // The arrow DECORATION draws through `.apply(UStroke.simple())`
     // (`ftile/Worm.java:159,166`), which is thickness 1.0
     // (`klimt/UStroke.java:75-77`) -- NOT the `UStroke.withThickness(1.5)`

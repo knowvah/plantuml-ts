@@ -4,7 +4,7 @@ One task, orchestrator-executed. Nothing may change source until it lands.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Probe and pre-change record | orchestrator | `.agent-notes/akc-T0.md` | — | [ ] |
+| T0 | Probe and pre-change record | orchestrator | `.agent-notes/akc-T0.md` | — | [x] |
 
 ## The probe
 

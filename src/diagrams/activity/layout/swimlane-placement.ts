@@ -49,6 +49,7 @@ import {
   type LaneWidth,
   type LaneWidthInput,
 } from './swimlane-context.js';
+import type { Reservation } from './hexagon-reservations.js';
 
 /** Metadata `tile-coordinates.ts` records per edge during the pass-1 walk
  * -- which lane each endpoint's source tile carries, resolved via its
@@ -104,6 +105,14 @@ export interface PlacementResult {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   swimlanes: SwimlaneGeo[];
+  /**
+   * One {@link Reservation} per divider line (mission `activity-klimt-
+   * compress` T3, D5). Never carries `ignoreX`/`ignoreY` -- a divider's
+   * `UEmpty(x1+x2, 1)` always occupies its full box (see
+   * {@link Reservation}'s own doc for why `UEmpty` never sets those flags).
+   * Internal to `layout/`; not part of the public `ActivityGeometry`.
+   */
+  reservations: Reservation[];
 }
 
 /**
@@ -207,6 +216,11 @@ interface LaneOrigin {
   readonly geo: SwimlaneGeo;
 }
 
+interface LaneOrigins {
+  readonly origins: Map<string, LaneOrigin>;
+  readonly dividerReservations: DividerReservation[];
+}
+
 /**
  * Ports `Swimlanes#computeSizeInternal`'s origin loop
  * (`Swimlanes.java:416-431`) restricted to the real lanes, plus one extra
@@ -219,9 +233,37 @@ interface LaneOrigin {
  * `baseX`, not `0`) so every returned `delta` is a ready-to-add absolute
  * offset for pass-1's `baseX`-relative node coordinates.
  */
+/** One divider's `UEmpty(x1+x2, 1)` reservation, in block-relative X only
+ *  -- {@link placeSwimlanes} adds `y: baseY` and `height: 1`. */
+interface DividerReservation {
+  readonly x: number;
+  readonly width: number;
+}
+
 interface LaneDividers {
   readonly dividerX: number[];
   readonly contentLeft: number[];
+  readonly dividerReservations: DividerReservation[];
+}
+
+/**
+ * The trailing "special" divider (the `i === n` empty lane closing the
+ * last real lane's span): its content and minX are both 0
+ * (`MinMax.getEmpty(true)`), so `xx_n` reduces to `xpos + dividerWidth_n +
+ * min / 2` and the divider itself to `xpos + x1_n + min / 2` (`min`
+ * already resolved, never negative -- see `resolveSwimlaneMinWidth`, so
+ * this is `Math.max(min, 0) / 2`). Split from {@link computeDividers} only
+ * to keep that function's own NLOC under the file's limit.
+ */
+function trailingDivider(
+  laneNames: readonly string[],
+  inputs: readonly LaneWidthInput[],
+  min: number,
+  xpos: number,
+): { dividerX: number; reservation: DividerReservation } {
+  const x1n = halfMissingSpace(laneNames.length, inputs, min);
+  const x2n = halfMissingSpace(laneNames.length + 1, inputs, min);
+  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos, width: x1n + x2n } };
 }
 
 /**
@@ -229,7 +271,13 @@ interface LaneDividers {
  * computeLaneOrigins} only to keep both under the file's function-length
  * limit -- `dividerX`/`contentLeft` are two views of the SAME loop
  * variable, never independently meaningful, so returning them as a pair
- * rather than merging further is the natural seam.
+ * rather than merging further is the natural seam. `dividerReservations`
+ * is each boundary's `LaneDivider#drawU` `UEmpty(x1+x2, 1)`
+ * (`LaneDivider.java:85-97`), at its own `xpos` -- BEFORE this divider's
+ * own `x1` padding -- matching `Swimlanes.java:347-348`'s `ug.apply
+ * (UTranslate.dx(xpos - dividerWith))` composed with `LaneDivider#drawU`'s
+ * own local `UEmpty` at (0, 0).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/LaneDivider.java:85-97
  */
 function computeDividers(
   laneNames: readonly string[],
@@ -240,6 +288,7 @@ function computeDividers(
 ): LaneDividers {
   const dividerX: number[] = [];
   const contentLeft: number[] = [];
+  const dividerReservations: DividerReservation[] = [];
   let xpos = blockOriginX;
   for (let i = 0; i < laneNames.length; i++) {
     const w = widths.get(laneNames[i]!)!;
@@ -249,16 +298,30 @@ function computeDividers(
     const left = xpos + dividerWidth + (w.width - w.contentWidth) / 2;
     contentLeft.push(left);
     dividerX.push(left - x2);
+    dividerReservations.push({ x: xpos, width: dividerWidth });
     xpos += w.width + dividerWidth;
   }
-  // Trailing divider (the `i === n` "special" empty lane): its content and
-  // minX are both 0 (`MinMax.getEmpty(true)`), so `xx_n` reduces to
-  // `xpos + dividerWidth_n + min / 2` and the divider itself to
-  // `xpos + x1_n + min / 2` (`min` already resolved, never negative --
-  // see `resolveSwimlaneMinWidth`, so this is `Math.max(min, 0) / 2`).
-  const x1n = halfMissingSpace(laneNames.length, inputs, min);
-  dividerX.push(xpos + x1n + min / 2);
-  return { dividerX, contentLeft };
+  const trailing = trailingDivider(laneNames, inputs, min, xpos);
+  dividerX.push(trailing.dividerX);
+  dividerReservations.push(trailing.reservation);
+  return { dividerX, contentLeft, dividerReservations };
+}
+
+/** One lane's {@link LaneOrigin}, split from {@link computeLaneOrigins}
+ *  only to keep that function's own NLOC under the file's limit. */
+function buildLaneOrigin(name: string, w: LaneWidth, x: number, width: number, left: number): LaneOrigin {
+  return {
+    delta: left - w.contentMinX,
+    geo: {
+      name,
+      x,
+      width,
+      contentWidth: w.contentWidth,
+      titleWidth: w.titleWidth,
+      contentMinX: w.contentMinX,
+      contentX: left,
+    },
+  };
 }
 
 function computeLaneOrigins(
@@ -266,32 +329,21 @@ function computeLaneOrigins(
   widths: ReadonlyMap<string, LaneWidth>,
   min: number,
   blockOriginX: number,
-): Map<string, LaneOrigin> {
+): LaneOrigins {
   const inputs: LaneWidthInput[] = laneNames.map((name) => {
     const w = widths.get(name)!;
     return { contentWidth: w.contentWidth, titleWidth: w.titleWidth };
   });
-  const { dividerX, contentLeft } = computeDividers(laneNames, widths, inputs, min, blockOriginX);
+  const { dividerX, contentLeft, dividerReservations } = computeDividers(laneNames, widths, inputs, min, blockOriginX);
 
   const origins = new Map<string, LaneOrigin>();
   for (let i = 0; i < laneNames.length; i++) {
     const name = laneNames[i]!;
     const w = widths.get(name)!;
-    const left = contentLeft[i]!;
-    origins.set(name, {
-      delta: left - w.contentMinX,
-      geo: {
-        name,
-        x: dividerX[i]!,
-        width: dividerX[i + 1]! - dividerX[i]!,
-        contentWidth: w.contentWidth,
-        titleWidth: w.titleWidth,
-        contentMinX: w.contentMinX,
-        contentX: left,
-      },
-    });
+    const width = dividerX[i + 1]! - dividerX[i]!;
+    origins.set(name, buildLaneOrigin(name, w, dividerX[i]!, width, contentLeft[i]!));
   }
-  return origins;
+  return { origins, dividerReservations };
 }
 
 /** `swimlane.getTranslate()` applied to one node
@@ -360,8 +412,8 @@ function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<st
 
 /**
  * Every input `placeSwimlanes` needs, bundled to keep the function's own
- * parameter count under the file's limit -- these seven values are
- * always supplied together by `assignCoordinates`, never independently.
+ * parameter count under the file's limit -- these values are always
+ * supplied together by `assignCoordinates`, never independently.
  */
 export interface PlacementInput {
   readonly nodes: readonly ActivityNodeGeo[];
@@ -369,6 +421,11 @@ export interface PlacementInput {
   readonly edgeMeta: readonly EdgeMeta[];
   readonly laneNames: readonly string[];
   readonly baseX: number;
+  /** The swimlane block's own top -- every divider's `UEmpty(x1+x2, 1)`
+   *  reservation sits here, OUTSIDE the title-band translate
+   *  (`Swimlanes.java:337`'s divider draw takes no `dy`). Mission
+   *  `activity-klimt-compress` T3. */
+  readonly baseY: number;
   readonly bounder: StringBounder;
   readonly theme: Theme;
 }
@@ -412,13 +469,13 @@ function measureLanes(
  * swimlanes -> byte-identical geometry".
  */
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
-  const { nodes, edges, edgeMeta, laneNames, baseX, bounder, theme } = input;
+  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
   if (laneNames.length === 0) {
-    return { nodes: [...nodes], edges: [...edges], swimlanes: [] };
+    return { nodes: [...nodes], edges: [...edges], swimlanes: [], reservations: [] };
   }
 
   const { widths, min } = measureLanes(nodes, laneNames, bounder, theme);
-  const origins = computeLaneOrigins(laneNames, widths, min, baseX);
+  const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
 
   const deltas = new Map<string, number>();
   const swimlanes: SwimlaneGeo[] = [];
@@ -428,9 +485,12 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
     swimlanes.push(origin.geo);
   }
 
+  const reservations: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
+
   return {
     nodes: nodes.map((n) => shiftNode(n, deltas)),
     edges: edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas)),
     swimlanes,
+    reservations,
   };
 }
