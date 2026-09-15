@@ -120,6 +120,16 @@ export interface ActivitySplit {
   kind: 'split';
   branches: ActivityNode[][];
   swimlane?: string;
+  /**
+   * The lane current at `end split`, when it differs from {@link swimlane}.
+   * Unlike fork, split has no second capture point at `split again`
+   * (`InstructionSplit.java:128-134` opens each further list with the
+   * DEFAULT lane, never re-reading `swimlaneOut`).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionSplit.java:136-141
+   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at
+   *   `end split`.
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivityNote {

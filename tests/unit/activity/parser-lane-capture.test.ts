@@ -13,6 +13,7 @@ import type {
   ActivityFork,
   ActivityIf,
   ActivityRepeat,
+  ActivitySplit,
   ActivityWhile,
 } from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
@@ -133,5 +134,39 @@ describe('fork captures its opener lane and re-reads swimlaneOut at fork again /
     const forkNode = ast.nodes[0] as ActivityFork;
     expect(forkNode.swimlane).toBeUndefined();
     expect(forkNode.swimlaneOut).toBeUndefined();
+  });
+});
+
+describe('split captures its opener lane and its own swimlaneOut at end split', () => {
+  it("the split node's swimlane is the lane at `split`, swimlaneOut the lane at `end split`", () => {
+    const ast = parse(['|A|', 'split', ':a;', 'split again', '|B|', ':b;', 'end split']);
+    const splitNode = ast.nodes[0] as ActivitySplit;
+    expect(splitNode.swimlane).toBe('A');
+    expect(splitNode.swimlaneOut).toBe('B');
+  });
+
+  it('swimlaneOut equals swimlane when every branch stays in one lane', () => {
+    const ast = parse(['|A|', 'split', ':a;', 'split again', ':b;', 'end split']);
+    const splitNode = ast.nodes[0] as ActivitySplit;
+    expect(splitNode.swimlane).toBe('A');
+    expect(splitNode.swimlaneOut).toBe('A');
+  });
+
+  it('`split again` never re-reads swimlaneOut -- only `end split` does', () => {
+    // A lane switch right at the SECOND branch's start (before `split
+    // again`'s own branch body) is still in effect when `end split` is
+    // reached, so swimlaneOut still reads it -- but via the single
+    // end-split capture, not a `fork again`-style per-separator re-read.
+    const ast = parse(['|A|', 'split', ':a;', '|B|', 'split again', ':b;', 'end split']);
+    const splitNode = ast.nodes[0] as ActivitySplit;
+    expect(splitNode.swimlane).toBe('A');
+    expect(splitNode.swimlaneOut).toBe('B');
+  });
+
+  it('swimlane and swimlaneOut are undefined when no lane is ever declared', () => {
+    const ast = parse(['split', ':a;', 'split again', ':b;', 'end split']);
+    const splitNode = ast.nodes[0] as ActivitySplit;
+    expect(splitNode.swimlane).toBeUndefined();
+    expect(splitNode.swimlaneOut).toBeUndefined();
   });
 });

@@ -99,17 +99,25 @@ export function tryFork(
 // ---------------------------------------------------------------------------
 // split / split again / end split
 // ---------------------------------------------------------------------------
-export function trySplit(
-  ctx: ParseContext,
-  idx: number,
-  _line: string,
-  lc: string,
-): DispatchResult | ParseRefusal | null {
-  if (lc !== 'split') return null;
+const SPLIT_STOPS: StopKeywords = ['split again', 'end split'];
+
+interface SplitBranches {
+  cursor: number;
+  branches: ActivityNode[][];
+  swimlaneOut: string | undefined;
+}
+
+/**
+ * Collects every `split`/`split again`-delimited branch up to and including
+ * `end split`. Unlike {@link collectForkBranches}, `swimlaneOut` is read
+ * only once, at `end split` -- `split again` never re-reads it.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionSplit.java:136-141
+ */
+function collectSplitBranches(ctx: ParseContext, startIdx: number): SplitBranches | ParseRefusal {
   const { lines } = ctx;
-  let cursor = idx + 1;
+  let cursor = startIdx;
   const branches: ActivityNode[][] = [];
-  const SPLIT_STOPS: StopKeywords = ['split again', 'end split'];
+  let swimlaneOut: string | undefined;
   let done = false;
   while (!done) {
     const branchResult = parseNodes(ctx, cursor, SPLIT_STOPS);
@@ -119,6 +127,7 @@ export function trySplit(
     if (cursor >= lines.length) break;
     const sep = lines[cursor]!.trim().toLowerCase();
     if (sep === 'end split') {
+      swimlaneOut = ctx.currentSwimlane;
       cursor++;
       done = true;
     } else if (sep === 'split again') {
@@ -127,6 +136,33 @@ export function trySplit(
       done = true;
     }
   }
-  const node: ActivitySplit = { kind: 'split', branches, ...swimlaneSpread(ctx) };
-  return { idx: cursor, node };
+  return { cursor, branches, swimlaneOut };
+}
+
+/**
+ * Captures the split's swimlane at its opener.
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:248-254
+ *   -- `new InstructionSplit(swimlanes.getCurrentSwimlane(), ...)`, taken
+ *   when the `split` line itself is parsed, before the first branch.
+ */
+export function trySplit(
+  ctx: ParseContext,
+  idx: number,
+  _line: string,
+  lc: string,
+): DispatchResult | ParseRefusal | null {
+  if (lc !== 'split') return null;
+  // Mission `activity-lane-capture` D1/T7: read BEFORE the first branch
+  // parses, mirroring `tryFork` (`ActivityDiagram3.java:248-254`'s
+  // `new InstructionSplit(swimlanes.getCurrentSwimlane(), ...)`).
+  const openerSwimlane = swimlaneSpread(ctx);
+  const result = collectSplitBranches(ctx, idx + 1);
+  if (isRefusal(result)) return result;
+  const node: ActivitySplit = {
+    kind: 'split',
+    branches: result.branches,
+    ...openerSwimlane,
+    ...(result.swimlaneOut !== undefined ? { swimlaneOut: result.swimlaneOut } : {}),
+  };
+  return { idx: result.cursor, node };
 }

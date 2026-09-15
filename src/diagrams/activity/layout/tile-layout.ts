@@ -183,7 +183,7 @@ function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): G
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  return withSwimlane(new GtileSplit(branches, bounder), node.swimlane);
+  return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
 }
 
 export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
