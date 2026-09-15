@@ -161,11 +161,22 @@ function consumeIfClauses(ctx: ParseContext, startIdx: number, ifInnerStops: Sto
   return { cursor, elseIfBranches, elseBranch, elseLabel };
 }
 
+/**
+ * Captures the `if`'s swimlane at its opener, not its closer.
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:309
+ *   -- `new InstructionIf(swimlanes.getCurrentSwimlane(), ...)`, taken
+ *   when the `if` line itself is parsed, before the then-branch.
+ */
 export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const ifMatch = RE_IF.exec(line);
   if (ifMatch === null) return null;
   const condition = ifMatch[1]!.trim();
   const thenLabel = ifMatch[2]?.trim();
+
+  // Mission `activity-lane-capture` D1/T3: read BEFORE the then-branch
+  // parses, so a lane switch inside the body never leaks into this node's
+  // own `swimlane`.
+  const openerSwimlane = swimlaneSpread(ctx);
 
   // then-branch stops at elseif, else, endif
   const IF_INNER_STOPS: StopKeywords = ['elseif', 'else', 'endif'];
@@ -186,7 +197,7 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
     thenBranch,
     elseBranch,
     elseIfBranches,
-    ...swimlaneSpread(ctx),
+    ...openerSwimlane,
   };
   return { idx: cursor, node: ifNode };
 }
