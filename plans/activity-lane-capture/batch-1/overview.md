@@ -7,7 +7,7 @@ T4–T7 implement literally (D2).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Diagnose the lane mechanisms; record the base measurement | debugger | `.agent-notes/alc-T1.md`, `plans/activity-lane-capture/measurements/base.json`, `base-lanes.txt`, `fixtures.md` (amend only), journal rows | T0a | [ ] |
+| T1 | Diagnose the lane mechanisms; record the base measurement | debugger | `.agent-notes/alc-T1.md`, `plans/activity-lane-capture/measurements/base.json`, `base-lanes.txt`, `fixtures.md` (amend only), journal rows | T0a | [x] |
 
 Spec: [`T1-lane-mechanism-diagnosis.md`](T1-lane-mechanism-diagnosis.md).
 
