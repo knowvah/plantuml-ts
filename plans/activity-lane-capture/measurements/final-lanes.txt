@@ -1,0 +1,129 @@
+== becanu-19-diti597
+diamond/hexagon[0]: ours=1 jar=0
+diamond/hexagon[1]: ours=? jar=1
+== bideta-97-cezo697
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=? jar=1
+== bixefi-77-moki051
+fork/join bar[0]: ours=0 jar=0
+fork/join bar[1]: ours=2 jar=2
+== bugaja-31-jaso630
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=2 jar=2
+== decudi-92-bisu741
+fork/join bar[0]: ours=1 jar=1
+fork/join bar[1]: ours=1 jar=1
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=0 jar=0
+split/join line[2]: ours=0 jar=0
+diamond/hexagon[0]: ours=0 jar=0
+== gesogi-81-xoma900
+fork/join bar[0]: ours=0 jar=0
+fork/join bar[1]: ours=1 jar=1
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=0
+diamond/hexagon[2]: ours=? jar=1
+== givanu-33-kire967
+diamond/hexagon[0]: ours=1 jar=0
+diamond/hexagon[1]: ours=? jar=1
+== gugala-11-suce270
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=1 jar=1
+== jevoce-05-mumi686
+split/join line[0]: ours=1 jar=1
+split/join line[1]: ours=4 jar=4
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=? jar=1
+== jucidi-98-zato093
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=? jar=0
+== judatu-15-xize591
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=1 jar=1
+split/join line[2]: ours=1 jar=1
+split/join line[3]: ours=1 jar=1
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=1 jar=1
+diamond/hexagon[2]: ours=1 jar=1
+diamond/hexagon[3]: ours=1 jar=1
+diamond/hexagon[4]: ours=? jar=1
+diamond/hexagon[5]: ours=? jar=1
+diamond/hexagon[6]: ours=? jar=1
+== kasadu-53-tuki533
+diamond/hexagon[0]: ours=1 jar=0
+diamond/hexagon[1]: ours=? jar=1
+== kijazo-83-kipu485
+diamond/hexagon[0]: ours=0 jar=0
+== kudedo-31-pafi082
+diamond/hexagon[0]: ours=0 jar=0
+== lukoxa-16-cecu095
+diamond/hexagon[0]: ours=0 jar=0
+== maduja-30-xiri319
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=0
+diamond/hexagon[2]: ours=? jar=1
+diamond/hexagon[3]: ours=? jar=1
+== mafete-03-rapa918
+diamond/hexagon[0]: ours=1 jar=1
+== maketa-43-juja264
+fork/join bar[0]: ours=1 jar=1
+fork/join bar[1]: ours=1 jar=1
+split/join line[0]: ours=0 jar=0
+diamond/hexagon[0]: ours=0 jar=0
+== manata-12-rido730
+diamond/hexagon[0]: ours=1 jar=0
+diamond/hexagon[1]: ours=2 jar=1
+diamond/hexagon[2]: ours=? jar=2
+== misiji-27-buje656
+fork/join bar[0]: ours=0 jar=0
+fork/join bar[1]: ours=1 jar=1
+== movexa-27-rexe388
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=? jar=0
+== nupose-71-vido428
+split/join line[0]: ours=1 jar=1
+split/join line[1]: ours=4 jar=4
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=? jar=1
+== pezubu-98-niba240
+diamond/hexagon[0]: ours=1 jar=1
+== racana-82-zece676
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=2 jar=2
+== roboja-69-susa752
+split/join line[0]: ours=1 jar=1
+split/join line[1]: ours=4 jar=4
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=? jar=1
+== ruzica-16-deli877
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=0 jar=0
+diamond/hexagon[2]: ours=1 jar=1
+diamond/hexagon[3]: ours=1 jar=1
+diamond/hexagon[4]: ours=? jar=1
+== samavi-13-fuku339
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=? jar=0
+== sopape-11-laxo488
+split/join line[0]: ours=0 jar=0
+== tobajo-64-mipi810
+fork/join bar[0]: ours=0 jar=0
+fork/join bar[1]: ours=2 jar=2
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=0
+diamond/hexagon[2]: ours=1 jar=1
+diamond/hexagon[3]: ours=1 jar=1
+diamond/hexagon[4]: ours=1 jar=1
+diamond/hexagon[5]: ours=2 jar=1
+diamond/hexagon[6]: ours=2 jar=1
+diamond/hexagon[7]: ours=? jar=1
+diamond/hexagon[8]: ours=? jar=1
+diamond/hexagon[9]: ours=? jar=1
+diamond/hexagon[10]: ours=? jar=2
+diamond/hexagon[11]: ours=? jar=2
+diamond/hexagon[12]: ours=? jar=2
+diamond/hexagon[13]: ours=? jar=2
+== zeporo-46-zicu301
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=1 jar=1
+diamond/hexagon[2]: ours=? jar=1

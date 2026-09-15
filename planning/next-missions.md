@@ -1230,7 +1230,14 @@ Ordered by how ready they are, not by size.
       and shifts the whole block 2.32 px left. `canvas-bounds.test.ts`
       asserts containment of nodes/lanes, not edge points. One fixture
       measured; grep the corpus for `points="-` before scoping.
-    - **`activity-fork-split-lane-capture`** — `src/diagrams/activity/
+    - **`activity-fork-split-lane-capture`** — **DONE 2026-09-15** as
+      `activity-lane-capture` (widened to if/while/repeat/fork/split; brief
+      `plans/activity-lane-capture/`). Aggregate 52954 -> 52673, the 30
+      affected fixtures 8950 -> 8669; 22 fell, 8 rose (all journaled);
+      `--lanes` mismatches 53 -> 36; `ALLOWED_NEW_OVERLAPS` 7 -> 9, every
+      entry attributed (the "fixing it should empty that pin list" premise
+      below was disproved). Original filing, kept for history:
+      `src/diagrams/activity/
       node-dispatch.ts:261` (fork) and `:291` (split) build the node with
       `...swimlaneSpread(ctx)` AFTER the branches have parsed, so the
       fork/split's `swimlane` is the LAST branch's lane, not the lane
@@ -1247,6 +1254,44 @@ Ordered by how ready they are, not by size.
       `racana`, `tobajo` onto one point (the 7 pinned allowed overlaps in
       `tests/diagrams/activity/layout/compress/invariant.test.ts`) and
       spill `maketa`'s lane-1 title; fixing it should empty that pin list.
+    - **`activity-repeat-entry-diamond`** — upstream draws `diamond1` when
+      `entry == null` and, when `swimlane != swimlaneOut`, a
+      `ConnectionBackComplex1` snake from `diamond2` back to it
+      (`ftile/vcompact/FtileRepeat.java:135-136,188-196,333-402`); our live
+      `GtileRepeat` has no entry diamond (`tiles/gtile-repeat.ts:32`).
+      Slugs: `becanu-19-diti597`, `givanu-33-kire967`, `kasadu-53-tuki533`,
+      `kudedo-31-pafi082`, `mafete-03-rapa918`, `manata-12-rido730`
+      (`kudedo` +2 at alc-T5 is this gap).
+    - **`activity-repeat-backward`** — `backward:` is unparsed; upstream
+      captures a third repeat lane there (`ActivityDiagram3.java:382`,
+      `InstructionRepeat.java:124-127`). `GtileRepeat.backwardBody` stays
+      unfed.
+    - **`activity-repeat-swimlane-in-from-body`** — `FtileRepeat#getSwimlaneIn`
+      returns the BODY's in-lane (`FtileRepeat.java:101-103`); ours returns
+      the opener. Differs only when a lane switch follows `repeat`:
+      `bumaca-51-kece901`, `rujuxa-07-neco067`, `sadovu-51-fata536`,
+      `zinelo-77-losu727`. Entangled with the entry diamond above.
+    - **`activity-split-connector-draw-order`** — upstream collects every
+      `ConnectionIn` in `doStep1` and every `ConnectionOut` in `doStep2`
+      (`ftile/vcompact/ParallelBuilderSplit.java:79-101,136-177`); ours
+      alternates in/out per branch (`layout/walk-fork-branches.ts:81,127`).
+      Sized by alc-T7's risers: `racana` +96, `gugala` +22, `nupose`/`roboja`
+      +4, `judatu` +2. Check `ParallelBuilderFork` for the same split.
+    - **`activity-diamond-count-shortfall`** — on 17 of the 30 alc fixtures
+      the jar draws more diamond/hexagon polygons than ours (`if` fixtures
+      1 vs 2; `tobajo-64-mipi810` 7 vs 14). Repeat ones are the entry
+      diamond; the other 13 are unread. `plans/activity-lane-capture/
+      measurements/final-lanes.txt`.
+    - **`activity-cross-lane-arrowhead-collapse`** — after compression, two
+      cross-lane arrowheads sit at identical coordinates on `bixefi`,
+      `tobajo` (3 pairs), `racana`, and 5 px apart on `bugaja`/`racana`
+      (`ON_X` heads, `ftile/Worm.java:159-168`). Allowed by the invariant;
+      whether the jar also collapses them is unread.
+    - **`activity-switch-parsing`** — no `switch` command in the activity
+      parser; `GtileSwitch` is reachable only from its unit test
+      (`ActivityDiagram3.java:277`).
+    - **`activity-fork-end-merge`** — `end merge` (`ForkStyle.MERGE`) is
+      unparsed.
     - **`activity-if-switch-connector-shape`** — upstream's
       `ConnectionHorizontalThenVertical` leaves the diamond's SIDE; ours
       leaves its bottom through `GConnectionSideThenVerticalThenSide`

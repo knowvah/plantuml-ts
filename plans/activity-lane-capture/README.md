@@ -139,4 +139,44 @@ batch gate row.
 - [x] Batch 4 — T5
 - [x] Batch 5 — T6
 - [x] Batch 6 — T7
-- [ ] Batch 7 — T8
+- [x] Batch 7 — T8
+
+## Session End — 2026-09-15
+
+**Tasks:** 9 of 9 planned (T0a, T0b, T1–T8), one commit each plus batch-gate
+docs commits. No stop condition fired; no halt.
+
+**Result:** aggregate `weightedScore` 52954 → **52673**; the affected set
+(T1 amended 40 → 30 rows: 10 open and close in one lane, one had no lane)
+8950 → **8669**; 22 fell, 8 rose, nothing outside the 30 moved.
+
+**Exit bar (D5):**
+- `ALLOWED_NEW_OVERLAPS` — **met by attribution**: 9 entries (was 7), each
+  cited to `Worm.java:159-168` (ON_X arrowheads) or
+  `UGraphicCompressOnXorY.java:100-112` (lane title); `hardViolations` empty.
+  The "fix empties the list" premise was disproved.
+- Compound lanes — **met as named misses**: `--lanes` mismatches 53 → 36;
+  every fork bar and split line now matches the jar. All 36 left are
+  diamond/hexagon pairing shifts where the jar draws more diamonds; 4
+  fixtures' extra is D3's entry diamond, 13 are unread (**flagged**).
+- Zero unexplained rises — **met**: 8 `ROSE` lines, each with a journal row
+  before its commit, accepted by name.
+- Siblings unmoved — **met**: identical test counts at `2a31a9ad` and HEAD.
+- Gates — **met**: typecheck, lint, build 0; `npm test` 710 passed + 1
+  skipped.
+
+**Decisions:** journal rows written during execution; flagged for review:
+(1) T6 overlap list growth accepted by the test's construction;
+(2) B6 class-level attribution of four smaller split risers;
+(3) T8 lane residual named as a pairing mechanism without per-fixture roots.
+
+**Filed** (`planning/next-missions.md`): `activity-repeat-entry-diamond`,
+`activity-repeat-backward`, `activity-repeat-swimlane-in-from-body`,
+`activity-split-connector-draw-order`, `activity-diamond-count-shortfall`,
+`activity-cross-lane-arrowhead-collapse`, `activity-switch-parsing`,
+`activity-fork-end-merge`.
+
+**Known issues:** `diff-census.json` still describes `63f73489` (no gate,
+not re-derived); untracked Serena scaffold under this brief directory
+(`.mcp.json`, `.serena/`, `.agent-notes/`, `.gitignore`) left for the
+maintainer. Branch unmerged; mission branches merge with a merge commit.
