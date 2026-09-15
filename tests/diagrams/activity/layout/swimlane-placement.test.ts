@@ -104,6 +104,21 @@ describe('laneAt/laneIn/laneOut', () => {
     expect(laneIn(wrapper, undefined)).toBe('wrapper-lane');
     expect(laneOut(wrapper, undefined)).toBe('wrapper-lane');
   });
+
+  it('laneOut prefers swimlaneOut over swimlane when both are set', () => {
+    const t = new FixedTile(10, 10);
+    t.swimlane = 'A';
+    t.swimlaneOut = 'B';
+    expect(laneIn(t, undefined)).toBe('A');
+    expect(laneOut(t, undefined)).toBe('B');
+  });
+
+  it('laneIn/laneOut both return the sole swimlane when swimlaneOut is unset', () => {
+    const t = new FixedTile(10, 10);
+    t.swimlane = 'A';
+    expect(laneIn(t, undefined)).toBe('A');
+    expect(laneOut(t, undefined)).toBe('A');
+  });
 });
 
 describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {

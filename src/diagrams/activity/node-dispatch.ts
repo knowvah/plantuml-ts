@@ -19,11 +19,9 @@ import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
   ActivityAction,
   ActivityArrowLabel,
-  ActivityFork,
   ActivityNode,
   ActivityNote,
   ActivityRepeat,
-  ActivitySplit,
   ActivityWhile,
 } from './ast.js';
 import {
@@ -50,6 +48,7 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
+import { tryFork, trySplit } from './parallel-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -151,12 +150,22 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
 // ---------------------------------------------------------------------------
 // while / endwhile
 // ---------------------------------------------------------------------------
+/**
+ * Captures the `while`'s swimlane at its opener, not its closer.
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:397
+ *   -- `new InstructionWhile(swimlanes.getCurrentSwimlane(), ...)`, taken
+ *   when the `while` line itself is parsed, before the body.
+ */
 function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const whileMatch = RE_WHILE.exec(line);
   if (whileMatch === null) return null;
   const { lines } = ctx;
   const condition = whileMatch[1]!.trim();
   const yesLabel = whileMatch[2]?.trim();
+  // Mission `activity-lane-capture` D1/T4: read BEFORE the body parses, so
+  // a lane switch inside the body never leaks into this node's own
+  // `swimlane`.
+  const openerSwimlane = swimlaneSpread(ctx);
   const bodyResult = parseNodes(ctx, idx + 1, ['endwhile']);
   if (isRefusal(bodyResult)) return bodyResult;
   let cursor = bodyResult.nextIdx;
@@ -173,7 +182,7 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
     ...(yesLabel !== undefined && yesLabel !== '' ? { yesLabel } : {}),
     ...(exitLabel !== undefined && exitLabel !== '' ? { exitLabel } : {}),
     body: bodyResult.nodes,
-    ...swimlaneSpread(ctx),
+    ...openerSwimlane,
   };
   return { idx: cursor, node };
 }
@@ -184,11 +193,25 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
 //   repeat :foo;  <<stereo>>
 // The action becomes the first body element.
 // ---------------------------------------------------------------------------
+/**
+ * Captures the `repeat`'s swimlane at its opener, and `swimlaneOut` at
+ * `repeat while`, not at a single closer.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:107
+ *   -- `this.swimlane = swimlanes.getCurrentSwimlane()`, taken when the
+ *   `repeat` line itself is parsed, before the body.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:194-196
+ *   -- `setTest` stores `swimlaneOut`, taken when `repeat while` is parsed
+ *   (`ActivityDiagram3.java:367`).
+ */
 function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal | null {
   const repeatHeadMatch = RE_REPEAT_HEAD.exec(line);
   if (repeatHeadMatch === null || !lc.startsWith('repeat')) return null;
   const { lines } = ctx;
   let cursor = idx + 1;
+  // Mission `activity-lane-capture` D1/T5: read BEFORE the body parses, so
+  // a lane switch inside the body never leaks into this node's own
+  // `swimlane`.
+  const openerSwimlane = swimlaneSpread(ctx);
   const inlineRest = repeatHeadMatch[1]?.trim();
   const inlineNodes: ActivityNode[] = [];
   if (inlineRest !== undefined && inlineRest !== '') {
@@ -223,72 +246,16 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
     if (repeatMatch !== null) condition = repeatMatch[1]?.trim() ?? '';
     cursor++;
   }
+  // Mission activity-lane-capture D1/T5: `swimlaneOut` is the lane current
+  // AT `repeat while`, which may differ from the opener's.
+  const closerSwimlane = ctx.currentSwimlane;
   const node: ActivityRepeat = {
     kind: 'repeat',
     body: [...inlineNodes, ...bodyResult.nodes],
     condition,
-    ...swimlaneSpread(ctx),
+    ...openerSwimlane,
+    ...(closerSwimlane !== undefined ? { swimlaneOut: closerSwimlane } : {}),
   };
-  return { idx: cursor, node };
-}
-
-// ---------------------------------------------------------------------------
-// fork / fork again / end fork
-// ---------------------------------------------------------------------------
-function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
-  if (lc !== 'fork') return null;
-  const { lines } = ctx;
-  let cursor = idx + 1;
-  const branches: ActivityNode[][] = [];
-  const FORK_STOPS: StopKeywords = ['fork again', 'end fork'];
-  let done = false;
-  while (!done) {
-    const branchResult = parseNodes(ctx, cursor, FORK_STOPS);
-    if (isRefusal(branchResult)) return branchResult;
-    branches.push(branchResult.nodes);
-    cursor = branchResult.nextIdx;
-    if (cursor >= lines.length) break;
-    const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end fork') {
-      cursor++;
-      done = true;
-    } else if (sep === 'fork again') {
-      cursor++;
-    } else {
-      done = true;
-    }
-  }
-  const node: ActivityFork = { kind: 'fork', branches, ...swimlaneSpread(ctx) };
-  return { idx: cursor, node };
-}
-
-// ---------------------------------------------------------------------------
-// split / split again / end split
-// ---------------------------------------------------------------------------
-function trySplit(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
-  if (lc !== 'split') return null;
-  const { lines } = ctx;
-  let cursor = idx + 1;
-  const branches: ActivityNode[][] = [];
-  const SPLIT_STOPS: StopKeywords = ['split again', 'end split'];
-  let done = false;
-  while (!done) {
-    const branchResult = parseNodes(ctx, cursor, SPLIT_STOPS);
-    if (isRefusal(branchResult)) return branchResult;
-    branches.push(branchResult.nodes);
-    cursor = branchResult.nextIdx;
-    if (cursor >= lines.length) break;
-    const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end split') {
-      cursor++;
-      done = true;
-    } else if (sep === 'split again') {
-      cursor++;
-    } else {
-      done = true;
-    }
-  }
-  const node: ActivitySplit = { kind: 'split', branches, ...swimlaneSpread(ctx) };
   return { idx: cursor, node };
 }
 

@@ -227,14 +227,42 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    * counted) so a CHANGE to the list is examined, not silently absorbed by
    * a bigger/smaller count.
    */
+  // Mission `activity-lane-capture` T6 (2026-09-15): fixing the fork's own
+  // bar/join lanes moves branch out-drop x-coordinates, which shifts WHICH
+  // pairs of already-pinned-class shapes collide post-compression -- not a
+  // new class. `bixefi-77-moki051` was predicted to leave this list
+  // entirely (planning-time guess); measured instead, its one pair
+  // persists at new coordinates, and `tobajo-64-mipi810`/`misiji-27-
+  // buje656` gain more instances of the SAME two pinned classes already
+  // named above (`polygon×polygon`, both `polygonSkipMode: 'x'` cross-lane
+  // arrowheads, `Worm.java:159-168`; `empty×centeredText`, the swimlane
+  // title never occupying x, `UGraphicCompressOnXorY.java:100-112`). See
+  // decision-journal.md's T6 row for the per-fixture shape dump that
+  // confirms this before committing (stop 8).
+  //
+  // T7 (2026-09-15): giving split its own opener/out lanes moves every
+  // split fixture's branch out-drop x-coordinates the same way T6's fork
+  // fix did. `maketa-43-juja264`'s two `empty×centeredText` pairs are
+  // GONE (confirmed via the scratch `dump-overlap.mts` -- zero NEW
+  // overlaps reported for this fixture at all, not merely reindexed
+  // elsewhere): its split-branch geometry no longer places a swimlane
+  // title's ignored-x rect over a lane-content box post-compression.
+  // `bugaja-31-jaso630 [7,9]` and `racana-82-zece676 [7,9]`/`[13,15]`
+  // persist at new coordinates -- confirmed by the same scratch dump: all
+  // three pairs are still `polygon×polygon`, both sides still carrying
+  // `polygonSkipMode: 'x'` (the pinned cross-lane-arrowhead class,
+  // `Worm.java:159-168` -- the Worm skips the x-axis on a polygon in this
+  // mode, so it never occupies x and a flip there is not a violation).
   const ALLOWED_NEW_OVERLAPS = [
     'bixefi-77-moki051 [6,8] polygon×polygon',
     'bugaja-31-jaso630 [7,9] polygon×polygon',
-    'maketa-43-juja264 [22,26] empty×centeredText',
-    'maketa-43-juja264 [23,26] empty×centeredText',
+    'misiji-27-buje656 [14,18] empty×centeredText',
+    'misiji-27-buje656 [15,18] empty×centeredText',
     'racana-82-zece676 [7,9] polygon×polygon',
     'racana-82-zece676 [13,15] polygon×polygon',
     'tobajo-64-mipi810 [31,38] polygon×polygon',
+    'tobajo-64-mipi810 [31,45] polygon×polygon',
+    'tobajo-64-mipi810 [38,45] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

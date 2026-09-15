@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { layoutActivity, tileNodes } from '../../../../src/diagrams/activity/layout/tile-layout.js';
+import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
+import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
+import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import type { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
-import type { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
+import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
+import type { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
+import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
 import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
 import { astOrThrow } from '../../../helpers/parse-ast.js';
@@ -263,5 +268,130 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(bodyTile.kind).toBe('gtile-action');
     expect(bodyTile.label).toBe('in-b');
     expect(bodyTile.swimlane).toBe('B');
+  });
+
+  // Mission `activity-lane-capture` T5: the repeat tile carries its opener
+  // AND out lane; the condition diamond's own lane is the OUT lane
+  // (`FtileRepeat.java:149,152` -- INSIDE_HEXAGON, the only condition style
+  // this port models: `ConditionStyle.java:43,56` defaults to
+  // INSIDE_HEXAGON when no style is configured).
+  it('repeat: the tile carries swimlane and swimlaneOut; the condition diamond carries swimlaneOut', () => {
+    const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('repeat');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    expect(tiles).toHaveLength(1);
+
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.kind).toBe('gtile-repeat');
+    expect(repeatTile.swimlane).toBe('A');
+    expect(repeatTile.swimlaneOut).toBe('B');
+
+    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    expect(condition.kind).toBe('gtile-diamond');
+    expect(condition.swimlane).toBe('B');
+
+    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
+    expect(bodyWrapper.kind).toBe('gtile-top-down');
+    expect(bodyWrapper.swimlane).toBeUndefined();
+    const bodyAction = bodyWrapper.children[0] as unknown as GtileAction;
+    expect(bodyAction.swimlane).toBe('B');
+  });
+
+  it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {
+    const ast = parseAst('@startuml\n|A|\nrepeat\n:b;\nrepeat while (x)\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.swimlane).toBe('A');
+    expect(repeatTile.swimlaneOut).toBe('A');
+    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    expect(condition.swimlane).toBe('A');
+  });
+
+  // Mission `activity-lane-capture` T6: the fork tile carries its opener
+  // AND out lane; the top (fork) bar draws in the opener lane, the join
+  // bar in the out lane -- `ParallelBuilderFork.java:85` (`in`) and `:77,
+  // 110` (`out`), not the last branch's own lane.
+  it('fork: the tile carries swimlane and swimlaneOut', () => {
+    const ast = parseAst('@startuml\n|A|\nfork\n:a;\nfork again\n|B|\n:b;\nend fork\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('fork');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const forkTile = tiles[0] as unknown as GtileFork;
+    expect(forkTile.kind).toBe('gtile-fork');
+    expect(forkTile.swimlane).toBe('A');
+    expect(forkTile.swimlaneOut).toBe('B');
+  });
+
+  it('fork-bar sits in the opener lane, join-bar in the out lane', () => {
+    const ast = parseAst('@startuml\n|swim1|\nfork\n:a;\nfork again\n|swim3|\n:b;\nend fork\n@enduml');
+    const geo = layoutActivity(ast, theme, measurer);
+    const forkBar = geo.nodes.find((n) => n.kind === 'fork-bar');
+    const joinBar = geo.nodes.find((n) => n.kind === 'join-bar');
+    expect(forkBar?.swimlane).toBe('swim1');
+    expect(joinBar?.swimlane).toBe('swim3');
+  });
+
+  // Mission `activity-lane-capture` T7: the split tile carries its opener
+  // AND out lane too, mirroring T6's fork. The split-bar/split-join-bar
+  // node lanes are UNCHANGED from before T7 (T1's Q2 confirmed both
+  // already matched upstream: the top line reads the FIRST branch's own
+  // entry lane, the join line the LAST branch's own exit lane -- neither
+  // is the split's own opener/out field).
+  it('split: the tile carries swimlane and swimlaneOut', () => {
+    const ast = parseAst('@startuml\n|A|\nsplit\n:a;\nsplit again\n|B|\n:b;\nend split\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('split');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const splitTile = tiles[0] as unknown as GtileSplit;
+    expect(splitTile.kind).toBe('gtile-split');
+    expect(splitTile.swimlane).toBe('A');
+    expect(splitTile.swimlaneOut).toBe('B');
+  });
+
+  it('split-bar sits in the first branch’s own entry lane, split-join-bar in the last branch’s own exit lane', () => {
+    const ast = parseAst('@startuml\n|A|\nsplit\n|X|\n:a;\nsplit again\n|Y|\n:b;\nend split\n@enduml');
+    const geo = layoutActivity(ast, theme, measurer);
+    const splitBar = geo.nodes.find((n) => n.kind === 'split-bar');
+    const splitJoinBar = geo.nodes.find((n) => n.kind === 'split-join-bar');
+    expect(splitBar?.swimlane).toBe('X');
+    expect(splitJoinBar?.swimlane).toBe('Y');
+  });
+
+  // T1's Q1 mechanism (the `jevoce` rise): before this task, `trySplit`
+  // captured `swimlane` at the CLOSER, so the in-drop's bar-side lane
+  // (`ctx.myLane`) was the split's LAST lane, not its opener -- wrong for
+  // every branch whose own entry lane the opener should feed. Red before
+  // this fix (`git stash` on the four `src/` files: bar lane read 'Y', the
+  // closer, not 'A').
+  it("each branch's in-drop bar-side lane is the split's OPENER, not its closer", () => {
+    const ast = parseAst('@startuml\n|A|\nsplit\n|X|\n:a;\nsplit again\n|Y|\n:b;\nend split\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const root = new GtileTopDown(tiles, bounder, theme);
+    const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
+    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');
+    expect(inDrops).toHaveLength(2);
+    expect(inDrops.map((m) => m.lane1)).toEqual(['A', 'A']);
+  });
+
+  // Every branch's out-drop lands in the split's own OUT lane
+  // (`swimlaneOut`, captured at `end split`), matching the join line's own
+  // lane -- the acceptance criterion T1's Q1 names. This value already
+  // agreed with the pre-T7 `myLane`-based landing lane for a NON-NESTED
+  // fixture like this one (both derive from "the lane at `end split`");
+  // Q1's actual disagreement needs a branch whose own exit lane the split's
+  // single pre-D1 field could never separately track (an `if`/`else` lane
+  // swap inside a branch, `jevoce-05-mumi686`'s shape) -- verified by the
+  // probe (`measurements/t7.json`), not reproduced here.
+  it("every branch's out-drop lands in the split's own out lane", () => {
+    const ast = parseAst('@startuml\n|A|\nsplit\n|X|\n:a;\nsplit again\n|Y|\n:b;\nend split\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const root = new GtileTopDown(tiles, bounder, theme);
+    const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
+    const outDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-out');
+    expect(outDrops).toHaveLength(2);
+    expect(outDrops.map((m) => m.lane2)).toEqual(['Y', 'Y']);
+    // The sources are each branch's own exit lane, unaffected by this fix.
+    expect(outDrops.map((m) => m.lane1)).toEqual(['X', 'Y']);
   });
 });

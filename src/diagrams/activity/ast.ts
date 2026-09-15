@@ -92,18 +92,44 @@ export interface ActivityRepeat {
   body: ActivityNode[];
   condition: string;
   swimlane?: string;
+  /**
+   * The lane at `repeat while`, when it differs from {@link swimlane}.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:194-196
+   *   -- `setTest` stores `swimlaneOut`, taken when `repeat while` is
+   *   parsed (`ActivityDiagram3.java:367`).
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivityFork {
   kind: 'fork';
   branches: ActivityNode[][];
   swimlane?: string;
+  /**
+   * The lane current at the most recent `fork again` or at `end fork`,
+   * when it differs from {@link swimlane}.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
+   *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
+   *   -- `setStyle` re-reads `swimlaneOut` at `end fork`.
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivitySplit {
   kind: 'split';
   branches: ActivityNode[][];
   swimlane?: string;
+  /**
+   * The lane current at `end split`, when it differs from {@link swimlane}.
+   * Unlike fork, split has no second capture point at `split again`
+   * (`InstructionSplit.java:128-134` opens each further list with the
+   * DEFAULT lane, never re-reading `swimlaneOut`).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionSplit.java:136-141
+   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at
+   *   `end split`.
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivityNote {
