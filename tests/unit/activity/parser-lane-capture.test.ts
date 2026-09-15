@@ -7,7 +7,12 @@
 import { describe, it, expect } from 'vitest';
 import { activityPlugin } from '../../../src/diagrams/activity/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import type { ActivityAction, ActivityDiagramAST, ActivityIf } from '../../../src/diagrams/activity/ast.js';
+import type {
+  ActivityAction,
+  ActivityDiagramAST,
+  ActivityIf,
+  ActivityWhile,
+} from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 
 function parse(lines: readonly string[]): ActivityDiagramAST {
@@ -36,5 +41,28 @@ describe('if captures its opener lane', () => {
     const ast = parse(['if (x) then', ':t;', 'else', ':e;', 'endif']);
     const ifNode = ast.nodes[0] as ActivityIf;
     expect(ifNode.swimlane).toBeUndefined();
+  });
+});
+
+describe('while captures its opener lane', () => {
+  it("the while node's swimlane is the lane at `while`, the body action's is its own", () => {
+    const ast = parse(['|A|', 'while (x)', '|B|', ':b;', 'endwhile']);
+    const whileNode = ast.nodes[0] as ActivityWhile;
+    expect(whileNode.swimlane).toBe('A');
+    const action = whileNode.body[0] as ActivityAction;
+    expect(action.swimlane).toBe('B');
+  });
+
+  it('a lane switch inside the body does not move the while node’s own lane', () => {
+    const ast = parse(['|A|', 'while (x)', ':t;', '|B|', ':b;', 'endwhile']);
+    const whileNode = ast.nodes[0] as ActivityWhile;
+    expect(whileNode.swimlane).toBe('A');
+    expect((whileNode.body[1] as ActivityAction).swimlane).toBe('B');
+  });
+
+  it('swimlane is undefined when no lane is ever declared', () => {
+    const ast = parse(['while (x)', ':t;', 'endwhile']);
+    const whileNode = ast.nodes[0] as ActivityWhile;
+    expect(whileNode.swimlane).toBeUndefined();
   });
 });

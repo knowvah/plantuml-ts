@@ -151,12 +151,22 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
 // ---------------------------------------------------------------------------
 // while / endwhile
 // ---------------------------------------------------------------------------
+/**
+ * Captures the `while`'s swimlane at its opener, not its closer.
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:397
+ *   -- `new InstructionWhile(swimlanes.getCurrentSwimlane(), ...)`, taken
+ *   when the `while` line itself is parsed, before the body.
+ */
 function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const whileMatch = RE_WHILE.exec(line);
   if (whileMatch === null) return null;
   const { lines } = ctx;
   const condition = whileMatch[1]!.trim();
   const yesLabel = whileMatch[2]?.trim();
+  // Mission `activity-lane-capture` D1/T4: read BEFORE the body parses, so
+  // a lane switch inside the body never leaks into this node's own
+  // `swimlane`.
+  const openerSwimlane = swimlaneSpread(ctx);
   const bodyResult = parseNodes(ctx, idx + 1, ['endwhile']);
   if (isRefusal(bodyResult)) return bodyResult;
   let cursor = bodyResult.nextIdx;
@@ -173,7 +183,7 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
     ...(yesLabel !== undefined && yesLabel !== '' ? { yesLabel } : {}),
     ...(exitLabel !== undefined && exitLabel !== '' ? { exitLabel } : {}),
     body: bodyResult.nodes,
-    ...swimlaneSpread(ctx),
+    ...openerSwimlane,
   };
   return { idx: cursor, node };
 }
