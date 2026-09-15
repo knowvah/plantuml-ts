@@ -8,8 +8,8 @@ Disjoint write-sets; run in separate worktrees
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Move lane helpers out; add `Tile.swimlaneOut` | typescript-pro | `src/diagrams/activity/layout/swimlane-lanes.ts` (new), `layout/swimlane-placement.ts`, `tiles/tile.ts`, `tests/diagrams/activity/layout/swimlane-placement.test.ts` | T1 | [ ] |
-| T3 | Capture the `if` swimlane at its opener | typescript-pro | `src/diagrams/activity/if-dispatch.ts`, `tests/unit/activity/parser-lane-capture.test.ts` (new) | T1 | [ ] |
+| T2 | Move lane helpers out; add `Tile.swimlaneOut` | typescript-pro | `src/diagrams/activity/layout/swimlane-lanes.ts` (new), `layout/swimlane-placement.ts`, `tiles/tile.ts`, `tests/diagrams/activity/layout/swimlane-placement.test.ts` | T1 | [x] |
+| T3 | Capture the `if` swimlane at its opener | typescript-pro | `src/diagrams/activity/if-dispatch.ts`, `tests/unit/activity/parser-lane-capture.test.ts` (new) | T1 | [x] |
 
 Specs: [`T2-lane-helpers-swimlane-out.md`](T2-lane-helpers-swimlane-out.md),
 [`T3-if-capture.md`](T3-if-capture.md).

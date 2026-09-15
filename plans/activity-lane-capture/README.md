@@ -134,7 +134,7 @@ batch gate row.
 
 - [x] Batch 0 — T0a, T0b
 - [x] Batch 1 — T1
-- [ ] Batch 2 — T2, T3
+- [x] Batch 2 — T2, T3
 - [ ] Batch 3 — T4
 - [ ] Batch 4 — T5
 - [ ] Batch 5 — T6
