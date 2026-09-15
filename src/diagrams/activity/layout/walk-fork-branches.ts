@@ -15,6 +15,16 @@ export interface ForkBranchContext {
   readonly y: number;
   readonly joinBarY: number;
   readonly myLane: string | undefined;
+  /**
+   * The bar-side lane for a JOIN: the join bar itself, and each branch's
+   * out-drop landing point. For fork this is the fork's own OUT lane
+   * (`laneOut(t, myLane)`, mission `activity-lane-capture` D1/T6); for
+   * split (T7's scope) it stays equal to {@link myLane}, unchanged from
+   * before T6.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:77
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:110
+   */
+  readonly myLaneOut: string | undefined;
   /** `t.barHeight` -- 6 for fork, 1.5 (`THIN_SPLIT_HEIGHT`) for split. The
    *  in-drop's start y is the TOP bar/line's own bottom edge, which is this
    *  many px below `y` (D4; `simuti`'s drops start at `56.5 = 55 + 1.5`). */
@@ -90,7 +100,7 @@ function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBra
         { x: outX, y: ctx.joinBarY },
       ],
       laneOut(branch, ctx.myLane),
-      ctx.myLane,
+      ctx.myLaneOut,
       'parallel-out',
     );
   }
@@ -144,17 +154,33 @@ function pushTopBarOrLine(t: GtileFork, x: number, y: number, myLane: string | u
  *  `FtileKilled` guard), spanning `computeSplitExtent` over branches
  *  WITH an out point, in the LAST branch's exit lane
  *  (`swimlaneOutForStep2()`, `AbstractParallelFtilesBuilder.java:208-210`). */
-function pushJoinBarOrLine(t: GtileFork, x: number, joinBarY: number, myLane: string | undefined, out: Out): void {
-  const lastBranch = t.children[t.children.length - 1]!;
+/** The fork's join bar is unconditional (D5's amendment -- a fork never
+ *  becomes `FtileKilled`), drawn in the fork's own OUT lane (`myLaneOut`,
+ *  mission `activity-lane-capture` D1/T6 -- upstream's `out`, not the last
+ *  branch's own exit lane). The split's join line only exists when
+ *  `t.hasPointOut()` (D4/D5, `ParallelBuilderSplit.java:139-141`'s
+ *  `FtileKilled` guard), spanning `computeSplitExtent` over branches
+ *  WITH an out point, in the LAST branch's exit lane
+ *  (`swimlaneOutForStep2()`, `AbstractParallelFtilesBuilder.java:208-210`)
+ *  -- unchanged here, T7's scope. */
+function pushJoinBarOrLine(
+  t: GtileFork,
+  x: number,
+  joinBarY: number,
+  myLane: string | undefined,
+  myLaneOut: string | undefined,
+  out: Out,
+): void {
   if (t.kind === 'gtile-fork') {
     pushNode(
       out,
       { id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: t.barHeight },
-      laneOut(lastBranch, myLane),
+      myLaneOut,
     );
     return;
   }
   if (!t.hasPointOut()) return;
+  const lastBranch = t.children[t.children.length - 1]!;
   const { first, last } = computeSplitExtent(t, SOUTH_HOOK, true);
   pushNode(
     out,
@@ -181,8 +207,12 @@ function pushJoinBarOrLine(t: GtileFork, x: number, joinBarY: number, myLane: st
  * README, "Push forward").
  */
 export function walkForkOrSplit(t: GtileFork, x: number, y: number, myLane: string | undefined, out: Out): void {
+  // Mission `activity-lane-capture` D1/T6: fork's bar-side OUT lane is the
+  // fork's own `swimlaneOut` (falling back to `swimlane`/`myLane`); split
+  // keeps its pre-T6 behaviour (out lane == in lane) until T7.
+  const myLaneOut = t.kind === 'gtile-fork' ? laneOut(t, myLane) : myLane;
   pushTopBarOrLine(t, x, y, myLane, out);
   const joinBarY = y + t.height - t.barHeight;
-  walkForkBranches(t, { x, y, joinBarY, myLane, barHeight: t.barHeight }, out);
-  pushJoinBarOrLine(t, x, joinBarY, myLane, out);
+  walkForkBranches(t, { x, y, joinBarY, myLane, myLaneOut, barHeight: t.barHeight }, out);
+  pushJoinBarOrLine(t, x, joinBarY, myLane, myLaneOut, out);
 }

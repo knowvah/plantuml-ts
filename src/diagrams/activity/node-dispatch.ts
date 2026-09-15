@@ -19,11 +19,9 @@ import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
   ActivityAction,
   ActivityArrowLabel,
-  ActivityFork,
   ActivityNode,
   ActivityNote,
   ActivityRepeat,
-  ActivitySplit,
   ActivityWhile,
 } from './ast.js';
 import {
@@ -50,6 +48,7 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
+import { tryFork, trySplit } from './parallel-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -257,66 +256,6 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
     ...openerSwimlane,
     ...(closerSwimlane !== undefined ? { swimlaneOut: closerSwimlane } : {}),
   };
-  return { idx: cursor, node };
-}
-
-// ---------------------------------------------------------------------------
-// fork / fork again / end fork
-// ---------------------------------------------------------------------------
-function tryFork(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
-  if (lc !== 'fork') return null;
-  const { lines } = ctx;
-  let cursor = idx + 1;
-  const branches: ActivityNode[][] = [];
-  const FORK_STOPS: StopKeywords = ['fork again', 'end fork'];
-  let done = false;
-  while (!done) {
-    const branchResult = parseNodes(ctx, cursor, FORK_STOPS);
-    if (isRefusal(branchResult)) return branchResult;
-    branches.push(branchResult.nodes);
-    cursor = branchResult.nextIdx;
-    if (cursor >= lines.length) break;
-    const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end fork') {
-      cursor++;
-      done = true;
-    } else if (sep === 'fork again') {
-      cursor++;
-    } else {
-      done = true;
-    }
-  }
-  const node: ActivityFork = { kind: 'fork', branches, ...swimlaneSpread(ctx) };
-  return { idx: cursor, node };
-}
-
-// ---------------------------------------------------------------------------
-// split / split again / end split
-// ---------------------------------------------------------------------------
-function trySplit(ctx: ParseContext, idx: number, _line: string, lc: string): DispatchResult | ParseRefusal | null {
-  if (lc !== 'split') return null;
-  const { lines } = ctx;
-  let cursor = idx + 1;
-  const branches: ActivityNode[][] = [];
-  const SPLIT_STOPS: StopKeywords = ['split again', 'end split'];
-  let done = false;
-  while (!done) {
-    const branchResult = parseNodes(ctx, cursor, SPLIT_STOPS);
-    if (isRefusal(branchResult)) return branchResult;
-    branches.push(branchResult.nodes);
-    cursor = branchResult.nextIdx;
-    if (cursor >= lines.length) break;
-    const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end split') {
-      cursor++;
-      done = true;
-    } else if (sep === 'split again') {
-      cursor++;
-    } else {
-      done = true;
-    }
-  }
-  const node: ActivitySplit = { kind: 'split', branches, ...swimlaneSpread(ctx) };
   return { idx: cursor, node };
 }
 

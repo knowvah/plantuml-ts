@@ -175,7 +175,7 @@ function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): Gti
     const tiles = tileNodes(b, bounder, theme);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  return withSwimlane(new GtileFork(branches, bounder), node.swimlane);
+  return withSwimlaneOut(withSwimlane(new GtileFork(branches, bounder), node.swimlane), node.swimlaneOut);
 }
 
 function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): GtileSplit {

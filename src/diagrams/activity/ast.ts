@@ -105,6 +105,15 @@ export interface ActivityFork {
   kind: 'fork';
   branches: ActivityNode[][];
   swimlane?: string;
+  /**
+   * The lane current at the most recent `fork again` or at `end fork`,
+   * when it differs from {@link swimlane}.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
+   *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
+   *   -- `setStyle` re-reads `swimlaneOut` at `end fork`.
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivitySplit {

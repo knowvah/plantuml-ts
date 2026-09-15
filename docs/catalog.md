@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1093 modules · 3963 exported names.
+1094 modules · 3965 exported names.
 
 ## `src/`
 
@@ -943,6 +943,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.old.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `ActivityGeometry`, `ActivityArrowLabel`, `layoutActivity` | Activity diagram layout engine. |
 | `node-dispatch.ts` | `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
+| `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
 

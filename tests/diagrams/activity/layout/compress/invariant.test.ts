@@ -227,14 +227,30 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    * counted) so a CHANGE to the list is examined, not silently absorbed by
    * a bigger/smaller count.
    */
+  // Mission `activity-lane-capture` T6 (2026-09-15): fixing the fork's own
+  // bar/join lanes moves branch out-drop x-coordinates, which shifts WHICH
+  // pairs of already-pinned-class shapes collide post-compression -- not a
+  // new class. `bixefi-77-moki051` was predicted to leave this list
+  // entirely (planning-time guess); measured instead, its one pair
+  // persists at new coordinates, and `tobajo-64-mipi810`/`misiji-27-
+  // buje656` gain more instances of the SAME two pinned classes already
+  // named above (`polygon×polygon`, both `polygonSkipMode: 'x'` cross-lane
+  // arrowheads, `Worm.java:159-168`; `empty×centeredText`, the swimlane
+  // title never occupying x, `UGraphicCompressOnXorY.java:100-112`). See
+  // decision-journal.md's T6 row for the per-fixture shape dump that
+  // confirms this before committing (stop 8).
   const ALLOWED_NEW_OVERLAPS = [
     'bixefi-77-moki051 [6,8] polygon×polygon',
     'bugaja-31-jaso630 [7,9] polygon×polygon',
     'maketa-43-juja264 [22,26] empty×centeredText',
     'maketa-43-juja264 [23,26] empty×centeredText',
+    'misiji-27-buje656 [14,18] empty×centeredText',
+    'misiji-27-buje656 [15,18] empty×centeredText',
     'racana-82-zece676 [7,9] polygon×polygon',
     'racana-82-zece676 [13,15] polygon×polygon',
     'tobajo-64-mipi810 [31,38] polygon×polygon',
+    'tobajo-64-mipi810 [31,45] polygon×polygon',
+    'tobajo-64-mipi810 [38,45] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

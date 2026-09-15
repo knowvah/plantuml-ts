@@ -10,6 +10,7 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type {
   ActivityAction,
   ActivityDiagramAST,
+  ActivityFork,
   ActivityIf,
   ActivityRepeat,
   ActivityWhile,
@@ -98,5 +99,39 @@ describe('repeat captures its opener lane and repeat-while its out lane', () => 
     const repeatNode = ast.nodes[0] as ActivityRepeat;
     expect(repeatNode.swimlane).toBeUndefined();
     expect(repeatNode.swimlaneOut).toBeUndefined();
+  });
+});
+
+describe('fork captures its opener lane and re-reads swimlaneOut at fork again / end fork', () => {
+  it("the fork node's swimlane is the lane at `fork`, swimlaneOut the lane at `end fork`", () => {
+    const ast = parse(['|A|', 'fork', ':a;', 'fork again', '|B|', ':b;', 'end fork']);
+    const forkNode = ast.nodes[0] as ActivityFork;
+    expect(forkNode.swimlane).toBe('A');
+    expect(forkNode.swimlaneOut).toBe('B');
+  });
+
+  it('swimlaneOut equals swimlane when every branch stays in one lane', () => {
+    const ast = parse(['|A|', 'fork', ':a;', 'fork again', ':b;', 'end fork']);
+    const forkNode = ast.nodes[0] as ActivityFork;
+    expect(forkNode.swimlane).toBe('A');
+    expect(forkNode.swimlaneOut).toBe('A');
+  });
+
+  it(
+    'a lane switch only before `fork again` sets swimlaneOut to that lane, ' +
+      'and `end fork` in the same lane leaves it unchanged',
+    () => {
+      const ast = parse(['|A|', 'fork', ':a;', '|B|', 'fork again', ':b;', 'end fork']);
+      const forkNode = ast.nodes[0] as ActivityFork;
+      expect(forkNode.swimlane).toBe('A');
+      expect(forkNode.swimlaneOut).toBe('B');
+    },
+  );
+
+  it('swimlane and swimlaneOut are undefined when no lane is ever declared', () => {
+    const ast = parse(['fork', ':a;', 'fork again', ':b;', 'end fork']);
+    const forkNode = ast.nodes[0] as ActivityFork;
+    expect(forkNode.swimlane).toBeUndefined();
+    expect(forkNode.swimlaneOut).toBeUndefined();
   });
 });

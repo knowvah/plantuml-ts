@@ -7,6 +7,7 @@ import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
+import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import type { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
 import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import type { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -303,5 +304,29 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(repeatTile.swimlaneOut).toBe('A');
     const condition = repeatTile.children[1] as unknown as GtileDiamond;
     expect(condition.swimlane).toBe('A');
+  });
+
+  // Mission `activity-lane-capture` T6: the fork tile carries its opener
+  // AND out lane; the top (fork) bar draws in the opener lane, the join
+  // bar in the out lane -- `ParallelBuilderFork.java:85` (`in`) and `:77,
+  // 110` (`out`), not the last branch's own lane.
+  it('fork: the tile carries swimlane and swimlaneOut', () => {
+    const ast = parseAst('@startuml\n|A|\nfork\n:a;\nfork again\n|B|\n:b;\nend fork\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('fork');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const forkTile = tiles[0] as unknown as GtileFork;
+    expect(forkTile.kind).toBe('gtile-fork');
+    expect(forkTile.swimlane).toBe('A');
+    expect(forkTile.swimlaneOut).toBe('B');
+  });
+
+  it('fork-bar sits in the opener lane, join-bar in the out lane', () => {
+    const ast = parseAst('@startuml\n|swim1|\nfork\n:a;\nfork again\n|swim3|\n:b;\nend fork\n@enduml');
+    const geo = layoutActivity(ast, theme, measurer);
+    const forkBar = geo.nodes.find((n) => n.kind === 'fork-bar');
+    const joinBar = geo.nodes.find((n) => n.kind === 'join-bar');
+    expect(forkBar?.swimlane).toBe('swim1');
+    expect(joinBar?.swimlane).toBe('swim3');
   });
 });
