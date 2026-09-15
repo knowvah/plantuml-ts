@@ -17,7 +17,9 @@ export interface Tile {
   /**
    * The swimlane this tile's source `ActivityNode` was parsed in, if any.
    * Threaded from `ActivityNode.swimlane` (`ast.ts`) at tile-construction
-   * time in `tile-layout.ts`; not yet consumed by layout or rendering.
+   * time in `tile-layout.ts`; consumed by `layout/swimlane-lanes.ts`'s
+   * `laneAt`/`laneIn`/`laneOut` and `layout/swimlane-placement.ts`'s
+   * lane-shift pass.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimable.java
    *   -- `getSwimlaneIn()`/`getSwimlaneOut()`, the upstream accessor pair
    *   every `Instruction` (the Java AST node) exposes.
@@ -26,6 +28,18 @@ export interface Tile {
    *   port's `ctx.currentSwimlane` (`dispatch-support.ts`) mirrors.
    */
   readonly swimlane?: string;
+  /**
+   * This tile's exit lane, when it differs from {@link swimlane} (its
+   * entry lane). Only fork, split and repeat hold a distinct exit lane
+   * upstream; if, while and switch never set this field, so
+   * `layout/swimlane-lanes.ts#laneOut` falls back to {@link swimlane} for
+   * them. Mission `activity-lane-capture` D1.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimable.java
+   *   -- `getSwimlaneOut()`.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:69
+   *   -- the `swimlaneOut` field this mirrors.
+   */
+  readonly swimlaneOut?: string;
   getCoord(hook: HookName): GPoint;
   /**
    * Whether this tile has an outgoing connection point that a later
@@ -50,6 +64,7 @@ export abstract class TileLeaf implements Tile {
   abstract readonly height: number;
   abstract getCoord(hook: HookName): GPoint;
   swimlane?: string;
+  swimlaneOut?: string;
 
   /**
    * Default `true` rather than `abstract`: every production `gtile-*.ts`
@@ -73,6 +88,7 @@ export abstract class TileComposite implements Tile {
   abstract getCoord(hook: HookName): GPoint;
   abstract readonly children: readonly Tile[];
   swimlane?: string;
+  swimlaneOut?: string;
 
   /**
    * Default `true` for the same reason as `TileLeaf.hasPointOut` above:

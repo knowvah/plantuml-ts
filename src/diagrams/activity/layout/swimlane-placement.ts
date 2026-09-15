@@ -28,7 +28,7 @@
  *   -- same `- 14` shape for the split's out-connector.
  */
 
-import type { StringBounder, Tile } from '../tiles/tile.js';
+import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type {
   ActivityEdgeGeo,
@@ -38,7 +38,6 @@ import type {
   SwimlaneGeo,
 } from '../activity-layout-types.js';
 import type { GPoint } from '../tiles/points.js';
-import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -50,6 +49,12 @@ import {
   type LaneWidthInput,
 } from './swimlane-context.js';
 import type { Reservation } from './hexagon-reservations.js';
+
+// `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
+// `activity-lane-capture` T2, this file's 500-line hook); re-exported here
+// so existing importers (`walk-fork-branches.ts`, `walk-while-branch.ts`,
+// `tile-coordinates.ts`, this file's own tests) are untouched.
+export { laneAt, laneIn, laneOut } from './swimlane-lanes.js';
 
 /** Metadata `tile-coordinates.ts` records per edge during the pass-1 walk
  * -- which lane each endpoint's source tile carries, resolved via its
@@ -67,39 +72,6 @@ export interface EdgeMeta {
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
  * other connection type uses. */
 export type EdgeShape = 'parallel-in' | 'parallel-out' | 'default';
-
-/** A tile's OWN lane if `tile-layout.ts` set one (`Tile.swimlane`), else
- * the inherited ambient lane. */
-export function laneAt(tile: Tile, inherited: string | undefined): string | undefined {
-  return tile.swimlane ?? inherited;
-}
-
-/**
- * A composite's entry lane -- upstream's `getSwimlaneIn()`
- * (`ftile/Swimable.java`). A `GtileTopDown` branch wrapper carries no
- * `.swimlane` of its own (`tile-layout.ts` never wraps it), so its entry
- * lane is its FIRST child's, recursively (a branch may itself switch
- * lanes partway through, e.g. `bideta-97-cezo697`'s else-branch).
- */
-export function laneIn(tile: Tile, inherited: string | undefined): string | undefined {
-  if (tile.swimlane !== undefined) return tile.swimlane;
-  if (tile.kind === 'gtile-top-down') {
-    const children = (tile as unknown as GtileTopDown).children;
-    if (children.length > 0) return laneIn(children[0]!, inherited);
-  }
-  return inherited;
-}
-
-/** A composite's exit lane -- upstream's `getSwimlaneOut()`; mirrors
- * {@link laneIn} but descends into the LAST child. */
-export function laneOut(tile: Tile, inherited: string | undefined): string | undefined {
-  if (tile.swimlane !== undefined) return tile.swimlane;
-  if (tile.kind === 'gtile-top-down') {
-    const children = (tile as unknown as GtileTopDown).children;
-    if (children.length > 0) return laneOut(children[children.length - 1]!, inherited);
-  }
-  return inherited;
-}
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
