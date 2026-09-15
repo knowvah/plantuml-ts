@@ -132,7 +132,7 @@ batch gate row.
 
 ## Progress
 
-- [ ] Batch 0 — T0a, T0b
+- [x] Batch 0 — T0a, T0b
 - [ ] Batch 1 — T1
 - [ ] Batch 2 — T2, T3
 - [ ] Batch 3 — T4
