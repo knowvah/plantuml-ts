@@ -6,7 +6,9 @@ import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
+import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import type { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
+import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import type { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
 import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
@@ -263,5 +265,43 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(bodyTile.kind).toBe('gtile-action');
     expect(bodyTile.label).toBe('in-b');
     expect(bodyTile.swimlane).toBe('B');
+  });
+
+  // Mission `activity-lane-capture` T5: the repeat tile carries its opener
+  // AND out lane; the condition diamond's own lane is the OUT lane
+  // (`FtileRepeat.java:149,152` -- INSIDE_HEXAGON, the only condition style
+  // this port models: `ConditionStyle.java:43,56` defaults to
+  // INSIDE_HEXAGON when no style is configured).
+  it('repeat: the tile carries swimlane and swimlaneOut; the condition diamond carries swimlaneOut', () => {
+    const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]!.kind).toBe('repeat');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    expect(tiles).toHaveLength(1);
+
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.kind).toBe('gtile-repeat');
+    expect(repeatTile.swimlane).toBe('A');
+    expect(repeatTile.swimlaneOut).toBe('B');
+
+    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    expect(condition.kind).toBe('gtile-diamond');
+    expect(condition.swimlane).toBe('B');
+
+    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
+    expect(bodyWrapper.kind).toBe('gtile-top-down');
+    expect(bodyWrapper.swimlane).toBeUndefined();
+    const bodyAction = bodyWrapper.children[0] as unknown as GtileAction;
+    expect(bodyAction.swimlane).toBe('B');
+  });
+
+  it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {
+    const ast = parseAst('@startuml\n|A|\nrepeat\n:b;\nrepeat while (x)\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.swimlane).toBe('A');
+    expect(repeatTile.swimlaneOut).toBe('A');
+    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    expect(condition.swimlane).toBe('A');
   });
 });

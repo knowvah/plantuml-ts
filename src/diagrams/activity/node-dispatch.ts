@@ -194,11 +194,25 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
 //   repeat :foo;  <<stereo>>
 // The action becomes the first body element.
 // ---------------------------------------------------------------------------
+/**
+ * Captures the `repeat`'s swimlane at its opener, and `swimlaneOut` at
+ * `repeat while`, not at a single closer.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:107
+ *   -- `this.swimlane = swimlanes.getCurrentSwimlane()`, taken when the
+ *   `repeat` line itself is parsed, before the body.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:194-196
+ *   -- `setTest` stores `swimlaneOut`, taken when `repeat while` is parsed
+ *   (`ActivityDiagram3.java:367`).
+ */
 function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal | null {
   const repeatHeadMatch = RE_REPEAT_HEAD.exec(line);
   if (repeatHeadMatch === null || !lc.startsWith('repeat')) return null;
   const { lines } = ctx;
   let cursor = idx + 1;
+  // Mission `activity-lane-capture` D1/T5: read BEFORE the body parses, so
+  // a lane switch inside the body never leaks into this node's own
+  // `swimlane`.
+  const openerSwimlane = swimlaneSpread(ctx);
   const inlineRest = repeatHeadMatch[1]?.trim();
   const inlineNodes: ActivityNode[] = [];
   if (inlineRest !== undefined && inlineRest !== '') {
@@ -233,11 +247,15 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
     if (repeatMatch !== null) condition = repeatMatch[1]?.trim() ?? '';
     cursor++;
   }
+  // Mission activity-lane-capture D1/T5: `swimlaneOut` is the lane current
+  // AT `repeat while`, which may differ from the opener's.
+  const closerSwimlane = ctx.currentSwimlane;
   const node: ActivityRepeat = {
     kind: 'repeat',
     body: [...inlineNodes, ...bodyResult.nodes],
     condition,
-    ...swimlaneSpread(ctx),
+    ...openerSwimlane,
+    ...(closerSwimlane !== undefined ? { swimlaneOut: closerSwimlane } : {}),
   };
   return { idx: cursor, node };
 }

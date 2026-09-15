@@ -11,6 +11,7 @@ import type {
   ActivityAction,
   ActivityDiagramAST,
   ActivityIf,
+  ActivityRepeat,
   ActivityWhile,
 } from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
@@ -64,5 +65,38 @@ describe('while captures its opener lane', () => {
     const ast = parse(['while (x)', ':t;', 'endwhile']);
     const whileNode = ast.nodes[0] as ActivityWhile;
     expect(whileNode.swimlane).toBeUndefined();
+  });
+});
+
+describe('repeat captures its opener lane and repeat-while its out lane', () => {
+  it("the repeat node's swimlane is the lane at `repeat`, swimlaneOut the lane at `repeat while`", () => {
+    const ast = parse(['|A|', 'repeat', '|B|', ':b;', 'repeat while (x)']);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.swimlane).toBe('A');
+    expect(repeatNode.swimlaneOut).toBe('B');
+    const action = repeatNode.body[0] as ActivityAction;
+    expect(action.swimlane).toBe('B');
+  });
+
+  it('swimlaneOut equals swimlane when the loop opens and closes in one lane', () => {
+    const ast = parse(['|A|', 'repeat', ':b;', 'repeat while (x)']);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.swimlane).toBe('A');
+    expect(repeatNode.swimlaneOut).toBe('A');
+  });
+
+  it('the inline `repeat :action;` form reads the lane at the opener', () => {
+    const ast = parse(['|A|', 'repeat :a;', 'repeat while (x)']);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.swimlane).toBe('A');
+    const action = repeatNode.body[0] as ActivityAction;
+    expect(action.swimlane).toBe('A');
+  });
+
+  it('swimlane and swimlaneOut are undefined when no lane is ever declared', () => {
+    const ast = parse(['repeat', ':b;', 'repeat while (x)']);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.swimlane).toBeUndefined();
+    expect(repeatNode.swimlaneOut).toBeUndefined();
   });
 });

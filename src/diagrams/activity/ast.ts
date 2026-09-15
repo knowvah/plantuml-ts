@@ -92,6 +92,13 @@ export interface ActivityRepeat {
   body: ActivityNode[];
   condition: string;
   swimlane?: string;
+  /**
+   * The lane at `repeat while`, when it differs from {@link swimlane}.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:194-196
+   *   -- `setTest` stores `swimlaneOut`, taken when `repeat while` is
+   *   parsed (`ActivityDiagram3.java:367`).
+   */
+  swimlaneOut?: string;
 }
 
 export interface ActivityFork {

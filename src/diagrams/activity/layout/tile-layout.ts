@@ -50,6 +50,21 @@ function withSwimlane<T extends { swimlane?: string | undefined }>(tile: T, swim
   return tile;
 }
 
+/** Mirrors {@link withSwimlane} for a tile's exit lane (T5, D1). */
+function withSwimlaneOut<T extends { swimlaneOut?: string | undefined }>(tile: T, swimlaneOut: string | undefined): T {
+  tile.swimlaneOut = swimlaneOut;
+  return tile;
+}
+
+/**
+ * A compound's OUT lane, falling back to its opener when it never set one
+ * (mission `activity-lane-capture` D1: repeat is the only kind this file
+ * builds an out-lane-aware child from so far).
+ */
+function outLane(swimlaneOut: string | undefined, swimlane: string | undefined): string | undefined {
+  return swimlaneOut ?? swimlane;
+}
+
 export function tileNodes(nodes: ActivityNode[], bounder: StringBounder, theme: Theme): Tile[] {
   const tiles: Tile[] = [];
   for (const node of nodes) {
@@ -128,11 +143,31 @@ function tileWhile(node: ActivityWhile, bounder: StringBounder, theme: Theme): G
   return withSwimlane(new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme), node.swimlane);
 }
 
+/**
+ * `swimlaneOut` on the repeat tile feeds `laneOut` for any sequential
+ * sibling that follows it (`tile-coordinates.ts`'s `gtile-top-down` case).
+ * The condition diamond's own lane is `swimlaneOut ?? swimlane`
+ * (`FtileRepeat.java:149,152` -- `diamond2`'s INSIDE_HEXAGON branch). This
+ * port models only the hexagon condition style: no `conditionStyle`/
+ * `ConditionStyle` name appears anywhere under `src/diagrams/activity`, and
+ * `ConditionStyle.fromString` defaults to `INSIDE_HEXAGON` when no style is
+ * configured (`ConditionStyle.java:43,56`), so the EMPTY_DIAMOND/
+ * INSIDE_DIAMOND styles -- which read `swimlane` instead -- are out of
+ * scope, not a divergence.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:101-106
+ *   -- `getSwimlaneIn`/`getSwimlaneOut`, the outer tile's own pair.
+ */
 function tileRepeat(node: ActivityRepeat, bounder: StringBounder, theme: Theme): GtileRepeat {
   const bodyTiles = tileNodes(node.body, bounder, theme);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  const condition = new GtileDiamond(node.condition, bounder, theme);
-  return withSwimlane(new GtileRepeat(body, condition, null, bounder, theme), node.swimlane);
+  const condition = withSwimlane(
+    new GtileDiamond(node.condition, bounder, theme),
+    outLane(node.swimlaneOut, node.swimlane),
+  );
+  return withSwimlaneOut(
+    withSwimlane(new GtileRepeat(body, condition, null, bounder, theme), node.swimlane),
+    node.swimlaneOut,
+  );
 }
 
 function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): GtileFork {
