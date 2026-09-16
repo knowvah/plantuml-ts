@@ -17,7 +17,7 @@ import { GtileKill } from '../tiles/gtile-kill.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
-import { GtileDiamond } from '../tiles/gtile-diamond.js';
+import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
@@ -93,16 +93,24 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrde
   return withSwimlane(buildIf(node, bounder, theme, laneOrder), node.swimlane);
 }
 
+/**
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
+ *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
+ *   the "is not"/exit label sits west.
+ */
 function tileWhile(
   node: ActivityWhile,
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
 ): GtileWhile {
-  const header = new GtileDiamond(node.condition, bounder, theme);
+  const labels: { north?: string; west?: string } = {};
+  if (node.yesLabel !== undefined) labels.north = node.yesLabel;
+  if (node.exitLabel !== undefined) labels.west = node.exitLabel;
+  const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
   const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  return withSwimlane(new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme), node.swimlane);
+  return withSwimlane(new GtileWhile(header, body, bounder, theme), node.swimlane);
 }
 
 /**
@@ -132,6 +140,11 @@ function repeatBodyNodes(node: ActivityRepeat): ActivityNode[] {
   return node.entry !== undefined ? [node.entry, ...node.body] : node.body;
 }
 
+/**
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ *   -- `.withEast(yesTb).withSouth(outTb)`: the default (no `backward`,
+ *   D1) branch puts the "is"/entry label east, the "not"/exit label south.
+ */
 function tileRepeat(
   node: ActivityRepeat,
   bounder: StringBounder,
@@ -140,8 +153,11 @@ function tileRepeat(
 ): GtileRepeat {
   const bodyTiles = tileNodes(repeatBodyNodes(node), bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
+  const labels: { east?: string; south?: string } = {};
+  if (node.yesLabel !== undefined) labels.east = node.yesLabel;
+  if (node.outLabel !== undefined) labels.south = node.outLabel;
   const condition = withSwimlane(
-    new GtileDiamond(node.condition, bounder, theme),
+    new GtileDiamondInside(node.condition, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
   );
   return withSwimlaneOut(

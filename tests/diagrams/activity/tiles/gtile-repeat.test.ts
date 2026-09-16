@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
+import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -34,15 +35,19 @@ function makeTile(width: number, height: number, hasPointOut = true, left = widt
   };
 }
 
+// GtileDiamondInside stub (mission `activity-loop-tile-port` T2, D1: the
+// repeat condition is a `GtileDiamondInside`, never a `GtileDiamond`).
+// Duck-typed and cast through `unknown` -- see `gtile-while.test.ts`'s own
+// header comment for why a plain object literal needs the cast.
 function makeDiamond(width: number, height: number) {
   return {
-    kind: 'gtile-diamond' as const,
+    kind: 'gtile-diamond-inside' as const,
     label: '',
     width,
     height,
     getCoord: (_hook: HookName): GPoint => ({ x: width / 2, y: 0 }),
     hasPointOut: () => true,
-  };
+  } as unknown as GtileDiamondInside;
 }
 
 describe('GtileRepeat — no backward body (body h=60, condition h=40)', () => {
@@ -233,5 +238,20 @@ describe('GtileRepeat — merger left/right with asymmetric children', () => {
     expect(tile.conditionOffsetX).toBe(cx - 60 / 2);
     expect(tile.backwardOffsetX).toBe(cx - 70 / 2);
     expect(tile.getCoord(NORTH_HOOK).x).toBe(cx);
+  });
+});
+
+// mission `activity-loop-tile-port` T2 (prior observation, D3): a REAL
+// `GtileDiamondInside` (not the stub above) must still have `left ===
+// width / 2`, the invariant `GtileRepeat`'s own centring math relies on.
+describe('GtileRepeat — a real GtileDiamondInside condition keeps left === width / 2', () => {
+  it('holds with a labelled condition (east/south set, non-trivial width)', () => {
+    const labelBounder: StringBounder = {
+      getDimension: (text: string, _size: number) => ({ width: text.length * 7, height: 13 }),
+    };
+    const condition = new GtileDiamondInside('cond', { east: 'yes', south: 'no' }, labelBounder, theme);
+    // gtile-diamond-inside.ts:92-99 -- NORTH_HOOK is unconditionally
+    // `{ x: this.width / 2, y: 0 }`.
+    expect(condition.getCoord(NORTH_HOOK).x).toBe(condition.width / 2);
   });
 });

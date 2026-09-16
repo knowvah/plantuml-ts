@@ -4,7 +4,7 @@ import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/
 import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
-import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
+import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
@@ -115,9 +115,11 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
 describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T6)', () => {
   it("a, X, c: edge run is X's internals, a->X, X->c", () => {
     const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
-    const header = new GtileDiamond('cond', bounder, theme);
+    // D1 (mission `activity-loop-tile-port` T2): the while header is a
+    // `GtileDiamondInside`, never a `GtileDiamond`.
+    const header = new GtileDiamondInside('cond', {}, bounder, theme);
     const body = new GtileAction({ kind: 'action' as const, label: 'body' }, bounder, theme);
-    const whileTile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const whileTile = new GtileWhile(header, body, bounder, theme);
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, whileTile, c], bounder, theme);
     const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
@@ -219,9 +221,9 @@ describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not cent
 });
 
 describe('assignCoordinates — GtileWhile produces back-edge', () => {
-  const header = new GtileDiamond('loop?', bounder, theme);
+  const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
   const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
   it('produces at least 2 nodes (diamond + action)', () => {
@@ -241,9 +243,9 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
 });
 
 describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () => {
-  const header = new GtileDiamond('loop?', bounder, theme);
+  const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
   const full = assignCoordinatesFull({
     root: tile,
     ast: emptyAst,
@@ -440,6 +442,42 @@ describe('layoutActivity — pakema-21-xema183-shaped diagram through the real p
     expect(nodeB.x).toBeGreaterThan(laneB.x);
     expect(nodeB.x + nodeB.width).toBeLessThan(laneB.x + laneB.width);
   });
+});
+
+// mission `activity-loop-tile-port` T2 fix (coordinator-reported
+// regression): `pushRepeatCondition`/`pushWhileHeader` push the condition/
+// header node directly, bypassing `walkTile`'s own `laneAt(tile, lane)`
+// resolution (`walkTile`'s own dispatch, `:117-118` in this file) that a
+// tile's OWN `.swimlane` normally gets. A laned repeat whose body switches
+// lane before `repeat while` sets the condition's own lane to the OUT lane
+// (`tileRepeat`'s `outLane(node.swimlaneOut, node.swimlane)`,
+// `FtileRepeat.java:149,152`) -- distinct from the repeat tile's own
+// (entry) lane, which is what `myLane` resolves to at the 'gtile-repeat'
+// case. Without re-resolving via `laneAt`, the condition (and its labels)
+// silently inherited the entry lane instead, moving the hexagon into the
+// wrong lane's x-range (observed on `kudedo-31-pafi082`/`kasadu-53-tuki533`).
+describe('layoutActivity — a laned repeat keeps the condition hexagon in its OWN (out) lane', () => {
+  function layout(markup: string) {
+    const first = buildBlockUmls(markup)[0];
+    if (first === undefined) throw new Error('no diagram block');
+    if (!first.ok) throw first.failure.cause;
+    const ast = astOrThrow(parseActivity(first.source), 'activity');
+    return layoutActivity(ast, resolveTheme('default'), new DeterministicMeasurer());
+  }
+
+  it("repeat-cond and its side label carry the OUT lane, not the repeat's own entry lane", () => {
+    const geo = layout('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x) is (y)\n@enduml');
+    const cond = geo.nodes.find((n) => n.kind === 'repeat-cond')!;
+    expect(cond.swimlane).toBe('B');
+    const label = geo.nodes.find((n) => n.kind === 'if-label')!;
+    expect(label.swimlane).toBe('B');
+  });
+
+  // `tile-layout.ts#tileWhile` never calls `withSwimlane` on the header
+  // (only the outer `GtileWhile` gets one), so a while header has no lane
+  // of its own to diverge from the parent's -- there is no while-side
+  // regression to reproduce; `pushWhileHeader`'s `laneAt` call is defensive
+  // parity only (see that function's own doc).
 });
 
 // D2 / `Worm#addPoint` (`Worm.java:262-266`): the one edge-construction

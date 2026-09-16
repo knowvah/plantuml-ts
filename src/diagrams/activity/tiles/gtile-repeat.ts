@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import type { GtileDiamond } from './gtile-diamond.js';
+import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
 
@@ -48,7 +48,8 @@ export class GtileRepeat extends TileComposite {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:696-699
    *   -- `calculateDimensionFtile`: the tile's `left` IS `getLeft()`.
    */
-  constructor(body: Tile, condition: GtileDiamond, backwardBody: Tile | null, _bounder: StringBounder, _theme: Theme) {
+  // prettier-ignore
+  constructor(body: Tile, condition: GtileDiamondInside, backwardBody: Tile | null, _bounder: StringBounder, _theme: Theme) {
     super();
     this.conditionOffsetY = body.height + NODE_MARGIN_Y;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;

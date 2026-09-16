@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
+import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -35,23 +36,30 @@ function makeTile(width: number, height: number, hasPointOut = true, left = widt
   };
 }
 
-// GtileDiamond stub — width/height and its `left` (`width / 2`, D3) matter
-// for GtileWhile geometry.
+// GtileDiamondInside stub (mission `activity-loop-tile-port` T2, D1: the
+// while header is a `GtileDiamondInside`, never a `GtileDiamond`) --
+// width/height and its `left` (`width / 2`, D3) matter for GtileWhile
+// geometry. Duck-typed and cast through `unknown`, the same idiom
+// `tile-coordinates.ts` already uses for its own `Gtile*` casts: the real
+// class has private fields (`north`/`south`/`west`/`east`/`hexHeight`), so
+// no plain object literal can satisfy it structurally, and `GtileWhile`'s
+// constructor never calls `labelAt`/`swapEastWest` -- only `width`,
+// `height`, `getCoord`, `hasPointOut` are read.
 function makeDiamond(width: number, height: number, left = width / 2) {
   return {
-    kind: 'gtile-diamond' as const,
+    kind: 'gtile-diamond-inside' as const,
     label: '',
     width,
     height,
     getCoord: (_hook: HookName): GPoint => ({ x: left, y: 0 }),
     hasPointOut: () => true,
-  };
+  } as unknown as GtileDiamondInside;
 }
 
 describe('GtileWhile — geometry (header h=40, body h=80)', () => {
   const header = makeDiamond(60, 40);
   const body = makeTile(80, 80);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
 
   it('height === header.height + NODE_MARGIN_Y + body.height + NODE_MARGIN_Y', () => {
     expect(tile.height).toBe(40 + NODE_MARGIN_Y + 80 + NODE_MARGIN_Y);
@@ -92,7 +100,7 @@ describe('GtileWhile — geometry (header h=40, body h=80)', () => {
 describe('GtileWhile — width: body wider than header', () => {
   const header = makeDiamond(40, 40);
   const body = makeTile(100, 80);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
 
   it('width driven by body.width', () => {
     expect(tile.width).toBe(100 + BACK_EDGE_MARGIN);
@@ -102,7 +110,7 @@ describe('GtileWhile — width: body wider than header', () => {
 describe('GtileWhile — width: header wider than body', () => {
   const header = makeDiamond(120, 40);
   const body = makeTile(60, 80);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
 
   it('width driven by header.width', () => {
     expect(tile.width).toBe(120 + BACK_EDGE_MARGIN);
@@ -112,7 +120,7 @@ describe('GtileWhile — width: header wider than body', () => {
 describe('GtileWhile — hooks', () => {
   const header = makeDiamond(60, 40);
   const body = makeTile(80, 80);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
   const cx = (tile.width - BACK_EDGE_MARGIN) / 2;
 
   it('NORTH_HOOK.y === 0', () => {
@@ -152,7 +160,7 @@ describe('GtileWhile — hasPointOut() is unconditionally true', () => {
   it('is true even when the body has no out point (ends in a stop)', () => {
     const header = makeDiamond(60, 40);
     const body = makeTile(80, 80, false);
-    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
     expect(tile.hasPointOut()).toBe(true);
   });
 });
@@ -164,7 +172,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('header left 30 (w 60), body left 10 (w 40): contentLeft 30, contentWidth 60', () => {
     const header = makeDiamond(60, 40, 30);
     const body = makeTile(40, 80, true, 10);
-    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
     expect(tile.contentLeft).toBe(30);
     expect(tile.headerOffsetX).toBe(0);
     expect(tile.bodyOffsetX).toBe(20);
@@ -177,7 +185,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('body left 20 px right of its centre: width = contentLeft - body.left + body.width + margin', () => {
     const header = makeDiamond(60, 40); // left 30
     const body = makeTile(120, 80, true, 80); // centre 60, left 80
-    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
     expect(tile.contentLeft).toBe(80);
     expect(tile.headerOffsetX).toBe(50);
     expect(tile.bodyOffsetX).toBe(0);
@@ -191,7 +199,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('body left LEFT of its centre widens the tile on the right', () => {
     const header = makeDiamond(60, 40); // left 30
     const body = makeTile(80, 80, true, 20); // left 20
-    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
     expect(tile.contentLeft).toBe(30);
     expect(tile.bodyOffsetX).toBe(10);
     // max(60 + 0, 80 + 10) = 90
@@ -202,10 +210,25 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('symmetric children: offsets equal the old centring and hooks equal (width - margin) / 2', () => {
     const header = makeDiamond(60, 40);
     const body = makeTile(80, 80);
-    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
     const cx = (tile.width - BACK_EDGE_MARGIN) / 2;
     expect(tile.headerOffsetX).toBe(cx - 60 / 2);
     expect(tile.bodyOffsetX).toBe(cx - 80 / 2);
     expect(tile.getCoord(NORTH_HOOK).x).toBe(cx);
+  });
+});
+
+// mission `activity-loop-tile-port` T2 (prior observation, D3): a REAL
+// `GtileDiamondInside` (not the stub above) must still have `left ===
+// width / 2`, the invariant `GtileWhile`'s own centring math relies on.
+describe('GtileWhile — a real GtileDiamondInside header keeps left === width / 2', () => {
+  it('holds with a labelled condition (north/west set, non-trivial width)', () => {
+    const labelBounder: StringBounder = {
+      getDimension: (text: string, _size: number) => ({ width: text.length * 7, height: 13 }),
+    };
+    const header = new GtileDiamondInside('cond', { north: 'yes', west: 'no' }, labelBounder, theme);
+    // gtile-diamond-inside.ts:92-99 -- NORTH_HOOK is unconditionally
+    // `{ x: this.width / 2, y: 0 }`.
+    expect(header.getCoord(NORTH_HOOK).x).toBe(header.width / 2);
   });
 });

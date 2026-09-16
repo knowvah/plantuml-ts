@@ -8,6 +8,7 @@ import type { Theme } from '../../../core/theme.js';
 import type { GtileAction } from '../tiles/gtile-action.js';
 import type { GtileNote } from '../tiles/gtile-note.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
+import type { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
@@ -27,6 +28,7 @@ import { walkWhile } from './walk-while-branch.js';
 import { walkIfWithLinks } from './walk-if-with-links.js';
 import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
+import { emitDiamondLabels } from './diamond-labels.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
@@ -77,6 +79,45 @@ export function pushEdge(
 ): void {
   out.edges.push({ points: dedupeAdjacentPoints(points) });
   out.edgeMeta.push({ lane1, lane2, shape });
+}
+
+/**
+ * The `'gtile-repeat'` case's condition hexagon: pushed directly (never
+ * through `walkTile`'s generic dispatch, same as `if`'s own `diamond1`,
+ * `walk-if-down.ts#pushDiamond1`), then its own side labels -- east is the
+ * "is"/entry label, south is the "not"/exit label (default, no `backward`,
+ * D1). Split out of the `'gtile-repeat'` case only to keep `walkTile`'s own
+ * NLOC from growing (the case itself is unchanged besides this call).
+ * `laneAt` resolves the condition's OWN `.swimlane` (`tileRepeat`'s
+ * `outLane(node.swimlaneOut, node.swimlane)`, `FtileRepeat.java:149,152`)
+ * over the parent's inherited `myLane` -- the same resolution `walkTile`'s
+ * own dispatch (`:117-118`) applies to every tile it walks; bypassing
+ * `walkTile` to push directly means this helper must apply it itself, or a
+ * laned repeat's condition silently renders in the wrong lane.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ */
+function pushRepeatCondition(
+  condition: GtileDiamondInside,
+  condX: number,
+  condY: number,
+  myLane: string | undefined,
+  out: Out,
+): void {
+  const hexLane = laneAt(condition, myLane);
+  pushNode(
+    out,
+    {
+      id: out.nextId('repeat-cond'),
+      kind: 'repeat-cond',
+      x: condX,
+      y: condY,
+      width: condition.width,
+      height: condition.height,
+      label: condition.label,
+    },
+    hexLane,
+  );
+  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east'], hexLane, out);
 }
 
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
@@ -235,7 +276,9 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       const t = tile as unknown as GtileRepeat;
       const rawChildren = t.children;
       const body = rawChildren[0]!;
-      const condition = rawChildren[1]!;
+      // D1: the condition is always a `GtileDiamondInside`
+      // (`tile-layout.ts#tileRepeat`).
+      const condition = rawChildren[1] as unknown as GtileDiamondInside;
       const backwardBody = rawChildren.length > 2 ? rawChildren[2]! : null;
       // Each child sits so its OWN `left` lands under the tile's merged
       // `left` (`FtileRepeat.java:730-765`), never centred by `width / 2`.
@@ -256,7 +299,7 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         laneIn(condition, myLane),
       );
 
-      walkTile(condition, condX, condY, { kindHint: 'repeat-cond', lane: myLane }, out);
+      pushRepeatCondition(condition, condX, condY, myLane, out);
 
       if (backwardBody !== null) {
         const bwX = x + t.backwardOffsetX!;

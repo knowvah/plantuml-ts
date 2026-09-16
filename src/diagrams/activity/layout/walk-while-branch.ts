@@ -19,17 +19,58 @@
  */
 
 import type { GtileWhile } from '../tiles/gtile-while.js';
+import type { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { GConnectionVerticalDownThenBack } from '../routing/gconnection-vertical-down-then-back.js';
-import { laneIn, laneOut } from './swimlane-placement.js';
+import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
-import { pushEdge, walkTile } from './tile-coordinates.js';
+import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { whileHexagonReservation } from './hexagon-reservations.js';
+import { emitDiamondLabels } from './diamond-labels.js';
+
+/**
+ * The hexagon node then its own side labels, pushed as one atomic unit
+ * (`diamond-labels.ts`'s own header cite for why). North is the "is"/entry
+ * label, west is the "is not"/exit label. `laneAt` resolves the header's
+ * OWN `.swimlane` over the parent's inherited `myLane` -- the same
+ * resolution `walkTile`'s own dispatch (`tile-coordinates.ts:117-118`)
+ * applies to every tile it walks; pushing a node directly (never through
+ * `walkTile`, D1) means this helper must apply it itself. `tileWhile`
+ * (`tile-layout.ts`) never calls `withSwimlane` on the header today, so
+ * `header.swimlane` is always `undefined` here and `hexLane === myLane` --
+ * kept for parity with `pushRepeatCondition`'s own fix and so a future
+ * `tileWhile` change that DOES lane the header does not silently regress.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
+ */
+function pushWhileHeader(
+  header: GtileDiamondInside,
+  hX: number,
+  hY: number,
+  myLane: string | undefined,
+  out: Out,
+): void {
+  const hexLane = laneAt(header, myLane);
+  pushNode(
+    out,
+    {
+      id: out.nextId('while-header'),
+      kind: 'while-header',
+      x: hX,
+      y: hY,
+      width: header.width,
+      height: header.height,
+      label: header.label,
+    },
+    hexLane,
+  );
+  emitDiamondLabels(header, { x: hX, y: hY }, ['north', 'west'], hexLane, out);
+}
 
 export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | undefined, out: Out): void {
   const rawChildren = t.children;
-  const header = rawChildren[0]!;
+  // D1: the header is always a `GtileDiamondInside` (`tile-layout.ts#tileWhile`).
+  const header = rawChildren[0] as unknown as GtileDiamondInside;
   const body = rawChildren[1]!;
   // Each child sits so its OWN `left` lands under the tile's merged `left`
   // (`FtileWhile.java:621-641`: `x = dimTotal.getLeft() - child.getLeft()`),
@@ -37,7 +78,7 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
   // the forward and back edges.
   const hX = x + t.headerOffsetX;
   const hY = y + t.headerOffsetY;
-  walkTile(header, hX, hY, { kindHint: 'while-header', lane: myLane }, out);
+  pushWhileHeader(header, hX, hY, myLane, out);
 
   const bX = x + t.bodyOffsetX;
   const bY = y + t.bodyOffsetY;

@@ -7,7 +7,7 @@ import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
-import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
+import type { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import type { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
@@ -291,8 +291,10 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('B');
 
-    const condition = repeatTile.children[1] as unknown as GtileDiamond;
-    expect(condition.kind).toBe('gtile-diamond');
+    // D1 (mission `activity-loop-tile-port` T2): the repeat condition is a
+    // `GtileDiamondInside`, never a `GtileDiamond`.
+    const condition = repeatTile.children[1] as unknown as GtileDiamondInside;
+    expect(condition.kind).toBe('gtile-diamond-inside');
     expect(condition.swimlane).toBe('B');
 
     const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
@@ -333,7 +335,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('A');
-    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    const condition = repeatTile.children[1] as unknown as GtileDiamondInside;
     expect(condition.swimlane).toBe('A');
   });
 

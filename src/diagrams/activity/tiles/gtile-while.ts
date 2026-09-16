@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import type { GtileDiamond } from './gtile-diamond.js';
+import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
 
@@ -39,14 +39,7 @@ export class GtileWhile extends TileComposite {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:48-82,190-192
    *   -- a tile's `left` IS its in/out x, i.e. `getCoord(NORTH_HOOK).x` here.
    */
-  constructor(
-    header: GtileDiamond,
-    body: Tile,
-    _exitLabel: string | undefined,
-    _backLabel: string | undefined,
-    _bounder: StringBounder,
-    _theme: Theme,
-  ) {
+  constructor(header: GtileDiamondInside, body: Tile, _bounder: StringBounder, _theme: Theme) {
     super();
     this.bodyOffsetY = header.height + NODE_MARGIN_Y;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
