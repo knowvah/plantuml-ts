@@ -10,6 +10,7 @@ import type { GtileNote } from '../tiles/gtile-note.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIf } from '../tiles/gtile-if.js';
+import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { GtileRepeat } from '../tiles/gtile-repeat.js';
 import type { GtileFork } from '../tiles/gtile-fork.js';
@@ -22,6 +23,7 @@ import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
+import { walkIfWithLinks } from './walk-if-with-links.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
@@ -230,6 +232,13 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       }
       return;
     }
+
+    case 'gtile-if-with-links':
+      // D1/D5: `FtileIfWithLinks`'s own walker, split into
+      // `walk-if-with-links.ts` for the same reason `walkForkOrSplit`/
+      // `walkWhile` already are.
+      walkIfWithLinks(tile as unknown as GtileIfWithLinks, x, y, myLane, out);
+      return;
 
     case 'gtile-while':
       walkWhile(tile as unknown as GtileWhile, x, y, myLane, out);

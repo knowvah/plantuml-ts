@@ -18,13 +18,13 @@ import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
 import { GtileDiamond } from '../tiles/gtile-diamond.js';
-import { GtileIf } from '../tiles/gtile-if.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
+import { buildIf } from './conditional-builder.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../layout.old.js';
@@ -112,28 +112,14 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme): Til
   }
 }
 
-function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme): GtileIf {
-  const diamond = new GtileDiamond(node.condition, bounder, theme);
-  const branches: Array<{ tile: Tile; label?: string }> = [];
-
-  const thenTiles = tileNodes(node.thenBranch, bounder, theme);
-  const thenEntry: { tile: Tile; label?: string } = { tile: new GtileTopDown(thenTiles, bounder, theme) };
-  if (node.thenLabel !== undefined) thenEntry.label = node.thenLabel;
-  branches.push(thenEntry);
-
-  for (const elseif of node.elseIfBranches) {
-    const elseifTiles = tileNodes(elseif.body, bounder, theme);
-    const entry: { tile: Tile; label?: string } = { tile: new GtileTopDown(elseifTiles, bounder, theme) };
-    if (elseif.label !== undefined) entry.label = elseif.label;
-    branches.push(entry);
-  }
-
-  const elseTiles = tileNodes(node.elseBranch, bounder, theme);
-  const elseEntry: { tile: Tile; label?: string } = { tile: new GtileTopDown(elseTiles, bounder, theme) };
-  if (node.elseLabel !== undefined) elseEntry.label = node.elseLabel;
-  branches.push(elseEntry);
-
-  return withSwimlane(new GtileIf(diamond, branches, null, bounder, theme), node.swimlane);
+/**
+ * Dispatches to `conditional-builder.ts#buildIf` (mission
+ * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`;
+ * `'down'`/`'long-horizontal'` still fall back to the legacy `GtileIf`
+ * until T4/T5 land their own builders.
+ */
+function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme): Tile {
+  return withSwimlane(buildIf(node, bounder, theme), node.swimlane);
 }
 
 function tileWhile(node: ActivityWhile, bounder: StringBounder, theme: Theme): GtileWhile {

@@ -311,10 +311,54 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     'tobajo-64-mipi810 [51,52] polygon×polygon',
   ].sort();
 
+  /**
+   * A hard overlap (both shapes DO occupy both axes -- `isHard` below is
+   * `true`) that is NOT a geometry defect: a proven floating-point
+   * rounding artifact at an EXACT-touch boundary, not a real intersection.
+   * Kept separate from `ALLOWED_NEW_OVERLAPS` because that list's own
+   * class (a shape not occupying one axis, `Worm.java:159-168` /
+   * `UGraphicCompressOnXorY.java:100-112`) does not apply here -- this
+   * pair fails `isHard`'s test in the "should be forbidden" direction, so
+   * the attribution has to justify the exception on its own terms.
+   *
+   * `kitupi-32-jexo155 [0,1] polygon×text` (mission `activity-if-tile-port`
+   * T3): shape 0 is the `if-split` hexagon, shape 1 its own west
+   * `if-label` (the `then`-branch's `(yes)` label; `if-label` nodes did not
+   * exist before T3, so this pair is new by construction, not a
+   * regression in existing geometry).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:98-99
+   *   -- `west.drawU(ug.apply(new UTranslate(-dimWest.getWidth(), ...)))`:
+   *   the west label's OWN right edge is placed at the hexagon's local
+   *   x=0 -- EXACTLY zero gap by design, not merely close.
+   *
+   * Confirmed (not assumed) with a direct dump of `shapesOf`'s shape[0]/
+   * shape[1] on this fixture, before and after compression:
+   * - `before` (pre-compression): hexagon.x === label.x + label.width ===
+   *   `173.2156249999999` on BOTH sides -- the IDENTICAL float, not merely
+   *   close. `overlaps()`'s strict `<` requires one bound to be less than
+   *   the other; two equal floats never satisfy that, so `before` has no
+   *   overlap here (confirmed: `beforePairs` does not contain `[0,1]`).
+   * - `after` (post-compression): hexagon.x = `163.21562499999993`,
+   *   label.x + label.width = `163.21562499999995` -- the SAME nominal
+   *   10px leftward shift applied to both shapes, but through two
+   *   independent `compress-geometry.ts` transform calls that round
+   *   ~2e-14 apart. That sub-epsilon gap is what flips the pair from
+   *   touching to `overlaps()`-true.
+   *
+   * Not fixed at the source (`compress-geometry.ts`/`slot-finder.ts`'s
+   * `overlaps()`, both outside every task's write-set in this mission): an
+   * epsilon tolerance there would also silently absorb a genuine
+   * sub-epsilon overlap elsewhere in the 268-fixture corpus, which is a
+   * strictly worse trade than pinning this one proven-benign pair by its
+   * exact fixture + index + kind.
+   */
+  const ALLOWED_HARD_OVERLAPS = ['kitupi-32-jexo155 [0,1] polygon×text'].sort();
+
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
     const measurer = new DeterministicMeasurer();
     const hardViolations: string[] = [];
     const allowed: string[] = [];
+    const allowedHard: string[] = [];
     for (const fixture of baselineFixtures) {
       const both = layoutBeforeAfter(readMarkup(fixture), measurer);
       if (both === null) continue;
@@ -329,11 +373,17 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
         const b = after[j]!;
         const isHard = occupiesOn(a, 'x') && occupiesOn(b, 'x') && occupiesOn(a, 'y') && occupiesOn(b, 'y');
         const entry = `${fixture.slug} [${i},${j}] ${a.kind}×${b.kind}`;
-        if (isHard) hardViolations.push(entry);
-        else allowed.push(entry);
+        if (!isHard) {
+          allowed.push(entry);
+        } else if (ALLOWED_HARD_OVERLAPS.includes(entry)) {
+          allowedHard.push(entry);
+        } else {
+          hardViolations.push(entry);
+        }
       }
     }
     expect(hardViolations).toEqual([]);
     expect(allowed.sort()).toEqual(ALLOWED_NEW_OVERLAPS);
+    expect(allowedHard.sort()).toEqual(ALLOWED_HARD_OVERLAPS);
   });
 });
