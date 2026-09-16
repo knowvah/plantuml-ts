@@ -116,6 +116,14 @@ from there (or moved to a shared module), fed the lanes the body touches.
 **Consequences.** The default repeat flips to the right side into the entry
 tile's right edge; laned fixtures may hit stop 11.
 
+**Amendment 2026-09-16 (human decision, option 1 of `stop-11-complex1.md`).**
+Six baseline fixtures reach `ConnectionBackComplex1` (`becanu`, `givanu`,
+`kasadu`, `kudedo`, `mafete`, `manata`: `swimlane != swimlaneOut`), so
+"unreachable" was false. T6 ports `Complex1` (`FtileRepeat.java:333-404`,
+`drawSnake` `:364-402`) alongside `Simple1`/`Simple2`; stop 11 is retired.
+Only the `drawU` shapes are in scope; the `drawTranslate` lane variants stay
+the filed follow-on (`activity-loop-lane-translate`).
+
 ## D6 — Hooks stay `(left, inY)/(left, outY)`; the exit path is drawn inside the tile
 
 **Context.** Both tiles' `pointOut` is `(left, height)` (`FtileWhile.java:

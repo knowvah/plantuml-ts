@@ -43,7 +43,8 @@ the mechanism, quoted, is in [`decisions.md`](decisions.md).
 - `backward:` bodies and `ConnectionBackBackward1/2` (0 fixtures; awrl T2's
   stacking stays the interim; file `activity-loop-backward`)
 - `specialOut` / `ConnectionOutSpecial` (D3: unreachable)
-- `ConnectionBackComplex1` (cross-lane repeat; stop 11)
+- ~~`ConnectionBackComplex1` (cross-lane repeat; stop 11)~~ — amended
+  2026-09-16: reachable from six fixtures, T6 ports it (D5 amendment)
 - `ConditionStyle` EMPTY_DIAMOND / INSIDE_DIAMOND
   (`activity-condition-style-variants`)
 - Compression changes (D4; stop 14)
@@ -64,7 +65,7 @@ the mechanism, quoted, is in [`decisions.md`](decisions.md).
 8. A committed jar golden looks stale
 9. An assertion must be DELETED rather than updated with a Java cite
 10. A fix appears to need `layout.old.ts` or anything only it imports
-11. A laned repeat reaches `ConnectionBackComplex1` (file with the slug list)
+11. ~~A laned repeat reaches `ConnectionBackComplex1`~~ retired 2026-09-16 (D5 amendment); a repeat that reaches NONE of `Simple1`/`Simple2`/`Complex1` is the stop
 12. A `backward:` body or a non-null `specialOut` proves reachable from a
     baseline fixture (D3 assumed unreachable)
 13. An `--align` per-tag count on a representative slug moves AWAY from the
@@ -124,7 +125,7 @@ committing and are resumed to commit.
 - [x] Batch 0 — T0, T1
 - [x] Batch 1 — T2
 - [x] Batch 2 — T3, T4
-- [ ] Batch 3 — T5 [x], T6 [ ] (HALTED: stop 11, see stop-11-complex1.md)
+- [ ] Batch 3 — T5 [x], T6 [ ] (resumed 2026-09-16 under the D5 amendment)
 - [ ] Batch 4 — T7
 
 ## Session summary (2026-09-16, halted at T6)
