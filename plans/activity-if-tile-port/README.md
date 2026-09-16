@@ -149,6 +149,8 @@ the pins.
 - [`batch-5/overview.md`](batch-5/overview.md) — sibling link order (T6)
 - [`batch-5b/overview.md`](batch-5b/overview.md) — siblings aligned on `left`;
   trailing notes transparent to `hasPointOut` (T6b, added under stop 1)
+- [`batch-5c/overview.md`](batch-5c/overview.md) — the if tiles carry each
+  branch's own `left` (T6c, fix commits after T6b's scan)
 - [`batch-6/overview.md`](batch-6/overview.md) — re-pin and close-out (T7)
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — one `if` from AST to
   edge run
@@ -165,4 +167,5 @@ the pins.
 - [x] Batch 4 — T5
 - [x] Batch 5 — T6
 - [ ] Batch 5b — T6b (added 2026-09-16 under stop 1, maintainer-authorised)
+- [ ] Batch 5c — T6c (added 2026-09-16: bucket C of T6b's diagonal scan)
 - [ ] Batch 6 — T7
