@@ -79,44 +79,6 @@ export function tileNodes(
   return tiles;
 }
 
-function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
-  switch (node.kind) {
-    case 'start':
-      return withSwimlane(new GtileStart(), node.swimlane);
-    case 'stop':
-      return withSwimlane(new GtileStop(), node.swimlane);
-    case 'end':
-      return withSwimlane(new GtileEnd(), node.swimlane);
-    case 'kill':
-      return withSwimlane(new GtileKill(), node.swimlane);
-    case 'detach':
-      return withSwimlane(new GtileStop(), node.swimlane);
-    case 'break':
-      return withSwimlane(new GtileBreak(), node.swimlane);
-    case 'action':
-      return withSwimlane(new GtileAction(node, bounder, theme), node.swimlane);
-    case 'note':
-      return withSwimlane(new GtileNote(node, bounder, theme), node.swimlane);
-    case 'arrow-label':
-      return null;
-    case 'if':
-      return tileIf(node, bounder, theme, laneOrder);
-    case 'while':
-      return tileWhile(node, bounder, theme, laneOrder);
-    case 'repeat':
-      return tileRepeat(node, bounder, theme, laneOrder);
-    case 'fork':
-      return tileFork(node, bounder, theme, laneOrder);
-    case 'split':
-      return tileSplit(node, bounder, theme, laneOrder);
-    default: {
-      const _exhaustive: never = node;
-      console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);
-      return null;
-    }
-  }
-}
-
 /**
  * Dispatches to `conditional-builder.ts#buildIf` (mission
  * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`,
@@ -218,4 +180,50 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
   const root = new GtileTopDown(tiles, bounder, theme);
   return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+}
+
+/**
+ * Kept LAST in this file on purpose (mission `activity-loop-tile-port`,
+ * T1): Lizard 1.23.0's TypeScript reader loses this function's closing
+ * scope inside the `switch` (the same `identifier(` heuristic bug
+ * `node-dispatch.ts`'s header describes) and reports everything after it
+ * as part of `tileNode`, so any function placed below it inflates the
+ * complexity hook's ratchet for this name. Add new builders above.
+ */
+function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
+  switch (node.kind) {
+    case 'start':
+      return withSwimlane(new GtileStart(), node.swimlane);
+    case 'stop':
+      return withSwimlane(new GtileStop(), node.swimlane);
+    case 'end':
+      return withSwimlane(new GtileEnd(), node.swimlane);
+    case 'kill':
+      return withSwimlane(new GtileKill(), node.swimlane);
+    case 'detach':
+      return withSwimlane(new GtileStop(), node.swimlane);
+    case 'break':
+      return withSwimlane(new GtileBreak(), node.swimlane);
+    case 'action':
+      return withSwimlane(new GtileAction(node, bounder, theme), node.swimlane);
+    case 'note':
+      return withSwimlane(new GtileNote(node, bounder, theme), node.swimlane);
+    case 'arrow-label':
+      return null;
+    case 'if':
+      return tileIf(node, bounder, theme, laneOrder);
+    case 'while':
+      return tileWhile(node, bounder, theme, laneOrder);
+    case 'repeat':
+      return tileRepeat(node, bounder, theme, laneOrder);
+    case 'fork':
+      return tileFork(node, bounder, theme, laneOrder);
+    case 'split':
+      return tileSplit(node, bounder, theme, laneOrder);
+    default: {
+      const _exhaustive: never = node;
+      console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);
+      return null;
+    }
+  }
 }
