@@ -452,16 +452,47 @@ describe('renderActivity — edge with label', () => {
 });
 
 // ---------------------------------------------------------------------------
-// if-merge node renders as empty string
+// if-merge node renders the rhombus rendered.Hexagon.asPolygon(shadowing)
+// (Hexagon.java:49-56, D2); if-label draws its text (D3).
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — if-merge node', () => {
-  it('if-merge node renders as empty string (no SVG output)', () => {
-    const node = makeNode({ kind: 'if-merge' });
+  it('renders one rhombus polygon at (x+12,y) (x+24,y+12) (x+12,y+24) (x,y+12)', () => {
+    const node = makeNode({ kind: 'if-merge', x: 10, y: 20, width: 24, height: 24 });
     const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderActivity(geo, theme));
-    // The if-merge node itself produces nothing, only background rect present
-    expect(svg.trimStart()).toMatch(/^<svg/);
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const pointsMatch = content.match(/points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('22,20,34,32,22,44,10,32');
+  });
+
+  it('carries the diamond bucket line thickness (`activityLineThickness(theme, "diamond")`)', () => {
+    // `FtileDiamond.java:89`'s `.apply(getStyle().getStroke())` -- the same
+    // diamond-style stroke `renderHexagon` already resolves explicitly, not
+    // silently defaulted. `ELEMENT_LINE_THICKNESS = 0.5`
+    // (`activity-style-defaults.ts:207`) is the diamond bucket's default.
+    const node = makeNode({ kind: 'if-merge', x: 10, y: 20, width: 24, height: 24 });
+    const geo = makeGeo({ nodes: [node] });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    expect(content).toContain('stroke-width="0.5"');
+  });
+});
+
+describe('renderActivity — if-label node', () => {
+  it('renders one left-aligned <text> at the arrow SName font size', () => {
+    const node = makeNode({ kind: 'if-label', label: 'yes', x: 10, y: 20 });
+    const geo = makeGeo({ nodes: [node] });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const textCount = (content.match(/<text/g) ?? []).length;
+    expect(textCount).toBe(1);
+    // Q5: baseline = node.y + ARROW_FONT_SIZE(11) * ASCENT_FRACTION(1-1/4.5),
+    // left-aligned starting at node.x (ConditionalBuilder.java:280).
+    const textMatch = content.match(/<text x="([^"]+)" y="([^"]+)"[^>]*>yes<\/text>/);
+    expect(textMatch).not.toBeNull();
+    expect(Number(textMatch![1])).toBe(10);
+    expect(Number(textMatch![2])).toBeCloseTo(20 + 11 * (1 - 1 / 4.5), 2);
   });
 });
 
@@ -590,11 +621,12 @@ describe('renderActivity — edge with label but no color', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 14: edge with midArrow renders an extra arrowhead at segment midpoint
+// Test 14: `emphasize` draws an extra arrowhead at the FIRST matching
+// segment's midpoint (Worm.java:138-139,178-183) -- not the longest segment.
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — edge with midArrow', () => {
-  it('renders two <polygon> arrowheads when midArrow is true', () => {
+describe('renderActivity — edge with emphasize', () => {
+  it('renders two <polygon> arrowheads when emphasize matches a segment', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -604,18 +636,18 @@ describe('renderActivity — edge with midArrow', () => {
             { x: 50, y: 50 },
             { x: 100, y: 50 },
           ],
-          midArrow: true,
+          emphasize: 'up',
         },
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
-    // One polygon for the terminal arrowhead, one for the mid-segment arrowhead
+    // One polygon for the terminal arrowhead, one for the emphasized segment
     const polygonCount = (content.match(/<polygon/g) ?? []).length;
-    expect(polygonCount).toBeGreaterThanOrEqual(2);
+    expect(polygonCount).toBe(2);
   });
 
-  it('renders only one arrowhead when midArrow is absent', () => {
+  it('renders only one arrowhead when emphasize is absent', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -632,6 +664,60 @@ describe('renderActivity — edge with midArrow', () => {
     const content = contentAfterDefs(result);
     const polygonCount = (content.match(/<polygon/g) ?? []).length;
     expect(polygonCount).toBe(1);
+  });
+
+  it('places the emphasized arrow on the FIRST matching segment, not the longest', () => {
+    // (0,0)->(0,30) DOWN len 30; (0,30)->(50,30) RIGHT len 50;
+    // (50,30)->(50,90) DOWN len 60 (longest). First DOWN segment is the
+    // first one, midpoint (0,15) -- Worm.java:138-139's `drawn == false`
+    // guard only ever fires the FIRST matching segment.
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+            { x: 50, y: 30 },
+            { x: 50, y: 90 },
+          ],
+          emphasize: 'down',
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const polygons = content.match(/<polygon[^>]*points="([^"]*)"/g) ?? [];
+    expect(polygons.length).toBe(2);
+    // The emphasized arrow's tip point is (0, 15) -- `arrowHeadPoints('down')`
+    // includes the tip at its own local (0,0), translated by the segment
+    // midpoint.
+    const hasMidpointTip = polygons.some((p) => p.includes('0,15'));
+    expect(hasMidpointTip).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 15: `arrowhead: false` skips the end decoration entirely
+// (D6 -- `cond/FtileIfWithLinks.java:96-101`'s `null` end decoration).
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge with arrowhead: false', () => {
+  it('renders the <line>s but no <polygon> tip', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+          arrowhead: false,
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    expect(content).toContain('<line');
+    expect(content).not.toContain('<polygon');
   });
 });
 
@@ -923,7 +1009,7 @@ describe('renderActivity — arrowhead is ArrowsRegular (akc-T1)', () => {
     expect(pointsMatch?.[1]).toBe('90,6,100,10,90,14,94,10');
   });
 
-  it('four points, not the old triangle\'s three', () => {
+  it("four points, not the old triangle's three", () => {
     const edge = {
       points: [
         { x: 10, y: 10 },

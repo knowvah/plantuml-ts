@@ -102,7 +102,7 @@ function buildRepeatBackEdge(
       { x: rightX, y: startY + start.dStart / 2 },
       { x: centerX + start.dStart / 2, y: startY + start.dStart / 2 },
     ],
-    midArrow: true,
+    emphasize: 'up',
   };
 }
 

@@ -34,6 +34,13 @@ import {
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
+import { renderIfMerge, renderIfLabel } from './activity-renderer-if-shapes.js';
+import {
+  renderSignalLabel,
+  renderChevronLeft,
+  renderChevronRight,
+  renderParallelogram,
+} from './activity-renderer-signal-shapes.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -41,6 +48,10 @@ import {
   measureLineWidth,
   measureMonoLineWidth,
 } from './activity-text-placement.js';
+
+// Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
+// importers of these four symbols working unchanged.
+export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -73,7 +84,7 @@ function actionCornerRadius(theme: Theme): number {
  * `lh * 0.8` approximation (0.8 was already close to 7/9 ≈ 0.7778 --
  * likely someone's earlier hand-rounding of the same ratio, never cited).
  */
-const ASCENT_FRACTION = 1 - 1 / 4.5;
+export const ASCENT_FRACTION = 1 - 1 / 4.5;
 
 /**
  * One `<text>` element PER LINE, never `<tspan>` (D3). Upstream draws a
@@ -82,7 +93,7 @@ const ASCENT_FRACTION = 1 - 1 / 4.5;
  * (`src/core/creole-svg.ts`, not this function's concern -- none of this
  * file's multi-line call sites carry creole markup, only `\n`-split text).
  */
-function textLines(
+export function textLines(
   lines: readonly string[],
   x: number,
   firstBaselineY: number,
@@ -303,72 +314,6 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   return shape + label;
 }
 
-export function renderSignalLabel(label: string, x: number, width: number, cy: number, theme: Theme): string {
-  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
-  // `SName.activity` like the plain box (`FtileBox.java:97-99`, `:146`) --
-  // the same SName `tiles/gtile-action.ts` sizes it at, and the same
-  // LEFT/CENTER/RIGHT branch (`FtileBox.java:224-233`) the action box uses.
-  const size = activityFontSize(theme, 'activity');
-  const cx = x + width / 2;
-  const opts: ActivityTextOpts = { sname: 'activity', fontSize: size, width };
-  const lines = label.split('\n');
-  if (lines.length === 1) {
-    const lineWidth = measureLineWidth(theme, size, label);
-    const lx = activityTextLineX(theme, cx, lineWidth, opts);
-    return text(lx, cy, label, {
-      fill: activityFontColor(theme, 'activity'),
-      fontFamily: theme.fontFamily,
-      fontSize: size,
-      dominantBaseline: 'central',
-    });
-  }
-  return renderMultilineText(lines, cx, cy, theme, opts);
-}
-
-export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // <<input>> = UML receive signal: flat left side (right-angle corners at
-  // top-left and bottom-left). Right side: two lines from top-right and
-  // bottom-right corners go inward/left at 60° to horizontal, meeting at
-  // the midpoint of the right edge → concave right notch pointing left.
-  // dent = (h/2) / tan(60°) = h / (2√3)
-  const dent = h / (2 * Math.sqrt(3));
-  const shape = polygon(
-    [
-      { x: x, y: y },
-      { x: x + w, y: y },
-      { x: x + w - dent, y: y + h / 2 },
-      { x: x + w, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
-  );
-  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
-}
-
-export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // 60° to horizontal: dent = (h/2) / tan(60°) = h / (2√3)
-  const dent = h / (2 * Math.sqrt(3));
-  // <<output>> = right-pointing arrow: body rectangle indented on right,
-  // vertex pointing right at the midpoint of the right edge.
-  const shape = polygon(
-    [
-      { x: x, y: y },
-      { x: x + w - dent, y: y },
-      { x: x + w, y: y + h / 2 },
-      { x: x + w - dent, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
-  );
-  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
-}
-
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const c = actColors(theme);
@@ -396,36 +341,6 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
         // diamond)`, the diamond SName -- `FontSize 11` (plantuml.skin:370).
         renderMultilineText(lines, cx, cy, theme, { sname: 'diamond', fontSize: condSize })
       : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, { sname: 'diamond', fontSize: condSize });
-  return shape + labelEl;
-}
-
-export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // Right-leaning parallelogram: interior angles 75° (acute) / 105° (obtuse).
-  // tan(75°) = h/d  →  d = h / (2 + √3) = h · (2 − √3)
-  const d = h * (2 - Math.sqrt(3));
-  const shape = polygon(
-    [
-      { x: x + d, y: y },
-      { x: x + w, y: y },
-      { x: x + w - d, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
-  );
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const boxSize = activityFontSize(theme, 'activity');
-  const lines = (node.label ?? '').split('\n');
-  const labelEl =
-    lines.length > 1
-      ? // `BoxStyle.SDL_SAVE` (`BoxStyle.java:73`) is still an `FtileBox`, so
-        // it resolves `SName.activity` like the plain box (`FtileBox.java
-        // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
-        renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize, width: w })
-      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize, width: w });
   return shape + labelEl;
 }
 
@@ -537,7 +452,9 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'repeat-cond':
       return renderHexagon(node, theme);
     case 'if-merge':
-      return '';
+      return renderIfMerge(node, theme);
+    case 'if-label':
+      return renderIfLabel(node, theme);
     case 'note':
       return renderNote(node, theme);
     default: {

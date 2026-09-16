@@ -128,9 +128,13 @@ function noteBox(node: ActivityNodeGeo): { x: number; y: number; width: number; 
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
-/** `FtileBreak`/`FtileEmpty#drawU` draw nothing; upstream's `FtileThinSplit`
- *  draws a `ULine`, which never occupies (see {@link shapeForNode}'s doc). */
-const NO_SHAPE_KINDS = new Set(['break', 'if-merge', 'split-bar', 'split-join-bar']);
+/** `FtileBreak#drawU` draws nothing; upstream's `FtileThinSplit` draws a
+ *  `ULine`, which never occupies (see {@link shapeForNode}'s doc). `if-merge`
+ *  used to be listed here (`FtileEmpty#drawU`, the omitted-diamond2 path,
+ *  `ConditionalBuilder.java:309-311`) but the merge rhombus DOES draw when
+ *  `hasTwoBranches()` -- D2, `Hexagon.asPolygon(shadowing)` -- so it now gets
+ *  a polygon box below instead of being listed as drawing nothing. */
+const NO_SHAPE_KINDS = new Set(['break', 'split-bar', 'split-join-bar']);
 
 /** `FtileBlackBlock#drawU`'s `URectangle.ignoreForCompressionOnX()`
  *  (`vertical/FtileBlackBlock.java:101-102`). */
@@ -140,12 +144,27 @@ const BAR_KINDS = new Set(['fork-bar', 'join-bar']);
 const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
 
 /**
+ * `if-label`'s text box (D3) -- `renderIfLabel`'s own baseline convention
+ * (`activity-renderer-if-shapes.ts`, Q5: `y0 + ARROW_FONT_SIZE *
+ * ASCENT_FRACTION`, left-aligned starting at `node.x`,
+ * `ConditionalBuilder.java:280`'s `HorizontalAlignment.LEFT`). The ascent
+ * ratio is the same one {@link titleShapes} already cites
+ * (`StringBounder#getDescent`, `klimt/font/StringBounder.java:47`).
+ */
+function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
+  const fontSize = activityFontSize(theme, 'arrow');
+  const baselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
+  const dim = bounder.getDimension(node.label ?? '', fontSize);
+  return { kind: 'text', x: node.x, y: baselineY, width: dim.width, height: dim.height };
+}
+
+/**
  * Maps one `ActivityNodeGeo` to the `CompressShape` `renderNode`
  * (`activity-renderer-shapes.ts`) actually draws for it, or `null` for a
  * kind that draws nothing.
  *
- * - `break`, `if-merge` -> nothing (`FtileBreak`, `FtileEmpty#drawU` draw
- *   nothing; our `renderNode` returns `''` for both).
+ * - `break` -> nothing (`FtileBreak#drawU` draws nothing; our `renderNode`
+ *   returns `''`).
  * - `split-bar`, `split-join-bar` -> nothing. DEVIATION from a literal
  *   reading of this task's own brief, which grouped these with the fork
  *   bars: `renderSplitLine` (`activity-renderer-bars.ts`) draws a `<line>`,
@@ -159,6 +178,10 @@ const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
  *   (`FtileBlackBlock.java:101-102`).
  * - `if-split`, `while-header`, `repeat-cond` -> `polygon`,
  *   {@link conditionBox}.
+ * - `if-merge` -> `polygon`, the node's own 24x24 box (D2 -- `renderIfMerge`
+ *   draws `Hexagon.asPolygon(shadowing)`'s 4-point rhombus, whose bounding
+ *   box is exactly `[x, x+24] x [y, y+24]`, `Hexagon.java:49-56`).
+ * - `if-label` -> `text`, {@link ifLabelShape} (D3).
  * - `note` -> `polygon`, {@link noteBox} (Opale is a `UPath`; `SlotFinder
  *   #drawPath` uses min/max, same as `drawPolygon`).
  * - everything else (start/stop/end/kill/spot/action/group/partition/
@@ -169,12 +192,16 @@ const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
  *   :138-161`) -- so which of the three a plain box kind is tagged does
  *   not change any slot.
  */
-function shapeForNode(node: ActivityNodeGeo): CompressShape | null {
+function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape | null {
   if (NO_SHAPE_KINDS.has(node.kind)) return null;
   if (BAR_KINDS.has(node.kind)) {
     return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height, ignoreX: true };
   }
   if (CONDITION_KINDS.has(node.kind)) return { kind: 'polygon', ...conditionBox(node) };
+  if (node.kind === 'if-merge') {
+    return { kind: 'polygon', x: node.x, y: node.y, width: node.width, height: node.height };
+  }
+  if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
@@ -182,10 +209,13 @@ function shapeForNode(node: ActivityNodeGeo): CompressShape | null {
 /**
  * The terminal arrowhead at an edge's last point, direction from the
  * second-to-last point (`renderer.ts#renderEdge`'s own `arrowTip` call).
- * `undefined` when the edge is too short or the last segment is zero-
- * length -- `arrowTip`'s own `dx === 0 && dy === 0` guard, D3.
+ * `undefined` when `edge.arrowhead === false` (D6 -- a `null` end decoration
+ * never draws, `ftile/Worm.java:161-168`), the edge is too short, or the
+ * last segment is zero-length -- `arrowTip`'s own `dx === 0 && dy === 0`
+ * guard, D3.
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
+  if (edge.arrowhead === false) return undefined;
   const pts = edge.points;
   if (pts.length < 2) return undefined;
   const last = pts[pts.length - 1]!;
@@ -207,48 +237,33 @@ function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape
   return shape;
 }
 
-/** `renderer.ts#renderEdge`'s own longest-segment search, split out only
- *  to keep {@link midArrowhead}'s own NLOC under the file's limit. */
-function longestSegment(pts: readonly { x: number; y: number }[]): {
-  segStart: { x: number; y: number };
-  segEnd: { x: number; y: number };
-} {
-  let maxLen = 0;
-  let maxI = 1;
-  for (let i = 1; i < pts.length; i++) {
-    const p0 = pts[i - 1]!;
-    const p1 = pts[i]!;
-    const len = Math.hypot(p1.x - p0.x, p1.y - p0.y);
-    if (len > maxLen) {
-      maxLen = len;
-      maxI = i;
-    }
-  }
-  return { segStart: pts[maxI - 1]!, segEnd: pts[maxI]! };
-}
-
 /**
- * The mid-segment arrowhead `renderer.ts#renderEdge` draws on the LONGEST
- * segment when `edge.midArrow === true` (repeat back-edges) -- same
- * longest-segment search, same direction/extents computation.
+ * The emphasized mid-segment arrowhead `renderer.ts#renderEdge` draws at the
+ * midpoint of the FIRST segment whose direction equals `edge.emphasize`
+ * (`Snake#emphasizeDirection`, `Worm.java:138-139,178-183`, D6) -- same
+ * first-match search and direction/extents computation as the renderer.
  */
-function midArrowhead(edge: ActivityEdgeGeo): CompressShape | undefined {
+function emphasizeArrowhead(edge: ActivityEdgeGeo): CompressShape | undefined {
   const pts = edge.points;
-  if (edge.midArrow !== true || pts.length < 2) return undefined;
-  const { segStart, segEnd } = longestSegment(pts);
-  const dx = segEnd.x - segStart.x;
-  const dy = segEnd.y - segStart.y;
-  if (dx === 0 && dy === 0) return undefined;
-  const midX = (segStart.x + segEnd.x) / 2;
-  const midY = (segStart.y + segEnd.y) / 2;
-  const ext = arrowHeadExtents(arrowDirection(dx, dy));
-  return {
-    kind: 'polygon',
-    x: midX + ext.minX,
-    y: midY + ext.minY,
-    width: ext.maxX - ext.minX,
-    height: ext.maxY - ext.minY,
-  };
+  if (edge.emphasize === undefined) return undefined;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p1 = pts[i]!;
+    const p2 = pts[i + 1]!;
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    if (arrowDirection(dx, dy) !== edge.emphasize) continue;
+    const midX = (p1.x + p2.x) / 2;
+    const midY = (p1.y + p2.y) / 2;
+    const ext = arrowHeadExtents(arrowDirection(dx, dy));
+    return {
+      kind: 'polygon',
+      x: midX + ext.minX,
+      y: midY + ext.minY,
+      width: ext.maxX - ext.minX,
+      height: ext.maxY - ext.minY,
+    };
+  }
+  return undefined;
 }
 
 /**
@@ -290,8 +305,8 @@ function shapesForEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, bounder: StringBou
   const shapes: CompressShape[] = [];
   const terminal = terminalArrowhead(edge, meta);
   if (terminal !== undefined) shapes.push(terminal);
-  const mid = midArrowhead(edge);
-  if (mid !== undefined) shapes.push(mid);
+  const emphasized = emphasizeArrowhead(edge);
+  if (emphasized !== undefined) shapes.push(emphasized);
   const label = edgeLabelShape(edge, bounder, theme);
   if (label !== undefined) shapes.push(label);
   return shapes;
@@ -370,7 +385,7 @@ function titleShapes(
 export function shapesOf(input: ShapesOfInput): CompressShape[] {
   const shapes: CompressShape[] = [];
   for (const node of input.nodes) {
-    const shape = shapeForNode(node);
+    const shape = shapeForNode(node, input.bounder, input.theme);
     if (shape !== null) shapes.push(shape);
   }
   for (let i = 0; i < input.edges.length; i++) {

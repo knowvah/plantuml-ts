@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1095 modules · 3968 exported names.
+1097 modules · 3976 exported names.
 
 ## `src/`
 
@@ -931,7 +931,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-layout-types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry`, `BranchResult`, `BranchResultInternal`, `LayoutSequenceFn`, `LayoutCtx` | Shared geometry, context, and result types for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-while.ts` | `layoutWhile` | While-loop layout for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
-| `activity-renderer-shapes.ts` | `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderHexagon`, `renderParallelogram`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderIfLabel` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `ASCENT_FRACTION`, `textLines`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `resolveSolidBucketColor`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
