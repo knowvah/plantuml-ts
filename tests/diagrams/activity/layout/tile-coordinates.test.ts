@@ -8,7 +8,7 @@ import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diam
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
-import { NORTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -101,6 +101,120 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
 
   it('totalHeight >= tile.height + 2 * LAYOUT_MARGIN', () => {
     expect(geo.totalHeight).toBeGreaterThanOrEqual(tile.height + 2 * LAYOUT_MARGIN);
+  });
+});
+
+// D7 / T6 (`plans/activity-if-tile-port/decisions.md` D7,
+// `FtileFactoryDelegatorAssembly.java:57-79`,
+// `FtileAssemblySimple.java:108-112`, `FtileWithConnection.java:69-74`): the
+// sibling link around a compound child is drawn AFTER that child's own
+// internals, not before. `a, X, c` with `X` a while (a stand-in for any
+// if/while/repeat/fork -- `walkWhile` pushes 2 internal edges, the same
+// generic path every compound child's walker takes) must read: X's
+// internals, then a->X, then (c is a leaf, no internals) X->c.
+describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T6)', () => {
+  it("a, X, c: edge run is X's internals, a->X, X->c", () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const header = new GtileDiamond('cond', bounder, theme);
+    const body = new GtileAction({ kind: 'action' as const, label: 'body' }, bounder, theme);
+    const whileTile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
+    const root = new GtileTopDown([a, whileTile, c], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    // node order is unaffected by D7 -- draws are node-then-its-own-edges
+    // per compound, walk order is unchanged: a, header, body, c.
+    expect(geo.nodes).toHaveLength(4);
+    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'body', 'c']);
+    expect(geo.edges).toHaveLength(4);
+
+    const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
+    const cTop = geo.nodes[3]!.y;
+    // X's own origin y === the header's y (`GtileWhile.headerOffsetY === 0`).
+    const xTop = geo.nodes[1]!.y;
+    // Pre-compression upper bound (raw `whileTile.height`) -- compression
+    // (T5, `compress-geometry.ts`) only ever REMOVES empty gaps, so a
+    // compressed y can only be <= this raw estimate, never past it; used
+    // below only as a `<=` ceiling, never as an exact expected value.
+    const xBottomRaw = xTop + whileTile.height;
+    // Body's own (post-compression) bottom -- a safe floor for X's true
+    // south-hook y, which sits at or below it (`GtileWhile`'s south hook is
+    // the whole tile's exit, past the body by `NODE_MARGIN_Y`).
+    const bodyBottom = geo.nodes[2]!.y + geo.nodes[2]!.height;
+
+    // edges[0..1]: X's own internals (forward + back) -- every point stays
+    // strictly inside X's own vertical span, never touching a leaf sibling.
+    for (const edgeIndex of [0, 1]) {
+      for (const p of geo.edges[edgeIndex]!.points) {
+        expect(p.y).toBeGreaterThanOrEqual(xTop);
+        expect(p.y).toBeLessThanOrEqual(xBottomRaw);
+      }
+    }
+
+    // edges[2]: a -> X, pushed only AFTER X's own internals above.
+    expect(geo.edges[2]!.points.some((p) => p.y === aBottom)).toBe(true);
+    expect(geo.edges[2]!.points.every((p) => p.y <= xTop)).toBe(true);
+
+    // edges[3]: X -> c (c has no internals of its own to precede it).
+    expect(geo.edges[3]!.points.some((p) => p.y === cTop)).toBe(true);
+    expect(geo.edges[3]!.points.every((p) => p.y >= bodyBottom)).toBe(true);
+  });
+
+  it('leaves-only sequence (a, b, c) keeps identity walk order, unaffected by D7', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+    const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
+    const root = new GtileTopDown([a, b, c], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'b', 'c']);
+    expect(geo.edges).toHaveLength(2);
+    const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
+    const bTop = geo.nodes[1]!.y;
+    const bBottom = geo.nodes[1]!.y + geo.nodes[1]!.height;
+    const cTop = geo.nodes[2]!.y;
+    expect(geo.edges[0]!.points[0]).toEqual(expect.objectContaining({ y: aBottom }));
+    expect(geo.edges[0]!.points[geo.edges[0]!.points.length - 1]).toEqual(expect.objectContaining({ y: bTop }));
+    expect(geo.edges[1]!.points[0]).toEqual(expect.objectContaining({ y: bBottom }));
+    expect(geo.edges[1]!.points[geo.edges[1]!.points.length - 1]).toEqual(expect.objectContaining({ y: cTop }));
+  });
+});
+
+// T6b (`FtileAssemblySimple.java:124-141`, `FtileGeometryMerger.java:44-56`):
+// siblings align on their own `left`, not the composite's centre.
+describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not centre (T6b)', () => {
+  it("a leaf's centre x lands on a wider sibling's left; the link is one vertical segment", () => {
+    // Stand-in for an `if` tile whose own `left` is 20px right of its
+    // `width / 2` (`width: 100` -> centre 50, `left: 70`).
+    const ifLike: Tile = {
+      kind: 'stub-if',
+      width: 100,
+      height: 40,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK ? { x: 70, y: 0 } : hook === SOUTH_HOOK ? { x: 70, y: 40 } : { x: 0, y: 20 },
+      hasPointOut: () => true,
+    };
+    const start: Tile = {
+      kind: 'stub-start',
+      width: 30,
+      height: 20,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK ? { x: 15, y: 0 } : hook === SOUTH_HOOK ? { x: 15, y: 20 } : { x: 0, y: 10 },
+      hasPointOut: () => true,
+    };
+    const root = new GtileTopDown([start, ifLike], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes).toHaveLength(2);
+    const startNode = geo.nodes[0]!;
+    const ifNode = geo.nodes[1]!;
+    // start's centre x (its own left, a leaf) lands on if's left.
+    expect(startNode.x + startNode.width / 2).toBeCloseTo(ifNode.x + 70, 5);
+
+    expect(geo.edges).toHaveLength(1);
+    const xs = geo.edges[0]!.points.map((p) => p.x);
+    // A single vertical segment: every waypoint shares one x.
+    expect(new Set(xs.map((v) => Math.round(v * 1e6) / 1e6)).size).toBe(1);
   });
 });
 

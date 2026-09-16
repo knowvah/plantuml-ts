@@ -14,7 +14,7 @@ import { renderNode } from './activity-renderer-shapes.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { arrowDirection, arrowHeadPoints } from './arrows-regular.js';
+import { arrowDirection, arrowHeadPoints, type ArrowDir } from './arrows-regular.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -150,6 +150,31 @@ function renderEdgeSegments(
   return out;
 }
 
+/**
+ * The FIRST segment whose direction equals `emphasize`, and its midpoint --
+ * `Worm#drawInternalOneColor`'s `drawn == false && Direction.fromVector(p1,
+ * p2) == emphasizeDirection` guard (`ftile/Worm.java:138-139`), which fires
+ * at most once per Worm regardless of how many later segments also match.
+ * Direction classification (including the diagonal/zero-length cases
+ * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
+ * `Direction.fromVector` (`utils/Direction.java:110-128`).
+ */
+function findEmphasisSegment(
+  pts: ReadonlyArray<{ x: number; y: number }>,
+  emphasize: ArrowDir,
+): { mid: { x: number; y: number }; dx: number; dy: number } | undefined {
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p1 = pts[i]!;
+    const p2 = pts[i + 1]!;
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    if (arrowDirection(dx, dy) === emphasize) {
+      return { mid: { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, dx, dy };
+    }
+  }
+  return undefined;
+}
+
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
@@ -166,32 +191,25 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // all. This port had generalised it to every segment of every edge.
   const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'));
 
-  // Arrowhead at last point, direction from second-to-last to last
+  // Arrowhead at last point, direction from second-to-last to last.
+  // `edge.arrowhead === false` mirrors a `null` end decoration
+  // (`ftile/Worm.java:161-168`'s `if (endDecoration != null)` never firing).
   const last = pts[pts.length - 1]!;
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
-  const arrow = arrowTip(last.x, last.y, dx, dy, edgeColor);
+  const arrow = edge.arrowhead === false ? '' : arrowTip(last.x, last.y, dx, dy, edgeColor);
 
-  // Optional mid-segment arrowhead (used for repeat back-edges)
-  let midArrowEl = '';
-  if (edge.midArrow === true && pts.length >= 2) {
-    let maxLen = 0;
-    let maxI = 1;
-    for (let i = 1; i < pts.length; i++) {
-      const p0 = pts[i - 1]!;
-      const p1 = pts[i]!;
-      const len = Math.sqrt((p1.x - p0.x) ** 2 + (p1.y - p0.y) ** 2);
-      if (len > maxLen) {
-        maxLen = len;
-        maxI = i;
-      }
+  // Emphasized mid-segment arrowhead (`Snake#emphasizeDirection`, D6) --
+  // drawn IN ADDITION to the terminal arrowhead, never instead of it
+  // (`Worm.java:138-183`: the loop's `drawn` flag and the post-loop
+  // `endDecoration` draw are independent).
+  let emphasizeEl = '';
+  if (edge.emphasize !== undefined) {
+    const seg = findEmphasisSegment(pts, edge.emphasize);
+    if (seg !== undefined) {
+      emphasizeEl = arrowTip(seg.mid.x, seg.mid.y, seg.dx, seg.dy, edgeColor);
     }
-    const segStart = pts[maxI - 1]!;
-    const segEnd = pts[maxI]!;
-    const midX = (segStart.x + segEnd.x) / 2;
-    const midY = (segStart.y + segEnd.y) / 2;
-    midArrowEl = arrowTip(midX, midY, segEnd.x - segStart.x, segEnd.y - segStart.y, edgeColor);
   }
 
   // Optional edge label near midpoint
@@ -202,7 +220,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
   }
 
-  return segments + arrow + midArrowEl + labelEl;
+  return segments + arrow + emphasizeEl + labelEl;
 }
 
 // ---------------------------------------------------------------------------

@@ -52,3 +52,18 @@ export function whileHexagonReservation(backFromX: number, backFromY: number, bo
   const y1bis = Math.max(backFromY, bodyBottomY) + HEXAGON_HALF_SIZE;
   return { x: backFromX, y: y1bis, width: HEXAGON_RESERVATION_WIDTH, height: HEXAGON_HALF_SIZE };
 }
+
+/**
+ * `ConnectionElse1`/`ConnectionElse2#drawU`'s own `UEmpty(5,
+ * Hexagon.hexagonHalfSize)` placement: `(x2, y2 - hexagonHalfSize)`, where
+ * `(x2, y2)` is that connector's own second endpoint (the merge diamond's
+ * D or B point, or -- `ConnectionElseNoDiamond` -- the tile's own point
+ * out). Both connectors draw the identical reservation shape at their own
+ * endpoint; a single function covers both call sites.
+ *
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:349
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:401
+ */
+export function ifElseHexagonReservation(x2: number, y2: number): Reservation {
+  return { x: x2, y: y2 - HEXAGON_HALF_SIZE, width: HEXAGON_RESERVATION_WIDTH, height: HEXAGON_HALF_SIZE };
+}

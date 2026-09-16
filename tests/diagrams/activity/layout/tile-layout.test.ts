@@ -9,7 +9,7 @@ import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
-import type { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
+import type { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import type { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -247,20 +247,24 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     // swimlane is read via `swimlaneSpread(ctx)` AFTER its branches are
     // fully parsed (`if-dispatch.ts` `tryIf`) -- lands on 'A', while the
     // body action, parsed while the lane was still 'B', lands on 'B'.
+    // Mission `activity-if-tile-port` T4: an empty else routes to `down`
+    // (`GtileIfDown`, D1), not the legacy single-diamond tile -- children
+    // are `[mainTile, diamond1]` (D1's `drawU` order), not `[diamond,
+    // branch]`.
     const ast = parseAst('@startuml\n|A|\nif (x) then (y)\n|B|\n:in-b;\n|A|\nendif\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('if');
     const tiles = tileNodes(ast.nodes, bounder, theme);
     expect(tiles).toHaveLength(1);
 
-    const ifTile = tiles[0] as unknown as GtileIf;
-    expect(ifTile.kind).toBe('gtile-if');
+    const ifTile = tiles[0] as unknown as GtileIfDown;
+    expect(ifTile.kind).toBe('gtile-if-down');
     expect(ifTile.swimlane).toBe('A');
 
-    // children = [diamond, thenBranch-wrapper]; the wrapper carries NO lane
-    // of its own -- it is a layout container over possibly-mixed-lane
-    // content, not a modeled AST node.
-    const thenWrapper = ifTile.children[1] as unknown as GtileTopDown;
+    // The main-flow branch wrapper carries NO lane of its own -- it is a
+    // layout container over possibly-mixed-lane content, not a modeled AST
+    // node.
+    const thenWrapper = ifTile.mainTile as unknown as GtileTopDown;
     expect(thenWrapper.kind).toBe('gtile-top-down');
     expect(thenWrapper.swimlane).toBeUndefined();
 

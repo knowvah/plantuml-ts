@@ -1297,7 +1297,17 @@ Ordered by how ready they are, not by size.
       splits a route into more pieces than our `routeEdge`, and merging can
       only REDUCE). File it as a faithfulness port, not a fix for a known
       symptom. Evidence: `.agent-notes/aedo-T1.md` Q3.
-    - **`activity-if-connector-draw-order`** — D7 of
+    - ~~**`activity-if-connector-draw-order`**~~ — **SUPERSEDED 2026-09-16 by
+      `activity-if-tile-port`** (`plans/activity-if-tile-port/`, branch
+      `feat/activity-if-tile-port`). The premise below was wrong: the live `if`
+      emitted ONE diamond and only `diamond -> branch` edges (`tileIf` passed a
+      null merge; `if-merge` rendered `''`), so there was no connector order to
+      fix. The port landed all three jar builders (`FtileIfWithLinks`,
+      `FtileIfDown`, `FtileIfLongHorizontal`) with their conns-list order, the
+      sibling-link-after-both-endpoints rule, and the top-down `left`
+      alignment. Aggregate **52067 -> 49647** over 268; the with-links
+      templates match the jar's element counts exactly. Original filing kept
+      for the record: D7 of
       `activity-edge-draw-order`. `FtileIfLongHorizontal.java:203-257`
       appends, per branch, a `ConnectionVerticalIn` then `ConnectionVerticalOut`
       (`:226-227`), then the inter-diamond horizontals (`:231-238`), then the
@@ -1322,13 +1332,89 @@ Ordered by how ready they are, not by size.
       ordered by our walk rather than the jar's conns list. `while` was
       checked in the same pass and AGREES (`FtileWhile.java:151-168`) — no
       work there. Evidence: `.agent-notes/aedo-T1.md` Q4.
+      **Widened 2026-09-16 by `activity-if-tile-port` (D6 amendment):** the
+      live repeat back-edge draws NO mid-arrow while the jar's golden does
+      (`Snake#emphasizeDirection(Direction.UP)`, arrow on the first UP
+      segment, `Worm.java:138-139,178-183`; `biguku-39-voxu233`). The renderer
+      now supports `ActivityEdgeGeo.emphasize`; setting `emphasize: 'up'` in
+      `tile-coordinates.ts`'s repeat case adds one polygon on 43 baseline
+      repeat fixtures — do it here, not in an if mission. Also: the repeat and
+      while walkers still centre their children by `width/2` where the jar
+      aligns on `left` (see `activity-while-repeat-left-alignment`).
+    - **`activity-while-repeat-left-alignment`** — filed 2026-09-16 by
+      `activity-if-tile-port` T6b/T6c. `GtileTopDown` now aligns siblings on
+      their in/out x (`FtileAssemblySimple.java:131-141`,
+      `FtileGeometryMerger.java:44-56`) and the three if tiles carry each
+      branch's own `left`, but `walk-while-branch.ts:35-52` and
+      `tile-coordinates.ts`'s `'gtile-repeat'` case still place header/body/
+      condition at `contentCenterX - width/2`. 19 baseline fixtures keep a
+      diagonal segment (5 while: `bareka-88-fusu160`, `nafaxo-62-boso912`,
+      `vamazo-19-tufu812`, `pixako-75-kumi821`, `ruzica-16-deli877`; 14
+      repeat, list in the aitp journal row "T6b | Diagonal-sibling-segment
+      scan"). Same fix shape as T6c: `FtileWhile`/`FtileRepeat`'s
+      `getTranslateFor` align on `left`.
+    - **`activity-diamond-sizing`** — filed by `activity-if-tile-port` T1 Q2
+      (stop 13). `GtileDiamond` (`tiles/gtile-diamond.ts:15-29`,
+      `DIAMOND_MIN=20`/`DIAMOND_LABEL_PAD=10`) is 4 px narrower and 16 px
+      taller than `FtileDiamondInside#calculateDimensionAlone`
+      (`vertical/FtileDiamondInside.java:104-116`: `max(label, 24x24) +
+      (24, 0)`) on every labelled while/repeat hexagon — measured on
+      `cemagu-66-vazo965` (width 183.35 vs 187.35, height 40 vs 24); text
+      measurement agrees to the pixel, only the constants differ. The if
+      condition already uses the jar's arithmetic (`GtileDiamondInside`); port
+      the same for while/repeat.
+    - **`activity-detach-as-stop`** — surfaced by `activity-if-tile-port` T7.
+      `tile-layout.ts` builds `kill`/`detach` as a `GtileStop` (a drawn double
+      ellipse plus an in-edge); the jar's `InstructionSimple.kill()` only
+      MUTATES the preceding action (`InstructionList.java:169-173`,
+      `InstructionSimple.java:124-126`) and draws no shape. +2 lines / +2
+      arrowheads / an extra stop shape on `gevaxi-80-tone223`,
+      `maketa-43-juja264` and every `detach` fixture.
+    - **`activity-note-sibling-links`** — surfaced by `activity-if-tile-port`
+      T7. Our AST models a note as a sibling `ActivityNode`, so the top-down
+      walker links INTO and OUT OF every note tile (`pifoni-76-duxa505`:
+      three note links the jar never draws); the jar attaches notes to their
+      instruction (`FtileWithNotes`) and draws no link. T6b already made
+      trailing notes transparent to `hasPointOut`; `laneIn`/`laneOut`
+      (`swimlane-lanes.ts`) have the same exposure (journaled at T6b). Fix at
+      the walker: skip note tiles when linking siblings.
+    - **`activity-if-with-links-sizing-6px`** — filed by `activity-if-tile-port`
+      T6b. `gakelo-29-neno787` and `vozane-63-kepe177` show a uniform +6 px
+      x-shift on 36/40 elements against the jar with element counts at
+      parity; the if tiles' `left` arithmetic was verified on the nine
+      template slugs, so the residual is elsewhere in `GtileIfWithLinks`'s
+      sizing (a candidate: `getYdelta1b`'s `hasTwoBranches ? 6 : 0`,
+      `cond/FtileIfWithDiamonds.java:162-166`, applied on the wrong axis or
+      branch). Diagnose with `--dump` before touching a constant.
+    - **`activity-if-d8-variants`** — the items `activity-if-tile-port` D8
+      filed and never built: `FtileIfLongVertical` (`!pragma useVerticalIf`,
+      0 fixtures), `switch` (`FtileSwitch*`, still on the legacy
+      `GtileSwitch` + `GConnectionSideThenVerticalThenSide`), notes attached
+      to an `if` (`opale`, `cond/FtileIfWithDiamonds.java:79-114`),
+      `conditionStyle` `EMPTY_DIAMOND`/`INSIDE_DIAMOND` and
+      `conditionEndStyle hline` (2 + 2 fixtures), the multi-snake cross-lane
+      `drawTranslate` shapes of `ConnectionHorizontalThenVertical` /
+      `ConnectionVerticalThenHorizontal` (`cond/FtileIfWithLinks.java:149-174,
+      232-286`), the laned `ConnectionHline` extent (`getMinmax`,
+      `FtileIfLongHorizontal.java:520-560` — the port emits the unlaned
+      extent), and the `->label->` in-labels of elseif diamonds
+      (`inlabelSizes`, no AST field). The parent's `activity-snake-merge`
+      (D5) explains every remaining per-tag surplus on the nine template
+      slugs (`UGraphicForSnake.java:146-165`).
+    - **`activity-multiline-condition-text-count`** — `copisa-69-xisi273`,
+      `vimako-25-mega336`, `pekefu-66-mepa144`: the jar emits one `<text>` per
+      wrapped line of a condition/branch label, ours one element with
+      `tspan`s (text 5 vs 7). Pre-existing renderer behaviour, noted by T3/
+      T4/T5, outside the if mission.
     - **`activity-stale-pushBranchConnectors-comment`** — one-line
       housekeeping. `src/diagrams/activity/layout/swimlane-placement.ts:343`
       still names `pushBranchConnectors`, which `activity-edge-draw-order` T3
       split into `pushBranchIn`/`pushBranchOut`. Prose cross-reference only,
       no code dependency. Left unfixed deliberately: that file is read-only
       for every task in that mission, so no task could touch it in scope.
-    - **`activity-diamond-count-shortfall`** — on 17 of the 30 alc fixtures
+    - **`activity-diamond-count-shortfall`** — **`if` half DONE 2026-09-16 by
+      `activity-if-tile-port`** (the merge rhombus is now drawn); the repeat
+      entry-diamond half is still open. Original: on 17 of the 30 alc fixtures
       the jar draws more diamond/hexagon polygons than ours (`if` fixtures
       1 vs 2; `tobajo-64-mipi810` 7 vs 14). Repeat ones are the entry
       diamond; the other 13 are unread. `plans/activity-lane-capture/

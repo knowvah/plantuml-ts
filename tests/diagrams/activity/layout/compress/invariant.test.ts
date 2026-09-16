@@ -304,17 +304,149 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     'racana-82-zece676 [14,15] polygon×polygon',
     'racana-82-zece676 [16,17] polygon×polygon',
     // Same class (`Worm.java:159-168`). Were `[47,49]`, `[47,51]`,
-    // `[49,51]` before T3 -- one coincident triple, all three at
-    // (436.62187499999993, 479.5) throughout.
-    'tobajo-64-mipi810 [50,51] polygon×polygon',
-    'tobajo-64-mipi810 [50,52] polygon×polygon',
-    'tobajo-64-mipi810 [51,52] polygon×polygon',
+    // `[49,51]` before T3, `[50,51]`/`[50,52]`/`[51,52]` before T4 --
+    // mission `activity-if-tile-port` T4 (2026-09-16): `tobajo-64-mipi810`
+    // is a `down` fixture (`fixtures.md`); `GtileIfDown` now emits its
+    // `if-split`/`if-label`/`if-merge` nodes (previously the legacy
+    // single-diamond tile, retired at T5, drew no merge diamond and no
+    // branch labels), inserting 16 new shapes ahead of this triple in
+    // `shapesOf`'s flat list. Same fixture, same coincident triple, same
+    // coordinates (436.62187499999993, 479.5), only the index shifted.
+    'tobajo-64-mipi810 [66,67] polygon×polygon',
+    'tobajo-64-mipi810 [66,68] polygon×polygon',
+    'tobajo-64-mipi810 [67,68] polygon×polygon',
+    // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
+    // java:100-112`): the swimlane title's rect never occupies x. Mission
+    // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
+    // `if` that switches swimlane in its `else`
+    // (`Web Service|if..stop / else |Fournisseur|:foo2;`); `GtileTopDown`
+    // aligning its two top-level children (`start`-chain, `if`) on `left`
+    // instead of centring shifts both branch-out-drop x-coordinates
+    // (12->12 unmoved, 126->118 by -8, matching the if's own left shift)
+    // enough that the post-compression `empty` ignoreX rects now project
+    // onto the swimlane title's y-span. Dumped directly (not assumed):
+    // both pairs are `hard=false` (`occupiesOn(a, 'x')` is false on the
+    // `empty` shape in both), so this is the pinned non-hard class, not a
+    // hard violation.
+    'lukoxa-16-cecu095 [10,14] empty×centeredText',
+    'lukoxa-16-cecu095 [11,14] empty×centeredText',
+  ].sort();
+
+  /**
+   * A hard overlap (both shapes DO occupy both axes -- `isHard` below is
+   * `true`) that is NOT a geometry defect: a proven floating-point
+   * rounding artifact at an EXACT-touch boundary, not a real intersection.
+   * Kept separate from `ALLOWED_NEW_OVERLAPS` because that list's own
+   * class (a shape not occupying one axis, `Worm.java:159-168` /
+   * `UGraphicCompressOnXorY.java:100-112`) does not apply here -- this
+   * pair fails `isHard`'s test in the "should be forbidden" direction, so
+   * the attribution has to justify the exception on its own terms.
+   *
+   * `kitupi-32-jexo155 [0,1] polygon×text` (mission `activity-if-tile-port`
+   * T3): shape 0 is the `if-split` hexagon, shape 1 its own west
+   * `if-label` (the `then`-branch's `(yes)` label; `if-label` nodes did not
+   * exist before T3, so this pair is new by construction, not a
+   * regression in existing geometry).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:98-99
+   *   -- `west.drawU(ug.apply(new UTranslate(-dimWest.getWidth(), ...)))`:
+   *   the west label's OWN right edge is placed at the hexagon's local
+   *   x=0 -- EXACTLY zero gap by design, not merely close.
+   *
+   * Confirmed (not assumed) with a direct dump of `shapesOf`'s shape[0]/
+   * shape[1] on this fixture, before and after compression:
+   * - `before` (pre-compression): hexagon.x === label.x + label.width ===
+   *   `173.2156249999999` on BOTH sides -- the IDENTICAL float, not merely
+   *   close. `overlaps()`'s strict `<` requires one bound to be less than
+   *   the other; two equal floats never satisfy that, so `before` has no
+   *   overlap here (confirmed: `beforePairs` does not contain `[0,1]`).
+   * - `after` (post-compression): hexagon.x = `163.21562499999993`,
+   *   label.x + label.width = `163.21562499999995` -- the SAME nominal
+   *   10px leftward shift applied to both shapes, but through two
+   *   independent `compress-geometry.ts` transform calls that round
+   *   ~2e-14 apart. That sub-epsilon gap is what flips the pair from
+   *   touching to `overlaps()`-true.
+   *
+   * Not fixed at the source (`compress-geometry.ts`/`slot-finder.ts`'s
+   * `overlaps()`, both outside every task's write-set in this mission): an
+   * epsilon tolerance there would also silently absorb a genuine
+   * sub-epsilon overlap elsewhere in the 268-fixture corpus, which is a
+   * strictly worse trade than pinning this one proven-benign pair by its
+   * exact fixture + index + kind.
+   *
+   * `boxoto-53-sifo232 [27,29]` and `[38,40] polygon×text` (mission
+   * `activity-if-tile-port` T6b): the SAME class, mirrored to the EAST
+   * label. Shape 27/38 is each an `if-split` hexagon (`if-split-28`,
+   * `if-split-39`); shape 29/40 its own east `if-label`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:101-102
+   *   -- `east.drawU(ug.apply(new UTranslate(dimTotal.getWidth(), ...)))`:
+   *   the east label's OWN left edge is placed at the hexagon's local
+   *   x=width -- EXACTLY zero gap by design, the mirror of the west case
+   *   above.
+   *
+   * T6b (`GtileTopDown` aligning children on `left` instead of centring on
+   * width) changes the ABSOLUTE x-translate applied to these two if-tiles
+   * within their containing top-down, which is what exposes this pair:
+   * the local hexagon/label offset is unconditionally zero by construction
+   * regardless of translate, but `compress-geometry.ts`'s two independent
+   * transform calls (one per shape) round the shifted absolute x
+   * ~1.1e-13 apart. Confirmed with a direct dump (not assumed):
+   * - `before` (pre-compression): `hexagon.x + hexagon.width ===
+   *   label.x` bit-identical on both pairs (`568.27812500000004547` and
+   *   `646.58750000000009095` respectively) -- no overlap
+   *   (`beforePairs` does not contain either key).
+   * - `after` (post-compression): `560.67812500000013642` vs
+   *   `560.67812500000002274`, and `638.98750000000018190` vs
+   *   `638.98750000000006821` -- sub-epsilon gaps, same mechanism as
+   *   `kitupi-32-jexo155` above, not a geometry defect.
+   *
+   * `lopone-15-xiki477 [7,20] polygon×polygon` (mission `activity-if-tile-
+   * port` T6c): the SAME class again, mirrored to an edge's own arrowhead
+   * instead of an `if-label`. Shape 7 is node 7, `if-split-8` -- a nested
+   * `if`'s own diamond1 hexagon, itself the branch content of an outer
+   * `elseif`-row (`FtileIfLongHorizontal`). Shape 20 is edge 6's terminal
+   * arrowhead (`shapesOf`'s node-shapes-then-edge-shapes ordering: 14
+   * nodes, so edge 0's arrowhead starts at index 14); edge 6 carries the
+   * `'if-vertical-in'` tag, i.e. `ConnectionVerticalIn`:
+   * `diamond_i.pointOut -> tile_i.pointIn`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:389-436
+   *   -- `ConnectionVerticalIn`'s own inner class, `tile_i.pointIn` is
+   *   `tile_i`'s own `FtileGeometry` `getPointIn()`, unmodified.
+   *
+   * `tile_i` here is a bare `FtileIfDown` (no further wrapping): its own
+   * reported `left` ALWAYS lands exactly on its own `diamond1`'s centre,
+   * by construction -- `getTranslateDiamond1`'s `x1 = dimTotal.getLeft() -
+   * dimDiamond1.getLeft()` places `diamond1` so that `diamond1.left +
+   * dimDiamond1.getLeft() === dimTotal.getLeft()` always, independent of
+   * any branch asymmetry (T6c only changes `dimTotal.getLeft()`'s VALUE,
+   * never this identity).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:624-637
+   *   -- `getTranslateForThen`/`getTranslateDiamond1`, the identity above.
+   *
+   * So `ConnectionVerticalIn`'s arrowhead landing exactly on the nested
+   * `if`'s own hexagon top-centre is by design, not a defect -- T6c's fix
+   * is what makes `tile_i.pointIn` correctly resolve to that exact point
+   * (previously off by the `outer/2` bug), which is what newly exposes the
+   * pre-existing rounding artifact here. Confirmed with a direct dump:
+   * - `before`: hexagon top `y === 132` and arrowhead-box `y(122) +
+   *   height(10) === 132` -- bit-identical integers, no overlap
+   *   (`beforePairs` does not contain `[7,20]`).
+   * - `after`: hexagon `y === 126.05555555555554`, arrowhead `y(
+   *   116.05555555555556) + height(10) === 126.05555555555556` -- a
+   *   ~1.8e-14 gap, same two-independent-transform-calls mechanism as
+   *   `kitupi-32-jexo155` above, not a geometry defect.
+   */
+  const ALLOWED_HARD_OVERLAPS = [
+    'kitupi-32-jexo155 [0,1] polygon×text',
+    'boxoto-53-sifo232 [27,29] polygon×text',
+    'boxoto-53-sifo232 [38,40] polygon×text',
+    'lopone-15-xiki477 [7,20] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
     const measurer = new DeterministicMeasurer();
     const hardViolations: string[] = [];
     const allowed: string[] = [];
+    const allowedHard: string[] = [];
     for (const fixture of baselineFixtures) {
       const both = layoutBeforeAfter(readMarkup(fixture), measurer);
       if (both === null) continue;
@@ -329,11 +461,17 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
         const b = after[j]!;
         const isHard = occupiesOn(a, 'x') && occupiesOn(b, 'x') && occupiesOn(a, 'y') && occupiesOn(b, 'y');
         const entry = `${fixture.slug} [${i},${j}] ${a.kind}×${b.kind}`;
-        if (isHard) hardViolations.push(entry);
-        else allowed.push(entry);
+        if (!isHard) {
+          allowed.push(entry);
+        } else if (ALLOWED_HARD_OVERLAPS.includes(entry)) {
+          allowedHard.push(entry);
+        } else {
+          hardViolations.push(entry);
+        }
       }
     }
     expect(hardViolations).toEqual([]);
     expect(allowed.sort()).toEqual(ALLOWED_NEW_OVERLAPS);
+    expect(allowedHard.sort()).toEqual(ALLOWED_HARD_OVERLAPS);
   });
 });

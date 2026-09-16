@@ -36,10 +36,6 @@ describe('shapesOf — node kinds that draw nothing', () => {
     expect(shapesOf(baseInput({ nodes: [node('break')] }))).toHaveLength(0);
   });
 
-  it('if-merge emits no shape (FtileEmpty#drawU draws nothing)', () => {
-    expect(shapesOf(baseInput({ nodes: [node('if-merge')] }))).toHaveLength(0);
-  });
-
   it('split-bar emits no shape (FtileThinSplit draws a ULine, never occupies)', () => {
     expect(shapesOf(baseInput({ nodes: [node('split-bar')] }))).toHaveLength(0);
   });
@@ -80,6 +76,23 @@ describe('shapesOf — condition diamonds/hexagons', () => {
     const n = node('repeat-cond', { x: 10, y: 20, width: 40, height: 24 });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
     expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 20, width: 40, height: 24 }]);
+  });
+});
+
+describe('shapesOf — if-merge and if-label (D2/D3)', () => {
+  it('if-merge is a polygon spanning its own 24x24 box (Hexagon.java:49-56)', () => {
+    const n = node('if-merge', { x: 10, y: 20, width: 24, height: 24 });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 20, width: 24, height: 24 }]);
+  });
+
+  it('if-label is a text box at the node origin, measured with the bounder', () => {
+    const n = node('if-label', { x: 10, y: 20, width: 12, height: 11, label: 'yes' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    // bounder.getDimension('yes', ARROW_FONT_SIZE=11) = { width: 3*6, height: 11 };
+    // baseline = node.y + 11 * (1 - 1/4.5), Q5's ASCENT_FRACTION formula
+    // (`activity-renderer-shapes.ts:76`).
+    expect(shapes).toEqual([{ kind: 'text', x: 10, y: 20 + 11 * (1 - 1 / 4.5), width: 18, height: 11 }]);
   });
 });
 
@@ -161,19 +174,44 @@ describe('shapesOf — edges', () => {
     expect(shapes[0]!.polygonSkipMode).toBeUndefined();
   });
 
-  it('midArrow adds a second polygon at the longest segment midpoint', () => {
+  it('emphasize adds a second polygon at the FIRST matching segment midpoint', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
         { x: 100, y: 0 },
         { x: 100, y: 10 },
       ],
-      midArrow: true,
+      emphasize: 'right',
     };
     const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
-    // terminal arrowhead (last point) + mid arrowhead (longest segment: (0,0)->(100,0))
+    // terminal arrowhead (last point) + emphasized arrowhead (first RIGHT
+    // segment: (0,0)->(100,0))
     expect(shapes).toHaveLength(2);
     expect(shapes[1]!.kind).toBe('polygon');
+  });
+
+  it('emphasize with no matching segment adds no second polygon', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      emphasize: 'up',
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    expect(shapes).toHaveLength(1);
+  });
+
+  it('arrowhead: false drops the terminal arrowhead entirely', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+      ],
+      arrowhead: false,
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    expect(shapes).toHaveLength(0);
   });
 
   it('an edge label is measured with the bounder and placed like renderEdgeLabel (no color)', () => {

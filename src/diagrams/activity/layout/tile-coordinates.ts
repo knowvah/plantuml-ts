@@ -9,7 +9,9 @@ import type { GtileAction } from '../tiles/gtile-action.js';
 import type { GtileNote } from '../tiles/gtile-note.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
-import type { GtileIf } from '../tiles/gtile-if.js';
+import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
+import type { GtileIfDown } from '../tiles/gtile-if-down.js';
+import type { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { GtileRepeat } from '../tiles/gtile-repeat.js';
 import type { GtileFork } from '../tiles/gtile-fork.js';
@@ -22,6 +24,9 @@ import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
+import { walkIfWithLinks } from './walk-if-with-links.js';
+import { walkIfDown } from './walk-if-down.js';
+import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
@@ -156,80 +161,71 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     }
 
     case 'gtile-top-down': {
+      // D7 (`plans/activity-if-tile-port/decisions.md`,
+      // `.agent-notes/aicdo-planning.md` "the jar draws EVERY sibling link
+      // after BOTH endpoints"): the vertical link between two siblings is
+      // added AROUND `FtileAssemblySimple(tile1, tile2)` by
+      // `FtileFactoryDelegatorAssembly#assembly`
+      // (`vcompact/FtileFactoryDelegatorAssembly.java:57-79`), whose own
+      // `drawU` draws only the two tiles, no connection
+      // (`FtileAssemblySimple.java:108-112`); `FtileWithConnection#drawU`
+      // draws its delegate BEFORE its own connections
+      // (`FtileWithConnection.java:69-74`). So for siblings `a, X, c` the
+      // jar's run is `X's internals, a->X, c's internals, X->c`: each link
+      // is pushed only after the child it points TO has been fully walked,
+      // not before the child it points FROM.
+      // T6b (`FtileAssemblySimple.java:131-141`): children are NOT centred
+      // on the composite's width -- each child i is translated by
+      // `left - child_i.left` so every child's own in/out x lands under the
+      // merged `left` (`GtileTopDown`'s `childOffsetsX`).
       const t = tile as unknown as GtileTopDown;
       if (t.children.length === 0) return;
-      const centerX = x + tile.width / 2;
+      let prevChild: Tile | null = null;
+      let prevX = 0;
+      let prevY = 0;
       for (let i = 0; i < t.children.length; i++) {
         const child = t.children[i]!;
         const childY = y + t.childOffsets[i]!;
-        const childX = centerX - child.width / 2;
+        const childX = x + t.childOffsetsX[i]!;
         walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
-        if (i < t.children.length - 1) {
-          const next = t.children[i + 1]!;
-          const nextY = y + t.childOffsets[i + 1]!;
-          const nextX = centerX - next.width / 2;
-          const from = { x: childX + child.getCoord(SOUTH_HOOK).x, y: childY + child.getCoord(SOUTH_HOOK).y };
-          const to = { x: nextX + next.getCoord(NORTH_HOOK).x, y: nextY + next.getCoord(NORTH_HOOK).y };
+        if (prevChild !== null) {
+          const from = { x: prevX + prevChild.getCoord(SOUTH_HOOK).x, y: prevY + prevChild.getCoord(SOUTH_HOOK).y };
+          const to = { x: childX + child.getCoord(NORTH_HOOK).x, y: childY + child.getCoord(NORTH_HOOK).y };
           pushEdge(
             out,
             new GConnectionVerticalDown().getPoints(from, to),
-            laneOut(child, myLane),
-            laneIn(next, myLane),
+            laneOut(prevChild, myLane),
+            laneIn(child, myLane),
           );
         }
+        prevChild = child;
+        prevX = childX;
+        prevY = childY;
       }
       return;
     }
 
-    case 'gtile-if': {
-      const t = tile as unknown as GtileIf;
-      const centerX = x + tile.width / 2;
-      const hasMerge = t.mergeOffsetY !== null;
-      const rawChildren = t.children;
-      const diamond = rawChildren[0]!;
-      const branches = hasMerge ? rawChildren.slice(1, -1) : rawChildren.slice(1);
-      const mergeDiamond = hasMerge ? rawChildren[rawChildren.length - 1]! : null;
-
-      const dX = centerX - diamond.width / 2;
-      const dY = y + t.diamondOffsetY;
-      walkTile(diamond, dX, dY, { kindHint: 'if-split', lane: myLane }, out);
-
-      for (let i = 0; i < branches.length; i++) {
-        const branch = branches[i]!;
-        const bX = x + t.branchOffsets[i]!;
-        const bY = y + t.branchOffsetY;
-        walkTile(branch, bX, bY, { kindHint: null, lane: myLane }, out);
-
-        const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
-        const to = { x: bX + branch.getCoord(NORTH_HOOK).x, y: bY + branch.getCoord(NORTH_HOOK).y };
-        pushEdge(
-          out,
-          new GConnectionSideThenVerticalThenSide().getPoints(from, to),
-          laneOut(diamond, myLane),
-          laneIn(branch, myLane),
-        );
-
-        if (mergeDiamond !== null) {
-          const mX = centerX - mergeDiamond.width / 2;
-          const mY = y + t.mergeOffsetY!;
-          const mFrom = { x: bX + branch.getCoord(SOUTH_HOOK).x, y: bY + branch.getCoord(SOUTH_HOOK).y };
-          const mTo = { x: mX + mergeDiamond.getCoord(NORTH_HOOK).x, y: mY + mergeDiamond.getCoord(NORTH_HOOK).y };
-          pushEdge(
-            out,
-            new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
-            laneOut(branch, myLane),
-            laneIn(mergeDiamond, myLane),
-          );
-        }
-      }
-
-      if (mergeDiamond !== null) {
-        const mX = centerX - mergeDiamond.width / 2;
-        const mY = y + t.mergeOffsetY!;
-        walkTile(mergeDiamond, mX, mY, { kindHint: 'if-merge', lane: myLane }, out);
-      }
+    case 'gtile-if-with-links':
+      // D1/D5: `FtileIfWithLinks`'s own walker, split into
+      // `walk-if-with-links.ts` for the same reason `walkForkOrSplit`/
+      // `walkWhile` already are.
+      walkIfWithLinks(tile as unknown as GtileIfWithLinks, x, y, myLane, out);
       return;
-    }
+
+    case 'gtile-if-down':
+      // D1/D5: `FtileIfDown`'s own walker, split into `walk-if-down.ts`
+      // for the same reason `walkIfWithLinks` already is.
+      walkIfDown(tile as unknown as GtileIfDown, x, y, myLane, out);
+      return;
+
+    case 'gtile-if-long-horizontal':
+      // D1/D5: `FtileIfLongHorizontal`'s own walker, split into
+      // `walk-if-long-horizontal.ts` for the same reason `walkIfDown`/
+      // `walkIfWithLinks` already are. The legacy single-diamond tile and
+      // this switch's own single-diamond case are retired here (T5, the
+      // task that lands the last if-builder, D1).
+      walkIfLongHorizontal(tile as unknown as GtileIfLongHorizontal, x, y, myLane, out);
+      return;
 
     case 'gtile-while':
       walkWhile(tile as unknown as GtileWhile, x, y, myLane, out);

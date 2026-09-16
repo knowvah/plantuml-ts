@@ -70,8 +70,14 @@ export interface EdgeMeta {
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
- * other connection type uses. */
-export type EdgeShape = 'parallel-in' | 'parallel-out' | 'default';
+ * other connection type uses. `'if-vertical-in'` (mission `activity-if-
+ * tile-port` T1 Q4, T5): `ConnectionVerticalIn#drawTranslate`'s own
+ * `middle = mp1a.y + 4` -- numerically identical to `'parallel-in'` but a
+ * DIFFERENT Java class (`FtileIfLongHorizontal`, not a fork/split
+ * builder), so it gets its own semantically-named tag rather than reusing
+ * the fork one.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:419-435 */
+export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default';
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -348,6 +354,7 @@ function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
 function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
   switch (shape) {
     case 'parallel-in':
+    case 'if-vertical-in':
       return mp1.y + 4;
     case 'parallel-out':
       return mp2.y - 14;

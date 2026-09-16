@@ -38,7 +38,23 @@ export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
   color?: string;
-  midArrow?: boolean;
+  /**
+   * `false` = draw no end decoration. `Worm#drawInternalOneColor`'s
+   * `if (endDecoration != null)` guard (`ftile/Worm.java:161-168`) never
+   * fires when the builder passes a `null` end decoration -- e.g. an empty
+   * branch (`cond/FtileIfWithLinks.java:96-101`), `…Direct`
+   * (`FtileIfWithLinks.java:288-367`) or `ConnectionHline`.
+   */
+  arrowhead?: false;
+  /**
+   * `Worm#drawInternalOneColor`'s `emphasizeDirection` parameter (set via
+   * `Snake#emphasizeDirection`): an arrow is drawn at the midpoint of the
+   * FIRST segment whose `Direction.fromVector(p1, p2)` equals this value,
+   * in addition to (never instead of) the terminal arrowhead.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:138-139,178-183
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:112-113
+   */
+  emphasize?: 'up' | 'down' | 'left' | 'right';
 }
 
 export interface SwimlaneGeo {

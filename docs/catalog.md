@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1095 modules · 3968 exported names.
+1105 modules · 3995 exported names.
 
 ## `src/`
 
@@ -931,7 +931,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-layout-types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry`, `BranchResult`, `BranchResultInternal`, `LayoutSequenceFn`, `LayoutCtx` | Shared geometry, context, and result types for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-while.ts` | `layoutWhile` | While-loop layout for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
-| `activity-renderer-shapes.ts` | `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderHexagon`, `renderParallelogram`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderIfLabel` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `ASCENT_FRACTION`, `textLines`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `resolveSolidBucketColor`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
@@ -952,15 +954,19 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
+| `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
-| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
+| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-lanes.ts` | `laneAt`, `laneIn`, `laneOut` | The `laneAt`/`laneIn`/`laneOut` lane-inheritance helpers, split out of `swimlane-placement.ts` (`plans/activity-lane-capture` T2) to keep that file under the 500-line hook. |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+| `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
+| `walk-if-long-horizontal.ts` | `walkIfLongHorizontal` | The `'gtile-if-long-horizontal'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-down.ts`/`walk-if-with-links.ts` already are (mission `activity-if-tile-port` D5). |
+| `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
 | `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
 ## `src/diagrams/activity/layout/compress/`
@@ -991,11 +997,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `gtile-action.ts` | `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
+| `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `GtileDiamondInside` |  |
+| `gtile-diamond-inside2.ts` | `DiamondInside2Side`, `DiamondInside2Labels`, `GtileDiamondInside2` |  |
 | `gtile-diamond.ts` | `GtileDiamond` |  |
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
 | `gtile-group.ts` | `GtileGroup` |  |
-| `gtile-if.ts` | `GtileIf` |  |
+| `gtile-if-down.ts` | `GtileIfDown` |  |
+| `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
+| `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
 | `gtile-kill.ts` | `GtileKill` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
 | `gtile-note.ts` | `GtileNote` |  |
