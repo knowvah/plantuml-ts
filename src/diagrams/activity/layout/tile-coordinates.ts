@@ -237,13 +237,14 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       const body = rawChildren[0]!;
       const condition = rawChildren[1]!;
       const backwardBody = rawChildren.length > 2 ? rawChildren[2]! : null;
-      const contentCenterX = x + tile.width / 2;
+      // Each child sits so its OWN `left` lands under the tile's merged
+      // `left` (`FtileRepeat.java:730-765`), never centred by `width / 2`.
 
-      const bodyX = contentCenterX - body.width / 2;
+      const bodyX = x + t.bodyOffsetX;
       const bodyY = y + t.bodyOffsetY;
       walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
 
-      const condX = contentCenterX - condition.width / 2;
+      const condX = x + t.conditionOffsetX;
       const condY = y + t.conditionOffsetY;
 
       const fFrom = { x: bodyX + body.getCoord(SOUTH_HOOK).x, y: bodyY + body.getCoord(SOUTH_HOOK).y };
@@ -258,7 +259,7 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       walkTile(condition, condX, condY, { kindHint: 'repeat-cond', lane: myLane }, out);
 
       if (backwardBody !== null) {
-        const bwX = contentCenterX - backwardBody.width / 2;
+        const bwX = x + t.backwardOffsetX!;
         const bwY = y + t.backwardOffsetY!;
         const bwFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
         const bwTo = { x: bwX + backwardBody.getCoord(NORTH_HOOK).x, y: bwY + backwardBody.getCoord(NORTH_HOOK).y };
