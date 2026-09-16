@@ -13,6 +13,6 @@ draw a diagonal sibling segment today** — 88 `if` rows and 13 non-if ones
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6b | `GtileTopDown` aligns children on their in/out x (`left`) per `FtileAssemblySimple`; trailing note tiles do not decide `hasPointOut` | typescript-pro | `src/diagrams/activity/tiles/gtile-top-down.ts`, `layout/tile-coordinates.ts` (top-down case only); `tests/diagrams/activity/tiles/gtile-top-down.test.ts`, `layout/tile-coordinates.test.ts`, `layout/tile-layout.test.ts`, `tests/unit/activity/layout.test.ts`, `compress/invariant.test.ts` ONLY where the geometry breaks them; `measurements/t6b.json` | T6 | [ ] |
+| T6b | `GtileTopDown` aligns children on their in/out x (`left`) per `FtileAssemblySimple`; trailing note tiles do not decide `hasPointOut` | typescript-pro | `src/diagrams/activity/tiles/gtile-top-down.ts`, `layout/tile-coordinates.ts` (top-down case only); `tests/diagrams/activity/tiles/gtile-top-down.test.ts`, `layout/tile-coordinates.test.ts`, `layout/tile-layout.test.ts`, `tests/unit/activity/layout.test.ts`, `compress/invariant.test.ts` ONLY where the geometry breaks them; `measurements/t6b.json` | T6 | [x] |
 
 Spec: [`T6b-topdown-left-alignment.md`](T6b-topdown-left-alignment.md).
