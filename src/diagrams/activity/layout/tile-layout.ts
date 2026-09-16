@@ -119,11 +119,12 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
 
 /**
  * Dispatches to `conditional-builder.ts#buildIf` (mission
- * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`;
- * `'long-horizontal'` still falls back to the legacy `GtileIf` until T5
- * lands its own builder. `laneOrder` (`ast.swimlanes`, this diagram's real
- * declaration order) is threaded down for `down`'s own `ConnectionElse1`
- * vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
+ * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`,
+ * `'down'` builds `GtileIfDown`, `'long-horizontal'` builds
+ * `GtileIfLongHorizontal` (T5, the last of the three -- the legacy
+ * single-diamond tile is retired). `laneOrder` (`ast.swimlanes`, this
+ * diagram's real declaration order) is threaded down for `down`'s own
+ * `ConnectionElse1` vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
  * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
  */
 function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {

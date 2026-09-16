@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { buildIf, ifBuilderOf } from '../../../../src/diagrams/activity/layout/conditional-builder.js';
 import type { ActivityIf, ActivityNode } from '../../../../src/diagrams/activity/ast.js';
-import { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
 import { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../../../../src/diagrams/activity/tiles/gtile-if-with-links.js';
+import { GtileIfLongHorizontal } from '../../../../src/diagrams/activity/tiles/gtile-if-long-horizontal.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
@@ -89,8 +89,15 @@ describe('buildIf — dispatch to the right tile class', () => {
     expect(tile).toBeInstanceOf(GtileIfDown);
   });
 
-  it('long-horizontal still builds the legacy GtileIf (until T5)', () => {
+  it('long-horizontal builds GtileIfLongHorizontal (mission activity-if-tile-port T5)', () => {
     const tile = buildIf(makeIf([action('a')], [], [{ condition: 'c2', body: [action('b')] }]), bounder, theme);
-    expect(tile).toBeInstanceOf(GtileIf);
+    expect(tile).toBeInstanceOf(GtileIfLongHorizontal);
+  });
+
+  it('long-horizontal builds one diamond per then + elseif branch', () => {
+    const node = makeIf([action('a')], [action('c')], [{ condition: 'c2', body: [action('b')] }]);
+    const tile = buildIf(node, bounder, theme) as GtileIfLongHorizontal;
+    expect(tile.diamonds).toHaveLength(2);
+    expect(tile.tiles).toHaveLength(2);
   });
 });

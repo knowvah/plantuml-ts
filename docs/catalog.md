@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1103 modules · 3990 exported names.
+1105 modules · 3995 exported names.
 
 ## `src/`
 
@@ -954,7 +954,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
-| `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and the `with-links` builder (`buildIf`) -- `down`/`long-horizontal` still fall back to the legacy `GtileIf` (T4/T5 replace them). |
+| `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
@@ -965,6 +965,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
+| `walk-if-long-horizontal.ts` | `walkIfLongHorizontal` | The `'gtile-if-long-horizontal'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-down.ts`/`walk-if-with-links.ts` already are (mission `activity-if-tile-port` D5). |
 | `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
 | `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
@@ -997,13 +998,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-action.ts` | `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `GtileDiamondInside` |  |
+| `gtile-diamond-inside2.ts` | `DiamondInside2Side`, `DiamondInside2Labels`, `GtileDiamondInside2` |  |
 | `gtile-diamond.ts` | `GtileDiamond` |  |
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
 | `gtile-group.ts` | `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
+| `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
 | `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
-| `gtile-if.ts` | `GtileIf` |  |
 | `gtile-kill.ts` | `GtileKill` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
 | `gtile-note.ts` | `GtileNote` |  |

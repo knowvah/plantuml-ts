@@ -308,10 +308,10 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // mission `activity-if-tile-port` T4 (2026-09-16): `tobajo-64-mipi810`
     // is a `down` fixture (`fixtures.md`); `GtileIfDown` now emits its
     // `if-split`/`if-label`/`if-merge` nodes (previously the legacy
-    // `GtileIf` drew no merge diamond and no branch labels), inserting 16
-    // new shapes ahead of this triple in `shapesOf`'s flat list. Same
-    // fixture, same coincident triple, same coordinates
-    // (436.62187499999993, 479.5), only the index shifted.
+    // single-diamond tile, retired at T5, drew no merge diamond and no
+    // branch labels), inserting 16 new shapes ahead of this triple in
+    // `shapesOf`'s flat list. Same fixture, same coincident triple, same
+    // coordinates (436.62187499999993, 479.5), only the index shifted.
     'tobajo-64-mipi810 [66,67] polygon×polygon',
     'tobajo-64-mipi810 [66,68] polygon×polygon',
     'tobajo-64-mipi810 [67,68] polygon×polygon',

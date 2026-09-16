@@ -248,8 +248,9 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     // fully parsed (`if-dispatch.ts` `tryIf`) -- lands on 'A', while the
     // body action, parsed while the lane was still 'B', lands on 'B'.
     // Mission `activity-if-tile-port` T4: an empty else routes to `down`
-    // (`GtileIfDown`, D1), not the legacy `GtileIf` -- children are
-    // `[mainTile, diamond1]` (D1's `drawU` order), not `[diamond, branch]`.
+    // (`GtileIfDown`, D1), not the legacy single-diamond tile -- children
+    // are `[mainTile, diamond1]` (D1's `drawU` order), not `[diamond,
+    // branch]`.
     const ast = parseAst('@startuml\n|A|\nif (x) then (y)\n|B|\n:in-b;\n|A|\nendif\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('if');
