@@ -253,16 +253,41 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
   // `polygonSkipMode: 'x'` (the pinned cross-lane-arrowhead class,
   // `Worm.java:159-168` -- the Worm skips the x-axis on a polygon in this
   // mode, so it never occupies x and a flip there is not a violation).
+  //
+  // Mission `activity-edge-draw-order` T2 (2026-09-15): rule (b) draws the
+  // edge run in swimlane pass order (`edge-draw-order.ts`,
+  // `Swimlanes.java:328-352`), which permutes `geometry.edges` and
+  // `edgeMeta` together and therefore renumbers every EDGE-derived shape in
+  // `shapesOf`'s flat list (nodes first, then edges, then reservations and
+  // titles -- `shapes-of.ts:370-382`). Same fixtures, same pair KINDS, same
+  // count (9 -> 9): only the indices move. Verified pair by pair against a
+  // HEAD (`d33799dc`) worktree running this same harness -- each pair below
+  // has byte-identical coordinates and `polygonSkipMode` on both sides of
+  // the change, and each fixture's total shape count is unchanged
+  // (`bixefi` 19, `bugaja` 21, `misiji` 20, `racana` 26, `tobajo` 61), so
+  // no pair is NEW and no shape was added or dropped. Per-entry cites below.
   const ALLOWED_NEW_OVERLAPS = [
-    'bixefi-77-moki051 [6,8] polygon×polygon',
-    'bugaja-31-jaso630 [7,9] polygon×polygon',
+    // Cross-lane arrowheads, both `polygonSkipMode: 'x'` -- the Worm skips
+    // the x-axis on such a polygon, so it never occupies x and a flip there
+    // is not a violation (`ftile/Worm.java:159-168`). Was `[6,8]` at HEAD.
+    'bixefi-77-moki051 [7,9] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Was `[7,9]` at HEAD.
+    'bugaja-31-jaso630 [9,11] polygon×polygon',
+    // The swimlane title's rect never occupies x
+    // (`klimt/UGraphicCompressOnXorY.java:100-112`, the
+    // `ignoreForCompressionOnX` band of `Swimlanes.java:358-367`).
+    // Unmoved: both shapes follow the whole edge run in `shapesOf`'s list.
     'misiji-27-buje656 [14,18] empty×centeredText',
     'misiji-27-buje656 [15,18] empty×centeredText',
-    'racana-82-zece676 [7,9] polygon×polygon',
-    'racana-82-zece676 [13,15] polygon×polygon',
-    'tobajo-64-mipi810 [31,38] polygon×polygon',
-    'tobajo-64-mipi810 [31,45] polygon×polygon',
-    'tobajo-64-mipi810 [38,45] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Were `[7,9]` and `[13,15]` at HEAD.
+    'racana-82-zece676 [10,12] polygon×polygon',
+    'racana-82-zece676 [14,16] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Were `[31,38]`, `[31,45]`,
+    // `[38,45]` at HEAD -- one coincident triple, all three at
+    // (436.62187499999993, 479.5) before and after.
+    'tobajo-64-mipi810 [47,49] polygon×polygon',
+    'tobajo-64-mipi810 [47,51] polygon×polygon',
+    'tobajo-64-mipi810 [49,51] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

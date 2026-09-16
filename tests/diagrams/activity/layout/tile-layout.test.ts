@@ -392,6 +392,16 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(outDrops).toHaveLength(2);
     expect(outDrops.map((m) => m.lane2)).toEqual(['Y', 'Y']);
     // The sources are each branch's own exit lane, unaffected by this fix.
-    expect(outDrops.map((m) => m.lane1)).toEqual(['X', 'Y']);
+    //
+    // Mission `activity-edge-draw-order` T2 (2026-09-15), rule (b): the edge
+    // run is now emitted in swimlane pass order (`edge-draw-order.ts`,
+    // `Swimlanes.java:328-352`), so these two out-drops arrive REORDERED --
+    // same two values, position only. Lanes are declared `A, X, Y`, so
+    // branch Y's out-drop (`Y -> Y`, drawn in lane Y's own pass,
+    // `UGraphicInterceptorOneSwimlane.java:96-101`) precedes branch X's
+    // (`X -> Y`, whose ends differ and which therefore falls to the final
+    // `Cross` pass, `Swimlanes.java:178-216` at `:350-352`). Was
+    // `['X', 'Y']` in walk order.
+    expect(outDrops.map((m) => m.lane1)).toEqual(['Y', 'X']);
   });
 });

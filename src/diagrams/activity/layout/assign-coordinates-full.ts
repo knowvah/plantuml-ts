@@ -31,6 +31,7 @@ import type { Out } from './tile-coordinates.js';
 import { computeSwimlaneChrome, placeSwimlanes, resolveSwimlaneVertical } from './swimlane-placement.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 import { compressGeometry } from './compress/compress-geometry.js';
+import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
 
 /**
  * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
@@ -179,6 +180,28 @@ function compressAndAssemble(input: CompressAndAssembleInput): Omit<AssignCoordi
   };
 }
 
+/**
+ * D1's last step: rule (b) of mission `activity-edge-draw-order`. Re-emits
+ * the assembled edge run in the jar's swimlane pass order
+ * (`edge-draw-order.ts`, `Swimlanes.java:328-352`), permuting the geometry's
+ * `edges` and the pass-1 `edgeMeta` by ONE index array so the two stay
+ * aligned for `shapesOf`/`compressGeometry` (`compress/shapes-of.ts:376-377`,
+ * stop 9). Runs AFTER compression: no coordinate is read or written here,
+ * only the order of the list.
+ */
+function inLanePassOrder(
+  result: Omit<AssignCoordinatesResult, 'edgeMeta'>,
+  edgeMeta: EdgeMeta[],
+  laneNames: readonly string[],
+): AssignCoordinatesResult {
+  const ordered = applyEdgeDrawOrder(result.geometry.edges, edgeMeta, lanePassOrder(edgeMeta, laneNames));
+  return {
+    ...result,
+    geometry: { ...result.geometry, edges: ordered.edges },
+    edgeMeta: ordered.edgeMeta,
+  };
+}
+
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
   const nodes: ActivityNodeGeo[] = [];
@@ -197,7 +220,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
 
   if (!compress) {
     const result = pass1Assemble(placed, allReservations, bounds, baseY, titlesHeight);
-    return { ...result, edgeMeta };
+    return inLanePassOrder(result, edgeMeta, ast.swimlanes);
   }
   const result = compressAndAssemble({
     placed,
@@ -209,5 +232,5 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
     bounder,
     theme,
   });
-  return { ...result, edgeMeta };
+  return inLanePassOrder(result, edgeMeta, ast.swimlanes);
 }
