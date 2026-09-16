@@ -161,27 +161,43 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     }
 
     case 'gtile-top-down': {
+      // D7 (`plans/activity-if-tile-port/decisions.md`,
+      // `.agent-notes/aicdo-planning.md` "the jar draws EVERY sibling link
+      // after BOTH endpoints"): the vertical link between two siblings is
+      // added AROUND `FtileAssemblySimple(tile1, tile2)` by
+      // `FtileFactoryDelegatorAssembly#assembly`
+      // (`vcompact/FtileFactoryDelegatorAssembly.java:57-79`), whose own
+      // `drawU` draws only the two tiles, no connection
+      // (`FtileAssemblySimple.java:108-112`); `FtileWithConnection#drawU`
+      // draws its delegate BEFORE its own connections
+      // (`FtileWithConnection.java:69-74`). So for siblings `a, X, c` the
+      // jar's run is `X's internals, a->X, c's internals, X->c`: each link
+      // is pushed only after the child it points TO has been fully walked,
+      // not before the child it points FROM.
       const t = tile as unknown as GtileTopDown;
       if (t.children.length === 0) return;
       const centerX = x + tile.width / 2;
+      let prevChild: Tile | null = null;
+      let prevX = 0;
+      let prevY = 0;
       for (let i = 0; i < t.children.length; i++) {
         const child = t.children[i]!;
         const childY = y + t.childOffsets[i]!;
         const childX = centerX - child.width / 2;
         walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
-        if (i < t.children.length - 1) {
-          const next = t.children[i + 1]!;
-          const nextY = y + t.childOffsets[i + 1]!;
-          const nextX = centerX - next.width / 2;
-          const from = { x: childX + child.getCoord(SOUTH_HOOK).x, y: childY + child.getCoord(SOUTH_HOOK).y };
-          const to = { x: nextX + next.getCoord(NORTH_HOOK).x, y: nextY + next.getCoord(NORTH_HOOK).y };
+        if (prevChild !== null) {
+          const from = { x: prevX + prevChild.getCoord(SOUTH_HOOK).x, y: prevY + prevChild.getCoord(SOUTH_HOOK).y };
+          const to = { x: childX + child.getCoord(NORTH_HOOK).x, y: childY + child.getCoord(NORTH_HOOK).y };
           pushEdge(
             out,
             new GConnectionVerticalDown().getPoints(from, to),
-            laneOut(child, myLane),
-            laneIn(next, myLane),
+            laneOut(prevChild, myLane),
+            laneIn(child, myLane),
           );
         }
+        prevChild = child;
+        prevX = childX;
+        prevY = childY;
       }
       return;
     }
