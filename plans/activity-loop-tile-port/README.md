@@ -124,5 +124,40 @@ committing and are resumed to commit.
 - [x] Batch 0 — T0, T1
 - [x] Batch 1 — T2
 - [x] Batch 2 — T3, T4
-- [ ] Batch 3 — T5, T6
+- [ ] Batch 3 — T5 [x], T6 [ ] (HALTED: stop 11, see stop-11-complex1.md)
 - [ ] Batch 4 — T7
+
+## Session summary (2026-09-16, halted at T6)
+
+- **Tasks:** 6 of 8 complete (T0, T1, T2, T3, T4, T5); T6 not started
+  (stop 11), T7 not started (depends on T6). Commits on
+  `feat/activity-loop-tile-port`: `7dcb0726` T0, `92a7fcb2` T1 + `5741d1c8`
+  chore (tileNode last for lizard), `adf014d8` T2, `adf84310` T3, `256ad510`
+  T4, `7163ae94` T5 move, `bc2c4194` T5 port; docs commits per batch.
+- **Decisions:** ~30 journal rows. Flagged for review: (1) the halt --
+  `stop-11-complex1.md`, six fixtures reach `ConnectionBackComplex1`
+  (~70 lines to port; D5/README scope line rests on a disproved premise);
+  (2) laned connections use the jar's `drawTranslate` variants
+  (`FtileWhile.java:200-214,276-308`), unported -- the residual on every
+  laned while row (file `activity-loop-lane-translate`); (3) T5 dropped the
+  never-fed `backward` child slot; (4) `GtileBreak` is 20x20 where
+  `FtileBreak` is 0x0 (welding starts 10 px left on break fixtures);
+  (5) an `end` right after `endwhile` is placed differently by the jar
+  (`cutabu`), mechanism not isolated.
+- **Defects found by measurement and fixed:** T2's helpers dropped the
+  hexagon's own lane (kudedo/kasadu); T2's while-header polygon used the
+  tile height (35 px) instead of the hexagon-alone height (24 px) -- found
+  only by element-level comparison against the golden after `--align`
+  counts had matched.
+- **Quality gates at HEAD `bc2c4194`:** typecheck 0, lint 0, build 0 (0
+  `error TS`); `npm test` 724/724 collected, red ONLY on the four activity
+  oracle gates and only on the 60 `fixtures.md` movers (red allowance);
+  `svg-conformance` 27 files / 3428 tests, sibling suites unmoved; scan 0
+  at every task; `hardViolations` empty (one attributed exemption added).
+- **Exit bar status:** `cemagu` (labelled while) and `fovaja` match the
+  golden on every line segment to 0.01 after canvas offset; `bareka`'s
+  residual named (if-side width, break size); `ruzica` named
+  (`drawTranslate`); repeat representatives await T6. Aggregate 49658 ->
+  50108, reported not gated (D9); every rise classed.
+- **Not merged.** Branch state is an intermediate: repeats have their
+  entry tile but no entry->body edge and awrl's left back edge until T6.
