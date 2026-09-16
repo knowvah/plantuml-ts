@@ -322,10 +322,20 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // height formula (`entry.h + body.h + condition.h + 96`) growing the
     // repeat's own height and shifting everything below it down -- same
     // coincident triple, same `polygonSkipMode: 'x'` cross-lane-arrowhead
-    // class (`Worm.java:159-168`), not a new mechanism.
-    'tobajo-64-mipi810 [71,72] polygon×polygon',
-    'tobajo-64-mipi810 [71,73] polygon×polygon',
-    'tobajo-64-mipi810 [72,73] polygon×polygon',
+    // class (`Worm.java:159-168`), not a new mechanism. altp-T6: indices +6
+    // (71->77) -- each of this fixture's three repeats gains a real
+    // `ConnectionIn` edge (entry->body, absent before T6: the interim drew
+    // only a body->condition edge and a left-side back edge, D5) and its
+    // back edge now carries `emphasize: 'up'` (a second, mid-segment
+    // arrowhead polygon, `Snake#emphasizeDirection(UP)`, `FtileRepeat.java:
+    // 558,630,381,393` -- the interim's `GConnectionDownThenUp` back edge
+    // set no such flag), so 2 new shapes per repeat x 3 repeats = 6 new
+    // shapes ahead of this triple in `shapesOf`'s flat list. Coordinates
+    // dumped directly and confirmed byte-identical to the numbers above
+    // (`(467.8749999999999, 591)`, `polygonSkipMode: 'x'` on both sides).
+    'tobajo-64-mipi810 [77,78] polygon×polygon',
+    'tobajo-64-mipi810 [77,79] polygon×polygon',
+    'tobajo-64-mipi810 [78,79] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch

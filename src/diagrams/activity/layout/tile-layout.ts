@@ -25,7 +25,8 @@ import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
-import { buildIf } from './conditional-builder.js';
+import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
+import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../layout.old.js';
@@ -150,6 +151,25 @@ function tileRepeatEntry(
 }
 
 /**
+ * `FtileRepeat.create`'s back-connection selection (`FtileRepeat.java:
+ * 186-199`, `backward == null`, D5): `swimlane == null || swimlane ==
+ * swimlaneOut` picks `'simple1'` when the repeat's own lane sorts before
+ * every lane its BODY touches (`Swimlane#isSmallerThanAllOthers`,
+ * `Swimlane.java:130-137`, shared here as `isMainLaneSmallerThanAllOthers`
+ * -- see that function's own doc for why `node.body` there is exactly
+ * `repeat.getSwimlanes()` here), else `'simple2'`; a repeat that opens in
+ * one lane and closes (`repeat while`) in another always takes
+ * `'complex1'`.
+ */
+function selectRepeatBackConnection(node: ActivityRepeat, laneOrder: readonly string[]): RepeatBackConnection {
+  const { swimlane, swimlaneOut } = node;
+  if (swimlane === undefined || swimlane === swimlaneOut) {
+    return isMainLaneSmallerThanAllOthers(swimlane, node.body, laneOrder) ? 'simple1' : 'simple2';
+  }
+  return 'complex1';
+}
+
+/**
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
  *   -- `.withEast(yesTb).withSouth(outTb)`: the default (no `backward`,
  *   D1) branch puts the "is"/entry label east, the "not"/exit label south.
@@ -170,8 +190,9 @@ function tileRepeat(
     new GtileDiamondInside(node.condition, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
   );
+  const backConnection = selectRepeatBackConnection(node, laneOrder);
   return withSwimlaneOut(
-    withSwimlane(new GtileRepeat(entry, body, condition, bounder, theme), node.swimlane),
+    withSwimlane(new GtileRepeat(entry, body, condition, backConnection, { bounder, theme }), node.swimlane),
     node.swimlaneOut,
   );
 }

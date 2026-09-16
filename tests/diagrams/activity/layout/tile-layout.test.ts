@@ -356,6 +356,55 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(condition.swimlane).toBe('A');
   });
 
+  // Mission `activity-loop-tile-port` T6 (D5): `FtileRepeat.java:186-199`'s
+  // own back-connection selection, ported into `tile-layout.ts#tileRepeat`
+  // (`selectRepeatBackConnection`) and stored on `GtileRepeat.backConnection`
+  // for `walk-repeat.ts` to read. `laneOrder` here is `ast.swimlanes`
+  // (declaration order), threaded the same way `buildIf`'s own
+  // `isMainLaneSmallerThanAllOthers` call already is (T4).
+  describe('repeat: backConnection selection (D5, FtileRepeat.java:186-199)', () => {
+    it('no swimlanes at all -> simple2 (the no-lane default)', () => {
+      const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.backConnection).toBe('simple2');
+    });
+
+    it('opens and closes in lane A, body touches only a lane declared AFTER A -> simple1', () => {
+      // Declaration order: A (first `|A|`), then B. `swimlane === swimlaneOut
+      // === 'A'`; body touches only 'B', whose laneOrder index (1) is never
+      // less than A's (0), so `isMainLaneSmallerThanAllOthers` returns true.
+      const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
+      expect(ast.swimlanes).toEqual(['A', 'B']);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('A');
+      expect(repeatTile.backConnection).toBe('simple1');
+    });
+
+    it('opens and closes in lane A, body touches a lane declared BEFORE A -> simple2', () => {
+      // Declaration order: B (first `|B|`), then A. Body touches 'B', whose
+      // laneOrder index (0) is less than A's (1), so the predicate fails.
+      const ast = parseAst('@startuml\n|B|\n:x;\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
+      expect(ast.swimlanes).toEqual(['B', 'A']);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[1] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('A');
+      expect(repeatTile.backConnection).toBe('simple2');
+    });
+
+    it('swimlane !== swimlaneOut -> complex1', () => {
+      const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('B');
+      expect(repeatTile.backConnection).toBe('complex1');
+    });
+  });
+
   // Mission `activity-lane-capture` T6: the fork tile carries its opener
   // AND out lane; the top (fork) bar draws in the opener lane, the join
   // bar in the out lane -- `ParallelBuilderFork.java:85` (`in`) and `:77,

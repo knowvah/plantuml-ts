@@ -7,6 +7,32 @@ import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 
 /**
+ * `FtileRepeat.create`'s back-connection selection (`FtileRepeat.java:
+ * 186-199`, `backward == null`, D5): `'simple1'`/`'simple2'` are the
+ * no-cross-lane-exit case (`swimlane == null || swimlane == swimlaneOut`),
+ * split by whether the repeat's own lane sorts before every lane its body
+ * touches; `'complex1'` is the cross-lane case (`swimlane != swimlaneOut`).
+ * Decided once in `tile-layout.ts#tileRepeat` (build time, the same seam
+ * `GtileIfDown.useElse1` is decided at) and stored here so `walk-repeat.ts`
+ * never re-derives it from swimlane state it does not carry.
+ */
+export type RepeatBackConnection = 'simple1' | 'simple2' | 'complex1';
+
+/**
+ * `_bounder`/`_theme` are bundled into one trailing object solely to keep
+ * the constructor's own parameter count at the hook's 5-parameter limit
+ * once {@link RepeatBackConnection} is added as a real parameter -- neither
+ * field is read (see the constructor's own `_bounder`/`_theme` names, kept
+ * from before this bundling); `tile-layout.ts#tileRepeat` is this class's
+ * only call site, so the bundling is invisible to every other tileXxx
+ * builder's own `(bounder, theme)` calling convention.
+ */
+export interface GtileRepeatContext {
+  readonly bounder: StringBounder;
+  readonly theme: Theme;
+}
+
+/**
  * `FtileRepeat`'s three children -- an entry point (a label-less diamond,
  * `GtileRepeatEntry`, or the inline `repeat :label;` action tile), the loop
  * body, and the condition hexagon (mission `activity-loop-tile-port`, T5,
@@ -30,8 +56,10 @@ export class GtileRepeat extends TileComposite {
   /** The jar's `getLeft()`: the merged `left` every child's own `left`
    *  lands under. */
   readonly left: number;
-  /** Kept for `walk-repeat.ts`'s default back edge; T6 retires it (D8). */
-  readonly backEdgeLeftX = 0;
+  /** {@link RepeatBackConnection}: which of the jar's `ConnectionBack
+   *  Simple1`/`Simple2`/`Complex1` `walk-repeat.ts` draws for this repeat,
+   *  decided once at build time by `tile-layout.ts#tileRepeat` (D5, T6). */
+  readonly backConnection: RepeatBackConnection;
 
   /**
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:767-775
@@ -60,8 +88,15 @@ export class GtileRepeat extends TileComposite {
    *   -- `getTranslateDiamond2` (the condition): `y2 = height - d2.h`,
    *   `x = left - d2.w/2`.
    */
-  constructor(entry: Tile, body: Tile, condition: GtileDiamondInside, _bounder: StringBounder, _theme: Theme) {
+  constructor(
+    entry: Tile,
+    body: Tile,
+    condition: GtileDiamondInside,
+    backConnection: RepeatBackConnection,
+    _ctx: GtileRepeatContext,
+  ) {
     super();
+    this.backConnection = backConnection;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
     const entryHalf = entry.width / 2;
     const conditionHalf = condition.width / 2;

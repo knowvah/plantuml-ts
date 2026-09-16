@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { GConnectionDownThenUp } from '../../../../src/diagrams/activity/routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../../../../src/diagrams/activity/routing/gconnection-side-then-vertical-then-side.js';
 
 // `GConnectionVerticalDownThenBack` and its own `describe` block here were
@@ -8,34 +7,14 @@ import { GConnectionSideThenVerticalThenSide } from '../../../../src/diagrams/ac
 // (`walk-while-branch.ts`'s `backEdgePoints`), not this home-grown 4-point
 // route class. `grep` shows no reader of the class left outside
 // `layout.old.ts` (the superseded engine, D8's own carve-out).
-
-describe('GConnectionDownThenUp', () => {
-  it('produces 4 waypoints for a repeat backward arrow', () => {
-    const conn = new GConnectionDownThenUp(20);
-    const from = { x: 50, y: 100 };
-    const to = { x: 50, y: 10 };
-
-    const points = conn.getPoints(from, to);
-
-    expect(points).toEqual([
-      { x: 50, y: 100 },
-      { x: 30, y: 100 },
-      { x: 30, y: 10 },
-      { x: 50, y: 10 },
-    ]);
-  });
-
-  it('uses the default leftMargin of 20 when none is provided', () => {
-    const conn = new GConnectionDownThenUp();
-    const from = { x: 50, y: 100 };
-    const to = { x: 50, y: 10 };
-
-    const points = conn.getPoints(from, to);
-
-    expect(points[1]).toEqual({ x: 30, y: 100 });
-    expect(points[2]).toEqual({ x: 30, y: 10 });
-  });
-});
+//
+// `GConnectionDownThenUp` and its own `describe` block here were retired by
+// altp-T6/D8: the repeat back-edge is now the jar's own explicit
+// `ConnectionBackSimple1`/`Simple2`/`Complex1` point lists
+// (`walk-repeat.ts`'s `simple1Points`/`simple2Points`/`complex1Points`), not
+// this home-grown 4-point left-only route class. `grep` shows no reader of
+// the class left anywhere in `src/` (not even `layout.old.ts`, which never
+// imported it).
 
 describe('GConnectionSideThenVerticalThenSide', () => {
   // D1 (`plans/activity-parallel-connectors/decisions.md`): the

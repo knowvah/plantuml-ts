@@ -252,8 +252,15 @@ function buildIfLongHorizontal(
  * deviation from T4's originally declared write-set, pre-authorised
  * because `tile-layout.ts` is inside T3's write-set already).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlane.java:130-137
+ *
+ * Exported (not moved) for mission `activity-loop-tile-port` T6: `FtileRepeat
+ * .create`'s own back-connection selection (`FtileRepeat.java:186-199`) calls
+ * this exact predicate -- `swimlane.isSmallerThanAllOthers(repeat.getSwimlanes
+ * ())`, where `repeat` there is the loop's BODY ftile, matching `mainNodes ===
+ * node.body` here -- so `tile-layout.ts#tileRepeat` calls this function
+ * directly rather than duplicating it.
  */
-function isMainLaneSmallerThanAllOthers(
+export function isMainLaneSmallerThanAllOthers(
   ifLane: string | undefined,
   mainNodes: readonly ActivityNode[],
   laneOrder: readonly string[],

@@ -54,6 +54,13 @@ function makeDiamond(width: number, height: number) {
   } as unknown as GtileDiamondInside;
 }
 
+// T6: the constructor gained a `backConnection` parameter (D5), bundling
+// `bounder`/`theme` into one trailing context object to stay at the hook's
+// 5-parameter limit (`GtileRepeat`'s own class doc) -- neither is read, so
+// every dimension test below passes a fixed `'simple2'` (the no-lane
+// default) unless the test is specifically about `backConnection` itself.
+const ctx = { bounder, theme };
+
 // The task's own acceptance numbers (T5-repeat-dimension.md): body 40x60
 // (left 10), condition 50x40, entry 24x24 -> left=25, width=79, height=220,
 // bodyOffsetY=72, conditionOffsetY=180, entryOffsetX=13.
@@ -61,7 +68,7 @@ describe('GtileRepeat — acceptance: body 40x60 (left 10), condition 50x40, ent
   const entry = makeEntry();
   const body = makeTile(40, 60, true, 10);
   const condition = makeDiamond(50, 40);
-  const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+  const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
 
   it('left === 25', () => {
     expect(tile.left).toBe(25);
@@ -98,8 +105,18 @@ describe('GtileRepeat — acceptance: body 40x60 (left 10), condition 50x40, ent
     expect(tile.children[2]).toBe(condition);
   });
 
-  it('backEdgeLeftX === 0 (kept for walk-repeat.ts; T6 retires it)', () => {
-    expect(tile.backEdgeLeftX).toBe(0);
+  it("backConnection stores the constructor's own argument (D5, T6 retires `backEdgeLeftX`)", () => {
+    expect(tile.backConnection).toBe('simple2');
+  });
+});
+
+describe('GtileRepeat — backConnection stores whichever value tile-layout.ts#tileRepeat selects (D5)', () => {
+  it.each(['simple1', 'simple2', 'complex1'] as const)('stores %s verbatim', (backConnection) => {
+    const entry = makeEntry();
+    const body = makeTile(40, 60, true, 10);
+    const condition = makeDiamond(50, 40);
+    const tile = new GtileRepeat(entry, body, condition, backConnection, ctx);
+    expect(tile.backConnection).toBe(backConnection);
   });
 });
 
@@ -111,7 +128,7 @@ describe('GtileRepeat — hooks', () => {
   const entry = makeEntry();
   const body = makeTile(80, 60);
   const condition = makeDiamond(60, 40);
-  const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+  const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
 
   it('NORTH_HOOK.y === 0', () => {
     expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
@@ -151,7 +168,7 @@ describe('GtileRepeat — hasPointOut() is unconditionally true', () => {
     const entry = makeEntry();
     const body = makeTile(80, 60, false);
     const condition = makeDiamond(60, 40);
-    const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
     expect(tile.hasPointOut()).toBe(true);
   });
 });
@@ -166,7 +183,7 @@ describe('GtileRepeat — merger left/right with asymmetric children', () => {
     const entry = makeEntry();
     const body = makeTile(40, 60, true, 10);
     const condition = makeDiamond(50, 40);
-    const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
     expect(tile.left).toBe(25);
     expect(tile.width).toBe(79);
     expect(tile.bodyOffsetX).toBe(25 - 10);
@@ -182,7 +199,7 @@ describe('GtileRepeat — merger left/right with asymmetric children', () => {
     Object.defineProperty(entry, 'getCoord', { value: (): GPoint => ({ x: 20, y: 0 }) });
     const body = makeTile(40, 60, true, 10);
     const condition = makeDiamond(50, 40);
-    const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
     expect(tile.left).toBe(50); // max(10, 100/2=50, 25) = 50
     expect(tile.entryOffsetX).toBe(50 - 50); // left - entry.width/2, not left - 20
   });
@@ -191,7 +208,7 @@ describe('GtileRepeat — merger left/right with asymmetric children', () => {
     const entry = makeEntry();
     const body = makeTile(80, 60, true, 60); // centre 40, left 60
     const condition = makeDiamond(60, 40); // left 30
-    const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
     expect(tile.left).toBe(60);
     // right = max(80 - 60, entryHalf=12, conditionHalf=30) = 30
     expect(tile.width).toBe(60 + 30 + 24);
@@ -202,7 +219,7 @@ describe('GtileRepeat — merger left/right with asymmetric children', () => {
     const entry = makeEntry();
     const body = makeTile(80, 60);
     const condition = makeDiamond(60, 40);
-    const tile = new GtileRepeat(entry, body, condition, bounder, theme);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
     expect(tile.left).toBe(40);
     expect(tile.width).toBe(40 + 40 + 24);
     expect(tile.bodyOffsetX).toBe(0);
