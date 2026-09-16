@@ -31,14 +31,15 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
   const rawChildren = t.children;
   const header = rawChildren[0]!;
   const body = rawChildren[1]!;
-  // Center of content area (excludes the back-edge lane)
-  const contentCenterX = x + t.getCoord(NORTH_HOOK).x;
-
-  const hX = contentCenterX - header.width / 2;
+  // Each child sits so its OWN `left` lands under the tile's merged `left`
+  // (`FtileWhile.java:621-641`: `x = dimTotal.getLeft() - child.getLeft()`),
+  // never centred by `width / 2` -- an asymmetric body (an `if`) would slant
+  // the forward and back edges.
+  const hX = x + t.headerOffsetX;
   const hY = y + t.headerOffsetY;
   walkTile(header, hX, hY, { kindHint: 'while-header', lane: myLane }, out);
 
-  const bX = contentCenterX - body.width / 2;
+  const bX = x + t.bodyOffsetX;
   const bY = y + t.bodyOffsetY;
   walkTile(body, bX, bY, { kindHint: null, lane: myLane }, out);
 
