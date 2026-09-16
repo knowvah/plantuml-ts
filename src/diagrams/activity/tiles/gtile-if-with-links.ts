@@ -28,16 +28,31 @@ interface PaddedWidth {
   /** The branch's own effective width after both wraps. */
   readonly outer: number;
   /** How far the branch's own (unwrapped) content is offset from the
-   *  padded box's left edge -- both wraps preserve `left === width / 2`
-   *  symmetry, so this reduces to one delta. */
+   *  padded box's left edge. */
   readonly contentDx: number;
+  /** The padded box's own `left` -- the branch's OWN `left`
+   *  (`getPoint2`/`FtileMarged`'s `orig.left + margin1`), NOT `outer / 2`:
+   *  a branch whose own content is off-centre (e.g. a nested `if`) shifts
+   *  through both wraps unchanged in kind, only translated.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMinWidthCentered.java:99-106
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMarged.java:93-97 */
+  readonly paddedLeft: number;
+  /** `outer - paddedLeft` -- the padded box's own `width - left`, the
+   *  Java's `(dimN.getWidth() - dimN.getLeft())` term. */
+  readonly paddedRight: number;
 }
 
 /** `FtileMinWidthCentered(branch, 30)` folded with `addHorizontalMargin(_,
- *  10)` (`FtileMinWidthCentered.java:68-79,99-106`; `FtileMarged.java:93-97`). */
-function paddedWidth(raw: number): PaddedWidth {
+ *  10)` (`FtileMinWidthCentered.java:68-79,99-106`; `FtileMarged.java:93-97`).
+ *  `branch` is the branch tile's OWN (unwrapped) geometry -- `paddedLeft`
+ *  reads its real `getCoord(NORTH_HOOK).x`, not an assumed `width / 2`. */
+function paddedWidth(branch: Tile): PaddedWidth {
+  const raw = branch.width;
   const min = Math.max(raw, MIN_BRANCH_WIDTH);
-  return { outer: min + 2 * BRANCH_MARGIN, contentDx: (min - raw) / 2 + BRANCH_MARGIN };
+  const outer = min + 2 * BRANCH_MARGIN;
+  const contentDx = (min - raw) / 2 + BRANCH_MARGIN;
+  const paddedLeft = branch.getCoord(NORTH_HOOK).x + contentDx;
+  return { outer, contentDx, paddedLeft, paddedRight: outer - paddedLeft };
 }
 
 interface AlignedGeo {
@@ -88,11 +103,14 @@ function computeNudeAndMerge(
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const diamondWidth = diamond1.width;
 
+  // `FtileIfNude#widthInner`: (dim1.w - dim1.left) + dim2.left.
   // `FtileIfWithDiamonds#widthInner`: max(super.widthInner, diamond1.w + 20).
-  const innerMargin = Math.max(b1.padded.outer / 2 + b2.padded.outer / 2, diamondWidth + SUPP_WIDTH);
+  const innerMargin = Math.max(b1.padded.paddedRight + b2.padded.paddedLeft, diamondWidth + SUPP_WIDTH);
+  // `FtileIfNude.java:147,153`: width = dim1.left + innerMargin + (dim2.w -
+  // dim2.left); left = dim1.left + innerMargin / 2.
   const nude: AlignedGeo = {
-    left: b1.padded.outer / 2 + innerMargin / 2,
-    width: b1.padded.outer / 2 + innerMargin + b2.padded.outer / 2,
+    left: b1.padded.paddedLeft + innerMargin / 2,
+    width: b1.padded.paddedLeft + innerMargin + b2.padded.paddedRight,
     height: Math.max(b1.height, b2.height),
   };
   const geoA = appendBottomGeo({ left: diamondLeft, width: diamondWidth, height: diamondOutY }, nude);
@@ -214,8 +232,8 @@ export class GtileIfWithLinks extends TileComposite {
     this.hasPointOut1 = branch1.tile.hasPointOut();
     this.hasPointOut2 = branch2.tile.hasPointOut();
 
-    const b1: BranchGeo = { padded: paddedWidth(branch1.tile.width), height: branch1.tile.height };
-    const b2: BranchGeo = { padded: paddedWidth(branch2.tile.width), height: branch2.tile.height };
+    const b1: BranchGeo = { padded: paddedWidth(branch1.tile), height: branch1.tile.height };
+    const b2: BranchGeo = { padded: paddedWidth(branch2.tile), height: branch2.tile.height };
     const hasTwoBranches = this.hasPointOut1 && this.hasPointOut2;
     const core = computeCoreGeometry(diamond1, b1, b2, hasTwoBranches, laneCount);
     const margins = computeLabelMargins(diamond1, core);

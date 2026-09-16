@@ -25,6 +25,19 @@ function stubTile(width: number, height: number, hasPointOut = true): Tile {
   };
 }
 
+/** A branch whose own reported `left` differs from `width / 2` -- stands in
+ *  for a nested `if`/`GtileTopDown` merged subtree (T6c). */
+function stubTileAsym(width: number, height: number, left: number, hasPointOut = true): Tile {
+  return {
+    kind: 'stub-asym',
+    width,
+    height,
+    getCoord: (hook) =>
+      hook === NORTH_HOOK || hook === SOUTH_HOOK ? { x: left, y: hook === NORTH_HOOK ? 0 : height } : { x: 0, y: 0 },
+    hasPointOut: () => hasPointOut,
+  };
+}
+
 // condition '' -> 24x24 hexagon, no west/east label -> diff1/diff2/suppHeight all 0.
 const diamond = () => new GtileDiamondInside('', {}, bounder, theme);
 
@@ -80,6 +93,61 @@ describe('GtileIfWithLinks — both branches non-empty, both have a point out', 
   it('getCoord uses the tile"s own asymmetric left, not width/2', () => {
     expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 110, y: 0 });
     expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 110, y: 114 });
+  });
+});
+
+describe('GtileIfWithLinks — branch 1 is asymmetric (nested if, left != width/2)', () => {
+  // branch1: raw=100, its own left=70 (20px right of width/2=50); branch2:
+  // raw=60, left=30 (symmetric). paddedLeft = branch.left + contentDx
+  // (`FtileMinWidthCentered.java:99-106`, `FtileMarged.java:93-97`):
+  // b1: contentDx=10, paddedLeft=80, outer=120, paddedRight=40.
+  // b2: contentDx=10, paddedLeft=40, outer=80, paddedRight=40.
+  // innerMargin = max(b1.paddedRight(40)+b2.paddedLeft(40), 24+20) = 80.
+  // nude.left = b1.paddedLeft(80) + 80/2 = 120; nude.width = 80+80+40 = 200.
+  // geoA = appendBottom(diamond{12,24,24}, nude{120,200,50}) = {120,200,74}.
+  // geoTotal = appendBottom(geoA, merge{12,24,24}) = {120,200,98}.
+  // ydelta1a=10, ydelta1b=6 -> totalHeight=114. No labels -> diffs/supp=0.
+  const branch1: IfWithLinksBranch = { tile: stubTileAsym(100, 50, 70), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const tile = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
+
+  it('width === 200, height === 114, left === 120 (not 110, the symmetric value)', () => {
+    expect(tile.width).toBe(200);
+    expect(tile.height).toBe(114);
+    expect(tile.left).toBe(120);
+  });
+
+  it('diamond1X === 108 (total.left(120) - diamond1.left(12))', () => {
+    expect(tile.diamond1X).toBe(108);
+  });
+
+  it('tile1X === 10 (padded box left 0 + contentDx 10) -- contentDx unaffected by asymmetry', () => {
+    expect(tile.tile1X).toBe(10);
+  });
+
+  it('tile2X === 130 (total.w(200) - w2.outer(80) + contentDx(10))', () => {
+    expect(tile.tile2X).toBe(130);
+  });
+
+  it('in1To (walker"s absolute target, tile1X + tile1.getCoord(NORTH_HOOK).x) reaches branch1"s own real hook at x=80', () => {
+    // `walk-if-with-links.ts#pushInConnectors`'s `in1To` formula, unchanged
+    // (D5) -- it already reads `tile1.getCoord(NORTH_HOOK)` directly, so it
+    // was never the source of the diagonal; `tile1X` itself (contentDx-only,
+    // unaffected by this fix, since branch1 always sits at local x=0) was
+    // already correct too. The bug was `diamond1X`/`left`/`mergeX` chasing
+    // the WRONG value for where branch1's padded box starts (asserted above).
+    const in1ToX = tile.tile1X + branch1.tile.getCoord(NORTH_HOOK).x;
+    expect(in1ToX).toBe(80);
+  });
+
+  it('mergeX === 108, mergeY === 90 (unaffected -- merge geo never depends on branch left)', () => {
+    expect(tile.mergeX).toBe(108);
+    expect(tile.mergeY).toBe(90);
+  });
+
+  it('getCoord reports the corrected asymmetric left', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 120, y: 0 });
+    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 120, y: 114 });
   });
 });
 

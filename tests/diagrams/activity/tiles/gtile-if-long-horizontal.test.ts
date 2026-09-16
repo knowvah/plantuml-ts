@@ -24,6 +24,19 @@ function stubTile(width: number, height: number, hasPointOut = true): Tile {
   };
 }
 
+/** A branch/`tile2` whose own reported `left` differs from `width / 2` --
+ *  stands in for a nested `if`/`GtileTopDown` merged subtree (T6c). */
+function stubTileAsym(width: number, height: number, left: number, hasPointOut = true): Tile {
+  return {
+    kind: 'stub-asym',
+    width,
+    height,
+    getCoord: (hook) =>
+      hook === NORTH_HOOK || hook === SOUTH_HOOK ? { x: left, y: hook === NORTH_HOOK ? 0 : height } : { x: 0, y: 0 },
+    hasPointOut: () => hasPointOut,
+  };
+}
+
 describe('GtileIfLongHorizontal — two equal-height branches, both with a point out', () => {
   // Both diamonds: condition '' -> hexAlone 24x24, left=12; no north label ->
   // width/height stay 24x24 -> alignDiamonds' maxOutY=24, topMargin=0 for
@@ -73,6 +86,74 @@ describe('GtileIfLongHorizontal — two equal-height branches, both with a point
   it('getCoord reports the composite left, not width/2 coincidentally equal here', () => {
     expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 80, y: 0 });
     expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 80, y: 164 });
+  });
+});
+
+describe('GtileIfLongHorizontal — branch 0"s tile is asymmetric (nested if, left != width/2)', () => {
+  // Same base geometry as the first describe block, but tile0's own left
+  // is 30 (not 20=width/2). tilePad: outer=max(40,30)=40, contentDx=0,
+  // paddedLeft = tile0.left(30) + 0 = 30 (`FtileMinWidthCentered.java:
+  // 99-106` -- NOT outer/2=20). assemblyLeft = max(diamond.left(12),
+  // tileLeft(30)) = 30; assemblyWidth = max(24+18, 40+0) = 42.
+  // diamondLocalX = 30-12 = 18; tileLocalX = (30-30)+0 = 0.
+  const d0 = new GtileDiamondInside2('', {}, bounder, theme);
+  const d1 = new GtileDiamondInside2('', {}, bounder, theme);
+  const tile0 = stubTileAsym(40, 20, 30);
+  const tile1 = stubTile(40, 20);
+  const tile2 = stubTile(40, 20);
+  const tile = new GtileIfLongHorizontal([d0, d1], [tile0, tile1], tile2, [0, 0]);
+
+  it('branch 0"s couple: coupleWidth === 42, coupleLeft === 30 (not 20, the symmetric value)', () => {
+    expect(tile.branches[0]!.coupleWidth).toBe(42);
+    expect(tile.branches[0]!.coupleLeft).toBe(30);
+  });
+
+  it('branch 0: diamondX === 18 (not 8), tileX === 0', () => {
+    expect(tile.branches[0]!.diamondX).toBe(18);
+    expect(tile.branches[0]!.tileX).toBe(0);
+  });
+
+  it('ConnectionVerticalIn is a single vertical segment: diamond0"s out-x and tile0"s own real in-x match', () => {
+    // `walk-if-long-horizontal.ts#connectionVerticalIn`: p1.x =
+    // diamondX + diamond.left; p2.x = tileX + tile.getCoord(NORTH_HOOK).x.
+    const p1x = tile.branches[0]!.diamondX + d0.left;
+    const p2x = tile.branches[0]!.tileX + tile0.getCoord(NORTH_HOOK).x;
+    expect(p1x).toBe(30);
+    expect(p2x).toBe(30);
+    expect(p1x).toBe(p2x);
+  });
+});
+
+describe('GtileIfLongHorizontal — tile2 is asymmetric (nested if, left != width/2)', () => {
+  // Branches symmetric (same as the baseline block) -- only tile2's own
+  // left differs (33, not 20=width/2). tile2Pad: outer=40, contentDx=0,
+  // paddedLeft = 33 + 0 = 33 (not outer/2=20).
+  const d0 = new GtileDiamondInside2('', {}, bounder, theme);
+  const d1 = new GtileDiamondInside2('', { east: 'no' }, bounder, theme);
+  const tile0 = stubTile(40, 20);
+  const tile1 = stubTile(40, 20);
+  const tile2 = stubTileAsym(40, 20, 33);
+  const tile = new GtileIfLongHorizontal([d0, d1], [tile0, tile1], tile2, [0, 0]);
+
+  it('width/height/tile2X/tile2Y unaffected (outer, not left, drives them) -- same as the symmetric baseline', () => {
+    expect(tile.width).toBe(160);
+    expect(tile.height).toBe(164);
+    expect(tile.tile2X).toBe(120);
+    expect(tile.tile2Y).toBe(72);
+  });
+
+  it('tile2Left === 33 (not 20, the symmetric value)', () => {
+    expect(tile.tile2Left).toBe(33);
+  });
+
+  it('hlineOutXs"s tile2 contribution (tile2X + tile2Left) matches tile2"s own real absolute hook', () => {
+    // `walk-if-long-horizontal.ts#hlineOutXs`/`tile2Origin`: the Hline's
+    // rightmost extent must land where tile2 actually draws, not at an
+    // assumed centre.
+    const hlineX = tile.tile2X + tile.tile2Left;
+    const realHookX = tile.tile2X + tile.tile2ContentDx + tile2.getCoord(NORTH_HOOK).x;
+    expect(hlineX).toBe(153);
+    expect(hlineX).toBe(realHookX);
   });
 });
 

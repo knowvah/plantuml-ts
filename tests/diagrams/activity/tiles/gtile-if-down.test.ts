@@ -24,6 +24,19 @@ function stubTile(width: number, height: number, hasPointOut = true): Tile {
   };
 }
 
+/** A branch whose own reported `left` differs from `width / 2` -- stands in
+ *  for a nested `if`/`GtileTopDown` merged subtree (T6c). */
+function stubTileAsym(width: number, height: number, left: number, hasPointOut = true): Tile {
+  return {
+    kind: 'stub-asym',
+    width,
+    height,
+    getCoord: (hook) =>
+      hook === NORTH_HOOK || hook === SOUTH_HOOK ? { x: left, y: hook === NORTH_HOOK ? 0 : height } : { x: 0, y: 0 },
+    hasPointOut: () => hasPointOut,
+  };
+}
+
 describe('GtileIfDown — merge rhombus case (no optionalStop, both branches have a point out)', () => {
   // condition '' -> 24x24 hexagon; south "yes" (21x14), east "no" (14x14) -- neither
   // affects diamond1.height (north unset).
@@ -64,6 +77,47 @@ describe('GtileIfDown — merge rhombus case (no optionalStop, both branches hav
   it('getCoord reports the asymmetric left, not width/2', () => {
     expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 60, y: 0 });
     expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 60, y: 148 });
+  });
+});
+
+describe('GtileIfDown — main flow is asymmetric (nested if, left != width/2)', () => {
+  // condition '' -> d1Geo{left:12,w:24,h:24}. mainTile: raw=100, own
+  // left=70 (20px right of width/2=50). thenPadded: min=100,outer=120,
+  // contentDx=10, paddedLeft = 70+10 = 80 (`FtileMinWidthCentered.java:
+  // 99-106`, `FtileMarged.java:93-97` -- NOT outer/2=60).
+  // thenGeo{left:80,w:120,h:50}. geoA=appendBottom(d1,then)={80,120,74}.
+  // d2 (hasTwoBranches, no optionalStop) = {left:12,w:24,h:24}.
+  // geo=appendBottom(geoA,d2)={80,120,98}. height=98+36+12=146; width=132.
+  const diamond1 = new GtileDiamondInside('', {}, bounder, theme);
+  const mainTile = stubTileAsym(100, 50, 70);
+  const tile = new GtileIfDown(diamond1, mainTile, null, true, false);
+
+  it('width === 132, height === 146, left === 80 (not 60, the symmetric value)', () => {
+    expect(tile.width).toBe(132);
+    expect(tile.height).toBe(146);
+    expect(tile.left).toBe(80);
+  });
+
+  it('diamond1X === 68 and diamond2X === 68 (both follow the corrected left)', () => {
+    expect(tile.offsets.diamond1X).toBe(68);
+    expect(tile.offsets.diamond2X).toBe(68);
+  });
+
+  it('wrapX === 0 (thenGeo.left already equals core.left) and mainTileX === 10', () => {
+    expect(tile.offsets.wrapX).toBe(0);
+    expect(tile.offsets.mainTileX).toBe(10);
+  });
+
+  it('ConnectionIn/ConnectionOut are single vertical segments: diamond1"s centre and mainTile"s own real hook land on the SAME absolute x', () => {
+    const diamond1CentreX = tile.offsets.diamond1X + diamond1.width / 2;
+    const mainHookX = tile.offsets.mainTileX + mainTile.getCoord(NORTH_HOOK).x;
+    expect(diamond1CentreX).toBe(80);
+    expect(mainHookX).toBe(80);
+    expect(diamond1CentreX).toBe(mainHookX);
+  });
+
+  it('getCoord reports the corrected asymmetric left', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 80, y: 0 });
   });
 });
 

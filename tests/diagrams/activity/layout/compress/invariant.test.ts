@@ -398,11 +398,48 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    *   `560.67812500000002274`, and `638.98750000000018190` vs
    *   `638.98750000000006821` -- sub-epsilon gaps, same mechanism as
    *   `kitupi-32-jexo155` above, not a geometry defect.
+   *
+   * `lopone-15-xiki477 [7,20] polygon×polygon` (mission `activity-if-tile-
+   * port` T6c): the SAME class again, mirrored to an edge's own arrowhead
+   * instead of an `if-label`. Shape 7 is node 7, `if-split-8` -- a nested
+   * `if`'s own diamond1 hexagon, itself the branch content of an outer
+   * `elseif`-row (`FtileIfLongHorizontal`). Shape 20 is edge 6's terminal
+   * arrowhead (`shapesOf`'s node-shapes-then-edge-shapes ordering: 14
+   * nodes, so edge 0's arrowhead starts at index 14); edge 6 carries the
+   * `'if-vertical-in'` tag, i.e. `ConnectionVerticalIn`:
+   * `diamond_i.pointOut -> tile_i.pointIn`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:389-436
+   *   -- `ConnectionVerticalIn`'s own inner class, `tile_i.pointIn` is
+   *   `tile_i`'s own `FtileGeometry` `getPointIn()`, unmodified.
+   *
+   * `tile_i` here is a bare `FtileIfDown` (no further wrapping): its own
+   * reported `left` ALWAYS lands exactly on its own `diamond1`'s centre,
+   * by construction -- `getTranslateDiamond1`'s `x1 = dimTotal.getLeft() -
+   * dimDiamond1.getLeft()` places `diamond1` so that `diamond1.left +
+   * dimDiamond1.getLeft() === dimTotal.getLeft()` always, independent of
+   * any branch asymmetry (T6c only changes `dimTotal.getLeft()`'s VALUE,
+   * never this identity).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:624-637
+   *   -- `getTranslateForThen`/`getTranslateDiamond1`, the identity above.
+   *
+   * So `ConnectionVerticalIn`'s arrowhead landing exactly on the nested
+   * `if`'s own hexagon top-centre is by design, not a defect -- T6c's fix
+   * is what makes `tile_i.pointIn` correctly resolve to that exact point
+   * (previously off by the `outer/2` bug), which is what newly exposes the
+   * pre-existing rounding artifact here. Confirmed with a direct dump:
+   * - `before`: hexagon top `y === 132` and arrowhead-box `y(122) +
+   *   height(10) === 132` -- bit-identical integers, no overlap
+   *   (`beforePairs` does not contain `[7,20]`).
+   * - `after`: hexagon `y === 126.05555555555554`, arrowhead `y(
+   *   116.05555555555556) + height(10) === 126.05555555555556` -- a
+   *   ~1.8e-14 gap, same two-independent-transform-calls mechanism as
+   *   `kitupi-32-jexo155` above, not a geometry defect.
    */
   const ALLOWED_HARD_OVERLAPS = [
     'kitupi-32-jexo155 [0,1] polygon×text',
     'boxoto-53-sifo232 [27,29] polygon×text',
     'boxoto-53-sifo232 [38,40] polygon×text',
+    'lopone-15-xiki477 [7,20] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

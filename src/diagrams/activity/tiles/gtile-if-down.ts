@@ -21,15 +21,24 @@ const MERGE_EMPTY_HEIGHT = 6;
 interface PaddedWidth {
   readonly outer: number;
   readonly contentDx: number;
+  /** The padded box's own `left` -- the branch's OWN `left` shifted through
+   *  both wraps, NOT `outer / 2`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMinWidthCentered.java:99-106
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMarged.java:93-97 */
+  readonly paddedLeft: number;
 }
 
 /** `FtileMinWidthCentered(branch, 30)` folded with `addHorizontalMargin(_,
  *  10)` (`FtileMinWidthCentered.java:68-79,99-106`; `FtileMarged.java:93-97`).
  *  Duplicated from `walk-if-with-links.ts`'s own copy per D5 (one walker/
- *  tile module per builder, no shared helper module). */
-function paddedWidth(raw: number): PaddedWidth {
+ *  tile module per builder, no shared helper module). `branch` is the
+ *  branch tile's OWN (unwrapped) geometry. */
+function paddedWidth(branch: Tile): PaddedWidth {
+  const raw = branch.width;
   const min = Math.max(raw, MIN_BRANCH_WIDTH);
-  return { outer: min + 2 * BRANCH_MARGIN, contentDx: (min - raw) / 2 + BRANCH_MARGIN };
+  const outer = min + 2 * BRANCH_MARGIN;
+  const contentDx = (min - raw) / 2 + BRANCH_MARGIN;
+  return { outer, contentDx, paddedLeft: branch.getCoord(NORTH_HOOK).x + contentDx };
 }
 
 interface AlignedGeo {
@@ -77,11 +86,6 @@ interface CoreGeometry {
   readonly thenGeo: AlignedGeo;
 }
 
-interface MainDim {
-  readonly width: number;
-  readonly height: number;
-}
-
 /** `getAdditionalWidth` (`FtileIfDown.java:580-585`): `max(stopWidth,
  *  eastLabelWidth + stopWidth / 2)`. Shared by {@link computeGeometry}'s own
  *  width term and `computeStopOffsets`' own `stopX` -- both need the exact
@@ -103,13 +107,13 @@ interface AlignedTotal {
  *  limit. @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:547-550 */
 function computeAlignedTotal(
   diamond1: GtileDiamondInside,
-  main: MainDim,
+  main: Tile,
   hasOptionalStop: boolean,
   hasTwoBranches: boolean,
 ): AlignedTotal {
   const d1Geo: AlignedGeo = { left: diamond1.width / 2, width: diamond1.width, height: diamond1.height };
-  const thenPadded = paddedWidth(main.width);
-  const thenGeo: AlignedGeo = { left: thenPadded.outer / 2, width: thenPadded.outer, height: main.height };
+  const thenPadded = paddedWidth(main);
+  const thenGeo: AlignedGeo = { left: thenPadded.paddedLeft, width: thenPadded.outer, height: main.height };
   const d2 = diamond2Geo(hasOptionalStop, hasTwoBranches);
   const geo = appendBottomGeo(appendBottomGeo(d1Geo, thenGeo), d2);
   return { geo, d1Height: d1Geo.height, thenPadded, thenGeo };
@@ -125,7 +129,7 @@ function computeAlignedTotal(
  */
 function computeGeometry(
   diamond1: GtileDiamondInside,
-  main: MainDim,
+  main: Tile,
   hasOptionalStop: boolean,
   hasTwoBranches: boolean,
   optionalStopWidth: number,

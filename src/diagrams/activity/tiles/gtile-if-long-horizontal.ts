@@ -22,13 +22,20 @@ const MIN_ROW_HEIGHT = 100;
 interface PaddedWidth {
   readonly outer: number;
   readonly contentDx: number;
+  /** The padded box's own `left` -- the branch's OWN `left` shifted by
+   *  `contentDx`, NOT `outer / 2`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMinWidthCentered.java:99-106 */
+  readonly paddedLeft: number;
 }
 
 /** `FtileMinWidthCentered(tile, 30)` alone -- no `addHorizontalMargin` fold
- *  (contrast `gtile-if-down.ts`'s own `paddedWidth`, which folds both). */
-function minWidthCentered(raw: number): PaddedWidth {
+ *  (contrast `gtile-if-down.ts`'s own `paddedWidth`, which folds both).
+ *  `tile` is the branch/`tile2`'s OWN (unwrapped) geometry. */
+function minWidthCentered(tile: Tile): PaddedWidth {
+  const raw = tile.width;
   const outer = Math.max(raw, MIN_TILE_WIDTH);
-  return { outer, contentDx: (outer - raw) / 2 };
+  const contentDx = (outer - raw) / 2;
+  return { outer, contentDx, paddedLeft: tile.getCoord(NORTH_HOOK).x + contentDx };
 }
 
 interface AlignedDiamond {
@@ -72,15 +79,16 @@ function coupleGeometry(
   tile: Tile,
   inlabelSize: number,
 ): CoupleGeo {
-  const tilePad = minWidthCentered(tile.width);
-  const assemblyLeft = Math.max(diamond.left, tilePad.outer / 2);
+  const tilePad = minWidthCentered(tile);
+  const tileLeft = tilePad.paddedLeft;
+  const assemblyLeft = Math.max(diamond.left, tileLeft);
   const assemblyWidth = Math.max(
     diamond.width + (assemblyLeft - diamond.left),
-    tilePad.outer + (assemblyLeft - tilePad.outer / 2),
+    tilePad.outer + (assemblyLeft - tileLeft),
   );
   return {
     diamondLocalX: inlabelSize + (assemblyLeft - diamond.left),
-    tileLocalX: inlabelSize + (assemblyLeft - tilePad.outer / 2) + tilePad.contentDx,
+    tileLocalX: inlabelSize + (assemblyLeft - tileLeft) + tilePad.contentDx,
     tileLocalY: alignedHeight,
     width: assemblyWidth + inlabelSize,
     left: assemblyLeft + inlabelSize,
@@ -184,7 +192,7 @@ function computeOverallAndTile2(
   tile2: Tile,
   aligned: readonly AlignedDiamond[],
 ): OverallAndTile2 {
-  const tile2Pad = minWidthCentered(tile2.width);
+  const tile2Pad = minWidthCentered(tile2);
   const diamondsH = Math.max(0, ...aligned.map((a) => a.height));
   const maxOutYAligned = Math.max(0, ...aligned.map((a) => a.outY));
   const overall = computeOverall(
@@ -199,7 +207,7 @@ function computeOverallAndTile2(
     height: overall.height,
     tile2X: overall.width - tile2Pad.outer,
     tile2Y: (overall.height - tile2.height) / 2,
-    tile2Left: tile2Pad.outer / 2,
+    tile2Left: tile2Pad.paddedLeft,
     tile2ContentDx: tile2Pad.contentDx,
   };
 }
