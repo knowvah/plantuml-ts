@@ -315,6 +315,21 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     'tobajo-64-mipi810 [66,67] polygon×polygon',
     'tobajo-64-mipi810 [66,68] polygon×polygon',
     'tobajo-64-mipi810 [67,68] polygon×polygon',
+    // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
+    // java:100-112`): the swimlane title's rect never occupies x. Mission
+    // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
+    // `if` that switches swimlane in its `else`
+    // (`Web Service|if..stop / else |Fournisseur|:foo2;`); `GtileTopDown`
+    // aligning its two top-level children (`start`-chain, `if`) on `left`
+    // instead of centring shifts both branch-out-drop x-coordinates
+    // (12->12 unmoved, 126->118 by -8, matching the if's own left shift)
+    // enough that the post-compression `empty` ignoreX rects now project
+    // onto the swimlane title's y-span. Dumped directly (not assumed):
+    // both pairs are `hard=false` (`occupiesOn(a, 'x')` is false on the
+    // `empty` shape in both), so this is the pinned non-hard class, not a
+    // hard violation.
+    'lukoxa-16-cecu095 [10,14] empty×centeredText',
+    'lukoxa-16-cecu095 [11,14] empty×centeredText',
   ].sort();
 
   /**
@@ -357,8 +372,38 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    * sub-epsilon overlap elsewhere in the 268-fixture corpus, which is a
    * strictly worse trade than pinning this one proven-benign pair by its
    * exact fixture + index + kind.
+   *
+   * `boxoto-53-sifo232 [27,29]` and `[38,40] polygon×text` (mission
+   * `activity-if-tile-port` T6b): the SAME class, mirrored to the EAST
+   * label. Shape 27/38 is each an `if-split` hexagon (`if-split-28`,
+   * `if-split-39`); shape 29/40 its own east `if-label`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:101-102
+   *   -- `east.drawU(ug.apply(new UTranslate(dimTotal.getWidth(), ...)))`:
+   *   the east label's OWN left edge is placed at the hexagon's local
+   *   x=width -- EXACTLY zero gap by design, the mirror of the west case
+   *   above.
+   *
+   * T6b (`GtileTopDown` aligning children on `left` instead of centring on
+   * width) changes the ABSOLUTE x-translate applied to these two if-tiles
+   * within their containing top-down, which is what exposes this pair:
+   * the local hexagon/label offset is unconditionally zero by construction
+   * regardless of translate, but `compress-geometry.ts`'s two independent
+   * transform calls (one per shape) round the shifted absolute x
+   * ~1.1e-13 apart. Confirmed with a direct dump (not assumed):
+   * - `before` (pre-compression): `hexagon.x + hexagon.width ===
+   *   label.x` bit-identical on both pairs (`568.27812500000004547` and
+   *   `646.58750000000009095` respectively) -- no overlap
+   *   (`beforePairs` does not contain either key).
+   * - `after` (post-compression): `560.67812500000013642` vs
+   *   `560.67812500000002274`, and `638.98750000000018190` vs
+   *   `638.98750000000006821` -- sub-epsilon gaps, same mechanism as
+   *   `kitupi-32-jexo155` above, not a geometry defect.
    */
-  const ALLOWED_HARD_OVERLAPS = ['kitupi-32-jexo155 [0,1] polygon×text'].sort();
+  const ALLOWED_HARD_OVERLAPS = [
+    'kitupi-32-jexo155 [0,1] polygon×text',
+    'boxoto-53-sifo232 [27,29] polygon×text',
+    'boxoto-53-sifo232 [38,40] polygon×text',
+  ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
     const measurer = new DeterministicMeasurer();

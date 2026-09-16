@@ -8,7 +8,7 @@ import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diam
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
-import { NORTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -177,6 +177,44 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     expect(geo.edges[0]!.points[geo.edges[0]!.points.length - 1]).toEqual(expect.objectContaining({ y: bTop }));
     expect(geo.edges[1]!.points[0]).toEqual(expect.objectContaining({ y: bBottom }));
     expect(geo.edges[1]!.points[geo.edges[1]!.points.length - 1]).toEqual(expect.objectContaining({ y: cTop }));
+  });
+});
+
+// T6b (`FtileAssemblySimple.java:124-141`, `FtileGeometryMerger.java:44-56`):
+// siblings align on their own `left`, not the composite's centre.
+describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not centre (T6b)', () => {
+  it("a leaf's centre x lands on a wider sibling's left; the link is one vertical segment", () => {
+    // Stand-in for an `if` tile whose own `left` is 20px right of its
+    // `width / 2` (`width: 100` -> centre 50, `left: 70`).
+    const ifLike: Tile = {
+      kind: 'stub-if',
+      width: 100,
+      height: 40,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK ? { x: 70, y: 0 } : hook === SOUTH_HOOK ? { x: 70, y: 40 } : { x: 0, y: 20 },
+      hasPointOut: () => true,
+    };
+    const start: Tile = {
+      kind: 'stub-start',
+      width: 30,
+      height: 20,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK ? { x: 15, y: 0 } : hook === SOUTH_HOOK ? { x: 15, y: 20 } : { x: 0, y: 10 },
+      hasPointOut: () => true,
+    };
+    const root = new GtileTopDown([start, ifLike], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes).toHaveLength(2);
+    const startNode = geo.nodes[0]!;
+    const ifNode = geo.nodes[1]!;
+    // start's centre x (its own left, a leaf) lands on if's left.
+    expect(startNode.x + startNode.width / 2).toBeCloseTo(ifNode.x + 70, 5);
+
+    expect(geo.edges).toHaveLength(1);
+    const xs = geo.edges[0]!.points.map((p) => p.x);
+    // A single vertical segment: every waypoint shares one x.
+    expect(new Set(xs.map((v) => Math.round(v * 1e6) / 1e6)).size).toBe(1);
   });
 });
 

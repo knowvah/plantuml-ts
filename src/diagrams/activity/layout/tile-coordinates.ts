@@ -174,16 +174,19 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       // jar's run is `X's internals, a->X, c's internals, X->c`: each link
       // is pushed only after the child it points TO has been fully walked,
       // not before the child it points FROM.
+      // T6b (`FtileAssemblySimple.java:131-141`): children are NOT centred
+      // on the composite's width -- each child i is translated by
+      // `left - child_i.left` so every child's own in/out x lands under the
+      // merged `left` (`GtileTopDown`'s `childOffsetsX`).
       const t = tile as unknown as GtileTopDown;
       if (t.children.length === 0) return;
-      const centerX = x + tile.width / 2;
       let prevChild: Tile | null = null;
       let prevX = 0;
       let prevY = 0;
       for (let i = 0; i < t.children.length; i++) {
         const child = t.children[i]!;
         const childY = y + t.childOffsets[i]!;
-        const childX = centerX - child.width / 2;
+        const childX = x + t.childOffsetsX[i]!;
         walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
         if (prevChild !== null) {
           const from = { x: prevX + prevChild.getCoord(SOUTH_HOOK).x, y: prevY + prevChild.getCoord(SOUTH_HOOK).y };
