@@ -1,6 +1,6 @@
 {
-  "commit": "9360c515",
-  "aggregate": 49690,
+  "commit": "54e59169",
+  "aggregate": 49647,
   "subsetSum": null,
   "fixtures": [
     {
@@ -125,9 +125,9 @@
     },
     {
       "slug": "boxoto-53-sifo232",
-      "score": 879,
+      "score": 877,
       "pinned": 1033,
-      "delta": -154
+      "delta": -156
     },
     {
       "slug": "bozido-07-geze049",
@@ -263,9 +263,9 @@
     },
     {
       "slug": "cujoni-21-somi079",
-      "score": 176,
+      "score": 155,
       "pinned": 211,
-      "delta": -35
+      "delta": -56
     },
     {
       "slug": "cutabu-59-cilo276",
@@ -407,9 +407,9 @@
     },
     {
       "slug": "feceme-58-xodo415",
-      "score": 115,
+      "score": 117,
       "pinned": 133,
-      "delta": -18
+      "delta": -16
     },
     {
       "slug": "felega-00-saxi785",
@@ -515,9 +515,9 @@
     },
     {
       "slug": "gakelo-29-neno787",
-      "score": 169,
+      "score": 193,
       "pinned": 243,
-      "delta": -74
+      "delta": -50
     },
     {
       "slug": "ganaku-47-muko252",
@@ -707,15 +707,15 @@
     },
     {
       "slug": "jupoxe-15-sugo110",
-      "score": 1899,
+      "score": 1898,
       "pinned": 1974,
-      "delta": -75
+      "delta": -76
     },
     {
       "slug": "kafevi-44-tesu096",
-      "score": 128,
+      "score": 126,
       "pinned": 205,
-      "delta": -77
+      "delta": -79
     },
     {
       "slug": "kasadu-53-tuki533",
@@ -1061,9 +1061,9 @@
     },
     {
       "slug": "nonusu-50-nute147",
-      "score": 172,
+      "score": 168,
       "pinned": 266,
-      "delta": -94
+      "delta": -98
     },
     {
       "slug": "norire-15-taka956",
@@ -1151,9 +1151,9 @@
     },
     {
       "slug": "pifoni-76-duxa505",
-      "score": 296,
+      "score": 247,
       "pinned": 255,
-      "delta": 41
+      "delta": -8
     },
     {
       "slug": "pirofe-41-xama594",
@@ -1421,9 +1421,9 @@
     },
     {
       "slug": "tobajo-64-mipi810",
-      "score": 842,
+      "score": 832,
       "pinned": 942,
-      "delta": -100
+      "delta": -110
     },
     {
       "slug": "topico-42-fuza478",
@@ -1451,9 +1451,9 @@
     },
     {
       "slug": "vaxuta-95-cico162",
-      "score": 235,
+      "score": 233,
       "pinned": 325,
-      "delta": -90
+      "delta": -92
     },
     {
       "slug": "vebala-15-tade547",
@@ -1499,9 +1499,9 @@
     },
     {
       "slug": "vozane-63-kepe177",
-      "score": 186,
+      "score": 210,
       "pinned": 262,
-      "delta": -76
+      "delta": -52
     },
     {
       "slug": "vubolo-48-cubu499",
@@ -1547,9 +1547,9 @@
     },
     {
       "slug": "xigelo-67-sipi599",
-      "score": 205,
+      "score": 203,
       "pinned": 255,
-      "delta": -50
+      "delta": -52
     },
     {
       "slug": "xovano-23-tazo278",
@@ -1618,24 +1618,24 @@
     "svg/@width": 268,
     "svg/g[]/rect[]/@height": 34,
     "svg/g[]/rect[]/@width": 94,
-    "svg/g[]/rect[]/@x": 965,
+    "svg/g[]/rect[]/@x": 967,
     "svg/g[]/rect[]/@y": 967,
     "svg/g[]/text[]/@textLength": 1541,
-    "svg/g[]/text[]/@x": 1709,
+    "svg/g[]/text[]/@x": 1713,
     "svg/g[]/text[]/@y": 1713,
     "svg/g[]/text[]/text()[]": 399,
-    "svg/g[][childCount]": 9444,
+    "svg/g[][childCount]": 9374,
     "svg/g[]/ellipse[]/@cx": 469,
-    "svg/g[]/ellipse[]/@cy": 437,
+    "svg/g[]/ellipse[]/@cy": 427,
     "svg/g[]/path[]/@d": 40,
     "svg/g[]/path[]/@fill": 80,
     "svg/g[]/path[]/@d[]": 320,
     "svg/g[]/text[]/@font-size": 120,
-    "svg/g[]/line[]/@x1": 3031,
-    "svg/g[]/line[]/@x2": 3033,
-    "svg/g[]/line[]/@y1": 3041,
+    "svg/g[]/line[]/@x1": 3038,
+    "svg/g[]/line[]/@x2": 3038,
+    "svg/g[]/line[]/@y1": 3040,
     "svg/g[]/line[]/@y2": 3041,
-    "svg/g[]/polygon[]/@points[]": 14437,
+    "svg/g[]/polygon[]/@points[]": 14457,
     "svg/g[]/polygon[]/@points": 422,
     "svg/g[]/ellipse[]/@rx": 297,
     "svg/g[]/ellipse[]/@ry": 297,
