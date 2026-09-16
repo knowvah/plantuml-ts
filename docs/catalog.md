@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1105 modules · 3994 exported names.
+1106 modules · 3995 exported names.
 
 ## `src/`
 
@@ -968,6 +968,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
 | `walk-if-long-horizontal.ts` | `walkIfLongHorizontal` | The `'gtile-if-long-horizontal'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-down.ts`/`walk-if-with-links.ts` already are (mission `activity-if-tile-port` D5). |
 | `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
+| `walk-repeat.ts` | `walkRepeat` | The `'gtile-repeat'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
 ## `src/diagrams/activity/layout/compress/`
