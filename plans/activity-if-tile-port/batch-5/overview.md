@@ -7,6 +7,6 @@ ANY compound child that has internal edges, inside `fixtures.md` or not
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6 | `gtile-top-down`: walk child i+1, THEN push link i->i+1 | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts` (top-down case only), `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tile-layout.test.ts`, `swimlane-placement.test.ts`, `compress/{compress-geometry,invariant}.test.ts` ONLY where order breaks them; `measurements/t6.json` | T5 | [ ] |
+| T6 | `gtile-top-down`: walk child i+1, THEN push link i->i+1 | typescript-pro | `src/diagrams/activity/layout/tile-coordinates.ts` (top-down case only), `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tile-layout.test.ts`, `swimlane-placement.test.ts`, `compress/{compress-geometry,invariant}.test.ts` ONLY where order breaks them; `measurements/t6.json` | T5 | [x] |
 
 Spec: [`T6-sibling-link-order.md`](T6-sibling-link-order.md).
