@@ -125,40 +125,38 @@ committing and are resumed to commit.
 - [x] Batch 0 — T0, T1
 - [x] Batch 1 — T2
 - [x] Batch 2 — T3, T4
-- [ ] Batch 3 — T5 [x], T6 [ ] (resumed 2026-09-16 under the D5 amendment)
-- [ ] Batch 4 — T7
+- [x] Batch 3 — T5, T6 (T6 after the D5 amendment, option 1)
+- [x] Batch 4 — T7
 
-## Session summary (2026-09-16, halted at T6)
+## Session summary (2026-09-16)
 
-- **Tasks:** 6 of 8 complete (T0, T1, T2, T3, T4, T5); T6 not started
-  (stop 11), T7 not started (depends on T6). Commits on
-  `feat/activity-loop-tile-port`: `7dcb0726` T0, `92a7fcb2` T1 + `5741d1c8`
-  chore (tileNode last for lizard), `adf014d8` T2, `adf84310` T3, `256ad510`
-  T4, `7163ae94` T5 move, `bc2c4194` T5 port; docs commits per batch.
-- **Decisions:** ~30 journal rows. Flagged for review: (1) the halt --
-  `stop-11-complex1.md`, six fixtures reach `ConnectionBackComplex1`
-  (~70 lines to port; D5/README scope line rests on a disproved premise);
-  (2) laned connections use the jar's `drawTranslate` variants
-  (`FtileWhile.java:200-214,276-308`), unported -- the residual on every
-  laned while row (file `activity-loop-lane-translate`); (3) T5 dropped the
-  never-fed `backward` child slot; (4) `GtileBreak` is 20x20 where
-  `FtileBreak` is 0x0 (welding starts 10 px left on break fixtures);
-  (5) an `end` right after `endwhile` is placed differently by the jar
-  (`cutabu`), mechanism not isolated.
+- **Tasks:** 8 of 8 complete. Commits on `feat/activity-loop-tile-port`:
+  `7dcb0726` T0, `92a7fcb2` T1 + `5741d1c8` chore (tileNode last for
+  lizard), `adf014d8` T2, `adf84310` T3, `256ad510` T4, `7163ae94` T5 move,
+  `bc2c4194` T5 port, `0249de03` D5 amendment, `77d50172` T6, T7 re-pin
+  (this commit); docs commits per batch.
+- **Halt and resume:** stopped once at the T6 boundary (stop 11: six
+  fixtures reach `ConnectionBackComplex1`, `stop-11-complex1.md`); the
+  human chose option 1, D5 was amended, T6 ported `Complex1`.
+- **Decisions:** ~45 journal rows. Flagged for review: D5 amendment;
+  T5 dropped the never-fed `backward` child slot; the five filings below.
 - **Defects found by measurement and fixed:** T2's helpers dropped the
   hexagon's own lane (kudedo/kasadu); T2's while-header polygon used the
-  tile height (35 px) instead of the hexagon-alone height (24 px) -- found
-  only by element-level comparison against the golden after `--align`
-  counts had matched.
-- **Quality gates at HEAD `bc2c4194`:** typecheck 0, lint 0, build 0 (0
-  `error TS`); `npm test` 724/724 collected, red ONLY on the four activity
-  oracle gates and only on the 60 `fixtures.md` movers (red allowance);
-  `svg-conformance` 27 files / 3428 tests, sibling suites unmoved; scan 0
-  at every task; `hardViolations` empty (one attributed exemption added).
-- **Exit bar status:** `cemagu` (labelled while) and `fovaja` match the
-  golden on every line segment to 0.01 after canvas offset; `bareka`'s
-  residual named (if-side width, break size); `ruzica` named
-  (`drawTranslate`); repeat representatives await T6. Aggregate 49658 ->
-  50108, reported not gated (D9); every rise classed.
-- **Not merged.** Branch state is an intermediate: repeats have their
-  entry tile but no entry->body edge and awrl's left back edge until T6.
+  tile height (35 px) instead of the hexagon-alone height (24 px). Both
+  found by element-level comparison against the golden after `--align`
+  counts had already matched (memory `segment-compare-beats-align-counts`).
+- **Quality gates at HEAD:** typecheck 0, lint 0, build 0 (0 `error TS`);
+  `npm test` 725/725 collected, 19875 passed, 0 failed, coverage
+  95.95/91.28/97.06/96.94; `svg-conformance` 27 files / 3427 passed / 1
+  skipped at `3651a1ec` and at HEAD; scan 0 at every task; `hardViolations`
+  empty (one attributed exemption added).
+- **Exit bar:** `cemagu`, `fovaja`, `biguku` match the golden on every
+  segment to 0.01 after canvas offset; `bareka` (if-side width,
+  `GtileBreak` size), `ruzica`/`katopo`/`felega`/`tobajo` (`drawTranslate`)
+  named with cites. Movers 60 of 60 rows, no parent re-centring. 56 rises
+  accepted at the single re-pin, each classed. Aggregate 49658 -> 51371,
+  reported not gated (D9).
+- **Filed:** `activity-loop-lane-translate`, `activity-repeat-break-welding`,
+  `activity-gtile-break-size`, `activity-loop-backward`,
+  `activity-endwhile-end-placement` (`planning/next-missions.md`).
+- **Not merged.**

@@ -1356,7 +1356,7 @@ Ordered by how ready they are, not by size.
       siblings on their in/out x but `walk-while-branch.ts` and the
       `'gtile-repeat'` walker case still centred header/body/condition by
       `width/2`; 19 baseline fixtures drew a diagonal segment.
-    - **`activity-loop-gutters`** — filed 2026-09-16 by
+    - **`activity-loop-gutters`** — **DONE 2026-09-16 by `activity-loop-tile-port`** (T3 `adf84310` while: `left = geo.left + 24`, `width = geo.w + 36`, `height = geo.h + 48`; T5 `bc2c4194` repeat: `max(left + right, 24) + 24`, `height = d1.h + body.h + d2.h + 96`; `BACK_EDGE_MARGIN` deleted; `tobajo`'s 5.991 px residual is now the `drawTranslate` class below). Original filing: filed 2026-09-16 by
       `activity-while-repeat-left-alignment` (its D2, first measured symptom
       `tobajo-64-mipi810`). Ours widens a while/repeat by ONE
       `BACK_EDGE_MARGIN = 20` (`activity-layout-constants.ts:77`) and hooks
@@ -1375,7 +1375,7 @@ Ordered by how ready they are, not by size.
       test-label floor together; the repeat's side-hung `backward` belongs
       to `activity-repeat-connector-draw-order` (remove T2's backward terms
       from the merge in the same commit).
-    - **`activity-diamond-sizing`** — filed by `activity-if-tile-port` T1 Q2
+    - **`activity-diamond-sizing`** — **DONE 2026-09-16 by `activity-loop-tile-port`** T2 `adf014d8` (`GtileDiamondInside` for both loops; `cemagu` hexagon 187.35 = jar, 24 tall after T4's alone-height fix `256ad510`). Original filing: filed by `activity-if-tile-port` T1 Q2
       (stop 13). `GtileDiamond` (`tiles/gtile-diamond.ts:15-29`,
       `DIAMOND_MIN=20`/`DIAMOND_LABEL_PAD=10`) is 4 px narrower and 16 px
       taller than `FtileDiamondInside#calculateDimensionAlone`
@@ -1385,6 +1385,56 @@ Ordered by how ready they are, not by size.
       measurement agrees to the pixel, only the constants differ. The if
       condition already uses the jar's arithmetic (`GtileDiamondInside`); port
       the same for while/repeat.
+    - **`activity-loop-lane-translate`** — filed 2026-09-16 by
+      `activity-loop-tile-port` T4/T6. With swimlanes the jar draws every
+      `ConnectionTranslatable` whose two ftiles sit in different lanes through
+      `drawTranslate(ug, translate1, translate2)`, not `drawU`; the shapes
+      differ: `FtileWhile.ConnectionIn.drawTranslate` (`:200-214`, mid-y
+      dog-leg), `ConnectionBackSimple.drawTranslate` (`:276-308`: `xx =
+      max(t1.dx, t2.dx) + width`, elbow `y1 + 12`, a separate `asToUp` arrow
+      at `(xx, (y1+y2)/2)`, `MergeStrategy.LIMITED`); `FtileRepeat`'s
+      `ConnectionIn/Out/BackSimple1/BackSimple2/Complex1.drawTranslate`
+      (`:250-259,301-321,356-362,580-606,650-660`). The mission ported
+      `drawU` only; every laned loop row's residual (`ruzica`, `kijazo`,
+      `judatu`, `gesogi`, `xovano`, `bulasi`, `camavo`, `vupuse`, `zepima`,
+      `becanu`, `givanu`, `kasadu`, `kudedo`, `mafete`, `manata`, `bumaca`,
+      `navene`, `rujuxa`, `tobajo`, `katopo`, `felega`, `megara`) is this
+      class. Read `Swimlanes.java`'s connection drawing to see WHICH
+      translates apply before porting.
+    - **`activity-repeat-break-welding`** — filed 2026-09-16 by
+      `activity-loop-tile-port` T6. The jar welds `break`s inside a repeat
+      exactly as inside a while (`FtileFactoryDelegatorRepeat.java:123`
+      `repeat.getWeldingPoints()`); the mission's D3 scoped the welding to
+      the while (`FtileFactoryDelegatorWhile.java:95-116`, done in T4
+      `256ad510`). Five repeat break rows carry the residual: `bizono`,
+      `cixave`, `dacuga`, `dixiku`, `doziki`. Same shape as the while's:
+      `(break.x, break.y) -> (12, break.y)`, `asToLeft` -- read the delegator
+      for the x it uses.
+    - **`activity-gtile-break-size`** — filed 2026-09-16 by
+      `activity-loop-tile-port` T4 (`.agent-notes/altp-T4-gtile-break-
+      dimension.md`). `GtileBreak` is 20x20; the jar's `FtileBreak` is
+      `calculateDimensionEmpty().withoutPointOut()` = 0x0
+      (`FtileBreak.java:62-64`, `FtileEmpty.java:74-76`), so every welding
+      starts 10 px left and 10 px low of the jar's (`bareka`). Fix the tile
+      size and re-check the nine break rows.
+    - **`activity-loop-backward`** — filed 2026-09-16 by
+      `activity-loop-tile-port` (D3/D5). `backward:` bodies are unparsed
+      (no AST field, 0 fixtures); the jar hangs the backward tile off the
+      RIGHT edge at `(width - backward.w, (h - backward.h)/2)`
+      (`FtileRepeat.java:750-757`, width `:709-710`) and draws
+      `ConnectionBackBackward1/2` (`:406-536`); the while has
+      `ConnectionBackBackward1/2` too (`FtileWhile.java:313-408`). T5
+      dropped the never-fed stacking slot, so this starts from the jar's
+      placement, not from an interim.
+    - **`activity-endwhile-end-placement`** — filed 2026-09-16 by
+      `activity-loop-tile-port` T4. `cutabu-59-cilo276` (`while () ...
+      endwhile ... end`): the golden's `end` cross sits under the while's
+      EXIT column (x = 12) with no bottom horizontal and a shorter exit
+      vertical; ours places `end` at the tile's `left`. The while's five
+      connectors reproduce the ported formulas, so the mechanism is in how
+      the jar assembles a killed/`end` instruction after a while
+      (`InstructionWhile.java:129` `FtileKilled`?) -- unread. Diagnose with
+      the golden before touching anything.
     - **`activity-detach-as-stop`** — surfaced by `activity-if-tile-port` T7.
       `tile-layout.ts` builds `kill`/`detach` as a `GtileStop` (a drawn double
       ellipse plus an in-edge); the jar's `InstructionSimple.kill()` only
@@ -1435,8 +1485,10 @@ Ordered by how ready they are, not by size.
       no code dependency. Left unfixed deliberately: that file is read-only
       for every task in that mission, so no task could touch it in scope.
     - **`activity-diamond-count-shortfall`** — **`if` half DONE 2026-09-16 by
-      `activity-if-tile-port`** (the merge rhombus is now drawn); the repeat
-      entry-diamond half is still open. **Widened 2026-09-16 by
+      `activity-if-tile-port`** (the merge rhombus is now drawn); **repeat
+      half DONE 2026-09-16 by `activity-loop-tile-port` T5 `bc2c4194`**
+      (`GtileRepeatEntry` 24x24 or the inline action as `diamond1`, both
+      `d1.w/2` terms of `getLeft`/`getRight` real; `biguku` polygon 7 = 7). **Widened 2026-09-16 by
       `activity-while-repeat-left-alignment` T2:** `GtileRepeat`'s ported
       `getLeft`/`getRight` omit the jar's `dimDiamond1.getWidth() / 2` terms
       (`vcompact/FtileRepeat.java:769,771,780,782`) because the tile has no
