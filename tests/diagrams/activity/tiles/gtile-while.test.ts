@@ -112,9 +112,10 @@ describe('GtileWhile — geometry (header h=40, body h=80)', () => {
     expect(tile.headerOffsetY).toBe(0);
   });
 
-  it('backEdgeRightX === width', () => {
-    expect(tile.backEdgeRightX).toBe(tile.width);
-  });
+  // `backEdgeRightX` was retired by altp-T4 (D8): the back edge's own
+  // point list now reads `x + t.width` directly (`walk-while-branch.ts`'s
+  // `buildWhileFrame`'s `xx`), and `grep` shows no reader of the field left
+  // outside `layout.old.ts`.
 
   it('children contains header and body', () => {
     expect(tile.children).toHaveLength(2);
@@ -235,7 +236,6 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
     expect(tile.bodyOffsetX).toBe(34);
     // geo.width = max(60 + 0, 80 + 10) = 90; tile.width = 90 + 36 = 126.
     expect(tile.width).toBe(90 + 3 * HEXAGON_HALF_SIZE);
-    expect(tile.backEdgeRightX).toBe(tile.width);
   });
 
   it('symmetric children: offsets land the composite at tile.left, not width / 2', () => {

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1106 modules · 3996 exported names.
+1105 modules · 3994 exported names.
 
 ## `src/`
 
@@ -987,10 +987,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gconnection-down-then-up.ts` | `GConnectionDownThenUp` |  |
 | `gconnection-horizontal.ts` | `GConnectionHorizontal` |  |
 | `gconnection-side-then-vertical-then-side.ts` | `GConnectionSideThenVerticalThenSide` |  |
-| `gconnection-vertical-down-then-back.ts` | `GConnectionVerticalDownThenBack` |  |
 | `gconnection-vertical-down.ts` | `GConnectionVerticalDown` |  |
 | `gconnection.ts` | `GConnection` |  |
-| `index.ts` | `GConnection`, `GConnectionVerticalDown`, `GConnectionHorizontal`, `GConnectionVerticalDownThenBack`, `GConnectionDownThenUp`, `GConnectionSideThenVerticalThenSide` |  |
+| `index.ts` | `GConnection`, `GConnectionVerticalDown`, `GConnectionHorizontal`, `GConnectionDownThenUp`, `GConnectionSideThenVerticalThenSide` |  |
 
 ## `src/diagrams/activity/tiles/`
 

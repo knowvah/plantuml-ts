@@ -33,13 +33,6 @@ export class GtileWhile extends TileComposite {
   readonly headerOffsetX: number;
   /** `left - body.left`: the body's x inside the tile. */
   readonly bodyOffsetX: number;
-  /**
-   * `= width` (`FtileWhile.java:591-593`: the tile's own right edge, since
-   * the unported `backward` tile's width is always 0, D2
-   * `plans/activity-while-repeat-left-alignment/decisions.md`). Retired by
-   * T4 once the back-edge routing it feeds is replaced (D8).
-   */
-  readonly backEdgeRightX: number;
 
   /**
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:575-596
@@ -83,7 +76,6 @@ export class GtileWhile extends TileComposite {
     this.bodyOffsetX = this.left - bodyLeft;
     this.bodyOffsetY = header.height + (this.height - header.height - body.height - this.labelHeight) / 2;
 
-    this.backEdgeRightX = this.width;
     this.children = [header, body];
   }
 
