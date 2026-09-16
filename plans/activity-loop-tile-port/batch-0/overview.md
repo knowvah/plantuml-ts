@@ -2,8 +2,8 @@
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0 | Commit the diagonal scan and render-all tools; record `base.json` | orchestrator | `scripts/activity-diag-scan.ts`, `scripts/activity-render-all.ts`, `tests/unit/scripts/activity-diag-scan.test.ts`, `measurements/base.json` (already in place) | — | [ ] |
-| T1 | `ActivityRepeat.entry` + repeat `yesLabel`/`outLabel` in the AST and parser; output byte-identical | typescript-pro | `src/diagrams/activity/ast.ts`, `src/diagrams/activity/node-dispatch.ts`, `src/diagrams/activity/layout/tile-layout.ts` (prepend `entry` to the body), `tests/unit/activity/parser.test.ts`, `tests/diagrams/activity/layout/tile-layout.test.ts` | — | [ ] |
+| T0 | Commit the diagonal scan and render-all tools; record `base.json` | orchestrator | `scripts/activity-diag-scan.ts`, `scripts/activity-render-all.ts`, `tests/unit/scripts/activity-diag-scan.test.ts`, `measurements/base.json` (already in place) | — | [x] |
+| T1 | `ActivityRepeat.entry` + repeat `yesLabel`/`outLabel` in the AST and parser; output byte-identical | typescript-pro | `src/diagrams/activity/ast.ts`, `src/diagrams/activity/node-dispatch.ts`, `src/diagrams/activity/layout/tile-layout.ts` (prepend `entry` to the body), `tests/unit/activity/parser.test.ts`, `tests/diagrams/activity/layout/tile-layout.test.ts` | — | [x] |
 
 Disjoint write-sets; run in parallel (separate worktrees if agents run
 concurrently — memory `batch-parallelism-needs-worktrees`). Specs:
