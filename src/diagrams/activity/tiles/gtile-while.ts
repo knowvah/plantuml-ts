@@ -4,7 +4,7 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
-import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
+import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 
 export class GtileWhile extends TileComposite {
   readonly kind = 'gtile-while' as const;
@@ -13,52 +13,82 @@ export class GtileWhile extends TileComposite {
   readonly children: readonly Tile[];
   readonly headerOffsetY = 0;
   readonly bodyOffsetY: number;
-  /** The merged `left` of header and body -- the x of both hooks. */
-  readonly contentLeft: number;
-  /** `contentLeft - header.left`: the header's x inside the tile. */
+  /**
+   * The merged `left` of header and body, shifted by the loop-back gutter --
+   * the x of both hooks. `FtileWhile.java:593`: `geo.getLeft() + dx` where
+   * `dx = 2 * Hexagon.hexagonHalfSize` (`:586`).
+   */
+  readonly left: number;
+  /**
+   * `back1`'s height, added to `height` (`FtileWhile.java:585,597-601`).
+   * `back1` is the `-> text;` line immediately before `endwhile`
+   * (`ActivityDiagram3.java:403-407`, `InstructionWhile.java:208-213`).
+   * Our tile engine tiles every `arrow-label` node to `null`
+   * (`tile-layout.ts`'s `'arrow-label'` case) and no baseline `while`
+   * fixture has one before `endwhile`, so this is always 0 today -- the
+   * capture itself is a separate, filed gap, not this task's write-set.
+   */
+  readonly labelHeight = 0;
+  /** `left - header.left`: the header's x inside the tile. */
   readonly headerOffsetX: number;
-  /** `contentLeft - body.left`: the body's x inside the tile. */
+  /** `left - body.left`: the body's x inside the tile. */
   readonly bodyOffsetX: number;
+  /**
+   * `= width` (`FtileWhile.java:591-593`: the tile's own right edge, since
+   * the unported `backward` tile's width is always 0, D2
+   * `plans/activity-while-repeat-left-alignment/decisions.md`). Retired by
+   * T4 once the back-edge routing it feeds is replaced (D8).
+   */
   readonly backEdgeRightX: number;
 
   /**
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:576-593
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:575-596
    *   -- `calculateDimensionFtile`: `geo = geoDiamond1.appendBottom(geoWhile)`;
-   *   the tile's `left` is `geo.getLeft() + dx` and its width `geo.getWidth()
-   *   + dx + hexagonHalfSize + backwardWidth` -- the jar's gutters (`dx = 2 *
-   *   hexagonHalfSize`) are NOT ported here: `BACK_EDGE_MARGIN` stays (D2,
-   *   `plans/activity-while-repeat-left-alignment/decisions.md`).
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:44-56
-   *   -- `appendBottom`: `left = max(left1, left2)`,
-   *   `width = max(w1 + (left - left1), w2 + (left - left2))`.
+   *   `height = geo.getHeight() + 4 * hexagonHalfSize + suppHeightForLabel`
+   *   (`:585`); the returned `FtileGeometry`'s `width = geo.getWidth() + dx +
+   *   hexagonHalfSize` and `left = geo.getLeft() + dx`, `dx = 2 *
+   *   hexagonHalfSize` (`:586,591-593`) -- with `backward == null` (D2) and
+   *   `specialOut == null` (D3 `plans/activity-loop-tile-port/decisions.md`),
+   *   both of which are otherwise added into `width`/`left`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:42-56
+   *   -- `appendBottom`: `left = max(left1, left2)`, `width = max(w1 +
+   *   (left - left1), w2 + (left - left2))`, `height = h1 + h2`.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:621-641
-   *   -- `getTranslateForWhile`: `x = dimTotal.getLeft() - dimWhile.getLeft()`;
-   *   `getTranslateDiamond1`: `x1 = dimTotal.getLeft() - dimDiamond1.getLeft()`
-   *   -- each child is shifted so its OWN `left` lands under the merged
-   *   `left`, never centred on the composite's width.
+   *   -- `getTranslateForWhile`: `y = d1.h + (total.h - d1.h - body.h -
+   *   suppHeightForLabel) / 2`, `x = total.left - body.left`;
+   *   `getTranslateDiamond1`: `y = 0`, `x = total.left - d1.left` -- each
+   *   child is shifted so its OWN `left` lands under the merged `left`,
+   *   never centred on the composite's width.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:48-82,190-192
-   *   -- a tile's `left` IS its in/out x, i.e. `getCoord(NORTH_HOOK).x` here.
+   *   -- a tile's `left` IS its in/out x, i.e. `getCoord(NORTH_HOOK).x` here;
+   *   `appendBottom`'s `inY` is `geo1.getInY()`, and `FtileDiamondInside`'s
+   *   own `calculateDimensionAlone` (`vertical/FtileDiamondInside.java:106-
+   *   116`) always returns `inY = 0`, so the tile's `NORTH_HOOK.y` is 0.
    */
   constructor(header: GtileDiamondInside, body: Tile, _bounder: StringBounder, _theme: Theme) {
     super();
-    this.bodyOffsetY = header.height + NODE_MARGIN_Y;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
-    this.contentLeft = Math.max(headerLeft, bodyLeft);
-    this.headerOffsetX = this.contentLeft - headerLeft;
-    this.bodyOffsetX = this.contentLeft - bodyLeft;
-    const contentWidth = Math.max(this.headerOffsetX + header.width, this.bodyOffsetX + body.width);
-    this.width = contentWidth + BACK_EDGE_MARGIN;
-    this.height = this.bodyOffsetY + body.height + NODE_MARGIN_Y;
+    const geoLeft = Math.max(headerLeft, bodyLeft);
+    const headerDx = geoLeft - headerLeft;
+    const bodyDx = geoLeft - bodyLeft;
+    const geoWidth = Math.max(headerDx + header.width, bodyDx + body.width);
+    const geoHeight = header.height + body.height;
+
+    this.left = geoLeft + 2 * HEXAGON_HALF_SIZE;
+    this.width = geoWidth + 2 * HEXAGON_HALF_SIZE + HEXAGON_HALF_SIZE;
+    this.height = geoHeight + 4 * HEXAGON_HALF_SIZE + this.labelHeight;
+
+    this.headerOffsetX = this.left - headerLeft;
+    this.bodyOffsetX = this.left - bodyLeft;
+    this.bodyOffsetY = header.height + (this.height - header.height - body.height - this.labelHeight) / 2;
+
     this.backEdgeRightX = this.width;
     this.children = [header, body];
   }
 
   getCoord(hook: HookName): GPoint {
-    // The merged `left` (FtileWhile.java:593 -- `geo.getLeft() + dx`, minus
-    // the unported gutter); equals `(width - BACK_EDGE_MARGIN) / 2` exactly
-    // when both children are symmetric (`left == width / 2`).
-    const cx = this.contentLeft;
+    const cx = this.left;
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
