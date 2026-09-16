@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-09-16",
-  "measuredAgainstCommit": "543f0fcf",
+  "measuredAgainstCommit": "46caf80b",
   "fixtures": [
     {
       "type": "activity",
@@ -777,7 +777,8 @@
           "(absent)": 5
         },
         "inset": {
-          "10": 3
+          "10": 1,
+          "9.999": 2
         },
         "textCount": 5
       },
@@ -794,7 +795,7 @@
         "textCount": 9
       },
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",
@@ -2755,8 +2756,8 @@
           "(absent)": 17
         },
         "inset": {
-          "10": 4,
-          "9.999": 3
+          "10": 6,
+          "9.999": 1
         },
         "textCount": 17
       },
@@ -2773,7 +2774,7 @@
         "textCount": 17
       },
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",
@@ -2944,7 +2945,8 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 5
+          "10": 4,
+          "9.999": 1
         },
         "textCount": 8
       },
@@ -2961,7 +2963,7 @@
         "textCount": 8
       },
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",
@@ -7108,7 +7110,8 @@
           "(absent)": 20
         },
         "inset": {
-          "10": 7
+          "10": 6,
+          "9.999": 1
         },
         "textCount": 20
       },
@@ -7125,7 +7128,7 @@
         "textCount": 20
       },
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",
@@ -7217,7 +7220,8 @@
           "(absent)": 12
         },
         "inset": {
-          "10": 6
+          "10": 4,
+          "9.999": 2
         },
         "textCount": 12
       },
@@ -7233,8 +7237,8 @@
         },
         "textCount": 12
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",

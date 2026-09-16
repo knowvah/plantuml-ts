@@ -21,24 +21,29 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
-function makeTile(width: number, height: number, hasPointOut = true): Tile {
+// A stub's `left` (its `NORTH_HOOK.x`, `FtileGeometry.java:48-82` --
+// `pointIn = (left, inY)`) defaults to `width / 2`, i.e. symmetric, which is
+// what every real tile was before `activity-if-tile-port`; pass `left` to
+// model an asymmetric child such as an `if`.
+function makeTile(width: number, height: number, hasPointOut = true, left = width / 2): Tile {
   return {
     kind: 'stub',
     width,
     height,
-    getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    getCoord: (): GPoint => ({ x: left, y: 0 }),
     hasPointOut: () => hasPointOut,
   };
 }
 
-// GtileDiamond stub — only width/height matter for GtileWhile geometry
-function makeDiamond(width: number, height: number) {
+// GtileDiamond stub — width/height and its `left` (`width / 2`, D3) matter
+// for GtileWhile geometry.
+function makeDiamond(width: number, height: number, left = width / 2) {
   return {
     kind: 'gtile-diamond' as const,
     label: '',
     width,
     height,
-    getCoord: (_hook: HookName): GPoint => ({ x: 0, y: 0 }),
+    getCoord: (_hook: HookName): GPoint => ({ x: left, y: 0 }),
     hasPointOut: () => true,
   };
 }
@@ -114,8 +119,12 @@ describe('GtileWhile — hooks', () => {
     expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
   });
 
-  it('NORTH_HOOK.x === content centre', () => {
+  // FtileWhile.java:593 -- `left = geo.getLeft() + dx` (gutter unported,
+  // D2); for symmetric children the merged `left` (`FtileGeometryMerger
+  // .java:44`, `max(left1, left2)`) is the content centre.
+  it('NORTH_HOOK.x === content centre === contentLeft', () => {
     expect(tile.getCoord(NORTH_HOOK).x).toBe(cx);
+    expect(tile.contentLeft).toBe(cx);
   });
 
   it('SOUTH_HOOK.y === height', () => {
@@ -145,5 +154,58 @@ describe('GtileWhile — hasPointOut() is unconditionally true', () => {
     const body = makeTile(80, 80, false);
     const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
     expect(tile.hasPointOut()).toBe(true);
+  });
+});
+
+// FtileGeometryMerger.java:44-56 -- `appendBottom`: `left = max(left1,
+// left2)`, `width = max(w1 + (left - left1), w2 + (left - left2))`;
+// FtileWhile.java:621-641 -- each child at `x = total.left - child.left`.
+describe('GtileWhile — merger left/width with asymmetric children (D1)', () => {
+  it('header left 30 (w 60), body left 10 (w 40): contentLeft 30, contentWidth 60', () => {
+    const header = makeDiamond(60, 40, 30);
+    const body = makeTile(40, 80, true, 10);
+    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    expect(tile.contentLeft).toBe(30);
+    expect(tile.headerOffsetX).toBe(0);
+    expect(tile.bodyOffsetX).toBe(20);
+    // max(60 + 0, 40 + 20) = 60
+    expect(tile.width).toBe(60 + BACK_EDGE_MARGIN);
+    expect(tile.getCoord(NORTH_HOOK).x).toBe(30);
+    expect(tile.getCoord(SOUTH_HOOK).x).toBe(30);
+  });
+
+  it('body left 20 px right of its centre: width = contentLeft - body.left + body.width + margin', () => {
+    const header = makeDiamond(60, 40); // left 30
+    const body = makeTile(120, 80, true, 80); // centre 60, left 80
+    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    expect(tile.contentLeft).toBe(80);
+    expect(tile.headerOffsetX).toBe(50);
+    expect(tile.bodyOffsetX).toBe(0);
+    // merger: max(50 + 60, 0 + 120) = 120 -- the body term wins here
+    expect(tile.width).toBe(80 - 80 + 120 + BACK_EDGE_MARGIN);
+    // both hooks sit on the merged left, so header.SOUTH -> body.NORTH is
+    // vertical: header at x=50 puts its left at 80, body at x=0 its left at 80.
+    expect(tile.headerOffsetX + header.getCoord(SOUTH_HOOK).x).toBe(tile.bodyOffsetX + body.getCoord(NORTH_HOOK).x);
+  });
+
+  it('body left LEFT of its centre widens the tile on the right', () => {
+    const header = makeDiamond(60, 40); // left 30
+    const body = makeTile(80, 80, true, 20); // left 20
+    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    expect(tile.contentLeft).toBe(30);
+    expect(tile.bodyOffsetX).toBe(10);
+    // max(60 + 0, 80 + 10) = 90
+    expect(tile.width).toBe(90 + BACK_EDGE_MARGIN);
+    expect(tile.backEdgeRightX).toBe(tile.width);
+  });
+
+  it('symmetric children: offsets equal the old centring and hooks equal (width - margin) / 2', () => {
+    const header = makeDiamond(60, 40);
+    const body = makeTile(80, 80);
+    const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const cx = (tile.width - BACK_EDGE_MARGIN) / 2;
+    expect(tile.headerOffsetX).toBe(cx - 60 / 2);
+    expect(tile.bodyOffsetX).toBe(cx - 80 / 2);
+    expect(tile.getCoord(NORTH_HOOK).x).toBe(cx);
   });
 });
