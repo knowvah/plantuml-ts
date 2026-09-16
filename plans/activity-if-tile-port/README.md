@@ -160,6 +160,6 @@ the pins.
 - [x] Batch 1 — T2
 - [x] Batch 2 — T3
 - [x] Batch 3 — T4
-- [ ] Batch 4 — T5
+- [x] Batch 4 — T5
 - [ ] Batch 5 — T6
 - [ ] Batch 6 — T7
