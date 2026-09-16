@@ -17,10 +17,12 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamond } from '../tiles/gtile-diamond.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileIf } from '../tiles/gtile-if.js';
+import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { tileNodes } from './tile-layout.js';
+import { laneOut } from './swimlane-lanes.js';
 
 export type IfBuilder = 'down' | 'with-links' | 'long-horizontal';
 
@@ -149,8 +151,13 @@ function countIfSwimlanes(node: ActivityIf): number {
   return acc.size;
 }
 
-function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme): IfWithLinksBranch {
-  const tiles = tileNodes([...nodes], bounder, theme);
+function toBranchTile(
+  nodes: readonly ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): IfWithLinksBranch {
+  const tiles = tileNodes([...nodes], bounder, theme, laneOrder);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
@@ -158,13 +165,13 @@ function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, th
  * `createWithLinks` (`ConditionalBuilder.java:213-232`): a `withWestAndEast`
  * hexagon, both branches, and the merge rhombus when both have a point out.
  */
-function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme): Tile {
+function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
   const labels: { west?: string; east?: string } = {};
   if (node.thenLabel !== undefined) labels.west = node.thenLabel;
   if (node.elseLabel !== undefined) labels.east = node.elseLabel;
   const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
-  const branch1 = toBranchTile(node.thenBranch, bounder, theme);
-  const branch2 = toBranchTile(node.elseBranch, bounder, theme);
+  const branch1 = toBranchTile(node.thenBranch, bounder, theme, laneOrder);
+  const branch2 = toBranchTile(node.elseBranch, bounder, theme, laneOrder);
   const laneCount = countIfSwimlanes(node);
   return new GtileIfWithLinks(diamond1, branch1, branch2, laneCount);
 }
@@ -172,26 +179,26 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
 /**
  * The pre-T3 `tileIf` body verbatim: one `GtileDiamond` condition, every
  * branch (`then`, each `elseif`, `else`) as a plain child, no merge
- * diamond. Kept byte-identical for `down`/`long-horizontal` answers until
- * T4/T5 replace them with their own builders (D1).
+ * diamond. Kept byte-identical for `long-horizontal` answers until T5
+ * lands its own builder (D1).
  */
-function buildLegacyIf(node: ActivityIf, bounder: StringBounder, theme: Theme): Tile {
+function buildLegacyIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
   const diamond = new GtileDiamond(node.condition, bounder, theme);
   const branches: Array<{ tile: Tile; label?: string }> = [];
 
-  const thenTiles = tileNodes(node.thenBranch, bounder, theme);
+  const thenTiles = tileNodes(node.thenBranch, bounder, theme, laneOrder);
   const thenEntry: { tile: Tile; label?: string } = { tile: new GtileTopDown(thenTiles, bounder, theme) };
   if (node.thenLabel !== undefined) thenEntry.label = node.thenLabel;
   branches.push(thenEntry);
 
   for (const elseif of node.elseIfBranches) {
-    const elseifTiles = tileNodes(elseif.body, bounder, theme);
+    const elseifTiles = tileNodes(elseif.body, bounder, theme, laneOrder);
     const entry: { tile: Tile; label?: string } = { tile: new GtileTopDown(elseifTiles, bounder, theme) };
     if (elseif.label !== undefined) entry.label = elseif.label;
     branches.push(entry);
   }
 
-  const elseTiles = tileNodes(node.elseBranch, bounder, theme);
+  const elseTiles = tileNodes(node.elseBranch, bounder, theme, laneOrder);
   const elseEntry: { tile: Tile; label?: string } = { tile: new GtileTopDown(elseTiles, bounder, theme) };
   if (node.elseLabel !== undefined) elseEntry.label = node.elseLabel;
   branches.push(elseEntry);
@@ -199,8 +206,121 @@ function buildLegacyIf(node: ActivityIf, bounder: StringBounder, theme: Theme): 
   return new GtileIf(diamond, branches, null, bounder, theme);
 }
 
-export function buildIf(node: ActivityIf, bounder: StringBounder, theme: Theme): Tile {
+/**
+ * `Swimlane#isSmallerThanAllOthers` (`Swimlane.java:130-137`): `false` when
+ * `others` is exactly `{this}` alone (no real switch happened); else
+ * `false` the moment some touched lane's `compareTo(this) < 0` --
+ * `Swimlane implements Comparable<Swimlane>` compares `order`, the
+ * declaration-index each lane is assigned the FIRST time `|name|` is
+ * parsed anywhere in the diagram (`Swimlanes.java`'s `getCurrentSwimlane`,
+ * mirrored by `laneOrder` here, `ast.swimlanes`, threaded from
+ * `layoutActivity` through `tileNodes`/`tileNode`/`tileIf`/`buildIf` --
+ * mission `activity-if-tile-port` T4, decision journal: this is a
+ * deviation from T4's originally declared write-set, pre-authorised
+ * because `tile-layout.ts` is inside T3's write-set already).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlane.java:130-137
+ */
+function isMainLaneSmallerThanAllOthers(
+  ifLane: string | undefined,
+  mainNodes: readonly ActivityNode[],
+  laneOrder: readonly string[],
+): boolean {
+  if (ifLane === undefined) return false;
+  const touched = new Set<string>();
+  collectSwimlanes(mainNodes, touched);
+  if (touched.size === 0) return false;
+  if (touched.size === 1 && touched.has(ifLane)) return false;
+
+  const ifIndex = laneOrder.indexOf(ifLane);
+  for (const lane of touched) {
+    const laneIndex = laneOrder.indexOf(lane);
+    if (laneIndex !== -1 && laneIndex < ifIndex) return false;
+  }
+  return true;
+}
+
+interface IfDownParts {
+  readonly mainTile: Tile;
+  readonly sideTile: Tile;
+  readonly mainLabel: string | undefined;
+  readonly sideLabel: string | undefined;
+  readonly mainNodes: readonly ActivityNode[];
+}
+
+/** `createDown`'s branch selection (`ConditionalBuilder.java:170-191`):
+ *  `swapped` names which ORIGINAL branch is the visual main flow. */
+function resolveIfDownParts(node: ActivityIf, swapped: boolean, thenTile: Tile, elseTile: Tile): IfDownParts {
+  if (swapped) {
+    return {
+      mainTile: elseTile,
+      sideTile: thenTile,
+      mainLabel: node.elseLabel,
+      sideLabel: node.thenLabel,
+      mainNodes: node.elseBranch,
+    };
+  }
+  return {
+    mainTile: thenTile,
+    sideTile: elseTile,
+    mainLabel: node.thenLabel,
+    sideLabel: node.elseLabel,
+    mainNodes: node.thenBranch,
+  };
+}
+
+/**
+ * `createDown` (`ConditionalBuilder.java:170-191`) composed with
+ * `FtileIfDown.create` (`:124-159`): a `withSouth(mainLabel)
+ * .withEast(sideLabel)` hexagon, the main flow's own raw content, and
+ * either the merge rhombus or the other branch's own raw content as a side
+ * box (`optionalStop`).
+ */
+function buildIfDown(
+  node: ActivityIf,
+  bounder: StringBounder,
+  theme: Theme,
+  dispatch: IfBuilderResult,
+  laneOrder: readonly string[],
+): Tile {
+  const thenTile = new GtileTopDown(tileNodes([...node.thenBranch], bounder, theme, laneOrder), bounder, theme);
+  const elseTile = new GtileTopDown(tileNodes([...node.elseBranch], bounder, theme, laneOrder), bounder, theme);
+  const parts = resolveIfDownParts(node, dispatch.swapped === true, thenTile, elseTile);
+
+  const labels: { south?: string; east?: string } = {};
+  if (parts.mainLabel !== undefined) labels.south = parts.mainLabel;
+  if (parts.sideLabel !== undefined) labels.east = parts.sideLabel;
+  const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
+
+  const optionalStop = dispatch.optionalStop === true ? parts.sideTile : null;
+  const hasTwoBranches = thenTile.hasPointOut() && elseTile.hasPointOut();
+  const useElse1 =
+    optionalStop === null &&
+    parts.mainTile.hasPointOut() &&
+    isMainLaneSmallerThanAllOthers(node.swimlane, parts.mainNodes, laneOrder);
+  if (useElse1) diamond1.swapEastWest();
+
+  const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, hasTwoBranches, useElse1);
+  if (optionalStop !== null) {
+    const out = laneOut(parts.mainTile, undefined);
+    if (out !== undefined) result.swimlaneOut = out;
+  }
+  return result;
+}
+
+/**
+ * `laneOrder` is `ast.swimlanes` (this diagram's real declaration order),
+ * threaded from `layoutActivity` (mission `activity-if-tile-port` T4).
+ * Defaulted to `[]` so direct unit-test callers that only exercise unlaned
+ * fixtures need not pass it.
+ */
+export function buildIf(
+  node: ActivityIf,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[] = [],
+): Tile {
   const dispatch = ifBuilderOf(node);
-  if (dispatch.builder === 'with-links') return buildIfWithLinks(node, bounder, theme);
-  return buildLegacyIf(node, bounder, theme);
+  if (dispatch.builder === 'with-links') return buildIfWithLinks(node, bounder, theme, laneOrder);
+  if (dispatch.builder === 'down') return buildIfDown(node, bounder, theme, dispatch, laneOrder);
+  return buildLegacyIf(node, bounder, theme, laneOrder);
 }

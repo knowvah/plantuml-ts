@@ -304,11 +304,17 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     'racana-82-zece676 [14,15] polygon×polygon',
     'racana-82-zece676 [16,17] polygon×polygon',
     // Same class (`Worm.java:159-168`). Were `[47,49]`, `[47,51]`,
-    // `[49,51]` before T3 -- one coincident triple, all three at
-    // (436.62187499999993, 479.5) throughout.
-    'tobajo-64-mipi810 [50,51] polygon×polygon',
-    'tobajo-64-mipi810 [50,52] polygon×polygon',
-    'tobajo-64-mipi810 [51,52] polygon×polygon',
+    // `[49,51]` before T3, `[50,51]`/`[50,52]`/`[51,52]` before T4 --
+    // mission `activity-if-tile-port` T4 (2026-09-16): `tobajo-64-mipi810`
+    // is a `down` fixture (`fixtures.md`); `GtileIfDown` now emits its
+    // `if-split`/`if-label`/`if-merge` nodes (previously the legacy
+    // `GtileIf` drew no merge diamond and no branch labels), inserting 16
+    // new shapes ahead of this triple in `shapesOf`'s flat list. Same
+    // fixture, same coincident triple, same coordinates
+    // (436.62187499999993, 479.5), only the index shifted.
+    'tobajo-64-mipi810 [66,67] polygon×polygon',
+    'tobajo-64-mipi810 [66,68] polygon×polygon',
+    'tobajo-64-mipi810 [67,68] polygon×polygon',
   ].sort();
 
   /**

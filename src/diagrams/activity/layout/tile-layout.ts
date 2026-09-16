@@ -65,16 +65,21 @@ function outLane(swimlaneOut: string | undefined, swimlane: string | undefined):
   return swimlaneOut ?? swimlane;
 }
 
-export function tileNodes(nodes: ActivityNode[], bounder: StringBounder, theme: Theme): Tile[] {
+export function tileNodes(
+  nodes: ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[] = [],
+): Tile[] {
   const tiles: Tile[] = [];
   for (const node of nodes) {
-    const t = tileNode(node, bounder, theme);
+    const t = tileNode(node, bounder, theme, laneOrder);
     if (t !== null) tiles.push(t);
   }
   return tiles;
 }
 
-function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme): Tile | null {
+function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
   switch (node.kind) {
     case 'start':
       return withSwimlane(new GtileStart(), node.swimlane);
@@ -95,15 +100,15 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme): Til
     case 'arrow-label':
       return null;
     case 'if':
-      return tileIf(node, bounder, theme);
+      return tileIf(node, bounder, theme, laneOrder);
     case 'while':
-      return tileWhile(node, bounder, theme);
+      return tileWhile(node, bounder, theme, laneOrder);
     case 'repeat':
-      return tileRepeat(node, bounder, theme);
+      return tileRepeat(node, bounder, theme, laneOrder);
     case 'fork':
-      return tileFork(node, bounder, theme);
+      return tileFork(node, bounder, theme, laneOrder);
     case 'split':
-      return tileSplit(node, bounder, theme);
+      return tileSplit(node, bounder, theme, laneOrder);
     default: {
       const _exhaustive: never = node;
       console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);
@@ -115,16 +120,24 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme): Til
 /**
  * Dispatches to `conditional-builder.ts#buildIf` (mission
  * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`;
- * `'down'`/`'long-horizontal'` still fall back to the legacy `GtileIf`
- * until T4/T5 land their own builders.
+ * `'long-horizontal'` still falls back to the legacy `GtileIf` until T5
+ * lands its own builder. `laneOrder` (`ast.swimlanes`, this diagram's real
+ * declaration order) is threaded down for `down`'s own `ConnectionElse1`
+ * vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
+ * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
  */
-function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme): Tile {
-  return withSwimlane(buildIf(node, bounder, theme), node.swimlane);
+function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
+  return withSwimlane(buildIf(node, bounder, theme, laneOrder), node.swimlane);
 }
 
-function tileWhile(node: ActivityWhile, bounder: StringBounder, theme: Theme): GtileWhile {
+function tileWhile(
+  node: ActivityWhile,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileWhile {
   const header = new GtileDiamond(node.condition, bounder, theme);
-  const bodyTiles = tileNodes(node.body, bounder, theme);
+  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   return withSwimlane(new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme), node.swimlane);
 }
@@ -143,8 +156,13 @@ function tileWhile(node: ActivityWhile, bounder: StringBounder, theme: Theme): G
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:101-106
  *   -- `getSwimlaneIn`/`getSwimlaneOut`, the outer tile's own pair.
  */
-function tileRepeat(node: ActivityRepeat, bounder: StringBounder, theme: Theme): GtileRepeat {
-  const bodyTiles = tileNodes(node.body, bounder, theme);
+function tileRepeat(
+  node: ActivityRepeat,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileRepeat {
+  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const condition = withSwimlane(
     new GtileDiamond(node.condition, bounder, theme),
@@ -156,17 +174,22 @@ function tileRepeat(node: ActivityRepeat, bounder: StringBounder, theme: Theme):
   );
 }
 
-function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme): GtileFork {
+function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): GtileFork {
   const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme);
+    const tiles = tileNodes(b, bounder, theme, laneOrder);
     return new GtileTopDown(tiles, bounder, theme);
   });
   return withSwimlaneOut(withSwimlane(new GtileFork(branches, bounder), node.swimlane), node.swimlaneOut);
 }
 
-function tileSplit(node: ActivitySplit, bounder: StringBounder, theme: Theme): GtileSplit {
+function tileSplit(
+  node: ActivitySplit,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileSplit {
   const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme);
+    const tiles = tileNodes(b, bounder, theme, laneOrder);
     return new GtileTopDown(tiles, bounder, theme);
   });
   return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
@@ -178,7 +201,7 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   }
 
   const bounder = makeBounder(measurer, theme);
-  const tiles = tileNodes(ast.nodes, bounder, theme);
+  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
   const root = new GtileTopDown(tiles, bounder, theme);
   return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 }

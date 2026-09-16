@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1101 modules · 3987 exported names.
+1103 modules · 3990 exported names.
 
 ## `src/`
 
@@ -957,13 +957,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and the `with-links` builder (`buildIf`) -- `down`/`long-horizontal` still fall back to the legacy `GtileIf` (T4/T5 replace them). |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
-| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
+| `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-lanes.ts` | `laneAt`, `laneIn`, `laneOut` | The `laneAt`/`laneIn`/`laneOut` lane-inheritance helpers, split out of `swimlane-placement.ts` (`plans/activity-lane-capture` T2) to keep that file under the 500-line hook. |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+| `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
 | `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
 | `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
@@ -1000,6 +1001,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
 | `gtile-group.ts` | `GtileGroup` |  |
+| `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
 | `gtile-if.ts` | `GtileIf` |  |
 | `gtile-kill.ts` | `GtileKill` |  |

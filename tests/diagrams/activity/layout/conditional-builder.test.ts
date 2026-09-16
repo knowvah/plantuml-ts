@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildIf, ifBuilderOf } from '../../../../src/diagrams/activity/layout/conditional-builder.js';
 import type { ActivityIf, ActivityNode } from '../../../../src/diagrams/activity/ast.js';
 import { GtileIf } from '../../../../src/diagrams/activity/tiles/gtile-if.js';
+import { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../../../../src/diagrams/activity/tiles/gtile-if-with-links.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -83,9 +84,9 @@ describe('buildIf — dispatch to the right tile class', () => {
     expect(tile).toBeInstanceOf(GtileIfWithLinks);
   });
 
-  it('down still builds the legacy GtileIf', () => {
+  it('down builds GtileIfDown (mission activity-if-tile-port T4)', () => {
     const tile = buildIf(makeIf([action('a')], []), bounder, theme);
-    expect(tile).toBeInstanceOf(GtileIf);
+    expect(tile).toBeInstanceOf(GtileIfDown);
   });
 
   it('long-horizontal still builds the legacy GtileIf (until T5)', () => {
