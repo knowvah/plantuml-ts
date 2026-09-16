@@ -90,8 +90,8 @@ Java paths are under `~/git/plantuml/src/main/java/net/sourceforge/plantuml/acti
 4. **No `src/` edit before T1's note holds the per-builder element templates
    (Q1) and the dispatch contract**, each with `file:line`
 5. A fixture rises and its mechanism cannot be stated before the commit
-6. A fixture outside [`fixtures.md`](fixtures.md) moves (T6 excepted, per
-   its own journaled list)
+6. A fixture outside [`fixtures.md`](fixtures.md) moves (T6 and T6b
+   excepted, per their own journaled lists)
 7. Any sibling suite's test count changes
 8. `hardViolations` is ever non-empty, or an `ALLOWED_NEW_OVERLAPS` entry
    cannot be attributed with a Java cite
@@ -147,6 +147,8 @@ the pins.
 - [`batch-3/overview.md`](batch-3/overview.md) — `FtileIfDown` (T4)
 - [`batch-4/overview.md`](batch-4/overview.md) — `FtileIfLongHorizontal` (T5)
 - [`batch-5/overview.md`](batch-5/overview.md) — sibling link order (T6)
+- [`batch-5b/overview.md`](batch-5b/overview.md) — siblings aligned on `left`;
+  trailing notes transparent to `hasPointOut` (T6b, added under stop 1)
 - [`batch-6/overview.md`](batch-6/overview.md) — re-pin and close-out (T7)
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — one `if` from AST to
   edge run
@@ -162,4 +164,5 @@ the pins.
 - [x] Batch 3 — T4
 - [x] Batch 4 — T5
 - [x] Batch 5 — T6
+- [ ] Batch 5b — T6b (added 2026-09-16 under stop 1, maintainer-authorised)
 - [ ] Batch 6 — T7
