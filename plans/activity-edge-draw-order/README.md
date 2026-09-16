@@ -151,4 +151,58 @@ pins — they go stale on purpose between T2 and T4.
 - [x] Batch 0 — T1
 - [x] Batch 1 — T2
 - [x] Batch 2 — T3
-- [ ] Batch 3 — T4
+- [x] Batch 3 — T4
+
+## Session End (2026-09-15)
+
+**Tasks completed vs planned: 4 of 4.** T1 diagnosis (`b355127a`), T2 rule (b)
+(`bda6551c`), T3 rule (a) (`5b88c1da`), T4 re-pin and close-out. Batch
+close-outs: `d33799dc`, `2b8120a2`, `d53b06ff`.
+
+**Result.** Aggregate activity `weightedScore` **52673 -> 52067 (-606)** over
+the 268 baseline fixtures. Rule (b) swimlane pass order: **-595** over 36
+fixtures. Rule (a) parallel connector order: **-11** over 2. 38 movers total,
+33 fell and 5 rose, every one inside [`fixtures.md`](fixtures.md).
+
+**Exit bar — met.**
+
+- Zero UNEXPLAINED rises. Five pins rose (`bumaca` 169->173, `decudi`
+  362->366, `judatu` 575->577, `maketa` 275->276, `xarumo` 217->221); each
+  carries a journal row naming its mechanism and each was named explicitly in
+  `--accept-rises`. All five are element-COUNT mismatches under positional
+  pairing, where `compare.ts:404`'s `[childCount]` short-circuit charges the
+  SUM of both sides — `maketa` is the proof, its alignment IMPROVING 10 -> 12
+  while its score rises.
+- No fixture outside `fixtures.md` moved; membership never changed from T1's
+  rewrite (38 slugs, pin sum 11193).
+- Siblings unmoved: `svg-conformance` **27 files / 3427 passed | 1 skipped**,
+  byte-identical at `6ff347f8` and at HEAD.
+- `ALLOWED_NEW_OVERLAPS` 9 -> 9, indices only, each entry re-attributed with a
+  Java cite; `hardViolations` empty throughout, in both trees, across all 268.
+- Four gates green with the red allowance fully discharged: `npm test` exit 0,
+  **711 passed | 1 skipped (712)**, **19667 passed | 2 skipped | 1 todo**;
+  typecheck, lint, build all exit 0.
+
+**Decisions: 26 journal rows, 3 flagged for review.**
+
+1. **T2's write-set deviation, accepted not reverted** — it edited
+   `tile-layout.test.ts`, which belongs to T3. Stop 1 does not fire (the file
+   is in another task's write-set) and the change is the order-only one rule
+   (b) predicts, but a reviewer may prefer the stricter reading.
+2. **Two brief premises corrected in flight** — 59 laned baseline fixtures,
+   not 60; and only ONE of the four activity gates reds under a draw-order
+   change, not four. Both were verified independently by the orchestrator
+   before adoption.
+3. **D2's edge case proved unreachable rather than implemented** — a
+   lane-less edge needs content before the first `|lane|`, which the jar's
+   parser rejects outright (`ActivityDiagram3.java`, `SWIMLANE_FORBIDDEN`),
+   with `ConnectionCross.drawU`'s null-lane early return as a second barrier.
+   `passOf` keeps a defined answer on that branch rather than throwing.
+
+**Known issues / follow-ons filed** in `planning/next-missions.md`:
+`activity-snake-merge` (D5 — filed with measured evidence that it explains
+NOTHING present, so it is a faithfulness port, not a fix),
+`activity-if-connector-draw-order` and
+`activity-repeat-connector-draw-order` (D7; `while` was checked and agrees),
+and `activity-stale-pushBranchConnectors-comment` (one line, deliberately
+out of scope for every task here).
