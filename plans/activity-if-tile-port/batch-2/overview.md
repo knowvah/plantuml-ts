@@ -7,7 +7,7 @@ four activity oracle gates may be red on `fixtures.md` slugs whose
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T3 | `GtileDiamondInside`, `GtileIfWithLinks`, `walk-if-with-links.ts`, `conditional-builder.ts` dispatch (with-links cases only) | typescript-pro | `src/diagrams/activity/tiles/gtile-diamond-inside.ts`, `tiles/gtile-if-with-links.ts`, `layout/conditional-builder.ts`, `layout/walk-if-with-links.ts` (new); `layout/tile-layout.ts`, `layout/tile-coordinates.ts` (dispatch lines), `layout/swimlane-placement.ts` (`EdgeShape` tags Q4 named); their tests; `measurements/t3.json` | T2 | [ ] |
+| T3 | `GtileDiamondInside`, `GtileIfWithLinks`, `walk-if-with-links.ts`, `conditional-builder.ts` dispatch (with-links cases only) | typescript-pro | `src/diagrams/activity/tiles/gtile-diamond-inside.ts`, `tiles/gtile-if-with-links.ts`, `layout/conditional-builder.ts`, `layout/walk-if-with-links.ts` (new); `layout/tile-layout.ts`, `layout/tile-coordinates.ts` (dispatch lines), `layout/swimlane-placement.ts` (`EdgeShape` tags Q4 named); their tests; `measurements/t3.json` | T2 | [x] |
 
 Spec: [`T3-if-with-links.md`](T3-if-with-links.md).
 Expected movers: `with-links` rows of [`../fixtures.md`](../fixtures.md).
