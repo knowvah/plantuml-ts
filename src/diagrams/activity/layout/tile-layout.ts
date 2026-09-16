@@ -157,13 +157,26 @@ function tileWhile(
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:101-106
  *   -- `getSwimlaneIn`/`getSwimlaneOut`, the outer tile's own pair.
  */
+
+/**
+ * T1 interim contract (D2): folds `entry` back into the body wrapper so
+ * every rendered SVG stays byte-identical; T5 replaces this with a real
+ * entry tile as `GtileRepeat`'s first child.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
+ *   -- `entry` replaces the entry diamond as `diamond1`, the eventual
+ *   first child.
+ */
+function repeatBodyNodes(node: ActivityRepeat): ActivityNode[] {
+  return node.entry !== undefined ? [node.entry, ...node.body] : node.body;
+}
+
 function tileRepeat(
   node: ActivityRepeat,
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
 ): GtileRepeat {
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const bodyTiles = tileNodes(repeatBodyNodes(node), bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const condition = withSwimlane(
     new GtileDiamond(node.condition, bounder, theme),

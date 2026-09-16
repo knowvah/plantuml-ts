@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { layoutActivity, tileNodes } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
-import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
+import type { ActivityDiagramAST, ActivityRepeat } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
@@ -300,6 +300,31 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(bodyWrapper.swimlane).toBeUndefined();
     const bodyAction = bodyWrapper.children[0] as unknown as GtileAction;
     expect(bodyAction.swimlane).toBe('B');
+  });
+
+  // Mission `activity-loop-tile-port` T1 (D2 interim contract): the entry
+  // action is parsed OFF the body (`ActivityRepeat.entry`), but `tileRepeat`
+  // still folds it back in as `tileNodes([entry, ...body])` so every
+  // rendered SVG stays byte-identical until T5 builds the real entry tile.
+  // @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
+  //   -- `entry` replaces the entry diamond as `diamond1`, the first child.
+  it('repeat: an inline entry action still lands first in the body wrapper (T1 interim contract)', () => {
+    const ast = parseAst('@startuml\nrepeat :R1;\n:a;\nrepeat while (x)\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.entry?.label).toBe('R1');
+    expect(repeatNode.body).toHaveLength(1);
+
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
+    expect(bodyWrapper.kind).toBe('gtile-top-down');
+    expect(bodyWrapper.children).toHaveLength(2);
+    const entryTile = bodyWrapper.children[0] as unknown as GtileAction;
+    expect(entryTile.kind).toBe('gtile-action');
+    expect(entryTile.label).toBe('R1');
+    const actionTile = bodyWrapper.children[1] as unknown as GtileAction;
+    expect(actionTile.label).toBe('a');
   });
 
   it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {

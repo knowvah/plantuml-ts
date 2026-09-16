@@ -191,8 +191,68 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
 // repeat / repeatwhile
 // `repeat` may stand alone or be followed by an inline action:
 //   repeat :foo;  <<stereo>>
-// The action becomes the first body element.
+// The action becomes the ENTRY tile (`ActivityRepeat.entry`), never a body
+// element.
 // ---------------------------------------------------------------------------
+
+/**
+ * Parses the inline action on `repeat :label;`, if present, into the
+ * repeat's ENTRY tile. `undefined` for a bare `repeat`.
+ * @see net/sourceforge/plantuml/activitydiagram3/CommandRepeat3.java:126
+ *   -- the inline label is handed to `ActivityDiagram3#startRepeat`.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:51
+ *   -- stored as `startLabel`, handed to `factory.repeat(…, startLabel,
+ *   …)` (`:166-167`) as the tile that replaces the entry diamond
+ *   (`ftile/vcompact/FtileRepeat.java:77-80`).
+ */
+function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): ActivityAction | undefined {
+  if (inlineRest === undefined || inlineRest === '') return undefined;
+  // Parse the inline content as a virtual line — most commonly an action
+  // :label; with optional <<stereotype>>. The action regex requires a `;`
+  // followed by optional stereotype/color suffixes, so leave the line as-is
+  // when it already terminates properly and only synthesize a `;` for bare
+  // `:label`.
+  const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
+  const actionM = RE_ACTION.exec(restLine);
+  if (actionM === null) return undefined;
+  const label = actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+  const stereoRaw = actionM[2];
+  const colorRaw = actionM[3];
+  return {
+    kind: 'action',
+    label,
+    ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
+    ...(colorRaw !== undefined ? { color: colorRaw } : {}),
+    ...swimlaneSpread(ctx),
+  };
+}
+
+interface RepeatClose {
+  readonly condition: string;
+  readonly yesLabel: string | undefined;
+  readonly outLabel: string | undefined;
+  readonly nextIdx: number;
+}
+
+/**
+ * Parses the `repeatwhile`/`repeat while` closer line, including its
+ * `is (…)`/`not (…)` side labels.
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:359-371
+ *   -- `repeatWhile(label, yes, out, …)`.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:193-200
+ *   -- `setTest` stores `yesTb`/`outTb`, drawn on the condition hexagon
+ *   (`ftile/vcompact/FtileRepeat.java:150-151`).
+ */
+function parseRepeatClose(lines: readonly string[], cursor: number): RepeatClose {
+  if (cursor >= lines.length) return { condition: '', yesLabel: undefined, outLabel: undefined, nextIdx: cursor };
+  const endLine = lines[cursor]!.trim();
+  const repeatMatch = RE_REPEATWHILE.exec(endLine);
+  const condition = repeatMatch?.[1]?.trim() ?? '';
+  const yesLabel = repeatMatch?.[2]?.trim();
+  const outLabel = repeatMatch?.[3]?.trim();
+  return { condition, yesLabel, outLabel, nextIdx: cursor + 1 };
+}
+
 /**
  * Captures the `repeat`'s swimlane at its opener, and `swimlaneOut` at
  * `repeat while`, not at a single closer.
@@ -206,57 +266,28 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
 function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal | null {
   const repeatHeadMatch = RE_REPEAT_HEAD.exec(line);
   if (repeatHeadMatch === null || !lc.startsWith('repeat')) return null;
-  const { lines } = ctx;
-  let cursor = idx + 1;
   // Mission `activity-lane-capture` D1/T5: read BEFORE the body parses, so
   // a lane switch inside the body never leaks into this node's own
   // `swimlane`.
   const openerSwimlane = swimlaneSpread(ctx);
-  const inlineRest = repeatHeadMatch[1]?.trim();
-  const inlineNodes: ActivityNode[] = [];
-  if (inlineRest !== undefined && inlineRest !== '') {
-    // Parse the inline content as a virtual line — most commonly an action
-    // :label; with optional <<stereotype>>. The action regex requires a
-    // `;` followed by optional stereotype/color suffixes, so leave the
-    // line as-is when it already terminates properly and only synthesize
-    // a `;` for bare `:label`.
-    const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
-    const actionM = RE_ACTION.exec(restLine);
-    if (actionM !== null) {
-      const label = actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
-      const stereoRaw = actionM[2];
-      const colorRaw = actionM[3];
-      const node: ActivityAction = {
-        kind: 'action',
-        label,
-        ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
-        ...(colorRaw !== undefined ? { color: colorRaw } : {}),
-        ...swimlaneSpread(ctx),
-      };
-      inlineNodes.push(node);
-    }
-  }
-  const bodyResult = parseNodes(ctx, cursor, ['repeatwhile', 'repeat while']);
+  const entry = parseRepeatEntry(ctx, repeatHeadMatch[1]?.trim());
+  const bodyResult = parseNodes(ctx, idx + 1, ['repeatwhile', 'repeat while']);
   if (isRefusal(bodyResult)) return bodyResult;
-  cursor = bodyResult.nextIdx;
-  let condition = '';
-  if (cursor < lines.length) {
-    const endLine = lines[cursor]!.trim();
-    const repeatMatch = RE_REPEATWHILE.exec(endLine);
-    if (repeatMatch !== null) condition = repeatMatch[1]?.trim() ?? '';
-    cursor++;
-  }
+  const close = parseRepeatClose(ctx.lines, bodyResult.nextIdx);
   // Mission activity-lane-capture D1/T5: `swimlaneOut` is the lane current
   // AT `repeat while`, which may differ from the opener's.
   const closerSwimlane = ctx.currentSwimlane;
   const node: ActivityRepeat = {
     kind: 'repeat',
-    body: [...inlineNodes, ...bodyResult.nodes],
-    condition,
+    ...(entry !== undefined ? { entry } : {}),
+    body: bodyResult.nodes,
+    condition: close.condition,
+    ...(close.yesLabel !== undefined && close.yesLabel !== '' ? { yesLabel: close.yesLabel } : {}),
+    ...(close.outLabel !== undefined && close.outLabel !== '' ? { outLabel: close.outLabel } : {}),
     ...openerSwimlane,
     ...(closerSwimlane !== undefined ? { swimlaneOut: closerSwimlane } : {}),
   };
-  return { idx: cursor, node };
+  return { idx: close.nextIdx, node };
 }
 
 /** note right : text  (single-line) */

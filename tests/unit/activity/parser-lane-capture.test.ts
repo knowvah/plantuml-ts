@@ -91,8 +91,12 @@ describe('repeat captures its opener lane and repeat-while its out lane', () => 
     const ast = parse(['|A|', 'repeat :a;', 'repeat while (x)']);
     const repeatNode = ast.nodes[0] as ActivityRepeat;
     expect(repeatNode.swimlane).toBe('A');
-    const action = repeatNode.body[0] as ActivityAction;
+    // altp T1: the inline action is the repeat's ENTRY tile, never a body
+    // element (`InstructionRepeat.java:51` `startLabel` ->
+    // `FtileRepeat.java:77-80` `diamond1 = entry`).
+    const action = repeatNode.entry as ActivityAction;
     expect(action.swimlane).toBe('A');
+    expect(repeatNode.body).toEqual([]);
   });
 
   it('swimlane and swimlaneOut are undefined when no lane is ever declared', () => {

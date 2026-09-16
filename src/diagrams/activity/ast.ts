@@ -89,8 +89,32 @@ export interface ActivityWhile {
 
 export interface ActivityRepeat {
   kind: 'repeat';
+  /**
+   * `repeat :label;` -- the inline action, absent for a bare `repeat`.
+   * Never appears in {@link body}.
+   * @see net/sourceforge/plantuml/activitydiagram3/CommandRepeat3.java:126
+   *   -- the inline label is handed to `ActivityDiagram3#startRepeat`.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:51
+   *   -- stored as `startLabel`, handed to `factory.repeat(…, startLabel,
+   *   …)` (`:166-167`) as the ENTRY tile that replaces the entry diamond
+   *   (`ftile/vcompact/FtileRepeat.java:77-80`).
+   */
+  entry?: ActivityAction;
   body: ActivityNode[];
   condition: string;
+  /**
+   * `is (…)` on `repeat while` -- the condition hexagon's east/north side
+   * label, absent when not written or empty.
+   * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:359-371
+   *   -- `repeatWhile(label, yes, out, …)`.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:193-200
+   *   -- `setTest` stores `yesTb`/`outTb`, drawn on the condition hexagon
+   *   (`ftile/vcompact/FtileRepeat.java:150-151`).
+   */
+  yesLabel?: string;
+  /** `not (…)` on `repeat while` -- the condition hexagon's south/west side
+   * label. @see the {@link yesLabel} cites. */
+  outLabel?: string;
   swimlane?: string;
   /**
    * The lane at `repeat while`, when it differs from {@link swimlane}.
