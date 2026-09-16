@@ -313,10 +313,19 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `shapesOf`'s flat list. Same fixture, same coincident triple, same
     // coordinates (436.62187499999993, 479.5), only the index shifted.
     // altp T2: indices +2 (the repeat's two `ja` east labels now precede
-    // these three shapes); coordinates unchanged.
-    'tobajo-64-mipi810 [68,69] polygon×polygon',
-    'tobajo-64-mipi810 [68,70] polygon×polygon',
-    'tobajo-64-mipi810 [69,70] polygon×polygon',
+    // these three shapes); coordinates unchanged. altp-T5: indices +3 more
+    // (68->71 etc.) -- `tileRepeat` now builds a real entry tile as
+    // `GtileRepeat`'s first child (D2), inserting new shapes ahead of this
+    // triple; AND the coordinates themselves moved this time (dumped
+    // directly: `(437.51249999999998, 507)` before T5 -> `(437.5124999999
+    // 998, 591)` after), an expected consequence of D4's jar-verbatim
+    // height formula (`entry.h + body.h + condition.h + 96`) growing the
+    // repeat's own height and shifting everything below it down -- same
+    // coincident triple, same `polygonSkipMode: 'x'` cross-lane-arrowhead
+    // class (`Worm.java:159-168`), not a new mechanism.
+    'tobajo-64-mipi810 [71,72] polygon×polygon',
+    'tobajo-64-mipi810 [71,73] polygon×polygon',
+    'tobajo-64-mipi810 [72,73] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -449,10 +458,20 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `338.01874999999995` -- a 5e-14 overlap from the label's x being
     // re-derived through a second transform after lane compression, the
     // same mechanism as `kitupi-32-jexo155` below. Not a geometry defect.
-    'tobajo-64-mipi810 [16,17] polygon×text',
+    // altp-T5: index +1 (was `[16,17]`) -- `tileRepeat` now builds a real
+    // entry tile as `GtileRepeat`'s first child (D2), which inserts one new
+    // shape ahead of this pair in `shapesOf`'s flat list. Coordinates
+    // dumped directly and confirmed byte-identical to the numbers above
+    // (`264.65625 + 73.3625 === 338.01875` vs `338.01874999999995`).
+    'tobajo-64-mipi810 [17,18] polygon×text',
     'kitupi-32-jexo155 [0,1] polygon×text',
-    'boxoto-53-sifo232 [27,29] polygon×text',
-    'boxoto-53-sifo232 [38,40] polygon×text',
+    // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
+    // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
+    // dump: both hexagons' right edge exactly equals their own `ja`/east
+    // label's `x` (`283.37187500000005 + 267.30625000000003 ===
+    // 550.678125`; `500.1250000000001 + 131.1125 === 631.2375`).
+    'boxoto-53-sifo232 [28,30] polygon×text',
+    'boxoto-53-sifo232 [39,41] polygon×text',
     'lopone-15-xiki477 [7,20] polygon×polygon',
   ].sort();
 

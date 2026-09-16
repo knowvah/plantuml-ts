@@ -4,88 +4,91 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
-import { NODE_MARGIN_Y, BACK_EDGE_MARGIN } from '../activity-layout-constants.js';
+import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 
+/**
+ * `FtileRepeat`'s three children -- an entry point (a label-less diamond,
+ * `GtileRepeatEntry`, or the inline `repeat :label;` action tile), the loop
+ * body, and the condition hexagon (mission `activity-loop-tile-port`, T5,
+ * D2). `backward:` bodies are out of scope (0 fixtures; README "What this
+ * mission does NOT do"; filed as `activity-loop-backward`) -- the prior
+ * interim's home-grown third child and `BACK_EDGE_MARGIN`/`NODE_MARGIN_Y`
+ * arithmetic are retired here in favour of the jar's own formulas below,
+ * which have no term for it.
+ */
 export class GtileRepeat extends TileComposite {
   readonly kind = 'gtile-repeat' as const;
   readonly width: number;
   readonly height: number;
-  readonly children: readonly Tile[];
-  readonly bodyOffsetY = 0;
-  readonly conditionOffsetY: number;
-  readonly backwardOffsetY: number | null;
-  /** The jar's `getLeft()`: the merged `left` of the stacked children,
-   * measured from the content's left edge (before `BACK_EDGE_MARGIN / 2`). */
-  readonly left: number;
-  /** `BACK_EDGE_MARGIN / 2 + left - body.left`: the body's x inside the tile. */
+  readonly children: readonly [Tile, Tile, GtileDiamondInside];
+  readonly entryOffsetX: number;
+  readonly entryOffsetY = 0;
   readonly bodyOffsetX: number;
-  /** `BACK_EDGE_MARGIN / 2 + left - condition.width / 2`. */
+  readonly bodyOffsetY: number;
   readonly conditionOffsetX: number;
-  /** `BACK_EDGE_MARGIN / 2 + left - backward.left`, or `null` without one. */
-  readonly backwardOffsetX: number | null;
+  readonly conditionOffsetY: number;
+  /** The jar's `getLeft()`: the merged `left` every child's own `left`
+   *  lands under. */
+  readonly left: number;
+  /** Kept for `walk-repeat.ts`'s default back edge; T6 retires it (D8). */
   readonly backEdgeLeftX = 0;
 
   /**
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:767-774
-   *   -- `getLeft`: `max(repeat.left, dimDiamond1.w / 2, dimDiamond2.w / 2)`.
-   *   Our tile has no entry diamond (`diamond1`), so that term is absent;
-   *   `condition` is the jar's `diamond2`, whose `left` is `w / 2` (D3).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:767-775
+   *   -- `getLeft`: `max(repeat.left, dimDiamond1.w / 2, dimDiamond2.w / 2)`
+   *   -- note BOTH diamond terms read `getWidth() / 2`, never `.getLeft()`,
+   *   even though `diamond1` (the entry) may be an asymmetric inline action.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:777-786
    *   -- `getRight`: `max(repeat.w - repeat.left, dimDiamond1.w / 2,
-   *   dimDiamond2.w / 2)`.
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:701-716
-   *   -- `calculateDimensionInternal`: `width = getLeft() + getRight()`
-   *   (then the test-label and `2 * hexagonHalfSize` gutters, unported --
-   *   `BACK_EDGE_MARGIN` stays, D2). The jar adds `backward.w` on the RIGHT
-   *   and places it at `width - backward.w` (`:750-757`); ours stacks the
-   *   backward body in the column under the condition, so here it joins the
-   *   left/right merge like any stacked child (`FtileGeometryMerger.java:44-47`)
-   *   -- the jar's side placement is the deferred
-   *   `activity-repeat-connector-draw-order` work, not this tile's.
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:730-765
-   *   -- body at `left - repeat.left` (`:740`), diamonds at `left - d.w / 2`
-   *   (`:747`, `:764`): each child so its OWN `left` lands under `getLeft()`.
+   *   dimDiamond2.w / 2)`, the same width/2 terms.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:701-717
+   *   -- `calculateDimensionInternal`: `width = max(getLeft() + getRight(),
+   *   tbTest.w + 2*hexagonHalfSize) + 2*hexagonHalfSize`; `tbTest` is always
+   *   `TextBlockUtils.empty(0, 0)` under `INSIDE_HEXAGON` (`:155`), so the
+   *   floor is always `0 + 24`. `height = d1.h + repeat.h + d2.h +
+   *   8*hexagonHalfSize`. The `backward != null` width term (`:710-711`) is
+   *   out of scope (class doc).
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:696-699
-   *   -- `calculateDimensionFtile`: the tile's `left` IS `getLeft()`.
+   *   -- `calculateDimensionFtile`: `left = getLeft()`, `inY = 0`, `outY =
+   *   height` -- the geometry's `left` is UNPADDED by the `+24` gutters.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:730-742
+   *   -- `getTranslateForRepeat`: `space = height - d1.h - d2.h - repeat.h`;
+   *   `y = d1.h + space/2`; `x = left - repeat.left`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:744-748
+   *   -- `getTranslateDiamond1` (the entry): `x = left - d1.w/2`, `y = 0`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:759-765
+   *   -- `getTranslateDiamond2` (the condition): `y2 = height - d2.h`,
+   *   `x = left - d2.w/2`.
    */
-  // prettier-ignore
-  constructor(body: Tile, condition: GtileDiamondInside, backwardBody: Tile | null, _bounder: StringBounder, _theme: Theme) {
+  constructor(entry: Tile, body: Tile, condition: GtileDiamondInside, _bounder: StringBounder, _theme: Theme) {
     super();
-    this.conditionOffsetY = body.height + NODE_MARGIN_Y;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
-    const conditionLeft = condition.width / 2;
-    const backwardLeft = backwardBody === null ? 0 : backwardBody.getCoord(NORTH_HOOK).x;
-    const backwardRight = backwardBody === null ? 0 : backwardBody.width - backwardLeft;
-    this.left = Math.max(bodyLeft, conditionLeft, backwardLeft);
-    const right = Math.max(body.width - bodyLeft, condition.width - conditionLeft, backwardRight);
+    const entryHalf = entry.width / 2;
+    const conditionHalf = condition.width / 2;
+    this.left = Math.max(bodyLeft, entryHalf, conditionHalf);
+    const right = Math.max(body.width - bodyLeft, entryHalf, conditionHalf);
     const contentWidth = this.left + right;
-    this.width = contentWidth + BACK_EDGE_MARGIN;
-    const contentX = BACK_EDGE_MARGIN / 2;
-    this.bodyOffsetX = contentX + this.left - bodyLeft;
-    this.conditionOffsetX = contentX + this.left - conditionLeft;
-    this.backwardOffsetX = backwardBody === null ? null : contentX + this.left - backwardLeft;
-    let h = this.conditionOffsetY + condition.height;
-    if (backwardBody !== null) {
-      this.backwardOffsetY = h + NODE_MARGIN_Y;
-      h = this.backwardOffsetY + backwardBody.height;
-    } else {
-      this.backwardOffsetY = null;
-    }
-    this.height = h + NODE_MARGIN_Y;
-    this.children = backwardBody !== null ? [body, condition, backwardBody] : [body, condition];
+    this.width = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE) + 2 * HEXAGON_HALF_SIZE;
+    this.height = entry.height + body.height + condition.height + 8 * HEXAGON_HALF_SIZE;
+
+    const space = this.height - entry.height - body.height - condition.height;
+    this.entryOffsetX = this.left - entryHalf;
+    this.bodyOffsetX = this.left - bodyLeft;
+    this.bodyOffsetY = entry.height + space / 2;
+    this.conditionOffsetX = this.left - conditionHalf;
+    this.conditionOffsetY = this.height - condition.height;
+
+    this.children = [entry, body, condition];
   }
 
   getCoord(hook: HookName): GPoint {
-    // The merged `left` (FtileRepeat.java:696-699) behind the back-edge
-    // lane; equals `width / 2` exactly when every child is symmetric.
-    const cx = BACK_EDGE_MARGIN / 2 + this.left;
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: cx, y: 0 };
+        return { x: this.left, y: 0 };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
-        return { x: cx, y: this.height };
+        return { x: this.left, y: this.height };
       case EAST_HOOK:
         return { x: this.width, y: this.height / 2 };
       case WEST_HOOK:

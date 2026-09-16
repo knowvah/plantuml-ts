@@ -20,6 +20,7 @@ import { GtileNote } from '../tiles/gtile-note.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
+import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
@@ -129,15 +130,23 @@ function tileWhile(
  */
 
 /**
- * T1 interim contract (D2): folds `entry` back into the body wrapper so
- * every rendered SVG stays byte-identical; T5 replaces this with a real
- * entry tile as `GtileRepeat`'s first child.
+ * `entry`'s own tile: the inline `repeat :label;` action when present, else
+ * a label-less entry diamond in the repeat's OPENER lane (D2). `tileNode`
+ * never returns `null` for an `'action'` node (only `'arrow-label'` does,
+ * `tileNode`'s own switch) -- the assertion documents that invariant rather
+ * than re-checking it.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
- *   -- `entry` replaces the entry diamond as `diamond1`, the eventual
- *   first child.
+ *   -- `if (entry == null) diamond1 = new FtileDiamond(skinParam,
+ *   diamondColor1, borderColor, swimlane); else diamond1 = entry;`.
  */
-function repeatBodyNodes(node: ActivityRepeat): ActivityNode[] {
-  return node.entry !== undefined ? [node.entry, ...node.body] : node.body;
+function tileRepeatEntry(
+  node: ActivityRepeat,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): Tile {
+  if (node.entry !== undefined) return tileNode(node.entry, bounder, theme, laneOrder)!;
+  return withSwimlane(new GtileRepeatEntry(), node.swimlane);
 }
 
 /**
@@ -151,7 +160,8 @@ function tileRepeat(
   theme: Theme,
   laneOrder: readonly string[],
 ): GtileRepeat {
-  const bodyTiles = tileNodes(repeatBodyNodes(node), bounder, theme, laneOrder);
+  const entry = tileRepeatEntry(node, bounder, theme, laneOrder);
+  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const labels: { east?: string; south?: string } = {};
   if (node.yesLabel !== undefined) labels.east = node.yesLabel;
@@ -161,7 +171,7 @@ function tileRepeat(
     outLane(node.swimlaneOut, node.swimlane),
   );
   return withSwimlaneOut(
-    withSwimlane(new GtileRepeat(body, condition, null, bounder, theme), node.swimlane),
+    withSwimlane(new GtileRepeat(entry, body, condition, bounder, theme), node.swimlane),
     node.swimlaneOut,
   );
 }

@@ -7,7 +7,6 @@ import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
-import type { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import type { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
@@ -291,26 +290,34 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('B');
 
+    // D2 (mission `activity-loop-tile-port` T5): a bare `repeat` (no inline
+    // label) builds a `GtileRepeatEntry` in the OPENER lane, the tile's
+    // first child (`FtileRepeat.java:77-80,135-136`).
+    const entry = repeatTile.children[0];
+    expect(entry.kind).toBe('gtile-repeat-entry');
+    expect(entry.swimlane).toBe('A');
+
     // D1 (mission `activity-loop-tile-port` T2): the repeat condition is a
-    // `GtileDiamondInside`, never a `GtileDiamond`.
-    const condition = repeatTile.children[1] as unknown as GtileDiamondInside;
+    // `GtileDiamondInside`, never a `GtileDiamond` -- statically typed as
+    // such by `GtileRepeat.children`'s own tuple type (D2, T5).
+    const condition = repeatTile.children[2];
     expect(condition.kind).toBe('gtile-diamond-inside');
     expect(condition.swimlane).toBe('B');
 
-    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
     expect(bodyWrapper.kind).toBe('gtile-top-down');
     expect(bodyWrapper.swimlane).toBeUndefined();
     const bodyAction = bodyWrapper.children[0] as unknown as GtileAction;
     expect(bodyAction.swimlane).toBe('B');
   });
 
-  // Mission `activity-loop-tile-port` T1 (D2 interim contract): the entry
-  // action is parsed OFF the body (`ActivityRepeat.entry`), but `tileRepeat`
-  // still folds it back in as `tileNodes([entry, ...body])` so every
-  // rendered SVG stays byte-identical until T5 builds the real entry tile.
+  // Mission `activity-loop-tile-port` T5 (D2): the entry action is parsed
+  // OFF the body (`ActivityRepeat.entry`) and now lands as `GtileRepeat`'s
+  // OWN first child, never inside the body wrapper -- the T1 interim fold
+  // (`tileNodes([entry, ...body])`) is retired.
   // @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
   //   -- `entry` replaces the entry diamond as `diamond1`, the first child.
-  it('repeat: an inline entry action still lands first in the body wrapper (T1 interim contract)', () => {
+  it("repeat: an inline entry action is the tile's own first child, never inside the body wrapper", () => {
     const ast = parseAst('@startuml\nrepeat :R1;\n:a;\nrepeat while (x)\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     const repeatNode = ast.nodes[0] as ActivityRepeat;
@@ -319,14 +326,24 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
     const tiles = tileNodes(ast.nodes, bounder, theme);
     const repeatTile = tiles[0] as unknown as GtileRepeat;
-    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
-    expect(bodyWrapper.kind).toBe('gtile-top-down');
-    expect(bodyWrapper.children).toHaveLength(2);
-    const entryTile = bodyWrapper.children[0] as unknown as GtileAction;
+    const entryTile = repeatTile.children[0] as unknown as GtileAction;
     expect(entryTile.kind).toBe('gtile-action');
     expect(entryTile.label).toBe('R1');
-    const actionTile = bodyWrapper.children[1] as unknown as GtileAction;
+
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
+    expect(bodyWrapper.kind).toBe('gtile-top-down');
+    expect(bodyWrapper.children).toHaveLength(1);
+    const actionTile = bodyWrapper.children[0] as unknown as GtileAction;
     expect(actionTile.label).toBe('a');
+  });
+
+  it('repeat: no inline entry action builds a GtileRepeatEntry as the first child', () => {
+    const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.children[0].kind).toBe('gtile-repeat-entry');
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
+    expect(bodyWrapper.children).toHaveLength(1);
   });
 
   it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {
@@ -335,7 +352,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('A');
-    const condition = repeatTile.children[1] as unknown as GtileDiamondInside;
+    const condition = repeatTile.children[2];
     expect(condition.swimlane).toBe('A');
   });
 

@@ -4,12 +4,7 @@
  * oversized function (`#lizard forgives`, faithful port of the upstream
  * tile-kind dispatch) from growing further, and to keep `tile-coordinates
  * .ts` itself under the file's 500-line cap (D10, the same reason
- * `walk-while-branch.ts`/`walk-fork-branches.ts` already exist). The logic
- * below is the former case's own code, unchanged, per CLAUDE.md "do not
- * refactor while porting" -- split into `walkRepeat`/{@link pushRepeatBack}/
- * {@link pushRepeatBackwardEdge} only to satisfy the hook's 30-NLOC-per-
- * function limit once the case was pulled out of the exempted switch; no
- * arithmetic or draw order differs.
+ * `walk-while-branch.ts`/`walk-fork-branches.ts` already exist).
  *
  * `walkTile`/`pushEdge`/`pushNode` are re-imported from `tile-coordinates
  * .ts`, which itself imports {@link walkRepeat} from here for its
@@ -18,11 +13,16 @@
  * both sides are function DEFINITIONS, and neither calls into the other
  * until `assignCoordinates` actually walks the tile tree, well after both
  * modules finish loading.
+ *
+ * altp-T5: places `GtileRepeat`'s three children (entry, body, condition)
+ * at their jar-derived offsets. The prior interim's `backward:` third-child
+ * branch is retired with `GtileRepeat`'s own constructor (out of scope, 0
+ * fixtures, `activity-loop-backward`); the default back edge still goes
+ * left at `x = 0` (D5's real jar selection is T6's).
  */
 
 import type { GtileRepeat } from '../tiles/gtile-repeat.js';
 import type { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
-import type { Tile } from '../tiles/tile.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
@@ -31,25 +31,27 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { emitDiamondLabels } from './diamond-labels.js';
 
-/** The values {@link pushRepeatBack} needs, bundled to keep it (and
- *  {@link walkRepeat}, which builds this) within the file's parameter
- *  limit -- the same reason `walk-while-branch.ts`'s `WhileFrame` exists.
- *  Declared ahead of every function in this file (never trailing one): a
- *  lizard 1.23.0 TypeScript tokenizer quirk attributes an `interface` block
- *  placed AFTER a function to that function's own NLOC count, which can
- *  push an otherwise-compliant function over the hook's 30-line cap. */
-interface RepeatFrame {
-  readonly out: Out;
-  readonly x: number;
-  readonly y: number;
-  readonly t: GtileRepeat;
-  readonly condX: number;
-  readonly condY: number;
-  readonly condition: GtileDiamondInside;
-  readonly bodyX: number;
-  readonly bodyY: number;
-  readonly body: Tile;
-  readonly myLane: string | undefined;
+/**
+ * The repeat's entry point: pushed directly (never through `walkTile`'s
+ * generic dispatch, which has no `'gtile-repeat-entry'` case and would fall
+ * through to the unknown-kind default) as a `repeat-start` node -- the
+ * label-less diamond `FtileRepeat.create` builds when `entry == null`
+ * (`FtileRepeat.java:135-136`, `GtileRepeatEntry`'s own class doc). An
+ * inline `repeat :label;` entry is a real action tile instead and walks
+ * through `walkTile` like any other node (D2, {@link walkRepeat}).
+ */
+function pushRepeatEntry(
+  entry: { width: number; height: number },
+  x: number,
+  y: number,
+  myLane: string | undefined,
+  out: Out,
+): void {
+  pushNode(
+    out,
+    { id: out.nextId('repeat-start'), kind: 'repeat-start', x, y, width: entry.width, height: entry.height },
+    myLane,
+  );
 }
 
 /**
@@ -64,8 +66,13 @@ interface RepeatFrame {
  * over the parent's inherited `myLane` -- the same resolution `walkTile`'s
  * own dispatch (`:117-118`) applies to every tile it walks; bypassing
  * `walkTile` to push directly means this helper must apply it itself, or a
- * laned repeat's condition silently renders in the wrong lane.
+ * laned repeat's condition silently renders in the wrong lane. The pushed
+ * node's `height` is the hexagon-ALONE height (`condition.getCoord(SOUTH_
+ * HOOK).y`), not `condition.height` (which would add a north label's height
+ * below it) -- the repeat condition never sets a north label (D1), so the
+ * two are equal today, but this keeps the walker correct if one ever does.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:87-89
  */
 function pushRepeatCondition(
   condition: GtileDiamondInside,
@@ -83,7 +90,7 @@ function pushRepeatCondition(
       x: condX,
       y: condY,
       width: condition.width,
-      height: condition.height,
+      height: condition.getCoord(SOUTH_HOOK).y,
       label: condition.label,
     },
     hexLane,
@@ -91,73 +98,21 @@ function pushRepeatCondition(
   emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east'], hexLane, out);
 }
 
-/**
- * The `backwardBody !== null` branch of `pushRepeatBack`: condition south ->
- * backward north, walk the backward body, then backward south -> body
- * north. Split out only to keep `pushRepeatBack` under the hook's 30-NLOC
- * limit (see file header) -- every point/margin computation is unchanged.
- */
-function pushRepeatBackwardEdge(frame: RepeatFrame, backwardBody: Tile): void {
-  const { out, x, y, t, condX, condY, condition, bodyX, bodyY, body, myLane } = frame;
-  const bwX = x + t.backwardOffsetX!;
-  const bwY = y + t.backwardOffsetY!;
-  const bwFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
-  const bwTo = { x: bwX + backwardBody.getCoord(NORTH_HOOK).x, y: bwY + backwardBody.getCoord(NORTH_HOOK).y };
-  pushEdge(
-    out,
-    new GConnectionVerticalDown().getPoints(bwFrom, bwTo),
-    laneOut(condition, myLane),
-    laneIn(backwardBody, myLane),
-  );
+export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
+  const [entry, body, condition] = t.children;
 
-  walkTile(backwardBody, bwX, bwY, { kindHint: null, lane: myLane }, out);
-
-  const backFrom = { x: bwX + backwardBody.getCoord(SOUTH_HOOK).x, y: bwY + backwardBody.getCoord(SOUTH_HOOK).y };
-  const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
-  const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-  pushEdge(
-    out,
-    new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
-    laneOut(backwardBody, myLane),
-    laneIn(body, myLane),
-  );
-}
-
-/**
- * Back: `backwardBody` present -> {@link pushRepeatBackwardEdge}; otherwise
- * condition south -> body north directly, going left. Split out of
- * `walkRepeat` only to keep that function's own NLOC under the hook's limit
- * -- the branch and every point/margin computation is unchanged.
- */
-function pushRepeatBack(frame: RepeatFrame, backwardBody: Tile | null): void {
-  if (backwardBody !== null) {
-    pushRepeatBackwardEdge(frame, backwardBody);
-    return;
+  const entryX = x + t.entryOffsetX;
+  const entryY = y + t.entryOffsetY;
+  if (entry.kind === 'gtile-repeat-entry') {
+    pushRepeatEntry(entry, entryX, entryY, myLane, out);
+  } else {
+    walkTile(entry, entryX, entryY, { kindHint: null, lane: myLane }, out);
   }
 
-  // Back: condition south → body north, going left
-  const { out, x, t, condX, condY, condition, bodyX, bodyY, body, myLane } = frame;
-  const backFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
-  const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
-  const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-  pushEdge(
-    out,
-    new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
-    laneOut(condition, myLane),
-    laneIn(body, myLane),
-  );
-}
-
-export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
-  const rawChildren = t.children;
-  const body = rawChildren[0]!;
-  // D1: the condition is always a `GtileDiamondInside`
-  // (`tile-layout.ts#tileRepeat`).
-  const condition = rawChildren[1] as unknown as GtileDiamondInside;
-  const backwardBody = rawChildren.length > 2 ? rawChildren[2]! : null;
-  // Each child sits so its OWN `left` lands under the tile's merged
-  // `left` (`FtileRepeat.java:730-765`), never centred by `width / 2`.
-
+  // Each child sits so its OWN `left` lands under the tile's merged `left`
+  // (`FtileRepeat.java:730-765`), never centred by `width / 2` -- except
+  // the entry, whose OWN `width / 2` is used even when it is asymmetric
+  // (`:744-748`, `GtileRepeat`'s own class doc).
   const bodyX = x + t.bodyOffsetX;
   const bodyY = y + t.bodyOffsetY;
   walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
@@ -171,6 +126,15 @@ export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string 
 
   pushRepeatCondition(condition, condX, condY, myLane, out);
 
-  const frame: RepeatFrame = { out, x, y, t, condX, condY, condition, bodyX, bodyY, body, myLane };
-  pushRepeatBack(frame, backwardBody);
+  // Back: condition south → body north, going left (D5's default; T6 ports
+  // the jar's own selection, which for the no-lane case goes right instead).
+  const backFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
+  const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
+  const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
+  pushEdge(
+    out,
+    new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
+    laneOut(condition, myLane),
+    laneIn(body, myLane),
+  );
 }
