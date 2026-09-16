@@ -4,7 +4,7 @@ Sequential after Batch 1, measured against `measurements/t1.json`.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | `GtileRepeat` `getLeft`/`getRight` + per-child x offsets + hooks; the `'gtile-repeat'` walker case places body/condition/backward at the offsets | typescript-pro | `src/diagrams/activity/tiles/gtile-repeat.ts`, `src/diagrams/activity/layout/tile-coordinates.ts` (repeat case only); `tests/diagrams/activity/tiles/gtile-repeat.test.ts`, `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tile-layout.test.ts`, `compress/invariant.test.ts`, `tests/unit/activity/layout.test.ts` ONLY where the geometry breaks them; `measurements/t2.json` | T1 | [ ] |
+| T2 | `GtileRepeat` `getLeft`/`getRight` + per-child x offsets + hooks; the `'gtile-repeat'` walker case places body/condition/backward at the offsets | typescript-pro | `src/diagrams/activity/tiles/gtile-repeat.ts`, `src/diagrams/activity/layout/tile-coordinates.ts` (repeat case only); `tests/diagrams/activity/tiles/gtile-repeat.test.ts`, `tests/diagrams/activity/layout/tile-coordinates.test.ts`, `tile-layout.test.ts`, `compress/invariant.test.ts`, `tests/unit/activity/layout.test.ts` ONLY where the geometry breaks them; `measurements/t2.json` | T1 | [x] |
 
 Spec: [`T2-repeat-left.md`](T2-repeat-left.md). Expected movers: the 14
 `repeat` diagonal fixtures (`bizono-61-sasa740`, `bozuro-33-celo170`,
