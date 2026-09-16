@@ -155,6 +155,17 @@ caller) migrates to `emphasize: 'up'`; T1 verifies its pins cannot move.
 type (no external consumers — `plantuml-ts` has none); `shapes-of.ts` and
 the renderer read the new fields.
 
+**Amended 2026-09-15 after T1 Q3 (flagged for review).** The premise "the
+repeat back-edge is the only `midArrow` caller" was wrong: the sole writer is
+`activity-layout-repeat.ts:105` in the DEAD old engine, and the live repeat
+back-edge draws no mid-arrow today although the jar's golden does
+(`biguku-39-voxu233`). T2 therefore renames the field mechanically wherever
+it compiles (that dead line included) and gives the LIVE repeat edge no
+`emphasize` — adding the jar's arrow would move 43 repeat fixtures outside
+`fixtures.md`. T7 files the missing repeat mid-arrow under
+`activity-repeat-connector-draw-order`. The decision itself (`arrowhead?:
+false`, `emphasize: Direction` per `Worm.java:138-139,178-183`) stands.
+
 ## D7 — Draw order is the conns list, sibling links after both endpoints
 
 **Context.** `FtileWithConnection#drawU` (`FtileWithConnection.java:69-74`)

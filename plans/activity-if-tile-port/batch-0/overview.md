@@ -8,7 +8,7 @@ markup guess.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Diagnose the `if` port gap; per-builder element templates; base measurement; `--align` probe flag | debugger | `.agent-notes/aitp-T1.md`, `plans/activity-if-tile-port/fixtures.md` (rewrite), `measurements/base.json`, `scripts/activity-probe.ts` + `tests/unit/scripts/activity-probe.test.ts`, journal rows | — | [ ] |
+| T1 | Diagnose the `if` port gap; per-builder element templates; base measurement; `--align` probe flag | debugger | `.agent-notes/aitp-T1.md`, `plans/activity-if-tile-port/fixtures.md` (rewrite), `measurements/base.json`, `scripts/activity-probe.ts` + `tests/unit/scripts/activity-probe.test.ts`, journal rows | — | [x] |
 
 Spec: [`T1-if-diagnosis.md`](T1-if-diagnosis.md).
 

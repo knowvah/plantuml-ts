@@ -156,7 +156,7 @@ the pins.
 
 ## Progress
 
-- [ ] Batch 0 — T1
+- [x] Batch 0 — T1
 - [ ] Batch 1 — T2
 - [ ] Batch 2 — T3
 - [ ] Batch 3 — T4
