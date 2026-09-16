@@ -21,10 +21,16 @@
  *
  * Usage:
  *   npx tsx scripts/activity-probe.ts [--slugs a,b | --slugs-file <path>]
- *     [--json <out>] [--dump <slug>] [--lanes <slug>]
+ *     [--json <out>] [--dump <slug>] [--lanes <slug>] [--align <slug>]
  *
  * --slugs-file extracts every match of `/[a-z]+-\d{2}-[a-z]+\d{3}/g` from the
  * file, so `plans/activity-lane-capture/fixtures.md` works as-is.
+ *
+ * --align <slug> (mission `activity-if-tile-port`, T1/Q6) prints per-tag
+ * `polygon`/`line`/`text`/`rect` counts (ours vs jar) and the (tag, lane)
+ * positional alignment `n/N` -- delegated to the sibling
+ * `activity-probe-align.ts` (kept out of this file to stay under its
+ * 500-line cap; see that module's doc comment).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -40,6 +46,7 @@ import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import type { NormalizedNode } from '../tests/oracle/svg-conformance/normalize.js';
 import { censusOf } from '../tests/oracle/svg-conformance/swimlane-census.js';
 import type { LaneExtent } from '../tests/oracle/svg-conformance/swimlane-census.js';
+import { alignReport } from './activity-probe-align.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..');
@@ -214,7 +221,7 @@ export function categoryOf(n: NormalizedNode): CompoundCategory | undefined {
  * `swimlane-census.ts#flatten` performs, duplicated here (it is not
  * exported) rather than widening that module's exports for a generic tree
  * utility outside this task's write-set. */
-function flattenElements(root: NormalizedNode): NormalizedNode[] {
+export function flattenElements(root: NormalizedNode): NormalizedNode[] {
   const out: NormalizedNode[] = [];
   const walk = (n: NormalizedNode): void => {
     if (n.type === 'element') out.push(n);
@@ -364,6 +371,19 @@ function lanesForSlug(slug: string): void {
   }
 }
 
+/** T1/Q6: per-tag `polygon`/`line`/`text`/`rect` counts (ours vs jar) plus
+ * the `--dump`-ordered (tag, lane) positional alignment `n/N` -- the same
+ * figures Q1's templates record by hand for each representative slug. */
+function alignForSlug(slug: string): void {
+  const { markup, golden } = readFixture(slug);
+  const { perTag, alignment } = alignReport(renderOurs(markup), golden);
+  console.log(`${slug}:`);
+  for (const [tag, counts] of Object.entries(perTag)) {
+    console.log(`  ${tag}: ours=${counts.ours} jar=${counts.jar}`);
+  }
+  console.log(`  alignment: ${alignment.matched}/${alignment.total}`);
+}
+
 // ---------------------------------------------------------------------------
 // CLI entry point.
 // ---------------------------------------------------------------------------
@@ -373,6 +393,7 @@ interface CliArgs {
   jsonOut: string | undefined;
   dumpSlug: string | undefined;
   lanesSlug: string | undefined;
+  alignSlug: string | undefined;
 }
 
 /** One setter per flag, keyed by flag name -- a lookup table instead of a
@@ -384,10 +405,17 @@ const FLAG_SETTERS: Record<string, (args: CliArgs, value: string) => void> = {
   '--json': (args, value) => (args.jsonOut = value),
   '--dump': (args, value) => (args.dumpSlug = value),
   '--lanes': (args, value) => (args.lanesSlug = value),
+  '--align': (args, value) => (args.alignSlug = value),
 };
 
 function parseArgs(argv: readonly string[]): CliArgs {
-  const args: CliArgs = { slugs: undefined, jsonOut: undefined, dumpSlug: undefined, lanesSlug: undefined };
+  const args: CliArgs = {
+    slugs: undefined,
+    jsonOut: undefined,
+    dumpSlug: undefined,
+    lanesSlug: undefined,
+    alignSlug: undefined,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i];
     const value = argv[i + 1];
@@ -425,6 +453,10 @@ function main(): void {
   }
   if (args.lanesSlug !== undefined) {
     lanesForSlug(args.lanesSlug);
+    return;
+  }
+  if (args.alignSlug !== undefined) {
+    alignForSlug(args.alignSlug);
     return;
   }
 
