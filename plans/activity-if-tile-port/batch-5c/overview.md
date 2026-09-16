@@ -16,6 +16,6 @@ sequential after Batch 5b, measured against `measurements/t6b.json`.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T6c | Each if tile's branch `left` = `branch.getCoord(NORTH_HOOK).x + contentDx`; placements and hooks follow | typescript-pro | `src/diagrams/activity/tiles/gtile-if-with-links.ts`, `gtile-if-down.ts`, `gtile-if-long-horizontal.ts`; their three test files; `layout/compress/invariant.test.ts` and `tests/unit/activity/layout.test.ts` only where the geometry breaks them; `measurements/t6c.json` | T6b | [ ] |
+| T6c | Each if tile's branch `left` = `branch.getCoord(NORTH_HOOK).x + contentDx`; placements and hooks follow | typescript-pro | `src/diagrams/activity/tiles/gtile-if-with-links.ts`, `gtile-if-down.ts`, `gtile-if-long-horizontal.ts`; their three test files; `layout/compress/invariant.test.ts` and `tests/unit/activity/layout.test.ts` only where the geometry breaks them; `measurements/t6c.json` | T6b | [x] |
 
 Spec: [`T6c-branch-left.md`](T6c-branch-left.md).

@@ -167,5 +167,5 @@ the pins.
 - [x] Batch 4 — T5
 - [x] Batch 5 — T6
 - [x] Batch 5b — T6b (added 2026-09-16 under stop 1, maintainer-authorised)
-- [ ] Batch 5c — T6c (added 2026-09-16: bucket C of T6b's diagonal scan)
+- [x] Batch 5c — T6c (added 2026-09-16: bucket C of T6b's diagonal scan)
 - [ ] Batch 6 — T7
