@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
   "measuredAt": "2026-09-16",
-  "measuredAgainstCommit": "46caf80b",
+  "measuredAgainstCommit": "77d50172",
   "fixtures": [
     {
       "type": "activity",
@@ -44,7 +44,7 @@
           }
         ],
         "width": "146",
-        "height": "331"
+        "height": "375"
       },
       "jar": {
         "dividerXs": [
@@ -465,11 +465,11 @@
         "lanes": [
           {
             "x": 17,
-            "width": 98.2
+            "width": 119.73125000000002
           }
         ],
-        "width": "136",
-        "height": "338"
+        "width": "160",
+        "height": "369"
       },
       "jar": {
         "dividerXs": [],
@@ -521,7 +521,7 @@
           }
         ],
         "width": "250",
-        "height": "279"
+        "height": "307"
       },
       "jar": {
         "dividerXs": [
@@ -878,40 +878,40 @@
       "ours": {
         "dividerXs": [
           17,
-          67.212,
-          116.25
+          75,
+          124.038
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22.588",
+            "x": "26.481",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "72.212",
+            "x": "80",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 98.25,
+          "width": 106.038,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 50.21249999999999
+            "width": 58
           },
           {
-            "x": 67.21249999999999,
+            "x": 75,
             "width": 49.037499999999994
           }
         ],
-        "width": "128",
-        "height": "283"
+        "width": "136",
+        "height": "295"
       },
       "jar": {
         "dividerXs": [
@@ -1042,40 +1042,40 @@
       "ours": {
         "dividerXs": [
           17,
-          265.325,
-          426.05
+          279.413,
+          470.138
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "111.181",
+            "x": "118.225",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "321.669",
+            "x": "350.756",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 408.05,
+          "width": 452.138,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 248.32500000000005
+            "width": 262.4125
           },
           {
-            "x": 265.32500000000005,
-            "width": 160.72500000000002
+            "x": 279.4125,
+            "width": 190.72500000000002
           }
         ],
-        "width": "438",
-        "height": "263"
+        "width": "482",
+        "height": "309"
       },
       "jar": {
         "dividerXs": [
@@ -1163,7 +1163,7 @@
           }
         ],
         "width": "146",
-        "height": "383"
+        "height": "430"
       },
       "jar": {
         "dividerXs": [
@@ -1621,7 +1621,7 @@
         "dividerXs": [
           17,
           319.175,
-          593.688
+          599.231
         ],
         "titles": [
           {
@@ -1631,29 +1631,29 @@
           },
           {
             "fontSize": "18",
-            "x": "450.413",
+            "x": "453.184",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 575.688,
+          "width": 581.231,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 302.17500000000007
+            "width": 302.175
           },
           {
-            "x": 319.17500000000007,
-            "width": 274.51250000000016
+            "x": 319.175,
+            "width": 280.05625000000003
           }
         ],
-        "width": "624",
-        "height": "605"
+        "width": "648",
+        "height": "625"
       },
       "jar": {
         "dividerXs": [
@@ -1735,7 +1735,7 @@
           }
         ],
         "width": "817",
-        "height": "279"
+        "height": "326"
       },
       "jar": {
         "dividerXs": [
@@ -1791,8 +1791,8 @@
             "width": 91.35000000000001
           }
         ],
-        "width": "145",
-        "height": "264"
+        "width": "147",
+        "height": "304"
       },
       "jar": {
         "dividerXs": [],
@@ -1898,41 +1898,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          154.044,
-          498.969
+          -28.603,
+          127.153,
+          472.078
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "54.978",
+            "x": "18.731",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "268.063",
+            "x": "241.172",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
+          "x": -28.603,
           "y": 12,
-          "width": 480.969,
+          "width": 499.681,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 137.04375000000005
+            "x": -28.603124999999963,
+            "width": 155.75625000000002
           },
           {
-            "x": 154.04375000000005,
+            "x": 127.15312500000006,
             "width": 344.92499999999995
           }
         ],
-        "width": "510",
-        "height": "353"
+        "width": "484",
+        "height": "351"
       },
       "jar": {
         "dividerXs": [
@@ -1981,40 +1981,40 @@
       "ours": {
         "dividerXs": [
           17,
-          88.594,
-          200.644
+          92.594,
+          204.644
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "27.766",
+            "x": "29.766",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "119.588",
+            "x": "123.588",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 182.644,
+          "width": 186.644,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 71.59375
+            "width": 75.59375
           },
           {
-            "x": 88.59375,
+            "x": 92.59375,
             "width": 112.05000000000001
           }
         ],
-        "width": "212",
-        "height": "367"
+        "width": "216",
+        "height": "349"
       },
       "jar": {
         "dividerXs": [
@@ -2294,7 +2294,7 @@
           }
         ],
         "width": "279",
-        "height": "331"
+        "height": "333"
       },
       "jar": {
         "dividerXs": [
@@ -2427,7 +2427,7 @@
           17,
           90.35,
           211.7,
-          302.819
+          306.819
         ],
         "titles": [
           {
@@ -2442,14 +2442,14 @@
           },
           {
             "fontSize": "18",
-            "x": "230.766",
+            "x": "232.766",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 284.819,
+          "width": 288.819,
           "height": 18,
           "fill": "none"
         },
@@ -2464,11 +2464,11 @@
           },
           {
             "x": 211.7,
-            "width": 91.11875000000003
+            "width": 95.11875000000003
           }
         ],
-        "width": "314",
-        "height": "449"
+        "width": "318",
+        "height": "481"
       },
       "jar": {
         "dividerXs": [
@@ -2527,50 +2527,50 @@
       "ours": {
         "dividerXs": [
           17,
-          88.594,
-          158.644,
-          228.694
+          104.831,
+          174.881,
+          244.931
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "26.809",
+            "x": "34.928",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "97.631",
+            "x": "113.869",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "167.681",
+            "x": "183.919",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 210.694,
+          "width": 226.931,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 71.59375
+            "width": 87.83125
           },
           {
-            "x": 88.59375,
-            "width": 70.05000000000001
+            "x": 104.83125,
+            "width": 70.05000000000003
           },
           {
-            "x": 158.64375,
+            "x": 174.88125000000002,
             "width": 70.05000000000001
           }
         ],
-        "width": "240",
-        "height": "331"
+        "width": "256",
+        "height": "359"
       },
       "jar": {
         "dividerXs": [
@@ -2848,7 +2848,7 @@
           }
         ],
         "width": "521",
-        "height": "1005"
+        "height": "1033"
       },
       "jar": {
         "dividerXs": [
@@ -4228,50 +4228,50 @@
       "ours": {
         "dividerXs": [
           17,
-          185.7,
-          326.4,
-          437.75
+          179.7,
+          320.4,
+          431.75
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "91.337",
+            "x": "88.337",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "246.037",
+            "x": "240.037",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "372.063",
+            "x": "366.063",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 419.75,
+          "width": 413.75,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 168.69999999999996
+            "width": 162.69999999999996
           },
           {
-            "x": 185.69999999999996,
+            "x": 179.69999999999996,
             "width": 140.70000000000002
           },
           {
-            "x": 326.4,
+            "x": 320.4,
             "width": 111.35000000000002
           }
         ],
-        "width": "449",
-        "height": "551"
+        "width": "443",
+        "height": "607"
       },
       "jar": {
         "dividerXs": [
@@ -4336,40 +4336,40 @@
       "ours": {
         "dividerXs": [
           17,
-          215.281,
-          383.213
+          235.281,
+          411.213
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "68.609",
+            "x": "78.609",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "250.703",
+            "x": "274.703",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 365.213,
+          "width": 393.213,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 17,
-            "width": 198.28125
+            "width": 218.28125
           },
           {
-            "x": 215.28125,
-            "width": 167.93125000000003
+            "x": 235.28125,
+            "width": 175.93125000000003
           }
         ],
-        "width": "395",
-        "height": "609"
+        "width": "423",
+        "height": "587"
       },
       "jar": {
         "dividerXs": [
@@ -4865,8 +4865,8 @@
         "dividerXs": [
           17,
           258.4,
-          426.703,
-          537.384
+          439.875,
+          588.194
         ],
         "titles": [
           {
@@ -4876,19 +4876,19 @@
           },
           {
             "fontSize": "18",
-            "x": "323.089",
+            "x": "329.675",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "463.087",
+            "x": "495.078",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 47,
-          "width": 519.384,
+          "width": 570.194,
           "height": 18,
           "fill": "none"
         },
@@ -4899,15 +4899,15 @@
           },
           {
             "x": 258.4,
-            "width": 168.3031249999999
+            "width": 181.4749999999999
           },
           {
-            "x": 426.7031249999999,
-            "width": 110.68124999999986
+            "x": 439.8749999999999,
+            "width": 148.3187499999999
           }
         ],
-        "width": "549",
-        "height": "578"
+        "width": "600",
+        "height": "654"
       },
       "jar": {
         "dividerXs": [
@@ -5263,7 +5263,7 @@
         "dividerXs": [
           17,
           149.75,
-          291.725
+          298.306
         ],
         "titles": [
           {
@@ -5273,14 +5273,14 @@
           },
           {
             "fontSize": "18",
-            "x": "197.731",
+            "x": "201.022",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 273.725,
+          "width": 280.306,
           "height": 18,
           "fill": "none"
         },
@@ -5291,11 +5291,11 @@
           },
           {
             "x": 149.75,
-            "width": 141.97500000000002
+            "width": 148.55625000000003
           }
         ],
-        "width": "318",
-        "height": "505"
+        "width": "317",
+        "height": "503"
       },
       "jar": {
         "dividerXs": [

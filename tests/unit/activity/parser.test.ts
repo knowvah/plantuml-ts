@@ -244,6 +244,66 @@ describe('parses repeat with space-separated repeat while terminator', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Test 7c — repeat's inline action becomes the entry tile, not a body node
+// @see net/sourceforge/plantuml/activitydiagram3/CommandRepeat3.java:126
+//   -- the inline label is handed to `ActivityDiagram3#startRepeat`.
+// @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:51
+//   -- stored as `startLabel`, the ENTRY tile
+//   (`ftile/vcompact/FtileRepeat.java:77-80`), never a body element.
+// ---------------------------------------------------------------------------
+
+describe('repeat with an inline action becomes entry, not a body node', () => {
+  it('entry.label is "R1" and body is exactly [a]', () => {
+    const ast = parse(['repeat :R1;', ':a;', 'repeat while (c)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.entry?.label).toBe('R1');
+    expect(node.body).toHaveLength(1);
+    expect((node.body[0] as ActivityAction).label).toBe('a');
+  });
+
+  it('has no entry when the repeat has no inline action', () => {
+    const ast = parse(['repeat', '  :Do thing;', 'repeatwhile (again?)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.entry).toBeUndefined();
+    expect('entry' in node).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 7d — repeat while's "is (…)"/"not (…)" side labels
+// @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:359-371
+//   -- `repeatWhile(label, yes, out, …)`.
+// @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:193-200
+//   -- `setTest` stores `yesTb`/`outTb`, drawn on the condition hexagon
+//   (`ftile/vcompact/FtileRepeat.java:150-151`).
+// ---------------------------------------------------------------------------
+
+describe('repeat while is/not side labels', () => {
+  it('captures yesLabel and outLabel', () => {
+    const ast = parse(['repeat', '  :Do thing;', 'repeat while (c) is (y) not (n)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.yesLabel).toBe('y');
+    expect(node.outLabel).toBe('n');
+  });
+
+  it('both absent when not written', () => {
+    const ast = parse(['repeat', '  :Do thing;', 'repeat while (c)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.yesLabel).toBeUndefined();
+    expect(node.outLabel).toBeUndefined();
+    expect('yesLabel' in node).toBe(false);
+    expect('outLabel' in node).toBe(false);
+  });
+
+  it('both absent when written empty: "is () not ()"', () => {
+    const ast = parse(['repeat', '  :Do thing;', 'repeat while (c) is () not ()']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.yesLabel).toBeUndefined();
+    expect(node.outLabel).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 8 — parses fork / fork again / end fork
 // ---------------------------------------------------------------------------
 

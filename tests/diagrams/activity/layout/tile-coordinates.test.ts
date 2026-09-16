@@ -4,10 +4,12 @@ import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/
 import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
-import { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
+import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.js';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
+import { GtileBreak } from '../../../../src/diagrams/activity/tiles/gtile-break.js';
+import { GtileStop } from '../../../../src/diagrams/activity/tiles/gtile-stop.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
@@ -109,15 +111,18 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
 // `FtileAssemblySimple.java:108-112`, `FtileWithConnection.java:69-74`): the
 // sibling link around a compound child is drawn AFTER that child's own
 // internals, not before. `a, X, c` with `X` a while (a stand-in for any
-// if/while/repeat/fork -- `walkWhile` pushes 2 internal edges, the same
-// generic path every compound child's walker takes) must read: X's
-// internals, then a->X, then (c is a leaf, no internals) X->c.
+// if/while/repeat/fork -- `walkWhile` pushes 4 internal edges since altp-T4
+// (`ConnectionIn`, `ConnectionBackSimple`, `ConnectionOut` x2; this body has
+// no `break`), the same generic path every compound child's walker takes)
+// must read: X's internals, then a->X, then (c is a leaf, no internals) X->c.
 describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T6)', () => {
   it("a, X, c: edge run is X's internals, a->X, X->c", () => {
     const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
-    const header = new GtileDiamond('cond', bounder, theme);
+    // D1 (mission `activity-loop-tile-port` T2): the while header is a
+    // `GtileDiamondInside`, never a `GtileDiamond`.
+    const header = new GtileDiamondInside('cond', {}, bounder, theme);
     const body = new GtileAction({ kind: 'action' as const, label: 'body' }, bounder, theme);
-    const whileTile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+    const whileTile = new GtileWhile(header, body, bounder, theme);
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, whileTile, c], bounder, theme);
     const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
@@ -126,7 +131,8 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // per compound, walk order is unchanged: a, header, body, c.
     expect(geo.nodes).toHaveLength(4);
     expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'body', 'c']);
-    expect(geo.edges).toHaveLength(4);
+    // altp-T4: In, Back, Out, Out2 (X's own internals) + a->X + X->c.
+    expect(geo.edges).toHaveLength(6);
 
     const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
     const cTop = geo.nodes[3]!.y;
@@ -142,22 +148,23 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // the whole tile's exit, past the body by `NODE_MARGIN_Y`).
     const bodyBottom = geo.nodes[2]!.y + geo.nodes[2]!.height;
 
-    // edges[0..1]: X's own internals (forward + back) -- every point stays
-    // strictly inside X's own vertical span, never touching a leaf sibling.
-    for (const edgeIndex of [0, 1]) {
+    // edges[0..3]: X's own internals (In, Back, Out, Out2) -- every point
+    // stays strictly inside X's own vertical span, never touching a leaf
+    // sibling.
+    for (const edgeIndex of [0, 1, 2, 3]) {
       for (const p of geo.edges[edgeIndex]!.points) {
         expect(p.y).toBeGreaterThanOrEqual(xTop);
         expect(p.y).toBeLessThanOrEqual(xBottomRaw);
       }
     }
 
-    // edges[2]: a -> X, pushed only AFTER X's own internals above.
-    expect(geo.edges[2]!.points.some((p) => p.y === aBottom)).toBe(true);
-    expect(geo.edges[2]!.points.every((p) => p.y <= xTop)).toBe(true);
+    // edges[4]: a -> X, pushed only AFTER X's own internals above.
+    expect(geo.edges[4]!.points.some((p) => p.y === aBottom)).toBe(true);
+    expect(geo.edges[4]!.points.every((p) => p.y <= xTop)).toBe(true);
 
-    // edges[3]: X -> c (c has no internals of its own to precede it).
-    expect(geo.edges[3]!.points.some((p) => p.y === cTop)).toBe(true);
-    expect(geo.edges[3]!.points.every((p) => p.y >= bodyBottom)).toBe(true);
+    // edges[5]: X -> c (c has no internals of its own to precede it).
+    expect(geo.edges[5]!.points.some((p) => p.y === cTop)).toBe(true);
+    expect(geo.edges[5]!.points.every((p) => p.y >= bodyBottom)).toBe(true);
   });
 
   it('leaves-only sequence (a, b, c) keeps identity walk order, unaffected by D7', () => {
@@ -219,31 +226,49 @@ describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not cent
 });
 
 describe('assignCoordinates — GtileWhile produces back-edge', () => {
-  const header = new GtileDiamond('loop?', bounder, theme);
+  const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
   const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
   it('produces at least 2 nodes (diamond + action)', () => {
     expect(geo.nodes.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('produces exactly 2 edges (forward + back)', () => {
-    expect(geo.edges).toHaveLength(2);
+  // altp-T4 (D7): ConnectionIn, ConnectionBackSimple, ConnectionOut (x2) --
+  // this body has no `break`, so no welding edges.
+  it('produces exactly 4 edges (In, Back, Out, Out2)', () => {
+    expect(geo.edges).toHaveLength(4);
   });
 
-  it('back-edge has >= 4 waypoints', () => {
-    // forward edge has 2 points; back-edge has 4
-    const backEdge = geo.edges.find((e) => e.points.length >= 4);
+  it('back-edge has exactly 5 waypoints and is emphasized up (ConnectionBackSimple)', () => {
+    const backEdge = geo.edges.find((e) => e.points.length === 5);
     expect(backEdge).toBeDefined();
-    expect(backEdge!.points.length).toBeGreaterThanOrEqual(4);
+    expect(backEdge!.emphasize).toBe('up');
+  });
+
+  it('the In edge has exactly 2 waypoints and no emphasize/arrowhead flags', () => {
+    const inEdge = geo.edges.find((e) => e.points.length === 2 && e.emphasize === undefined);
+    expect(inEdge).toBeDefined();
+    expect(inEdge!.arrowhead).toBeUndefined();
+  });
+
+  it('exactly one edge is emphasized down (ConnectionOut, first snake)', () => {
+    expect(geo.edges.filter((e) => e.emphasize === 'down')).toHaveLength(1);
+  });
+
+  // `ConnectionOut`'s BOTH snakes use the undecorated `Snake.create
+  // (skinParam, color)` overload (`Snake.java:138-142`) -- neither has a
+  // terminal arrowhead.
+  it('exactly two edges carry arrowhead: false (both ConnectionOut snakes)', () => {
+    expect(geo.edges.filter((e) => e.arrowhead === false)).toHaveLength(2);
   });
 });
 
 describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () => {
-  const header = new GtileDiamond('loop?', bounder, theme);
+  const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, undefined, undefined, bounder, theme);
+  const tile = new GtileWhile(header, body, bounder, theme);
   const full = assignCoordinatesFull({
     root: tile,
     ast: emptyAst,
@@ -277,6 +302,123 @@ describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () 
     // shifts up by that 2. Verified against `t5-debug-fork.ts`'s GtileWhile
     // dump: `removed: { x: 0, y: 2 }`.
     expect(full.reservations[0]!.y).toBeCloseTo(expectedY - 2, 5);
+  });
+});
+
+// altp-T4 (D7): a truly empty body (`dim.getWidth() == 0 || dim.getHeight()
+// == 0`) gets ONLY `ConnectionBackEmpty` -- no `ConnectionIn` is added at
+// all (`FtileWhile.java:148-168,150`).
+describe('assignCoordinates — GtileWhile with an empty body draws ConnectionBackEmpty', () => {
+  it('emits exactly 3 edges (BackEmpty, Out, Out2), no ConnectionIn', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    const body = new GtileTopDown([], bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(3);
+    const backEdge = geo.edges.find((e) => e.points.length === 5)!;
+    expect(backEdge).toBeDefined();
+    expect(backEdge.emphasize).toBe('up');
+    // `ConnectionBackEmpty`'s own p1 is the HEADER's south exit
+    // (`FtileWhile.java:418-420`), not the (nonexistent) body's.
+    const headerNode = geo.nodes.find((n) => n.kind === 'while-header')!;
+    expect(backEdge.points[0]).toEqual({ x: headerNode.x + headerNode.width / 2, y: headerNode.y + headerNode.height });
+  });
+
+  it('still reserves one 5x12 UEmpty beside the elbow (FtileWhile.java:459)', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    const body = new GtileTopDown([], bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+
+    expect(full.reservations).toHaveLength(1);
+    expect(full.reservations[0]).toMatchObject({ width: 5, height: 12 });
+  });
+});
+
+// altp-T4 fix: the `while-header` polygon is the hexagon ALONE.
+// `FtileDiamondInside#drawU` draws `Hexagon.asPolygon(dimTotal)` with
+// `dimTotal = calculateDimensionAlone` (`FtileDiamondInside.java:87-89`);
+// the tile's `height` is `calculateDimensionFtile`'s, which adds the north
+// label BELOW the hexagon (`:119-124`). Found on `cemagu-66-vazo965`: a
+// 35 px polygon where the jar draws 24 px, the `yes` label overlapping it.
+describe('assignCoordinates — the while-header polygon is the hexagon-alone height', () => {
+  it('uses the alone height, not the tile height that includes the north label', () => {
+    const header = new GtileDiamondInside('loop?', { north: 'yes', west: 'no' }, bounder, theme);
+    const body = new GtileTopDown([new GtileAction({ kind: 'action', label: 'a' }, bounder, theme)], bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    const headerNode = geo.nodes.find((n) => n.kind === 'while-header')!;
+    const aloneHeight = header.getCoord(SOUTH_HOOK).y;
+    expect(header.height).toBeGreaterThan(aloneHeight);
+    expect(headerNode.height).toBe(aloneHeight);
+    // The north label sits at the hexagon's own bottom edge (`:91`).
+    const northLabel = geo.nodes.find((n) => n.kind === 'if-label' && n.label === 'yes')!;
+    expect(northLabel.y).toBeCloseTo(headerNode.y + aloneHeight, 9);
+  });
+});
+
+// `ConnectionBackSimple#drawU` returns early -- drawing nothing, not even
+// the reservation -- when `whileBlock.hasPointOut() === false`
+// (`FtileWhile.java:229-232`), e.g. a body ending in `stop`.
+describe('assignCoordinates — GtileWhile with a body that has no point out (ends in stop)', () => {
+  it('draws ConnectionIn but no back edge and no reservation', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    // A lone `GtileStop` body (not wrapped in a `GtileTopDown` sequence) so
+    // the only edges below are the while's own -- a wrapped sequence would
+    // also add its own internal sibling edge, unrelated to this assertion.
+    const body = new GtileStop();
+    const tile = new GtileWhile(header, body, bounder, theme);
+    const full = assignCoordinatesFull({
+      root: tile,
+      ast: emptyAst,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+    });
+
+    // In, Out, Out2 -- no Back, so no 5-point edge and no reservation.
+    expect(full.geometry.edges).toHaveLength(3);
+    expect(full.geometry.edges.some((e) => e.points.length === 5)).toBe(false);
+    expect(full.reservations).toHaveLength(0);
+  });
+});
+
+// D3/D7: a `break` welds LAST, after In/Back/Out/Out2 -- a plain terminal
+// arrow (`asToLeft`), no `emphasize`/`arrowhead` override.
+// @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorWhile.java:101-116
+describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)', () => {
+  it('draw order is In, Back, Out, Out2, then one welding edge per break', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    const action1 = new GtileAction(actionNode, bounder, theme);
+    const brk = new GtileBreak();
+    const action2 = new GtileAction({ kind: 'action' as const, label: 'after', swimlane: 'default' }, bounder, theme);
+    const body = new GtileTopDown([action1, brk, action2], bounder, theme);
+    const tile = new GtileWhile(header, body, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    // action1->brk, brk->action2 (the body's OWN internal sibling edges,
+    // pushed while walking the body, before the while's own connections),
+    // then In, Back (action2 still has a point out), Out, Out2, then the
+    // weld LAST -- 7 edges total.
+    expect(geo.edges).toHaveLength(7);
+    const breakNode = geo.nodes.find((n) => n.kind === 'break')!;
+    const weld = geo.edges[geo.edges.length - 1]!;
+    expect(weld.points).toEqual([
+      { x: breakNode.x, y: breakNode.y },
+      { x: LAYOUT_MARGIN + 12, y: breakNode.y },
+    ]);
+    expect(weld.emphasize).toBeUndefined();
+    expect(weld.arrowhead).toBeUndefined();
   });
 });
 
@@ -440,6 +582,42 @@ describe('layoutActivity — pakema-21-xema183-shaped diagram through the real p
     expect(nodeB.x).toBeGreaterThan(laneB.x);
     expect(nodeB.x + nodeB.width).toBeLessThan(laneB.x + laneB.width);
   });
+});
+
+// mission `activity-loop-tile-port` T2 fix (coordinator-reported
+// regression): `pushRepeatCondition`/`pushWhileHeader` push the condition/
+// header node directly, bypassing `walkTile`'s own `laneAt(tile, lane)`
+// resolution (`walkTile`'s own dispatch, `:117-118` in this file) that a
+// tile's OWN `.swimlane` normally gets. A laned repeat whose body switches
+// lane before `repeat while` sets the condition's own lane to the OUT lane
+// (`tileRepeat`'s `outLane(node.swimlaneOut, node.swimlane)`,
+// `FtileRepeat.java:149,152`) -- distinct from the repeat tile's own
+// (entry) lane, which is what `myLane` resolves to at the 'gtile-repeat'
+// case. Without re-resolving via `laneAt`, the condition (and its labels)
+// silently inherited the entry lane instead, moving the hexagon into the
+// wrong lane's x-range (observed on `kudedo-31-pafi082`/`kasadu-53-tuki533`).
+describe('layoutActivity — a laned repeat keeps the condition hexagon in its OWN (out) lane', () => {
+  function layout(markup: string) {
+    const first = buildBlockUmls(markup)[0];
+    if (first === undefined) throw new Error('no diagram block');
+    if (!first.ok) throw first.failure.cause;
+    const ast = astOrThrow(parseActivity(first.source), 'activity');
+    return layoutActivity(ast, resolveTheme('default'), new DeterministicMeasurer());
+  }
+
+  it("repeat-cond and its side label carry the OUT lane, not the repeat's own entry lane", () => {
+    const geo = layout('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x) is (y)\n@enduml');
+    const cond = geo.nodes.find((n) => n.kind === 'repeat-cond')!;
+    expect(cond.swimlane).toBe('B');
+    const label = geo.nodes.find((n) => n.kind === 'if-label')!;
+    expect(label.swimlane).toBe('B');
+  });
+
+  // `tile-layout.ts#tileWhile` never calls `withSwimlane` on the header
+  // (only the outer `GtileWhile` gets one), so a while header has no lane
+  // of its own to diverge from the parent's -- there is no while-side
+  // regression to reproduce; `pushWhileHeader`'s `laneAt` call is defensive
+  // parity only (see that function's own doc).
 });
 
 // D2 / `Worm#addPoint` (`Worm.java:262-266`): the one edge-construction

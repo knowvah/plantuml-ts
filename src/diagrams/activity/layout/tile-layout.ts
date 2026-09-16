@@ -17,14 +17,16 @@ import { GtileKill } from '../tiles/gtile-kill.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
-import { GtileDiamond } from '../tiles/gtile-diamond.js';
+import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
+import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
-import { buildIf } from './conditional-builder.js';
+import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
+import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../layout.old.js';
@@ -79,6 +81,162 @@ export function tileNodes(
   return tiles;
 }
 
+/**
+ * Dispatches to `conditional-builder.ts#buildIf` (mission
+ * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`,
+ * `'down'` builds `GtileIfDown`, `'long-horizontal'` builds
+ * `GtileIfLongHorizontal` (T5, the last of the three -- the legacy
+ * single-diamond tile is retired). `laneOrder` (`ast.swimlanes`, this
+ * diagram's real declaration order) is threaded down for `down`'s own
+ * `ConnectionElse1` vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
+ * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
+ */
+function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
+  return withSwimlane(buildIf(node, bounder, theme, laneOrder), node.swimlane);
+}
+
+/**
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
+ *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
+ *   the "is not"/exit label sits west.
+ */
+function tileWhile(
+  node: ActivityWhile,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileWhile {
+  const labels: { north?: string; west?: string } = {};
+  if (node.yesLabel !== undefined) labels.north = node.yesLabel;
+  if (node.exitLabel !== undefined) labels.west = node.exitLabel;
+  const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const body = new GtileTopDown(bodyTiles, bounder, theme);
+  return withSwimlane(new GtileWhile(header, body, bounder, theme), node.swimlane);
+}
+
+/**
+ * `swimlaneOut` on the repeat tile feeds `laneOut` for any sequential
+ * sibling that follows it (`tile-coordinates.ts`'s `gtile-top-down` case).
+ * The condition diamond's own lane is `swimlaneOut ?? swimlane`
+ * (`FtileRepeat.java:149,152` -- `diamond2`'s INSIDE_HEXAGON branch). This
+ * port models only the hexagon condition style: no `conditionStyle`/
+ * `ConditionStyle` name appears anywhere under `src/diagrams/activity`, and
+ * `ConditionStyle.fromString` defaults to `INSIDE_HEXAGON` when no style is
+ * configured (`ConditionStyle.java:43,56`), so the EMPTY_DIAMOND/
+ * INSIDE_DIAMOND styles -- which read `swimlane` instead -- are out of
+ * scope, not a divergence.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:101-106
+ *   -- `getSwimlaneIn`/`getSwimlaneOut`, the outer tile's own pair.
+ */
+
+/**
+ * `entry`'s own tile: the inline `repeat :label;` action when present, else
+ * a label-less entry diamond in the repeat's OPENER lane (D2). `tileNode`
+ * never returns `null` for an `'action'` node (only `'arrow-label'` does,
+ * `tileNode`'s own switch) -- the assertion documents that invariant rather
+ * than re-checking it.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
+ *   -- `if (entry == null) diamond1 = new FtileDiamond(skinParam,
+ *   diamondColor1, borderColor, swimlane); else diamond1 = entry;`.
+ */
+function tileRepeatEntry(
+  node: ActivityRepeat,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): Tile {
+  if (node.entry !== undefined) return tileNode(node.entry, bounder, theme, laneOrder)!;
+  return withSwimlane(new GtileRepeatEntry(), node.swimlane);
+}
+
+/**
+ * `FtileRepeat.create`'s back-connection selection (`FtileRepeat.java:
+ * 186-199`, `backward == null`, D5): `swimlane == null || swimlane ==
+ * swimlaneOut` picks `'simple1'` when the repeat's own lane sorts before
+ * every lane its BODY touches (`Swimlane#isSmallerThanAllOthers`,
+ * `Swimlane.java:130-137`, shared here as `isMainLaneSmallerThanAllOthers`
+ * -- see that function's own doc for why `node.body` there is exactly
+ * `repeat.getSwimlanes()` here), else `'simple2'`; a repeat that opens in
+ * one lane and closes (`repeat while`) in another always takes
+ * `'complex1'`.
+ */
+function selectRepeatBackConnection(node: ActivityRepeat, laneOrder: readonly string[]): RepeatBackConnection {
+  const { swimlane, swimlaneOut } = node;
+  if (swimlane === undefined || swimlane === swimlaneOut) {
+    return isMainLaneSmallerThanAllOthers(swimlane, node.body, laneOrder) ? 'simple1' : 'simple2';
+  }
+  return 'complex1';
+}
+
+/**
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ *   -- `.withEast(yesTb).withSouth(outTb)`: the default (no `backward`,
+ *   D1) branch puts the "is"/entry label east, the "not"/exit label south.
+ */
+function tileRepeat(
+  node: ActivityRepeat,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileRepeat {
+  const entry = tileRepeatEntry(node, bounder, theme, laneOrder);
+  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const body = new GtileTopDown(bodyTiles, bounder, theme);
+  const labels: { east?: string; south?: string } = {};
+  if (node.yesLabel !== undefined) labels.east = node.yesLabel;
+  if (node.outLabel !== undefined) labels.south = node.outLabel;
+  const condition = withSwimlane(
+    new GtileDiamondInside(node.condition, labels, bounder, theme),
+    outLane(node.swimlaneOut, node.swimlane),
+  );
+  const backConnection = selectRepeatBackConnection(node, laneOrder);
+  return withSwimlaneOut(
+    withSwimlane(new GtileRepeat(entry, body, condition, backConnection, { bounder, theme }), node.swimlane),
+    node.swimlaneOut,
+  );
+}
+
+function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): GtileFork {
+  const branches = node.branches.map((b) => {
+    const tiles = tileNodes(b, bounder, theme, laneOrder);
+    return new GtileTopDown(tiles, bounder, theme);
+  });
+  return withSwimlaneOut(withSwimlane(new GtileFork(branches, bounder), node.swimlane), node.swimlaneOut);
+}
+
+function tileSplit(
+  node: ActivitySplit,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileSplit {
+  const branches = node.branches.map((b) => {
+    const tiles = tileNodes(b, bounder, theme, laneOrder);
+    return new GtileTopDown(tiles, bounder, theme);
+  });
+  return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
+}
+
+export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
+  if (ast.nodes.length === 0) {
+    return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
+  }
+
+  const bounder = makeBounder(measurer, theme);
+  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+  const root = new GtileTopDown(tiles, bounder, theme);
+  return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+}
+
+/**
+ * Kept LAST in this file on purpose (mission `activity-loop-tile-port`,
+ * T1): Lizard 1.23.0's TypeScript reader loses this function's closing
+ * scope inside the `switch` (the same `identifier(` heuristic bug
+ * `node-dispatch.ts`'s header describes) and reports everything after it
+ * as part of `tileNode`, so any function placed below it inflates the
+ * complexity hook's ratchet for this name. Add new builders above.
+ */
 function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
   switch (node.kind) {
     case 'start':
@@ -115,94 +273,4 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
       return null;
     }
   }
-}
-
-/**
- * Dispatches to `conditional-builder.ts#buildIf` (mission
- * `activity-if-tile-port` D1): `'with-links'` builds `GtileIfWithLinks`,
- * `'down'` builds `GtileIfDown`, `'long-horizontal'` builds
- * `GtileIfLongHorizontal` (T5, the last of the three -- the legacy
- * single-diamond tile is retired). `laneOrder` (`ast.swimlanes`, this
- * diagram's real declaration order) is threaded down for `down`'s own
- * `ConnectionElse1` vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
- * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
- */
-function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
-  return withSwimlane(buildIf(node, bounder, theme, laneOrder), node.swimlane);
-}
-
-function tileWhile(
-  node: ActivityWhile,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): GtileWhile {
-  const header = new GtileDiamond(node.condition, bounder, theme);
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
-  const body = new GtileTopDown(bodyTiles, bounder, theme);
-  return withSwimlane(new GtileWhile(header, body, node.exitLabel, node.yesLabel, bounder, theme), node.swimlane);
-}
-
-/**
- * `swimlaneOut` on the repeat tile feeds `laneOut` for any sequential
- * sibling that follows it (`tile-coordinates.ts`'s `gtile-top-down` case).
- * The condition diamond's own lane is `swimlaneOut ?? swimlane`
- * (`FtileRepeat.java:149,152` -- `diamond2`'s INSIDE_HEXAGON branch). This
- * port models only the hexagon condition style: no `conditionStyle`/
- * `ConditionStyle` name appears anywhere under `src/diagrams/activity`, and
- * `ConditionStyle.fromString` defaults to `INSIDE_HEXAGON` when no style is
- * configured (`ConditionStyle.java:43,56`), so the EMPTY_DIAMOND/
- * INSIDE_DIAMOND styles -- which read `swimlane` instead -- are out of
- * scope, not a divergence.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:101-106
- *   -- `getSwimlaneIn`/`getSwimlaneOut`, the outer tile's own pair.
- */
-function tileRepeat(
-  node: ActivityRepeat,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): GtileRepeat {
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
-  const body = new GtileTopDown(bodyTiles, bounder, theme);
-  const condition = withSwimlane(
-    new GtileDiamond(node.condition, bounder, theme),
-    outLane(node.swimlaneOut, node.swimlane),
-  );
-  return withSwimlaneOut(
-    withSwimlane(new GtileRepeat(body, condition, null, bounder, theme), node.swimlane),
-    node.swimlaneOut,
-  );
-}
-
-function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): GtileFork {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
-  return withSwimlaneOut(withSwimlane(new GtileFork(branches, bounder), node.swimlane), node.swimlaneOut);
-}
-
-function tileSplit(
-  node: ActivitySplit,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): GtileSplit {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
-  return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
-}
-
-export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
-  if (ast.nodes.length === 0) {
-    return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
-  }
-
-  const bounder = makeBounder(measurer, theme);
-  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
-  const root = new GtileTopDown(tiles, bounder, theme);
-  return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 }

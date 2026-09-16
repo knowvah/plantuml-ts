@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1105 modules · 3995 exported names.
+1106 modules · 3996 exported names.
 
 ## `src/`
 
@@ -919,7 +919,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `BACK_EDGE_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-fork.ts` | `layoutFork`, `layoutSplit` | Fork/split (parallel-branch) layout for the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-helpers.ts` | `ACTION_HEIGHT`, `ACTION_H_PAD`, `nextId`, `diamondSize`, `repeatCondSize`, `actionSize`, `parallelogramSize`, `noteSize`, `orthogonalPoints`, `nodeCenterX` | Small geometry/measurement helpers shared across the activity diagram layout engine (see `layout.old.ts`). |
 | `activity-layout-if.ts` | `layoutIf` | If/else-if/else layout for the activity diagram layout engine (see `layout.old.ts`). |
@@ -954,7 +954,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
-| `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
+| `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `isMainLaneSmallerThanAllOthers`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
+| `diamond-labels.ts` | `emitDiamondLabels` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
@@ -967,6 +968,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
 | `walk-if-long-horizontal.ts` | `walkIfLongHorizontal` | The `'gtile-if-long-horizontal'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-down.ts`/`walk-if-with-links.ts` already are (mission `activity-if-tile-port` D5). |
 | `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
+| `walk-repeat.ts` | `walkRepeat` | The `'gtile-repeat'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-branch.ts` | `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
 ## `src/diagrams/activity/layout/compress/`
@@ -983,13 +985,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `gconnection-down-then-up.ts` | `GConnectionDownThenUp` |  |
 | `gconnection-horizontal.ts` | `GConnectionHorizontal` |  |
 | `gconnection-side-then-vertical-then-side.ts` | `GConnectionSideThenVerticalThenSide` |  |
-| `gconnection-vertical-down-then-back.ts` | `GConnectionVerticalDownThenBack` |  |
 | `gconnection-vertical-down.ts` | `GConnectionVerticalDown` |  |
 | `gconnection.ts` | `GConnection` |  |
-| `index.ts` | `GConnection`, `GConnectionVerticalDown`, `GConnectionHorizontal`, `GConnectionVerticalDownThenBack`, `GConnectionDownThenUp`, `GConnectionSideThenVerticalThenSide` |  |
+| `index.ts` | `GConnection`, `GConnectionVerticalDown`, `GConnectionHorizontal`, `GConnectionSideThenVerticalThenSide` |  |
 
 ## `src/diagrams/activity/tiles/`
 
@@ -1010,7 +1010,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-label.ts` | `GtileLabel` |  |
 | `gtile-note.ts` | `GtileNote` |  |
 | `gtile-partition.ts` | `GtilePartition` |  |
-| `gtile-repeat.ts` | `GtileRepeat` |  |
+| `gtile-repeat-entry.ts` | `GtileRepeatEntry` |  |
+| `gtile-repeat.ts` | `RepeatBackConnection`, `GtileRepeatContext`, `GtileRepeat` |  |
 | `gtile-split.ts` | `GtileSplit` |  |
 | `gtile-spot.ts` | `GtileSpot` |  |
 | `gtile-start.ts` | `GtileStart` |  |

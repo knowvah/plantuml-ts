@@ -312,9 +312,30 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // branch labels), inserting 16 new shapes ahead of this triple in
     // `shapesOf`'s flat list. Same fixture, same coincident triple, same
     // coordinates (436.62187499999993, 479.5), only the index shifted.
-    'tobajo-64-mipi810 [66,67] polygon×polygon',
-    'tobajo-64-mipi810 [66,68] polygon×polygon',
-    'tobajo-64-mipi810 [67,68] polygon×polygon',
+    // altp T2: indices +2 (the repeat's two `ja` east labels now precede
+    // these three shapes); coordinates unchanged. altp-T5: indices +3 more
+    // (68->71 etc.) -- `tileRepeat` now builds a real entry tile as
+    // `GtileRepeat`'s first child (D2), inserting new shapes ahead of this
+    // triple; AND the coordinates themselves moved this time (dumped
+    // directly: `(437.51249999999998, 507)` before T5 -> `(437.5124999999
+    // 998, 591)` after), an expected consequence of D4's jar-verbatim
+    // height formula (`entry.h + body.h + condition.h + 96`) growing the
+    // repeat's own height and shifting everything below it down -- same
+    // coincident triple, same `polygonSkipMode: 'x'` cross-lane-arrowhead
+    // class (`Worm.java:159-168`), not a new mechanism. altp-T6: indices +6
+    // (71->77) -- each of this fixture's three repeats gains a real
+    // `ConnectionIn` edge (entry->body, absent before T6: the interim drew
+    // only a body->condition edge and a left-side back edge, D5) and its
+    // back edge now carries `emphasize: 'up'` (a second, mid-segment
+    // arrowhead polygon, `Snake#emphasizeDirection(UP)`, `FtileRepeat.java:
+    // 558,630,381,393` -- the interim's `GConnectionDownThenUp` back edge
+    // set no such flag), so 2 new shapes per repeat x 3 repeats = 6 new
+    // shapes ahead of this triple in `shapesOf`'s flat list. Coordinates
+    // dumped directly and confirmed byte-identical to the numbers above
+    // (`(467.8749999999999, 591)`, `polygonSkipMode: 'x'` on both sides).
+    'tobajo-64-mipi810 [77,78] polygon×polygon',
+    'tobajo-64-mipi810 [77,79] polygon×polygon',
+    'tobajo-64-mipi810 [78,79] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -436,9 +457,31 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    *   `kitupi-32-jexo155` above, not a geometry defect.
    */
   const ALLOWED_HARD_OVERLAPS = [
+    // `tobajo-64-mipi810 [16,17]` (mission `activity-loop-tile-port`, T2):
+    // a repeat's condition hexagon and its OWN east label `ja`. The jar
+    // draws the east label AT the hexagon's right edge, zero gap
+    // (`FtileDiamondInside.java:102`: `east.drawU(ug.apply(new
+    // UTranslate(dimTotal.getWidth(), …)))`; the golden's `ja` sits at
+    // x=330.838 = its hexagon's right edge). `before`: hexagon
+    // `x(566.225) + width(73.3625) === 639.5875 === text.x` -- touching,
+    // no overlap. `after`: `264.65625 + 73.3625 === 338.01875` vs text
+    // `338.01874999999995` -- a 5e-14 overlap from the label's x being
+    // re-derived through a second transform after lane compression, the
+    // same mechanism as `kitupi-32-jexo155` below. Not a geometry defect.
+    // altp-T5: index +1 (was `[16,17]`) -- `tileRepeat` now builds a real
+    // entry tile as `GtileRepeat`'s first child (D2), which inserts one new
+    // shape ahead of this pair in `shapesOf`'s flat list. Coordinates
+    // dumped directly and confirmed byte-identical to the numbers above
+    // (`264.65625 + 73.3625 === 338.01875` vs `338.01874999999995`).
+    'tobajo-64-mipi810 [17,18] polygon×text',
     'kitupi-32-jexo155 [0,1] polygon×text',
-    'boxoto-53-sifo232 [27,29] polygon×text',
-    'boxoto-53-sifo232 [38,40] polygon×text',
+    // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
+    // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
+    // dump: both hexagons' right edge exactly equals their own `ja`/east
+    // label's `x` (`283.37187500000005 + 267.30625000000003 ===
+    // 550.678125`; `500.1250000000001 + 131.1125 === 631.2375`).
+    'boxoto-53-sifo232 [28,30] polygon×text',
+    'boxoto-53-sifo232 [39,41] polygon×text',
     'lopone-15-xiki477 [7,20] polygon×polygon',
   ].sort();
 

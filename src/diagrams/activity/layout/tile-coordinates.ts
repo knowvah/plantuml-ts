@@ -19,11 +19,11 @@ import type { GtileGroup } from '../tiles/gtile-group.js';
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
-import { GConnectionDownThenUp } from '../routing/gconnection-down-then-up.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
+import { walkRepeat } from './walk-repeat.js';
 import { walkIfWithLinks } from './walk-if-with-links.js';
 import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
@@ -231,70 +231,11 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       walkWhile(tile as unknown as GtileWhile, x, y, myLane, out);
       return;
 
-    case 'gtile-repeat': {
-      const t = tile as unknown as GtileRepeat;
-      const rawChildren = t.children;
-      const body = rawChildren[0]!;
-      const condition = rawChildren[1]!;
-      const backwardBody = rawChildren.length > 2 ? rawChildren[2]! : null;
-      // Each child sits so its OWN `left` lands under the tile's merged
-      // `left` (`FtileRepeat.java:730-765`), never centred by `width / 2`.
-
-      const bodyX = x + t.bodyOffsetX;
-      const bodyY = y + t.bodyOffsetY;
-      walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
-
-      const condX = x + t.conditionOffsetX;
-      const condY = y + t.conditionOffsetY;
-
-      const fFrom = { x: bodyX + body.getCoord(SOUTH_HOOK).x, y: bodyY + body.getCoord(SOUTH_HOOK).y };
-      const fTo = { x: condX + condition.getCoord(NORTH_HOOK).x, y: condY + condition.getCoord(NORTH_HOOK).y };
-      pushEdge(
-        out,
-        new GConnectionVerticalDown().getPoints(fFrom, fTo),
-        laneOut(body, myLane),
-        laneIn(condition, myLane),
-      );
-
-      walkTile(condition, condX, condY, { kindHint: 'repeat-cond', lane: myLane }, out);
-
-      if (backwardBody !== null) {
-        const bwX = x + t.backwardOffsetX!;
-        const bwY = y + t.backwardOffsetY!;
-        const bwFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
-        const bwTo = { x: bwX + backwardBody.getCoord(NORTH_HOOK).x, y: bwY + backwardBody.getCoord(NORTH_HOOK).y };
-        pushEdge(
-          out,
-          new GConnectionVerticalDown().getPoints(bwFrom, bwTo),
-          laneOut(condition, myLane),
-          laneIn(backwardBody, myLane),
-        );
-
-        walkTile(backwardBody, bwX, bwY, { kindHint: null, lane: myLane }, out);
-
-        const backFrom = { x: bwX + backwardBody.getCoord(SOUTH_HOOK).x, y: bwY + backwardBody.getCoord(SOUTH_HOOK).y };
-        const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
-        const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-        pushEdge(
-          out,
-          new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
-          laneOut(backwardBody, myLane),
-          laneIn(body, myLane),
-        );
-      } else {
-        // Back: condition south → body north, going left
-        const backFrom = { x: condX + condition.getCoord(SOUTH_HOOK).x, y: condY + condition.getCoord(SOUTH_HOOK).y };
-        const backTo = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
-        const leftMargin = backFrom.x - (x + t.backEdgeLeftX);
-        pushEdge(
-          out,
-          new GConnectionDownThenUp(leftMargin).getPoints(backFrom, backTo),
-          laneOut(condition, myLane),
-          laneIn(body, myLane),
-        );
-      }
+    case 'gtile-repeat':
+      // D10: `FtileRepeat`'s own walker, split into `walk-repeat.ts` for
+      // the same reason `walkWhile`/`walkIfDown` already are.
+      walkRepeat(tile as unknown as GtileRepeat, x, y, myLane, out);
       return;
-    }
 
     case 'gtile-fork':
     case 'gtile-split': {

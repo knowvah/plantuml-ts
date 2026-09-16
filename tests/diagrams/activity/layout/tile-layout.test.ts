@@ -2,12 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { layoutActivity, tileNodes } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
-import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
+import type { ActivityDiagramAST, ActivityRepeat } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
-import type { GtileDiamond } from '../../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import type { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import type { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import type { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
@@ -291,15 +290,60 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('B');
 
-    const condition = repeatTile.children[1] as unknown as GtileDiamond;
-    expect(condition.kind).toBe('gtile-diamond');
+    // D2 (mission `activity-loop-tile-port` T5): a bare `repeat` (no inline
+    // label) builds a `GtileRepeatEntry` in the OPENER lane, the tile's
+    // first child (`FtileRepeat.java:77-80,135-136`).
+    const entry = repeatTile.children[0];
+    expect(entry.kind).toBe('gtile-repeat-entry');
+    expect(entry.swimlane).toBe('A');
+
+    // D1 (mission `activity-loop-tile-port` T2): the repeat condition is a
+    // `GtileDiamondInside`, never a `GtileDiamond` -- statically typed as
+    // such by `GtileRepeat.children`'s own tuple type (D2, T5).
+    const condition = repeatTile.children[2];
+    expect(condition.kind).toBe('gtile-diamond-inside');
     expect(condition.swimlane).toBe('B');
 
-    const bodyWrapper = repeatTile.children[0] as unknown as GtileTopDown;
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
     expect(bodyWrapper.kind).toBe('gtile-top-down');
     expect(bodyWrapper.swimlane).toBeUndefined();
     const bodyAction = bodyWrapper.children[0] as unknown as GtileAction;
     expect(bodyAction.swimlane).toBe('B');
+  });
+
+  // Mission `activity-loop-tile-port` T5 (D2): the entry action is parsed
+  // OFF the body (`ActivityRepeat.entry`) and now lands as `GtileRepeat`'s
+  // OWN first child, never inside the body wrapper -- the T1 interim fold
+  // (`tileNodes([entry, ...body])`) is retired.
+  // @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
+  //   -- `entry` replaces the entry diamond as `diamond1`, the first child.
+  it("repeat: an inline entry action is the tile's own first child, never inside the body wrapper", () => {
+    const ast = parseAst('@startuml\nrepeat :R1;\n:a;\nrepeat while (x)\n@enduml');
+    expect(ast.nodes).toHaveLength(1);
+    const repeatNode = ast.nodes[0] as ActivityRepeat;
+    expect(repeatNode.entry?.label).toBe('R1');
+    expect(repeatNode.body).toHaveLength(1);
+
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    const entryTile = repeatTile.children[0] as unknown as GtileAction;
+    expect(entryTile.kind).toBe('gtile-action');
+    expect(entryTile.label).toBe('R1');
+
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
+    expect(bodyWrapper.kind).toBe('gtile-top-down');
+    expect(bodyWrapper.children).toHaveLength(1);
+    const actionTile = bodyWrapper.children[0] as unknown as GtileAction;
+    expect(actionTile.label).toBe('a');
+  });
+
+  it('repeat: no inline entry action builds a GtileRepeatEntry as the first child', () => {
+    const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const repeatTile = tiles[0] as unknown as GtileRepeat;
+    expect(repeatTile.children[0].kind).toBe('gtile-repeat-entry');
+    const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
+    expect(bodyWrapper.children).toHaveLength(1);
   });
 
   it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {
@@ -308,8 +352,57 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('A');
-    const condition = repeatTile.children[1] as unknown as GtileDiamond;
+    const condition = repeatTile.children[2];
     expect(condition.swimlane).toBe('A');
+  });
+
+  // Mission `activity-loop-tile-port` T6 (D5): `FtileRepeat.java:186-199`'s
+  // own back-connection selection, ported into `tile-layout.ts#tileRepeat`
+  // (`selectRepeatBackConnection`) and stored on `GtileRepeat.backConnection`
+  // for `walk-repeat.ts` to read. `laneOrder` here is `ast.swimlanes`
+  // (declaration order), threaded the same way `buildIf`'s own
+  // `isMainLaneSmallerThanAllOthers` call already is (T4).
+  describe('repeat: backConnection selection (D5, FtileRepeat.java:186-199)', () => {
+    it('no swimlanes at all -> simple2 (the no-lane default)', () => {
+      const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.backConnection).toBe('simple2');
+    });
+
+    it('opens and closes in lane A, body touches only a lane declared AFTER A -> simple1', () => {
+      // Declaration order: A (first `|A|`), then B. `swimlane === swimlaneOut
+      // === 'A'`; body touches only 'B', whose laneOrder index (1) is never
+      // less than A's (0), so `isMainLaneSmallerThanAllOthers` returns true.
+      const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
+      expect(ast.swimlanes).toEqual(['A', 'B']);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('A');
+      expect(repeatTile.backConnection).toBe('simple1');
+    });
+
+    it('opens and closes in lane A, body touches a lane declared BEFORE A -> simple2', () => {
+      // Declaration order: B (first `|B|`), then A. Body touches 'B', whose
+      // laneOrder index (0) is less than A's (1), so the predicate fails.
+      const ast = parseAst('@startuml\n|B|\n:x;\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
+      expect(ast.swimlanes).toEqual(['B', 'A']);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[1] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('A');
+      expect(repeatTile.backConnection).toBe('simple2');
+    });
+
+    it('swimlane !== swimlaneOut -> complex1', () => {
+      const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.swimlane).toBe('A');
+      expect(repeatTile.swimlaneOut).toBe('B');
+      expect(repeatTile.backConnection).toBe('complex1');
+    });
   });
 
   // Mission `activity-lane-capture` T6: the fork tile carries its opener

@@ -40,13 +40,20 @@ export interface Reservation {
 /**
  * `ConnectionBackSimple#drawU`'s `(x1, y1bis)` placement
  * (`FtileWhile.java:227-273`, cited at `:264,272`): `x1` is the while body's
- * own south exit x (this port's `backFrom.x`,
- * `tile-coordinates.ts`'s `gtile-while` case); `y1bis = Math.max(y1,
- * getBottom()) + hexagonHalfSize`, where `y1` is that same exit's y and
- * `getBottom()` is the body's own bottom edge (`bY + body.height`).
+ * own south exit x (this port's `backFrom.x`, `walk-while-branch.ts`'s
+ * `pushWhileBack`); `y1bis = Math.max(y1, getBottom()) + hexagonHalfSize`,
+ * where `y1` is that same exit's y and `getBottom()` is the body's own
+ * bottom edge (`bY + body.height`). `ConnectionBackEmpty#drawU`
+ * (`:410-462`, cited at `:450,459`) draws the byte-identical shape at the
+ * SAME `y1bis` formula -- only `x1,y1` differ there (the header's own south
+ * exit, not the body's, since the body is empty) -- so this one function
+ * covers both call sites, same as `ifElseHexagonReservation` below covers
+ * its own pair.
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:264
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:272
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:450
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:459
  */
 export function whileHexagonReservation(backFromX: number, backFromY: number, bodyBottomY: number): Reservation {
   const y1bis = Math.max(backFromY, bodyBottomY) + HEXAGON_HALF_SIZE;
