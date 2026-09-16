@@ -72,13 +72,15 @@ export function computeSplitExtent(
 }
 
 /**
- * D1: `ConnectionIn#drawU`/`ConnectionOut#drawU`
- * (`ParallelBuilderSplit.java:194-203,246-261`; `ParallelBuilderFork.java
- * :151-163,202-216`) draw a straight vertical drop at the BRANCH's own
- * north/south x -- never the bar centre. The out connector is emitted
- * only `if (geo.hasPointOut())`.
+ * D1: `ConnectionIn#drawU`
+ * (`ParallelBuilderSplit.java:194-203`; `ParallelBuilderFork.java:151-163`)
+ * draws a straight vertical drop at the BRANCH's own north x -- never the
+ * bar centre. `doStep1` appends one of these per branch, unconditionally
+ * (`ParallelBuilderSplit.java:97`, `ParallelBuilderFork.java:93`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:88-101
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:87-97
  */
-function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBranchContext, out: Out): void {
+function pushBranchIn(branch: Tile, bX: number, bY: number, ctx: ForkBranchContext, out: Out): void {
   const north = branch.getCoord(NORTH_HOOK);
   const inX = bX + north.x;
   pushEdge(
@@ -91,21 +93,32 @@ function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBra
     laneIn(branch, ctx.myLane),
     'parallel-in',
   );
+}
 
-  if (branch.hasPointOut()) {
-    const south = branch.getCoord(SOUTH_HOOK);
-    const outX = bX + south.x;
-    pushEdge(
-      out,
-      [
-        { x: outX, y: bY + south.y },
-        { x: outX, y: ctx.joinBarY },
-      ],
-      laneOut(branch, ctx.myLane),
-      ctx.myLaneOut,
-      'parallel-out',
-    );
-  }
+/**
+ * D1: `ConnectionOut#drawU`
+ * (`ParallelBuilderSplit.java:246-261`; `ParallelBuilderFork.java:202-216`)
+ * draws the drop at the BRANCH's own south x. `doStep2` appends one per
+ * branch, but only `if (dim.hasPointOut())` -- a branch ending in
+ * `detach`/`kill` contributes none, and the rest keep source order
+ * (`ParallelBuilderSplit.java:165-166`, `ParallelBuilderFork.java:125-126`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:155-167
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:120-127
+ */
+function pushBranchOut(branch: Tile, bX: number, bY: number, ctx: ForkBranchContext, out: Out): void {
+  if (!branch.hasPointOut()) return;
+  const south = branch.getCoord(SOUTH_HOOK);
+  const outX = bX + south.x;
+  pushEdge(
+    out,
+    [
+      { x: outX, y: bY + south.y },
+      { x: outX, y: ctx.joinBarY },
+    ],
+    laneOut(branch, ctx.myLane),
+    ctx.myLaneOut,
+    'parallel-out',
+  );
 }
 
 /**
@@ -117,15 +130,33 @@ function pushBranchConnectors(branch: Tile, bX: number, bY: number, ctx: ForkBra
  * import each other -- safe because neither calls the other until
  * `assignCoordinates` actually walks the tile tree, well after both
  * modules finish loading.
+ *
+ * Mission `activity-edge-draw-order` D4/T3: THREE passes, not one per
+ * branch. Upstream builds a parallel as `doStep2(inner, doStep1(inner))`
+ * (`AbstractParallelFtilesBuilder.java:166-169`); `doStep1` collects one
+ * `ConnectionIn` per branch into a single list and wraps the branches with
+ * it (`ParallelBuilderSplit.java:88-101`, `ParallelBuilderFork.java:87-97`),
+ * then `doStep2` collects one `ConnectionOut` per branch WITH an out point
+ * and wraps again (`ParallelBuilderSplit.java:155-177`,
+ * `ParallelBuilderFork.java:120-130`). `FtileWithConnection.drawU` draws its
+ * delegate BEFORE its own connections (`FtileWithConnection.java:69-74`), so
+ * the jar's edge run is every branch's internal edges, then every
+ * in-connector in branch order, then every out-connector. Lanes,
+ * coordinates and counts are identical to the per-branch interleaving this
+ * replaced -- only each edge's position in `out.edges` changes.
  */
 export function walkForkBranches(t: GtileFork, ctx: ForkBranchContext, out: Out): void {
-  for (let i = 0; i < t.children.length; i++) {
-    const branch = t.children[i]!;
-    const bX = ctx.x + t.branchOffsets[i]!;
-    const bY = ctx.y + t.branchTopYs[i]!;
-    walkTile(branch, bX, bY, { kindHint: null, lane: ctx.myLane }, out);
-    pushBranchConnectors(branch, bX, bY, ctx, out);
-  }
+  const placed = t.children.map((branch, i) => ({
+    branch,
+    bX: ctx.x + t.branchOffsets[i]!,
+    bY: ctx.y + t.branchTopYs[i]!,
+  }));
+  // `inner` -- each branch's own internals, in branch order.
+  for (const p of placed) walkTile(p.branch, p.bX, p.bY, { kindHint: null, lane: ctx.myLane }, out);
+  // `doStep1` -- every `ConnectionIn`, unconditional.
+  for (const p of placed) pushBranchIn(p.branch, p.bX, p.bY, ctx, out);
+  // `doStep2` -- every `ConnectionOut`, `hasPointOut()` branches only.
+  for (const p of placed) pushBranchOut(p.branch, p.bX, p.bY, ctx, out);
 }
 
 /** The fork's top bar is a full-`barWidth` rect in `myLane` (D4,

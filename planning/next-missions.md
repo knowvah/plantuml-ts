@@ -1271,12 +1271,63 @@ Ordered by how ready they are, not by size.
       the opener. Differs only when a lane switch follows `repeat`:
       `bumaca-51-kece901`, `rujuxa-07-neco067`, `sadovu-51-fata536`,
       `zinelo-77-losu727`. Entangled with the entry diamond above.
-    - **`activity-split-connector-draw-order`** — upstream collects every
-      `ConnectionIn` in `doStep1` and every `ConnectionOut` in `doStep2`
-      (`ftile/vcompact/ParallelBuilderSplit.java:79-101,136-177`); ours
-      alternates in/out per branch (`layout/walk-fork-branches.ts:81,127`).
-      Sized by alc-T7's risers: `racana` +96, `gugala` +22, `nupose`/`roboja`
-      +4, `judatu` +2. Check `ParallelBuilderFork` for the same split.
+    - ~~**`activity-split-connector-draw-order`**~~ — **DONE 2026-09-15**
+      as `activity-edge-draw-order` (widened to both draw-order rules).
+      Aggregate **52673 -> 52067 (-606)** over the 268 baseline fixtures:
+      rule (b) swimlane pass order -606+11 = **-595** over 36 fixtures, rule
+      (a) parallel connector order **-11** over 2. The alc-T7 sizing above
+      (`racana` +96, `gugala` +22, `nupose`/`roboja` +4, `judatu` +2) was
+      measured BEFORE rule (b) and did not survive it: with (b) landed, (a)
+      moves only `gevaxi` -5 and `jupivo` -6, and `misiji`'s +32 is absorbed
+      entirely. `ParallelBuilderFork` was checked and shares the shape (D4).
+      Brief `plans/activity-edge-draw-order/`.
+    - **`activity-snake-merge`** — D5 of `activity-edge-draw-order`, filed
+      with its evidence rather than its hypothesis. `UGraphicForSnake
+      #addPendingSnake` merges a new Snake into an earlier pending one and
+      keeps the EARLIER slot (`svek/UGraphicForSnake.java:146-156`); `flushUg`
+      also strips an arrowhead via `removeEndDecorationIfTouches`
+      (`:158-165`, `:81-88`). Both hinge on `Snake#merge` returning non-null
+      only when the two snakes share an endpoint to within 0.001
+      (`ftile/Snake.java:299-327`, the gate at `:312`). **Measured across
+      seven fixtures: our edges have ZERO touching pairs, so that
+      precondition is not satisfiable by our edge set even in principle**, and
+      jar arrowheads equal our edge count on 6 of 7. Merging explains none of
+      the present residual — the real count gap runs the other way (the jar
+      draws 34 `<line>`s where we draw 28 segments on `racana`, i.e. `Worm`
+      splits a route into more pieces than our `routeEdge`, and merging can
+      only REDUCE). File it as a faithfulness port, not a fix for a known
+      symptom. Evidence: `.agent-notes/aedo-T1.md` Q3.
+    - **`activity-if-connector-draw-order`** — D7 of
+      `activity-edge-draw-order`. `FtileIfLongHorizontal.java:203-257`
+      appends, per branch, a `ConnectionVerticalIn` then `ConnectionVerticalOut`
+      (`:226-227`), then the inter-diamond horizontals (`:231-238`), then the
+      if's OWN entry connector `ConnectionIn` (`:239`), then
+      `ConnectionLastElseIn`/`Out` (`:249-250`) and an optional
+      `ConnectionHline` (`:254`); `FtileIfDown.java:135-157` has the same
+      shape. Our per-branch in/out pairing agrees, but the if's ENTRY edge is
+      emitted by the enclosing `gtile-top-down` sibling loop
+      (`tile-coordinates.ts:166-180`) BEFORE the if's internals, where the jar
+      appends it AFTER every branch connector. Measured on
+      `cemipu-87-dinu624`: 42 drawn elements vs the jar's 46, (tag,lane)
+      positional agreement **17/42**. Evidence: `.agent-notes/aedo-T1.md` Q4.
+    - **`activity-repeat-connector-draw-order`** — D7 of
+      `activity-edge-draw-order`. `FtileRepeat.java:172-204` is
+      `ConnectionIn`, then the backward family, then `ConnectionOut` last.
+      Ours pushes the body->condition edge BEFORE walking the condition tile
+      (`tile-coordinates.ts:252-261`, then `walkTile(condition, ...)` at
+      `:262`) — an edge emitted between two node emissions. Harmless to output
+      today because the renderer re-groups nodes and edges, but a real
+      structural divergence from `FtileWithConnection.drawU`
+      (`FtileWithConnection.java:69-74`), leaving the repeat's edge run
+      ordered by our walk rather than the jar's conns list. `while` was
+      checked in the same pass and AGREES (`FtileWhile.java:151-168`) — no
+      work there. Evidence: `.agent-notes/aedo-T1.md` Q4.
+    - **`activity-stale-pushBranchConnectors-comment`** — one-line
+      housekeeping. `src/diagrams/activity/layout/swimlane-placement.ts:343`
+      still names `pushBranchConnectors`, which `activity-edge-draw-order` T3
+      split into `pushBranchIn`/`pushBranchOut`. Prose cross-reference only,
+      no code dependency. Left unfixed deliberately: that file is read-only
+      for every task in that mission, so no task could touch it in scope.
     - **`activity-diamond-count-shortfall`** — on 17 of the 30 alc fixtures
       the jar draws more diamond/hexagon polygons than ours (`if` fixtures
       1 vs 2; `tobajo-64-mipi810` 7 vs 14). Repeat ones are the entry

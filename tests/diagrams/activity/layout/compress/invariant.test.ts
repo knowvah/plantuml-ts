@@ -253,16 +253,62 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
   // `polygonSkipMode: 'x'` (the pinned cross-lane-arrowhead class,
   // `Worm.java:159-168` -- the Worm skips the x-axis on a polygon in this
   // mode, so it never occupies x and a flip there is not a violation).
+  //
+  // Mission `activity-edge-draw-order` T2 (2026-09-15): rule (b) draws the
+  // edge run in swimlane pass order (`edge-draw-order.ts`,
+  // `Swimlanes.java:328-352`), which permutes `geometry.edges` and
+  // `edgeMeta` together and therefore renumbers every EDGE-derived shape in
+  // `shapesOf`'s flat list (nodes first, then edges, then reservations and
+  // titles -- `shapes-of.ts:370-382`). Same fixtures, same pair KINDS, same
+  // count (9 -> 9): only the indices move. Verified pair by pair against a
+  // HEAD (`d33799dc`) worktree running this same harness -- each pair below
+  // has byte-identical coordinates and `polygonSkipMode` on both sides of
+  // the change, and each fixture's total shape count is unchanged
+  // (`bixefi` 19, `bugaja` 21, `misiji` 20, `racana` 26, `tobajo` 61), so
+  // no pair is NEW and no shape was added or dropped. Per-entry cites below.
+  //
+  // Mission `activity-edge-draw-order` T3 (2026-09-15): rule (a) emits a
+  // parallel's connectors as upstream builds them -- every branch's
+  // internals, then every `ConnectionIn` (`doStep1`), then every
+  // `ConnectionOut` (`doStep2`), since `build` is `doStep2(inner,
+  // doStep1(inner))` (`AbstractParallelFtilesBuilder.java:166-169`) and
+  // `FtileWithConnection.drawU` draws its delegate before its own
+  // connections (`FtileWithConnection.java:69-74`). That permutes the edge
+  // run inside every fork/split and so renumbers the EDGE-derived shapes
+  // again. Seven of the nine entries below move index; `misiji`'s two do
+  // not. Same fixtures, same pair KINDS, same count (9 -> 9). Verified
+  // pair by pair against a worktree at `2b8120a2` running this same
+  // harness: every pair has byte-identical coordinates and
+  // `polygonSkipMode` on both sides of the change, and each fixture's
+  // total shape count is unchanged (`bixefi` 19, `bugaja` 21, `misiji` 20,
+  // `racana` 26, `tobajo` 61), so no pair is new. Independently, the edge
+  // MULTISET (points + both lanes + shape tag + label + colour) is equal
+  // across all 268 baseline fixtures between that worktree and this tree,
+  // so only array position changed. `hardViolations` is empty in BOTH
+  // trees. Per-entry cites below.
   const ALLOWED_NEW_OVERLAPS = [
-    'bixefi-77-moki051 [6,8] polygon×polygon',
-    'bugaja-31-jaso630 [7,9] polygon×polygon',
+    // Cross-lane arrowheads, both `polygonSkipMode: 'x'` -- the Worm skips
+    // the x-axis on such a polygon, so it never occupies x and a flip there
+    // is not a violation (`ftile/Worm.java:159-168`). Was `[7,9]` before T3.
+    'bixefi-77-moki051 [9,10] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Was `[9,11]` before T3.
+    'bugaja-31-jaso630 [11,12] polygon×polygon',
+    // The swimlane title's rect never occupies x
+    // (`klimt/UGraphicCompressOnXorY.java:100-112`, the
+    // `ignoreForCompressionOnX` band of `Swimlanes.java:358-367`).
+    // Unmoved: both shapes follow the whole edge run in `shapesOf`'s list.
     'misiji-27-buje656 [14,18] empty×centeredText',
     'misiji-27-buje656 [15,18] empty×centeredText',
-    'racana-82-zece676 [7,9] polygon×polygon',
-    'racana-82-zece676 [13,15] polygon×polygon',
-    'tobajo-64-mipi810 [31,38] polygon×polygon',
-    'tobajo-64-mipi810 [31,45] polygon×polygon',
-    'tobajo-64-mipi810 [38,45] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Were `[10,12]` and `[14,16]`
+    // before T3.
+    'racana-82-zece676 [14,15] polygon×polygon',
+    'racana-82-zece676 [16,17] polygon×polygon',
+    // Same class (`Worm.java:159-168`). Were `[47,49]`, `[47,51]`,
+    // `[49,51]` before T3 -- one coincident triple, all three at
+    // (436.62187499999993, 479.5) throughout.
+    'tobajo-64-mipi810 [50,51] polygon×polygon',
+    'tobajo-64-mipi810 [50,52] polygon×polygon',
+    'tobajo-64-mipi810 [51,52] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

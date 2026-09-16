@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1094 modules · 3965 exported names.
+1095 modules · 3968 exported names.
 
 ## `src/`
 
@@ -952,6 +952,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
+| `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
