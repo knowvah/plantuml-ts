@@ -1355,10 +1355,10 @@
       "type": "activity",
       "slug": "jupoxe-15-sugo110",
       "status": "baseline",
-      "weightedScore": 1898,
-      "diffCount": 735,
+      "weightedScore": 1899,
+      "diffCount": 736,
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",
@@ -2885,10 +2885,10 @@
       "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
-      "weightedScore": 832,
-      "diffCount": 688,
+      "weightedScore": 842,
+      "diffCount": 698,
       "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAgainstCommit": "46caf80b"
     },
     {
       "type": "activity",

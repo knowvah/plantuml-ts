@@ -1341,18 +1341,40 @@ Ordered by how ready they are, not by size.
       repeat fixtures — do it here, not in an if mission. Also: the repeat and
       while walkers still centre their children by `width/2` where the jar
       aligns on `left` (see `activity-while-repeat-left-alignment`).
-    - **`activity-while-repeat-left-alignment`** — filed 2026-09-16 by
-      `activity-if-tile-port` T6b/T6c. `GtileTopDown` now aligns siblings on
-      their in/out x (`FtileAssemblySimple.java:131-141`,
-      `FtileGeometryMerger.java:44-56`) and the three if tiles carry each
-      branch's own `left`, but `walk-while-branch.ts:35-52` and
-      `tile-coordinates.ts`'s `'gtile-repeat'` case still place header/body/
-      condition at `contentCenterX - width/2`. 19 baseline fixtures keep a
-      diagonal segment (5 while: `bareka-88-fusu160`, `nafaxo-62-boso912`,
-      `vamazo-19-tufu812`, `pixako-75-kumi821`, `ruzica-16-deli877`; 14
-      repeat, list in the aitp journal row "T6b | Diagonal-sibling-segment
-      scan"). Same fix shape as T6c: `FtileWhile`/`FtileRepeat`'s
-      `getTranslateFor` align on `left`.
+    - ~~**`activity-while-repeat-left-alignment`**~~ — **DONE 2026-09-16
+      (mission-index G5-awrl), 3 of 3**, branch
+      `feat/activity-while-repeat-left-alignment` (unmerged). `GtileWhile`
+      and `GtileRepeat` now compute the jar's merged `left` and place each
+      child at `left - child.left` (`FtileWhile.java:584,593,621-641`;
+      `FtileRepeat.java:696-699,730-765,767-786`). Diagonal scan over the
+      268 baseline fixtures **19 -> 0**; 21 fixtures moved (5 while + 16
+      repeat, every one a loop with an asymmetric child, plus one float-tie
+      flip), nothing symmetric moved; aggregate 49647 -> 49658 (two rises,
+      `tobajo` +10 and `jupoxe` +1, each with its mechanism in the journal
+      -- a coincidental positional match traded for a vertical edge, and a
+      2 px klimt-compression shift). Original filing: `GtileTopDown` aligned
+      siblings on their in/out x but `walk-while-branch.ts` and the
+      `'gtile-repeat'` walker case still centred header/body/condition by
+      `width/2`; 19 baseline fixtures drew a diagonal segment.
+    - **`activity-loop-gutters`** — filed 2026-09-16 by
+      `activity-while-repeat-left-alignment` (its D2, first measured symptom
+      `tobajo-64-mipi810`). Ours widens a while/repeat by ONE
+      `BACK_EDGE_MARGIN = 20` (`activity-layout-constants.ts:77`) and hooks
+      at `contentLeft` (while) / `BACK_EDGE_MARGIN/2 + left` (repeat). The
+      jar: `FtileWhile#calculateDimensionFtile` (`vcompact/FtileWhile.java:
+      586-593`) adds `dx = 2 * hexagonHalfSize` (24) on the LEFT, `+
+      hexagonHalfSize` (12) on the right, `+ backward.w`, and sets `left =
+      geo.left + dx`; `FtileRepeat#calculateDimensionInternal`
+      (`vcompact/FtileRepeat.java:701-716`) is `max(left + right, testLabel.w
+      + 24) + backward.w + 24` with `backward` hung off the RIGHT edge at
+      `width - backward.w` (`:750-757`). Consequences today: every loop tile
+      is 16 px (while) / 4 px (repeat, plus the test-label floor) narrower
+      than the jar's, so a loop centred inside a fork branch or a wider
+      sibling sits left of the jar's -- `tobajo`'s middle repeat body is at
+      x 388.753 vs the golden's 394.744 (5.991 px). Port the gutters and the
+      test-label floor together; the repeat's side-hung `backward` belongs
+      to `activity-repeat-connector-draw-order` (remove T2's backward terms
+      from the merge in the same commit).
     - **`activity-diamond-sizing`** — filed by `activity-if-tile-port` T1 Q2
       (stop 13). `GtileDiamond` (`tiles/gtile-diamond.ts:15-29`,
       `DIAMOND_MIN=20`/`DIAMOND_LABEL_PAD=10`) is 4 px narrower and 16 px
@@ -1414,7 +1436,12 @@ Ordered by how ready they are, not by size.
       for every task in that mission, so no task could touch it in scope.
     - **`activity-diamond-count-shortfall`** — **`if` half DONE 2026-09-16 by
       `activity-if-tile-port`** (the merge rhombus is now drawn); the repeat
-      entry-diamond half is still open. Original: on 17 of the 30 alc fixtures
+      entry-diamond half is still open. **Widened 2026-09-16 by
+      `activity-while-repeat-left-alignment` T2:** `GtileRepeat`'s ported
+      `getLeft`/`getRight` omit the jar's `dimDiamond1.getWidth() / 2` terms
+      (`vcompact/FtileRepeat.java:769,771,780,782`) because the tile has no
+      entry diamond to measure; when it is built, add both terms and place it
+      at `left - d1.w / 2` (`:744-748`). Original: on 17 of the 30 alc fixtures
       the jar draws more diamond/hexagon polygons than ours (`if` fixtures
       1 vs 2; `tobajo-64-mipi810` 7 vs 14). Repeat ones are the entry
       diamond; the other 13 are unread. `plans/activity-lane-capture/

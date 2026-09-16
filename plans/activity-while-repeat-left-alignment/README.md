@@ -115,4 +115,61 @@ commit.
 
 - [x] Batch 1 — T1
 - [x] Batch 2 — T2
-- [ ] Batch 3 — T3
+- [x] Batch 3 — T3
+
+## Session End (2026-09-16)
+
+**Tasks completed vs planned: 3 of 3** — T1 `9f328e5f`, T2 `6540a782`,
+T3 (this commit). Batch close-outs `eb87e294`, `46caf80b`. Both fix tasks
+were executed in the orchestrator rather than dispatched (journaled): each
+is ~20 lines across two files with the Java already open.
+
+**Result.** `GtileWhile` and `GtileRepeat` now compute the jar's merged
+`left` (`FtileGeometryMerger.java:44-47`; `FtileWhile.java:584,593`;
+`FtileRepeat.java:767-786`) and place every child at `left - child.left`
+(`FtileWhile.java:621-641`; `FtileRepeat.java:730-765`); the walkers
+consume per-child x offsets instead of centring by `width/2`. Gutters
+unported (D2), `GtileDiamond` untouched (D3), the repeat's entry-diamond
+term absent and its backward body joining the merge (both journaled).
+
+**Exit bar — met.**
+
+- Diagonal-segment scan over all 268 baseline slugs: **19 -> 0** (T1 19 ->
+  14, T2 14 -> 0).
+- Symmetric fixtures byte-identical in score to `base.json`: every score
+  mover is one of the two journaled risers; by SVG byte-diff 21 fixtures
+  moved (5 while + 16 repeat), all `fixtures.md` rows, every one a loop with
+  an asymmetric child except `felega` (a 3.6e-15 evaluation-order flip on a
+  printed-3-decimal tie, geometry identical); the `katopo`/`bulasi` census
+  reds are raw-double ulp pins of unchanged geometry.
+- Zero UNEXPLAINED rises: `tobajo-64-mipi810` +10 (a slanted edge's far
+  endpoint coincidentally matched the golden; the vertical edge now sits at
+  the body's `left`, 5.991 px from the jar's -- the D2 gutter offset, filed
+  as `activity-loop-gutters`) and `jupoxe-15-sugo110` +1 (klimt compression
+  shifted the condition 2 px after its x changed). Both named in
+  `--accept-rises`.
+- Siblings unmoved: `svg-conformance` **27 files / 3427 passed | 1 skipped**
+  at `6f1c04f7` (scratch worktree) and at HEAD.
+- `hardViolations` empty; `ALLOWED_NEW_OVERLAPS`/`ALLOWED_HARD_OVERLAPS`
+  equal their attributed pins throughout (no entry moved, nothing to
+  re-index).
+- Gates: `npm test` 721/721 collected (JSON reporter vs `find`), **720
+  passed | 1 skipped**, 19824 tests; typecheck, lint, build exit 0;
+  `docs/catalog.md` no drift.
+
+**Aggregate:** 49647 -> 49658 over 268 (reported, not gated -- D5; the
+comparator charged nothing for T1's five corrected edges).
+
+**Decisions: 20 journal rows.** Flagged for review: executing T1/T2 in the
+orchestrator instead of `typescript-pro`; the scan tolerance (0.01 px, the
+brief's 19 as calibration); the repeat backward body joining the merge
+(the jar hangs it off the right edge -- `activity-repeat-connector-draw-
+order` should remove those terms when it lands); treating the felega/
+katopo/bulasi ulp flips as non-moves under stop 13 (the brief's instrument
+is the score, which did not move).
+
+**Known issues / follow-ups (filed in `planning/next-missions.md`):**
+`activity-loop-gutters` (new: while 24+12, repeat 24 + test-label floor,
+side-hung backward); `activity-diamond-count-shortfall` widened with the
+repeat `getLeft` entry-diamond terms; `activity-diamond-sizing` and
+`activity-repeat-connector-draw-order` unchanged and still open.
