@@ -84,6 +84,18 @@ describe('layoutActivity — with-links: then ends in stop (no merge, Direct out
     const direct = geo.edges[geo.edges.length - 1]!;
     expect(direct.arrowhead).toBe(false);
   });
+
+  it("the Direct connector ends at the if tile's own left, i.e. the hexagon's centre x (FtileIfWithLinks.java:309)", () => {
+    // `p2 = new XPoint2D(dimTotal.getLeft(), dimTotal.getHeight())` --
+    // `dimTotal.getLeft()` is `diamond1`'s centre (`getTranslateDiamond1`:
+    // `x1 = dimTotal.getLeft() - dimDiamond1.getLeft()`,
+    // `FtileIfWithDiamonds.java:234-240`), NOT the tile's origin x. Found
+    // at T7 on `gevaxi-80-tone223`, whose Direct ended at the canvas margin.
+    const hexagon = geo.nodes.find((n) => n.kind === 'if-split')!;
+    const direct = geo.edges[geo.edges.length - 1]!;
+    const last = direct.points[direct.points.length - 1]!;
+    expect(last.x).toBeCloseTo(hexagon.x + hexagon.width / 2, 6);
+  });
 });
 
 describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and emphasizes its out-arrow (D6)', () => {

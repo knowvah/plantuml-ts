@@ -195,7 +195,7 @@ function pushDirectConnector(ctx: IfLinksCtx, useTile1: boolean): void {
   const tile = useTile1 ? t.tile1 : t.tile2;
   const isEmpty = useTile1 ? t.thenIsEmpty : t.elseIsEmpty;
   const p1 = absolutePoint(tile.getCoord(SOUTH_HOOK), origin.x, origin.y);
-  const p2 = { x, y: y + t.height };
+  const p2 = { x: x + t.left, y: y + t.height };
   const points = [...verticalThenHorizontal(p1, p2), p2];
   pushDecoratedEdge(out, points, [laneOut(tile, myLane), myLane], {
     arrowhead: false,
