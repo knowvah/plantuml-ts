@@ -113,6 +113,6 @@ commit.
 
 ## Progress
 
-- [ ] Batch 1 — T1
+- [x] Batch 1 — T1
 - [ ] Batch 2 — T2
 - [ ] Batch 3 — T3
