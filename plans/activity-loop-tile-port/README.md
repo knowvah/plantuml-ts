@@ -122,7 +122,7 @@ committing and are resumed to commit.
 ## Progress
 
 - [x] Batch 0 — T0, T1
-- [ ] Batch 1 — T2
+- [x] Batch 1 — T2
 - [ ] Batch 2 — T3, T4
 - [ ] Batch 3 — T5, T6
 - [ ] Batch 4 — T7
