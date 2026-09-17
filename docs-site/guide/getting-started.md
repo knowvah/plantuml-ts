@@ -22,12 +22,34 @@ declarations (`dist/plantuml-ts.d.ts`), wired through `package.json`'s
 
 ## Render a diagram
 
+Start with ordinary PlantUML source. This one is a sequence diagram with a
+participant declaration, a note, and a preprocessor variable:
+
+```plantuml
+@startuml
+!$greeting = "hello"
+' A one-line comment.
+actor Alice
+participant Bob <<service>> #lightblue
+
+Alice -> Bob: $greeting
+note right of Bob: Bob thinks it over
+Bob --> Alice: hi
+@enduml
+```
+
+Pass it to `renderSync` and you get the SVG back as a string:
+
 ```ts
 import { renderSync } from '@knowvah/plantuml-ts';
 
 const source = `
 @startuml
+actor Alice
+participant Bob <<service>> #lightblue
+
 Alice -> Bob: hello
+note right of Bob: Bob thinks it over
 Bob --> Alice: hi
 @enduml
 `;
@@ -35,6 +57,8 @@ Bob --> Alice: hi
 const svg = renderSync(source);
 console.log(svg); // <svg ...>...</svg>
 ```
+
+To see it drawn, paste the source into the [playground](/playground).
 
 `renderSync(source, options?)` parses the PlantUML source, resolves the
 theme/skinparam/style-block chain, lays out the diagram, and returns the SVG
