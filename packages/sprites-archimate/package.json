@@ -7,7 +7,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/sseely/plantuml-ts.git",
+    "url": "https://github.com/knowvah/plantuml-ts.git",
     "directory": "packages/sprites-archimate"
   },
   "scripts": {
@@ -40,6 +40,7 @@
     "@knowvah/plantuml-ts": "file:../.."
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

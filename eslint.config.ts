@@ -16,6 +16,14 @@ export default tseslint.config([
     ...tseslint.configs.disableTypeChecked,
   },
   {
+    // `docs-site/` is in no tsconfig either: VitePress transpiles its config
+    // and theme itself. `npm run lint` never names it, but lint-staged does
+    // on commit, and a typed rule with no project throws instead of failing
+    // a rule. Same treatment as the `.mjs` helpers above.
+    files: ['docs-site/**/*.ts'],
+    ...tseslint.configs.disableTypeChecked,
+  },
+  {
     // `scripts/` and the root `*.config.ts` files are NOT in the root tsconfig (which includes src/tests/demo
     // only), so `project: true` -- nearest-tsconfig resolution -- cannot see
     // it. Most script files happened to be reachable transitively as imports
