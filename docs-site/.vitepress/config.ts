@@ -4,6 +4,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { dirname, resolve as resolvePath } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
+import { plantumlLang } from './plantuml.tmLanguage';
 
 // VitePress treats any resolved module id matching /\.data\.m?(j|t)s($|\?)/
 // as a build-time "data loader" (see vitepress/dist/node's staticDataPlugin)
@@ -53,6 +54,12 @@ export default defineConfig({
   description: 'PlantUML in pure TypeScript — no Java, no server, browser-native. ' + 'PlantUML source in, SVG out.',
   lang: 'en-US',
   cleanUrls: true,
+  markdown: {
+    // Shiki bundles no PlantUML grammar, so without this it warns and falls
+    // back to plain text. Registered here and reused by the playground's
+    // client-side highlighter, so both come from one grammar.
+    languages: [plantumlLang],
+  },
   head: [
     // The mark comes from @knowvah/theme, copied into docs-site/public/ by
     // `npm run docs:brand` (docs-site/copy-brand-assets.mjs).

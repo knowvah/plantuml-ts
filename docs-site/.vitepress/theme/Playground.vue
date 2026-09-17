@@ -4,6 +4,16 @@ import { ref, onMounted, watch } from 'vue';
 // Aliased in .vitepress/config.ts to the real library source (src/index.ts,
 // D2), so the playground always runs exactly what ships.
 import { renderSync } from '@knowvah/plantuml-ts';
+// Client-side PlantUML syntax highlighting, reusing the SAME grammar the docs
+// code blocks use (single source of truth). Shiki runs in the browser here
+// over a transparent-textarea overlay with its pure-JS regex engine (no
+// WASM); the plain textarea still works if it fails to load (progressive
+// enhancement). Ported from dot-atlassian's DOT playground.
+import { createHighlighterCore, type HighlighterCore } from 'shiki/core';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import githubLight from '@shikijs/themes/github-light';
+import githubDark from '@shikijs/themes/github-dark';
+import { plantumlLang } from '../plantuml.tmLanguage';
 
 const DEFAULT_SOURCE = `@startuml
 class Animal {
@@ -43,6 +53,32 @@ const source = ref(props.initial ?? DEFAULT_SOURCE);
 const svg = ref('');
 const error = ref('');
 
+// --- syntax-highlight overlay ---
+const highlighted = ref('');
+const overlaid = ref(false); // true once the highlighter has painted a layer
+const highlightEl = ref<HTMLElement | null>(null);
+let highlighter: HighlighterCore | undefined;
+
+function paintHighlight(): void {
+  if (!highlighter) return;
+  // Trailing newline keeps the highlight layer's height in step with the
+  // textarea while the last line is being typed.
+  highlighted.value = highlighter.codeToHtml(`${source.value}\n`, {
+    lang: 'plantuml',
+    themes: { light: 'github-light', dark: 'github-dark' },
+    defaultColor: false,
+  });
+  overlaid.value = true;
+}
+
+function syncScroll(e: Event): void {
+  const ta = e.target as HTMLTextAreaElement;
+  if (highlightEl.value) {
+    highlightEl.value.scrollTop = ta.scrollTop;
+    highlightEl.value.scrollLeft = ta.scrollLeft;
+  }
+}
+
 function renderNow(): void {
   // Render is client-only — CanvasMeasurer needs the DOM <canvas> API, which
   // is unavailable during VitePress's Node-side SSR pass.
@@ -66,21 +102,43 @@ function scheduleRender(): void {
   timer = setTimeout(renderNow, 250);
 }
 
-onMounted(renderNow);
-watch(source, scheduleRender);
+onMounted(async () => {
+  renderNow();
+  try {
+    highlighter = await createHighlighterCore({
+      themes: [githubLight, githubDark],
+      langs: [plantumlLang],
+      // Pure-JS regex engine: the grammar is simple enough that the
+      // JavaScript engine covers it fully, and it keeps the site free of
+      // WASM (the Oniguruma engine ships a .wasm binary).
+      engine: createJavaScriptRegexEngine(),
+    });
+    paintHighlight();
+  } catch {
+    // Highlighter unavailable — the plain (visible) textarea keeps working.
+  }
+});
+
+watch(source, () => {
+  paintHighlight();
+  scheduleRender();
+});
 </script>
 
 <template>
   <div class="pu-playground">
     <div class="pu-panes" :style="{ height: props.height ?? '480px' }">
       <div class="pu-editor">
+        <div ref="highlightEl" class="pu-highlight" aria-hidden="true" v-html="highlighted"></div>
         <textarea
           v-model="source"
           class="pu-input"
+          :class="{ overlaid }"
           spellcheck="false"
           autocapitalize="off"
           autocomplete="off"
           aria-label="PlantUML source"
+          @scroll="syncScroll"
         ></textarea>
       </div>
       <div class="pu-output" aria-label="Rendered SVG">
@@ -102,12 +160,15 @@ watch(source, scheduleRender);
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
+/* Editor: a highlighted layer behind a transparent textarea. Both must share
+   identical text metrics so the caret lines up with the painted glyphs. */
 .pu-editor {
   position: relative;
   border-right: 1px solid var(--vp-c-divider);
   overflow: hidden;
   background: var(--vp-c-bg);
 }
+.pu-highlight,
 .pu-input {
   margin: 0;
   padding: 0.75rem;
@@ -119,15 +180,34 @@ watch(source, scheduleRender);
   word-wrap: normal;
   overflow-wrap: normal;
   border: none;
+  box-sizing: border-box;
+}
+.pu-highlight {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  pointer-events: none;
+}
+.pu-highlight :deep(pre.shiki) {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  font: inherit;
+}
+.pu-input {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   resize: none;
   outline: none;
   background: transparent;
-  color: var(--vp-c-text-1);
+  color: var(--vp-c-text-1); /* visible until the highlight layer paints */
   caret-color: var(--vp-c-text-1);
   overflow: auto;
-  box-sizing: border-box;
+}
+.pu-input.overlaid {
+  color: transparent; /* text is shown by the layer behind; keep the caret */
 }
 .pu-output {
   overflow: auto;
@@ -150,5 +230,22 @@ watch(source, scheduleRender);
     grid-template-rows: 1fr 1fr;
     height: auto !important;
   }
+}
+</style>
+
+<style>
+/* UNSCOPED on purpose. defaultColor:false emits token colors as
+   --shiki-light/--shiki-dark CSS variables, not a `color`; these rules map
+   them to the live color, switching on VitePress's html.dark. They cannot
+   live in the scoped block: Vue does not support :global() as an ancestor
+   combinator, so a scoped `html.dark …` rule never matches and dark mode
+   would paint the light palette onto the dark background. */
+.pu-playground .pu-highlight .shiki,
+.pu-playground .pu-highlight .shiki span {
+  color: var(--shiki-light);
+}
+html.dark .pu-playground .pu-highlight .shiki,
+html.dark .pu-playground .pu-highlight .shiki span {
+  color: var(--shiki-dark);
 }
 </style>
