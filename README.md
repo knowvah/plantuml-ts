@@ -1,6 +1,6 @@
 # plantuml-ts
 
-[![CI](https://github.com/sseely/plantuml-ts/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sseely/plantuml-ts/actions/workflows/ci.yml)
+[![CI](https://github.com/knowvah/plantuml-ts/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/knowvah/plantuml-ts/actions/workflows/ci.yml)
 
 A TypeScript port of [PlantUML](https://plantuml.com), producing SVG
 diagrams synchronously in the browser and Node.js with no server

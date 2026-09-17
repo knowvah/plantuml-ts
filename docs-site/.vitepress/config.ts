@@ -42,16 +42,34 @@ function libraryDataFileShim(): Plugin {
   };
 }
 
-// Deployed at https://sseely.github.io/plantuml-ts/ — base must match the repo.
+// Published at https://plantuml.knowvah.com by .github/workflows/docs.yml.
+// docs-site/public/CNAME is what tells GitHub Pages to serve that host.
 export default defineConfig({
-  base: '/plantuml-ts/',
+  // Served from the root of its own subdomain, so no path prefix. This is
+  // what would break first if the site ever moved back to a subdirectory:
+  // the page would still load and every stylesheet would 404.
+  base: '/',
   title: 'plantuml-ts',
-  description:
-    'PlantUML in pure TypeScript — no Java, no server, browser-native. ' +
-    'PlantUML source in, SVG out.',
+  description: 'PlantUML in pure TypeScript — no Java, no server, browser-native. ' + 'PlantUML source in, SVG out.',
   lang: 'en-US',
   cleanUrls: true,
+  head: [
+    // The mark comes from @knowvah/theme, copied into docs-site/public/ by
+    // `npm run docs:brand` (docs-site/copy-brand-assets.mjs).
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/knowvah_logo.svg' }],
+    ['meta', { name: 'theme-color', content: '#c45d3e' }],
+    // The social card is the corporate site's existing PlantUML banner,
+    // referenced where it already lives rather than committed here.
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'plantuml-ts' }],
+    ['meta', { property: 'og:image', content: 'https://knowvah.com/images/og-plantuml.png' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+  ],
   themeConfig: {
+    // Nav-bar mark, beside the site title.
+    logo: '/knowvah_logo.svg',
     // Built-in offline search (MiniSearch); no external service.
     search: { provider: 'local' },
     nav: [
@@ -78,9 +96,7 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/sseely/plantuml-ts' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/knowvah/plantuml-ts' }],
   },
   vite: {
     plugins: [libraryDataFileShim()],
@@ -88,9 +104,7 @@ export default defineConfig({
       alias: {
         // The playground imports the *real* engine source (D2), so docs
         // stay in lockstep with the library rather than a copied bundle.
-        '@knowvah/plantuml-ts': fileURLToPath(
-          new URL('../../src/index.ts', import.meta.url),
-        ),
+        '@knowvah/plantuml-ts': fileURLToPath(new URL('../../src/index.ts', import.meta.url)),
       },
     },
   },

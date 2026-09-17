@@ -68,3 +68,7 @@ assets/stdlib/
 # Generated per-bundle BundleData modules (scripts/build-stdlib-packages.ts)
 # — regenerable from assets/stdlib/ + assets/manifests/, never committed.
 packages/*/generated/
+
+# Brand assets copied out of @knowvah/theme by `npm run docs:brand`. The
+# package is the source; see docs-site/copy-brand-assets.mjs.
+docs-site/public/knowvah_logo.svg

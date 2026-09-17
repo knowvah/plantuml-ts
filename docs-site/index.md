@@ -13,7 +13,7 @@ hero:
       link: /playground
     - theme: alt
       text: View on GitHub
-      link: https://github.com/sseely/plantuml-ts
+      link: https://github.com/knowvah/plantuml-ts
 features:
   - title: Faithful to upstream PlantUML
     details: A deep port of the Java implementation's parsing, layout, and rendering rules — including the long tail of special cases. The class-diagram dot pipeline matches the upstream oracle on 680/680 comparable fixtures.

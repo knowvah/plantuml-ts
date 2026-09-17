@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sseely/plantuml-ts.git"
+    "url": "https://github.com/knowvah/plantuml-ts.git"
   },
   "keywords": [
     "plantuml",
@@ -20,7 +20,8 @@
     "typescript"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "type": "module",
   "main": "./dist/plantuml-ts.cjs",
@@ -59,20 +60,23 @@
     "manifest": "jiti scripts/render-manifest.ts",
     "svg:survey": "jiti scripts/svg-parity-survey.ts",
     "svg:dashboard": "jiti scripts/svg-parity-dashboard.ts",
+    "docs:brand": "node docs-site/copy-brand-assets.mjs",
     "docs:copy-reports": "node docs-site/copy-reports.mjs",
-    "docs:dev": "npm run docs:copy-reports && vitepress dev docs-site",
-    "docs:build": "npm run docs:copy-reports && vitepress build docs-site",
+    "docs:dev": "npm run docs:brand && npm run docs:copy-reports && vitepress dev docs-site",
+    "docs:build": "npm run docs:brand && npm run docs:copy-reports && vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site",
     "prepare": "husky",
     "format": "prettier --write",
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@knowvah/dot-engine": "^1.6.0",
+    "@knowvah/dot-engine": "https://registry.npmjs.org/@knowvah/dot-engine/-/dot-engine-1.6.0.tgz",
     "jsonc-parser": "^3.3.1",
     "katex": "^0.16.45"
   },
   "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@knowvah/theme": "0.3.0",
     "@microsoft/api-extractor": "^7.58.12",
     "@playwright/test": "^1.40.0",
     "@types/katex": "^0.16.8",

@@ -9,7 +9,7 @@ server, no DOM — so it runs the same way in the browser and in Node.js.
 The library is not yet published to npm. For now, clone and build:
 
 ```bash
-git clone https://github.com/sseely/plantuml-ts.git
+git clone https://github.com/knowvah/plantuml-ts.git
 cd plantuml-ts
 npm install
 npm run build         # → dist/plantuml-ts.js (ESM) + dist/plantuml-ts.cjs

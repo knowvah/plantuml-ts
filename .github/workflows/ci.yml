@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: read
+  # `@knowvah/theme` installs from GitHub Packages; see .npmrc.
+  packages: read
 
 # A newer push supersedes an in-flight PR run; main runs are never cancelled,
 # because main's result is the record of whether that commit was green.
@@ -37,8 +39,15 @@ jobs:
         with:
           node-version: '26'
           cache: npm
+          # Writes the npm.pkg.github.com auth line to the runner's ~/.npmrc
+          # so `@knowvah/theme` resolves; the scope mapping itself is in
+          # the repo's .npmrc.
+          registry-url: https://npm.pkg.github.com
+          scope: '@knowvah'
 
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ----------------------------------------------------------------------
       # Cheap gates first. None of them need the vendored stdlib, so a type
