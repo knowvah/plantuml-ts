@@ -1,0 +1,51 @@
+# Weekly update PRs, each run through ci.yml before anyone merges. Security
+# updates for advisories are raised by Dependabot alerts regardless of this
+# file; the `applies-to: security-updates` groups below are what shape them.
+#
+# Why vitest is grouped: vitest and @vitest/coverage-v8 pin each other by
+# exact version (the provider's peerDependency is `vitest@<same version>`).
+# On 2026-09-17 a security update bumped vitest alone, `npm ci` failed with
+# ERESOLVE on every branch until the provider caught up (#38, fixed by #41).
+# A group makes Dependabot bump the whole family in one PR. It has to be
+# declared twice because a group applies to one update type only, and the
+# bump that broke main was a security update, not a version update.
+#
+# `@knowvah/theme` resolves from GitHub Packages (see .npmrc). The security
+# updates above succeeded without a registry token because the lockfile
+# already pins its resolved URL; if a Dependabot run ever fails resolving
+# it, add a `registries` block with a Dependabot secret, as dot-atlassian's
+# dependabot.yml does.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      vitest:
+        patterns:
+          - vitest
+          - '@vitest/*'
+      vitest-security:
+        applies-to: security-updates
+        patterns:
+          - vitest
+          - '@vitest/*'
+      # One PR per week for routine bumps rather than one per package.
+      # Majors stay separate; each deserves its own review.
+      minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
