@@ -24,6 +24,8 @@ import {
   shortenColor,
   formatOpacity,
   formatPercent,
+  escapeAttribute,
+  escapeText,
 } from '../../../src/core/svg-format.js';
 
 describe('svg-format', () => {
@@ -144,6 +146,62 @@ describe('svg-format', () => {
 
     it('leaves values with no trailing zeros unchanged', () => {
       expect(trimZeros('1.23')).toBe('1.23');
+    });
+  });
+
+  // T2 (SI-saea): table-driven cases for the two `XmlWriter.java`
+  // escapers, hoisted from `xml-writer.ts`'s private methods. Character
+  // sets per `XmlWriter.java:244-275` -- attribute: `& < "`; text: `& <`.
+  describe.each([
+    { fn: escapeAttribute, name: 'escapeAttribute' },
+    { fn: escapeText, name: 'escapeText' },
+  ])('$name shared cases', ({ fn }) => {
+    it('escapes &', () => {
+      expect(fn('a&b')).toBe('a&amp;b');
+    });
+
+    it('escapes <', () => {
+      expect(fn('a<b')).toBe('a&lt;b');
+    });
+
+    it('leaves > unescaped', () => {
+      expect(fn('a>b')).toBe('a>b');
+    });
+
+    it("leaves ' unescaped", () => {
+      expect(fn("a'b")).toBe("a'b");
+    });
+
+    it('returns the empty string unchanged', () => {
+      expect(fn('')).toBe('');
+    });
+
+    it('double-escapes an already-escaped &amp;', () => {
+      expect(fn('&amp;')).toBe('&amp;amp;');
+    });
+  });
+
+  describe('escapeAttribute', () => {
+    it('escapes "', () => {
+      expect(escapeAttribute('a"b')).toBe('a&quot;b');
+    });
+
+    it('escapes a mix of &, <, and "', () => {
+      expect(escapeAttribute('a&b<c"d')).toBe('a&amp;b&lt;c&quot;d');
+    });
+
+    it('does not escape >, matching the jar (no &gt; in attribute values)', () => {
+      expect(escapeAttribute('a>b')).toBe('a>b');
+    });
+  });
+
+  describe('escapeText', () => {
+    it('leaves " unescaped', () => {
+      expect(escapeText('a"b')).toBe('a"b');
+    });
+
+    it('escapes a mix of & and <, leaving " and > alone', () => {
+      expect(escapeText('a&b<c"d>e')).toBe('a&amp;b&lt;c"d>e');
     });
   });
 });
