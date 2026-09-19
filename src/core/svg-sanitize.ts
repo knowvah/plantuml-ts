@@ -9,6 +9,13 @@
  *   - The { trustSource: true } escape hatch bypasses sanitization for content
  *     that is verified safe at build time (e.g. committed fixtures).
  *
+ * Wiring status (2026-09-19, `plans/svg-attribute-escaping-audit/decisions.md`
+ * D6): no in-library caller yet. The intended call site is D3-prime image
+ * embedding (`klimt/drawing/svg/svg-graphics.ts#svgImage`, currently a
+ * throwing stub), where fetched SVG would be inlined into the document as
+ * upstream does raw. Hosts that inline external SVG themselves may call it
+ * directly; it is exported for that.
+ *
  * What is stripped:
  *   - <script> elements and their content
  *   - <foreignObject> elements and their content

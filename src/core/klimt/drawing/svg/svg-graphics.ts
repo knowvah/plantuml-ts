@@ -151,7 +151,11 @@ export class SvgGraphics extends SvgGraphicsElements {
   /**
    * D3′ throwing stub covering both upstream `svgImage` overloads
    * (`PortableImage`, `UImageSvg`) and `svgImageUnsecure` — see the
-   * module doc comment above.
+   * module doc comment above. When this deferral lifts, fetched SVG that
+   * is inlined here (upstream splices it raw, `SvgGraphics.java:790-797`)
+   * must pass through `src/core/svg-sanitize.ts#sanitizeSvg` first — that
+   * function exists for exactly this call site
+   * (`plans/svg-attribute-escaping-audit/decisions.md` D6).
    */
   svgImage(..._args: readonly unknown[]): void {
     throw new Error('deferred per D3-prime: image embedding (PNG/inline SVG base64) not yet ported');
