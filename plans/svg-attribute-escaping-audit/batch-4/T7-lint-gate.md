@@ -8,11 +8,14 @@ block starts at `:44`). `tests/architecture/svg-emission-seam.test.ts`
 already guards shape markup outside the seam (textual scan of `src/`).
 
 ## Task
-1. `eslint.config.ts`, in a NEW block scoped to `files: ['src/**/*.ts']`
-   (tests and scripts stay free to build markup strings):
+1. `eslint.config.ts`, in a NEW block scoped to `files: ['src/**/*.ts']` with
+   `ignores: ['src/core/svek-dot-emit*.ts', 'src/core/graph-layout-build*.ts']`
+   and a comment: those emit graphviz DOT / HTML-like labels, not SVG — a
+   language boundary, not a sink allowlist (journal B3). Tests and scripts
+   stay free to build markup strings:
    ```ts
    'no-restricted-syntax': ['error', {
-     selector: 'TemplateElement[value.raw=/[A-Za-z:-]="$/]',
+     selector: 'TemplateElement[value.raw=/="$/]',  // widened (journal B3): dynamic names too
      message: 'Attribute values must go through attrs()/attrsFromRecord() so they are escaped once (plans/svg-attribute-escaping-audit/decisions.md D5).',
    }],
    ```
@@ -43,6 +46,7 @@ already guards shape markup outside the seam (textual scan of `src/`).
 
 ## Write-set
 - `eslint.config.ts`
+- `src/core/annotations/coord-shift.ts` (ONLY the two `${name}="…"` branches at ~:162-163 → `attrs()`; journal B3)
 - `tests/architecture/attribute-sink-rule.test.ts` (create)
 - `tests/architecture/svg-emission-seam.test.ts`
 - `docs/catalog.md`
