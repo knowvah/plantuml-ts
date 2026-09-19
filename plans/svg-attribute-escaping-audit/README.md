@@ -105,3 +105,43 @@ file count with the on-disk count (726 at baseline).
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — how a value reaches an attribute, before and after
 - [`diagrams/component-map.md`](diagrams/component-map.md) — the two emission paths and the seam
 - [`decision-journal.md`](decision-journal.md) — appended during execution
+
+## Execution summary (2026-09-19)
+
+**Tasks:** 10 completed of 9 planned (T3c added by the D8 amendment after
+stop 1). Commits, in order: c340f196 (T6), 74259771 (T2), 03d916cb (T1),
+350e5182 (T3b), dddd0510 (T3a), 827c0805 (T3c), 04f3a701 (T4),
+70b7ba2c (T5a), 17381593 (T5b), 0fed4d6e + 6232d152 (T7). Every batch
+executed SERIALIZED (journal B1 row 1).
+
+**Decisions:** D1–D7 approved at planning; D8 added and D2's enumeration
+amended during execution. Journal rows flagged for review: the stop-1 halt
+(T1's comment injection), the orchestrator's T3a write-set expansion (three
+pre-escape helpers D2 had not enumerated), and the D5 reading that excludes
+DOT emitters (`svek-dot-emit*.ts`, `graph-layout-build*.ts`) by file
+pattern as a language boundary.
+
+**Exit bar:** SVG template attribute sinks 39 → 0, enforced by two ESLint
+selectors (`="` before an interpolation; unclosed `<!--` before an
+interpolation) with zero `eslint-disable` under `src/`. `escapeXml` now
+matches jar `XmlWriter.escapeAttribute` (`& < "`), pinned by the jar's
+`title="a>b"`. Two live defects closed with the jar's bytes:
+`font-family="a'b&amp;c&lt;d"` (was malformed XML) and the comment
+breakout (`<!--class x- -><script>…<!- - -->`, was a real `<script>`
+element). Oracle/baseline diffs: zero at every batch
+(`svg-conformance` 27 files / 3427 passed | 1 skipped throughout).
+
+**Gates (final, branch head):** typecheck 0 errors · lint exit 0 · build
+clean · catalog no drift · conformance unmoved · `npm test` see journal.
+
+**Known issues / follow-ups (none blocking):**
+- Unresolved INLINE colours (`class C #banana`) reach `fill` verbatim; jar
+  draws white (`getColorOrWhite`) — fidelity, K1 territory; file with
+  `sequence-participant-background-cascade`.
+- D2 direction: migrate template emitters onto `XmlWriter` (a program).
+- `state/renderer-group.ts` link comment is routed but unreachable
+  (transition grammar drops quoted endpoints) — fidelity gap, unfiled.
+- Pre-existing, untouched: `coord-shift.ts:161` unused `match` callback
+  param (IDE hint); `eslint.config.ts` uses deprecated `tseslint.config`
+  signature; lizard misreads `assembleDocumentShell`'s end.
+- `sanitizeSvg` remains unwired until D3-prime image embedding (D6).
