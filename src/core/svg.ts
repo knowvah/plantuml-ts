@@ -519,13 +519,10 @@ export function svgRoot(
   bgColor = '#FFFFFF',
   extraDefs = '',
 ): string {
-  // SI-saea T3a/D2: `bg` feeds ONLY the marker fills below -- `svg-markers.ts`
-  // still templates it directly (T4 removes this pre-escape once the
-  // markers move onto the seam). The canvas rect below goes through
-  // `attrs()`, which escapes on its own, so it takes the RAW `bgColor`;
-  // handing it `bg` too would double-escape.
-  const bg = escapeXml(bgColor);
-  const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bg));
+  // SI-saea T4: marker fills now route through `svg-markers.ts`'s `attrs()`
+  // call, which escapes on its own -- same as the canvas rect below -- so
+  // both take the RAW `bgColor`; escaping it here too would double-escape.
+  const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bgColor));
   // Gradients are lifted out of the children FIRST so they can ride in the
   // same `<defs>` the markers do, as `SvgGraphics#createSvgGradient` puts
   // them (`:404`).
