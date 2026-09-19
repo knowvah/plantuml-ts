@@ -23,8 +23,7 @@
 
 import type { ChartGeometry, LegendGeometry, AnnotationGeometry } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, line, text, circle, polygon } from '../../core/svg.js';
-import { fmt } from '../../core/svg-format.js';
+import { rect, line, text, circle, polygon, attrs } from '../../core/svg.js';
 import type { AssembledSvg } from '../../core/dispatcher.js';
 import { drawBar } from './renderers/bar.js';
 import { drawLine } from './renderers/line.js';
@@ -235,7 +234,11 @@ function renderErrorDiagram(errors: string[]): string {
   const height = 80;
   const errColor = '#dc2626';
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(width)}" height="${fmt(height)}">` +
+    `<svg${attrs([
+      ['xmlns', 'http://www.w3.org/2000/svg'],
+      ['width', width],
+      ['height', height],
+    ])}>` +
     rect(0, 0, width, height, { fill: '#fee2e2', stroke: errColor, strokeWidth: 2 }) +
     text(10, 28, 'Chart error:', { fill: errColor, fontFamily: 'monospace', fontSize: 12 }) +
     text(10, 52, message, { fill: errColor, fontFamily: 'monospace', fontSize: 11 }) +

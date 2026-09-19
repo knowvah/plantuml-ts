@@ -1,4 +1,4 @@
-import { rect, line, text } from '../../core/svg.js';
+import { rect, line, text, attrs } from '../../core/svg.js';
 import type { BoardGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
@@ -9,7 +9,13 @@ const CELL_H = 90;
 const BOARD_MARGIN = 10;
 function buildShadowDefs(shadowId: string): string {
   return (
-    `<filter id="${shadowId}" x="-1" y="-1" width="300%" height="300%">` +
+    `<filter${attrs([
+      ['id', shadowId],
+      ['x', -1],
+      ['y', -1],
+      ['width', '300%'],
+      ['height', '300%'],
+    ])}>` +
     `<feGaussianBlur result="blurOut" stdDeviation="2"/>` +
     `<feColorMatrix type="matrix" in="blurOut" result="blurOut2" ` +
     `values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/>` +
