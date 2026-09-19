@@ -241,7 +241,8 @@ describe('resolveSkinparam — direct key matches', () => {
       defaultTheme,
     );
     expect(r.theme.colors.graph.arrowFontColor).toBeUndefined();
-    expect(r.theme.colors.text).toBe('NOTACOLOUR'); // raw, as before
+    // `HColorSet#getColorOrWhite` (java:58-63): a rejected token is WHITE.
+    expect(r.theme.colors.text).toBe('#FFFFFF');
     const ok = resolveSkinparam(new Map([['arrowfontcolor', '333']]), defaultTheme);
     expect(ok.theme.colors.graph.arrowFontColor).toBe('#333333');
   });
@@ -1039,6 +1040,24 @@ describe('resolveColor', () => {
 
   it('strips gradient — returns end color for hex-hex gradients', () => {
     expect(resolveColor('#AAAAAA-#FF0000')).toBe('#FF0000');
+  });
+
+  // `HColorSet#getColorOrWhite` (klimt/color/HColorSet.java:58-63): every
+  // token `parseColor` (java:78-119) rejects is WHITE, never the raw text.
+  it('falls back to white for a token that is not a color at all', () => {
+    expect(resolveColor('NOTACOLOUR')).toBe('#FFFFFF');
+    expect(resolveColor('x"onload="alert(1)')).toBe('#FFFFFF');
+    expect(resolveColor('#red-banana')).toBe('#FFFFFF');
+  });
+
+  it('passes the keyword and conditional forms parseColor accepts', () => {
+    for (const v of ['transparent', '#background', 'automatic', 'none', '#?red:blue', '#?red:blue:white']) {
+      expect(resolveColor(v)).toBe(v);
+    }
+  });
+
+  it('rejects a conditional whose halves are not colors', () => {
+    expect(resolveColor('#?red:banana')).toBe('#FFFFFF');
   });
 
   it('applies to backgroundColor skinparam with gradient', () => {

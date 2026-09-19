@@ -134,8 +134,11 @@ describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skin
       "the names genuinely aren't registered functions to substitute",
     () => {
       const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
-      expect(result.colors.graph.classBackground).toBe('BOXBG');
-      expect(result.colors.graph.classBorder).toBe('BORDERCOLOR');
+      // The unsubstituted tokens are not colors, so `resolveColor` hands back
+      // `HColorSet#getColorOrWhite`'s WHITE (java:58-63). Substitution would
+      // have produced `ccc`/`aaa` or `2e2e2e`/`1b1b1b` -- never white.
+      expect(result.colors.graph.classBackground).toBe('#FFFFFF');
+      expect(result.colors.graph.classBorder).toBe('#FFFFFF');
     },
   );
 

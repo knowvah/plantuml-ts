@@ -834,6 +834,41 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`svg-attribute-escaping-audit`** (NEW, unbriefed) — FILED 2026-09-19 by
+  the CodeQL pass (branch `fix/codeql-alerts`). Alert 13 was REAL: an
+  unparseable `skinparam backgroundColor` token reached every `fill` raw
+  (canvas rect, shell `style`, arrowhead markers, participant boxes). Fixed
+  at the skinparam boundary the way upstream does it —
+  `resolveColor` now applies `HColorSet#parseColor`'s acceptance set
+  (HColorSet.java:78-119) and hands back `getColorOrWhite`'s WHITE
+  (`:58-63`) otherwise; oracle-verified against the jar. **What is NOT
+  fixed:** the emitter itself never escapes. `grep -rn '[a-z-]="\${' src`
+  finds **39 template-literal attribute sinks across 14 files** (15 color),
+  and `formatAttrValue` — the declared single point where an attribute
+  value becomes text — passes strings through raw; `linkWrap` pre-escapes
+  before `attrs` (svg.ts:401-402), so escaping in `formatAttrValue` would
+  double-escape until that is removed. The jar escapes once, at DOM
+  serialization (`SvgGraphics.java:598/882` + the XML transformer). The
+  mission: (1) audit every user-text→attribute path that is not
+  regex-restricted to `\w` — `<img:…>` paths, sprite names, `[[url]]`
+  targets, creole `<color:…>` — with a probe per path; (2) decide the single
+  escape seam (`formatAttrValue` + strip `linkWrap`'s pre-escape, or a
+  serializer step) and move the 39 template sinks onto it; (3) a fitness
+  test that greps for the template-sink shape and fails on any new one.
+  Evidence: `.agent-notes/codeql-2026-09-19.md`.
+
+- **`sequence-participant-background-cascade`** (NEW, unbriefed) — FILED
+  2026-09-19, oracle-measured while verifying the above. `A -> B` under
+  `skinparam backgroundColor red`: the jar keeps participant boxes at
+  `fill="#E2E2F0"` and writes the shell `style` as `background:#FF0000`;
+  this port draws participants `fill="#F00"` and `background:red`. Two
+  gaps: the theme cascades `backgroundColor` into sequence participant
+  background where upstream's `ColorParam.background` and
+  `participantBackground` are separate params; and the document shell emits
+  the raw color name where the jar emits `HColor#toSvg`'s canonical hex.
+  Small, self-contained, one fixture each. Evidence:
+  `.agent-notes/codeql-2026-09-19.md`.
+
 - **`linetype-ortho-routing`** (NEW, unbriefed) — FILED 2026-09-03 while
   reviewing `docs/reclassify-graphviz-issue-17`. **`skinparam linetype
   ortho|polyline` is HALF PORTED**: the per-edge label→xlabel switch is wired

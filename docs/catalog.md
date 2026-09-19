@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1106 modules · 3996 exported names.
+1106 modules · 3998 exported names.
 
 ## `src/`
 
@@ -82,7 +82,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
 | `skinparam-key-handlers.ts` | `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
-| `skinparam-key-normalize.ts` | `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
+| `skinparam-key-normalize.ts` | `UNPARSEABLE_COLOR`, `isColorSpec`, `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
 | `skinparam-stereo-keys.ts` | `applyStereoOverride` | Stereotype-qualified skinparam key handling (`key.includes('<<')` branch). |
 | `skinparam-style-block.ts` | `parseStyleBlock` | `<style>` block parsing — parseStyleBlock and its internal helpers. |
 | `skinparam-theme-builder.ts` | `buildThemePartial` | Builds a `Partial<Theme>` from a populated {@link SkinparamAccumulator} — only the keys that were actually seen during key processing are set. |
