@@ -37,7 +37,9 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '26'
+          # Reads the `volta.node` pin from package.json, the same source volta
+          # uses locally, so CI and the dev box cannot drift apart.
+          node-version-file: package.json
           cache: npm
           # Writes the npm.pkg.github.com auth line to the runner's ~/.npmrc
           # so `@knowvah/theme` resolves; the scope mapping itself is in
