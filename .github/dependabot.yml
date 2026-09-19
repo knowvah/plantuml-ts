@@ -38,6 +38,15 @@ updates:
       # Majors stay separate; each deserves its own review.
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Dependabot cannot co-move the pair across a major: #46 bumped vitest
+      # to 5.0.1 "in the vitest group" and left the provider at 4.1.11, and
+      # `npm ci` failed exactly as before. Majors for this family are done by
+      # hand as a pair; the groups above still carry minors and patches.
+      - dependency-name: vitest
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@vitest/*'
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: chore
       include: scope
