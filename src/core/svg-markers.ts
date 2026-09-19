@@ -8,7 +8,7 @@
  * `core/svg.js` are unaffected.
  */
 
-import { shortenColor } from './svg-format.js';
+import { attrs } from './svg.js';
 
 // ---------------------------------------------------------------------------
 // Arrow type
@@ -129,7 +129,12 @@ const MARKER_SPECS: Record<ArrowType, MarkerSpec> = {
     refX: 11,
     refY: 5,
     orient: 'auto',
-    body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>`,
+    body: (bg) =>
+      `<polygon points="0 0, 11 5, 0 10"${attrs([
+        ['fill', bg],
+        ['stroke', '#000'],
+        ['stroke-width', 1.5],
+      ])}/>`,
   },
   implementation: {
     w: 12,
@@ -137,7 +142,12 @@ const MARKER_SPECS: Record<ArrowType, MarkerSpec> = {
     refX: 11,
     refY: 5,
     orient: 'auto',
-    body: (bg) => `<polygon points="0 0, 11 5, 0 10" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>`,
+    body: (bg) =>
+      `<polygon points="0 0, 11 5, 0 10"${attrs([
+        ['fill', bg],
+        ['stroke', '#000'],
+        ['stroke-width', 1.5],
+      ])}/>`,
   },
   composition: {
     w: 12,
@@ -153,7 +163,12 @@ const MARKER_SPECS: Record<ArrowType, MarkerSpec> = {
     refX: 11,
     refY: 4,
     orient: 'auto',
-    body: (bg) => `<polygon points="0 4, 5 0, 11 4, 5 8" fill="${shortenColor(bg)}" stroke="#000" stroke-width="1.5"/>`,
+    body: (bg) =>
+      `<polygon points="0 4, 5 0, 11 4, 5 8"${attrs([
+        ['fill', bg],
+        ['stroke', '#000'],
+        ['stroke-width', 1.5],
+      ])}/>`,
   },
   lost: { w: 8, h: 8, refX: 4, refY: 4, orient: 'auto', body: () => '<circle cx="4" cy="4" r="3" fill="#000000"/>' },
   found: {
@@ -173,12 +188,18 @@ const MARKER_SPECS: Record<ArrowType, MarkerSpec> = {
  */
 export function arrowHead(type: ArrowType, bgColor = '#FFFFFF'): string {
   const s = MARKER_SPECS[type];
-  return (
-    `<marker id="${arrowHeadRef(type)}" markerWidth="${s.w}" markerHeight="${s.h}" ` +
-    `refX="${s.refX}" refY="${s.refY}" orient="${s.orient}">` +
-    s.body(bgColor) +
-    `</marker>`
-  );
+  // `s.w`/`s.h`/`s.refX`/`s.refY` were raw `${n}` interpolations (no `fmt`),
+  // so pass String(n) here to stay byte-identical instead of routing them
+  // through `formatAttrValue`'s decimal formatting.
+  const open = attrs([
+    ['id', arrowHeadRef(type)],
+    ['markerWidth', String(s.w)],
+    ['markerHeight', String(s.h)],
+    ['refX', String(s.refX)],
+    ['refY', String(s.refY)],
+    ['orient', s.orient],
+  ]);
+  return `<marker${open}>` + s.body(bgColor) + `</marker>`;
 }
 
 /**
@@ -193,10 +214,23 @@ export function arrowHead(type: ArrowType, bgColor = '#FFFFFF'): string {
  */
 export function openArrowHeadDef(markerId: string, stroke: string): string {
   const s = MARKER_SPECS.async;
-  return (
-    `<marker id="${markerId}" markerWidth="${s.w}" markerHeight="${s.h}" ` +
-    `refX="${s.refX}" refY="${s.refY}" orient="${s.orient}" markerUnits="userSpaceOnUse">` +
-    s.body('').replace('stroke="#000"', `stroke="${shortenColor(stroke)}"`) +
-    `</marker>`
-  );
+  // `s.w`/`s.h`/`s.refX`/`s.refY` were raw `${n}` interpolations (no `fmt`),
+  // so pass String(n) to stay byte-identical. The body used to be built via
+  // `s.body('').replace('stroke="#000"', ...)`; rebuilt here with `stroke`
+  // as a parameter instead of a post-hoc string replace.
+  const open = attrs([
+    ['id', markerId],
+    ['markerWidth', String(s.w)],
+    ['markerHeight', String(s.h)],
+    ['refX', String(s.refX)],
+    ['refY', String(s.refY)],
+    ['orient', s.orient],
+    ['markerUnits', 'userSpaceOnUse'],
+  ]);
+  const body = `<polyline points="0 0, 9 3.5, 0 7"${attrs([
+    ['fill', 'none'],
+    ['stroke', stroke],
+    ['stroke-width', 1.5],
+  ])}/>`;
+  return `<marker${open}>` + body + `</marker>`;
 }

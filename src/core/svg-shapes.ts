@@ -394,20 +394,22 @@ export function noteBox(x: number, y: number, w: number, h: number, style: NoteB
   const { fill = '#FEFECE', stroke = '#AAAAAA', strokeWidth = 1, dogEar = 10 } = style;
   const paint = shortenColor(stroke);
   // Rule 4: `stroke:none` suppresses `stroke-width` here too.
-  const sw = paint === PAINT_NONE ? '' : ` stroke-width="${fmt(strokeWidth)}"`;
+  const paintAttrs = attrs([
+    ['fill', fill],
+    ['stroke', stroke],
+    ['stroke-width', paint === PAINT_NONE ? undefined : strokeWidth],
+  ]);
   const d = dogEar;
   // Pentagon: top-left → fold-point on top edge → dog-ear corner → bottom-right → bottom-left
   const body =
     `<path d="M${fmt(x)},${fmt(y)} L${fmt(x + w - d)},${fmt(y)} L${fmt(x + w)},${fmt(y + d)} ` +
-    `L${fmt(x + w)},${fmt(y + h)} L${fmt(x)},${fmt(y + h)} Z" ` +
-    `fill="${shortenColor(fill)}" stroke="${paint}"${sw}/>`;
+    `L${fmt(x + w)},${fmt(y + h)} L${fmt(x)},${fmt(y + h)} Z"${paintAttrs}/>`;
   // The fold, as ONE closed path -- `Opale#getCorner`'s four points, in its
   // order. The final `lineTo` returns to the start, which is why upstream's
   // `closePath()` adds nothing to the emitted `d` (its own goldens end at the
   // last `L`, with no `Z`); this matches that.
   const fold =
     `<path d="M${fmt(x + w - d)},${fmt(y)} L${fmt(x + w - d)},${fmt(y + d)} ` +
-    `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}" ` +
-    `fill="${shortenColor(fill)}" stroke="${paint}"${sw}/>`;
+    `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}"${paintAttrs}/>`;
   return body + fold;
 }
