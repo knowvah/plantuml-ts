@@ -67,6 +67,13 @@ ships with no allowlist. The seam test gains one assertion: zero
 positive/negative fixture test through the ESLint `Linter` API.
 **Consequences.** A new sink fails `npm run lint`, not a later review.
 More than two disables needed = stop 7.
+**Addendum (PR #59 review, 2026-09-19).** The shipped selector anchored on a
+chunk ENDING in `="`; a mid-value interpolation (`style="a;font:${x}"`)
+passed it. Widened to `="[^"]*$` (an attribute value opened and not yet
+closed when the interpolation starts). It immediately found four more:
+`latex.ts` two foreignObject `<div style>` tags (one a live break-out via
+`skinparam defaultFontName`) and `svg-shapes.ts` two note-box `<path d>`
+values. All routed through `attrs()`; fixture (g) pins the shape.
 
 ## D6 — `sanitizeSvg` stays exported, unwired, with its wiring point named
 

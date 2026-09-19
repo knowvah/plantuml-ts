@@ -165,15 +165,19 @@ export function formatPercent(value: number, decimals: number): string {
  * @see .../klimt/drawing/svg/XmlWriter.java#escapeAttribute (:244-275)
  */
 export function escapeAttribute(input: string): string {
-  let result = '';
-  for (const c of input) {
-    if (c === '&') result += '&amp;';
-    else if (c === '<') result += '&lt;';
-    else if (c === '"') result += '&quot;';
-    else result += c;
-  }
-  return result;
+  return input.replace(ATTRIBUTE_ESCAPE_RE, (c) => XML_ENTITIES[c] ?? c);
 }
+
+// Entity table shared by both escapers. The regexes are built from strings,
+// not literals: the complexity hook miscounts a regex literal containing `<`
+// (same workaround `svg.ts` used). Expressed as `replace` over a character
+// class rather than a hand-rolled loop so static analysis (CodeQL's HTML
+// sanitizer model) can see WHICH characters are covered -- a loop is opaque
+// to it and every attribute built on top of these was flagged as unsanitized
+// (PR #59 review). Same bytes as the loop; pinned in svg-format.test.ts.
+const XML_ENTITIES: Readonly<Record<string, string>> = { '&': '&amp;', '<': '&lt;', '"': '&quot;' };
+const ATTRIBUTE_ESCAPE_RE = new RegExp('[&<"]', 'g');
+const TEXT_ESCAPE_RE = new RegExp('[&<]', 'g');
 
 /**
  * Escapes characters that are special in XML **text content**: only `&` and
@@ -184,13 +188,7 @@ export function escapeAttribute(input: string): string {
  * @see .../klimt/drawing/svg/XmlWriter.java#escapeText (:244-275)
  */
 export function escapeText(input: string): string {
-  let result = '';
-  for (const c of input) {
-    if (c === '&') result += '&amp;';
-    else if (c === '<') result += '&lt;';
-    else result += c;
-  }
-  return result;
+  return input.replace(TEXT_ESCAPE_RE, (c) => XML_ENTITIES[c] ?? c);
 }
 
 /**

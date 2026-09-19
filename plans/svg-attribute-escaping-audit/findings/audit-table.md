@@ -126,3 +126,10 @@ this before T2/T3 run. `object` and `package` share the sink.
 | `@startjson` / `@startyaml` keys and values → `<text>` | `src/diagrams/json/renderer.ts:12` `text` from `core/svg.js` | `escapeXmlText` | escaped | `x-->&lt;script>evil()&lt;/script>&lt;!--` as a key and a value |
 | syntax-error page (every grammar-rejected payload) | `src/core/error/PSystemErrorUtils.ts` | text escaping | escaped | echoes the source as `<text>`: `class "x"onload="alert(1)"`, `&lt;b&amp;c` |
 | DOT emission (`src/core/svek-dot-emit.ts`, `svek-dot-emit-labels.ts`, `svek-dot-emit-clusters.ts`) | `svek-dot-emit-labels.ts:17` `hex()`; label tables `:54-61` (`labelTable`, `edgeLabelTable`), `:74`, `:94`, `:135` (`shieldTable`, `portTable`, `rowPortTable`); `svek-dot-emit.ts:133-143`; `svek-dot-emit-clusters.ts:76`, `:228`, `:298`, `:343` | `hex()` formats a NUMBER (`(n & 0xffffff).toString(16)`) as `#rrggbb`; every label table emits only `WIDTH`/`HEIGHT` (integers via `trunc`) and `BGCOLOR`/`COLOR` (via `hex`) around empty `<TD></TD>` cells; node ids are `rec.sh` and cluster ids `cluster.id` (synthetic); `linetype` arrives as the `ortho\|polyline` enum | dot-audit-only | no user STRING is interpolated into DOT, so no escaping function exists and none is needed; label TEXT is measured (width/height) and drawn by the port, never handed to graphviz. Nothing changed. |
+
+
+## Addendum — PR #59 review (2026-09-19)
+
+| Path | Sink (file:line) | Escaped where | Verdict | Note |
+|---|---|---|---|---|
+| `skinparam defaultFontName` / theme text colour → `<latex>` foreignObject `<div style="…">` | `src/core/latex.ts:161-166` (mid-value interpolation) | none → now `attrs()` | **raw → escaped** | Missed by T1 (no `<latex>` probe) and invisible to the `="$` selector; widened to `="[^"]*$`. Probe: `font-family:x"onload="alert(1)` terminated the attribute inside XHTML content. |

@@ -401,15 +401,17 @@ export function noteBox(x: number, y: number, w: number, h: number, style: NoteB
   ]);
   const d = dogEar;
   // Pentagon: top-left → fold-point on top edge → dog-ear corner → bottom-right → bottom-left
-  const body =
-    `<path d="M${fmt(x)},${fmt(y)} L${fmt(x + w - d)},${fmt(y)} L${fmt(x + w)},${fmt(y + d)} ` +
-    `L${fmt(x + w)},${fmt(y + h)} L${fmt(x)},${fmt(y + h)} Z"${paintAttrs}/>`;
+  const bodyD =
+    `M${fmt(x)},${fmt(y)} L${fmt(x + w - d)},${fmt(y)} L${fmt(x + w)},${fmt(y + d)} ` +
+    `L${fmt(x + w)},${fmt(y + h)} L${fmt(x)},${fmt(y + h)} Z`;
+  const body = '<path' + attrs([['d', bodyD]]) + paintAttrs + '/>';
   // The fold, as ONE closed path -- `Opale#getCorner`'s four points, in its
   // order. The final `lineTo` returns to the start, which is why upstream's
   // `closePath()` adds nothing to the emitted `d` (its own goldens end at the
   // last `L`, with no `Z`); this matches that.
-  const fold =
-    `<path d="M${fmt(x + w - d)},${fmt(y)} L${fmt(x + w - d)},${fmt(y + d)} ` +
-    `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}"${paintAttrs}/>`;
+  const foldD =
+    `M${fmt(x + w - d)},${fmt(y)} L${fmt(x + w - d)},${fmt(y + d)} ` +
+    `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}`;
+  const fold = '<path' + attrs([['d', foldD]]) + paintAttrs + '/>';
   return body + fold;
 }

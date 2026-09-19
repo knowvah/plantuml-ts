@@ -158,13 +158,18 @@ export function renderNodeLabel(label: string, cx: number, cy: number, theme: Th
     });
   });
 
-  const inner =
-    `<div xmlns="http://www.w3.org/1999/xhtml" ` +
-    `style="display:flex;align-items:center;justify-content:center;` +
-    `width:100%;height:100%;color:${theme.colors.text};` +
-    `font-family:${theme.fontFamily};font-size:${theme.fontSize}px">` +
-    htmlParts.join('') +
-    `</div>`;
+  // `style` is built as a VALUE and emitted through `attrs()` so the theme
+  // strings inside it (font name, text colour) are escaped once: a font name
+  // carrying `"` used to terminate the attribute mid-value (PR #59 review;
+  // decisions.md D5 addendum).
+  const style =
+    'display:flex;align-items:center;justify-content:center;width:100%;height:100%;' +
+    `color:${theme.colors.text};font-family:${theme.fontFamily};font-size:${theme.fontSize}px`;
+  const divAttrs = attrs([
+    ['xmlns', 'http://www.w3.org/1999/xhtml'],
+    ['style', style],
+  ] as const);
+  const inner = '<div' + divAttrs + '>' + htmlParts.join('') + '</div>';
 
   return foreignObject(x, y, w, h, inner);
 }
@@ -325,10 +330,11 @@ export function renderLatexMathML(expr: string, x: number, y: number, w: number,
 
   // The foreignObject must contain an XHTML namespace wrapper for MathML to
   // render correctly in browsers.
-  const inner =
-    `<div xmlns="http://www.w3.org/1999/xhtml" ` +
-    `style="display:flex;align-items:center;justify-content:center;` +
-    `width:100%;height:100%;color:${color}">${mathml}</div>`;
+  const divAttrs = attrs([
+    ['xmlns', 'http://www.w3.org/1999/xhtml'],
+    ['style', `display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${color}`],
+  ] as const);
+  const inner = '<div' + divAttrs + '>' + mathml + '</div>';
 
   return foreignObject(x, y, w, h, inner);
 }
