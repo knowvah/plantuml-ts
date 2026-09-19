@@ -49,7 +49,7 @@ malformed XML. Decisions, with the Java quoted, are in
    task's. Likeliest trigger: a pre-escaping call site not yet found; log
    it, do not widen the seam to skip it
 2. The same gate fails on two consecutive fix attempts
-3. A finding contradicts [`decisions.md`](decisions.md) D1–D7; amend there
+3. A finding contradicts [`decisions.md`](decisions.md) D1–D8; amend there
    and halt
 4. T1's `>`-in-tooltip oracle shows the jar emitting `&gt;` in an
    attribute (D3 flips; T3a must not proceed on the approved text)
@@ -94,13 +94,13 @@ file count with the on-disk count (726 at baseline).
 | Batch | Tasks | Status |
 |---|---|---|
 | [1](batch-1/overview.md) | T1 audit + oracles · T2 escaper consolidation · T6 sanitizeSvg disposition | [x] 2026-09-19 (03d916cb / 74259771 / c340f196) |
-| [2](batch-2/overview.md) | T3a attribute seam · T3b paint + shell | [ ] |
+| [2](batch-2/overview.md) | T3b paint + shell · T3a attribute seam · T3c comment defang (D8) | [ ] |
 | [3](batch-3/overview.md) | T4 shapes/markers · T5a diagram sinks · T5b coord-shift/latex | [ ] |
 | [4](batch-4/overview.md) | T7 lint gate + close-out | [ ] |
 
 ## Documents
 
-- [`decisions.md`](decisions.md) — D1–D7, Java quoted
+- [`decisions.md`](decisions.md) — D1–D8, Java quoted (D8 amended 2026-09-19 after stop 1)
 - [`findings/audit-table.md`](findings/audit-table.md) — written by T1
 - [`diagrams/data-flow.md`](diagrams/data-flow.md) — how a value reaches an attribute, before and after
 - [`diagrams/component-map.md`](diagrams/component-map.md) — the two emission paths and the seam
