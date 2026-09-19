@@ -1,0 +1,4 @@
+@startuml
+component "c--><script>evil()</script><!--"
+[A] -> "c--><script>evil()</script><!--"
+@enduml

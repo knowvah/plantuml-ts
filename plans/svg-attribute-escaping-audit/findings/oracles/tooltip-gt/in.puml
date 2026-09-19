@@ -1,0 +1,3 @@
+@startuml
+A -> B : [[http://e.com{a>b} t]]
+@enduml

@@ -1,0 +1,4 @@
+@startuml
+skinparam defaultFontName a"b&c<d
+A -> B
+@enduml
