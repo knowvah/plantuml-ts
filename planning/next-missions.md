@@ -834,7 +834,7 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
-- **`svg-attribute-escaping-audit`** (BRIEFED 2026-09-19, `plans/svg-attribute-escaping-audit/`) — FILED 2026-09-19 by
+- **`svg-attribute-escaping-audit`** — **EXECUTED + CLOSED 2026-09-19** (10/10 tasks, branch `feat/svg-attribute-escaping-audit` head aa7772e8, UNMERGED; sinks 39→0, two live defects closed with jar bytes; see `plans/svg-attribute-escaping-audit/README.md` "Execution summary") — FILED 2026-09-19 by
   the CodeQL pass (branch `fix/codeql-alerts`). Alert 13 was REAL: an
   unparseable `skinparam backgroundColor` token reached every `fill` raw
   (canvas rect, shell `style`, arrowhead markers, participant boxes). Fixed
