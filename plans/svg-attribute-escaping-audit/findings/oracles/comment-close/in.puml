@@ -1,0 +1,8 @@
+@startuml
+class "x--><script>evil()</script><!--"
+class A
+A -> "x--><script>evil()</script><!--"
+package "p--><script>evil()</script><!--" {
+class B
+}
+@enduml
