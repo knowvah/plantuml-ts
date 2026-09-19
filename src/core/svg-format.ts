@@ -156,3 +156,39 @@ export function formatPercent(value: number, decimals: number): string {
   const percent = value * 100;
   return trimZeros(javaFixedN(percent, Math.max(decimals, 2))) + '%';
 }
+
+/**
+ * Escapes characters that are special in an XML **attribute value** (always
+ * double-quoted): `&`, `<`, and `"`. Line-for-line port of `XmlWriter.java`'s
+ * private `escapeAttribute`; hoisted here (SI-saea T2/D1) so `xml-writer.ts`
+ * has a single implementation instead of a private copy.
+ * @see .../klimt/drawing/svg/XmlWriter.java#escapeAttribute (:244-275)
+ */
+export function escapeAttribute(input: string): string {
+  let result = '';
+  for (const c of input) {
+    if (c === '&') result += '&amp;';
+    else if (c === '<') result += '&lt;';
+    else if (c === '"') result += '&quot;';
+    else result += c;
+  }
+  return result;
+}
+
+/**
+ * Escapes characters that are special in XML **text content**: only `&` and
+ * `<` are mandatory -- `>` is special only as part of the `]]>` sequence,
+ * which cannot occur in text content, so it is left unescaped. Line-for-line
+ * port of `XmlWriter.java`'s private `escapeText`; hoisted here (SI-saea
+ * T2/D1) alongside {@link escapeAttribute}.
+ * @see .../klimt/drawing/svg/XmlWriter.java#escapeText (:244-275)
+ */
+export function escapeText(input: string): string {
+  let result = '';
+  for (const c of input) {
+    if (c === '&') result += '&amp;';
+    else if (c === '<') result += '&lt;';
+    else result += c;
+  }
+  return result;
+}

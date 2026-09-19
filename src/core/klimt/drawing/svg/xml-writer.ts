@@ -23,6 +23,7 @@
  *   method.
  */
 
+import { escapeAttribute, escapeText } from '../../../svg-format.js';
 import { UGroupType } from '../../shape/UGroup.js';
 
 /** A piece of content that can sit inside an `XmlNode`: a nested element
@@ -83,14 +84,14 @@ export class XmlWriter {
     if (!this.isPendingClose) {
       throw new Error('Cannot add an attribute outside of an open start tag.');
     }
-    this.out += ' ' + name + '="' + this.escapeAttribute(value) + '"';
+    this.out += ' ' + name + '="' + escapeAttribute(value) + '"';
     return this;
   }
 
   text(value: string): XmlWriter {
     this.closePendingStartTag(false);
     this.hasInlineContent = true;
-    this.out += this.escapeText(value);
+    this.out += escapeText(value);
     return this;
   }
 
@@ -210,31 +211,6 @@ export class XmlWriter {
   private indent(level: number): void {
     if (this.indentSpaces <= 0) return;
     this.out += ' '.repeat(level * this.indentSpaces);
-  }
-
-  // Text content: only '&' and '<' are mandatory. '>' is escaped only as
-  // part of the "]]>" sequence in real XML, which cannot occur here, so
-  // we leave it.
-  private escapeText(input: string): string {
-    let result = '';
-    for (const c of input) {
-      if (c === '&') result += '&amp;';
-      else if (c === '<') result += '&lt;';
-      else result += c;
-    }
-    return result;
-  }
-
-  // Attribute value (always double-quoted): escape '&', '<' and '"'.
-  private escapeAttribute(input: string): string {
-    let result = '';
-    for (const c of input) {
-      if (c === '&') result += '&amp;';
-      else if (c === '<') result += '&lt;';
-      else if (c === '"') result += '&quot;';
-      else result += c;
-    }
-    return result;
   }
 }
 
