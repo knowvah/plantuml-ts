@@ -21,7 +21,9 @@ layering test only polices `core → diagrams` edges, so no new edge.
 **Context.** `attrs`/`attrsFromRecord` (26 call sites, 9 files) route through
 `svg.ts#formatAttrValue` (`:171`), which formats but never escapes. Known
 pre-escaping sites that would double-escape: `linkWrap` (`svg.ts:401-402`)
-and `paint.ts#escapeAttr` (`:190`). The upstream architecture is the
+and `paint.ts#escapeAttr` (`:190`); found by T3a's full-suite run
+(amended 2026-09-19): `class/renderer-edge.ts:96#escapeIdAttr`,
+`class/renderer-group.ts:52#escAttr`, `state/renderer-group.ts:57#escAttr`. The upstream architecture is the
 `XmlWriter` path; migrating every template emitter onto it is a program.
 **Decision.** `formatAttrValue` escapes every string value with
 `escapeAttribute`; the two pre-escapes are removed in the same batch; the
