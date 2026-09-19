@@ -32,6 +32,8 @@
  * @see svg-graphics-shadow.ts#buildShadowFilter (the klimt-path twin)
  */
 
+import { attrs } from '../../core/svg.js';
+
 /** Fixed, deterministic id -- ONE shadow filter per diagram, referenced by
  *  every shadowed shape's own `filter="url(#...)"`. Jar's own id is a
  *  per-render random hash (`shadowId`, not reproduced here) -- the SVG-
@@ -59,9 +61,20 @@ const SHADOW_COLOR_MATRIX_VALUES = '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0';
  */
 export function buildStateShadowFilterDef(): string {
   return (
-    `<filter id="${STATE_SHADOW_FILTER_ID}" x="-1" y="-1" width="300%" height="300%">` +
+    `<filter${attrs([
+      ['id', STATE_SHADOW_FILTER_ID],
+      ['x', -1],
+      ['y', -1],
+      ['width', '300%'],
+      ['height', '300%'],
+    ])}>` +
     `<feGaussianBlur result="blurOut" stdDeviation="2"/>` +
-    `<feColorMatrix type="matrix" in="blurOut" result="blurOut2" values="${SHADOW_COLOR_MATRIX_VALUES}"/>` +
+    `<feColorMatrix${attrs([
+      ['type', 'matrix'],
+      ['in', 'blurOut'],
+      ['result', 'blurOut2'],
+      ['values', SHADOW_COLOR_MATRIX_VALUES],
+    ])}/>` +
     `<feOffset result="blurOut3" in="blurOut2" dx="4" dy="4"/>` +
     `<feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/>` +
     `</filter>`

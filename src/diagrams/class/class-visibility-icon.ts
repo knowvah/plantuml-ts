@@ -268,7 +268,7 @@ export function renderVisibilityIcon(
   // Jar-verified against `jovaxe-68-bube754` (classifier-level `[[{tooltip}]]`
   // + two icon-bearing member rows).
   const inner = url !== undefined ? linkWrap(shape, url) : shape;
-  return `<g data-visibility-modifier="${visibilityModifierName(icon, isField)}">${inner}</g>`;
+  return `<g${attrs([['data-visibility-modifier', visibilityModifierName(icon, isField)]])}>${inner}</g>`;
   // #lizard forgives -- pre-existing 6-param signature (icon/isField/
   // originX/originY/url?/theme?), unrelated to T7b; url/theme were added by
   // earlier G2 N21/N54 work. Collapsing to an options object is a public-

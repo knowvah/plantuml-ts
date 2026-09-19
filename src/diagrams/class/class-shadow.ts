@@ -29,6 +29,8 @@
  * @see ../state/state-shadow.ts (the identical string-emission twin)
  */
 
+import { attrs } from '../../core/svg.js';
+
 /** Fixed, deterministic id — ONE shadow filter per diagram, referenced by
  *  every shadowed classifier box's own `filter="url(#...)"`. See
  *  `state-shadow.ts#STATE_SHADOW_FILTER_ID`'s own doc comment for why a
@@ -51,9 +53,20 @@ const SHADOW_COLOR_MATRIX_VALUES = '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0';
  */
 export function buildClassShadowFilterDef(): string {
   return (
-    `<filter id="${CLASS_SHADOW_FILTER_ID}" x="-1" y="-1" width="300%" height="300%">` +
+    `<filter${attrs([
+      ['id', CLASS_SHADOW_FILTER_ID],
+      ['x', -1],
+      ['y', -1],
+      ['width', '300%'],
+      ['height', '300%'],
+    ])}>` +
     `<feGaussianBlur result="blurOut" stdDeviation="2"/>` +
-    `<feColorMatrix type="matrix" in="blurOut" result="blurOut2" values="${SHADOW_COLOR_MATRIX_VALUES}"/>` +
+    `<feColorMatrix${attrs([
+      ['type', 'matrix'],
+      ['in', 'blurOut'],
+      ['result', 'blurOut2'],
+      ['values', SHADOW_COLOR_MATRIX_VALUES],
+    ])}/>` +
     `<feOffset result="blurOut3" in="blurOut2" dx="4" dy="4"/>` +
     `<feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/>` +
     `</filter>`

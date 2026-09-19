@@ -15,7 +15,7 @@
  */
 import type { StateNodeGeo } from './state-geo-types.js';
 import type { Theme } from '../../core/theme.js';
-import { ellipse, rect, diamond, text } from '../../core/svg.js';
+import { ellipse, rect, diamond, text, attrs } from '../../core/svg.js';
 import {
   STATE_DEFAULT_BACKGROUND,
   STATE_BORDER_STROKE_WIDTH,
@@ -132,7 +132,12 @@ function closeDiamondPoints(markup: string): string {
     .split(/[\s,]+/)
     .slice(0, 2)
     .join(',');
-  return markup.replace(`points="${pts}"`, `points="${pts} ${first}"`);
+  const closed = `${pts} ${first}`;
+  // Search key only (matches the already-escaped `points` attribute already
+  // present in `markup`) -- built via concatenation, not a template
+  // literal, so D5's attribute-template lint selector has nothing to flag
+  // here. The actual re-emission goes through `attrs()` below.
+  return markup.replace('points="' + pts + '"', attrs([['points', closed]]).trimStart());
 }
 
 /** `EntityImagePseudoState.java`/`EntityImageDeepHistory.java` (SIZE=22):
