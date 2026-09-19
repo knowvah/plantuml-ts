@@ -13,6 +13,15 @@
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    // TypeScript 6.0 changed `types` to default to `[]`: node_modules/@types
+    // is no longer enumerated automatically, and the release notes' migration
+    // is exactly this line. Without it `@types/node` reaches the root program
+    // only transitively (vite's index.d.ts references it), which is why
+    // `tsc --noEmit` passed while vite-plugin-dts, whose program holds only
+    // `src/`, printed TS2591 for src/core/include-resolver-node.ts on every
+    // build. Named explicitly, both programs see the same typings.
+    // https://devblogs.microsoft.com/typescript/announcing-typescript-6-0/
+    "types": ["node"],
     // `demo/` imports the library by its PUBLIC name, the way a consumer does.
     // Without this, that name resolves through node_modules/@knowvah/plantuml-ts
     // (the workspace self-link) to the root manifest's "types", i.e. to

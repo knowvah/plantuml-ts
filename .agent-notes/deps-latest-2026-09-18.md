@@ -9,10 +9,18 @@
   because the root tsconfig loads @types/node by default; the dts plugin's
   compiler host evidently does not. The emitted `dist/plantuml-ts.d.ts` is
   still produced.
-- **Impact**: harmless today but it is noise that will hide a real dts
-  error. Fix candidate for its own PR: give the dts plugin `types: ['node']`
-  (or a dedicated tsconfig) and confirm the lines disappear.
-- **Confidence**: High (reproduced on main).
+- **Mechanism (diagnosed 2026-09-18, fixed same day)**: not the plugin.
+  TypeScript 6.0 changed `types` to default to `[]`, so node_modules/@types
+  is no longer enumerated. `tsc --explainFiles` on the root program shows
+  `@types/node` arriving only as "Type library referenced via 'node' from
+  vite/dist/node/index.d.ts", i.e. transitively through tests/ and demo/.
+  A src-only program (`extends` root, `include: ["src"]`) reproduces the
+  three errors with plain tsc; adding `"types": ["node"]` clears them.
+  Ruled out: the plugin's custom compiler host (DTS_DISABLE_SOURCE_FILE_CACHE=1
+  swaps in ts.createCompilerHost and the three lines remain).
+- **Fix**: `"types": ["node"]` in tsconfig.json, the release notes' own
+  migration line. Build now logs zero TS diagnostics.
+- **Confidence**: High (reproduced with tsc alone, fix verified).
 
 ## Observation: VitePress 1.6.x cannot run on Vite 8
 - **Context**: root `vite` moved to 8.3.0 (rolldown). The `overrides.vitepress.vite`
