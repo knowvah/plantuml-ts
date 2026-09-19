@@ -25,6 +25,7 @@
  */
 
 import { parseSimpleColor, resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+import { escapeAttribute } from './svg-format.js';
 
 /**
  * A two-color linear gradient.
@@ -175,22 +176,6 @@ function hashString(s: string): string {
   return (h >>> 0).toString(36);
 }
 
-/** Named-entity replacements for the four XML-significant attribute chars. */
-const XML_ATTR_ENTITIES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-};
-// Built from a string (not a regex literal) to keep angle brackets out of the
-// source, which the complexity checker miscounts; matches the same chars.
-const XML_ATTR_RE = new RegExp('[&<>"]', 'g');
-
-/** Escape a value for use inside a double-quoted XML attribute. */
-function escapeAttr(s: string): string {
-  return s.replace(XML_ATTR_RE, (ch) => XML_ATTR_ENTITIES[ch] ?? ch);
-}
-
 /**
  * Resolve a {@link Paint} to an SVG `fill` value and, for gradients, the
  * `<linearGradient>` def that must be emitted for the fill's `url(#id)` to
@@ -224,8 +209,8 @@ export function paintToSvg(p: Paint): { fill: string; def?: string } {
   const def =
     `<linearGradient id="${id}" x1="${v.x1}" y1="${v.y1}"` +
     ` x2="${v.x2}" y2="${v.y2}">` +
-    `<stop offset="0%" stop-color="${escapeAttr(color1)}"/>` +
-    `<stop offset="100%" stop-color="${escapeAttr(color2)}"/>` +
+    `<stop offset="0%" stop-color="${escapeAttribute(color1)}"/>` +
+    `<stop offset="100%" stop-color="${escapeAttribute(color2)}"/>` +
     `</linearGradient>`;
   return { fill: `url(#${id})`, def };
 }

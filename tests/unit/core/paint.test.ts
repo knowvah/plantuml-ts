@@ -189,11 +189,20 @@ describe('paintToSvg', () => {
 
   it('escapes XML-significant characters in stop colors', () => {
     // Neither half resolves as a color, so both pass through unchanged
-    // (deferred-resolution design) and still need XML escaping.
+    // (deferred-resolution design) and still need XML escaping. `>` is NOT
+    // escaped in an attribute value per XmlWriter.java:264-275 (D3) — only
+    // `&`, `<`, and `"` are.
     const g: Gradient = { color1: 'a&b<c', color2: 'd">e', policy: '/' };
     const out = paintToSvg(g);
     expect(out.def).toContain('stop-color="a&amp;b&lt;c"');
-    expect(out.def).toContain('stop-color="d&quot;&gt;e"');
+    expect(out.def).toContain('stop-color="d&quot;>e"');
+  });
+
+  it('escapes a stop color with a quote exactly once (saea-T3b)', () => {
+    const g: Gradient = { color1: 'x"y', color2: '#000000', policy: '/' };
+    const out = paintToSvg(g);
+    expect(out.def).toContain('stop-color="x&quot;y"');
+    expect(out.def).not.toContain('&amp;quot;');
   });
 });
 

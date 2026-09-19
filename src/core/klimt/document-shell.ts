@@ -18,8 +18,9 @@
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2, T1)
  */
 
-import { extractGradientDefs, escapeXml } from '../svg.js';
+import { extractGradientDefs } from '../svg.js';
 import { ROOT_GROUP_OPEN } from '../svg.js';
+import { escapeAttribute } from '../svg-format.js';
 import { UGraphicSvg } from './drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from './drawing/svg/svg-graphics.js';
 import { seedOf } from './drawing/svg/svg-seed.js';
@@ -140,10 +141,9 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
   // catches it; the original two literal-string checks are kept for any
   // caller that still passes a raw, un-resolved value.
   const isSolid = background !== 'transparent' && background !== 'none' && background !== '#00000000';
-  // `escapeXml` for the same reason `svg.ts#svgRoot`'s background rect
+  // `escapeAttribute` for the same reason `svg.ts#svgRoot`'s background rect
   // escapes its `fill`: an unparseable skinparam color arrives verbatim.
-  const style =
-    `width:${String(width)}px;height:${String(height)}px;` + (isSolid ? `background:${escapeXml(background)};` : '');
+  const style = `width:${String(width)}px;height:${String(height)}px;${isSolid ? `background:${escapeAttribute(background)};` : ''}`;
   const lifted = extractGradientDefs(fragment.body);
   const defsBody = extraDefs + lifted.defs;
   return (

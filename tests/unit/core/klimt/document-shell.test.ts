@@ -101,4 +101,13 @@ describe('assembleDocumentShell — root <g> text attributes', () => {
     const first = '<rect x="0" y="0" width="100" height="50" fill="#EEE"/>';
     expect(afterDefs(shell('<g>' + first + INNER + CLOSE))).toBe(ROOT_GROUP_OPEN + first + INNER + CLOSE);
   });
+
+  it('escapes a quote in the background exactly once (saea-T3b)', () => {
+    const svg = assembleDocumentShell(
+      { body: '<g>' + INNER + CLOSE, width: 100, height: 50, background: 'x"onload="alert(1)' },
+      'CLASS',
+    );
+    expect(svg).toContain('background:x&quot;onload=&quot;alert(1);');
+    expect(svg).not.toContain('&amp;quot;');
+  });
 });
