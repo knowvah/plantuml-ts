@@ -40,6 +40,8 @@
  * @see ~/git/plantuml/.../klimt/UGraphic.java#apply
  */
 
+import { attrs } from '../svg.js';
+
 /** Matches a JS-`Number`-parseable numeric token — integer, decimal, or
  *  exponential, optionally signed. Every numeric attribute value / path
  *  coordinate / points-list entry this codebase emits (`core/svg.ts`'s
@@ -159,8 +161,8 @@ export function shiftFragmentBody(body: string, dx: number, dy: number): string 
   return body.replace(SHIFTABLE_ATTR_RE, (match, name: string, value: string) => {
     if (X_ATTRS.has(name)) return `${name}="${shiftNumberToken(value, dx)}"`;
     if (Y_ATTRS.has(name)) return `${name}="${shiftNumberToken(value, dy)}"`;
-    if (name === 'points') return `points="${shiftPoints(value, dx, dy)}"`;
-    if (name === 'd') return `d="${shiftPathD(value, dx, dy)}"`;
-    return `transform="${shiftTransform(value, dx, dy)}"`;
+    if (name === 'points') return attrs([['points', shiftPoints(value, dx, dy)]]).trimStart();
+    if (name === 'd') return attrs([['d', shiftPathD(value, dx, dy)]]).trimStart();
+    return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();
   });
 }

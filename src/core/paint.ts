@@ -206,11 +206,30 @@ export function paintToSvg(p: Paint): { fill: string; def?: string } {
   const { policy } = p;
   const id = 'g' + hashString(`${color1}|${color2}|${policy}`);
   const v = gradientVector(policy);
+  // Built via concatenation, not a template literal whose text ends in
+  // `name="` before an interpolation (D5's ESLint selector shape) --
+  // `svg.ts#attrs` is unavailable here (`svg.ts` imports this module,
+  // T3b-confirmed cycle), so each attribute value is escaped inline with
+  // the same `escapeAttribute` `svg.ts#formatAttrValue` calls.
   const def =
-    `<linearGradient id="${id}" x1="${v.x1}" y1="${v.y1}"` +
-    ` x2="${v.x2}" y2="${v.y2}">` +
-    `<stop offset="0%" stop-color="${escapeAttribute(color1)}"/>` +
-    `<stop offset="100%" stop-color="${escapeAttribute(color2)}"/>` +
-    `</linearGradient>`;
+    '<linearGradient id="' +
+    id +
+    '" x1="' +
+    v.x1 +
+    '" y1="' +
+    v.y1 +
+    '"' +
+    ' x2="' +
+    v.x2 +
+    '" y2="' +
+    v.y2 +
+    '">' +
+    '<stop offset="0%" stop-color="' +
+    escapeAttribute(color1) +
+    '"/>' +
+    '<stop offset="100%" stop-color="' +
+    escapeAttribute(color2) +
+    '"/>' +
+    '</linearGradient>';
   return { fill: `url(#${id})`, def };
 }
