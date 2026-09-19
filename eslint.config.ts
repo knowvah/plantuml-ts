@@ -1,7 +1,45 @@
 import tseslint from 'typescript-eslint';
+import type { ConfigWithExtends } from 'typescript-eslint';
 import { fileURLToPath } from 'url';
 
 const tsconfigRootDir = fileURLToPath(new URL('.', import.meta.url));
+
+/** D5 (decisions.md): a template chunk ending in `name="` is, by
+ *  construction, immediately followed by an interpolation -- the last
+ *  quasi of a template literal has `tail: true`, and a trailing `="`
+ *  there would be a syntax error in the emitted markup anyway. Catches
+ *  every attribute-value sink that bypasses `attrs()`/`attrsFromRecord()`. */
+const ATTRIBUTE_SINK_SELECTOR = {
+  selector: 'TemplateElement[value.raw=/="$/]',
+  message:
+    'Attribute values must go through attrs()/attrsFromRecord() so they are escaped once (plans/svg-attribute-escaping-audit/decisions.md D5).',
+};
+
+/** D8 (decisions.md): a template chunk containing an unclosed `<!--`
+ *  before an interpolation is an XML-comment sink that must defang `--`
+ *  via `escapeComment()`, not interpolate raw. */
+const COMMENT_SINK_SELECTOR = {
+  selector: 'TemplateElement[value.raw=/<!--(?:(?!-->).)*$/]',
+  message: 'XML comments must go through escapeComment() (plans/svg-attribute-escaping-audit/decisions.md D8).',
+};
+
+/**
+ * Shared with `tests/architecture/attribute-sink-rule.test.ts` so the
+ * fitness fixtures exercise the exact block this file ships, not a
+ * re-derived copy that could drift from it.
+ *
+ * `svek-dot-emit*.ts`/`graph-layout-build*.ts` emit graphviz DOT syntax
+ * and HTML-like `<TABLE>` labels, not SVG -- a language boundary the D5/D8
+ * seam does not apply to. This is a FILE-pattern exclusion, not a
+ * per-sink allowlist: every other file under `src/` is covered with no
+ * exemptions (journal B3).
+ */
+export const ATTRIBUTE_SINK_RULE_CONFIG: ConfigWithExtends = {
+  ignores: ['src/core/svek-dot-emit*.ts', 'src/core/graph-layout-build*.ts'],
+  rules: {
+    'no-restricted-syntax': ['error', ATTRIBUTE_SINK_SELECTOR, COMMENT_SINK_SELECTOR],
+  },
+};
 
 export default tseslint.config([
   {
@@ -56,5 +94,9 @@ export default tseslint.config([
       ],
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  {
+    files: ['src/**/*.ts'],
+    ...ATTRIBUTE_SINK_RULE_CONFIG,
   },
 ]);
