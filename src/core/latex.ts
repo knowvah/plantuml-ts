@@ -8,7 +8,7 @@
  */
 
 import katex from 'katex';
-import { foreignObject, text } from './svg.js';
+import { attrs, foreignObject, text } from './svg.js';
 import type { StringMeasurer, FontSpec } from './measurer.js';
 import type { Theme } from './theme.js';
 import { toBase64 } from './klimt/sprite/png-encoder.js';
@@ -352,7 +352,11 @@ export function renderLatexMathML(expr: string, x: number, y: number, w: number,
 export function renderLatexAsImage(expr: string, color: string): { href: string; width: number; height: number } {
   const { width, height } = measureLatex(expr);
   const body = renderLatexMathML(expr, 0, 0, width, height, color);
-  const svgDoc = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${body}</svg>`;
+  const svgDoc = `<svg${attrs([
+    ['xmlns', 'http://www.w3.org/2000/svg'],
+    ['width', String(width)],
+    ['height', String(height)],
+  ])}>${body}</svg>`;
   const bytes = new TextEncoder().encode(svgDoc);
   return { href: `data:image/svg+xml;base64,${toBase64(bytes)}`, width, height };
 }
