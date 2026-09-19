@@ -85,6 +85,27 @@ with `@xmldom/xmldom` (already a devDependency, already used by
 `tests/oracle/svg-conformance/normalize.ts`) and fails on a parse error.
 **Consequences.** The `a&b<c` font name becomes a regression test.
 
+## D8 — XML comments from user names use the jar's `--` defang (amendment, 2026-09-19)
+
+**Context.** T1 found a live injection the brief missed: `class
+"x--><script>evil()</script><!--"` renders a real `<script>` element
+because `src/diagrams/class/renderer-group.ts:83/:93/:123` and
+`src/diagrams/state/renderer-group.ts:112` template names into
+`<!--…-->`. Jar `XmlWriter.comment` defangs `--` to `- -` and pads a
+trailing `-` (oracle `findings/oracles/comment-close/jar.svg`:
+`<!--class x- -><script>evil()</script><!- - -->`); the port's
+`xml-writer.ts:104-118` already mirrors it. D7's parse gate cannot see
+this: the output is well-formed XML.
+**Decision.** Extract the defang into `svg-format.ts` as `escapeComment`
+(same shape as D1); `xml-writer.ts` calls it; the four comment sinks call
+it. T3c owns this (Batch 2, after T3a). D5's ESLint rule gains a second
+selector: a template chunk containing an unclosed `<!--` before an
+interpolation. The probe file's DOM walk (no `script`, no `on*`) stays on
+every probe.
+**Consequences.** Byte-identical for every name without `--`; the
+comment-close oracles become regression pins. Approved by the user
+2026-09-19 after stop 1.
+
 ## Rollback
 
 Reversible. Code only; `git revert` of the merge restores prior behaviour.

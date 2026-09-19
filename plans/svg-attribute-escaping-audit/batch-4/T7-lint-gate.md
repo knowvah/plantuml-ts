@@ -21,6 +21,13 @@ already guards shape markup outside the seam (textual scan of `src/`).
    true`; a trailing `="` there is a syntax error in the output anyway).
    Verify the selector against the ESLint selector docs before trusting
    it; adjust the regex if `value.raw` needs escaping in the selector.
+   D8 adds a SECOND entry in the same rule: a template chunk that contains
+   an unclosed comment opener before an interpolation —
+   `TemplateElement[value.raw=/<!--(?:(?!-->).)*$/]` — with a message
+   pointing at `escapeComment`. Fixture (d) `` `<!--class ${name}-->` `` →
+   one error; (e) `` `<!--class ${escapeComment(name)}-->` `` → ALSO one
+   error by construction (the chunk before the interpolation is identical),
+   so the comment sinks must be rewritten as `` `<!--` + 'class ' + escapeComment(name) + `-->` `` or via a tiny `comment(text)` helper in `svg.ts`; pick one, apply it in T3c's files if T3c did not, and say which in the commit body.
 2. `tests/architecture/attribute-sink-rule.test.ts`: load the flat config,
    run `new Linter({ configType: 'flat' }).verify(code, config, 'src/x.ts')`
    on (a) `` `<a href="${x}">` `` → one error; (b) `` `<a${attrs([['href', x]])}>` ``
