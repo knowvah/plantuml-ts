@@ -26,6 +26,7 @@ import {
   formatPercent,
   escapeAttribute,
   escapeText,
+  escapeComment,
 } from '../../../src/core/svg-format.js';
 
 describe('svg-format', () => {
@@ -202,6 +203,47 @@ describe('svg-format', () => {
 
     it('escapes a mix of & and <, leaving " and > alone', () => {
       expect(escapeText('a&b<c"d>e')).toBe('a&amp;b&lt;c"d>e');
+    });
+  });
+
+  // T3c (SI-saea, D8): `escapeComment` is a line-for-line port of
+  // `XmlWriter.java#comment`'s defang body (`:117-119`): `--` -> `- -`;
+  // a trailing `-` after that substitution gets one appended space so it
+  // cannot merge with the comment's own closing `-->`.
+  describe('escapeComment', () => {
+    it('leaves a plain value unchanged (no-op per D8)', () => {
+      expect(escapeComment('class A')).toBe('class A');
+    });
+
+    it('returns the empty string unchanged', () => {
+      expect(escapeComment('')).toBe('');
+    });
+
+    it('splits a single -- into - -', () => {
+      expect(escapeComment('x--y')).toBe('x- -y');
+    });
+
+    it('splits every -- occurrence left to right, non-overlapping (---)', () => {
+      // '---'.split('--') consumes the leading '--' first, leaving a lone
+      // trailing '-': ['', '-'].join('- -') -> '- --', which itself ends
+      // in '-' so the trailing-space rule applies once more.
+      expect(escapeComment('---')).toBe('- -- ');
+    });
+
+    it('appends a space when the defanged value ends in -', () => {
+      expect(escapeComment('x--')).toBe('x- - ');
+    });
+
+    it('defangs a literal comment-close sequence -->', () => {
+      expect(escapeComment('x-->y')).toBe('x- ->y');
+    });
+
+    it('closes the exact live-injection payload the jar defangs', () => {
+      // Oracle `findings/oracles/comment-close/jar.svg`: the comment body
+      // between `<!--class ` and the writer's own closing `-->` is
+      // `x- -><script>evil()</script><!- - ` (trailing space from the
+      // final `--` -> `- -` split, whose own trailing `-` gets padded).
+      expect(escapeComment('x--><script>evil()</script><!--')).toBe('x- -><script>evil()</script><!- - ');
     });
   });
 });

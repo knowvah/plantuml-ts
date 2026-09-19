@@ -46,6 +46,7 @@
  * @see plans/g6-cluster-geometry/decisions.md (D3)
  */
 import { group } from '../../core/svg.js';
+import { escapeComment } from '../../core/svg-format.js';
 
 /** Wraps a state/pseudostate's rendered body in the jar's `<g
  *  class="entity" data-qualified-name="..." id="...">` group — the
@@ -99,7 +100,9 @@ export interface WrapLinkInfo {
  *  tail decor, no reversal question), unlike class's multi-decor edges. */
 export function wrapLink(info: WrapLinkInfo, inner: string): string {
   const { from, to, uid, fromUid, toUid } = info;
-  const comment = `<!--link ${from} to ${to}-->`;
+  // SI-saea T3c/D8: `escapeComment` defangs `--`, matching class's wrapLink
+  // (`class/renderer-group.ts`) and the jar's `XmlWriter.comment`.
+  const comment = '<!--link ' + escapeComment(from) + ' to ' + escapeComment(to) + '-->';
   return (
     comment +
     group(inner, {

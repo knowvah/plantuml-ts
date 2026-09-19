@@ -192,3 +192,20 @@ export function escapeText(input: string): string {
   }
   return result;
 }
+
+/**
+ * Defangs a value for use inside an XML **comment** (`<!--...-->`): `--`
+ * (illegal inside a comment, and the mechanism a `-->` breakout payload
+ * relies on) is replaced with `- -`; if the result then ends in `-`, a
+ * single space is appended so the trailing `-` cannot merge with the
+ * comment's own closing `-->`. Line-for-line port of `XmlWriter.java`'s
+ * `comment(String)` body; hoisted here (SI-saea T3c/D8) so both
+ * `xml-writer.ts#comment` and the plain-string `renderer-group.ts` comment
+ * sinks share one implementation instead of `xml-writer.ts` alone mirroring
+ * the jar.
+ * @see .../klimt/drawing/svg/XmlWriter.java#comment (:114-127)
+ */
+export function escapeComment(value: string): string {
+  const safe = value.split('--').join('- -');
+  return safe.endsWith('-') ? safe + ' ' : safe;
+}

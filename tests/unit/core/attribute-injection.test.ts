@@ -82,7 +82,7 @@ describe('attribute injection via skinparam colors', () => {
 // findings/audit-table.md`. Each renders the payload and asserts
 // well-formedness plus no live markup; it does NOT pin where the payload
 // lands (text vs attribute) -- that is the table's job. Every entry here is
-// green today; the defects are the `it.todo`s below.
+// green today; the comment-defang fix and its byte-pins are below (T3c).
 const GREEN_PROBES: ReadonlyArray<readonly [string, string]> = [
   // Element names and aliases into id/class/data-qualified-name/comments.
   [
@@ -417,22 +417,55 @@ describe('attribute injection probe matrix (audit-table.md, one probe per path)'
     expect(svg).toContain('title="a>b" xlink:title="a>b"');
   });
 
-  // NEW finding (audit-table.md, verdict `raw`, comment context): the class-
-  // diagram renderer interpolates the entity/cluster/link name into
-  // `<!--class …-->`, `<!--cluster …-->` and `<!--link … to …-->` without
-  // the `--` defang, so `x-->` closes the comment and `<script>evil()</script>`
-  // becomes a live element -- well-formed XML, which is why parsesAsXml alone
-  // does not catch it and `liveMarkup` exists. The jar emits
-  // `<!--class x- -><script>evil()</script><!- - -->`
-  // (`findings/oracles/comment-close/jar.svg`).
-  it.todo(
-    'class "x--><script>evil()</script><!--" emits <!--class x- ->…<!- - --> (class/renderer-group.ts:83) and liveMarkup is empty',
-  );
-  it.todo(
-    'package "p--><script>…<!--" emits <!--cluster p- ->…--> (class/renderer-group.ts:93) and liveMarkup is empty',
-  );
-  it.todo(
-    'A -> "x--><script>…<!--" emits <!--link A to x- ->…--> (class/renderer-group.ts:123) and liveMarkup is empty',
-  );
-  it.todo('object "x--><script>…<!--" (class renderer) emits a defanged comment and liveMarkup is empty');
+  // Fixed by SI-saea T3c (D8): the class-diagram renderer interpolates the
+  // entity/cluster/link name into `<!--class …-->`, `<!--cluster …-->` and
+  // `<!--link … to …-->` via `escapeComment` (`class/renderer-group.ts`),
+  // which defangs `--` the way the jar's `XmlWriter.comment` does
+  // (`XmlWriter.java:117-119`). Before the fix `x-->` closed the comment
+  // early and `<script>evil()</script>` became a live element --
+  // well-formed XML, which is why `parsesAsXml` alone did not catch it and
+  // `liveMarkup` exists. Byte-for-byte pins against the two oracles below.
+  it('class "x--><script>evil()</script><!--" emits the jar\'s defanged comment (class/renderer-group.ts wrapEntity) and liveMarkup is empty', () => {
+    const svg = expectSafe(`@startuml\nclass "${COMMENT_PAYLOAD}"\nclass A\nA -> "${COMMENT_PAYLOAD}"\n@enduml`);
+    // Oracle `findings/oracles/comment-close/jar.svg`.
+    expect(svg).toContain('<!--class x- -><script>evil()</script><!- - -->');
+  });
+
+  it('package "p--><script>…<!--" { class B } emits the jar\'s defanged cluster comment (class/renderer-group.ts wrapCluster) and liveMarkup is empty', () => {
+    const svg = expectSafe(`@startuml\npackage "p${COMMENT_PAYLOAD}" {\nclass B\n}\n@enduml`);
+    // Oracle `findings/oracles/comment-close/jar.svg`'s cluster comment is
+    // `<!--cluster p- -><script>evil()</script><!- - -->` for the payload
+    // `p<COMMENT_PAYLOAD>` there; this probe's own payload is `p` prefixed
+    // onto `COMMENT_PAYLOAD`, producing the same defang shape.
+    expect(svg).toContain('<!--cluster px- -><script>evil()</script><!- - -->');
+  });
+
+  it('A -> "x--><script>…<!--" emits the jar\'s defanged link comment (class/renderer-group.ts wrapLink) and liveMarkup is empty', () => {
+    const svg = expectSafe(`@startuml\nclass "${COMMENT_PAYLOAD}"\nclass A\nA -> "${COMMENT_PAYLOAD}"\n@enduml`);
+    // Oracle `findings/oracles/comment-close/jar.svg`.
+    expect(svg).toContain('<!--link A to x- -><script>evil()</script><!- - -->');
+  });
+
+  it('object "x--><script>…<!--" (class renderer, wrapEntity) emits a defanged comment and liveMarkup is empty', () => {
+    const svg = expectSafe(`@startuml\nobject "${COMMENT_PAYLOAD}"\n@enduml`);
+    // `object` shares `class/renderer-group.ts#wrapEntity` with `class`, so
+    // it emits the same `<!--class …-->` tag (not `<!--object …-->`).
+    expect(svg).toContain('<!--class x- -><script>evil()</script><!- - -->');
+  });
+
+  // `state/renderer-group.ts#wrapLink` also got `escapeComment` (D8), but
+  // this port's state-transition grammar drops quoted endpoint names today
+  // (T1 finding), so `[*] --> "COMMENT_PAYLOAD"` never reaches a transition
+  // at all -- measured directly: the rendered SVG has no `<g class="link">`
+  // and no `<!--link …-->` comment of any kind. The sink is routed anyway
+  // (D8's "route it anyway") for when the grammar gap closes; this probe
+  // pins today's actual, narrower observable: no live `<script>` and no
+  // link comment to defang.
+  it('state [*] --> "x--><script>…<!--" emits no link (transition grammar drops the quoted endpoint) and liveMarkup is empty', () => {
+    const svg = expectSafe(
+      `@startuml\nstate "${COMMENT_PAYLOAD}"\n[*] --> "${COMMENT_PAYLOAD}"\n"${COMMENT_PAYLOAD}" --> [*]\n@enduml`,
+    );
+    expect(svg).not.toContain('<!--link');
+    expect(svg).not.toContain('<g class="link"');
+  });
 });
