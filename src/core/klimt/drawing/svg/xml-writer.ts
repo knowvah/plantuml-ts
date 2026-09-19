@@ -23,7 +23,7 @@
  *   method.
  */
 
-import { escapeAttribute, escapeText } from '../../../svg-format.js';
+import { escapeAttribute, escapeComment, escapeText } from '../../../svg-format.js';
 import { UGroupType } from '../../shape/UGroup.js';
 
 /** A piece of content that can sit inside an `XmlNode`: a nested element
@@ -107,9 +107,7 @@ export class XmlWriter {
     this.indent(this.openTags.length);
     this.out += '<!--';
     if (value !== null) {
-      let safe = value.split('--').join('- -');
-      if (safe.endsWith('-')) safe = safe + ' ';
-      this.out += safe;
+      this.out += escapeComment(value);
     }
     this.out += '-->';
     this.newline();

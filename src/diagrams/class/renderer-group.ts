@@ -38,6 +38,7 @@
  * conformance (also `data-*`, also stripped).
  */
 import { group } from '../../core/svg.js';
+import { escapeComment } from '../../core/svg-format.js';
 import { getLinkTypeName, looksLikeRevertedForSvg } from '../../core/svek/extremity/link-decor.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
 
@@ -68,7 +69,9 @@ export function wrapEntity(
   withComment: boolean,
   inner: string,
 ): string {
-  const comment = withComment ? `<!--class ${name}-->` : '';
+  // SI-saea T3c/D8: `escapeComment` defangs `--` the way the jar's
+  // `XmlWriter.comment` does, closing the `x--><script>...` breakout.
+  const comment = withComment ? '<!--class ' + escapeComment(name) + '-->' : '';
   // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
   return comment + group(inner, { class: 'entity', 'data-qualified-name': qualifiedName, id: uid });
 }
@@ -79,7 +82,8 @@ export function wrapEntity(
  *  synthetic-`##`-name comment skip `core/svek/Cluster.ts#drawU` already
  *  ports, reproduced here for the class-local plain-string path). */
 export function wrapCluster(name: string, uid: string, qualifiedName: string, inner: string): string {
-  const comment = name.startsWith('##') ? '' : `<!--cluster ${name}-->`;
+  // SI-saea T3c/D8: `escapeComment` defangs `--`, see {@link wrapEntity}.
+  const comment = name.startsWith('##') ? '' : '<!--cluster ' + escapeComment(name) + '-->';
   // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
   return comment + group(inner, { class: 'cluster', 'data-qualified-name': qualifiedName, id: uid });
 }
@@ -110,7 +114,12 @@ export interface WrapLinkInfo {
 export function wrapLink(info: WrapLinkInfo, inner: string): string {
   const { from, to, uid, fromUid, toUid, decor1, decor2 } = info;
   const reversed = looksLikeRevertedForSvg(decor1, decor2);
-  const comment = reversed ? `<!--reverse link ${from} to ${to}-->` : `<!--link ${from} to ${to}-->`;
+  // SI-saea T3c/D8: `escapeComment` defangs `--`, see {@link wrapEntity}.
+  const efrom = escapeComment(from);
+  const eto = escapeComment(to);
+  const comment = reversed
+    ? '<!--reverse link ' + efrom + ' to ' + eto + '-->'
+    : '<!--link ' + efrom + ' to ' + eto + '-->';
   const linkType = getLinkTypeName(decor1, decor2);
   return (
     comment +
