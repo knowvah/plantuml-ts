@@ -2,3 +2,10 @@
 
 | Date | Task | Decision | Why | Flag for review |
 |---|---|---|---|---|
+| 2026-09-19 | B1 | Execution plan: Batch 1 SERIALIZED (T6 by orchestrator → T2 agent → T1 agent), not parallel | memory `batch-parallelism-needs-worktrees`: one tree, one git index, concurrent `npm test` races; wall-clock gain (~10 min) not worth worktree + `npm install` overhead | no |
+| 2026-09-19 | T1 | `tooltip-gt` oracle: jar `title="a>b"`, `>` RAW → D3 stands, stop 4 not triggered | quoted bytes in findings/audit-table.md | no |
+| 2026-09-19 | T1 | `font-name-chars` oracle: jar `font-family="a'b&amp;c&lt;d"` (swap `"`→`'` AND escape `& <`); port emits `a&b<c` raw → T3a target bytes are the jar's | oracle bytes | no |
+| 2026-09-19 | T1 | Brief's `class "n" as "a b"` is a jar syntax error (NameAndCodeParser.java:52-67: quoted CODE only as `[%g]…[%g]`); oracle substituted `class "a b"` — jar `<!--class a b-->`, `id="C-to-a b"`, port byte-identical → D4 stands | agent verified against the Java | no |
+| 2026-09-19 | T1 | **STOP 1 TRIGGERED.** NEW live injection in COMMENT context: `class "x--><script>evil()</script><!--"` emits a real `<script>` element — sinks `src/diagrams/class/renderer-group.ts:83/:93/:123` and `src/diagrams/state/renderer-group.ts:112` template names into `<!--…-->` without the jar's `--` defang (`XmlWriter.comment`, port `xml-writer.ts:104-118`; jar oracle `comment-close`: `<!--class x- -><script>…`). Files in no task's write-set. Orchestrator verified by rendering (2026-09-19). Halted for human decision; Batch 1 gates run meanwhile. | autonomous-execution stop rule; D7's parse gate cannot see it (well-formed XML) | YES |
+| 2026-09-19 | B1 | Removed untracked Serena auto-init artifacts (`findings/oracles/{.agent-notes,.gitignore}`) T1's tooling dropped; never committed | junk, not evidence | no |
+| 2026-09-19 | B1 | Gates: npm test EXIT 0 (727 files collected = on-disk), typecheck 0 errors, lint exit 0, build clean, catalog no drift, svg-conformance 27/3427 unmoved (T2 report, verified on T2's commit); write-set check: every changed path in a B1 write-set (docs/catalog.md pre-authorised for T2) | batch close-out | no |

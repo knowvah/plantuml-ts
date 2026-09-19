@@ -93,7 +93,7 @@ file count with the on-disk count (726 at baseline).
 
 | Batch | Tasks | Status |
 |---|---|---|
-| [1](batch-1/overview.md) | T1 audit + oracles · T2 escaper consolidation · T6 sanitizeSvg disposition | [ ] |
+| [1](batch-1/overview.md) | T1 audit + oracles · T2 escaper consolidation · T6 sanitizeSvg disposition | [x] 2026-09-19 (03d916cb / 74259771 / c340f196) |
 | [2](batch-2/overview.md) | T3a attribute seam · T3b paint + shell | [ ] |
 | [3](batch-3/overview.md) | T4 shapes/markers · T5a diagram sinks · T5b coord-shift/latex | [ ] |
 | [4](batch-4/overview.md) | T7 lint gate + close-out | [ ] |
