@@ -159,8 +159,8 @@ const SHIFTABLE_ATTR_RE = /\b(x|y|cx|cy|x1|y1|x2|y2|points|d|transform)="([^"]*)
 export function shiftFragmentBody(body: string, dx: number, dy: number): string {
   if (dx === 0 && dy === 0) return body;
   return body.replace(SHIFTABLE_ATTR_RE, (match, name: string, value: string) => {
-    if (X_ATTRS.has(name)) return `${name}="${shiftNumberToken(value, dx)}"`;
-    if (Y_ATTRS.has(name)) return `${name}="${shiftNumberToken(value, dy)}"`;
+    if (X_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dx)]]).trimStart();
+    if (Y_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dy)]]).trimStart();
     if (name === 'points') return attrs([['points', shiftPoints(value, dx, dy)]]).trimStart();
     if (name === 'd') return attrs([['d', shiftPathD(value, dx, dy)]]).trimStart();
     return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();

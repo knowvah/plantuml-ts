@@ -83,4 +83,27 @@ describe('SVG shape markup has one emission seam', () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  /**
+   * D5/D8 (decisions.md) ship the `no-restricted-syntax` gate with no
+   * per-sink allowlist: every attribute/comment template sink under `src/`
+   * (outside the DOT/HTML-like-label file-pattern exclusion in
+   * `eslint.config.ts`) must actually route through `attrs()`/
+   * `attrsFromRecord()`/`escapeComment()`, not silence the rule locally.
+   * This is the ledger stop 7 depends on -- more than two disables means
+   * the gate needs review, not another exemption.
+   */
+  it('no line under src/ disables no-restricted-syntax', () => {
+    const offenders: string[] = [];
+    for (const file of tsFiles(join(REPO, 'src'))) {
+      const rel = file.slice(REPO.length + 1);
+      const lines = readFileSync(file, 'utf8').split('\n');
+      lines.forEach((line, i) => {
+        if (line.includes('eslint-disable') && line.includes('no-restricted-syntax')) {
+          offenders.push(`${rel}:${i + 1}`);
+        }
+      });
+    }
+    expect(offenders).toEqual([]);
+  });
 });
