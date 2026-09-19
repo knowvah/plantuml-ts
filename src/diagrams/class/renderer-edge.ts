@@ -78,25 +78,6 @@ function buildPathData(points: EdgeGeo['points']): string {
  * `SvekEdge#uniq`, duplicated per this codebase's small-helper-per-call-
  * site convention -- see `renderer-group.ts`'s own `escAttr` precedent).
  */
-// XML-attribute-value escaping for `linkIdForSvg` -- a local duplicate of
-// `core/svg.ts`'s own (module-private) `escapeXml`/`renderer-group.ts`'s
-// `escAttr`, per this codebase's established one-small-helper-per-call-site
-// convention. `path()`'s own `attrs()` never escapes its values (every
-// OTHER caller passes colors/keywords with no XML-significant chars), so a
-// classifier name containing `<`/`>`/`&`/`"` (a C++ template type,
-// nagega-30-poso418: `boost::function<ResultE(...)>`) needs escaping here,
-// at the one call site that can carry arbitrary user text into an attribute.
-// `>` deliberately NOT escaped -- jar-verified (nagega-30-poso418's own
-// template-syntax id): Java's XML serializer escapes `&`/`<`/the attribute
-// quote char but leaves a literal `>` in an attribute value untouched (only
-// `&`/`<`/quote are STRICTLY required by the XML spec; `>` escaping is
-// optional and this serializer skips it).
-const ID_XML_UNSAFE_RE = new RegExp('[&<"]', 'g');
-const ID_XML_REPLACEMENTS: Record<string, string> = { '&': '&amp;', '<': '&lt;', '"': '&quot;' };
-function escapeIdAttr(value: string): string {
-  return value.replace(ID_XML_UNSAFE_RE, (ch) => ID_XML_REPLACEMENTS[ch]!);
-}
-
 export function linkIdForSvg(geo: EdgeGeo, ids: Set<string>, syntheticNames: ReadonlyMap<string, string>): string {
   // G2 N9: `idEntity1`/`idEntity2` are ALREADY the nsSep-aware leaf name
   // (`class-relationship-parser.ts#idLeaf`, computed at parse time from the
@@ -108,8 +89,12 @@ export function linkIdForSvg(geo: EdgeGeo, ids: Set<string>, syntheticNames: Rea
   // `"apointN"`/`"<existing>lolN"`, NOT the raw AST id `leafPortion` would
   // otherwise return), falling back further to `leafPortion` for every
   // other (real, user-declared) endpoint.
-  const ent1 = escapeIdAttr(geo.idEntity1 ?? syntheticNames.get(geo.from) ?? leafPortion(geo.from));
-  const ent2 = escapeIdAttr(geo.idEntity2 ?? syntheticNames.get(geo.to) ?? leafPortion(geo.to));
+  // SI-saea T3a/D2: raw here -- `path()`'s `attrs()` now escapes `id`
+  // (a classifier name may carry `<`/`&`/`"`, e.g. a C++ template type,
+  // nagega-30-poso418: `boost::function<ResultE(...)>`). A local pre-escape
+  // here (removed) double-escaped once `attrs()` started escaping.
+  const ent1 = geo.idEntity1 ?? syntheticNames.get(geo.from) ?? leafPortion(geo.from);
+  const ent2 = geo.idEntity2 ?? syntheticNames.get(geo.to) ?? leafPortion(geo.to);
   const decorAtEnt1 = decorName(geo.idEntity1Decor ?? geo.sourceDecor);
   const decorAtEnt2 = decorName(geo.idEntity2Decor ?? geo.targetDecor);
   let base: string;

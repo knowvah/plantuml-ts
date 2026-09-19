@@ -47,23 +47,13 @@
  */
 import { group } from '../../core/svg.js';
 
-// XML-attribute-value escaping — a local duplicate of `core/svg.ts`'s own
-// (module-private, unexported) `escapeXml`, per this codebase's established
-// one-small-helper-per-call-site convention (`class/renderer-group.ts`'s own
-// `escAttr` precedent). Built from a string, not a regex literal containing
-// `<`/`>` — the complexity checker miscounts those.
-const XML_UNSAFE_RE = new RegExp('[&<>"]', 'g');
-const XML_REPLACEMENTS: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
-function escAttr(value: string): string {
-  return value.replace(XML_UNSAFE_RE, (ch) => XML_REPLACEMENTS[ch]!);
-}
-
 /** Wraps a state/pseudostate's rendered body in the jar's `<g
  *  class="entity" data-qualified-name="..." id="...">` group — the
  *  `normal`/`json`/`choice`/composite ('entity'-wrapped, see module doc
  *  comment's composite class dispatch note) case. */
 export function wrapEntity(qualifiedName: string, uid: string, inner: string): string {
-  return group(inner, { class: 'entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
+  return group(inner, { class: 'entity', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Wraps a `'cluster'`-classified composite's OWN shape (`node.
@@ -76,19 +66,19 @@ export function wrapEntity(qualifiedName: string, uid: string, inner: string): s
  *  the composite's own wrap, never its (flat-sibling, G5 C3) children — see
  *  `renderer.ts#renderClusterSiblingMarkup`. */
 export function wrapCluster(qualifiedName: string, uid: string, inner: string): string {
-  return group(inner, { class: 'cluster', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  return group(inner, { class: 'cluster', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Wraps an `initial` pseudostate in the jar's `<g class="start_entity"
  *  data-qualified-name="..." id="...">` group. */
 export function wrapStartEntity(qualifiedName: string, uid: string, inner: string): string {
-  return group(inner, { class: 'start_entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  return group(inner, { class: 'start_entity', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Wraps a `final` pseudostate in the jar's `<g class="end_entity"
  *  data-qualified-name="..." id="...">` group. */
 export function wrapEndEntity(qualifiedName: string, uid: string, inner: string): string {
-  return group(inner, { class: 'end_entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  return group(inner, { class: 'end_entity', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Parameter bundle for {@link wrapLink} — collapsed from 4 positional args

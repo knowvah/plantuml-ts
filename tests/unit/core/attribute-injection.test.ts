@@ -366,17 +366,56 @@ describe('attribute injection probe matrix (audit-table.md, one probe per path)'
     expect(svg).toContain(`font-family="x'onload='alert(1)"`);
   });
 
-  // Known `raw` defect (audit-table.md): both font-family swap sites replace
-  // `"` with `'` but leave `&` and `<` untouched. Oracle
+  // SI-saea T3a/D2: `class/renderer-group.ts`'s local `escAttr` pre-escape
+  // was removed -- `group()`'s `attrsFromRecord` now escapes `data-
+  // qualified-name` exactly once. Before the fix this doubled to
+  // `&amp;quot;` (still well-formed XML, so `expectSafe` alone never
+  // caught it); this pin asserts the exact bytes.
+  it('data-qualified-name escapes a quote exactly once, never &amp;quot;', () => {
+    const svg = expectSafe(`@startuml\nclass N1 as "x\\"y"\nN1 -> N2\n@enduml`);
+    expect(svg).toContain('data-qualified-name="x\\&quot;y"');
+    expect(svg).not.toContain('&amp;quot;');
+  });
+
+  // Formerly a `raw` defect (audit-table.md): the string-based font-family
+  // swap site (`svg-text-font.ts:31`) replaced `"` with `'` but left `&` and
+  // `<` untouched, producing malformed XML. T3a's `formatAttrValue` seam
+  // (`svg.ts`) now escapes every string attribute after the swap. Oracle
   // `findings/oracles/font-name-chars/jar.svg` emits
-  // `font-family="a'b&amp;c&lt;d"`. T3a turns these on.
-  it.todo(
-    'skinparam defaultFontName a"b&c<d emits font-family="a\'b&amp;c&lt;d" and parsesAsXml (sequence path, svg-text-font.ts:31)',
-  );
-  it.todo(
-    'skinparam classFontName a"b&c<d emits font-family="a\'b&amp;c&lt;d" and parsesAsXml (klimt path, svg-graphics-elements.ts:83)',
-  );
-  it.todo('creole <font:a"b&c<d>t</font> emits font-family="a\'b&amp;c&lt;d" and parsesAsXml');
+  // `font-family="a'b&amp;c&lt;d"`.
+  //
+  // `classFontName` was audited as reaching the separate klimt path
+  // (`svg-graphics-elements.ts:83`); measured directly, class diagrams draw
+  // text through the same `core/svg.js#text` string path as `defaultFontName`
+  // (`src/diagrams/class/class-namespace-shape.ts:41` imports `text` from
+  // `../../core/svg.js`), so both skinparams close through this one seam.
+  // The klimt path (`svg-graphics-elements.ts:83`) was checked separately:
+  // its value is set via `XmlNode#setAttribute` and serialized by
+  // `XmlWriter#attribute` (`xml-writer.ts:87`), which already calls
+  // `escapeAttribute` (D1/T2) -- confirmed by rendering a component diagram
+  // with `skinparam defaultFontName a"b&c<d`, which already emitted
+  // `font-family="a'b&amp;c&lt;d"` before this task. No fix needed there.
+  it('skinparam defaultFontName a"b&c<d emits font-family="a\'b&amp;c&lt;d" and parsesAsXml', () => {
+    const svg = expectSafe(`@startuml\nskinparam defaultFontName a"b&c<d\nA -> B\n@enduml`);
+    expect(svg).toContain(`font-family="a'b&amp;c&lt;d"`);
+  });
+
+  it('skinparam classFontName a"b&c<d emits font-family="a\'b&amp;c&lt;d" and parsesAsXml', () => {
+    const svg = expectSafe(`@startuml\nskinparam classFontName a"b&c<d\nclass A\nA -> B\n@enduml`);
+    expect(svg).toContain(`font-family="a'b&amp;c&lt;d"`);
+  });
+
+  it('creole <font:a"b&c<d>t</font> emits font-family="a\'b&amp;c&lt;d" and parsesAsXml', () => {
+    const svg = expectSafe(`@startuml\nA -> B : <font:a"b&c<d>t</font>\n@enduml`);
+    expect(svg).toContain(`font-family="a'b&amp;c&lt;d"`);
+  });
+
+  // D3 gate (decisions.md#d3): the jar writes `title="a>b"` RAW in an
+  // attribute -- oracle `findings/oracles/tooltip-gt/jar.svg`.
+  it('[[url{a>b}]] tooltip renders title="a>b" raw, matching the jar (D3)', () => {
+    const svg = expectSafe(`@startuml\nA -> B : [[http://e.com{a>b} t]]\n@enduml`);
+    expect(svg).toContain('title="a>b" xlink:title="a>b"');
+  });
 
   // NEW finding (audit-table.md, verdict `raw`, comment context): the class-
   // diagram renderer interpolates the entity/cluster/link name into

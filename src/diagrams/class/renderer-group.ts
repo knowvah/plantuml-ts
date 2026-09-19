@@ -41,18 +41,6 @@ import { group } from '../../core/svg.js';
 import { getLinkTypeName, looksLikeRevertedForSvg } from '../../core/svek/extremity/link-decor.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
 
-// XML-attribute-value escaping — a local duplicate of `core/svg.ts`'s own
-// (module-private, unexported) `escapeXml`, per this codebase's
-// established one-small-helper-per-call-site convention (e.g. `Cluster.ts`
-// /`DecorateEntityImage.ts`'s duplicated `requireGroups`). Built from a
-// string, not a regex literal containing `<`/`>` — the complexity checker
-// miscounts those (same workaround `core/svg.ts`/`paint.ts` already use).
-const XML_UNSAFE_RE = new RegExp('[&<>"]', 'g');
-const XML_REPLACEMENTS: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
-function escAttr(value: string): string {
-  return value.replace(XML_UNSAFE_RE, (ch) => XML_REPLACEMENTS[ch]!);
-}
-
 /** Leaf (unqualified) portion of a dotted `Classifier.id`/`Relationship
  *  .from`/`.to` — the jar entity comment (`<!--class NAME-->`) and link
  *  comment (`<!--link X to Y-->`) both use the bare declared/alias name,
@@ -81,7 +69,8 @@ export function wrapEntity(
   inner: string,
 ): string {
   const comment = withComment ? `<!--class ${name}-->` : '';
-  return comment + group(inner, { class: 'entity', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
+  return comment + group(inner, { class: 'entity', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Wraps a namespace's rendered body in the jar's `<g class="cluster"
@@ -91,7 +80,8 @@ export function wrapEntity(
  *  ports, reproduced here for the class-local plain-string path). */
 export function wrapCluster(name: string, uid: string, qualifiedName: string, inner: string): string {
   const comment = name.startsWith('##') ? '' : `<!--cluster ${name}-->`;
-  return comment + group(inner, { class: 'cluster', 'data-qualified-name': escAttr(qualifiedName), id: uid });
+  // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
+  return comment + group(inner, { class: 'cluster', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Parameter bundle for {@link wrapLink} — collapsed from 8 positional
