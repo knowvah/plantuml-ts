@@ -16,7 +16,7 @@
 import { paintToSvg } from './paint.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
-import { DEFAULT_SVG_DECIMALS, fmt, formatDecimal, shortenColor } from './svg-format.js';
+import { DEFAULT_SVG_DECIMALS, escapeAttribute, escapeText, fmt, formatDecimal, shortenColor } from './svg-format.js';
 
 // Arrow-marker builders live in ./svg-markers (no Paint involvement); re-export
 // them here so existing importers of `core/svg.js` are unaffected by the split.
@@ -127,50 +127,33 @@ export type SvgAttrs = Record<string, string | number | undefined>;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-// Named-entity replacements for the XML-significant characters. Built from a
-// string (not a regex literal) — the complexity checker miscounts regex
-// literals containing `<`/`>` (same workaround as paint.ts).
-const XML_ENTITIES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-};
-const XML_RE = new RegExp('[&<>"]', 'g');
-const XML_TEXT_RE = new RegExp('[&<]', 'g');
-
-/**
- * Escape characters that are special in an XML **attribute value**.
- */
+/** Escapes `& < "` in an XML **attribute value**; `>` stays RAW (oracle
+ *  `title="a>b"`, SI-saea D3). Delegates to {@link escapeAttribute}.
+ *  @see .../klimt/drawing/svg/XmlWriter.java#escapeAttribute (:264-275) */
 export function escapeXml(s: string): string {
-  return s.replace(XML_RE, (ch) => XML_ENTITIES[ch] ?? ch);
+  return escapeAttribute(s);
 }
 
-/**
- * Escape characters that are special in XML **text content** -- `&` and `<`
- * only, which is what the jar's serializer emits. Verified against the oracle
- * jar: `say "hi" here` and `a > b & c` come back as `say "hi" here` and
- * `a &amp; b`-style output with the `"` and `>` RAW; only `&` and `<` are
- * entity-encoded.
- *
- * Attribute values still need `"` (and keep `>`) -- that is {@link escapeXml}.
- * Using the attribute escaper for text content over-escaped `"` and `>`; the
- * conformance harness could not see it because `normalize.ts` parses both
- * forms to the same DOM text node.
- */
+/** Escapes `& <` only in XML **text content** -- `"`/`>` stay RAW, matching
+ *  the jar. Delegates to {@link escapeText}. See {@link escapeXml} for
+ *  attribute values, which additionally need `"`.
+ *  @see .../klimt/drawing/svg/XmlWriter.java#escapeText (:264-275) */
 export function escapeXmlText(s: string): string {
-  return s.replace(XML_TEXT_RE, (ch) => XML_ENTITIES[ch] ?? ch);
+  return escapeText(s);
 }
 
 /** The single point where an attribute value becomes text: numbers take
  *  rule 1's formatting, {@link COLOR_ATTRS} take rule 2's shortening (by
- *  NAME, so a `#`-prefixed id/href survives). Applied here so `attrs` and
- *  `attrsFromRecord` cannot disagree — they did, and visibility icons
- *  emitted `fill="#FFFF44"` where the jar emits `#FF4`.
+ *  NAME), then every string is XML-escaped LAST (SI-saea T3a/D2) -- a no-op
+ *  for a well-formed value, so this is byte-identical for every existing
+ *  caller. `attrs`/`attrsFromRecord` route through this so they cannot
+ *  disagree — they did, and visibility icons emitted `fill="#FFFF44"`
+ *  where the jar emits `#FF4`.
  *  @see .../klimt/drawing/svg/SvgGraphics.java#shortenColor */
 function formatAttrValue(name: string, value: string | number, decimals: number): string {
   if (typeof value === 'number') return formatDecimal(value, decimals);
-  return COLOR_ATTRS.has(name) ? shortenColor(value) : value;
+  const shortened = COLOR_ATTRS.has(name) ? shortenColor(value) : value;
+  return escapeAttribute(shortened);
 }
 
 /**
@@ -187,7 +170,7 @@ export function attrs(
   const parts: string[] = [];
   for (const [name, value] of entries) {
     if (value !== undefined) {
-      parts.push(`${name}="${formatAttrValue(name, value, decimals)}"`);
+      parts.push(name + '="' + formatAttrValue(name, value, decimals) + '"');
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
@@ -202,7 +185,7 @@ export function attrsFromRecord(record: SvgAttrs, decimals = DEFAULT_SVG_DECIMAL
   const parts: string[] = [];
   for (const [name, value] of Object.entries(record)) {
     if (value !== undefined) {
-      parts.push(`${name}="${formatAttrValue(name, value, decimals)}"`);
+      parts.push(name + '="' + formatAttrValue(name, value, decimals) + '"');
     }
   }
   return parts.length > 0 ? ' ' + parts.join(' ') : '';
@@ -254,7 +237,9 @@ const STOP_COLOR_RE = new RegExp('stop-color="([^"]*)"', 'g');
  */
 function shortenStopColors(def: string): string {
   if (def === '') return '';
-  return def.replace(STOP_COLOR_RE, (_m, color: string) => `stop-color="${shortenColor(color)}"`);
+  // SI-saea T3a/D2: routed through `attrs()` (the seam) rather than a
+  // template literal; `.trim()` drops `attrs()`'s leading separator space.
+  return def.replace(STOP_COLOR_RE, (_m, color: string) => attrs([['stop-color', color]]).trim());
 }
 
 /**
@@ -311,7 +296,7 @@ const ROOT_LENGTH_ADJUST = 'spacing';
  * `klimt/document-shell.ts#withRootGroupAttributes`), so they cannot drift.
  * @see .../klimt/drawing/svg/SvgGraphicsCore.java (getG)
  */
-export const ROOT_GROUP_OPEN = `<g font-family="${ROOT_FONT_FAMILY}" lengthAdjust="${ROOT_LENGTH_ADJUST}">`;
+export const ROOT_GROUP_OPEN = '<g font-family="' + ROOT_FONT_FAMILY + '" lengthAdjust="' + ROOT_LENGTH_ADJUST + '">';
 
 /** Closing tag of {@link ROOT_GROUP_OPEN}'s element. */
 export const ROOT_GROUP_CLOSE = '</g>';
@@ -370,8 +355,8 @@ export function group(id: string, children: string[]): string;
 export function group(children: string, extraAttrs?: SvgAttrs): string;
 export function group(first: string, second?: string[] | SvgAttrs): string {
   if (Array.isArray(second)) {
-    // Legacy overload: group(id, children[])
-    return `<g id="${escapeXml(first)}">${second.join('')}</g>`;
+    // Legacy overload: group(id, children[]) -- escaped via the shared seam.
+    return '<g id="' + escapeXml(first) + '">' + second.join('') + '</g>';
   }
   // New overload: group(children, extraAttrs?)
   // After the Array.isArray guard, `second` is narrowed to SvgAttrs | undefined
@@ -398,17 +383,17 @@ export function linkWrap(
   url: { readonly url: string; readonly tooltip: string },
   target = '_top',
 ): string {
-  const href = escapeXml(url.url);
-  const title = escapeXml(url.tooltip);
+  // SI-saea T3a/D2: raw values in -- `attrs()` escapes via `formatAttrValue`.
+  // A pre-escape here (removed) double-escaped (`&amp;quot;`).
   const a = attrs([
     ['target', target],
-    ['href', href],
-    ['xlink:href', href],
+    ['href', url.url],
+    ['xlink:href', url.url],
     ['xlink:type', 'simple'],
     ['xlink:actuate', 'onRequest'],
     ['xlink:show', 'new'],
-    ['title', title],
-    ['xlink:title', title],
+    ['title', url.tooltip],
+    ['xlink:title', url.tooltip],
   ] as const);
   return `<a${a}>${children}</a>`;
 }
@@ -434,9 +419,13 @@ export function defs(children: string[]): string {
  * @param content - Inner HTML/MathML string (verbatim, not escaped).
  */
 export function foreignObject(x: number, y: number, w: number, h: number, content: string): string {
-  return (
-    `<foreignObject x="${fmt(x)}" y="${fmt(y)}" width="${fmt(w)}" height="${fmt(h)}">` + content + `</foreignObject>`
-  );
+  const a = attrs([
+    ['x', x],
+    ['y', y],
+    ['width', w],
+    ['height', h],
+  ] as const);
+  return '<foreignObject' + a + '>' + content + '</foreignObject>';
 }
 
 // ---------------------------------------------------------------------------
@@ -530,10 +519,11 @@ export function svgRoot(
   bgColor = '#FFFFFF',
   extraDefs = '',
 ): string {
-  // Escaped ONCE, up front: `bgColor` is a public parameter and feeds both
-  // the marker fills below and the canvas rect. `escapeXml` is what the
-  // jar's DOM serializer does to every attribute (`SvgGraphics.java:598/882`
-  // set `fill` on an `XmlNode`) -- a no-op for a resolved color.
+  // SI-saea T3a/D2: `bg` feeds ONLY the marker fills below -- `svg-markers.ts`
+  // still templates it directly (T4 removes this pre-escape once the
+  // markers move onto the seam). The canvas rect below goes through
+  // `attrs()`, which escapes on its own, so it takes the RAW `bgColor`;
+  // handing it `bg` too would double-escape.
   const bg = escapeXml(bgColor);
   const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bg));
   // Gradients are lifted out of the children FIRST so they can ride in the
@@ -542,18 +532,23 @@ export function svgRoot(
   const lifted = extractGradientDefs(children.join(''));
   const defsBlock = defs([...markers, extraDefs, lifted.defs]);
   const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
-  const bgRect = isSolid ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bg)}"/>` : '';
+  const rectAttrs = attrs([
+    ['width', width],
+    ['height', height],
+    ['fill', bgColor],
+  ] as const);
+  const bgRect = isSolid ? '<rect' + rectAttrs + '/>' : '';
   // Rule 3: `font-family`/`lengthAdjust` ride on the root `<g>` and are
   // inherited, so no `<text>` below repeats them (`svg-shapes.ts#text`).
   // `<defs>` stays OUTSIDE that group, matching the jar's `<defs/><g …>`
   // child order. Gradient de-dup still spans the whole document, exactly
   // as before — the `<g>` tags are inert to `GRADIENT_DEF_RE`.
   const body = defsBlock + ROOT_GROUP_OPEN + bgRect + lifted.body + ROOT_GROUP_CLOSE;
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" ` +
-    `width="${fmt(width)}" height="${fmt(height)}" ` +
-    `viewBox="0 0 ${fmt(width)} ${fmt(height)}">` +
-    body +
-    `</svg>`
-  );
+  const rootAttrs = attrs([
+    ['xmlns', 'http://www.w3.org/2000/svg'],
+    ['width', width],
+    ['height', height],
+    ['viewBox', '0 0 ' + fmt(width) + ' ' + fmt(height)],
+  ] as const);
+  return '<svg' + rootAttrs + '>' + body + '</svg>';
 }

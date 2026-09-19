@@ -1016,6 +1016,28 @@ describe('rule 5 — no textLength on single-glyph text', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// SI-saea T3a — attribute values escaped once at `formatAttrValue` (D2/D3)
+// ---------------------------------------------------------------------------
+describe('SI-saea T3a — attribute escaping seam', () => {
+  it('escapes & < " but leaves > raw in an attribute value (D3)', () => {
+    // Oracle `findings/oracles/tooltip-gt/jar.svg`: jar writes `title="a>b"`
+    // raw -- `>` is not one of the three XmlWriter escapes an attribute gets.
+    expect(attrs([['title', 'a"b<c&d>e']])).toBe(' title="a&quot;b&lt;c&amp;d>e"');
+  });
+
+  it('linkWrap never double-escapes a quote in url/tooltip', () => {
+    const result = linkWrap('<rect/>', { url: 'http://x.com/q', tooltip: 'a "tip"' });
+    expect(result).not.toContain('&amp;quot;');
+    expect(result).toContain('title="a &quot;tip&quot;"');
+    expect(result).toContain('xlink:title="a &quot;tip&quot;"');
+  });
+
+  it('group(id, children) id escaping is unaffected by the D3 raw ">" rule', () => {
+    expect(group('a"b<&', [])).toBe('<g id="a&quot;b&lt;&amp;"></g>');
+  });
+});
+
 describe('rule 6 — opacity formatting', () => {
   it('formats opacity at max(decimals, 2) places with trailing zeros trimmed', () => {
     expect(rect(0, 0, 1, 1, { opacity: 0.5 })).toContain('opacity="0.5"');
