@@ -228,8 +228,11 @@ export async function fetchInclude(url: string): Promise<string> {
  * `!includedef` and `!import` are NOT scanned: neither names a fetchable file in
  * this port (see `IncludeExecutor#executeIncludeDef` / `#executeImport`).
  */
-const INCLUDE_RE = /^\s*!include(?:url|_once|_many)?\s+(\S.*?)\s*$/;
-const INCLUDESUB_RE = /^\s*!includesub\s+(\S.*?)\s*$/;
+// Applied to a `trimEnd()`ed line, so `$` is the last non-blank character
+// and the capture needs no lazy `.*?` / `\s*$` pair -- that pair backtracks
+// quadratically over a long trailing run of blanks (CodeQL js/polynomial-redos).
+const INCLUDE_RE = /^\s*!include(?:url|_once|_many)?\s+(\S.*)$/;
+const INCLUDESUB_RE = /^\s*!includesub\s+(\S.*)$/;
 
 /** Strip the block selector: `!include foo.puml!SUB` fetches `foo.puml`. */
 function fileOf(target: string): string {
@@ -238,7 +241,8 @@ function fileOf(target: string): string {
 }
 
 /** The include targets named on one line, if any. */
-function targetOf(line: string): string | undefined {
+function targetOf(rawLine: string): string | undefined {
+  const line = rawLine.trimEnd();
   const include = INCLUDE_RE.exec(line);
   if (include !== null) return fileOf(include[1]!);
 

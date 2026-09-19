@@ -371,7 +371,7 @@ export function group(children: string, extraAttrs?: SvgAttrs): string;
 export function group(first: string, second?: string[] | SvgAttrs): string {
   if (Array.isArray(second)) {
     // Legacy overload: group(id, children[])
-    return `<g id="${first}">${second.join('')}</g>`;
+    return `<g id="${escapeXml(first)}">${second.join('')}</g>`;
   }
   // New overload: group(children, extraAttrs?)
   // After the Array.isArray guard, `second` is narrowed to SvgAttrs | undefined
@@ -460,9 +460,22 @@ export function foreignObject(x: number, y: number, w: number, h: number, conten
  */
 // Matches one inline gradient def. Built from a string (not a regex literal) —
 // the complexity checker miscounts `<`/`>` in literals. The id capture is the
-// FNV/base36 content-hash `paintToSvg` emits (`g` + [0-9a-z]); `[\s\S]*?` is
-// newline-safe and non-greedy so adjacent distinct defs don't merge.
-const GRADIENT_DEF_RE = new RegExp('<linearGradient id="(g[0-9a-z]+)"[\\s\\S]*?</linearGradient>', 'g');
+// FNV/base36 content-hash `paintToSvg` emits (`g` + [0-9a-z]). Scanned with
+// `indexOf` rather than a regex: a lazy `[\s\S]*?` over library input is
+// quadratic when open tags outnumber close tags (CodeQL js/polynomial-redos).
+const GRADIENT_OPEN = '<linearGradient id="';
+const GRADIENT_CLOSE = '</linearGradient>';
+const GRADIENT_ID_RE = /^g[0-9a-z]+$/;
+
+/** The `id` of the `<linearGradient id="…"` opening at `at`, or undefined
+ *  when the quoted value is not a `paintToSvg` hash. */
+function gradientIdAt(body: string, at: number): string | undefined {
+  const idStart = at + GRADIENT_OPEN.length;
+  const idEnd = body.indexOf('"', idStart);
+  if (idEnd === -1) return undefined;
+  const id = body.substring(idStart, idEnd);
+  return GRADIENT_ID_RE.test(id) ? id : undefined;
+}
 
 /**
  * Lift every inline `<linearGradient>` out of `body` and return them, deduped
@@ -483,14 +496,31 @@ const GRADIENT_DEF_RE = new RegExp('<linearGradient id="(g[0-9a-z]+)"[\\s\\S]*?<
 export function extractGradientDefs(body: string): { body: string; defs: string } {
   const seen = new Set<string>();
   const found: string[] = [];
-  const stripped = body.replace(GRADIENT_DEF_RE, (match, id: string) => {
+  const kept: string[] = [];
+  let cursor = 0;
+  for (;;) {
+    const open = body.indexOf(GRADIENT_OPEN, cursor);
+    if (open === -1) break;
+    const id = gradientIdAt(body, open);
+    if (id === undefined) {
+      // Not a `paintToSvg` hash: keep the text and scan on past this open.
+      kept.push(body.substring(cursor, open + GRADIENT_OPEN.length));
+      cursor = open + GRADIENT_OPEN.length;
+      continue;
+    }
+    const close = body.indexOf(GRADIENT_CLOSE, open);
+    // No close tag after this open means none after any later open either.
+    if (close === -1) break;
+    const end = close + GRADIENT_CLOSE.length;
+    kept.push(body.substring(cursor, open));
     if (!seen.has(id)) {
       seen.add(id);
-      found.push(match);
+      found.push(body.substring(open, end));
     }
-    return '';
-  });
-  return { body: stripped, defs: found.join('') };
+    cursor = end;
+  }
+  kept.push(body.substring(cursor));
+  return { body: kept.join(''), defs: found.join('') };
 }
 
 export function svgRoot(
@@ -500,14 +530,19 @@ export function svgRoot(
   bgColor = '#FFFFFF',
   extraDefs = '',
 ): string {
-  const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bgColor));
+  // Escaped ONCE, up front: `bgColor` is a public parameter and feeds both
+  // the marker fills below and the canvas rect. `escapeXml` is what the
+  // jar's DOM serializer does to every attribute (`SvgGraphics.java:598/882`
+  // set `fill` on an `XmlNode`) -- a no-op for a resolved color.
+  const bg = escapeXml(bgColor);
+  const markers = ALL_ARROW_TYPES.map((t) => arrowHead(t, bg));
   // Gradients are lifted out of the children FIRST so they can ride in the
   // same `<defs>` the markers do, as `SvgGraphics#createSvgGradient` puts
   // them (`:404`).
   const lifted = extractGradientDefs(children.join(''));
   const defsBlock = defs([...markers, extraDefs, lifted.defs]);
   const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
-  const bgRect = isSolid ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bgColor)}"/>` : '';
+  const bgRect = isSolid ? `<rect width="${fmt(width)}" height="${fmt(height)}" fill="${shortenColor(bg)}"/>` : '';
   // Rule 3: `font-family`/`lengthAdjust` ride on the root `<g>` and are
   // inherited, so no `<text>` below repeats them (`svg-shapes.ts#text`).
   // `<defs>` stays OUTSIDE that group, matching the jar's `<defs/><g …>`

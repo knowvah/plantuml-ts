@@ -562,3 +562,20 @@ describe('CircularIncludeError — class properties', () => {
     expect(err.name).toBe('CircularIncludeError');
   });
 });
+
+describe('prefetchIncludes — trailing whitespace on the directive line', () => {
+  it('drops trailing blanks and a CR from the target', async () => {
+    const fetcher = vi.fn().mockResolvedValue('');
+    await prefetchIncludes('!include foo.puml   \r\n!includesub bar.puml!S \t\r', fetcher);
+    const calls = fetcher.mock.calls as [string][];
+    expect(calls.map((c) => c[0])).toEqual(['foo.puml', 'bar.puml']);
+  });
+
+  it('keeps interior blanks and drops a long run of trailing blanks', async () => {
+    // The trailing run is the js/polynomial-redos shape CodeQL flagged on the
+    // old `(\S.*?)\s*$` form; the target itself must still come out exact.
+    const fetcher = vi.fn().mockResolvedValue('');
+    await prefetchIncludes(`!include a b.puml${' '.repeat(20000)}`, fetcher);
+    expect(fetcher).toHaveBeenCalledWith('a b.puml');
+  });
+});

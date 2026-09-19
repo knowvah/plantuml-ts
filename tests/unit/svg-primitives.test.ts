@@ -302,6 +302,10 @@ describe('group', () => {
     expect(outer).toBe('<g id="outer"><g id="inner"><circle/></g></g>');
   });
 
+  it('escapes attribute-significant characters in the id', () => {
+    expect(group('a"b<&', [])).toBe('<g id="a&quot;b&lt;&amp;"></g>');
+  });
+
   // New overload: group(children: string, attrs?: SvgAttrs)
   it('wraps a child string in a g element with SvgAttrs', () => {
     const result = group('<rect/>', { transform: 'translate(10,20)' });
@@ -483,6 +487,12 @@ describe('diamond', () => {
 // svgRoot
 // ---------------------------------------------------------------------------
 describe('svgRoot', () => {
+  it('escapes an attribute-breaking background color in the canvas rect', () => {
+    const result = svgRoot(10, 10, [], 'x"onload="alert(1)');
+    expect(result).toContain('fill="x&quot;onload=&quot;alert(1)"');
+    expect(result).not.toContain('onload="alert');
+  });
+
   it('starts with svg element with xmlns', () => {
     const result = svgRoot(400, 300, []);
     expect(result).toMatch(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);

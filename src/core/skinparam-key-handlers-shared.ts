@@ -11,6 +11,7 @@
 
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { resolveColorToSvgHex, parseSimpleColor } from './klimt/color/HColorSet.js';
+import { isColorSpec } from './skinparam-key-normalize.js';
 
 /**
  * SI26 D1: the arrow-label FontColor value as the theme carries it --
@@ -22,8 +23,14 @@ import { resolveColorToSvgHex, parseSimpleColor } from './klimt/color/HColorSet.
  * default. Named divergence: the jar draws such tokens WHITE
  * (`HColorSet#getColorOrWhite`; oracle experiment `bad` in
  * `plans/arrow-label-font-colour/decision-journal.md`).
+ *
+ * @param value the raw skinparam token, BEFORE `resolveColor`'s WHITE fallback
+ * @param color `resolveColor(value)` -- gradient-collapsed, WHITE if unparseable
  */
-export function arrowFontColorValue(color: string): string | undefined {
+export function arrowFontColorValue(value: string, color: string): string | undefined {
+  // Gate on the RAW value: `resolveColor` has already turned an unresolvable
+  // token into `getColorOrWhite`'s WHITE, which would otherwise pass below.
+  if (!isColorSpec(value)) return undefined;
   const lower = color.toLowerCase();
   if (lower !== 'transparent' && lower !== 'background' && parseSimpleColor(color) === undefined) {
     return undefined;

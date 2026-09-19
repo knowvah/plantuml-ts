@@ -40,9 +40,9 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   // experiments b/g in plans/arrow-label-font-colour/decisions.md).
   [
     ['fontcolor', 'defaultfontcolor'],
-    (acc, _v, color) => {
+    (acc, v, color) => {
       acc.text = color;
-      const hex = arrowFontColorValue(color);
+      const hex = arrowFontColorValue(v, color);
       if (hex !== undefined) acc.arrowFontColor = hex;
     },
   ],
@@ -88,8 +88,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   // (T3-T5) draw it verbatim.
   [
     ['arrowfontcolor'],
-    (acc, _v, color) => {
-      const hex = arrowFontColorValue(color);
+    (acc, v, color) => {
+      const hex = arrowFontColorValue(v, color);
       if (hex !== undefined) acc.arrowFontColor = hex;
     },
   ],

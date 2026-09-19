@@ -217,6 +217,49 @@ describe('sanitizeSvg — multiple patterns stripped in one pass', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Adversarial nesting — a single replace pass is not enough (CodeQL
+// js/incomplete-multi-character-sanitization, js/bad-tag-filter)
+// ---------------------------------------------------------------------------
+
+describe('sanitizeSvg — adversarial nesting and tag variants', () => {
+  it('removes a <script> whose close tag carries whitespace and junk', () => {
+    const svg = '<svg><script>alert(1)</script\t\n bar><rect/></svg>';
+    const result = sanitizeSvg(svg);
+    expect(result).not.toContain('<script');
+    expect(result).not.toContain('alert');
+    expect(result).toContain('<rect/>');
+  });
+
+  it('removes a <script> reassembled from a split token', () => {
+    const svg = '<svg><scr<script>x</script>ipt>alert(1)</script><rect/></svg>';
+    const result = sanitizeSvg(svg);
+    expect(result).not.toContain('<script');
+    expect(result).not.toContain('alert');
+  });
+
+  it('removes a <foreignObject> reassembled from a split token', () => {
+    const svg = '<svg><foreign<foreignObject>x</foreignObject>Object><div>leak</div></foreignObject></svg>';
+    const result = sanitizeSvg(svg);
+    expect(result).not.toContain('<foreignObject');
+    expect(result).not.toContain('leak');
+  });
+
+  it('removes a self-closing <script/> whose attribute contains a slash', () => {
+    const svg = '<svg><script src="a/b.js"/><rect/></svg>';
+    const result = sanitizeSvg(svg);
+    expect(result).not.toContain('<script');
+    expect(result).toContain('<rect/>');
+  });
+
+  it('removes an event handler reassembled from a split token', () => {
+    const svg = '<svg><rect on onclick="a"click="b"/></svg>';
+    const result = sanitizeSvg(svg);
+    expect(result).not.toContain('onclick');
+    expect(result).toContain('<rect');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // trustSource bypass
 // ---------------------------------------------------------------------------
 
