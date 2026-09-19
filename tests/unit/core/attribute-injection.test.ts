@@ -63,6 +63,17 @@ function expectSafe(source: string): string {
 }
 
 describe('attribute injection via skinparam colors', () => {
+  // PR #59 review: `<latex>` labels wrap KaTeX in a foreignObject whose
+  // `<div style="…font-family:${theme.fontFamily}…">` interpolated the font
+  // name MID-VALUE -- past every `="`-anchored check. Now emitted via attrs().
+  it('escapes the font name once inside the latex foreignObject style attribute', () => {
+    const svg = expectSafe(
+      `@startuml\nskinparam defaultFontName x"onload="alert(1)\nstart\n:a <latex>x^2</latex> b;\nstop\n@enduml`,
+    );
+    expect(svg).toContain('font-family:x&quot;onload=&quot;alert(1);');
+    expect(svg).not.toContain('onload="alert');
+  });
+
   it('renderSync never emits the raw quote payload as an attribute', () => {
     const svg = renderSync(`@startuml\nskinparam backgroundColor ${PAYLOAD}\nA -> B\n@enduml`);
     expect(svg).not.toContain('onload');

@@ -10,7 +10,10 @@ const tsconfigRootDir = fileURLToPath(new URL('.', import.meta.url));
  *  there would be a syntax error in the emitted markup anyway. Catches
  *  every attribute-value sink that bypasses `attrs()`/`attrsFromRecord()`. */
 const ATTRIBUTE_SINK_SELECTOR = {
-  selector: 'TemplateElement[value.raw=/="$/]',
+  // Any chunk that OPENS an attribute value (`="`) and has not closed it by
+  // the time an interpolation starts -- covers `href="${x}"` and the
+  // mid-value `style="a;b:${x}"` shape alike (PR #59 review).
+  selector: 'TemplateElement[value.raw=/="[^"]*$/]',
   message:
     'Attribute values must go through attrs()/attrsFromRecord() so they are escaped once (plans/svg-attribute-escaping-audit/decisions.md D5).',
 };

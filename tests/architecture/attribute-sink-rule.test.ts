@@ -71,6 +71,14 @@ describe('attribute-sink-rule (D5/D8 fitness gate)', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('(g) flags an interpolation in the MIDDLE of an attribute value -- one D5 error', () => {
+    // PR #59 review: `<div style="a;font-family:${name}">` opened the value
+    // long before the interpolation, so an `="$`-anchored selector missed it.
+    const messages = sinkMessages('const x = `<div style="a;b:${y}">`;', 'src/x.ts');
+    expect(messages).toHaveLength(1);
+    expect(messages[0]?.message).toContain('decisions.md D5');
+  });
+
   it('(d) flags a raw XML-comment template sink -- one D8 error', () => {
     const messages = sinkMessages('const x = `<!--class ${name}-->`;', 'src/x.ts');
     expect(messages).toHaveLength(1);
