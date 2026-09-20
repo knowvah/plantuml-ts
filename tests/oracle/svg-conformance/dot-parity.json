@@ -1,0 +1,230 @@
+{
+  "generatedAt": "2026-09-20T18:46:17.208Z",
+  "measuredAgainstCommit": "993cc2ae",
+  "rows": [
+    {
+      "type": "activity",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "board",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "c4",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "chart",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "chronology",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "class",
+      "comparable": 711,
+      "equal": 710,
+      "pct": "100%",
+      "oracleBlind": 7,
+      "note": "—"
+    },
+    {
+      "type": "component",
+      "comparable": 263,
+      "equal": 259,
+      "pct": "98%",
+      "oracleBlind": 1,
+      "note": "—"
+    },
+    {
+      "type": "ditaa",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "dot",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "ebnf",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "files",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "gantt",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "hcl",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "json",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "mindmap",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "network",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "object",
+      "comparable": 80,
+      "equal": 78,
+      "pct": "98%",
+      "oracleBlind": 1,
+      "note": "—"
+    },
+    {
+      "type": "packet",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "regex",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "salt",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "sequence",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    },
+    {
+      "type": "state",
+      "comparable": 268,
+      "equal": 267,
+      "pct": "100%",
+      "oracleBlind": 0,
+      "note": "—"
+    },
+    {
+      "type": "timing",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "unknown",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "usecase",
+      "comparable": 93,
+      "equal": 93,
+      "pct": "100%",
+      "oracleBlind": 0,
+      "note": "—"
+    },
+    {
+      "type": "wbs",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "wire",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "no oracle captured"
+    },
+    {
+      "type": "yaml",
+      "comparable": 0,
+      "equal": 0,
+      "pct": "—",
+      "oracleBlind": 0,
+      "note": "n/a (no DOT stage)"
+    }
+  ]
+}

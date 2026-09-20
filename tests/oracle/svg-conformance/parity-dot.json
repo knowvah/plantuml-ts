@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-09-20T18:47:21.358Z",
+  "fixtures": [
+    {
+      "slug": "bemepi-16-kuzo249",
+      "type": "dot",
+      "dotEqual": true,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "chain-expansion",
+      "type": "dot",
+      "dotEqual": true,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ciditi-21-xacu710",
+      "type": "dot",
+      "dotEqual": true,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cluster-basic",
+      "type": "dot",
+      "dotEqual": true,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cluster-nested",
+      "type": "dot",
+      "dotEqual": true,
+      "verdict": "conformant"
+    }
+  ]
+}

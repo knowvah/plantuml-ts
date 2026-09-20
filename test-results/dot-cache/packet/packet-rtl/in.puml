@@ -1,0 +1,8 @@
+@startpacketdiag
+packetdiag {
+  scale_direction = rtl
+  0-7: Source Port
+  8-15: Destination Port
+  16-31: Length
+}
+@endpacketdiag

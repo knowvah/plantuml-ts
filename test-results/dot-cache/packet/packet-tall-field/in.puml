@@ -1,0 +1,8 @@
+@startpacketdiag
+packetdiag {
+  0-7: A [height=2]
+  8-15: B
+  16-23: C [height=2]
+  24-31: D
+}
+@endpacketdiag

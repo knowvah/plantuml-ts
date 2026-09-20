@@ -1,0 +1,15 @@
+@startboard
+Activity 1
++User Task 1a
++++red
++User Task 2a
+
+Activity 2
++User Task 2
+++blue1
+++blue2
+
+
+Activity 3
++User Task 3
+@endboard

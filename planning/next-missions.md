@@ -35,6 +35,52 @@ post-D7 measurements.
 
 ---
 
+## `parity-dashboard-refresh` — DONE 2026-09-20, 8 of 8
+
+Branch `feat/parity-dashboard-refresh`, regenerated at `9f095acc`.
+Replaced the July-stale, five-row per-type status tables with one
+generated dashboard, `docs/parity-report.md`
+(`scripts/parity-dashboard.ts`, `npm run parity:dashboard`), composed
+from committed JSON only — no renderer, no jar invoked, sub-second
+regeneration — plus a drift test
+(`tests/unit/scripts/parity-dashboard.test.ts`) that fails whenever
+the committed report no longer matches the JSON on disk. **D9
+(locked): every re-pin commit must regenerate the report; the drift
+test turns "stale dashboard" into a CI failure instead of a silent
+fact** (`plans/parity-dashboard-refresh/decisions.md`).
+
+**Five families that had never been jar-captured now have an oracle**
+(oracle-cache counts, `docs/parity-report.md` Matrix): board 4, chart
+29, chronology 1, files 1, packet 6. Routing and refusal baselines
+were re-pinned additively for all five — none is a svek/DOT type, so
+none gets a DOT-parity row (`n/a (no DOT stage (non-svek))`). Their
+engines stamp no root `data-diagram-type`, so routing agrees 0/4,
+0/29, 0/1, 0/6 (40 `known-misroute` pins on one cited mechanism).
+**Chronology's only oracle is the pinned jar's own "Diagram not
+supported by this release" page** — `PSystemBuilder.java:184` has the
+chronology factory commented out — so its routing/refusal 1/1 is
+NONE == NONE against a placeholder and its survey verdict (`diverged`)
+is not a fidelity number.
+
+**Headline per-type numbers** (corpus / oracle / ratchet pins /
+routing agree / refusal ok — `docs/parity-report.md` Matrix, measured
+2026-09-20T18:50:23.645Z): class 768/723/314/720:723/723:723 ·
+component 384/266/32/266:266/266:266 · object 84/80/34/80:80/80:80 ·
+state 278/273/60/269:273/273:273 · usecase 351/94/19/94:94/94:94 ·
+sequence 1271/1141/0/1124:1141/1132:1141 · activity
+771/373/0/268:373/373:373 · dot 62/5/5/5:5/5:5 · hcl 12/3/1/3:3/3:3 ·
+json 49/50/10/50:50/50:50 · yaml 40/39/6/39:39/39:39 · board
+4/4/—/0:4/4:4 · chart 29/29/—/0:29/29:29 · chronology 1/1/—/1:1/1:1 ·
+files 1/1/—/0:1/1:1 · packet 6/6/—/0:6/6:6. Description-engine ratchet
+total (component + usecase): **51** (32 + 19) — corrects
+`docs/svg-conformance.md`'s stale "5 fixtures ratcheted".
+
+README's five-row "Supported Diagram Types" table (a second,
+independently-stale status surface) is retired in favour of a pointer
+to `docs/parity-report.md`; the docs site mirrors the same file at
+plantuml.knowvah.com/parity.
+
+---
 ## `activity-oracle-harness` — DONE 2026-09-02, 8 of 8 (T0b added mid-mission)
 
 Branch `feat/activity-oracle-harness`, 14 commits, all four gates green at

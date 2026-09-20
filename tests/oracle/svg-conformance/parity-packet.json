@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-09-20T18:48:00.213Z",
+  "fixtures": [
+    {
+      "slug": "packet-auto-position",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 36.968999999999994,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    },
+    {
+      "slug": "packet-colwidth-8",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 33.07499999999999,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "packet-rtl",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 47.861999999999995,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "packet-spanning-field",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 336,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/rect[4]/@width"
+    },
+    {
+      "slug": "packet-tall-field",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 45.111000000000004,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[7]/@y"
+    },
+    {
+      "slug": "packet-tcp-header",
+      "type": "packet",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 78.22500000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    }
+  ]
+}

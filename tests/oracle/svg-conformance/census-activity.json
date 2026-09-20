@@ -1,0 +1,2336 @@
+{
+  "generatedAt": "2026-09-20T18:50:00.745Z",
+  "measuredAgainstCommit": "993cc2ae",
+  "type": "activity+tests/oracle/svg-conformance/census-activity.json",
+  "measurer": "deterministic",
+  "fixtures": [
+    {
+      "slug": "activity-creole-table",
+      "status": "ok",
+      "diffCount": 17,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "bakopu-96-pudu086",
+      "status": "ok",
+      "diffCount": 96,
+      "bucket": "31+"
+    },
+    {
+      "slug": "barada-07-veca157",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "bareka-88-fusu160",
+      "status": "ok",
+      "diffCount": 168,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bazize-75-dedo568",
+      "status": "ok",
+      "diffCount": 282,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bazuma-86-metu353",
+      "status": "ok",
+      "diffCount": 107,
+      "bucket": "31+"
+    },
+    {
+      "slug": "becaje-01-vaji284",
+      "status": "ok",
+      "diffCount": 91,
+      "bucket": "31+"
+    },
+    {
+      "slug": "becanu-19-diti597",
+      "status": "ok",
+      "diffCount": 161,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bedezo-44-more709",
+      "status": "ok",
+      "diffCount": 138,
+      "bucket": "31+"
+    },
+    {
+      "slug": "begivo-34-sicu289",
+      "status": "ok",
+      "diffCount": 142,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bepuku-07-vebe062",
+      "status": "ok",
+      "diffCount": 283,
+      "bucket": "31+"
+    },
+    {
+      "slug": "besaga-58-poli497",
+      "status": "ok",
+      "diffCount": 244,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bideta-97-cezo697",
+      "status": "ok",
+      "diffCount": 141,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bidosa-98-veca008",
+      "status": "ok",
+      "diffCount": 133,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bigide-91-bise382",
+      "status": "ok",
+      "diffCount": 79,
+      "bucket": "31+"
+    },
+    {
+      "slug": "biguku-39-voxu233",
+      "status": "ok",
+      "diffCount": 67,
+      "bucket": "31+"
+    },
+    {
+      "slug": "biredi-08-bama025",
+      "status": "ok",
+      "diffCount": 263,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bixefi-77-moki051",
+      "status": "ok",
+      "diffCount": 158,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bizono-61-sasa740",
+      "status": "ok",
+      "diffCount": 179,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bocaga-53-nale241",
+      "status": "ok",
+      "diffCount": 91,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bolizi-92-pele824",
+      "status": "ok",
+      "diffCount": 207,
+      "bucket": "31+"
+    },
+    {
+      "slug": "boxefe-81-situ725",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "boxoto-53-sifo232",
+      "status": "ok",
+      "diffCount": 829,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bozido-07-geze049",
+      "status": "ok",
+      "diffCount": 84,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bozuro-33-celo170",
+      "status": "ok",
+      "diffCount": 155,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bugaja-31-jaso630",
+      "status": "ok",
+      "diffCount": 190,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bulasi-17-vafa634",
+      "status": "ok",
+      "diffCount": 159,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bumaca-51-kece901",
+      "status": "ok",
+      "diffCount": 143,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bunoxu-10-jabe604",
+      "status": "ok",
+      "diffCount": 156,
+      "bucket": "31+"
+    },
+    {
+      "slug": "caburo-70-buki284",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "caciva-80-kene990",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "cagoze-40-tete366",
+      "status": "ok",
+      "diffCount": 95,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cakeca-72-kara622",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "calenu-74-vigo098",
+      "status": "ok",
+      "diffCount": 273,
+      "bucket": "31+"
+    },
+    {
+      "slug": "camavo-50-kaku123",
+      "status": "ok",
+      "diffCount": 216,
+      "bucket": "31+"
+    },
+    {
+      "slug": "carapo-31-bisi880",
+      "status": "ok",
+      "diffCount": 63,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cejupe-34-muti621",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "cemagu-66-vazo965",
+      "status": "ok",
+      "diffCount": 99,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cemipu-87-dinu624",
+      "status": "ok",
+      "diffCount": 192,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cetica-88-toke482",
+      "status": "ok",
+      "diffCount": 91,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ciceto-21-zanu057",
+      "status": "ok",
+      "diffCount": 197,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cifafo-49-jazi415",
+      "status": "ok",
+      "diffCount": 140,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cigagu-31-rime196",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "ciloke-34-pumi198",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "citire-32-mive114",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "cixave-47-milo698",
+      "status": "ok",
+      "diffCount": 154,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cizixu-00-koro700",
+      "status": "ok",
+      "diffCount": 24,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "copisa-69-xisi273",
+      "status": "ok",
+      "diffCount": 125,
+      "bucket": "31+"
+    },
+    {
+      "slug": "covage-54-pine573",
+      "status": "ok",
+      "diffCount": 182,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cubida-55-meku256",
+      "status": "ok",
+      "diffCount": 34,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cufega-65-beji958",
+      "status": "ok",
+      "diffCount": 129,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cugezi-99-tire097",
+      "status": "ok",
+      "diffCount": 209,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cujoni-21-somi079",
+      "status": "ok",
+      "diffCount": 103,
+      "bucket": "31+"
+    },
+    {
+      "slug": "cutabu-59-cilo276",
+      "status": "ok",
+      "diffCount": 106,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dacuga-41-popo038",
+      "status": "ok",
+      "diffCount": 150,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dakesa-98-mano758",
+      "status": "ok",
+      "diffCount": 11,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "darote-51-kuta407",
+      "status": "ok",
+      "diffCount": 258,
+      "bucket": "31+"
+    },
+    {
+      "slug": "daxare-39-buci637",
+      "status": "ok",
+      "diffCount": 182,
+      "bucket": "31+"
+    },
+    {
+      "slug": "debofa-60-mude568",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "decudi-92-bisu741",
+      "status": "ok",
+      "diffCount": 285,
+      "bucket": "31+"
+    },
+    {
+      "slug": "delide-30-teva601",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "demibe-40-moda439",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "dexero-99-ziru660",
+      "status": "ok",
+      "diffCount": 93,
+      "bucket": "31+"
+    },
+    {
+      "slug": "digexe-63-zifu774",
+      "status": "ok",
+      "diffCount": 140,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dirame-64-cica627",
+      "status": "ok",
+      "diffCount": 75,
+      "bucket": "31+"
+    },
+    {
+      "slug": "disemi-67-keva276",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "dixiku-28-guzo497",
+      "status": "ok",
+      "diffCount": 131,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dotuzi-75-nape254",
+      "status": "ok",
+      "diffCount": 166,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dozaxu-98-xetu961",
+      "status": "ok",
+      "diffCount": 116,
+      "bucket": "31+"
+    },
+    {
+      "slug": "doziki-93-rosi997",
+      "status": "ok",
+      "diffCount": 223,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dulate-94-bupu593",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "dulezi-77-sana210",
+      "status": "ok",
+      "diffCount": 158,
+      "bucket": "31+"
+    },
+    {
+      "slug": "dunejo-33-divo189",
+      "status": "ok",
+      "diffCount": 15,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "dupopo-44-deto131",
+      "status": "ok",
+      "diffCount": 153,
+      "bucket": "31+"
+    },
+    {
+      "slug": "duzumu-46-geve509",
+      "status": "ok",
+      "diffCount": 31,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fabexi-81-dife869",
+      "status": "ok",
+      "diffCount": 66,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fabule-54-pili300",
+      "status": "ok",
+      "diffCount": 13,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "fabuli-92-vemo727",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "fakece-07-koga025",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "farexi-86-xanu521",
+      "status": "ok",
+      "diffCount": 28,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "fatuzu-07-cevu894",
+      "status": "ok",
+      "diffCount": 197,
+      "bucket": "31+"
+    },
+    {
+      "slug": "feceme-58-xodo415",
+      "status": "ok",
+      "diffCount": 117,
+      "bucket": "31+"
+    },
+    {
+      "slug": "felega-00-saxi785",
+      "status": "ok",
+      "diffCount": 123,
+      "bucket": "31+"
+    },
+    {
+      "slug": "femaco-88-bufe808",
+      "status": "ok",
+      "diffCount": 43,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fetizo-39-jace641",
+      "status": "ok",
+      "diffCount": 200,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fibafo-22-foze119",
+      "status": "ok",
+      "diffCount": 378,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "status": "ok",
+      "diffCount": 50,
+      "bucket": "31+"
+    },
+    {
+      "slug": "filela-40-rumo296",
+      "status": "ok",
+      "diffCount": 32,
+      "bucket": "31+"
+    },
+    {
+      "slug": "firibi-00-puki721",
+      "status": "ok",
+      "diffCount": 300,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fisaca-74-deco063",
+      "status": "ok",
+      "diffCount": 43,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fivama-51-cusa142",
+      "status": "ok",
+      "diffCount": 147,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fivone-96-nalo453",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "fofele-65-lozo631",
+      "status": "ok",
+      "diffCount": 29,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "foludi-80-gilo247",
+      "status": "ok",
+      "diffCount": 75,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fomapa-90-bore251",
+      "status": "ok",
+      "diffCount": 104,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fonabu-93-xama593",
+      "status": "ok",
+      "diffCount": 87,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fonebe-54-save009",
+      "status": "ok",
+      "diffCount": 25,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "fotamo-01-rupi481",
+      "status": "ok",
+      "diffCount": 42,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fovaja-48-leso567",
+      "status": "ok",
+      "diffCount": 206,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fufefa-17-faje066",
+      "status": "ok",
+      "diffCount": 158,
+      "bucket": "31+"
+    },
+    {
+      "slug": "fukika-81-gite897",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gabeme-89-tiko230",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gacaja-15-keko600",
+      "status": "ok",
+      "diffCount": 356,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gakelo-29-neno787",
+      "status": "ok",
+      "diffCount": 167,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ganaku-47-muko252",
+      "status": "ok",
+      "diffCount": 166,
+      "bucket": "31+"
+    },
+    {
+      "slug": "garuga-34-debe901",
+      "status": "ok",
+      "diffCount": 121,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gaxezi-48-zesa921",
+      "status": "ok",
+      "diffCount": 46,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gebuzi-30-nulo391",
+      "status": "ok",
+      "diffCount": 124,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gelono-70-zuce760",
+      "status": "ok",
+      "diffCount": 189,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gepetu-15-seba834",
+      "status": "ok",
+      "diffCount": 42,
+      "bucket": "31+"
+    },
+    {
+      "slug": "geremo-94-tecu179",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gesogi-81-xoma900",
+      "status": "ok",
+      "diffCount": 223,
+      "bucket": "31+"
+    },
+    {
+      "slug": "getene-72-dido571",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gevaxi-80-tone223",
+      "status": "ok",
+      "diffCount": 171,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gimegi-77-xidu727",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "giteso-65-mefo026",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gitoke-38-beme495",
+      "status": "ok",
+      "diffCount": 513,
+      "bucket": "31+"
+    },
+    {
+      "slug": "givanu-33-kire967",
+      "status": "ok",
+      "diffCount": 178,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gizore-52-fode894",
+      "status": "ok",
+      "diffCount": 15,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "gofebi-87-zeka817",
+      "status": "ok",
+      "diffCount": 112,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gokagi-91-mise154",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gonixe-93-zaza537",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "goxoni-69-lemo511",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "guceja-66-tola192",
+      "status": "ok",
+      "diffCount": 111,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gudute-55-nulo344",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gugala-11-suce270",
+      "status": "ok",
+      "diffCount": 200,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jafuli-91-sota277",
+      "status": "ok",
+      "diffCount": 252,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jageti-56-kume076",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "jagove-43-nako107",
+      "status": "ok",
+      "diffCount": 229,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jakuco-69-dari135",
+      "status": "ok",
+      "diffCount": 82,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jamana-83-gige126",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "japeru-28-guku001",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "javedu-70-vaxo310",
+      "status": "ok",
+      "diffCount": 118,
+      "bucket": "31+"
+    },
+    {
+      "slug": "javivi-33-poma496",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "jecoxu-17-zama003",
+      "status": "ok",
+      "diffCount": 86,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jevoce-05-mumi686",
+      "status": "ok",
+      "diffCount": 361,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jevofu-58-fazo194",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "jidefi-14-kafe151",
+      "status": "ok",
+      "diffCount": 26,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "jipapo-14-kevu587",
+      "status": "ok",
+      "diffCount": 85,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jisema-42-rapa121",
+      "status": "ok",
+      "diffCount": 129,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jodagi-12-xatu540",
+      "status": "ok",
+      "diffCount": 42,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jogami-42-jaji869",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "jokaxi-40-toko207",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "jonave-00-xabi793",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "status": "ok",
+      "diffCount": 202,
+      "bucket": "31+"
+    },
+    {
+      "slug": "judatu-15-xize591",
+      "status": "ok",
+      "diffCount": 422,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jufefu-66-josa392",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "juleki-83-xusi470",
+      "status": "ok",
+      "diffCount": 34,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jupivo-67-gidi531",
+      "status": "ok",
+      "diffCount": 237,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jupoxe-15-sugo110",
+      "status": "ok",
+      "diffCount": 757,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kafevi-44-tesu096",
+      "status": "ok",
+      "diffCount": 113,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kasadu-53-tuki533",
+      "status": "ok",
+      "diffCount": 138,
+      "bucket": "31+"
+    },
+    {
+      "slug": "katopo-68-xajo866",
+      "status": "ok",
+      "diffCount": 140,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kavoro-11-jife299",
+      "status": "ok",
+      "diffCount": 86,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kemedu-83-vipa115",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "kenizo-43-siro273",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "kepavi-26-sasu141",
+      "status": "ok",
+      "diffCount": 133,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ketajo-72-rula535",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "ketiro-31-nazo312",
+      "status": "ok",
+      "diffCount": 107,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kiceze-91-luke737",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "kijazo-83-kipu485",
+      "status": "ok",
+      "diffCount": 156,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kitupi-32-jexo155",
+      "status": "ok",
+      "diffCount": 129,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kivada-26-koti213",
+      "status": "ok",
+      "diffCount": 29,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "kodaku-19-moni161",
+      "status": "ok",
+      "diffCount": 200,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kodiji-34-mofe202",
+      "status": "ok",
+      "diffCount": 6,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "kojivo-44-ceti956",
+      "status": "ok",
+      "diffCount": 107,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kubaso-31-gaxu491",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "kudedo-31-pafi082",
+      "status": "ok",
+      "diffCount": 148,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kuzeru-09-voke075",
+      "status": "ok",
+      "diffCount": 93,
+      "bucket": "31+"
+    },
+    {
+      "slug": "labala-74-juki864",
+      "status": "ok",
+      "diffCount": 134,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lacuci-13-nogo718",
+      "status": "ok",
+      "diffCount": 109,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lafilo-69-tuti771",
+      "status": "ok",
+      "diffCount": 120,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lajuxi-63-nopo039",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "lapura-36-kavu144",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 11 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "laxibe-66-teme800",
+      "status": "ok",
+      "diffCount": 46,
+      "bucket": "31+"
+    },
+    {
+      "slug": "leduvi-16-voli986",
+      "status": "ok",
+      "diffCount": 248,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lefobe-62-gipe702",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "letare-59-gore448",
+      "status": "ok",
+      "diffCount": 39,
+      "bucket": "31+"
+    },
+    {
+      "slug": "letuke-04-poza319",
+      "status": "ok",
+      "diffCount": 114,
+      "bucket": "31+"
+    },
+    {
+      "slug": "levuma-67-cego489",
+      "status": "ok",
+      "diffCount": 219,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lidefe-01-vaki092",
+      "status": "ok",
+      "diffCount": 74,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lifeve-53-zubi598",
+      "status": "ok",
+      "diffCount": 101,
+      "bucket": "31+"
+    },
+    {
+      "slug": "liteza-62-nopo771",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "livigo-47-negi605",
+      "status": "ok",
+      "diffCount": 96,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lokane-30-dinu378",
+      "status": "ok",
+      "diffCount": 241,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lopone-15-xiki477",
+      "status": "ok",
+      "diffCount": 261,
+      "bucket": "31+"
+    },
+    {
+      "slug": "loxija-71-joku558",
+      "status": "ok",
+      "diffCount": 190,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lubapi-40-siji634",
+      "status": "ok",
+      "diffCount": 49,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lufamo-62-xavo766",
+      "status": "ok",
+      "diffCount": 269,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lukoxa-16-cecu095",
+      "status": "ok",
+      "diffCount": 110,
+      "bucket": "31+"
+    },
+    {
+      "slug": "luxido-91-covi016",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "mabuke-20-muco282",
+      "status": "ok",
+      "diffCount": 250,
+      "bucket": "31+"
+    },
+    {
+      "slug": "maduja-30-xiri319",
+      "status": "ok",
+      "diffCount": 268,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mafete-03-rapa918",
+      "status": "ok",
+      "diffCount": 153,
+      "bucket": "31+"
+    },
+    {
+      "slug": "maketa-43-juja264",
+      "status": "ok",
+      "diffCount": 204,
+      "bucket": "31+"
+    },
+    {
+      "slug": "manata-12-rido730",
+      "status": "ok",
+      "diffCount": 239,
+      "bucket": "31+"
+    },
+    {
+      "slug": "megara-21-rumi574",
+      "status": "ok",
+      "diffCount": 178,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mepeze-15-nuge493",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "mezuce-12-gemi988",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "mifejo-31-sovi184",
+      "status": "ok",
+      "diffCount": 65,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mijoso-20-sato362",
+      "status": "ok",
+      "diffCount": 31,
+      "bucket": "31+"
+    },
+    {
+      "slug": "misiji-27-buje656",
+      "status": "ok",
+      "diffCount": 173,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mojezi-43-gamu360",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "molexa-46-redi999",
+      "status": "ok",
+      "diffCount": 52,
+      "bucket": "31+"
+    },
+    {
+      "slug": "movexa-27-rexe388",
+      "status": "ok",
+      "diffCount": 141,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mudobi-07-biji996",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "mufixi-71-koma752",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "mukaxi-27-xero900",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "mulida-55-ceja768",
+      "status": "ok",
+      "diffCount": 211,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nafaxo-62-boso912",
+      "status": "ok",
+      "diffCount": 208,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nakavu-98-pela661",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "naroji-40-nuke022",
+      "status": "ok",
+      "diffCount": 29,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "narota-16-bago100",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "navene-45-cozo466",
+      "status": "ok",
+      "diffCount": 466,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nerete-42-save418",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "nesozi-09-zezu092",
+      "status": "ok",
+      "diffCount": 90,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nexitu-74-luga914",
+      "status": "ok",
+      "diffCount": 83,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nijipa-25-pede639",
+      "status": "ok",
+      "diffCount": 85,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nikinu-06-sace939",
+      "status": "ok",
+      "diffCount": 186,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nikivo-06-kaxa873",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "niletu-83-lego826",
+      "status": "ok",
+      "diffCount": 17,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "niluji-46-joma773",
+      "status": "ok",
+      "diffCount": 40,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nimusa-16-tiku252",
+      "status": "ok",
+      "diffCount": 138,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ninago-40-dalo726",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "nipuxu-11-tefa314",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "nisexe-68-vabu320",
+      "status": "ok",
+      "diffCount": 46,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nivese-34-zavo418",
+      "status": "ok",
+      "diffCount": 197,
+      "bucket": "31+"
+    },
+    {
+      "slug": "niviji-21-maco613",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "nojije-35-teta491",
+      "status": "ok",
+      "diffCount": 220,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nolubo-93-rula384",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "nomeco-93-minu967",
+      "status": "ok",
+      "diffCount": 99,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nonusu-50-nute147",
+      "status": "ok",
+      "diffCount": 168,
+      "bucket": "31+"
+    },
+    {
+      "slug": "norire-15-taka956",
+      "status": "ok",
+      "diffCount": 50,
+      "bucket": "31+"
+    },
+    {
+      "slug": "notuli-49-xugi698",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "novata-87-muti352",
+      "status": "ok",
+      "diffCount": 69,
+      "bucket": "31+"
+    },
+    {
+      "slug": "noxasi-06-nejo322",
+      "status": "ok",
+      "diffCount": 191,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nudonu-37-kaja626",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "numalo-91-pole243",
+      "status": "ok",
+      "diffCount": 26,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "nupiko-03-cezu269",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "nupose-71-vido428",
+      "status": "ok",
+      "diffCount": 343,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nusajo-97-bemo713",
+      "status": "ok",
+      "diffCount": 96,
+      "bucket": "31+"
+    },
+    {
+      "slug": "nuzugu-44-pega793",
+      "status": "ok",
+      "diffCount": 73,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pakema-21-xema183",
+      "status": "ok",
+      "diffCount": 66,
+      "bucket": "31+"
+    },
+    {
+      "slug": "patagi-39-jone354",
+      "status": "ok",
+      "diffCount": 94,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pateca-54-lija084",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "pedoco-30-mose082",
+      "status": "ok",
+      "diffCount": 143,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pejima-95-nuxu520",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "pekefu-66-mepa144",
+      "status": "ok",
+      "diffCount": 127,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pekuxe-00-bovi270",
+      "status": "ok",
+      "diffCount": 46,
+      "bucket": "31+"
+    },
+    {
+      "slug": "perate-09-gale335",
+      "status": "ok",
+      "diffCount": 89,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pezubu-98-niba240",
+      "status": "ok",
+      "diffCount": 174,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pifoni-76-duxa505",
+      "status": "ok",
+      "diffCount": 145,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pirofe-41-xama594",
+      "status": "ok",
+      "diffCount": 139,
+      "bucket": "31+"
+    },
+    {
+      "slug": "piruxe-91-zivi081",
+      "status": "ok",
+      "diffCount": 32,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pixako-75-kumi821",
+      "status": "ok",
+      "diffCount": 155,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pixisi-38-kixa563",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "podelo-13-jaja314",
+      "status": "ok",
+      "diffCount": 57,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pokoro-73-bili712",
+      "status": "ok",
+      "diffCount": 229,
+      "bucket": "31+"
+    },
+    {
+      "slug": "popofi-03-momo442",
+      "status": "ok",
+      "diffCount": 229,
+      "bucket": "31+"
+    },
+    {
+      "slug": "poraji-17-goke817",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "povoju-50-raxi136",
+      "status": "ok",
+      "diffCount": 97,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pucinu-80-nopo009",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "pufuzi-99-vone170",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "pujozo-36-nino158",
+      "status": "ok",
+      "diffCount": 133,
+      "bucket": "31+"
+    },
+    {
+      "slug": "pujumu-36-nelo283",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "putega-59-fuzi707",
+      "status": "ok",
+      "diffCount": 32,
+      "bucket": "31+"
+    },
+    {
+      "slug": "racana-82-zece676",
+      "status": "ok",
+      "diffCount": 278,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rarodo-65-fudu505",
+      "status": "ok",
+      "diffCount": 16,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "raruzu-62-giro837",
+      "status": "ok",
+      "diffCount": 186,
+      "bucket": "31+"
+    },
+    {
+      "slug": "razuzu-32-faje125",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "rekuxa-78-lidi292",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "relufo-04-fezo835",
+      "status": "ok",
+      "diffCount": 133,
+      "bucket": "31+"
+    },
+    {
+      "slug": "reluvi-59-pifi444",
+      "status": "ok",
+      "diffCount": 98,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rerovo-62-nazo755",
+      "status": "ok",
+      "diffCount": 63,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ribapo-84-xudu593",
+      "status": "ok",
+      "diffCount": 89,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rirefa-62-kucu593",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "roboja-69-susa752",
+      "status": "ok",
+      "diffCount": 343,
+      "bucket": "31+"
+    },
+    {
+      "slug": "roroko-26-coje324",
+      "status": "ok",
+      "diffCount": 39,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rosepa-78-xivi448",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "rosizo-69-mera514",
+      "status": "ok",
+      "diffCount": 185,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rucuga-83-tosu408",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "ruderu-68-dere287",
+      "status": "ok",
+      "diffCount": 58,
+      "bucket": "31+"
+    },
+    {
+      "slug": "rujixe-89-sumo552",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "rujuxa-07-neco067",
+      "status": "ok",
+      "diffCount": 405,
+      "bucket": "31+"
+    },
+    {
+      "slug": "runima-82-jigi009",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "rurake-60-licu592",
+      "status": "ok",
+      "diffCount": 15,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "rurebu-12-nebi203",
+      "status": "ok",
+      "diffCount": 99,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ruzazu-94-meso880",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "ruzica-16-deli877",
+      "status": "ok",
+      "diffCount": 388,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sadovu-51-fata536",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "samavi-13-fuku339",
+      "status": "ok",
+      "diffCount": 151,
+      "bucket": "31+"
+    },
+    {
+      "slug": "saxeku-17-gume203",
+      "status": "ok",
+      "diffCount": 137,
+      "bucket": "31+"
+    },
+    {
+      "slug": "saxuro-16-tezu631",
+      "status": "ok",
+      "diffCount": 149,
+      "bucket": "31+"
+    },
+    {
+      "slug": "secepo-00-febi326",
+      "status": "ok",
+      "diffCount": 220,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sesodi-22-lupe361",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "setecu-78-cuko533",
+      "status": "ok",
+      "diffCount": 44,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sifite-87-ziti434",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "sigofi-46-gaja158",
+      "status": "ok",
+      "diffCount": 132,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sikino-19-vuca111",
+      "status": "ok",
+      "diffCount": 54,
+      "bucket": "31+"
+    },
+    {
+      "slug": "simuti-16-lece058",
+      "status": "ok",
+      "diffCount": 118,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sofoje-37-tila554",
+      "status": "ok",
+      "diffCount": 162,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sojono-24-tufe806",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "sokafe-69-jita472",
+      "status": "ok",
+      "diffCount": 197,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sokapa-71-tifi543",
+      "status": "ok",
+      "diffCount": 188,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sopape-11-laxo488",
+      "status": "ok",
+      "diffCount": 87,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sucice-41-pebi088",
+      "status": "ok",
+      "diffCount": 185,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sufupo-40-fuke080",
+      "status": "ok",
+      "diffCount": 49,
+      "bucket": "31+"
+    },
+    {
+      "slug": "suluni-73-lotu140",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "sutura-08-zeme419",
+      "status": "ok",
+      "diffCount": 160,
+      "bucket": "31+"
+    },
+    {
+      "slug": "suzuci-53-biku826",
+      "status": "ok",
+      "diffCount": 105,
+      "bucket": "31+"
+    },
+    {
+      "slug": "tagixo-41-gapo816",
+      "status": "ok",
+      "diffCount": 40,
+      "bucket": "31+"
+    },
+    {
+      "slug": "tajuxe-32-sexo680",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "tamaxe-36-mono574",
+      "status": "ok",
+      "diffCount": 194,
+      "bucket": "31+"
+    },
+    {
+      "slug": "taxeta-89-mapo546",
+      "status": "ok",
+      "diffCount": 9,
+      "bucket": "4-10"
+    },
+    {
+      "slug": "tefuga-86-xefe850",
+      "status": "ok",
+      "diffCount": 66,
+      "bucket": "31+"
+    },
+    {
+      "slug": "tepivu-88-reze603",
+      "status": "ok",
+      "diffCount": 99,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ticeka-12-buli543",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "tirizu-79-niza262",
+      "status": "ok",
+      "diffCount": 27,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "tmp1",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "status": "ok",
+      "diffCount": 718,
+      "bucket": "31+"
+    },
+    {
+      "slug": "todufa-81-gavo441",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "topico-42-fuza478",
+      "status": "ok",
+      "diffCount": 40,
+      "bucket": "31+"
+    },
+    {
+      "slug": "tuneta-22-mega154",
+      "status": "ok",
+      "diffCount": 248,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vafupe-19-cima350",
+      "status": "ok",
+      "diffCount": 107,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vamazo-19-tufu812",
+      "status": "ok",
+      "diffCount": 196,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vaxiki-78-nice114",
+      "status": "ok",
+      "diffCount": 83,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vaxuta-95-cico162",
+      "status": "ok",
+      "diffCount": 220,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vebala-15-tade547",
+      "status": "ok",
+      "diffCount": 545,
+      "bucket": "31+"
+    },
+    {
+      "slug": "velodu-59-sada437",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vexula-75-noko098",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "vidada-17-xuse810",
+      "status": "ok",
+      "diffCount": 188,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vilecu-41-tete416",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "vimako-25-mega336",
+      "status": "ok",
+      "diffCount": 65,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vimoxa-78-zucu656",
+      "status": "ok",
+      "diffCount": 47,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vivate-04-guso306",
+      "status": "ok",
+      "diffCount": 235,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vodobe-33-kefa909",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "vokibe-29-vepe451",
+      "status": "ok",
+      "diffCount": 85,
+      "bucket": "31+"
+    },
+    {
+      "slug": "volefo-41-tolo996",
+      "status": "ok",
+      "diffCount": 35,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vozane-63-kepe177",
+      "status": "ok",
+      "diffCount": 184,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vubolo-48-cubu499",
+      "status": "ok",
+      "diffCount": 155,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vupuse-73-nuso490",
+      "status": "ok",
+      "diffCount": 109,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xabesu-51-dimi831",
+      "status": "ok",
+      "diffCount": 147,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xarumo-26-zinu467",
+      "status": "ok",
+      "diffCount": 167,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xefalo-73-sabi101",
+      "status": "ok",
+      "diffCount": 541,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xekame-27-geba281",
+      "status": "ok",
+      "diffCount": 208,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xenofo-81-rame803",
+      "status": "ok",
+      "diffCount": 137,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xidamu-85-xoti640",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "xigelo-67-sipi599",
+      "status": "ok",
+      "diffCount": 203,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xizola-97-sizu458",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "xolazi-74-vamu265",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "xoreko-43-noto860",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "xoreni-54-xoro817",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "xovano-23-tazo278",
+      "status": "ok",
+      "diffCount": 260,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zafoxu-20-xofe568",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zakuke-30-sobi867",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zaloze-31-jibo311",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zamagu-75-vape137",
+      "status": "ok",
+      "diffCount": 46,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zanudo-86-seco241",
+      "status": "ok",
+      "diffCount": 28,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "zaxati-90-xacu660",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zedoco-71-guge507",
+      "status": "ok",
+      "diffCount": 35,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zejuso-92-kexo870",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zepima-96-peco612",
+      "status": "ok",
+      "diffCount": 259,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "status": "ok",
+      "diffCount": 320,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ziboco-73-kazu841",
+      "status": "ok",
+      "diffCount": 123,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zinelo-77-losu727",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zivege-92-rise076",
+      "status": "ok",
+      "diffCount": 221,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zizaki-04-guvi945",
+      "status": "ok",
+      "diffCount": 121,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zizumo-48-taku661",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zokodi-10-dexu703",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zokuni-21-sapu966",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
+    },
+    {
+      "slug": "zukori-83-fiso705",
+      "status": "ok",
+      "diffCount": 202,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zuxute-46-daku634",
+      "status": "error",
+      "diffCount": null,
+      "bucket": null,
+      "reason": "activity parser refused this source at line 9 (syntax): Syntax Error?"
+    }
+  ]
+}

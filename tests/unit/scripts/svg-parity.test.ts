@@ -6,13 +6,23 @@
  * task (tests/oracle/svg-conformance/parity.json + PARITY-SVG.md).
  */
 import { describe, it, expect } from 'vitest';
-import { isWellFormedSvg, diffVerdict, computeDotEqual } from '../../../scripts/svg-parity-survey.js';
+import { readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  isWellFormedSvg,
+  diffVerdict,
+  computeDotEqual,
+  parityOutPath,
+  parseSurveyArgs,
+} from '../../../scripts/svg-parity-survey.js';
 import type { FixtureRow, ParityReport } from '../../../scripts/svg-parity-survey.js';
 import {
   pct,
   tally,
   summarySection,
   familyTable,
+  reportTypes,
   conformantSection,
   numericTable,
   msgTable,
@@ -21,9 +31,14 @@ import {
   ledgerSection,
   loadLedger,
   buildMarkdown,
+  parseDashboardArgs,
 } from '../../../scripts/svg-parity-dashboard.js';
 import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.types.js';
+
+const REPO = join(dirname(fileURLToPath(import.meta.url)), '../../..');
+const SVG_CONFORMANCE_DIR = join(REPO, 'tests', 'oracle', 'svg-conformance');
+const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 
 function svg(children: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg"><g>${children}</g></svg>`;
@@ -131,6 +146,47 @@ describe('computeDotEqual', () => {
 });
 
 // ---------------------------------------------------------------------------
+// parityOutPath / parseSurveyArgs (pdr-T3 survey planner)
+// ---------------------------------------------------------------------------
+
+describe('parityOutPath', () => {
+  it('derives tests/oracle/svg-conformance/parity-<type>.json', () => {
+    expect(parityOutPath('class')).toBe(join(SVG_CONFORMANCE_DIR, 'parity-class.json'));
+  });
+});
+
+describe('parseSurveyArgs', () => {
+  it('AC1: with no args, plans one parity-<type>.json per cache type plus parity.json for component+usecase', () => {
+    const expectedTypes = readdirSync(CACHE_DIR)
+      .filter((f) => statSync(join(CACHE_DIR, f)).isDirectory())
+      .sort();
+    const plan = parseSurveyArgs([]);
+    expect(plan).toHaveLength(expectedTypes.length + 1);
+    expectedTypes.forEach((type, i) => {
+      expect(plan[i]).toEqual({ types: [type], out: parityOutPath(type) });
+    });
+    expect(plan.at(-1)).toEqual({
+      types: ['component', 'usecase'],
+      out: join(SVG_CONFORMANCE_DIR, 'parity.json'),
+    });
+  });
+
+  it('keeps legacy behavior for positional args', () => {
+    expect(parseSurveyArgs(['class'])).toEqual([{ types: ['class'], out: join(SVG_CONFORMANCE_DIR, 'parity.json') }]);
+  });
+
+  it('keeps legacy behavior for --out with positional args', () => {
+    const out = join(SVG_CONFORMANCE_DIR, 'parity-class.json');
+    expect(parseSurveyArgs(['--out', out, 'class'])).toEqual([{ types: ['class'], out }]);
+  });
+
+  it('keeps legacy behavior for --out with no positional args (defaults to component+usecase)', () => {
+    const out = join(SVG_CONFORMANCE_DIR, 'custom.json');
+    expect(parseSurveyArgs(['--out', out])).toEqual([{ types: ['component', 'usecase'], out }]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Dashboard pure functions
 // ---------------------------------------------------------------------------
 
@@ -185,6 +241,26 @@ describe('svg-parity-dashboard pure functions', () => {
     const out = familyTable(sampleReport);
     expect(out).toContain('| component | 2 | 1 | 0 | 1 | 0 | 0 | 0 | 1 |');
     expect(out).toContain('| usecase | 2 | 0 | 1 | 0 | 1 | 0 | 0 | 0 |');
+  });
+
+  it('AC2: familyTable derives rows from the distinct types present, in sorted order', () => {
+    const report: ParityReport = {
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      fixtures: [
+        { slug: 'x', type: 'zeta', verdict: 'conformant', dotEqual: true },
+        { slug: 'y', type: 'alpha', verdict: 'conformant', dotEqual: true },
+        { slug: 'z', type: 'mid', verdict: 'conformant', dotEqual: true },
+      ],
+    };
+    expect(reportTypes(report)).toEqual(['alpha', 'mid', 'zeta']);
+    const lines = familyTable(report)
+      .split('\n')
+      .filter((l) => l.startsWith('| alpha') || l.startsWith('| mid') || l.startsWith('| zeta'));
+    expect(lines).toEqual([
+      '| alpha | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |',
+      '| mid | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |',
+      '| zeta | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |',
+    ]);
   });
 
   it('conformantSection collapses slugs as `type/slug`', () => {
@@ -256,5 +332,28 @@ describe('svg-parity-dashboard pure functions', () => {
     expect(md).toContain('## timeout (0)');
     expect(md).toContain('## oracle-error (0)');
     expect(md).toContain("## Divergence ledger (accepted, won't-fix)");
+  });
+
+  it('AC4: buildMarkdown never mentions AWT', () => {
+    expect(buildMarkdown(sampleReport)).not.toMatch(/AWT/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseDashboardArgs
+// ---------------------------------------------------------------------------
+
+describe('parseDashboardArgs', () => {
+  it('defaults --in to parity.json and --out to PARITY-SVG.md', () => {
+    expect(parseDashboardArgs([])).toEqual({
+      in: join(SVG_CONFORMANCE_DIR, 'parity.json'),
+      out: join(SVG_CONFORMANCE_DIR, 'PARITY-SVG.md'),
+    });
+  });
+
+  it('accepts --in and --out overrides so any parity-<type>.json can be rendered', () => {
+    const inPath = join(SVG_CONFORMANCE_DIR, 'parity-class.json');
+    const outPath = join(SVG_CONFORMANCE_DIR, 'PARITY-CLASS.md');
+    expect(parseDashboardArgs(['--in', inPath, '--out', outPath])).toEqual({ in: inPath, out: outPath });
   });
 });

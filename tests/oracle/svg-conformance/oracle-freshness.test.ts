@@ -111,6 +111,18 @@ const SENTINELS: readonly Sentinel[] = [
   // rejected for that reason). `cmp`-verified against `oracle-render.sh`
   // output during T3.
   { type: 'activity', slug: 'movexa-27-rexe388' },
+  // The five families `parity-dashboard-refresh` T5 captured for the first
+  // time, each its cache dir's `localeCompare`-first slug (the SI16
+  // convention). chronology's oracle is the pinned jar's own "Diagram not
+  // supported by this release" page (`PSystemBuilder.java:284` returns
+  // `PSystemUnsupported`): still a byte-stable render of that source, so it
+  // guards freshness exactly like the others -- and flips the moment a jar
+  // that supports chronology is pinned, which is the point.
+  { type: 'board', slug: 'gasaxu-65-cipo396' },
+  { type: 'chart', slug: 'babadu-29-gexe909' },
+  { type: 'chronology', slug: 'lenudo-53-nade902' },
+  { type: 'files', slug: 'files-directory-tree-with-note' },
+  { type: 'packet', slug: 'packet-auto-position' },
 ];
 
 const cachedSvg = (s: Sentinel): string => join(CACHE, s.type, s.slug, 'in.svg');
@@ -120,11 +132,27 @@ const cachedPuml = (s: Sentinel): string => join(CACHE, s.type, s.slug, 'in.puml
  * Render every sentinel in a single jar invocation. Each is copied in under
  * `<type>.puml` so the outputs land side by side instead of overwriting one
  * shared `in.svg`.
+ *
+ * The jar's exit code is deliberately NOT a success signal here.
+ * `SourceFileReaderAbstract.java:108-114` flags the whole run as errored when
+ * ANY block's diagram is a `PSystemError` OR a `PSystemUnsupported`, and
+ * `Run` then exits 200 -- after every SVG, including the unsupported one, has
+ * been written (`.agent-notes/aoh-T0.md` Finding 1; the same rule
+ * `scripts/capture-oracle-cache.ts#renderFixture` encodes). With the
+ * chronology sentinel in the list that exit is the NORMAL outcome, because the
+ * pinned jar has no factory for `DiagramType.CHRONOLOGY` and renders its
+ * "Diagram not supported" page (`PSystemBuilder.java:284`). Success is judged
+ * per sentinel by the byte comparison below: a sentinel the jar really did not
+ * write fails there, on a missing `<type>.svg`, which names the type.
  */
 function renderAll(out: string): void {
   for (const s of SENTINELS) copyFileSync(cachedPuml(s), join(out, `${s.type}.puml`));
   const pumls = SENTINELS.map((s) => join(out, `${s.type}.puml`));
-  execFileSync(RENDER, [out, ...pumls], { stdio: 'pipe' });
+  try {
+    execFileSync(RENDER, [out, ...pumls], { stdio: 'pipe' });
+  } catch {
+    /* non-zero exit is not render failure; each `it` below reads its own file */
+  }
 }
 
 function staleMessage(s: Sentinel, fresh: Buffer, cached: Buffer): string {

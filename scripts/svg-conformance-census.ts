@@ -64,7 +64,7 @@
 import { astOrThrow } from '../tests/helpers/parse-ast.js';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
 import type { PreprocessorResult } from '../src/core/preprocessor.js';
@@ -90,7 +90,9 @@ import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { renderFixtureActivity } from '../tests/oracle/svg-conformance/render-fixture-activity.js';
 import { renderFixtureJson } from '../tests/oracle/svg-conformance/render-fixture-json.js';
+import { bucketOf, type Bucket, jsonPathArg, runJsonMode } from './svg-conformance-census-json.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
@@ -198,74 +200,91 @@ function renderFixtureDescription(markup: string, measurer: StringMeasurer): str
   return assembleSvg(applyChrome(unwrapped, annotations, styles, measurer));
 }
 
+/** The name of the render helper `renderFixtureFor` dispatches to for a given
+ * fixture `type`. */
+type FixtureHelperName = 'class' | 'state' | 'sequence' | 'activity' | 'json' | 'dot' | 'description';
+
+/**
+ * Pure dispatch table underlying `renderFixtureFor`, extracted so the
+ * dispatch itself is unit-testable without rendering a fixture (pdr-T2 AC1):
+ * `class`/`object` -> `class`, `state` -> `state`, `sequence` -> `sequence`,
+ * `activity` -> `activity` (own dedicated engine, `render-fixture-
+ * activity.ts#renderFixtureActivity` — see that file's own doc comment for
+ * why it takes the same `{ includeStore }` shape as sequence/state/class),
+ * `json`/`yaml`/`hcl` -> `json`, `dot` -> `dot`, else -> `description`
+ * (component/usecase).
+ */
+export function helperFor(type: string): FixtureHelperName {
+  if (type === 'class' || type === 'object') return 'class';
+  if (type === 'state') return 'state';
+  if (type === 'sequence') return 'sequence';
+  if (type === 'activity') return 'activity';
+  if (type === 'json' || type === 'yaml' || type === 'hcl') return 'json';
+  if (type === 'dot') return 'dot';
+  return 'description';
+}
+
 /**
  * N0 (G2), extended O0 (G3), extended S0 (G4), extended T5 (sequence-oracle-
- * harness): dispatches to the CLASS pipeline for `class` AND `object`
- * fixtures, to the STATE pipeline for `state` fixtures, to the SEQUENCE
- * pipeline for `sequence` fixtures, else the pre-existing description
+ * harness), extended pdr-T2 (activity): dispatches via `helperFor` to each
+ * fixture type's own low-level pipeline, else the pre-existing description
  * pipeline (component/usecase). `parseDescription` silently "succeeds" on
- * class/object/state/sequence markup -- it just drops the native syntax
- * (member compartments, nested classifiers inside `package{}` blocks,
- * `object`/`map` declarations, state transitions, `->` message arrows) --
- * so each of these fixture types MUST route through its own parser/layout/
- * renderer or every downstream family/error measurement is meaningless
- * (diagnosed N0, re-confirmed for object at O0, re-confirmed for state at
- * S0: state diagrams DO have a dedicated upstream engine, `statediagram/`,
- * unlike object's reuse of `classdiagram/` -- see `renderFixtureState`'s own
- * doc comment; sequence likewise has its own dedicated upstream engine,
- * `src/diagrams/sequence/`, via `render-fixture-sequence.ts#
- * renderFixtureSequence`).
+ * class/object/state/sequence/activity markup -- it just drops the native
+ * syntax (member compartments, nested classifiers inside `package{}` blocks,
+ * `object`/`map` declarations, state transitions, `->` message arrows,
+ * activity nodes) -- so each of these fixture types MUST route through its
+ * own parser/layout/renderer or every downstream family/error measurement is
+ * meaningless (diagnosed N0, re-confirmed for object at O0, re-confirmed for
+ * state at S0, re-confirmed for activity at pdr-T2: each has a dedicated
+ * upstream engine -- see the respective `render-fixture-*.ts` helper's own
+ * doc comment).
  */
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
-  if (type === 'class' || type === 'object') {
-    return renderFixtureClass(markup, measurer, { includeStore: fixtureIncludeStore() });
+  const opts = { includeStore: fixtureIncludeStore() };
+  switch (helperFor(type)) {
+    case 'class':
+      return renderFixtureClass(markup, measurer, opts);
+    case 'state':
+      return renderFixtureState(markup, measurer, opts);
+    case 'sequence':
+      return renderFixtureSequence(markup, measurer, opts);
+    case 'activity':
+      return renderFixtureActivity(markup, measurer, opts);
+    case 'json':
+      // Mission A5. ONE helper serves all three: yaml and hcl have no layout
+      // or renderer of their own (`yaml/index.ts` and `hcl/index.ts` both
+      // import `layoutJson`/`renderJson`), so only the parse differs and
+      // `renderFixtureJson` dispatches that internally on the block type.
+      return renderFixtureJson(markup, measurer, opts);
+    case 'dot':
+      // Mission D14. The ONE type with no low-level pipeline to dispatch to,
+      // and no `measurer` to inject: `@startdot` is a passthrough to
+      // graphviz (see `src/diagrams/dot/ast.ts`), so this port makes no
+      // drawing or measurement decision the census could vary. Both of the
+      // census's two passes therefore produce the identical result for dot,
+      // by construction -- that is the type's nature, not a wiring miss.
+      // See `oracle/goldens/svg-dot/README.md`.
+      return renderSync(markup);
+    case 'description':
+      return renderFixtureDescription(markup, measurer);
   }
-  if (type === 'state') {
-    return renderFixtureState(markup, measurer, { includeStore: fixtureIncludeStore() });
-  }
-  if (type === 'sequence') {
-    return renderFixtureSequence(markup, measurer, { includeStore: fixtureIncludeStore() });
-  }
-  if (type === 'json' || type === 'yaml' || type === 'hcl') {
-    // Mission A5. ONE helper serves all three: yaml and hcl have no layout or
-    // renderer of their own (`yaml/index.ts` and `hcl/index.ts` both import
-    // `layoutJson`/`renderJson`), so only the parse differs and
-    // `renderFixtureJson` dispatches that internally on the block type.
-    return renderFixtureJson(markup, measurer, { includeStore: fixtureIncludeStore() });
-  }
-  if (type === 'dot') {
-    // Mission D14. The ONE type with no low-level pipeline to dispatch to, and
-    // no `measurer` to inject: `@startdot` is a passthrough to graphviz (see
-    // `src/diagrams/dot/ast.ts`), so this port makes no drawing or measurement
-    // decision the census could vary. Both of the census's two passes
-    // therefore produce the identical result for dot, by construction -- that
-    // is the type's nature, not a wiring miss. See
-    // `oracle/goldens/svg-dot/README.md`.
-    return renderSync(markup);
-  }
-  return renderFixtureDescription(markup, measurer);
 }
 
 // ---------------------------------------------------------------------------
-// Bucketing
+// Bucketing (Bucket/bucketOf now live in svg-conformance-census-json.ts —
+// see that file's own doc comment for why the dependency runs this
+// direction)
 // ---------------------------------------------------------------------------
 
-type Bucket = '0' | '1-3' | '4-10' | '11-30' | '31+';
-
-function bucketOf(diffCount: number): Bucket {
-  if (diffCount === 0) return '0';
-  if (diffCount <= 3) return '1-3';
-  if (diffCount <= 10) return '4-10';
-  if (diffCount <= 30) return '11-30';
-  return '31+';
-}
-
-interface CensusResult {
+export interface CensusResult {
   slug: string;
   type: string;
   diffCount: number | 'error';
   /** diff paths (present on non-error rows) for the --families report */
   paths?: readonly string[];
+  /** set only on error rows; the render/compare failure that caused it
+   * (pdr-T2: carried into census-<type>.json's per-fixture `reason`) */
+  reason?: string;
 }
 
 function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): CensusResult[] {
@@ -275,7 +294,7 @@ function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): Cens
     const jarSvg = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
     try {
       if (!isWellFormed(jarSvg)) {
-        results.push({ slug: f.slug, type: f.type, diffCount: 'error' });
+        results.push({ slug: f.slug, type: f.type, diffCount: 'error', reason: 'malformed jar golden SVG' });
         continue;
       }
       const oursSvg = renderFixtureFor(f.type, markup, measurer);
@@ -286,8 +305,9 @@ function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): Cens
         diffCount: diffs.length,
         paths: diffs.map((d) => d.path),
       });
-    } catch {
-      results.push({ slug: f.slug, type: f.type, diffCount: 'error' });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      results.push({ slug: f.slug, type: f.type, diffCount: 'error', reason });
     }
   }
   return results;
@@ -388,6 +408,12 @@ function main(): void {
   const deterministicResults = census(fixtures, new DeterministicMeasurer());
   printReport('DeterministicMeasurer (ratchet metric)', deterministicResults);
 
+  const jsonPath = jsonPathArg(process.argv);
+  if (jsonPath !== undefined) {
+    runJsonMode(jsonPath, requested.join('+'), deterministicResults, REPO);
+    return; // pdr-T2 D5: json mode skips the jar pass, like --per-fixture/--families
+  }
+
   if (process.argv.includes('--per-fixture')) {
     printPerFixture('DeterministicMeasurer', deterministicResults);
     return; // triage tool, like --families: skip the jar pass
@@ -402,4 +428,11 @@ function main(): void {
   printReport('jarMeasurer (production — should show the pre-existing D12 gap, not a regression)', jarResults);
 }
 
-main();
+// pdr-T2: guarded like svg-parity-dashboard.ts's own CLI entry point, so
+// importing `helperFor`/`CensusResult` for unit tests (AC1) never triggers a
+// real run over the default fixture types.
+/* v8 ignore start -- CLI entry point; exercised via the real census run. */
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  main();
+}
+/* v8 ignore stop */

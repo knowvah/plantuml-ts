@@ -1,0 +1,149 @@
+/**
+ * `docs/parity-report.md` dashboard — corpus/engine/oracle/DOT/survey/census
+ * loaders (mission parity-dashboard-refresh, T6). Split from
+ * `parity-dashboard-goldens.ts` (ratchet/diff-baseline/routing/refusal —
+ * everything under `oracle/goldens/`) purely to keep each file under the
+ * 500-line complexity cap; both feed `parity-dashboard.ts#loadInputs`.
+ *
+ * D2 (plans/parity-dashboard-refresh/decisions.md): every loader here reads a
+ * COMMITTED artifact — it never renders a diagram or invokes the jar. The
+ * summarizer half of each pair (`tally*`/`*StatsOf`) is pure and unit-tested
+ * directly; the loader half is IO-only and exercised by the D9 drift test.
+ */
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+import type { FixtureRow, ParityReport, Verdict } from './svg-parity-survey.js';
+import type { CensusJson, CensusJsonFixture } from './svg-conformance-census-json.js';
+import type { DotParityJson } from './dot-parity-rows.js';
+
+// ---------------------------------------------------------------------------
+// Manifest buckets + corpus counts
+// ---------------------------------------------------------------------------
+
+/** The 28 `tests/visual/data/*.json` buckets (D7), alphabetical. */
+export function manifestBuckets(dataDir: string): string[] {
+  return readdirSync(dataDir)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => f.replace(/\.json$/, ''))
+    .sort();
+}
+
+/** Fixture-array length per bucket — the "corpus" matrix column. */
+export function corpusCountsOf(dataDir: string, buckets: readonly string[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const b of buckets) {
+    out[b] = (JSON.parse(readFileSync(join(dataDir, b + '.json'), 'utf-8')) as unknown[]).length;
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Engine registry (parsed as DATA — never imports src/index.ts, which would
+// pull in every diagram engine's full module graph just to read 14 names)
+// ---------------------------------------------------------------------------
+
+const REGISTER_RE = /registry\.register\((\w+)Plugin\)/g;
+
+/** Pure: the plugin `type` values registered in `src/index.ts`, in
+ *  registration order, parsed from its own source text rather than imported
+ *  as a module. Every registered plugin here follows the `<type>Plugin`
+ *  naming convention (verified against all 14 current registrations). */
+export function registeredEngineTypes(indexTsSource: string): string[] {
+  return [...indexTsSource.matchAll(REGISTER_RE)].map((m) => m[1]!);
+}
+
+// ---------------------------------------------------------------------------
+// Oracle cache (test-results/dot-cache/<type>/*/.done)
+// ---------------------------------------------------------------------------
+
+/** Count of cached fixture dirs (a `.done` marker present) per dot-cache type. */
+export function oracleCountsOf(cacheDir: string): Record<string, number> {
+  if (!existsSync(cacheDir)) return {};
+  const out: Record<string, number> = {};
+  for (const type of readdirSync(cacheDir)) {
+    const typeDir = join(cacheDir, type);
+    out[type] = readdirSync(typeDir).filter((slug) => existsSync(join(typeDir, slug, '.done'))).length;
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// DOT parity (tests/oracle/svg-conformance/dot-parity.json — amendment)
+// ---------------------------------------------------------------------------
+
+export function loadDotParity(path: string): DotParityJson {
+  return JSON.parse(readFileSync(path, 'utf-8')) as DotParityJson;
+}
+
+// ---------------------------------------------------------------------------
+// Survey (parity-<type>.json / parity.json — production renderSync path)
+// ---------------------------------------------------------------------------
+
+export interface SurveySummary {
+  conformant: number;
+  structural: number;
+  diverged: number;
+  generatedAt: string;
+}
+
+/** Pure: verdict tally for one type's fixture rows. */
+export function tallySurvey(
+  rows: readonly FixtureRow[],
+): Pick<SurveySummary, 'conformant' | 'structural' | 'diverged'> {
+  const count = (v: Verdict): number => rows.filter((r) => r.verdict === v).length;
+  return { conformant: count('conformant'), structural: count('structural-match'), diverged: count('diverged') };
+}
+
+const PARITY_FILE_RE = /^parity-([a-z0-9]+)\.json$/;
+
+/** One entry per type covered by ANY survey file: `parity-<type>.json` files
+ *  plus `parity.json`'s two embedded types (component/usecase, D4). A type
+ *  present in both is unreachable in practice (D4: parity.json is exactly the
+ *  types with no dedicated `parity-<type>.json`), so no merge conflict arises. */
+export function loadSurveyByType(svgConformanceDir: string): Record<string, SurveySummary> {
+  const out: Record<string, SurveySummary> = {};
+  for (const f of readdirSync(svgConformanceDir)) {
+    const m = PARITY_FILE_RE.exec(f);
+    if (m === null) continue;
+    const report = JSON.parse(readFileSync(join(svgConformanceDir, f), 'utf-8')) as ParityReport;
+    out[m[1]!] = { ...tallySurvey(report.fixtures), generatedAt: report.generatedAt };
+  }
+  const legacyPath = join(svgConformanceDir, 'parity.json');
+  if (existsSync(legacyPath)) {
+    const report = JSON.parse(readFileSync(legacyPath, 'utf-8')) as ParityReport;
+    for (const type of new Set(report.fixtures.map((r) => r.type))) {
+      const rows = report.fixtures.filter((r) => r.type === type);
+      out[type] = { ...tallySurvey(rows), generatedAt: report.generatedAt };
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Census (census-<type>.json — none committed yet, D5)
+// ---------------------------------------------------------------------------
+
+export interface CensusSummary {
+  zeroDiff: number;
+  generatedAt: string;
+}
+
+/** Pure: count of `bucket === '0'` among `status === 'ok'` fixtures. */
+export function zeroDiffCount(fixtures: readonly CensusJsonFixture[]): number {
+  return fixtures.filter((f) => f.status === 'ok' && f.bucket === '0').length;
+}
+
+const CENSUS_FILE_RE = /^census-([a-z0-9]+)\.json$/;
+
+export function loadCensusByType(svgConformanceDir: string): Record<string, CensusSummary> {
+  const out: Record<string, CensusSummary> = {};
+  if (!existsSync(svgConformanceDir)) return out;
+  for (const f of readdirSync(svgConformanceDir)) {
+    const m = CENSUS_FILE_RE.exec(f);
+    if (m === null) continue;
+    const census = JSON.parse(readFileSync(join(svgConformanceDir, f), 'utf-8')) as CensusJson;
+    out[m[1]!] = { zeroDiff: zeroDiffCount(census.fixtures), generatedAt: census.generatedAt };
+  }
+  return out;
+}

@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3158 fixtures, 8 of them jar errors, 15 of them erroring here', () => {
+  it('the manifest is 3572 fixtures, 31 of them jar errors, 105 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -577,10 +577,21 @@ describe('refusal coverage — baseline shape', () => {
     // requires naming the specific unported Command and that census has not
     // been done. They are the tracked queue `activity-oracle-harness` D8
     // declares out of scope for that mission and hands to a later one.
-    expect(manifest.fixtures.length).toBe(3531);
+    //
+    // 3531 -> 3572 / 31 / 105 / 3426 -> 3467 at `parity-dashboard-refresh`
+    // T5, which captured the five never-captured families (board 4, chart 29,
+    // chronology 1, files 1, packet 6 = 41) and pinned them additively --
+    // 452 insertions, one deletion (the rewritten `$comment`). All 41 render
+    // on both sides: `jarRendered: true`, `weErrored: false`, `engine: none`
+    // (none of these engines stamps a root `data-diagram-type`; the sibling
+    // routing gate pins that). chronology's golden is the jar's own
+    // `PSystemUnsupported` page (`PSystemBuilder.java:284`), which is a
+    // rendered document, not a `PSystemError` page, so it counts as
+    // rendered here exactly as `isJarErrorPage` classifies it.
+    expect(manifest.fixtures.length).toBe(3572);
     expect(pinnedJarErrors.length).toBe(31);
     expect(pinnedErroring.length).toBe(105);
-    expect(pinnedRendering.length).toBe(3426);
+    expect(pinnedRendering.length).toBe(3467);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

@@ -534,7 +534,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3401 agree, 99 known-misroute and 31 jar-error', () => {
+  it('the manifest splits into 3402 agree, 139 known-misroute and 31 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -598,10 +598,28 @@ describe('routing conformance — jar-error classification', () => {
     // reasons were rewritten accordingly: the T0b text named a mechanism that no
     // longer applies to them and promised a re-pin that would have turned this
     // gate RED.
-    expect(pinnedAgree.length).toBe(3401);
-    expect(pinnedMisroutes.length).toBe(99);
+    //
+    // DERIVATION of 3402/139/31 over 3572, at `parity-dashboard-refresh` T5.
+    // Five never-captured families (board 4, chart 29, chronology 1, files 1,
+    // packet 6 = 41) were captured with `scripts/capture-oracle-cache.ts` and
+    // pinned here additively -- `git diff --numstat` shows 451 insertions and
+    // ONE deletion, the rewritten `$comment` line, so no pre-existing pin
+    // moved. 40 are `known-misroute` on ONE shared mechanism, the activity
+    // T0b one again: each engine's renderer returns a `RenderFragment` with
+    // no `diagramType` (`src/diagrams/board/renderer.ts:75-81`,
+    // `chart/renderer.ts:336-341`, `files/renderer.ts:64-69`,
+    // `packetdiag/renderer.ts:104-109`), so `assemble-svg.ts:496-497` never
+    // stamps the root attribute `TextBlockExporter.java:292-294` writes --
+    // NONE here, BOARD/CHART/FILES/PACKET in the golden. The 41st,
+    // chronology/lenudo-53-nade902, AGREES at NONE == NONE: the pinned jar
+    // has no factory for `DiagramType.CHRONOLOGY`, so `PSystemBuilder.java:284`
+    // returns `PSystemUnsupported`, whose page (`PSystemUnsupported.java:62`)
+    // carries no root attribute and is not a `PSystemError` page. 3401 + 1 =
+    // 3402, 99 + 40 = 139, 31 unchanged.
+    expect(pinnedAgree.length).toBe(3402);
+    expect(pinnedMisroutes.length).toBe(139);
     expect(pinnedJarErrors.length).toBe(31);
-    expect(manifest.fixtures.length).toBe(3531);
+    expect(manifest.fixtures.length).toBe(3572);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -639,7 +657,12 @@ describe('routing conformance — jar-error classification', () => {
     // upstream stamp they are measured against (`TextBlockExporter.java:293`).
     // The uncensused remainder is STILL exactly sequence/nuvoja-46-dezu541:
     // 99 - 1 = 98.
-    expect(censused.length).toBe(98);
+    //
+    // 98 -> 138 at `parity-dashboard-refresh` T5: the 40 board/chart/files/
+    // packet pins all carry the same cited mechanism (see the derivation
+    // above). The uncensused remainder is STILL exactly
+    // sequence/nuvoja-46-dezu541: 139 - 1 = 138.
+    expect(censused.length).toBe(138);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

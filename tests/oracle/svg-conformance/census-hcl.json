@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-09-20T18:50:18.039Z",
+  "measuredAgainstCommit": "993cc2ae",
+  "type": "hcl+tests/oracle/svg-conformance/census-hcl.json",
+  "measurer": "deterministic",
+  "fixtures": [
+    {
+      "slug": "citoda-80-dimi195",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "jubete-32-sutu417",
+      "status": "ok",
+      "diffCount": 117,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vocago-35-xodu446",
+      "status": "ok",
+      "diffCount": 40,
+      "bucket": "31+"
+    }
+  ]
+}

@@ -129,12 +129,13 @@ suite, but **description-engine SVG output is not yet fully conformant**.
 Under **production** rendering (`renderSync`, `jarMeasurer`), 0 of 354
 surveyed component/usecase fixtures reach zero-diff — this is *expected*,
 not a regression (see "Why the survey shows near-zero conformant" below).
-A separate, deliberately narrow **ratchet** locks 5 fixtures that *are*
-zero-diff conformant under a dedicated deterministic-measurer render path.
-The gap between "cutover done" and "fully conformant" is real and tracked
-as follow-ups F1–F5 (see the end of this section) — do not read the
-ratchet's 5 fixtures as "5/N conformant"; read it as "5 fixtures proven
-and regression-locked, with an honest backlog for the rest."
+A separate, deliberately narrow **ratchet** locks a growing set of
+fixtures that *are* zero-diff conformant under a dedicated
+deterministic-measurer render path. The gap between "cutover done" and
+"fully conformant" is real and tracked as follow-ups F1–F5 (see the end of
+this section) — do not read the ratchet's fixture count as "N/total
+conformant"; read it as "N fixtures proven and regression-locked, with an
+honest backlog for the rest."
 
 ## Why the survey shows near-zero conformant: the D12 measurer split
 
@@ -168,26 +169,44 @@ the deterministic path.
 ## Survey and dashboard: measuring where things stand
 
 The survey compares **production** `renderSync` output against the cached
-jar SVG over the full component/usecase corpus. It is a report, not a
-gate — it exists to make the (currently large, D12-driven) production gap
-visible and trackable, not to fail CI.
+jar SVG. A bare invocation now surveys every type under
+`test-results/dot-cache/`, writing each type its own `parity-<type>.json`
+(`parityOutPath`), plus the legacy component+usecase pair into the shared
+`parity.json` the golden ratchets read for DOT eligibility (unchanged
+population and shape). Passing positional type args and/or `--out <path>`
+keeps the single-job behavior the script always had. It is a report, not a
+gate — it exists to make the (currently large) production gap visible and
+trackable, not to fail CI.
 
 ```sh
-npm run svg:survey      # scripts/svg-parity-survey.ts
-                         # writes tests/oracle/svg-conformance/parity.json
-npm run svg:dashboard   # scripts/svg-parity-dashboard.ts
-                         # renders tests/oracle/svg-conformance/PARITY-SVG.md
+npm run svg:survey                # scripts/svg-parity-survey.ts
+                                   # every cache type -> parity-<type>.json,
+                                   # plus component+usecase -> parity.json
+npm run svg:dashboard              # scripts/svg-parity-dashboard.ts
+                                   # renders parity.json -> PARITY-SVG.md
+npx jiti scripts/svg-parity-dashboard.ts --in tests/oracle/svg-conformance/parity-class.json \
+  --out tests/oracle/svg-conformance/PARITY-CLASS.md   # any parity-<type>.json
 ```
 
-Each row in `parity.json` records a `verdict` (`conformant`,
-`structural-match`, `diverged`, `errored`, `timeout`, `oracle-error`) and a
-`dotEqual` flag — whether the fixture's DOT emission is structurally
-`EQUAL` against the DOT oracle, independent of SVG rendering. `dotEqual`
-is the ratchet's eligibility gate (see below); it does not by itself imply
-SVG conformance.
+Each row records a `verdict` (`conformant`, `structural-match`, `diverged`,
+`errored`, `timeout`, `oracle-error`) and a `dotEqual` flag — whether the
+fixture's DOT emission is structurally `EQUAL` against the DOT oracle,
+independent of SVG rendering. `dotEqual` is the ratchet's eligibility gate
+(see below); it does not by itself imply SVG conformance.
+
+The dashboard's per-family table derives its rows from the distinct `type`
+values present in the input report, sorted — not a fixed list — so it
+renders correctly whichever `parity[-<type>].json` it is pointed at. Both
+the survey and the byte-exact golden ratchets already measure text through
+the same system (`WidthTableMeasurer`, re-exported as
+`DeterministicMeasurer`; see `src/core/measurer-deterministic.ts`), so a
+`diverged` verdict here is never a text-metric mismatch. What differs is
+the RENDER PATH: this survey renders through production `renderSync`,
+while the ratchets and the DOT-conformance census render through the
+low-level `renderFixture` helpers.
 
 Regenerate the dashboard after every survey run so `PARITY-SVG.md` stays
-in sync with `parity.json` — the dashboard reads `parity.json` from disk,
+in sync with `parity.json` — the dashboard reads its input file from disk,
 it does not re-render anything itself.
 
 ## Overlay triage: diagnosing one fixture
@@ -286,15 +305,13 @@ unrelated change.
 
 ## Current description-engine conformance status (as of Brief 2 close)
 
-**5 fixtures ratcheted**, all single-element/simple cases:
-
-| Type | Slug |
-|------|------|
-| component | `buduni-98-bima526` |
-| component | `vacuxi-18-baxu582` |
-| component | `vumija-03-xise495` |
-| usecase | `majuma-84-loma401` |
-| usecase | `kevipe-39-gaji640` |
+Per-fixture ratchet counts are tracked in the generated parity
+dashboard, not maintained here — see
+[`docs/parity-report.md`](parity-report.md) (also published at
+https://plantuml.knowvah.com/parity). As of that report's latest
+measurement, the description-engine ratchet holds **51** pins across
+the two svg-description families it covers: **32** component +
+**19** usecase.
 
 **No conformant fixture yet** for: package/cluster containers, multi-edge
 diagrams, or any fixture using a named CSS color (e.g. `#orange` — named
@@ -302,9 +319,9 @@ colors are not yet normalized to hex, see F below). Do not force-add a
 fixture in one of these categories to "close" it — widen the ratchet only
 once a real fixture in that category reaches zero-diff.
 
-**Do not confuse "5 ratcheted" with "conformance is done."** The mission
+**Do not confuse ratchet size with "conformance is done."** The mission
 delivered the klimt cutover, the dual-measurer infrastructure, and a live
-(if small) regression-proof ratchet — not full description-engine
+regression-proof ratchet — not full description-engine
 conformance. The remaining gap is real and tracked:
 
 | ID | Gap | Scope |

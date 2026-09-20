@@ -93,13 +93,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ## Supported Diagram Types
 
-| Diagram | Status |
-|---------|--------|
-| Sequence | ✓ |
-| Class | ✓ |
-| Component | ✓ |
-| State | ✓ |
-| Use Case | ✓ |
+Per-diagram-type parity — corpus size, oracle coverage, ratchet pins,
+and survey/census/routing/refusal counts — is tracked in one generated
+dashboard: [`docs/parity-report.md`](docs/parity-report.md). It is
+also published at
+[plantuml.knowvah.com/parity](https://plantuml.knowvah.com/parity),
+and is the single status surface for this project — no second list is
+maintained here.
 
 ### Preprocessor scope
 
