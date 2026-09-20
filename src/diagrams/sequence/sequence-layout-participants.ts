@@ -403,7 +403,27 @@ function resolveParticipantBackground(p: Participant, theme: Theme): Paint {
   const inline = resolveBareOrBackColor(p.color);
   if (inline !== undefined) return resolveColorToSvgHex(inline);
   const bucket = theme.colors.elements?.[p.type]?.background;
-  if (bucket === undefined) return theme.colors.background;
+  // `participantBackgroundColor<<X>>` (`FromSkinparamToStyle.java:272,
+  // 290-296` tokenises the key on `<>`): the stereotype-scoped tier sits
+  // above the bare bucket, keyed like `state-render-colors.ts
+  // #resolveStateBackgroundByStereo`. `p.stereotype` carries its guillemets
+  // (`sequence-parse-helpers.ts`), so strip them before the lookup.
+  const byStereo = theme.colors.elements?.[p.type]?.backgroundColorByStereo;
+  if (byStereo !== undefined && p.stereotype !== undefined) {
+    const scoped =
+      byStereo[
+        p.stereotype
+          .replace(/^<<|>>$/g, '')
+          .trim()
+          .toLowerCase()
+      ];
+    if (scoped !== undefined) return resolveColorToSvgHex(scoped);
+  }
+  // Not the canvas: `plantuml.skin:197-201` scopes the heads' grey-blue to
+  // `sequenceDiagram { }` and the jar keeps them there under `skinparam
+  // backgroundColor` (`ColorParam.background` and the participant style are
+  // separate). See `Theme.colors.participantBackground`.
+  if (bucket === undefined) return theme.colors.participantBackground;
   return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
 }
 

@@ -19,6 +19,7 @@ const TEST_THEME: Theme = {
   fontSize: 12,
   colors: {
     background: '#FFFFFF',
+    participantBackground: '#E2E2F0',
     nodeBackground: '#f1f1f1',
     border: '#AAAAAA',
     text: '#000000',

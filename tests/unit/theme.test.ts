@@ -354,6 +354,7 @@ describe('deepMergeTheme', () => {
     fontSize: 12,
     colors: {
       background: '#AAAAAA',
+      participantBackground: '#E2E2F0',
       nodeBackground: '#A1A1A1',
       border: '#BBBBBB',
       text: '#CCCCCC',

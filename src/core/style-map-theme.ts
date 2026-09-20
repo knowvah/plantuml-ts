@@ -15,6 +15,7 @@ import type { Theme, ElementColors } from './theme.js';
 import type { StyleMap } from './skinparam.js';
 import { deepMergeTheme } from './theme.js';
 import { resolveColor } from './skinparam.js';
+import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import {
   collectElementStyleBuckets,
   resolveDocumentBackground,
@@ -117,6 +118,15 @@ interface StyleMapExtras {
   readonly hasNoteTagCascade: boolean;
   readonly shadowing: number | undefined;
   readonly rootElementBorderRaw: string | undefined;
+  /** The bare `root`/`element` BackgroundColor, RAW. Besides
+   *  `graph.rootElementBackground` it also overrides
+   *  `colors.participantBackground`: upstream merges styles in
+   *  DECLARATION order with OVERWRITE_EXISTING_VALUE
+   *  (`StyleStorage#computeMergedStyle:102-114`), so a `<style> root {
+   *  BackgroundColor }` declared after `plantuml.skin`'s participant rule
+   *  (`:197-201`) wins over it -- `puml-theme-plain.puml:35-37` is the
+   *  case the corpus carries (jar: `xiceso-64-pelu456` heads #FFF). */
+  readonly rootElementBackgroundRaw: string | undefined;
   /** T14/D3: `computeCardinalityFontOverride`'s result -- the ONLY two
    *  `StyleMap`-derived fields that live at the TOP of `Theme` rather than
    *  under `colors.graph` (`theme.ts:21-22`), so they ride the partial's
@@ -149,6 +159,7 @@ function computeStyleMapExtras(styleMap: StyleMap, base: Theme): StyleMapExtras 
     hasShowStereotypeByTag: Object.keys(showStereotypeByTag).length > 0,
     shadowing: resolveGlobalShadowing(styleMap),
     rootElementBorderRaw: resolveGlobalBorder(styleMap),
+    rootElementBackgroundRaw: resolveGlobalBackground(styleMap),
     // SI26 D5: `cardinalityFontColor` rides the same top-level fold.
     cardinalityFont: computeCardinalityFontOverride(styleMap, [], base.colors.background),
   };
@@ -231,6 +242,9 @@ function buildStyleMapPartialTheme(
     ...extras.cardinalityFont,
     colors: {
       ...base.colors,
+      ...(extras.rootElementBackgroundRaw !== undefined
+        ? { participantBackground: resolveColorToSvgHex(extras.rootElementBackgroundRaw) }
+        : {}),
       ...(extras.documentBg !== undefined ? { background: extras.documentBg } : {}),
       ...(extras.rootElementBorderRaw !== undefined ? { border: resolveColor(extras.rootElementBorderRaw) } : {}),
       ...(extras.hasElements ? { elements: mergeElementBuckets(base, extras.elements) } : {}),

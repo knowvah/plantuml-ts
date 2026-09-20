@@ -22,6 +22,7 @@ const stubTheme: Theme = {
   fontFamily: 'Arial',
   colors: {
     background: '#fff',
+    participantBackground: '#E2E2F0',
     border: '#000',
     text: '#000',
     arrow: '#000',
