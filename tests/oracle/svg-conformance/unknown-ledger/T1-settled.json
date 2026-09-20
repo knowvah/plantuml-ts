@@ -1,0 +1,4117 @@
+{
+  "$comment": "T1 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T1): one row per settled slug from cohorts/T1.tsv -- agreements, jar-error pages, no-engine misroutes/gaps (NWDIAG/BPM/GIT/FLOW/TIMING/HELP), and the FILES root-attribute gap. One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0).",
+  "rows": [
+    {
+      "slug": "Timing-short-alias-5",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "Timing-short-alias-6",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "Timing-short-alias-7",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "Timing-short-alias-8",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "Timing-short-alias-9",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "bacore-60-gana679",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bafega-98-puju017",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "baketu-62-cumu838",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "baleco-37-lili752",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bamami-10-lava790",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "banire-12-feze162",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "banomu-15-keni701",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "barobi-40-zusa254",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "basoto-36-resu245",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bavezi-52-bive782",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "beboke-62-zofu377",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "befemi-82-coro755",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "befize-38-mine284",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "beguta-99-gixu960",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bekoni-23-xece793",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bemixo-79-xulu250",
+      "cohort": "no-engine-flow",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.FLOW: FlowDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:185), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero FLOW candidates and returns the error sentinel; the document reads as NONE here while the golden says FLOW. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "bezapo-02-xixu443",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bibeja-29-goxu033",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bibeso-63-kazo655",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bibigo-23-koli015",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bibuka-01-novu361",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "bicusa-63-cosu196",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "bidafa-53-lufi179",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bijilu-89-dadu849",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "bijufi-98-xafa015",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bikavu-22-rago633",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "binupo-93-begi656",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bisefo-56-dumu120",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bitujo-81-gunu116",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bixixe-41-vigu064",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bizasu-70-vaxa243",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bizeco-46-bevi495",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "bobixe-18-riza923",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bocipi-24-vexi113",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bocuri-67-bira302",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bogebu-46-deri191",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "bogide-54-buco992",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "boguze-30-lava691",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bonaco-71-xefu608",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bovagi-47-kago640",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "bujigu-81-nima035",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "bujosa-00-toro940",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "busada-35-veno431",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "buvofa-22-vozi025",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "buxuvo-46-paco030",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cagoze-40-tete366",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cagufu-48-kori236",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "cakutu-40-lece271",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "caluni-22-noci624",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "caruta-83-deta919",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "catana-32-licu332",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "catigu-77-keje426",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cececu-91-ruje022",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cejegu-93-kobo234",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cenucu-07-mepi600",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cerobi-73-sane324",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cevoti-40-jeco305",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cexoke-68-kici335",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cezeje-11-roxe484",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "cidoka-28-dava554",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cikifu-97-pasu472",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cikoge-60-riti614",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "cilefu-21-begi547",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cilibi-66-tasa181",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cimice-03-zata362",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cimono-94-ximu187",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cinula-56-dipu972",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cisipo-98-dire511",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "citoda-80-dimi195",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "codanu-59-titi616",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "cokuda-77-fesa475",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "colede-79-give418",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "comufa-64-noru360",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "coxoja-99-vosi661",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cozinu-92-cuvi600",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cujime-15-lobi079",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cukuba-10-cipo394",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cunotu-47-bute165",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "curojo-96-rara225",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "cuvupe-50-kola234",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "cuzedo-79-geju664",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dacica-03-jimi244",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dafitu-05-lumi067",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dagugu-60-zuli109",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "dajafo-57-fexi530",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dakeja-23-kapi402",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dakijo-89-mofa766",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "dalime-11-papi722",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "daroli-95-remo515",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "decato-52-soki987",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "dedumo-33-paco879",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "defici-02-texe585",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "degici-07-kura718",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "delagi-06-leji038",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "delipu-38-foze615",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "demeli-77-cozo712",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "depali-74-visa399",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "deroxu-29-gude369",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dicoge-13-meso213",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dijapi-54-jiza111",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dilese-24-neku812",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dirado-96-bivo248",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "dobido-76-nugu008",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "dociba-44-deno997",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dofixa-09-soji615",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dogizu-51-sora488",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dojufe-85-xaru596",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "donaxa-34-gotu113",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "dosixi-10-vetu164",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dovoxo-68-sufa237",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dufaka-77-jine221",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dugeki-47-celo546",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dumoke-08-gixu329",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "dunexe-27-rike921",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "dunudu-55-zene634",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dupifu-56-firi787",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "dupufa-70-zuji566",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "duvoxu-73-jine816",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fabosu-90-kilu899",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fajagi-98-funo863",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "febuci-08-zogi253",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "febuli-89-dusi249",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fecure-20-muca822",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "fedoxa-73-boje316",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "fefeza-33-xute344",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fepiko-26-vobi566",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fepoko-61-fona364",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fepulu-27-soci473",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fesusa-40-gabo183",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fetajo-61-sesi146",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fexeci-32-japu912",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fezaro-08-nopo877",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "ficame-31-lece592",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "figagi-40-mila236",
+      "cohort": "no-engine-git",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.GIT: GitDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:191, D6), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero GIT candidates and returns the error sentinel; the document reads as NONE here while the golden says GIT. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "fikofu-31-tefa367",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "fimiku-32-firu782",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "finume-86-gada330",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fipago-01-vuzi220",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "fipezo-93-zimi512",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fisoma-58-kobo261",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fivisa-32-suzi802",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fokudi-24-limo685",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "folutu-01-xuzo995",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "fomopo-28-fabe385",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fonatu-29-texo854",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "foraba-98-sagi735",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fotuko-85-voro628",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fukegu-14-zona532",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fukibe-03-jasu909",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fukoku-72-zudi472",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fupari-69-zite171",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "fupumu-08-zebu446",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "furepi-72-xivu327",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gaceme-16-dezo748",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "galata-74-luka487",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gapeji-48-keze681",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gasivu-43-gono952",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gemigi-37-safi979",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "geniku-96-mome670",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "genobe-17-dili872",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "geravi-79-nafu641",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gerebe-26-neli152",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gesapu-18-kazu561",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "getozu-01-sibu282",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gibapi-78-fote878",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gigetu-10-funi859",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gigoru-88-naze087",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gijamu-35-vale058",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gijegu-60-jori109",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gijoge-27-kito705",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gimofu-04-raje064",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gisuvu-77-suti527",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gitaxu-39-zifa189",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gobane-73-musa068",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "godego-76-casa114",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "godixi-01-fizo921",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "gogaxo-82-mire024",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "golamo-46-lume529",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gubexu-05-dufu787",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gufeva-83-vaje876",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gujara-70-tocu390",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "gujeku-90-jisa609",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "gukibi-02-kame147",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gumulo-94-ziva021",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "gunoxa-58-vico685",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gupaji-44-tezu003",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gurofo-44-xako688",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "gusola-40-gaco027",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "guvali-97-mike476",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "guxico-27-bofu708",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jadamo-76-xabi141",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jadavu-33-cono513",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jafexe-59-muzo362",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jajebe-95-jomo899",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jajeve-56-poza115",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jamuxo-74-diji002",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "japode-92-famo984",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jatujo-12-done231",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "javari-89-jibo072",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jekula-87-cida633",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jepide-33-luxo210",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jetigu-21-zaje860",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jiceju-70-copo737",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jifoke-84-jude859",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "jijali-88-pike617",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "jilodo-21-cifo618",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "jimizu-14-zole306",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jinaxe-58-zuva028",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jipapo-14-kevu587",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jititi-15-maxe512",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jixipo-21-mefu703",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jixuju-53-ruku075",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jizilu-55-jexu697",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jobuje-80-mopu051",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jofetu-26-nofo513",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jojajo-33-jilo451",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jojoxo-29-zuko417",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "joliva-50-vuva261",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jomege-63-guxe281",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "jopisi-58-rika067",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jubaba-44-tole509",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jubete-32-sutu417",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "judelo-10-teca860",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jugepi-77-xude968",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jujade-99-goza626",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "jujuga-39-miva043",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "jupeni-57-nexu873",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "juvopu-66-pipu000",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "juvose-99-mopu040",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "juxeji-51-todu651",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "juzane-95-fose365",
+      "cohort": "no-engine-git",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.GIT: GitDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:191, D6), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero GIT candidates and returns the error sentinel; the document reads as NONE here while the golden says GIT. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "juzica-68-kava475",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kacecu-90-pudi895",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kacura-85-tulu518",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kakitu-70-kuvi013",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "kakupi-00-lano640",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kaneke-33-nili717",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kavagu-15-poma470",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kebadi-11-fula439",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kebola-08-zoxe844",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "keceji-97-nuza070",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kefuna-77-kago547",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kekami-48-nibi969",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kekeli-82-vagi037",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kekese-70-zisa632",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kesexi-71-dubu320",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "kexaba-26-kobu577",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kibilo-60-fado726",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "kicapi-47-naka074",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kicice-20-pacu211",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kigazu-20-ticu127",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kijaro-77-vomi552",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kijipu-30-vona046",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kikudo-03-voto032",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kipesi-54-sasi125",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kojuja-62-xesu266",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kokofa-47-deni140",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "kubaca-07-dime602",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kuduba-74-taki821",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kufebo-74-sujo175",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "kumuti-42-tace851",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kuniko-53-rilu801",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kunuja-48-ropa074",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kupofu-67-cupo145",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "kurugo-90-pabi007",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "laboji-96-jone338",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lacifo-03-taka068",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lacode-63-laji967",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "lafeze-33-ralu563",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lagalo-25-fini318",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lagapi-44-lemu042",
+      "cohort": "no-engine-git",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.GIT: GitDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:191, D6), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero GIT candidates and returns the error sentinel; the document reads as NONE here while the golden says GIT. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "larevi-66-levu205",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "latilu-49-jebu021",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lavoke-68-lezi492",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lazetu-95-lisa969",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lazuxa-86-dizu716",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lebuca-31-sese441",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lejenu-55-paso269",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "leluza-90-kece237",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lerecu-03-tudo825",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "liboma-63-gamu743",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "liciru-76-ruse157",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lidoxa-65-nusu138",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lifuxe-94-xeto977",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "ligalo-62-suvu444",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "lijota-92-sove350",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "likinu-77-pepo298",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lirumo-81-jega996",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lituge-35-beli050",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lobana-68-baji893",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "locoge-06-luki835",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lofabo-38-tefo040",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "logavi-03-mita108",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "logifa-32-tuzi644",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lonome-59-lego635",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "losizo-97-tiki566",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "loxeke-95-tita253",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "ludipa-77-tako754",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lufano-46-xise868",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lulanu-89-tase004",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lulupi-98-gogi744",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lupano-18-jibi678",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "lusila-47-xiba216",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "luvufe-13-lifi483",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "luzeti-08-lafa321",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mafaki-14-cido418",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "manama-22-joxi528",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "marege-44-nifi894",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "marese-34-xaro137",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mebafo-26-fupu096",
+      "cohort": "no-engine-git",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.GIT: GitDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:191, D6), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero GIT candidates and returns the error sentinel; the document reads as NONE here while the golden says GIT. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "mebeva-33-bafu201",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mefule-86-calo549",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mefure-90-gitu244",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "mejote-23-xeso233",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "melosu-77-sati627",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mepemu-15-bitu955",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mepuro-90-lage386",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "meramo-02-vasu175",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "micono-65-juka195",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mifila-05-suzo732",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "migene-71-rogu145",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mijape-37-doka854",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mileba-84-rike349",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mimumu-93-fota059",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "miveni-64-rexo238",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mivisa-94-rite657",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "mixavu-83-xale251",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mocute-04-lori647",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "modubu-02-zamo711",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "mofora-39-nole251",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "molove-42-koxu080",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "momada-03-zeka599",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mulavi-78-faxo108",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mupavi-50-fijo192",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "mupiso-60-lide159",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nacipi-74-bivo164",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nadedo-37-nesa665",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nakavu-98-pela661",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "nakola-11-naga420",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nakosa-29-zata504",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "naluge-13-mefo624",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "namumi-26-zisi487",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "naneli-28-xufe452",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "napaju-13-kuva269",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nararo-54-kobi940",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "navapo-58-soto151",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "necele-02-femi691",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "necixe-44-rina124",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nedeto-35-rete203",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "neduvo-76-rigi020",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nefire-75-sudo926",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "negupo-97-loro420",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nejuge-86-duve357",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nekeso-74-tebe680",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nepevi-24-dune081",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nezimo-68-jabo300",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nibuta-88-lalu236",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nidezo-51-xevi604",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nijiku-48-falu377",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "nijipa-25-pede639",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nilimi-64-xeco438",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "niraji-17-gipi481",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nixaro-94-pefo622",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "nixeka-00-nuni016",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nixuje-20-bobu879",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "nojeru-23-tavo641",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "nonaja-03-zoki801",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "noxebo-98-foga433",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nucefo-27-tedu214",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "nufike-34-rila935",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nujapi-78-mota753",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "nulevu-49-bovi390",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nunema-69-degi058",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "nunexe-00-luba528",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nupiko-03-cezu269",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "nurile-03-kumi912",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nuvapa-57-joxi089",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nuzada-73-goke308",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "nuzise-60-temi305",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pacako-16-vudu147",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "padefe-05-bemu901",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pajeki-99-bezu928",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pajojo-12-kixi425",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "pakisi-27-xaro239",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "palida-11-pexu992",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "palovo-20-jivo819",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "papola-00-nira696",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "pavozu-43-tone454",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pavuni-17-nifu306",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "pavuso-18-rusi688",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pebara-08-raja604",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "peboza-00-roze848",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pecafo-64-rili177",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pefigi-94-raxa740",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pekico-53-logi157",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "pemare-74-julo947",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "petexo-14-zoju957",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "petiku-70-fogu777",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "pexaxo-70-dofe187",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pexona-78-kede899",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pezini-79-mupi337",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pibefe-94-cibu835",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pijugo-91-jilo150",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pisova-11-rego297",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pivexe-31-bade269",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pixelu-98-bovo354",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pizegi-06-jiro383",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "pizepu-20-bero680",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pocofe-94-ludu000",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pocoko-23-jupa184",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pocube-36-teja768",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pofali-42-vule505",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pojeje-60-vata579",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "poluve-80-mire025",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pomoxu-05-luco302",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "potani-24-vata851",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "potase-97-japa248",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "potefu-34-jilu183",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "potezi-53-doku302",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "poxopi-12-jupi541",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pucazu-91-paxe635",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pucozi-74-zilo936",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pugodi-27-kone040",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pumoko-38-sedi467",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "punofe-33-loji825",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "pupini-69-doko713",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "racemi-48-ceni130",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "racujo-01-veme537",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rafaci-22-fiki075",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "ragudu-37-poxi589",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "raxanu-33-xuzu111",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rebena-98-kiba723",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "regodu-14-peve499",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "renice-72-peda344",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "reromi-71-nona507",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "revezi-19-kuki251",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rexobo-28-rite508",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rezide-10-dulu504",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "ricute-48-xocu720",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "ridofi-55-lexe637",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rikosu-08-foda496",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "rilere-84-seba785",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rimeca-17-gice904",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rinidi-95-neko205",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rirelu-80-tagi213",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rivino-95-midu088",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rixeje-01-gava056",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rixuvo-85-safu077",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rodubi-28-vuxi527",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "roxita-24-tixu731",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rozesu-56-suve592",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rubebe-45-sura795",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "rufala-47-nosa835",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rufopi-30-roro642",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rugora-14-muxa930",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rujimo-45-dato973",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rukate-37-jabu394",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rumepo-86-tima388",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "runufe-74-dico475",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "rupigu-89-xabo757",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sacupe-57-dejo730",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "saduse-90-jama680",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "safuke-64-vuzo599",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "samutu-03-jude646",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "saneka-20-muma963",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sanima-32-teja660",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sapeka-40-zoze338",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sapofa-97-gizu737",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sasafi-70-gano653",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "savudo-32-lopu722",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "saxomu-54-deza117",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "secida-27-jaco323",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sejube-03-bote542",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "selapa-88-lopi279",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "seloni-75-tuze396",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "seluva-39-xebe172",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "semutu-45-zeno907",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sezupe-60-neko208",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sikike-36-nexu500",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sikove-75-lebe293",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "sinife-24-fise413",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sixoxu-07-neba246",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "sofobo-48-meme531",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sogeme-65-kate687",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "somule-10-duci912",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sonufo-86-jaje694",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "soseka-43-riru110",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sozeke-50-rilu829",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-fill-management-0",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-fill-management-1",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-fill-management-4",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-fill-management-5",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-stroke-management-0",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-stroke-management-1",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sprite-SVG-stroke-management-2",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sufaru-98-mifa724",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sufura-56-muke185",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sukazu-57-zozi807",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "sukuje-36-libo212",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tabuma-85-sizi973",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tadabe-21-dovi548",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "tagiko-99-sulo647",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "taliti-27-vuzo488",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tamiku-72-fafu058",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "tamovu-79-fifo533",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tavamu-02-meci663",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tegaju-61-mimo980",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tejevu-11-rafo563",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "temeca-88-zagi087",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "tenava-30-cele768",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tepili-19-sati986",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "terede-92-fuka839",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tezofo-39-fano197",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "ticemi-41-laze086",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tififu-24-rixa240",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tijica-43-sesu519",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tikiti-02-bagu049",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tilege-34-riki742",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tinizu-50-vamu491",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tipibu-04-cufe371",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "tirabi-23-xoka079",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tireno-34-buta139",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "titafe-19-sela022",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "titucu-21-vagi041",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tivezu-91-bevu722",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tivifi-47-limi217",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tmp1-1",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "tobevo-04-mata128",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "todotu-20-zelo085",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "todozi-34-jire490",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "togijo-81-zako477",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tonake-05-zibo183",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "topopo-11-cuze939",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "torazi-09-gago377",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "tozizu-96-voka262",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tububo-41-kezo224",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tufixe-50-zimu614",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tumuke-16-xomo243",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "tuteda-60-toca657",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vabobu-24-temi990",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vacapo-27-kizu746",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vacoli-38-suso931",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vagipe-25-jafo132",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vajaru-64-loni744",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vakovo-25-licu237",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vapelu-42-maba761",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vasogu-32-getu521",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vasuka-21-tugo253",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vatifu-07-vaci182",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vaxodu-91-komu816",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "vaxolu-89-boxo515",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vecagi-21-zupe986",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vekena-36-deja977",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "velono-84-vude605",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vemuti-86-jiga057",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "venofe-94-vopu657",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vevako-05-kula611",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vevali-53-jiri075",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vexebu-65-caxe283",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vilona-32-jusa967",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "vinefa-69-lufo631",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "viraki-97-kido395",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vivoba-16-deze072",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vocago-35-xodu446",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vocalo-20-dixu237",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "votafe-10-fixa830",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vovipa-79-gapu674",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vozeco-89-kune515",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vozubi-21-seto654",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vugaso-74-supa801",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vujalo-62-paji974",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vuneti-03-madi874",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vupupa-98-pelo131",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vusopa-96-tero462",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vuvave-27-saki879",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "vuxexo-42-fija881",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xadudi-62-pupa491",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xagabo-19-cege045",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xagonu-36-sudi116",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xalivi-74-gonu283",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xamive-55-lipi586",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xanuke-94-tope429",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xariko-97-zuno323",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xasanu-61-guze787",
+      "cohort": "no-engine-help",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+    },
+    {
+      "slug": "xavefa-87-tabi094",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xazave-85-nare716",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "xefuma-94-cura811",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xejuke-02-vale981",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "xelumo-69-cuge217",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "xemeke-75-copu190",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xemoba-72-xuvi441",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xerumu-58-sava024",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xesepu-10-biza064",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xeseve-00-tipa730",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "xibuvu-39-nasi818",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xicili-92-foke737",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xidaxi-41-niti333",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xigele-78-sija109",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xigumi-63-ranu028",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xikefu-26-vora536",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xipazi-55-naxo709",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xisora-84-faca166",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xonedu-05-mubu593",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xovudi-74-juce659",
+      "cohort": "no-engine-timing",
+      "disposition": "known-gap",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.TIMING: TimingDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:187, D1); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the TIMING diagram the jar drew. The document errors here while the golden says TIMING."
+    },
+    {
+      "slug": "xozonu-96-nota512",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xubabi-00-bike493",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xucika-16-zago215",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xucura-15-fuxu925",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xujebo-87-nade992",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "xukofa-63-ropa738",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xukono-55-nezi535",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xupiko-87-dafi146",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xurivi-47-gupo448",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xusuxi-66-zaci221",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "xuxugi-47-vuzu867",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zaburu-47-dala032",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zakaca-67-paxe321",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zamiba-19-zafa358",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zanaco-20-fudo468",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zarelu-57-xika172",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zasuxe-15-lugo662",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zaxavo-08-rake498",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zaxuce-77-ziti117",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zecate-11-guta563",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zeceme-22-rade890",
+      "cohort": "jar-error",
+      "disposition": "jar-error",
+      "task": "T1"
+    },
+    {
+      "slug": "zedena-31-deso122",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zeleni-35-xuzo854",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zeluge-00-cofi214",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zepoxo-18-kefi748",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zevece-09-cono092",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zexaxa-41-kaki432",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "ziboza-73-cexo876",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zicepa-25-ciri712",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zimuxu-52-lazi274",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zinisu-57-buma865",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "ziruri-42-maxo237",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zisizi-13-nuxe218",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zivenu-37-nace681",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zivilu-35-leja732",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zixuta-02-suzo281",
+      "cohort": "files-untyped-root",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "the files engine stamps no root data-diagram-type: renderFiles (src/diagrams/files/renderer.ts:64-69) returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never writes the attribute upstream stamps on every export (TextBlockExporter.java:292-294); the document reads as NONE here while the golden says FILES. FilesDiagramFactory IS registered (PSystemBuilder.java:192), so the engine itself renders correctly -- only the root-attribute stamp is missing. One mechanism for every files fixture, the same one T5 pinned for board; it falls to agree once the engine sets diagramType."
+    },
+    {
+      "slug": "zocefi-61-vunu811",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zodeja-60-gide950",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zodela-36-sica712",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zogizu-64-febi743",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zoguvu-43-vami815",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zomoba-18-raka718",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zonamu-61-kocu599",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zopebe-86-xusi460",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zosacu-94-gico849",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zovija-41-tocu113",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zovojo-65-gocu245",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zozale-62-xene777",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zoziko-62-toko934",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zucave-84-moki390",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zucixi-23-seni671",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zufefe-09-fifa419",
+      "cohort": "no-engine-bpm",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.BPM: BpmDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:141), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero BPM candidates and returns the error sentinel; the document reads as NONE here while the golden says BPM. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "slug": "zugazo-84-raju675",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zumuji-10-tixo987",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zumuvu-52-jure458",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zupagu-81-pona636",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zuropa-39-cada269",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zurule-27-guko881",
+      "cohort": "agree",
+      "disposition": "agree",
+      "task": "T1"
+    },
+    {
+      "slug": "zusubu-74-ruce269",
+      "cohort": "no-engine-nwdiag",
+      "disposition": "known-misroute",
+      "task": "T1",
+      "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    }
+  ]
+}
