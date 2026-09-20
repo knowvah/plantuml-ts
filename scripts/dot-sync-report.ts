@@ -8,17 +8,14 @@
  * Modes:
  *   [--rebuild] [--type-tag TAG] [type ...]   Aggregate report (default: component usecase).
  *     Canonical SVGs are self-built via the oracle jar (batch mode) if missing for a type.
- *   --slug <slug> <type>   Drill-down: oracle svek DOT, our emitted svek DOT (toSvekDot), and
- *     the per-check StructuralDiff with underlying values for every failing check, one fixture.
- *   --probe-json-dot   One-shot probe: does -DPLANTUML_DUMP_DOT produce svek-*.dot for the
- *     json/dot corpora? Writes findings to plans/dot-oracle-sync/phase-5-json-dot/probe.md.
- *   --equal-list   Aggregate-report addendum: writes the sorted list of slugs classified
- *     "structurally EQUAL" per type to test-results/dot-sync-equal/<type>.txt (one per line) —
- *     a machine-readable feed for promoting fixtures into oracle/goldens/.
- *   --markdown   Writes docs/parity-report.md: one row per manifest type with comparable/equal/
- *     oracle-blind counts. Types with no dot-cache dump get a "not yet measured" row (never a
- *     failure). Reads only what is already cached — no oracle jar batch build (D1, see
- *     plans/docs-site/decisions.md).
+ *   --slug <slug> <type>   Drill-down: oracle svek DOT vs. ours (toSvekDot), with the per-check
+ *     StructuralDiff and underlying values for every failing check, for one fixture.
+ *   --probe-json-dot   One-shot probe: does -DPLANTUML_DUMP_DOT produce svek-*.dot for json/dot?
+ *     Writes findings to plans/dot-oracle-sync/phase-5-json-dot/probe.md.
+ *   --equal-list   Addendum: writes slugs classified "structurally EQUAL" per type to
+ *     test-results/dot-sync-equal/<type>.txt — a feed for promoting fixtures into oracle/goldens/.
+ *   --markdown   Writes docs/parity-report.md (row shape/vocabulary in dot-parity-rows.ts).
+ *     Reads only what is already cached — no oracle jar batch build (D1, plans/docs-site/decisions.md).
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -40,32 +37,16 @@ import {
   type StructuralDiff,
 } from '../tests/oracle/svek-dot.js';
 import { CHECKS, drillDownGraph, stripDiagramName, stripLayoutPragma } from './dot-sync-drilldown.js';
-import {
-  DATA_DIR,
-  CANON_DIR,
-  ensureCanonical,
-  enumerateFixtures,
-  findFixture,
-  reportSkips,
-  taggedSlugs,
-  type Fixture,
-} from './dot-sync-fixtures.js';
+import { ensureCanonical, enumerateFixtures, findFixture, reportSkips, taggedSlugs, type Fixture } from './dot-sync-fixtures.js';
+import { EXPECTED_TAG, dotParityRows, dotParityMarkdown } from './dot-parity-rows.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** Lizard-safe (no regex literals): matches svek-<N>.dot dump files. */
 const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
-const CACHE = join(REPO, 'test-results', 'dot-cache');
+/** Exported so dot-parity-rows.ts can check per-type cache freshness. */
+export const CACHE = join(REPO, 'test-results', 'dot-cache');
 const PROBE_OUT = join(REPO, 'plans', 'dot-oracle-sync', 'phase-5-json-dot', 'probe.md');
 const EQUAL_LIST_DIR = join(REPO, 'test-results', 'dot-sync-equal');
-
-/** Expected PlantUML data-diagram-type per corpus bucket we know how to classify. Override with --type-tag. */
-const EXPECTED_TAG: Record<string, string> = {
-  component: 'DESCRIPTION',
-  usecase: 'DESCRIPTION',
-  class: 'CLASS',
-  object: 'CLASS', // no separate object engine upstream (ClassDiagramFactory.java)
-  state: 'STATE',
-};
 
 function resolveJar(): string {
   if (process.env.PLANTUML_JAR !== undefined) {
@@ -269,18 +250,7 @@ function report(type: string, tag: string, a: Agg): void {
       console.log('    ' + c.padEnd(12) + ' fails: ' + a.fail[c] + '   e.g. ' + a.examples[c]!.slice(0, 4).join(', '));
   }
   console.log(
-    '  node count: over ' +
-      a.nodeOver +
-      ' / under ' +
-      a.nodeUnder +
-      ' | edges: over ' +
-      a.edgeOver +
-      ' / under ' +
-      a.edgeUnder +
-      ' | clusters: over ' +
-      a.clusterOver +
-      ' / under ' +
-      a.clusterUnder,
+    `  node count: over ${a.nodeOver} / under ${a.nodeUnder} | edges: over ${a.edgeOver} / under ${a.edgeUnder} | clusters: over ${a.clusterOver} / under ${a.clusterUnder}`,
   );
 }
 
@@ -294,9 +264,9 @@ function writeEqualList(type: string, a: Agg): void {
   console.error('[dot-sync] wrote ' + sorted.length + ' EQUAL slugs to ' + out);
 }
 
-/** Core aggregation shared by the console report and --markdown: classifies `fixtures` to `tag`
- *  via cached canonical SVGs, diffs each non-oracle-blind fixture's cached DOT against ours. */
-function buildAgg(jar: string, type: string, fixtures: Fixture[], tag: string, rebuild: boolean): Agg {
+/** Core aggregation shared by the console report and dot-parity-rows.ts: classifies `fixtures`
+ *  to `tag` via cached canonical SVGs, diffs each non-oracle-blind fixture's cached DOT against ours. */
+export function buildAgg(jar: string, type: string, fixtures: Fixture[], tag: string, rebuild: boolean): Agg {
   const slugs = taggedSlugs(type, tag);
   const a = newAgg();
   const skipped: string[] = [];
@@ -327,12 +297,7 @@ function runType(
   const fixtures = enumerateFixtures(type);
   if (fixtures === undefined) {
     console.error(
-      'No fixture manifest for "' +
-        type +
-        '" at tests/visual/data/' +
-        type +
-        '.json. ' +
-        'Run npm run visual:classify first, then re-run this report.',
+      `No fixture manifest for "${type}" at tests/visual/data/${type}.json. Run npm run visual:classify first, then re-run this report.`,
     );
     return;
   }
@@ -350,82 +315,13 @@ function runType(
 // --markdown -------------------------------------------------------------------
 
 const PARITY_REPORT_OUT = join(REPO, 'docs', 'parity-report.md');
-interface TypeRow {
-  type: string;
-  comparable: number;
-  equal: number;
-  pct: string;
-  oracleBlind: number;
-  note: string;
-}
-const NOT_MEASURED = (type: string, note: string): TypeRow => ({
-  type,
-  comparable: 0,
-  equal: 0,
-  pct: '—',
-  oracleBlind: 0,
-  note,
-});
 
-/** All diagram types with a fixture manifest, sorted for a stable report. */
-function manifestTypes(): string[] {
-  return readdirSync(DATA_DIR)
-    .filter((f) => f.endsWith('.json'))
-    .map((f) => f.replace(/\.json$/, ''))
-    .sort();
-}
-
-/** One report row for `type`. Unlike ensureCanonical, never invokes the oracle jar's batch build — reads only what is cached. */
-function markdownRowForType(jar: string, type: string): TypeRow {
-  const cacheDir = join(CACHE, type);
-  if (!existsSync(cacheDir) || readdirSync(cacheDir).length === 0) return NOT_MEASURED(type, 'not yet measured');
-  const fixtures = enumerateFixtures(type);
-  if (fixtures === undefined) return NOT_MEASURED(type, 'not yet measured');
-  const tag = EXPECTED_TAG[type];
-  const canonDir = join(CANON_DIR, type);
-  const hasCanon = tag !== undefined && existsSync(canonDir) && readdirSync(canonDir).some((f) => f.endsWith('.svg'));
-  if (!hasCanon)
-    return NOT_MEASURED(
-      type,
-      'oracle dumps cached but no data-diagram-type classification available — run with --type-tag to classify',
-    );
-  const a = buildAgg(jar, type, fixtures, tag, false);
-  const pct = a.total > 0 ? ((100 * a.equal) / a.total).toFixed(0) + '%' : '—';
-  return { type, comparable: a.total, equal: a.equal, pct, oracleBlind: a.oracleBlind, note: '—' };
-}
-
-const MARKDOWN_LEGEND = [
-  '- **comparable** — fixtures classified to this type (cached canonical SVG `data-diagram-type`) whose PlantUML svek DOT was diffable against ours. Excludes **oracle-blind**.',
-  '- **equal** — of the comparable fixtures, how many are structurally EQUAL per every check in `tests/oracle/svek-dot.ts`.',
-  '- **oracle-blind** — `!pragma layout elk` fixtures (smetana/vizjs are graphviz under other names and are captured normally, per DIVERGENCES.md); PlantUML only dumps svek DOT on the graphviz path, so there is no oracle DOT to diff for elk. Excluded from **comparable**.',
-  '- **not yet measured** — no cached oracle DOT dump under `test-results/dot-cache/<type>/` yet (or no classification configured); not a failure, just unmeasured.',
-];
-
+/** Row computation and rendering live in dot-parity-rows.ts; this just resolves the jar and writes the file. */
 function runMarkdown(jar: string): void {
-  const rows = manifestTypes().map((t) => markdownRowForType(jar, t));
-  const table = rows.map(
-    (r) => `| ${r.type} | ${r.comparable} | ${r.equal} | ${r.pct} | ${r.oracleBlind} | ${r.note} |`,
-  );
-  const lines: string[] = [
-    '<!-- GENERATED by `npx tsx scripts/dot-sync-report.ts --markdown` — do not edit by hand. -->',
-    '',
-    '# DOT parity report',
-    '',
-    'Generated by `npx tsx scripts/dot-sync-report.ts --markdown` on ' + new Date().toISOString().slice(0, 10) + '.',
-    '',
-    '## Parity by diagram type',
-    '',
-    '| type | comparable | equal | pct | oracle-blind | note |',
-    '| --- | ---: | ---: | ---: | ---: | --- |',
-    ...table,
-    '',
-    '## Legend',
-    '',
-    ...MARKDOWN_LEGEND,
-    '',
-  ];
+  const rows = dotParityRows(jar);
+  const markdown = dotParityMarkdown(rows, new Date().toISOString().slice(0, 10));
   mkdirSync(dirname(PARITY_REPORT_OUT), { recursive: true });
-  writeFileSync(PARITY_REPORT_OUT, lines.join('\n') + '\n', 'utf-8');
+  writeFileSync(PARITY_REPORT_OUT, markdown, 'utf-8');
   console.log('Wrote ' + PARITY_REPORT_OUT);
 }
 

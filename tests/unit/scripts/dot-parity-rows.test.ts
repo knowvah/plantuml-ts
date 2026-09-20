@@ -1,0 +1,121 @@
+/**
+ * Unit tests for the DOT-sync report's per-type row builder
+ * (`scripts/dot-parity-rows.ts`, mission parity-dashboard-refresh T4).
+ *
+ * `dotParityRows` reads two pieces of ambient repo state: `test-results/dot-cache/`
+ * (committed — see `.gitignore`'s carve-out — so its presence/absence per type is
+ * as stable across checkouts as `tests/visual/data/*.json`) and
+ * `test-results/visual-qa-svg/canonical/` (gitignored, jar-generated, and never
+ * created by anything a unit-test run touches). These tests rely on that
+ * asymmetry: the no-cache-dir and no-classification branches are exercised
+ * against real, checked-in ambient state rather than fixtures, the same pattern
+ * `dot-sync-fixtures.test.ts` uses for its "over the committed corpus" suite.
+ */
+import { describe, it, expect } from 'vitest';
+import { readdirSync } from 'node:fs';
+
+import { dotParityRows, dotParityMarkdown, NON_SVEK_TYPES, type TypeRow } from '../../../scripts/dot-parity-rows.js';
+import { DATA_DIR } from '../../../scripts/dot-sync-fixtures.js';
+
+/** Never invoked: every row exercised here short-circuits before `buildAgg`. */
+const UNUSED_JAR = 'unused-test-jar';
+
+function manifestTypeCount(): number {
+  return readdirSync(DATA_DIR).filter((f) => f.endsWith('.json')).length;
+}
+
+function rowFor(rows: TypeRow[], type: string): TypeRow {
+  const row = rows.find((r) => r.type === type);
+  if (row === undefined) throw new Error(`no row for "${type}" — check the manifest still has ${type}.json`);
+  return row;
+}
+
+// ---------------------------------------------------------------------------
+// NON_SVEK_TYPES — the structural constant
+// ---------------------------------------------------------------------------
+
+describe('NON_SVEK_TYPES', () => {
+  it('is exactly sequence, activity, json, yaml, hcl, dot, gitgraph', () => {
+    expect(new Set(NON_SVEK_TYPES)).toEqual(new Set(['sequence', 'activity', 'json', 'yaml', 'hcl', 'dot', 'gitgraph']));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dotParityRows — AC1, AC2
+// ---------------------------------------------------------------------------
+
+describe('dotParityRows', () => {
+  it('returns exactly one row per tests/visual/data/*.json manifest, sorted by type', () => {
+    const rows = dotParityRows(UNUSED_JAR);
+    expect(rows).toHaveLength(manifestTypeCount());
+    expect(rows.map((r) => r.type)).toEqual([...rows.map((r) => r.type)].sort());
+  });
+
+  // AC1: sequence, activity, json, yaml, hcl, dot are n/a with comparable 0,
+  // regardless of how much oracle data is cached for them (all six have a
+  // populated test-results/dot-cache/<type>/ dir today — the short circuit
+  // must fire before that cache is even inspected).
+  it.each(['sequence', 'activity', 'json', 'yaml', 'hcl', 'dot'])(
+    '%s: n/a (no DOT stage), comparable 0, regardless of its cache',
+    (type) => {
+      const row = rowFor(dotParityRows(UNUSED_JAR), type);
+      expect(row.note).toBe('n/a (no DOT stage)');
+      expect(row.comparable).toBe(0);
+      expect(row.equal).toBe(0);
+      expect(row.oracleBlind).toBe(0);
+      expect(row.pct).toBe('—');
+    },
+  );
+
+  // AC2: a manifest type with no test-results/dot-cache/<type>/ directory at
+  // all gets "no oracle captured" — not "n/a" (it is not a NON_SVEK_TYPES
+  // member) and not the classification note (no cache means no fixtures were
+  // ever diffed, so classification was never reached).
+  it('board (no cache dir, not a NON_SVEK_TYPES member): no oracle captured', () => {
+    const row = rowFor(dotParityRows(UNUSED_JAR), 'board');
+    expect(row.note).toBe('no oracle captured');
+    expect(row.comparable).toBe(0);
+  });
+
+  // Third vocabulary member: cache is populated and the type has a manifest,
+  // but no canonical SVG exists locally to classify against — the
+  // pre-existing "run with --type-tag" branch, reworded per the new
+  // 4-value note vocabulary.
+  it('class (cached, no local canonical SVGs): no data-diagram-type classification', () => {
+    const row = rowFor(dotParityRows(UNUSED_JAR), 'class');
+    expect(row.note).toBe('no data-diagram-type classification');
+    expect(row.comparable).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dotParityMarkdown — pure rendering, no filesystem or jar involved
+// ---------------------------------------------------------------------------
+
+describe('dotParityMarkdown', () => {
+  const rows: TypeRow[] = [
+    { type: 'class', comparable: 708, equal: 708, pct: '100%', oracleBlind: 7, note: '—' },
+    { type: 'dot', comparable: 0, equal: 0, pct: '—', oracleBlind: 0, note: 'n/a (no DOT stage)' },
+    { type: 'board', comparable: 0, equal: 0, pct: '—', oracleBlind: 0, note: 'no oracle captured' },
+  ];
+
+  it('renders the generated-on date, the header, one table row per TypeRow, and the legend', () => {
+    const out = dotParityMarkdown(rows, '2026-09-20');
+
+    expect(out).toContain('Generated by `npx tsx scripts/dot-sync-report.ts --markdown` on 2026-09-20.');
+    expect(out).toContain('| class | 708 | 708 | 100% | 7 | — |');
+    expect(out).toContain('| dot | 0 | 0 | — | 0 | n/a (no DOT stage) |');
+    expect(out).toContain('| board | 0 | 0 | — | 0 | no oracle captured |');
+  });
+
+  it('documents n/a (no DOT stage) in the legend', () => {
+    const out = dotParityMarkdown(rows, '2026-09-20');
+    expect(out).toContain('**n/a (no DOT stage)**');
+  });
+
+  it('ends with a single trailing newline (matches the previous generator byte-for-byte convention)', () => {
+    const out = dotParityMarkdown([], '2026-09-20');
+    expect(out.endsWith('\n')).toBe(true);
+    expect(out.endsWith('\n\n\n')).toBe(false);
+  });
+});
