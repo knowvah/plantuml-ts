@@ -132,7 +132,9 @@ function freshBaselinePaths(label: string): { routingBaselinePath: string; refus
   return { routingBaselinePath, refusalBaselinePath };
 }
 
-function baseOpts(overrides: Partial<PinOptions> & Pick<PinOptions, 'routingBaselinePath' | 'refusalBaselinePath'>): PinOptions {
+function baseOpts(
+  overrides: Partial<PinOptions> & Pick<PinOptions, 'routingBaselinePath' | 'refusalBaselinePath'>,
+): PinOptions {
   return {
     type: 'unknown-test',
     treeDir,
@@ -217,7 +219,13 @@ describe('deriveRow', () => {
       weErrored: true,
       engine: 'unknown',
     };
-    const ledgerRow: LedgerRow = { slug: 's', cohort: 'c', disposition: 'known-misroute', reason: 'Foo.java:1 x', task: 'T0' };
+    const ledgerRow: LedgerRow = {
+      slug: 's',
+      cohort: 'c',
+      disposition: 'known-misroute',
+      reason: 'Foo.java:1 x',
+      task: 'T0',
+    };
     const d = deriveRow(f, ledgerRow);
     expect(d.routing).toEqual({ status: 'known-misroute', needsReason: true, reason: 'Foo.java:1 x' });
     expect(d.refusal).toEqual({ status: 'known-gap', cohort: 'known-gap', needsReason: true, reason: 'Foo.java:1 x' });
@@ -272,20 +280,84 @@ describe('checkAdditive', () => {
 describe('computeTally', () => {
   it('buckets by ledger cohort x routing status x refusal cohort, counting a blocked defect as unpinned', () => {
     const measured: MeasuredFixture[] = [
-      { slug: 'a', jarType: 'CLASS', ourType: 'CLASS', jarErrored: false, jarRendered: true, weErrored: false, engine: 'class' },
-      { slug: 'b', jarType: 'CLASS', ourType: 'SEQUENCE', jarErrored: false, jarRendered: true, weErrored: false, engine: 'sequence' },
+      {
+        slug: 'a',
+        jarType: 'CLASS',
+        ourType: 'CLASS',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'class',
+      },
+      {
+        slug: 'b',
+        jarType: 'CLASS',
+        ourType: 'SEQUENCE',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'sequence',
+      },
     ];
     const ledger = new Map<string, LedgerRow>();
     const derived = new Map(measured.map((m) => [m.slug, deriveRow(m, ledger.get(m.slug))]));
     const tally = computeTally(measured, ledger, derived);
     expect(tally.unpinned).toBe(1);
+    expect(tally.fixCandidates).toBe(0);
     expect(tally.entries).toEqual([{ cohort: '(no ledger row)', routing: 'agree', refusal: 'ok', count: 1 }]);
+  });
+
+  it('counts a fix-candidate ledger row under fixCandidates, not unpinned (batch-1 gate reads them apart)', () => {
+    const measured: MeasuredFixture[] = [
+      {
+        slug: 'a',
+        jarType: 'CLASS',
+        ourType: 'SEQUENCE',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'sequence',
+      },
+      {
+        slug: 'b',
+        jarType: 'CLASS',
+        ourType: 'SEQUENCE',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'sequence',
+      },
+    ];
+    const ledger = new Map<string, LedgerRow>([
+      ['a', { slug: 'a', cohort: 'seq-overclaim', disposition: 'fix-candidate', seam: 'sequence', task: 'T4' }],
+    ]);
+    const derived = new Map(measured.map((m) => [m.slug, deriveRow(m, ledger.get(m.slug))]));
+    const tally = computeTally(measured, ledger, derived);
+    expect(tally.fixCandidates).toBe(1);
+    expect(tally.unpinned).toBe(1);
+    expect(tally.entries).toEqual([]);
   });
 
   it('sorts entries by cohort, then routing status, then refusal cohort when cohorts tie', () => {
     const measured: MeasuredFixture[] = [
-      { slug: 'a', jarType: 'CLASS', ourType: 'CLASS', jarErrored: false, jarRendered: true, weErrored: false, engine: 'class' },
-      { slug: 'b', jarType: 'CLASS', ourType: 'CLASS', jarErrored: false, jarRendered: false, weErrored: false, engine: 'class' },
+      {
+        slug: 'a',
+        jarType: 'CLASS',
+        ourType: 'CLASS',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'class',
+      },
+      {
+        slug: 'b',
+        jarType: 'CLASS',
+        ourType: 'CLASS',
+        jarErrored: false,
+        jarRendered: false,
+        weErrored: false,
+        engine: 'class',
+      },
     ];
     const ledgerRow: LedgerRow = { slug: 'shared', cohort: 'same-cohort', disposition: 'agree', task: 'T0' };
     const ledger = new Map<string, LedgerRow>([
@@ -302,10 +374,18 @@ describe('computeTally', () => {
 
   it('skips a measured fixture with no corresponding entry in derived rather than throwing', () => {
     const measured: MeasuredFixture[] = [
-      { slug: 'a', jarType: 'CLASS', ourType: 'CLASS', jarErrored: false, jarRendered: true, weErrored: false, engine: 'class' },
+      {
+        slug: 'a',
+        jarType: 'CLASS',
+        ourType: 'CLASS',
+        jarErrored: false,
+        jarRendered: true,
+        weErrored: false,
+        engine: 'class',
+      },
     ];
     const tally = computeTally(measured, new Map(), new Map());
-    expect(tally).toEqual({ entries: [], unpinned: 0 });
+    expect(tally).toEqual({ entries: [], fixCandidates: 0, unpinned: 0 });
   });
 });
 
@@ -321,16 +401,32 @@ describe('loadLedger', () => {
   it('merges rows from multiple fragment files by slug', () => {
     const dir = join(tmp, 'ledger-merge');
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'a.json'), JSON.stringify({ rows: [{ slug: 'x', cohort: 'c', disposition: 'agree', task: 'T1' }] }), 'utf8');
-    writeFileSync(join(dir, 'b.json'), JSON.stringify({ rows: [{ slug: 'y', cohort: 'c', disposition: 'agree', task: 'T2' }] }), 'utf8');
+    writeFileSync(
+      join(dir, 'a.json'),
+      JSON.stringify({ rows: [{ slug: 'x', cohort: 'c', disposition: 'agree', task: 'T1' }] }),
+      'utf8',
+    );
+    writeFileSync(
+      join(dir, 'b.json'),
+      JSON.stringify({ rows: [{ slug: 'y', cohort: 'c', disposition: 'agree', task: 'T2' }] }),
+      'utf8',
+    );
     expect([...loadLedger(dir).keys()].sort()).toEqual(['x', 'y']);
   });
 
   it('throws when a slug appears in two fragments', () => {
     const dir = join(tmp, 'ledger-dup');
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'a.json'), JSON.stringify({ rows: [{ slug: 'z', cohort: 'c', disposition: 'agree', task: 'T1' }] }), 'utf8');
-    writeFileSync(join(dir, 'b.json'), JSON.stringify({ rows: [{ slug: 'z', cohort: 'c', disposition: 'agree', task: 'T2' }] }), 'utf8');
+    writeFileSync(
+      join(dir, 'a.json'),
+      JSON.stringify({ rows: [{ slug: 'z', cohort: 'c', disposition: 'agree', task: 'T1' }] }),
+      'utf8',
+    );
+    writeFileSync(
+      join(dir, 'b.json'),
+      JSON.stringify({ rows: [{ slug: 'z', cohort: 'c', disposition: 'agree', task: 'T2' }] }),
+      'utf8',
+    );
     expect(() => loadLedger(dir)).toThrow(/"z"/);
   });
 });
@@ -411,7 +507,9 @@ describe('runPinCorpusTree', () => {
     const beforeRefusal = readFileSync(refusalBaselinePath, 'utf8');
 
     expect(() =>
-      runPinCorpusTree(baseOpts({ dry: false, ledgerDir: noReasonLedgerDir, routingBaselinePath, refusalBaselinePath })),
+      runPinCorpusTree(
+        baseOpts({ dry: false, ledgerDir: noReasonLedgerDir, routingBaselinePath, refusalBaselinePath }),
+      ),
     ).toThrow(/misroute-sequence/);
 
     expect(readFileSync(routingBaselinePath, 'utf8')).toBe(beforeRouting);
@@ -433,7 +531,9 @@ describe('runPinCorpusTree', () => {
     const { routingBaselinePath, refusalBaselinePath } = freshBaselinePaths('ac3');
 
     expect(() =>
-      runPinCorpusTree(baseOpts({ dry: false, ledgerDir: fixCandidateLedgerDir, routingBaselinePath, refusalBaselinePath })),
+      runPinCorpusTree(
+        baseOpts({ dry: false, ledgerDir: fixCandidateLedgerDir, routingBaselinePath, refusalBaselinePath }),
+      ),
     ).toThrow(/misroute-sequence/);
   });
 
@@ -484,8 +584,20 @@ describe('runPinCorpusTree', () => {
   it('a malformed ledger reason refuses regardless of --dry', () => {
     const badLedgerDir = join(tmp, 'ledger-bad-reason');
     writeLedgerFragment(badLedgerDir, [
-      { slug: 'misroute-sequence', cohort: 'c', disposition: 'known-misroute', reason: 'not a file reference', task: 'T0' },
-      { slug: 'refusal-includedef', cohort: 'c', disposition: 'known-gap', reason: 'CommandIncludeDef.java:99 x', task: 'T0' },
+      {
+        slug: 'misroute-sequence',
+        cohort: 'c',
+        disposition: 'known-misroute',
+        reason: 'not a file reference',
+        task: 'T0',
+      },
+      {
+        slug: 'refusal-includedef',
+        cohort: 'c',
+        disposition: 'known-gap',
+        reason: 'CommandIncludeDef.java:99 x',
+        task: 'T0',
+      },
     ]);
     const { routingBaselinePath, refusalBaselinePath } = freshBaselinePaths('bad-reason');
 

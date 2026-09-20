@@ -170,7 +170,10 @@ export function checkAdditive(before: readonly unknown[], after: readonly unknow
 }
 
 function isBlocked(d: DerivedRow): boolean {
-  return (d.routing.needsReason && d.routing.reason === undefined) || (d.refusal.needsReason && d.refusal.reason === undefined);
+  return (
+    (d.routing.needsReason && d.routing.reason === undefined) ||
+    (d.refusal.needsReason && d.refusal.reason === undefined)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -203,14 +206,32 @@ export interface RefusalBaselineRow {
   readonly reason?: string;
 }
 
-function buildRoutingRow(type: string, m: MeasuredFixture, d: RoutingDerived, today: string, commit: string): RoutingBaselineRow {
+function buildRoutingRow(
+  type: string,
+  m: MeasuredFixture,
+  d: RoutingDerived,
+  today: string,
+  commit: string,
+): RoutingBaselineRow {
   const withType = { tree: 'dot-cache' as const, type, slug: m.slug, jarType: m.jarType };
   const withErrored = d.status === 'jar-error' ? { ...withType, jarErrored: true as const } : withType;
-  const withRest = { ...withErrored, ourType: m.ourType, status: d.status, measuredAt: today, measuredAgainstCommit: commit };
+  const withRest = {
+    ...withErrored,
+    ourType: m.ourType,
+    status: d.status,
+    measuredAt: today,
+    measuredAgainstCommit: commit,
+  };
   return d.reason === undefined ? withRest : { ...withRest, reason: d.reason };
 }
 
-function buildRefusalRow(type: string, m: MeasuredFixture, d: RefusalDerived, today: string, commit: string): RefusalBaselineRow {
+function buildRefusalRow(
+  type: string,
+  m: MeasuredFixture,
+  d: RefusalDerived,
+  today: string,
+  commit: string,
+): RefusalBaselineRow {
   const base = {
     tree: 'dot-cache' as const,
     type,
@@ -238,6 +259,9 @@ export interface TallyEntry {
 
 export interface Tally {
   readonly entries: readonly TallyEntry[];
+  /** Measured defects whose ledger row is `fix-candidate`: batch 2's work queue, not a pin. */
+  readonly fixCandidates: number;
+  /** Measured defects with no usable ledger row (absent, reason-less, or a stale `fixed`). */
   readonly unpinned: number;
 }
 
@@ -250,11 +274,16 @@ export function computeTally(
 ): Tally {
   const counts = new Map<string, number>();
   let unpinned = 0;
+  let fixCandidates = 0;
   for (const m of measured) {
     const ledgerRow = ledger.get(m.slug);
     const d = derived.get(m.slug);
     if (d === undefined) continue;
-    if (ledgerRow?.disposition === 'fix-candidate' || isBlocked(d)) {
+    if (ledgerRow?.disposition === 'fix-candidate') {
+      fixCandidates++;
+      continue;
+    }
+    if (isBlocked(d)) {
       unpinned++;
       continue;
     }
@@ -268,9 +297,10 @@ export function computeTally(
       return { cohort, routing, refusal, count };
     })
     .sort(
-      (a, b) => a.cohort.localeCompare(b.cohort) || a.routing.localeCompare(b.routing) || a.refusal.localeCompare(b.refusal),
+      (a, b) =>
+        a.cohort.localeCompare(b.cohort) || a.routing.localeCompare(b.routing) || a.refusal.localeCompare(b.refusal),
     );
-  return { entries, unpinned };
+  return { entries, fixCandidates, unpinned };
 }
 
 // ---------------------------------------------------------------------------
@@ -294,11 +324,17 @@ export interface PinResult {
   readonly wrote: boolean;
 }
 
-function deriveAll(measured: readonly MeasuredFixture[], ledger: ReadonlyMap<string, LedgerRow>): Map<string, DerivedRow> {
+function deriveAll(
+  measured: readonly MeasuredFixture[],
+  ledger: ReadonlyMap<string, LedgerRow>,
+): Map<string, DerivedRow> {
   return new Map(measured.map((m) => [m.slug, deriveRow(m, ledger.get(m.slug))]));
 }
 
-function findMalformedReason(measured: readonly MeasuredFixture[], derived: ReadonlyMap<string, DerivedRow>): string | undefined {
+function findMalformedReason(
+  measured: readonly MeasuredFixture[],
+  derived: ReadonlyMap<string, DerivedRow>,
+): string | undefined {
   for (const m of measured) {
     const d = derived.get(m.slug);
     const reasons = [d?.routing.reason, d?.refusal.reason];
@@ -335,9 +371,17 @@ function appendAndWrite<Row>(path: string, newRows: readonly Row[], commentSuffi
   writeFileSync(path, JSON.stringify(updated, null, 2) + '\n', 'utf8');
 }
 
-function writeBaselines(opts: PinOptions, measured: readonly MeasuredFixture[], derived: ReadonlyMap<string, DerivedRow>): void {
-  const routingRows = measured.map((m) => buildRoutingRow(opts.type, m, derived.get(m.slug)!.routing, opts.today, opts.commit));
-  const refusalRows = measured.map((m) => buildRefusalRow(opts.type, m, derived.get(m.slug)!.refusal, opts.today, opts.commit));
+function writeBaselines(
+  opts: PinOptions,
+  measured: readonly MeasuredFixture[],
+  derived: ReadonlyMap<string, DerivedRow>,
+): void {
+  const routingRows = measured.map((m) =>
+    buildRoutingRow(opts.type, m, derived.get(m.slug)!.routing, opts.today, opts.commit),
+  );
+  const refusalRows = measured.map((m) =>
+    buildRefusalRow(opts.type, m, derived.get(m.slug)!.refusal, opts.today, opts.commit),
+  );
   const suffix = `Re-pinned ${opts.today} at ${opts.commit} by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (${measured.length} "${opts.type}" rows appended).`;
   appendAndWrite(opts.routingBaselinePath, routingRows, suffix);
   appendAndWrite(opts.refusalBaselinePath, refusalRows, suffix);
@@ -368,7 +412,9 @@ export function runPinCorpusTree(opts: PinOptions): PinResult {
 
   const blocked = findBlockedSlug(measured, ledger, derived);
   if (blocked !== undefined) {
-    throw new Error(`pin-corpus-tree: ${blocked}: no usable ledger row (missing, fix-candidate, or a stale "fixed" pin)`);
+    throw new Error(
+      `pin-corpus-tree: ${blocked}: no usable ledger row (missing, fix-candidate, or a stale "fixed" pin)`,
+    );
   }
 
   writeBaselines(opts, measured, derived);
@@ -416,6 +462,7 @@ function printTally(tally: Tally, treeDir: string, total: number): void {
   for (const e of tally.entries) {
     console.log(`  ${e.cohort}\trouting=${e.routing}\trefusal=${e.refusal}\t${e.count}`);
   }
+  console.log(`  fix-candidate\t${tally.fixCandidates}`);
   console.log(`  unpinned\t${tally.unpinned}`);
 }
 
@@ -438,7 +485,11 @@ function main(): void {
   };
   const result = runPinCorpusTree(opts);
   printTally(result.tally, opts.treeDir, result.total);
-  console.log(result.wrote ? `pin-corpus-tree: wrote ${result.total} rows to each baseline.` : 'pin-corpus-tree: --dry -- nothing written.');
+  console.log(
+    result.wrote
+      ? `pin-corpus-tree: wrote ${result.total} rows to each baseline.`
+      : 'pin-corpus-tree: --dry -- nothing written.',
+  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
