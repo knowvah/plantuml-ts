@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-20T14:44:15.369Z",
-  "measuredAgainstCommit": "bdd3344e",
+  "generatedAt": "2026-09-20T18:46:17.208Z",
+  "measuredAgainstCommit": "993cc2ae",
   "rows": [
     {
       "type": "activity",
@@ -16,7 +16,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "c4",
@@ -32,7 +32,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "chronology",
@@ -40,7 +40,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "class",
@@ -88,7 +88,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "gantt",
@@ -144,7 +144,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "regex",

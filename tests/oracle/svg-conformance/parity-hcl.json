@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-09-20T18:47:33.663Z",
+  "fixtures": [
+    {
+      "slug": "citoda-80-dimi195",
+      "type": "hcl",
+      "dotEqual": false,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jubete-32-sutu417",
+      "type": "hcl",
+      "dotEqual": false,
+      "verdict": "structural-match",
+      "maxDelta": 325.409,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
+    },
+    {
+      "slug": "vocago-35-xodu446",
+      "type": "hcl",
+      "dotEqual": false,
+      "verdict": "structural-match",
+      "maxDelta": 134.383,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    }
+  ]
+}

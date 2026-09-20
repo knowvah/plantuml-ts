@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-03T18:45:20.062Z",
+  "generatedAt": "2026-09-20T18:47:03.673Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -2766,7 +2766,7 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 187.00400000000002,
+      "maxDelta": 169.00400000000002,
       "firstDiff": "svg/g[1]/g[3]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[8]"
     },
@@ -4302,7 +4302,7 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 24,
+      "maxDelta": 72,
       "firstDiff": "svg/g[1]/g[4]/path[1]/@d",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -4491,9 +4491,9 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 196.00000000000006,
+      "maxDelta": 250.001,
       "firstDiff": "svg/g[1]/g[4]/path[1]/@d",
-      "maxDeltaPath": "svg/g[1]/g[2]/path[1]/@d[2]"
+      "maxDeltaPath": "svg/g[1]/g[2]/line[1]/@x2"
     },
     {
       "slug": "vorimi-67-gudu296",
@@ -4657,7 +4657,7 @@
     {
       "slug": "xamule-03-jeda376",
       "type": "class",
-      "dotEqual": false,
+      "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 901.2900000000001,
       "firstDiff": "svg/g[1]/g[20]/text[1]/@font-size",

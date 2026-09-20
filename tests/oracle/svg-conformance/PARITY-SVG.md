@@ -20,7 +20,7 @@ byte-exact ratchets can cover.
 
 ## Summary
 
-- **Generated:** 2026-09-03T18:57:41.486Z
+- **Generated:** 2026-09-20T18:49:07.156Z
 - **Surveyed:** 360
 - **conformant:** 2 (0.6%)
 - **structural-match:** 15 (4.2%)
@@ -97,11 +97,11 @@ byte-exact ratchets can cover.
 | `vivido-49-nisu863` | usecase | 376.77 | `svg/@background` |
 | `bisedo-29-kone620` | component | 355.34 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `zosaxo-93-nici652` | component | 313.35 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kafexo-72-xupa679` | usecase | 312.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bagoze-78-lada681` | component | 302.93 | `svg/g[1]/g[3]/text[1]/@textLength` |
 | `depabo-06-kato214` | usecase | 290.59 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fajira-11-xada239` | usecase | 281.00 | `svg/g[1]/g[1]/text[1]` |
 | `kezodo-14-pume985` | component | 244.00 | `svg/g[1]/g[1]/rect[1]/@stroke-width` |
+| `kafexo-72-xupa679` | usecase | 242.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `malumi-33-safu797` | usecase | 242.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xagino-11-vazo768` | component | 233.57 | `svg/g[1]/g[1]/path[1]/@stroke` |
 | `tatofi-90-vali632` | component | 228.88 | `svg/g[1]/g[1]/text[1]/@textLength` |
@@ -136,7 +136,7 @@ byte-exact ratchets can cover.
 | `jegure-48-cesi766` | component | 140.50 | `svg/g[1]/g[1]/@id` |
 | `bijoko-90-riro507` | component | 138.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bujige-52-gase998` | component | 133.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `tuliba-37-liza126` | component | 123.55 | `svg/g[1]/g[1]/rect[1]/@fill` |
+| `tuliba-37-liza126` | component | 130.55 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `cuxelu-66-zopu195` | component | 123.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `detona-13-ziko113` | component | 122.58 | `svg/g[1]/g[1]/path[1]/@d` |
 | `kokodo-61-dano461` | component | 120.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
@@ -153,7 +153,7 @@ byte-exact ratchets can cover.
 | `tujica-34-tire129` | component | 106.65 | `svg/g[1]/g[1]/@id` |
 | `tacixe-99-gesi489` | component | 106.44 | `svg/g[1]/g[1]/@id` |
 | `cuzuci-92-dugi933` | usecase | 105.60 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `nipapu-74-roro938` | usecase | 104.64 | `svg/g[1]/g[1]/text[1]` |
+| `nipapu-74-roro938` | usecase | 104.64 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nevuzi-33-duna992` | component | 102.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vovuru-39-sula650` | component | 102.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bozoju-49-kufo528` | component | 98.06 | `svg/g[1]/g[1]/text[1]/@font-weight` |
@@ -161,8 +161,8 @@ byte-exact ratchets can cover.
 | `berelu-46-namo819` | component | 94.00 | `svg/g[1]/g[5]/polygon[1]/@fill` |
 | `nipoga-91-nole703` | component | 90.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `misube-65-seni576` | component | 87.01 | `svg/g[1]/g[5][childCount]` |
-| `lesori-32-zeve057` | component | 87.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `ravodu-50-siso430` | component | 87.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
+| `lesori-32-zeve057` | component | 81.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
+| `ravodu-50-siso430` | component | 81.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
 | `kobasu-11-difo566` | usecase | 80.72 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `togeke-15-zala124` | usecase | 79.30 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `dugovi-24-kupu658` | component | 79.00 | `svg/g[1]/g[4][childCount]` |
@@ -219,7 +219,6 @@ byte-exact ratchets can cover.
 | `gucefa-91-pume734` | component | 40.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zugofa-47-risi694` | component | 40.10 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `ziniso-08-damu446` | component | 39.29 | `svg/g[1]/g[1]/@class` |
-| `turasu-73-zoni468` | component | 38.00 | `svg/g[1]/g[1]/text[1]` |
 | `bitexe-13-mopa885` | component | 36.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `duvoru-86-lubo341` | component | 36.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `garopu-71-riri890` | component | 36.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
@@ -228,6 +227,7 @@ byte-exact ratchets can cover.
 | `xadaji-25-cufe655` | component | 31.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `mutere-78-geko363` | usecase | 30.59 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `camevo-41-suki094` | usecase | 30.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `turasu-73-zoni468` | component | 30.00 | `svg/g[1]/g[1]/text[1]` |
 | `lizutu-99-mapa855` | usecase | 29.57 | `svg/g[1]/g[3][childCount]` |
 | `cevuji-49-bile305` | usecase | 29.23 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fogiku-22-gone205` | usecase | 29.00 | `svg/g[1]/g[3]/text[1]/@textLength` |

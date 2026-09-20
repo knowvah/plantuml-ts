@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-09-20T18:46:39.547Z",
+  "fixtures": [
+    {
+      "slug": "gasaxu-65-cipo396",
+      "type": "board",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 190.889,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[11]/@y"
+    },
+    {
+      "slug": "jifeju-37-zeza533",
+      "type": "board",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 12,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "nuropa-85-vili653",
+      "type": "board",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 190.889,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@y"
+    },
+    {
+      "slug": "rebire-77-depi269",
+      "type": "board",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 12,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    }
+  ]
+}

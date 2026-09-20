@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-09-20T18:46:53.594Z",
+  "fixtures": [
+    {
+      "slug": "lenudo-53-nade902",
+      "type": "chronology",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 797,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    }
+  ]
+}
