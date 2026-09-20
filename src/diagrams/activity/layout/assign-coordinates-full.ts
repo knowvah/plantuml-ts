@@ -220,11 +220,11 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
 
   if (!compress) {
     const result = pass1Assemble(placed, allReservations, bounds, baseY, titlesHeight);
-    return inLanePassOrder(result, edgeMeta, ast.swimlanes);
+    return inLanePassOrder(result, placed.edgeMeta, ast.swimlanes);
   }
   const result = compressAndAssemble({
     placed,
-    edgeMeta,
+    edgeMeta: placed.edgeMeta,
     reservations: allReservations,
     bounds,
     baseY,
@@ -232,5 +232,5 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
     bounder,
     theme,
   });
-  return inLanePassOrder(result, edgeMeta, ast.swimlanes);
+  return inLanePassOrder(result, placed.edgeMeta, ast.swimlanes);
 }

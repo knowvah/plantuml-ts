@@ -267,6 +267,22 @@ function emphasizeArrowhead(edge: ActivityEdgeGeo): CompressShape | undefined {
 }
 
 /**
+ * D4/T1b (`stop-1-edgemeta-zip.md` addendum): the extra arrowhead a
+ * translate shape draws at its own `midArrowAt` point (`renderer.ts
+ * #renderMidArrow`), built the exact same way as {@link emphasizeArrowhead}
+ * -- same `arrowHeadExtents(dir)` polygon box -- so the compressor sees it
+ * as an occupant and moves it with the snake (`compress-geometry.ts
+ * #transformEdge`), matching the jar's shared compressing `UGraphic`
+ * (`FtileWhile.java:307`; `UGraphicCompressOnXorY.java`).
+ */
+function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
+  if (edge.midArrowAt === undefined) return undefined;
+  const { x, y, dir } = edge.midArrowAt;
+  const ext = arrowHeadExtents(dir);
+  return { kind: 'polygon', x: x + ext.minX, y: y + ext.minY, width: ext.maxX - ext.minX, height: ext.maxY - ext.minY };
+}
+
+/**
  * An edge label, measured WITH THE BOUNDER at `activityFontSize(theme,
  * 'arrow')` and placed exactly where `renderer.ts#renderEdgeLabel` places
  * it -- the renderer's own `label.length * 0.6 * size` width estimate is a
@@ -307,6 +323,8 @@ function shapesForEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, bounder: StringBou
   if (terminal !== undefined) shapes.push(terminal);
   const emphasized = emphasizeArrowhead(edge);
   if (emphasized !== undefined) shapes.push(emphasized);
+  const midArrow = midArrowShape(edge);
+  if (midArrow !== undefined) shapes.push(midArrow);
   const label = edgeLabelShape(edge, bounder, theme);
   if (label !== undefined) shapes.push(label);
   return shapes;

@@ -130,13 +130,28 @@ function transformNode(node: ActivityNodeGeo, ct: PiecewiseAffineTransform, mode
   return next;
 }
 
-/** A `ULine` per segment endpoint -- every point moves independently on
- *  its own axis (`UGraphicCompressOnXorY.java:122-127`, both endpoints). */
+/**
+ * A `ULine` per segment endpoint -- every point moves independently on its
+ * own axis (`UGraphicCompressOnXorY.java:122-127`, both endpoints).
+ *
+ * D4/T1b (`stop-1-edgemeta-zip.md` addendum): `midArrowAt` is an absolute
+ * point drawn through the SAME compressing `UGraphic` as the snake
+ * (`ug.apply(new UTranslate(xx, (y1 + y2) / 2)).draw(asToUp)`,
+ * `FtileWhile.java:307`), so it transforms exactly as one of `edge.points`
+ * would on the matching axis -- never left at its pre-compression value.
+ */
 function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode: CompressionMode): ActivityEdgeGeo {
   const points = edge.points.map((p) =>
     mode === 'x' ? { ...p, x: ct.transform(p.x) } : { ...p, y: ct.transform(p.y) },
   );
-  return { ...edge, points };
+  const next: ActivityEdgeGeo = { ...edge, points };
+  if (edge.midArrowAt !== undefined) {
+    next.midArrowAt =
+      mode === 'x'
+        ? { ...edge.midArrowAt, x: ct.transform(edge.midArrowAt.x) }
+        : { ...edge.midArrowAt, y: ct.transform(edge.midArrowAt.y) };
+  }
+  return next;
 }
 
 /** @see isRectReservation */

@@ -6,6 +6,7 @@ import {
   laneOut,
   measureSwimlaneTitlesHeight,
   placeSwimlanes,
+  repeatEdgeMeta,
   resolveSwimlaneVertical,
 } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import type { SwimlaneGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
@@ -474,6 +475,11 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     // lane engine's own X arithmetic.
     expect(result.edges[0]!.points[0]!.y).toBe(32);
     expect(result.edges[1]!.points[0]!.y).toBe(10);
+    // T1b: `edgeMeta` stays parallel to `edges`, one entry per routed edge,
+    // in the SAME order as the input `edgeMeta` array.
+    expect(result.edgeMeta).toHaveLength(2);
+    expect(result.edgeMeta[0]).toEqual(edgeMeta[0]);
+    expect(result.edgeMeta[1]).toEqual(edgeMeta[1]);
   });
 
   it('loop reservations (empty per stub) are appended after divider reservations, order preserved', () => {
@@ -502,6 +508,76 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     // nothing about the divider reservations already under test above.
     expect(withLoop.reservations).toEqual(withoutLoop.reservations);
     expect(withLoop.reservations.length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// placeSwimlanes -- edgeMeta parallel to edges (T1b, `stop-1-edgemeta-zip.md`).
+// No stub in this mission yet returns N>1 edges from a SINGLE `routeEdge`
+// call, so `repeatEdgeMeta` (the helper `placeSwimlanes` flat-maps with) is
+// unit-tested directly for the N>1 case, and `placeSwimlanes` itself is
+// tested end to end for every N=1 routing path.
+// ---------------------------------------------------------------------------
+
+describe('repeatEdgeMeta — the N>1 case placeSwimlanes flat-maps (pure function)', () => {
+  const m: EdgeMeta = { lane1: 'A', lane2: 'B', shape: 'repeat-out' };
+
+  it('repeats the source meta once per edge routeEdge returned', () => {
+    expect(repeatEdgeMeta(m, 2)).toEqual([m, m]);
+  });
+
+  it('returns exactly one entry for the ordinary one-edge case', () => {
+    expect(repeatEdgeMeta(m, 1)).toEqual([m]);
+  });
+
+  it('returns no entries when routeEdge produced no edge', () => {
+    expect(repeatEdgeMeta(m, 0)).toEqual([]);
+  });
+});
+
+describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to end', () => {
+  const bounder: StringBounder = { getDimension: () => ({ width: 40, height: 18 }) };
+  const laneNames = ['A', 'B'];
+
+  it('the no-lane early return copies edgeMeta 1:1 (new array, same content)', () => {
+    const nodes = [node('a', 12, 40, 'A')];
+    const inputMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const edges = [{ points: [{ x: 12, y: 0 }] }];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta: inputMeta, laneNames: [], baseX: 12, baseY: 12, bounder, theme });
+    expect(result.edgeMeta).toEqual(inputMeta);
+    expect(result.edgeMeta).not.toBe(inputMeta);
+  });
+
+  it('a cross-lane default-shape edge yields one edgeMeta entry, equal to the source meta', () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const inputMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'default' }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 60 },
+        ],
+      },
+    ];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta: inputMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    expect(result.edgeMeta).toHaveLength(result.edges.length);
+    expect(result.edgeMeta).toEqual(inputMeta);
+  });
+
+  it('a loop-tagged edge (D3 stub, one edge out) yields edgeMeta.length === edges.length', () => {
+    const whileBack: LoopTranslate = {
+      kind: 'while-back',
+      p1: { x: 32, y: 32 },
+      p2: { x: 32, y: 60 },
+      dimTotalWidth: 100,
+      diamond: { inY: 0, outY: 10, width: 20 },
+    };
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const inputMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
+    const edges = [{ points: [{ x: 999, y: 999 }] }];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta: inputMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    expect(result.edgeMeta).toHaveLength(result.edges.length);
+    expect(result.edgeMeta).toEqual(inputMeta);
   });
 });
 

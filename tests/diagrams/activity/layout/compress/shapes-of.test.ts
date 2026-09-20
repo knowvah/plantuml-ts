@@ -229,6 +229,52 @@ describe('shapesOf — edges', () => {
   });
 });
 
+describe('shapesOf — midArrowAt (D4/T1b)', () => {
+  it('adds a polygon occupant at the mid-arrow point, using the same extent as emphasize', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+      ],
+      midArrowAt: { x: 50, y: 30, dir: 'up' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    // terminal arrowhead (index 0) + mid-arrow polygon (index 1, emphasize
+    // is absent here).
+    expect(shapes).toHaveLength(2);
+    // asToUp: (-4,10),(0,0),(4,10),(0,6) -> minX=-4,maxX=4,minY=0,maxY=10.
+    expect(shapes[1]).toEqual({ kind: 'polygon', x: 46, y: 30, width: 8, height: 10 });
+  });
+
+  it('is pushed AFTER the emphasize shape when both are present', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+        { x: 100, y: 10 },
+      ],
+      emphasize: 'right',
+      midArrowAt: { x: 200, y: 200, dir: 'down' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    // terminal + emphasize + midArrow = 3, in that order.
+    expect(shapes).toHaveLength(3);
+    // asToDown: (-4,-10),(0,0),(4,-10),(0,-6) -> minX=-4,maxX=4,minY=-10,maxY=0.
+    expect(shapes[2]).toEqual({ kind: 'polygon', x: 196, y: 190, width: 8, height: 10 });
+  });
+
+  it('no midArrowAt contributes no extra shape', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+      ],
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    expect(shapes).toHaveLength(1);
+  });
+});
+
 describe('shapesOf — reservations', () => {
   it('a plain reservation (no ignore flags) is an empty shape', () => {
     const r: Reservation = { x: 5, y: 12, width: 5, height: 12 };

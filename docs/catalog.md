@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1110 modules · 4020 exported names.
+1110 modules · 4021 exported names.
 
 ## `src/`
 
@@ -965,7 +965,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-loop-translate-repeat.ts` | `routeRepeatOut`, `routeRepeatSimple1`, `routeRepeatSimple2`, `routeRepeatComplex1` | `repeat`'s four translatable back-edge shapes plus its exit connector (mission `activity-loop-lane-translate`). |
 | `swimlane-loop-translate-while.ts` | `routeWhileBack` | `while`'s one translatable back-edge shape (mission `activity-loop-lane-translate`). |
 | `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
-| `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
+| `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `repeatEdgeMeta`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |

@@ -92,6 +92,18 @@ export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'def
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
+  /**
+   * D3/T1b (`plans/activity-loop-lane-translate/stop-1-edgemeta-zip.md`):
+   * parallel to {@link edges}, NOT to the walker's own `edgeMeta` input --
+   * `routeEdge` may flat-map one input edge into several (the repeat exit's
+   * unarrowed-then-arrowed pair), so each output edge repeats its SOURCE
+   * meta once per edge `routeEdge` returned for it (same lanes/shape --
+   * that is what `shapesForEdge`/`passRank` read). Consumers
+   * (`assign-coordinates-full.ts`, `compress/shapes-of.ts`,
+   * `edge-draw-order.ts`) must zip `edges[i]` with `edgeMeta[i]`, never with
+   * the pre-route `PlacementInput.edgeMeta`.
+   */
+  edgeMeta: EdgeMeta[];
   swimlanes: SwimlaneGeo[];
   /**
    * One {@link Reservation} per divider line (mission `activity-klimt-
@@ -252,6 +264,16 @@ interface RoutedEdge {
   readonly reservations: Reservation[];
 }
 
+/**
+ * D3/T1b's meta-repeating rule, split out as a pure function so it is
+ * unit-testable directly: no stub in this mission yet returns more than one
+ * edge (`stop-1-edgemeta-zip.md`), so there is no production path that
+ * drives `count > 1` end to end today.
+ */
+export function repeatEdgeMeta(meta: EdgeMeta, count: number): EdgeMeta[] {
+  return Array.from({ length: count }, () => meta);
+}
+
 /** `lane`'s own delta, or 0 when the endpoint carries no lane. */
 function laneDelta(lane: string | undefined, deltas: ReadonlyMap<string, number>): number {
   return lane !== undefined ? (deltas.get(lane) ?? 0) : 0;
@@ -352,7 +374,7 @@ function measureLanes(
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
   if (laneNames.length === 0) {
-    return { nodes: [...nodes], edges: [...edges], swimlanes: [], reservations: [] };
+    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
   }
 
   const { widths, min } = measureLanes(nodes, laneNames, bounder, theme);
@@ -373,6 +395,7 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
   return {
     nodes: nodes.map((n) => shiftNode(n, deltas)),
     edges: routed.flatMap((r) => r.edges),
+    edgeMeta: routed.flatMap((r, i) => repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
     reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
   };

@@ -127,6 +127,64 @@ describe('compressGeometry — edges move with their gap', () => {
   });
 });
 
+describe('compressGeometry — midArrowAt moves with the edge (D4/T1b)', () => {
+  it('midArrowAt.x transforms exactly like an edge point at the same x, on the X pass', () => {
+    const left = node('a', 'start', 0, 0, 30, 10);
+    const right = node('b', 'start', 58, 0, 30, 10);
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 15, y: 10 },
+        { x: 73, y: 10 },
+      ],
+      midArrowAt: { x: 73, y: 10, dir: 'up' },
+    };
+    const edgeMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const input = baseInput({ nodes: [left, right], edges: [edge], edgeMeta, bounds: { maxX: 88, maxY: 10 } });
+    const result = compressGeometry(input);
+    const edgeOut = result.edges[0]!;
+    // Same gap [30,58] -> 18 removed as the "edges move with their gap"
+    // test above: neither the point nor the mid-arrow (both at x=73) sit
+    // inside the removed slot, so both shift by the full 18.
+    expect(round(edgeOut.midArrowAt!.x)).toBe(round(edgeOut.points[1]!.x));
+    expect(edgeOut.midArrowAt!.x).toBe(55);
+    expect(edgeOut.midArrowAt!.dir).toBe('up');
+  });
+
+  it('midArrowAt.y transforms exactly like an edge point at the same y, on the Y pass', () => {
+    const top = node('a', 'start', 0, 0, 10, 30);
+    const bottom = node('b', 'start', 0, 58, 10, 30);
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 5, y: 15 },
+        { x: 5, y: 73 },
+      ],
+      midArrowAt: { x: 5, y: 73, dir: 'left' },
+    };
+    const edgeMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const input = baseInput({ nodes: [top, bottom], edges: [edge], edgeMeta, bounds: { maxX: 10, maxY: 88 } });
+    const result = compressGeometry(input);
+    const edgeOut = result.edges[0]!;
+    expect(round(edgeOut.midArrowAt!.y)).toBe(round(edgeOut.points[1]!.y));
+    expect(edgeOut.midArrowAt!.y).toBe(55);
+    expect(edgeOut.midArrowAt!.dir).toBe('left');
+  });
+
+  it('an edge with no midArrowAt is unaffected (field stays absent)', () => {
+    const left = node('a', 'start', 0, 0, 30, 10);
+    const right = node('b', 'start', 58, 0, 30, 10);
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 15, y: 10 },
+        { x: 73, y: 10 },
+      ],
+    };
+    const edgeMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const input = baseInput({ nodes: [left, right], edges: [edge], edgeMeta, bounds: { maxX: 88, maxY: 10 } });
+    const result = compressGeometry(input);
+    expect(result.edges[0]!.midArrowAt).toBeUndefined();
+  });
+});
+
 describe('compressGeometry — lanes', () => {
   it("a lane's x + width and contentX + contentWidth follow the transform", () => {
     const left = node('a', 'start', 0, 0, 30, 10);
