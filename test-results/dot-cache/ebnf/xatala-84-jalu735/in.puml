@@ -1,0 +1,4 @@
+@startebnf
+h-tab = ?Unicode U+0009? , "Foo";
+empty-special = ??, "";
+@endebnf

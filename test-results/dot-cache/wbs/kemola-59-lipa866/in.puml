@@ -1,0 +1,8 @@
+@startwbs
+* Test
+** "A topic" as b
+*** "c1 common" as c1
+** "t2 Another topic" as t2
+t2 --> c1
+b --> t2
+@endwbs

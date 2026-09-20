@@ -1,0 +1,40 @@
+@startwbs
+<style>
+wbsDiagram {
+  FontColor blue
+  FontStyle bold  
+  FontSize 13
+  
+  document {
+    BackGroundColor silver
+  }
+
+  element {
+    BackGroundColor palegreen
+    LineThickness 1.0
+  }
+  
+  boxless {
+	  FontColor green
+	  FontStyle italic 
+      MaximumWidth 40
+  }
+  
+  leafNode {
+	  FontSize 9
+  }
+
+  rootNode {
+	  BackGroundColor yellow
+  }
+}
+</style>
++ the partner workpackage
+++ blue
++++ blue workpackage
++++_ blue boxless workpackage 
+++ red
++++ red workpackage
++++_ red boxless workpackage
+
+@endwbs

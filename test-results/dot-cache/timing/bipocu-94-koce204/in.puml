@@ -1,0 +1,21 @@
+@startuml
+clock clk with period 1
+binary "enable" as en
+concise "dataBus" as db
+
+@0
+en is low
+db is "0x0"
+
+@10 as :foo1
+ en is high
+@:foo1+1
+ db is "0xDEADBEEF"
+
+@30
+en is low
+@31 
+db is "0x0"
+
+
+@enduml

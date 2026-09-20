@@ -1,0 +1,24 @@
+@startmindmap
+caption figure 1
+title My super title
+
+left side
+
+* count
+** 100
+*** 101
+*** 102
+** 200
+
+right side
+** A
+*** AA
+*** AB
+** B
+
+header
+My super header
+endheader
+
+center footer My super footer
+@endmindmap

@@ -1,0 +1,10 @@
+@startsalt
+{
+   [X] checkbox
+	[] checkbox
+	() radio
+	(X) radio
+	This is a text
+	[This is my button]
+}
+@endsalt

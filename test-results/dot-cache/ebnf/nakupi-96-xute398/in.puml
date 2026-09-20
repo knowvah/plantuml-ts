@@ -1,0 +1,5 @@
+@startebnf
+Command = start,
+?(_)? (* comment *),
+end;
+@endebnf

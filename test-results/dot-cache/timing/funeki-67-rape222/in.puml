@@ -1,0 +1,9 @@
+@startuml
+binary "A" as a
+@0
+a is low
+@1
+a is high
+@2
+a is low
+@enduml

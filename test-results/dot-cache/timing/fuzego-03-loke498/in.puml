@@ -1,0 +1,5 @@
+@startuml
+title WU is ok
+concise "Web User" as WU
+WU is ok
+@enduml

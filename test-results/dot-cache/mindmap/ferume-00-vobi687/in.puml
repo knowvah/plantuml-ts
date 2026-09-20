@@ -1,0 +1,14 @@
+@startmindmap
+<style>
+.s1 {
+  BackgroundColor #E74C3C
+}
+.s2 {
+  BackgroundColor #E74C3C
+}
+</style>
+
+* Mqwerty\npoint
+** Qwerty\npoint <<s1>>
+** Dummy\npoint <<s2>>
+@endmindmap

@@ -1,0 +1,16 @@
+@startuml
+concise "LR" as LR
+concise "ST" as ST
+
+LR is AtPlace
+ST is AtLoad
+
+@LR
+0 is Lowering
+100 is Lowered
+350 is Releasing
+ 
+@ST
+0 is AtLoad
+200 is Moving
+@enduml

@@ -46,7 +46,9 @@ import {
   engineCell,
   oracleColumn,
   isPlantumlTsOnly,
+  noEngineColumn,
   PLANTUML_TS_ONLY,
+  type ColumnResult,
   dotColumn,
   surveyColumn,
   censusColumn,
@@ -158,8 +160,16 @@ function plantumlTsOnlyColumns(): RowColumns {
   return { oracle: c, dot: c, survey: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
 }
 
+/** A no-engine bucket keeps its real oracle count; every comparison cell
+ *  repeats the engine reason (`parity-dashboard-matrix.ts#noEngineColumn`). */
+function noEngineColumns(c: ColumnResult, oracle: ColumnResult): RowColumns {
+  return { oracle, dot: c, survey: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
+}
+
 function columnsFor(type: string, inputs: RawInputs, dotByType: ReadonlyMap<string, TypeRow>): RowColumns {
   if (isPlantumlTsOnly(type, inputs.oracleCounts, inputs.jarUnsupportedCounts)) return plantumlTsOnlyColumns();
+  const noEngine = noEngineColumn(engineCell(type, inputs.registeredEngines));
+  if (noEngine !== undefined) return noEngineColumns(noEngine, oracleColumn(type, inputs.oracleCounts));
   return {
     oracle: oracleColumn(type, inputs.oracleCounts),
     dot: dotColumn(dotByType.get(type), inputs.dotParity.generatedAt),
@@ -260,7 +270,10 @@ const PREAMBLE = [
     'vocabulary in decisions.md D8 — a bare `n/a` never appears. `n/a (plantuml-ts only)` marks ' +
     'a type whose every cached jar SVG is PlantUML\'s own "Diagram not supported by this ' +
     'release" page: the port draws it, the pinned jar declines it, so nothing can be compared ' +
-    'until a jar that supports the type is pinned.',
+    'until a jar that supports the type is pinned. A bucket with no engine keeps its real ' +
+    '**oracle** count but repeats its `no engine (Dn todo)` reason in every comparison cell: ' +
+    "this port answers such a source with the dispatcher's error sentinel, so a routing or " +
+    'refusal count there would measure nothing.',
   '',
   '**survey** and **census** differ by RENDER PATH, not measurer. Both already measure text ' +
     'through the same system — `WidthTableMeasurer`, re-exported as `DeterministicMeasurer` ' +

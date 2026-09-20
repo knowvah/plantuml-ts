@@ -1,0 +1,19 @@
+@startmindmap
+<style>
+mindMapDiagram {
+  shadowing 0
+  BackGroundColor transparent
+}
+</style>
+
+* Debian
+** Ubuntu
+*** Linux Mint
+*** Kubuntu
+*** Lubuntu
+*** KDE Neon
+** LMDE
+** SolydXK
+** SteamOS
+** Raspbian with a very long name
+@endmindmap

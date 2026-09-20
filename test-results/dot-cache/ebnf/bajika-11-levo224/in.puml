@@ -1,0 +1,6 @@
+@startebnf
+twelve = "1" , "2";
+undeuxtrois = "1" , "2", "3";
+letter = "A" | "B";
+character = letter | digit | symbol | "_" ;
+@endebnf

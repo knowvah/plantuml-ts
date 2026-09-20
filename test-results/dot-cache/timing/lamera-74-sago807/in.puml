@@ -1,0 +1,24 @@
+@startuml
+
+scale 100 as 0 pixels
+
+concise "identificatin-app" as idapp
+concise "CSABackApp" as CB
+
+
+
+idapp is idle
+CB is idle
+
+
+@idapp
+
+0 is "идентификация"
++250 is "запрос в процессинг"
+
+
+@CB
+
+0 is "обновление профиля"
+
+@enduml

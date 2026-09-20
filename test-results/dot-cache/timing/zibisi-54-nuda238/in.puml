@@ -1,0 +1,5 @@
+@startuml
+concise Bob
+concise Alice
+Bob->Alice : hello
+@enduml

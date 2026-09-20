@@ -1,0 +1,8 @@
+@startwire
+*DDR3L
+*SLC_NAND [150x200]
+*TestPoints
+--
+*PF3000 [150x300]
+*EEPROM
+@endwire

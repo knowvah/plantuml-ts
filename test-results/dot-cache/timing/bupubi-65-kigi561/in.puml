@@ -1,0 +1,4 @@
+@startuml
+concise "Data" as DATA
+@DATA
+@enduml

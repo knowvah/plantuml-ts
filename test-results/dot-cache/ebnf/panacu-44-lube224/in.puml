@@ -1,0 +1,5 @@
+@startebnf
+title Test on comments
+
+test_above_below_first = (*this is a comment\nabove z*) z (*this is a comment\nbelow z*);
+@endebnf

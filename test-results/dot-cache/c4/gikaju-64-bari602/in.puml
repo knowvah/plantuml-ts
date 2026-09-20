@@ -1,0 +1,8 @@
+@startuml
+!include <C4/C4_Container>
+
+Rel(WebAppContainer, someContainer, "relation")
+System_Boundary(azureCloud, "xxx") {
+  Container(someContainer, "some container")
+}
+@enduml

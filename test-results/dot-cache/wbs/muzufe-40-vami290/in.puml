@@ -1,0 +1,8 @@
+@startwbs
+* Test
+**(a) A topic
+***(c1) c1 common
+**(t2) t2 Another topic
+t2 --> c1
+a --> t2
+@endwbs

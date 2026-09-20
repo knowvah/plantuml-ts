@@ -1,0 +1,9 @@
+@startwbs
+* r
+**(TLA):Teamlead
+Team A;
+**(TLB):Teamlead
+Team B;
+
+TLB -> TLA
+@endwbs

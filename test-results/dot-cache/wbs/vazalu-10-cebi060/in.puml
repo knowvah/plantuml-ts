@@ -1,0 +1,14 @@
+@startwbs
+* first element
+** second element
+<style>
+wbsDiagram {
+  node {
+    BackGroundColor red
+    FontSize 14
+    FontStyle Bold
+  }
+}
+</style>
+** third element
+@endwbs

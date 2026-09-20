@@ -1,0 +1,11 @@
+@startuml
+robust "actor" as A
+
+A is idle
+
+@A
+4 is sending
+@3 <-> @4 : {foo}
+@1 <-> @2 : BAR
+
+@enduml

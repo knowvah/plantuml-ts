@@ -1,0 +1,13 @@
+@startmindmap
+
+<style>
+node {
+    MinimumWidth 300
+}
+</style>
+* Hi
+** some
+** short but nice
+** ideas
+
+@endmindmap

@@ -1,0 +1,3 @@
+@startregex
+(a(b\bc)*|d*|(ef\wg)+h)+|i*|jk
+@endregex

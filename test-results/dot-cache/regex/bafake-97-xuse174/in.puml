@@ -1,0 +1,6 @@
+@startregex
+!option language de
+!option useDescriptiveNames true
+
+\b\B\d\D\w\W\s\S
+@endregex

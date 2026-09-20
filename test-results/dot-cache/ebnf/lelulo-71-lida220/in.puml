@@ -1,0 +1,5 @@
+@startebnf
+digit1 = ["0" (*this is a comment below*), "1"];
+
+
+@endebnf

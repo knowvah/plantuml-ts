@@ -1,0 +1,16 @@
+@startuml
+title test title
+legend
+test
+end legend
+
+
+robust "Power switch" as PowerSwitch
+robust "Power" as Power
+PowerSwitch is Off
+Power is Off
+@0
+PowerSwitch is On
+@+1
+Power is On
+@enduml

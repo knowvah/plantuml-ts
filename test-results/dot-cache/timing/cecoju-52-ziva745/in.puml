@@ -1,0 +1,11 @@
+@startuml
+binary "A" as a
+@0
+a is low
+note top of a : note top
+@1
+a is high
+@2
+a is low
+note bottom of a : note bottom
+@enduml

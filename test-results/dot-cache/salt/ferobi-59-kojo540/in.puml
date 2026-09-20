@@ -1,0 +1,13 @@
+@startsalt
+{+
+{/ <b>General | Fullscreen | Behavior | Saving }
+{
+	{ Open image in: | ^Smart Mode^m2^ }
+	[X] Smooth images when zoomed
+	[X] Confirm image deletion
+	[ ] Show hidden images
+	^Other test^
+}
+[Close]
+}
+@endsalt

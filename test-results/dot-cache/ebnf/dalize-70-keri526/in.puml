@@ -1,0 +1,5 @@
+@startebnf
+!pragma compact
+terminal = "'" , character , { character } , "'" 
+         | '"' , character , { character } , '"' ;
+@endebnf

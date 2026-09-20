@@ -1,0 +1,18 @@
+@startuml
+concise "Web User" as WU
+binary "Bin" as Bin
+
+WU is Absent
+
+@WU
+0 is Waiting
++500 is ok
+@200 <-> @+150 : {150 ms}
+
+@Bin
+0 is 0
++200 is 1
++100 is 0
+'The Following line crash Plantuml
+@200 <-> @+100 : {100 ms}
+@enduml

@@ -1,0 +1,15 @@
+@startwbs
+<style>
+wbsDiagram {
+  .cyan * {
+    BackgroundColor cyan
+  }
+  .gold * {
+    BackgroundColor gold
+  }
+}
+</style>
+
+* Cyan <<cyan>>
+** Gold2 <<gold>>
+@endwbs

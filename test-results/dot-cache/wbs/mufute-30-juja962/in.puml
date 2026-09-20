@@ -1,0 +1,10 @@
+@startwbs
+* Project
+**_
+*** Task A
+*** Task B long name
+*** Task C
+** Planning
+*** Define scope
+*** Set milestones
+@endwbs

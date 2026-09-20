@@ -1,0 +1,6 @@
+@startebnf
+digit1 = {"0", "1"};
+(** note
+with (* and *)
+end of note **)
+@endebnf

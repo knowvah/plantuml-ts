@@ -1,0 +1,5 @@
+@startebnf
+digit1 = ["this is a 0" (*b*), "1"];
+
+
+@endebnf

@@ -1,0 +1,9 @@
+@startwbs
+* R
+    * Line 1
+        * L11
+        * L12
+    * Line 2
+        * L21
+        * L22
+@endwbs

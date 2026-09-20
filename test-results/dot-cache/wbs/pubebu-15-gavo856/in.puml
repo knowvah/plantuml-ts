@@ -1,0 +1,18 @@
+@startwbs
+<style>
+.green {
+  BackgroundColor lightgreen
+}
+.pink {
+  BackgroundColor pink
+}
+.dotted {
+  LineStyle 10
+}
+</style>
+* Colors
+** Green <<green>>
+** Pink <<pink>>
+** Dotted  <<dotted>>
+** pink + dotted \n(KO on 1.2024.6)<<pink>> <<dotted>>
+@endwbs

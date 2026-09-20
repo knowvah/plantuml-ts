@@ -1,0 +1,4 @@
+@startregex
+!theme crt-amber
+^("0" | "1" )$
+@enderegex

@@ -1,0 +1,21 @@
+@startuml
+clock clk with period 1
+binary "Enable" as EN
+analog "Vcore" as VDD
+
+@0
+EN is low
+VDD is 0
+@1
+VDD is 1.8
+@3
+EN is high
+@7
+EN is low
+@8
+VDD is 1.8
+@11
+VDD is 0.3
+@13
+VDD is 0
+@enduml

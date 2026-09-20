@@ -1,0 +1,4 @@
+@startebnf
+letter = "A" | "B" | "C";
+character = letter | digit | symbol | "_" ;
+@endebnf

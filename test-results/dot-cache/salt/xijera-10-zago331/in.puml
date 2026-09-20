@@ -1,0 +1,11 @@
+@startsalt
+{
+"test1    "
+"X      "
+"1      "
+[OK   ]
+[Cancel ]
+^Drop list 1 ^
+^D2     ^
+}
+@endsalt

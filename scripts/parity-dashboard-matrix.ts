@@ -80,6 +80,20 @@ const NOT_STARTED = (cell: string): ColumnResult => ({ cell, freshness: undefine
  *  `no oracle captured`. */
 export const PLANTUML_TS_ONLY: ColumnResult = NOT_STARTED('n/a (plantuml-ts only)');
 
+/** A bucket with no engine at all (engine cell `n/a (no engine (Dn todo))`)
+ *  can have an oracle -- the jar renders it -- but every comparison against
+ *  that oracle is vacuous: this port answers the source with the dispatcher's
+ *  error sentinel (`src/core/dispatcher.ts:342`). Printing "routing 0/265,
+ *  refusal 265/265" beside "no engine" would read as measurements, so every
+ *  comparison cell repeats the engine reason instead (added 2026-09-20 with
+ *  the first oracle captures for those buckets). The oracle count stays: it is
+ *  real, and it is what a future port mission starts from. */
+const NO_ENGINE_PREFIX = 'n/a (no engine (';
+
+export function noEngineColumn(engineCell: string): ColumnResult | undefined {
+  return engineCell.startsWith(NO_ENGINE_PREFIX) ? NOT_STARTED(engineCell) : undefined;
+}
+
 export function isPlantumlTsOnly(
   bucket: string,
   oracleCounts: Readonly<Record<string, number>>,

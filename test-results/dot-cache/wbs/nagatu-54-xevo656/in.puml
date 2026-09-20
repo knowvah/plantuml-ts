@@ -1,0 +1,15 @@
+@startwbs 
++ root
+ + level 1\nright\nwrong upper link
+  + level 2\nright right
+   + level 3\nright right right
+   - level 3\nright right left
+  - level 2\nright left
+   + level 3\nright left right
+    + level 4\nright left right right
+    - level 4\nright left right left
+   - level 3\nright left left
+    + level 4\nright left right right
+    - level 4\nright left right left
+ - level 1\nleft\nThis is missing
+@endwbs

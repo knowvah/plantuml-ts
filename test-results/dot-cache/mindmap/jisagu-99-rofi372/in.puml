@@ -1,0 +1,18 @@
+@startmindmap
+* Linux
+** NixOS
+** Debian
+*** Ubuntu
+**** Linux Mint
+**** Kubuntu
+**** Lubuntu
+**** KDE Neon
+*** LMDE
+*** SolydXK
+*** SteamOS
+**** SteamOS1
+**** SteamOS2
+*** Raspbian with a very long name
+**** <s>Raspmbc</s> => OSMC
+**** <s>Raspyfi</s> => Volumio
+@endmindmap

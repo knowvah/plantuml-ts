@@ -1,0 +1,11 @@
+@startuml
+
+binary "abc" as abc
+
+abc is high
+
+@0
+
+abc is low
+
+@enduml

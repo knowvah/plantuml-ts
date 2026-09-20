@@ -1,0 +1,3 @@
+@startebnf
+expression = [ { "A", "B" | "C" } , foo2 ], ( { "A", "B" | "C" } , foo2 );
+@endebnf

@@ -1,0 +1,8 @@
+@startmindmap
+skinparam backgroundColor #EEEBDC
+skinparam handwritten true
+
+* root
+** first
+** second
+@endmindmap

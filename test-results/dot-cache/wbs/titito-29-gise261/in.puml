@@ -1,0 +1,7 @@
+@startwbs 
++ root
+ + level 1A
+  + level 2A
+  - level 2B
+ - level 1XXX
+@endwbs

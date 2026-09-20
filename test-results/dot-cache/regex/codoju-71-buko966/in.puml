@@ -1,0 +1,6 @@
+@startregex  
+language de
+useDescriptiveNames true
+
+\b\B  
+@endregex

@@ -1,0 +1,26 @@
+@startuml
+<style>
+timingDiagram {
+  timeline {
+    FontColor green
+    LineColor red
+    LineThickness 1
+    LineStyle 5-2
+  }
+}
+</style>
+
+clock   "Clock_0"   as C0 with period 50
+binary  "Binary"  as B
+concise "Concise" as C
+robust  "Robust"  as R
+@0
+C is Idle
+R is Idle
+@100
+B is high
+C is Waiting
+R is Processing
+@300
+R is Waiting
+@enduml

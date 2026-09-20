@@ -1,0 +1,11 @@
+@startsalt
+{#
+|Addr| Data                
+
+| 1 | data
+|  0 | serial number   |*
+
+}
+
+caption Table 1.
+@endsalt

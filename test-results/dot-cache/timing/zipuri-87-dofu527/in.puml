@@ -1,0 +1,3 @@
+@startuml
+robust "WB" as ＷＢ
+@enduml

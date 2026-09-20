@@ -1,0 +1,3 @@
+@startebnf
+expression = { "A" };
+@endebnf

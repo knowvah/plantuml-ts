@@ -1,0 +1,12 @@
+@startwire
+*DDR3L [70x70]
+
+--
+
+*i_MX7_SoC [270x570]
+	*2x_ARM [70x70]
+	--
+	*signals
+		*24_bit_display [85x20]
+
+@endwire
