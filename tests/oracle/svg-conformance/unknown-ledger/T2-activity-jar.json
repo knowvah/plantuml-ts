@@ -1,0 +1,345 @@
+{
+  "$comment": "T2 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T2): one row per slug from cohorts/T2.tsv -- the activity-jar cohort (38). See plans/unknown-bucket-routing-repair/diagnosis/T2.md for the full mechanism table and per-exemplar evidence. Consumed by scripts/pin-corpus-tree.ts (T0).",
+  "rows": [
+    {
+      "slug": "activity-legacy1-example-0",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "activity-legacy1-example-1",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "activity-legacy1-example-2",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "activity-legacy1-example-3",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "activity-legacy1-example-4",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "activity-legacy1-example-5",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "barada-07-veca157",
+      "cohort": "activity-if-then-when-legacy",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandIfLegacy1/CommandElseLegacy1",
+      "size": 20
+    },
+    {
+      "slug": "bezogu-47-vevu307",
+      "cohort": "description-sprite-partition-crossseam",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3",
+      "size": 90
+    },
+    {
+      "slug": "bitabu-34-lota947",
+      "cohort": "activity-legacy-arrow-syntax",
+      "disposition": "known-misroute",
+      "task": "T2",
+      "reason": "state's parser silently accepts the legacy '(*) ..> \"X\"' arrow-link line (CucaDiagram-shared arrow matching) and produces an empty (0x0) STATE diagram instead of refusing; the jar's real owner is the UNPORTED legacy ActivityDiagramFactory's CommandLinkActivity.java:73-119 (registered ActivityDiagramFactory.java:96), which this port never registers (src/index.ts:96-109 has no legacy-activity slot, only activitydiagram3's slot after state) -- a whole unported command family per D2, not a small missing command. Narrowing state's over-claim alone would not land this at ACTIVITY (it would fall through to this port's activity3 engine, which also has no arrow-link command, and end at the error sentinel), so pin rather than fix."
+    },
+    {
+      "slug": "bokupo-95-rede308",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "cemilu-33-voma521",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "coruvi-63-vuzu133",
+      "cohort": "class-note-no-target",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    },
+    {
+      "slug": "cubixe-14-gaze754",
+      "cohort": "activity-if-trailing-stereotype",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandIf2/CommandElseIf2",
+      "size": 15
+    },
+    {
+      "slug": "doveka-76-fiza931",
+      "cohort": "activity-switch-case",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandSwitch/CommandCase/CommandEndSwitch",
+      "size": 120
+    },
+    {
+      "slug": "gucipa-88-xoti966",
+      "cohort": "activity-backward-edge",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandBackward3",
+      "size": 40
+    },
+    {
+      "slug": "jutesi-96-jemo224",
+      "cohort": "description-sprite-partition-crossseam",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3",
+      "size": 90
+    },
+    {
+      "slug": "labeji-53-pari860",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "legoda-27-cedo414",
+      "cohort": "description-sprite-partition-crossseam",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3",
+      "size": 90
+    },
+    {
+      "slug": "lipiki-79-fapu237",
+      "cohort": "activity-switch-case",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandSwitch/CommandCase/CommandEndSwitch",
+      "size": 120
+    },
+    {
+      "slug": "lonosi-76-xoka469",
+      "cohort": "activity-switch-case",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandSwitch/CommandCase/CommandEndSwitch",
+      "size": 120
+    },
+    {
+      "slug": "mazuxi-71-xipu561",
+      "cohort": "activity-if-trailing-stereotype",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandIf2/CommandElseIf2",
+      "size": 15
+    },
+    {
+      "slug": "nezaxe-99-mumo948",
+      "cohort": "class-note-no-target",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    },
+    {
+      "slug": "punuve-45-baja096",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "rizoba-79-feco788",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "rucuga-83-tosu408",
+      "cohort": "activity-endwhile-spelling",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandWhileEnd3",
+      "size": 5
+    },
+    {
+      "slug": "rurufo-83-sadi254",
+      "cohort": "description-sprite-partition-crossseam",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3",
+      "size": 90
+    },
+    {
+      "slug": "ticini-08-zico145",
+      "cohort": "activity-backward-edge",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandBackward3",
+      "size": 40
+    },
+    {
+      "slug": "tiseze-53-gace410",
+      "cohort": "class-note-no-target",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    },
+    {
+      "slug": "tivado-46-vete823",
+      "cohort": "description-sprite-partition-crossseam",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3",
+      "size": 90
+    },
+    {
+      "slug": "tuvigo-52-redo102",
+      "cohort": "activity-partition-group",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3/CommandCloseGroup3/CommandCloseGroupLegacy3",
+      "size": 90
+    },
+    {
+      "slug": "vezozu-78-pici074",
+      "cohort": "activity-partition-group",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandPartition3/CommandCloseGroup3/CommandCloseGroupLegacy3",
+      "size": 90
+    },
+    {
+      "slug": "vugasu-31-koca724",
+      "cohort": "activity-bullet-list",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandActivityList",
+      "size": 25
+    },
+    {
+      "slug": "xaxene-93-doka767",
+      "cohort": "activity-switch-case",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandSwitch/CommandCase/CommandEndSwitch",
+      "size": 120
+    },
+    {
+      "slug": "xebuce-87-poba093",
+      "cohort": "activity-backward-edge",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandBackward3",
+      "size": 40
+    },
+    {
+      "slug": "xevumo-18-luvo279",
+      "cohort": "activity-backward-edge",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandBackward3",
+      "size": 40
+    },
+    {
+      "slug": "xucero-03-kixi746",
+      "cohort": "activity-if-is-then",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandIf4",
+      "size": 15
+    },
+    {
+      "slug": "zakuke-30-sobi867",
+      "cohort": "activity-endwhile-spelling",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandWhileEnd3",
+      "size": 5
+    },
+    {
+      "slug": "zovemu-18-keki646",
+      "cohort": "activity-switch-case",
+      "disposition": "fix-candidate",
+      "task": "T2",
+      "seam": "activity",
+      "command": "CommandSwitch/CommandCase/CommandEndSwitch",
+      "size": 120
+    }
+  ]
+}
