@@ -1,0 +1,35 @@
+{
+  "$comment": "Split from T4-class-misroutes.json by the orchestrator before batch 2 (D4: one fragment, one writer): the sequence-seam fix-candidate rows of T4. Rows sorted by slug.",
+  "rows": [
+    {
+      "slug": "jamupa-36-duni483",
+      "cohort": "sequence-overclaim-invalid-arrow-style",
+      "disposition": "fix-candidate",
+      "seam": "sequence",
+      "command": "CommandArrow",
+      "size": 15,
+      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
+      "task": "T4"
+    },
+    {
+      "slug": "kevegu-65-zagi834",
+      "cohort": "sequence-overclaim-invalid-arrow-style",
+      "disposition": "fix-candidate",
+      "seam": "sequence",
+      "command": "CommandArrow",
+      "size": 15,
+      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
+      "task": "T4"
+    },
+    {
+      "slug": "lakivi-73-vuko958",
+      "cohort": "sequence-overclaim-invalid-arrow-style",
+      "disposition": "fix-candidate",
+      "seam": "sequence",
+      "command": "CommandArrow",
+      "size": 15,
+      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
+      "task": "T4"
+    }
+  ]
+}

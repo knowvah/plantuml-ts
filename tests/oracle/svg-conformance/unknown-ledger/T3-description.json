@@ -1,0 +1,14 @@
+{
+  "$comment": "Split from T3-class-refusals.json by the orchestrator before batch 2 (D4: one fragment, one writer): the description-seam fix-candidate rows of T3. Rows sorted by slug.",
+  "rows": [
+    {
+      "slug": "rozugu-82-pera583",
+      "cohort": "description-nested-embedded-diagram",
+      "disposition": "fix-candidate",
+      "task": "T3",
+      "seam": "description",
+      "command": "CommandCreateElementMultilines",
+      "size": 30
+    }
+  ]
+}

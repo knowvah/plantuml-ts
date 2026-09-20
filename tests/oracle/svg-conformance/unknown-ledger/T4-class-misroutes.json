@@ -1,5 +1,5 @@
 {
-  "$comment": "T4 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T4): one row per slug in cohorts/T4.tsv -- 46 jar-CLASS sources this port routes elsewhere (42 to DESCRIPTION, 3 to SEQUENCE, 1 to STATE). Five mechanisms, all fix-candidate: (A, 37) CommandCreateElementMultilines never ported into the class engine; (B, 4) REL_ARROW's crow's-foot alternative lacks a dotted body / CIRCLE '0' token / mid-arrow style bracket; (C, 1) CLASS_ID hardcodes '.' regardless of a configured namespaceSeparator; (D, 1) the note-declaration CODE regex excludes dots upstream allows; (E, 3) sequence's CommandArrow over-claims a bare-dressing arrow and an unrestricted style-token vocabulary that upstream refuses, so sequence (registered before class) wins a block class would otherwise correctly claim. See diagnosis/T4.md for the full table and per-mechanism citations.",
+  "$comment": "T4 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T4): one row per slug in cohorts/T4.tsv -- 46 jar-CLASS sources this port routes elsewhere (42 to DESCRIPTION, 3 to SEQUENCE, 1 to STATE). Five mechanisms, all fix-candidate: (A, 37) CommandCreateElementMultilines never ported into the class engine; (B, 4) REL_ARROW's crow's-foot alternative lacks a dotted body / CIRCLE '0' token / mid-arrow style bracket; (C, 1) CLASS_ID hardcodes '.' regardless of a configured namespaceSeparator; (D, 1) the note-declaration CODE regex excludes dots upstream allows; (E, 3) sequence's CommandArrow over-claims a bare-dressing arrow and an unrestricted style-token vocabulary that upstream refuses, so sequence (registered before class) wins a block class would otherwise correctly claim. See diagnosis/T4.md for the full table and per-mechanism citations. Batch-2 split: 3 sequence rows moved to T4-sequence.json.",
   "rows": [
     {
       "slug": "boguko-42-zuda981",
@@ -162,16 +162,6 @@
       "task": "T4"
     },
     {
-      "slug": "jamupa-36-duni483",
-      "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
-      "seam": "sequence",
-      "command": "CommandArrow",
-      "size": 15,
-      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
-      "task": "T4"
-    },
-    {
       "slug": "jefidu-98-gisu131",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
       "disposition": "fix-candidate",
@@ -222,16 +212,6 @@
       "task": "T4"
     },
     {
-      "slug": "kevegu-65-zagi834",
-      "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
-      "seam": "sequence",
-      "command": "CommandArrow",
-      "size": 15,
-      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
-      "task": "T4"
-    },
-    {
       "slug": "komuvi-52-vave599",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
       "disposition": "fix-candidate",
@@ -239,16 +219,6 @@
       "command": "CommandCreateElementMultilines",
       "size": 90,
       "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
-      "task": "T4"
-    },
-    {
-      "slug": "lakivi-73-vuko958",
-      "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
-      "seam": "sequence",
-      "command": "CommandArrow",
-      "size": 15,
-      "reason": "CommandArrow.java:311-313: when neither ARROW_DRESSING1 nor ARROW_DRESSING2 carries any of <,\\\\,/,>,x,o (a bare '--'-only body, no arrowhead/cross/circle at all), executeArg returns CommandExecutionResult.error('Illegal sequence arrow') -- upstream's sequence engine refuses a plain association dash with zero decoration. Separately, CommandArrow.java:482-502 applyStyle only recognizes 'dashed'/'bold'/'dotted'/'hidden' as non-color style tokens; any OTHER LINE_STYLE token the shared regex accepts syntactically (e.g. 'thickness=5', which is valid class-relationship style per CommandLinkElement.java:71 but not a sequence arrow style) falls to `HColorSet.instance().getColor(s)`, throws NoSuchColorException, and that uncaught Throwable is caught by PSystemBuilder.java:271's per-factory catch, which discards the sequence result and tries the next factory (class) -- bisected against the real jar: 'a --> b' -> SEQUENCE, 'a -[dashed]-> b' -> SEQUENCE, 'a -[thickness=5]-> b' -> CLASS. This port's command-arrow.ts accepts both a no-dressing bare body (UNDRESSED_ARROW_RE has no equivalent 'Illegal sequence arrow' refusal) and an unrestricted style-token vocabulary (no dashed/bold/dotted/hidden whitelist), so sequence claims what upstream's own sequence factory refuses, and -- tried before class in registration order -- wins the block.",
       "task": "T4"
     },
     {

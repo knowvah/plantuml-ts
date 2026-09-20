@@ -1,5 +1,5 @@
 {
-  "$comment": "T3 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T3): one row per slug in cohorts/T3.tsv -- the 16 Class-visibility-N + gegosa/girapu/jodasa/muvici/neticu/rozugu/taboco/tenule/topave/vijuce/xuloxo/zelura class-jar-refusal fixtures. One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0) and, for fix-candidate rows, by the orchestrator's batch-2 seam assignment. See plans/unknown-bucket-routing-repair/diagnosis/T3.md for the full per-mechanism diagnosis (upstream File.java:line citations, D3 landing checks, the rozugu routing-vs-refusal caveat, and the xuloxo ruled-out evidence).",
+  "$comment": "T3 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T3): one row per slug in cohorts/T3.tsv -- the 16 Class-visibility-N + gegosa/girapu/jodasa/muvici/neticu/rozugu/taboco/tenule/topave/vijuce/xuloxo/zelura class-jar-refusal fixtures. One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0) and, for fix-candidate rows, by the orchestrator's batch-2 seam assignment. See plans/unknown-bucket-routing-repair/diagnosis/T3.md for the full per-mechanism diagnosis (upstream File.java:line citations, D3 landing checks, the rozugu routing-vs-refusal caveat, and the xuloxo ruled-out evidence). Batch-2 split: 1 description rows moved to T3-description.json.",
   "rows": [
     {
       "slug": "Class-visibility-0",
@@ -108,15 +108,6 @@
       "seam": "class",
       "command": "CommandCreateJson",
       "size": 18
-    },
-    {
-      "slug": "rozugu-82-pera583",
-      "cohort": "description-nested-embedded-diagram",
-      "disposition": "fix-candidate",
-      "task": "T3",
-      "seam": "description",
-      "command": "CommandCreateElementMultilines",
-      "size": 30
     },
     {
       "slug": "taboco-79-pire192",

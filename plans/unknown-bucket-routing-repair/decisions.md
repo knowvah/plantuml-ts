@@ -73,3 +73,21 @@ under-claim exceptions as the only ones.
 ## D10 — Every batch ends green
 The four gates plus the drift test. Any commit that moves a pin, a cache tree
 or a survey artifact runs `npm run parity:dashboard` in the same commit.
+
+## D11 — Cross-seam mechanisms are fixed in both seams (user ruling 2026-09-20)
+Amends stop 8 and D2 for this mission. When a fixture lands on the jar's
+engine only after two seams change (one engine stops over-claiming AND
+another gains the upstream Command), BOTH changes are made, each in its own
+seam task, and the landing is judged (D3) after both are on the mission
+branch. The intermediate state (one seam changed) is never a commit on the
+mission branch's batch boundary; a seam task reports the intermediate
+landing and does not treat it as stop 5. Jar behaviour is the target; a
+divergence is never kept because matching it needs two files.
+
+## D12 — No size bar on a faithful port (user ruling 2026-09-20)
+Amends D2(c). A missing upstream `Command` is ported faithfully regardless
+of NLOC; long Java is split into hook-sized functions (≤30 NLOC, CCN ≤10)
+that keep upstream's names and structure. "Too big" is not a pin reason in
+this mission. Pins remain for unported engines/factories, whole unported
+families upstream itself routes elsewhere, and defects already filed under
+their own note (D2's other arms are unchanged).

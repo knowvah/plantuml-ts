@@ -1,5 +1,5 @@
 {
-  "$comment": "T2 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T2): one row per slug from cohorts/T2.tsv -- the activity-jar cohort (38). See plans/unknown-bucket-routing-repair/diagnosis/T2.md for the full mechanism table and per-exemplar evidence. Consumed by scripts/pin-corpus-tree.ts (T0).",
+  "$comment": "T2 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T2): one row per slug from cohorts/T2.tsv -- the activity-jar cohort (38). See plans/unknown-bucket-routing-repair/diagnosis/T2.md for the full mechanism table and per-exemplar evidence. Consumed by scripts/pin-corpus-tree.ts (T0). Batch-2 split: 3 class rows moved to T2-class.json.",
   "rows": [
     {
       "slug": "activity-legacy1-example-0",
@@ -99,15 +99,6 @@
       "size": 25
     },
     {
-      "slug": "coruvi-63-vuzu133",
-      "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
-      "task": "T2",
-      "seam": "class",
-      "command": "CommandFactoryNoteOnEntity",
-      "size": 10
-    },
-    {
       "slug": "cubixe-14-gaze754",
       "cohort": "activity-if-trailing-stereotype",
       "disposition": "fix-candidate",
@@ -189,15 +180,6 @@
       "size": 15
     },
     {
-      "slug": "nezaxe-99-mumo948",
-      "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
-      "task": "T2",
-      "seam": "class",
-      "command": "CommandFactoryNoteOnEntity",
-      "size": 10
-    },
-    {
       "slug": "punuve-45-baja096",
       "cohort": "activity-bullet-list",
       "disposition": "fix-candidate",
@@ -241,15 +223,6 @@
       "seam": "activity",
       "command": "CommandBackward3",
       "size": 40
-    },
-    {
-      "slug": "tiseze-53-gace410",
-      "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
-      "task": "T2",
-      "seam": "class",
-      "command": "CommandFactoryNoteOnEntity",
-      "size": 10
     },
     {
       "slug": "tivado-46-vete823",

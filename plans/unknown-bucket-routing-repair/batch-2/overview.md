@@ -8,12 +8,12 @@ discovers it needs a second seam stops (stop 8).
 
 | ID | Seam | Writes | Fixtures | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | class | `src/diagrams/class/**`, its tests, `unknown-ledger/T3-*.json` + `T4-*.json` rows it resolves | from T3, T4 | T3, T4 | [ ] |
-| T8 | description | `src/diagrams/description/**`, `src/core/descriptive-keywords.ts`, tests, its ledger rows | from T2, T4, T5 | T2, T4, T5 | [ ] |
-| T9 | state | `src/diagrams/state/**`, tests, its ledger rows | from T2, T5, T6 | T2, T5, T6 | [ ] |
-| T10 | activity | `src/diagrams/activity/**`, tests, its ledger rows | from T2 | T2 | [ ] |
-| T11 | sequence | `src/diagrams/sequence/**`, tests, its ledger rows | from T4, T5, T6 | T4, T5, T6 | [ ] |
-| T12 | block-extractor | `src/core/block-extractor.ts`, its tests, its ledger rows | any | batch 1 | [ ] |
+| T7 | class | `src/diagrams/class/**`, its tests, `unknown-ledger/{T2-class,T3-class-refusals,T4-class-misroutes,T5-class}.json` | 66: T2 3 · T3 17 · T4 43 · T5 3 | T3, T4 | [ ] |
+| T8 | description | `src/diagrams/description/**`, `src/core/descriptive-keywords.ts`, tests, `unknown-ledger/{T3-description,T5-descr-seq}.json` | 6: T3 1 · T5 5, plus the D11 narrowing for T2's 5 cross-seam rows (no rows of its own) | T2, T4, T5 | [ ] |
+| T9 | state | `src/diagrams/state/**`, tests, `unknown-ledger/T6-jar-none.json` | 1: T6 1 | T2, T5, T6 | [ ] |
+| T10 | activity | `src/diagrams/activity/**`, tests, `unknown-ledger/T2-activity-jar.json` | 34: T2 34 (5 cross-seam, D11; dispatched after T8 lands) | T2, T8 | [ ] |
+| T11 | sequence | `src/diagrams/sequence/**`, tests, `unknown-ledger/{T4-sequence,T5-sequence}.json` | 9: T4 3 · T5 6 | T4, T5, T6 | [ ] |
+| T12 | block-extractor | `src/core/block-extractor.ts`, its tests, its ledger rows | 0 — SKIPPED (push-forward) | batch 1 | [x] |
 | T13 | dashboard | `scripts/parity-dashboard-matrix.ts`, `tests/unit/scripts/parity-dashboard.test.ts`, `docs/parity-report.md` | — | — | [ ] |
 
 Ledger ownership in this batch: a fragment file is written by AT MOST one
