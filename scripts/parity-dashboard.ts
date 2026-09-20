@@ -273,7 +273,10 @@ const PREAMBLE = [
     'until a jar that supports the type is pinned. A bucket with no engine keeps its real ' +
     '**oracle** count but repeats its `no engine (Dn todo)` reason in every comparison cell: ' +
     "this port answers such a source with the dispatcher's error sentinel, so a routing or " +
-    'refusal count there would measure nothing.',
+    'refusal count there would measure nothing. The `unknown` row is the one exception: it ' +
+    'keeps its `n/a (accounting bucket)` engine cell — it is not a todo, D8 of `plans/unknown-' +
+    'bucket-routing-repair/decisions.md` — but every other column reports every measurement ' +
+    'its oracle allows.',
   '',
   '**survey** and **census** differ by RENDER PATH, not measurer. Both already measure text ' +
     'through the same system — `WidthTableMeasurer`, re-exported as `DeterministicMeasurer` ' +
