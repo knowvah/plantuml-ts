@@ -15,12 +15,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { helperFor } from '../../../scripts/svg-conformance-census.js';
 import type { CensusResult } from '../../../scripts/svg-conformance-census.js';
-import {
-  toCensusJson,
-  jsonPathArg,
-  runJsonMode,
-  bucketOf,
-} from '../../../scripts/svg-conformance-census-json.js';
+import { toCensusJson, jsonPathArg, runJsonMode, bucketOf } from '../../../scripts/svg-conformance-census-json.js';
 
 // ---------------------------------------------------------------------------
 // helperFor (AC1: activity dispatches to the activity helper)

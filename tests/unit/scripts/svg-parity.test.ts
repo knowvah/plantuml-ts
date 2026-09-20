@@ -172,9 +172,7 @@ describe('parseSurveyArgs', () => {
   });
 
   it('keeps legacy behavior for positional args', () => {
-    expect(parseSurveyArgs(['class'])).toEqual([
-      { types: ['class'], out: join(SVG_CONFORMANCE_DIR, 'parity.json') },
-    ]);
+    expect(parseSurveyArgs(['class'])).toEqual([{ types: ['class'], out: join(SVG_CONFORMANCE_DIR, 'parity.json') }]);
   });
 
   it('keeps legacy behavior for --out with positional args', () => {
