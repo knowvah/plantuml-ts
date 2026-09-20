@@ -4,7 +4,7 @@ Freshest measurement across every source below: 2026-09-20T18:50:23.645Z.
 
 # Parity dashboard
 
-One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — D7, plans/parity-dashboard-refresh/decisions.md). **engine** names the plugin that owns the bucket, or the still-unbuilt Phase D mission that will; **corpus** is the bucket's fixture count; **oracle** is how many of those fixtures have a cached PlantUML jar SVG under `test-results/dot-cache/<type>/`; **DOT equal** reads `tests/oracle/svg-conformance/dot-parity.json`; **ratchet pins**, **diff-baseline**, **routing** and **refusal** read the committed goldens under `oracle/goldens/`. Every empty cell names why it is empty, per the vocabulary in decisions.md D8 — a bare `n/a` never appears.
+One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — D7, plans/parity-dashboard-refresh/decisions.md). **engine** names the plugin that owns the bucket, or the still-unbuilt Phase D mission that will; **corpus** is the bucket's fixture count; **oracle** is how many of those fixtures have a cached PlantUML jar SVG under `test-results/dot-cache/<type>/`; **DOT equal** reads `tests/oracle/svg-conformance/dot-parity.json`; **ratchet pins**, **diff-baseline**, **routing** and **refusal** read the committed goldens under `oracle/goldens/`. Every empty cell names why it is empty, per the vocabulary in decisions.md D8 — a bare `n/a` never appears. `n/a (plantuml-ts only)` marks a type whose every cached jar SVG is PlantUML's own "Diagram not supported by this release" page: the port draws it, the pinned jar declines it, so nothing can be compared until a jar that supports the type is pinned.
 
 **survey** and **census** differ by RENDER PATH, not measurer. Both already measure text through the same system — `WidthTableMeasurer`, re-exported as `DeterministicMeasurer` (`src/core/measurer-deterministic.ts`) — over the SAME cached corpus. Survey renders through production `renderSync`; the ratchet and census render through the low-level `renderFixture*` helpers instead. A `diverged` survey verdict beside a passing byte-exact ratchet is that path difference, never a text-metric mismatch.
 
@@ -16,7 +16,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | board | board | 4 | 4 | n/a (no DOT stage (non-svek)) | 0 / 0 / 4 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
-| chronology | chronology | 1 | 1 | n/a (no DOT stage (non-svek)) | 0 / 0 / 1 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 1/1 | 1/1 |
+| chronology | chronology | 1 | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) |
 | class | class | 768 | 723 | 710/711 (100%) | 412 / 50 / 261 | 414 | 314 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
 | component | description | 384 | 266 | 259/263 (98%) | 0 / 13 / 253 | 44 | 32 | 15 · 853 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
@@ -49,7 +49,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | board | — | 2026-09-20T18:46:39.547Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | c4 | — | — | — | — | — | — | — |
 | chart | — | 2026-09-20T18:46:48.302Z | — | — | — | 2026-09-20 | 2026-09-20 |
-| chronology | — | 2026-09-20T18:46:53.594Z | — | — | — | 2026-09-20 | 2026-09-20 |
+| chronology | — | — | — | — | — | — | — |
 | class | 2026-09-20T18:46:17.208Z | 2026-09-20T18:47:03.673Z | 2026-09-20T18:49:31.409Z | 2026-08-17 | — | 2026-08-24 | 2026-08-24 |
 | component | 2026-09-20T18:46:17.208Z | 2026-09-20T18:49:07.156Z | 2026-09-20T18:49:14.773Z | 2026-07-15 | 2026-09-03 | 2026-08-26 | 2026-08-26 |
 | ditaa | — | — | — | — | — | — | — |

@@ -71,6 +71,24 @@ export interface ColumnResult {
 
 const NOT_STARTED = (cell: string): ColumnResult => ({ cell, freshness: undefined });
 
+/** D8 word added 2026-09-20 at the maintainer's request: a bucket whose EVERY
+ *  cached jar SVG is PlantUML's own "Diagram not supported by this release"
+ *  page (`parity-dashboard-inputs.ts#isJarUnsupportedPage`). The port draws the
+ *  type; the pinned jar declines it; so no cell can compare anything, and every
+ *  comparison cell says so instead of reporting a verdict against a placeholder.
+ *  Requires at least one cached fixture — an uncaptured type is still
+ *  `no oracle captured`. */
+export const PLANTUML_TS_ONLY: ColumnResult = NOT_STARTED('n/a (plantuml-ts only)');
+
+export function isPlantumlTsOnly(
+  bucket: string,
+  oracleCounts: Readonly<Record<string, number>>,
+  jarUnsupportedCounts: Readonly<Record<string, number>>,
+): boolean {
+  const n = oracleCounts[bucket];
+  return n !== undefined && n > 0 && jarUnsupportedCounts[bucket] === n;
+}
+
 export function oracleColumn(bucket: string, oracleCounts: Readonly<Record<string, number>>): ColumnResult {
   const n = oracleCounts[bucket];
   return n === undefined ? NOT_STARTED('n/a (no oracle captured)') : NOT_STARTED(String(n));

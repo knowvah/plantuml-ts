@@ -10,7 +10,7 @@
  * summarizer half of each pair (`tally*`/`*StatsOf`) is pure and unit-tested
  * directly; the loader half is IO-only and exercised by the D9 drift test.
  */
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { closeSync, existsSync, openSync, readFileSync, readSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { FixtureRow, ParityReport, Verdict } from './svg-parity-survey.js';
@@ -64,6 +64,51 @@ export function oracleCountsOf(cacheDir: string): Record<string, number> {
   for (const type of readdirSync(cacheDir)) {
     const typeDir = join(cacheDir, type);
     out[type] = readdirSync(typeDir).filter((slug) => existsSync(join(typeDir, slug, '.done'))).length;
+  }
+  return out;
+}
+
+/**
+ * The first line `PSystemUnsupported#getDescription` writes
+ * (`PSystemUnsupported.java:62`), as the one whole `<text>` element the jar's
+ * SVG exporter turns it into — anchored at both ends exactly the way
+ * `routing-conformance.test.ts#isJarErrorPage` anchors the two error banners,
+ * so a label merely mentioning the phrase cannot fire. `PSystemBuilder.java:284`
+ * returns that system when no factory in the block's candidate set produced a
+ * diagram; a cached golden carrying it is the jar DECLINING the source, not an
+ * oracle of it. Keyed on the text PlantUML itself writes, never on a type name,
+ * so pinning a jar that supports the type flips the classification by itself.
+ */
+const JAR_UNSUPPORTED_PAGE_RE = />Diagram not supported by this release of PlantUML<\/text>/;
+/** The banner sits in the first element; the largest cached golden is 8 MB. */
+const HEAD_BYTES = 4096;
+
+export function isJarUnsupportedPage(head: string): boolean {
+  return JAR_UNSUPPORTED_PAGE_RE.test(head);
+}
+
+function readHead(path: string): string {
+  const fd = openSync(path, 'r');
+  try {
+    const buf = Buffer.alloc(HEAD_BYTES);
+    return buf.subarray(0, readSync(fd, buf, 0, HEAD_BYTES, 0)).toString('utf8');
+  } finally {
+    closeSync(fd);
+  }
+}
+
+/** Per dot-cache type: how many cached (`.done`) fixtures' `in.svg` is the jar's
+ *  own unsupported-diagram page. `plantuml-ts only` in the matrix means this
+ *  equals the type's whole oracle count (`parity-dashboard-matrix.ts#isPlantumlTsOnly`). */
+export function jarUnsupportedCountsOf(cacheDir: string): Record<string, number> {
+  if (!existsSync(cacheDir)) return {};
+  const out: Record<string, number> = {};
+  for (const type of readdirSync(cacheDir)) {
+    const typeDir = join(cacheDir, type);
+    out[type] = readdirSync(typeDir).filter((slug) => {
+      const svg = join(typeDir, slug, 'in.svg');
+      return existsSync(join(typeDir, slug, '.done')) && existsSync(svg) && isJarUnsupportedPage(readHead(svg));
+    }).length;
   }
   return out;
 }

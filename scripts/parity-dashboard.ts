@@ -26,6 +26,7 @@ import {
   corpusCountsOf,
   registeredEngineTypes,
   oracleCountsOf,
+  jarUnsupportedCountsOf,
   loadDotParity,
   loadSurveyByType,
   loadCensusByType,
@@ -44,6 +45,8 @@ import {
 import {
   engineCell,
   oracleColumn,
+  isPlantumlTsOnly,
+  PLANTUML_TS_ONLY,
   dotColumn,
   surveyColumn,
   censusColumn,
@@ -77,6 +80,8 @@ export interface RawInputs {
   corpusCounts: Record<string, number>;
   registeredEngines: string[];
   oracleCounts: Record<string, number>;
+  /** Per type, cached goldens that are the jar's unsupported-diagram page. */
+  jarUnsupportedCounts: Record<string, number>;
   dotParity: DotParityJson;
   surveyByType: Record<string, SurveySummary>;
   censusByType: Record<string, CensusSummary>;
@@ -95,6 +100,7 @@ export function loadInputs(): RawInputs {
     corpusCounts: corpusCountsOf(DATA_DIR, buckets),
     registeredEngines: registeredEngineTypes(readFileSync(INDEX_TS_PATH, 'utf-8')),
     oracleCounts: oracleCountsOf(CACHE_DIR),
+    jarUnsupportedCounts: jarUnsupportedCountsOf(CACHE_DIR),
     dotParity: loadDotParity(DOT_PARITY_PATH),
     surveyByType: loadSurveyByType(SVG_CONFORMANCE_DIR),
     censusByType: loadCensusByType(SVG_CONFORMANCE_DIR),
@@ -145,7 +151,15 @@ interface RowColumns {
   refusal: ReturnType<typeof refusalColumn>;
 }
 
+/** Every comparison cell of a `plantuml-ts only` type: the jar declined the
+ *  source, so there is nothing to compare and no source date to report. */
+function plantumlTsOnlyColumns(): RowColumns {
+  const c = PLANTUML_TS_ONLY;
+  return { oracle: c, dot: c, survey: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
+}
+
 function columnsFor(type: string, inputs: RawInputs, dotByType: ReadonlyMap<string, TypeRow>): RowColumns {
+  if (isPlantumlTsOnly(type, inputs.oracleCounts, inputs.jarUnsupportedCounts)) return plantumlTsOnlyColumns();
   return {
     oracle: oracleColumn(type, inputs.oracleCounts),
     dot: dotColumn(dotByType.get(type), inputs.dotParity.generatedAt),
@@ -243,7 +257,10 @@ const PREAMBLE = [
     '`test-results/dot-cache/<type>/`; **DOT equal** reads `tests/oracle/svg-conformance/dot-' +
     'parity.json`; **ratchet pins**, **diff-baseline**, **routing** and **refusal** read the ' +
     'committed goldens under `oracle/goldens/`. Every empty cell names why it is empty, per the ' +
-    'vocabulary in decisions.md D8 — a bare `n/a` never appears.',
+    'vocabulary in decisions.md D8 — a bare `n/a` never appears. `n/a (plantuml-ts only)` marks ' +
+    'a type whose every cached jar SVG is PlantUML\'s own "Diagram not supported by this ' +
+    'release" page: the port draws it, the pinned jar declines it, so nothing can be compared ' +
+    'until a jar that supports the type is pinned.',
   '',
   '**survey** and **census** differ by RENDER PATH, not measurer. Both already measure text ' +
     'through the same system — `WidthTableMeasurer`, re-exported as `DeterministicMeasurer` ' +

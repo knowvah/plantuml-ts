@@ -43,6 +43,7 @@ function baseInputs(): RawInputs {
     corpusCounts: { class: 768, component: 384, ditaa: 2, sequence: 1271, unknown: 825 },
     registeredEngines: ['class', 'description', 'sequence'],
     oracleCounts: { class: 723, component: 266, sequence: 1141 },
+    jarUnsupportedCounts: {},
     dotParity: {
       generatedAt: '2026-09-20T14:44:15.369Z',
       measuredAgainstCommit: 'bdd3344e',
@@ -117,6 +118,26 @@ describe('buildMatrix', () => {
     expect(row('sequence').diffBaseline).toBe('1124 · 1158537');
     expect(row('sequence').routing).toBe('1124/1141');
     expect(row('sequence').refusal).toBe('1132/1141');
+  });
+
+  it('turns every comparison cell of a jar-unsupported type into n/a (plantuml-ts only)', () => {
+    const inputs = baseInputs();
+    inputs.buckets = [...inputs.buckets, 'chronology'].sort();
+    inputs.corpusCounts['chronology'] = 1;
+    inputs.registeredEngines = [...inputs.registeredEngines, 'chronology'];
+    inputs.oracleCounts['chronology'] = 1;
+    inputs.jarUnsupportedCounts['chronology'] = 1;
+    inputs.dotParity.rows.push(dotRow('chronology', { note: 'n/a (no DOT stage)' }));
+    inputs.surveyByType['chronology'] = { conformant: 0, structural: 0, diverged: 1, generatedAt: '2026-09-20' };
+    inputs.routingByType['chronology'] = { counts: { agree: 1 }, total: 1, measuredAt: '2026-09-20' };
+    const r = buildMatrix(inputs).find((x) => x.type === 'chronology')!;
+    expect(r.engine).toBe('chronology');
+    expect(r.corpus).toBe(1);
+    for (const cell of [r.oracle, r.dot, r.survey, r.census, r.ratchet, r.diffBaseline, r.routing, r.refusal]) {
+      expect(cell).toBe('n/a (plantuml-ts only)');
+    }
+    const f = buildFreshness(inputs).find((x) => x.type === 'chronology')!;
+    expect([f.dot, f.survey, f.routing]).toEqual([undefined, undefined, undefined]);
   });
 
   it('gives ditaa a D-row "no engine" reason, not a bare n/a', () => {
@@ -209,7 +230,7 @@ describe('renderReport', () => {
   it('AC2: every n/a in the Matrix table matches the D8 vocabulary, no bare n/a', () => {
     const tableBlock = out.slice(out.indexOf('## Matrix'), out.indexOf('## Freshness'));
     const vocab =
-      /^n\/a \((no engine \(D\d+ todo\)|no DOT stage \(non-svek\)|no oracle captured|no ratchet yet|no survey yet|no census yet|no diff-baseline yet|no data-diagram-type classification|engine, unclassifiable corpus|accounting bucket)\)$/;
+      /^n\/a \((no engine \(D\d+ todo\)|no DOT stage \(non-svek\)|no oracle captured|no ratchet yet|no survey yet|no census yet|no diff-baseline yet|no data-diagram-type classification|plantuml-ts only|engine, unclassifiable corpus|accounting bucket)\)$/;
     for (const line of tableBlock.split('\n').filter((l) => l.startsWith('| '))) {
       for (const cell of line.split('|').map((c) => c.trim())) {
         if (cell.startsWith('n/a')) expect(cell).toMatch(vocab);
