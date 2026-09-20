@@ -52,6 +52,16 @@ Vocabulary: `no engine (Dn todo)` · `no DOT stage (non-svek)` ·
 `accounting bucket`. A bare `n/a` is a generator failure. Adding a word is
 a push-forward; log it.
 
+Added during execution (journal rows 12, 20): `no survey yet` ·
+`no census yet` · `no diff-baseline yet` · `no data-diagram-type
+classification`. Added after close at the maintainer's request (row 30):
+`plantuml-ts only` — every cached jar SVG of the type is PlantUML's own
+"Diagram not supported by this release" page (`PSystemUnsupported.java:62`,
+reached via `PSystemBuilder.java:284`), so the port draws a diagram the
+pinned jar declines and no cell can compare anything; it replaces the
+oracle count and every comparison cell, and is keyed on the page text, never
+a type name, so pinning a supporting jar flips it back by itself.
+
 ## D9 — Drift gate as a unit test
 Decision: `tests/unit/scripts/parity-dashboard.test.ts` rebuilds the
 markdown from the JSON on disk and asserts equality with the committed
