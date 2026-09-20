@@ -53,6 +53,24 @@ export interface TypeRow {
   note: string;
 }
 
+/** Filesystem roots `dotParityRows` reads. Defaults to the real repo state;
+ *  tests inject a temp tree so a row's note never depends on ambient
+ *  `test-results/` contents that vary machine-to-machine and worktree-to-worktree.
+ *
+ *  The default is an inline parameter-default expression on `dotParityRows`, not a
+ *  module-level constant: `CACHE` is a live binding of the circular import from
+ *  `dot-sync-report.ts` (this module exports `dotParityRows`/`dotParityMarkdown`
+ *  back to it), and when `dot-sync-report.ts` is the ESM entry point, its own
+ *  `export const CACHE` has not run yet at the point THIS module's top level would
+ *  evaluate — reading it there yields `undefined`. A parameter default is
+ *  re-evaluated on every call that omits the argument, i.e. after both modules'
+ *  top-level code has finished, when `CACHE` is guaranteed to be initialized. */
+export interface DotParityRoots {
+  dataDir: string;
+  cacheDir: string;
+  canonDir: string;
+}
+
 const NOT_MEASURED = (type: string, note: string): TypeRow => ({
   type,
   comparable: 0,
@@ -63,8 +81,8 @@ const NOT_MEASURED = (type: string, note: string): TypeRow => ({
 });
 
 /** All diagram types with a fixture manifest, sorted for a stable report. */
-function manifestTypes(): string[] {
-  return readdirSync(DATA_DIR)
+function manifestTypes(dataDir: string): string[] {
+  return readdirSync(dataDir)
     .filter((f) => f.endsWith('.json'))
     .map((f) => f.replace(/\.json$/, ''))
     .sort();
@@ -73,14 +91,14 @@ function manifestTypes(): string[] {
 /** One report row for `type`. Unlike ensureCanonical, never invokes the oracle jar's batch
  *  build — reads only what is already cached. Non-svek types (D8: every n/a carries a
  *  reason) short-circuit before any cache or classification check runs. */
-function rowForType(jar: string, type: string): TypeRow {
+function rowForType(jar: string, type: string, roots: DotParityRoots): TypeRow {
   if (NON_SVEK_TYPES.has(type)) return NOT_MEASURED(type, 'n/a (no DOT stage)');
-  const cacheDir = join(CACHE, type);
+  const cacheDir = join(roots.cacheDir, type);
   if (!existsSync(cacheDir) || readdirSync(cacheDir).length === 0) return NOT_MEASURED(type, 'no oracle captured');
-  const fixtures = enumerateFixtures(type);
+  const fixtures = enumerateFixtures(type, roots.dataDir);
   if (fixtures === undefined) return NOT_MEASURED(type, 'no oracle captured');
   const tag = EXPECTED_TAG[type];
-  const canonDir = join(CANON_DIR, type);
+  const canonDir = join(roots.canonDir, type);
   const hasCanon = tag !== undefined && existsSync(canonDir) && readdirSync(canonDir).some((f) => f.endsWith('.svg'));
   if (!hasCanon) return NOT_MEASURED(type, 'no data-diagram-type classification');
   const a = buildAgg(jar, type, fixtures, tag, false);
@@ -88,10 +106,14 @@ function rowForType(jar: string, type: string): TypeRow {
   return { type, comparable: a.total, equal: a.equal, pct, oracleBlind: a.oracleBlind, note: '—' };
 }
 
-/** One row per manifest diagram type (`tests/visual/data/<type>.json`), in
- *  the vocabulary `docs/parity-report.md` renders. */
-export function dotParityRows(jar: string): TypeRow[] {
-  return manifestTypes().map((t) => rowForType(jar, t));
+/** One row per manifest diagram type (`tests/visual/data/<type>.json`), in the vocabulary
+ *  `docs/parity-report.md` renders. `roots` defaults to the real repo paths; tests inject a
+ *  temp tree so a row's note never depends on ambient `test-results/` state. */
+export function dotParityRows(
+  jar: string,
+  roots: DotParityRoots = { dataDir: DATA_DIR, cacheDir: CACHE, canonDir: CANON_DIR },
+): TypeRow[] {
+  return manifestTypes(roots.dataDir).map((t) => rowForType(jar, t, roots));
 }
 
 const MARKDOWN_LEGEND = [

@@ -2,33 +2,84 @@
  * Unit tests for the DOT-sync report's per-type row builder
  * (`scripts/dot-parity-rows.ts`, mission parity-dashboard-refresh T4).
  *
- * `dotParityRows` reads two pieces of ambient repo state: `test-results/dot-cache/`
- * (committed — see `.gitignore`'s carve-out — so its presence/absence per type is
- * as stable across checkouts as `tests/visual/data/*.json`) and
- * `test-results/visual-qa-svg/canonical/` (gitignored, jar-generated, and never
- * created by anything a unit-test run touches). These tests rely on that
- * asymmetry: the no-cache-dir and no-classification branches are exercised
- * against real, checked-in ambient state rather than fixtures, the same pattern
- * `dot-sync-fixtures.test.ts` uses for its "over the committed corpus" suite.
+ * `dotParityRows` reads three filesystem roots (manifest dir, dot-cache dir,
+ * canonical-SVG dir). The first version of this suite called it against the
+ * REAL repo roots, relying on `test-results/visual-qa-svg/canonical/` being
+ * absent in this worktree to keep every type on the "no data-diagram-type
+ * classification" branch. Once that directory was linked in (it holds real
+ * canonical SVGs for class/component/object/state/usecase in the main
+ * checkout), `class` reached `buildAgg` and ran the full ~700-fixture
+ * aggregate on every call — about 11s per call, timing out the 5000ms test
+ * default. `roots` (`DotParityRoots`) exists so a row's note is a function of
+ * an INJECTED tree, never of what happens to be cached on whatever machine or
+ * worktree runs the suite. Every test below builds its own temp tree and
+ * passes it explicitly; none call `dotParityRows` with the real, ambient
+ * default roots.
  */
-import { describe, it, expect } from 'vitest';
-import { readdirSync } from 'node:fs';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
-import { dotParityRows, dotParityMarkdown, NON_SVEK_TYPES, type TypeRow } from '../../../scripts/dot-parity-rows.js';
-import { DATA_DIR } from '../../../scripts/dot-sync-fixtures.js';
+import { dotParityRows, dotParityMarkdown, NON_SVEK_TYPES, type TypeRow, type DotParityRoots } from '../../../scripts/dot-parity-rows.js';
 
-/** Never invoked: every row exercised here short-circuits before `buildAgg`. */
+/** Never invoked in this suite: every temp-tree type below resolves before
+ *  `rowForType` reaches `buildAgg` (no `roots.canonDir` is ever created, so
+ *  `hasCanon` is false for every type unconditionally). */
 const UNUSED_JAR = 'unused-test-jar';
 
-function manifestTypeCount(): number {
-  return readdirSync(DATA_DIR).filter((f) => f.endsWith('.json')).length;
+let tmp: string;
+let roots: DotParityRoots;
+
+function writeManifest(dataDir: string, type: string, fixtures: unknown[]): void {
+  writeFileSync(join(dataDir, type + '.json'), JSON.stringify(fixtures), 'utf-8');
+}
+
+function markDone(cacheDir: string, type: string, slug: string): void {
+  const dir = join(cacheDir, type, slug);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, '.done'), '', 'utf-8');
 }
 
 function rowFor(rows: TypeRow[], type: string): TypeRow {
   const row = rows.find((r) => r.type === type);
-  if (row === undefined) throw new Error(`no row for "${type}" — check the manifest still has ${type}.json`);
+  if (row === undefined) throw new Error(`no row for "${type}" — check the temp manifest still has ${type}.json`);
   return row;
 }
+
+beforeAll(() => {
+  tmp = mkdtempSync(join(tmpdir(), 'dot-parity-rows-'));
+  const dataDir = join(tmp, 'data');
+  const cacheDir = join(tmp, 'cache');
+  // roots.canonDir is deliberately never created — every type must resolve
+  // via a branch earlier than "no data-diagram-type classification"'s
+  // buildAgg call, or via that branch itself, never past it.
+  const canonDir = join(tmp, 'canon-never-created');
+  mkdirSync(dataDir, { recursive: true });
+  roots = { dataDir, cacheDir, canonDir };
+
+  // sequence: NON_SVEK_TYPES member, cached anyway — the short circuit must
+  // fire BEFORE the cache is even inspected.
+  writeManifest(dataDir, 'sequence', [{ slug: 'seq-1', markup: '@startuml\nA -> B\n@enduml\n' }]);
+  markDone(cacheDir, 'sequence', 'seq-1');
+
+  // board: manifest exists, no cache dir at all.
+  writeManifest(dataDir, 'board', [{ slug: 'board-1', markup: '@startuml\nsalt\n{T\n}\n@enduml\n' }]);
+
+  // class: cached (has .done), has EXPECTED_TAG, but canonDir never exists —
+  // exercises "no data-diagram-type classification" without ever reaching
+  // buildAgg.
+  writeManifest(dataDir, 'class', [{ slug: 'cls-1', markup: '@startuml\nclass A\n@enduml\n' }]);
+  markDone(cacheDir, 'class', 'cls-1');
+
+  // alpha / zeta: empty manifests bracketing the alphabet, to prove sort order.
+  writeManifest(dataDir, 'alpha', []);
+  writeManifest(dataDir, 'zeta', []);
+});
+
+afterAll(() => {
+  rmSync(tmp, { recursive: true, force: true });
+});
 
 // ---------------------------------------------------------------------------
 // NON_SVEK_TYPES — the structural constant
@@ -41,51 +92,52 @@ describe('NON_SVEK_TYPES', () => {
 });
 
 // ---------------------------------------------------------------------------
-// dotParityRows — AC1, AC2
+// dotParityRows — AC1, AC2, against an injected temp tree (never real roots)
 // ---------------------------------------------------------------------------
 
 describe('dotParityRows', () => {
-  it('returns exactly one row per tests/visual/data/*.json manifest, sorted by type', () => {
-    const rows = dotParityRows(UNUSED_JAR);
-    expect(rows).toHaveLength(manifestTypeCount());
-    expect(rows.map((r) => r.type)).toEqual([...rows.map((r) => r.type)].sort());
+  it('returns exactly one row per manifest in roots.dataDir, sorted by type', () => {
+    const rows = dotParityRows(UNUSED_JAR, roots);
+    expect(rows.map((r) => r.type)).toEqual(['alpha', 'board', 'class', 'sequence', 'zeta']);
   });
 
-  // AC1: sequence, activity, json, yaml, hcl, dot are n/a with comparable 0,
-  // regardless of how much oracle data is cached for them (all six have a
-  // populated test-results/dot-cache/<type>/ dir today — the short circuit
-  // must fire before that cache is even inspected).
-  it.each(['sequence', 'activity', 'json', 'yaml', 'hcl', 'dot'])(
-    '%s: n/a (no DOT stage), comparable 0, regardless of its cache',
-    (type) => {
-      const row = rowFor(dotParityRows(UNUSED_JAR), type);
-      expect(row.note).toBe('n/a (no DOT stage)');
-      expect(row.comparable).toBe(0);
-      expect(row.equal).toBe(0);
-      expect(row.oracleBlind).toBe(0);
-      expect(row.pct).toBe('—');
-    },
-  );
+  // AC1: a NON_SVEK_TYPES member is n/a with comparable 0 even though it has
+  // a populated cache dir — the short circuit must fire first.
+  it('sequence: n/a (no DOT stage), comparable 0, despite a populated cache dir', () => {
+    const row = rowFor(dotParityRows(UNUSED_JAR, roots), 'sequence');
+    expect(row.note).toBe('n/a (no DOT stage)');
+    expect(row.comparable).toBe(0);
+    expect(row.equal).toBe(0);
+    expect(row.oracleBlind).toBe(0);
+    expect(row.pct).toBe('—');
+  });
 
-  // AC2: a manifest type with no test-results/dot-cache/<type>/ directory at
-  // all gets "no oracle captured" — not "n/a" (it is not a NON_SVEK_TYPES
-  // member) and not the classification note (no cache means no fixtures were
-  // ever diffed, so classification was never reached).
+  // AC2: a manifest type with no cache dir at all gets "no oracle captured".
   it('board (no cache dir, not a NON_SVEK_TYPES member): no oracle captured', () => {
-    const row = rowFor(dotParityRows(UNUSED_JAR), 'board');
+    const row = rowFor(dotParityRows(UNUSED_JAR, roots), 'board');
     expect(row.note).toBe('no oracle captured');
     expect(row.comparable).toBe(0);
   });
 
-  // Third vocabulary member: cache is populated and the type has a manifest,
-  // but no canonical SVG exists locally to classify against — the
-  // pre-existing "run with --type-tag" branch, reworded per the new
-  // 4-value note vocabulary.
-  it('class (cached, no local canonical SVGs): no data-diagram-type classification', () => {
-    const row = rowFor(dotParityRows(UNUSED_JAR), 'class');
+  // Third vocabulary member: cache populated, manifest present, but
+  // roots.canonDir was never created — buildAgg is never reached.
+  it('class (cached, no canonical SVGs in roots.canonDir): no data-diagram-type classification', () => {
+    const row = rowFor(dotParityRows(UNUSED_JAR, roots), 'class');
     expect(row.note).toBe('no data-diagram-type classification');
     expect(row.comparable).toBe(0);
   });
+
+  it('alpha and zeta (no cache dir, empty manifests): no oracle captured', () => {
+    const rows = dotParityRows(UNUSED_JAR, roots);
+    expect(rowFor(rows, 'alpha').note).toBe('no oracle captured');
+    expect(rowFor(rows, 'zeta').note).toBe('no oracle captured');
+  });
+
+  // `roots` defaulting to the real repo paths is exercised by
+  // dot-sync-report.ts's own `--markdown` CLI mode, not here: calling
+  // dotParityRows with no roots against this worktree's real, populated
+  // test-results/ would reach buildAgg's ~700-fixture class aggregate and
+  // couple this suite to ambient state it must stay independent of.
 });
 
 // ---------------------------------------------------------------------------
