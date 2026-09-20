@@ -857,17 +857,48 @@ Ordered by how ready they are, not by size.
   test that greps for the template-sink shape and fails on any new one.
   Evidence: `.agent-notes/codeql-2026-09-19.md`.
 
-- **`sequence-participant-background-cascade`** (NEW, unbriefed) — FILED
-  2026-09-19, oracle-measured while verifying the above. `A -> B` under
-  `skinparam backgroundColor red`: the jar keeps participant boxes at
-  `fill="#E2E2F0"` and writes the shell `style` as `background:#FF0000`;
-  this port draws participants `fill="#F00"` and `background:red`. Two
-  gaps: the theme cascades `backgroundColor` into sequence participant
-  background where upstream's `ColorParam.background` and
-  `participantBackground` are separate params; and the document shell emits
-  the raw color name where the jar emits `HColor#toSvg`'s canonical hex.
-  Small, self-contained, one fixture each. Evidence:
-  `.agent-notes/codeql-2026-09-19.md`.
+- **`sequence-participant-background-cascade`** — **EXECUTED 2026-09-19** on
+  `fix/sequence-participant-background` (`1452ec2d` fix, re-pin after it):
+  default fill, the `skinparam backgroundColor` cascade, the `!theme`/`<style>`
+  root override and `participantBackgroundColor<<X>>` all closed with jar
+  bytes; ratchet 1072 falls / 0 rises, sum 1163681 -> 1158537. **Still open:**
+  the document shell's raw colour name (`background:red` vs the jar's
+  `background:#FF0000`), and `transparent` -> `#00000000` vs `fill="none"`
+  (`.agent-notes/sequence-participant-background.md`). Original filing: FILED
+  2026-09-19, oracle-measured while verifying the above; **RE-DIAGNOSED
+  2026-09-19 (same day) after a maintainer screenshot: the DEFAULT is wrong,
+  not only the cascade.** Bare `Alice -> Bob : hello` with no skinparam: the
+  jar draws every participant head `fill="#E2E2F0"`; this port draws
+  `fill="#FFF"`. Measured on all eight kinds (`participant actor boundary
+  control entity queue database collections`): jar **18 × `#E2E2F0`**, ours
+  **18 × `#FFF`** — the same 18 shapes, so this is fill only, not geometry.
+  **Mechanism.** Upstream: each kind's style signature is `root, element,
+  sequenceDiagram, <kind>` (`sequencediagram/ParticipantType.java:55-80`);
+  `resources/skin/plantuml.skin:197-201` sets
+  `participant,actor,boundary,control,entity,queue,database,collections {
+  BackgroundColor: var(--grey-blue) }` with `--grey-blue: #e2e2f0` (`:4`);
+  `skin/rose/Rose.java:138-150` builds `ComponentRoseParticipant` from those
+  styles and `ComponentRoseParticipant.java:82` takes `biColor.getBackColor()`.
+  Ours: `sequence-layout-participants.ts#resolveParticipantBackground`
+  (`:402-408`) reads `theme.colors.elements[p.type].background`, and the root
+  theme (`src/core/theme.ts:334ff`) seeds NO bucket for any of the eight
+  kinds, so the fallback `theme.colors.background` — the CANVAS `#FFFFFF` —
+  is returned. That single fallback is both defects: white by default, and
+  `skinparam backgroundColor red` drags the heads to `#F00` because the canvas
+  moved. `resolveParticipantBorder` (`:412-416`) has the same shape and falls
+  to `theme.colors.border`; check it against the jar's `#181818` stroke in the
+  same pass (it currently matches, so no change expected). The fix belongs at
+  the root theme — seed the eight kinds' `background` with the skin's
+  `#E2E2F0`, the way `nodeBackground`/`noteBackground` already bake
+  `plantuml.skin` values — not at the resolver. Second, smaller gap unchanged:
+  the document shell emits the raw color name (`background:red`) where the
+  jar emits `HColor#toSvg`'s canonical hex (`background:#FF0000`).
+  **Blast radius:** the fill sits on every sequence fixture's heads, so the
+  sequence diff-baseline ratchet moves corpus-wide (all falls if correct);
+  re-pin ONCE after adjudication per D5, and diff the baseline JSON for any
+  rise. Small enough to be a warm-up before `activity-loop-lane-translate`.
+  Evidence: `.agent-notes/codeql-2026-09-19.md`; probe renders in this
+  session's scratchpad (`bg/k.puml`, eight kinds).
 
 - **`linetype-ortho-routing`** (NEW, unbriefed) — FILED 2026-09-03 while
   reviewing `docs/reclassify-graphviz-issue-17`. **`skinparam linetype
