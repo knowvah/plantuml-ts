@@ -99,3 +99,41 @@ Baseline at planning time (2026-09-20, `a012be16`): recorded in
 
 One commit per task, `type(pdr-TN): …`, per `~/.claude/rules/commits.md`.
 Fix commits reference the task: `fix(pdr-T3): …`. No attribution lines.
+
+## Session summary (2026-09-20)
+
+**Tasks:** 8 of 8 planned completed (T1–T8), plus two fix commits
+(`fix(pdr-T4)` hermetic row tests; `fix(pdr-T7)` five families non-svek),
+one `style(pdr)` commit and per-batch bookkeeping commits. 18 commits on
+`feat/parity-dashboard-refresh` over `a012be16`.
+
+**Decisions:** 29 journal rows. Flagged for review: row 15 (T5 write-set
+widened to the two gate test files, per the activity T0b precedent),
+row 12 (T6 reads DOT rows from committed `dot-parity.json`, not a live
+call — D2/D9), row 16/22 (chronology's oracle is the jar's own
+unsupported-diagram page; `PSystemBuilder.java:184`), row 20 (D8 gains
+`no data-diagram-type classification` and `no diff-baseline yet`), rows 11
+and 28 (worktree/agent-tooling hazards).
+
+**Quality gates (final, `00b39d73`):** `npm test` 734 files passed / 1
+skipped, 20194 tests, coverage 96.14 / 91.56 / 97.26 / 97.11 (baseline
+96.00 / 91.37 / 97.08 / 96.97); typecheck 0; lint 0; build 0. Every batch
+gate re-run from scratch after its fix.
+
+**Headline:** `docs/parity-report.md` regenerated at `9f095acc` — 28 rows,
+zero bare `n/a`; five families captured for the first time (41 fixtures,
+0 jarFailed); routing 3402/139/31 over 3572 and refusal 3572/31/105/3467,
+both additive; 16 per-type surveys with zero timeouts; 11 censuses.
+
+**Known issues / follow-ups:**
+- 40 `known-misroute` pins share one mechanism: board, chart, files and
+  packet renderers return no `diagramType` (`.agent-notes/pdr-T5.md`); a
+  one-line change per engine closes them.
+- chronology cannot be measured against this jar (no factory upstream);
+  its freshness sentinel flips when a supporting jar is pinned.
+- `svg-parity-dashboard.ts` / `svg-parity-survey.ts` were prettier-warned
+  on main before this mission and remain so.
+- The survey's per-fixture timeout is load-sensitive (journal row 24);
+  run producers alone. Stop 5 never triggered on a quiet box.
+- Worktree recipe corrections and the Serena-root hazard are in
+  `.agent-notes/pdr-batch1-worktrees.md` and the `batch-parallelism-needs-worktrees` memory.
