@@ -168,26 +168,44 @@ the deterministic path.
 ## Survey and dashboard: measuring where things stand
 
 The survey compares **production** `renderSync` output against the cached
-jar SVG over the full component/usecase corpus. It is a report, not a
-gate — it exists to make the (currently large, D12-driven) production gap
-visible and trackable, not to fail CI.
+jar SVG. A bare invocation now surveys every type under
+`test-results/dot-cache/`, writing each type its own `parity-<type>.json`
+(`parityOutPath`), plus the legacy component+usecase pair into the shared
+`parity.json` the golden ratchets read for DOT eligibility (unchanged
+population and shape). Passing positional type args and/or `--out <path>`
+keeps the single-job behavior the script always had. It is a report, not a
+gate — it exists to make the (currently large) production gap visible and
+trackable, not to fail CI.
 
 ```sh
-npm run svg:survey      # scripts/svg-parity-survey.ts
-                         # writes tests/oracle/svg-conformance/parity.json
-npm run svg:dashboard   # scripts/svg-parity-dashboard.ts
-                         # renders tests/oracle/svg-conformance/PARITY-SVG.md
+npm run svg:survey                # scripts/svg-parity-survey.ts
+                                   # every cache type -> parity-<type>.json,
+                                   # plus component+usecase -> parity.json
+npm run svg:dashboard              # scripts/svg-parity-dashboard.ts
+                                   # renders parity.json -> PARITY-SVG.md
+npx jiti scripts/svg-parity-dashboard.ts --in tests/oracle/svg-conformance/parity-class.json \
+  --out tests/oracle/svg-conformance/PARITY-CLASS.md   # any parity-<type>.json
 ```
 
-Each row in `parity.json` records a `verdict` (`conformant`,
-`structural-match`, `diverged`, `errored`, `timeout`, `oracle-error`) and a
-`dotEqual` flag — whether the fixture's DOT emission is structurally
-`EQUAL` against the DOT oracle, independent of SVG rendering. `dotEqual`
-is the ratchet's eligibility gate (see below); it does not by itself imply
-SVG conformance.
+Each row records a `verdict` (`conformant`, `structural-match`, `diverged`,
+`errored`, `timeout`, `oracle-error`) and a `dotEqual` flag — whether the
+fixture's DOT emission is structurally `EQUAL` against the DOT oracle,
+independent of SVG rendering. `dotEqual` is the ratchet's eligibility gate
+(see below); it does not by itself imply SVG conformance.
+
+The dashboard's per-family table derives its rows from the distinct `type`
+values present in the input report, sorted — not a fixed list — so it
+renders correctly whichever `parity[-<type>].json` it is pointed at. Both
+the survey and the byte-exact golden ratchets already measure text through
+the same system (`WidthTableMeasurer`, re-exported as
+`DeterministicMeasurer`; see `src/core/measurer-deterministic.ts`), so a
+`diverged` verdict here is never a text-metric mismatch. What differs is
+the RENDER PATH: this survey renders through production `renderSync`,
+while the ratchets and the DOT-conformance census render through the
+low-level `renderFixture` helpers.
 
 Regenerate the dashboard after every survey run so `PARITY-SVG.md` stays
-in sync with `parity.json` — the dashboard reads `parity.json` from disk,
+in sync with `parity.json` — the dashboard reads its input file from disk,
 it does not re-render anything itself.
 
 ## Overlay triage: diagnosing one fixture

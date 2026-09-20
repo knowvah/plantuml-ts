@@ -1,7 +1,12 @@
 /**
  * SVG parity survey — differential comparison of plantuml-ts's rendered SVG
- * against the cached PlantUML jar SVG (`in.svg`) over the component/usecase
- * corpus (`test-results/dot-cache/`, populated by scripts/dot-sync-report.ts).
+ * against the cached PlantUML jar SVG (`in.svg`) over every cached diagram
+ * type (`test-results/dot-cache/`, populated by scripts/dot-sync-report.ts).
+ *
+ * A bare invocation surveys every cache type into its own `parity-<type>
+ * .json` (`parityOutPath`), plus the legacy component+usecase pair into
+ * `parity.json` (the golden ratchets' DOT-eligibility source). Positional
+ * type args and/or `--out <path>` keep the pre-pdr-T3 single-job behavior.
  *
  * A report, not a gate: divergences are expected data, especially pre-cutover
  * (the description renderer is still legacy as of this baseline — verdicts
@@ -61,6 +66,13 @@ const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 const PARITY_OUT = join(REPO, 'tests', 'oracle', 'svg-conformance', 'parity.json');
 const THIS_FILE = fileURLToPath(import.meta.url);
 const DEFAULT_TYPES = ['component', 'usecase'];
+
+/** `tests/oracle/svg-conformance/parity-<type>.json` — the naming rule the
+ *  hand-authored `parity-class/object/state.json` already follow, extracted
+ *  so a full-corpus survey can derive it for every cache type. */
+export function parityOutPath(type: string): string {
+  return join(REPO, 'tests', 'oracle', 'svg-conformance', `parity-${type}.json`);
+}
 /**
  * Wall-clock budget per fixture. **60s, not the 10s this started at** — SI19,
  * 2026-08-12.
@@ -231,6 +243,15 @@ function listFixtureDirs(type: string): FixtureDir[] {
   return out.sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
+/** Every type dir under `test-results/dot-cache/`, sorted — the population a
+ *  bare (no-args) survey invocation now covers (AC1). */
+function listCacheTypes(): string[] {
+  if (!existsSync(CACHE_DIR)) return [];
+  return readdirSync(CACHE_DIR)
+    .filter((f) => statSync(join(CACHE_DIR, f)).isDirectory())
+    .sort();
+}
+
 const svekIndex = (f: string): number => Number(SVEK_DOT_RE.exec(f)?.[1] ?? 0);
 
 function readSvekDots(dir: string): string[] {
@@ -385,34 +406,60 @@ function tally(rows: FixtureRow[]): Record<Verdict, number> {
   return counts;
 }
 
+export interface SurveyJob {
+  types: string[];
+  out: string;
+}
+
+/** No-args plan (pdr-T3): one job per cache type into its own
+ *  `parity-<type>.json`, PLUS the legacy component+usecase pair surveyed
+ *  again into `parity.json` (D4: four golden ratchets read its population
+ *  for DOT eligibility and must never see it change) — additive, not a
+ *  replacement for the new per-type files. */
+function surveyEverythingPlan(): SurveyJob[] {
+  const perType = listCacheTypes().map((type) => ({ types: [type], out: parityOutPath(type) }));
+  return [...perType, { types: DEFAULT_TYPES, out: PARITY_OUT }];
+}
+
 /**
  * N0 (G2): `--out <path>` and bare positional type args, both additive and
  * both defaulting to the pre-existing behavior (`DEFAULT_TYPES` ->
- * `PARITY_OUT`) -- a plain `npm run svg:survey` invocation is byte-identical
- * to before this change. Lets a future class-scoped survey run write its
- * own `parity-class.json` (`--out tests/oracle/svg-conformance/parity-
- * class.json class`) without ever touching the shared component/usecase
- * `parity.json` this mission's write-set must not regenerate.
+ * `PARITY_OUT`). A single-job invocation (positional types and/or `--out`
+ * given) is byte-identical to before this change. pdr-T3: a truly bare
+ * invocation now returns the full-corpus plan instead of the single
+ * component+usecase job — additive, since that job is still its last entry.
  */
-function parseSurveyArgs(argv: string[]): { types: string[]; out: string } {
+export function parseSurveyArgs(argv: string[]): SurveyJob[] {
   const outIdx = argv.indexOf('--out');
   const out = outIdx !== -1 ? argv[outIdx + 1] : undefined;
-  const positional = argv.filter((a, i) => a !== '--out' && i !== outIdx + 1 && !a.startsWith('--'));
-  return { types: positional.length > 0 ? positional : DEFAULT_TYPES, out: out ?? PARITY_OUT };
+  // pdr-T3 fix: bare `i !== outIdx + 1` dropped argv[0] whenever `--out` was
+  // absent (outIdx -1 + 1 === 0), losing a bare positional type arg.
+  const positional = argv.filter(
+    (a, i) => a !== '--out' && (outIdx === -1 || i !== outIdx + 1) && !a.startsWith('--'),
+  );
+  if (positional.length === 0 && out === undefined) return surveyEverythingPlan();
+  return [{ types: positional.length > 0 ? positional : DEFAULT_TYPES, out: out ?? PARITY_OUT }];
 }
 
-async function main(): Promise<void> {
-  const { types, out } = parseSurveyArgs(process.argv.slice(2));
-  const jiti = resolveJiti();
+/** Surveys every type in one job and writes its report to `job.out`. */
+async function runJob(job: SurveyJob, jiti: { cmd: string; pre: string[] }): Promise<void> {
   const rows: FixtureRow[] = [];
-  for (const type of types) {
+  for (const type of job.types) {
     const fixtures = listFixtureDirs(type);
     process.stderr.write(`surveying ${fixtures.length} ${type} fixtures (concurrency ${CONCURRENCY})\n`);
     rows.push(...(await surveyType(type, fixtures, jiti)));
   }
   const report: ParityReport = { generatedAt: new Date().toISOString(), fixtures: rows };
-  writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
-  process.stderr.write(`wrote ${out} — ${JSON.stringify(tally(rows))}\n`);
+  writeFileSync(job.out, JSON.stringify(report, null, 2) + '\n');
+  process.stderr.write(`wrote ${job.out} — ${JSON.stringify(tally(rows))}\n`);
+}
+
+async function main(): Promise<void> {
+  const jobs = parseSurveyArgs(process.argv.slice(2));
+  const jiti = resolveJiti();
+  for (const job of jobs) {
+    await runJob(job, jiti);
+  }
 }
 
 // ---------------------------------------------------------------------------

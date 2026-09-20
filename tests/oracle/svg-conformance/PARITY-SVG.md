@@ -3,284 +3,301 @@
 # SVG parity dashboard
 
 Differential survey of plantuml-ts vs the cached PlantUML jar SVG output
-over the component/usecase corpus (`test-results/dot-cache/`). A report,
-not a gate. Regenerate: `npm run svg:survey && npm run svg:dashboard`.
+over the surveyed corpus (`test-results/dot-cache/`). A report, not a
+gate. Regenerate: `npm run svg:survey && npm run svg:dashboard`.
 
-Verdicts are overwhelmingly `diverged` **by construction**: this survey
-renders through `renderSync` + `WidthTableMeasurer` (AWT font metrics),
-while the jar goldens were captured in deterministic-text mode. That is
-the documented D12 apples-to-oranges gap, not a rendering bug — see
-`oracle/goldens/svg-description/README.md`. The byte-exact gate is the
-ratchet (`description.golden.ratchet.test.ts`), which renders through
-`renderFixture` + `DeterministicMeasurer` so both sides measure text the
-same way. Read `dotEqual` here, not `verdict`, for ratchet eligibility.
+Both sides already measure text through the same system —
+`WidthTableMeasurer`, re-exported as `DeterministicMeasurer`
+(`src/core/measurer-deterministic.ts`) — so a `diverged` verdict here is
+never a text-metric mismatch. What differs between this survey and the
+byte-exact golden ratchets (e.g. `description.golden.ratchet.test.ts`)
+is the RENDER PATH: this script renders through production `renderSync`,
+while the ratchets and the DOT-conformance census render through the
+low-level `renderFixture` helpers instead. `dotEqual` — DOT-emission
+parity, independent of render path — remains the ratchet-eligibility
+signal; read it here, not `verdict`, to see which fixtures the
+byte-exact ratchets can cover.
 
 ## Summary
 
-- **Generated:** 2026-07-31T14:20:33.935Z
-- **Surveyed:** 358
+- **Generated:** 2026-09-03T18:57:41.486Z
+- **Surveyed:** 360
 - **conformant:** 2 (0.6%)
-- **structural-match:** 2 (0.6%)
-- **diverged:** 353 (98.6%)
+- **structural-match:** 15 (4.2%)
+- **diverged:** 342 (95.0%)
 - **errored:** 0 (0.0%)
 - **timeout:** 0 (0.0%)
 - **oracle-error:** 1 (0.3%)
-- **dot-EQUAL (ratchet-eligible):** 349/358 (97.5%)
+- **dot-EQUAL (ratchet-eligible):** 348/360 (96.7%)
 
 ## Per-family
 
 | type | total | conformant | structural-match | diverged | errored | timeout | oracle-error | dot-equal |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| component | 265 | 0 | 2 | 263 | 0 | 0 | 0 | 262 |
-| usecase | 93 | 2 | 0 | 90 | 0 | 0 | 1 | 87 |
+| component | 266 | 0 | 13 | 253 | 0 | 0 | 0 | 260 |
+| usecase | 94 | 2 | 2 | 89 | 0 | 0 | 1 | 88 |
 
 ## conformant (2)
 
 `usecase/sprite-svg-archimate-0` `usecase/sprite-svg-bootstrap-0`
 
-## structural-match (2)
+## structural-match (15)
 
 | slug | type | maxΔ | maxDeltaPath |
 |---|---|---:|---|
+| `vimulo-11-buni641` | component | 52.00 | `svg/@viewBox[2]` |
+| `berome-43-xini276` | component | 10.58 | `svg/g[1]/g[1]/text[1]/@y` |
 | `cobadu-43-gabi397` | component | 8.00 | `svg/@height` |
-| `kokebo-27-vafi688` | component | 3.00 | `svg/@height` |
+| `mavuxi-16-jafi782` | component | 5.52 | `svg/g[1]/g[1]/text[1]/@x` |
+| `fubaje-48-xaje065` | usecase | 4.00 | `svg/@viewBox[2]` |
+| `gotofu-80-joku316` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `zijaro-25-kufa588` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `balotu-54-tuxu203` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `buduxo-54-tubo525` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `gogosu-37-mipe918` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `jolaru-18-dofi669` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `kavico-81-sonu694` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `mifexu-61-tada457` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `vonipa-26-pudo091` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@y` |
+| `kevipe-39-gaji640` | usecase | 2.43 | `svg/g[1]/g[1]/text[1]/@y` |
 
-## diverged (353)
+## diverged (342)
 
 | slug | type | maxΔ | firstDiff |
 |---|---|---:|---|
-| `gutute-00-gaki684` | component | 8966.00 | `svg/g[1][childCount]` |
-| `mucezi-78-ciki658` | component | 1051.89 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kovaxi-11-reti348` | usecase | 973.00 | `svg/g[1][childCount]` |
-| `zidebi-71-nocu387` | usecase | 973.00 | `svg/g[1][childCount]` |
-| `gurive-62-ricu497` | component | 827.00 | `svg/g[1][childCount]` |
+| `gutute-00-gaki684` | component | 6427.00 | `svg/g[1]/g[1]/@class` |
+| `gurive-62-ricu497` | component | 1402.34 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `tojitu-03-ruto643` | component | 1121.79 | `svg/g[1]/g[1]/@class` |
+| `fidati-41-kofe029` | component | 1089.00 | `svg/g[1]/g[1]/@class` |
+| `kofovu-01-niti223` | component | 1089.00 | `svg/g[1]/g[1]/@class` |
+| `bobije-35-nigi914` | usecase | 1071.04 | `svg/g[1]/g[1]/@id` |
+| `xoculo-95-fuvi894` | usecase | 1071.04 | `svg/g[1]/g[1]/@id` |
+| `kovaxi-11-reti348` | usecase | 1058.00 | `svg/g[1]/g[1]/@id` |
+| `zidebi-71-nocu387` | usecase | 1058.00 | `svg/g[1]/g[1]/@id` |
+| `repite-70-vabe533` | component | 1024.86 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zavitu-69-cemu013` | usecase | 810.11 | `svg/g[1]/g[1]/@id` |
+| `siseda-71-napu395` | component | 732.84 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nobiza-91-fimo741` | usecase | 729.21 | `svg/g[1]/g[1]/@id` |
+| `berufi-69-dara369` | usecase | 709.00 | `svg/g[1]/g[1]/@id` |
+| `seline-83-vifi756` | usecase | 709.00 | `svg/g[1]/g[1]/@id` |
 | `texacu-57-daci050` | component | 704.88 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `kofuca-08-pafi749` | usecase | 701.77 | `svg/@background` |
 | `fariba-82-xolu802` | usecase | 680.77 | `svg/@background` |
-| `siseda-71-napu395` | component | 651.00 | `svg/g[1][childCount]` |
-| `repite-70-vabe533` | component | 648.00 | `svg/g[1][childCount]` |
-| `jecici-56-bimu826` | usecase | 646.00 | `svg/@height` |
+| `sunuju-01-pote718` | component | 642.80 | `svg/g[1]/g[1]/rect[1]/@stroke-width` |
 | `bootstrap-0` | usecase | 581.77 | `svg/@background` |
 | `ruziru-69-xixo434` | usecase | 581.77 | `svg/@background` |
-| `detona-13-ziko113` | component | 551.03 | `svg/g[1]/g[1]/path[1]/@d` |
-| `perapa-23-mobu798` | component | 526.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `xacaxe-43-bupe002` | usecase | 523.96 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `sunuju-01-pote718` | component | 519.00 | `svg/g[1]/g[1][childCount]` |
-| `gogamo-72-pibo470` | usecase | 401.31 | `svg/g[1]/g[1][childCount]` |
+| `perapa-23-mobu798` | component | 553.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `xacaxe-43-bupe002` | usecase | 545.96 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `dirofi-81-cuga514` | component | 532.00 | `svg/g[1]/g[1]/@class` |
+| `zotiru-33-legi180` | usecase | 494.50 | `svg/g[1]/g[1]/@class` |
+| `josoxo-49-taci997` | component | 478.43 | `svg/g[1]/g[1]/@class` |
+| `dujodu-23-viba393` | component | 430.00 | `svg/g[1]/g[1]/@class` |
+| `gekato-87-lisi598` | component | 402.08 | `svg/g[1]/g[1]/@id` |
+| `jecici-56-bimu826` | usecase | 379.22 | `svg/@height` |
 | `vivido-49-nisu863` | usecase | 376.77 | `svg/@background` |
 | `bisedo-29-kone620` | component | 355.34 | `svg/g[1]/g[1]/rect[1]/@fill` |
-| `kafexo-72-xupa679` | usecase | 321.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `bagoze-78-lada681` | component | 297.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gafico-37-cuma657` | component | 296.00 | `svg/g[1]/g[1][childCount]` |
+| `zosaxo-93-nici652` | component | 313.35 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `kafexo-72-xupa679` | usecase | 312.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `bagoze-78-lada681` | component | 302.93 | `svg/g[1]/g[3]/text[1]/@textLength` |
 | `depabo-06-kato214` | usecase | 290.59 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `temufu-00-rira888` | component | 286.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fajira-11-xada239` | usecase | 281.00 | `svg/g[1]/g[1]/text[1]` |
-| `kezodo-14-pume985` | component | 269.00 | `svg/g[1]/g[1][childCount]` |
-| `dirofi-81-cuga514` | component | 261.00 | `svg/g[1][childCount]` |
-| `sotine-10-lore970` | usecase | 260.00 | `svg/g[1]/g[1][childCount]` |
-| `fijido-06-kapu656` | component | 255.50 | `svg/g[1]/g[1]/rect[1]/@fill` |
-| `malumi-33-safu797` | usecase | 249.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `kezodo-14-pume985` | component | 244.00 | `svg/g[1]/g[1]/rect[1]/@stroke-width` |
+| `malumi-33-safu797` | usecase | 242.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xagino-11-vazo768` | component | 233.57 | `svg/g[1]/g[1]/path[1]/@stroke` |
 | `tatofi-90-vali632` | component | 228.88 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zosaxo-93-nici652` | component | 219.43 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `garopu-71-riri890` | component | 210.21 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `nixura-77-bina738` | usecase | 208.00 | `svg/g[1]/g[1][childCount]` |
-| `zotiru-33-legi180` | usecase | 207.00 | `svg/g[1][childCount]` |
-| `gevozu-46-sasu860` | component | 200.81 | `svg/g[1]/g[1][childCount]` |
-| `vimulo-11-buni641` | component | 196.00 | `svg/g[1]/g[1][childCount]` |
-| `kanute-77-lacu414` | component | 195.18 | `svg/g[1]/g[1][childCount]` |
-| `ruciga-77-ruja233` | component | 195.00 | `svg/defs[1][childCount]` |
-| `tilexe-28-fiju280` | component | 186.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `daxija-24-pozu867` | component | 184.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zavitu-69-cemu013` | usecase | 184.00 | `svg/g[1][childCount]` |
+| `repoge-41-demu604` | component | 218.51 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zosuje-43-zebi775` | component | 207.91 | `svg/@background` |
+| `dikexa-30-jobu917` | component | 200.48 | `svg/g[1]/g[1]/@id` |
+| `gevozu-46-sasu860` | component | 195.99 | `svg/g[1]/g[12]/text[1]` |
+| `kanute-77-lacu414` | component | 195.18 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `tilexe-28-fiju280` | component | 188.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
+| `daxija-24-pozu867` | component | 184.21 | `svg/g[1]/g[2]/text[1]/@textLength` |
+| `sojika-99-dopa449` | component | 182.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cemutu-31-tuxe792` | component | 181.79 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `dexigu-24-deru622` | component | 180.57 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `kenece-24-juku624` | component | 177.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zifaji-87-raki559` | component | 177.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `sojika-99-dopa449` | component | 176.82 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kafopo-19-doxu941` | component | 176.64 | `svg/g[1]/g[1]/polygon[1]/@fill` |
+| `balopu-66-jagu236` | component | 174.42 | `svg/g[1]/g[1]/@class` |
+| `saroje-26-vabi530` | component | 174.42 | `svg/g[1]/g[1]/@class` |
 | `lirebi-26-voka556` | usecase | 167.34 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `turasu-73-zoni468` | component | 167.00 | `svg/g[1]/g[1]/text[1]` |
-| `mekimu-46-luzu886` | component | 164.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kumefo-73-xodu411` | component | 161.25 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `mekimu-46-luzu886` | component | 165.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `banatu-09-koce254` | component | 158.39 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `bobije-35-nigi914` | usecase | 157.00 | `svg/g[1][childCount]` |
-| `xoculo-95-fuvi894` | usecase | 157.00 | `svg/g[1][childCount]` |
-| `josoxo-49-taci997` | component | 152.00 | `svg/g[1][childCount]` |
-| `berufi-69-dara369` | usecase | 151.00 | `svg/g[1][childCount]` |
-| `seline-83-vifi756` | usecase | 151.00 | `svg/g[1][childCount]` |
+| `kizobu-64-rozo458` | component | 158.01 | `svg/g[1]/g[1]/@id` |
+| `sotine-10-lore970` | usecase | 155.20 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `sumata-59-zavu229` | usecase | 154.10 | `svg/g[1]/g[1]/text[1]/@font-size` |
+| `xixaca-96-nene831` | usecase | 154.10 | `svg/g[1]/g[1]/text[1]/@font-size` |
+| `mucezi-78-ciki658` | component | 152.74 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `exposant-02-usecase` | usecase | 150.13 | `svg/g[1]/g[1]/@id` |
 | `xusuxe-62-guba767` | component | 148.29 | `svg/@background` |
-| `dopova-50-digo290` | usecase | 146.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `mejoxi-96-cegu294` | component | 145.09 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zilisi-99-rate911` | usecase | 143.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `balopu-66-jagu236` | component | 142.00 | `svg/g[1][childCount]` |
-| `saroje-26-vabi530` | component | 142.00 | `svg/g[1][childCount]` |
+| `ruciga-77-ruja233` | component | 146.00 | `svg/defs[1][childCount]` |
+| `mejoxi-96-cegu294` | component | 145.10 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `dopova-50-digo290` | usecase | 141.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zilisi-99-rate911` | usecase | 141.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `jegure-48-cesi766` | component | 140.50 | `svg/g[1]/g[1]/@id` |
 | `bijoko-90-riro507` | component | 138.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bujige-52-gase998` | component | 133.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fidati-41-kofe029` | component | 131.00 | `svg/g[1][childCount]` |
-| `repoge-41-demu604` | component | 131.00 | `svg/g[1][childCount]` |
-| `kokodo-61-dano461` | component | 128.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `golati-24-xika861` | component | 127.25 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `tuliba-37-liza126` | component | 123.55 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `cuxelu-66-zopu195` | component | 123.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `dikexa-30-jobu917` | component | 123.00 | `svg/g[1][childCount]` |
-| `tojitu-03-ruto643` | component | 117.00 | `svg/g[1][childCount]` |
+| `detona-13-ziko113` | component | 122.58 | `svg/g[1]/g[1]/path[1]/@d` |
+| `kokodo-61-dano461` | component | 120.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `tizuza-93-xeto109` | component | 120.14 | `svg/g[1]/g[1]/@class` |
+| `koxeca-82-mese950` | component | 118.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `minulo-12-bare186` | component | 118.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gafico-37-cuma657` | component | 117.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `golati-24-xika861` | component | 116.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `cuxeda-73-semi910` | component | 113.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `berelu-46-namo819` | component | 109.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `murava-69-tago286` | component | 111.04 | `svg/g[1]/g[1]/ellipse[1]/@fill` |
 | `nunibu-79-vucu711` | component | 108.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `mifexu-61-tada457` | component | 106.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `koxeca-82-mese950` | component | 106.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `minulo-12-bare186` | component | 106.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nujove-77-xiva558` | component | 106.65 | `svg/g[1]/g[1]/@id` |
+| `silito-78-vubi253` | component | 106.65 | `svg/g[1]/g[1]/@id` |
+| `tujica-34-tire129` | component | 106.65 | `svg/g[1]/g[1]/@id` |
+| `tacixe-99-gesi489` | component | 106.44 | `svg/g[1]/g[1]/@id` |
 | `cuzuci-92-dugi933` | usecase | 105.60 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `cemutu-31-tuxe792` | component | 103.00 | `svg/g[1]/g[1][childCount]` |
+| `nipapu-74-roro938` | usecase | 104.64 | `svg/g[1]/g[1]/text[1]` |
+| `nevuzi-33-duna992` | component | 102.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vovuru-39-sula650` | component | 102.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `renita-52-jazi848` | component | 101.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `nevuzi-33-duna992` | component | 101.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `tuliba-37-liza126` | component | 99.00 | `svg/g[1][childCount]` |
-| `nipapu-74-roro938` | usecase | 99.00 | `svg/g[1]/g[1]/text[1]` |
 | `bozoju-49-kufo528` | component | 98.06 | `svg/g[1]/g[1]/text[1]/@font-weight` |
-| `gafegu-06-nito976` | component | 94.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gocexi-61-biso565` | component | 94.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `rapaji-98-xato067` | component | 94.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nujito-06-neca370` | component | 94.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `berelu-46-namo819` | component | 94.00 | `svg/g[1]/g[5]/polygon[1]/@fill` |
 | `nipoga-91-nole703` | component | 90.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kizobu-64-rozo458` | component | 89.00 | `svg/g[1][childCount]` |
-| `misube-65-seni576` | component | 87.01 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `camevo-41-suki094` | usecase | 87.00 | `svg/g[1]/g[1][childCount]` |
-| `lesori-32-zeve057` | component | 84.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `ravodu-50-siso430` | component | 84.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `sprite-SVG-fill-management-3` | usecase | 83.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `tatori-66-kaci883` | usecase | 83.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `vixeni-34-nici683` | component | 81.17 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zubujo-87-xaxa087` | component | 81.00 | `svg/g[1][childCount]` |
+| `misube-65-seni576` | component | 87.01 | `svg/g[1]/g[5][childCount]` |
+| `lesori-32-zeve057` | component | 87.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
+| `ravodu-50-siso430` | component | 87.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
 | `kobasu-11-difo566` | usecase | 80.72 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fojamu-08-veku866` | component | 80.00 | `svg/g[1][childCount]` |
 | `togeke-15-zala124` | usecase | 79.30 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `dugovi-24-kupu658` | component | 79.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
+| `dugovi-24-kupu658` | component | 79.00 | `svg/g[1]/g[4][childCount]` |
+| `tijexo-10-zipo222` | component | 78.97 | `svg/g[1]/g[1]/@id` |
 | `mevupe-82-meva605` | component | 78.43 | `svg/g[1]/g[1]/path[1]/@fill` |
-| `pebace-74-cuca176` | component | 77.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fetefi-28-figu176` | component | 74.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `saduja-80-goba120` | usecase | 73.10 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `tacixe-99-gesi489` | component | 73.00 | `svg/g[1][childCount]` |
-| `nofunu-07-tuna518` | component | 72.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `pepego-30-kati324` | component | 69.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `nenedo-78-fiva569` | usecase | 68.93 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fuvosu-10-lixu251` | usecase | 66.71 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `pebace-74-cuca176` | component | 77.51 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `fetefi-28-figu176` | component | 76.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nofunu-07-tuna518` | component | 74.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `kafopo-19-doxu941` | component | 74.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
+| `saduja-80-goba120` | usecase | 73.11 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gogamo-72-pibo470` | usecase | 72.00 | `svg/g[1]/g[1]/ellipse[1]/@stroke` |
+| `fojamu-08-veku866` | component | 71.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `sprite-SVG-fill-management-3` | usecase | 70.00 | `svg/g[1]/g[4]/text[1]/@textLength` |
+| `tatori-66-kaci883` | usecase | 70.00 | `svg/g[1]/g[4]/text[1]/@textLength` |
+| `bivira-53-boja685` | usecase | 69.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `pepego-30-kati324` | component | 69.00 | `svg/g[1]/g[3]/text[1]/@textLength` |
+| `zubujo-87-xaxa087` | component | 69.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nenedo-78-fiva569` | usecase | 68.93 | `svg/g[1]/g[4]/text[1]/@textLength` |
+| `fuvosu-10-lixu251` | usecase | 66.71 | `svg/g[1]/g[1]/text[2]/@textLength` |
 | `kijufe-84-colu239` | usecase | 66.71 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `seneso-72-cuje674` | usecase | 66.71 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `seneso-72-cuje674` | usecase | 66.71 | `svg/g[1]/g[1]/text[2]/@textLength` |
 | `tanuna-53-neko979` | usecase | 66.71 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `murava-69-tago286` | component | 65.00 | `svg/g[1]/g[1][childCount]` |
 | `fopako-15-labi027` | component | 64.75 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `povuju-56-zafi701` | component | 63.49 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `povuju-56-zafi701` | component | 63.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `gopomi-26-pome923` | component | 63.01 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `figika-36-sola271` | component | 62.05 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `purevo-74-pamo264` | component | 62.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `xenusu-76-sabi405` | component | 61.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zosuje-43-zebi775` | component | 61.00 | `svg/@background` |
+| `vogefo-33-xeve917` | component | 61.37 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nixura-77-bina738` | usecase | 58.22 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `vixeni-34-nici683` | component | 57.79 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `vaseda-71-suje167` | component | 57.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fumitu-00-reji589` | usecase | 56.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `molopu-64-totu560` | usecase | 56.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xeluxu-64-fozo131` | usecase | 56.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `bivira-53-boja685` | usecase | 56.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `nujito-06-neca370` | component | 55.00 | `svg/g[1]/g[1][childCount]` |
-| `cumofi-94-lixe862` | component | 54.00 | `svg/g[1][childCount]` |
+| `cumofi-94-lixe862` | component | 54.00 | `svg/g[1]/g[1]/@id` |
 | `zotake-65-cabi912` | component | 54.00 | `svg/g[1]/g[1]/path[1]/@d` |
 | `jazabe-68-bica131` | component | 53.00 | `svg/g[1]/g[1][childCount]` |
-| `vogefo-33-xeve917` | component | 53.00 | `svg/g[1][childCount]` |
-| `tajadu-40-juro990` | component | 52.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `babafi-51-dixi026` | component | 52.71 | `svg/g[1]/g[1]/text[2]/@textLength` |
+| `figika-36-sola271` | component | 52.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `rigoge-48-ziso050` | component | 51.48 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zaraze-24-vixi421` | component | 51.48 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `vaseda-71-suje167` | component | 51.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `xenusu-76-sabi405` | component | 50.50 | `svg/g[1]/g[3]/path[1]/@stroke-width` |
+| `vosuxa-11-tapu784` | component | 49.61 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `balipa-82-feto843` | component | 49.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vosapi-62-mugu541` | component | 49.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `babafi-51-dixi026` | component | 48.71 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `tozubi-37-feze715` | usecase | 47.89 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `vosuxa-11-tapu784` | component | 47.36 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `bubemi-25-noxu873` | component | 46.00 | `svg/g[1]/g[1][childCount]` |
-| `xufexu-38-fola855` | component | 45.00 | `svg/g[1][childCount]` |
-| `pecupa-75-zote612` | usecase | 43.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `temufu-00-rira888` | component | 46.38 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `pemifo-35-kute324` | component | 45.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cudazo-20-silo903` | component | 43.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fotisa-06-xipe681` | usecase | 42.55 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zusota-76-jagu564` | component | 42.36 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `dujodu-23-viba393` | component | 42.00 | `svg/g[1][childCount]` |
+| `zusota-76-jagu564` | component | 42.37 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `buduco-56-jeke005` | component | 40.50 | `svg/g[1]/g[3]/text[1]/@textLength` |
+| `fimoxe-74-sobi956` | component | 40.50 | `svg/g[1]/g[3]/text[1]/@textLength` |
+| `pegali-65-rotu416` | component | 40.50 | `svg/g[1]/g[3]/text[1]/@textLength` |
 | `gucefa-91-pume734` | component | 40.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zugofa-47-risi694` | component | 40.10 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `pemifo-35-kute324` | component | 40.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `buduco-56-jeke005` | component | 38.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fimoxe-74-sobi956` | component | 38.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `pegali-65-rotu416` | component | 38.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `cudazo-20-silo903` | component | 38.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `ziniso-08-damu446` | component | 39.29 | `svg/g[1]/g[1]/@class` |
+| `turasu-73-zoni468` | component | 38.00 | `svg/g[1]/g[1]/text[1]` |
 | `bitexe-13-mopa885` | component | 36.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `duvoru-86-lubo341` | component | 36.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `garopu-71-riri890` | component | 36.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
 | `zucufi-77-vabo990` | component | 36.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xegapu-80-damu730` | usecase | 35.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xadaji-25-cufe655` | component | 31.21 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `mutere-78-geko363` | usecase | 30.59 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `camevo-41-suki094` | usecase | 30.39 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lizutu-99-mapa855` | usecase | 29.57 | `svg/g[1]/g[3][childCount]` |
-| `cevuji-49-bile305` | usecase | 28.96 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cevuji-49-bile305` | usecase | 29.23 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `fogiku-22-gone205` | usecase | 29.00 | `svg/g[1]/g[3]/text[1]/@textLength` |
+| `jafuke-47-xepe403` | usecase | 29.00 | `svg/g[1]/g[3]/text[1]/@textLength` |
+| `rekisu-47-pesa949` | component | 28.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zarabi-01-koka785` | component | 28.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gekage-52-dato745` | component | 27.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gekato-87-lisi598` | component | 26.00 | `svg/g[1][childCount]` |
+| `bubemi-25-noxu873` | component | 27.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `fijido-06-kapu656` | component | 26.00 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `gezemu-34-kamu453` | component | 26.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `rekisu-47-pesa949` | component | 26.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fogiku-22-gone205` | usecase | 26.00 | `svg/g[1]/g[3][childCount]` |
-| `jafuke-47-xepe403` | usecase | 26.00 | `svg/g[1]/g[3][childCount]` |
 | `saxosu-09-nodi002` | component | 25.89 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `seguci-13-zure968` | component | 25.89 | `svg/g[1]/g[1]/text[1]/@font-family` |
 | `mamase-39-buto560` | component | 25.04 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nedapu-57-dife142` | component | 25.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vunimi-85-xadu895` | component | 25.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `kumefo-73-xodu411` | component | 24.49 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lurupu-11-fubo915` | component | 24.44 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `tijexo-10-zipo222` | component | 23.00 | `svg/g[1][childCount]` |
-| `nobiza-91-fimo741` | usecase | 23.00 | `svg/g[1][childCount]` |
-| `nidemo-97-domu132` | component | 22.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `xocodo-09-nuxi647` | component | 22.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `nidemo-97-domu132` | component | 22.50 | `svg/g[1]/g[2]/text[1]/@textLength` |
+| `xocodo-09-nuxi647` | component | 22.50 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `foboxa-33-menu312` | component | 22.43 | `svg/g[1]/g[1]/polygon[1]/@fill` |
 | `nibige-54-voki590` | component | 22.43 | `svg/g[1]/g[1]/polygon[1]/@fill` |
-| `zibumo-62-rije152` | component | 22.31 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zibumo-62-rije152` | component | 22.31 | `svg/g[1]/g[3]/text[1]/@textLength` |
 | `saveja-25-bezi839` | component | 22.00 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `robiga-73-tedi466` | usecase | 22.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `sumata-59-zavu229` | usecase | 22.00 | `svg/g[1]/g[1][childCount]` |
-| `xixaca-96-nene831` | usecase | 22.00 | `svg/g[1]/g[1][childCount]` |
-| `zacute-55-zece399` | usecase | 22.00 | `svg/g[1][childCount]` |
+| `zacute-55-zece399` | usecase | 22.00 | `svg/g[1]/g[3][childCount]` |
+| `bozana-38-xufi750` | component | 21.35 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zonobi-55-zuna105` | component | 21.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `xozabi-42-pixa842` | usecase | 21.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fasave-91-jaka816` | component | 20.97 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `xozabi-42-pixa842` | usecase | 20.75 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `butebe-90-dozo380` | component | 20.51 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `tukipe-82-ziva562` | component | 20.00 | `svg/g[1]/g[1][childCount]` |
 | `vajaxu-62-poto986` | component | 20.00 | `svg/g[1]/g[1]/polygon[1]/@stroke` |
 | `mogidu-85-roxe269` | usecase | 20.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `tajadu-40-juro990` | component | 19.31 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nafuta-52-pomo915` | component | 19.02 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `jegure-48-cesi766` | component | 19.00 | `svg/g[1][childCount]` |
+| `junoxu-15-gori632` | component | 19.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `cimare-47-deke334` | usecase | 19.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `junoxu-15-gori632` | component | 18.35 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `radiga-95-junu817` | component | 18.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zodare-91-rira454` | component | 18.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bekeno-37-luna380` | component | 18.32 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cojege-69-ruku138` | component | 18.27 | `svg/g[1]/g[1]/ellipse[1]/@fill` |
+| `fodena-72-sule202` | component | 18.27 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `keniji-18-tupu819` | component | 18.27 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `riradu-09-xipo824` | component | 18.15 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bukece-71-miku542` | component | 18.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `catari-10-xiza828` | component | 18.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `catari-10-xiza828` | component | 18.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `gabogi-09-zoda184` | component | 18.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lufiba-62-dubi670` | component | 18.00 | `svg/g[1]/g[1]/polygon[1]/@fill` |
 | `saveje-35-vumu271` | component | 18.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zabixa-22-tovi572` | component | 18.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `radiga-95-junu817` | component | 17.37 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zodare-91-rira454` | component | 17.37 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `cojege-69-ruku138` | component | 17.00 | `svg/g[1]/g[1]/ellipse[1]/@fill` |
-| `fodena-72-sule202` | component | 16.93 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `keniji-18-tupu819` | component | 16.93 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `ziniso-08-damu446` | component | 15.00 | `svg/g[1][childCount]` |
-| `codabo-50-mupa164` | component | 14.88 | `svg/g[1]/g[1][childCount]` |
+| `codabo-50-mupa164` | component | 17.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `loroto-06-fano471` | component | 16.20 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `toxine-81-xofo986` | component | 16.20 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `revusu-28-pexi248` | component | 16.00 | `svg/g[1]/g[1]/text[1]/@font-style` |
 | `ciboso-93-romi495` | component | 14.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `pecupa-75-zote612` | usecase | 14.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `vibunu-17-guso486` | usecase | 14.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `romuco-28-zafo015` | component | 13.69 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `tajuki-26-bime046` | component | 13.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `style-stereotype-on-arrow-0` | usecase | 13.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `style-stereotype-on-arrow-1` | component | 13.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `katane-80-xeka153` | component | 13.09 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `revusu-28-pexi248` | component | 13.00 | `svg/g[1]/g[1]/text[1]/@font-style` |
-| `ridola-99-jija391` | usecase | 13.00 | `svg/g[1]/g[1][childCount]` |
-| `loroto-06-fano471` | component | 12.91 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `toxine-81-xofo986` | component | 12.91 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `xekale-36-tiri787` | component | 12.87 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gekage-52-dato745` | component | 13.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `xekale-36-tiri787` | component | 13.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `ponare-43-kazu160` | component | 12.76 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `nadocu-64-juba262` | component | 12.31 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `style-stereotype-on-arrow-0` | usecase | 12.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `xufexu-38-fola855` | component | 12.00 | `svg/g[1]/g[1]/@id` |
 | `gigofe-94-zepe032` | usecase | 12.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `style-stereotype-on-arrow-1` | component | 12.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `diduxa-76-zimu664` | component | 12.00 | `svg/g[1]/g[1]/ellipse[1]/@fill` |
 | `pafoxe-99-xulo156` | component | 11.97 | `svg/g[1]/g[1]/path[1]/@d` |
 | `sakare-67-voci462` | component | 11.88 | `svg/g[1]/g[1]/polygon[1]/@stroke` |
-| `vibunu-17-guso486` | usecase | 11.75 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `kacite-73-sobe773` | component | 11.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sipuma-82-fene185` | component | 11.47 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lotofa-28-rudo664` | component | 11.09 | `svg/g[1]/g[1]/path[1]/@stroke-dasharray` |
@@ -288,39 +305,35 @@ same way. Read `dotEqual` here, not `verdict`, for ratchet eligibility.
 | `nuxebu-15-sixe797` | component | 11.00 | `svg/g[1]/g[1]/path[1]/@fill` |
 | `pafefo-52-zeli644` | component | 11.00 | `svg/g[1]/g[1]/path[1]/@stroke` |
 | `sacuso-94-gugi476` | component | 11.00 | `svg/g[1]/g[1]/path[1]/@stroke` |
-| `tizuza-93-xeto109` | component | 11.00 | `svg/g[1][childCount]` |
 | `cukafa-49-fona812` | component | 10.95 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `berome-43-xini276` | component | 10.58 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `kucabo-74-cora635` | component | 10.27 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `lovapo-83-xilo457` | component | 10.27 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `betidu-24-xuku720` | component | 10.26 | `svg/g[1]/g[1]/rect[1]/@fill` |
-| `dozudi-14-sevu997` | component | 10.00 | `svg/g[1][childCount]` |
+| `fogexa-24-lavi583` | component | 10.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `gacida-77-joku810` | component | 10.00 | `svg/g[1]/g[1][childCount]` |
 | `kuciku-99-tedu217` | component | 10.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `mavicu-17-mago821` | component | 10.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `bixofa-44-siso224` | usecase | 10.00 | `svg/g[1]/g[1]/text[1]/@fill` |
+| `funeme-74-tenu200` | usecase | 10.00 | `svg/g[1]/g[4]/text[1]/@textLength` |
+| `pivudu-29-pele178` | usecase | 10.00 | `svg/g[1]/g[1]/@id` |
 | `cobuju-30-paxo591` | usecase | 9.99 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `rokipo-88-sece008` | usecase | 9.81 | `svg/g[1]/g[1]/path[1]/@fill` |
-| `favega-89-rado990` | component | 9.56 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fosito-02-fegi991` | usecase | 9.08 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `favega-89-rado990` | component | 9.55 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cigite-14-kane677` | component | 9.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nidome-87-xesa939` | component | 9.08 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `somugi-21-doli483` | component | 9.08 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `bozana-38-xufi750` | component | 9.00 | `svg/g[1]/g[1][childCount]` |
-| `cegale-42-loxa672` | component | 9.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `mobugi-89-tine417` | component | 9.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `pivudu-29-pele178` | usecase | 9.00 | `svg/g[1][childCount]` |
+| `fosito-02-fegi991` | usecase | 9.08 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `xonafo-10-moki423` | usecase | 9.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `diduxa-76-zimu664` | component | 8.52 | `svg/g[1]/g[1][childCount]` |
+| `kokebo-27-vafi688` | component | 8.89 | `svg/g[1]/g[1]/@id` |
+| `cegale-42-loxa672` | component | 8.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `dodeni-90-xizu677` | component | 8.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `mobugi-89-tine417` | component | 8.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sugaca-11-boma467` | component | 8.52 | `svg/@background` |
 | `vapalu-27-muxa300` | component | 8.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `cigite-14-kane677` | component | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fogexa-24-lavi583` | component | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `dinejo-36-mite007` | component | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `jenivo-18-zuku513` | component | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `malado-53-noso561` | component | 8.00 | `svg/g[1]/g[1]/ellipse[1]/@stroke` |
 | `mifuvu-23-kalu239` | component | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `nujove-77-xiva558` | component | 8.00 | `svg/g[1][childCount]` |
 | `sprite-svg-multiline-0` | usecase | 8.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `juvucu-92-bugo434` | component | 7.62 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `fafeze-50-jomi091` | component | 7.45 | `svg/g[1]/g[1]/text[1]/@textLength` |
@@ -330,39 +343,39 @@ same way. Read `dotEqual` here, not `verdict`, for ratchet eligibility.
 | `titona-45-jile471` | component | 7.27 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `cizolo-88-lake154` | usecase | 7.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `mofuba-79-came821` | usecase | 7.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `mopimi-10-jaco443` | usecase | 7.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `mopimi-10-jaco443` | usecase | 7.00 | `svg/g[1]/g[4]/text[1]/@textLength` |
 | `kabasu-44-caxu950` | component | 6.55 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lunexo-59-fupo775` | usecase | 6.16 | `svg/g[1]/g[1]/text[1]/@fill` |
 | `dijico-15-cabu824` | usecase | 6.12 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `cedosa-23-nini915` | component | 6.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nuxamo-38-vuxa816` | component | 6.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `ridola-99-jija391` | usecase | 6.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sidame-35-cozu078` | usecase | 6.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `dozudi-14-sevu997` | component | 5.72 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `jesibe-85-sozu187` | component | 5.72 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `mavuxi-16-jafi782` | component | 5.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `dipixi-71-nuga611` | usecase | 5.36 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `suzemi-86-kuma659` | component | 5.14 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `kagapo-72-cofe085` | component | 5.13 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lobute-63-tizi096` | component | 5.13 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `pamake-46-sadu464` | component | 5.13 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `suzemi-86-kuma659` | component | 5.13 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zozutu-82-pupa220` | component | 5.13 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `gevaje-94-sajo802` | component | 5.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `tusugu-95-geju398` | component | 5.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
-| `venoti-11-seza115` | component | 5.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `basetu-75-xevi153` | component | 5.11 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `renita-52-jazi848` | component | 5.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `venoti-11-seza115` | component | 5.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `zajozi-04-dixu500` | component | 5.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zeteze-09-kuno793` | component | 5.00 | `svg/g[1]/g[1]/rect[1]/@stroke` |
-| `funeme-74-tenu200` | usecase | 5.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gevaje-94-sajo802` | component | 5.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
+| `tusugu-95-geju398` | component | 5.00 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `buduni-98-bima526` | component | 4.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vacuxi-18-baxu582` | component | 4.50 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `reroca-56-safi108` | component | 4.49 | `svg/g[1]/g[1]/rect[1]/@fill` |
 | `xirika-05-beju263` | component | 4.47 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `luniju-97-tuja870` | component | 4.15 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `zanibo-14-sami874` | component | 4.02 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `luniju-97-tuja870` | component | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `cifaki-66-boxa005` | component | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fanija-24-xogo706` | component | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lopite-93-vevo106` | component | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `silito-78-vubi253` | component | 4.00 | `svg/g[1][childCount]` |
 | `sufedi-40-baki261` | component | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `fubaje-48-xaje065` | usecase | 4.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `cenoja-47-rodu998` | component | 3.99 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `rimiku-31-cigo272` | component | 3.99 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `vumija-03-xise495` | component | 3.99 | `svg/g[1]/g[1]/text[1]/@textLength` |
@@ -370,37 +383,29 @@ same way. Read `dotEqual` here, not `verdict`, for ratchet eligibility.
 | `levuxi-16-fotu885` | component | 3.16 | `svg/g[1]/g[1]/ellipse[1]/@fill` |
 | `samicu-23-rula038` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sivamo-20-gaga179` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `rabida-94-kula497` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `majuma-84-loma401` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `komivo-22-toki497` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `rabida-94-kula497` | usecase | 3.00 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `komivo-22-toki497` | usecase | 3.00 | `svg/g[1]/g[5]/text[1]/@textLength` |
 | `sadeja-25-tina867` | usecase | 3.00 | `svg/g[1]/g[1][childCount]` |
 | `bokumi-45-pupo531` | component | 2.92 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `raxata-43-buni314` | component | 2.88 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `balotu-54-tuxu203` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `buduxo-54-tubo525` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `cusubu-18-xacu379` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gafegu-06-nito976` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `gocexi-61-biso565` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `rapaji-98-xato067` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `zoriso-46-vata931` | usecase | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `fuzula-86-temo881` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gogosu-37-mipe918` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `jebovo-64-rasa849` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `jolaru-18-dofi669` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kavico-81-sonu694` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `lakuti-06-dobi447` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `licapa-79-kepo009` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `nufofe-18-xani887` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sobobi-72-miri289` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `sodoza-93-nanu557` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `veboxo-36-nupe102` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `vonipa-26-pudo091` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `vosiju-58-cixu268` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zijaro-25-kufa588` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
+| `vosiju-58-cixu268` | component | 2.65 | `svg/g[1]/g[2]/text[1]/@textLength` |
 | `zijase-36-cice967` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `cusubu-18-xacu379` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `gotofu-80-joku316` | component | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `zoriso-46-vata931` | usecase | 2.65 | `svg/g[1]/g[1]/text[1]/@textLength` |
 | `norebe-58-bixu182` | usecase | 2.52 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `kevipe-39-gaji640` | usecase | 2.43 | `svg/g[1]/g[1]/text[1]/@textLength` |
-| `basetu-75-xevi153` | component | 2.00 | `svg/g[1][childCount]` |
 | `givape-84-xano421` | component | 2.00 | `svg/g[1]/g[1]/ellipse[1]/@stroke-width` |
-| `tujica-34-tire129` | component | 2.00 | `svg/g[1][childCount]` |
 | `kolibo-58-rata251` | usecase | 0.00 | `svg/g[1]/g[1][childCount]` |
 
 ## errored (0)
@@ -417,7 +422,7 @@ same way. Read `dotEqual` here, not `verdict`, for ratchet eligibility.
 
 | slug | type | message |
 |---|---|---|
-| `fepuvo-06-rugi981` | usecase | cached in.svg not well-formed XML: 10743B |
+| `fepuvo-06-rugi981` | usecase | cached in.svg not well-formed XML: 9677B |
 
 ## Divergence ledger (accepted, won't-fix)
 
