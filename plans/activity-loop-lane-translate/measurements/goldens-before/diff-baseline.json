@@ -1454,10 +1454,10 @@
       "type": "activity",
       "slug": "kijazo-83-kipu485",
       "status": "baseline",
-      "weightedScore": 211,
-      "diffCount": 156,
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "weightedScore": 208,
+      "diffCount": 160,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -1751,10 +1751,10 @@
       "type": "activity",
       "slug": "mafete-03-rapa918",
       "status": "baseline",
-      "weightedScore": 179,
-      "diffCount": 153,
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "weightedScore": 177,
+      "diffCount": 151,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -2606,10 +2606,10 @@
       "type": "activity",
       "slug": "ruzica-16-deli877",
       "status": "baseline",
-      "weightedScore": 559,
+      "weightedScore": 545,
       "diffCount": 388,
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",

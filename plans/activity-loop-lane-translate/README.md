@@ -50,7 +50,7 @@ rows (`camavo`, `vupuse`, `zepima`) declare no swimlane and leave at T0 (D8).
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 classify + read dispatch · T1 seam (no-op) | T0 ∥ T1 (worktree) | [x] |
 | [1](batch-1/overview.md) | T2 while back · T3 repeat out/simple1/simple2/complex1 | T1b then T2 ∥ T3 (worktrees) | [x] (T1b added 2026-09-20 after stops 1 + 14, see [`stop-1-edgemeta-zip.md`](stop-1-edgemeta-zip.md)) |
-| [2](batch-2/overview.md) | T4 sweep · T5a/T5b optional (D9) · T6 re-pin + close-out | sequential | [ ] |
+| [2](batch-2/overview.md) | T4 sweep · T5a/T5b optional (D9) · T6 re-pin + close-out | sequential | [x] (T5 struck) |
 
 ## Stop conditions
 
@@ -110,3 +110,40 @@ on T0's evidence, journaled; a worktree per Batch 1 task.
 [`settings.autonomous.json`](settings.autonomous.json) · prior briefs:
 `plans/activity-loop-tile-port/` (esp. `stop-11-complex1.md`),
 `plans/activity-if-tile-port/`. Queued next: `activity-note-opale-attachment`.
+
+## Mission summary (T6, 2026-09-20)
+
+- **Tasks:** 6 planned (T0, T1, T2, T3, T4, T6) all done, plus T1b added
+  2026-09-20 under a human write-set grant; T5a/T5b struck by D9 on T0's
+  evidence (no baseline row combines `break` with a lane).
+- **Halt:** Batch 1 stopped 2026-09-19 on stops 1 and 14
+  ([`stop-1-edgemeta-zip.md`](stop-1-edgemeta-zip.md)): D3's two-edge
+  `repeat-out` broke the `edges`/`edgeMeta` index zip in three consumers,
+  and D4's `midArrowAt` was not carried through compression. Human chose
+  option 1; T1b threaded `PlacementResult.edgeMeta` and transformed/occupied
+  `midArrowAt`, byte-identical on 268 rows; T2/T3 resumed on top.
+- **Decisions amended:** none of D1–D9; two consequences were incomplete
+  (D3's consumers, D4 under compression) and are recorded, not rewritten.
+  Journal rows: 40+, three flagged for review (T1's `PushEdgeRouting` union
+  and `swimlane-lane-origins.ts` extraction; the mid-mission oracle-pin
+  allowance).
+- **Geometry:** all 11 rows reaching a translate shape draw the jar's
+  `drawTranslate` geometry; connector X exact after canvas offset on
+  `becanu`/`kasadu`; `rujuxa`/`megara` byte-identical by construction.
+  `--align` after: kijazo 21/42, ruzica 36/97, becanu 10/36, givanu 12/40,
+  kasadu 25/32, kudedo 34/37, mafete 29/33, manata 39/54 — every remaining
+  residual is named with its Java cite (`fixtures.md`, six residuals a–f,
+  all outside the write-set, re-filed in `planning/next-missions.md`).
+- **Aggregate:** 51371 -> 51390 (never gated); risers exactly kijazo +3,
+  ruzica +14, mafete +2, each classed (element growth under positional
+  pairing; reorder / pre-existing divergence made visible); fallers 0.
+  Re-pinned once with `--accept-rises` naming those three; the diff against
+  `measurements/goldens-before/` shows no other pin rose. `diff-census.json`
+  left as-is, following the five missions since `activity-klimt-compress`.
+- **Gates at close:** `npm test` exit 0, JSON collected 731 = on-disk 731,
+  20066 passed; typecheck/lint/build 0; diagonal scan 0; sibling suites'
+  per-file counts unchanged (stop 6).
+- **Process findings:** a no-op seam gate cannot exercise consumers of the
+  seam's NEW outputs (memory `no-op-seam-gate-cannot-see-consumers`); the
+  T2 agent stalled twice on background `npm test` polling and was resumed,
+  gates then run in the foreground.

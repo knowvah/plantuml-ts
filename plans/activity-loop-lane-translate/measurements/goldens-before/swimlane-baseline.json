@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
-  "measuredAt": "2026-09-20",
-  "measuredAgainstCommit": "f7154050",
+  "measuredAt": "2026-09-16",
+  "measuredAgainstCommit": "77d50172",
   "fixtures": [
     {
       "type": "activity",
@@ -43,8 +43,8 @@
             "width": 56.625
           }
         ],
-        "width": "156",
-        "height": "359"
+        "width": "146",
+        "height": "375"
       },
       "jar": {
         "dividerXs": [
@@ -1162,8 +1162,8 @@
             "width": 56.625
           }
         ],
-        "width": "156",
-        "height": "411"
+        "width": "146",
+        "height": "430"
       },
       "jar": {
         "dividerXs": [
@@ -1734,8 +1734,8 @@
             "width": 725.5499999999993
           }
         ],
-        "width": "824",
-        "height": "307"
+        "width": "817",
+        "height": "326"
       },
       "jar": {
         "dividerXs": [
@@ -2014,7 +2014,7 @@
           }
         ],
         "width": "216",
-        "height": "331"
+        "height": "349"
       },
       "jar": {
         "dividerXs": [
@@ -2293,8 +2293,8 @@
             "width": 126.67500000000001
           }
         ],
-        "width": "286",
-        "height": "315"
+        "width": "279",
+        "height": "333"
       },
       "jar": {
         "dividerXs": [
@@ -2467,8 +2467,8 @@
             "width": 95.11875000000003
           }
         ],
-        "width": "337",
-        "height": "477"
+        "width": "318",
+        "height": "481"
       },
       "jar": {
         "dividerXs": [
@@ -4337,7 +4337,7 @@
         "dividerXs": [
           17,
           235.281,
-          419.831
+          411.213
         ],
         "titles": [
           {
@@ -4347,14 +4347,14 @@
           },
           {
             "fontSize": "18",
-            "x": "279.013",
+            "x": "274.703",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 17,
           "y": 12,
-          "width": 401.831,
+          "width": 393.213,
           "height": 18,
           "fill": "none"
         },
@@ -4365,10 +4365,10 @@
           },
           {
             "x": 235.28125,
-            "width": 184.55000000000007
+            "width": 175.93125000000003
           }
         ],
-        "width": "450",
+        "width": "423",
         "height": "587"
       },
       "jar": {

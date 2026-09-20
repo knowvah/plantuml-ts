@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
-  "measuredAt": "2026-09-20",
-  "measuredAgainstCommit": "f7154050",
+  "measuredAt": "2026-09-16",
+  "measuredAgainstCommit": "77d50172",
   "fixtures": [
     {
       "type": "activity",
@@ -254,8 +254,8 @@
           "12.5": 3
         },
         "textCount": 6,
-        "width": "156",
-        "height": "359"
+        "width": "146",
+        "height": "375"
       },
       "jar": {
         "fontSize": {
@@ -274,8 +274,8 @@
         "width": "183",
         "height": "367"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -3771,8 +3771,8 @@
           "12.5": 4
         },
         "textCount": 7,
-        "width": "156",
-        "height": "411"
+        "width": "146",
+        "height": "430"
       },
       "jar": {
         "fontSize": {
@@ -3791,8 +3791,8 @@
         "width": "183",
         "height": "427"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -4747,8 +4747,8 @@
           "12.5": 2
         },
         "textCount": 5,
-        "width": "824",
-        "height": "307"
+        "width": "817",
+        "height": "326"
       },
       "jar": {
         "fontSize": {
@@ -4769,8 +4769,8 @@
         "width": "851",
         "height": "321"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -4968,7 +4968,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 16,
+          "1": 15,
           "1.5": 3
         },
         "rx": {
@@ -4997,8 +4997,8 @@
         "width": "584",
         "height": "380"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -5193,7 +5193,7 @@
         },
         "textCount": 8,
         "width": "216",
-        "height": "331"
+        "height": "349"
       },
       "jar": {
         "fontSize": {
@@ -5213,8 +5213,8 @@
         "width": "253",
         "height": "355"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -6061,8 +6061,8 @@
           "12.5": 3
         },
         "textCount": 6,
-        "width": "286",
-        "height": "315"
+        "width": "279",
+        "height": "333"
       },
       "jar": {
         "fontSize": {
@@ -6082,8 +6082,8 @@
         "width": "313",
         "height": "333"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -6149,8 +6149,8 @@
           "12.5": 4
         },
         "textCount": 9,
-        "width": "337",
-        "height": "477"
+        "width": "318",
+        "height": "481"
       },
       "jar": {
         "fontSize": {
@@ -6171,8 +6171,8 @@
         "width": "384",
         "height": "466"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
@@ -8696,7 +8696,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 48,
+          "1": 46,
           "1.5": 3
         },
         "rx": {
@@ -8704,7 +8704,7 @@
           "12.5": 6
         },
         "textCount": 12,
-        "width": "450",
+        "width": "423",
         "height": "587"
       },
       "jar": {
@@ -8725,8 +8725,8 @@
         "width": "528",
         "height": "607"
       },
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "f7154050"
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
     },
     {
       "type": "activity",
