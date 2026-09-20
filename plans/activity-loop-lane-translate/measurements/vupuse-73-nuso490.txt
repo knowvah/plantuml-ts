@@ -1,0 +1,69 @@
+=== ALIGN vupuse-73-nuso490 ===
+vupuse-73-nuso490:
+  polygon: ours=11 jar=9
+  line: ours=11 jar=11
+  text: ours=3 jar=2
+  rect: ours=1 jar=1
+  alignment: 8/26
+=== LANES vupuse-73-nuso490 ===
+diamond/hexagon[0]: ours=? jar=?
+diamond/hexagon[1]: ours=? jar=?
+diamond/hexagon[2]: ours=? jar=?
+=== DUMP vupuse-73-nuso490 ===
+OURS:
+  [0] <ellipse> x=73.338 lane=?
+  [1] <polygon> x=73.338 lane=?
+  [2] <rect> x=73.3375 lane=?
+  [3] <text> x=22 lane=?
+  [4] <polygon> x=73.33749999999999 lane=?
+  [5] <text> x=56.253 lane=?
+  [6] <ellipse> x=73.338 lane=?
+  [7] <ellipse> x=73.338 lane=?
+  [8] <polygon> x=73.338 lane=?
+  [9] <text> x=73.338 lane=?
+  [10] <line> x=73.338 lane=?
+  [11] <polygon> x=73.338 lane=?
+  [12] <line> x=38.253 lane=?
+  [13] <line> x=32.253 lane=?
+  [14] <polygon> x=32.253 lane=?
+  [15] <line> x=52.7955 lane=?
+  [16] <line> x=73.338 lane=?
+  [17] <polygon> x=73.338 lane=?
+  [18] <line> x=73.338 lane=?
+  [19] <polygon> x=73.338 lane=?
+  [20] <line> x=116.0065 lane=?
+  [21] <line> x=146.675 lane=?
+  [22] <line> x=116.0065 lane=?
+  [23] <polygon> x=91.838 lane=?
+  [24] <polygon> x=146.675 lane=?
+  [25] <line> x=73.338 lane=?
+  [26] <polygon> x=73.338 lane=?
+  [27] <line> x=73.338 lane=?
+  [28] <polygon> x=73.338 lane=?
+JAR:
+  [0] <ellipse> x=77.338 lane=?
+  [1] <rect> x=77.3375 lane=?
+  [2] <text> x=26 lane=?
+  [3] <ellipse> x=77.338 lane=?
+  [4] <ellipse> x=77.338 lane=?
+  [5] <polygon> x=74.89685714285714 lane=?
+  [6] <text> x=60.253 lane=?
+  [7] <polygon> x=77.338 lane=?
+  [8] <line> x=77.338 lane=?
+  [9] <polygon> x=77.338 lane=?
+  [10] <line> x=42.253 lane=?
+  [11] <polygon> x=36.253 lane=?
+  [12] <line> x=36.253 lane=?
+  [13] <line> x=56.7955 lane=?
+  [14] <line> x=77.338 lane=?
+  [15] <line> x=77.338 lane=?
+  [16] <polygon> x=77.338 lane=?
+  [17] <line> x=77.338 lane=?
+  [18] <polygon> x=77.338 lane=?
+  [19] <line> x=114.0065 lane=?
+  [20] <polygon> x=150.675 lane=?
+  [21] <line> x=150.675 lane=?
+  [22] <line> x=120.0065 lane=?
+  [23] <polygon> x=95.838 lane=?
+  [24] <line> x=77.338 lane=?
+  [25] <polygon> x=77.338 lane=?

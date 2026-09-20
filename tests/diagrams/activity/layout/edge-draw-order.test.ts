@@ -179,3 +179,30 @@ describe('assignCoordinatesFull — the lane pass order applied last (D1)', () =
     expect(order).toEqual(order.map((_, i) => i));
   });
 });
+
+/**
+ * T1b (`stop-1-edgemeta-zip.md`): `assignCoordinatesFull`'s `compress: false`
+ * branch (`assign-coordinates-full.ts`'s `pass1Assemble` call) is a SEPARATE
+ * call site from the default `compress: true` path covered above -- both
+ * must source `edgeMeta` from `placeSwimlanes`'s own `PlacementResult
+ * .edgeMeta`, never the walker's pre-route `edgeMeta`.
+ */
+describe('assignCoordinatesFull — edgeMeta/edges length on the compress:false path', () => {
+  it('keeps edges and edgeMeta the same length with compression skipped', () => {
+    const tile = new GtileFork([branchStub(60, 'A'), branchStub(80, 'B')], bounder);
+    tile.swimlane = 'A';
+    tile.swimlaneOut = 'A';
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
+    const result = assignCoordinatesFull({
+      root: tile,
+      ast,
+      baseX: LAYOUT_MARGIN,
+      baseY: LAYOUT_MARGIN,
+      bounder,
+      theme,
+      compress: false,
+    });
+    expect(result.edgeMeta).toHaveLength(result.geometry.edges.length);
+    expect(result.geometry.edges.length).toBeGreaterThan(0);
+  });
+});

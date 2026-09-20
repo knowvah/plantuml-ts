@@ -175,6 +175,25 @@ function findEmphasisSegment(
   return undefined;
 }
 
+/** Canonical unit vector per {@link ArrowDir}, so {@link arrowTip}'s own
+ *  `arrowDirection(dx, dy)` recomputes the SAME `dir` a `midArrowAt` point
+ *  already names -- D4, `ActivityEdgeGeo.midArrowAt`. */
+const DIR_VECTOR: Record<ArrowDir, { dx: number; dy: number }> = {
+  up: { dx: 0, dy: -1 },
+  down: { dx: 0, dy: 1 },
+  left: { dx: -1, dy: 0 },
+  right: { dx: 1, dy: 0 },
+};
+
+/** D4: the extra arrowhead a translate shape places at its own point,
+ *  split out of {@link renderEdge} to keep that function under the file's
+ *  NLOC limit. */
+function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string): string {
+  const { x, y, dir } = midArrowAt;
+  const { dx, dy } = DIR_VECTOR[dir];
+  return arrowTip(x, y, dx, dy, edgeColor);
+}
+
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
@@ -212,6 +231,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     }
   }
 
+  // D4: an explicit extra arrowhead at a translate shape's own point (see
+  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after `emphasize`,
+  // never instead of the terminal arrowhead.
+  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor);
+
   // Optional edge label near midpoint
   let labelEl = '';
   if (edge.label !== undefined) {
@@ -220,7 +244,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
   }
 
-  return segments + arrow + emphasizeEl + labelEl;
+  return segments + arrow + emphasizeEl + midArrowEl + labelEl;
 }
 
 // ---------------------------------------------------------------------------

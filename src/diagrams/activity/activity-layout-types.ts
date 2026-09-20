@@ -55,6 +55,17 @@ export interface ActivityEdgeGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:112-113
    */
   emphasize?: 'up' | 'down' | 'left' | 'right';
+  /**
+   * D4 (`plans/activity-loop-lane-translate/decisions.md`): an explicit
+   * extra arrowhead a translate shape draws at its own midpoint, separate
+   * from `emphasize`'s segment-direction search --
+   * `FtileWhile.ConnectionBackSimple#drawTranslate` draws `asToUp` at
+   * `(xx, (y1 + y2) / 2)` with NO `emphasizeDirection` set, so the
+   * renderer's `findEmphasisSegment` cannot place it. `renderEdge` draws
+   * one `arrowTip` here, after the `emphasize` element.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:306-307
+   */
+  midArrowAt?: { x: number; y: number; dir: 'up' | 'down' | 'left' | 'right' };
 }
 
 export interface SwimlaneGeo {

@@ -1,0 +1,90 @@
+=== ALIGN becanu-19-diti597 ===
+becanu-19-diti597:
+  polygon: ours=10 jar=10
+  line: ours=16 jar=16
+  text: ours=6 jar=5
+  rect: ours=4 jar=4
+  alignment: 10/36
+=== LANES becanu-19-diti597 ===
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=1
+=== DUMP becanu-19-diti597 ===
+OURS:
+  [0] <rect> x=75.4875 lane=0
+  [1] <ellipse> x=47.675 lane=0
+  [2] <polygon> x=47.675 lane=0
+  [3] <rect> x=47.675 lane=0
+  [4] <text> x=32 lane=0
+  [5] <rect> x=47.675 lane=0
+  [6] <text> x=32 lane=0
+  [7] <ellipse> x=47.675 lane=0
+  [8] <ellipse> x=47.675 lane=0
+  [9] <line> x=17 lane=0
+  [10] <polygon> x=106.663 lane=1
+  [11] <text> x=106.663 lane=1
+  [12] <rect> x=106.6625 lane=1
+  [13] <text> x=93.35 lane=1
+  [14] <line> x=78.35 lane=1
+  [15] <line> x=134.975 lane=?
+  [16] <line> x=47.675 lane=0
+  [17] <polygon> x=47.675 lane=0
+  [18] <line> x=47.675 lane=0
+  [19] <polygon> x=47.675 lane=0
+  [20] <line> x=47.675 lane=0
+  [21] <polygon> x=47.675 lane=0
+  [22] <line> x=106.663 lane=1
+  [23] <polygon> x=106.663 lane=1
+  [24] <line> x=131.5 lane=1
+  [25] <line> x=144.337 lane=?
+  [26] <line> x=102.006 lane=1
+  [27] <polygon> x=66.175 lane=0
+  [28] <polygon> x=144.337 lane=?
+  [29] <line> x=47.675 lane=0
+  [30] <line> x=77.169 lane=0
+  [31] <line> x=106.663 lane=1
+  [32] <polygon> x=106.663 lane=1
+  [33] <line> x=106.663 lane=1
+  [34] <line> x=77.169 lane=0
+  [35] <line> x=47.675 lane=0
+  [36] <polygon> x=47.675 lane=0
+  [37] <text> x=31.138 lane=0
+  [38] <text> x=90.125 lane=1
+JAR:
+  [0] <rect> x=78.4875 lane=0
+  [1] <ellipse> x=51.675 lane=0
+  [2] <rect> x=51.675 lane=0
+  [3] <text> x=36 lane=0
+  [4] <polygon> x=51.675 lane=0
+  [5] <rect> x=51.675 lane=0
+  [6] <text> x=36 lane=0
+  [7] <ellipse> x=51.675 lane=0
+  [8] <ellipse> x=51.675 lane=0
+  [9] <line> x=20 lane=0
+  [10] <polygon> x=110.663 lane=1
+  [11] <rect> x=110.6625 lane=1
+  [12] <text> x=97.35 lane=1
+  [13] <line> x=81.35 lane=1
+  [14] <line> x=137.975 lane=?
+  [15] <line> x=51.675 lane=0
+  [16] <polygon> x=51.675 lane=0
+  [17] <line> x=51.675 lane=0
+  [18] <polygon> x=51.675 lane=0
+  [19] <line> x=51.675 lane=0
+  [20] <polygon> x=51.675 lane=0
+  [21] <line> x=110.663 lane=1
+  [22] <polygon> x=110.663 lane=1
+  [23] <line> x=135.5 lane=1
+  [24] <polygon> x=148.337 lane=?
+  [25] <line> x=148.337 lane=?
+  [26] <line> x=106.006 lane=1
+  [27] <polygon> x=70.175 lane=0
+  [28] <line> x=51.675 lane=0
+  [29] <line> x=81.169 lane=0
+  [30] <line> x=110.663 lane=1
+  [31] <polygon> x=110.663 lane=1
+  [32] <line> x=110.663 lane=1
+  [33] <line> x=81.169 lane=0
+  [34] <line> x=51.675 lane=0
+  [35] <polygon> x=51.675 lane=0
+  [36] <text> x=34.138 lane=0
+  [37] <text> x=93.125 lane=1

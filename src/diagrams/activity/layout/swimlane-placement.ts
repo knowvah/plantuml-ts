@@ -41,14 +41,14 @@ import type { GPoint } from '../tiles/points.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
-  halfMissingSpace,
   measureLaneExtents,
   resolveSwimlaneMinWidth,
   type LaneItem,
   type LaneWidth,
-  type LaneWidthInput,
 } from './swimlane-context.js';
 import type { Reservation } from './hexagon-reservations.js';
+import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
+import { computeLaneOrigins } from './swimlane-lane-origins.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
 // `activity-lane-capture` T2, this file's 500-line hook); re-exported here
@@ -67,6 +67,11 @@ export interface EdgeMeta {
    * `pushEdge`; `'default'` is the average-Y shape every non-parallel
    * connection uses. */
   readonly shape: EdgeShape;
+  /** D2 (`activity-loop-lane-translate`): set only on a `ConnectionTranslatable`
+   * while/repeat back-edge (`ftile/ConnectionCross.java:47-63`). When set and
+   * the lanes differ, {@link routeEdge} delegates to `routeLoopTranslate`.
+   * T1 never sets this from a walker -- scaffolding for T2/T3. */
+  readonly loop?: LoopTranslate;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
@@ -76,12 +81,29 @@ export interface EdgeMeta {
  * DIFFERENT Java class (`FtileIfLongHorizontal`, not a fork/split
  * builder), so it gets its own semantically-named tag rather than reusing
  * the fork one.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:419-435 */
-export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default';
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:419-435
+ *
+ * `LoopTranslate['kind']` (`activity-loop-lane-translate` D2) is folded in
+ * so a loop-tagged edge stays self-describing; {@link routeEdge} dispatches
+ * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
+ * the same as `'default'` via its `default:` branch. */
+export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
+  /**
+   * D3/T1b (`plans/activity-loop-lane-translate/stop-1-edgemeta-zip.md`):
+   * parallel to {@link edges}, NOT to the walker's own `edgeMeta` input --
+   * `routeEdge` may flat-map one input edge into several (the repeat exit's
+   * unarrowed-then-arrowed pair), so each output edge repeats its SOURCE
+   * meta once per edge `routeEdge` returned for it (same lanes/shape --
+   * that is what `shapesForEdge`/`passRank` read). Consumers
+   * (`assign-coordinates-full.ts`, `compress/shapes-of.ts`,
+   * `edge-draw-order.ts`) must zip `edges[i]` with `edgeMeta[i]`, never with
+   * the pre-route `PlacementInput.edgeMeta`.
+   */
+  edgeMeta: EdgeMeta[];
   swimlanes: SwimlaneGeo[];
   /**
    * One {@link Reservation} per divider line (mission `activity-klimt-
@@ -189,140 +211,10 @@ export function computeSwimlaneChrome(
   };
 }
 
-interface LaneOrigin {
-  readonly delta: number;
-  readonly geo: SwimlaneGeo;
-}
-
-interface LaneOrigins {
-  readonly origins: Map<string, LaneOrigin>;
-  readonly dividerReservations: DividerReservation[];
-}
-
-/**
- * Ports `Swimlanes#computeSizeInternal`'s origin loop
- * (`Swimlanes.java:416-431`) restricted to the real lanes, plus one extra
- * step for the trailing empty "special" lane
- * (`swimlanesSpecial()`, `:116-124`) that closes the last lane's span --
- * upstream loops over all `n + 1` entries uniformly; splitting the loop
- * here avoids threading a synthetic empty `LaneWidth` through the real
- * per-lane map. `blockOriginX` seeds the accumulator at the lane block's
- * own left edge (`xpos = 0` upstream; this diagram's block starts at
- * `baseX`, not `0`) so every returned `delta` is a ready-to-add absolute
- * offset for pass-1's `baseX`-relative node coordinates.
- */
-/** One divider's `UEmpty(x1+x2, 1)` reservation, in block-relative X only
- *  -- {@link placeSwimlanes} adds `y: baseY` and `height: 1`. */
-interface DividerReservation {
-  readonly x: number;
-  readonly width: number;
-}
-
-interface LaneDividers {
-  readonly dividerX: number[];
-  readonly contentLeft: number[];
-  readonly dividerReservations: DividerReservation[];
-}
-
-/**
- * The trailing "special" divider (the `i === n` empty lane closing the
- * last real lane's span): its content and minX are both 0
- * (`MinMax.getEmpty(true)`), so `xx_n` reduces to `xpos + dividerWidth_n +
- * min / 2` and the divider itself to `xpos + x1_n + min / 2` (`min`
- * already resolved, never negative -- see `resolveSwimlaneMinWidth`, so
- * this is `Math.max(min, 0) / 2`). Split from {@link computeDividers} only
- * to keep that function's own NLOC under the file's limit.
- */
-function trailingDivider(
-  laneNames: readonly string[],
-  inputs: readonly LaneWidthInput[],
-  min: number,
-  xpos: number,
-): { dividerX: number; reservation: DividerReservation } {
-  const x1n = halfMissingSpace(laneNames.length, inputs, min);
-  const x2n = halfMissingSpace(laneNames.length + 1, inputs, min);
-  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos, width: x1n + x2n } };
-}
-
-/**
- * The origin loop itself (`Swimlanes.java:416-431`), split from {@link
- * computeLaneOrigins} only to keep both under the file's function-length
- * limit -- `dividerX`/`contentLeft` are two views of the SAME loop
- * variable, never independently meaningful, so returning them as a pair
- * rather than merging further is the natural seam. `dividerReservations`
- * is each boundary's `LaneDivider#drawU` `UEmpty(x1+x2, 1)`
- * (`LaneDivider.java:85-97`), at its own `xpos` -- BEFORE this divider's
- * own `x1` padding -- matching `Swimlanes.java:347-348`'s `ug.apply
- * (UTranslate.dx(xpos - dividerWith))` composed with `LaneDivider#drawU`'s
- * own local `UEmpty` at (0, 0).
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/LaneDivider.java:85-97
- */
-function computeDividers(
-  laneNames: readonly string[],
-  widths: ReadonlyMap<string, LaneWidth>,
-  inputs: readonly LaneWidthInput[],
-  min: number,
-  blockOriginX: number,
-): LaneDividers {
-  const dividerX: number[] = [];
-  const contentLeft: number[] = [];
-  const dividerReservations: DividerReservation[] = [];
-  let xpos = blockOriginX;
-  for (let i = 0; i < laneNames.length; i++) {
-    const w = widths.get(laneNames[i]!)!;
-    const x1 = halfMissingSpace(i, inputs, min);
-    const x2 = halfMissingSpace(i + 1, inputs, min);
-    const dividerWidth = x1 + x2;
-    const left = xpos + dividerWidth + (w.width - w.contentWidth) / 2;
-    contentLeft.push(left);
-    dividerX.push(left - x2);
-    dividerReservations.push({ x: xpos, width: dividerWidth });
-    xpos += w.width + dividerWidth;
-  }
-  const trailing = trailingDivider(laneNames, inputs, min, xpos);
-  dividerX.push(trailing.dividerX);
-  dividerReservations.push(trailing.reservation);
-  return { dividerX, contentLeft, dividerReservations };
-}
-
-/** One lane's {@link LaneOrigin}, split from {@link computeLaneOrigins}
- *  only to keep that function's own NLOC under the file's limit. */
-function buildLaneOrigin(name: string, w: LaneWidth, x: number, width: number, left: number): LaneOrigin {
-  return {
-    delta: left - w.contentMinX,
-    geo: {
-      name,
-      x,
-      width,
-      contentWidth: w.contentWidth,
-      titleWidth: w.titleWidth,
-      contentMinX: w.contentMinX,
-      contentX: left,
-    },
-  };
-}
-
-function computeLaneOrigins(
-  laneNames: readonly string[],
-  widths: ReadonlyMap<string, LaneWidth>,
-  min: number,
-  blockOriginX: number,
-): LaneOrigins {
-  const inputs: LaneWidthInput[] = laneNames.map((name) => {
-    const w = widths.get(name)!;
-    return { contentWidth: w.contentWidth, titleWidth: w.titleWidth };
-  });
-  const { dividerX, contentLeft, dividerReservations } = computeDividers(laneNames, widths, inputs, min, blockOriginX);
-
-  const origins = new Map<string, LaneOrigin>();
-  for (let i = 0; i < laneNames.length; i++) {
-    const name = laneNames[i]!;
-    const w = widths.get(name)!;
-    const width = dividerX[i + 1]! - dividerX[i]!;
-    origins.set(name, buildLaneOrigin(name, w, dividerX[i]!, width, contentLeft[i]!));
-  }
-  return { origins, dividerReservations };
-}
+// `LaneOrigin`/`computeLaneOrigins` and its supporting helpers moved to
+// `swimlane-lane-origins.ts` (this file's own 500-line hook, mission
+// `activity-loop-lane-translate` T1) -- pure move, re-imported below so the
+// one call site in `placeSwimlanes` is unchanged.
 
 /** `swimlane.getTranslate()` applied to one node
  * (`UGraphicInterceptorOneSwimlane`, `Swimlanes.java:342-343` -- one `dx`
@@ -358,24 +250,56 @@ function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
       return mp1.y + 4;
     case 'parallel-out':
       return mp2.y - 14;
-    case 'default':
+    default:
+      // 'default' + every loop kind -- the latter never reach here in
+      // practice ({@link routeEdge} dispatches on `EdgeMeta.loop` first).
       return (mp1.y + mp2.y) / 2;
   }
 }
 
-/**
- * Same-lane edges shift uniformly by that lane's own delta. Cross-lane
- * edges discard the pass-1 shape entirely and draw a fresh 4-point jog
- * through both lanes' own translates -- see the module doc for the
- * upstream citations; only the path's two endpoints matter (upstream's
- * `getP1()`/`getP2()`), never any interior elbow the same-lane shape had.
- */
-function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<string, number>): ActivityEdgeGeo {
-  const d1 = meta.lane1 !== undefined ? (deltas.get(meta.lane1) ?? 0) : 0;
-  const d2 = meta.lane2 !== undefined ? (deltas.get(meta.lane2) ?? 0) : 0;
+/** {@link routeEdge}'s return (D3): a non-loop path is one edge, no
+ *  reservations; a dispatched translate shape may return more of either. */
+interface RoutedEdge {
+  readonly edges: ActivityEdgeGeo[];
+  readonly reservations: Reservation[];
+}
 
-  if (meta.lane1 === meta.lane2 || meta.lane1 === undefined || meta.lane2 === undefined) {
-    return { ...edge, points: shiftPoints(edge.points, d1) };
+/**
+ * D3/T1b's meta-repeating rule, split out as a pure function so it is
+ * unit-testable directly: no stub in this mission yet returns more than one
+ * edge (`stop-1-edgemeta-zip.md`), so there is no production path that
+ * drives `count > 1` end to end today.
+ */
+export function repeatEdgeMeta(meta: EdgeMeta, count: number): EdgeMeta[] {
+  return Array.from({ length: count }, () => meta);
+}
+
+/** `lane`'s own delta, or 0 when the endpoint carries no lane. */
+function laneDelta(lane: string | undefined, deltas: ReadonlyMap<string, number>): number {
+  return lane !== undefined ? (deltas.get(lane) ?? 0) : 0;
+}
+
+/** True only when both endpoints are laned and the lanes differ. */
+function isCrossLane(meta: EdgeMeta): boolean {
+  return meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2;
+}
+
+/**
+ * Same-lane edges shift uniformly. A cross-lane edge tagged with a
+ * {@link LoopTranslate} (D1) delegates to `routeLoopTranslate`; any other
+ * cross-lane edge draws the generic 4-point jog (module doc); only the
+ * path's two endpoints matter, never the same-lane shape's interior elbow.
+ */
+function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<string, number>): RoutedEdge {
+  const d1 = laneDelta(meta.lane1, deltas);
+  const d2 = laneDelta(meta.lane2, deltas);
+
+  if (!isCrossLane(meta)) {
+    return { edges: [{ ...edge, points: shiftPoints(edge.points, d1) }], reservations: [] };
+  }
+
+  if (meta.loop !== undefined) {
+    return routeLoopTranslate(meta.loop, edge, d1, d2);
   }
 
   const p1 = edge.points[0]!;
@@ -384,8 +308,8 @@ function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<st
   const mp2 = { x: p2.x + d2, y: p2.y };
   const middle = crossLaneMiddleY(meta.shape, mp1, mp2);
   return {
-    ...edge,
-    points: [mp1, { x: mp1.x, y: middle }, { x: mp2.x, y: middle }, mp2],
+    edges: [{ ...edge, points: [mp1, { x: mp1.x, y: middle }, { x: mp2.x, y: middle }, mp2] }],
+    reservations: [],
   };
 }
 
@@ -450,7 +374,7 @@ function measureLanes(
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
   if (laneNames.length === 0) {
-    return { nodes: [...nodes], edges: [...edges], swimlanes: [], reservations: [] };
+    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
   }
 
   const { widths, min } = measureLanes(nodes, laneNames, bounder, theme);
@@ -464,12 +388,15 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
     swimlanes.push(origin.geo);
   }
 
-  const reservations: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
+  const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
+  // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
+  const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas));
 
   return {
     nodes: nodes.map((n) => shiftNode(n, deltas)),
-    edges: edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas)),
+    edges: routed.flatMap((r) => r.edges),
+    edgeMeta: routed.flatMap((r, i) => repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
-    reservations,
+    reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
   };
 }

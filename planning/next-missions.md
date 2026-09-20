@@ -1491,7 +1491,18 @@ Ordered by how ready they are, not by size.
       measurement agrees to the pixel, only the constants differ. The if
       condition already uses the jar's arithmetic (`GtileDiamondInside`); port
       the same for while/repeat.
-    - **`activity-loop-lane-translate`** — filed 2026-09-16 by
+    - **`activity-loop-lane-translate`** — **EXECUTED + CLOSED 2026-09-20**
+      (T0, T1, T1b, T2, T3, T4, T6 done; T5a/T5b struck by D9; branch
+      `feat/activity-loop-lane-translate`, close-out = the `test(allt-T6)`
+      commit at its head, UNMERGED). All 11 rows that reach a translate
+      shape (kijazo, ruzica; six `complex1`; becanu/rujuxa/megara
+      `repeat-out`) now draw the jar's `drawTranslate` geometry (X exact
+      after canvas offset on becanu/kasadu); aggregate 51371 -> 51390 with
+      exactly three classed risers, re-pinned once. Two brief-level gaps
+      surfaced mid-mission (stops 1 + 14) and were fixed by human-granted
+      T1b: see `plans/activity-loop-lane-translate/stop-1-edgemeta-zip.md`.
+      Residual re-filings are the bullets at the end of this entry.
+      Originally filed 2026-09-16 by
       `activity-loop-tile-port` T4/T6. With swimlanes the jar draws every
       `ConnectionTranslatable` whose two ftiles sit in different lanes through
       `drawTranslate(ug, translate1, translate2)`, not `drawU`; the shapes
@@ -1507,6 +1518,69 @@ Ordered by how ready they are, not by size.
       `navene`, `rujuxa`, `tobajo`, `katopo`, `felega`, `megara`) is this
       class. Read `Swimlanes.java`'s connection drawing to see WHICH
       translates apply before porting.
+      - T0 (`activity-loop-lane-translate`, 2026-09-19, D8) re-files three of
+        this filing's own rows: `camavo-50-kaku123`, `vupuse-73-nuso490`,
+        `zepima-96-peco612` declare NO swimlane (0 `|lane|` lines); their
+        residual is not a translate shape — `swimlane-placement.ts:377`'s
+        `meta.lane1 === undefined` check always takes the same-lane shift
+        branch when no lane is declared, so `routeEdge` never reaches
+        `crossLaneMiddleY` for them. Their 35/48, 8/26, 50/63 `--align`
+        residuals are an unrelated, unread mechanism.
+      - T0 also found the filing's OWN classification wrong for six of its
+        22 rows, corrected in `plans/activity-loop-lane-translate/
+        fixtures.md`: `judatu-15-xize591`/`gesogi-81-xoma900`/
+        `bulasi-17-vafa634` ("both builders") and `tobajo-64-mipi810`
+        ("repeat, cross-lane") reach NEITHER `while-back` NOR a cross-lane
+        repeat shape (instrumented directly at `walk-while-branch.ts:185`/
+        `walk-repeat.ts:240,345`, not inferred from the `.puml` text);
+        `bulasi` declares only one swimlane so `Swimlanes.java:352`'s
+        `size() > 1` gate never runs `drawWhenSwimlanes`. Their align
+        residuals (29/42, 78/105, 44/55, 91/170) are real but out of this
+        mission's scope — re-file as a separate `activity-lane-align-
+        residuals` filing once T4's sweep confirms they are still
+        unexplained after the five shapes land.
+      - T0 found a shape the filing did not name: `FtileRepeat.ConnectionOut`
+        is independently `ConnectionTranslatable` and crosses lanes even
+        when the repeat's back-connection itself resolves to same-lane
+        `simple1`/`simple2` (`rujuxa-07-neco067`, `megara-21-rumi574`, plus
+        `becanu-19-diti597` which also reaches `complex1`) — folded into
+        T3's `repeat-out` task, not a new filing.
+      - T6 (2026-09-20) re-files the six residuals T4 named (all outside
+        the mission's write-set; cites in `plans/activity-loop-lane-
+        translate/fixtures.md` "Residuals handed to T6"):
+        - **`activity-canvas-minmax-pass`** — residual (d): the jar sizes
+          the canvas in a SEPARATE full `drawU` pass (`Swimlanes.java:
+          455-457` -> `getMinMax` `:483-487` -> `TextBlockUtils.java:138-
+          141`) that runs `Cross` after the lane translates are fixed, so a
+          translated back-edge's `xx` run widens the CANVAS but never a
+          lane (`UGraphicInterceptorAllSwimlanes.java:129-143` gates
+          per-lane). Ours folds the edge into `assign-coordinates-full.ts#
+          computeBounds`'s one `maxX`; `ruzica-16-deli877` canvas 450 vs
+          golden 528.
+        - **`activity-emphasize-tip-order`** — residual (e): `renderer.ts#
+          renderEdge` emits segments, terminal tip, then the emphasize tip;
+          `Worm.java:133-143,179-183` emits the emphasize polygon inline
+          BEFORE its matching segment's `ULine`, end decoration last.
+          Costs one aligned element each on `kudedo-31-pafi082` and
+          `mafete-03-rapa918`; a pure element-order fix in `renderer.ts`.
+        - **`activity-lane-align-residuals`** — residuals (a)/(b)/(c) plus
+          the T0-reclassified rows: `kijazo-83-kipu485` inherits a
+          pre-existing body/header node-position divergence (rect dy 20.25,
+          header dy 5.5, so the mid-arrow anchor is 12.9 px off although
+          the shape is right), lane-1 width 155.8 vs 193.8, and the
+          while-exit dog-leg (+2 lines; `FtileWhile.ConnectionOut`,
+          `:465`, not translatable); `judatu`/`gesogi`/`bulasi`/`tobajo`
+          (29/42, 78/105, 44/55, 91/170 aligned, all same-lane) and
+          `camavo`/`vupuse`/`zepima` (no lanes). None is a translate
+          shape; read each with `--dump` before naming a mechanism.
+        - `activity-loop-backward` (already filed above) additionally owns
+          `ConnectionBackBackward1/2#drawTranslate` (`FtileWhile.java:
+          313-408`, `FtileRepeat.java:406-536`), out of this mission by D8.
+        - `FtileRepeat.ConnectionBackSimple1/2#drawTranslate` are ported
+          (`swimlane-loop-translate-repeat.ts`) but UNREACHABLE in the jar
+          under the default `INSIDE_HEXAGON` style (`FtileRepeat.java:136,
+          149,152,188`: both diamonds share the lane whenever Simple1/2 is
+          selected); no golden can exercise them. Not a filing, a note.
     - **`activity-repeat-break-welding`** — filed 2026-09-16 by
       `activity-loop-tile-port` T6. The jar welds `break`s inside a repeat
       exactly as inside a while (`FtileFactoryDelegatorRepeat.java:123`

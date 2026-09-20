@@ -30,6 +30,7 @@ import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
 
 export const LAYOUT_MARGIN = 12;
@@ -68,15 +69,27 @@ export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefin
   out.nodes.push(node);
 }
 
+/**
+ * `pushEdge`'s trailing parameter: a bare {@link EdgeShape} (every existing
+ * call site -- fork/if-long-horizontal's three non-default shapes) or,
+ * for a `while`/`repeat` back-edge that also carries a translate tag
+ * (mission `activity-loop-lane-translate`, T2/T3), an object bundling both.
+ * A single parameter keeps `pushEdge` at the file's 5-parameter limit
+ * without touching the three call sites that already pass a bare shape.
+ */
+export type PushEdgeRouting = EdgeShape | { readonly shape?: EdgeShape; readonly loop?: LoopTranslate };
+
 export function pushEdge(
   out: Out,
   points: GPoint[],
   lane1: string | undefined,
   lane2: string | undefined,
-  shape: EdgeShape = 'default',
+  routing: PushEdgeRouting = 'default',
 ): void {
+  const shape = typeof routing === 'string' ? routing : (routing.shape ?? 'default');
+  const loop = typeof routing === 'string' ? undefined : routing.loop;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
-  out.edgeMeta.push({ lane1, lane2, shape });
+  out.edgeMeta.push({ lane1, lane2, shape, ...(loop !== undefined ? { loop } : {}) });
 }
 
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {

@@ -1,0 +1,76 @@
+=== ALIGN katopo-68-xajo866 ===
+katopo-68-xajo866:
+  polygon: ours=13 jar=12
+  line: ours=12 jar=11
+  text: ours=3 jar=3
+  rect: ours=1 jar=1
+  alignment: 18/29
+=== LANES katopo-68-xajo866 ===
+diamond/hexagon[0]: ours=? jar=?
+diamond/hexagon[1]: ours=? jar=?
+diamond/hexagon[2]: ours=? jar=?
+=== DUMP katopo-68-xajo866 ===
+OURS:
+  [0] <ellipse> x=62.675 lane=?
+  [1] <polygon> x=62.675 lane=?
+  [2] <rect> x=62.675 lane=?
+  [3] <text> x=32 lane=?
+  [4] <polygon> x=62.675000000000004 lane=?
+  [5] <text> x=62.675 lane=?
+  [6] <polygon> x=62.675000000000004 lane=?
+  [7] <text> x=62.675 lane=?
+  [8] <ellipse> x=62.675 lane=?
+  [9] <ellipse> x=62.675 lane=?
+  [10] <line> x=62.675 lane=?
+  [11] <polygon> x=62.675 lane=?
+  [12] <line> x=95.01249999999999 lane=?
+  [13] <line> x=115.35 lane=?
+  [14] <line> x=109.35 lane=?
+  [15] <polygon> x=109.85 lane=?
+  [16] <polygon> x=115.35 lane=?
+  [17] <line> x=62.675 lane=?
+  [18] <polygon> x=62.675 lane=?
+  [19] <line> x=62.675 lane=?
+  [20] <polygon> x=62.675 lane=?
+  [21] <line> x=104.01249999999999 lane=?
+  [22] <line> x=133.35 lane=?
+  [23] <line> x=104.01249999999999 lane=?
+  [24] <polygon> x=81.175 lane=?
+  [25] <polygon> x=133.35 lane=?
+  [26] <line> x=62.675 lane=?
+  [27] <polygon> x=62.675 lane=?
+  [28] <line> x=62.675 lane=?
+  [29] <polygon> x=62.675 lane=?
+  [30] <line> x=62.675 lane=?
+  [31] <polygon> x=62.675 lane=?
+JAR:
+  [0] <ellipse> x=56.675 lane=?
+  [1] <rect> x=56.675 lane=?
+  [2] <text> x=26 lane=?
+  [3] <polygon> x=54.96071428571429 lane=?
+  [4] <text> x=44.781 lane=?
+  [5] <polygon> x=56.675 lane=?
+  [6] <polygon> x=54.96071428571429 lane=?
+  [7] <text> x=44.781 lane=?
+  [8] <ellipse> x=56.675 lane=?
+  [9] <ellipse> x=56.675 lane=?
+  [10] <line> x=56.675 lane=?
+  [11] <polygon> x=56.675 lane=?
+  [12] <line> x=95.01249999999999 lane=?
+  [13] <polygon> x=109.35 lane=?
+  [14] <line> x=109.35 lane=?
+  [15] <line> x=103.35 lane=?
+  [16] <polygon> x=103.85 lane=?
+  [17] <line> x=56.675 lane=?
+  [18] <polygon> x=56.675 lane=?
+  [19] <line> x=104.01249999999999 lane=?
+  [20] <polygon> x=127.35 lane=?
+  [21] <line> x=127.35 lane=?
+  [22] <line> x=98.01249999999999 lane=?
+  [23] <polygon> x=75.175 lane=?
+  [24] <line> x=56.675 lane=?
+  [25] <polygon> x=56.675 lane=?
+  [26] <line> x=56.675 lane=?
+  [27] <polygon> x=56.675 lane=?
+  [28] <line> x=56.675 lane=?
+  [29] <polygon> x=56.675 lane=?

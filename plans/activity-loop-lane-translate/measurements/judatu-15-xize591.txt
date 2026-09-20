@@ -1,0 +1,232 @@
+=== ALIGN judatu-15-xize591 ===
+judatu-15-xize591:
+  polygon: ours=34 jar=34
+  line: ours=48 jar=48
+  text: ours=15 jar=15
+  rect: ours=8 jar=8
+  alignment: 78/105
+=== LANES judatu-15-xize591 ===
+split/join line[0]: ours=0 jar=0
+split/join line[1]: ours=1 jar=1
+split/join line[2]: ours=1 jar=1
+split/join line[3]: ours=1 jar=1
+diamond/hexagon[0]: ours=1 jar=1
+diamond/hexagon[1]: ours=1 jar=1
+diamond/hexagon[2]: ours=1 jar=1
+diamond/hexagon[3]: ours=1 jar=1
+diamond/hexagon[4]: ours=1 jar=1
+diamond/hexagon[5]: ours=1 jar=1
+diamond/hexagon[6]: ours=1 jar=1
+=== DUMP judatu-15-xize591 ===
+OURS:
+  [0] <rect> x=307.6155 lane=0
+  [1] <line> x=135.219 lane=0
+  [2] <rect> x=59.675 lane=0
+  [3] <text> x=32 lane=0
+  [4] <rect> x=210.7625 lane=0
+  [5] <text> x=117.35 lane=0
+  [6] <line> x=17 lane=0
+  [7] <rect> x=462.37149999999997 lane=1
+  [8] <text> x=459.034 lane=1
+  [9] <polygon> x=462.372 lane=1
+  [10] <line> x=510.964 lane=1
+  [11] <polygon> x=441.03400000000005 lane=1
+  [12] <text> x=367.059 lane=1
+  [13] <rect> x=441.0345 lane=1
+  [14] <text> x=437.697 lane=1
+  [15] <polygon> x=441.03400000000005 lane=1
+  [16] <text> x=387.512 lane=1
+  [17] <text> x=358.394 lane=1
+  [18] <rect> x=365.5125 lane=1
+  [19] <text> x=362.175 lane=1
+  [20] <rect> x=516.5565 lane=1
+  [21] <text> x=513.219 lane=1
+  [22] <polygon> x=441.034 lane=1
+  [23] <rect> x=580.8935 lane=1
+  [24] <text> x=577.556 lane=1
+  [25] <line> x=510.964 lane=1
+  [26] <polygon> x=462.372 lane=1
+  [27] <text> x=459.312 lane=1
+  [28] <text> x=466.372 lane=1
+  [29] <polygon> x=462.372 lane=1
+  [30] <polygon> x=462.372 lane=1
+  [31] <text> x=380.731 lane=1
+  [32] <line> x=393.2735 lane=1
+  [33] <line> x=319.175 lane=1
+  [34] <line> x=599.231 lane=?
+  [35] <line> x=59.675 lane=0
+  [36] <polygon> x=59.675 lane=0
+  [37] <line> x=210.763 lane=0
+  [38] <polygon> x=210.763 lane=0
+  [39] <line> x=370.512 lane=1
+  [40] <line> x=365.512 lane=1
+  [41] <polygon> x=365.512 lane=1
+  [42] <line> x=511.55600000000004 lane=1
+  [43] <line> x=516.556 lane=1
+  [44] <polygon> x=516.556 lane=1
+  [45] <line> x=365.512 lane=1
+  [46] <line> x=397.273 lane=1
+  [47] <polygon> x=422.534 lane=1
+  [48] <line> x=516.556 lane=1
+  [49] <line> x=484.795 lane=1
+  [50] <polygon> x=459.534 lane=1
+  [51] <line> x=441.034 lane=1
+  [52] <polygon> x=441.034 lane=1
+  [53] <line> x=441.034 lane=1
+  [54] <polygon> x=441.034 lane=1
+  [55] <line> x=441.034 lane=1
+  [56] <line> x=497.295 lane=1
+  [57] <line> x=553.556 lane=1
+  [58] <line> x=540.2825 lane=1
+  [59] <polygon> x=533.509 lane=1
+  [60] <polygon> x=553.556 lane=1
+  [61] <line> x=346.617 lane=1
+  [62] <line> x=338.175 lane=1
+  [63] <polygon> x=338.175 lane=1
+  [64] <line> x=389.60450000000003 lane=1
+  [65] <line> x=441.034 lane=1
+  [66] <polygon> x=441.034 lane=1
+  [67] <line> x=580.894 lane=1
+  [68] <polygon> x=580.894 lane=1
+  [69] <line> x=441.034 lane=1
+  [70] <polygon> x=441.034 lane=1
+  [71] <line> x=580.894 lane=1
+  [72] <polygon> x=580.894 lane=1
+  [73] <line> x=462.372 lane=1
+  [74] <polygon> x=462.372 lane=1
+  [75] <line> x=552.3015 lane=1
+  [76] <line> x=618.231 lane=?
+  [77] <line> x=546.3015 lane=1
+  [78] <polygon> x=480.872 lane=1
+  [79] <polygon> x=618.231 lane=?
+  [80] <line> x=462.372 lane=1
+  [81] <polygon> x=462.372 lane=1
+  [82] <line> x=462.372 lane=1
+  [83] <polygon> x=462.372 lane=1
+  [84] <line> x=596.1220000000001 lane=1
+  [85] <line> x=636.231 lane=?
+  [86] <line> x=555.3015 lane=1
+  [87] <polygon> x=480.872 lane=1
+  [88] <polygon> x=636.231 lane=?
+  [89] <line> x=462.372 lane=1
+  [90] <polygon> x=462.372 lane=1
+  [91] <line> x=462.372 lane=1
+  [92] <polygon> x=462.372 lane=1
+  [93] <line> x=462.372 lane=1
+  [94] <polygon> x=462.372 lane=1
+  [95] <line> x=210.763 lane=0
+  [96] <line> x=336.5675 lane=1
+  [97] <line> x=462.372 lane=1
+  [98] <polygon> x=462.372 lane=1
+  [99] <line> x=59.675 lane=0
+  [100] <line> x=191.925 lane=0
+  [101] <line> x=324.175 lane=1
+  [102] <polygon> x=324.175 lane=1
+  [103] <text> x=162.069 lane=0
+  [104] <text> x=453.184 lane=1
+JAR:
+  [0] <rect> x=335.6155 lane=1
+  [1] <line> x=139.219 lane=0
+  [2] <rect> x=63.675 lane=0
+  [3] <text> x=36 lane=0
+  [4] <rect> x=214.7625 lane=0
+  [5] <text> x=121.35 lane=0
+  [6] <line> x=20 lane=0
+  [7] <rect> x=469.37149999999997 lane=1
+  [8] <text> x=466.034 lane=1
+  [9] <line> x=517.9639999999999 lane=1
+  [10] <rect> x=448.0345 lane=1
+  [11] <text> x=444.697 lane=1
+  [12] <polygon> x=440.3885714285714 lane=1
+  [13] <text> x=394.513 lane=1
+  [14] <text> x=365.394 lane=1
+  [15] <rect> x=372.5125 lane=1
+  [16] <text> x=369.175 lane=1
+  [17] <rect> x=523.5565 lane=1
+  [18] <text> x=520.219 lane=1
+  [19] <polygon> x=448.034 lane=1
+  [20] <polygon> x=437.4661428571429 lane=1
+  [21] <text> x=374.059 lane=1
+  [22] <rect> x=587.8935 lane=1
+  [23] <text> x=584.556 lane=1
+  [24] <line> x=517.9639999999999 lane=1
+  [25] <polygon> x=467.65771428571423 lane=1
+  [26] <text> x=473.372 lane=1
+  [27] <text> x=466.313 lane=1
+  [28] <polygon> x=469.372 lane=1
+  [29] <polygon> x=469.372 lane=1
+  [30] <polygon> x=457.70899999999995 lane=1
+  [31] <text> x=387.731 lane=1
+  [32] <line> x=398.2735 lane=1
+  [33] <line> x=322.175 lane=1
+  [34] <line> x=652.231 lane=?
+  [35] <line> x=63.675 lane=0
+  [36] <polygon> x=63.675 lane=0
+  [37] <line> x=214.763 lane=0
+  [38] <polygon> x=214.763 lane=0
+  [39] <line> x=377.513 lane=1
+  [40] <line> x=372.513 lane=1
+  [41] <polygon> x=372.513 lane=1
+  [42] <line> x=518.556 lane=1
+  [43] <line> x=523.556 lane=1
+  [44] <polygon> x=523.556 lane=1
+  [45] <line> x=372.513 lane=1
+  [46] <line> x=404.2735 lane=1
+  [47] <polygon> x=429.534 lane=1
+  [48] <line> x=523.556 lane=1
+  [49] <line> x=491.795 lane=1
+  [50] <polygon> x=466.534 lane=1
+  [51] <line> x=448.034 lane=1
+  [52] <polygon> x=448.034 lane=1
+  [53] <line> x=448.034 lane=1
+  [54] <polygon> x=448.034 lane=1
+  [55] <line> x=448.034 lane=1
+  [56] <line> x=504.295 lane=1
+  [57] <polygon> x=560.556 lane=1
+  [58] <line> x=560.556 lane=1
+  [59] <line> x=547.2825 lane=1
+  [60] <polygon> x=540.509 lane=1
+  [61] <line> x=353.617 lane=1
+  [62] <polygon> x=345.175 lane=1
+  [63] <line> x=345.175 lane=1
+  [64] <line> x=396.60450000000003 lane=1
+  [65] <line> x=448.034 lane=1
+  [66] <polygon> x=448.034 lane=1
+  [67] <line> x=448.034 lane=1
+  [68] <polygon> x=448.034 lane=1
+  [69] <line> x=587.894 lane=1
+  [70] <polygon> x=587.894 lane=1
+  [71] <line> x=587.894 lane=1
+  [72] <polygon> x=587.894 lane=1
+  [73] <line> x=469.372 lane=1
+  [74] <polygon> x=469.372 lane=1
+  [75] <line> x=554.3015 lane=1
+  [76] <polygon> x=615.231 lane=1
+  [77] <line> x=615.231 lane=1
+  [78] <line> x=548.3015 lane=1
+  [79] <polygon> x=487.872 lane=1
+  [80] <line> x=469.372 lane=1
+  [81] <polygon> x=469.372 lane=1
+  [82] <line> x=469.372 lane=1
+  [83] <polygon> x=469.372 lane=1
+  [84] <line> x=598.1220000000001 lane=1
+  [85] <polygon> x=633.231 lane=1
+  [86] <line> x=633.231 lane=1
+  [87] <line> x=557.3015 lane=1
+  [88] <polygon> x=487.872 lane=1
+  [89] <line> x=469.372 lane=1
+  [90] <polygon> x=469.372 lane=1
+  [91] <line> x=469.372 lane=1
+  [92] <polygon> x=469.372 lane=1
+  [93] <line> x=469.372 lane=1
+  [94] <polygon> x=469.372 lane=1
+  [95] <line> x=214.763 lane=0
+  [96] <line> x=342.0675 lane=1
+  [97] <line> x=469.372 lane=1
+  [98] <polygon> x=469.372 lane=1
+  [99] <line> x=63.675 lane=0
+  [100] <line> x=195.425 lane=0
+  [101] <line> x=327.175 lane=1
+  [102] <polygon> x=327.175 lane=1
+  [103] <text> x=165.069 lane=0
+  [104] <text> x=481.184 lane=1

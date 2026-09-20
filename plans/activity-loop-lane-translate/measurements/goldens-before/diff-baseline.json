@@ -1,0 +1,3362 @@
+{
+  "$comment": "Per-fixture weightedScore pins for the ACTIVITY oracle corpus. RE-PINNED by activity-klimt-compress T6 (2026-09-10) after T1 (ArrowsRegular) and T5 (klimt/compress ON_X then ON_Y): 253 pins ROSE from T1's per-index arrowhead pairing (pre-named), 3 fell (strictuml/ArrowsTriangle), and T5 moved 6 up / 14 down against the post-T1 state with every riser journaled. The pinned score is comparable only within one comparator regime; see diff-census.json descent and plans/activity-klimt-compress/decision-journal.md. Prior re-pin: activity-parallel-connectors T6 (fa578b8a).",
+  "fixtures": [
+    {
+      "type": "activity",
+      "slug": "activity-creole-table",
+      "status": "baseline",
+      "weightedScore": 51,
+      "diffCount": 17,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "bakopu-96-pudu086",
+      "status": "baseline",
+      "weightedScore": 176,
+      "diffCount": 96,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "barada-07-veca157",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "bareka-88-fusu160",
+      "status": "baseline",
+      "weightedScore": 291,
+      "diffCount": 168,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bazize-75-dedo568",
+      "status": "baseline",
+      "weightedScore": 337,
+      "diffCount": 282,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "bazuma-86-metu353",
+      "status": "baseline",
+      "weightedScore": 141,
+      "diffCount": 107,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "becaje-01-vaji284",
+      "status": "baseline",
+      "weightedScore": 104,
+      "diffCount": 91,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "becanu-19-diti597",
+      "status": "baseline",
+      "weightedScore": 190,
+      "diffCount": 161,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bedezo-44-more709",
+      "status": "baseline",
+      "weightedScore": 166,
+      "diffCount": 138,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "begivo-34-sicu289",
+      "status": "baseline",
+      "weightedScore": 142,
+      "diffCount": 142,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "bepuku-07-vebe062",
+      "status": "baseline",
+      "weightedScore": 303,
+      "diffCount": 283,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "besaga-58-poli497",
+      "status": "baseline",
+      "weightedScore": 313,
+      "diffCount": 244,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "bideta-97-cezo697",
+      "status": "baseline",
+      "weightedScore": 167,
+      "diffCount": 141,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "bidosa-98-veca008",
+      "status": "baseline",
+      "weightedScore": 179,
+      "diffCount": 133,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "bigide-91-bise382",
+      "status": "baseline",
+      "weightedScore": 98,
+      "diffCount": 79,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "biguku-39-voxu233",
+      "status": "baseline",
+      "weightedScore": 134,
+      "diffCount": 67,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "biredi-08-bama025",
+      "status": "baseline",
+      "weightedScore": 283,
+      "diffCount": 263,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "bixefi-77-moki051",
+      "status": "baseline",
+      "weightedScore": 158,
+      "diffCount": 158,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "bizono-61-sasa740",
+      "status": "baseline",
+      "weightedScore": 268,
+      "diffCount": 179,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bocaga-53-nale241",
+      "status": "baseline",
+      "weightedScore": 118,
+      "diffCount": 91,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "bolizi-92-pele824",
+      "status": "baseline",
+      "weightedScore": 358,
+      "diffCount": 207,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "boxefe-81-situ725",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "boxoto-53-sifo232",
+      "status": "baseline",
+      "weightedScore": 888,
+      "diffCount": 829,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bozido-07-geze049",
+      "status": "baseline",
+      "weightedScore": 239,
+      "diffCount": 84,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "bozuro-33-celo170",
+      "status": "baseline",
+      "weightedScore": 198,
+      "diffCount": 155,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bugaja-31-jaso630",
+      "status": "baseline",
+      "weightedScore": 190,
+      "diffCount": 190,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "bulasi-17-vafa634",
+      "status": "baseline",
+      "weightedScore": 334,
+      "diffCount": 159,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bumaca-51-kece901",
+      "status": "baseline",
+      "weightedScore": 210,
+      "diffCount": 143,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "bunoxu-10-jabe604",
+      "status": "baseline",
+      "weightedScore": 214,
+      "diffCount": 156,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "caburo-70-buki284",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "caciva-80-kene990",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "cagoze-40-tete366",
+      "status": "baseline",
+      "weightedScore": 121,
+      "diffCount": 95,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "cakeca-72-kara622",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "calenu-74-vigo098",
+      "status": "baseline",
+      "weightedScore": 273,
+      "diffCount": 273,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "camavo-50-kaku123",
+      "status": "baseline",
+      "weightedScore": 396,
+      "diffCount": 216,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "carapo-31-bisi880",
+      "status": "baseline",
+      "weightedScore": 89,
+      "diffCount": 63,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "cejupe-34-muti621",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "cemagu-66-vazo965",
+      "status": "baseline",
+      "weightedScore": 195,
+      "diffCount": 99,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "cemipu-87-dinu624",
+      "status": "baseline",
+      "weightedScore": 218,
+      "diffCount": 192,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "cetica-88-toke482",
+      "status": "baseline",
+      "weightedScore": 91,
+      "diffCount": 91,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "ciceto-21-zanu057",
+      "status": "baseline",
+      "weightedScore": 197,
+      "diffCount": 197,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "cifafo-49-jazi415",
+      "status": "baseline",
+      "weightedScore": 140,
+      "diffCount": 140,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "cigagu-31-rime196",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "ciloke-34-pumi198",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "citire-32-mive114",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "cixave-47-milo698",
+      "status": "baseline",
+      "weightedScore": 227,
+      "diffCount": 154,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "cizixu-00-koro700",
+      "status": "baseline",
+      "weightedScore": 24,
+      "diffCount": 24,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "copisa-69-xisi273",
+      "status": "baseline",
+      "weightedScore": 138,
+      "diffCount": 125,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "covage-54-pine573",
+      "status": "baseline",
+      "weightedScore": 182,
+      "diffCount": 182,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "cubida-55-meku256",
+      "status": "baseline",
+      "weightedScore": 80,
+      "diffCount": 34,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "cufega-65-beji958",
+      "status": "baseline",
+      "weightedScore": 258,
+      "diffCount": 129,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "cugezi-99-tire097",
+      "status": "baseline",
+      "weightedScore": 209,
+      "diffCount": 209,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "cujoni-21-somi079",
+      "status": "baseline",
+      "weightedScore": 155,
+      "diffCount": 103,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "cutabu-59-cilo276",
+      "status": "baseline",
+      "weightedScore": 159,
+      "diffCount": 106,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "dacuga-41-popo038",
+      "status": "baseline",
+      "weightedScore": 214,
+      "diffCount": 150,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "dakesa-98-mano758",
+      "status": "baseline",
+      "weightedScore": 22,
+      "diffCount": 11,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "darote-51-kuta407",
+      "status": "baseline",
+      "weightedScore": 258,
+      "diffCount": 258,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "daxare-39-buci637",
+      "status": "baseline",
+      "weightedScore": 182,
+      "diffCount": 182,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "debofa-60-mude568",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "decudi-92-bisu741",
+      "status": "baseline",
+      "weightedScore": 382,
+      "diffCount": 285,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "delide-30-teva601",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "demibe-40-moda439",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "dexero-99-ziru660",
+      "status": "baseline",
+      "weightedScore": 93,
+      "diffCount": 93,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "digexe-63-zifu774",
+      "status": "baseline",
+      "weightedScore": 269,
+      "diffCount": 140,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "dirame-64-cica627",
+      "status": "baseline",
+      "weightedScore": 75,
+      "diffCount": 75,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "disemi-67-keva276",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 23,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "dixiku-28-guzo497",
+      "status": "baseline",
+      "weightedScore": 206,
+      "diffCount": 131,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "dotuzi-75-nape254",
+      "status": "baseline",
+      "weightedScore": 259,
+      "diffCount": 166,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "dozaxu-98-xetu961",
+      "status": "baseline",
+      "weightedScore": 129,
+      "diffCount": 116,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "doziki-93-rosi997",
+      "status": "baseline",
+      "weightedScore": 310,
+      "diffCount": 223,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "dulate-94-bupu593",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "dulezi-77-sana210",
+      "status": "baseline",
+      "weightedScore": 158,
+      "diffCount": 158,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "dunejo-33-divo189",
+      "status": "baseline",
+      "weightedScore": 15,
+      "diffCount": 15,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "dupopo-44-deto131",
+      "status": "baseline",
+      "weightedScore": 153,
+      "diffCount": 153,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "duzumu-46-geve509",
+      "status": "baseline",
+      "weightedScore": 31,
+      "diffCount": 31,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fabexi-81-dife869",
+      "status": "baseline",
+      "weightedScore": 66,
+      "diffCount": 66,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fabule-54-pili300",
+      "status": "baseline",
+      "weightedScore": 25,
+      "diffCount": 13,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fabuli-92-vemo727",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 23,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fakece-07-koga025",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "farexi-86-xanu521",
+      "status": "baseline",
+      "weightedScore": 28,
+      "diffCount": 28,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fatuzu-07-cevu894",
+      "status": "baseline",
+      "weightedScore": 273,
+      "diffCount": 197,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "feceme-58-xodo415",
+      "status": "baseline",
+      "weightedScore": 117,
+      "diffCount": 117,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "felega-00-saxi785",
+      "status": "baseline",
+      "weightedScore": 150,
+      "diffCount": 123,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "femaco-88-bufe808",
+      "status": "baseline",
+      "weightedScore": 43,
+      "diffCount": 43,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fetizo-39-jace641",
+      "status": "baseline",
+      "weightedScore": 220,
+      "diffCount": 200,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "fibafo-22-foze119",
+      "status": "baseline",
+      "weightedScore": 503,
+      "diffCount": 378,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "fikuki-99-kulu790",
+      "status": "baseline",
+      "weightedScore": 115,
+      "diffCount": 50,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "filela-40-rumo296",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "firibi-00-puki721",
+      "status": "baseline",
+      "weightedScore": 300,
+      "diffCount": 300,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "fisaca-74-deco063",
+      "status": "baseline",
+      "weightedScore": 43,
+      "diffCount": 43,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fivama-51-cusa142",
+      "status": "baseline",
+      "weightedScore": 147,
+      "diffCount": 147,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "fivone-96-nalo453",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "fofele-65-lozo631",
+      "status": "baseline",
+      "weightedScore": 29,
+      "diffCount": 29,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "foludi-80-gilo247",
+      "status": "baseline",
+      "weightedScore": 116,
+      "diffCount": 75,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "fomapa-90-bore251",
+      "status": "baseline",
+      "weightedScore": 104,
+      "diffCount": 104,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fonabu-93-xama593",
+      "status": "baseline",
+      "weightedScore": 113,
+      "diffCount": 87,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "fonebe-54-save009",
+      "status": "baseline",
+      "weightedScore": 25,
+      "diffCount": 25,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fotamo-01-rupi481",
+      "status": "baseline",
+      "weightedScore": 42,
+      "diffCount": 42,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fovaja-48-leso567",
+      "status": "baseline",
+      "weightedScore": 424,
+      "diffCount": 206,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "fufefa-17-faje066",
+      "status": "baseline",
+      "weightedScore": 158,
+      "diffCount": 158,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "fukika-81-gite897",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gabeme-89-tiko230",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gacaja-15-keko600",
+      "status": "baseline",
+      "weightedScore": 408,
+      "diffCount": 356,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "gakelo-29-neno787",
+      "status": "baseline",
+      "weightedScore": 193,
+      "diffCount": 167,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "ganaku-47-muko252",
+      "status": "baseline",
+      "weightedScore": 242,
+      "diffCount": 166,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "garuga-34-debe901",
+      "status": "baseline",
+      "weightedScore": 121,
+      "diffCount": 121,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "gaxezi-48-zesa921",
+      "status": "baseline",
+      "weightedScore": 68,
+      "diffCount": 46,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "gebuzi-30-nulo391",
+      "status": "baseline",
+      "weightedScore": 124,
+      "diffCount": 124,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "gelono-70-zuce760",
+      "status": "baseline",
+      "weightedScore": 227,
+      "diffCount": 189,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "gepetu-15-seba834",
+      "status": "baseline",
+      "weightedScore": 42,
+      "diffCount": 42,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "geremo-94-tecu179",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gesogi-81-xoma900",
+      "status": "baseline",
+      "weightedScore": 374,
+      "diffCount": 223,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "getene-72-dido571",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gevaxi-80-tone223",
+      "status": "baseline",
+      "weightedScore": 240,
+      "diffCount": 171,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "gimegi-77-xidu727",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 23,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "giteso-65-mefo026",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gitoke-38-beme495",
+      "status": "baseline",
+      "weightedScore": 533,
+      "diffCount": 513,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "givanu-33-kire967",
+      "status": "baseline",
+      "weightedScore": 207,
+      "diffCount": 178,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "gizore-52-fode894",
+      "status": "baseline",
+      "weightedScore": 15,
+      "diffCount": 15,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "gofebi-87-zeka817",
+      "status": "baseline",
+      "weightedScore": 169,
+      "diffCount": 112,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "gokagi-91-mise154",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gonixe-93-zaza537",
+      "status": "baseline",
+      "weightedScore": 9,
+      "diffCount": 9,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "goxoni-69-lemo511",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 23,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "guceja-66-tola192",
+      "status": "baseline",
+      "weightedScore": 140,
+      "diffCount": 111,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "gudute-55-nulo344",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gufuma-85-zoce945",
+      "status": "baseline",
+      "weightedScore": 83,
+      "diffCount": 48,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "gugala-11-suce270",
+      "status": "baseline",
+      "weightedScore": 200,
+      "diffCount": 200,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "jafuli-91-sota277",
+      "status": "baseline",
+      "weightedScore": 272,
+      "diffCount": 252,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jageti-56-kume076",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jagove-43-nako107",
+      "status": "baseline",
+      "weightedScore": 307,
+      "diffCount": 229,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jakuco-69-dari135",
+      "status": "baseline",
+      "weightedScore": 82,
+      "diffCount": 82,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "jamana-83-gige126",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "japeru-28-guku001",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "javedu-70-vaxo310",
+      "status": "baseline",
+      "weightedScore": 164,
+      "diffCount": 97,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "javivi-33-poma496",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jecoxu-17-zama003",
+      "status": "baseline",
+      "weightedScore": 99,
+      "diffCount": 86,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jevoce-05-mumi686",
+      "status": "baseline",
+      "weightedScore": 374,
+      "diffCount": 361,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jevofu-58-fazo194",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jidefi-14-kafe151",
+      "status": "baseline",
+      "weightedScore": 26,
+      "diffCount": 26,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "jipapo-14-kevu587",
+      "status": "baseline",
+      "weightedScore": 98,
+      "diffCount": 85,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jisema-42-rapa121",
+      "status": "baseline",
+      "weightedScore": 142,
+      "diffCount": 129,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "jodagi-12-xatu540",
+      "status": "baseline",
+      "weightedScore": 42,
+      "diffCount": 42,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "jogami-42-jaji869",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jokaxi-40-toko207",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jonave-00-xabi793",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jucidi-98-zato093",
+      "status": "baseline",
+      "weightedScore": 243,
+      "diffCount": 202,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "judatu-15-xize591",
+      "status": "baseline",
+      "weightedScore": 747,
+      "diffCount": 422,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "jufefu-66-josa392",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "juleki-83-xusi470",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jupivo-67-gidi531",
+      "status": "baseline",
+      "weightedScore": 385,
+      "diffCount": 237,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "jupoxe-15-sugo110",
+      "status": "baseline",
+      "weightedScore": 1909,
+      "diffCount": 757,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "kafevi-44-tesu096",
+      "status": "baseline",
+      "weightedScore": 126,
+      "diffCount": 113,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "kasadu-53-tuki533",
+      "status": "baseline",
+      "weightedScore": 205,
+      "diffCount": 138,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "katopo-68-xajo866",
+      "status": "baseline",
+      "weightedScore": 178,
+      "diffCount": 140,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "kavoro-11-jife299",
+      "status": "baseline",
+      "weightedScore": 146,
+      "diffCount": 86,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "kemedu-83-vipa115",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "kenizo-43-siro273",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "kepavi-26-sasu141",
+      "status": "baseline",
+      "weightedScore": 179,
+      "diffCount": 133,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "ketajo-72-rula535",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "ketiro-31-nazo312",
+      "status": "baseline",
+      "weightedScore": 107,
+      "diffCount": 107,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "kiceze-91-luke737",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "kijazo-83-kipu485",
+      "status": "baseline",
+      "weightedScore": 208,
+      "diffCount": 160,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "kitupi-32-jexo155",
+      "status": "baseline",
+      "weightedScore": 175,
+      "diffCount": 129,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "kivada-26-koti213",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "kodaku-19-moni161",
+      "status": "baseline",
+      "weightedScore": 293,
+      "diffCount": 200,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "kodiji-34-mofe202",
+      "status": "baseline",
+      "weightedScore": 6,
+      "diffCount": 6,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "kojivo-44-ceti956",
+      "status": "baseline",
+      "weightedScore": 107,
+      "diffCount": 107,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "kubaso-31-gaxu491",
+      "status": "baseline",
+      "weightedScore": 9,
+      "diffCount": 9,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "kudedo-31-pafi082",
+      "status": "baseline",
+      "weightedScore": 174,
+      "diffCount": 148,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "kuzeru-09-voke075",
+      "status": "baseline",
+      "weightedScore": 93,
+      "diffCount": 93,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "labala-74-juki864",
+      "status": "baseline",
+      "weightedScore": 134,
+      "diffCount": 134,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "lacuci-13-nogo718",
+      "status": "baseline",
+      "weightedScore": 135,
+      "diffCount": 109,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lafilo-69-tuti771",
+      "status": "baseline",
+      "weightedScore": 147,
+      "diffCount": 120,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lajuxi-63-nopo039",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 23,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "lapura-36-kavu144",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 11 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "laxibe-66-teme800",
+      "status": "baseline",
+      "weightedScore": 62,
+      "diffCount": 46,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "leduvi-16-voli986",
+      "status": "baseline",
+      "weightedScore": 345,
+      "diffCount": 248,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lefobe-62-gipe702",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "letare-59-gore448",
+      "status": "baseline",
+      "weightedScore": 72,
+      "diffCount": 39,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "letuke-04-poza319",
+      "status": "baseline",
+      "weightedScore": 183,
+      "diffCount": 114,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "levuma-67-cego489",
+      "status": "baseline",
+      "weightedScore": 276,
+      "diffCount": 219,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "lidefe-01-vaki092",
+      "status": "baseline",
+      "weightedScore": 141,
+      "diffCount": 74,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "lifeve-53-zubi598",
+      "status": "baseline",
+      "weightedScore": 149,
+      "diffCount": 101,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "liteza-62-nopo771",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "livigo-47-negi605",
+      "status": "baseline",
+      "weightedScore": 122,
+      "diffCount": 96,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lokane-30-dinu378",
+      "status": "baseline",
+      "weightedScore": 241,
+      "diffCount": 241,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "lopone-15-xiki477",
+      "status": "baseline",
+      "weightedScore": 337,
+      "diffCount": 261,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "loxija-71-joku558",
+      "status": "baseline",
+      "weightedScore": 288,
+      "diffCount": 190,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "lubapi-40-siji634",
+      "status": "baseline",
+      "weightedScore": 49,
+      "diffCount": 49,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "lufamo-62-xavo766",
+      "status": "baseline",
+      "weightedScore": 296,
+      "diffCount": 269,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lukoxa-16-cecu095",
+      "status": "baseline",
+      "weightedScore": 137,
+      "diffCount": 110,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "luxido-91-covi016",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mabuke-20-muco282",
+      "status": "baseline",
+      "weightedScore": 312,
+      "diffCount": 250,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "maduja-30-xiri319",
+      "status": "baseline",
+      "weightedScore": 295,
+      "diffCount": 268,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "mafete-03-rapa918",
+      "status": "baseline",
+      "weightedScore": 177,
+      "diffCount": 151,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "maketa-43-juja264",
+      "status": "baseline",
+      "weightedScore": 301,
+      "diffCount": 204,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "manata-12-rido730",
+      "status": "baseline",
+      "weightedScore": 277,
+      "diffCount": 239,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "megara-21-rumi574",
+      "status": "baseline",
+      "weightedScore": 245,
+      "diffCount": 178,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "mepeze-15-nuge493",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mezuce-12-gemi988",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mifejo-31-sovi184",
+      "status": "baseline",
+      "weightedScore": 108,
+      "diffCount": 65,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "mijoso-20-sato362",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "misiji-27-buje656",
+      "status": "baseline",
+      "weightedScore": 173,
+      "diffCount": 173,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "mojezi-43-gamu360",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "molexa-46-redi999",
+      "status": "baseline",
+      "weightedScore": 52,
+      "diffCount": 52,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "movexa-27-rexe388",
+      "status": "baseline",
+      "weightedScore": 167,
+      "diffCount": 141,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "mudobi-07-biji996",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mufixi-71-koma752",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mukaxi-27-xero900",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "mulida-55-ceja768",
+      "status": "baseline",
+      "weightedScore": 211,
+      "diffCount": 211,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "nafaxo-62-boso912",
+      "status": "baseline",
+      "weightedScore": 295,
+      "diffCount": 208,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "nakavu-98-pela661",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "naroji-40-nuke022",
+      "status": "baseline",
+      "weightedScore": 29,
+      "diffCount": 29,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "narota-16-bago100",
+      "status": "baseline",
+      "weightedScore": 9,
+      "diffCount": 9,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "navene-45-cozo466",
+      "status": "baseline",
+      "weightedScore": 542,
+      "diffCount": 466,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "nerete-42-save418",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nesozi-09-zezu092",
+      "status": "baseline",
+      "weightedScore": 127,
+      "diffCount": 90,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "nexitu-74-luga914",
+      "status": "baseline",
+      "weightedScore": 222,
+      "diffCount": 83,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "nijipa-25-pede639",
+      "status": "baseline",
+      "weightedScore": 98,
+      "diffCount": 85,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "nikinu-06-sace939",
+      "status": "baseline",
+      "weightedScore": 212,
+      "diffCount": 186,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "nikivo-06-kaxa873",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "niletu-83-lego826",
+      "status": "baseline",
+      "weightedScore": 51,
+      "diffCount": 17,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "niluji-46-joma773",
+      "status": "baseline",
+      "weightedScore": 40,
+      "diffCount": 40,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "nimusa-16-tiku252",
+      "status": "baseline",
+      "weightedScore": 164,
+      "diffCount": 138,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "ninago-40-dalo726",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nipuxu-11-tefa314",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nisexe-68-vabu320",
+      "status": "baseline",
+      "weightedScore": 68,
+      "diffCount": 46,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "nivese-34-zavo418",
+      "status": "baseline",
+      "weightedScore": 293,
+      "diffCount": 197,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "niviji-21-maco613",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nojije-35-teta491",
+      "status": "baseline",
+      "weightedScore": 254,
+      "diffCount": 220,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "nolubo-93-rula384",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nomeco-93-minu967",
+      "status": "baseline",
+      "weightedScore": 152,
+      "diffCount": 99,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "nonusu-50-nute147",
+      "status": "baseline",
+      "weightedScore": 168,
+      "diffCount": 168,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "norire-15-taka956",
+      "status": "baseline",
+      "weightedScore": 93,
+      "diffCount": 50,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "notuli-49-xugi698",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "novata-87-muti352",
+      "status": "baseline",
+      "weightedScore": 96,
+      "diffCount": 69,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "noxasi-06-nejo322",
+      "status": "baseline",
+      "weightedScore": 191,
+      "diffCount": 191,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "nudonu-37-kaja626",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "numalo-91-pole243",
+      "status": "baseline",
+      "weightedScore": 26,
+      "diffCount": 26,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "nupiko-03-cezu269",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "nupose-71-vido428",
+      "status": "baseline",
+      "weightedScore": 343,
+      "diffCount": 343,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "nusajo-97-bemo713",
+      "status": "baseline",
+      "weightedScore": 122,
+      "diffCount": 96,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "nuzugu-44-pega793",
+      "status": "baseline",
+      "weightedScore": 166,
+      "diffCount": 73,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "pakema-21-xema183",
+      "status": "baseline",
+      "weightedScore": 66,
+      "diffCount": 66,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "patagi-39-jone354",
+      "status": "baseline",
+      "weightedScore": 94,
+      "diffCount": 94,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "pateca-54-lija084",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "pedoco-30-mose082",
+      "status": "baseline",
+      "weightedScore": 169,
+      "diffCount": 143,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "pejima-95-nuxu520",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "pekefu-66-mepa144",
+      "status": "baseline",
+      "weightedScore": 168,
+      "diffCount": 127,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "pekuxe-00-bovi270",
+      "status": "baseline",
+      "weightedScore": 68,
+      "diffCount": 46,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "perate-09-gale335",
+      "status": "baseline",
+      "weightedScore": 187,
+      "diffCount": 89,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "pezubu-98-niba240",
+      "status": "baseline",
+      "weightedScore": 208,
+      "diffCount": 174,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "pifoni-76-duxa505",
+      "status": "baseline",
+      "weightedScore": 247,
+      "diffCount": 145,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "pirofe-41-xama594",
+      "status": "baseline",
+      "weightedScore": 188,
+      "diffCount": 139,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "piruxe-91-zivi081",
+      "status": "baseline",
+      "weightedScore": 73,
+      "diffCount": 32,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "pixako-75-kumi821",
+      "status": "baseline",
+      "weightedScore": 279,
+      "diffCount": 155,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "pixisi-38-kixa563",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 13 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "podelo-13-jaja314",
+      "status": "baseline",
+      "weightedScore": 57,
+      "diffCount": 57,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "pokoro-73-bili712",
+      "status": "baseline",
+      "weightedScore": 322,
+      "diffCount": 187,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "popofi-03-momo442",
+      "status": "baseline",
+      "weightedScore": 303,
+      "diffCount": 229,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "poraji-17-goke817",
+      "status": "baseline",
+      "weightedScore": 61,
+      "diffCount": 48,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "povoju-50-raxi136",
+      "status": "baseline",
+      "weightedScore": 97,
+      "diffCount": 97,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "pucinu-80-nopo009",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "pufuzi-99-vone170",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "pujozo-36-nino158",
+      "status": "baseline",
+      "weightedScore": 159,
+      "diffCount": 133,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "pujumu-36-nelo283",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "putega-59-fuzi707",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "racana-82-zece676",
+      "status": "baseline",
+      "weightedScore": 278,
+      "diffCount": 278,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d53b06ff"
+    },
+    {
+      "type": "activity",
+      "slug": "rarodo-65-fudu505",
+      "status": "baseline",
+      "weightedScore": 16,
+      "diffCount": 16,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "raruzu-62-giro837",
+      "status": "baseline",
+      "weightedScore": 212,
+      "diffCount": 186,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "razuzu-32-faje125",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "rekuxa-78-lidi292",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "relufo-04-fezo835",
+      "status": "baseline",
+      "weightedScore": 179,
+      "diffCount": 112,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "reluvi-59-pifi444",
+      "status": "baseline",
+      "weightedScore": 196,
+      "diffCount": 98,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "rerovo-62-nazo755",
+      "status": "baseline",
+      "weightedScore": 89,
+      "diffCount": 63,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "ribapo-84-xudu593",
+      "status": "baseline",
+      "weightedScore": 187,
+      "diffCount": 89,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "rirefa-62-kucu593",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "roboja-69-susa752",
+      "status": "baseline",
+      "weightedScore": 343,
+      "diffCount": 343,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "roroko-26-coje324",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "rosepa-78-xivi448",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "rosizo-69-mera514",
+      "status": "baseline",
+      "weightedScore": 211,
+      "diffCount": 185,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "rucuga-83-tosu408",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "ruderu-68-dere287",
+      "status": "baseline",
+      "weightedScore": 58,
+      "diffCount": 58,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "rujixe-89-sumo552",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "rujuxa-07-neco067",
+      "status": "baseline",
+      "weightedScore": 467,
+      "diffCount": 405,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "runima-82-jigi009",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 30 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "rurake-60-licu592",
+      "status": "baseline",
+      "weightedScore": 15,
+      "diffCount": 15,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "rurebu-12-nebi203",
+      "status": "baseline",
+      "weightedScore": 152,
+      "diffCount": 99,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "ruzazu-94-meso880",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "ruzica-16-deli877",
+      "status": "baseline",
+      "weightedScore": 545,
+      "diffCount": 388,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "sadovu-51-fata536",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "samavi-13-fuku339",
+      "status": "baseline",
+      "weightedScore": 164,
+      "diffCount": 151,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "saxeku-17-gume203",
+      "status": "baseline",
+      "weightedScore": 164,
+      "diffCount": 137,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "saxuro-16-tezu631",
+      "status": "baseline",
+      "weightedScore": 233,
+      "diffCount": 149,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "secepo-00-febi326",
+      "status": "baseline",
+      "weightedScore": 240,
+      "diffCount": 220,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sesodi-22-lupe361",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "setecu-78-cuko533",
+      "status": "baseline",
+      "weightedScore": 44,
+      "diffCount": 44,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "sifite-87-ziti434",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "sigofi-46-gaja158",
+      "status": "baseline",
+      "weightedScore": 192,
+      "diffCount": 132,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sikino-19-vuca111",
+      "status": "baseline",
+      "weightedScore": 54,
+      "diffCount": 54,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "simuti-16-lece058",
+      "status": "baseline",
+      "weightedScore": 173,
+      "diffCount": 118,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "sofoje-37-tila554",
+      "status": "baseline",
+      "weightedScore": 182,
+      "diffCount": 162,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sojono-24-tufe806",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "sokafe-69-jita472",
+      "status": "baseline",
+      "weightedScore": 197,
+      "diffCount": 197,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sokapa-71-tifi543",
+      "status": "baseline",
+      "weightedScore": 268,
+      "diffCount": 188,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sopape-11-laxo488",
+      "status": "baseline",
+      "weightedScore": 87,
+      "diffCount": 87,
+      "measuredAt": "2026-09-15",
+      "measuredAgainstCommit": "d2eac49b"
+    },
+    {
+      "type": "activity",
+      "slug": "sucice-41-pebi088",
+      "status": "baseline",
+      "weightedScore": 211,
+      "diffCount": 185,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "sufupo-40-fuke080",
+      "status": "baseline",
+      "weightedScore": 49,
+      "diffCount": 49,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "suluni-73-lotu140",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "sutura-08-zeme419",
+      "status": "baseline",
+      "weightedScore": 201,
+      "diffCount": 160,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "suzuci-53-biku826",
+      "status": "baseline",
+      "weightedScore": 105,
+      "diffCount": 105,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "tagixo-41-gapo816",
+      "status": "baseline",
+      "weightedScore": 40,
+      "diffCount": 40,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "tajuxe-32-sexo680",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "tamaxe-36-mono574",
+      "status": "baseline",
+      "weightedScore": 220,
+      "diffCount": 194,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "taxeta-89-mapo546",
+      "status": "baseline",
+      "weightedScore": 9,
+      "diffCount": 9,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "tefuga-86-xefe850",
+      "status": "baseline",
+      "weightedScore": 66,
+      "diffCount": 66,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "tepivu-88-reze603",
+      "status": "baseline",
+      "weightedScore": 195,
+      "diffCount": 99,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "ticeka-12-buli543",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "tirizu-79-niza262",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "tmp1",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "tobajo-64-mipi810",
+      "status": "baseline",
+      "weightedScore": 881,
+      "diffCount": 718,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "todufa-81-gavo441",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "topico-42-fuza478",
+      "status": "baseline",
+      "weightedScore": 40,
+      "diffCount": 40,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "tuneta-22-mega154",
+      "status": "baseline",
+      "weightedScore": 355,
+      "diffCount": 248,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vafupe-19-cima350",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vamazo-19-tufu812",
+      "status": "baseline",
+      "weightedScore": 302,
+      "diffCount": 196,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "vaxiki-78-nice114",
+      "status": "baseline",
+      "weightedScore": 124,
+      "diffCount": 83,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vaxuta-95-cico162",
+      "status": "baseline",
+      "weightedScore": 233,
+      "diffCount": 220,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vebala-15-tade547",
+      "status": "baseline",
+      "weightedScore": 586,
+      "diffCount": 545,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "velodu-59-sada437",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vexula-75-noko098",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vidada-17-xuse810",
+      "status": "baseline",
+      "weightedScore": 214,
+      "diffCount": 188,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vilecu-41-tete416",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vimako-25-mega336",
+      "status": "baseline",
+      "weightedScore": 92,
+      "diffCount": 65,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vimoxa-78-zucu656",
+      "status": "baseline",
+      "weightedScore": 86,
+      "diffCount": 47,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "vivate-04-guso306",
+      "status": "baseline",
+      "weightedScore": 269,
+      "diffCount": 235,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vodobe-33-kefa909",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vokibe-29-vepe451",
+      "status": "baseline",
+      "weightedScore": 131,
+      "diffCount": 85,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "volefo-41-tolo996",
+      "status": "baseline",
+      "weightedScore": 35,
+      "diffCount": 35,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "vozane-63-kepe177",
+      "status": "baseline",
+      "weightedScore": 210,
+      "diffCount": 184,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vubolo-48-cubu499",
+      "status": "baseline",
+      "weightedScore": 235,
+      "diffCount": 155,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "vupuse-73-nuso490",
+      "status": "baseline",
+      "weightedScore": 181,
+      "diffCount": 109,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "xabesu-51-dimi831",
+      "status": "baseline",
+      "weightedScore": 206,
+      "diffCount": 147,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "xarumo-26-zinu467",
+      "status": "baseline",
+      "weightedScore": 193,
+      "diffCount": 167,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "xefalo-73-sabi101",
+      "status": "baseline",
+      "weightedScore": 582,
+      "diffCount": 541,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "xekame-27-geba281",
+      "status": "baseline",
+      "weightedScore": 409,
+      "diffCount": 208,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "xenofo-81-rame803",
+      "status": "baseline",
+      "weightedScore": 137,
+      "diffCount": 137,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "xidamu-85-xoti640",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xigelo-67-sipi599",
+      "status": "baseline",
+      "weightedScore": 203,
+      "diffCount": 203,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "xizola-97-sizu458",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xolazi-74-vamu265",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xoreko-43-noto860",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xoreni-54-xoro817",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xovano-23-tazo278",
+      "status": "baseline",
+      "weightedScore": 375,
+      "diffCount": 260,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "zafoxu-20-xofe568",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zakuke-30-sobi867",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zaloze-31-jibo311",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zamagu-75-vape137",
+      "status": "baseline",
+      "weightedScore": 62,
+      "diffCount": 46,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "zanudo-86-seco241",
+      "status": "baseline",
+      "weightedScore": 28,
+      "diffCount": 28,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "zaxati-90-xacu660",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zedoco-71-guge507",
+      "status": "baseline",
+      "weightedScore": 35,
+      "diffCount": 35,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "zejuso-92-kexo870",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zepima-96-peco612",
+      "status": "baseline",
+      "weightedScore": 441,
+      "diffCount": 259,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "zeporo-46-zicu301",
+      "status": "baseline",
+      "weightedScore": 375,
+      "diffCount": 320,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "ziboco-73-kazu841",
+      "status": "baseline",
+      "weightedScore": 152,
+      "diffCount": 123,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "zinelo-77-losu727",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zivege-92-rise076",
+      "status": "baseline",
+      "weightedScore": 238,
+      "diffCount": 221,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "zizaki-04-guvi945",
+      "status": "baseline",
+      "weightedScore": 121,
+      "diffCount": 121,
+      "measuredAt": "2026-09-10",
+      "measuredAgainstCommit": "63f73489"
+    },
+    {
+      "type": "activity",
+      "slug": "zizumo-48-taku661",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zokodi-10-dexu703",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zokuni-21-sapu966",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "zukori-83-fiso705",
+      "status": "baseline",
+      "weightedScore": 254,
+      "diffCount": 202,
+      "measuredAt": "2026-09-16",
+      "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "zuxute-46-daku634",
+      "status": "error",
+      "diffCount": null,
+      "reason": "activity parser refused this source at line 9 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    }
+  ]
+}
