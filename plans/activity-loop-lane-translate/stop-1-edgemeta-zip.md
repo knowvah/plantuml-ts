@@ -71,3 +71,64 @@ and lint green; `npm test` unrunnable until the zip is fixed). T3 also left
 two `--align` fallers open (`kudedo-31-pafi082` 35/37 -> 34/37,
 `mafete-03-rapa918` 30/33 -> 29/33) with no mechanism yet; they are T3/T4
 work once it resumes, not part of this stop.
+
+## Addendum (same session): D4's `midArrowAt` is not carried through compression — stop 14
+
+Found by the orchestrator while verifying T2's uncommitted work in `allt-t2`
+(the T2 agent stalled twice on the harness watchdog and never reported).
+On `kijazo-83-kipu485` T2's back edge now has the jar's four segments and
+its vertical run at x = 431.828 (golden 537.056 before canvas offset, same
+relative position), but the D4 mid-arrow polygon renders at x = 477.431:
+45.6 px off its own edge. `compress/compress-geometry.ts:135-140`
+(`transformEdge`) maps `edge.points` through the piecewise-affine
+compression transform and returns `{ ...edge, points }`, so the absolute
+`midArrowAt` point keeps its PRE-compression coordinates. In the jar the
+`asToUp` polygon is drawn through the same compressing `UGraphic` as the
+snake (`ug.apply(new UTranslate(xx, (y1 + y2) / 2)).draw(asToUp)`,
+`FtileWhile.java:307`), so it moves with it. `shapes-of.ts` likewise knows
+nothing of the polygon, so the compressor cannot see it as an occupant.
+
+The fix site is `compress/compress-geometry.ts` — the file stop 14 names
+verbatim — plus `compress/shapes-of.ts` if the polygon is to occupy a slot.
+About four lines in `transformEdge` (transform `midArrowAt.x`/`.y` on the
+matching axis) and one shape in `shapesForEdge`.
+
+### T2 state left in `allt-t2` (uncommitted, gates NOT green)
+
+`swimlane-loop-translate-while.ts` and `walk-while-branch.ts` edited,
+`swimlane-loop-translate-while.test.ts` new, `docs/catalog.md` regenerated,
+`measurements/t2.json` written. Arithmetic checked against
+`FtileWhile.java:277-308` by the orchestrator: correct. Measured on the
+worktree: movers exactly `kijazo` and `ruzica` (stop 5 clean); scan 0;
+typecheck/lint/build 0; `npm test` 7 failures, all on those two rows:
+
+- `--align` kijazo 21/41 -> 21/42, lines 18 -> 19 (jar 17); ruzica 35/95 ->
+  36/97, polygons 27 (jar 25), lines 49 -> 51 (jar 45). The +1 line per back
+  edge IS the jar's shape (three-segment generic elbow -> four segments);
+  kijazo's remaining +2 lines are the while EXIT edge's pre-existing dog-leg
+  (`(56.631,287)->(56.631,297)->(299.616,297)` where the golden runs straight
+  at y = 312.306), present in `base-svg` too, not this mission's shape.
+- Ratchet: kijazo 208 -> 211, ruzica 545 -> 559 (rises; the T2 stub tests in
+  `swimlane-placement.test.ts` that asserted the 4-point stub also fail, as
+  expected). Candidate classes: element growth under positional pairing
+  (+1 line) and the misplaced mid-arrow polygon; NOT adjudicated per slug.
+- Style census: strokeWidth 1 count +1 (kijazo), +2 (ruzica) — the added
+  segments. Swimlane census ruzica: `dividerXs` [17,235.281,411.213] ->
+  [17,235.281,417.213], canvas width 423 -> 452 — the translated snake's
+  `xx = max(dx1,dx2) + dimTotal.width` run or its `UEmpty` reservation now
+  blocks X compression the stub's elbow did not; whether the jar's canvas
+  shows the same width is unmeasured.
+
+## Recommendation (amended)
+
+One fix task, **T1b "seam consumers"**, before either Batch 1 task resumes,
+with an explicit human write-set grant for `assign-coordinates-full.ts`,
+`compress/compress-geometry.ts`, `compress/shapes-of.ts`,
+`swimlane-placement.ts` and their tests: (a) `PlacementResult.edgeMeta`
+parallel to the flat-mapped edges, threaded at
+`assign-coordinates-full.ts:222,226,235`; (b) `transformEdge` moves
+`midArrowAt` with the points and `shapesForEdge` emits its polygon. Both
+gaps have the same cause: the seam added outputs (a second edge, an
+absolute point) that Batch 0's byte-identical gate could not exercise
+because T1's stubs never produce them. Then T2 and T3 resume in their
+worktrees on top of T1b, and T4 adjudicates the rises.
