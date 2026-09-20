@@ -224,6 +224,26 @@ export interface Theme {
     background: string;
     /** Default fill for action/node shapes (separate from canvas background). */
     nodeBackground: string;
+    /**
+     * Default fill of every sequence participant head — `participant,
+     * actor, boundary, control, entity, queue, database, collections`.
+     *
+     * Each kind's style signature is `root, element, sequenceDiagram,
+     * <kind>` (`sequencediagram/ParticipantType.java:55-80`), and
+     * `plantuml.skin:197-201` sets `BackgroundColor: var(--grey-blue)` for
+     * all eight, with `--grey-blue: #e2e2f0` at `plantuml.skin:4`.
+     * `skin/rose/Rose.java:138-150` builds `ComponentRoseParticipant` from
+     * those styles; the component takes `biColor.getBackColor()`
+     * (`ComponentRoseParticipant.java:82`). A flat field like
+     * {@link nodeBackground}, not a `colors.elements` bucket, because the
+     * skin rule is scoped to `sequenceDiagram { }` while the buckets are
+     * diagram-agnostic (`actor`/`database` are description kinds too). A
+     * per-kind `elements[<kind>].background` bucket (skinparam, `<style>`)
+     * and an inline `participant X #color` both still win over it; a
+     * theme's or `<style>`'s bare `root { BackgroundColor }` overrides it
+     * (declaration-order merge, `StyleStorage#computeMergedStyle:102-114`).
+     */
+    participantBackground: string;
     border: string;
     text: string;
     arrow: string;
@@ -333,6 +353,7 @@ export const defaultTheme: Theme = {
   colors: {
     background: '#FFFFFF',
     nodeBackground: '#F1F1F1',
+    participantBackground: '#E2E2F0', // plantuml.skin:4 via :197-201
     border: '#181818',
     text: '#181818',
     arrow: '#181818',
@@ -407,6 +428,10 @@ export const darkTheme: Theme = {
   colors: {
     background: '#1E1E1E',
     nodeBackground: '#2D2D2D',
+    // No upstream counterpart (darkTheme is this port's own): keeps the
+    // heads at the canvas colour, which is what this theme drew before
+    // `participantBackground` existed.
+    participantBackground: '#1E1E1E',
     border: '#CCCCCC',
     text: '#CCCCCC',
     arrow: '#CCCCCC',
@@ -498,6 +523,7 @@ export type ThemeOverride = {
   colors?: {
     background?: string;
     nodeBackground?: string;
+    participantBackground?: string;
     border?: string;
     text?: string;
     arrow?: string;
@@ -552,17 +578,19 @@ export function resolveTheme(option?: ThemeOverride | string): Theme {
 
   if (typeof option === 'string') {
     const builtin = BUILTIN_THEMES[option];
-    if (builtin !== undefined) return deepMergeTheme(defaultTheme, builtin);
+    if (builtin !== undefined) return foldRootBackgroundIntoSequence(deepMergeTheme(defaultTheme, builtin));
     return defaultTheme;
   }
 
   // Partial<Theme> deep-merge — produce a new object, never mutate defaultTheme
-  return deepMergeTheme(defaultTheme, option);
+  return foldRootBackgroundIntoSequence(deepMergeTheme(defaultTheme, option));
 }
 
 // Per-element (SName) resolution helpers moved to `theme-element-resolve.ts`
 // (mechanical extraction to keep this file under the 500-line cap) and
 // re-exported here so existing `from './theme.js'` call sites are unaffected.
+import { foldRootBackgroundIntoSequence } from './theme-element-resolve.js';
+
 export {
   resolveElementPaint,
   resolveElementFontSize,

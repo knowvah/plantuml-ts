@@ -139,3 +139,28 @@ export function resolveElementLineThickness(theme: Theme, sname: string): number
 export function resolveElementMinimumWidth(theme: Theme, sname: string): number | undefined {
   return theme.colors.elements?.[sname]?.minimumWidth ?? theme.minimumWidth;
 }
+
+/**
+ * Fold a theme's own bare `root`/`element` `BackgroundColor` (a builtin
+ * theme's pre-parsed `styleOverrides`, e.g. `puml-theme-plain.puml:35-37`
+ * `root { BackgroundColor $BGCOLOR }`) into `colors.participantBackground`.
+ *
+ * Upstream merges every matching style in DECLARATION order with
+ * `OVERWRITE_EXISTING_VALUE` (`StyleStorage#computeMergedStyle:102-114`),
+ * and a theme is declared after `plantuml.skin`'s `participant {
+ * BackgroundColor var(--grey-blue) }` (`:197-201`), so its root rule wins
+ * over the grey-blue default. Jar-verified: `!theme plain` heads are `#FFF`
+ * (`xiceso-64-pelu456`), `!theme amiga` heads are `#0B58A8`. The document's
+ * own `<style>` blocks are applied AFTER `resolveTheme`, so they still
+ * layer on top (`style-map-theme.ts#StyleMapExtras.rootElementBackgroundRaw`).
+ * Same last-wins walk as `style-map-element.ts#resolveRootElementProperty`.
+ */
+export function foldRootBackgroundIntoSequence(theme: Theme): Theme {
+  let raw: string | undefined;
+  for (const selector of ['root', 'element']) {
+    const value = theme.styleOverrides?.[selector]?.['backgroundcolor'];
+    if (value !== undefined) raw = value;
+  }
+  if (raw === undefined) return theme;
+  return { ...theme, colors: { ...theme.colors, participantBackground: resolveColorToSvgHex(raw) } };
+}

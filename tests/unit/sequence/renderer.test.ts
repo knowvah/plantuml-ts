@@ -1836,8 +1836,9 @@ describe('renderSequence — participant colours', () => {
         'actor A\nparticipant B\nA -> B: x\n@enduml',
     );
     expect(svg).toContain('#0F0');
-    // B is a plain participant and keeps the theme default.
-    expect(svg).toContain('fill="#FFF"');
+    // B is a plain participant and keeps the theme default: the skin's
+    // grey-blue (`plantuml.skin:4,197-201`), not the canvas.
+    expect(svg).toContain('fill="#E2E2F0"');
   });
 
   it('lets the inline colour win over the bucket', () => {
