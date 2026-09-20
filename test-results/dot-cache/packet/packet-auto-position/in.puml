@@ -1,0 +1,9 @@
+@startpacketdiag
+packetdiag {
+  * Version [len=4]
+  * IHL [len=4]
+  * DSCP [len=6]
+  * ECN [len=2]
+  * Total Length [len=16]
+}
+@endpacketdiag

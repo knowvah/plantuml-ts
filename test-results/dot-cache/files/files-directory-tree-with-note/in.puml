@@ -1,0 +1,12 @@
+@startfiles
+/src/
+/src/index.ts
+/src/utils/
+/src/utils/helper.ts
+/tests/
+/tests/index.test.ts
+<note>
+Main entry point
+</note>
+/README.md
+@endfiles

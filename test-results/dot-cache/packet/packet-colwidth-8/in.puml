@@ -1,0 +1,8 @@
+@startpacketdiag
+packetdiag {
+  colwidth = 8
+  0-3: Type
+  4-7: Code
+  8-15: Checksum
+}
+@endpacketdiag

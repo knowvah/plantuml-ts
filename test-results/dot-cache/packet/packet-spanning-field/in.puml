@@ -1,0 +1,7 @@
+@startpacketdiag
+packetdiag {
+  0-7: Header
+  8-39: Payload (spans rows)
+  40-47: Checksum
+}
+@endpacketdiag
