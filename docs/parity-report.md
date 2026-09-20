@@ -13,23 +13,23 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
 | activity | activity | 771 | 373 | n/a (no DOT stage (non-svek)) | n/a (no survey yet) | n/a (no census yet) | 0 | 268 · 51390 | 268/373 | 373/373 |
-| board | board | 4 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
+| board | board | 4 | 4 | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
-| chart | chart | 29 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
-| chronology | chronology | 1 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
+| chart | chart | 29 | 29 | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
+| chronology | chronology | 1 | 1 | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 1/1 | 1/1 |
 | class | class | 768 | 723 | 710/711 (100%) | 412 / 50 / 261 | n/a (no census yet) | 314 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
 | component | description | 384 | 266 | 259/263 (98%) | 0 / 13 / 253 | n/a (no census yet) | 32 | 15 · 853 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | dot | dot | 62 | 5 | n/a (no DOT stage (non-svek)) | n/a (no survey yet) | n/a (no census yet) | 5 | n/a (no diff-baseline yet) | 5/5 | 5/5 |
 | ebnf | n/a (no engine (D10 todo)) | 44 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
-| files | files | 1 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
+| files | files | 1 | 1 | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/1 | 1/1 |
 | gantt | n/a (no engine (D4 todo)) | 265 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | hcl | hcl | 12 | 3 | n/a (no DOT stage (non-svek)) | n/a (no survey yet) | n/a (no census yet) | 1 | n/a (no diff-baseline yet) | 3/3 | 3/3 |
 | json | json | 49 | 50 | n/a (no DOT stage (non-svek)) | n/a (no survey yet) | n/a (no census yet) | 10 | n/a (no diff-baseline yet) | 50/50 | 50/50 |
 | mindmap | n/a (no engine (D2 todo)) | 142 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | network | n/a (no engine (D5 todo)) | 3 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | object | class | 84 | 80 | 78/80 (98%) | 34 / 27 / 19 | n/a (no census yet) | 34 | n/a (no diff-baseline yet) | 80/80 | 80/80 |
-| packet | packetdiag | 6 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
+| packet | packetdiag | 6 | 6 | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/6 | 6/6 |
 | regex | n/a (no engine (D11 todo)) | 46 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | salt | n/a (no engine (D7 todo)) | 51 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
 | sequence | sequence | 1271 | 1141 | n/a (no DOT stage (non-svek)) | n/a (no survey yet) | n/a (no census yet) | 0 | 1124 · 1158537 | 1124/1141 | 1132/1141 |
@@ -46,23 +46,23 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | type | DOT | survey | census | ratchet | diff-baseline | routing | refusal |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | activity | — | — | — | — | 2026-09-20 | 2026-09-02 | 2026-09-02 |
-| board | — | — | — | — | — | — | — |
+| board | — | — | — | — | — | 2026-09-20 | 2026-09-20 |
 | c4 | — | — | — | — | — | — | — |
-| chart | — | — | — | — | — | — | — |
-| chronology | — | — | — | — | — | — | — |
+| chart | — | — | — | — | — | 2026-09-20 | 2026-09-20 |
+| chronology | — | — | — | — | — | 2026-09-20 | 2026-09-20 |
 | class | 2026-09-20T14:44:15.369Z | 2026-09-03T18:45:20.062Z | — | 2026-08-17 | — | 2026-08-24 | 2026-08-24 |
 | component | 2026-09-20T14:44:15.369Z | 2026-09-03T18:57:41.486Z | — | 2026-07-15 | 2026-09-03 | 2026-08-26 | 2026-08-26 |
 | ditaa | — | — | — | — | — | — | — |
 | dot | — | — | — | 2026-08-08 | — | 2026-08-23 | 2026-08-24 |
 | ebnf | — | — | — | — | — | — | — |
-| files | — | — | — | — | — | — | — |
+| files | — | — | — | — | — | 2026-09-20 | 2026-09-20 |
 | gantt | — | — | — | — | — | — | — |
 | hcl | — | — | — | 2026-08-09 | — | 2026-08-23 | 2026-08-24 |
 | json | — | — | — | 2026-08-09 | — | 2026-08-23 | 2026-08-24 |
 | mindmap | — | — | — | — | — | — | — |
 | network | — | — | — | — | — | — | — |
 | object | 2026-09-20T14:44:15.369Z | 2026-08-11T21:48:38.502Z | — | 2026-08-11 | — | 2026-08-24 | 2026-08-24 |
-| packet | — | — | — | — | — | — | — |
+| packet | — | — | — | — | — | 2026-09-20 | 2026-09-20 |
 | regex | — | — | — | — | — | — | — |
 | salt | — | — | — | — | — | — | — |
 | sequence | — | — | — | — | 2026-09-19 | 2026-08-26 | 2026-08-26 |
