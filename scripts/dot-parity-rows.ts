@@ -6,14 +6,19 @@
  * render/compare pipeline that produces them" — `buildAgg` stays in
  * `dot-sync-report.ts` and is imported back here.
  *
- * Seven diagram types never emit PlantUML's svek-N.dot dump, so a DOT-parity
+ * Twelve diagram types never emit PlantUML's svek-N.dot dump, so a DOT-parity
  * row for them is structurally undefined rather than merely unmeasured:
  * sequence and activity never call graphviz for their own diagram; json,
  * yaml and hcl (all via `jsondiagram/SmetanaForJson.java`) and gitgraph
  * (`gitlog/SmetanaForGit.java`) route through Smetana with no svek
  * intermediate (DIVERGENCES.md "Smetana-backed diagram types"; CLAUDE.md
  * "One layout engine"); dot passes its fixture's own DOT body straight to
- * graphviz with no svek intermediate either. Reporting "not yet measured"
+ * graphviz with no svek intermediate either; board, chart, files and packet
+ * are `TitledDiagram`s drawn directly (`board/BoardDiagram.java`,
+ * `chart/ChartDiagram.java`, `filesdiagram/FilesDiagram.java`,
+ * `packetdiag/PacketDiagram.java` -- none extends `CucaDiagram`, the only
+ * base that runs svek), and chronology has no factory at all in this source
+ * tree (`PSystemBuilder.java:184` is commented out). Reporting "not yet measured"
  * for these read as unfinished work rather than the structural fact that it
  * is — that ambiguity is what this module's `note` vocabulary removes.
  */
@@ -46,6 +51,11 @@ export const NON_SVEK_TYPES: ReadonlySet<string> = new Set([
   'hcl',
   'dot',
   'gitgraph',
+  'board',
+  'chart',
+  'chronology',
+  'files',
+  'packet',
 ]);
 
 export interface TypeRow {
@@ -161,7 +171,7 @@ const MARKDOWN_LEGEND = [
   '- **comparable** — fixtures classified to this type (cached canonical SVG `data-diagram-type`) whose PlantUML svek DOT was diffable against ours. Excludes **oracle-blind**.',
   '- **equal** — of the comparable fixtures, how many are structurally EQUAL per every check in `tests/oracle/svek-dot.ts`.',
   '- **oracle-blind** — `!pragma layout elk` fixtures (smetana/vizjs are graphviz under other names and are captured normally, per DIVERGENCES.md); PlantUML only dumps svek DOT on the graphviz path, so there is no oracle DOT to diff for elk. Excluded from **comparable**.',
-  '- **n/a (no DOT stage)** — sequence, activity, json, yaml, hcl, dot and gitgraph never emit PlantUML\'s svek DOT upstream (DIVERGENCES.md; CLAUDE.md "One layout engine"), so they cannot have a DOT-parity row regardless of how much oracle data is cached.',
+  '- **n/a (no DOT stage)** — sequence, activity, json, yaml, hcl, dot, gitgraph, board, chart, chronology, files and packet never emit PlantUML\'s svek DOT upstream (DIVERGENCES.md; CLAUDE.md "One layout engine"; the last five are `TitledDiagram`s or, for chronology, have no factory in this source tree), so they cannot have a DOT-parity row regardless of how much oracle data is cached.',
   '- **no oracle captured** — no cached oracle DOT dump under `test-results/dot-cache/<type>/` yet, or the type has no fixture manifest; not a failure, just unmeasured.',
   "- **no data-diagram-type classification** — oracle DOT is cached but no canonical SVG carries this type's expected `data-diagram-type` tag; run with `--type-tag` to classify.",
 ];
