@@ -201,6 +201,15 @@ describe('walkRepeat — ConnectionOut (body -> condition, FtileRepeat.java:275-
       { x: 12, y: 110 },
       { x: 30, y: 120 },
     ]);
+    // T3 (mission `activity-loop-lane-translate`, D2): the `repeat-out` loop
+    // record `routeLoopTranslate`/`routeRepeatOut` need carries the SAME two
+    // points as `ConnectionOut#getP1`/`getP2` (`FtileRepeat.java:285-293`) --
+    // never a copy the walker could drift from the pushed points above.
+    expect(out.edgeMeta[2]!.loop).toEqual({
+      kind: 'repeat-out',
+      p1: { x: 12, y: 110 },
+      p2: { x: 30, y: 120 },
+    });
   });
 });
 
@@ -237,6 +246,17 @@ describe('walkRepeat — back connection: simple2 (ConnectionBackSimple2#drawU, 
       { x: 64, y: 12 },
     ]);
     expect(back.emphasize).toBe('up');
+    // T3, D2: `ConnectionBackSimple2#getP1`/`getP2` (`FtileRepeat.java:
+    // 618-623`) are the diamonds' own UNTRANSLATED origins -- condX/condY
+    // and entryX/entryY -- never the mid-height points `back.points` above
+    // computes for the same-lane `drawU` shape.
+    expect(out.edgeMeta[1]!.loop).toEqual({
+      kind: 'repeat-simple2',
+      p1: { x: 15, y: 100 },
+      p2: { x: 40, y: 0 },
+      diamond1: { width: 24, height: 24 },
+      diamond2: { width: 50, height: 40 },
+    });
   });
 });
 
@@ -271,6 +291,18 @@ describe('walkRepeat — back connection: simple1 (ConnectionBackSimple1#drawU, 
       { x: 40, y: 12 },
     ]);
     expect(back.emphasize).toBe('up');
+    // T3, D2: `ConnectionBackSimple1#getP1`/`getP2` (`FtileRepeat.java:
+    // 547-552`) are the diamonds' own UNTRANSLATED origins; `repeatWidth` is
+    // `repeat.calculateDimension().getWidth()` (`:583`) -- `body.width` (40)
+    // here, the same tile `complex1Points` already reads for its `x1_b` term.
+    expect(out.edgeMeta[1]!.loop).toEqual({
+      kind: 'repeat-simple1',
+      p1: { x: 15, y: 100 },
+      p2: { x: 40, y: 0 },
+      repeatWidth: 40,
+      diamond1: { height: 24 },
+      diamond2: { width: 50, height: 40 },
+    });
   });
 });
 
@@ -308,6 +340,18 @@ describe('walkRepeat — back connection: complex1 (ConnectionBackComplex1#drawS
       { x: 24, y: 12 },
     ]);
     expect(back.emphasize).toBe('up');
+    // T3, D2: `ConnectionBackComplex1#getP1`/`getP2` (`FtileRepeat.java:
+    // 341-347`) are the diamonds' own UNTRANSLATED origins (condX/condY,
+    // entryX/entryY here both 0/100 and 0/0); `repeatWidth` is `body.width`
+    // (100), the same term `complex1Points`'s own `x1_b` reads above.
+    expect(out.edgeMeta[1]!.loop).toEqual({
+      kind: 'repeat-complex1',
+      p1: { x: 0, y: 100 },
+      p2: { x: 0, y: 0 },
+      repeatWidth: 100,
+      diamond1: { width: 24, height: 24 },
+      diamond2: { width: 50, height: 40 },
+    });
   });
 
   it('routes left through x1_a + 10 when x1_a >= x1_b', () => {
@@ -338,6 +382,16 @@ describe('walkRepeat — back connection: complex1 (ConnectionBackComplex1#drawS
       { x: 60, y: 12 },
       { x: 24, y: 12 },
     ]);
+    // T3, D2: `repeatWidth` here is `body.width` (20, a narrower body than
+    // the sibling test above), the sole difference driving `x1_b`'s branch.
+    expect(out.edgeMeta[1]!.loop).toEqual({
+      kind: 'repeat-complex1',
+      p1: { x: 0, y: 100 },
+      p2: { x: 0, y: 0 },
+      repeatWidth: 20,
+      diamond1: { width: 24, height: 24 },
+      diamond2: { width: 50, height: 40 },
+    });
   });
 
   it('routes right through the quarter-point middle when the entry sits at or right of the condition', () => {
@@ -371,6 +425,17 @@ describe('walkRepeat — back connection: complex1 (ConnectionBackComplex1#drawS
       { x: 0, y: 12 },
     ]);
     expect(back.emphasize).toBe('up');
+    // T3, D2: the wider entry (width 60) only changes `diamond1.width`
+    // relative to the first complex1 test above -- `p1`/`p2`/`repeatWidth`
+    // are unchanged since condition/body geometry is the same.
+    expect(out.edgeMeta[1]!.loop).toEqual({
+      kind: 'repeat-complex1',
+      p1: { x: 0, y: 100 },
+      p2: { x: 0, y: 0 },
+      repeatWidth: 100,
+      diamond1: { width: 60, height: 24 },
+      diamond2: { width: 50, height: 40 },
+    });
   });
 });
 

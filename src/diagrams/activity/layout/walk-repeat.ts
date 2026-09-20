@@ -35,6 +35,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { emitDiamondLabels } from './diamond-labels.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
 
 /** Every absolute-frame value {@link pushRepeatIn}/{@link pushRepeatBack}/
  *  {@link pushRepeatOut} share, computed once so those functions stay
@@ -157,16 +158,17 @@ function pushRepeatCondition(
  *  copied instead, per this task's own instructions). Pushes an edge, then
  *  overlays `emphasize`/`arrowhead: false` on the just-pushed edge -- widens
  *  `walk-if-down.ts`'s `pushEmphasizedEdge` idiom to also cover
- *  `arrowhead: false` (`Worm.java:161-168`'s `null` end decoration), unused
- *  by any repeat connection today but kept for parity with the shared
- *  shape. */
+ *  `arrowhead: false` (`Worm.java:161-168`'s `null` end decoration).
+ *  `loop` (mission `activity-loop-lane-translate`, D1/D2) is threaded
+ *  through `pushEdge`'s own routing argument rather than added as a fifth
+ *  parameter, keeping this function at the file's 5-parameter cap. */
 function pushEdgeFlagged(
   out: Out,
   points: GPoint[],
   lanes: readonly [string | undefined, string | undefined],
-  flags: { emphasize?: 'up' | 'down'; arrowhead?: false },
+  flags: { emphasize?: 'up' | 'down'; arrowhead?: false; loop?: LoopTranslate },
 ): void {
-  pushEdge(out, points, lanes[0], lanes[1]);
+  pushEdge(out, points, lanes[0], lanes[1], flags.loop !== undefined ? { loop: flags.loop } : 'default');
   const edge = out.edges[out.edges.length - 1]!;
   if (flags.emphasize !== undefined) edge.emphasize = flags.emphasize;
   if (flags.arrowhead === false) edge.arrowhead = false;
@@ -230,14 +232,20 @@ function pushRepeatIn(frame: RepeatFrame): void {
  * drawn in that case. Otherwise a straight two-point run from the body's
  * own point out (`SOUTH_HOOK`) to the condition's own point in
  * (`NORTH_HOOK`), `asToDown`, no label (`tbout1` always `null`, same reason
- * as {@link pushRepeatIn}).
+ * as {@link pushRepeatIn}). `p1`/`p2` here are exactly `ConnectionOut#getP1`/
+ * `getP2` (`:285-293`) -- both already `getTranslateForRepeat`/
+ * `getTranslateDiamond2`-translated, i.e. this tile's own absolute frame,
+ * same as `drawU` reads -- so the `repeat-out` loop tag (mission
+ * `activity-loop-lane-translate`, D2) carries these same two points
+ * unchanged; only `routeLoopTranslate` ever applies a lane delta to them.
  */
 function pushRepeatOut(frame: RepeatFrame): void {
   const { out, body, bodyX, bodyY, condition, condX, condY, bodyOutLane, conditionInLane } = frame;
   if (!body.hasPointOut()) return;
   const p1 = { x: bodyX + body.getCoord(SOUTH_HOOK).x, y: bodyY + body.getCoord(SOUTH_HOOK).y };
   const p2 = { x: condX + condition.getCoord(NORTH_HOOK).x, y: condY + condition.getCoord(NORTH_HOOK).y };
-  pushEdge(out, [p1, p2], bodyOutLane, conditionInLane);
+  const loop: LoopTranslate = { kind: 'repeat-out', p1, p2 };
+  pushEdge(out, [p1, p2], bodyOutLane, conditionInLane, { loop });
 }
 
 /**
@@ -326,13 +334,46 @@ function complex1Points(frame: RepeatFrame): GPoint[] {
 }
 
 /**
+ * The `LoopTranslate` record `routeLoopTranslate` needs to re-derive the
+ * `Back{Simple1,Simple2,Complex1}#drawTranslate` shape once the walker's
+ * own lane pass supplies `dx1`/`dx2` (D1/D2, mission
+ * `activity-loop-lane-translate`). `p1`/`p2` are each connection's own
+ * `getP1`/`getP2` (`:547-552`, `:618-623`, `:341-347`) -- the diamonds'
+ * own UNTRANSLATED origins, `(condX, condY)`/`(entryX, entryY)` in this
+ * walker's frame -- never the mid-height points {@link simple1Points}/
+ * {@link simple2Points}/{@link complex1Points} compute for the same-lane
+ * `drawU` shape. `repeatWidth` is `repeat.calculateDimension().getWidth()`
+ * (`:583`, `:376-377`), i.e. `body.width` here, same tile
+ * {@link complex1Points} already reads for its own `x1_b` term.
+ */
+function buildRepeatBackLoop(frame: RepeatFrame): LoopTranslate {
+  const { entry, condition, body, condX, condY, entryX, entryY, backConnection } = frame;
+  const p1 = { x: condX, y: condY };
+  const p2 = { x: entryX, y: entryY };
+  const diamond2 = { width: condition.width, height: condition.height };
+  if (backConnection === 'simple1') {
+    return { kind: 'repeat-simple1', p1, p2, repeatWidth: body.width, diamond1: { height: entry.height }, diamond2 };
+  }
+  const diamond1 = { width: entry.width, height: entry.height };
+  if (backConnection === 'simple2') {
+    return { kind: 'repeat-simple2', p1, p2, diamond1, diamond2 };
+  }
+  return { kind: 'repeat-complex1', p1, p2, repeatWidth: body.width, diamond1, diamond2 };
+}
+
+/**
  * Dispatches on {@link RepeatBackConnection} (decided at build time by
  * `tile-layout.ts#tileRepeat`, D5) and pushes the resulting point list with
  * `emphasize: 'up'` (`Snake#emphasizeDirection(UP)`, every one of the three
  * jar classes sets this) -- the terminal arrowhead direction itself is never
  * an explicit flag; `renderer.ts` derives it from the pushed points' own
  * final segment, which is why {@link simple1Points}/{@link simple2Points}/
- * {@link complex1Points} need no `asToLeft`/`asToRight` parameter.
+ * {@link complex1Points} need no `asToLeft`/`asToRight` parameter. The
+ * attached {@link buildRepeatBackLoop} record lets `routeLoopTranslate`
+ * (mission `activity-loop-lane-translate`) redraw this same connection's
+ * `drawTranslate` shape when the two lanes differ; the points pushed here
+ * stay the same-lane `drawU` shape regardless (D1: only a translate shape
+ * function ever reads the loop record).
  */
 function pushRepeatBack(frame: RepeatFrame): void {
   const { out, backConnection, conditionOutLane, entryInLane } = frame;
@@ -342,7 +383,8 @@ function pushRepeatBack(frame: RepeatFrame): void {
       : backConnection === 'simple2'
         ? simple2Points(frame)
         : complex1Points(frame);
-  pushEdgeFlagged(out, points, [conditionOutLane, entryInLane], { emphasize: 'up' });
+  const loop = buildRepeatBackLoop(frame);
+  pushEdgeFlagged(out, points, [conditionOutLane, entryInLane], { emphasize: 'up', loop });
 }
 
 export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
