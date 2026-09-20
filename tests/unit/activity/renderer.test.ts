@@ -721,6 +721,72 @@ describe('renderActivity — edge with arrowhead: false', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Test 16: `midArrowAt` draws exactly one extra arrowhead at its own point
+// (D4, mission `activity-loop-lane-translate` T1 --
+// `FtileWhile.ConnectionBackSimple#drawTranslate`'s `asToUp` at
+// `(xx, (y1 + y2) / 2)`, which `emphasize`'s segment search cannot place).
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge with midArrowAt', () => {
+  it('renders two <polygon> arrowheads when midArrowAt is present', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 0 },
+          ],
+          midArrowAt: { x: 50, y: 20, dir: 'up' },
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const polygonCount = (content.match(/<polygon/g) ?? []).length;
+    expect(polygonCount).toBe(2);
+  });
+
+  it('renders only the terminal arrowhead when midArrowAt is absent -- byte-identical to before D4', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 0 },
+          ],
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const polygonCount = (content.match(/<polygon/g) ?? []).length;
+    expect(polygonCount).toBe(1);
+  });
+
+  it('places the extra arrowhead tip AT midArrowAt.{x,y}, oriented by .dir', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 0 },
+          ],
+          midArrowAt: { x: 50, y: 20, dir: 'up' },
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    // `arrowHeadPoints('up')` includes the tip at its own local (0, 0),
+    // translated by (50, 20) -- same fixture convention as the emphasize
+    // test above (`0,15` for a 'down' tip at (0, 15)).
+    const polygons = content.match(/<polygon[^>]*points="([^"]*)"/g) ?? [];
+    const hasTipAtPoint = polygons.some((p) => p.includes('50,20'));
+    expect(hasTipAtPoint).toBe(true);
+  });
+});
+
 describe('stereotype action shapes', () => {
   function renderStereotypeNode(stereotype: string): string {
     const geo: ActivityGeometry = {

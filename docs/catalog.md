@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1106 modules · 4002 exported names.
+1110 modules · 4020 exported names.
 
 ## `src/`
 
@@ -960,9 +960,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
+| `swimlane-lane-origins.ts` | `LaneOrigins`, `DividerReservation`, `computeLaneOrigins` | The per-lane origin loop, split out of `swimlane-placement.ts` (this file's own 500-line hook -- mission `activity-loop-lane-translate` T1, same pure-move precedent as `swimlane-lanes.ts`, whose own header notes why: existing importers stay |
 | `swimlane-lanes.ts` | `laneAt`, `laneIn`, `laneOut` | The `laneAt`/`laneIn`/`laneOut` lane-inheritance helpers, split out of `swimlane-placement.ts` (`plans/activity-lane-capture` T2) to keep that file under the 500-line hook. |
+| `swimlane-loop-translate-repeat.ts` | `routeRepeatOut`, `routeRepeatSimple1`, `routeRepeatSimple2`, `routeRepeatComplex1` | `repeat`'s four translatable back-edge shapes plus its exit connector (mission `activity-loop-lane-translate`). |
+| `swimlane-loop-translate-while.ts` | `routeWhileBack` | `while`'s one translatable back-edge shape (mission `activity-loop-lane-translate`). |
+| `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
-| `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
+| `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |

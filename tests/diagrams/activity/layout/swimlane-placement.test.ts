@@ -25,6 +25,7 @@ import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { ActivityNodeGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
+import type { LoopTranslate } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate.js';
 
 /** A minimal leaf tile with a caller-controlled width/height, used to feed
  * exact content extents into `placeSwimlanes` without going through a real
@@ -352,6 +353,155 @@ describe('placeSwimlanes — edge routing', () => {
     expect(pts[1]).toEqual({ x: pts[0]!.x, y: 66 });
     expect(pts[2]).toEqual({ x: pts[3]!.x, y: 66 });
     expect(pts[3]).toEqual({ x: pts[3]!.x, y: 80 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// placeSwimlanes -- loop-translate dispatch seam (T1, `activity-loop-lane-
+// translate`, D1/D2/D3/D4). `routeLoopTranslate`'s per-kind functions are
+// STUBS: every one returns the same generic middle-Y elbow `routeEdge`'s
+// own 'default' case computes, so these tests exercise the DISPATCH and
+// flat-map wiring, not the real translate geometry (T2/T3).
+// ---------------------------------------------------------------------------
+
+describe('placeSwimlanes — loop-translate dispatch seam', () => {
+  const bounder: StringBounder = { getDimension: () => ({ width: 40, height: 18 }) };
+  const laneNames = ['A', 'B'];
+
+  const whileBack: LoopTranslate = {
+    kind: 'while-back',
+    p1: { x: 32, y: 32 },
+    p2: { x: 32, y: 60 },
+    dimTotalWidth: 100,
+    diamond: { inY: 0, outY: 10, width: 20 },
+  };
+
+  it('a while-back-tagged cross-lane edge dispatches to the generic elbow, sourced from the loop record', () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
+    const edges = [{ points: [{ x: 999, y: 999 }] }]; // deliberately NOT loop.p1/p2 -- proves the source is the loop record, not `edge.points`
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const pts = result.edges[0]!.points;
+    expect(pts).toHaveLength(4);
+    // Y is delta-independent (lane translates are X-only, D2) so these are
+    // exact regardless of lane arithmetic; X is asserted structurally
+    // (mp1's vertical run, mp2's vertical run) rather than as a literal,
+    // matching this file's existing 'parallel-in'/'parallel-out' tests.
+    expect(pts[0]!.y).toBe(32); // whileBack.p1.y, NOT edge.points[0].y (999)
+    expect(pts[3]!.y).toBe(60); // whileBack.p2.y, NOT edge.points[0].y (999)
+    expect(pts[1]!.y).toBe(46); // (32 + 60) / 2
+    expect(pts[2]!.y).toBe(46);
+    expect(pts[0]!.x).toBe(pts[1]!.x);
+    expect(pts[2]!.x).toBe(pts[3]!.x);
+  });
+
+  const repeatLoops: readonly LoopTranslate[] = [
+    { kind: 'repeat-out', p1: { x: 32, y: 32 }, p2: { x: 32, y: 60 } },
+    {
+      kind: 'repeat-simple1',
+      p1: { x: 32, y: 32 },
+      p2: { x: 32, y: 60 },
+      repeatWidth: 100,
+      diamond1: { height: 10 },
+      diamond2: { width: 20, height: 10 },
+    },
+    {
+      kind: 'repeat-simple2',
+      p1: { x: 32, y: 32 },
+      p2: { x: 32, y: 60 },
+      diamond1: { width: 20, height: 10 },
+      diamond2: { width: 20, height: 10 },
+    },
+    {
+      kind: 'repeat-complex1',
+      p1: { x: 32, y: 32 },
+      p2: { x: 32, y: 60 },
+      repeatWidth: 100,
+      diamond1: { width: 20, height: 10 },
+      diamond2: { width: 20, height: 10 },
+    },
+  ];
+
+  it.each(repeatLoops)('a $kind-tagged cross-lane edge dispatches to exactly one four-point edge', (loop) => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: loop.kind, loop }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 60 },
+        ],
+      },
+    ];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    expect(result.edges).toHaveLength(1);
+    const pts = result.edges[0]!.points;
+    expect(pts).toHaveLength(4);
+    expect(pts[0]!.y).toBe(32); // loop.p1.y
+    expect(pts[3]!.y).toBe(60); // loop.p2.y
+  });
+
+  it('a loop-tagged edge whose lanes are EQUAL is shifted like any same-lane edge -- no dispatch', () => {
+    const nodes = [node('a', 12, 40, 'A'), node('a2', 12, 40, 'A')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'A', shape: 'while-back', loop: whileBack }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 60 },
+        ],
+      },
+    ];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    // Same-lane shift keeps the pass-1 point count (2) -- the loop record's
+    // own 4-point elbow (proven in the test above) never fires here.
+    expect(result.edges[0]!.points).toHaveLength(2);
+  });
+
+  it('flat-maps two independently loop-tagged edges into two routed edges, order preserved', () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const repeatOut: LoopTranslate = { kind: 'repeat-out', p1: { x: 10, y: 10 }, p2: { x: 10, y: 90 } };
+    const edgeMeta: EdgeMeta[] = [
+      { lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack },
+      { lane1: 'A', lane2: 'B', shape: 'repeat-out', loop: repeatOut },
+    ];
+    const edges = [{ points: [{ x: 1, y: 1 }] }, { points: [{ x: 2, y: 2 }] }];
+    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    expect(result.edges).toHaveLength(2);
+    // First routed edge sources from `whileBack.p1` (y=32); second from
+    // `repeatOut.p1` (y=10) -- order matches the input `edgeMeta` array. Y
+    // is delta-independent (D2), so these are exact regardless of the
+    // lane engine's own X arithmetic.
+    expect(result.edges[0]!.points[0]!.y).toBe(32);
+    expect(result.edges[1]!.points[0]!.y).toBe(10);
+  });
+
+  it('loop reservations (empty per stub) are appended after divider reservations, order preserved', () => {
+    const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
+    const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
+    const edges = [
+      {
+        points: [
+          { x: 32, y: 32 },
+          { x: 32, y: 60 },
+        ],
+      },
+    ];
+    const withLoop = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const withoutLoop = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta: [{ lane1: 'A', lane2: 'B', shape: 'default' }],
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      bounder,
+      theme,
+    });
+    // The stub contributes zero reservations, so tagging an edge changes
+    // nothing about the divider reservations already under test above.
+    expect(withLoop.reservations).toEqual(withoutLoop.reservations);
+    expect(withLoop.reservations.length).toBeGreaterThan(0);
   });
 });
 
