@@ -29,7 +29,7 @@ Merge with a merge commit, never squash.
 | Batch | Tasks | Mode | Status |
 |---|---|---|---|
 | [1](batch-1/overview.md) | T1 capture script · T2 census `--json` + activity · T3 survey/dashboard all types · T4 DOT rows n/a + export | 4 parallel agents (separate worktrees) | [x] |
-| [2](batch-2/overview.md) | T5 capture five families, re-pin routing/refusal, freshness sentinels | orchestrator, sequential | [ ] |
+| [2](batch-2/overview.md) | T5 capture five families, re-pin routing/refusal, freshness sentinels | orchestrator, sequential | [x] |
 | [3](batch-3/overview.md) | T6 unified dashboard + drift test | 1 agent | [ ] |
 | [4](batch-4/overview.md) | T7 regenerate everything · T8 bookkeeping | orchestrator then 1 agent | [ ] |
 
