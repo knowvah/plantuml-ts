@@ -49,7 +49,7 @@ rows (`camavo`, `vupuse`, `zepima`) declare no swimlane and leave at T0 (D8).
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 classify + read dispatch · T1 seam (no-op) | T0 ∥ T1 (worktree) | [x] |
-| [1](batch-1/overview.md) | T2 while back · T3 repeat out/simple1/simple2/complex1 | T1b then T2 ∥ T3 (worktrees) | resumed 2026-09-20 with T1b (stops 1 + 14, see [`stop-1-edgemeta-zip.md`](stop-1-edgemeta-zip.md)) [ ] |
+| [1](batch-1/overview.md) | T2 while back · T3 repeat out/simple1/simple2/complex1 | T1b then T2 ∥ T3 (worktrees) | [x] (T1b added 2026-09-20 after stops 1 + 14, see [`stop-1-edgemeta-zip.md`](stop-1-edgemeta-zip.md)) |
 | [2](batch-2/overview.md) | T4 sweep · T5a/T5b optional (D9) · T6 re-pin + close-out | sequential | [ ] |
 
 ## Stop conditions
