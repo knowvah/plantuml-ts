@@ -60,6 +60,7 @@
     "manifest": "jiti scripts/render-manifest.ts",
     "svg:survey": "jiti scripts/svg-parity-survey.ts",
     "svg:dashboard": "jiti scripts/svg-parity-dashboard.ts",
+    "parity:dashboard": "jiti scripts/parity-dashboard.ts",
     "docs:brand": "node docs-site/copy-brand-assets.mjs",
     "docs:copy-reports": "node docs-site/copy-reports.mjs",
     "docs:dev": "npm run docs:brand && npm run docs:copy-reports && vitepress dev docs-site",
