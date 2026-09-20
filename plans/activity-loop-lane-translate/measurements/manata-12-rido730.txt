@@ -61,11 +61,11 @@ OURS:
   [47] <line> x=193.142 lane=1
   [48] <line> x=127.025 lane=1
   [49] <polygon> x=127.025 lane=1
-  [50] <line> x=301.819 lane=2
-  [51] <line> x=183.747 lane=1
-  [52] <line> x=65.675 lane=0
-  [53] <polygon> x=65.675 lane=0
-  [54] <polygon> x=301.819 lane=2
+  [50] <line> x=313.819 lane=?
+  [51] <line> x=325.819 lane=?
+  [52] <line> x=195.747 lane=1
+  [53] <polygon> x=72.175 lane=0
+  [54] <polygon> x=325.819 lane=?
   [55] <text> x=27.688 lane=0
   [56] <text> x=125.038 lane=1
   [57] <text> x=232.766 lane=2

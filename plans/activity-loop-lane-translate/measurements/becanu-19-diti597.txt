@@ -4,7 +4,7 @@ becanu-19-diti597:
   line: ours=16 jar=16
   text: ours=6 jar=5
   rect: ours=4 jar=4
-  alignment: 8/36
+  alignment: 10/36
 === LANES becanu-19-diti597 ===
 diamond/hexagon[0]: ours=0 jar=0
 diamond/hexagon[1]: ours=1 jar=1
@@ -34,11 +34,11 @@ OURS:
   [21] <polygon> x=47.675 lane=0
   [22] <line> x=106.663 lane=1
   [23] <polygon> x=106.663 lane=1
-  [24] <line> x=118.663 lane=1
-  [25] <line> x=77.169 lane=0
-  [26] <line> x=35.675 lane=0
-  [27] <polygon> x=35.675 lane=0
-  [28] <polygon> x=118.663 lane=1
+  [24] <line> x=131.5 lane=1
+  [25] <line> x=144.337 lane=?
+  [26] <line> x=102.006 lane=1
+  [27] <polygon> x=66.175 lane=0
+  [28] <polygon> x=144.337 lane=?
   [29] <line> x=47.675 lane=0
   [30] <line> x=77.169 lane=0
   [31] <line> x=106.663 lane=1

@@ -4,7 +4,7 @@ kudedo-31-pafi082:
   line: ours=15 jar=15
   text: ours=8 jar=8
   rect: ours=6 jar=6
-  alignment: 35/37
+  alignment: 34/37
 === LANES kudedo-31-pafi082 ===
 diamond/hexagon[0]: ours=0 jar=0
 === DUMP kudedo-31-pafi082 ===
@@ -35,11 +35,11 @@ OURS:
   [23] <line> x=101.708 lane=1
   [24] <line> x=54.797 lane=0
   [25] <polygon> x=54.797 lane=0
-  [26] <line> x=87.594 lane=0
-  [27] <line> x=92.594 lane=1
-  [28] <line> x=97.594 lane=1
-  [29] <polygon> x=97.594 lane=1
-  [30] <polygon> x=87.594 lane=0
+  [26] <line> x=91.344 lane=0
+  [27] <line> x=95.094 lane=1
+  [28] <line> x=96.344 lane=1
+  [29] <polygon> x=91.094 lane=0
+  [30] <polygon> x=95.094 lane=1
   [31] <line> x=54.797 lane=0
   [32] <line> x=101.708 lane=1
   [33] <line> x=148.619 lane=1

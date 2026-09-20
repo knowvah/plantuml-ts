@@ -4,7 +4,7 @@ givanu-33-kire967:
   line: ours=17 jar=17
   text: ours=7 jar=6
   rect: ours=5 jar=5
-  alignment: 10/40
+  alignment: 12/40
 === LANES givanu-33-kire967 ===
 diamond/hexagon[0]: ours=0 jar=0
 diamond/hexagon[1]: ours=1 jar=1
@@ -42,11 +42,11 @@ OURS:
   [29] <line> x=77.169 lane=0
   [30] <line> x=106.663 lane=1
   [31] <polygon> x=106.663 lane=1
-  [32] <line> x=118.663 lane=1
-  [33] <line> x=77.169 lane=0
-  [34] <line> x=35.675 lane=0
-  [35] <polygon> x=35.675 lane=0
-  [36] <polygon> x=118.663 lane=1
+  [32] <line> x=131.5 lane=1
+  [33] <line> x=144.337 lane=?
+  [34] <line> x=102.006 lane=1
+  [35] <polygon> x=66.175 lane=0
+  [36] <polygon> x=144.337 lane=?
   [37] <line> x=106.663 lane=1
   [38] <line> x=77.169 lane=0
   [39] <line> x=47.675 lane=0

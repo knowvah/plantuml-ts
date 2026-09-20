@@ -1,10 +1,10 @@
 === ALIGN ruzica-16-deli877 ===
 ruzica-16-deli877:
   polygon: ours=27 jar=25
-  line: ours=49 jar=45
+  line: ours=51 jar=45
   text: ours=12 jar=12
   rect: ours=7 jar=7
-  alignment: 35/95
+  alignment: 36/97
 === LANES ruzica-16-deli877 ===
 diamond/hexagon[0]: ours=0 jar=0
 diamond/hexagon[1]: ours=0 jar=0
@@ -13,7 +13,7 @@ diamond/hexagon[3]: ours=1 jar=1
 diamond/hexagon[4]: ours=1 jar=1
 === DUMP ruzica-16-deli877 ===
 OURS:
-  [0] <rect> x=213.6065 lane=0
+  [0] <rect> x=217.9155 lane=0
   [1] <ellipse> x=120.32 lane=0
   [2] <polygon> x=46 lane=0
   [3] <text> x=34.106 lane=0
@@ -30,19 +30,19 @@ OURS:
   [14] <ellipse> x=120.32 lane=0
   [15] <ellipse> x=120.32 lane=0
   [16] <line> x=17 lane=0
-  [17] <polygon> x=321.24699999999996 lane=1
-  [18] <text> x=305.606 lane=1
-  [19] <polygon> x=321.247 lane=1
-  [20] <text> x=309.353 lane=1
+  [17] <polygon> x=323.86549999999994 lane=1
+  [18] <text> x=308.225 lane=1
+  [19] <polygon> x=323.866 lane=1
+  [20] <text> x=311.972 lane=1
   [21] <rect> x=261.94350000000003 lane=1
   [22] <text> x=250.281 lane=1
-  [23] <rect> x=384.5505 lane=1
-  [24] <text> x=372.887 lane=1
-  [25] <rect> x=384.5505 lane=1
-  [26] <text> x=372.887 lane=1
-  [27] <polygon> x=321.247 lane=1
+  [23] <rect> x=393.1685 lane=1
+  [24] <text> x=381.506 lane=1
+  [25] <rect> x=393.1685 lane=1
+  [26] <text> x=381.506 lane=1
+  [27] <polygon> x=323.866 lane=1
   [28] <line> x=235.281 lane=1
-  [29] <line> x=411.213 lane=?
+  [29] <line> x=419.831 lane=?
   [30] <line> x=46 lane=0
   [31] <polygon> x=46 lane=0
   [32] <line> x=80 lane=0
@@ -57,62 +57,64 @@ OURS:
   [41] <line> x=182.82049999999998 lane=0
   [42] <line> x=120.32 lane=0
   [43] <polygon> x=120.32 lane=0
-  [44] <line> x=279.5955 lane=1
+  [44] <line> x=280.905 lane=1
   [45] <line> x=261.944 lane=1
   [46] <polygon> x=261.944 lane=1
-  [47] <line> x=364.8985 lane=1
-  [48] <line> x=384.55 lane=1
-  [49] <polygon> x=384.55 lane=1
-  [50] <line> x=321.247 lane=1
-  [51] <polygon> x=321.247 lane=1
-  [52] <line> x=254.27499999999998 lane=1
+  [47] <line> x=370.5175 lane=1
+  [48] <line> x=393.169 lane=1
+  [49] <polygon> x=393.169 lane=1
+  [50] <line> x=323.866 lane=1
+  [51] <polygon> x=323.866 lane=1
+  [52] <line> x=255.5845 lane=1
   [53] <line> x=214.944 lane=0
   [54] <polygon> x=214.944 lane=0
-  [55] <line> x=268.0955 lane=1
+  [55] <line> x=269.405 lane=1
   [56] <line> x=261.944 lane=1
   [57] <line> x=153.972 lane=0
   [58] <line> x=46 lane=0
   [59] <polygon> x=46 lane=0
   [60] <line> x=202.641 lane=0
-  [61] <line> x=293.5955 lane=1
-  [62] <line> x=384.55 lane=1
-  [63] <polygon> x=384.55 lane=1
-  [64] <line> x=384.55 lane=1
-  [65] <line> x=307.4155 lane=1
-  [66] <line> x=230.281 lane=0
-  [67] <polygon> x=230.281 lane=0
-  [68] <polygon> x=384.55 lane=1
-  [69] <line> x=384.55 lane=1
-  [70] <line> x=293.5955 lane=1
-  [71] <line> x=202.641 lane=0
-  [72] <polygon> x=202.641 lane=0
-  [73] <line> x=46 lane=0
-  [74] <line> x=177.6235 lane=0
-  [75] <line> x=309.247 lane=1
-  [76] <polygon> x=309.247 lane=1
-  [77] <line> x=202.641 lane=0
-  [78] <line> x=267.944 lane=1
-  [79] <line> x=333.247 lane=1
-  [80] <polygon> x=333.247 lane=1
-  [81] <line> x=321.247 lane=1
-  [82] <line> x=220.7835 lane=0
-  [83] <line> x=120.32 lane=0
-  [84] <polygon> x=120.32 lane=0
-  [85] <line> x=120.32 lane=0
-  [86] <line> x=234.60399999999998 lane=0
-  [87] <line> x=348.888 lane=1
-  [88] <polygon> x=348.888 lane=1
-  [89] <polygon> x=120.32 lane=0
-  [90] <line> x=120.32 lane=0
-  [91] <line> x=220.7835 lane=0
-  [92] <line> x=321.247 lane=1
-  [93] <polygon> x=321.247 lane=1
-  [94] <line> x=321.247 lane=1
-  [95] <line> x=220.7835 lane=0
-  [96] <line> x=120.32 lane=0
-  [97] <polygon> x=120.32 lane=0
-  [98] <text> x=78.609 lane=0
-  [99] <text> x=274.703 lane=1
+  [61] <line> x=297.905 lane=1
+  [62] <line> x=393.169 lane=1
+  [63] <polygon> x=393.169 lane=1
+  [64] <line> x=393.169 lane=1
+  [65] <line> x=337.697 lane=1
+  [66] <line> x=282.225 lane=1
+  [67] <line> x=256.25300000000004 lane=1
+  [68] <polygon> x=236.781 lane=1
+  [69] <polygon> x=282.225 lane=1
+  [70] <line> x=393.169 lane=1
+  [71] <line> x=297.905 lane=1
+  [72] <line> x=202.641 lane=0
+  [73] <polygon> x=202.641 lane=0
+  [74] <line> x=46 lane=0
+  [75] <line> x=178.933 lane=0
+  [76] <line> x=311.866 lane=1
+  [77] <polygon> x=311.866 lane=1
+  [78] <line> x=202.641 lane=0
+  [79] <line> x=269.2535 lane=1
+  [80] <line> x=335.866 lane=1
+  [81] <polygon> x=335.866 lane=1
+  [82] <line> x=323.866 lane=1
+  [83] <line> x=222.093 lane=0
+  [84] <line> x=120.32 lane=0
+  [85] <polygon> x=120.32 lane=0
+  [86] <line> x=120.32 lane=0
+  [87] <line> x=279.57550000000003 lane=1
+  [88] <line> x=438.831 lane=?
+  [89] <line> x=395.1685 lane=1
+  [90] <polygon> x=358.006 lane=1
+  [91] <polygon> x=438.831 lane=?
+  [92] <line> x=120.32 lane=0
+  [93] <line> x=222.093 lane=0
+  [94] <line> x=323.866 lane=1
+  [95] <polygon> x=323.866 lane=1
+  [96] <line> x=323.866 lane=1
+  [97] <line> x=222.093 lane=0
+  [98] <line> x=120.32 lane=0
+  [99] <polygon> x=120.32 lane=0
+  [100] <text> x=78.609 lane=0
+  [101] <text> x=279.013 lane=1
 JAR:
   [0] <rect> x=240.1065 lane=0
   [1] <ellipse> x=133.32 lane=0

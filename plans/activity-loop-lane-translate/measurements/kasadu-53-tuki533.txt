@@ -37,11 +37,11 @@ OURS:
   [24] <line> x=245.628 lane=1
   [25] <line> x=442.762 lane=1
   [26] <polygon> x=442.762 lane=1
-  [27] <line> x=500 lane=1
-  [28] <line> x=280.247 lane=1
-  [29] <line> x=60.494 lane=0
-  [30] <polygon> x=60.494 lane=0
-  [31] <polygon> x=500 lane=1
+  [27] <line> x=656.2685 lane=1
+  [28] <line> x=812.537 lane=?
+  [29] <line> x=436.51550000000003 lane=1
+  [30] <polygon> x=66.994 lane=0
+  [31] <polygon> x=812.537 lane=?
   [32] <text> x=22 lane=0
   [33] <text> x=405.187 lane=1
 JAR:

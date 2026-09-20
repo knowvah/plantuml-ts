@@ -4,7 +4,7 @@ mafete-03-rapa918:
   line: ours=15 jar=15
   text: ours=6 jar=6
   rect: ours=4 jar=4
-  alignment: 30/33
+  alignment: 29/33
 === LANES mafete-03-rapa918 ===
 diamond/hexagon[0]: ours=1 jar=1
 === DUMP mafete-03-rapa918 ===
@@ -34,11 +34,11 @@ OURS:
   [22] <line> x=141.7065 lane=1
   [23] <line> x=204.388 lane=1
   [24] <polygon> x=204.388 lane=1
-  [25] <line> x=242.65 lane=1
-  [26] <line> x=132.325 lane=0
-  [27] <line> x=22 lane=0
-  [28] <polygon> x=22 lane=0
-  [29] <polygon> x=242.65 lane=1
+  [25] <line> x=258.6875 lane=1
+  [26] <line> x=274.725 lane=?
+  [27] <line> x=205.38750000000002 lane=1
+  [28] <polygon> x=142.55 lane=1
+  [29] <polygon> x=274.725 lane=?
   [30] <line> x=204.388 lane=1
   [31] <line> x=141.7065 lane=1
   [32] <line> x=79.025 lane=0
