@@ -253,8 +253,28 @@ reach graphviz. These are independent SVG-assembly bugs.
 
 ---
 
-## Snapshot (update as missions flip — last refreshed 2026-07-13)
+## Snapshot (update as missions flip — last refreshed 2026-09-20)
 
+- **`parity-dashboard-refresh` (pdr-T1..T8) DONE (2026-09-20),
+  regenerated at commit `9f095acc`.** Unified per-type parity
+  dashboard at `docs/parity-report.md` (`scripts/parity-dashboard.ts`),
+  composed from committed JSON only, gated by a drift test
+  (`tests/unit/scripts/parity-dashboard.test.ts`). Five
+  never-jar-captured families now have an oracle (board 4, chart 29,
+  chronology 1, files 1, packet 6); routing/refusal baselines re-pinned
+  additively. **Per-type (corpus/oracle/ratchet pins/routing/refusal):**
+  class 768/723/314/720:723/723:723, component 384/266/32/266:266/
+  266:266, object 84/80/34/80:80/80:80, state 278/273/60/269:273/
+  273:273, usecase 351/94/19/94:94/94:94, sequence 1271/1141/0/
+  1124:1141/1132:1141, activity 771/373/0/268:373/373:373, dot
+  62/5/5/5:5/5:5, hcl 12/3/1/3:3/3:3, json 49/50/10/50:50/50:50, yaml
+  40/39/6/39:39/39:39, board 4/4/—/0:4/4:4, chart 29/29/—/0:29/29:29,
+  chronology 1/1/—/1:1/1:1 (its only oracle is the jar's "Diagram not
+  supported" page — no chronology factory upstream, so the 1/1 is
+  NONE == NONE against a placeholder, not a fidelity number), files
+  1/1/—/0:1/1:1, packet 6/6/—/0:6/6:6. Description-engine ratchet total
+  (component+usecase) = **51** (32+19), correcting
+  `docs/svg-conformance.md`'s stale "5 ratcheted."
 - **G0b + G0 CLOSED (2026-07-13).** Annotations (title/caption/legend/header/
   footer) render for every engine; LimitFinder machinery ported; description
   doc dims jar-exact; smetana/vizjs re-captured. **Current DOT baseline:

@@ -129,12 +129,13 @@ suite, but **description-engine SVG output is not yet fully conformant**.
 Under **production** rendering (`renderSync`, `jarMeasurer`), 0 of 354
 surveyed component/usecase fixtures reach zero-diff — this is *expected*,
 not a regression (see "Why the survey shows near-zero conformant" below).
-A separate, deliberately narrow **ratchet** locks 5 fixtures that *are*
-zero-diff conformant under a dedicated deterministic-measurer render path.
-The gap between "cutover done" and "fully conformant" is real and tracked
-as follow-ups F1–F5 (see the end of this section) — do not read the
-ratchet's 5 fixtures as "5/N conformant"; read it as "5 fixtures proven
-and regression-locked, with an honest backlog for the rest."
+A separate, deliberately narrow **ratchet** locks a growing set of
+fixtures that *are* zero-diff conformant under a dedicated
+deterministic-measurer render path. The gap between "cutover done" and
+"fully conformant" is real and tracked as follow-ups F1–F5 (see the end of
+this section) — do not read the ratchet's fixture count as "N/total
+conformant"; read it as "N fixtures proven and regression-locked, with an
+honest backlog for the rest."
 
 ## Why the survey shows near-zero conformant: the D12 measurer split
 
@@ -304,15 +305,13 @@ unrelated change.
 
 ## Current description-engine conformance status (as of Brief 2 close)
 
-**5 fixtures ratcheted**, all single-element/simple cases:
-
-| Type | Slug |
-|------|------|
-| component | `buduni-98-bima526` |
-| component | `vacuxi-18-baxu582` |
-| component | `vumija-03-xise495` |
-| usecase | `majuma-84-loma401` |
-| usecase | `kevipe-39-gaji640` |
+Per-fixture ratchet counts are tracked in the generated parity
+dashboard, not maintained here — see
+[`docs/parity-report.md`](parity-report.md) (also published at
+https://plantuml.knowvah.com/parity). As of that report's latest
+measurement, the description-engine ratchet holds **51** pins across
+the two svg-description families it covers: **32** component +
+**19** usecase.
 
 **No conformant fixture yet** for: package/cluster containers, multi-edge
 diagrams, or any fixture using a named CSS color (e.g. `#orange` — named
@@ -320,9 +319,9 @@ colors are not yet normalized to hex, see F below). Do not force-add a
 fixture in one of these categories to "close" it — widen the ratchet only
 once a real fixture in that category reaches zero-diff.
 
-**Do not confuse "5 ratcheted" with "conformance is done."** The mission
+**Do not confuse ratchet size with "conformance is done."** The mission
 delivered the klimt cutover, the dual-measurer infrastructure, and a live
-(if small) regression-proof ratchet — not full description-engine
+regression-proof ratchet — not full description-engine
 conformance. The remaining gap is real and tracked:
 
 | ID | Gap | Scope |
