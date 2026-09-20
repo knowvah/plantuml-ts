@@ -48,7 +48,7 @@ rows (`camavo`, `vupuse`, `zepima`) declare no swimlane and leave at T0 (D8).
 
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) | T0 classify + read dispatch · T1 seam (no-op) | T0 ∥ T1 (worktree) | [ ] |
+| [0](batch-0/overview.md) | T0 classify + read dispatch · T1 seam (no-op) | T0 ∥ T1 (worktree) | T0 [x] T1 [ ] |
 | [1](batch-1/overview.md) | T2 while back · T3 repeat out/simple1/simple2/complex1 | T2 ∥ T3 (worktrees) | [ ] |
 | [2](batch-2/overview.md) | T4 sweep · T5a/T5b optional (D9) · T6 re-pin + close-out | sequential | [ ] |
 
