@@ -1,0 +1,15 @@
+@startebnf
+digit1 = ["0", "1"];
+
+(* note
+this is a note
+end note *)
+
+(* note
+this is a note1
+end note *)
+
+digit2 = ["0", "1"];
+
+
+@endebnf

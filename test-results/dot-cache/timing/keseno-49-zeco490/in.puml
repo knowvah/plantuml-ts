@@ -1,0 +1,4 @@
+@startuml
+title period 10 pulse 50
+clock C with period 10 pulse 50
+@enduml

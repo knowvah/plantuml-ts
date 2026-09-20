@@ -1,0 +1,9 @@
+@startwbs
+* Root
+'row 1
+** CategoryA
+*** ObjectA
+'row 2
+** CategoryA
+*** ObjectB
+@endwbs

@@ -1,0 +1,9 @@
+@startuml
+mode compact
+clock "clk" as clk with period 1
+binary "bin" as bin
+@0
+bin is 0
+@1
+bin is 1
+@enduml

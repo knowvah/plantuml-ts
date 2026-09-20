@@ -1,0 +1,17 @@
+@startmindmap
+<style>
+node {
+    MaximumWidth 300
+}
+
+firstNode {
+	FontSize 50
+}
+
+leafNode {
+}
+
+arrow {
+}
+</style>
+@endmindmap

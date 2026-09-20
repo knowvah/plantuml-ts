@@ -1,0 +1,12 @@
+@startuml
+concise "AAAA" as ConsiseA
+concise "BBB" as ConsiseB
+
+ConsiseA is "OffA"
+ConsiseB is "OffB"
+
+@0
+ConsiseA is "OnA"
+
+
+@enduml

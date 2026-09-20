@@ -1,0 +1,35 @@
+@startwbs
+<style>
+arrow {
+  LineStyle 8
+  LineColor blue
+}
+</style>
++ New Job
+<style>
+arrow {
+  LineColor green
+}
+</style>
+++ Decide on Job Requirements
++++ Identity gaps
++++ Review JDs
+++++ Sign-Up for courses
+++++ Volunteer
+++++ Reading
++++ Checklist
+++++ Responsibilities
+++++ Location
+<style>
+arrow {
+  LineStyle 0
+  LineThickness 4
+}
+</style>
+++ CV Upload Done
++++ CV Updated
+++++ Spelling & Grammar
+++++ Check dates
+++++ Skills
++++ Recruitment sites chosen
+@endwbs

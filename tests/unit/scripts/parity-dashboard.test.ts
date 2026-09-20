@@ -140,6 +140,21 @@ describe('buildMatrix', () => {
     expect([f.dot, f.survey, f.routing]).toEqual([undefined, undefined, undefined]);
   });
 
+  it("keeps a no-engine bucket's oracle count but repeats the engine reason in every comparison cell", () => {
+    const inputs = baseInputs();
+    inputs.oracleCounts['ditaa'] = 2;
+    inputs.surveyByType['ditaa'] = { conformant: 0, structural: 0, diverged: 2, generatedAt: '2026-09-20' };
+    inputs.routingByType['ditaa'] = { counts: { agree: 2 }, total: 2, measuredAt: '2026-09-20' };
+    const r = buildMatrix(inputs).find((x) => x.type === 'ditaa')!;
+    expect(r.engine).toBe('n/a (no engine (D8 todo))');
+    expect(r.oracle).toBe('2');
+    for (const cell of [r.dot, r.survey, r.census, r.ratchet, r.diffBaseline, r.routing, r.refusal]) {
+      expect(cell).toBe('n/a (no engine (D8 todo))');
+    }
+    const f = buildFreshness(inputs).find((x) => x.type === 'ditaa')!;
+    expect([f.survey, f.routing]).toEqual([undefined, undefined]);
+  });
+
   it('gives ditaa a D-row "no engine" reason, not a bare n/a', () => {
     expect(row('ditaa').engine).toBe('n/a (no engine (D8 todo))');
     expect(row('ditaa').oracle).toBe('n/a (no oracle captured)');

@@ -1,0 +1,9 @@
+@startuml
+concise "Web Browser" as WB
+
+@WB
+0 is idle
+2.7 is Proc.
+7.9 is Waiting
+
+@enduml

@@ -1,0 +1,12 @@
+@startsalt
+{
+N={# This is my title }
+S={# [OK south] | [Cancel]}
+W={# West }
+E={# East }
+C={#
+A0 | B0
+A1 | B1 
+}
+}
+@endsalt

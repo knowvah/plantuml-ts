@@ -1,0 +1,22 @@
+@startuml
+robust "Web Browser" as WB
+concise "Web User" as WU
+
+'WB has Initializing, idle, Waiting, Processing
+WB has Processing
+WB has Waiting
+WB has idle
+WB has Initializing
+
+WB is Initializing
+WU is Absent
+
+@WB
+0 is idle
++200 is Processing
++100 is Waiting
+
+@WU
+0 is Waiting
++500 is ok
+@endumll

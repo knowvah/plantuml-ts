@@ -1,0 +1,12 @@
+@startwbs
+* R
+** Line 1
+***(l1) L11
+** Line 2
+***[#green]:L21 a
+L21 b;
+***(l2)<:L22 a
+L22 b;
+
+l2 -> l1
+@endwbs

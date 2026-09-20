@@ -1,0 +1,12 @@
+@startwbs
+<style>
+boxless {
+  FontColor darkgreen
+  FontSize 30
+}
+</style>
+*_ root
+** a1
+***_ a2
+**_ b1
+@endwbs

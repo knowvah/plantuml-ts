@@ -1,0 +1,3 @@
+@startebnf
+test = "a" , "b" | "c";
+@endebnf

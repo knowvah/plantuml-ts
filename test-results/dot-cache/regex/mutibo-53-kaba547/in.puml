@@ -1,0 +1,3 @@
+@startregex
+^a[0-9]*bc$
+@endregex

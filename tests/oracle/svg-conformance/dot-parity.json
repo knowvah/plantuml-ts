@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-20T18:46:17.208Z",
-  "measuredAgainstCommit": "993cc2ae",
+  "generatedAt": "2026-09-20T20:20:27.682Z",
+  "measuredAgainstCommit": "27ed6346",
   "rows": [
     {
       "type": "activity",
@@ -24,7 +24,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "no data-diagram-type classification"
     },
     {
       "type": "chart",
@@ -64,7 +64,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "dot",
@@ -80,7 +80,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "files",
@@ -96,7 +96,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "hcl",
@@ -120,7 +120,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "network",
@@ -128,7 +128,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "object",
@@ -152,7 +152,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "salt",
@@ -160,7 +160,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "sequence",
@@ -184,7 +184,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "unknown",
@@ -208,7 +208,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "wire",
@@ -216,7 +216,7 @@
       "equal": 0,
       "pct": "—",
       "oracleBlind": 0,
-      "note": "no oracle captured"
+      "note": "n/a (no DOT stage)"
     },
     {
       "type": "yaml",

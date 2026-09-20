@@ -1,0 +1,11 @@
+@startuml
+concise "Web User" as WU
+
+WU is Absent
+
+@WU
+0 is Waiting
++500 is ok
+@200 <-> @+150 : {150 ms}
+@200 <-> @+200 : {200 ms}
+@enduml

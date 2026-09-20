@@ -1,0 +1,15 @@
+@startuml
+
+concise "R-Algo-0" as RA0
+
+@-100
+RA0 is A
+
+@300
+RA0 is B
+
+@500
+RA0 is C
+
+
+@enduml

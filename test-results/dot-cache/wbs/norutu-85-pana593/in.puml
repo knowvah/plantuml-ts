@@ -1,0 +1,43 @@
+@startwbs
+<style>
+wbsDiagram {
+  node {
+    Padding 5
+    Margin 15
+    BackGroundColor white
+  }
+
+  .europeStyle * {
+	  node {
+	    FontColor red
+	  }
+	  /' this is some comment 
+	   '/
+  }
+
+  .europeStyle {
+	  node {
+	    FontSize 20
+	  }
+  }
+
+  .usaStyle * {
+	  node {
+	      Padding 10; // because we are fatter ;) 
+	  }
+	  FontColor Blue
+  }
+}
+</style>
+
+* World
+** America
+*** Canada
+*** Mexico
+*** USA <<usaStyle>>
+**** Texas
+** Europe <<europeStyle>>
+*** England
+*** Germany
+*** Spain
+@endwbs

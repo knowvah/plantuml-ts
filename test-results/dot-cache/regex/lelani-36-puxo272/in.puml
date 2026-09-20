@@ -1,0 +1,3 @@
+@startregex
+AB(?# this is an inline comment)C
+@endregex

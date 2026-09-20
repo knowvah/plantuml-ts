@@ -1,0 +1,14 @@
+@startmindmap
+<style>
+mindmapDiagram {
+    node {
+        BackgroundColor Red
+    }
+    .lol {
+        BackgroundColor Green
+    }
+}
+</style>
+* root
+** not root <<lol>>
+@endmindmap

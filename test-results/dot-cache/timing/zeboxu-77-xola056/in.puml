@@ -1,0 +1,19 @@
+@startuml
+<style>
+timingDiagram {
+  .red {
+    LineColor red
+    LineThickness 2
+  }
+
+  .blue {
+    LineColor blue
+    LineThickness 5
+  }
+}
+</style>
+
+analog "Vcore" as VDD <<red>>
+binary "Vcore_EN" as VDD_EN <<blue>>
+
+@enduml

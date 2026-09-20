@@ -1,0 +1,22 @@
+@startmindmap
+
+<style>
+mindmapDiagram {
+  node {
+    BackgroundColor white
+  }
+}
+</style>
+* Hi
+<style>
+mindmapDiagram {
+  node {
+    BackgroundColor yellow
+  }
+}
+</style>
+** some
+** short
+** ideas
+
+@endmindmap

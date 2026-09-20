@@ -1,0 +1,19 @@
+@startuml
+robust R
+@0
+R is 0
+@1
+R is 1
+@2
+R is 0
+@3
+R is 1
+@5
+R is 0
+@10
+R is 1
+
+R@0 <-> @2 : {A long label}
+R@2 <-> @5 : {Another long label}
+R@5 <-> @10 : {Another long label}
+@enduml

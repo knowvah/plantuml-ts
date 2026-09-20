@@ -1,0 +1,5 @@
+@startgantt
+[ThisMustFail] starts 2023-09-25
+[ThisMustFail] lasts 15 days
+
+@endgantt

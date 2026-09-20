@@ -1,0 +1,13 @@
+@startmindmap
+* root
+!$arg=2
+!while $arg!=0
+  !$i=3
+  ** $arg
+  !while $i != 0
+    *** $arg.$i
+    !$i = $i - 1
+  !endwhile
+  !$arg = $arg - 1
+!endwhile
+@endmindmap

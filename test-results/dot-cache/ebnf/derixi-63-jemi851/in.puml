@@ -1,0 +1,4 @@
+@startebnf
+scale 5
+test = ['a'|'b'];
+@endebnf

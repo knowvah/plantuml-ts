@@ -1,0 +1,13 @@
+@startmindmap
+
+<style>
+node {
+    HorizontalAlignment right
+}
+</style>
+* Hi
+** some
+** short but nice
+** ideas
+
+@endmindmap

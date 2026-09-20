@@ -1,0 +1,16 @@
+@startuml
+binary "line" as line
+
+!$a = 3.9
+!$b = 4
+
+!function $test($a, $b)
+!return $a + $b
+!endfunction
+
+@0
+line is low
+
+@3
+line is high: $test($a, $b)
+@enduml

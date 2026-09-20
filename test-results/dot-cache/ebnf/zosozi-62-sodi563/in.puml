@@ -1,0 +1,4 @@
+@startebnf
+terminal = "'" , character , { character } , "'" 
+         | '"' , character , { character } , '"' ;
+@endebnf

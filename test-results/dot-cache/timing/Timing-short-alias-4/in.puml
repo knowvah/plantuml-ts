@@ -1,0 +1,18 @@
+@startuml
+robust WB
+concise WU
+rectangle RWU
+
+@0
+WU is Idle
+RWU is Idle
+WB is Idle
+
+@100
+WU is Waiting
+RWU is Waiting
+WB is Processing
+
+@300
+WB is Waiting
+@enduml

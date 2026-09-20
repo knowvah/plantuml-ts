@@ -1,0 +1,3 @@
+@startebnf
+Fortran_77_continuation_line = 5 * " ",  '[...]', 66 * [character];
+@endebnf

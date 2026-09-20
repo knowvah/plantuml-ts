@@ -1,0 +1,8 @@
+@startuml
+robust "Power switch" as PowerSwitch
+robust "Power" as Power
+PowerSwitch is Off
+@0
+PowerSwitch is On
+PowerSwitch -> Power@+1 : PowerOn
+@enduml

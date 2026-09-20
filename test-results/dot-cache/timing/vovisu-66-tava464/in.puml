@@ -1,0 +1,8 @@
+@startuml
+title @0 WU is {-}
+concise "Web User" as WU
+@0
+WU is {-}
+@1
+WU is a
+@enduml

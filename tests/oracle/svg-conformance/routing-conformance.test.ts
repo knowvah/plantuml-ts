@@ -534,7 +534,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3402 agree, 139 known-misroute and 31 jar-error', () => {
+  it('the manifest splits into 3424 agree, 987 known-misroute and 73 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -616,10 +616,30 @@ describe('routing conformance — jar-error classification', () => {
     // returns `PSystemUnsupported`, whose page (`PSystemUnsupported.java:62`)
     // carries no root attribute and is not a `PSystemError` page. 3401 + 1 =
     // 3402, 99 + 40 = 139, 31 unchanged.
-    expect(pinnedAgree.length).toBe(3402);
-    expect(pinnedMisroutes.length).toBe(139);
-    expect(pinnedJarErrors.length).toBe(31);
-    expect(manifest.fixtures.length).toBe(3572);
+    //
+    // DERIVATION of 3424/987/73 over 4484, follow-on to `parity-dashboard-
+    // refresh` (2026-09-20): the eleven buckets that had no oracle at all --
+    // c4 11, ditaa 2, ebnf 44, gantt 265, mindmap 142, network 3, regex 46,
+    // salt 51, timing 126, wbs 204, wire 18 = 912 -- captured with
+    // `scripts/capture-oracle-cache.ts` and pinned additively (10011
+    // insertions, one deletion: the `$comment`). Ten of the eleven have NO
+    // engine in this port, so 848 pins share one mechanism: no plugin
+    // registers their DiagramType, `DiagramRegistry#resolve` has zero
+    // candidates and returns the error sentinel (`src/core/dispatcher.ts:
+    // 317-342`) where upstream runs the factory `PSystemBuilder.java`
+    // registers -- each reason names that factory line and the Phase D row
+    // that ports it. The exceptions each carry their own cited mechanism:
+    // c4's two preprocessor failures (`ReversePolishInterpretor.ts:74`, see
+    // `.agent-notes/tim-nested-call-argcount.md`), network's two legacy
+    // `(*) -->` activity sources (`CommandLinkActivity.java:73`), and the one
+    // timing source STATE claimed. 22 agree (c4 7, ditaa 2, gantt 4, network
+    // 1, regex 2, wbs 6 -- NONE == NONE, or the c4/network sources the jar
+    // and this port both type CLASS/DESCRIPTION); 42 jar errors. 3402 + 22 =
+    // 3424, 139 + 848 = 987, 31 + 42 = 73.
+    expect(pinnedAgree.length).toBe(3424);
+    expect(pinnedMisroutes.length).toBe(987);
+    expect(pinnedJarErrors.length).toBe(73);
+    expect(manifest.fixtures.length).toBe(4484);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -662,7 +682,11 @@ describe('routing conformance — jar-error classification', () => {
     // packet pins all carry the same cited mechanism (see the derivation
     // above). The uncensused remainder is STILL exactly
     // sequence/nuvoja-46-dezu541: 139 - 1 = 138.
-    expect(censused.length).toBe(138);
+    //
+    // 138 -> 986 at the parity-dashboard-refresh follow-on (2026-09-20): all
+    // 848 new pins carry a reason (see the derivation above). The uncensused
+    // remainder is STILL exactly sequence/nuvoja-46-dezu541: 987 - 1 = 986.
+    expect(censused.length).toBe(986);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

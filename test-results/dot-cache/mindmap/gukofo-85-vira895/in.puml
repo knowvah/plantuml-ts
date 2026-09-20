@@ -1,0 +1,7 @@
+@startmindmap
+* 排列组合问题
+** 基础概念
+***_ <latex>C_{n-1}^{m-1}</latex>
+***_ 环形排列
+****_ n个主体环形排列有<latex>A_{n-1}^{n-1}</latex>种可能
+@endmindmap

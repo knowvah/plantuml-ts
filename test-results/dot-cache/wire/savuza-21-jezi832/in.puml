@@ -1,0 +1,7 @@
+@startwire
+*big_1
+	*a
+	--
+	*b
+	
+@endwire

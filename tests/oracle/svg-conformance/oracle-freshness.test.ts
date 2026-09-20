@@ -123,6 +123,24 @@ const SENTINELS: readonly Sentinel[] = [
   { type: 'chronology', slug: 'lenudo-53-nade902' },
   { type: 'files', slug: 'files-directory-tree-with-note' },
   { type: 'packet', slug: 'packet-auto-position' },
+  // The eleven buckets captured 2026-09-20 (follow-on to parity-dashboard-
+  // refresh: "capture every oracle so we know where we land"), each its cache
+  // dir's `localeCompare`-first slug. Ten have no engine in this port yet; the
+  // jar renders them, so their caches are what a future port mission starts
+  // from and must stay fresh. ditaa's oracle is the PNG the jar writes even
+  // under `-tsvg` (`PSystemDitaa extends DirectOsDiagram`, PNG-only), stored
+  // under the `.svg` name; a byte guard on it is still a freshness guard.
+  { type: 'c4', slug: 'biluko-70-licu481' },
+  { type: 'ditaa', slug: 'pibite-04-xiba436' },
+  { type: 'ebnf', slug: 'bajika-11-levo224' },
+  { type: 'gantt', slug: 'bafilu-92-tafa086' },
+  { type: 'mindmap', slug: 'bepinu-34-tiji715' },
+  { type: 'network', slug: 'denevo-18-toza672' },
+  { type: 'regex', slug: 'bafake-97-xuse174' },
+  { type: 'salt', slug: 'bireva-46-dalu382' },
+  { type: 'timing', slug: 'bejilu-38-kaje288' },
+  { type: 'wbs', slug: 'bacole-35-fiki903' },
+  { type: 'wire', slug: 'bexone-92-bebe715' },
 ];
 
 const cachedSvg = (s: Sentinel): string => join(CACHE, s.type, s.slug, 'in.svg');

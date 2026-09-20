@@ -1,0 +1,20 @@
+@startmindmap
+skinparam backgroundColor #302934
+<style>
+mindmapDiagram {
+  .rootStyle * {
+    BackGroundColor lightblue
+    LineColor lightblue
+  }
+  .leafStyle * {
+    LineColor lightgray
+    FontColor white
+  }
+}
+</style>
+* Lessons by Den <<rootStyle>>
+** OS-agnostic package management
+***_ Flatpak <<leafStyle>>
+***_ SNAP Packages <<leafStyle>>
+***_ AppImages <<leafStyle>>
+@endmindmap

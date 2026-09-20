@@ -1,0 +1,17 @@
+@startwbs
+<style>
+document {
+  BackGroundColor pink
+}
+wbsDiagram {
+  element {
+    BackGroundColor palegreen
+  }
+}
+</style>
++ r
+++ aa
++++ aaa
+++ bb
++++ bbb
+@endwbs

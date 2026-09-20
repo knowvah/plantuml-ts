@@ -1,0 +1,15 @@
+@startmindmap
+* Debian
+** Ubuntu
+*** Linux Mint
+*** Kubuntu
+*** Lubuntu
+*** KDE Neon
+** SolydXK
+
+-- foo1
+--- foo2
+--- foo3
+-- foo1
+
+@endmindmap

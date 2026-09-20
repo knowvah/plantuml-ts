@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 3572 fixtures, 31 of them jar errors, 105 of them erroring here', () => {
+  it('the manifest is 4484 fixtures, 73 of them jar errors, 237 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -588,10 +588,28 @@ describe('refusal coverage — baseline shape', () => {
     // `PSystemUnsupported` page (`PSystemBuilder.java:284`), which is a
     // rendered document, not a `PSystemError` page, so it counts as
     // rendered here exactly as `isJarErrorPage` classifies it.
-    expect(manifest.fixtures.length).toBe(3572);
-    expect(pinnedJarErrors.length).toBe(31);
-    expect(pinnedErroring.length).toBe(105);
-    expect(pinnedRendering.length).toBe(3467);
+    //
+    // 3572 -> 4484 / 31 -> 73 / 105 -> 237 / 3467 -> 4247 at the
+    // parity-dashboard-refresh follow-on (2026-09-20): the eleven buckets
+    // that had no oracle (912 fixtures, see the sibling gate's derivation)
+    // pinned additively -- 10157 insertions, one deletion (the `$comment`).
+    // 42 are jar error pages. Of the 870 the jar rendered, 746 render here
+    // too -- for the ten no-engine types this port answers with the
+    // dispatcher's error SENTINEL (`src/core/dispatcher.ts:342`), a page
+    // with no PSystemError banner, exactly as upstream's own
+    // `PSystemUnsupported` is not a PSystemError page; both sides "render"
+    // by this gate's definition -- and 124 error here on a source the jar
+    // rendered. Every one of the 124 is pinned `known-gap` with a cited
+    // mechanism (timing 119: `@startuml` sources refused by all ten legacy
+    // factories, `TimingDiagramFactory` unported, `PSystemBuilder.java:187`;
+    // c4 2: the nested-call preprocessor gap; network 2: legacy activity
+    // `CommandLinkActivity.java:73`; gantt 1: an empty `@startgantt`). The
+    // "specific unported Command" the known-gap bar demands is, for a whole
+    // missing engine, the factory itself -- named with its line.
+    expect(manifest.fixtures.length).toBe(4484);
+    expect(pinnedJarErrors.length).toBe(73);
+    expect(pinnedErroring.length).toBe(237);
+    expect(pinnedRendering.length).toBe(4247);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -630,7 +648,12 @@ describe('refusal coverage — baseline shape', () => {
     // sibling gate still pins, not a refusal. Every one of the surviving nine
     // was re-probed at HEAD and carries a reason true at HEAD; seven of the
     // sixteen named a line this port now parses.
-    expect(gaps.length).toBe(9);
+    //
+    // 9 -> 133 at the parity-dashboard-refresh follow-on (2026-09-20): the
+    // 124 known-gap pins described in the derivation above. Not a dumping
+    // ground: 119 share one named mechanism (no timing engine), and the
+    // other five each name theirs.
+    expect(gaps.length).toBe(133);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

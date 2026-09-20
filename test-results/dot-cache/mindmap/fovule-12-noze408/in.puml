@@ -1,0 +1,12 @@
+@startmindmap
+* long plain text
+**: **first**
+<latex> \int_{0}^{\infty} \left( \sum_{i = 0}^{n} \right) {\rm d}x </latex>
+;
+**: **second**
+<latex>
+    \int_{0}^{\infty} \left( 
+        \sum_{i = 0}^{n} 
+    \right) {\rm d}x 
+</latex>;
+@endmindmap

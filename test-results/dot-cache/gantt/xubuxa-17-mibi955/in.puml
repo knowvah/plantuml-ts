@@ -1,0 +1,8 @@
+@startgantt
+[1] lasts 3 days
+[2] lasts 8 days
+[3] lasts 5 days
+
+[3] starts at [2]'s end
+[3] starts at [1]'s end
+@endgantt
