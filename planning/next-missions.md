@@ -857,6 +857,25 @@ Ordered by how ready they are, not by size.
   test that greps for the template-sink shape and fails on any new one.
   Evidence: `.agent-notes/codeql-2026-09-19.md`.
 
+- **`sequence-self-message-width`** (NEW, unbriefed) — FILED 2026-09-19 from
+  a maintainer sample: `Alice -> Bob : hello` then `Alice -> Alice: this is
+  snappy isn't it now!`. The self-arrow's own three `<line>`s and polygon
+  match the jar to the pixel (32.225/74.225 x, 93/106 y). Two things do not:
+  (1) **the next participant's x** — jar `Bob` head at x=174.519, ours
+  83.933, because `CommunicationTileSelf#addConstraints`
+  (`teoz/CommunicationTileSelf.java:166-180`) does
+  `next.getPosC().ensureBiggerThan(getMaxX())` at `:180` — the NEXT
+  participant's lifeline is pushed past the self tile's own right extent
+  (`getMaxX`, `:272`), which includes the label; the `posA`/`posE`
+  self-overflow margin at `:195-225` is the sibling lever already on
+  `planning/sequence-next-missions.md`'s carried-forward list; the port's participant sweep ignores self-message
+  width entirely. (2) **the label's own width** — jar `textLength=128.294`,
+  ours `146.358` for the same 28-char 13px string, while `hello` agrees to
+  0.08 px, so one glyph (candidates: `'` or `!`) is mis-measured in the
+  width table; `WidthTableMeasurer` before the sequence code. Both are
+  single-mechanism; (2) is a measurer fix and may move other suites.
+  Evidence: this session's scratchpad `self/s.puml`, jar vs ours.
+
 - **`sequence-participant-background-cascade`** — **EXECUTED 2026-09-19** on
   `fix/sequence-participant-background` (`1452ec2d` fix, re-pin after it):
   default fill, the `skinparam backgroundColor` cascade, the `!theme`/`<style>`
@@ -1036,6 +1055,27 @@ Ordered by how ready they are, not by size.
   Likely short and mechanical once upstream's `SkinParam` key and its
   diamond-`Ftile` consumer are located. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md`.
+
+- **`activity-note-opale-attachment`** (NEW, unbriefed) — FILED 2026-09-19
+  from a maintainer sample (`:Transfer Phase;` + `note right ... end note`
+  + `:Termination Phase;`). The jar attaches a note to its instruction
+  (`FtileFactoryDelegatorAddNote` -> `FtileWithNoteOpale`, 255 lines, and
+  `FtileWithNotes`, 226): the tile's own width becomes instruction + note,
+  the note is an OPALE callout (`Opale` shape with a pointer aimed at the
+  instruction, `M144.05,105 L144.05,119 L124.05,123 L144.05,127 ...`),
+  fill `--note-background: #FEFFDD` (`plantuml.skin:3,322-324`), and NO
+  link is drawn. This port models the note as a sibling node in the flow:
+  a full-width plain note box BETWEEN the two actions (jar canvas 370x255,
+  ours 395x305), one extra `<line>`+`<polygon>` (5 vs 4), fill `#FEFECE`
+  (the legacy ColorParam yellow, not the skin's), text at x=18 vs 150.05.
+  Blast radius: 51 of 373 baseline rows carry a `note`, 66 of 452 corpus.
+  Absorbs four filings: `activity-note-sibling-links`,
+  `activity-note-width-overscan`, `activity-note-after-terminal`, and the
+  note half of `activity-embedded-diagram-labels`. Distinct mechanism from
+  `activity-loop-lane-translate` (no lanes, no loop); a mission of its own.
+  Our note code: `tiles/gtile-note.ts`, `tile-layout.ts` (sibling
+  modelling), `tile-coordinates.ts`. Evidence: this session's scratchpad
+  `note/n.puml`, jar vs ours.
 
 - **`activity-note-after-terminal`** (NEW, unbriefed) — FILED 2026-09-03 by
   `activity-element-granularity` T1, measured. A note attached to a `stop`
