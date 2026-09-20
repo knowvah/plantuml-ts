@@ -360,9 +360,11 @@ describe('placeSwimlanes — edge routing', () => {
 // ---------------------------------------------------------------------------
 // placeSwimlanes -- loop-translate dispatch seam (T1, `activity-loop-lane-
 // translate`, D1/D2/D3/D4). `routeLoopTranslate`'s per-kind functions are
-// STUBS: every one returns the same generic middle-Y elbow `routeEdge`'s
-// own 'default' case computes, so these tests exercise the DISPATCH and
-// flat-map wiring, not the real translate geometry (T2/T3).
+// STUBS for `repeat-*`, exercising only the DISPATCH and flat-map wiring
+// (T3 lands the real geometry). `while-back` is REAL as of T2 --
+// `ConnectionBackSimple#drawTranslate` (`ftile/vcompact/FtileWhile.java
+// :277-308`) -- so the `whileBack`-tagged tests below assert its own
+// five-point snake, not a generic elbow.
 // ---------------------------------------------------------------------------
 
 describe('placeSwimlanes — loop-translate dispatch seam', () => {
@@ -377,23 +379,30 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     diamond: { inY: 0, outY: 10, width: 20 },
   };
 
-  it('a while-back-tagged cross-lane edge dispatches to the generic elbow, sourced from the loop record', () => {
+  it('a while-back-tagged cross-lane edge dispatches to ConnectionBackSimple#drawTranslate\'s own five-point snake, sourced from the loop record (FtileWhile.java:289-300, T2)', () => {
     const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
     const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
     const edges = [{ points: [{ x: 999, y: 999 }] }]; // deliberately NOT loop.p1/p2 -- proves the source is the loop record, not `edge.points`
     const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
     const pts = result.edges[0]!.points;
-    expect(pts).toHaveLength(4);
-    // Y is delta-independent (lane translates are X-only, D2) so these are
-    // exact regardless of lane arithmetic; X is asserted structurally
-    // (mp1's vertical run, mp2's vertical run) rather than as a literal,
-    // matching this file's existing 'parallel-in'/'parallel-out' tests.
-    expect(pts[0]!.y).toBe(32); // whileBack.p1.y, NOT edge.points[0].y (999)
-    expect(pts[3]!.y).toBe(60); // whileBack.p2.y, NOT edge.points[0].y (999)
-    expect(pts[1]!.y).toBe(46); // (32 + 60) / 2
-    expect(pts[2]!.y).toBe(46);
+    expect(pts).toHaveLength(5);
+    // y1 = whileBack.p1.y (32, NOT edge.points[0].y 999); y1bis = y1 + 12
+    // (Hexagon.hexagonHalfSize, Hexagon.java:46); half = (outY-inY)/2 = 5;
+    // y2 = whileBack.p2.y + inY + half = 60 + 0 + 5 = 65. Delta-independent
+    // (lane translates are X-only, D2), so exact regardless of lane
+    // arithmetic; X is asserted structurally (x1's vertical run, xx's
+    // vertical run), matching this file's 'parallel-in'/'parallel-out' style.
+    expect(pts[0]!.y).toBe(32);
+    expect(pts[1]!.y).toBe(44);
+    expect(pts[2]!.y).toBe(44);
+    expect(pts[3]!.y).toBe(65);
+    expect(pts[4]!.y).toBe(65);
     expect(pts[0]!.x).toBe(pts[1]!.x);
     expect(pts[2]!.x).toBe(pts[3]!.x);
+    // The mid-arrow anchor sits on the xx column, at (y1+y2)/2 (:307), and
+    // `emphasize` is dropped -- no `emphasizeDirection` in `drawTranslate`.
+    expect(result.edges[0]!.midArrowAt).toEqual({ x: pts[2]!.x, y: 48.5, dir: 'up' });
+    expect(result.edges[0]!.emphasize).toBeUndefined();
   });
 
   const repeatLoops: readonly LoopTranslate[] = [
@@ -482,7 +491,7 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     expect(result.edgeMeta[1]).toEqual(edgeMeta[1]);
   });
 
-  it('loop reservations (empty per stub) are appended after divider reservations, order preserved', () => {
+  it('a while-back UEmpty reservation (5x12 at x1,y1bis) is appended after divider reservations (FtileWhile.java:304, T2)', () => {
     const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
     const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
     const edges = [
@@ -504,10 +513,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
       bounder,
       theme,
     });
-    // The stub contributes zero reservations, so tagging an edge changes
-    // nothing about the divider reservations already under test above.
-    expect(withLoop.reservations).toEqual(withoutLoop.reservations);
-    expect(withLoop.reservations.length).toBeGreaterThan(0);
+    // `ConnectionBackSimple#drawTranslate`'s own `UEmpty(5, hexagonHalfSize)`
+    // at `(x1, y1 + hexagonHalfSize)` (:304-305) is ONE extra reservation
+    // beyond the divider reservations already under test above -- x1 is
+    // read off the routed edge's own first point rather than hardcoded,
+    // since it depends on the lane engine's own dx arithmetic (D2).
+    expect(withLoop.reservations).toHaveLength(withoutLoop.reservations.length + 1);
+    expect(withLoop.reservations.slice(0, withoutLoop.reservations.length)).toEqual(withoutLoop.reservations);
+    const x1 = withLoop.edges[0]!.points[0]!.x;
+    expect(withLoop.reservations[withoutLoop.reservations.length]).toEqual({ x: x1, y: 44, width: 5, height: 12 });
   });
 });
 

@@ -1,0 +1,1680 @@
+{
+  "commit": "8b036fa7",
+  "aggregate": 51388,
+  "subsetSum": null,
+  "fixtures": [
+    {
+      "slug": "activity-creole-table",
+      "score": 51,
+      "pinned": 51,
+      "delta": 0
+    },
+    {
+      "slug": "bakopu-96-pudu086",
+      "score": 176,
+      "pinned": 176,
+      "delta": 0
+    },
+    {
+      "slug": "bareka-88-fusu160",
+      "score": 291,
+      "pinned": 291,
+      "delta": 0
+    },
+    {
+      "slug": "bazize-75-dedo568",
+      "score": 337,
+      "pinned": 337,
+      "delta": 0
+    },
+    {
+      "slug": "bazuma-86-metu353",
+      "score": 141,
+      "pinned": 141,
+      "delta": 0
+    },
+    {
+      "slug": "becaje-01-vaji284",
+      "score": 104,
+      "pinned": 104,
+      "delta": 0
+    },
+    {
+      "slug": "becanu-19-diti597",
+      "score": 190,
+      "pinned": 190,
+      "delta": 0
+    },
+    {
+      "slug": "bedezo-44-more709",
+      "score": 166,
+      "pinned": 166,
+      "delta": 0
+    },
+    {
+      "slug": "begivo-34-sicu289",
+      "score": 142,
+      "pinned": 142,
+      "delta": 0
+    },
+    {
+      "slug": "bepuku-07-vebe062",
+      "score": 303,
+      "pinned": 303,
+      "delta": 0
+    },
+    {
+      "slug": "besaga-58-poli497",
+      "score": 313,
+      "pinned": 313,
+      "delta": 0
+    },
+    {
+      "slug": "bideta-97-cezo697",
+      "score": 167,
+      "pinned": 167,
+      "delta": 0
+    },
+    {
+      "slug": "bidosa-98-veca008",
+      "score": 179,
+      "pinned": 179,
+      "delta": 0
+    },
+    {
+      "slug": "bigide-91-bise382",
+      "score": 98,
+      "pinned": 98,
+      "delta": 0
+    },
+    {
+      "slug": "biguku-39-voxu233",
+      "score": 134,
+      "pinned": 134,
+      "delta": 0
+    },
+    {
+      "slug": "biredi-08-bama025",
+      "score": 283,
+      "pinned": 283,
+      "delta": 0
+    },
+    {
+      "slug": "bixefi-77-moki051",
+      "score": 158,
+      "pinned": 158,
+      "delta": 0
+    },
+    {
+      "slug": "bizono-61-sasa740",
+      "score": 268,
+      "pinned": 268,
+      "delta": 0
+    },
+    {
+      "slug": "bocaga-53-nale241",
+      "score": 118,
+      "pinned": 118,
+      "delta": 0
+    },
+    {
+      "slug": "bolizi-92-pele824",
+      "score": 358,
+      "pinned": 358,
+      "delta": 0
+    },
+    {
+      "slug": "boxoto-53-sifo232",
+      "score": 888,
+      "pinned": 888,
+      "delta": 0
+    },
+    {
+      "slug": "bozido-07-geze049",
+      "score": 239,
+      "pinned": 239,
+      "delta": 0
+    },
+    {
+      "slug": "bozuro-33-celo170",
+      "score": 198,
+      "pinned": 198,
+      "delta": 0
+    },
+    {
+      "slug": "bugaja-31-jaso630",
+      "score": 190,
+      "pinned": 190,
+      "delta": 0
+    },
+    {
+      "slug": "bulasi-17-vafa634",
+      "score": 334,
+      "pinned": 334,
+      "delta": 0
+    },
+    {
+      "slug": "bumaca-51-kece901",
+      "score": 210,
+      "pinned": 210,
+      "delta": 0
+    },
+    {
+      "slug": "bunoxu-10-jabe604",
+      "score": 214,
+      "pinned": 214,
+      "delta": 0
+    },
+    {
+      "slug": "cagoze-40-tete366",
+      "score": 121,
+      "pinned": 121,
+      "delta": 0
+    },
+    {
+      "slug": "calenu-74-vigo098",
+      "score": 273,
+      "pinned": 273,
+      "delta": 0
+    },
+    {
+      "slug": "camavo-50-kaku123",
+      "score": 396,
+      "pinned": 396,
+      "delta": 0
+    },
+    {
+      "slug": "carapo-31-bisi880",
+      "score": 89,
+      "pinned": 89,
+      "delta": 0
+    },
+    {
+      "slug": "cemagu-66-vazo965",
+      "score": 195,
+      "pinned": 195,
+      "delta": 0
+    },
+    {
+      "slug": "cemipu-87-dinu624",
+      "score": 218,
+      "pinned": 218,
+      "delta": 0
+    },
+    {
+      "slug": "cetica-88-toke482",
+      "score": 91,
+      "pinned": 91,
+      "delta": 0
+    },
+    {
+      "slug": "ciceto-21-zanu057",
+      "score": 197,
+      "pinned": 197,
+      "delta": 0
+    },
+    {
+      "slug": "cifafo-49-jazi415",
+      "score": 140,
+      "pinned": 140,
+      "delta": 0
+    },
+    {
+      "slug": "cixave-47-milo698",
+      "score": 227,
+      "pinned": 227,
+      "delta": 0
+    },
+    {
+      "slug": "cizixu-00-koro700",
+      "score": 24,
+      "pinned": 24,
+      "delta": 0
+    },
+    {
+      "slug": "copisa-69-xisi273",
+      "score": 138,
+      "pinned": 138,
+      "delta": 0
+    },
+    {
+      "slug": "covage-54-pine573",
+      "score": 182,
+      "pinned": 182,
+      "delta": 0
+    },
+    {
+      "slug": "cubida-55-meku256",
+      "score": 80,
+      "pinned": 80,
+      "delta": 0
+    },
+    {
+      "slug": "cufega-65-beji958",
+      "score": 258,
+      "pinned": 258,
+      "delta": 0
+    },
+    {
+      "slug": "cugezi-99-tire097",
+      "score": 209,
+      "pinned": 209,
+      "delta": 0
+    },
+    {
+      "slug": "cujoni-21-somi079",
+      "score": 155,
+      "pinned": 155,
+      "delta": 0
+    },
+    {
+      "slug": "cutabu-59-cilo276",
+      "score": 159,
+      "pinned": 159,
+      "delta": 0
+    },
+    {
+      "slug": "dacuga-41-popo038",
+      "score": 214,
+      "pinned": 214,
+      "delta": 0
+    },
+    {
+      "slug": "dakesa-98-mano758",
+      "score": 22,
+      "pinned": 22,
+      "delta": 0
+    },
+    {
+      "slug": "darote-51-kuta407",
+      "score": 258,
+      "pinned": 258,
+      "delta": 0
+    },
+    {
+      "slug": "daxare-39-buci637",
+      "score": 182,
+      "pinned": 182,
+      "delta": 0
+    },
+    {
+      "slug": "decudi-92-bisu741",
+      "score": 382,
+      "pinned": 382,
+      "delta": 0
+    },
+    {
+      "slug": "dexero-99-ziru660",
+      "score": 93,
+      "pinned": 93,
+      "delta": 0
+    },
+    {
+      "slug": "digexe-63-zifu774",
+      "score": 269,
+      "pinned": 269,
+      "delta": 0
+    },
+    {
+      "slug": "dirame-64-cica627",
+      "score": 75,
+      "pinned": 75,
+      "delta": 0
+    },
+    {
+      "slug": "disemi-67-keva276",
+      "score": 23,
+      "pinned": 23,
+      "delta": 0
+    },
+    {
+      "slug": "dixiku-28-guzo497",
+      "score": 206,
+      "pinned": 206,
+      "delta": 0
+    },
+    {
+      "slug": "dotuzi-75-nape254",
+      "score": 259,
+      "pinned": 259,
+      "delta": 0
+    },
+    {
+      "slug": "dozaxu-98-xetu961",
+      "score": 129,
+      "pinned": 129,
+      "delta": 0
+    },
+    {
+      "slug": "doziki-93-rosi997",
+      "score": 310,
+      "pinned": 310,
+      "delta": 0
+    },
+    {
+      "slug": "dulezi-77-sana210",
+      "score": 158,
+      "pinned": 158,
+      "delta": 0
+    },
+    {
+      "slug": "dunejo-33-divo189",
+      "score": 15,
+      "pinned": 15,
+      "delta": 0
+    },
+    {
+      "slug": "dupopo-44-deto131",
+      "score": 153,
+      "pinned": 153,
+      "delta": 0
+    },
+    {
+      "slug": "duzumu-46-geve509",
+      "score": 31,
+      "pinned": 31,
+      "delta": 0
+    },
+    {
+      "slug": "fabexi-81-dife869",
+      "score": 66,
+      "pinned": 66,
+      "delta": 0
+    },
+    {
+      "slug": "fabule-54-pili300",
+      "score": 25,
+      "pinned": 25,
+      "delta": 0
+    },
+    {
+      "slug": "fabuli-92-vemo727",
+      "score": 23,
+      "pinned": 23,
+      "delta": 0
+    },
+    {
+      "slug": "farexi-86-xanu521",
+      "score": 28,
+      "pinned": 28,
+      "delta": 0
+    },
+    {
+      "slug": "fatuzu-07-cevu894",
+      "score": 273,
+      "pinned": 273,
+      "delta": 0
+    },
+    {
+      "slug": "feceme-58-xodo415",
+      "score": 117,
+      "pinned": 117,
+      "delta": 0
+    },
+    {
+      "slug": "felega-00-saxi785",
+      "score": 150,
+      "pinned": 150,
+      "delta": 0
+    },
+    {
+      "slug": "femaco-88-bufe808",
+      "score": 43,
+      "pinned": 43,
+      "delta": 0
+    },
+    {
+      "slug": "fetizo-39-jace641",
+      "score": 220,
+      "pinned": 220,
+      "delta": 0
+    },
+    {
+      "slug": "fibafo-22-foze119",
+      "score": 503,
+      "pinned": 503,
+      "delta": 0
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "score": 115,
+      "pinned": 115,
+      "delta": 0
+    },
+    {
+      "slug": "firibi-00-puki721",
+      "score": 300,
+      "pinned": 300,
+      "delta": 0
+    },
+    {
+      "slug": "fisaca-74-deco063",
+      "score": 43,
+      "pinned": 43,
+      "delta": 0
+    },
+    {
+      "slug": "fivama-51-cusa142",
+      "score": 147,
+      "pinned": 147,
+      "delta": 0
+    },
+    {
+      "slug": "fofele-65-lozo631",
+      "score": 29,
+      "pinned": 29,
+      "delta": 0
+    },
+    {
+      "slug": "foludi-80-gilo247",
+      "score": 116,
+      "pinned": 116,
+      "delta": 0
+    },
+    {
+      "slug": "fomapa-90-bore251",
+      "score": 104,
+      "pinned": 104,
+      "delta": 0
+    },
+    {
+      "slug": "fonabu-93-xama593",
+      "score": 113,
+      "pinned": 113,
+      "delta": 0
+    },
+    {
+      "slug": "fonebe-54-save009",
+      "score": 25,
+      "pinned": 25,
+      "delta": 0
+    },
+    {
+      "slug": "fotamo-01-rupi481",
+      "score": 42,
+      "pinned": 42,
+      "delta": 0
+    },
+    {
+      "slug": "fovaja-48-leso567",
+      "score": 424,
+      "pinned": 424,
+      "delta": 0
+    },
+    {
+      "slug": "fufefa-17-faje066",
+      "score": 158,
+      "pinned": 158,
+      "delta": 0
+    },
+    {
+      "slug": "gacaja-15-keko600",
+      "score": 408,
+      "pinned": 408,
+      "delta": 0
+    },
+    {
+      "slug": "gakelo-29-neno787",
+      "score": 193,
+      "pinned": 193,
+      "delta": 0
+    },
+    {
+      "slug": "ganaku-47-muko252",
+      "score": 242,
+      "pinned": 242,
+      "delta": 0
+    },
+    {
+      "slug": "garuga-34-debe901",
+      "score": 121,
+      "pinned": 121,
+      "delta": 0
+    },
+    {
+      "slug": "gaxezi-48-zesa921",
+      "score": 68,
+      "pinned": 68,
+      "delta": 0
+    },
+    {
+      "slug": "gebuzi-30-nulo391",
+      "score": 124,
+      "pinned": 124,
+      "delta": 0
+    },
+    {
+      "slug": "gelono-70-zuce760",
+      "score": 227,
+      "pinned": 227,
+      "delta": 0
+    },
+    {
+      "slug": "gepetu-15-seba834",
+      "score": 42,
+      "pinned": 42,
+      "delta": 0
+    },
+    {
+      "slug": "gesogi-81-xoma900",
+      "score": 374,
+      "pinned": 374,
+      "delta": 0
+    },
+    {
+      "slug": "gevaxi-80-tone223",
+      "score": 240,
+      "pinned": 240,
+      "delta": 0
+    },
+    {
+      "slug": "gimegi-77-xidu727",
+      "score": 23,
+      "pinned": 23,
+      "delta": 0
+    },
+    {
+      "slug": "gitoke-38-beme495",
+      "score": 533,
+      "pinned": 533,
+      "delta": 0
+    },
+    {
+      "slug": "givanu-33-kire967",
+      "score": 207,
+      "pinned": 207,
+      "delta": 0
+    },
+    {
+      "slug": "gizore-52-fode894",
+      "score": 15,
+      "pinned": 15,
+      "delta": 0
+    },
+    {
+      "slug": "gofebi-87-zeka817",
+      "score": 169,
+      "pinned": 169,
+      "delta": 0
+    },
+    {
+      "slug": "gonixe-93-zaza537",
+      "score": 9,
+      "pinned": 9,
+      "delta": 0
+    },
+    {
+      "slug": "goxoni-69-lemo511",
+      "score": 23,
+      "pinned": 23,
+      "delta": 0
+    },
+    {
+      "slug": "guceja-66-tola192",
+      "score": 140,
+      "pinned": 140,
+      "delta": 0
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "score": 83,
+      "pinned": 83,
+      "delta": 0
+    },
+    {
+      "slug": "gugala-11-suce270",
+      "score": 200,
+      "pinned": 200,
+      "delta": 0
+    },
+    {
+      "slug": "jafuli-91-sota277",
+      "score": 272,
+      "pinned": 272,
+      "delta": 0
+    },
+    {
+      "slug": "jagove-43-nako107",
+      "score": 307,
+      "pinned": 307,
+      "delta": 0
+    },
+    {
+      "slug": "jakuco-69-dari135",
+      "score": 82,
+      "pinned": 82,
+      "delta": 0
+    },
+    {
+      "slug": "javedu-70-vaxo310",
+      "score": 164,
+      "pinned": 164,
+      "delta": 0
+    },
+    {
+      "slug": "jecoxu-17-zama003",
+      "score": 99,
+      "pinned": 99,
+      "delta": 0
+    },
+    {
+      "slug": "jevoce-05-mumi686",
+      "score": 374,
+      "pinned": 374,
+      "delta": 0
+    },
+    {
+      "slug": "jidefi-14-kafe151",
+      "score": 26,
+      "pinned": 26,
+      "delta": 0
+    },
+    {
+      "slug": "jipapo-14-kevu587",
+      "score": 98,
+      "pinned": 98,
+      "delta": 0
+    },
+    {
+      "slug": "jisema-42-rapa121",
+      "score": 142,
+      "pinned": 142,
+      "delta": 0
+    },
+    {
+      "slug": "jodagi-12-xatu540",
+      "score": 42,
+      "pinned": 42,
+      "delta": 0
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "score": 243,
+      "pinned": 243,
+      "delta": 0
+    },
+    {
+      "slug": "judatu-15-xize591",
+      "score": 747,
+      "pinned": 747,
+      "delta": 0
+    },
+    {
+      "slug": "jupivo-67-gidi531",
+      "score": 385,
+      "pinned": 385,
+      "delta": 0
+    },
+    {
+      "slug": "jupoxe-15-sugo110",
+      "score": 1909,
+      "pinned": 1909,
+      "delta": 0
+    },
+    {
+      "slug": "kafevi-44-tesu096",
+      "score": 126,
+      "pinned": 126,
+      "delta": 0
+    },
+    {
+      "slug": "kasadu-53-tuki533",
+      "score": 205,
+      "pinned": 205,
+      "delta": 0
+    },
+    {
+      "slug": "katopo-68-xajo866",
+      "score": 178,
+      "pinned": 178,
+      "delta": 0
+    },
+    {
+      "slug": "kavoro-11-jife299",
+      "score": 146,
+      "pinned": 146,
+      "delta": 0
+    },
+    {
+      "slug": "kepavi-26-sasu141",
+      "score": 179,
+      "pinned": 179,
+      "delta": 0
+    },
+    {
+      "slug": "ketiro-31-nazo312",
+      "score": 107,
+      "pinned": 107,
+      "delta": 0
+    },
+    {
+      "slug": "kijazo-83-kipu485",
+      "score": 211,
+      "pinned": 208,
+      "delta": 3
+    },
+    {
+      "slug": "kitupi-32-jexo155",
+      "score": 175,
+      "pinned": 175,
+      "delta": 0
+    },
+    {
+      "slug": "kodaku-19-moni161",
+      "score": 293,
+      "pinned": 293,
+      "delta": 0
+    },
+    {
+      "slug": "kodiji-34-mofe202",
+      "score": 6,
+      "pinned": 6,
+      "delta": 0
+    },
+    {
+      "slug": "kojivo-44-ceti956",
+      "score": 107,
+      "pinned": 107,
+      "delta": 0
+    },
+    {
+      "slug": "kubaso-31-gaxu491",
+      "score": 9,
+      "pinned": 9,
+      "delta": 0
+    },
+    {
+      "slug": "kudedo-31-pafi082",
+      "score": 174,
+      "pinned": 174,
+      "delta": 0
+    },
+    {
+      "slug": "kuzeru-09-voke075",
+      "score": 93,
+      "pinned": 93,
+      "delta": 0
+    },
+    {
+      "slug": "labala-74-juki864",
+      "score": 134,
+      "pinned": 134,
+      "delta": 0
+    },
+    {
+      "slug": "lacuci-13-nogo718",
+      "score": 135,
+      "pinned": 135,
+      "delta": 0
+    },
+    {
+      "slug": "lafilo-69-tuti771",
+      "score": 147,
+      "pinned": 147,
+      "delta": 0
+    },
+    {
+      "slug": "lajuxi-63-nopo039",
+      "score": 23,
+      "pinned": 23,
+      "delta": 0
+    },
+    {
+      "slug": "laxibe-66-teme800",
+      "score": 62,
+      "pinned": 62,
+      "delta": 0
+    },
+    {
+      "slug": "leduvi-16-voli986",
+      "score": 345,
+      "pinned": 345,
+      "delta": 0
+    },
+    {
+      "slug": "letare-59-gore448",
+      "score": 72,
+      "pinned": 72,
+      "delta": 0
+    },
+    {
+      "slug": "letuke-04-poza319",
+      "score": 183,
+      "pinned": 183,
+      "delta": 0
+    },
+    {
+      "slug": "levuma-67-cego489",
+      "score": 276,
+      "pinned": 276,
+      "delta": 0
+    },
+    {
+      "slug": "lidefe-01-vaki092",
+      "score": 141,
+      "pinned": 141,
+      "delta": 0
+    },
+    {
+      "slug": "lifeve-53-zubi598",
+      "score": 149,
+      "pinned": 149,
+      "delta": 0
+    },
+    {
+      "slug": "livigo-47-negi605",
+      "score": 122,
+      "pinned": 122,
+      "delta": 0
+    },
+    {
+      "slug": "lokane-30-dinu378",
+      "score": 241,
+      "pinned": 241,
+      "delta": 0
+    },
+    {
+      "slug": "lopone-15-xiki477",
+      "score": 337,
+      "pinned": 337,
+      "delta": 0
+    },
+    {
+      "slug": "loxija-71-joku558",
+      "score": 288,
+      "pinned": 288,
+      "delta": 0
+    },
+    {
+      "slug": "lubapi-40-siji634",
+      "score": 49,
+      "pinned": 49,
+      "delta": 0
+    },
+    {
+      "slug": "lufamo-62-xavo766",
+      "score": 296,
+      "pinned": 296,
+      "delta": 0
+    },
+    {
+      "slug": "lukoxa-16-cecu095",
+      "score": 137,
+      "pinned": 137,
+      "delta": 0
+    },
+    {
+      "slug": "mabuke-20-muco282",
+      "score": 312,
+      "pinned": 312,
+      "delta": 0
+    },
+    {
+      "slug": "maduja-30-xiri319",
+      "score": 295,
+      "pinned": 295,
+      "delta": 0
+    },
+    {
+      "slug": "mafete-03-rapa918",
+      "score": 177,
+      "pinned": 177,
+      "delta": 0
+    },
+    {
+      "slug": "maketa-43-juja264",
+      "score": 301,
+      "pinned": 301,
+      "delta": 0
+    },
+    {
+      "slug": "manata-12-rido730",
+      "score": 277,
+      "pinned": 277,
+      "delta": 0
+    },
+    {
+      "slug": "megara-21-rumi574",
+      "score": 245,
+      "pinned": 245,
+      "delta": 0
+    },
+    {
+      "slug": "mifejo-31-sovi184",
+      "score": 108,
+      "pinned": 108,
+      "delta": 0
+    },
+    {
+      "slug": "misiji-27-buje656",
+      "score": 173,
+      "pinned": 173,
+      "delta": 0
+    },
+    {
+      "slug": "molexa-46-redi999",
+      "score": 52,
+      "pinned": 52,
+      "delta": 0
+    },
+    {
+      "slug": "movexa-27-rexe388",
+      "score": 167,
+      "pinned": 167,
+      "delta": 0
+    },
+    {
+      "slug": "mulida-55-ceja768",
+      "score": 211,
+      "pinned": 211,
+      "delta": 0
+    },
+    {
+      "slug": "nafaxo-62-boso912",
+      "score": 295,
+      "pinned": 295,
+      "delta": 0
+    },
+    {
+      "slug": "naroji-40-nuke022",
+      "score": 29,
+      "pinned": 29,
+      "delta": 0
+    },
+    {
+      "slug": "narota-16-bago100",
+      "score": 9,
+      "pinned": 9,
+      "delta": 0
+    },
+    {
+      "slug": "navene-45-cozo466",
+      "score": 542,
+      "pinned": 542,
+      "delta": 0
+    },
+    {
+      "slug": "nesozi-09-zezu092",
+      "score": 127,
+      "pinned": 127,
+      "delta": 0
+    },
+    {
+      "slug": "nexitu-74-luga914",
+      "score": 222,
+      "pinned": 222,
+      "delta": 0
+    },
+    {
+      "slug": "nijipa-25-pede639",
+      "score": 98,
+      "pinned": 98,
+      "delta": 0
+    },
+    {
+      "slug": "nikinu-06-sace939",
+      "score": 212,
+      "pinned": 212,
+      "delta": 0
+    },
+    {
+      "slug": "niletu-83-lego826",
+      "score": 51,
+      "pinned": 51,
+      "delta": 0
+    },
+    {
+      "slug": "niluji-46-joma773",
+      "score": 40,
+      "pinned": 40,
+      "delta": 0
+    },
+    {
+      "slug": "nimusa-16-tiku252",
+      "score": 164,
+      "pinned": 164,
+      "delta": 0
+    },
+    {
+      "slug": "nisexe-68-vabu320",
+      "score": 68,
+      "pinned": 68,
+      "delta": 0
+    },
+    {
+      "slug": "nivese-34-zavo418",
+      "score": 293,
+      "pinned": 293,
+      "delta": 0
+    },
+    {
+      "slug": "nojije-35-teta491",
+      "score": 254,
+      "pinned": 254,
+      "delta": 0
+    },
+    {
+      "slug": "nomeco-93-minu967",
+      "score": 152,
+      "pinned": 152,
+      "delta": 0
+    },
+    {
+      "slug": "nonusu-50-nute147",
+      "score": 168,
+      "pinned": 168,
+      "delta": 0
+    },
+    {
+      "slug": "norire-15-taka956",
+      "score": 93,
+      "pinned": 93,
+      "delta": 0
+    },
+    {
+      "slug": "novata-87-muti352",
+      "score": 96,
+      "pinned": 96,
+      "delta": 0
+    },
+    {
+      "slug": "noxasi-06-nejo322",
+      "score": 191,
+      "pinned": 191,
+      "delta": 0
+    },
+    {
+      "slug": "numalo-91-pole243",
+      "score": 26,
+      "pinned": 26,
+      "delta": 0
+    },
+    {
+      "slug": "nupose-71-vido428",
+      "score": 343,
+      "pinned": 343,
+      "delta": 0
+    },
+    {
+      "slug": "nusajo-97-bemo713",
+      "score": 122,
+      "pinned": 122,
+      "delta": 0
+    },
+    {
+      "slug": "nuzugu-44-pega793",
+      "score": 166,
+      "pinned": 166,
+      "delta": 0
+    },
+    {
+      "slug": "pakema-21-xema183",
+      "score": 66,
+      "pinned": 66,
+      "delta": 0
+    },
+    {
+      "slug": "patagi-39-jone354",
+      "score": 94,
+      "pinned": 94,
+      "delta": 0
+    },
+    {
+      "slug": "pedoco-30-mose082",
+      "score": 169,
+      "pinned": 169,
+      "delta": 0
+    },
+    {
+      "slug": "pekefu-66-mepa144",
+      "score": 168,
+      "pinned": 168,
+      "delta": 0
+    },
+    {
+      "slug": "pekuxe-00-bovi270",
+      "score": 68,
+      "pinned": 68,
+      "delta": 0
+    },
+    {
+      "slug": "perate-09-gale335",
+      "score": 187,
+      "pinned": 187,
+      "delta": 0
+    },
+    {
+      "slug": "pezubu-98-niba240",
+      "score": 208,
+      "pinned": 208,
+      "delta": 0
+    },
+    {
+      "slug": "pifoni-76-duxa505",
+      "score": 247,
+      "pinned": 247,
+      "delta": 0
+    },
+    {
+      "slug": "pirofe-41-xama594",
+      "score": 188,
+      "pinned": 188,
+      "delta": 0
+    },
+    {
+      "slug": "piruxe-91-zivi081",
+      "score": 73,
+      "pinned": 73,
+      "delta": 0
+    },
+    {
+      "slug": "pixako-75-kumi821",
+      "score": 279,
+      "pinned": 279,
+      "delta": 0
+    },
+    {
+      "slug": "podelo-13-jaja314",
+      "score": 57,
+      "pinned": 57,
+      "delta": 0
+    },
+    {
+      "slug": "pokoro-73-bili712",
+      "score": 322,
+      "pinned": 322,
+      "delta": 0
+    },
+    {
+      "slug": "popofi-03-momo442",
+      "score": 303,
+      "pinned": 303,
+      "delta": 0
+    },
+    {
+      "slug": "poraji-17-goke817",
+      "score": 61,
+      "pinned": 61,
+      "delta": 0
+    },
+    {
+      "slug": "povoju-50-raxi136",
+      "score": 97,
+      "pinned": 97,
+      "delta": 0
+    },
+    {
+      "slug": "pujozo-36-nino158",
+      "score": 159,
+      "pinned": 159,
+      "delta": 0
+    },
+    {
+      "slug": "racana-82-zece676",
+      "score": 278,
+      "pinned": 278,
+      "delta": 0
+    },
+    {
+      "slug": "rarodo-65-fudu505",
+      "score": 16,
+      "pinned": 16,
+      "delta": 0
+    },
+    {
+      "slug": "raruzu-62-giro837",
+      "score": 212,
+      "pinned": 212,
+      "delta": 0
+    },
+    {
+      "slug": "relufo-04-fezo835",
+      "score": 179,
+      "pinned": 179,
+      "delta": 0
+    },
+    {
+      "slug": "reluvi-59-pifi444",
+      "score": 196,
+      "pinned": 196,
+      "delta": 0
+    },
+    {
+      "slug": "rerovo-62-nazo755",
+      "score": 89,
+      "pinned": 89,
+      "delta": 0
+    },
+    {
+      "slug": "ribapo-84-xudu593",
+      "score": 187,
+      "pinned": 187,
+      "delta": 0
+    },
+    {
+      "slug": "roboja-69-susa752",
+      "score": 343,
+      "pinned": 343,
+      "delta": 0
+    },
+    {
+      "slug": "rosizo-69-mera514",
+      "score": 211,
+      "pinned": 211,
+      "delta": 0
+    },
+    {
+      "slug": "ruderu-68-dere287",
+      "score": 58,
+      "pinned": 58,
+      "delta": 0
+    },
+    {
+      "slug": "rujuxa-07-neco067",
+      "score": 467,
+      "pinned": 467,
+      "delta": 0
+    },
+    {
+      "slug": "rurake-60-licu592",
+      "score": 15,
+      "pinned": 15,
+      "delta": 0
+    },
+    {
+      "slug": "rurebu-12-nebi203",
+      "score": 152,
+      "pinned": 152,
+      "delta": 0
+    },
+    {
+      "slug": "ruzica-16-deli877",
+      "score": 559,
+      "pinned": 545,
+      "delta": 14
+    },
+    {
+      "slug": "samavi-13-fuku339",
+      "score": 164,
+      "pinned": 164,
+      "delta": 0
+    },
+    {
+      "slug": "saxeku-17-gume203",
+      "score": 164,
+      "pinned": 164,
+      "delta": 0
+    },
+    {
+      "slug": "saxuro-16-tezu631",
+      "score": 233,
+      "pinned": 233,
+      "delta": 0
+    },
+    {
+      "slug": "secepo-00-febi326",
+      "score": 240,
+      "pinned": 240,
+      "delta": 0
+    },
+    {
+      "slug": "setecu-78-cuko533",
+      "score": 44,
+      "pinned": 44,
+      "delta": 0
+    },
+    {
+      "slug": "sigofi-46-gaja158",
+      "score": 192,
+      "pinned": 192,
+      "delta": 0
+    },
+    {
+      "slug": "sikino-19-vuca111",
+      "score": 54,
+      "pinned": 54,
+      "delta": 0
+    },
+    {
+      "slug": "simuti-16-lece058",
+      "score": 173,
+      "pinned": 173,
+      "delta": 0
+    },
+    {
+      "slug": "sofoje-37-tila554",
+      "score": 182,
+      "pinned": 182,
+      "delta": 0
+    },
+    {
+      "slug": "sokafe-69-jita472",
+      "score": 197,
+      "pinned": 197,
+      "delta": 0
+    },
+    {
+      "slug": "sokapa-71-tifi543",
+      "score": 268,
+      "pinned": 268,
+      "delta": 0
+    },
+    {
+      "slug": "sopape-11-laxo488",
+      "score": 87,
+      "pinned": 87,
+      "delta": 0
+    },
+    {
+      "slug": "sucice-41-pebi088",
+      "score": 211,
+      "pinned": 211,
+      "delta": 0
+    },
+    {
+      "slug": "sufupo-40-fuke080",
+      "score": 49,
+      "pinned": 49,
+      "delta": 0
+    },
+    {
+      "slug": "sutura-08-zeme419",
+      "score": 201,
+      "pinned": 201,
+      "delta": 0
+    },
+    {
+      "slug": "suzuci-53-biku826",
+      "score": 105,
+      "pinned": 105,
+      "delta": 0
+    },
+    {
+      "slug": "tagixo-41-gapo816",
+      "score": 40,
+      "pinned": 40,
+      "delta": 0
+    },
+    {
+      "slug": "tamaxe-36-mono574",
+      "score": 220,
+      "pinned": 220,
+      "delta": 0
+    },
+    {
+      "slug": "taxeta-89-mapo546",
+      "score": 9,
+      "pinned": 9,
+      "delta": 0
+    },
+    {
+      "slug": "tefuga-86-xefe850",
+      "score": 66,
+      "pinned": 66,
+      "delta": 0
+    },
+    {
+      "slug": "tepivu-88-reze603",
+      "score": 195,
+      "pinned": 195,
+      "delta": 0
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "score": 881,
+      "pinned": 881,
+      "delta": 0
+    },
+    {
+      "slug": "topico-42-fuza478",
+      "score": 40,
+      "pinned": 40,
+      "delta": 0
+    },
+    {
+      "slug": "tuneta-22-mega154",
+      "score": 355,
+      "pinned": 355,
+      "delta": 0
+    },
+    {
+      "slug": "vamazo-19-tufu812",
+      "score": 302,
+      "pinned": 302,
+      "delta": 0
+    },
+    {
+      "slug": "vaxiki-78-nice114",
+      "score": 124,
+      "pinned": 124,
+      "delta": 0
+    },
+    {
+      "slug": "vaxuta-95-cico162",
+      "score": 233,
+      "pinned": 233,
+      "delta": 0
+    },
+    {
+      "slug": "vebala-15-tade547",
+      "score": 586,
+      "pinned": 586,
+      "delta": 0
+    },
+    {
+      "slug": "vidada-17-xuse810",
+      "score": 214,
+      "pinned": 214,
+      "delta": 0
+    },
+    {
+      "slug": "vimako-25-mega336",
+      "score": 92,
+      "pinned": 92,
+      "delta": 0
+    },
+    {
+      "slug": "vimoxa-78-zucu656",
+      "score": 86,
+      "pinned": 86,
+      "delta": 0
+    },
+    {
+      "slug": "vivate-04-guso306",
+      "score": 269,
+      "pinned": 269,
+      "delta": 0
+    },
+    {
+      "slug": "vokibe-29-vepe451",
+      "score": 131,
+      "pinned": 131,
+      "delta": 0
+    },
+    {
+      "slug": "volefo-41-tolo996",
+      "score": 35,
+      "pinned": 35,
+      "delta": 0
+    },
+    {
+      "slug": "vozane-63-kepe177",
+      "score": 210,
+      "pinned": 210,
+      "delta": 0
+    },
+    {
+      "slug": "vubolo-48-cubu499",
+      "score": 235,
+      "pinned": 235,
+      "delta": 0
+    },
+    {
+      "slug": "vupuse-73-nuso490",
+      "score": 181,
+      "pinned": 181,
+      "delta": 0
+    },
+    {
+      "slug": "xabesu-51-dimi831",
+      "score": 206,
+      "pinned": 206,
+      "delta": 0
+    },
+    {
+      "slug": "xarumo-26-zinu467",
+      "score": 193,
+      "pinned": 193,
+      "delta": 0
+    },
+    {
+      "slug": "xefalo-73-sabi101",
+      "score": 582,
+      "pinned": 582,
+      "delta": 0
+    },
+    {
+      "slug": "xekame-27-geba281",
+      "score": 409,
+      "pinned": 409,
+      "delta": 0
+    },
+    {
+      "slug": "xenofo-81-rame803",
+      "score": 137,
+      "pinned": 137,
+      "delta": 0
+    },
+    {
+      "slug": "xigelo-67-sipi599",
+      "score": 203,
+      "pinned": 203,
+      "delta": 0
+    },
+    {
+      "slug": "xovano-23-tazo278",
+      "score": 375,
+      "pinned": 375,
+      "delta": 0
+    },
+    {
+      "slug": "zamagu-75-vape137",
+      "score": 62,
+      "pinned": 62,
+      "delta": 0
+    },
+    {
+      "slug": "zanudo-86-seco241",
+      "score": 28,
+      "pinned": 28,
+      "delta": 0
+    },
+    {
+      "slug": "zedoco-71-guge507",
+      "score": 35,
+      "pinned": 35,
+      "delta": 0
+    },
+    {
+      "slug": "zepima-96-peco612",
+      "score": 441,
+      "pinned": 441,
+      "delta": 0
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "score": 375,
+      "pinned": 375,
+      "delta": 0
+    },
+    {
+      "slug": "ziboco-73-kazu841",
+      "score": 152,
+      "pinned": 152,
+      "delta": 0
+    },
+    {
+      "slug": "zivege-92-rise076",
+      "score": 238,
+      "pinned": 238,
+      "delta": 0
+    },
+    {
+      "slug": "zizaki-04-guvi945",
+      "score": 121,
+      "pinned": 121,
+      "delta": 0
+    },
+    {
+      "slug": "zukori-83-fiso705",
+      "score": 254,
+      "pinned": 254,
+      "delta": 0
+    }
+  ],
+  "families": {
+    "svg/@height": 267,
+    "svg/@viewBox[]": 535,
+    "svg/@width": 268,
+    "svg/g[]/rect[]/@height": 29,
+    "svg/g[]/rect[]/@width": 91,
+    "svg/g[]/rect[]/@x": 935,
+    "svg/g[]/rect[]/@y": 935,
+    "svg/g[]/text[]/@textLength": 1557,
+    "svg/g[]/text[]/@x": 1727,
+    "svg/g[]/text[]/@y": 1727,
+    "svg/g[]/text[]/text()[]": 427,
+    "svg/g[][childCount]": 8435,
+    "svg/g[]/ellipse[]/@cx": 471,
+    "svg/g[]/ellipse[]/@cy": 423,
+    "svg/g[]/path[]/@d": 40,
+    "svg/g[]/path[]/@fill": 80,
+    "svg/g[]/path[]/@d[]": 320,
+    "svg/g[]/text[]/@font-size": 139,
+    "svg/g[]/line[]/@x1": 3138,
+    "svg/g[]/line[]/@x2": 3138,
+    "svg/g[]/line[]/@y1": 3138,
+    "svg/g[]/line[]/@y2": 3137,
+    "svg/g[]/polygon[]/@points[]": 15042,
+    "svg/g[]/polygon[]/@points": 418,
+    "svg/g[]/ellipse[]/@rx": 299,
+    "svg/g[]/ellipse[]/@ry": 299,
+    "svg/g[]/ellipse[]/@stroke": 134,
+    "svg/g[]/ellipse[]/@stroke-width": 128,
+    "svg/g[]/g[]/text[]/@x": 22,
+    "svg/g[]/g[]/text[]/@y": 22,
+    "svg/g[]/line[]/@stroke-width": 121,
+    "svg/g[]/line[]/@stroke": 32,
+    "svg/g[]/text[]/@text-decoration": 2,
+    "svg/g[]/polygon[]/@stroke-linejoin": 20,
+    "svg/g[]/polygon[]/@stroke-miterlimit": 20,
+    "svg/g[]/polygon[]/@stroke-width": 23,
+    "svg/g[]/line[]": 1011,
+    "svg/g[]/polygon[]": 1440,
+    "svg/g[]/g[]/rect[]/@x": 2,
+    "svg/g[]/g[]/rect[]/@y": 2,
+    "svg/g[]/rect[]": 659,
+    "svg/g[]/text[]": 504,
+    "svg/g[]/rect[]/@stroke": 35,
+    "svg/g[]/rect[]/@stroke-width": 39,
+    "svg/g[]/rect[]/@fill": 10,
+    "svg/g[]/rect[]/@rx": 3,
+    "svg/g[]/rect[]/@ry": 3,
+    "svg/defs[][childCount]": 12,
+    "svg/g[]/text[]/@font-family": 4,
+    "svg/g[]/text[]/@fill": 14,
+    "svg/g[]/polygon[]/@fill": 18,
+    "svg/g[]/polygon[]/@stroke": 17,
+    "svg/g[]/text[]/@font-weight": 14,
+    "svg/g[]/text[][childCount]": 4,
+    "svg/g[]/ellipse[]/@fill": 6,
+    "svg/g[]/g[]/rect[]/@height": 1,
+    "svg/g[]/g[]/rect[]/@width": 1,
+    "svg/g[]/g[]/text[]/@textLength": 3,
+    "svg/g[]/g[]/text[]/text()[]": 2,
+    "svg/g[]/g[][childCount]": 42,
+    "svg/@background": 1,
+    "svg/g[]/g[]/text[][childCount]": 1,
+    "svg/@preserveAspectRatio": 1
+  }
+}

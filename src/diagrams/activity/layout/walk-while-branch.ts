@@ -37,6 +37,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
 import { emitDiamondLabels } from './diamond-labels.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
 
 /**
  * The hexagon node then its own side labels, pushed as one atomic unit
@@ -84,14 +85,18 @@ function pushWhileHeader(
 /** Pushes an edge, then overlays `emphasize`/`arrowhead: false` on the
  *  just-pushed edge -- widens `walk-if-down.ts`'s `pushEmphasizedEdge`
  *  idiom to also cover `arrowhead: false` (D6, `Worm.java:161-168`'s `null`
- *  end decoration), which the while exit's second snake needs. */
+ *  end decoration), which the while exit's second snake needs. `loop`
+ *  (mission `activity-loop-lane-translate`, T2) forwards D1's translate tag
+ *  through to `pushEdge`'s routing argument -- a no-op on a same-lane edge
+ *  (`swimlane-placement.ts#routeEdge` never reads `EdgeMeta.loop` unless
+ *  the edge is cross-lane), so `emphasize` still applies on top of it. */
 function pushEdgeFlagged(
   out: Out,
   points: GPoint[],
   lanes: readonly [string | undefined, string | undefined],
-  flags: { emphasize?: 'up' | 'down'; arrowhead?: false },
+  flags: { emphasize?: 'up' | 'down'; arrowhead?: false; loop?: LoopTranslate },
 ): void {
-  pushEdge(out, points, lanes[0], lanes[1]);
+  pushEdge(out, points, lanes[0], lanes[1], flags.loop !== undefined ? { loop: flags.loop } : 'default');
   const edge = out.edges[out.edges.length - 1]!;
   if (flags.emphasize !== undefined) edge.emphasize = flags.emphasize;
   if (flags.arrowhead === false) edge.arrowhead = false;
@@ -111,6 +116,28 @@ function pushEdgeFlagged(
 function backEdgePoints(backFrom: GPoint, headerEast: GPoint, bodyBottomY: number, xx: number): GPoint[] {
   const y1bis = Math.max(backFrom.y, bodyBottomY) + HEXAGON_HALF_SIZE;
   return [backFrom, { x: backFrom.x, y: y1bis }, { x: xx, y: y1bis }, { x: xx, y: headerEast.y }, headerEast];
+}
+
+/**
+ * D2: `ConnectionBackSimple#drawTranslate`'s own untranslated `getP1` (this
+ * `backFrom`) and `getP2` (diamond1's own origin, `(hX, hY)` --
+ * `getTranslateDiamond1(...).getTranslated(new XPoint2D(0,0))`), plus the
+ * header's own `diamond1.calculateDimension()` fields: `inY = 0`,
+ * `outY = header.getCoord(SOUTH_HOOK).y` (the hexagon-ALONE height,
+ * `FtileDiamondInside.java:106-116`'s `calculateDimensionAlone`, same value
+ * `pushWhileHeader`'s own comment cites for that hook), `width =
+ * header.width` (also hexagon-alone, per that same method). Split out of
+ * {@link pushWhileBack} to keep that function's own NLOC under the file's
+ * limit.
+ */
+function buildWhileBackLoop(header: GtileDiamondInside, hX: number, hY: number, backFrom: GPoint, dimTotalWidth: number): LoopTranslate {
+  return {
+    kind: 'while-back',
+    p1: backFrom,
+    p2: { x: hX, y: hY },
+    dimTotalWidth,
+    diamond: { inY: 0, outY: header.getCoord(SOUTH_HOOK).y, width: header.width },
+  };
 }
 
 /** The absolute-frame values every `Connection*` below shares, computed
@@ -135,6 +162,12 @@ interface WhileFrame {
   readonly bodyBottomY: number;
   readonly xx: number;
   readonly elbowX: number;
+  /** `ConnectionBackSimple#drawTranslate`'s own `calculateDimension
+   *  (stringBounder).getWidth()` (`:283,296`) -- the whole while tile's
+   *  width, read here (not derived from `xx`) since `xx = x + dimTotalWidth`
+   *  bakes in the tile's own placement `x`, which the translate shape's
+   *  `Math.max(translate1.dx, translate2.dx) + dimTotal.width` never does. */
+  readonly dimTotalWidth: number;
   readonly headerOutLane: string | undefined;
   readonly headerInLane: string | undefined;
   readonly bodyInLane: string | undefined;
@@ -142,31 +175,42 @@ interface WhileFrame {
 }
 
 /**
- * `ConnectionIn`, then `ConnectionBackSimple` -- or, when the body is truly
- * empty (`dim.getWidth() == 0 || dim.getHeight() == 0`), `ConnectionBack
- * Empty` in their place (no separate `ConnectionIn` is added at all in that
- * branch). `ConnectionBackSimple`'s own `drawU` returns early -- drawing
- * nothing, not even the reservation -- when the body has no point out
- * (`getP1` returns `null`, `:229-232`), e.g. a body ending in `stop`.
+ * The `ConnectionIn`-then-`ConnectionBackSimple` branch (body has real
+ * size): the in-edge, then -- unless the body has no point out
+ * (`ConnectionBackSimple`'s own `drawU` returns early, drawing nothing, not
+ * even the reservation, when `getP1` returns `null`, `:229-232`, e.g. a
+ * body ending in `stop`) -- the back edge, tagged with D2's `WhileBackLoop`
+ * record so a cross-lane placement can retarget it (T2). Split out of
+ * {@link pushWhileBack} to keep that function's own NLOC under the file's
+ * limit.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
+ */
+function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
+  const { out, header, body, hX, hY, bX, bY, headerEast, bodyBottomY, xx, dimTotalWidth } = frame;
+  const { headerOutLane, headerInLane, bodyInLane, bodyOutLane } = frame;
+  const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
+  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
+  if (!body.hasPointOut()) return;
+
+  const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
+  pushEdgeFlagged(out, backEdgePoints(backFrom, headerEast, bodyBottomY, xx), [bodyOutLane, headerInLane], {
+    emphasize: 'up',
+    loop: buildWhileBackLoop(header, hX, hY, backFrom, dimTotalWidth),
+  });
+  out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
+}
+
+/**
+ * `ConnectionIn`, then `ConnectionBackSimple` (delegated to
+ * {@link pushWhileBackNonEmpty}) -- or, when the body is truly empty
+ * (`dim.getWidth() == 0 || dim.getHeight() == 0`), `ConnectionBackEmpty` in
+ * their place (no separate `ConnectionIn` is added at all in that branch,
+ * and no `loop` tag: `ConnectionBackEmpty` is NOT `ConnectionTranslatable`,
+ * `decisions.md`'s translatable/non-translatable list).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
 function pushWhileBack(frame: WhileFrame): void {
-  const {
-    out,
-    header,
-    body,
-    hX,
-    hY,
-    bX,
-    bY,
-    headerEast,
-    bodyBottomY,
-    xx,
-    headerOutLane,
-    headerInLane,
-    bodyInLane,
-    bodyOutLane,
-  } = frame;
+  const { out, header, body, hX, hY, headerEast, bodyBottomY, xx, headerOutLane } = frame;
   const headerSouth = { x: hX + header.getCoord(SOUTH_HOOK).x, y: hY + header.getCoord(SOUTH_HOOK).y };
 
   if (body.width === 0 || body.height === 0) {
@@ -177,15 +221,7 @@ function pushWhileBack(frame: WhileFrame): void {
     return;
   }
 
-  const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
-  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
-  if (!body.hasPointOut()) return;
-
-  const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
-  pushEdgeFlagged(out, backEdgePoints(backFrom, headerEast, bodyBottomY, xx), [bodyOutLane, headerInLane], {
-    emphasize: 'up',
-  });
-  out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
+  pushWhileBackNonEmpty(frame, headerSouth);
 }
 
 /**
@@ -278,6 +314,7 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     bodyBottomY: bY + body.height,
     xx: x + t.width,
     elbowX: x + HEXAGON_HALF_SIZE,
+    dimTotalWidth: t.width,
     headerOutLane: laneOut(header, myLane),
     headerInLane: laneIn(header, myLane),
     bodyInLane: laneIn(body, myLane),
