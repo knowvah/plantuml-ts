@@ -1,0 +1,118 @@
+=== ALIGN camavo-50-kaku123 ===
+camavo-50-kaku123:
+  polygon: ours=18 jar=18
+  line: ours=20 jar=20
+  text: ours=5 jar=5
+  rect: ours=5 jar=5
+  alignment: 35/48
+=== LANES camavo-50-kaku123 ===
+fork/join bar[0]: ours=? jar=?
+fork/join bar[1]: ours=? jar=?
+diamond/hexagon[0]: ours=? jar=?
+diamond/hexagon[1]: ours=? jar=?
+diamond/hexagon[2]: ours=? jar=?
+=== DUMP camavo-50-kaku123 ===
+OURS:
+  [0] <ellipse> x=161.725 lane=?
+  [1] <polygon> x=161.725 lane=?
+  [2] <polygon> x=161.725 lane=?
+  [3] <text> x=155.916 lane=?
+  [4] <rect> x=161.7255 lane=?
+  [5] <text> x=154.038 lane=?
+  [6] <rect> x=161.725 lane=?
+  [7] <rect> x=92.35 lane=?
+  [8] <text> x=58 lane=?
+  [9] <rect> x=220.075 lane=?
+  [10] <text> x=174.7 lane=?
+  [11] <rect> x=161.725 lane=?
+  [12] <polygon> x=161.72500000000002 lane=?
+  [13] <text> x=140.344 lane=?
+  [14] <ellipse> x=161.725 lane=?
+  [15] <ellipse> x=161.725 lane=?
+  [16] <line> x=92.35 lane=?
+  [17] <polygon> x=92.35 lane=?
+  [18] <line> x=220.075 lane=?
+  [19] <polygon> x=220.075 lane=?
+  [20] <line> x=92.35 lane=?
+  [21] <polygon> x=92.35 lane=?
+  [22] <line> x=220.075 lane=?
+  [23] <polygon> x=220.075 lane=?
+  [24] <line> x=161.725 lane=?
+  [25] <polygon> x=161.725 lane=?
+  [26] <line> x=161.725 lane=?
+  [27] <polygon> x=161.725 lane=?
+  [28] <line> x=161.725 lane=?
+  [29] <line> x=230.58749999999998 lane=?
+  [30] <line> x=299.45 lane=?
+  [31] <line> x=242.58749999999998 lane=?
+  [32] <polygon> x=192.225 lane=?
+  [33] <polygon> x=299.45 lane=?
+  [34] <line> x=80.8625 lane=?
+  [35] <line> x=24 lane=?
+  [36] <polygon> x=24 lane=?
+  [37] <line> x=92.8625 lane=?
+  [38] <line> x=161.725 lane=?
+  [39] <polygon> x=161.725 lane=?
+  [40] <line> x=253.278 lane=?
+  [41] <line> x=311.45 lane=?
+  [42] <line> x=242.58749999999998 lane=?
+  [43] <polygon> x=180.225 lane=?
+  [44] <polygon> x=311.45 lane=?
+  [45] <line> x=161.725 lane=?
+  [46] <polygon> x=161.725 lane=?
+  [47] <line> x=161.725 lane=?
+  [48] <polygon> x=161.725 lane=?
+  [49] <line> x=161.725 lane=?
+  [50] <polygon> x=161.725 lane=?
+JAR:
+  [0] <ellipse> x=166.725 lane=?
+  [1] <rect> x=166.7255 lane=?
+  [2] <text> x=159.038 lane=?
+  [3] <rect> x=166.725 lane=?
+  [4] <rect> x=97.35 lane=?
+  [5] <text> x=63 lane=?
+  [6] <rect> x=225.075 lane=?
+  [7] <text> x=179.7 lane=?
+  [8] <rect> x=166.725 lane=?
+  [9] <polygon> x=165.0107142857143 lane=?
+  [10] <text> x=160.916 lane=?
+  [11] <polygon> x=166.725 lane=?
+  [12] <polygon> x=163.67057142857146 lane=?
+  [13] <text> x=145.344 lane=?
+  [14] <ellipse> x=166.725 lane=?
+  [15] <ellipse> x=166.725 lane=?
+  [16] <line> x=97.35 lane=?
+  [17] <polygon> x=97.35 lane=?
+  [18] <line> x=225.075 lane=?
+  [19] <polygon> x=225.075 lane=?
+  [20] <line> x=97.35 lane=?
+  [21] <polygon> x=97.35 lane=?
+  [22] <line> x=225.075 lane=?
+  [23] <polygon> x=225.075 lane=?
+  [24] <line> x=166.725 lane=?
+  [25] <polygon> x=166.725 lane=?
+  [26] <line> x=166.725 lane=?
+  [27] <polygon> x=166.725 lane=?
+  [28] <line> x=166.725 lane=?
+  [29] <line> x=235.58749999999998 lane=?
+  [30] <polygon> x=304.45 lane=?
+  [31] <line> x=304.45 lane=?
+  [32] <line> x=247.58749999999998 lane=?
+  [33] <polygon> x=197.225 lane=?
+  [34] <line> x=85.8625 lane=?
+  [35] <polygon> x=29 lane=?
+  [36] <line> x=29 lane=?
+  [37] <line> x=97.8625 lane=?
+  [38] <line> x=166.725 lane=?
+  [39] <polygon> x=166.725 lane=?
+  [40] <line> x=166.725 lane=?
+  [41] <polygon> x=166.725 lane=?
+  [42] <line> x=258.278 lane=?
+  [43] <polygon> x=316.45 lane=?
+  [44] <line> x=316.45 lane=?
+  [45] <line> x=247.58749999999998 lane=?
+  [46] <polygon> x=185.225 lane=?
+  [47] <line> x=166.725 lane=?
+  [48] <polygon> x=166.725 lane=?
+  [49] <line> x=166.725 lane=?
+  [50] <polygon> x=166.725 lane=?

@@ -1,0 +1,81 @@
+=== ALIGN kasadu-53-tuki533 ===
+kasadu-53-tuki533:
+  polygon: ours=9 jar=9
+  line: ours=15 jar=15
+  text: ours=5 jar=5
+  rect: ours=3 jar=3
+  alignment: 25/32
+=== LANES kasadu-53-tuki533 ===
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=1
+=== DUMP kasadu-53-tuki533 ===
+OURS:
+  [0] <rect> x=410.7685 lane=1
+  [1] <ellipse> x=48.494 lane=0
+  [2] <polygon> x=48.494 lane=0
+  [3] <rect> x=48.494 lane=0
+  [4] <text> x=40.169 lane=0
+  [5] <line> x=17 lane=0
+  [6] <rect> x=442.763 lane=1
+  [7] <text> x=94.988 lane=1
+  [8] <polygon> x=442.76250000000005 lane=1
+  [9] <text> x=397.525 lane=1
+  [10] <ellipse> x=442.762 lane=1
+  [11] <line> x=442.7625 lane=1
+  [12] <line> x=442.7625 lane=1
+  [13] <line> x=79.988 lane=1
+  [14] <line> x=805.537 lane=?
+  [15] <line> x=48.494 lane=0
+  [16] <polygon> x=48.494 lane=0
+  [17] <line> x=48.494 lane=0
+  [18] <polygon> x=48.494 lane=0
+  [19] <line> x=442.762 lane=1
+  [20] <polygon> x=442.762 lane=1
+  [21] <line> x=442.762 lane=1
+  [22] <polygon> x=442.762 lane=1
+  [23] <line> x=48.494 lane=0
+  [24] <line> x=245.628 lane=1
+  [25] <line> x=442.762 lane=1
+  [26] <polygon> x=442.762 lane=1
+  [27] <line> x=500 lane=1
+  [28] <line> x=280.247 lane=1
+  [29] <line> x=60.494 lane=0
+  [30] <polygon> x=60.494 lane=0
+  [31] <polygon> x=500 lane=1
+  [32] <text> x=22 lane=0
+  [33] <text> x=405.187 lane=1
+JAR:
+  [0] <rect> x=413.7685 lane=1
+  [1] <ellipse> x=51.494 lane=0
+  [2] <rect> x=51.494 lane=0
+  [3] <text> x=43.169 lane=0
+  [4] <polygon> x=51.49400000000001 lane=0
+  [5] <line> x=20 lane=0
+  [6] <rect> x=446.763 lane=1
+  [7] <text> x=98.988 lane=1
+  [8] <polygon> x=440.30000000000007 lane=1
+  [9] <text> x=401.525 lane=1
+  [10] <ellipse> x=446.762 lane=1
+  [11] <line> x=446.7625 lane=1
+  [12] <line> x=446.7625 lane=1
+  [13] <line> x=82.988 lane=1
+  [14] <line> x=808.537 lane=?
+  [15] <line> x=51.494 lane=0
+  [16] <polygon> x=51.494 lane=0
+  [17] <line> x=51.494 lane=0
+  [18] <polygon> x=51.494 lane=0
+  [19] <line> x=446.762 lane=1
+  [20] <polygon> x=446.762 lane=1
+  [21] <line> x=446.762 lane=1
+  [22] <polygon> x=446.762 lane=1
+  [23] <line> x=51.494 lane=0
+  [24] <line> x=249.128 lane=1
+  [25] <line> x=446.762 lane=1
+  [26] <polygon> x=446.762 lane=1
+  [27] <line> x=660.2685 lane=1
+  [28] <polygon> x=816.537 lane=?
+  [29] <line> x=816.537 lane=?
+  [30] <line> x=440.01550000000003 lane=1
+  [31] <polygon> x=69.994 lane=0
+  [32] <text> x=25 lane=0
+  [33] <text> x=408.187 lane=1

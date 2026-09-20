@@ -1,0 +1,126 @@
+=== ALIGN manata-12-rido730 ===
+manata-12-rido730:
+  polygon: ours=15 jar=14
+  line: ours=25 jar=22
+  text: ours=9 jar=9
+  rect: ours=5 jar=5
+  alignment: 39/54
+=== LANES manata-12-rido730 ===
+diamond/hexagon[0]: ours=0 jar=0
+diamond/hexagon[1]: ours=1 jar=1
+diamond/hexagon[2]: ours=2 jar=2
+=== DUMP manata-12-rido730 ===
+OURS:
+  [0] <rect> x=161.4095 lane=1
+  [1] <ellipse> x=53.675 lane=0
+  [2] <rect> x=53.675 lane=0
+  [3] <text> x=32 lane=0
+  [4] <polygon> x=53.675 lane=0
+  [5] <rect> x=53.675 lane=0
+  [6] <text> x=32 lane=0
+  [7] <line> x=17 lane=0
+  [8] <rect> x=127.02499999999999 lane=1
+  [9] <text> x=105.35 lane=1
+  [10] <polygon> x=127.02550000000001 lane=1
+  [11] <text> x=109.288 lane=1
+  [12] <ellipse> x=192.7 lane=1
+  [13] <ellipse> x=192.7 lane=1
+  [14] <line> x=90.35 lane=1
+  [15] <rect> x=259.259 lane=2
+  [16] <text> x=237.584 lane=2
+  [17] <polygon> x=259.2595 lane=2
+  [18] <text> x=228.7 lane=2
+  [19] <ellipse> x=259.259 lane=2
+  [20] <line> x=259.2595 lane=2
+  [21] <line> x=259.2595 lane=2
+  [22] <line> x=211.7 lane=2
+  [23] <line> x=306.819 lane=?
+  [24] <line> x=53.675 lane=0
+  [25] <polygon> x=53.675 lane=0
+  [26] <line> x=53.675 lane=0
+  [27] <polygon> x=53.675 lane=0
+  [28] <line> x=53.675 lane=0
+  [29] <polygon> x=53.675 lane=0
+  [30] <line> x=167.73149999999998 lane=1
+  [31] <polygon> x=172.2 lane=1
+  [32] <line> x=127.025 lane=1
+  [33] <polygon> x=127.025 lane=1
+  [34] <line> x=259.259 lane=2
+  [35] <polygon> x=259.259 lane=2
+  [36] <line> x=259.259 lane=2
+  [37] <polygon> x=259.259 lane=2
+  [38] <line> x=53.675 lane=0
+  [39] <line> x=90.35 lane=1
+  [40] <line> x=127.025 lane=1
+  [41] <polygon> x=127.025 lane=1
+  [42] <line> x=127.025 lane=1
+  [43] <line> x=193.142 lane=1
+  [44] <line> x=259.259 lane=2
+  [45] <polygon> x=259.259 lane=2
+  [46] <line> x=259.259 lane=2
+  [47] <line> x=193.142 lane=1
+  [48] <line> x=127.025 lane=1
+  [49] <polygon> x=127.025 lane=1
+  [50] <line> x=301.819 lane=2
+  [51] <line> x=183.747 lane=1
+  [52] <line> x=65.675 lane=0
+  [53] <polygon> x=65.675 lane=0
+  [54] <polygon> x=301.819 lane=2
+  [55] <text> x=27.688 lane=0
+  [56] <text> x=125.038 lane=1
+  [57] <text> x=232.766 lane=2
+JAR:
+  [0] <rect> x=174.9405 lane=1
+  [1] <ellipse> x=57.675 lane=0
+  [2] <rect> x=57.675 lane=0
+  [3] <text> x=36 lane=0
+  [4] <rect> x=57.675 lane=0
+  [5] <text> x=36 lane=0
+  [6] <polygon> x=57.675 lane=0
+  [7] <line> x=20 lane=0
+  [8] <rect> x=138.088 lane=1
+  [9] <text> x=116.413 lane=1
+  [10] <polygon> x=135.55357142857142 lane=1
+  [11] <text> x=120.35 lane=1
+  [12] <ellipse> x=200.763 lane=1
+  [13] <ellipse> x=200.763 lane=1
+  [14] <line> x=93.35 lane=1
+  [15] <rect> x=273.322 lane=2
+  [16] <text> x=251.647 lane=2
+  [17] <polygon> x=268.95642857142855 lane=2
+  [18] <text> x=242.763 lane=2
+  [19] <ellipse> x=273.322 lane=2
+  [20] <line> x=273.322 lane=2
+  [21] <line> x=273.322 lane=2
+  [22] <line> x=215.763 lane=2
+  [23] <line> x=330.881 lane=?
+  [24] <line> x=57.675 lane=0
+  [25] <polygon> x=57.675 lane=0
+  [26] <line> x=57.675 lane=0
+  [27] <polygon> x=57.675 lane=0
+  [28] <line> x=57.675 lane=0
+  [29] <polygon> x=57.675 lane=0
+  [30] <line> x=178.79399999999998 lane=1
+  [31] <polygon> x=183.263 lane=1
+  [32] <line> x=138.087 lane=1
+  [33] <polygon> x=138.087 lane=1
+  [34] <line> x=273.322 lane=2
+  [35] <polygon> x=273.322 lane=2
+  [36] <line> x=273.322 lane=2
+  [37] <polygon> x=273.322 lane=2
+  [38] <line> x=57.675 lane=0
+  [39] <line> x=97.881 lane=1
+  [40] <line> x=138.087 lane=1
+  [41] <polygon> x=138.087 lane=1
+  [42] <line> x=138.087 lane=1
+  [43] <line> x=205.7045 lane=1
+  [44] <line> x=273.322 lane=2
+  [45] <polygon> x=273.322 lane=2
+  [46] <line> x=332.881 lane=?
+  [47] <polygon> x=349.881 lane=?
+  [48] <line> x=349.881 lane=?
+  [49] <line> x=209.778 lane=1
+  [50] <polygon> x=76.175 lane=0
+  [51] <text> x=30.688 lane=0
+  [52] <text> x=128.569 lane=1
+  [53] <text> x=246.828 lane=2

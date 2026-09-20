@@ -1,0 +1,100 @@
+=== ALIGN bulasi-17-vafa634 ===
+bulasi-17-vafa634:
+  polygon: ours=14 jar=14
+  line: ours=16 jar=16
+  text: ours=9 jar=9
+  rect: ours=3 jar=3
+  alignment: 29/42
+=== LANES bulasi-17-vafa634 ===
+diamond/hexagon[0]: ours=? jar=?
+diamond/hexagon[1]: ours=? jar=?
+diamond/hexagon[2]: ours=? jar=?
+=== DUMP bulasi-17-vafa634 ===
+OURS:
+  [0] <ellipse> x=74.425 lane=?
+  [1] <polygon> x=74.425 lane=?
+  [2] <rect> x=74.425 lane=?
+  [3] <text> x=57.4 lane=?
+  [4] <polygon> x=74.425 lane=?
+  [5] <text> x=48.094 lane=?
+  [6] <text> x=78.425 lane=?
+  [7] <text> x=22 lane=?
+  [8] <rect> x=74.4255 lane=?
+  [9] <text> x=57.063 lane=?
+  [10] <polygon> x=74.425 lane=?
+  [11] <text> x=48.094 lane=?
+  [12] <text> x=78.425 lane=?
+  [13] <text> x=112.756 lane=?
+  [14] <rect> x=74.4255 lane=?
+  [15] <text> x=57.063 lane=?
+  [16] <line> x=74.425 lane=?
+  [17] <polygon> x=74.425 lane=?
+  [18] <line> x=74.425 lane=?
+  [19] <line> x=99.59049999999999 lane=?
+  [20] <line> x=124.756 lane=?
+  [21] <line> x=118.756 lane=?
+  [22] <polygon> x=119.256 lane=?
+  [23] <polygon> x=124.756 lane=?
+  [24] <line> x=30.094 lane=?
+  [25] <line> x=24.094 lane=?
+  [26] <polygon> x=24.094 lane=?
+  [27] <line> x=49.2595 lane=?
+  [28] <line> x=74.425 lane=?
+  [29] <polygon> x=74.425 lane=?
+  [30] <line> x=74.425 lane=?
+  [31] <polygon> x=74.425 lane=?
+  [32] <line> x=124.756 lane=?
+  [33] <line> x=136.756 lane=?
+  [34] <line> x=111.59049999999999 lane=?
+  [35] <polygon> x=92.925 lane=?
+  [36] <polygon> x=136.756 lane=?
+  [37] <line> x=74.425 lane=?
+  [38] <polygon> x=74.425 lane=?
+  [39] <line> x=74.425 lane=?
+  [40] <polygon> x=74.425 lane=?
+  [41] <line> x=74.425 lane=?
+  [42] <polygon> x=74.425 lane=?
+JAR:
+  [0] <ellipse> x=79.331 lane=?
+  [1] <rect> x=79.33099999999999 lane=?
+  [2] <text> x=62.306 lane=?
+  [3] <rect> x=79.3315 lane=?
+  [4] <text> x=61.969 lane=?
+  [5] <polygon> x=75.56985714285715 lane=?
+  [6] <text> x=83.331 lane=?
+  [7] <text> x=53 lane=?
+  [8] <text> x=26.906 lane=?
+  [9] <polygon> x=79.331 lane=?
+  [10] <polygon> x=75.56985714285715 lane=?
+  [11] <text> x=83.331 lane=?
+  [12] <text> x=53 lane=?
+  [13] <text> x=117.663 lane=?
+  [14] <rect> x=79.3315 lane=?
+  [15] <text> x=61.969 lane=?
+  [16] <line> x=79.331 lane=?
+  [17] <polygon> x=79.331 lane=?
+  [18] <line> x=79.331 lane=?
+  [19] <line> x=104.49700000000001 lane=?
+  [20] <polygon> x=129.663 lane=?
+  [21] <line> x=129.663 lane=?
+  [22] <line> x=123.66300000000001 lane=?
+  [23] <polygon> x=124.163 lane=?
+  [24] <line> x=35 lane=?
+  [25] <polygon> x=29 lane=?
+  [26] <line> x=29 lane=?
+  [27] <line> x=54.1655 lane=?
+  [28] <line> x=79.331 lane=?
+  [29] <polygon> x=79.331 lane=?
+  [30] <line> x=79.331 lane=?
+  [31] <polygon> x=79.331 lane=?
+  [32] <line> x=79.331 lane=?
+  [33] <polygon> x=79.331 lane=?
+  [34] <line> x=129.663 lane=?
+  [35] <polygon> x=141.663 lane=?
+  [36] <line> x=141.663 lane=?
+  [37] <line> x=116.49700000000001 lane=?
+  [38] <polygon> x=97.831 lane=?
+  [39] <line> x=79.331 lane=?
+  [40] <polygon> x=79.331 lane=?
+  [41] <line> x=79.331 lane=?
+  [42] <polygon> x=79.331 lane=?

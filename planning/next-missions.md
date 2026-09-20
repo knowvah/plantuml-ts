@@ -1507,6 +1507,33 @@ Ordered by how ready they are, not by size.
       `navene`, `rujuxa`, `tobajo`, `katopo`, `felega`, `megara`) is this
       class. Read `Swimlanes.java`'s connection drawing to see WHICH
       translates apply before porting.
+      - T0 (`activity-loop-lane-translate`, 2026-09-19, D8) re-files three of
+        this filing's own rows: `camavo-50-kaku123`, `vupuse-73-nuso490`,
+        `zepima-96-peco612` declare NO swimlane (0 `|lane|` lines); their
+        residual is not a translate shape — `swimlane-placement.ts:377`'s
+        `meta.lane1 === undefined` check always takes the same-lane shift
+        branch when no lane is declared, so `routeEdge` never reaches
+        `crossLaneMiddleY` for them. Their 35/48, 8/26, 50/63 `--align`
+        residuals are an unrelated, unread mechanism.
+      - T0 also found the filing's OWN classification wrong for six of its
+        22 rows, corrected in `plans/activity-loop-lane-translate/
+        fixtures.md`: `judatu-15-xize591`/`gesogi-81-xoma900`/
+        `bulasi-17-vafa634` ("both builders") and `tobajo-64-mipi810`
+        ("repeat, cross-lane") reach NEITHER `while-back` NOR a cross-lane
+        repeat shape (instrumented directly at `walk-while-branch.ts:185`/
+        `walk-repeat.ts:240,345`, not inferred from the `.puml` text);
+        `bulasi` declares only one swimlane so `Swimlanes.java:352`'s
+        `size() > 1` gate never runs `drawWhenSwimlanes`. Their align
+        residuals (29/42, 78/105, 44/55, 91/170) are real but out of this
+        mission's scope — re-file as a separate `activity-lane-align-
+        residuals` filing once T4's sweep confirms they are still
+        unexplained after the five shapes land.
+      - T0 found a shape the filing did not name: `FtileRepeat.ConnectionOut`
+        is independently `ConnectionTranslatable` and crosses lanes even
+        when the repeat's back-connection itself resolves to same-lane
+        `simple1`/`simple2` (`rujuxa-07-neco067`, `megara-21-rumi574`, plus
+        `becanu-19-diti597` which also reaches `complex1`) — folded into
+        T3's `repeat-out` task, not a new filing.
     - **`activity-repeat-break-welding`** — filed 2026-09-16 by
       `activity-loop-tile-port` T6. The jar welds `break`s inside a repeat
       exactly as inside a while (`FtileFactoryDelegatorRepeat.java:123`
