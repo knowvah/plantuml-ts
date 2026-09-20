@@ -21,7 +21,14 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { dotParityRows, dotParityMarkdown, NON_SVEK_TYPES, type TypeRow, type DotParityRoots } from '../../../scripts/dot-parity-rows.js';
+import {
+  dotParityRows,
+  dotParityMarkdown,
+  dotParityJson,
+  NON_SVEK_TYPES,
+  type TypeRow,
+  type DotParityRoots,
+} from '../../../scripts/dot-parity-rows.js';
 
 /** Never invoked in this suite: every temp-tree type below resolves before
  *  `rowForType` reaches `buildAgg` (no `roots.canonDir` is ever created, so
@@ -87,7 +94,9 @@ afterAll(() => {
 
 describe('NON_SVEK_TYPES', () => {
   it('is exactly sequence, activity, json, yaml, hcl, dot, gitgraph', () => {
-    expect(new Set(NON_SVEK_TYPES)).toEqual(new Set(['sequence', 'activity', 'json', 'yaml', 'hcl', 'dot', 'gitgraph']));
+    expect(new Set(NON_SVEK_TYPES)).toEqual(
+      new Set(['sequence', 'activity', 'json', 'yaml', 'hcl', 'dot', 'gitgraph']),
+    );
   });
 });
 
@@ -169,5 +178,31 @@ describe('dotParityMarkdown', () => {
     const out = dotParityMarkdown([], '2026-09-20');
     expect(out.endsWith('\n')).toBe(true);
     expect(out.endsWith('\n\n\n')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dotParityJson — pure pairing of rows + injected meta (T6 amendment: the
+// dashboard reads this committed shape instead of calling dotParityRows live)
+// ---------------------------------------------------------------------------
+
+describe('dotParityJson', () => {
+  const rows: TypeRow[] = [{ type: 'class', comparable: 708, equal: 708, pct: '100%', oracleBlind: 7, note: '—' }];
+  const meta = { generatedAt: '2026-09-20T00:00:00.000Z', measuredAgainstCommit: 'abc1234' };
+
+  it('pairs the given rows with the given meta verbatim, never reading the clock or git itself', () => {
+    expect(dotParityJson(rows, meta)).toEqual({
+      generatedAt: '2026-09-20T00:00:00.000Z',
+      measuredAgainstCommit: 'abc1234',
+      rows,
+    });
+  });
+
+  it('is a pure function of its arguments: same rows and meta always produce the same result', () => {
+    expect(dotParityJson(rows, meta)).toEqual(dotParityJson(rows, meta));
+  });
+
+  it('carries an empty rows array through unchanged', () => {
+    expect(dotParityJson([], meta).rows).toEqual([]);
   });
 });

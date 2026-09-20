@@ -37,15 +37,22 @@ import {
   type StructuralDiff,
 } from '../tests/oracle/svek-dot.js';
 import { CHECKS, drillDownGraph, stripDiagramName, stripLayoutPragma } from './dot-sync-drilldown.js';
-import { ensureCanonical, enumerateFixtures, findFixture, reportSkips, taggedSlugs, type Fixture } from './dot-sync-fixtures.js';
-import { EXPECTED_TAG, dotParityRows, dotParityMarkdown } from './dot-parity-rows.js';
+import {
+  ensureCanonical,
+  enumerateFixtures,
+  findFixture,
+  reportSkips,
+  taggedSlugs,
+  type Fixture,
+} from './dot-sync-fixtures.js';
+import { EXPECTED_TAG, dotParityRows, dotParityMarkdown, writeDotParityJson } from './dot-parity-rows.js';
+import { runProbeJsonDot } from './dot-sync-probe.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** Lizard-safe (no regex literals): matches svek-<N>.dot dump files. */
 const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
 /** Exported so dot-parity-rows.ts can check per-type cache freshness. */
 export const CACHE = join(REPO, 'test-results', 'dot-cache');
-const PROBE_OUT = join(REPO, 'plans', 'dot-oracle-sync', 'phase-5-json-dot', 'probe.md');
 const EQUAL_LIST_DIR = join(REPO, 'test-results', 'dot-sync-equal');
 
 function resolveJar(): string {
@@ -75,8 +82,9 @@ function dotFiles(dir: string): string[] {
     .map((f) => readFileSync(join(dir, f), 'utf-8'));
 }
 
-/** Cached PlantUML svek DOT for a fixture; dumps once via -DPLANTUML_DUMP_DOT. */
-function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boolean): string[] {
+/** Cached PlantUML svek DOT for a fixture; dumps once via -DPLANTUML_DUMP_DOT.
+ *  Exported so `dot-sync-probe.ts` can reuse the same cache without duplicating it. */
+export function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boolean): string[] {
   const dir = join(CACHE, type, f.slug);
   const done = join(dir, '.done');
   if (!rebuild && existsSync(done)) return dotFiles(dir);
@@ -337,96 +345,6 @@ function drillDownSlug(jar: string, type: string, slug: string, rebuild: boolean
   for (let i = 0; i < n; i++) drillDownGraph(i, oracleDots[i], inputs[i]);
 }
 
-// --probe-json-dot ------------------------------------------------------------
-
-interface ProbeResult {
-  anyDots: boolean;
-  evidence: string[];
-}
-
-function probeType(jar: string, type: string): ProbeResult | undefined {
-  const fixtures = enumerateFixtures(type);
-  if (fixtures === undefined) return undefined;
-  const sample = [...fixtures].sort((a, b) => a.slug.localeCompare(b.slug)).slice(0, 5);
-  const evidence: string[] = [];
-  let anyDots = false;
-  for (const f of sample) {
-    const dots = plantumlDots(jar, type, f, false);
-    evidence.push(f.slug + ': ' + dots.length + ' svek-*.dot file(s)');
-    if (dots.length > 0) anyDots = true;
-  }
-  return { anyDots, evidence };
-}
-
-function jsonImplication(anyDots: boolean): string {
-  if (anyDots) {
-    return 'svek-*.dot appeared for at least one json fixture, contradicting the phase-5 assumption that @startjson routes through SmetanaForJson directly — worth investigating whether this is loopable via the standard svek oracle after all.';
-  }
-  return 'No svek-*.dot appeared for any sampled json fixture, consistent with the phase-5 expectation that @startjson uses SmetanaForJson directly rather than routing through svek DOT. Per the overview this means json (and transitively yaml/hcl) is not loopable via the existing svek StructuralDiff oracle and needs a maintainer decision: treat as out of scope for this mission, or define a new Smetana-input oracle. Do not invent one without sign-off — this is a STOP condition.';
-}
-
-function dotImplication(anyDots: boolean): string {
-  if (anyDots) {
-    return "svek-*.dot appeared for at least one dot fixture, contradicting the phase-5 assumption that @startdot feeds the fixture's own DOT straight to graphviz — worth confirming before assuming the fixture body itself is the oracle.";
-  }
-  return "No svek-*.dot appeared for any sampled dot fixture, consistent with the phase-5 expectation that @startdot passes the fixture's own DOT body verbatim to graphviz with no svek intermediate. Per the overview, the oracle for this type is the fixture's own DOT text, and parity should be defined as \"does the seam's DotInputGraph preserve the input graph\" — a new comparison, not the svek StructuralDiff. That needs a short design note and maintainer sign-off (STOP condition) before looping.";
-}
-
-function probeSection(
-  type: string,
-  result: ProbeResult | undefined,
-  implication: (anyDots: boolean) => string,
-): string[] {
-  const lines: string[] = ['## ' + type, ''];
-  if (result === undefined) {
-    lines.push(
-      'Verdict: no fixture manifest — tests/visual/data/' + type + '.json does not exist.',
-      '',
-      'Evidence: none (no fixtures could be sampled).',
-      '',
-    );
-    return lines;
-  }
-  lines.push(
-    'Verdict: svek dump path ' +
-      (result.anyDots ? 'EXISTS' : 'DOES NOT EXIST') +
-      ' for ' +
-      type +
-      ' (' +
-      (result.anyDots ? 'at least one' : 'none of the') +
-      ' sampled fixtures produced svek-*.dot).',
-    '',
-    'Evidence:',
-  );
-  for (const e of result.evidence) lines.push('- ' + e);
-  lines.push('', 'Implication: ' + implication(result.anyDots), '');
-  return lines;
-}
-
-function runProbeJsonDot(jar: string): void {
-  const jsonResult = probeType(jar, 'json');
-  const dotResult = probeType(jar, 'dot');
-  const lines: string[] = [
-    '# Phase 5 probe — json/dot svek DOT dump',
-    '',
-    'Generated by npx tsx scripts/dot-sync-report.ts --probe-json-dot.',
-    '',
-    ...probeSection('json', jsonResult, jsonImplication),
-    ...probeSection('dot', dotResult, dotImplication),
-  ];
-  mkdirSync(dirname(PROBE_OUT), { recursive: true });
-  writeFileSync(PROBE_OUT, lines.join('\n') + '\n', 'utf-8');
-  console.log('Wrote ' + PROBE_OUT);
-  console.log(
-    'json: ' +
-      (jsonResult === undefined ? 'no manifest' : jsonResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'),
-  );
-  console.log(
-    'dot:  ' +
-      (dotResult === undefined ? 'no manifest' : dotResult.anyDots ? 'svek dump EXISTS' : 'svek dump DOES NOT EXIST'),
-  );
-}
-
 // CLI -------------------------------------------------------------------------
 
 interface Options {
@@ -436,12 +354,14 @@ interface Options {
   probeJsonDot: boolean;
   equalList: boolean;
   markdown: boolean;
+  jsonOut: string | undefined;
   types: string[];
 }
 
 function parseArgs(argv: string[]): Options {
   let slug: string | undefined;
   let typeTag: string | undefined;
+  let jsonOut: string | undefined;
   let rebuild = false;
   let probeJsonDot = false;
   let equalList = false;
@@ -455,9 +375,30 @@ function parseArgs(argv: string[]): Options {
     else if (a === '--probe-json-dot') probeJsonDot = true;
     else if (a === '--equal-list') equalList = true;
     else if (a === '--markdown') markdown = true;
+    else if (a === '--json') jsonOut = argv[++i];
     else types.push(a);
   }
-  return { rebuild, slug, typeTag, probeJsonDot, equalList, markdown, types };
+  return { rebuild, slug, typeTag, probeJsonDot, equalList, markdown, jsonOut, types };
+}
+
+/** The three one-shot modes that write a single artifact and exit. Extracted
+ *  so `main` stays under the complexity hook's CCN cap. Returns true when one
+ *  fired, so `main` knows not to fall through to the aggregate report. */
+function runSingleShotMode(jar: string, opts: Options): boolean {
+  if (opts.probeJsonDot) {
+    runProbeJsonDot(jar);
+    return true;
+  }
+  if (opts.markdown) {
+    runMarkdown(jar);
+    return true;
+  }
+  if (opts.jsonOut !== undefined) {
+    writeDotParityJson(opts.jsonOut, jar);
+    console.log('Wrote ' + opts.jsonOut);
+    return true;
+  }
+  return false;
 }
 
 function main(): void {
@@ -465,14 +406,7 @@ function main(): void {
   const opts = parseArgs(process.argv.slice(2));
   mkdirSync(CACHE, { recursive: true });
 
-  if (opts.probeJsonDot) {
-    runProbeJsonDot(jar);
-    return;
-  }
-  if (opts.markdown) {
-    runMarkdown(jar);
-    return;
-  }
+  if (runSingleShotMode(jar, opts)) return;
   if (opts.slug !== undefined) {
     const type = opts.types[0];
     if (type === undefined) throw new Error('--slug requires a type argument, e.g. --slug <slug> <type>');
