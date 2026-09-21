@@ -101,10 +101,7 @@ export class Slot {
     if (otherOrStart instanceof Slot) {
       const other = otherOrStart;
       return (
-        this.contains(other.start) ||
-        this.contains(other.end) ||
-        other.contains(this.start) ||
-        other.contains(this.end)
+        this.contains(other.start) || this.contains(other.end) || other.contains(this.start) || other.contains(this.end)
       );
     }
     const otherStart = otherOrStart;

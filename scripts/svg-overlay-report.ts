@@ -74,9 +74,7 @@ export interface ParityFile {
 
 /** Selects every `diverged` row from a parsed parity.json. Pure. */
 export function selectDiverged(parity: ParityFile): FixtureRef[] {
-  return parity.fixtures
-    .filter((f) => f.verdict === 'diverged')
-    .map((f) => ({ type: f.type, slug: f.slug }));
+  return parity.fixtures.filter((f) => f.verdict === 'diverged').map((f) => ({ type: f.type, slug: f.slug }));
 }
 
 // ---------------------------------------------------------------------------
@@ -273,9 +271,7 @@ export function runReports(cacheDir: string, outDir: string, refs: FixtureRef[])
 
 function loadParity(parityPath: string): ParityFile {
   if (!existsSync(parityPath)) {
-    throw new Error(
-      `No parity.json at ${parityPath} — run npm run svg:survey first (scripts/svg-parity-survey.ts).`,
-    );
+    throw new Error(`No parity.json at ${parityPath} — run npm run svg:survey first (scripts/svg-parity-survey.ts).`);
   }
   return JSON.parse(readFileSync(parityPath, 'utf-8')) as ParityFile;
 }

@@ -1,4 +1,10 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -19,7 +25,10 @@ header {
   border-bottom: 1px solid #dee2e6;
 }
 
-header h1 { font-size: 16px; font-weight: 600; }
+header h1 {
+  font-size: 16px;
+  font-weight: 600;
+}
 
 .app {
   display: flex;
@@ -48,9 +57,12 @@ nav button {
   font-size: 13px;
 }
 
-nav button:hover { background: #e9ecef; }
+nav button:hover {
+  background: #e9ecef;
+}
 
-.editor, .preview {
+.editor,
+.preview {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -69,7 +81,9 @@ textarea {
   outline: none;
 }
 
-textarea:focus { border-color: #339af0; }
+textarea:focus {
+  border-color: #339af0;
+}
 
 #error-bar {
   margin-top: 4px;
@@ -81,7 +95,9 @@ textarea:focus { border-color: #339af0; }
   font-size: 12px;
 }
 
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 
 #preview {
   flex: 1;
@@ -92,7 +108,10 @@ textarea:focus { border-color: #339af0; }
   padding: 8px;
 }
 
-#preview svg { max-width: 100%; height: auto; }
+#preview svg {
+  max-width: 100%;
+  height: auto;
+}
 
 #render-time {
   margin-top: 4px;

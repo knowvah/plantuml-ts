@@ -41,9 +41,27 @@ export const AXES: readonly Axis[] = ['x', 'y', 'mixed', 'none'];
  * scoped the parity rule to `points` and left the claim to C2/C3.
  */
 const AXIS_BY_BUCKET: Readonly<Record<string, Axis>> = {
-  x: 'x', x1: 'x', x2: 'x', cx: 'x', rx: 'x', dx: 'x', width: 'x', 'points.x': 'x',
-  y: 'y', y1: 'y', y2: 'y', cy: 'y', ry: 'y', dy: 'y', height: 'y', 'points.y': 'y',
-  d: 'mixed', transform: 'mixed', viewBox: 'mixed', r: 'mixed', 'points.mixed': 'mixed',
+  x: 'x',
+  x1: 'x',
+  x2: 'x',
+  cx: 'x',
+  rx: 'x',
+  dx: 'x',
+  width: 'x',
+  'points.x': 'x',
+  y: 'y',
+  y1: 'y',
+  y2: 'y',
+  cy: 'y',
+  ry: 'y',
+  dy: 'y',
+  height: 'y',
+  'points.y': 'y',
+  d: 'mixed',
+  transform: 'mixed',
+  viewBox: 'mixed',
+  r: 'mixed',
+  'points.mixed': 'mixed',
 };
 
 /** The axis a bucket belongs to. An unknown name is `none`, never a guess. */
@@ -85,9 +103,7 @@ const ZERO: DistanceTotals = { distance: 0, count: 0 };
  * of the four, so the four sum to the corpus total: regrouping must not move
  * the number this mission is gated on.
  */
-export function axisTotals(
-  byAttribute: Readonly<Record<string, DistanceTotals>>,
-): Record<Axis, DistanceTotals> {
+export function axisTotals(byAttribute: Readonly<Record<string, DistanceTotals>>): Record<Axis, DistanceTotals> {
   const out: Record<Axis, DistanceTotals> = { x: ZERO, y: ZERO, mixed: ZERO, none: ZERO };
   for (const [bucket, totals] of Object.entries(byAttribute)) {
     const axis = axisOf(bucket);
@@ -108,12 +124,14 @@ export function axisTotals(
 export function formatAxisTable(byAttribute: Readonly<Record<string, DistanceTotals>>): string {
   const totals = axisTotals(byAttribute);
   const header = ['axis', 'distance', 'diffs'];
-  const grid = [
-    header,
-    ...AXES.map((a) => [a, totals[a].distance.toFixed(3), String(totals[a].count)]),
-  ];
-  const widths = header.map((_, i) =>
-    grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0),
-  );
-  return grid.map((r) => r.map((c, i) => c.padEnd(widths[i] ?? 0)).join('  ').trimEnd()).join('\n');
+  const grid = [header, ...AXES.map((a) => [a, totals[a].distance.toFixed(3), String(totals[a].count)])];
+  const widths = header.map((_, i) => grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0));
+  return grid
+    .map((r) =>
+      r
+        .map((c, i) => c.padEnd(widths[i] ?? 0))
+        .join('  ')
+        .trimEnd(),
+    )
+    .join('\n');
 }

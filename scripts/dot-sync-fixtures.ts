@@ -25,14 +25,7 @@
  * manifest at all — see `plans/si13-class-authored-registration/decisions.md`
  * ADR-1.
  */
-import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  rmSync,
-  existsSync,
-  readdirSync,
-} from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -52,7 +45,10 @@ export const GOLDEN_DIR = join(REPO, 'oracle', 'goldens', 'svg-description');
 export const CLASS_GOLDEN_DIR = join(REPO, 'oracle', 'goldens', 'svg-class');
 const CANON_PUML_DIR = join(REPO, 'test-results', 'visual-qa-svg', 'puml');
 
-export interface Fixture { slug: string; markup: string }
+export interface Fixture {
+  slug: string;
+  markup: string;
+}
 
 // ---------------------------------------------------------------------------
 // Enumeration (ADR-1)
@@ -185,11 +181,15 @@ function generateCanonical(jar: string, type: string, fixtures: Fixture[]): void
   for (const f of fixtures)
     writeFileSync(join(pumlDir, f.slug + '.puml'), stripDiagramName(stripLayoutPragma(f.markup)), 'utf-8');
   try {
-    execFileSync('java', ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', jar, '-tsvg', '-nometadata', '-o', svgDir, pumlDir], {
-      stdio: ['ignore', 'ignore', 'inherit'],
-      maxBuffer: MAX_JAR_BUFFER_BYTES,
-      timeout: oracleJarBatchTimeoutMs(fixtures.length),
-    });
+    execFileSync(
+      'java',
+      ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', jar, '-tsvg', '-nometadata', '-o', svgDir, pumlDir],
+      {
+        stdio: ['ignore', 'ignore', 'inherit'],
+        maxBuffer: MAX_JAR_BUFFER_BYTES,
+        timeout: oracleJarBatchTimeoutMs(fixtures.length),
+      },
+    );
   } catch {
     /* partial batch — valid SVGs are on disk */
   }
@@ -213,9 +213,21 @@ export function reportSkips(
 ): void {
   const noCanon = new Set(skipped.filter((s) => !existsSync(join(canonDir, s + '.svg'))));
   console.error(
-    '[dot-sync] ' + type + ': enumerated ' + enumerated + ', analysed ' + analysed +
-    ', skipped ' + skipped.length + ' (' + noCanon.size + ' with no canonical SVG, ' +
-    (skipped.length - noCanon.size) + ' canonical but not tagged ' + tag + ')',
+    '[dot-sync] ' +
+      type +
+      ': enumerated ' +
+      enumerated +
+      ', analysed ' +
+      analysed +
+      ', skipped ' +
+      skipped.length +
+      ' (' +
+      noCanon.size +
+      ' with no canonical SVG, ' +
+      (skipped.length - noCanon.size) +
+      ' canonical but not tagged ' +
+      tag +
+      ')',
   );
   for (const s of skipped) {
     console.error('  skip ' + type + '/' + s + ': ' + (noCanon.has(s) ? 'no canonical SVG' : 'not tagged ' + tag));
@@ -232,7 +244,9 @@ export function reportSkips(
 export function missingCanonicalSlugs(dir: string, fixtures: Fixture[]): string[] {
   if (!existsSync(dir)) return fixtures.map((f) => f.slug);
   const have = new Set(
-    readdirSync(dir).filter((f) => f.endsWith('.svg')).map((f) => f.replace(/\.svg$/, '')),
+    readdirSync(dir)
+      .filter((f) => f.endsWith('.svg'))
+      .map((f) => f.replace(/\.svg$/, '')),
   );
   return fixtures.filter((f) => !have.has(f.slug)).map((f) => f.slug);
 }
@@ -246,9 +260,16 @@ export function ensureCanonical(jar: string, type: string, fixtures: Fixture[]):
   const missing = missingCanonicalSlugs(dir, fixtures);
   if (missing.length === 0) return;
   console.error(
-    '[dot-sync] canonical SVG cache for "' + type + '" is missing ' + missing.length + ' of ' +
-    fixtures.length + ' fixture(s) (e.g. ' + missing.slice(0, 3).join(', ') + ') — ' +
-    'regenerating via oracle jar…',
+    '[dot-sync] canonical SVG cache for "' +
+      type +
+      '" is missing ' +
+      missing.length +
+      ' of ' +
+      fixtures.length +
+      ' fixture(s) (e.g. ' +
+      missing.slice(0, 3).join(', ') +
+      ') — ' +
+      'regenerating via oracle jar…',
   );
   generateCanonical(jar, type, fixtures);
 }

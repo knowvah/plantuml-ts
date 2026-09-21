@@ -36,7 +36,12 @@ import type { UmlSource } from '../src/core/block-extractor.js';
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = join(REPO, 'test-results/dot-cache');
 
-interface Rect { x: number; y: number; width: number; height: number }
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 /**
  * The node rects the jar drew, in document order, deduped.
@@ -86,7 +91,9 @@ function ourNodes(type: string, markup: string): Rect[] {
 function fixtures(type: string): string[] {
   const dir = join(CACHE, type);
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).sort().filter((s) => existsSync(join(dir, s, 'in.svg')));
+  return readdirSync(dir)
+    .sort()
+    .filter((s) => existsSync(join(dir, s, 'in.svg')));
 }
 
 function loadPair(type: string, slug: string): { jar: Rect[]; ours: Rect[] } {
@@ -105,17 +112,19 @@ function reportOne(type: string, slug: string): void {
   console.log('   #        jar x/y/w/h                 ours x/y/w/h                deltas');
   const n = Math.min(jar.length, ours.length);
   for (let i = 0; i < n; i++) {
-    const j = jar[i]!, o = ours[i]!;
+    const j = jar[i]!,
+      o = ours[i]!;
     console.log(
       `  ${String(i).padStart(2)}  ${f(j.x)}${f(j.y)}${f(j.width)}${f(j.height)}  |` +
-      `${f(o.x)}${f(o.y)}${f(o.width)}${f(o.height)}  |` +
-      `${f(o.x - j.x)}${f(o.y - j.y)}${f(o.width - j.width)}${f(o.height - j.height)}`,
+        `${f(o.x)}${f(o.y)}${f(o.width)}${f(o.height)}  |` +
+        `${f(o.x - j.x)}${f(o.y - j.y)}${f(o.width - j.width)}${f(o.height - j.height)}`,
     );
   }
 }
 
 function reportSummary(types: string[]): void {
-  let nodes = 0, exact = 0;
+  let nodes = 0,
+    exact = 0;
   const acc = { x: 0, y: 0, w: 0, h: 0 };
   const worst: Array<{ slug: string; type: string; err: number }> = [];
   for (const type of types) {
@@ -123,23 +132,33 @@ function reportSummary(types: string[]): void {
       let err = 0;
       try {
         const { jar, ours } = loadPair(type, slug);
-        if (jar.length !== ours.length) { worst.push({ slug, type, err: Infinity }); continue; }
+        if (jar.length !== ours.length) {
+          worst.push({ slug, type, err: Infinity });
+          continue;
+        }
         for (let i = 0; i < jar.length; i++) {
-          const j = jar[i]!, o = ours[i]!;
+          const j = jar[i]!,
+            o = ours[i]!;
           const d = { x: o.x - j.x, y: o.y - j.y, w: o.width - j.width, h: o.height - j.height };
-          acc.x += Math.abs(d.x); acc.y += Math.abs(d.y);
-          acc.w += Math.abs(d.w); acc.h += Math.abs(d.h);
+          acc.x += Math.abs(d.x);
+          acc.y += Math.abs(d.y);
+          acc.w += Math.abs(d.w);
+          acc.h += Math.abs(d.h);
           err += Math.abs(d.x) + Math.abs(d.y) + Math.abs(d.w) + Math.abs(d.h);
           nodes += 1;
           if (d.x === 0 && d.y === 0 && d.w === 0 && d.h === 0) exact += 1;
         }
-      } catch { err = Infinity; }
+      } catch {
+        err = Infinity;
+      }
       worst.push({ slug, type, err });
     }
   }
   console.log(`nodes compared: ${nodes}   exact (x,y,w,h all 0): ${exact}`);
-  console.log(`mean |Δx| ${(acc.x / nodes).toFixed(2)}   |Δy| ${(acc.y / nodes).toFixed(2)}` +
-    `   |Δw| ${(acc.w / nodes).toFixed(2)}   |Δh| ${(acc.h / nodes).toFixed(2)}`);
+  console.log(
+    `mean |Δx| ${(acc.x / nodes).toFixed(2)}   |Δy| ${(acc.y / nodes).toFixed(2)}` +
+      `   |Δw| ${(acc.w / nodes).toFixed(2)}   |Δh| ${(acc.h / nodes).toFixed(2)}`,
+  );
   console.log('\nworst fixtures by total node error:');
   for (const r of worst.sort((a, b) => b.err - a.err).slice(0, 8)) {
     console.log(`  ${r.type}/${r.slug}: ${r.err === Infinity ? 'ERROR/COUNT-MISMATCH' : r.err.toFixed(1)}`);

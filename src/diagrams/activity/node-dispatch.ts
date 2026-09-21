@@ -17,7 +17,14 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
-import type { ActivityAction, ActivityArrowLabel, ActivityNode, ActivityNote, ActivityRepeat, ActivityWhile } from './ast.js';
+import type {
+  ActivityAction,
+  ActivityArrowLabel,
+  ActivityNode,
+  ActivityNote,
+  ActivityRepeat,
+  ActivityWhile,
+} from './ast.js';
 import {
   RE_ACTION,
   RE_ACTION_CLOSE,

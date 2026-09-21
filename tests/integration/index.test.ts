@@ -173,11 +173,9 @@ describe('renderAll() with fetcher option', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderAll() — per-block include isolation', () => {
-  it('renders the good block normally when a sibling block\'s include fails', async () => {
+  it("renders the good block normally when a sibling block's include fails", async () => {
     const fetcher = (url: string): Promise<string> =>
-      url.includes('/bad.puml')
-        ? Promise.reject(new Error('network down'))
-        : Promise.resolve('Alice -> Bob : hello');
+      url.includes('/bad.puml') ? Promise.reject(new Error('network down')) : Promise.resolve('Alice -> Bob : hello');
 
     const good = `@startuml\n!include https://example.com/good.puml\n@enduml`;
     const bad = `@startuml\n!include https://example.com/bad.puml\n@enduml`;
@@ -192,9 +190,7 @@ describe('renderAll() — per-block include isolation', () => {
 
   it('a failing first block does not prevent a later good block from rendering', async () => {
     const fetcher = (url: string): Promise<string> =>
-      url.includes('/bad.puml')
-        ? Promise.reject(new Error('network down'))
-        : Promise.resolve('Alice -> Bob : hello');
+      url.includes('/bad.puml') ? Promise.reject(new Error('network down')) : Promise.resolve('Alice -> Bob : hello');
 
     const bad = `@startuml\n!include https://example.com/bad.puml\n@enduml`;
     const good = `@startuml\n!include https://example.com/good.puml\n@enduml`;

@@ -30,13 +30,7 @@ import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings } from './core/sprite-commands.js';
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
-import {
-  DiagramRefusal,
-  emptySvg,
-  errorSvg,
-  preprocessorErrorSvg,
-  welcomeSvg,
-} from './core/error/error-diagrams.js';
+import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer } from './core/render-options.js';
 import type { RenderOptions } from './core/render-options.js';
 import { assembleSvg } from './core/assemble-svg.js';
@@ -71,7 +65,12 @@ export {
 export { SecurityProfile } from './core/security/SecurityProfile.js';
 // SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment. si11b's
 // `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites it names, not the 1.06 MB bundle holding all 2,078 of them.
-export { remoteStdlib, StdlibResourceFetchError, type StdlibRemoteManifest, type RemoteBundle } from './core/tim/StdlibRemote.js';
+export {
+  remoteStdlib,
+  StdlibResourceFetchError,
+  type StdlibRemoteManifest,
+  type RemoteBundle,
+} from './core/tim/StdlibRemote.js';
 export { spriteSplitStdlib, SpriteNotBundledError, type SpriteSplitManifest } from './core/sprite-split-stdlib.js';
 // ADR-2 (plans/s1l-tail-fix/decisions.md): the sync-fillable asset seam F4-a/F4-b both consume via options.assetStore.
 export { combineAssetStores, type AssetPayload, type AssetStore } from './core/asset-store.js';
@@ -119,8 +118,6 @@ registry.register(filesPlugin);
 registry.register(packetdiagPlugin);
 registry.register(chartPlugin);
 registry.register(dotPlugin);
-
-
 
 /**
  * The block's preprocessed interior, carrying the `<style>` blocks the
@@ -275,7 +272,13 @@ interface PageContext {
 
 function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown): string {
   const chromed = applyAnnotationChrome(
-    fragment, ast, ctx.theme, ctx.styleMap, ctx.preprocessed, ctx.measurer, ctx.plugin.type,
+    fragment,
+    ast,
+    ctx.theme,
+    ctx.styleMap,
+    ctx.preprocessed,
+    ctx.measurer,
+    ctx.plugin.type,
   );
   return assembleSvg(chromed);
 }
@@ -295,23 +298,18 @@ function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown)
 function assemblePagesUnscoped(ctx: PageContext, geo: unknown, ast: unknown): string[] {
   const { plugin } = ctx;
   const count = plugin.getNbPages?.(geo) ?? 1;
-  if (count <= 1 || plugin.renderPage === undefined)
-    return [assembleOnePage(ctx, plugin.render(geo, ctx.theme), ast)];
+  if (count <= 1 || plugin.renderPage === undefined) return [assembleOnePage(ctx, plugin.render(geo, ctx.theme), ast)];
 
   const pages: string[] = [];
   for (let index = 0; index < count; index++)
-    pages.push(
-      assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index), plugin.pageAst?.(ast, index) ?? ast),
-    );
+    pages.push(assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index), plugin.pageAst?.(ast, index) ?? ast));
   return pages;
 }
 
 /** {@link assemblePagesUnscoped} with the caller's `allowJavascriptInLink`
  *  installed for the (synchronous) emission -- `svg.ts#linkWrap` reads it. */
 function assemblePages(ctx: PageContext, geo: unknown, ast: unknown, options?: RenderOptions): string[] {
-  return withAllowJavascriptInLink(options?.allowJavascriptInLink === true, () =>
-    assemblePagesUnscoped(ctx, geo, ast),
-  );
+  return withAllowJavascriptInLink(options?.allowJavascriptInLink === true, () => assemblePagesUnscoped(ctx, geo, ast));
 }
 
 /** {@link prepareBlock}'s result: the page context every page of the block
@@ -334,13 +332,11 @@ interface PreparedBlock {
  * warnings. Neither caller's own try/catch nor sync-vs-async `layout` call
  * belongs here — those stay distinct per caller.
  */
-function prepareBlock(
-  block: BlockUmlOk,
-  umlSource: UmlSource,
-  options: RenderOptions | undefined,
-): PreparedBlock {
+function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOptions | undefined): PreparedBlock {
   const { theme, styleMap } = buildTheme(
-    block.preprocessed, options, block.rawSource.map((s) => s.getString()),
+    block.preprocessed,
+    options,
+    block.rawSource.map((s) => s.getString()),
   );
   const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
   const plugin = resolution.plugin;
@@ -400,10 +396,7 @@ export function renderSync(source: string, options?: RenderOptions): string {
   return renderPagesSync(source, options)[0]!;
 }
 
-export async function render(
-  source: string,
-  options?: RenderOptions,
-): Promise<string> {
+export async function render(source: string, options?: RenderOptions): Promise<string> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
@@ -420,10 +413,7 @@ export async function render(
  * {@link renderPagesSync}, and the one to use when the source has
  * `!include` directives to fetch.
  */
-export async function renderPages(
-  source: string,
-  options?: RenderOptions,
-): Promise<string[]> {
+export async function renderPages(source: string, options?: RenderOptions): Promise<string[]> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
     const blocks = buildBlockUmls(source, { includeStore });
@@ -448,10 +438,7 @@ export async function renderPages(
  * before that block is preprocessed) keeps a bad include local to its own
  * page: sibling blocks whose includes resolve still render normally.
  */
-export async function renderAll(
-  source: string,
-  options?: RenderOptions,
-): Promise<string[]> {
+export async function renderAll(source: string, options?: RenderOptions): Promise<string[]> {
   // This outer catch is for document-level failures (e.g. a non-string
   // `source`, which throws before any block exists to attribute the error
   // to) -- `renderRawBlock` never rejects, so a single bad block cannot
@@ -502,4 +489,3 @@ async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promi
     return [errorSvg(umlSource.lines.join('\n'), err, options)];
   }
 }
-

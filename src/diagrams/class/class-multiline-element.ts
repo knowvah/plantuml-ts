@@ -146,7 +146,12 @@ function finishBlock(state: ParseState, pending: PendingMultilineElement): void 
  * including a nested element's own closing `]` — are ever tested against
  * this block's END regex (T3.md M6, rozugu-82-pera583).
  */
-export function continueMultilineElement(state: ParseState, lines: readonly string[], rawLines: readonly string[], i: number): number {
+export function continueMultilineElement(
+  state: ParseState,
+  lines: readonly string[],
+  rawLines: readonly string[],
+  i: number,
+): number {
   const pending = state.pendingMultilineElement;
   if (pending === undefined) return 0;
   const trimmed = lines[i]!;

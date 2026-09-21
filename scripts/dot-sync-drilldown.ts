@@ -86,12 +86,9 @@ export function stripDiagramName(markup: string): string {
 
 const shapesOf = (g: StructuralGraph): string[] => g.nodes.map((n) => n.shape).sort();
 /** Mirrors `svek-dot.ts#sortedPorts` — `-` marks an endpoint with no port. */
-const portsOf = (g: StructuralGraph): string[] =>
-  g.edges.flatMap((e) => [e.fromPort ?? '-', e.toPort ?? '-']).sort();
-const minlensOf = (g: StructuralGraph): number[] =>
-  g.edges.map((e) => e.minlen).sort((x, y) => x - y);
-const clusterSizesOf = (g: StructuralGraph): number[] =>
-  g.clusters.map((c) => c.memberCount).sort((x, y) => x - y);
+const portsOf = (g: StructuralGraph): string[] => g.edges.flatMap((e) => [e.fromPort ?? '-', e.toPort ?? '-']).sort();
+const minlensOf = (g: StructuralGraph): number[] => g.edges.map((e) => e.minlen).sort((x, y) => x - y);
+const clusterSizesOf = (g: StructuralGraph): number[] => g.clusters.map((c) => c.memberCount).sort((x, y) => x - y);
 const labelCountsOf = (g: StructuralGraph): [number, number, number, number] => [
   g.edges.filter((e) => e.hasLabel).length,
   g.edges.filter((e) => e.hasTailLabel).length,
@@ -159,17 +156,24 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   ranksepOk: { label: 'ranksep (in)', values: (o, c) => [o.ranksep, c.ranksep] },
   splinesOk: {
     label: 'splines/forcelabels',
-    values: (o, c) => [
-      `${o.splines ?? '-'}/${o.forcelabels}`,
-      `${c.splines ?? '-'}/${c.forcelabels}`,
-    ],
+    values: (o, c) => [`${o.splines ?? '-'}/${o.forcelabels}`, `${c.splines ?? '-'}/${c.forcelabels}`],
   },
 };
 
 function printGraphAttrs(label: string, g: StructuralGraph): void {
   console.log(
-    '  ' + label + ': rankdir=' + g.rankdir + ' nodesep=' + g.nodesep + ' ranksep=' + g.ranksep +
-    ' remincross=' + g.remincross + ' searchsize=' + g.searchsize,
+    '  ' +
+      label +
+      ': rankdir=' +
+      g.rankdir +
+      ' nodesep=' +
+      g.nodesep +
+      ' ranksep=' +
+      g.ranksep +
+      ' remincross=' +
+      g.remincross +
+      ' searchsize=' +
+      g.searchsize,
   );
 }
 
@@ -188,11 +192,7 @@ function printCheckDetails(o: StructuralGraph, c: StructuralGraph, d: Structural
   console.log('  maxSizeDeltaIn: ' + d.maxSizeDeltaIn.toFixed(4));
 }
 
-export function drillDownGraph(
-  i: number,
-  oracleDot: string | undefined,
-  input: DotInputGraph | undefined,
-): void {
+export function drillDownGraph(i: number, oracleDot: string | undefined, input: DotInputGraph | undefined): void {
   console.log('\n--- graph #' + i + ' ---');
   if (oracleDot !== undefined) {
     console.log('\n[oracle svek DOT]');

@@ -270,10 +270,7 @@ function movementFor(base: FixtureDistance, live: FixtureDistance): DistanceMove
     slug: live.slug,
     baseDistance: base.distance,
     liveDistance: live.distance,
-    delta:
-      commensurable && base.distance !== null && live.distance !== null
-        ? live.distance - base.distance
-        : null,
+    delta: commensurable && base.distance !== null && live.distance !== null ? live.distance - base.distance : null,
     baseDescended: base.descended,
     liveDescended: live.descended,
   };
@@ -297,15 +294,10 @@ function indexBySlug(fixtures: readonly FixtureDistance[]): Map<string, FixtureD
  * only one ref is reported rather than dropped, and sorted so two runs of the
  * same pair are byte-identical.
  */
-export function compareSnapshots(
-  base: DistanceSnapshot,
-  live: DistanceSnapshot,
-): DistanceMovement[] {
+export function compareSnapshots(base: DistanceSnapshot, live: DistanceSnapshot): DistanceMovement[] {
   const baseIndex = indexBySlug(base.fixtures);
   const liveIndex = indexBySlug(live.fixtures);
-  const slugs = [...new Set([...baseIndex.keys(), ...liveIndex.keys()])].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const slugs = [...new Set([...baseIndex.keys(), ...liveIndex.keys()])].sort((a, b) => a.localeCompare(b));
   return slugs.map((slug) =>
     movementFor(baseIndex.get(slug) ?? { ...ABSENT, slug }, liveIndex.get(slug) ?? { ...ABSENT, slug }),
   );
@@ -337,10 +329,15 @@ export function formatAttributeTable(byAttribute: Readonly<Record<string, Distan
   if (rows.length === 0) return 'no numeric diffs.';
   const header = ['attr', 'distance', 'diffs'];
   const grid = [header, ...rows.map(([name, t]) => [name, round(t.distance), String(t.count)])];
-  const widths = header.map((_, i) =>
-    grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0),
-  );
-  return grid.map((r) => r.map((c, i) => c.padEnd(widths[i] ?? 0)).join('  ').trimEnd()).join('\n');
+  const widths = header.map((_, i) => grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0));
+  return grid
+    .map((r) =>
+      r
+        .map((c, i) => c.padEnd(widths[i] ?? 0))
+        .join('  ')
+        .trimEnd(),
+    )
+    .join('\n');
 }
 
 /** The cohort line every report carries, so a total is never read bare. */
@@ -427,11 +424,7 @@ export function listFixtureSlugs(cacheRoot: string): string[] {
   return readdirSync(cacheRoot)
     .filter((slug) => {
       const dir = join(cacheRoot, slug);
-      return (
-        statSync(dir).isDirectory() &&
-        existsSync(join(dir, 'in.puml')) &&
-        existsSync(join(dir, 'in.svg'))
-      );
+      return statSync(dir).isDirectory() && existsSync(join(dir, 'in.puml')) && existsSync(join(dir, 'in.svg'));
     })
     .sort((a, b) => a.localeCompare(b));
 }
@@ -444,9 +437,7 @@ export function listFixtureSlugs(cacheRoot: string): string[] {
 export function measureTree(repo: string): DistanceSnapshot {
   const store = requireIncludeStore(fixtureIncludeStore);
   const cacheRoot = join(repo, SEQUENCE_CACHE_REL);
-  return summarize(
-    listFixtureSlugs(cacheRoot).map((slug) => measureFixture(join(cacheRoot, slug), slug, store)),
-  );
+  return summarize(listFixtureSlugs(cacheRoot).map((slug) => measureFixture(join(cacheRoot, slug), slug, store)));
 }
 
 // ---------------------------------------------------------------------------
@@ -454,8 +445,7 @@ export function measureTree(repo: string): DistanceSnapshot {
 // ---------------------------------------------------------------------------
 
 const USAGE =
-  'Usage:\n' +
-  '  npx jiti scripts/sequence-geometry-distance.ts [--snapshot <path>] [--compare <baseline.json>]\n';
+  'Usage:\n' + '  npx jiti scripts/sequence-geometry-distance.ts [--snapshot <path>] [--compare <baseline.json>]\n';
 
 function argValue(argv: readonly string[], flag: string): string | undefined {
   const at = argv.indexOf(flag);

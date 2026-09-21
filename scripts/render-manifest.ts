@@ -86,7 +86,6 @@ export function discoverFixtures(only: readonly string[] | undefined): string[] 
 // Rendering
 // ---------------------------------------------------------------------------
 
-
 /** Renders one fixture, capturing an SVG hash and — when the render drove
  *  graph layout — a DOT hash from the same input graphs the layout engine
  *  consumed, in a single render pass (no second `renderSync` call).

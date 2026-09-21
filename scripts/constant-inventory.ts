@@ -142,16 +142,18 @@ function printText(entries: Entry[], collisionsOnly: boolean): void {
 function printSummary(entries: Entry[]): void {
   const collisions = entries.filter((e) => e.collision);
   console.log('');
-  console.log(JSON.stringify({
-    summary: {
-      duplicatedNames: entries.length,
-      redundantDeclarations: redundant(entries),
-      sameValueNames: entries.length - collisions.length,
-      collisionNames: collisions.length,
-      citedNames: entries.filter((e) => e.cited).length,
-      knownExceptions: entries.filter((e) => e.knownException).length,
-    },
-  }));
+  console.log(
+    JSON.stringify({
+      summary: {
+        duplicatedNames: entries.length,
+        redundantDeclarations: redundant(entries),
+        sameValueNames: entries.length - collisions.length,
+        collisionNames: collisions.length,
+        citedNames: entries.filter((e) => e.cited).length,
+        knownExceptions: entries.filter((e) => e.knownException).length,
+      },
+    }),
+  );
 }
 
 function main(): void {

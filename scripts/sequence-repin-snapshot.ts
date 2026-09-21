@@ -48,11 +48,7 @@ export interface RepinMeasurement {
 
 /** Never throws: an error is `null`/`null`, never a zero score, for the same
  *  reason every other instrument in this mission refuses to coerce one. */
-export function measureForRepin(
-  dir: string,
-  slug: string,
-  store: IncludeStore,
-): RepinMeasurement {
+export function measureForRepin(dir: string, slug: string, store: IncludeStore): RepinMeasurement {
   try {
     const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
     const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
@@ -74,9 +70,7 @@ function main(argv: readonly string[]): number {
     return 2;
   }
   const store = requireIncludeStore(fixtureIncludeStore);
-  const rows = listFixtureSlugs(CACHE).map((slug) =>
-    measureForRepin(join(CACHE, slug), slug, store),
-  );
+  const rows = listFixtureSlugs(CACHE).map((slug) => measureForRepin(join(CACHE, slug), slug, store));
   writeFileSync(out, JSON.stringify(rows), 'utf8');
   const measured = rows.filter((r) => r.score !== null).length;
   console.log(`wrote ${String(rows.length)} rows (${String(measured)} measured) to ${out}`);

@@ -9,13 +9,7 @@
  *   jiti scripts/capture-corpus.ts --dry-run
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,10 +47,7 @@ function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
 
   const typeIdx = args.indexOf('--type');
-  const filterType =
-    typeIdx !== -1 && typeIdx + 1 < args.length
-      ? (args[typeIdx + 1] ?? null)
-      : null;
+  const filterType = typeIdx !== -1 && typeIdx + 1 < args.length ? (args[typeIdx + 1] ?? null) : null;
 
   const dryRun = args.includes('--dry-run');
 
@@ -104,11 +95,7 @@ interface TypeSummary {
   errors: number;
 }
 
-async function processManifest(
-  type: string,
-  entries: FixtureEntry[],
-  dryRun: boolean,
-): Promise<TypeSummary> {
+async function processManifest(type: string, entries: FixtureEntry[], dryRun: boolean): Promise<TypeSummary> {
   const outDir = join(REF_DIR, type);
   mkdirSync(outDir, { recursive: true });
 

@@ -37,13 +37,7 @@
  * Node-only dev/test infra — never imported by src/index.ts.
  */
 import { spawn } from 'node:child_process';
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -51,11 +45,7 @@ import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import { WidthTableMeasurer } from '../src/core/measurer.js';
 import type { DotInputGraph } from '../src/core/graph-layout.types.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-} from '../tests/oracle/svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 import { runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
@@ -115,13 +105,7 @@ const PRAGMA_LAYOUT_RE = /!pragma\s+layout\s+/i;
 // Public types — the interface contract consumed by the dashboard + T18/T19.
 // ---------------------------------------------------------------------------
 
-export type Verdict =
-  | 'conformant'
-  | 'structural-match'
-  | 'diverged'
-  | 'oracle-error'
-  | 'errored'
-  | 'timeout';
+export type Verdict = 'conformant' | 'structural-match' | 'diverged' | 'oracle-error' | 'errored' | 'timeout';
 
 export interface FixtureRow {
   slug: string;
@@ -203,11 +187,7 @@ export function diffVerdict(
 /** DOT-level parity: mirrors scripts/dot-sync-report.ts's analyzeFixture. Both
  *  sides skipping graphviz (degenerate single-leaf/empty diagrams) IS
  *  agreement; a count mismatch or a structural check failure is not. */
-export function computeDotEqual(
-  dots: string[],
-  inputs: DotInputGraph[],
-  oracleBlind: boolean,
-): boolean {
+export function computeDotEqual(dots: string[], inputs: DotInputGraph[], oracleBlind: boolean): boolean {
   if (oracleBlind) return false;
   if (dots.length === 0 && inputs.length === 0) return true;
   if (inputs.length === 0) return false;
@@ -355,7 +335,10 @@ function resolveJiti(): { cmd: string; pre: string[] } {
 function oracleErrorRow(type: string, f: FixtureDir, oracleSvg: string): FixtureRow | undefined {
   if (isWellFormedSvg(oracleSvg)) return undefined;
   return {
-    slug: f.slug, type, verdict: 'oracle-error', dotEqual: false,
+    slug: f.slug,
+    type,
+    verdict: 'oracle-error',
+    dotEqual: false,
     errMsg: `cached in.svg not well-formed XML: ${oracleSvg.length}B`,
   };
 }
@@ -382,9 +365,11 @@ async function surveyType(
   const todo = fixtures.map((f, i) => ({ f, i })).filter(({ i }) => pre[i] === undefined);
   const outcomes = await runPersistentPool({
     dirs: todo.map(({ f }) => f.dir),
-    spawn: () => spawn(jiti.cmd, [...jiti.pre, THIS_FILE, '--render-many'], {
-      env: process.env, stdio: ['pipe', 'pipe', 'pipe'],
-    }),
+    spawn: () =>
+      spawn(jiti.cmd, [...jiti.pre, THIS_FILE, '--render-many'], {
+        env: process.env,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }),
     timeoutMs: RENDER_TIMEOUT_MS,
     concurrency: CONCURRENCY,
     onProgress: (done, total) => {
@@ -400,7 +385,12 @@ async function surveyType(
 
 function tally(rows: FixtureRow[]): Record<Verdict, number> {
   const counts: Record<Verdict, number> = {
-    conformant: 0, 'structural-match': 0, diverged: 0, errored: 0, timeout: 0, 'oracle-error': 0,
+    conformant: 0,
+    'structural-match': 0,
+    diverged: 0,
+    errored: 0,
+    timeout: 0,
+    'oracle-error': 0,
   };
   for (const r of rows) counts[r.verdict]++;
   return counts;
@@ -434,9 +424,7 @@ export function parseSurveyArgs(argv: string[]): SurveyJob[] {
   const out = outIdx !== -1 ? argv[outIdx + 1] : undefined;
   // pdr-T3 fix: bare `i !== outIdx + 1` dropped argv[0] whenever `--out` was
   // absent (outIdx -1 + 1 === 0), losing a bare positional type arg.
-  const positional = argv.filter(
-    (a, i) => a !== '--out' && (outIdx === -1 || i !== outIdx + 1) && !a.startsWith('--'),
-  );
+  const positional = argv.filter((a, i) => a !== '--out' && (outIdx === -1 || i !== outIdx + 1) && !a.startsWith('--'));
   if (positional.length === 0 && out === undefined) return surveyEverythingPlan();
   return [{ types: positional.length > 0 ? positional : DEFAULT_TYPES, out: out ?? PARITY_OUT }];
 }

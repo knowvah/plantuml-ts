@@ -81,11 +81,7 @@ export type DeltaStatus = 'widened' | 'improved' | 'unchanged';
 /** Classifies a measured delta against its allowance. `improved` is only
  *  meaningful for backlog fixtures (a conformant non-backlog fixture sitting
  *  below the 0.01in ceiling is `unchanged`, not "improved"). Pure, no I/O. */
-export function classifyDelta(
-  delta: number,
-  allowed: number,
-  inBacklog: boolean,
-): DeltaStatus {
+export function classifyDelta(delta: number, allowed: number, inBacklog: boolean): DeltaStatus {
   if (delta > allowed + DELTA_EPSILON) return 'widened';
   if (inBacklog && delta < allowed - DELTA_EPSILON) return 'improved';
   return 'unchanged';
@@ -236,23 +232,36 @@ function measureFixture(slug: string, allowed: number, inBacklog: boolean, excus
   const captured = captureGraphs(markup);
   if (captured.length !== files.length) {
     return {
-      slug, delta: Number.POSITIVE_INFINITY, allowed, status: 'widened',
-      conformant: false, cause: detectCause(markup),
+      slug,
+      delta: Number.POSITIVE_INFINITY,
+      allowed,
+      status: 'widened',
+      conformant: false,
+      cause: detectCause(markup),
       detail: `captured ${captured.length} layout graph(s), expected ${files.length}`,
     };
   }
   const outcome = comparePasses(dir, files, captured, excused);
   if ('failure' in outcome) {
     return {
-      slug, delta: Number.POSITIVE_INFINITY, allowed, status: 'widened',
-      conformant: false, cause: detectCause(markup), detail: outcome.failure,
+      slug,
+      delta: Number.POSITIVE_INFINITY,
+      allowed,
+      status: 'widened',
+      conformant: false,
+      cause: detectCause(markup),
+      detail: outcome.failure,
     };
   }
   const delta = outcome.maxDelta;
   const conformant = delta <= SIZE_CONFORMANCE_TOLERANCE_IN + DELTA_EPSILON;
   const status = classifyDelta(delta, allowed, inBacklog);
   return {
-    slug, delta, allowed, status, conformant,
+    slug,
+    delta,
+    allowed,
+    status,
+    conformant,
     ...(conformant ? {} : { cause: detectCause(markup) }),
     ...(status !== 'unchanged' ? { detail: `maxSizeDeltaIn=${delta}` } : {}),
   };
@@ -298,8 +307,13 @@ export interface Summary {
 
 export function summarize(results: readonly DeltaResult[]): Summary {
   const s: Summary = {
-    total: results.length, conformant: 0, conformantPct: 0,
-    widened: 0, improved: 0, unchanged: 0, causes: {},
+    total: results.length,
+    conformant: 0,
+    conformantPct: 0,
+    widened: 0,
+    improved: 0,
+    unchanged: 0,
+    causes: {},
   };
   for (const r of results) {
     s[r.status] += 1;

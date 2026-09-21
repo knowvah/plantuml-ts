@@ -160,8 +160,12 @@ function axisRows(ctx: AxisCtx, oracle: StructuralGraph, ours: StructuralGraph):
     const jar = o[i]!;
     const mine = c[i]!;
     rows.push({
-      fixture: ctx.fixture, scope: ctx.scope, axis: ctx.axis, index: i,
-      ours: mine, jar,
+      fixture: ctx.fixture,
+      scope: ctx.scope,
+      axis: ctx.axis,
+      index: i,
+      ours: mine,
+      jar,
       deltaPx: (mine - jar) * PX_PER_INCH,
       match: isExact(mine, jar),
       lastDigit: isLastDigit(mine, jar),
@@ -241,17 +245,19 @@ function main(): void {
 
   for (const slug of slugs) tallyFixture(slug, mismatchedOnly, t);
 
-  console.log(JSON.stringify({
-    summary: {
-      fixtures: slugs.length,
-      declarations: t.exact + t.mismatched + t.lastDigit,
-      exact: t.exact,
-      mismatched: t.mismatched,
-      lastDigitOnly: t.lastDigit,
-      unmatchedFixtures: t.unmatched,
-      dirtyFixtures: t.dirty.size,
-    },
-  }));
+  console.log(
+    JSON.stringify({
+      summary: {
+        fixtures: slugs.length,
+        declarations: t.exact + t.mismatched + t.lastDigit,
+        exact: t.exact,
+        mismatched: t.mismatched,
+        lastDigitOnly: t.lastDigit,
+        unmatchedFixtures: t.unmatched,
+        dirtyFixtures: t.dirty.size,
+      },
+    }),
+  );
 }
 
 main();

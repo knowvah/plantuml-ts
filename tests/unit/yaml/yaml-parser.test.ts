@@ -69,9 +69,7 @@ describe('parseYamlLines', () => {
   it('collects a warning naming the dropped key when a warnings array is passed', () => {
     const warnings: string[] = [];
     parseYamlLines(['key: >'], warnings);
-    expect(warnings).toEqual([
-      'YAML key "key": folded-style (>) block value is not supported and was dropped',
-    ]);
+    expect(warnings).toEqual(['YAML key "key": folded-style (>) block value is not supported and was dropped']);
   });
 
   it('collects one warning per KEY_AND_FOLDED_STYLE occurrence, list items included', () => {

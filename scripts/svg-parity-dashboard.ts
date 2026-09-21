@@ -24,9 +24,7 @@ const PARITY_IN = join(REPO, 'tests', 'oracle', 'svg-conformance', 'parity.json'
 const LEDGER_IN = join(REPO, 'oracle', 'accepted-divergences.json');
 const OUT = join(REPO, 'tests', 'oracle', 'svg-conformance', 'PARITY-SVG.md');
 
-const VERDICTS: Verdict[] = [
-  'conformant', 'structural-match', 'diverged', 'errored', 'timeout', 'oracle-error',
-];
+const VERDICTS: Verdict[] = ['conformant', 'structural-match', 'diverged', 'errored', 'timeout', 'oracle-error'];
 
 export interface LedgerEntry {
   match: { id?: string; idPattern?: string };
@@ -34,7 +32,10 @@ export interface LedgerEntry {
   reason?: string;
   ref?: string;
 }
-interface LedgerFile { comment?: string; entries: LedgerEntry[] }
+interface LedgerFile {
+  comment?: string;
+  entries: LedgerEntry[];
+}
 
 // ---------------------------------------------------------------------------
 // Small formatting helpers
@@ -113,9 +114,7 @@ export function conformantSection(report: ParityReport): string {
 /** Worst-first table for structural-match (maxDeltaPath) / diverged (firstDiff). */
 export function numericTable(title: string, rows: readonly FixtureRow[], showFirstDiff: boolean): string {
   const sorted = [...rows].sort((a, b) => (b.maxDelta ?? 0) - (a.maxDelta ?? 0));
-  const header = showFirstDiff
-    ? '| slug | type | maxΔ | firstDiff |'
-    : '| slug | type | maxΔ | maxDeltaPath |';
+  const header = showFirstDiff ? '| slug | type | maxΔ | firstDiff |' : '| slug | type | maxΔ | maxDeltaPath |';
   const body = sorted.map((r) => {
     const last = showFirstDiff ? cell(r.firstDiff) : cell(r.maxDeltaPath);
     return `| \`${r.slug}\` | ${r.type} | ${(r.maxDelta ?? 0).toFixed(2)} | \`${last}\` |`;
@@ -176,12 +175,7 @@ export function ledgerSection(report: ParityReport, ledger?: readonly LedgerEntr
   // divergence is signed off, the empty-ledger placeholder can no longer be
   // reached by reading the real file.
   const entries = ledger ?? loadLedger();
-  const head = [
-    "## Divergence ledger (accepted, won't-fix)",
-    '',
-    'Source: `oracle/accepted-divergences.json`.',
-    '',
-  ];
+  const head = ["## Divergence ledger (accepted, won't-fix)", '', 'Source: `oracle/accepted-divergences.json`.', ''];
   if (entries.length === 0) return [...head, '_(no accepted divergences recorded yet)_', ''].join('\n');
   const rows = ledgerRows(report, entries);
   const body = rows.length > 0 ? rows : ['| _(none matched)_ | | | |'];

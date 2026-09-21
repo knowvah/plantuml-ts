@@ -153,9 +153,16 @@ describe('multi-line open form captures its stereotype (G9-E1)', () => {
 describe('a nested `{{ … }}` embedded region inside an element body (M6)', () => {
   it("does not close on the embedded region's own interior `]`", () => {
     const ast = parseRaw(
-      ['rectangle A [', '{{', 'rectangle FailCase [', 'inner text', ']', '}}', ']', 'rectangle OkCase [ outer text ]'].join(
-        '\n',
-      ),
+      [
+        'rectangle A [',
+        '{{',
+        'rectangle FailCase [',
+        'inner text',
+        ']',
+        '}}',
+        ']',
+        'rectangle OkCase [ outer text ]',
+      ].join('\n'),
     );
     expect(nodeById(ast, 'A')?.display).toBe('{{\nrectangle FailCase [\ninner text\n]\n}}');
     expect(ast.nodes.map((n) => n.id)).toEqual(['A', 'OkCase']);

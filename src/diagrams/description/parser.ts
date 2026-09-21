@@ -165,7 +165,12 @@ function finishElementBlock(state: ParseState): void {
  *  {@link scanEmbeddedElementBlock}'s doc) is swallowed as raw body lines in
  *  one step, so none of ITS lines — including a nested element's own
  *  closing `]` — are ever tested against this block's END regex (T3.md M6). */
-function continueElementBlock(state: ParseState, pending: PendingElementState, lines: readonly string[], i: number): LineOutcome {
+function continueElementBlock(
+  state: ParseState,
+  pending: PendingElementState,
+  lines: readonly string[],
+  i: number,
+): LineOutcome {
   const raw = lines[i]!;
   const trimmed = raw.trim();
   if (getEmbeddedType(trimmed) !== null) {

@@ -101,7 +101,8 @@ export function buildManifest(files: Readonly<Record<string, EmojiFileEntry>>): 
     licenceReview: 'plans/s1l-tail-fix/findings/emoji-artwork-licence-review.md',
     license: 'CC-BY-4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-    attribution: 'Twemoji (c) by Twitter at https://twemoji.twitter.com/ — graphics licensed CC-BY 4.0; maintained fork: https://github.com/jdecked/twemoji',
+    attribution:
+      'Twemoji (c) by Twitter at https://twemoji.twitter.com/ — graphics licensed CC-BY 4.0; maintained fork: https://github.com/jdecked/twemoji',
     modifications:
       'None. Copied byte-for-byte from the upstream PlantUML checkout at sourceSha; never re-encoded, optimised, minified or re-exported. Verify with `npx tsx scripts/vendor-emoji.ts --verify`.',
     excluded:
@@ -131,8 +132,7 @@ export function verifyTree(): string[] {
     if (found === undefined) drift.push(`missing: ${path}`);
     else if (found.sha256 !== entry.sha256) drift.push(`modified: ${path}`);
   }
-  for (const path of Object.keys(actual))
-    if (manifest.files[path] === undefined) drift.push(`unexpected: ${path}`);
+  for (const path of Object.keys(actual)) if (manifest.files[path] === undefined) drift.push(`unexpected: ${path}`);
   return drift;
 }
 
@@ -145,9 +145,7 @@ function main(argv: readonly string[]): number {
   }
   const sourceIdx = argv.indexOf('--source');
   const source =
-    sourceIdx === -1
-      ? join(process.env.HOME ?? '', 'git', 'plantuml', UPSTREAM_PATH)
-      : argv[sourceIdx + 1]!;
+    sourceIdx === -1 ? join(process.env.HOME ?? '', 'git', 'plantuml', UPSTREAM_PATH) : argv[sourceIdx + 1]!;
   copyTree(source);
   const manifest = buildManifest(hashTree(EMOJI_DIR));
   writeFileSync(EMOJI_MANIFEST, JSON.stringify(manifest, null, 2) + '\n');

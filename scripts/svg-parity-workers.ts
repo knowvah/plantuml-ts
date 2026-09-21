@@ -38,9 +38,7 @@ export interface RenderedFixture {
 /** What the pool observed for one fixture. Mirrors the three outcomes the
  *  per-fixture spawn model produced, so callers map them unchanged. */
 export type WorkerOutcome =
-  | { kind: 'ok'; rendered: RenderedFixture }
-  | { kind: 'timeout' }
-  | { kind: 'errored'; message: string };
+  { kind: 'ok'; rendered: RenderedFixture } | { kind: 'timeout' } | { kind: 'errored'; message: string };
 
 export interface PoolOptions {
   /** Fixture directories, in output order. */

@@ -160,7 +160,7 @@ describe('SlotSet', () => {
     expect(filtered[1]?.end).toBe(35);
   });
 
-  it('addAll merges another set\'s slots in without collision handling', () => {
+  it("addAll merges another set's slots in without collision handling", () => {
     const a = new SlotSet();
     a.addSlot(0, 10);
     const b = new SlotSet();
@@ -169,7 +169,7 @@ describe('SlotSet', () => {
     expect(a.slots()).toHaveLength(2);
   });
 
-  it('is iterable, matching Java\'s Iterable<Slot>', () => {
+  it("is iterable, matching Java's Iterable<Slot>", () => {
     const set = new SlotSet();
     set.addSlot(0, 10);
     set.addSlot(30, 40);

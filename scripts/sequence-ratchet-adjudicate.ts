@@ -119,13 +119,7 @@ export const SEQUENCE_CACHE_REL = join('test-results', 'dot-cache', 'sequence');
 // Contract (consumed by T18 and by every batch close)
 // ---------------------------------------------------------------------------
 
-export type Verdict =
-  | 'artefact'
-  | 'substructure'
-  | 'regression'
-  | 'inconclusive'
-  | 'unchanged'
-  | 'improved';
+export type Verdict = 'artefact' | 'substructure' | 'regression' | 'inconclusive' | 'unchanged' | 'improved';
 
 /** One fixture at one ref. `score` and `childDistance` are `null` when the
  *  fixture errored or when the record was absent — NEVER coerced to 0. */
@@ -249,16 +243,11 @@ function isSubstructureRise(base: Classifiable, live: Classifiable): boolean {
  *  `null` at that ref rather than a fabricated score. */
 const ABSENT: FixtureMeasurement = { slug: '', score: null, childDistance: null, ownUnits: null };
 
-function measurementFor(
-  index: ReadonlyMap<string, FixtureMeasurement>,
-  slug: string,
-): FixtureMeasurement {
+function measurementFor(index: ReadonlyMap<string, FixtureMeasurement>, slug: string): FixtureMeasurement {
   return index.get(slug) ?? { ...ABSENT, slug };
 }
 
-function indexBySlug(
-  measurements: readonly FixtureMeasurement[],
-): Map<string, FixtureMeasurement> {
+function indexBySlug(measurements: readonly FixtureMeasurement[]): Map<string, FixtureMeasurement> {
   const index = new Map<string, FixtureMeasurement>();
   for (const m of measurements) index.set(m.slug, m);
   return index;
@@ -269,15 +258,10 @@ function indexBySlug(
  * slugs is walked, sorted, so a fixture that exists at only one ref is
  * reported (as `inconclusive`) rather than dropped.
  */
-export function adjudicate(
-  base: readonly FixtureMeasurement[],
-  live: readonly FixtureMeasurement[],
-): Adjudication[] {
+export function adjudicate(base: readonly FixtureMeasurement[], live: readonly FixtureMeasurement[]): Adjudication[] {
   const baseIndex = indexBySlug(base);
   const liveIndex = indexBySlug(live);
-  const slugs = [...new Set([...baseIndex.keys(), ...liveIndex.keys()])].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const slugs = [...new Set([...baseIndex.keys(), ...liveIndex.keys()])].sort((a, b) => a.localeCompare(b));
   return slugs.map((slug) => {
     const b = measurementFor(baseIndex, slug);
     const l = measurementFor(liveIndex, slug);
@@ -333,11 +317,14 @@ export function formatTable(rows: readonly Adjudication[]): string {
   const interesting = rows.filter((r) => r.verdict !== 'unchanged');
   if (interesting.length === 0) return 'no fixture changed score.';
   const grid = [[...COLUMNS], ...interesting.map((r) => [...cells(r)])];
-  const widths = COLUMNS.map((_, i) =>
-    grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0),
-  );
+  const widths = COLUMNS.map((_, i) => grid.reduce((max, r) => Math.max(max, (r[i] ?? '').length), 0));
   return grid
-    .map((r) => r.map((c, i) => c.padEnd(widths[i] ?? 0)).join('  ').trimEnd())
+    .map((r) =>
+      r
+        .map((c, i) => c.padEnd(widths[i] ?? 0))
+        .join('  ')
+        .trimEnd(),
+    )
     .join('\n');
 }
 
@@ -361,10 +348,9 @@ export function requireIncludeStore(build: () => IncludeStore | undefined): Incl
     store = build();
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `cannot build the fixture include store, so no measurement here is trustworthy: ${reason}`,
-      { cause: err },
-    );
+    throw new Error(`cannot build the fixture include store, so no measurement here is trustworthy: ${reason}`, {
+      cause: err,
+    });
   }
   if (store === undefined) {
     throw new Error(
@@ -407,9 +393,7 @@ function units(node: NormalizedNode): number {
  */
 export function ownUnitsOf(svg: string): number | null {
   const root = normalizeSvg(svg);
-  const group = (root.children ?? []).find(
-    (c) => c.type === 'element' && c.tag === 'g',
-  );
+  const group = (root.children ?? []).find((c) => c.type === 'element' && c.tag === 'g');
   if (group === undefined) return null;
   return (group.children ?? []).reduce((sum, child) => sum + units(child), 0);
 }
@@ -419,11 +403,7 @@ export function ownUnitsOf(svg: string): number | null {
  * is captured as `score: null` with the reason, so an error can never be
  * silently coerced into a number.
  */
-export function measureFixture(
-  dir: string,
-  slug: string,
-  store: IncludeStore,
-): FixtureMeasurement {
+export function measureFixture(dir: string, slug: string, store: IncludeStore): FixtureMeasurement {
   try {
     const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
     const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
@@ -454,11 +434,7 @@ export function listFixtureSlugs(cacheRoot: string): string[] {
   return readdirSync(cacheRoot)
     .filter((slug) => {
       const dir = join(cacheRoot, slug);
-      return (
-        statSync(dir).isDirectory() &&
-        existsSync(join(dir, 'in.puml')) &&
-        existsSync(join(dir, 'in.svg'))
-      );
+      return statSync(dir).isDirectory() && existsSync(join(dir, 'in.puml')) && existsSync(join(dir, 'in.svg'));
     })
     .sort((a, b) => a.localeCompare(b));
 }
@@ -471,9 +447,7 @@ export function listFixtureSlugs(cacheRoot: string): string[] {
 function measureTree(repo: string): FixtureMeasurement[] {
   const store = requireIncludeStore(fixtureIncludeStore);
   const cacheRoot = join(repo, SEQUENCE_CACHE_REL);
-  return listFixtureSlugs(cacheRoot).map((slug) =>
-    measureFixture(join(cacheRoot, slug), slug, store),
-  );
+  return listFixtureSlugs(cacheRoot).map((slug) => measureFixture(join(cacheRoot, slug), slug, store));
 }
 
 // ---------------------------------------------------------------------------
@@ -565,9 +539,7 @@ export const JSON_END = '--- END ADJUDICATION JSON ---';
 function report(baseRef: string, rows: readonly Adjudication[]): void {
   const counts = summarize(rows);
   console.log(JSON_BEGIN);
-  console.log(
-    JSON.stringify({ baseRef, liveRef: 'working-tree', counts, fixtures: rows }, null, 2),
-  );
+  console.log(JSON.stringify({ baseRef, liveRef: 'working-tree', counts, fixtures: rows }, null, 2));
   console.log(JSON_END);
   console.log('');
   console.log(`base=${baseRef}  live=working-tree  fixtures=${String(rows.length)}`);

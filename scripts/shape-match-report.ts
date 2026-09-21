@@ -69,7 +69,11 @@ const MAX_OFFSET_CANDIDATES = 5;
 // Fixture discovery (mirrors scripts/svg-conformance-census.ts#listFixtureDirs)
 // ---------------------------------------------------------------------------
 
-interface FixtureDir { readonly slug: string; readonly type: string; readonly dir: string }
+interface FixtureDir {
+  readonly slug: string;
+  readonly type: string;
+  readonly dir: string;
+}
 
 function listFixtureDirs(type: string): FixtureDir[] {
   const typeDir = join(CACHE_DIR, type);
@@ -114,7 +118,10 @@ function numbersFrom(s: string): number[] {
  * spec ("use the min corner of the coordinate list"). */
 function bboxFromCoords(nums: readonly number[]): { x: number; y: number; width: number; height: number } | undefined {
   if (nums.length < 2) return undefined;
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
   for (let i = 0; i + 1 < nums.length; i += 2) {
     const x = nums[i] ?? 0;
     const y = nums[i + 1] ?? 0;
@@ -130,7 +137,13 @@ function bboxFromCoords(nums: readonly number[]): { x: number; y: number; width:
 // Per-shape geometry extraction
 // ---------------------------------------------------------------------------
 
-interface Shape { readonly tag: string; readonly x: number; readonly y: number; readonly width: number; readonly height: number }
+interface Shape {
+  readonly tag: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
 
 function attrNum(el: Element, name: string): number {
   const raw = el.getAttribute(name);
@@ -140,7 +153,13 @@ function attrNum(el: Element, name: string): number {
 }
 
 function rectShape(el: Element): Shape {
-  return { tag: 'rect', x: attrNum(el, 'x'), y: attrNum(el, 'y'), width: attrNum(el, 'width'), height: attrNum(el, 'height') };
+  return {
+    tag: 'rect',
+    x: attrNum(el, 'x'),
+    y: attrNum(el, 'y'),
+    width: attrNum(el, 'width'),
+    height: attrNum(el, 'height'),
+  };
 }
 
 function ellipseShape(el: Element): Shape {
@@ -183,13 +202,20 @@ function polygonShape(el: Element): Shape | undefined {
 
 function shapeFromElement(el: Element): Shape | undefined {
   switch (el.tagName) {
-    case 'rect': return rectShape(el);
-    case 'ellipse': return ellipseShape(el);
-    case 'line': return lineShape(el);
-    case 'text': return textShape(el);
-    case 'path': return pathShape(el);
-    case 'polygon': return polygonShape(el);
-    default: return undefined;
+    case 'rect':
+      return rectShape(el);
+    case 'ellipse':
+      return ellipseShape(el);
+    case 'line':
+      return lineShape(el);
+    case 'text':
+      return textShape(el);
+    case 'path':
+      return pathShape(el);
+    case 'polygon':
+      return polygonShape(el);
+    default:
+      return undefined;
   }
 }
 
@@ -211,7 +237,11 @@ function walkForShapes(node: XmlNode, out: Shape[]): void {
   }
 }
 
-interface DocumentGeometry { readonly shapes: readonly Shape[]; readonly width: number; readonly height: number }
+interface DocumentGeometry {
+  readonly shapes: readonly Shape[];
+  readonly width: number;
+  readonly height: number;
+}
 
 function extractDocument(svgText: string): DocumentGeometry {
   const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
@@ -219,7 +249,10 @@ function extractDocument(svgText: string): DocumentGeometry {
   const children = doc.childNodes;
   for (let i = 0; i < children.length; i++) {
     const child = children.item(i);
-    if (child !== null && child.nodeType === ELEMENT_NODE) { root = child as unknown as Element; break; }
+    if (child !== null && child.nodeType === ELEMENT_NODE) {
+      root = child as unknown as Element;
+      break;
+    }
   }
   if (root === undefined) throw new Error('extractDocument: no root <svg> element');
   const shapes: Shape[] = [];
@@ -296,7 +329,6 @@ function bestAlignmentScore(ours: readonly Shape[], jars: readonly Shape[]): num
 // Render dispatch
 // ---------------------------------------------------------------------------
 
-
 function renderOurs(type: string, markup: string): string {
   const options: PreprocessOptions = { includeStore: fixtureIncludeStore() };
   const measurer = new DeterministicMeasurer();
@@ -329,7 +361,16 @@ function compareFixture(f: FixtureDir): FixtureResult {
     const jar = extractDocument(jarSvg);
     const matched = bestAlignmentScore(ours.shapes, jar.shapes);
     const total = Math.max(ours.shapes.length, jar.shapes.length);
-    return { type: f.type, slug: f.slug, matched, total, ourW: ours.width, ourH: ours.height, jarW: jar.width, jarH: jar.height };
+    return {
+      type: f.type,
+      slug: f.slug,
+      matched,
+      total,
+      ourW: ours.width,
+      ourH: ours.height,
+      jarW: jar.width,
+      jarH: jar.height,
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { type: f.type, slug: f.slug, error: message };

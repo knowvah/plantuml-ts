@@ -166,8 +166,6 @@ describe('parseYaml', () => {
   it('renderSync surfaces the warning through options.onWarning', () => {
     const messages: string[] = [];
     renderSync('@startyaml\nkey: >\n@endyaml', { onWarning: (m) => messages.push(m) });
-    expect(messages).toEqual([
-      'YAML key "key": folded-style (>) block value is not supported and was dropped',
-    ]);
+    expect(messages).toEqual(['YAML key "key": folded-style (>) block value is not supported and was dropped']);
   });
 });

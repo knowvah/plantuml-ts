@@ -13,7 +13,12 @@
  * See LICENSES.md.
  */
 export * from '@knowvah/plantuml-stdlib-all';
-export { archimateSprites, spriteAssetKey, SPRITE_ASSET_PREFIX, SPRITE_EXTENSIONS } from '@knowvah/plantuml-sprites-archimate';
+export {
+  archimateSprites,
+  spriteAssetKey,
+  SPRITE_ASSET_PREFIX,
+  SPRITE_EXTENSIONS,
+} from '@knowvah/plantuml-sprites-archimate';
 export { emojiAssets, emojiAssetKey, emojiAssetPath, EMOJI_ASSET_PREFIX } from '@knowvah/plantuml-emoji';
 
 /** Every asset package this meta-package pulls, with its licence — so a

@@ -91,23 +91,36 @@ function measureFixture(slug: string, allowed: number, inBacklog: boolean, excus
   const captured = captureGraphs(markup);
   if (captured.length !== files.length) {
     return {
-      slug, delta: Number.POSITIVE_INFINITY, allowed, status: 'widened',
-      conformant: false, cause: detectCause(markup),
+      slug,
+      delta: Number.POSITIVE_INFINITY,
+      allowed,
+      status: 'widened',
+      conformant: false,
+      cause: detectCause(markup),
       detail: `captured ${captured.length} layout graph(s), expected ${files.length}`,
     };
   }
   const outcome = comparePasses(dir, files, captured, excused);
   if ('failure' in outcome) {
     return {
-      slug, delta: Number.POSITIVE_INFINITY, allowed, status: 'widened',
-      conformant: false, cause: detectCause(markup), detail: outcome.failure,
+      slug,
+      delta: Number.POSITIVE_INFINITY,
+      allowed,
+      status: 'widened',
+      conformant: false,
+      cause: detectCause(markup),
+      detail: outcome.failure,
     };
   }
   const delta = outcome.maxDelta;
   const conformant = delta <= SIZE_CONFORMANCE_TOLERANCE_IN + DELTA_EPSILON;
   const status = classifyDelta(delta, allowed, inBacklog);
   return {
-    slug, delta, allowed, status, conformant,
+    slug,
+    delta,
+    allowed,
+    status,
+    conformant,
     ...(conformant ? {} : { cause: detectCause(markup) }),
     ...(status !== 'unchanged' ? { detail: `maxSizeDeltaIn=${delta}` } : {}),
   };
@@ -129,9 +142,12 @@ function loadBacklog(): Record<string, number> {
 function ratchetSlugs(): string[] {
   if (!existsSync(GOLDENS)) return [];
   return readdirSync(GOLDENS, { withFileTypes: true })
-    .filter((d) => d.isDirectory()
-      && existsSync(join(GOLDENS, d.name, 'input.puml'))
-      && !existsSync(join(GOLDENS, d.name, 'input.svg')))
+    .filter(
+      (d) =>
+        d.isDirectory() &&
+        existsSync(join(GOLDENS, d.name, 'input.puml')) &&
+        !existsSync(join(GOLDENS, d.name, 'input.svg')),
+    )
     .map((d) => d.name)
     .sort();
 }

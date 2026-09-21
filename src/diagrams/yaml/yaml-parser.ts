@@ -145,9 +145,7 @@ export function parseYamlLines(lines: string[], warnings?: string[]): Monomorph 
           break;
         }
         case YamlLineType.KEY_AND_FOLDED_STYLE:
-          warnings?.push(
-            `YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`,
-          );
+          warnings?.push(`YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`);
           builder.onListItemKeyAndValue(yamlLine.key!, '');
           break;
         /* c8 ignore next 4 */
@@ -181,9 +179,7 @@ export function parseYamlLines(lines: string[], warnings?: string[]): Monomorph 
           builder.onKeyAndFlowSequence(yamlLine.key!, [...yamlLine.values!]);
           break;
         case YamlLineType.KEY_AND_FOLDED_STYLE:
-          warnings?.push(
-            `YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`,
-          );
+          warnings?.push(`YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`);
           builder.onKeyAndValue(yamlLine.key!, '');
           break;
         /* c8 ignore next 4 */

@@ -67,7 +67,12 @@ describe('M1 — CommandActivityList (* / - bullet activities)', () => {
 // ---------------------------------------------------------------------------
 describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
   it('gucipa-88-xoti966 shape: repeat body captures action + backward nodes', () => {
-    const ast = parse(['repeat', '  :Generate diagrams1; <<color>>', 'backward:Log context2; <<color>>', 'repeat while (more data?) is (yes)']);
+    const ast = parse([
+      'repeat',
+      '  :Generate diagrams1; <<color>>',
+      'backward:Log context2; <<color>>',
+      'repeat while (more data?) is (yes)',
+    ]);
     const node = firstNode(ast);
     expect(node.kind).toBe('repeat');
     // No inline `repeat :label;` here, so entry is undefined; the body
@@ -124,14 +129,32 @@ describe('M2 — CommandSwitch/CommandCase/CommandEndSwitch (doveka-76-fiza931)'
   });
 
   it('multiple cases in source order, "end" inside a case body is an End node (lipiki-79-fapu237)', () => {
-    const ast = parse(['switch (test?)', 'case (cond A)', '  :Text A;', 'case (cond B)', '  :text B;', 'case (cond C)', '  end', 'endswitch']);
+    const ast = parse([
+      'switch (test?)',
+      'case (cond A)',
+      '  :Text A;',
+      'case (cond B)',
+      '  :text B;',
+      'case (cond C)',
+      '  end',
+      'endswitch',
+    ]);
     const node = firstNode(ast) as ActivitySwitch;
     expect(node.cases.map((c) => c.label)).toEqual(['cond A', 'cond B', 'cond C']);
     expect(node.cases[2]?.body[0]?.kind).toBe('end');
   });
 
   it('spaced parens "case ( 503 )" trim to the bare value (xaxene-93-doka767)', () => {
-    const ast = parse(['switch (Q2)', 'case ( 503 )', '  :A;', '  stop', 'case ( 500 )', '  :B;', '  stop', 'endswitch']);
+    const ast = parse([
+      'switch (Q2)',
+      'case ( 503 )',
+      '  :A;',
+      '  stop',
+      'case ( 500 )',
+      '  :B;',
+      '  stop',
+      'endswitch',
+    ]);
     const node = firstNode(ast) as ActivitySwitch;
     expect(node.cases.map((c) => c.label)).toEqual(['503', '500']);
   });
@@ -154,7 +177,17 @@ describe('M4a — CommandIf2 trailing stereogroup (cubixe-14-gaze754)', () => {
     // `endif` — if `endif <<#blue>>` were NOT recognised as a closer, the
     // second diagram's `start`/`stop` would be swallowed into the first
     // if's clause scan (see if-dispatch.ts `classifyClauseLine`'s doc).
-    const ast = parse(['start', 'if(foo) <<#green>>', ':...;', 'else', ':..;', 'endif <<#blue>>', 'stop', 'start', 'stop']);
+    const ast = parse([
+      'start',
+      'if(foo) <<#green>>',
+      ':...;',
+      'else',
+      ':..;',
+      'endif <<#blue>>',
+      'stop',
+      'start',
+      'stop',
+    ]);
     expect(ast.nodes.map((n) => n.kind)).toEqual(['start', 'if', 'stop', 'start', 'stop']);
   });
 
@@ -185,7 +218,13 @@ describe('M4b — CommandIf4 (xucero-03-kixi746)', () => {
 // ---------------------------------------------------------------------------
 describe('M4c — CommandIfLegacy1/CommandElseLegacy1 (barada-07-veca157)', () => {
   it('"if (B is C) then when yes" captures thenLabel "yes"', () => {
-    const ast = parse(['if (B is C) then when yes', '- Report that A is C', 'else when no', '- Report that A is not C', 'endif']);
+    const ast = parse([
+      'if (B is C) then when yes',
+      '- Report that A is C',
+      'else when no',
+      '- Report that A is not C',
+      'endif',
+    ]);
     const node = firstNode(ast) as ActivityIf;
     expect(node.condition).toBe('B is C');
     expect(node.thenLabel).toBe('yes');
@@ -193,7 +232,13 @@ describe('M4c — CommandIfLegacy1/CommandElseLegacy1 (barada-07-veca157)', () =
   });
 
   it('the legacy else branch body is captured (bullet list inside)', () => {
-    const ast = parse(['if (B is C) then when yes', '- Report that A is C', 'else when no', '- Report that A is not C', 'endif']);
+    const ast = parse([
+      'if (B is C) then when yes',
+      '- Report that A is C',
+      'else when no',
+      '- Report that A is not C',
+      'endif',
+    ]);
     const node = firstNode(ast) as ActivityIf;
     expect((node.thenBranch[0] as ActivityAction).label).toBe('Report that A is C');
     expect((node.elseBranch[0] as ActivityAction).label).toBe('Report that A is not C');
@@ -264,7 +309,13 @@ describe('M6 — CommandPartition3 (tuvigo-52-redo102 shape)', () => {
   });
 
   it('bracket-less legacy "Group NAME" / "End group" (vezozu-78-pici074)', () => {
-    const ast = parse(['Group External Communication Thread', 'repeat', '  :Handle Rx;', 'repeat while (loop)', 'End group']);
+    const ast = parse([
+      'Group External Communication Thread',
+      'repeat',
+      '  :Handle Rx;',
+      'repeat while (loop)',
+      'End group',
+    ]);
     const node = firstNode(ast) as ActivityGroup;
     expect(node.groupType).toBe('group');
     expect(node.title).toBe('External Communication Thread');

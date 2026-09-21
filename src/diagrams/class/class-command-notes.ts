@@ -28,13 +28,7 @@ const NOTHING_TO_NOTE_TO = 'Nothing to note to';
  * silent no-op that leaves an empty diagram.
  */
 function refuseNothingToNoteTo(state: ParseState): void {
-  state.executionRefusal = refuse(
-    'execution',
-    state.currentLine ?? 0,
-    state.currentLine ?? 0,
-    NOTHING_TO_NOTE_TO,
-    0,
-  );
+  state.executionRefusal = refuse('execution', state.currentLine ?? 0, state.currentLine ?? 0, NOTHING_TO_NOTE_TO, 0);
 }
 
 /** A run of `$tag` tokens — upstream `Stereotag.pattern()` (the TAGS/TAGS1/
@@ -198,7 +192,12 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //      (executeInternal), :210 (addTags)
   {
     pattern: new RegExp(
-      '^note\\s+"([^"]+)"\\s+as\\s+' + FREESTANDING_NOTE_CODE + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
+      '^note\\s+"([^"]+)"\\s+as\\s+' +
+        FREESTANDING_NOTE_CODE +
+        NOTE_TAGS_CAPTURE +
+        NOTE_STEREO_CAPTURE +
+        NOTE_COLOR +
+        '\\s*$',
       'i',
     ),
     execute(state, match) {

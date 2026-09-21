@@ -247,7 +247,10 @@ const BATCH_SIZE = 120;
  *  `-o` is passed RELATIVE (`cap`) so the jar writes beside each input
  *  rather than into one shared directory -- with a shared `-o`, 446 files
  *  all named `in.svg` would overwrite each other. */
-function captureBatch(fixtures: readonly { relPath: string; fixtureDir: string }[], scratchRoot: string): Map<string, Capture> {
+function captureBatch(
+  fixtures: readonly { relPath: string; fixtureDir: string }[],
+  scratchRoot: string,
+): Map<string, Capture> {
   for (const f of fixtures) {
     mkdirSync(join(scratchRoot, f.relPath), { recursive: true });
     copyFileSync(join(f.fixtureDir, 'in.puml'), join(scratchRoot, f.relPath, 'in.puml'));

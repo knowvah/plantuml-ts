@@ -123,8 +123,7 @@ export function verifyTree(): string[] {
     if (found === undefined) drift.push(`missing: ${path}`);
     else if (found.sha256 !== entry.sha256) drift.push(`modified: ${path}`);
   }
-  for (const path of Object.keys(actual))
-    if (manifest.files[path] === undefined) drift.push(`unexpected: ${path}`);
+  for (const path of Object.keys(actual)) if (manifest.files[path] === undefined) drift.push(`unexpected: ${path}`);
   return drift;
 }
 
@@ -137,9 +136,7 @@ function main(argv: readonly string[]): number {
   }
   const sourceIdx = argv.indexOf('--source');
   const source =
-    sourceIdx === -1
-      ? join(process.env.HOME ?? '', 'git', 'plantuml', UPSTREAM_PATH)
-      : argv[sourceIdx + 1]!;
+    sourceIdx === -1 ? join(process.env.HOME ?? '', 'git', 'plantuml', UPSTREAM_PATH) : argv[sourceIdx + 1]!;
   copyTree(source);
   const manifest = buildManifest(hashTree(SPRITES_DIR));
   writeFileSync(SPRITES_MANIFEST, JSON.stringify(manifest, null, 2) + '\n');

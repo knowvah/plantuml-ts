@@ -16,7 +16,7 @@ describe('roundedCornerAttrs', () => {
     ]);
   });
 
-  it('returns only rx when ry is absent (per-axis, not upstream\'s joint guard)', () => {
+  it("returns only rx when ry is absent (per-axis, not upstream's joint guard)", () => {
     expect(roundedCornerAttrs(5, undefined)).toEqual([['rx', 5]]);
   });
 

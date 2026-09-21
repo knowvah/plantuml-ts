@@ -32,11 +32,7 @@ import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import { WidthTableMeasurer } from '../src/core/measurer.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
-import {
-  parseSvekDot,
-  dotInputToStructural,
-  compareStructural,
-} from '../tests/oracle/svek-dot.js';
+import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { svekFiles } from './lib/svek-files.js';

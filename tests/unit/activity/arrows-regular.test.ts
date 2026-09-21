@@ -125,7 +125,7 @@ describe('arrowDirection', () => {
   // arrowTip already refuses to draw on a zero-length segment before
   // calling arrowDirection, so this value is never read for a real
   // polygon (renderer.ts#arrowTip's `dx === 0 && dy === 0` guard).
-  it('a zero vector returns down rather than upstream\'s null', () => {
+  it("a zero vector returns down rather than upstream's null", () => {
     expect(arrowDirection(0, 0)).toBe('down');
   });
 });

@@ -85,8 +85,7 @@ function bundleDirNames(assetsStdlibDir: string): string[] {
     .map((d) => d.name);
 }
 
-const REMEDIATION =
-  'Run `npx tsx scripts/vendor-stdlib.ts` first, then re-run this command.';
+const REMEDIATION = 'Run `npx tsx scripts/vendor-stdlib.ts` first, then re-run this command.';
 
 /** Builds a {@link StdlibStore} that resolves `<bundle/thing>` against
  * every bundle vendored under `assetsStdlibDir` (default `assets/stdlib/`).

@@ -130,7 +130,13 @@ function backEdgePoints(backFrom: GPoint, headerEast: GPoint, bodyBottomY: numbe
  * {@link pushWhileBack} to keep that function's own NLOC under the file's
  * limit.
  */
-function buildWhileBackLoop(header: GtileDiamondInside, hX: number, hY: number, backFrom: GPoint, dimTotalWidth: number): LoopTranslate {
+function buildWhileBackLoop(
+  header: GtileDiamondInside,
+  hX: number,
+  hY: number,
+  backFrom: GPoint,
+  dimTotalWidth: number,
+): LoopTranslate {
   return {
     kind: 'while-back',
     p1: backFrom,

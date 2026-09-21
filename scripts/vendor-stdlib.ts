@@ -27,11 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 import { captureBundle, listBundleDirs } from './vendor-stdlib/capture.js';
 import { readJson, writeJson } from './vendor-stdlib/manifest-io.js';
-import type {
-  BundleIndexEntry,
-  BundleManifest,
-  RootManifest,
-} from './vendor-stdlib/types.js';
+import type { BundleIndexEntry, BundleManifest, RootManifest } from './vendor-stdlib/types.js';
 import { verifyBundle } from './vendor-stdlib/verify.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -44,16 +40,10 @@ const ROOT_MANIFEST_PATH = join(REPO_ROOT, 'assets', 'stdlib.manifest.json');
 const GENERATED_BY = 'scripts/vendor-stdlib.ts';
 
 function readSourceGitInfo(): { sourceSha: string; sourceRepo: string } {
-  const sourceSha = execFileSync(
-    'git',
-    ['-C', SOURCE_REPO_DIR, 'rev-parse', 'HEAD'],
-    { encoding: 'utf8' },
-  ).trim();
-  const remoteUrl = execFileSync(
-    'git',
-    ['-C', SOURCE_REPO_DIR, 'remote', 'get-url', 'origin'],
-    { encoding: 'utf8' },
-  ).trim();
+  const sourceSha = execFileSync('git', ['-C', SOURCE_REPO_DIR, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const remoteUrl = execFileSync('git', ['-C', SOURCE_REPO_DIR, 'remote', 'get-url', 'origin'], {
+    encoding: 'utf8',
+  }).trim();
   const sourceRepo = remoteUrl.replace(/\.git$/, '');
   return { sourceSha, sourceRepo };
 }

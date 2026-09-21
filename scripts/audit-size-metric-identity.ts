@@ -86,8 +86,7 @@ export interface ByIdOutcome {
 
 type NodeMap = Map<string, StructuralNode>;
 
-const nodeMap = (g: StructuralGraph): NodeMap =>
-  new Map(g.nodes.map((n) => [n.id, n] as const));
+const nodeMap = (g: StructuralGraph): NodeMap => new Map(g.nodes.map((n) => [n.id, n] as const));
 
 /** Ids present on exactly one side. Pure. */
 function unmatchedIds(om: NodeMap, cm: NodeMap): string[] {
@@ -96,10 +95,7 @@ function unmatchedIds(om: NodeMap, cm: NodeMap): string[] {
 }
 
 /** The single largest width- or height-delta over ids present on both sides. */
-function worstByIdPair(
-  om: NodeMap,
-  cm: NodeMap,
-): Pick<ByIdOutcome, 'maxDelta' | 'worstId' | 'worstDim'> {
+function worstByIdPair(om: NodeMap, cm: NodeMap): Pick<ByIdOutcome, 'maxDelta' | 'worstId' | 'worstDim'> {
   let best: Pick<ByIdOutcome, 'maxDelta' | 'worstId' | 'worstDim'> = { maxDelta: 0 };
   for (const [id, on] of om) {
     const cn = cm.get(id);
@@ -227,28 +223,17 @@ function costMatrix(oracle: StructuralGraph, candidate: StructuralGraph): number
 
 /** True when the sub-tolerance pairing is unique — i.e. value-matching pinned
  *  node identity and no swapped-size permutation can hide inside it. */
-export function pairingIsUnambiguous(
-  oracle: StructuralGraph,
-  candidate: StructuralGraph,
-): boolean {
+export function pairingIsUnambiguous(oracle: StructuralGraph, candidate: StructuralGraph): boolean {
   const costs = costMatrix(oracle, candidate);
   if (costs.length === 0 || (costs[0]?.length ?? 0) === 0) return true;
   return matchingIsUnique(costs, SIZE_CONFORMANCE_TOLERANCE_IN + EPSILON);
 }
 
-export type AuditVerdict =
-  | 'agree'
-  | 'false-conformant'
-  | 'understated'
-  | 'structurally-unequal';
+export type AuditVerdict = 'agree' | 'false-conformant' | 'understated' | 'structurally-unequal';
 
 /** Classifies one fixture. `false-conformant` is the finding that matters:
  *  the shipping gate passes it, pair-matching proves a real error. Pure. */
-export function classifyAudit(
-  sortedMax: number,
-  pairMax: number,
-  structurallyEqual: boolean,
-): AuditVerdict {
+export function classifyAudit(sortedMax: number, pairMax: number, structurallyEqual: boolean): AuditVerdict {
   if (!structurallyEqual) return 'structurally-unequal';
   const sortedPasses = sortedMax <= SIZE_CONFORMANCE_TOLERANCE_IN + EPSILON;
   const pairPasses = pairMax <= SIZE_CONFORMANCE_TOLERANCE_IN + EPSILON;
@@ -308,11 +293,7 @@ interface PassAggregate {
 
 /** Folds every render pass of one fixture into a single worst-case reading
  *  under both metrics. */
-function aggregatePasses(
-  dir: string,
-  files: readonly string[],
-  captured: readonly DotInputGraph[],
-): PassAggregate {
+function aggregatePasses(dir: string, files: readonly string[], captured: readonly DotInputGraph[]): PassAggregate {
   let sortedMax = 0;
   let pairMax = 0;
   let idsAligned = true;
@@ -355,11 +336,7 @@ function auditFixture(slug: string): AuditResult {
 
   if (captured.length !== files.length) return unequalPassCount(slug, captured.length, files.length);
 
-  const { sortedMax, pairMax, idsAligned, structurallyEqual, unambiguous } = aggregatePasses(
-    dir,
-    files,
-    captured,
-  );
+  const { sortedMax, pairMax, idsAligned, structurallyEqual, unambiguous } = aggregatePasses(dir, files, captured);
 
   return {
     slug,

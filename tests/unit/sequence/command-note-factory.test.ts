@@ -315,15 +315,7 @@ describe('noteOnArrowCommand anchors to Reference and GroupingLeaf, not just mes
   // (before any message in that branch) still anchors, to the full
   // currently-declared participant span.
   it('anchors to an `else` branch marker (no message in that branch yet)', () => {
-    const ast = parse([
-      'participant A',
-      'participant B',
-      'alt cond',
-      'A -> B : hi',
-      'else',
-      'note left : x',
-      'end',
-    ]);
+    const ast = parse(['participant A', 'participant B', 'alt cond', 'A -> B : hi', 'else', 'note left : x', 'end']);
     const frame = ast.events[0] as { branches: SequenceDiagramAST['events'][] };
     const ev = frame.branches[1]!.find((e): e is NoteEvent => e.kind === 'note');
     if (ev === undefined) throw new Error('expected a note event in the else branch');

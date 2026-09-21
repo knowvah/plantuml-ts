@@ -73,9 +73,7 @@ function namesOf(node: ts.Statement): string[] {
     return [node.name.text];
   }
   if (ts.isVariableStatement(node)) {
-    return node.declarationList.declarations
-      .map((d) => (ts.isIdentifier(d.name) ? d.name.text : ''))
-      .filter(Boolean);
+    return node.declarationList.declarations.map((d) => (ts.isIdentifier(d.name) ? d.name.text : '')).filter(Boolean);
   }
   return [];
 }
@@ -95,7 +93,12 @@ function leadingSummary(text: string, node: ts.Node, file: ts.SourceFile): strin
     .replace(/^\/\*+/, '')
     .replace(/\*+\/$/, '')
     .split('\n')
-    .map((l) => l.replace(/^\s*\*ic?\s?/, '').replace(/^\s*\*\s?/, '').trim())
+    .map((l) =>
+      l
+        .replace(/^\s*\*ic?\s?/, '')
+        .replace(/^\s*\*\s?/, '')
+        .trim(),
+    )
     .filter(Boolean)
     .join(' ');
   // First sentence, collapsed. Markdown emphasis and links survive as-is.
@@ -155,7 +158,7 @@ function header(moduleCount: number, exportCount: number): string[] {
     'This is the index `CLAUDE.md` means by "**Check before implementing',
     'anything**; agents routinely rebuild what exists". It answers *does a',
     'module for X already exist?* — one row per module, its exported surface',
-    'named. For *where is symbol Y defined*, use Serena\'s `find_symbol` or',
+    "named. For *where is symbol Y defined*, use Serena's `find_symbol` or",
     '`ast-grep`, which are better at it than any document.',
     '',
     `${moduleCount} modules · ${exportCount} exported names.`,

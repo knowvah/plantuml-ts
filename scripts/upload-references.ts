@@ -52,7 +52,18 @@ function saveManifest(manifest: Manifest): void {
 function uploadFile(localPath: string, r2Key: string): boolean {
   const result = spawnSync(
     'npx',
-    ['wrangler', 'r2', 'object', 'put', `${BUCKET}/${r2Key}`, '--file', localPath, '--content-type', 'image/png', '--remote'],
+    [
+      'wrangler',
+      'r2',
+      'object',
+      'put',
+      `${BUCKET}/${r2Key}`,
+      '--file',
+      localPath,
+      '--content-type',
+      'image/png',
+      '--remote',
+    ],
     { stdio: 'inherit' },
   );
   return result.status === 0;
@@ -103,7 +114,7 @@ function main(): void {
     for (const fname of files) {
       const localPath = join(typePath, fname);
       const relKey = relative(REF_DIR, localPath); // e.g. sequence/slug.png
-      const r2Key = relKey.replace(/\\/g, '/');     // normalise on Windows
+      const r2Key = relKey.replace(/\\/g, '/'); // normalise on Windows
       const size = statSync(localPath).size;
 
       if (manifest[r2Key] === size) {

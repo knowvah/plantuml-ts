@@ -349,7 +349,7 @@ const CALL_SITE_AUDIT: readonly CallSiteAudit[] = [
     file: 'src/diagrams/state/state-composite-cluster.ts:36',
     expectedSize: 14,
     actualSize: 'correct',
-    note: 'font = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize }, consumed by measureClusterTitle for the composite\'s OWN header/title text (matches SvekResult\'s title TABLE, class-dot-graph.ts\'s namespace-title precedent) -- this is body/entity-name text (FontParam.STATE default, 14), not an arrow label. Initially flagged for verification in an earlier pass of this audit; confirmed correct by reading the call site\'s only caller.',
+    note: "font = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize }, consumed by measureClusterTitle for the composite's OWN header/title text (matches SvekResult's title TABLE, class-dot-graph.ts's namespace-title precedent) -- this is body/entity-name text (FontParam.STATE default, 14), not an arrow label. Initially flagged for verification in an earlier pass of this audit; confirmed correct by reading the call site's only caller.",
   },
   {
     diagramType: 'component/usecase (description engine)',

@@ -22,11 +22,7 @@ let debounceTimer = 0;
 
 async function doRender(): Promise<void> {
   const source = sourceEl.value;
-  const themeVal = themeEl.value as
-    | 'default'
-    | 'dark'
-    | 'sketchy'
-    | 'monochrome';
+  const themeVal = themeEl.value as 'default' | 'dark' | 'sketchy' | 'monochrome';
   const opts: RenderOptions = { theme: themeVal };
   const t0 = performance.now();
   try {

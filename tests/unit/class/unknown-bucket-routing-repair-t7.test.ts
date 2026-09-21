@@ -158,12 +158,12 @@ describe('T4 Mechanism A -- CommandCreateElementMultilines TYPE0/TYPE1', () => {
 // ---------------------------------------------------------------------------
 
 describe("T4 Mechanism B -- crow's-foot arrow grammar gaps", () => {
-  it('accepts a dotted crow\'s-foot body (dajela-44-zovi778)', () => {
+  it("accepts a dotted crow's-foot body (dajela-44-zovi778)", () => {
     const ast = parse('Entity01 }|..|| Entity02');
     expect(ast.relationships).toHaveLength(1);
   });
 
-  it('accepts a style bracket inside a decorated crow\'s-foot arrow (mujega-45-mexi048)', () => {
+  it("accepts a style bracket inside a decorated crow's-foot arrow (mujega-45-mexi048)", () => {
     const ast = parse('Bob |o--|{ Alice : hello\nTed |o-[thickness=5]-|{ Alice : hello');
     expect(ast.relationships).toHaveLength(2);
   });
@@ -200,9 +200,7 @@ describe('T5 M2 -- descriptive-container body silently swallowed', () => {
   });
 
   it('refuses a truly-unmatched line inside a container instead of silently dropping it (xipane-40-dune740)', () => {
-    const refusal = refusalOf(
-      'rectangle "a" as he {\n' + 'rectangle "b""c""" as pn\n' + '}',
-    );
+    const refusal = refusalOf('rectangle "a" as he {\n' + 'rectangle "b""c""" as pn\n' + '}');
     expect(refusal).toBeDefined();
   });
 });
