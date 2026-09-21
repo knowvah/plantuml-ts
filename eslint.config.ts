@@ -123,4 +123,32 @@ export default tseslint.config([
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
+  {
+    // src/ is a browser-safe library: diagnostics go to the caller through
+    // RenderOptions.onWarning (or an error SVG), never the host's console.
+    files: ['src/**/*.ts'],
+    rules: { 'no-console': 'error' },
+  },
+  {
+    // The only sanctioned console writers, all pre-existing:
+    // - EmbeddedDiagram, svek/Cluster: faithful ports of upstream Logme.error.
+    // - tim/EaterLog, TMemoryGlobal/Local: the user's own !log / !dump_memory.
+    // - svg-nanoparser-transform: no warning carrier in scope yet
+    //   (.agent-notes/cr-core.md).
+    // - activity tile-layout (unreachable exhaustiveness default) and
+    //   description renderer-draw-sequence (edge-draw failure guard):
+    //   port-own; candidates for onWarning.
+    // Adding a file here needs a reason of the same kind.
+    files: [
+      'src/core/EmbeddedDiagram.ts',
+      'src/core/klimt/sprite/svg-nanoparser-transform.ts',
+      'src/core/svek/Cluster.ts',
+      'src/core/tim/EaterLog.ts',
+      'src/core/tim/TMemoryGlobal.ts',
+      'src/core/tim/TMemoryLocal.ts',
+      'src/diagrams/activity/layout/tile-layout.ts',
+      'src/diagrams/description/renderer-draw-sequence.ts',
+    ],
+    rules: { 'no-console': 'off' },
+  },
 ]);

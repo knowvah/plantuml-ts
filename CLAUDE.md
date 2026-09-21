@@ -117,9 +117,10 @@ in-place mutation where it mutates, and document the contract.
   (`include-resolver.ts`, the measurer seam). No `Date.now()`/`Math.random()`
   in rendering paths; seed every non-determinism.
 - Pipeline: `parse → layout (dot engine) → render (SVG string)`.
-- `CONTAINER_KINDS` is duplicated in `layout.ts`/`renderer.ts` — keep in sync;
-  childless containers are leaves for both. `svgRoot` (`src/core/svg.ts`)
-  embeds arrowhead `<defs>` automatically.
+- A layout constant a renderer also needs is exported from the layout
+  module and imported, never redeclared (board `CELL_H`, files
+  `NOTE_Y_OFFSET`). `svgRoot` (`src/core/svg.ts`) embeds arrowhead `<defs>`
+  automatically.
 
 ## Diagrams — PlantUML, never Mermaid
 
