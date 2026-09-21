@@ -8,11 +8,9 @@
  * Recursion-guard note: upstream (`TContext.java`/`TMemory.java`/
  * `FunctionsSet.java`) has no call-depth limit for procedures — the only
  * "Infinite loop?" guard in `tim/` (`CodeIteratorImpl`) is unrelated (a
- * no-progress check on its own line cursor). So there is nothing to pin
- * here: a self-recursive procedure exhausts the JS call stack exactly as
- * it would exhaust the Java call stack upstream, and this file
- * deliberately does not add a test that would crash the runner to prove
- * that absence.
+ * no-progress check on its own line cursor). The port bounds call nesting
+ * itself (`TFunctionImpl.ts#MAX_CALL_DEPTH`, DIVERGENCES.md); that guard is
+ * pinned in `tim/procedure-recursion-depth.test.ts`, not here.
  *
  * `%retrieve_procedure` (below) pins xadado-92-lazo250: unlike
  * `%invoke_procedure`, it is a RETURN function that can appear nested inside

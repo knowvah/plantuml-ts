@@ -19,7 +19,7 @@ import type { StringLocated } from '../StringLocated.js';
 import { TFunctionSignature } from '../TFunctionSignature.js';
 import { EaterException } from '../EaterException.js';
 import { SimpleReturnFunction } from './SimpleReturnFunction.js';
-import { deepMergeObjects, isJsonArray, isJsonObject, type JsonObj } from './json-utils.js';
+import { deepMergeObjects, isJsonArray, isJsonObject, setJsonMember, type JsonObj } from './json-utils.js';
 import { deepCloneJson } from './json-utils.js';
 import type { JsonValue } from '../expression/Token.js';
 
@@ -48,10 +48,10 @@ function setArrayIndex(json: JsonValue[], values: readonly TValue[]): TValue {
   return TValue.fromJson(json);
 }
 
-/** `case 3`'s object branch: set-or-add a single key. */
+/** `case 3`'s object branch: set-or-add a single key (any name, `__proto__` included -- see `setJsonMember`). */
 function setObjectKey(json: JsonObj, values: readonly TValue[]): TValue {
   const name = values[1]!.toString();
-  json[name] = values[2]!.toJsonValue();
+  setJsonMember(json, name, values[2]!.toJsonValue());
   return TValue.fromJson(json);
 }
 

@@ -81,9 +81,11 @@ describe('prefetchIncludes — single !include', () => {
 
   it('fetches !include_once / !include_many / !includeurl targets too', async () => {
     const fetcher = vi.fn().mockResolvedValue('x');
-    await prefetchIncludes('!include_once a\n!include_many b\n!includeurl https://c/d', fetcher);
+    // `c.example.com`: a dotless host (`https://c/d`) is refused by the
+    // default LEGACY security profile (URLCheck.java:54-57) before any fetch.
+    await prefetchIncludes('!include_once a\n!include_many b\n!includeurl https://c.example.com/d', fetcher);
     const calls = fetcher.mock.calls as [string][];
-    expect(calls.map((c) => c[0])).toEqual(['a', 'b', 'https://c/d']);
+    expect(calls.map((c) => c[0])).toEqual(['a', 'b', 'https://c.example.com/d']);
   });
 });
 
@@ -385,6 +387,14 @@ describe('fetchInclude — CORS error for GitHub raw URLs', () => {
 describe('fetchInclude — generic fetch failure (non-GitHub URL)', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('a non-Error rejection (null) is stringified, not dereferenced', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(null));
+    const url = 'https://example.com/file.puml';
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as IncludeResolveError;
+    expect(err).toBeInstanceOf(IncludeResolveError);
+    expect(err.message).toBe(`Failed to fetch !include ${url}: null`);
   });
 
   it('throws IncludeResolveError for a non-GitHub URL that fails to fetch', async () => {

@@ -39,6 +39,7 @@ import {
 import { resolveMeasurer } from './core/render-options.js';
 import type { RenderOptions } from './core/render-options.js';
 import { assembleSvg } from './core/assemble-svg.js';
+import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 
 // A5/T4: `RenderOptions` and `assembleSvg` moved out of this file (which sits
 // at the repo's 500-line hook cap) but stay exported HERE -- `package.json`'s
@@ -56,7 +57,17 @@ export { assembleSvg } from './core/assemble-svg.js';
 export { stdlibStore, withStdlib } from './core/tim/StdlibStore.js';
 export type { BundleData, StdlibStore } from './core/tim/StdlibStore.js';
 export { stdlibRegistry, StdlibChunkLoadError, type StdlibRegistry } from './core/tim/StdlibRegistry.js';
-export { prepareIncludeStore, type IncludeWarmupOptions } from './core/include-resolver.js';
+export {
+  prepareIncludeStore,
+  CspIncludeError,
+  CorsIncludeError,
+  IncludeResolveError,
+  CircularIncludeError,
+  StdlibNotBundledError,
+  type IncludeWarmupOptions,
+} from './core/include-resolver.js';
+// Upstream's SecurityProfile, as `RenderOptions.securityProfile` (README, "Security").
+export { SecurityProfile } from './core/security/SecurityProfile.js';
 // SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment. si11b's
 // `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites it names, not the 1.06 MB bundle holding all 2,078 of them.
 export { remoteStdlib, StdlibResourceFetchError, type StdlibRemoteManifest, type RemoteBundle } from './core/tim/StdlibRemote.js';
@@ -280,7 +291,7 @@ function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown)
  * before pagination existed: `plugin.render(geo, theme)` and the diagram's
  * own AST.
  */
-function assemblePages(ctx: PageContext, geo: unknown, ast: unknown): string[] {
+function assemblePagesUnscoped(ctx: PageContext, geo: unknown, ast: unknown): string[] {
   const { plugin } = ctx;
   const count = plugin.getNbPages?.(geo) ?? 1;
   if (count <= 1 || plugin.renderPage === undefined)
@@ -292,6 +303,14 @@ function assemblePages(ctx: PageContext, geo: unknown, ast: unknown): string[] {
       assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index), plugin.pageAst?.(ast, index) ?? ast),
     );
   return pages;
+}
+
+/** {@link assemblePagesUnscoped} with the caller's `allowJavascriptInLink`
+ *  installed for the (synchronous) emission -- `svg.ts#linkWrap` reads it. */
+function assemblePages(ctx: PageContext, geo: unknown, ast: unknown, options?: RenderOptions): string[] {
+  return withAllowJavascriptInLink(options?.allowJavascriptInLink === true, () =>
+    assemblePagesUnscoped(ctx, geo, ast),
+  );
 }
 
 /**
@@ -348,7 +367,7 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
     // buildTheme's move out of this file dropped index.ts under the
     // 500-line gate that previously short-circuited this per-function check.
     return assemblePages(
-      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast,
+      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast, options,
     );
   } catch (err) {
     return [errorSvg(source, err, options)];
@@ -444,7 +463,7 @@ async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promi
         ? plugin.layoutSync(ast, theme, measurer)
         : await plugin.layout(ast, theme, measurer);
     return assemblePages(
-      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast,
+      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast, options,
     );
   } catch (err) {
     // The block's own lines, so the listing shows the diagram that failed.

@@ -30,12 +30,26 @@ export function isJsonArray(v: JsonValue): v is JsonValue[] {
   return Array.isArray(v);
 }
 
+/**
+ * `JsonObject#set(name, value)` as an OWN data property, whatever `name` is.
+ *
+ * Upstream's minimal-json `JsonObject` keeps members in plain `names`/`values`
+ * lists, so no key has special meaning -- `__proto__` is as ordinary as `a`.
+ * A plain `obj[name] = value` would hit `Object.prototype`'s `__proto__`
+ * setter instead (re-prototyping the object and dropping the key), so every
+ * user-keyed write in this module family goes through `defineProperty`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/json/JsonObject.java (`set`, `add`)
+ */
+export function setJsonMember(obj: JsonObj, name: string, value: JsonValue): void {
+  Object.defineProperty(obj, name, { value, writable: true, enumerable: true, configurable: true });
+}
+
 /** `JsonValue#cloneMe()`: a full deep copy so mutation never aliases the source `TValue`. */
 export function deepCloneJson(v: JsonValue): JsonValue {
   if (Array.isArray(v)) return v.map(deepCloneJson);
   if (isJsonObject(v)) {
     const result: JsonObj = {};
-    for (const [k, val] of Object.entries(v)) result[k] = deepCloneJson(val);
+    for (const [k, val] of Object.entries(v)) setJsonMember(result, k, deepCloneJson(val));
     return result;
   }
   return v;
@@ -46,7 +60,7 @@ export function deepCloneJson(v: JsonValue): JsonValue {
  * into `dst`, overwriting on name collision.
  */
 export function shallowMergeObjects(dst: JsonObj, src: Readonly<JsonObj>): JsonObj {
-  for (const [k, v] of Object.entries(src)) dst[k] = v;
+  for (const [k, v] of Object.entries(src)) setJsonMember(dst, k, v);
   return dst;
 }
 
@@ -58,11 +72,11 @@ export function shallowMergeObjects(dst: JsonObj, src: Readonly<JsonObj>): JsonO
  */
 export function deepMergeObjects(dst: JsonObj, src: Readonly<JsonObj>): JsonObj {
   for (const [name, value] of Object.entries(src)) {
-    const existing = dst[name];
+    const existing = Object.hasOwn(dst, name) ? dst[name] : undefined;
     if (isJsonObject(value) && existing !== undefined && isJsonObject(existing)) {
-      dst[name] = deepMergeObjects({ ...existing }, value);
+      setJsonMember(dst, name, deepMergeObjects({ ...existing }, value));
     } else {
-      dst[name] = value;
+      setJsonMember(dst, name, value);
     }
   }
   return dst;
