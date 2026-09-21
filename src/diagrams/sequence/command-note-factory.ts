@@ -156,12 +156,16 @@ export const noteCommand: Command = {
 //    style-qualified closers `end hnote`/`end rnote` and the unspaced
 //    `endnote`/`endhnote`/`endrnote` forms, mirroring
 //    `Pattern2.cmpile("^end[%s]?(note|hnote|rnote)$")`.
+//    T11 (ubrr batch 2): a pending note with EMPTY participants (only
+//    `noteOnArrowCommand` can open one that way, see its own doc comment)
+//    is dropped without emitting, matching upstream's silent no-op rather
+//    than handing the renderer an empty `NoteEvent.participants`.
 // @see command/note/sequence/FactorySequenceNoteCommand.java:117
 export const endNoteCommand: Command = {
   pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
   execute(state) {
     if (state.pendingNote !== null) {
-      emit(state, state.pendingNote);
+      if (state.pendingNote.participants.length > 0) emit(state, state.pendingNote);
       state.pendingNote = null;
     }
   },
@@ -171,16 +175,36 @@ export const endNoteCommand: Command = {
  * `note left`/`note right`/`note top`/`note bottom` (bare — no participant),
  * single- or multi-line — `FactorySequenceNoteOnArrowCommand`: attaches to
  * the LAST event able to carry a note (`SequenceDiagram#getLastEventWithNote`,
- * typically the last message), positioned relative to IT rather than to a
- * named participant. `left`/`right` resolve to the message's `from`/`to`
- * (verified against `sequence/cijozi-08-mavu547`'s golden: `note left` after
- * `A->B` draws at x=40, left of A's lifeline; `note right` at x=154, right
- * of B's). `top`/`bottom` (hover above/below the whole message, spanning
- * both ends) map onto this engine's `over` position with both endpoints —
- * an approximation, since `NoteEvent.position` has no distinct
- * above/below-the-arrow geometry. Silently does nothing when there is no
- * prior message, mirroring `executeInternal`'s own `if (event == null)
- * return ok()`.
+ * `SequenceDiagram.java:154-158`) — NOT just the last message: `left`/`right`
+ * resolve from `ParseState.lastEventWithNoteLeft`/`Right` (T11, ubrr batch
+ * 2), which `executeArrow`, `refOverCommand`/`refOverMultilineCommand` and
+ * `endCommand`/`elseCommand` all keep current (see that field's own doc
+ * comment for the three upstream `EventWithNote` classes). For a plain
+ * message this is its `from`/`to`, verified against
+ * `sequence/cijozi-08-mavu547`'s golden (`note left` after `A->B` draws at
+ * x=40, left of A's lifeline; `note right` at x=154, right of B's) exactly
+ * as before this change. `top`/`bottom` (hover above/below, spanning both
+ * ends) map onto this engine's `over` position with both endpoints — an
+ * approximation, since `NoteEvent.position` has no distinct above/below
+ * geometry.
+ *
+ * Silently emits NOTHING when no note-capable event has occurred yet
+ * (`lastEventWithNoteLeft`/`Right` both `null`), mirroring
+ * `executeInternal`'s own `if (event == null) return ok()`
+ * (`FactorySequenceNoteOnArrowCommand.java:212-213`) — but the MULTI-LINE
+ * block must still be consumed as a unit either way: upstream's
+ * `CommandMultilines2` accumulates a multi-line command's body independent
+ * of whether `executeNow` later finds an anchor (`PSystemCommandFactory
+ * .java:268-286`'s `isMultilineCommandOk` only calls `isValid` on the
+ * HEADER line). `state.pendingNote` is therefore always opened, with
+ * `participants: []` as the "no anchor" case; `endNoteCommand` drops it
+ * without emitting rather than passing an empty array to the renderer
+ * (`sequence-layout-events.ts`'s `event.participants[0]!` would read past
+ * the end of an empty array otherwise — jar-verified regression bisected
+ * against `teoz-ng-001-17`, whose `opt`/`ref over A,B`/`end` sequence
+ * previously left this port's OWN early-return skipping `pendingNote`
+ * entirely, so the note BODY text fell through to the ordinary dispatch
+ * table and refused as `kind: 'syntax'`).
  *
  * T8: the `<<stereo>>` group is `StereotypePattern.optional`, which wraps
  * BOTH sides in `spaceZeroOrMore()` — so `note <<red>> left` (stereotype
@@ -193,15 +217,23 @@ export const endNoteCommand: Command = {
  * `NoteStyle.getNoteStyle(STYLE)` and feeds it straight into `new
  * Note(display, position, style, ...)` (`:221,225`), same as every other
  * note command in this family.
- * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:78-103,221,225
+ * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:78-103,209-225
  */
+function noteOnArrowParticipants(state: ParseState, position: NoteEvent['position']): string[] {
+  const left = state.lastEventWithNoteLeft;
+  const right = state.lastEventWithNoteRight;
+  if (left === null || right === null) return [];
+  if (position === 'left') return [left];
+  if (position === 'right') return [right];
+  return [left, right];
+}
+
 export const noteOnArrowCommand: Command = {
   pattern: new RegExp(
     String.raw`^(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|top|bottom)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.*))?\s*$`,
     'i',
   ),
   execute(state, match) {
-    if (state.lastMessageFrom === null || state.lastMessageTo === null) return;
     const style = match[1]!.toLowerCase();
     const stereo1 = match[2];
     const rawPosition = match[3]!.toLowerCase();
@@ -211,10 +243,7 @@ export const noteOnArrowCommand: Command = {
     const stereotype = stereo1 ?? stereo2;
     const position: NoteEvent['position'] =
       rawPosition === 'left' ? 'left' : rawPosition === 'right' ? 'right' : 'over';
-    const participants =
-      position === 'over'
-        ? [state.lastMessageFrom, state.lastMessageTo]
-        : [position === 'left' ? state.lastMessageFrom : state.lastMessageTo];
+    const participants = noteOnArrowParticipants(state, position);
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
     const base = {
       kind: 'note' as const,
@@ -227,7 +256,7 @@ export const noteOnArrowCommand: Command = {
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      if (participants.length > 0) emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
     } else {
       state.pendingNote = { ...base, text: '' };
     }

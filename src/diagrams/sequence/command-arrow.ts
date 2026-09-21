@@ -36,11 +36,8 @@
  * characters long — only `--++` and `++--` are (`:457-466`). The shared
  * `activationFlags` (`sequence-parse-helpers.ts:313`) implements upstream's
  * outer switch only, so `Bob -> Carol --++` closes Bob's bar and never opens
- * Carol's. Jar-verified: the pinned oracle draws TWO activation rectangles
- * for that line, `y 66..93` and `y 93..138`. Completing it is two lines in
- * `activationFlags` plus the pin at `tests/unit/sequence/parser.test.ts:253`,
- * whose comment cites `:445` and asserts the first character is all that is
- * read — both files outside this module's write-set.
+ * Carol's — jar-verified (TWO activation rectangles, `y 66..93`/`93..138`),
+ * fix is two lines in `activationFlags` plus a pin outside this module.
  *
  * Upstream's `executeArg` returns `CommandExecutionResult.error("Illegal
  * sequence arrow")` when neither dressing carries a direction (`:311-313`),
@@ -489,6 +486,8 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
 
   state.lastMessageFrom = from;
   state.lastMessageTo = to;
+  state.lastEventWithNoteLeft = from;
+  state.lastEventWithNoteRight = to;
   emit(state, msg);
 }
 

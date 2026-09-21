@@ -26,7 +26,13 @@
  */
 
 import type { DelayEvent, DividerEvent, SpaceEvent } from './ast.js';
-import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
+import {
+  emit,
+  ensureParticipant,
+  setLastEventWithNoteSpan,
+  type Command,
+  type ParseState,
+} from './sequence-parse-helpers.js';
 
 // 2. hide footbox
 export const hideFootboxCommand: Command = {
@@ -186,19 +192,28 @@ export const setSeparatorCommand: Command = {
  *  referenced participants) — not a new divergence introduced here. The
  *  leading `REF` background-color group and the inline `[[url]]` are
  *  matched and discarded: `FrameGeo` carries no per-frame color or URL.
+ *
+ *  Returns the resolved participant ids (T11, ubrr batch 2): `Reference
+ *  implements EventWithNote` (`Reference.java:54`), so its own
+ *  `participants` list is one of the three upstream `getLastEventWithNote`
+ *  anchors (`ParseState.lastEventWithNoteLeft`'s doc comment); `Reference
+ *  #addNote` accepts only LEFT/RIGHT (`:166-171`, never TOP/BOTTOM/OVER),
+ *  which is why first/last of THIS list -- not the whole diagram -- is the
+ *  right span for a `ref`-anchored note.
  *  @see sequencediagram/command/CommandReferenceOverSeveral.java:67-82 */
-function ensureRefParticipants(state: ParseState, raw: string): void {
+function ensureRefParticipants(state: ParseState, raw: string): string[] {
   const participants = raw
     .split(',')
     .map((s) => s.trim().replace(/^"(.*)"$/, '$1'))
     .filter((s) => s.length > 0);
   for (const p of participants) ensureParticipant(state, p);
+  return participants;
 }
 
 export const refOverCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?\s*:\s*(.*)$/i,
   execute(state, match) {
-    ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
     const label = match[3]!.trim();
     emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label] });
   },
@@ -214,13 +229,17 @@ export const refOverCommand: Command = {
  * BODY lines as ordinary commands (they are prose, e.g. "This can be on" /
  * "several lines" — not `Command`-shaped), refusing on the first one.
  * `handlePendingRef` (`parser.ts`) intercepts body lines the same way
- * `handlePendingNote` does for multi-line notes.
+ * `handlePendingNote` does for multi-line notes. The `EventWithNote` span
+ * (T11, ubrr batch 2) is set HERE, at the opening line, not at `end ref`:
+ * upstream's `Reference` object is built from the header regex's own
+ * PARTICIPANT group regardless of which command variant closes it, and its
+ * identity (hence its note anchor) does not depend on the body text.
  * @see sequencediagram/command/CommandReferenceMultilinesOverSeveral.java:60-77
  */
 export const refOverMultilineCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?(?:\s*#\w+)?\s*$/i,
   execute(state, match) {
-    ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
     state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''] };
   },
 };

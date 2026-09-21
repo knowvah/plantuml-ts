@@ -44,7 +44,7 @@
     {
       "slug": "teoz-ng-001-17",
       "cohort": "sequence-bare-note-position-gap",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",

@@ -46,6 +46,15 @@ export interface ParseState {
   /** Track the most recent message sender for `return` command. */
   lastMessageFrom: string | null;
   lastMessageTo: string | null;
+  /**
+   * T11 (ubrr batch 2): LEFT/RIGHT of the most recent `EventWithNote`
+   * (`SequenceDiagram#getLastEventWithNote`, `SequenceDiagram.java:154-
+   * 158`) -- set by `executeArrow`, `refOverCommand`/`refOverMultilineCommand`
+   * and `endCommand`/`elseCommand`; read by `noteOnArrowCommand`, which
+   * documents the full three-class mechanism. `null` = none yet.
+   */
+  lastEventWithNoteLeft: string | null;
+  lastEventWithNoteRight: string | null;
   /** The currently open box group (between `box` and `end box`). */
   currentBox: BoxGroup | null;
   /** Monotonically incrementing counter used to generate unique box ids. */
@@ -164,6 +173,17 @@ export function ensureParticipant(
 /** Emit a SequenceEvent into the current scope. */
 export function emit(state: ParseState, event: SequenceEvent): void {
   currentEvents(state).push(event);
+}
+
+/**
+ * Sets `ParseState.lastEventWithNoteLeft`/`Right` to `ids`' first/last
+ * entries (T11, ubrr batch 2; see that field's own doc comment). A no-op
+ * for an empty list -- must never silently clear a still-valid anchor.
+ */
+export function setLastEventWithNoteSpan(state: ParseState, ids: readonly string[]): void {
+  if (ids.length === 0) return;
+  state.lastEventWithNoteLeft = ids[0]!;
+  state.lastEventWithNoteRight = ids[ids.length - 1]!;
 }
 
 /**
