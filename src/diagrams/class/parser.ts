@@ -400,7 +400,11 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     state.currentRawLine = merged.rawLines[i];
     if (handlePendingNoteLine(state, line)) continue;
     if (handlePendingBodyLine(state, line)) continue;
-    if (continueMultilineElement(state, state.currentRawLine ?? line, line)) continue;
+    const multilineConsumed = continueMultilineElement(state, lines, merged.rawLines, i);
+    if (multilineConsumed > 0) {
+      i += multilineConsumed - 1;
+      continue;
+    }
     // A2s F-A / A3: blank lines now SURVIVE mergeStandaloneBraces (so open
     // note/brace bodies above receive them as content); one no open
     // construct claims is skipped here, exactly as when the pre-pass

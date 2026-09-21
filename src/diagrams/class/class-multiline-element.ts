@@ -37,6 +37,8 @@ import {
   extractNodeStereotype,
   stripFullWrap,
 } from '../description/parse-helpers.js';
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
+import { scanEmbeddedElementBlock } from './class-embedded-block.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 import type { PendingMultilineElement } from './class-parse-state.js';
 
@@ -133,21 +135,35 @@ function finishBlock(state: ParseState, pending: PendingMultilineElement): void 
 }
 
 /**
- * Consume one line of an already-open TYPE0/TYPE1 block. Returns whether a
- * block was open (i.e. the line was consumed either way).
+ * Consume one (or, for an embedded `{{ … }}` region, several) line(s) of an
+ * already-open TYPE0/TYPE1 block, starting at `lines[i]`. Returns how many
+ * lines were consumed, or `0` if no block was open (the line was not
+ * consumed at all).
+ *
+ * A line that OPENS an embedded diagram is handled FIRST, before either END
+ * test: the whole embedded region (see {@link scanEmbeddedElementBlock}'s
+ * doc) is swallowed as raw body lines in one step, so none of ITS lines —
+ * including a nested element's own closing `]` — are ever tested against
+ * this block's END regex (T3.md M6, rozugu-82-pera583).
  */
-export function continueMultilineElement(state: ParseState, raw: string, trimmed: string): boolean {
+export function continueMultilineElement(state: ParseState, lines: readonly string[], rawLines: readonly string[], i: number): number {
   const pending = state.pendingMultilineElement;
-  if (pending === undefined) return false;
+  if (pending === undefined) return 0;
+  const trimmed = lines[i]!;
+  if (getEmbeddedType(trimmed) !== null) {
+    const embedded = scanEmbeddedElementBlock(rawLines, i);
+    for (const l of embedded.block) pushBodyLine(pending, l);
+    return embedded.consumed;
+  }
   const end =
     pending.terminator === 'quote' ? ELEMENT_MULTILINE_END0_RE.exec(trimmed) : ELEMENT_MULTILINE_END1_RE.exec(trimmed);
   if (end === null) {
-    pushBodyLine(pending, raw);
-    return true;
+    pushBodyLine(pending, rawLines[i]!);
+    return 1;
   }
   pushEdgeText(pending, end[1]!);
   finishBlock(state, pending);
-  return true;
+  return 1;
 }
 
 /** TYPE1: `<kw> <code> [ ... ]`. The opener's own tail after `[` is the
