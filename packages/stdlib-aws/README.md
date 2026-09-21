@@ -1,7 +1,7 @@
 # @knowvah/plantuml-stdlib-aws
 
 Vendored AWS Architecture Icons for PlantUML (`awslib14`, plus the `awslib`
-alias) — packaged as [plantuml-ts](https://github.com/plantuml/plantuml-ts)
+alias) — packaged as [plantuml-ts](https://github.com/knowvah/plantuml-ts)
 `StdlibRemoteManifest` values plus the raw `.puml` assets they describe, for
 use with `plantuml-ts`'s `remoteStdlib()` / `stdlibRegistry()` include seam.
 There is no eager `BundleData` export — see "Usage" below.

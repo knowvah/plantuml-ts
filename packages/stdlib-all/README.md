@@ -1,7 +1,7 @@
 # @knowvah/plantuml-stdlib-all
 
 Meta-package: depends on and re-exports every non-GPL
-[plantuml-ts](https://github.com/plantuml/plantuml-ts) stdlib package
+[plantuml-ts](https://github.com/knowvah/plantuml-ts) stdlib package
 (`@knowvah/plantuml-stdlib`, `@knowvah/plantuml-stdlib-aws`,
 `@knowvah/plantuml-stdlib-tupadr3`) as a single discovery surface. `adaml`
 (GPL) is deliberately never included — see [`LICENSES.md`](./LICENSES.md).

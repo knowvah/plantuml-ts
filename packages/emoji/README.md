@@ -1,7 +1,7 @@
 # @knowvah/plantuml-emoji
 
 Vendored [Twemoji](https://github.com/jdecked/twemoji) artwork for
-[plantuml-ts](https://github.com/sseely/plantuml-ts), so `<:name:>` creole
+[plantuml-ts](https://github.com/knowvah/plantuml-ts), so `<:name:>` creole
 emoji render as real glyphs instead of measuring as text.
 
 **1,174 SVG files**, copied byte-for-byte from upstream PlantUML's own emoji

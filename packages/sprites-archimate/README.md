@@ -1,7 +1,7 @@
 # @knowvah/plantuml-sprites-archimate
 
 Vendored [ArchiMate](https://www.opengroup.org/archimate-forum) sprite artwork
-for [plantuml-ts](https://github.com/sseely/plantuml-ts), so
+for [plantuml-ts](https://github.com/knowvah/plantuml-ts), so
 `<<$archimate/technology-device>>` stereotypes and
 `sprite $x jar:archimate/name` resolve to real icons.
 

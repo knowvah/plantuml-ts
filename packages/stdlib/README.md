@@ -1,7 +1,7 @@
 # @knowvah/plantuml-stdlib
 
 Vendored PlantUML stdlib bundles — C4, Archimate, Cloudinsight, Cloudogu, and
-Bootstrap Icons — packaged as [plantuml-ts](https://github.com/plantuml/plantuml-ts)
+Bootstrap Icons — packaged as [plantuml-ts](https://github.com/knowvah/plantuml-ts)
 `BundleData` values, for use with `plantuml-ts`'s `stdlibStore()` /
 `withStdlib()` include seam.
 
