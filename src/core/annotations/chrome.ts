@@ -245,30 +245,21 @@ function addHeaderAndFooter(
  *
  * @see ~/git/plantuml/.../core/DiagramChromeFactory.java:137-149
  */
-export function applyChrome(
-  fragment: RenderFragment,
+/**
+ * Legend -> title -> caption -> header/footer, in `DiagramChromeFactory`'s
+ * own stacking order (D1/D9) -- split out of {@link applyChrome} so its own
+ * CCN stays under this repo's cap (port-own split: `DiagramChromeFactory
+ * .create` is one method upstream too; this is purely a decomposition of
+ * OUR four `if` checks, not a divergence from the ported algorithm).
+ * `decorated` mirrors upstream's own "did anything actually attach" state
+ * (`fragment` stays byte-identical, `===`, when nothing did — D5).
+ */
+function applyChromeSlots(
+  block: AnnotationBlock,
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
   measurer: StringMeasurer,
-): RenderFragment {
-  if (isEmpty(annotations)) return fragment;
-
-  // G2 N46: class fragments carry `preChromeWidth`/`preChromeHeight` --
-  // the PRE-document-margin/quirk ink dims jar's own `DecorateEntityImage`
-  // centers chrome text against (see `RenderFragment.preChromeWidth`'s own
-  // doc comment for the jar-verified mechanism and citation). Every other
-  // engine leaves these `undefined`, so `?? fragment.width/height` is a
-  // no-op for them -- zero behavior change outside class.
-  let block: AnnotationBlock = {
-    body: fragment.body,
-    width: fragment.preChromeWidth ?? fragment.width,
-    height: fragment.preChromeHeight ?? fragment.height,
-  };
-  // D9: `mainframe` participates in `isEmpty()` (chrome still RUNS for a
-  // mainframe-only diagram) but is not yet drawn (`BigFrame` unported) --
-  // tracked separately from `block` so a mainframe-only bag still returns
-  // `fragment.body` byte-identical (no new outer `<g>` either), matching
-  // `annotations-mainframe.test.ts`'s pinned D5-adjacent invariant.
+): { readonly block: AnnotationBlock; readonly decorated: boolean } {
   let decorated = false;
 
   if (!isDisplayPositionedNull(annotations.legend)) {
@@ -287,6 +278,35 @@ export function applyChrome(
     block = addHeaderAndFooter(block, annotations, styles, measurer);
     decorated = true;
   }
+
+  return { block, decorated };
+}
+
+export function applyChrome(
+  fragment: RenderFragment,
+  annotations: DiagramAnnotations,
+  styles: AnnotationStyles,
+  measurer: StringMeasurer,
+): RenderFragment {
+  if (isEmpty(annotations)) return fragment;
+
+  // G2 N46: class fragments carry `preChromeWidth`/`preChromeHeight` --
+  // the PRE-document-margin/quirk ink dims jar's own `DecorateEntityImage`
+  // centers chrome text against (see `RenderFragment.preChromeWidth`'s own
+  // doc comment for the jar-verified mechanism and citation). Every other
+  // engine leaves these `undefined`, so `?? fragment.width/height` is a
+  // no-op for them -- zero behavior change outside class.
+  const initial: AnnotationBlock = {
+    body: fragment.body,
+    width: fragment.preChromeWidth ?? fragment.width,
+    height: fragment.preChromeHeight ?? fragment.height,
+  };
+  // D9: `mainframe` participates in `isEmpty()` (chrome still RUNS for a
+  // mainframe-only diagram) but is not yet drawn (`BigFrame` unported) --
+  // tracked separately from `block` so a mainframe-only bag still returns
+  // `fragment.body` byte-identical (no new outer `<g>` either), matching
+  // `annotations-mainframe.test.ts`'s pinned D5-adjacent invariant.
+  const { block, decorated } = applyChromeSlots(initial, annotations, styles, measurer);
 
   if (!decorated) return fragment;
 
