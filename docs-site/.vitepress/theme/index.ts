@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 import DefaultTheme from 'vitepress/theme';
 import type { Theme } from 'vitepress';
 // Brand: the Warm Studio palette as VitePress variables, the brand mono

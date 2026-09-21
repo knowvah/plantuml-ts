@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-License-Identifier: MIT -->
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 // Aliased in .vitepress/config.ts to the real library source (src/index.ts,

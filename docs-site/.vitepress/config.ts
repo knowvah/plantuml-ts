@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 import { defineConfig } from 'vitepress';
 import { fileURLToPath, URL } from 'node:url';
 import { dirname, resolve as resolvePath } from 'node:path';

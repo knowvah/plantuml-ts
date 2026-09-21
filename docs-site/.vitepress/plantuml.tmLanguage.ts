@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 //
 // TextMate grammar for PlantUML, registered with VitePress/Shiki via
 // markdown.languages so ```plantuml fences are syntax-highlighted, and with
