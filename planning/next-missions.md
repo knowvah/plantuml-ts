@@ -912,6 +912,31 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **Parity dashboards cannot show an accepted divergence** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T0
+  (decision-journal row 4). `oracle/accepted-divergences.json` ids are
+  `svg-<type>/<slug>` (the retired `bipudo` entry, D10 of the mission,
+  and `tests/unit/scripts/svg-parity.test.ts:314`'s own sample), but
+  `scripts/svg-parity-dashboard.ts:161-171` (`ledgerRows`) joins on the
+  bare survey slug, so the class dashboard renders the 7 ELK entries as
+  `_(none matched)_`; and `scripts/parity-dashboard.ts` (the
+  `docs/parity-report.md` generator) has no ledger join at all. Fix:
+  match `svg-${f.type}/${f.slug}` (and keep the bare form) in
+  `ledgerRows`, then add a "declared" column or ledger section to
+  `parity-dashboard.ts` so the exit bar's "0 minus 7" is readable from
+  the report. Two scripts + their unit tests; small.
+
+- **`lint-staged` glob cannot stage a `.test.ts` under `plans/`** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T0b
+  (decision-journal row 2). `.husky/pre-commit` runs typed `eslint --fix`
+  on `*.{ts,tsx,mjs,js}`; no tsconfig `include` reaches `plans/`, so a
+  `plans/**/*.test.ts` throws the typed-rule `parserOptions` error
+  `eslint.config.ts` already documents for `docs-site/**`. Mission tools
+  work around it by using `.test.mts`. Fix: either extend the
+  `docs-site` carve-out in `eslint.config.ts` to `plans/**`, or narrow
+  the `lint-staged` glob to the paths `npm run lint` actually covers.
+  One config file; trivial.
+
 - **`activity-emphasize-arrow-atomic-anchor`** (NEW, unbriefed) — FILED
   2026-09-21 from `unknown-bucket-routing-repair` T15
   (decision-journal rows 19-20). The activity emphasize arrowhead's

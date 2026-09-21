@@ -110,7 +110,10 @@ under other names — see above), ELK cannot be satisfied by routing to
 `@knowvah/dot-engine`: it would produce a different layout. Diagrams carrying
 this pragma lay out with `@knowvah/dot-engine`, which will **not** match
 upstream. The ~8 corpus fixtures using it are ledgered and excluded from the
-conformance bars.
+conformance bars. The seven class-corpus fixtures are the `entries` of
+`oracle/accepted-divergences.json` (accepted 2026-09-21, one exact `svg-class/<slug>`
+id each; every one carries the pragma in `in.puml` and has no `svek-N.dot` dump in
+`test-results/dot-cache/class/`, so DOT parity has no oracle either).
 
 **Why (ruling, extending "one layout engine" of 2026-08-09):** this port has
 **one** layout engine, `@knowvah/dot-engine`, and supports no alternative
