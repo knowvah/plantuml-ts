@@ -24,19 +24,18 @@
  * this function does NOT use `creationIndex` values as the uid number
  * directly — it uses them only to SORT the kept geometry items, then
  * assigns a fresh dense 1..N sequence over that sorted order. This is
- * deliberate, not an approximation: `ensureClassifier` sometimes stamps a
- * creationIndex on a classifier that never reaches `ClassGeometry` at all
- * (a relationship endpoint that resolves to an EXISTING namespace, e.g.
- * `pkg --> Foo` where `pkg` is a package — `ensureClassifier` still
- * auto-creates a phantom `Classifier` row for the bare reference before
- * `class-shield-helpers.ts#packageEndpointAnchors` redirects the actual DOT
- * edge to an anchor point inside the cluster, so the phantom never gets a
- * `ClassifierGeo` — verified against `bajotu-30-soku184`: raw
- * creationIndex values are namespace=1, classifier=2, classifier=3,
- * PHANTOM=4, relationship=5, but jar's real uids are ent0001/ent0002/
- * ent0003/lnk4 with NO gap — dense re-numbering over the 4 KEPT items
- * (phantom excluded, it has no geo) reproduces that exactly, whereas a
- * literal counter replay would not).
+ * deliberate, not an approximation: the AST can carry rows that never
+ * reach `ClassGeometry` at all, and a literal counter replay would leave
+ * their holes in place. (cdd-T3 A1 SB4 removed the ORIGINAL example of
+ * this — a relationship endpoint resolving to an EXISTING namespace, e.g.
+ * `pkg --> Foo` where `pkg` is a package. `ensureClassifier` used to mint a
+ * phantom `Classifier` row AND burn a `cpt1` tick for it; upstream burns
+ * neither (`CommandLinkClass.java:326-334` reads `quark.getData()` and
+ * skips `reallyCreateLeaf`), so `class-ensure-classifier.ts
+ * #existingGroupAlias` now returns an unregistered stub and the row is gone
+ * — `bajotu-30-soku184`'s creationIndex values are namespace=1,
+ * classifier=2, classifier=3, relationship=4, matching jar's
+ * ent0001/ent0002/ent0003/lnk4 directly.)
  *
  * NOT reachable by dense re-numbering: upstream itself sometimes consumes
  * a real (non-phantom) uid for an internal node/edge this port does not
@@ -151,6 +150,7 @@ export interface ClassUidPlanInput {
     readonly noUidSlot?: true;
     readonly phantomSlot?: true;
     readonly subsumedLinkCreationIndex?: number;
+    readonly apointNameCreationIndex?: number;
     readonly invertedClassEdgeOldCreationIndex?: number;
     readonly repeatCoupleInvisLinkCreationIndex?: number;
   }[];
@@ -162,6 +162,12 @@ export interface ClassUidPlanInput {
     readonly tipGroupPhantomIndex?: number;
   }[];
   readonly edges: readonly { readonly creationIndex?: number; readonly phantomSlot?: true }[];
+  /** cdd-T3 (A1 SB5): ranks burned by entities `filterRemovedEntities` dropped
+   *  before geometry existed -- see `class-directives-removal.ts
+   *  #computeRemovedRanks`. Re-injected as uid-less phantom ranks so dense
+   *  re-numbering leaves the same holes jar's export-time `isRemoved()` skip
+   *  does. */
+  readonly removedRanks?: readonly number[];
 }
 
 /** Projects a parsed AST onto {@link ClassUidPlanInput}. `relationships` are
@@ -269,6 +275,13 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
       if (c.subsumedLinkCreationIndex !== undefined) {
         out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex });
       }
+      // cdd-T3 (A1 SB3): the DOUBLE-couple path's `getUniqueSequence
+      // ("apoint")` NAME tick -- a standalone rank two below the point
+      // entity's own, since upstream mints BOTH names before EITHER entity
+      // (`objectdiagram/AbstractClassOrObjectDiagram.java:120-129`).
+      if (c.apointNameCreationIndex !== undefined) {
+        out.push({ type: 'phantom', creationIndex: c.apointNameCreationIndex });
+      }
       // G2 N20: repeat-coupling's two classifier-level standalone phantom
       // ranks -- see `Classifier.invertedClassEdgeOldCreationIndex`/
       // `.repeatCoupleInvisLinkCreationIndex`'s own doc comments (ast.ts).
@@ -286,6 +299,8 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
     // ALL of `geo.notes`, not just `exactNotes` above -- a tip note's own
     // `creationIndex` is (and stays) undefined, so it is never itself an
     // 'entity'/'note' Ranked entry; only these two phantom slots are added.
+    // cdd-T3 (A1 SB5): the removed rows' own burned ranks.
+    ...(geo.removedRanks ?? []).map((creationIndex): Ranked => ({ type: 'phantom', creationIndex })),
     ...geo.notes.flatMap((n): Ranked[] =>
       n.tipGroupPhantomIndex !== undefined
         ? [

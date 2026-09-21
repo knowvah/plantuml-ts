@@ -374,3 +374,47 @@ export function filterRemovedEntities(ast: ClassDiagramAST): ClassDiagramAST {
     })),
   };
 }
+
+/**
+ * cdd-T3 (A1 SB5): every shared-counter rank the entities {@link
+ * filterRemovedEntities} drops had ALREADY been burned upstream.
+ * `remove`/`restore` is an EXPORT-time skip there — `Entity`'s ctor
+ * (`abel/Entity.java:171`) and `Link`'s (`abel/Link.java:135`) run at PARSE
+ * time, and `GraphvizImageBuilder` only consults `isRemoved()` when it walks
+ * the entities to print (`printEntities:350`, `printGroups:413`, `link:230`).
+ * So a removed leaf leaves a HOLE in jar's numbering; this port's dense
+ * re-numbering (`renderer-uid.ts`'s module doc comment) would close it.
+ *
+ * Returns the ranks to re-inject as uid-less phantoms, covering every burn
+ * the dropped row carried: a note's discarded `GMN` slot (`creationIndex -
+ * 1`) and its note<->host connector (`creationIndex + 1`) when
+ * `phantomSlot` is set, a member-tip group leader's TIPS entity + invisible
+ * link (`tipGroupPhantomIndex`, `+ 1`), and an inverted link's discarded
+ * pre-`getInv()` `Link` (`creationIndex - 1`) when `phantomSlot` is set.
+ * Classifier-level standalone ranks (`subsumedLinkCreationIndex` and the
+ * repeat-couple pair) are NOT re-injected here: they belong to the couple
+ * circle that survives, not to the removed row.
+ */
+export function computeRemovedRanks(ast: ClassDiagramAST): number[] {
+  const removed = computeRemovedIds(ast);
+  if (removed.size === 0) return [];
+  const ranks: number[] = [];
+  const push = (n: number | undefined): void => {
+    if (n !== undefined) ranks.push(n);
+  };
+  for (const c of ast.classifiers) if (removed.has(c.id)) push(c.creationIndex);
+  for (const n of ast.notes) {
+    if (!removed.has(n.id)) continue;
+    push(n.creationIndex);
+    if (n.phantomSlot === true && n.creationIndex !== undefined) {
+      ranks.push(n.creationIndex - 1, n.creationIndex + 1);
+    }
+    if (n.tipGroupPhantomIndex !== undefined) ranks.push(n.tipGroupPhantomIndex, n.tipGroupPhantomIndex + 1);
+  }
+  for (const r of ast.relationships) {
+    if (!removed.has(r.from) && !removed.has(r.to)) continue;
+    push(r.creationIndex);
+    if (r.phantomSlot === true && r.creationIndex !== undefined) ranks.push(r.creationIndex - 1);
+  }
+  return ranks;
+}

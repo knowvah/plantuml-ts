@@ -136,6 +136,7 @@ export interface ClassifierGeo {
    *  (`ast.ts`'s doc comment) — feeds `renderer-uid.ts#buildClassUidPlan`'s
    *  subsumed-explicit-association phantom-rank bookkeeping. */
   subsumedLinkCreationIndex?: number;
+  apointNameCreationIndex?: number; // cdd-T3: copied from `Classifier.apointNameCreationIndex` (`ast.ts` doc).
   /** G2 N20: copied unchanged from `Classifier
    *  .invertedClassEdgeOldCreationIndex` (`ast.ts`'s doc comment) — feeds
    *  `renderer-uid.ts#buildClassUidPlan`'s repeat-coupling phantom-rank
@@ -419,6 +420,8 @@ export interface NamespaceGeo {
 }
 
 export interface ClassGeometry {
+  /** cdd-T3 (A1 SB5): `class-directives-removal.ts#computeRemovedRanks`'s output (see its doc comment). */
+  removedRanks?: readonly number[];
   totalWidth: number;
   totalHeight: number;
   /**
