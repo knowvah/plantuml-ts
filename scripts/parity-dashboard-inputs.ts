@@ -16,6 +16,7 @@ import { join } from 'node:path';
 import type { FixtureRow, ParityReport, Verdict } from './svg-parity-survey.js';
 import type { CensusJson, CensusJsonFixture } from './svg-conformance-census-json.js';
 import type { DotParityJson } from './dot-parity-rows.js';
+import { assertJsonArrayShape, assertJsonObjectShape } from './lib/assert-json-shape.js';
 
 // ---------------------------------------------------------------------------
 // Manifest buckets + corpus counts
@@ -33,7 +34,10 @@ export function manifestBuckets(dataDir: string): string[] {
 export function corpusCountsOf(dataDir: string, buckets: readonly string[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const b of buckets) {
-    out[b] = (JSON.parse(readFileSync(join(dataDir, b + '.json'), 'utf-8')) as unknown[]).length;
+    const bucketPath = join(dataDir, b + '.json');
+    const parsed: unknown = JSON.parse(readFileSync(bucketPath, 'utf-8'));
+    assertJsonArrayShape(parsed, bucketPath);
+    out[b] = parsed.length;
   }
   return out;
 }
@@ -118,7 +122,9 @@ export function jarUnsupportedCountsOf(cacheDir: string): Record<string, number>
 // ---------------------------------------------------------------------------
 
 export function loadDotParity(path: string): DotParityJson {
-  return JSON.parse(readFileSync(path, 'utf-8')) as DotParityJson;
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf-8'));
+  assertJsonObjectShape(parsed, path, ['generatedAt', 'measuredAgainstCommit', 'rows']);
+  return parsed as DotParityJson;
 }
 
 // ---------------------------------------------------------------------------
@@ -151,12 +157,17 @@ export function loadSurveyByType(svgConformanceDir: string): Record<string, Surv
   for (const f of readdirSync(svgConformanceDir)) {
     const m = PARITY_FILE_RE.exec(f);
     if (m === null) continue;
-    const report = JSON.parse(readFileSync(join(svgConformanceDir, f), 'utf-8')) as ParityReport;
+    const surveyPath = join(svgConformanceDir, f);
+    const parsed: unknown = JSON.parse(readFileSync(surveyPath, 'utf-8'));
+    assertJsonObjectShape(parsed, surveyPath, ['generatedAt', 'fixtures']);
+    const report = parsed as ParityReport;
     out[m[1]!] = { ...tallySurvey(report.fixtures), generatedAt: report.generatedAt };
   }
   const legacyPath = join(svgConformanceDir, 'parity.json');
   if (existsSync(legacyPath)) {
-    const report = JSON.parse(readFileSync(legacyPath, 'utf-8')) as ParityReport;
+    const legacyParsed: unknown = JSON.parse(readFileSync(legacyPath, 'utf-8'));
+    assertJsonObjectShape(legacyParsed, legacyPath, ['generatedAt', 'fixtures']);
+    const report = legacyParsed as ParityReport;
     for (const type of new Set(report.fixtures.map((r) => r.type))) {
       const rows = report.fixtures.filter((r) => r.type === type);
       out[type] = { ...tallySurvey(rows), generatedAt: report.generatedAt };
@@ -187,7 +198,10 @@ export function loadCensusByType(svgConformanceDir: string): Record<string, Cens
   for (const f of readdirSync(svgConformanceDir)) {
     const m = CENSUS_FILE_RE.exec(f);
     if (m === null) continue;
-    const census = JSON.parse(readFileSync(join(svgConformanceDir, f), 'utf-8')) as CensusJson;
+    const censusPath = join(svgConformanceDir, f);
+    const parsed: unknown = JSON.parse(readFileSync(censusPath, 'utf-8'));
+    assertJsonObjectShape(parsed, censusPath, ['generatedAt', 'measuredAgainstCommit', 'type', 'measurer', 'fixtures']);
+    const census = parsed as CensusJson;
     out[m[1]!] = { zeroDiff: zeroDiffCount(census.fixtures), generatedAt: census.generatedAt };
   }
   return out;

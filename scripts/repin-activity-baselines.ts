@@ -65,6 +65,7 @@ import {
 } from '../tests/oracle/svg-conformance/swimlane-census.js';
 import { censusOf as textCensusOf } from '../tests/oracle/svg-conformance/text-census.js';
 import { extractSlugs } from './activity-probe.js';
+import { assertJsonObjectShape } from './lib/assert-json-shape.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..');
@@ -289,7 +290,9 @@ function applyDiffBaselineWrites(
  * regression, and writes only the entries whose score actually moved. */
 function processDiffBaseline(ctx: RepinContext): PlannedWrite[] {
   const path = join(GOLDENS_DIR, 'diff-baseline.json');
-  const data = JSON.parse(readFileSync(path, 'utf8')) as DiffBaselineFile;
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  assertJsonObjectShape(parsed, path, ['fixtures']);
+  const data = parsed as DiffBaselineFile;
   const { pinned, measured, diffCounts } = measureDiffBaseline(data.fixtures);
 
   const writes = plannedWrites(pinned, measured);
@@ -332,7 +335,9 @@ function processEqualityFixture(spec: EqualityFileSpec, f: EqualityFixture, ctx:
 
 function processEqualityFile(spec: EqualityFileSpec, ctx: RepinContext): string[] {
   const path = join(GOLDENS_DIR, spec.fileName);
-  const data = JSON.parse(readFileSync(path, 'utf8')) as EqualityManifest;
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  assertJsonObjectShape(parsed, path, ['measuredAt', 'measuredAgainstCommit', 'fixtures']);
+  const data = parsed as EqualityManifest;
   const changedSlugs = data.fixtures
     .filter((f) => f.status === 'baseline')
     .filter((f) => processEqualityFixture(spec, f, ctx))
@@ -384,7 +389,9 @@ function processSwimlaneFixture(f: SwimlaneFixture, ctx: RepinContext): boolean 
 
 function processSwimlaneFile(ctx: RepinContext): string[] {
   const path = join(GOLDENS_DIR, 'swimlane-baseline.json');
-  const data = JSON.parse(readFileSync(path, 'utf8')) as SwimlaneManifestFile;
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  assertJsonObjectShape(parsed, path, ['measuredAt', 'measuredAgainstCommit', 'fixtures']);
+  const data = parsed as SwimlaneManifestFile;
   const changedSlugs = data.fixtures
     .filter((f) => f.status === 'baseline')
     .filter((f) => processSwimlaneFixture(f, ctx))
