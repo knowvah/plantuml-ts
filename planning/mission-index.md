@@ -253,8 +253,24 @@ reach graphviz. These are independent SVG-assembly bugs.
 
 ---
 
-## Snapshot (update as missions flip — last refreshed 2026-09-20)
+## Snapshot (update as missions flip — last refreshed 2026-09-21)
 
+- **`unknown-bucket-routing-repair` (ubrr-T0..T14) DONE (2026-09-21),
+  landed at commit `4b6949ee`.** All 825 `unknown` fixtures pinned from
+  the parked jar capture. Routing 3468/943/73 -> 4157/1053/99 over 5309
+  (unknown: 689 agree / 110 known-misroute / 26 jar error); refusal
+  198 -> 269 erroring, 137 -> 198 gaps (unknown: 61 known-gap / 26 jar
+  error / 738 render). Survey: 59 conformant / 61 structural / 702
+  diverged (`docs/parity-report.md`). **Per-cohort (T14 commit
+  `4b6949ee`):** fixed 115 (class 66, activity 34, sequence 9,
+  description 6); pinned 42 named cohorts (no nwdiag/bpm/git/flow/
+  timing/help engine 96, files' root attribute 8, 12 jar error pages
+  past the 4096-byte head window, 22 unported utility/easter-egg
+  factories, timing/help `@startuml` sources 20, description
+  archimate/map/embedded gaps 3, the legacy `(*) -->` family 1, a
+  class link fallback 1, a Tim function gap 1, a preprocessor-only
+  source 1, and `kubuju`); the same batch retired 43 activity + 1
+  sequence pins on the EXISTING tree ([FIXED]).
 - **`parity-dashboard-refresh` (pdr-T1..T8) DONE (2026-09-20),
   regenerated at commit `9f095acc`.** Unified per-type parity
   dashboard at `docs/parity-report.md` (`scripts/parity-dashboard.ts`),

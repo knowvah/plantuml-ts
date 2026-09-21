@@ -35,6 +35,38 @@ post-D7 measurements.
 
 ---
 
+## `unknown-bucket-routing-repair` — DONE 2026-09-21 (T0-T14, batches 0-2)
+
+Branch `feat/unknown-bucket-routing-repair`, T14 landed at `4b6949ee`
+(`plans/unknown-bucket-routing-repair/decision-journal.md`). Pinned all
+825 `unknown`-bucket fixtures from the parked jar capture, retiring the
+accounting bucket's not-yet-pinned state: routing 3468/943/73 ->
+4157/1053/99 over 5309 (unknown: 689 agree, 110 known-misroute, 26 jar
+error); refusal 198 -> 269 erroring, 137 -> 198 gaps (unknown: 61
+known-gap, 26 jar errors, 738 render). Survey for `unknown`: 59
+conformant / 61 structural / 702 diverged (`docs/parity-report.md`
+Matrix).
+
+Of the 157 diagnosed disagreements batch 0's gate first counted, batch
+2 fixed 115 (class 66, activity 34, sequence 9, description 6) and
+pinned 42 named cohorts (no nwdiag/bpm/git/flow/timing/help engine, the
+files' root attribute, 12 jar error pages past the gates' 4096-byte
+head window, 22 unported utility/easter-egg factories, timing/help
+`@startuml` sources, description archimate/map/embedded gaps, the one
+true legacy `(*) -->` fixture, a class link fallback, a Tim function
+gap, a preprocessor-only source, and `kubuju`). The same batch retired
+43 activity and 1 sequence pins on the EXISTING tree ([FIXED]).
+
+**Premise disproved (T2):** none of the 25 `activity-legacy1-example-*`
+fixtures use the legacy `(*) -->` syntax — they are activity3
+constructs with port gaps; the one true legacy-arrow fixture is
+`bitabu-34-lota947`. **Follow-ons filed for T15**, added to §5 below:
+`activity-emphasize-arrow-atomic-anchor`, the four sequence/timing gaps
+T9 unmasked, widening the gates' 4096-byte head window, and T10's
+documented activity rendering divergences.
+
+---
+
 ## `parity-dashboard-refresh` — DONE 2026-09-20, 8 of 8
 
 Branch `feat/parity-dashboard-refresh`, regenerated at `9f095acc`.
@@ -879,6 +911,45 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 ## 5. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
+
+- **`activity-emphasize-arrow-atomic-anchor`** (NEW, unbriefed) — FILED
+  2026-09-21 from `unknown-bucket-routing-repair` T15
+  (decision-journal rows 19-20). The activity emphasize arrowhead's
+  anchor is `mid(ct(p1), ct(p2))` over two INDEPENDENTLY Y-compressed
+  endpoints (`shapes-of.ts:255-256`, twin in `renderer.ts:172`), where
+  upstream evaluates `ct(mid_raw)` once (`Worm.java:174-184` on
+  `UGraphicCompressOnXorY.java:55-63,87-120`). `nerete-42-save418
+  [22,25]` is the diagnosed 3.5 px collision, recorded in
+  `ALLOWED_HARD_OVERLAPS` as a defect, not an exemption. Corpus-wide:
+  ~7 files across `layout/**` + `renderer.ts`.
+
+- **Four sequence/timing gaps T9 unmasked** (NEW, unbriefed) — FILED
+  2026-09-21 from `unknown-bucket-routing-repair` T15
+  (decision-journal row 12). State's honest `Command.confirm`
+  narrowing unmasked five fixtures STATE had been drawing empty:
+  `CommandStyleImport` (`bomino-39-tipo216`), the note-on-arrow URL
+  group (`dolice-60-copi767`), `CommandLinkAnchor` ×2
+  (`fojomu-60-cuda302`, `zoturo-25-jima978`), and no timing engine
+  (`zeboxu-77-xola056`). Three are sequence ports; the fourth needs a
+  timing engine (Phase D1, still todo).
+
+- **Widen the routing/refusal gates' 4096-byte head window** (NEW,
+  unbriefed) — FILED 2026-09-21 from `unknown-bucket-routing-repair`
+  T15 (decision-journal row 8). 12 `unknown` jar goldens are genuine
+  `PSystemError` pages whose signature sits past byte 4096
+  (`PSystemError.java:213-231` prepends the Welcome tutorial), so both
+  gates and `scripts/pin-corpus-tree-measure.ts` — which all read only
+  `HEAD_BYTES` = 4096 — read `jarErrored=false`. Widen `readHead` in
+  the gates AND the measure script TOGETHER, never one without the
+  other, then re-derive the 12 `jar-error-beyond-head-window` pins.
+
+- **T10's documented activity rendering divergences** (NEW, unbriefed)
+  — FILED 2026-09-21 from `unknown-bucket-routing-repair` T15
+  (decision-journal row 18). `switch`/`case` reuses `GtileSwitch`, not
+  `GtileIfHexagon`; `backward:` is parsed but draws no return-edge
+  geometry; a bracket-less partition's "You should use a bracket"
+  warning banner is not drawn; `package`/`rectangle`/`card` all share
+  `GtilePartition`.
 
 - **`svg-attribute-escaping-audit`** — **EXECUTED + CLOSED 2026-09-19** (10/10 tasks, branch `feat/svg-attribute-escaping-audit` head aa7772e8, UNMERGED; sinks 39→0, two live defects closed with jar bytes; see `plans/svg-attribute-escaping-audit/README.md` "Execution summary") — FILED 2026-09-19 by
   the CodeQL pass (branch `fix/codeql-alerts`). Alert 13 was REAL: an
