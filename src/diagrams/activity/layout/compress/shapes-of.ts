@@ -11,12 +11,11 @@
  *   decides WHICH kind each of our node/edge kinds maps to.
  */
 
-import type { ActivityEdgeGeo, ActivityNodeGeo } from '../../layout.old.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneBandGeo, SwimlaneGeo } from '../../activity-geometry.types.js';
 import type { EdgeMeta } from '../swimlane-placement.js';
 import type { Reservation } from '../hexagon-reservations.js';
 import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
-import type { SwimlaneBandGeo, SwimlaneGeo } from '../../activity-layout-types.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';

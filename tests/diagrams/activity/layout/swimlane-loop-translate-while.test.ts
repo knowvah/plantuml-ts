@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { routeWhileBack } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate-while.js';
 import type { WhileBackLoop } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate.js';
-import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
+import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 
 const baseEdge: ActivityEdgeGeo = { points: [{ x: 999, y: 999 }], emphasize: 'up' };
 

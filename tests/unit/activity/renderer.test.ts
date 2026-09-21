@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
+import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
 

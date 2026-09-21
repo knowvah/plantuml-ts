@@ -28,7 +28,7 @@ import { GtileAction } from '../../../src/diagrams/activity/tiles/gtile-action.j
 import { GtileDiamond } from '../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
 import type { StringBounder as TileStringBounder } from '../../../src/diagrams/activity/tiles/tile.js';
-import type { ActivityNodeGeo } from '../../../src/diagrams/activity/layout.old.js';
+import type { ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';

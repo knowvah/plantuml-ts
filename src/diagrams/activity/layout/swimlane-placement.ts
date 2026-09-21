@@ -36,7 +36,7 @@ import type {
   SwimlaneBandGeo,
   SwimlaneDividerY,
   SwimlaneGeo,
-} from '../activity-layout-types.js';
+} from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {

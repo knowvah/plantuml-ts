@@ -9,7 +9,7 @@ import {
   repeatEdgeMeta,
   resolveSwimlaneVertical,
 } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
-import type { SwimlaneGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
+import type { SwimlaneGeo, ActivityNodeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 import type { EdgeMeta } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import { TileLeaf } from '../../../../src/diagrams/activity/tiles/tile.js';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
@@ -25,7 +25,6 @@ import type { GPoint, HookName } from '../../../../src/diagrams/activity/tiles/p
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
-import type { ActivityNodeGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
 import type { LoopTranslate } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate.js';
 
 /** A minimal leaf tile with a caller-controlled width/height, used to feed

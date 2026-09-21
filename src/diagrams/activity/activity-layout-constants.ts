@@ -1,5 +1,5 @@
 /**
- * Layout constants for the activity diagram layout engine (see `layout.old.ts`).
+ * Layout constants for the activity diagram layout engine.
  */
 
 export const NODE_MARGIN_Y = 20;
@@ -25,13 +25,8 @@ export const STOP_OUTER_RADIUS = 14;
  *  `activity-note-width-overscan` mission, not by this one. */
 export const NOTE_H_PAD = 16;
 export const NOTE_FOLD = 8;
-export const NOTE_SIDE_GAP = 16;
 /** The fork's black join bar's height. `GtileSplit` overrides with
- *  {@link THIN_SPLIT_HEIGHT} instead (`gtile-split.ts`). `layout.old.ts`'s
- *  `activity-layout-fork.ts` (the superseded engine, off the render path,
- *  never edited) also imports this constant -- its own bar geometry moves
- *  with it, which is why `tests/unit/activity/layout.test.ts` pins shift
- *  too (mission `activity-parallel-connectors` README, "Push forward").
+ *  {@link THIN_SPLIT_HEIGHT} instead (`gtile-split.ts`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:64
  *   -- `protected final double barHeight = 6;`. Was an unsourced `8`. */
 export const BAR_HEIGHT = 6;
@@ -58,19 +53,6 @@ export const PARALLEL_X_MARGIN = 14;
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:129
  *   -- `final double spaceArroundBlackBar = 20;`. */
 export const SPACE_AROUND_BLACK_BAR = 20;
-/**
- * NOT retired despite the boxed-header model it sized being replaced
- * (`activity-swimlane-rendering` T6) -- `layout.old.ts:53` (the superseded,
- * off-the-render-path engine) still imports this constant, and that file is
- * out of every task's write-set (mission stop condition 5). The live
- * renderer (`renderer.ts` / `activity-renderer-swimlanes.ts`) no longer
- * reads it; the divider-and-floating-title band height is measured instead
- * (`swimlane-placement.ts#measureSwimlaneTitlesHeight`, D2).
- */
-export const SWIMLANE_HEADER_H = 28;
-export const SWIMLANE_MIN_WIDTH = 120;
-export const DEFAULT_WIDTH = 600;
-export const LAYOUT_MARGIN = 12;
 
 export const DIAMOND_MIN = 20;
 export const DIAMOND_LABEL_PAD = 10;

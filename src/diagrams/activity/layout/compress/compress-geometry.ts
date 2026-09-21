@@ -15,8 +15,7 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:205-213
  */
 
-import type { ActivityEdgeGeo, ActivityNodeGeo } from '../../layout.old.js';
-import type { SwimlaneGeo, SwimlaneBandGeo } from '../../activity-layout-types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo, SwimlaneBandGeo } from '../../activity-geometry.types.js';
 import type { EdgeMeta } from '../swimlane-placement.js';
 import type { Reservation } from '../hexagon-reservations.js';
 import type { StringBounder } from '../../tiles/tile.js';

@@ -15,7 +15,7 @@ import {
   routeRepeatSimple1,
   routeRepeatSimple2,
 } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate-repeat.js';
-import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-layout-types.js';
+import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 import type {
   RepeatComplex1Loop,
   RepeatOutLoop,
