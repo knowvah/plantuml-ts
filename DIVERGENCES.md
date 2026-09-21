@@ -703,6 +703,29 @@ mechanisms; SI27 was a pure-move mission and ported the former only.
 `vixobo-14-jole910`); `duzazu`/`vixobo` additionally hit the unported
 trailing-backslash line continuation of the state parser (pre-existing).
 
+### Recursive `!procedure` / `!function` depth is bounded (limitation)
+
+**Upstream:** no nesting limit on user-function calls — neither
+`tim/TFunctionImpl.java` nor `tim/TContext.java` counts depth. (The only guard
+in `tim/`, `iterator/CodeIteratorImpl.java:95`'s 999-jump `Infinite loop?`,
+bounds loops, not calls.) A runaway recursion kills the jar with an uncaught
+`StackOverflowError` and **no diagram at all** (verified 2026-09-21 with the
+oracle jar: a countdown procedure renders at depth 1000 and overflows by 2000).
+
+**This port:** a user-function call nested more than `MAX_CALL_DEPTH` (256)
+deep throws `EaterException("Too many nested calls (limit 256). Infinite
+recursion?")` at the recursing line, which the error diagram reports with its
+line number (`src/core/tim/TFunctionImpl.ts#withCallDepth`).
+
+**Why:** the port's own JS-stack ceiling is lower than the jar's — measured
+2026-09-21 under Node 26's default stack at 546 nested procedures / 781 nested
+functions — and an overflow there surfaced only as a bare "Fatal parsing
+error" whose depth depends on the host engine's stack size. 256 is a
+port-local bound with ~2x headroom below that ceiling, so the failure is
+deterministic and names the line on every engine. **Cost:** a legitimate
+recursion 257–~1000 deep that the jar renders is refused here (it already
+failed past ~546 before this bound). **Category:** limitation.
+
 ## Descriptive diagrams
 
 <!--
