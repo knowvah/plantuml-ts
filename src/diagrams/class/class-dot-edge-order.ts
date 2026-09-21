@@ -1,5 +1,8 @@
 /**
- * Which direction a relationship's dot edge is emitted in.
+ * Which direction and document position a relationship's dot edge is
+ * emitted in -- two related "which order/direction does a class-diagram
+ * edge get emitted in" concerns sharing this file (T2 file-name note,
+ * `plans/class-divergence-drive/batch-1/T2-ordered-links.md`).
  *
  * Split out of ./class-dot-graph.ts (which re-exports nothing from here —
  * both symbols are imported directly) to keep that file under the project's
@@ -76,4 +79,59 @@ export function dotEdgeRunsReversed(rel: Relationship): boolean {
   // Relationships built outside the arrow grammar carry no flag — magma
   // chaining edges and note connectors. Unchanged since B6.
   return HIERARCHICAL.has(rel.type) && rel.parentIsLinkEntity1 === true;
+}
+
+/**
+ * `Link.sameConnections` (abel/Link.java:462-470): same endpoint pair,
+ * either direction, identity only -- ignores type/label/decor. `from`/`to`
+ * are the parser's post-`resolveRelationshipEndpoint` canonical ids by the
+ * time a relationship reaches this module (same identity contract
+ * `linkDedup.ts`'s free-function form already relies on for dedup).
+ */
+function sameConnections(a: Relationship, b: Relationship): boolean {
+  return (a.from === b.from && a.to === b.to) || (a.from === b.to && a.to === b.from);
+}
+
+/**
+ * `CucaDiagramFileMakerSvek.java:98-113 addLinkNew`: scan the ordered
+ * result being built for the FIRST link already placed that shares `link`'s
+ * connection pair; if found, skip forward while the run of adjacent
+ * same-connection links continues, then insert `link` right there (i.e.
+ * immediately after the LAST link of that contiguous group) -- else
+ * append `link` at the end. Because every insertion lands right after the
+ * group's current last member, a group stays contiguous once started; this
+ * is stable insertion, not a sort by key (no global re-ordering by pair
+ * identity -- a pair's FIRST occurrence still anchors the group's document
+ * position).
+ */
+function addLinkNew(result: Relationship[], link: Relationship): void {
+  for (let i = 0; i < result.length; i++) {
+    if (sameConnections(result[i]!, link)) {
+      while (i < result.length && sameConnections(result[i]!, link)) i++;
+      result.splice(i, 0, link);
+      return;
+    }
+  }
+  result.push(link);
+}
+
+/**
+ * `CucaDiagramFileMakerSvek.java:90-96 getOrderedLinks`: re-order a
+ * diagram's relationship list so links sharing an endpoint pair sit
+ * adjacently, by stable insertion over the declaration order -- the result
+ * `GraphvizImageBuilder.java:229` then iterates for BOTH the DOT edge
+ * emission loop and the SVG `<g class="link">` draw loop, so this one
+ * reorder sets both together (SB2,
+ * `plans/class-divergence-drive/diagnosis/A1-order.md`).
+ *
+ * Pure function -- builds a new array by insertion; never mutates
+ * `relationships`. Wired in at `class-dot-graph.ts#buildDotGraph`'s single
+ * entry point, ahead of every consumer that reads `ast.relationships`, so
+ * DOT emission and draw order stay in lock step (that two-site drift was
+ * SB2's root cause).
+ */
+export function getOrderedLinks(relationships: readonly Relationship[]): Relationship[] {
+  const result: Relationship[] = [];
+  for (const link of relationships) addLinkNew(result, link);
+  return result;
 }

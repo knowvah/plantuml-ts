@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1120 modules · 4072 exported names.
+1121 modules · 4074 exported names.
 
 ## `src/`
 
@@ -1110,8 +1110,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-directives-removal.ts` | `directiveAppliesTo`, `applyDirectives`, `foldEffectiveActions`, `computeRemovedIds`, `computeHiddenIds`, `filterRemovedEntities` | Directive APPLICATION + removal/hidden-id computation for class diagrams (applyDirectives, computeRemovedIds/HiddenIds, filterRemovedEntities and their link/pattern helpers). |
 | `class-directives-visibility.ts` | `parseHideShowVisibilityDirective`, `applyVisibilityHideShow` | `hide`/`show <visibility> members\|fields\|methods` directive family for class diagrams. |
 | `class-directives.ts` | `parseHideStereotypeDirective`, `applyStereotypeHideShow`, `parseHideShowDirective`, `parseHideShowPatternDirective`, `parseHideShowEntityDirective`, `applyHideShowEntityDirectives`, `parseHideShowKindDirective`, `applyHideShowKindDirectives`, `applyDirectives`, `computeRemovedIds`, `computeHiddenIds`, `filterRemovedEntities`, `parseHideShowVisibilityDirective`, `applyVisibilityHideShow` | Hide/show directive parsing and post-processing for class diagrams. |
-| `class-dot-edge-order.ts` | `HIERARCHICAL`, `dotEdgeRunsReversed` | Which direction a relationship's dot edge is emitted in. |
+| `class-dot-edge-order.ts` | `HIERARCHICAL`, `dotEdgeRunsReversed`, `getOrderedLinks` | Which direction and document position a relationship's dot edge is emitted in -- two related "which order/direction does a class-diagram edge get emitted in" concerns sharing this file (T2 file-name note, `plans/class-divergence-drive/batch |
 | `class-dot-edges.ts` | `EDGE_DECORATION_MAP`, `ARROW_LABEL_FONT_SIZE`, `buildDotEdges` | Class diagram DOT-edge construction -- split out of ./class-dot-graph.ts (S-A, pure relocation, no logic change) to keep that file under the repo's 500-line-per-file cap, same split rationale as ./class-object-fields.ts's own module doc (sp |
+| `class-dot-graph-assembly.ts` | `assembleDotInputGraph` | Class diagram `DotInputGraph` attribute-bag assembly -- split out of ./class-dot-graph.ts (T2, `plans/class-divergence-drive/batch-1/ T2-ordered-links.md`) purely to keep that file under the repo's 500-line-per-file cap once the SB2 `getOrd |
 | `class-dot-graph.ts` | `DotGraphParts`, `ThemeGroupInheritance`, `ThemeSameClassWidth`, `applySameClassWidthFloor`, `buildDotGraph` | Class diagram DOT-graph construction. |
 | `class-edge-geo.ts` | `EdgeGeoTextContext`, `buildEdgeGeos` | Class-diagram edge geometry: edge-label / magic-arrow / port-label anchors, stroke override, point normalization, and buildEdgeGeos. |
 | `class-edge-label-anchor.ts` | `multiLineLabelAnchor`, `LabelAnchorContext`, `LabelLineGeo`, `guideLinesAnchor`, `portLabelAnchor`, `PortLabelContext`, `attachPortLabels` | Edge-label anchoring for the class engine: converting the CENTER points `core/graph-layout.ts` extracts into the left/baseline anchors jar's `<text>` elements carry, and applying the port-label collision pass that sits between the two. |
