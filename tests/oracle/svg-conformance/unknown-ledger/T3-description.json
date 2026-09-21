@@ -4,12 +4,11 @@
     {
       "slug": "rozugu-82-pera583",
       "cohort": "description-nested-embedded-diagram",
-      "disposition": "known-misroute",
-      "task": "T8",
-      "seam": "description",
+      "disposition": "fixed",
+      "task": "T7",
+      "seam": "class",
       "command": "CommandCreateElementMultilines",
-      "size": 30,
-      "reason": "Fixed (T8) the M6 REFUSAL: description's continueElementBlock (parser.ts) now detects a line opening an embedded '{{ ... }}' region (getEmbeddedType, src/core/EmbeddedDiagram.ts) and swallows the whole region as raw body lines via scanEmbeddedElementBlock (element-embedded-block.ts), mirroring PSystemCommandFactory#addOneSingleLineManageEmbedded2 (PSystemCommandFactory.java:267-303) and EmbeddedDiagram's EMBEDDED_END nesting (EmbeddedDiagram.java:78,257) -- none of the embedded region's lines, including its own nested 'rectangle FailCase [ ... ]''s closing ']', are tested against the outer element block's END regex anymore. Re-measured: weErrored is now false (the refusal gap is closed). Residual ROUTING mismatch, freshly re-verified (not carried over from an earlier note): the jar types this fixture CLASS while ourType now measures DESCRIPTION. Upstream registers CommandCreateElementMultilines (the 'KEYWORD CODE [ ... ]' element-block command this fix touches) on BOTH ClassDiagramFactory (ClassDiagramFactory.java:166-167) AND DescriptionDiagramFactory (DescriptionDiagramFactory.java:122-123) -- the same shared-command-on-two-factories shape that caused the now-resolved kokebo-27-vafi688 tie (CommandPackageWithUSymbol, ClassDiagramFactory.java:130 / DescriptionDiagramFactory.java:96; that specific fixture is confirmed AGREE in the current routing-baseline.json, so it is cited here only as the same upstream PATTERN, not as an open residual). This port's class engine (src/diagrams/class/parser.ts) has no port of CommandCreateElementMultilines at all: probed directly, classPlugin.parse refuses 'rectangle A [' immediately (kind=syntax, consumed=1) -- so description is the only one of this port's five candidates that can parse the construct, and wins the parse-attempt merge by default (consumed=10) regardless of any tie-break. D1 forbids reordering plugins to force class-before-description the way upstream's real factory-trial order would; closing this residual needs class to gain its own CommandCreateElementMultilines port, a class-seam task outside T8's write-set (src/diagrams/description/** only)."
+      "size": 30
     }
   ]
 }
