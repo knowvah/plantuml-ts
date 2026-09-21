@@ -58,6 +58,7 @@ export function transform(patternString: string): string {
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:46 */
 export const URL_KEY = 'URL';
 
+// Code review: composed regex grammar (UrlBuilder.ts's URL patterns, preprocessor.ts's skinparam grammar) has not been run through a static ReDoS checker. Revisit if diagram sources are ever attacker-supplied at scale, or if these patterns are extended with additional nested quantifiers.
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:51-52 */
 const START_PART = '\\[\\[[%s]*';
 const END_PART = '[%s]*\\]\\]';

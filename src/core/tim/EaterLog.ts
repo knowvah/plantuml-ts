@@ -30,6 +30,7 @@ export class EaterLog extends Eater {
     this.skipSpaces();
     const logData =
       context.applyFunctionsAndVariables(memory, new StringLocated(this.eatAllToEnd(), this.getLineLocation())) ?? '';
+    // Code review: `!log` prints to console.info with no embedder opt-out. Revisit if this library is ever embedded in a context where arbitrary console output is undesirable (e.g. a CSP-audited host page).
     console.info(`[Log] ${logData}`);
   }
 }
