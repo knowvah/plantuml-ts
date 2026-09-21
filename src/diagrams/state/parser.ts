@@ -124,8 +124,13 @@ function handlePendingJsonLine(ps: ParseState, line: string, pass: Pass): boolea
 }
 
 /** Dispatch a line to the first matching command, then apply it only if
- *  eligible for the current pass (see `Command.passes`'s doc). Returns
- *  whether ANY command's pattern matched (regardless of pass eligibility) --
+ *  eligible for the current pass (see `Command.passes`'s doc). A `pattern`
+ *  match is only a REAL match if the command has no `confirm` or `confirm`
+ *  also returns true (T9: `Command.confirm`'s doc -- pass-independent,
+ *  mirrors upstream's own anchored `getCandidate` search running every
+ *  pass, strictly before `isEligibleFor`); a confirmed-false match keeps
+ *  searching later commands instead of being treated as consumed. Returns
+ *  whether ANY command REALLY matched (regardless of pass eligibility) --
  *  callers use this to decide whether to fall back to the annotation matcher
  *  (see `runPass`'s doc: the state-specific `CODE : text` description-line
  *  rule, COMMANDS' rule 15, must win over a same-shaped `header: text`/
@@ -135,10 +140,10 @@ function handlePendingJsonLine(ps: ParseState, line: string, pass: Pass): boolea
 function dispatchCommand(ps: ParseState, line: string, pass: Pass): boolean {
   for (const cmd of COMMANDS) {
     const match = cmd.pattern.exec(line);
-    if (match !== null) {
-      if (cmd.passes.includes(pass)) cmd.execute(ps, match, pass);
-      return true;
-    }
+    if (match === null) continue;
+    if (cmd.confirm !== undefined && !cmd.confirm(match)) continue;
+    if (cmd.passes.includes(pass)) cmd.execute(ps, match, pass);
+    return true;
   }
   return false;
 }

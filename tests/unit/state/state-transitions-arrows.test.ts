@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { statePlugin } from '../../../src/diagrams/state/index.js';
 import { parseAst } from '../../helpers/parse-ast.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, Transition } from '../../../src/diagrams/state/ast.js';
 
@@ -199,17 +200,23 @@ describe('transition arrow length', () => {
 
 // ---------------------------------------------------------------------------
 // Dispatch gate false positive — a line containing '<'/'>' that is not a
-// valid transition (and matched no earlier rule) is silently ignored rather
-// than crashing or emitting a bogus transition.
+// valid transition (and matched no earlier rule) refuses the WHOLE diagram,
+// matching upstream's real per-command candidate matching (`getCandidate`,
+// `command/PSystemCommandFactory.java:169-175`): no command's full anchored
+// grammar matches such a line, so upstream builds a "Syntax Error?" page,
+// not a diagram missing one line. T9 (mission unknown-bucket-routing-repair)
+// replaced the prior silent-swallow with this refusal — see
+// `state-angle-bracket-overclaim.test.ts` for the fixture this fixes
+// (kubuju-35-neji041) and `Command.confirm`'s doc in state-commands.ts for
+// the mechanism.
 // ---------------------------------------------------------------------------
 
 describe('transition dispatch gate false positive', () => {
-  it('a bare stray <<tag>> line (no dashes at all) is silently ignored', () => {
-    const ast = parse(`
-      A --> B
-      <<orphan>>
-    `);
-    expect(ast.transitions).toHaveLength(1);
-    expect(ast.states.map((s) => s.id).sort()).toEqual(['A', 'B']);
+  it('a bare stray <<tag>> line (no dashes at all) refuses the whole diagram', () => {
+    const lines = ['A --> B', '<<orphan>>'];
+    const block: UmlSource = { lines, type: 'state' };
+    const refusal = parseRefusalOf(statePlugin.parse(block));
+    expect(refusal?.kind).toBe('syntax');
+    expect(refusal?.message).toBe('Syntax Error?');
   });
 });
