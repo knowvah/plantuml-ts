@@ -91,6 +91,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+## Dependencies
+
+[KaTeX](https://katex.org) is a required **runtime** dependency, not an
+optional or dev-only one — installing this package always installs KaTeX
+too. `renderSync` is synchronous by design (see "Layout: one engine,
+always" above for the project's general preference for one code path
+over two), so the `<latex>` creole tag can't lazy-load a math renderer
+on first use the way an async API could; the import has to be resolvable
+at module load time for every consumer, whether or not their diagrams
+use `<latex>`.
+
 ## Supported Diagram Types
 
 Per-diagram-type parity — corpus size, oracle coverage, ratchet pins,
