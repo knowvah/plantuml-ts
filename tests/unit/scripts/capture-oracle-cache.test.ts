@@ -1,3 +1,7 @@
+// @vitest-environment node
+// Node, not the suite's jsdom default: under jsdom, vi.mock('node:child_process')
+// never reaches the script's own import, so the REAL oracle jar ran. It
+// passed locally (jar present) and failed in CI (no jar -> no in.svg).
 /**
  * Unit tests for `scripts/capture-oracle-cache.ts` (mission
  * parity-dashboard-refresh, T1).
