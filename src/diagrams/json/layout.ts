@@ -11,9 +11,9 @@ import type { JsonDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
-import type { DotInputEdge, DotInputGraph } from '../../core/graph-layout.js';
+import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from '../../core/graph-layout.js';
 import { measureNode, recordLabelFor } from './TextBlockJson.js';
-import type { JsonRowGeo } from './TextBlockJson.js';
+import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
 // boundary). Re-exported so `renderer.ts` and every existing consumer keep
@@ -255,21 +255,13 @@ function layoutParseFailure(
   };
 }
 
-export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMeasurer): JsonGeometry {
-  // Handle parse failure: return an error geometry that the renderer will
-  // display as PlantUML's canonical "Your data does not sound like JSON data".
-  const margin = marginsOf(theme);
-  if (ast.parseError) return layoutParseFailure(ast, measurer, margin);
-
-  const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
-
-  // Build per-node highlight map: nodeId → Map<key, styleClass>.
-  // Each #highlight path navigates from the root node through child nodes
-  // following all but the last segment, then marks the last segment as
-  // highlighted in that destination node.
-  const highlightMap = buildHighlightMap(flatNodes, ast.highlights);
-
-  // Read jsonDiagram.node theme overrides for layout purposes
+/**
+ * Resolve `jsonDiagram.node` theme overrides into `TextBlockJson#buildRows`
+ * options, plus the effective node font size. Split out of `layoutJson`
+ * (code review 2026-09-21) purely to keep that function under the repo's
+ * CCN/NLOC caps — no behavior change.
+ */
+function resolveJsonMeasureConfig(theme: Theme): { nodeFontSize: number; measureOptions: BuildRowsOptions } {
   const jsonTheme = theme.colors.graph.json;
   const nodeFontSize = jsonTheme?.nodeFontSize ?? theme.fontSize;
   const nodeFontFamily = jsonTheme?.nodeFontFamily ?? theme.fontFamily;
@@ -287,41 +279,44 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
     // uses it exactly as `AtomText#tabString` does.
     ...(theme.tabSize !== undefined ? { tabSize: theme.tabSize } : {}),
   };
+  return { nodeFontSize, measureOptions };
+}
 
-  // Measure each node
-  const measured = flatNodes.map((fn) =>
-    measureNode(fn, highlightMap.get(fn.id) ?? EMPTY_MAP, measurer, nodeFontSize, measureOptions),
-  );
-
-  // Build dot input graph. A5/T6 (ADR-1): dimensions are SWAPPED on the way in
-  // -- upstream hands graphviz each node's height as its width and vice versa
-  // (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
-  // transposed frame, then transposes the answer back. See
-  // `mirrorToDiagramSpace`.
-  // A5/T7: real `shape=record` nodes with a `<Pn>` port per row, so each edge
-  // leaves the ROW it belongs to. `recordLabelFor` builds the label upstream
-  // builds (`SmetanaForJson#getDotLabelArray`/`#getDotLabelMap`).
-  //
-  // This spaces same-rank siblings further apart than the jar does -- graphviz
-  // PADs every record field (`XPAD` = 4*GAP = 16, `macros.h:27-29`) and
-  // upstream's `colAwidth - 8` offsets only the `YPAD` half, so a node grows by
-  // 16 per row. **That is real graphviz's behaviour, not a defect here**:
-  // verified against the installed `dot` 15.1.1 on an equivalent 3-port record,
-  // which returns w=0.92708 h=0.69444 -- byte-identical to what this seam
-  // produces. The jar shows no such inflation because Smetana does not
-  // reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
-  // delta is accepted and named rather than chased. See DIVERGENCES.md.
-  const dotNodes = measured.map((m) => ({
+/**
+ * Build the dot-engine's node inputs, one `shape=record` per measured JSON
+ * node. A5/T6 (ADR-1): dimensions are SWAPPED on the way in -- upstream
+ * hands graphviz each node's height as its width and vice versa
+ * (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
+ * transposed frame, then transposes the answer back. See
+ * `mirrorToDiagramSpace`.
+ * A5/T7: real `shape=record` nodes with a `<Pn>` port per row, so each edge
+ * leaves the ROW it belongs to. `recordLabelFor` builds the label upstream
+ * builds (`SmetanaForJson#getDotLabelArray`/`#getDotLabelMap`).
+ *
+ * This spaces same-rank siblings further apart than the jar does -- graphviz
+ * PADs every record field (`XPAD` = 4*GAP = 16, `macros.h:27-29`) and
+ * upstream's `colAwidth - 8` offsets only the `YPAD` half, so a node grows by
+ * 16 per row. **That is real graphviz's behaviour, not a defect here**:
+ * verified against the installed `dot` 15.1.1 on an equivalent 3-port record,
+ * which returns w=0.92708 h=0.69444 -- byte-identical to what this seam
+ * produces. The jar shows no such inflation because Smetana does not
+ * reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
+ * delta is accepted and named rather than chased. See DIVERGENCES.md.
+ */
+function buildJsonDotNodes(measured: MeasuredNode[]): DotInputNode[] {
+  return measured.map((m) => ({
     id: m.flatNode.id,
     width: m.totalHeight,
     height: m.totalWidth,
     shape: 'record' as const,
     recordLabel: recordLabelFor(m),
   }));
+}
 
+/** Build the dot-engine's edge inputs, one per parent->child link. */
+function buildJsonDotEdges(flatNodes: FlatNode[], measured: MeasuredNode[]): DotInputEdge[] {
   const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));
-
-  const dotEdges: DotInputEdge[] = flatNodes
+  return flatNodes
     .filter((fn) => fn.parentId !== null)
     .map((fn) => {
       // `tailport="P<rowIndex>"` -- `SmetanaForJson#createEdge` (:224) names the
@@ -342,7 +337,92 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
       if (rowIndex >= 0) edge.attributes!.tailport = `P${rowIndex}`;
       return edge;
     });
+}
 
+/**
+ * Place measured nodes at their solved dot-engine coordinates, transposed
+ * back into diagram space and offset by the document margin -- same
+ * arithmetic as the former separate "build then shift" loops, folded into
+ * one pass.
+ */
+function placeJsonNodes(
+  measured: MeasuredNode[],
+  mirrored: Map<string, { x: number; y: number }>,
+  margin: { left: number; top: number },
+): JsonNodeGeo[] {
+  const nodes: JsonNodeGeo[] = [];
+  for (const m of measured) {
+    const dn = mirrored.get(m.flatNode.id);
+    if (dn === undefined) continue;
+    nodes.push({
+      id: m.flatNode.id,
+      x: dn.x + margin.left,
+      y: dn.y + margin.top,
+      width: m.totalWidth,
+      height: m.totalHeight,
+      keyColWidth: m.keyColWidth,
+      valueColWidth: m.valueColWidth,
+      rows: m.rows,
+    });
+  }
+  return nodes;
+}
+
+/**
+ * Transpose the dot engine's own splines into diagram space and offset by
+ * the document margin. A5/T8: the edges are the ENGINE's own splines,
+ * transposed, not points re-derived from node geometry. Upstream does the
+ * same -- `SmetanaForJson#drawMe` hands each `ST_Agedge_s` to `JsonCurve`,
+ * which reads `data.spl` (`JsonCurve.java:58-71`).
+ *
+ * This became worth doing at T7: with real `<Pn>` record ports the engine
+ * routes each edge out of the row it belongs to, so its spline carries
+ * information the old re-derivation could only approximate (a horizontal
+ * stub plus a hand-built S-curve).
+ *
+ * Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
+ * has already applied `Mirror#inv`, so only the x/y switch remains. See
+ * `mirrorToDiagramSpace`.
+ * `ep` takes the IDENTICAL transposition as the points — it is reported in
+ * the same frame, so anything else would put the arrow tip in a different
+ * space from the spline it terminates. Absent when the engine placed no
+ * arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
+ */
+function buildJsonEdgeGeometries(
+  dotEdges: DotLayoutResult['edges'],
+  margin: { left: number; top: number },
+): JsonEdgeGeo[] {
+  return dotEdges.map((e) => ({
+    points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
+    ...(e.epX !== undefined && e.epY !== undefined ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } } : {}),
+    spline: true,
+  }));
+}
+
+export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMeasurer): JsonGeometry {
+  // Handle parse failure: return an error geometry that the renderer will
+  // display as PlantUML's canonical "Your data does not sound like JSON data".
+  const margin = marginsOf(theme);
+  if (ast.parseError) return layoutParseFailure(ast, measurer, margin);
+
+  const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
+
+  // Build per-node highlight map: nodeId → Map<key, styleClass>.
+  // Each #highlight path navigates from the root node through child nodes
+  // following all but the last segment, then marks the last segment as
+  // highlighted in that destination node.
+  const highlightMap = buildHighlightMap(flatNodes, ast.highlights);
+
+  const { nodeFontSize, measureOptions } = resolveJsonMeasureConfig(theme);
+
+  // Measure each node
+  const measured = flatNodes.map((fn) =>
+    measureNode(fn, highlightMap.get(fn.id) ?? EMPTY_MAP, measurer, nodeFontSize, measureOptions),
+  );
+
+  // Build dot input graph (nodes + edges) -- see buildJsonDotNodes/
+  // buildJsonDotEdges doc comments for the ADR-1 transposition rationale.
+  //
   // A5/T6 (ADR-1): no `rankDir` and no separations, matching upstream. Its
   // `agopen` never sets `rankdir`, `nodesep` or `ranksep`, so graphviz's own
   // defaults (36pt / 18pt) apply -- this port previously forced `LR` with
@@ -350,8 +430,8 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
   // closer to the jar on document dimensions for 68 fixtures and worse for 2
   // (`plans/a5-json-family-conformance/adr1-gonogo.md`).
   const dotInput: DotInputGraph = {
-    nodes: dotNodes,
-    edges: dotEdges,
+    nodes: buildJsonDotNodes(measured),
+    edges: buildJsonDotEdges(flatNodes, measured),
     omitSepAttrs: true,
   };
 
@@ -361,64 +441,18 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
   // a coordinate off it.
   const mirrored = mirrorToDiagramSpace(dotResult.nodes);
 
-  const nodes: JsonNodeGeo[] = [];
-  for (const m of measured) {
-    const dn = mirrored.get(m.flatNode.id);
-    if (dn === undefined) continue;
-    nodes.push({
-      id: m.flatNode.id,
-      x: dn.x,
-      y: dn.y,
-      width: m.totalWidth,
-      height: m.totalHeight,
-      keyColWidth: m.keyColWidth,
-      valueColWidth: m.valueColWidth,
-      rows: m.rows,
-    });
-  }
-
   // Apply CANVAS_PAD to node positions first so that edge anchor points
   // computed below are in final canvas coordinates. Title no longer
   // reserves layout space here (mission G0b/T8) -- it flows through
   // ast.annotations.title and is drawn by the shared applyChrome step in
   // src/index.ts, entirely outside this layout stage.
-  for (const n of nodes) {
-    n.x += margin.left;
-    n.y += margin.top;
-  }
+  // T1/N -- `rankMaxRight` (a per-rank right-boundary map for edge routing)
+  // was computed here and never read; removed as dead code surfaced by this
+  // extraction (code review 2026-09-21, pr-workflow.md dead-code policy).
+  // No consumer existed anywhere in src/ or tests/ (grepped before removal).
+  const nodes = placeJsonNodes(measured, mirrored, margin);
 
-  // Compute per-rank right boundary: the rightmost edge of any node at that rank.
-  // Edges from narrow nodes would otherwise travel through the right portion of
-  // wider siblings at the same rank. Routing via the rank boundary keeps all
-  // edge paths in the clear gap between ranks.
-  const rankMaxRight = new Map<number, number>();
-  for (const n of nodes) {
-    const cur = rankMaxRight.get(n.x) ?? 0;
-    rankMaxRight.set(n.x, Math.max(cur, n.x + n.width));
-  }
-
-  // A5/T8: the edges are the ENGINE's own splines, transposed into diagram
-  // space, not points re-derived from node geometry. Upstream does the same --
-  // `SmetanaForJson#drawMe` hands each `ST_Agedge_s` to `JsonCurve`, which
-  // reads `data.spl` (`JsonCurve.java:58-71`).
-  //
-  // This became worth doing at T7: with real `<Pn>` record ports the engine
-  // routes each edge out of the row it belongs to, so its spline carries
-  // information the old re-derivation could only approximate (a horizontal
-  // stub plus a hand-built S-curve).
-  //
-  // Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
-  // has already applied `Mirror#inv`, so only the x/y switch remains. See
-  // `mirrorToDiagramSpace`.
-  // `ep` takes the IDENTICAL transposition as the points — it is reported in
-  // the same frame, so anything else would put the arrow tip in a different
-  // space from the spline it terminates. Absent when the engine placed no
-  // arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
-  const edges: JsonEdgeGeo[] = dotResult.edges.map((e) => ({
-    points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
-    ...(e.epX !== undefined && e.epY !== undefined ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } } : {}),
-    spline: true,
-  }));
+  const edges = buildJsonEdgeGeometries(dotResult.edges, margin);
 
   const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
   const result: JsonGeometry = {
