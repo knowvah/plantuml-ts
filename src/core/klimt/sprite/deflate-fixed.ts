@@ -116,6 +116,14 @@ interface Match {
   readonly distance: number;
 }
 
+/** How far `data[candidate..]` and `data[pos..]` agree, capped at `maxLen` —
+ *  the run-length probe {@link findMatch} makes against each chain candidate. */
+function matchLengthAt(data: Uint8Array, pos: number, candidate: number, maxLen: number): number {
+  let len = 0;
+  while (len < maxLen && data[candidate + len] === data[pos + len]) len++;
+  return len;
+}
+
 /** Longest match for `pos`, walking the chain head-first (most recent first)
  *  so ties resolve to the SHORTEST distance, which encodes smaller. */
 function findMatch(data: Uint8Array, pos: number, head: Int32Array, prev: Int32Array): Match | undefined {
@@ -127,8 +135,7 @@ function findMatch(data: Uint8Array, pos: number, head: Int32Array, prev: Int32A
   for (let n = 0; n < MAX_CHAIN && candidate !== NO_POS; n++) {
     const dist = pos - candidate;
     if (dist <= 0 || dist > WINDOW_SIZE) break;
-    let len = 0;
-    while (len < maxLen && data[candidate + len] === data[pos + len]) len++;
+    const len = matchLengthAt(data, pos, candidate, maxLen);
     if (len > best) {
       best = len;
       bestDist = dist;

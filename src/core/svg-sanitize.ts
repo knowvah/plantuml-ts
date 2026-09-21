@@ -10,11 +10,17 @@
  *     that is verified safe at build time (e.g. committed fixtures).
  *
  * Wiring status (2026-09-19, `plans/svg-attribute-escaping-audit/decisions.md`
- * D6): no in-library caller yet. The intended call site is D3-prime image
- * embedding (`klimt/drawing/svg/svg-graphics.ts#svgImage`, currently a
- * throwing stub), where fetched SVG would be inlined into the document as
- * upstream does raw. Hosts that inline external SVG themselves may call it
- * directly; it is exported for that.
+ * D6): NEITHER called nor part of the package's public surface yet.
+ * `sanitizeSvg` carries the `export` keyword (a plain module-level export,
+ * so `tests/unit/svg-sanitize.test.ts` can reach it directly), but
+ * `src/index.ts` — the package's only "exports" subpath (`package.json`) —
+ * does not re-export it, so a consumer of the built library cannot import
+ * it today. The intended call site is D3-prime image embedding
+ * (`klimt/drawing/svg/svg-graphics.ts#svgImage`, currently a throwing
+ * stub), where fetched SVG would be inlined into the document as upstream
+ * does raw. Until that lands (and `sanitizeSvg` is re-exported from
+ * `src/index.ts` alongside it), a host that inlines external SVG itself
+ * has no supported way to call this sanitizer.
  *
  * What is stripped:
  *   - <script> elements and their content

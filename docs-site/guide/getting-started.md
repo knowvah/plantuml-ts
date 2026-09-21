@@ -66,10 +66,13 @@ string synchronously. On a parse or layout error it returns a small SVG
 containing the error message rather than throwing.
 
 ::: tip !include is not supported by renderSync
-If `source` contains an `!include` directive, `renderSync` throws. Use the
-async `render(source, options?)` instead — it resolves includes first via
-`resolveIncludes()`. See [API reference](/guide/api) for both signatures and
-the include-resolver seam.
+`renderSync` cannot fetch. If `source` contains an `!include` directive and
+no `options.includeStore` is supplied, it returns an error SVG rather than
+resolving it. Use the async `render(source, options?)` instead — it
+resolves includes first via `prepareIncludeStore()` — or prefetch them
+yourself with `prepareIncludeStore()` and pass the result as
+`options.includeStore` to `renderSync`. See [API reference](/guide/api) for
+both signatures and the include-resolver seam.
 :::
 
 ## Browser usage
@@ -91,7 +94,8 @@ back to `FormulaMeasurer` automatically; pass a custom `measurer` in
 ## Next steps
 
 - [API reference](/guide/api) — the full public surface: `renderSync`,
-  `render`, `renderAll`, the measurer seam, the include-resolver seam.
+  `renderPagesSync`, `render`, `renderPages`, `renderAll`, the measurer
+  seam, the include-resolver seam, the stdlib seam, and the asset seam.
 - [Playground](/playground) — edit PlantUML source and see SVG live, in your
   browser.
 - [Known divergences](/divergences) — where plantuml-ts intentionally

@@ -272,13 +272,33 @@ function countAtoms(expr: string): number {
   return count;
 }
 
+// This port's own heuristic constants — there is no upstream (JLaTeXMath)
+// equivalent to cite: upstream rasterizes through JLaTeXMath and measures
+// the resulting bitmap, while this port renders through KaTeX and never
+// produces one to measure (permanent divergence, DIVERGENCES.md "LaTeX
+// rendering engine — KaTeX, not JLaTeXMath"). Values unchanged from the
+// heuristic mission E2r L2 chose; naming them here does not re-tune them.
+/** Width contributed by each semantic atom (`\command` or visible char). */
+const LATEX_WIDTH_PER_ATOM_PX = 10;
+/** Floor on the heuristic width, however few atoms the expression has. */
+const LATEX_MIN_WIDTH_PX = 120;
+/** Height with no structural marker present. */
+const LATEX_BASE_HEIGHT_PX = 40;
+/** Height added per structural marker (`\frac`, `\sum`, `\int`, `\prod`, `\sqrt`). */
+const LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX = 20;
+/** Ceiling on the heuristic height, however many structural markers appear. */
+const LATEX_MAX_HEIGHT_PX = 80;
+
 /**
  * Heuristic bounding box for a LaTeX expression.
  *
  * Width: count semantic atoms (each `\command` = 1, each visible char = 1)
- *        then multiply by 10px, floored at 120px.
- * Height: base 40px + 20px per structural marker (`\frac`, `\sum`, `\int`,
- *         `\prod`, `\sqrt`), capped at 80px.
+ *        then multiply by {@link LATEX_WIDTH_PER_ATOM_PX}, floored at
+ *        {@link LATEX_MIN_WIDTH_PX}.
+ * Height: {@link LATEX_BASE_HEIGHT_PX} +
+ *         {@link LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX} per structural
+ *         marker (`\frac`, `\sum`, `\int`, `\prod`, `\sqrt`), capped at
+ *         {@link LATEX_MAX_HEIGHT_PX}.
  */
 export function measureLatex(raw: string): { width: number; height: number } {
   // Strip <latex>…</latex> wrapper if present — the tags themselves must not
@@ -294,8 +314,11 @@ export function measureLatex(raw: string): { width: number; height: number } {
     }
   }
 
-  const height = Math.min(40 + structuralCount * 20, 80);
-  const width = Math.max(120, countAtoms(expr) * 10);
+  const height = Math.min(
+    LATEX_BASE_HEIGHT_PX + structuralCount * LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX,
+    LATEX_MAX_HEIGHT_PX,
+  );
+  const width = Math.max(LATEX_MIN_WIDTH_PX, countAtoms(expr) * LATEX_WIDTH_PER_ATOM_PX);
 
   return { width, height };
 }

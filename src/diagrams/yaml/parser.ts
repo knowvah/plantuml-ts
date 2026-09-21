@@ -116,9 +116,10 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
   }
 
   let root: unknown = null;
+  const parseWarnings: string[] = [];
   try {
     if (bodyLines.some((l) => l.trim() !== '')) {
-      const monomorph = parseYamlLines(bodyLines);
+      const monomorph = parseYamlLines(bodyLines, parseWarnings);
       root = monomorphToJson(monomorph);
     }
   } catch {
@@ -137,5 +138,6 @@ export function parseYaml(source: UmlSource): JsonDiagramAST {
     annotations,
     sprites,
     ...(scale === undefined ? {} : { scale }),
+    ...(parseWarnings.length === 0 ? {} : { parseWarnings }),
   };
 }

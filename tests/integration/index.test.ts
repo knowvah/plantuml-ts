@@ -20,7 +20,7 @@ import { registry } from '../../src/core/dispatcher.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import type { AsyncPlugin } from '../../src/core/dispatcher.js';
 import { refuse } from '../../src/core/parse-refusal.js';
-import { ERROR_BANNER, expectNoErrorDiagram } from '../helpers/error-diagram.js';
+import { ERROR_BANNER, expectErrorDiagram, expectNoErrorDiagram } from '../helpers/error-diagram.js';
 
 // ---------------------------------------------------------------------------
 // Unique trigger strings — must not match sequence arrow patterns
@@ -163,6 +163,46 @@ describe('renderAll() with fetcher option', () => {
     expect(svgs).toHaveLength(1);
     expect(svgs[0]?.trimStart()).toMatch(/^<svg/);
     expectNoErrorDiagram(svgs[0]!);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// renderAll() — one block's failing !include must not discard its siblings
+// (code-review item 2: prepareIncludeStore rejects the WHOLE call on the
+// first failing target, so it must be scoped to each block's OWN raw text).
+// ---------------------------------------------------------------------------
+
+describe('renderAll() — per-block include isolation', () => {
+  it('renders the good block normally when a sibling block\'s include fails', async () => {
+    const fetcher = (url: string): Promise<string> =>
+      url.includes('/bad.puml')
+        ? Promise.reject(new Error('network down'))
+        : Promise.resolve('Alice -> Bob : hello');
+
+    const good = `@startuml\n!include https://example.com/good.puml\n@enduml`;
+    const bad = `@startuml\n!include https://example.com/bad.puml\n@enduml`;
+    const svgs = await renderAll(`${good}\n${bad}`, { fetcher });
+
+    expect(svgs).toHaveLength(2);
+    expect(svgs[0]?.trimStart()).toMatch(/^<svg/);
+    expectNoErrorDiagram(svgs[0]!);
+    expect(svgs[1]?.trimStart()).toMatch(/^<svg/);
+    expectErrorDiagram(svgs[1]!, 'network down');
+  });
+
+  it('a failing first block does not prevent a later good block from rendering', async () => {
+    const fetcher = (url: string): Promise<string> =>
+      url.includes('/bad.puml')
+        ? Promise.reject(new Error('network down'))
+        : Promise.resolve('Alice -> Bob : hello');
+
+    const bad = `@startuml\n!include https://example.com/bad.puml\n@enduml`;
+    const good = `@startuml\n!include https://example.com/good.puml\n@enduml`;
+    const svgs = await renderAll(`${bad}\n${good}`, { fetcher });
+
+    expect(svgs).toHaveLength(2);
+    expectErrorDiagram(svgs[0]!, 'network down');
+    expectNoErrorDiagram(svgs[1]!);
   });
 });
 

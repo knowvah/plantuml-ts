@@ -11,7 +11,17 @@ export class YamlSyntaxError extends Error {
   }
 }
 
-export function parseYamlLines(lines: string[]): Monomorph {
+/**
+ * @param lines     The block's YAML body, one PlantUML source line each.
+ * @param warnings  Collects a message for each `KEY_AND_FOLDED_STYLE` (`>`)
+ *                  value this port drops (unimplemented, folded to an empty
+ *                  string) -- pushed here rather than printed, so the caller
+ *                  decides whether/where it surfaces (`RenderOptions.onWarning`
+ *                  via `JsonDiagramAST.parseWarnings`/`surfaceParseWarnings`,
+ *                  `diagrams/json/ast.ts`). Omitted -> the degradation is
+ *                  silent, matching every other unreported parser fallback.
+ */
+export function parseYamlLines(lines: string[], warnings?: string[]): Monomorph {
   const builder = new YamlBuilder();
   let i = 0;
 
@@ -135,7 +145,9 @@ export function parseYamlLines(lines: string[]): Monomorph {
           break;
         }
         case YamlLineType.KEY_AND_FOLDED_STYLE:
-          console.warn('KEY_AND_FOLDED_STYLE not supported');
+          warnings?.push(
+            `YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`,
+          );
           builder.onListItemKeyAndValue(yamlLine.key!, '');
           break;
         /* c8 ignore next 4 */
@@ -169,7 +181,9 @@ export function parseYamlLines(lines: string[]): Monomorph {
           builder.onKeyAndFlowSequence(yamlLine.key!, [...yamlLine.values!]);
           break;
         case YamlLineType.KEY_AND_FOLDED_STYLE:
-          console.warn('KEY_AND_FOLDED_STYLE not supported');
+          warnings?.push(
+            `YAML key "${yamlLine.key}": folded-style (>) block value is not supported and was dropped`,
+          );
           builder.onKeyAndValue(yamlLine.key!, '');
           break;
         /* c8 ignore next 4 */

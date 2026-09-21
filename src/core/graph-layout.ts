@@ -51,6 +51,7 @@ type OutClusters = NonNullable<DotLayoutResult['clusters']>;
 // tests capture the exact graph plantuml-ts feeds graphviz, for one fixture, to
 // compare against the oracle's svek-*.dot. Undefined (no-op) by default and in
 // every production path. See oracle/README.md and tests/oracle/.
+// Code review: layoutInputObserver is a shared module-level global set via setLayoutInputObserver; concurrent render() calls from the same process that both install an observer will race. Revisit if oracle/parity tests are ever parallelized within a single worker.
 let layoutInputObserver: ((input: DotInputGraph) => void) | undefined;
 
 export function setLayoutInputObserver(fn: ((input: DotInputGraph) => void) | undefined): void {

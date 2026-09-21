@@ -139,24 +139,27 @@ ruling above is, and it stands on its own.
 **Category:** limitation (one engine, by choice).
 
 
-### External `!import` / `!include` deferred (scope)
+### External `!import` / `!include` deferred (scope) — UPDATED, see below
 
 **Upstream:** `!include`/`!import` resolve local files, URLs, and the
 PlantUML stdlib inline during preprocessing.
 
-**This port:** external import/include functionality is not included at
-this time. Deferred past v1.0 by maintainer decision (2026-07-10): a
-faithful port needs a TypeScript/JavaScript-friendly resolution design
-(no synchronous filesystem access in a browser library) rather than a
-mechanical translation. An opt-in async seam for URL-based `!include`
-exists (`resolveIncludes()` + caller-supplied fetcher in
-`src/core/include-resolver.ts`); filesystem and stdlib resolution ship
-in no form. The `!procedure`/`!function` macro family (TIM subsystem)
-IS in scope and being ported.
+**This port (updated — see the two sections below):** URL-based
+`!include` resolves through `prepareIncludeStore()`/`options.fetcher`
+(`src/core/include-resolver.ts`, `docs-site/guide/api.md`'s "include-resolver
+seam"), gated by `RenderOptions.securityProfile`. PlantUML's bundled stdlib
+(`!include <bundle/thing>`) resolves once a host supplies bundle data —
+mission SI5b, see "`!include <bundle/thing>` is a typed error, not a silent
+skip" below; this library still vendors no stdlib content itself. There is
+still **no built-in local-filesystem `!include` resolver** — a Node host
+supplies its own `options.fetcher` reading from `node:fs` for that. The
+`!procedure`/`!function` macro family (TIM subsystem) is in scope and
+being ported.
 
 **Reason:** scope control for v1.0; the design question (how a JS/TS
-consumer supplies includable sources) deserves its own decision rather
-than an implicit port.
+consumer supplies includable sources) deserved its own decision rather
+than an implicit port — SI5a (URL includes) and SI5b (stdlib) are that
+decision, landed.
 
 ---
 

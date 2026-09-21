@@ -145,4 +145,29 @@ describe('parseYaml', () => {
     const result = renderSync('@startyaml\nfruit: Apple\nsize: Large\n@endyaml');
     expect(result).toContain('<svg');
   });
+
+  // -------------------------------------------------------------------------
+  // code-review item 5 — KEY_AND_FOLDED_STYLE degradation is reported, not
+  // silently dropped or console.warn'd (RenderOptions.onWarning).
+  // -------------------------------------------------------------------------
+
+  it('has no parseWarnings for a document with no folded-style values', () => {
+    const ast = parseYaml(makeSource(['fruit: Apple']));
+    expect(ast.parseWarnings).toBeUndefined();
+  });
+
+  it('collects a parseWarnings entry for a folded-style (>) value', () => {
+    const ast = parseYaml(makeSource(['key: >']));
+    expect(ast.parseWarnings).toEqual([
+      'YAML key "key": folded-style (>) block value is not supported and was dropped',
+    ]);
+  });
+
+  it('renderSync surfaces the warning through options.onWarning', () => {
+    const messages: string[] = [];
+    renderSync('@startyaml\nkey: >\n@endyaml', { onWarning: (m) => messages.push(m) });
+    expect(messages).toEqual([
+      'YAML key "key": folded-style (>) block value is not supported and was dropped',
+    ]);
+  });
 });

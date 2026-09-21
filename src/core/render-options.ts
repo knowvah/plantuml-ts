@@ -74,12 +74,36 @@ export interface RenderOptions {
   urlAllowlist?: readonly string[] | undefined;
 }
 
-export function getDefaultMeasurer(): StringMeasurer {
+/** Module-level cache for {@link getDefaultMeasurer} -- see its own doc
+ *  comment for why sharing one instance across renders is safe. */
+let defaultMeasurer: StringMeasurer | undefined;
+
+function createDefaultMeasurer(): StringMeasurer {
   try {
     return new CanvasMeasurer();
   } catch {
     return new FormulaMeasurer();
   }
+}
+
+/**
+ * The process-wide default `StringMeasurer`, created once (lazily, on first
+ * use) and reused by every render that does not pass its own
+ * `options.measurer`.
+ *
+ * Sharing contract: `CanvasMeasurer`'s measurement cache (8192 entries,
+ * keyed by `${font}|${text}` — `measurer.ts#CanvasMeasurer#buildCacheKey`)
+ * is safe to share across unrelated renders because a cache hit for a given
+ * text+font pair is the same measurement regardless of which diagram asked
+ * for it, and the measurer otherwise holds no per-render state. Constructing
+ * a fresh instance per render discarded that cache every time; this reuses
+ * it. A first call that falls back to `FormulaMeasurer` (no `document`/canvas
+ * available) is cached too — if canvas construction fails once in this
+ * process it fails every time, so there is nothing to gain by retrying it.
+ */
+export function getDefaultMeasurer(): StringMeasurer {
+  defaultMeasurer ??= createDefaultMeasurer();
+  return defaultMeasurer;
 }
 
 /**

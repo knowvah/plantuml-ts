@@ -45,6 +45,12 @@ import { splitDisplayLines } from './klimt/creole/DisplayNewlines.js';
  */
 const CREOLE_FORMAT_TAG_SOURCE = '</?(?:color|back|size|font|plain|w|b|i|u|s)(?::[^>]*|\\s[^>]*)?>';
 
+/** {@link CREOLE_FORMAT_TAG_SOURCE}, compiled once. Safe to share at module
+ *  scope: its only use is `String#replace`, which resets a global regex's
+ *  `lastIndex` to 0 both before and after each call, so no call-to-call
+ *  state leaks through repeated {@link stripCreoleMarkup} calls. */
+const CREOLE_FORMAT_TAG = new RegExp(CREOLE_FORMAT_TAG_SOURCE, 'gi');
+
 /**
  * Strip inline creole formatting to the text a measurer should see. Upstream
  * never faces this: `SvekEdge` measures a real creole `TextBlock`
@@ -54,7 +60,7 @@ const CREOLE_FORMAT_TAG_SOURCE = '</?(?:color|back|size|font|plain|w|b|i|u|s)(?:
  * for the one case handed off separately: a leading `<size:N>` run change.
  */
 export function stripCreoleMarkup(text: string): string {
-  return text.replace(new RegExp(CREOLE_FORMAT_TAG_SOURCE, 'gi'), '');
+  return text.replace(CREOLE_FORMAT_TAG, '');
 }
 
 /**

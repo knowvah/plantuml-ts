@@ -182,6 +182,7 @@ function solve3(coeff: [number, number, number, number], roots: number[]): numbe
   return roots.length;
 }
 
+/** @see ~/git/graphviz/lib/pathplan/route.c:314-392 (`splineintersectsline`) */
 function splineintersectslineCollect(sps: [Point, Point, Point, Point], lps: [Point, Point], out: number[]): number {
   const xcoeff0 = lps[0].x;
   const xcoeff1 = lps[1].x - lps[0].x;
