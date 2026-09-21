@@ -81,9 +81,11 @@ describe('prefetchIncludes — single !include', () => {
 
   it('fetches !include_once / !include_many / !includeurl targets too', async () => {
     const fetcher = vi.fn().mockResolvedValue('x');
-    await prefetchIncludes('!include_once a\n!include_many b\n!includeurl https://c/d', fetcher);
+    // `c.example.com`: a dotless host (`https://c/d`) is refused by the
+    // default LEGACY security profile (URLCheck.java:54-57) before any fetch.
+    await prefetchIncludes('!include_once a\n!include_many b\n!includeurl https://c.example.com/d', fetcher);
     const calls = fetcher.mock.calls as [string][];
-    expect(calls.map((c) => c[0])).toEqual(['a', 'b', 'https://c/d']);
+    expect(calls.map((c) => c[0])).toEqual(['a', 'b', 'https://c.example.com/d']);
   });
 });
 

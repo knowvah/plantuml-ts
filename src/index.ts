@@ -66,6 +66,8 @@ export {
   StdlibNotBundledError,
   type IncludeWarmupOptions,
 } from './core/include-resolver.js';
+// Upstream's SecurityProfile, as `RenderOptions.securityProfile` (README, "Security").
+export { SecurityProfile } from './core/security/SecurityProfile.js';
 // SI11a per-RESOURCE fetch (vs. si8's per-BUNDLE chunk above); see StdlibRemote.ts's doc comment. si11b's
 // `spriteSplitStdlib` is one level finer again: a bootstrap diagram pays for the sprites it names, not the 1.06 MB bundle holding all 2,078 of them.
 export { remoteStdlib, StdlibResourceFetchError, type StdlibRemoteManifest, type RemoteBundle } from './core/tim/StdlibRemote.js';

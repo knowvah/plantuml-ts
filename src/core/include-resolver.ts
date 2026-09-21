@@ -40,6 +40,17 @@
 import { MapIncludeStore, StdlibNotBundledError, stdlibPathOf, type IncludeStore } from './tim/IncludeStore.js';
 import { stdlibContentFor } from './stdlib-content.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
+import { DEFAULT_SECURITY_PROFILE, getTimeout, type SecurityProfile } from './security/SecurityProfile.js';
+import { isUrlOk } from './security/SURL.js';
+import { withIncludeTimeout } from './include-resolver-timeout.js';
+import {
+  CspIncludeError,
+  CorsIncludeError,
+  IncludeResolveError,
+  CircularIncludeError,
+  blockedUrlError,
+  includeTimeoutError,
+} from './include-resolver-errors.js';
 
 export {
   MapIncludeStore,
@@ -51,82 +62,12 @@ export {
 
 export type IncludeFetcher = (url: string) => Promise<string>;
 
-// ---------------------------------------------------------------------------
-// Error types
-// ---------------------------------------------------------------------------
-
-/**
- * Thrown when a CSP connect-src policy blocks an include fetch.
- * The `requiredDirective` property contains the exact directive the page needs.
- */
-export class CspIncludeError extends Error {
-  readonly url: string;
-  readonly requiredDirective: string;
-
-  constructor(url: string, origin: string) {
-    const directive = `connect-src 'self' ${origin}`;
-    super(
-      `CSP blocked !include fetch from ${url}.\n` +
-        `Add the following to your Content-Security-Policy to allow it:\n` +
-        `  Content-Security-Policy: ${directive}`,
-    );
-    this.name = 'CspIncludeError';
-    this.url = url;
-    this.requiredDirective = directive;
-  }
-}
-
-/**
- * Thrown when a CORS failure prevents an include fetch.
- * Browsers hide the CORS detail — this error is inferred from URL patterns.
- * Updating CSP will not resolve a CORS issue.
- */
-export class CorsIncludeError extends Error {
-  readonly url: string;
-
-  constructor(url: string) {
-    super(
-      `CORS error fetching !include from ${url}.\n` +
-        `The server does not send Access-Control-Allow-Origin headers; browsers block the response.\n` +
-        `Updating your Content-Security-Policy will not help — this is a server-side CORS issue.\n` +
-        `Options:\n` +
-        `  • Bundle the include content at build time using a local resolver\n` +
-        `  • Host the file on a server that sends CORS headers\n` +
-        `  • Use a CORS proxy service`,
-    );
-    this.name = 'CorsIncludeError';
-    this.url = url;
-  }
-}
-
-/**
- * Thrown when include resolution fails for a reason other than CSP or CORS.
- */
-export class IncludeResolveError extends Error {
-  readonly url: string;
-
-  constructor(message: string, url: string) {
-    super(message);
-    this.name = 'IncludeResolveError';
-    this.url = url;
-  }
-}
-
-/**
- * Thrown when a circular !include chain is detected.
- * The `chain` property contains the inclusion path leading to the cycle.
- */
-export class CircularIncludeError extends Error {
-  readonly url: string;
-  readonly chain: readonly string[];
-
-  constructor(url: string, chain: string[]) {
-    super(`Circular !include detected: ${[...chain, url].join(' → ')}`);
-    this.name = 'CircularIncludeError';
-    this.url = url;
-    this.chain = chain;
-  }
-}
+export {
+  CspIncludeError,
+  CorsIncludeError,
+  IncludeResolveError,
+  CircularIncludeError,
+} from './include-resolver-errors.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -161,8 +102,15 @@ function originOf(url: string): string {
  * GitHub raw URLs (raw.githubusercontent.com, gist.githubusercontent.com,
  * raw.github.com) are detected and always reported as CORS errors, because those
  * servers do not send Access-Control-Allow-Origin headers.
+ *
+ * The request is aborted after `timeoutMs` (default: the default profile's
+ * `getTimeout()`, SecurityProfile.java:170), failing as
+ * {@link includeTimeoutError}.
  */
-export async function fetchInclude(url: string): Promise<string> {
+export async function fetchInclude(
+  url: string,
+  timeoutMs: number = getTimeout(DEFAULT_SECURITY_PROFILE),
+): Promise<string> {
   const inBrowser = typeof window !== 'undefined' && typeof window.addEventListener === 'function';
 
   let cspViolationOrigin: string | null = null;
@@ -179,8 +127,12 @@ export async function fetchInclude(url: string): Promise<string> {
     window.addEventListener('securitypolicyviolation', cspHandler);
   }
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(includeTimeoutError(url, timeoutMs));
+  }, timeoutMs);
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal: controller.signal });
     if (!response.ok) {
       throw new IncludeResolveError(
         `Failed to fetch !include ${url}: HTTP ${response.status} ${response.statusText}`,
@@ -207,8 +159,12 @@ export async function fetchInclude(url: string): Promise<string> {
     // T1 edits a different function in this file. Each branch is one distinct,
     // differentiated failure mode (CSP / CORS / HTTP / generic) whose whole
     // point is a separate remediation message.
-    throw new IncludeResolveError(`Failed to fetch !include ${url}: ${err instanceof Error ? err.message : String(err)}`, url);
+    throw new IncludeResolveError(
+      `Failed to fetch !include ${url}: ${err instanceof Error ? err.message : String(err)}`,
+      url,
+    );
   } finally {
+    clearTimeout(timer);
     if (inBrowser) {
       window.removeEventListener('securitypolicyviolation', cspHandler);
     }
@@ -266,6 +222,32 @@ interface PrefetchWalk {
   /** si11b ADR-5b: `RenderOptions.sprites`, applied at EVERY recursion level
    *  (`stdlib-content.ts#stdlibContentFor`), not just the top one. */
   readonly extraSpriteNames: readonly string[] | undefined;
+  /** `RenderOptions.securityProfile`: gates url targets, bounds every fetch. */
+  readonly profile: SecurityProfile;
+  /** `RenderOptions.urlAllowlist` (upstream `plantuml.allowlist.url`). */
+  readonly allowlist: readonly string[];
+}
+
+/** Upstream opens a target as a URL iff it starts `http://`/`https://`
+ *  (`TContext.java:819`); matched case-insensitively here because `fetch`
+ *  would honor `HTTP://` too, and the gate must see everything it fetches. */
+const RE_URL_TARGET = /^https?:\/\//i;
+
+/**
+ * Fetch one non-stdlib target: refused if it is a url the profile does not
+ * allow (`SURL#isUrlOk`, SURL.java:200-230), otherwise bounded by the
+ * profile's `getTimeout()` (SecurityProfile.java:158-176).
+ */
+function fetchTarget(walk: PrefetchWalk, url: string): Promise<string> {
+  const { fetcher, profile, allowlist } = walk;
+  if (RE_URL_TARGET.test(url) && !isUrlOk(url, profile, allowlist))
+    return Promise.reject(blockedUrlError(url, profile));
+  const timeoutMs = getTimeout(profile);
+  return withIncludeTimeout(
+    () => fetcher(url),
+    timeoutMs,
+    () => includeTimeoutError(url, timeoutMs),
+  );
 }
 
 // si11a T4: run `work` for `url` once per walk (no `await` before the
@@ -292,7 +274,7 @@ async function prefetchInner(
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
-  const { fetcher, store, registry, inFlight, extraSpriteNames } = walk;
+  const { store, registry, inFlight, extraSpriteNames } = walk;
   const targets = source
     .split('\n')
     .map((line) => targetOf(line))
@@ -325,7 +307,7 @@ async function prefetchInner(
       }
       if (store.has(url)) return; // already fetched (diamond include), or host-supplied
       await dedupeInFlight(inFlight, url, async () => {
-        const content = await fetcher(url);
+        const content = await fetchTarget(walk, url);
         store.set(url, content);
         await prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
       });
@@ -334,18 +316,15 @@ async function prefetchInner(
 }
 
 /** Shared by {@link prefetchIncludes} and {@link prepareIncludeStore} so
- *  ADR-5b's `extraSpriteNames` reaches the walk without adding a parameter
- *  to `prefetchIncludes`'s public signature. */
+ *  ADR-5b's `extraSpriteNames` (and the security options) reach the walk
+ *  without adding a parameter to `prefetchIncludes`'s public signature. */
 async function startPrefetchWalk(
   source: string,
-  fetcher: IncludeFetcher,
   base: IncludeStore | undefined,
-  registry: StdlibRegistry | undefined,
-  extraSpriteNames: readonly string[] | undefined,
+  config: Omit<PrefetchWalk, 'store' | 'inFlight'>,
 ): Promise<IncludeStore> {
   const store = new BackedIncludeStore(base);
-  const inFlight = new Map<string, Promise<void>>();
-  const walk: PrefetchWalk = { fetcher, store, registry, inFlight, extraSpriteNames };
+  const walk: PrefetchWalk = { ...config, store, inFlight: new Map<string, Promise<void>>() };
   await prefetchInner(walk, source, new Set<string>(), []);
   return store;
 }
@@ -368,6 +347,9 @@ async function startPrefetchWalk(
  * @param registry Lazily-loaded stdlib bundles (si8 ADR-3/ADR-4), consulted
  *                 only after `base` misses. Its resolved text re-enters this
  *                 walk, so a bundle's own `!include <…>` lines are prefetched too.
+ *
+ * Url targets are gated, and every fetch is bounded, by the DEFAULT security
+ * profile; {@link prepareIncludeStore} takes an explicit one.
  * @throws StdlibChunkLoadError a registered bundle's chunk failed to load —
  *         deliberately distinct from `StdlibNotBundledError` (ADR-5).
  */
@@ -377,7 +359,13 @@ export async function prefetchIncludes(
   base?: IncludeStore,
   registry?: StdlibRegistry,
 ): Promise<IncludeStore> {
-  return startPrefetchWalk(source, fetcher, base, registry, undefined);
+  return startPrefetchWalk(source, base, {
+    fetcher,
+    registry,
+    extraSpriteNames: undefined,
+    profile: DEFAULT_SECURITY_PROFILE,
+    allowlist: [],
+  });
 }
 
 /** Options for {@link prepareIncludeStore}. A `RenderOptions` satisfies this. */
@@ -387,6 +375,12 @@ export interface IncludeWarmupOptions {
   readonly stdlibRegistry?: StdlibRegistry | undefined;
   /** si11b ADR-5b escape hatch, applied at every walk level (`PrefetchWalk`). */
   readonly sprites?: readonly string[] | undefined;
+  /** Which `http(s)://` include targets may be fetched, and how long each fetch
+   *  may take. Default: LEGACY, upstream's default (`SecurityProfile.java:136`). */
+  readonly securityProfile?: SecurityProfile | undefined;
+  /** Url prefixes always allowed (except under SANDBOX); the only ones allowed
+   *  under ALLOWLIST. Upstream's `plantuml.allowlist.url` (SURL.java:304-310). */
+  readonly urlAllowlist?: readonly string[] | undefined;
 }
 
 /**
@@ -407,13 +401,14 @@ export interface IncludeWarmupOptions {
  * `CircularIncludeError` (the `!include` chain loops — break it in the source).
  */
 export async function prepareIncludeStore(source: string, options?: IncludeWarmupOptions): Promise<IncludeStore> {
-  return startPrefetchWalk(
-    source,
-    options?.fetcher ?? fetchInclude,
-    options?.includeStore,
-    options?.stdlibRegistry,
-    options?.sprites,
-  );
+  const profile = options?.securityProfile ?? DEFAULT_SECURITY_PROFILE;
+  return startPrefetchWalk(source, options?.includeStore, {
+    fetcher: options?.fetcher ?? ((url: string) => fetchInclude(url, getTimeout(profile))),
+    registry: options?.stdlibRegistry,
+    extraSpriteNames: options?.sprites,
+    profile,
+    allowlist: options?.urlAllowlist ?? [],
+  });
 }
 
 /** A {@link MapIncludeStore} that falls back to a read-only base store on a miss. */

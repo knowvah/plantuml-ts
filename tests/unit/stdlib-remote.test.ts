@@ -23,7 +23,7 @@
  *
  * @see ../../src/core/tim/StdlibRemote.ts
  */
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { StdlibResourceFetchError, remoteStdlib, type StdlibRemoteManifest } from '../../src/core/tim/StdlibRemote.js';
 
 const TUPADR3: StdlibRemoteManifest = {
@@ -197,9 +197,44 @@ describe('remoteStdlib -- default fetcher (ADR-5, reuses fetchInclude)', () => {
 
       expect(content).toBe('sprite $ban [...] endsprite');
       expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith('https://example.com/tupadr3/font-awesome-5/ban.puml');
+      expect(fetchSpy).toHaveBeenCalledWith('https://example.com/tupadr3/font-awesome-5/ban.puml', {
+        signal: expect.any(AbortSignal) as AbortSignal,
+      });
     } finally {
       fetchSpy.mockRestore();
     }
+  });
+});
+
+describe('remoteStdlib -- every resource fetch is bounded (SURL.java:357-358)', () => {
+  const URL_BAN = 'https://example.com/tupadr3/font-awesome-5/ban.puml';
+  const never = (): Promise<string> => new Promise<string>(() => undefined);
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('a never-resolving fetcher fails after the default 60 s as StdlibResourceFetchError', async () => {
+    vi.useFakeTimers();
+    const bundle = remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3', fetcher: never });
+    const pending = bundle.fetch('ban').catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(59999);
+    expect(vi.getTimerCount()).toBe(1);
+    await vi.advanceTimersByTimeAsync(1);
+    const err = (await pending) as StdlibResourceFetchError;
+    expect(err).toBeInstanceOf(StdlibResourceFetchError);
+    expect(err.url).toBe(URL_BAN);
+    expect((err.cause as Error).message).toBe(`Cannot open URL ${URL_BAN}: no response within 60000 ms`);
+  });
+
+  it('honours an explicit timeoutMs, and a timed-out key can be retried', async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    const fetcher = (): Promise<string> => (++calls === 1 ? never() : Promise.resolve('ok'));
+    const bundle = remoteStdlib({ manifest: TUPADR3, baseUrl: 'https://example.com/tupadr3', fetcher, timeoutMs: 250 });
+    const pending = bundle.fetch('ban').catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(250);
+    expect(((await pending) as Error).message).toContain('no response within 250 ms');
+    await expect(bundle.fetch('ban')).resolves.toBe('ok');
   });
 });

@@ -51,3 +51,26 @@ describe('public include error exports', () => {
     expect((err as Error).message).toBe(`Failed to fetch !include ${PLAIN}: HTTP 500 Server Error`);
   });
 });
+
+describe('public SecurityProfile export', () => {
+  it("names upstream's six profiles", () => {
+    expect(Object.values(pub.SecurityProfile)).toEqual([
+      'SANDBOX',
+      'ALLOWLIST',
+      'INTERNET',
+      'INTERNET_WITH_DOTSVG',
+      'LEGACY',
+      'INSECURE',
+    ]);
+  });
+
+  it('render() honours it: SANDBOX refuses a url include before fetching', async () => {
+    const fetcher = vi.fn().mockResolvedValue('');
+    const svg = await pub.render(`@startuml\n!include ${PLAIN}\nA -> B\n@enduml`, {
+      fetcher,
+      securityProfile: pub.SecurityProfile.SANDBOX,
+    });
+    expect(svg).toContain('Cannot open URL');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+});

@@ -114,6 +114,32 @@ exists (`resolveIncludes()` with a caller-supplied fetcher, see
 `src/core/include-resolver.ts`), but no filesystem or stdlib resolution
 ships with the library.
 
+## Security
+
+`render()` fetches `!include http(s)://…` targets on the diagram author's
+behalf. Like the jar, it gates them with upstream's security profile
+(`RenderOptions.securityProfile`, the jar's `PLANTUML_SECURITY_PROFILE`) and
+bounds every fetch by that profile's timeout. **The default is upstream's
+default, `LEGACY`**: any public host on any port, refused only for IP
+literals, dot-less hosts (`localhost`), user info and percent-encoded host
+names. This port cannot resolve DNS, so unlike the jar it does **not** refuse
+a host *name* that resolves to an internal address.
+
+**If you render diagram source you do not trust on a server, set a
+restrictive profile:**
+
+```ts
+await render(source, { securityProfile: 'INTERNET' });          // ports 80/443 only
+await render(source, { securityProfile: 'ALLOWLIST',
+                       urlAllowlist: ['https://example.com/diagrams/'] });
+await render(source, { securityProfile: 'SANDBOX' });           // no url includes
+```
+
+The gate covers url targets only; what a local target (`!include a.puml`)
+reads is decided by your `fetcher` (`makeNodeFsFetcher` confines reads to its
+base directory, symlinks included). `[[javascript:…]]` link targets are
+emitted as `href=""`, as the jar does, unless `allowJavascriptInLink: true`.
+
 ## Layout Engines
 
 | Engine | Algorithm |

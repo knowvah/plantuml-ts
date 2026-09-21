@@ -20,6 +20,7 @@ import type { DiagramType } from './block-extractor.js';
 import type { IncludeFetcher, IncludeStore } from './include-resolver.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 import type { AssetStore } from './asset-store.js';
+import type { SecurityProfile } from './security/SecurityProfile.js';
 
 export interface RenderOptions {
   theme?: 'default' | 'dark' | 'sketchy' | 'monochrome' | Partial<Theme>;
@@ -58,6 +59,19 @@ export interface RenderOptions {
    * upstream's `PLANTUML_ALLOW_JAVASCRIPT_IN_LINK=true` (`SecurityUtils.java:197-200`).
    */
   allowJavascriptInLink?: boolean | undefined;
+  /**
+   * Upstream's `SecurityProfile` for `render()`'s include prefetch: which
+   * `!include http(s)://…` targets may be fetched (`SURL#isUrlOk`) and how long
+   * any one fetch may take (`getTimeout()`: SANDBOX 1 s, INTERNET 10 s, LEGACY
+   * 60 s, ALLOWLIST/INSECURE 5 min). Default `'LEGACY'`, upstream's default:
+   * public hosts only, lexically checked. A server rendering untrusted source
+   * should pass `'INTERNET'`, `'ALLOWLIST'` or `'SANDBOX'` (README, "Security").
+   * The jar reads this from `PLANTUML_SECURITY_PROFILE`.
+   */
+  securityProfile?: SecurityProfile | undefined;
+  /** Url prefixes allowed under every profile but SANDBOX, and the only ones
+   *  under ALLOWLIST. The jar's `plantuml.allowlist.url` (`;`-separated there). */
+  urlAllowlist?: readonly string[] | undefined;
 }
 
 export function getDefaultMeasurer(): StringMeasurer {

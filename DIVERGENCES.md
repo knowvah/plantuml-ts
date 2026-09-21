@@ -703,6 +703,35 @@ mechanisms; SI27 was a pure-move mission and ported the former only.
 `vixobo-14-jole910`); `duzazu`/`vixobo` additionally hit the unported
 trailing-backslash line continuation of the state parser (pre-existing).
 
+### Security profile: an option, not an environment variable; no DNS check (limitation)
+
+**Upstream:** `SecurityProfile#init` reads `PLANTUML_SECURITY_PROFILE` once per
+process (default `LEGACY`, `SecurityProfile.java:118-137`; the TeaVM build
+answers `INSECURE`), and the allowlist from `plantuml.allowlist.url`
+(`SURL.java:304-310`). `SURL#isUrlOk` gates every URL a diagram opens and
+`URLCheck#isURLforbidden` refuses IP literals, dot-less hosts, user info,
+encoded hosts **and, after a DNS lookup, any host resolving to a loopback,
+link-local, site-local or any-local address** (`URLCheck.java:87-96, 107-112`).
+Each read waits at most `getTimeout()` (`SURL.java:357-358`); a failure is
+`Cannot open URL`.
+
+**This port:** the same profiles, decisions and timeouts
+(`src/core/security/`), applied to `render()`'s include prefetch. The inputs
+are `RenderOptions.securityProfile` / `urlAllowlist` (default `LEGACY`, the
+JVM jar's default — this project's oracle). Three differences:
+
+- **No DNS-based inner-address check.** A browser has no DNS API and `src/`
+  may not use Node's, so only the lexical checks run. A host *name* resolving
+  to an internal address passes `LEGACY`/`INTERNET`; servers rendering
+  untrusted source should use `ALLOWLIST` or `SANDBOX` (README, "Security").
+- **The scheme test is case-insensitive** (`HTTP://…` is gated too), because
+  `fetch` would honor it; upstream treats such a target as a file path.
+- **No `BAD_HOSTS` back-off** (`SURL.java:346-367`, a failing host refused for
+  60 s): it needs a process-wide clock, which `src/` may not read. A timed-out
+  host is simply tried again by the next render.
+
+**Category:** limitation.
+
 ### Recursive `!procedure` / `!function` depth is bounded (limitation)
 
 **Upstream:** no nesting limit on user-function calls — neither

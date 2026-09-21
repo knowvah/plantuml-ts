@@ -77,6 +77,9 @@
 
 import type { IncludeFetcher } from '../include-resolver.js';
 import { fetchInclude } from '../include-resolver.js';
+import { includeTimeoutError } from '../include-resolver-errors.js';
+import { withIncludeTimeout } from '../include-resolver-timeout.js';
+import { DEFAULT_SECURITY_PROFILE, getTimeout } from '../security/SecurityProfile.js';
 import type { BundleData } from './StdlibStore.js';
 
 /**
@@ -192,13 +195,23 @@ function joinUrl(baseUrl: string, relPath: string): string {
  *                         CORS/CSP error differentiation for free. Override to
  *                         add retry, auth headers, or metrics (this module's
  *                         observability seam -- see the module doc comment).
+ * @param options.timeoutMs Upper bound on one resource fetch; a fetch still
+ *                         pending then fails as `StdlibResourceFetchError`
+ *                         (cause: `IncludeResolveError`). Default: the default
+ *                         security profile's `getTimeout()`, 60 s
+ *                         (`SecurityProfile.java:170`) -- `baseUrl` is host
+ *                         configuration, not diagram input, so no profile gate
+ *                         applies, only the deadline.
  */
 export function remoteStdlib(options: {
   readonly manifest: StdlibRemoteManifest;
   readonly baseUrl: string;
   readonly fetcher?: IncludeFetcher | undefined;
+  readonly timeoutMs?: number | undefined;
 }): RemoteBundle {
-  const { manifest, baseUrl, fetcher = fetchInclude } = options;
+  const { manifest, baseUrl, timeoutMs = getTimeout(DEFAULT_SECURITY_PROFILE) } = options;
+  // The built-in fetcher aborts its own request on the same deadline.
+  const fetcher: IncludeFetcher = options.fetcher ?? ((url: string) => fetchInclude(url, timeoutMs));
 
   /**
    * In-flight/completed fetches keyed by manifest key. Memoizing the PROMISE
@@ -215,7 +228,12 @@ export function remoteStdlib(options: {
     if (cached !== undefined) return cached;
 
     const url = joinUrl(baseUrl, relPath);
-    const pending = fetcher(url).catch((cause: unknown): never => {
+    const bounded = withIncludeTimeout(
+      () => fetcher(url),
+      timeoutMs,
+      () => includeTimeoutError(url, timeoutMs),
+    );
+    const pending = bounded.catch((cause: unknown): never => {
       // Drop the memo so a transient failure (offline, CDN blip) can be
       // retried rather than being cached as a permanent rejection.
       inflight.delete(key);

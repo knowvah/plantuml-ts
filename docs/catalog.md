@@ -9,13 +9,13 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1124 modules · 4082 exported names.
+1130 modules · 4105 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `IncludeWarmupOptions`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
 
 ## `src/core/`
 
@@ -53,7 +53,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `graph-layout-result.types.ts` | `DotLayoutResult` | `DotLayoutResult` — the layout engine's OUTPUT shape. |
 | `graph-layout.ts` | `CARDINALITY_FONT_SIZE`, `setLayoutInputObserver`, `layoutGraph`, `DotInputNode`, `DotInputNodeShape`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotLayoutResult` |  |
 | `graph-layout.types.ts` | `DotInputNodeShape`, `DotInputPortRow`, `DotInputNode`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotLayoutResult` |  |
-| `include-resolver-node.ts` | `ReadFileFn`, `makeNodeFsFetcher` |  |
+| `include-resolver-errors.ts` | `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `blockedUrlError`, `includeTimeoutError`, `CircularIncludeError` | The include seam's error types, split out of `include-resolver.ts` (which sits at the repo's 500-line cap) and re-exported from it unchanged. |
+| `include-resolver-node.ts` | `ReadFileFn`, `RealpathFn`, `makeNodeFsFetcher` |  |
+| `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
@@ -579,6 +581,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Plasma.ts` | `MAGIC_SEPARATOR`, `Plasma` |  |
 | `Quark.ts` | `Quark` |  |
 
+## `src/core/security/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `SecurityProfile.ts` | `SecurityProfile`, `DEFAULT_SECURITY_PROFILE`, `getTimeout` | Upstream's `SecurityProfile` -- the parts that govern network access. |
+| `SecurityUtils.ts` | `ignoreThisLink`, `withAllowJavascriptInLink` | The link-filtering half of upstream's `SecurityUtils`. |
+| `SURL.ts` | `isUrlOk` | The access decision of upstream's `SURL` -- which URL a diagram may open. |
+| `URLCheck.ts` | `isURLforbidden` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/security/URLCheck.java |
+
 ## `src/core/sequencediagram/`
 
 | Module | Exports | Purpose |
@@ -753,7 +764,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TContextSubstitution.ts` | `TContextSubstitutionHost`, `applyFunctionsAndVariablesImpl`, `getFunctionNameAt` | The inline `%function(...)` / `$variable` substitution engine used by `TContext#applyFunctionsAndVariables`. |
 | `TFunction.ts` | `TWarning`, `TPreprocessingOptionStore`, `TPreprocessingArtifact`, `TContext`, `TFunction` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunction.java |
 | `TFunctionArgument.ts` | `TFunctionArgument` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionArgument.java |
-| `TFunctionImpl.ts` | `TFunctionImpl` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionImpl.java |
+| `TFunctionImpl.ts` | `MAX_CALL_DEPTH`, `TFunctionImpl` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionImpl.java |
 | `TFunctionSignature.ts` | `TFunctionSignature` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionSignature.java |
 | `TFunctionType.ts` | `TFunctionType`, `isLegacyTFunctionType` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionType.java |
 | `TLineType.ts` | `getFromLineInternal`, `isQuote`, `isLatinDigit`, `isLetterOrEmojiOrUnderscoreOrDigit` | The `TLineType` CLASSIFIER -- the regex cascade that decides which TIM directive (if any) a raw source line is. |
@@ -809,7 +820,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `IsDark.ts` | `IsDark` | `%is_dark(color)` -- true iff `color`'s YIQ grayscale is `< 128`. |
 | `IsLight.ts` | `IsLight` | `%is_light(color)` -- negation of `%is_dark`. |
 | `jaws-constants.ts` | `USE_BLOCK_E1_IN_NEWLINE_FUNCTION`, `BLOCK_E1_NEWLINE`, `BLOCK_E1_NEWLINE_LEFT_ALIGN`, `BLOCK_E1_NEWLINE_RIGHT_ALIGN`, `BLOCK_E1_BREAKLINE`, `BLOCK_E1_REAL_BACKSLASH`, `BLOCK_E1_REAL_TABULATION` | Local, minimal stand-in for the private-use Unicode sentinels `net.sourceforge.plantuml.jaws.Jaws` defines for its Creole/Display-layer newline and escape handling. |
-| `json-utils.ts` | `JsonObj`, `isJsonObject`, `isJsonArray`, `deepCloneJson`, `shallowMergeObjects`, `deepMergeObjects` | Shared JSON-value helpers for the JSON builtin family (`GetJsonKey`/`GetJsonType`/`JsonAdd`/`JsonKeyExists`/`JsonMerge`/ `JsonRemove`/`JsonSet`/`LoadJson`/`Str2Json`). |
+| `json-utils.ts` | `JsonObj`, `isJsonObject`, `isJsonArray`, `setJsonMember`, `deepCloneJson`, `shallowMergeObjects`, `deepMergeObjects` | Shared JSON-value helpers for the JSON builtin family (`GetJsonKey`/`GetJsonType`/`JsonAdd`/`JsonKeyExists`/`JsonMerge`/ `JsonRemove`/`JsonSet`/`LoadJson`/`Str2Json`). |
 | `JsonAdd.ts` | `JsonAdd` | `%json_add(x, ...)` -- appends to a JSON array (`json_add(arr, value)`) or adds a member to a JSON object (`json_add(obj, name, value)`), returning the mutated clone. |
 | `JsonKeyExists.ts` | `JsonKeyExists` | `%json_key_exists(x, key)` -- true iff `x` is a JSON object containing `key`. |
 | `JsonMerge.ts` | `JsonMerge` | `%json_merge(x, y)` -- concatenates two JSON arrays, or shallow-merges two JSON objects (`y`'s keys overwrite `x`'s on collision). |
