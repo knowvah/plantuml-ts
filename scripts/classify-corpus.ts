@@ -267,17 +267,10 @@ function parseArgs(): { filterType: string | null } {
 // Main
 // ---------------------------------------------------------------------------
 
-function main(): void {
-  const { filterType } = parseArgs();
+type AddEntry = (entry: FixtureEntry) => void;
 
-  if (filterType !== null) {
-    console.log(`Processing only type: ${filterType}`);
-  }
-
-  // Accumulate entries per type
-  const byType = new Map<string, FixtureEntry[]>();
-
-  const addEntry = (entry: FixtureEntry): void => {
+function makeAddEntry(byType: Map<string, FixtureEntry[]>, filterType: string | null): AddEntry {
+  return (entry: FixtureEntry): void => {
     const type = detectType(entry.markup);
     if (filterType !== null && type !== filterType) return;
     const list = byType.get(type);
@@ -287,8 +280,10 @@ function main(): void {
       byType.set(type, [entry]);
     }
   };
+}
 
-  // --- Scan dbhum ---
+// --- Scan dbhum ---
+function scanDbhum(addEntry: AddEntry): void {
   let dbhumDirs: string[];
   try {
     dbhumDirs = readdirSync(PDIFF_DBHUM);
@@ -321,8 +316,10 @@ function main(): void {
       if (entry) addEntry(entry);
     }
   }
+}
 
-  // --- Scan input ---
+// --- Scan input ---
+function scanInput(addEntry: AddEntry): void {
   let inputFiles: string[];
   try {
     inputFiles = readdirSync(PDIFF_INPUT);
@@ -336,18 +333,21 @@ function main(): void {
     const entries = processInputFile(join(PDIFF_INPUT, fname));
     for (const entry of entries) addEntry(entry);
   }
+}
 
-  // --- Write manifests ---
+// --- Write manifests ---
+function writeManifests(byType: Map<string, FixtureEntry[]>, sortedTypes: readonly string[]): void {
   mkdirSync(OUT_DIR, { recursive: true });
 
-  const sortedTypes = [...byType.keys()].sort();
   for (const type of sortedTypes) {
     const entries = byType.get(type) ?? [];
     const outPath = join(OUT_DIR, `${type}.json`);
     writeFileSync(outPath, JSON.stringify(entries, null, 2) + '\n', 'utf-8');
   }
+}
 
-  // --- Summary ---
+// --- Summary ---
+function printSummary(byType: Map<string, FixtureEntry[]>, sortedTypes: readonly string[]): void {
   console.log('');
   let total = 0;
   for (const type of sortedTypes) {
@@ -357,6 +357,24 @@ function main(): void {
   }
   console.log(`total: ${total} fixtures`);
   console.log(`output: ${OUT_DIR}`);
+}
+
+function main(): void {
+  const { filterType } = parseArgs();
+
+  if (filterType !== null) {
+    console.log(`Processing only type: ${filterType}`);
+  }
+
+  const byType = new Map<string, FixtureEntry[]>();
+  const addEntry = makeAddEntry(byType, filterType);
+
+  scanDbhum(addEntry);
+  scanInput(addEntry);
+
+  const sortedTypes = [...byType.keys()].sort();
+  writeManifests(byType, sortedTypes);
+  printSummary(byType, sortedTypes);
 }
 
 // `main` is synchronous -- it awaits nothing -- so a rejected-promise

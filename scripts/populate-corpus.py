@@ -69,11 +69,8 @@ def copy_file(diagram: str, name: str, counts: dict, skipped_ref: list) -> None:
     counts[dtype] = counts.get(dtype, 0) + 1
 
 
-def main() -> None:
-    counts: dict[str, int] = {}
-    skipped = [0]
-
-    # pdiff dbhum
+def scan_pdiff_dbhum(counts: dict, skipped: list) -> None:
+    """Corpus tree: ~/git/pdiff/dbhum (one @startuml diagram per file)."""
     for root, _, files in os.walk(PDIFF_DBHUM):
         for fname in files:
             if not fname.endswith(".puml"):
@@ -86,7 +83,9 @@ def main() -> None:
             else:
                 skipped[0] += 1
 
-    # pdiff input (named fixtures)
+
+def scan_pdiff_input(counts: dict, skipped: list) -> None:
+    """Corpus tree: ~/git/pdiff/input (named fixtures, leading URL line)."""
     for fname in os.listdir(PDIFF_INPUT):
         if not fname.endswith(".puml"):
             continue
@@ -102,7 +101,9 @@ def main() -> None:
         else:
             skipped[0] += 1
 
-    # plantuml nonreg Java test files
+
+def scan_nonreg(counts: dict, skipped: list) -> None:
+    """Corpus tree: ~/git/plantuml nonreg Java test files (embedded blocks)."""
     for root, _, files in os.walk(NONREG_ROOT):
         for fname in files:
             if not fname.endswith("_Test.java"):
@@ -121,11 +122,23 @@ def main() -> None:
                 suffix = f"_{i}" if i > 0 else ""
                 copy_file(diagram, f"{base}{suffix}.puml", counts, skipped)
 
+
+def print_summary(counts: dict, skipped: list) -> None:
     print("tests/corpus/ populated:")
     for k, v in sorted(counts.items(), key=lambda x: -x[1]):
         print(f"  {k}: {v}")
     print(f"  Total: {sum(counts.values())}")
     print(f"  Skipped (unknown type / no diagram / duplicate): {skipped[0]}")
+
+
+def main() -> None:
+    counts: dict[str, int] = {}
+    skipped = [0]
+
+    scan_pdiff_dbhum(counts, skipped)
+    scan_pdiff_input(counts, skipped)
+    scan_nonreg(counts, skipped)
+    print_summary(counts, skipped)
 
 
 if __name__ == "__main__":
