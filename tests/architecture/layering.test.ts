@@ -85,6 +85,17 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       'shortcutting around it. Re-spelling LINE_STYLE here would duplicate ' +
       'a ported constant and violate no-magic-strings.',
   },
+  {
+    from: 'src/diagrams/class/class-multiline-element.ts',
+    to: 'src/diagrams/description/parse-helpers.ts',
+    why:
+      'upstream ClassDiagramFactory.java:166-167 registers ' +
+      'net.sourceforge.plantuml.descdiagram.command.CommandCreateElementMultilines ' +
+      '-- the multi-line element command is ONE class owned by the description ' +
+      'package and shared by the class factory, so the class seam reuses the ' +
+      'description port of its opener grammar rather than re-spelling it ' +
+      '(mission unknown-bucket-routing-repair, T7 / T4 mechanism A).',
+  },
 ];
 
 /** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task
