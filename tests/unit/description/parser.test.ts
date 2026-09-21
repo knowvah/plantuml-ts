@@ -656,6 +656,23 @@ describe('ignored directives', () => {
     expect(ast.nodes).toHaveLength(0);
   });
 
+  // T8 (unknown-bucket-routing-repair, T5.md mechanism 1): `UmlSource.lines`
+  // preserves each line's original indentation (block-extractor.ts trims
+  // only leading/trailing BLANK lines, never per-line whitespace) -- unlike
+  // this file's `parse()` helper above, which pre-trims every line and so
+  // can never exercise this path. Built directly, bypassing `parse()`,
+  // to reproduce dunila-61-licu078's raw tab-indented `title` line.
+  it('a tab-indented title line is still recognised (raw untrimmed lines)', () => {
+    const block: UmlSource = {
+      lines: ['\ttitle produces a green rectangle', 'rectangle "C1" as C1'],
+      type: 'description',
+    };
+    const ast = descriptionAst(parseDescription(block));
+    expect(ast.annotations).toBeDefined();
+    expect(ast.annotations!.title.display).toEqual(['produces a green rectangle']);
+    expect(ast.nodes.map((n) => n.id)).toEqual(['C1']);
+  });
+
   it('hide stereotype produces no nodes (still records the rule -- G1 I-hideshow)', () => {
     const ast = parse('hide stereotype');
     expect(ast.nodes).toHaveLength(0);
@@ -2136,6 +2153,33 @@ describe('parseDescription — sprite blocks consumed whole', () => {
     const ast = parse(['sprite $s [8x8/8] {', 'FF00', '}', 'package P {', '  component X', '}'].join('\n'));
     const pkg = ast.nodes.find((n) => n.id === 'P')!;
     expect(pkg.children.map((c) => c.id)).toEqual(['X']);
+  });
+});
+
+// T8 (unknown-bucket-routing-repair, D9 narrow-never-widen, D11): an
+// unquoted `<$sprite{params}>` display after a keyword has no matching
+// alternative in `CommandCreateElementFull`'s DISPLAY_WITHOUT_QUOTE/CODE
+// grammar (`descdiagram/command/CommandCreateElementFull.java:100-107,
+// 126-132` -- the unquoted alternatives are `[%pLN_.]+`, `()...`, `:...:`,
+// `(...)`, `[...]`; none starts with a bare `<`), so upstream's factory
+// never matches this Command at all and the line falls through to
+// SYNTAX_ERROR (`PSystemCommandFactory.java:169-175`) -- confirmed against
+// the jar via bezogu-47-vevu307 (`sprite react <svg…>` then
+// `rectangle <$react{scale=1}>`), which the jar routes past `description`
+// entirely. `KEYWORD_RE` (parse-helpers.ts) previously captured ANY
+// trailing text, so `parseNameSection`'s bare-id fallback over-claimed this
+// shape as a literal id/display.
+describe('parseDescription — a bare unquoted `<…>` display after a keyword refuses (D9)', () => {
+  it('`rectangle <$react{scale=1}>` is refused, not accepted as a bare id', () => {
+    const refusal = parseRefusal('rectangle <$react{scale=1}>');
+    expect(refusal.kind).toBe('syntax');
+    expect(refusal.line).toBe(0);
+  });
+
+  it('a keyword carrying ONLY a `<<stereotype>>` decoration still parses (regression guard)', () => {
+    const ast = parse('card <<x>>');
+    expect(ast.nodes).toHaveLength(1);
+    expect(ast.nodes[0]?.stereotype).toEqual(['x']);
   });
 });
 

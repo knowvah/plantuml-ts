@@ -11,12 +11,12 @@
     {
       "slug": "dunila-61-licu078",
       "cohort": "description-title-leading-whitespace",
-      "disposition": "fix-candidate",
-      "task": "T5",
+      "disposition": "fixed",
+      "task": "T8",
       "seam": "description",
       "command": "CommandTitle.java",
       "size": 10,
-      "reason": "The block is a tab-indented title line ('\\ttitle produces a green rectangle') followed by 'rectangle \"C1\" <<GreenContainer>><<RedContainer>> as C1'. descriptionPlugin.parse refuses (kind=syntax) because src/diagrams/description/parser.ts:336-337's dispatchCommand passes the RAW (untrimmed) lines array to matchAnnotationCommand (src/core/annotations/commands.ts:97, TITLE_RE = /^title.../ with no internal trim; upstream CommandTitle.java:56-66 matches against a pre-trimmed StringLocated line, so no equivalent gap exists there), so the leading tab defeats the anchor; class and state both PRE-TRIM each line before calling matchAnnotationCommand for exactly this reason (src/diagrams/state/parser.ts:147-149's doc comment: 'matchAnnotationCommand requires already-trimmed lines ... no internal trim'). description's own multiline-block rationale for keeping raw indentation (parser.ts:336) does not require the ANNOTATION-MATCHER call specifically to see untrimmed text. Fix: pass a trimmed copy of the line to matchAnnotationCommand in description's dispatchCommand, mirroring state/class. Verified: parseNameSection already handles the double-stereotype rectangle line correctly (isolated test); once the title line is recognised, the whole block parses clean and description wins (D3: lands in DESCRIPTION, matching the jar)."
+      "reason": "Fixed (T8): description's dispatchCommand now passes a trimmed copy of line i to matchAnnotationCommand (trimLineForAnnotationMatch, src/diagrams/description/annotation-line-trim.ts), mirroring state/parser.ts:147-149's precedent, while leaving the rest of the raw lines array untouched so a matched MULTILINE block's body keeps its indentation. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
     },
     {
       "slug": "gacoxo-93-guti295",
@@ -28,12 +28,12 @@
     {
       "slug": "gipeda-98-bigo389",
       "cohort": "description-title-leading-whitespace",
-      "disposition": "fix-candidate",
-      "task": "T5",
+      "disposition": "fixed",
+      "task": "T8",
       "seam": "description",
       "command": "CommandTitle.java",
       "size": 10,
-      "reason": "Same mechanism as dunila-61-licu078 (tab-indented title line, description/parser.ts:336-337 passing raw lines to matchAnnotationCommand): '\\ttitle produces a red rectangle' + 'rectangle \"C1\" <<RedContainer>><<GreenContainer>> as C1'. Re-measured independently: description refuses kind=syntax on the title line; state wins by default and wrongly claims the fixture. Upstream CommandTitle.java:56-66 matches against a pre-trimmed StringLocated line, so no equivalent leading-whitespace gap exists there."
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
     },
     {
       "slug": "liripi-72-kefa167",
@@ -45,32 +45,32 @@
     {
       "slug": "toxeto-79-kile546",
       "cohort": "description-title-leading-whitespace",
-      "disposition": "fix-candidate",
-      "task": "T5",
+      "disposition": "fixed",
+      "task": "T8",
       "seam": "description",
       "command": "CommandTitle.java",
       "size": 10,
-      "reason": "Same mechanism as dunila-61-licu078: '\\ttitle produces a red+smallItalic rectangle' + 'rectangle \"C1\" <<ItalicContainer>><<RedContainer>> as C1'. Re-measured independently: description refuses kind=syntax on the title line (description/parser.ts:336-337 raw-lines-to-matchAnnotationCommand). Upstream CommandTitle.java:56-66 matches against a pre-trimmed StringLocated line, so no equivalent leading-whitespace gap exists there."
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
     },
     {
       "slug": "xapuji-91-dagu145",
       "cohort": "description-title-leading-whitespace",
-      "disposition": "fix-candidate",
-      "task": "T5",
+      "disposition": "fixed",
+      "task": "T8",
       "seam": "description",
       "command": "CommandTitle.java",
       "size": 10,
-      "reason": "Same mechanism as dunila-61-licu078: '\\ttitle produces a red+smallItalic rectangle' + 'rectangle \"C1\" <<RedContainer>><<ItalicContainer>>  as C1'. Re-measured independently: description refuses kind=syntax on the title line (description/parser.ts:336-337 raw-lines-to-matchAnnotationCommand). Upstream CommandTitle.java:56-66 matches against a pre-trimmed StringLocated line, so no equivalent leading-whitespace gap exists there."
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
     },
     {
       "slug": "zetedu-83-bugu867",
       "cohort": "description-title-leading-whitespace",
-      "disposition": "fix-candidate",
-      "task": "T5",
+      "disposition": "fixed",
+      "task": "T8",
       "seam": "description",
       "command": "CommandTitle.java",
       "size": 10,
-      "reason": "Same mechanism as dunila-61-licu078: '\\ttitle produces a smallItalic+blue rectangle' + 'rectangle \"C1\" <<ItalicContainer>>  as C1'. Re-measured independently: description refuses kind=syntax on the title line (description/parser.ts:336-337 raw-lines-to-matchAnnotationCommand). Upstream CommandTitle.java:56-66 matches against a pre-trimmed StringLocated line, so no equivalent leading-whitespace gap exists there."
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
     },
     {
       "slug": "zolaza-45-sepi570",

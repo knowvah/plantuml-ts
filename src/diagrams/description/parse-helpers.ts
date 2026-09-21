@@ -355,8 +355,18 @@ export const CONTAINER_INLINE_RE = new RegExp(`^(${CONTAINER_KW_ALT})\\s+(.*?)\\
 /** Container keyword opening a multi-line block: package P { */
 export const CONTAINER_OPEN_RE = new RegExp(`^(${CONTAINER_KW_ALT})\\s+(.*?)\\s*\\{\\s*$`, 'i');
 
-/** Any keyword followed by at least one space and a name rest. */
-export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(.+)$`, 'i');
+/**
+ * Any keyword followed by at least one space and a name rest.
+ *
+ * `(?!<(?!<))` narrows the rest to what `CommandCreateElementFull`'s
+ * DISPLAY_WITHOUT_QUOTE/CODE alternation can match unquoted (`[%pLN_.]+`,
+ * `()...`, `:...:`, `(...)`, `[...]` -- java:100-107,126-132; none starts
+ * with a bare `<`): rejects a rest opening with a LONE `<` (a stray
+ * `<$sprite{…}>` reference), while `<<stereotype>>` still passes -- `<(?!
+ * <)` only matches a single `<`, so `<<` fails it and the outer negation
+ * lets it through (D9, T8 ubrr, bezogu-47-vevu307, jar-confirmed refusal).
+ */
+export const KEYWORD_RE = new RegExp(`^(${ALL_KW_ALT})\\s+(?!<(?!<))(.+)$`, 'i');
 
 /**
  * `StereotypePattern.optional("STEREO")` + `UrlBuilder.OPTIONAL` +
