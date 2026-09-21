@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T20:23:47.556Z",
+  "generatedAt": "2026-09-21T12:33:25.084Z",
   "fixtures": [
     {
       "slug": "bejilu-38-kaje288",
@@ -1032,9 +1032,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 212,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@height"
+      "maxDelta": 134.90099999999998,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@y"
     },
     {
       "slug": "zezomi-36-dujo188",

@@ -1,0 +1,13 @@
+@startnwdiag
+nwdiag {
+  network Sample_front {
+    address = "192.168.10.0/24"
+    color = "blue"
+
+    test_address [address = " .1,  .5", color = "#aaffaa"]
+    test_color [address = ".2", color = "lightblue"]
+    test_description [address = ".3", description = "<color:green>Description #3 ", color = "#00000000"]
+    test_shape [address = ".4", shape = "node", color = "transparent"]
+  }
+}
+@endnwdiag

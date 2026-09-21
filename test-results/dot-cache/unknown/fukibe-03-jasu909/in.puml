@@ -1,0 +1,4 @@
+@startuml
+skinparam backgroundColor white
+rectangle "White Background"
+@enduml

@@ -1,0 +1,7 @@
+@startcreole
+this is an example <i>which is italic</i>
+* first element
+* second element
+* third element
+And now the end
+@endcreole

@@ -1,0 +1,22 @@
+@startnwdiag
+<style>
+nwdiagDiagram {
+  group {
+    BackGroundColor cadetblue
+    FontStyle bold
+  }
+}
+</style>
+
+nwdiag {
+	network net1 {
+	  a
+	}
+	network net2 {
+	  b
+	}
+	group uniqueNode {
+	  a  [color = "Red", description="desc"]
+	}
+}
+@endnwdiag

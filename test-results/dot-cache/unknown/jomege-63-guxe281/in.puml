@@ -1,0 +1,24 @@
+@startbpm
+:login;
+20:<+>
+:show new message1;
+30:<+>
+resume 20
+:show new task2;
+goto 30
+tri:<+>
+:Accept Task;
+last:<+>
+resume tri
+:nothing;
+goto last
+resume tri
+100:<+>
+:read message;
+goto last
+resume 100
+:dummy;
+110:<+>
+goto last
+:logout;
+@endbpm

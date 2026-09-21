@@ -1,0 +1,4 @@
+@startuml
+ :GET(ressource, version, host)
+ FROM host VIA connection1; <<output>>
+@enduml

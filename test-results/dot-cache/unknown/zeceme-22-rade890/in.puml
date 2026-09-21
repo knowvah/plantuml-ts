@@ -1,0 +1,18 @@
+@startnwdiag
+nwdiag {
+    group {
+        peter
+
+        group {
+        }
+    }
+
+    network first {
+        peter
+    }
+
+    network second {
+        mary
+    }
+}
+@endnwdiag

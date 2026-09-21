@@ -1,0 +1,5 @@
+@startuml
+!define LOCATION New York
+!define TITLE This has been done in LOCATION
+title TITLE
+@enduml

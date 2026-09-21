@@ -1,0 +1,8 @@
+@startdef(id=MACROS)
+!definelong TITLE_ALL(s)
+  title s
+  footer Generated %date()
+  skinparam shadowing false
+  skinparam handwritten false
+!enddefinelong
+@enddef

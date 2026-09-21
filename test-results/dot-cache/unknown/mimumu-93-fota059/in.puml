@@ -1,0 +1,25 @@
+@startcreole math-Page-11
+= Test math - Page 11
+<math>text(f)</math>
+<math>text({f})</math>
+<math>text([f])</math>
+<math>text(  a)</math>
+<math>text(  a  )b</math>
+<math>text<a></math>
+<math>text<a ></math>
+<math>text{f}</math>
+<math>text[f]</math>
+<math>text{f</math>
+<math>text[f</math>
+<math>text{f abc</math>
+<math>f'</math>
+<math>fprime</math>
+<math>f''</math>
+<math>f'''</math>
+<math>uArr</math>
+<math>dArr</math>
+<math>newline</math>
+<math>a newline b</math>
+<math>anewlineb</math>
+<math>a^2newlinea^3</math>
+@endcreole

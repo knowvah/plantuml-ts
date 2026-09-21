@@ -1,0 +1,7 @@
+@startuml
+skinparam rectangle {
+    DiagonalCorner 10
+    BorderColor Red
+}
+rectangle rec
+@enduml

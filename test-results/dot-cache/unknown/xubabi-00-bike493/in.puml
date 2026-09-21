@@ -1,0 +1,10 @@
+@startuml
+<style>
+.LAN_A {
+  LineColor Red
+}
+</style>
+
+rectangle A
+rectangle LA <<LAN_A>>
+@enduml

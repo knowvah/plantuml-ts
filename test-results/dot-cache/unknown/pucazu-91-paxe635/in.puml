@@ -1,0 +1,4 @@
+@startuml
+A "0" -- "1" B : "a" is "b"
+Class01 "1" *-- "many" Class02 : "sourcerolename" contains "targetrolename"
+@enduml

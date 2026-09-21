@@ -1,0 +1,7 @@
+@startnwdiag
+nwdiag {
+  network inet {
+	  web01 [shape = cloud]
+  }
+}
+@endnwdiag

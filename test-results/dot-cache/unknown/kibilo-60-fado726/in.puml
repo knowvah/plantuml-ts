@@ -1,0 +1,10 @@
+@startfiles
+/.github/
+/src/1/example.py
+<note>
+this is note should be between example.py and iiimple1.py
+and not at level 0
+</note>
+/src/1/iiimple1.py
+/src/2/aaaaaa.txt
+@endfiles

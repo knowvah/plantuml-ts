@@ -1,0 +1,3 @@
+@startdef(id=macro)
+Alice -> Bob : hello1
+@enddef

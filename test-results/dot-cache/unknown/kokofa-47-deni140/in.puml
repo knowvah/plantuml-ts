@@ -1,0 +1,8 @@
+@startuml
+json J {
+	"a":42
+}
+json J {
+	"a":43
+}
+@enduml

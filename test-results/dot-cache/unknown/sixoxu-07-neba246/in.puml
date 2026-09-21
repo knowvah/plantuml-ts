@@ -1,0 +1,10 @@
+@startnwdiag
+nwdiag {
+  network dc {
+    server;
+    internet;
+  }
+  internet [shape = cloud];
+}
+
+@endnwdiag

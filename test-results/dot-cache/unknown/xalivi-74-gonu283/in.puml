@@ -1,0 +1,8 @@
+@startuml
+
+A o.. B
+C *.. D
+E ..o F
+G ..* H
+
+@enduml

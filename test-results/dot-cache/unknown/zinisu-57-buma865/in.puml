@@ -1,0 +1,15 @@
+@startnwdiag
+<style>
+root {
+ shadowing 0
+}
+</style>
+nwdiag {
+  network dc {
+    server;
+    internet;
+  }
+  internet [shape = cloud];
+}
+
+@endnwdiag

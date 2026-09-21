@@ -1,0 +1,8 @@
+@startuml
+!define fileServer <color:green><&folder>ho-itd-pbrcs05</color>
+@pause
+@a start
+@a :===initialization
+@a #create fileServer ; <<task>>
+@a end
+@enduml

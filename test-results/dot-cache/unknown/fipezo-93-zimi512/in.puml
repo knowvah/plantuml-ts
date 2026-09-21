@@ -1,0 +1,7 @@
+@startuml
+package "Folder1" as node1 <<Folder>> {
+}
+package "Folder2" as node2 <<Folder>> {
+  class content
+}
+@enduml

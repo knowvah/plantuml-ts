@@ -1,0 +1,9 @@
+@startuml
+Group External Communication Thread
+	repeat
+	:<b>Handle External Rx Event</b>;
+	:<b>Handle External Tx Event </b>;
+	Repeat while (repeat loop)
+End group
+
+@enduml

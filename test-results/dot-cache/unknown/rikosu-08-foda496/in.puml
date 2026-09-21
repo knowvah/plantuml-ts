@@ -1,0 +1,8 @@
+@startbpm
+:login;
+new branch
+:show new message1;
+else
+:show new task2;
+end branch
+@endbpm

@@ -1,0 +1,4 @@
+@startuml
+archimate #APPLICATION "Do Something" <<application-function>>
+archimate #MOTIVATION  SomeMotivation
+@enduml

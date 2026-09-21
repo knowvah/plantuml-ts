@@ -1,0 +1,4 @@
+@startuml
+repeat <<#green>>
+repeat while (ok)
+@enduml

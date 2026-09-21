@@ -1,0 +1,6 @@
+@startuml
+package my_package{
+    together {
+    }
+}
+@enduml

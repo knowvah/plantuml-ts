@@ -1,0 +1,6 @@
+@startuml
+!define THIS_IS(x) "this is x"
+!define DECLARE(x) participant x as THIS_IS(x)
+DECLARE(Bob)
+DECLARE(Alice)
+@enduml

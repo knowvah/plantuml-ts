@@ -1,0 +1,5 @@
+@startuml
+file test_bullet_list_creole [
+***bold no space***
+]
+@enduml

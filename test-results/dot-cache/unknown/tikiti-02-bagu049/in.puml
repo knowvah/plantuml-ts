@@ -1,0 +1,5 @@
+@startuml
+title smetana
+!pragma layout smetana
+thing1 -- thing2 [[{This is shown on hover}]]: " "
+@enduml

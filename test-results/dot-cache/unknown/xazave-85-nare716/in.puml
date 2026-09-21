@@ -1,0 +1,17 @@
+@startnwdiag
+nwdiag {
+  group group01 {
+    a01;
+  }
+  group group02 {
+    a02;
+  }
+  network net01 {
+    a01;
+  }
+  a01 -- a02;
+  network net02 {
+    a02;
+  }
+}
+@endnwdiag

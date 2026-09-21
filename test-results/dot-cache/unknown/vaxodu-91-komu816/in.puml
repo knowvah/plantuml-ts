@@ -1,0 +1,18 @@
+@startuml
+title Between min-max
+
+analog "Analog" from 350 to 450 as A
+A ticks every 50
+
+@0
+A is 350
+
+@50
+A is 360
+
+@100
+A is 450
+
+@300
+A is 350
+@enduml

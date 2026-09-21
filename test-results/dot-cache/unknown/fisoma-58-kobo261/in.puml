@@ -1,0 +1,4 @@
+@startcreole
+this is an example <i>which is italic</i>
+this is //an// example <i>which **is** italic
+@endcreole

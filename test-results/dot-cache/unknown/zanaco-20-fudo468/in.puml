@@ -1,0 +1,22 @@
+@startnwdiag
+<style>
+root {
+  BackGroundColor palegreen
+  LineThickness 5
+  LineColor red
+}
+</style>
+
+nwdiag {
+  network N {
+      w1;
+      w2;
+  }
+
+    group {
+    description = "long group label";
+    w1;
+    w2;
+  }
+}
+@endnwdiag

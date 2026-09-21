@@ -1,0 +1,6 @@
+@startuml
+annotation Foo {
+    String bar()
+    String baz()
+}
+@enduml

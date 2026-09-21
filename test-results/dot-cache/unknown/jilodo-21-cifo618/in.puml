@@ -1,0 +1,20 @@
+@startnwdiag
+nwdiag {
+
+    network proxy {
+        app;
+    }
+
+    network default {
+    	app;
+        db;
+    }
+    
+    group {
+      color = "pink";
+      app;
+      db;
+    }
+
+}
+@endnwdiag

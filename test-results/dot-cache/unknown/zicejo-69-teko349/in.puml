@@ -1,0 +1,4 @@
+@startuml
+#red:repeat
+#blue:repeat while (ok)
+@enduml

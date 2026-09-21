@@ -1,0 +1,6 @@
+@startuml
+set namespaceSeparator /
+namespace  a/b/c {
+   class "Object" as js/Object
+}
+@enduml

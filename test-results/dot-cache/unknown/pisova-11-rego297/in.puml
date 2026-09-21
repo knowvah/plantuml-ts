@@ -1,0 +1,15 @@
+@startuml
+  !pragma teoz true
+  
+      box "Components"
+          box "Component 1"
+              entity Part1 as C1P1
+              entity Part2 as C1P2
+          end box
+  
+          box "Component 2"
+              entity Part1 as C2P1
+              entity Part2 as C2P2
+          end box
+      end box
+@enduml

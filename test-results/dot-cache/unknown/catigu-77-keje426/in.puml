@@ -1,0 +1,4 @@
+@startuml
+package test {
+}
+@enduml

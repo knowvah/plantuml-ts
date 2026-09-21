@@ -1,0 +1,9 @@
+@startuml
+skinparam {
+      Maxmessagesize 200
+   }
+
+   group Grouping messages
+      Test <<-- Test : The group frame [now] does draw a border around the text (located on the left side), [no longer ignoring] its presence, and also [no longer ignores] the presence of a line.
+   end
+@enduml

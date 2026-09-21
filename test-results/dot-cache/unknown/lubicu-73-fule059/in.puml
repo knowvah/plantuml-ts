@@ -1,0 +1,22 @@
+@startuml
+rectangle r as "
+Text as top
+==
+{{salt
+{{T
++ <&folder>Folder1
+}
+}
+}}
+"
+note left of r
+Text as top
+==
+{{salt
+{{T
++ <&folder>Folder1
+}
+}
+}}
+end note
+@enduml

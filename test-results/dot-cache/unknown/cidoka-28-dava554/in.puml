@@ -1,0 +1,6 @@
+@startuml
+create Alice
+create Bob
+note over Alice: zzzzzz
+/note right Bob: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+@enduml

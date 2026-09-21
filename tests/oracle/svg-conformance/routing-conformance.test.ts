@@ -534,7 +534,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3468 agree, 943 known-misroute and 73 jar-error', () => {
+  it('the manifest splits into 4157 agree, 1053 known-misroute and 99 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -651,10 +651,24 @@ describe('routing conformance — jar-error classification', () => {
     // if spellings, end while, partition/group -- ActivityDiagramFactory3
     // .java:110-160) and now route ACTIVITY; 43 `[FIXED]` retirements,
     // re-pinned from a fresh measurement.
-    expect(pinnedAgree.length).toBe(3468);
-    expect(pinnedMisroutes.length).toBe(943);
-    expect(pinnedJarErrors.length).toBe(73);
-    expect(manifest.fixtures.length).toBe(4484);
+    //
+    // 3468 -> 4157 / 943 -> 1053 / 73 -> 99 over 4484 -> 5309 at
+    // unknown-bucket-routing-repair/T14 (2026-09-20): the 825 `unknown`
+    // fixtures pinned by `scripts/pin-corpus-tree.ts` from the ledger
+    // fragments under `tests/oracle/svg-conformance/unknown-ledger/`:
+    // 689 agree, 110 known-misroute, 26 jar error pages. Of the 157
+    // disagreements batch 1 diagnosed, batch 2 FIXED 115 (class 66,
+    // activity 34, sequence 9, description 6) and pinned the rest with
+    // the refusing line or the missing factory named (no nwdiag/bpm/git/
+    // flow/timing/help engine 96, files' missing root attribute 8, the
+    // legacy `(*) -->` activity family 1, description's archimate/map/
+    // embedded-diagram gaps 3, a class link fallback 1, a Tim function
+    // gap 1). The same batch retired 43 activity + 1 sequence pins of the
+    // existing tree (`[FIXED]`), already folded into 3468/943 above.
+    expect(pinnedAgree.length).toBe(4157);
+    expect(pinnedMisroutes.length).toBe(1053);
+    expect(pinnedJarErrors.length).toBe(99);
+    expect(manifest.fixtures.length).toBe(5309);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -703,7 +717,8 @@ describe('routing conformance — jar-error classification', () => {
     // remainder is STILL exactly sequence/nuvoja-46-dezu541: 987 - 1 = 986.
     // 986 -> 985 at unknown-bucket-routing-repair/T11: recani retired.
     // 985 -> 942 at unknown-bucket-routing-repair/T10: 43 activity retirements.
-    expect(censused.length).toBe(942);
+    // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
+    expect(censused.length).toBe(1052);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

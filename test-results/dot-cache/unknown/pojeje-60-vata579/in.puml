@@ -1,0 +1,15 @@
+@startuml
+
+package x {
+  note as _n
+    qwerty
+  end note
+}
+
+package y {
+  note as _n
+    aasdfg
+  end note
+  
+}
+@enduml

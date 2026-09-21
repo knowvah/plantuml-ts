@@ -1,0 +1,7 @@
+@startuml
+namespace A {
+  A.B.Toto <|.. Foo
+  A.B.Toto <|.. Bar
+}
+
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+package "One" {
+  entity foo {
+  }
+}
+newpage
+package "Two" {
+  entity bar {
+  }
+}
+bar ||--|| foo
+@enduml

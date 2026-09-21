@@ -1,0 +1,19 @@
+@startcreole math-Page-0
+= Test math - Page 0 - Known issue
+
+<math>a -lt b</math>
+
+<math>a >->> b</math>
+<math>a\twoheadrightarrowtailb</math>
+
+<math>glb</math>
+<math>lub</math>
+
+<math>|~</math>
+
+<math>cancel(x)</math>
+
+<math>Sin(x)</math>
+<math>Log(x)</math>
+
+@endcreole

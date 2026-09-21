@@ -1,0 +1,7 @@
+@startuml
+
+rectangle X
+rectangle Y
+X -left(0 Y
+
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+skinparam backgroundColor #FFFFFF-#EEEBDC
+skinparam databaseBackgroundColor #FFFFFF-#DDEBDC
+'skinparam DatabaseFontSize 24
+skinparam ActorFontSize 24
+database MyDB
+@enduml

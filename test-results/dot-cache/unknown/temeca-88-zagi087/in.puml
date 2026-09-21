@@ -1,0 +1,6 @@
+@startnwdiag
+nwdiag {
+  a
+  b
+}
+@endnwdiag

@@ -1,0 +1,21 @@
+@startuml
+    start
+    if(foo) <<#green>>
+    :...;
+    elseif(bar) <<#red>>
+    :...;
+    else
+    :..;
+    endif
+    stop
+
+    start
+    if(foo)
+    :...;
+    elseif(bar) <<#red>>
+    :...;
+    else
+    :..;
+    endif
+    stop
+@enduml

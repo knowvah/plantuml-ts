@@ -1,0 +1,16 @@
+@startuml
+'skinparam dpi 800
+Bob <- Alice
+Bob <<- Alice
+Bob /- Alice
+Bob //- Alice
+Bob \- Alice
+Bob \\- Alice
+Bob <-- Alice
+Bob <<-- Alice
+Bob /-- Alice
+Bob //-- Alice
+Bob \-- Alice
+Bob \\-- Alice
+
+@enduml

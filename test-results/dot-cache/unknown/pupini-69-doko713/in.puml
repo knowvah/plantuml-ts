@@ -1,0 +1,21 @@
+@startuml
+!pragma teoz true
+skinparam BoxPadding 30
+
+box "One"
+  participant a
+  participant b
+end box
+
+box "Other"
+  participant c
+  participant d
+end box
+
+  participant e
+
+box "Other2"
+  participant f
+  participant g
+end box
+@enduml

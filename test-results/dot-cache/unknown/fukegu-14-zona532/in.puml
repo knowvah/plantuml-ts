@@ -1,0 +1,9 @@
+@startuml
+skinparam noteTextAlignment center
+note as N1
+👑 center
+Keep Calm
+and
+Align Center
+end note
+@enduml

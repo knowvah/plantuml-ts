@@ -1,0 +1,22 @@
+@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- ingress;
+
+    group {
+      app;
+      db;
+    }
+
+    network proxy {
+    	app;
+        ingress;
+    }
+
+    network default {
+    	app;
+        db;
+    }
+  }
+}
+@endnwdiag

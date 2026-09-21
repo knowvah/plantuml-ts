@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 4484 fixtures, 73 of them jar errors, 198 of them erroring here', () => {
+  it('the manifest is 5309 fixtures, 99 of them jar errors, 269 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -617,8 +617,25 @@ describe('refusal coverage — baseline shape', () => {
     // way `PSystemCommandFactory.java:169-175` does; the five moved to
     // `known-gap`, each reason naming the missing Command. Not a new
     // refusal: an old one that was being hidden by a wrong render.
-    expect(manifest.fixtures.length).toBe(4484);
-    expect(pinnedJarErrors.length).toBe(73);
+    //
+    // 4484 -> 5309 / 73 -> 99 / 198 -> 269 / 4286 -> 5040 at
+    // unknown-bucket-routing-repair/T14 (2026-09-20): the 825 `unknown`
+    // fixtures pinned additively by `scripts/pin-corpus-tree.ts` (see the
+    // sibling gate's derivation). 26 are jar error pages. Of the 799 the
+    // jar rendered, 738 render here and 61 error, every one pinned
+    // `known-gap` with its mechanism: 12 are jar PSystemError pages whose
+    // signature sits past this gate's 4096-byte head window
+    // (`PSystemError.java:213-231` prepends the Welcome tutorial), 20 are
+    // `@startuml` sources for the unported timing/help engines, 23 are
+    // upstream utility/easter-egg factories with no port (listfonts,
+    // listemoji, colors, sudoku, openiconic, archimate sprites, charlie,
+    // dedication, the stdlib catalog, welcome), 3 are description
+    // command gaps, 1 a Tim function gap, 1 a preprocessor-only source,
+    // 1 the state parser now refusing a source only `PSystemListFonts`
+    // accepts. Batch 2 retired 43 activity + 1 sequence rows of the
+    // existing tree (`[FIXED]`), already folded into 198/4286 below.
+    expect(manifest.fixtures.length).toBe(5309);
+    expect(pinnedJarErrors.length).toBe(99);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -630,8 +647,8 @@ describe('refusal coverage — baseline shape', () => {
     // `weErrored: true`) whose activity3 constructs now parse render here
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
-    expect(pinnedErroring.length).toBe(198);
-    expect(pinnedRendering.length).toBe(4286);
+    expect(pinnedErroring.length).toBe(269);
+    expect(pinnedRendering.length).toBe(5040);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -680,7 +697,8 @@ describe('refusal coverage — baseline shape', () => {
     // sources STATE had been drawing as empty diagrams (see the manifest
     // derivation above).
     // 138 -> 137 at unknown-bucket-routing-repair/T11: recani retired.
-    expect(gaps.length).toBe(137);
+    // 137 -> 198 at unknown-bucket-routing-repair/T14: 61 unknown gaps.
+    expect(gaps.length).toBe(198);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

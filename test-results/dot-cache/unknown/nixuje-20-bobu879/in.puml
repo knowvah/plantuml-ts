@@ -1,0 +1,12 @@
+@startuml
+sprite $strategy-value-stream jar:archimate/strategy-value-stream
+skinparam rectangle {
+	roundCorner 25
+}
+rectangle "Strategy stream"  as SS <<$archimate/strategy-value-stream>>
+
+legend left
+<$strategy-value-stream>:strategy-value-stream
+endlegend
+
+@enduml

@@ -1,0 +1,4 @@
+@startmath
+backgroundColor yellow
+g_1(x,p)= f_12^u(X+1,sqrt2)-f_1^u*X
+@endmath

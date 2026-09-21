@@ -1,0 +1,17 @@
+@startuml
+<style>
+activityDiagram {
+  MaximumWidth 100
+  diamond {
+    FontColor green
+  }
+}
+</style>
+switch (A Long long long long Long long long long  condition? )
+case ( B Long )
+   :1  1;
+case ( C  )
+   :2  2;
+endswitch
+
+@enduml

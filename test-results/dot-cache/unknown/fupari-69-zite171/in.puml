@@ -1,0 +1,7 @@
+@startuml
+skinparam FrameBorderColor green
+frame "First frame" {
+    [test]
+}
+frame "Second frame"
+@enduml

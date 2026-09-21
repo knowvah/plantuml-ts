@@ -1,0 +1,7 @@
+@startnwdiag
+nwdiag {
+	dev1[address = "x1"]
+	dev2[address = "x2"]
+	dev1 -- dev2
+}
+@endnwdiag

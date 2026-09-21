@@ -1,0 +1,6 @@
+@startuml
+note over Bob
+~//This should not be italic//
+~**This should not be bold**
+end note
+@enduml

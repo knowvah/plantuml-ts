@@ -1,0 +1,11 @@
+@startuml
+opt test
+    ref over A, B
+        SomeSequence
+    end ref
+end
+
+note left 
+Appears on the right side, not on the left even though "note left" is used.
+end note
+@enduml

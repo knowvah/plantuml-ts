@@ -1,0 +1,3 @@
+@startuml
+rectangle "White Background"
+@enduml
