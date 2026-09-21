@@ -634,7 +634,15 @@ describe('refusal coverage — baseline shape', () => {
     // 1 the state parser now refusing a source only `PSystemListFonts`
     // accepts. Batch 2 retired 43 activity + 1 sequence rows of the
     // existing tree (`[FIXED]`), already folded into 198/4286 below.
-    expect(manifest.fixtures.length).toBe(5309);
+    //
+    // 5309 -> 5428 / 5040 -> 5159 at class-divergence-drive/close-b1
+    // (2026-09-21): 119 `goldens:svg-class/<slug>` rows appended when the
+    // class ratchet pinned 119 fixtures (314 -> 433). Each is the clone of
+    // its byte-identical dot-cache twin (`golden.svg` == `in.svg`, verified
+    // with `cmp`), exactly how every prior svg-class golden row was pinned;
+    // all render here and on the jar, so erroring/gaps/jar-error are
+    // unchanged. Derivation: rendering 5040 + 119 = 5159; 5159 + 269 = 5428.
+    expect(manifest.fixtures.length).toBe(5428);
     expect(pinnedJarErrors.length).toBe(99);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -648,7 +656,7 @@ describe('refusal coverage — baseline shape', () => {
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
     expect(pinnedErroring.length).toBe(269);
-    expect(pinnedRendering.length).toBe(5040);
+    expect(pinnedRendering.length).toBe(5159);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

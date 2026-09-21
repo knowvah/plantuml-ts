@@ -912,6 +912,19 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **Class SVG comments diverge from the jar (gate-invisible)** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T4
+  (decision-journal row 20; diagnosis `A1-order.md` "Invisible-to-the-gate
+  findings"). `normalize.ts` drops XML comments, so none of these moves the
+  survey, but a long-time user diffing SVGs sees them: (1) the link comment's
+  endpoint name and order differ from `abel/Link.java:115-120 commentForSvg()`
+  (~44 fixtures) and carry the fully-qualified dotted id where the jar writes
+  the bare leaf (T2's `.agent-notes/cdd-T2.md`); (2) the classifier comment
+  always says `class` regardless of leaf type (~28); (3) couple points are
+  named `__assoc0` in comments where the jar writes `apoint<N>`. One
+  comment-building site each; small, but touch only after the class buckets
+  are closed so the survey stays the score.
+
 - **Parity dashboards cannot show an accepted divergence** (NEW,
   unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T0
   (decision-journal row 4). `oracle/accepted-divergences.json` ids are

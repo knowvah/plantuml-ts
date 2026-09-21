@@ -16,10 +16,10 @@ touch, so it runs last.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | Defer implicit-package uid ticks (SB1, 42 fixtures) | typescript-pro (opus) | `src/diagrams/class/parser.ts`, `class-namespace-resolve.ts`, tests | — | [ ] |
-| T2 | `getOrderedLinks`/`addLinkNew` before DOT emission (SB2, 7 fixtures) | typescript-pro | `src/diagrams/class/class-dot-graph.ts`, `class-dot-edge-order.ts`, tests | — | [ ] |
-| T3 | Phantom uid slots: assoc-couple names, package endpoints, notes (SB3/SB4/SB5, 8 fixtures) | typescript-pro | `src/diagrams/class/class-assoc-couple.ts`, `parser.ts`, `class-notes.ts`, `renderer-uid.ts`, tests | T1 | [ ] |
-| T4 | Fix `path/@id` decor-classification inversion for couple edges (SB8, 8 fixtures) | typescript-pro | `src/diagrams/class/renderer-edge.ts`, `class-assoc-couple.ts`, tests | T3 | [ ] |
+| T1 | Defer implicit-package uid ticks (SB1, 42 fixtures) | typescript-pro (opus) | `src/diagrams/class/parser.ts`, `class-namespace-resolve.ts`, tests | — | [x] |
+| T2 | `getOrderedLinks`/`addLinkNew` before DOT emission (SB2, 7 fixtures) | typescript-pro | `src/diagrams/class/class-dot-graph.ts`, `class-dot-edge-order.ts`, tests | — | [x] |
+| T3 | Phantom uid slots: assoc-couple names, package endpoints, notes (SB3/SB4/SB5, 8 fixtures) | typescript-pro | `src/diagrams/class/class-assoc-couple.ts`, `parser.ts`, `class-notes.ts`, `renderer-uid.ts`, tests | T1 | [x] |
+| T4 | Fix `path/@id` decor-classification inversion for couple edges (SB8, 8 fixtures) | typescript-pro | `src/diagrams/class/renderer-edge.ts`, `class-assoc-couple.ts`, tests | T3 | [x] |
 
 Specs: [`T1-implicit-package-ticks.md`](T1-implicit-package-ticks.md),
 [`T2-ordered-links.md`](T2-ordered-links.md),

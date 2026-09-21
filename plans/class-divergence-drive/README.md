@@ -57,7 +57,7 @@ Plus, at every batch close: `npm run svg:survey class`,
 | Batch | Bucket | Tasks | Parallel | Moves layout | Done |
 |---|---|---|---|---|---|
 | [0](batch-0/overview.md) | B11 pre-flight + ELK ledger | T0 · T0b | T0 ∥ T0b | no | [x] |
-| [1](batch-1/overview.md) | B1 ordering & uid | T1 · T2 · T3 · T4 | T1 ∥ T2, then T3, T4 | YES | [ ] |
+| [1](batch-1/overview.md) | B1 ordering & uid | T1 · T2 · T3 · T4 | T1 ∥ T2, then T3, T4 | YES | [x] |
 | [2](batch-2/overview.md) | B2 link render-only | T5 · T6 · T7 | sequential | no | [ ] |
 | [3](batch-3/overview.md) | B5 notes | T8 · T9 · T10 | T8, then T9 ∥ T10 | partly | [ ] |
 | [4](batch-4/overview.md) | B4 clusters | T11 · T12 · T13 · T14 | T11 ∥ T13, then T12, T14 | YES | [ ] |

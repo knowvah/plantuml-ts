@@ -665,10 +665,17 @@ describe('routing conformance — jar-error classification', () => {
     // embedded-diagram gaps 3, a class link fallback 1, a Tim function
     // gap 1). The same batch retired 43 activity + 1 sequence pins of the
     // existing tree (`[FIXED]`), already folded into 3468/943 above.
-    expect(pinnedAgree.length).toBe(4157);
+    //
+    // 4157 -> 4276 / 5309 -> 5428 at class-divergence-drive/close-b1
+    // (2026-09-21): 119 `goldens:svg-class/<slug>` rows appended when the
+    // class ratchet pinned 119 fixtures; each is the clone of its
+    // byte-identical dot-cache twin (all `agree`, CLASS/CLASS), exactly how
+    // every prior svg-class golden row was pinned. Misroutes and jar errors
+    // unchanged. Derivation: 4276 + 1053 + 99 = 5428.
+    expect(pinnedAgree.length).toBe(4276);
     expect(pinnedMisroutes.length).toBe(1053);
     expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5309);
+    expect(manifest.fixtures.length).toBe(5428);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
