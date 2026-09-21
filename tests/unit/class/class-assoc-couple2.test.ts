@@ -385,6 +385,56 @@ describe('association-class couple: render-layer decor/dashing (G2 N8)', () => {
   );
 
   it(
+    "T4: the subsumed edge's B-side decor lands on circle->B's own end, " +
+      'NOT on A->circle\'s circle end (pajoka-72-reju527, "Foo --> Bar")',
+    () => {
+      const ast = parse(`
+      class Foo
+      class Bar
+      class Qux
+      Foo --> Bar
+      (Foo, Bar) --> Qux
+    `);
+      const foo = ast.classifiers.find((c) => c.display === 'Foo')!;
+      const bar = ast.classifiers.find((c) => c.display === 'Bar')!;
+      const [circleId] = circleIds(ast);
+      const aEdge = findRel(ast, foo.id, circleId!);
+      const bEdge = findRel(ast, circleId!, bar.id);
+      // "Foo --> Bar": the open arrowhead sits at Bar's OWN end (bSideDecor),
+      // none at Foo's own end (aSideDecor), in the original subsumed link.
+      expect(aEdge.sourceDecor).toBe('none'); // Foo's own end: aSideDecor
+      expect(aEdge.targetDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.sourceDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.targetDecor).toBe('open'); // Bar's own end: bSideDecor
+    },
+  );
+
+  it(
+    "T4: the subsumed edge's A-side decor lands on A->circle's own end, " +
+      "NOT on circle->B's circle end (mirror of the B-side case above)",
+    () => {
+      const ast = parse(`
+      class Foo
+      class Bar
+      class Qux
+      Foo <-- Bar
+      (Foo, Bar) --> Qux
+    `);
+      const foo = ast.classifiers.find((c) => c.display === 'Foo')!;
+      const bar = ast.classifiers.find((c) => c.display === 'Bar')!;
+      const [circleId] = circleIds(ast);
+      const aEdge = findRel(ast, foo.id, circleId!);
+      const bEdge = findRel(ast, circleId!, bar.id);
+      // "Foo <-- Bar" parses to {from: Bar, to: Foo, targetDecor: 'open'} --
+      // the arrowhead sits at Foo's OWN end (aSideDecor), none at Bar's.
+      expect(aEdge.sourceDecor).toBe('open'); // Foo's own end: aSideDecor
+      expect(aEdge.targetDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.sourceDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.targetDecor).toBe('none'); // Bar's own end: bSideDecor
+    },
+  );
+
+  it(
     'an arrowhead on the couple line carries onto the class-link edge ' + '(not just dashing) — "R1 --> (A,B)"',
     () => {
       const ast = parse(`

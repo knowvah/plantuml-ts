@@ -265,8 +265,8 @@ export function makeCoupleCircle(
     to: circleId,
     type: 'association',
     length: entityLength,
-    sourceDecor: 'none',
-    targetDecor: subsumed.bSideDecor ?? 'none',
+    sourceDecor: subsumed.aSideDecor ?? 'none',
+    targetDecor: 'none',
     dashed: subsumedDashed,
   };
   if (subsumed.a !== undefined) aEdge.fromMultiplicity = subsumed.a;
@@ -285,8 +285,8 @@ export function makeCoupleCircle(
     to: bId,
     type: 'association',
     length: entityLength,
-    sourceDecor: subsumed.aSideDecor ?? 'none',
-    targetDecor: 'none',
+    sourceDecor: 'none',
+    targetDecor: subsumed.bSideDecor ?? 'none',
     dashed: subsumedDashed,
   };
   if (subsumed.b !== undefined) bEdge.toMultiplicity = subsumed.b;
