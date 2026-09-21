@@ -66,4 +66,33 @@ export interface JsonDiagramAST {
    * `TextBlockExporter#computeScaleFactor` does.
    */
   scale?: ScaleSpec;
+  /**
+   * Parse-time degradations this diagram's own grammar can't represent
+   * losslessly -- e.g. yaml's `KEY_AND_FOLDED_STYLE` (`>`), which this
+   * port does not implement and folds to an empty value rather than
+   * throwing (`yaml-parser.ts`). Surfaced by {@link surfaceParseWarnings},
+   * the same `RenderOptions.onWarning`-only channel `surfaceSpriteWarnings`
+   * uses for sprite-collision warnings -- no Node global or `console.*` is
+   * touched here either. Optional and normally absent (`parseJson` never
+   * sets it; `parseHcl` has no degrading construct yet either).
+   */
+  parseWarnings?: readonly string[];
+}
+
+/**
+ * The render pipeline's channel for {@link JsonDiagramAST.parseWarnings}:
+ * `renderSync()`/`render()` call this once per parsed AST, right after
+ * `plugin.parse()`, alongside `surfaceSpriteWarnings` (`src/index.ts`'s
+ * `prepareBlock`). `ast` is `unknown` for the same reason
+ * `surfaceSpriteWarnings` treats it structurally rather than validating it
+ * as a boundary: it is this pipeline's own trusted `plugin.parse()` output,
+ * never external input (`~/.claude/rules/security.md`).
+ *
+ * A no-op when `onWarning` is omitted, matching `surfaceSpriteWarnings`.
+ */
+export function surfaceParseWarnings(ast: unknown, onWarning: ((message: string) => void) | undefined): void {
+  if (onWarning === undefined) return;
+  if (typeof ast !== 'object' || ast === null || !('parseWarnings' in ast)) return;
+  const warnings = (ast as { parseWarnings?: readonly string[] }).parseWarnings;
+  warnings?.forEach((message) => onWarning(message));
 }

@@ -28,6 +28,7 @@ import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
 import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings } from './core/sprite-commands.js';
+import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import {
   DiagramRefusal,
@@ -329,9 +330,9 @@ interface PreparedBlock {
  * production), resolve its diagram plugin (the parse happens HERE, inside
  * resolution: upstream picks a factory by attempting the parse, and D0
  * forbids a second parse path), resolve its measurer, extract its AST (or
- * throw the block's `DiagramRefusal`), and surface any sprite warnings.
- * Neither caller's own try/catch nor sync-vs-async `layout` call belongs
- * here — those stay distinct per caller.
+ * throw the block's `DiagramRefusal`), and surface any sprite/parse
+ * warnings. Neither caller's own try/catch nor sync-vs-async `layout` call
+ * belongs here — those stay distinct per caller.
  */
 function prepareBlock(
   block: BlockUmlOk,
@@ -346,6 +347,7 @@ function prepareBlock(
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);
   surfaceSpriteWarnings(ast, options?.onWarning);
+  surfaceParseWarnings(ast, options?.onWarning);
   return { ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, ast };
 }
 

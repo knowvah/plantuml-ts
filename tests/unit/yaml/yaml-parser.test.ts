@@ -65,6 +65,27 @@ describe('parseYamlLines', () => {
     expect(parse(['key: >'])).toEqual({ key: '' });
   });
 
+  // 9b. code-review item 5 — the degradation is reported, not console.warn'd
+  it('collects a warning naming the dropped key when a warnings array is passed', () => {
+    const warnings: string[] = [];
+    parseYamlLines(['key: >'], warnings);
+    expect(warnings).toEqual([
+      'YAML key "key": folded-style (>) block value is not supported and was dropped',
+    ]);
+  });
+
+  it('collects one warning per KEY_AND_FOLDED_STYLE occurrence, list items included', () => {
+    const warnings: string[] = [];
+    parseYamlLines(['- first: >', '  second: >'], warnings);
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0]).toContain('"first"');
+    expect(warnings[1]).toContain('"second"');
+  });
+
+  it('degrades silently when no warnings array is passed', () => {
+    expect(() => parseYamlLines(['key: >'])).not.toThrow();
+  });
+
   // 10. Plain list items (PLAIN_ELEMENT_LIST)
   it('parses a plain list of strings', () => {
     expect(parse(['- item'])).toEqual(['item']);
