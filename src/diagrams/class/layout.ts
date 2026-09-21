@@ -150,66 +150,10 @@ function preMeasureClassifiers(
   return measuredMap;
 }
 
-// ---------------------------------------------------------------------------
-// Ink-shift application (G2/N11) — post-dot-layout, pre-render uniform
-// translate. `SvekResult#calculateDimension`'s own `moveDelta(6 - minMax
-// .getMinX(), 6 - minMax.getMinY())` side effect (svek/SvekResult.java:133,
-// see `layout-ink-extent.ts`'s own doc comment for the full jar citation).
-// Shared by `layoutSinglePage` (the real ink shift, both axes) and
-// `layoutMultiPage` (the y-only, OUR-OWN `NEWPAGE_GAP` page-stacking offset
-// — same shape of translate, different origin, so the SAME helpers apply
-// with `dx=0`).
-// ---------------------------------------------------------------------------
-
-/** Shift a ClassifierGeo's absolute position by `(dx, dy)`. */
-function shiftClassifierGeo(c: ClassifierGeo, dx: number, dy: number): ClassifierGeo {
-  return { ...c, x: c.x + dx, y: c.y + dy };
-}
-
-/** Shift a NamespaceGeo's absolute position by `(dx, dy)`. */
-function shiftNamespaceGeo(n: NamespaceGeo, dx: number, dy: number): NamespaceGeo {
-  return { ...n, x: n.x + dx, y: n.y + dy };
-}
-
-/** Shift every coordinate in an EdgeGeo by `(dx, dy)` (labels included). */
-function shiftEdgeGeo(edge: EdgeGeo, dx: number, dy: number): EdgeGeo {
-  return {
-    ...edge,
-    points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-    ...(edge.label !== undefined ? { label: { ...edge.label, x: edge.label.x + dx, y: edge.label.y + dy } } : {}),
-    ...(edge.labelLines !== undefined
-      ? {
-          labelLines: edge.labelLines.map((l) => ({
-            ...l,
-            x: l.x + dx,
-            y: l.y + dy,
-            ...(l.glyph !== undefined
-              ? { glyph: { points: l.glyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
-              : {}),
-          })),
-        }
-      : {}),
-    ...(edge.arrowGlyph !== undefined
-      ? { arrowGlyph: { points: edge.arrowGlyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
-      : {}),
-    ...(edge.tailLabel !== undefined
-      ? { tailLabel: { ...edge.tailLabel, x: edge.tailLabel.x + dx, y: edge.tailLabel.y + dy } }
-      : {}),
-    ...(edge.headLabel !== undefined
-      ? { headLabel: { ...edge.headLabel, x: edge.headLabel.x + dx, y: edge.headLabel.y + dy } }
-      : {}),
-  };
-}
-
-/** Shift every coordinate in a NoteGeo by `(dx, dy)` (connector included). */
-function shiftNoteGeo(note: NoteGeo, dx: number, dy: number): NoteGeo {
-  return {
-    ...note,
-    x: note.x + dx,
-    y: note.y + dy,
-    connector: note.connector.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-  };
-}
+// cdd-T6: the five ink-shift helpers moved to `class-layout-shift.ts` when
+// `shiftEdgeExtras` (the four new `EdgeGeo` coordinate fields) pushed this
+// file past the 500-line hook cap -- a pure move, pre-authorised split.
+import { shiftClassifierGeo, shiftEdgeGeo, shiftNamespaceGeo, shiftNoteGeo } from './class-layout-shift.js';
 
 /**
  * T4 (mission leaf-draw-order, D3): reorders `leaves` (built by
@@ -316,7 +260,20 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
     effAst,
     result,
     swappedEdges,
-    { measurer, labelFont: resolveArrowLabelFont(theme), fontFamily: theme.fontFamily },
+    {
+      measurer,
+      labelFont: resolveArrowLabelFont(theme),
+      fontFamily: theme.fontFamily,
+      // cdd-T6 (A2a/M2): the SAME `skinparam classAttributeIconSize`
+      // `class-layout-edge-labels.ts` reserved the label box with.
+      classAttributeIconSize: theme.classAttributeIconSize,
+      // cdd-T6 (A2a/M10): the SAME resolved `arrow.cardinality` font
+      // `class-dot-graph.ts` sizes the tail/head DOT boxes with.
+      cardinalityFont: { family: theme.cardinalityFontFamily!, size: theme.cardinalityFontSize! },
+      // cdd-T6 (A2a/M5, M9): the SAME theme+sprite pair `class-dot-graph.ts`
+      // sized a `note on link`-merged label box with.
+      noteCtx: { theme, ...(effAst.sprites !== undefined ? { sprites: effAst.sprites } : {}) },
+    },
     posMap,
     anchors,
     theme.colors.graph.arrowThickness,

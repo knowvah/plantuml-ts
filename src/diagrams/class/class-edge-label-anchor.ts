@@ -15,6 +15,8 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import { type GuideLine, type MagicArrowDirection, magicArrowGlyphPoints } from './class-magic-arrow.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { computeQuantifierBox } from '../../core/edge-label-box.js';
+import type { QuantifierLineGeo } from './class-geo-edge-extras.js';
 import type { EdgeGeo } from './layout.js';
 import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
@@ -274,6 +276,69 @@ export interface PortLabelContext {
   readonly fontFamily: string;
   /** The collision set -- see `portLabelAnchor`'s `collisionNodes`. */
   readonly nodes: DotLayoutResult['nodes'];
+  /** cdd-T6 (A2a/M10): the RESOLVED `arrow.cardinality` font
+   *  (`GraphvizImageBuilder.java:237-238`'s `cardinalityFont`), the same
+   *  `{ theme.cardinalityFontFamily, theme.cardinalityFontSize }` pair
+   *  `class-dot-graph.ts` sizes the tail/head boxes with. Consumed by
+   *  {@link quantifierLineAnchors} only; `tailLabel`/`headLabel` keep
+   *  their pre-existing `{ fontFamily, CARDINALITY_FONT_SIZE }` font
+   *  unchanged, so no fixture's current ink moves -- the named follow-on
+   *  in `class-edge-geo.ts#EdgeGeoTextContext` stays open until T7
+   *  switches the renderer onto `quantifierLines`. */
+  readonly cardinalityFont?: FontSpec | undefined;
+}
+
+/**
+ * A2a/M10: lay out one quantifier as ONE anchor per physical line.
+ *
+ * Upstream builds it as `Display.getWithNewlines(pragma, quantifier)
+ * .create(cardinalityFont, HorizontalAlignment.CENTER, skinParam)`
+ * (`SvekEdge.java:330-340`) and draws that block at `startTailLabelXY`/
+ * `endHeadLabelXY`'s own position (`:952-971`) -- so `"customer\n1"` is two
+ * `<text>` elements, centred on each other and one `cardinalityFont` size
+ * apart, not one `<text>` containing a literal backslash-n.
+ *
+ * The split is {@link computeQuantifierBox}'s, called rather than
+ * re-derived: it is the SAME function `class-layout-edge-labels.ts` already
+ * reserved the DOT `taillabel`/`headlabel` box with, so the drawn lines and
+ * the reserved box cannot drift. Positioning generalizes
+ * {@link portLabelAnchor} from one line to n exactly as
+ * {@link multiLineLabelAnchor} generalizes it for the main label -- block
+ * height `(n-1) * font.size + firstLineHeight`, per-line CENTER offset
+ * inside the block's own max width, baseline `font.size - descent` from
+ * each line's top -- and reduces to `portLabelAnchor`'s own formula
+ * algebraically at `n === 1`, collision pass included.
+ *
+ * Jar-verified against `camuna-58-veca254`'s `"customer\n1"` tail label
+ * (`arrow { cardinality { FontSize 10 } }`): `customer` at `x=270.023
+ * y=228.853 textLength=41.063`, `1` at `x=287.773 y=238.853` -- a `10`
+ * baseline step (the cardinality size, not the 13 the tail/head ink still
+ * uses) and an x offset of `17.75 === (41.063 - width("1")) / 2`.
+ */
+export function quantifierLineAnchors(
+  text: string,
+  center: { x: number; y: number },
+  measurer: StringMeasurer,
+  font: FontSpec,
+  collisionNodes?: DotLayoutResult['nodes'],
+): QuantifierLineGeo[] {
+  const { lines } = computeQuantifierBox(text, font, measurer);
+  const widths = lines.map((l) => measurer.measure(l, font).width);
+  const maxWidth = Math.max(...widths);
+  const totalHeight = (lines.length - 1) * font.size + measurer.measure(lines[0] ?? '', font).height;
+  const box = new PositionableImpl(
+    center.x - Math.trunc(maxWidth) / 2,
+    center.y - Math.trunc(totalHeight) / 2,
+    new XDimension2D(maxWidth, totalHeight),
+  );
+  const placed = collisionNodes === undefined ? box : manageCollision(box, collisionNodes);
+  const pos = placed.getPosition();
+  return lines.map((lineText, i) => ({
+    text: lineText,
+    x: pos.getX() + (maxWidth - widths[i]!) / 2,
+    y: pos.getY() + i * font.size + (font.size - measurer.getDescent(font, lineText)),
+    width: widths[i]!,
+  }));
 }
 
 /** Attach `tailLabel`/`headLabel` (G2/N25) if `graph-layout.ts` computed a
@@ -302,22 +367,20 @@ export function attachPortLabels(
   const swap = dotEdgeRunsReversed(rel);
   const tailMultiplicity = swap ? rel.toMultiplicity : rel.fromMultiplicity;
   const headMultiplicity = swap ? rel.fromMultiplicity : rel.toMultiplicity;
+  // A2a/M10: the resolved `arrow.cardinality` font feeds the SPLIT anchors
+  // only -- see `PortLabelContext.cardinalityFont`.
+  const splitFont = ctx.cardinalityFont ?? cardinalityFont;
+  const tailLines: QuantifierLineGeo[] = [];
+  const headLines: QuantifierLineGeo[] = [];
   if (tailMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
-    edgeGeo.tailLabel = portLabelAnchor(
-      tailMultiplicity,
-      { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY },
-      measurer,
-      cardinalityFont,
-      nodes,
-    );
+    const center = { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY };
+    edgeGeo.tailLabel = portLabelAnchor(tailMultiplicity, center, measurer, cardinalityFont, nodes);
+    tailLines.push(...quantifierLineAnchors(tailMultiplicity, center, measurer, splitFont, nodes));
   }
   if (headMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
-    edgeGeo.headLabel = portLabelAnchor(
-      headMultiplicity,
-      { x: edgeResult.headLabelX, y: edgeResult.headLabelY },
-      measurer,
-      cardinalityFont,
-      nodes,
-    );
+    const center = { x: edgeResult.headLabelX, y: edgeResult.headLabelY };
+    edgeGeo.headLabel = portLabelAnchor(headMultiplicity, center, measurer, cardinalityFont, nodes);
+    headLines.push(...quantifierLineAnchors(headMultiplicity, center, measurer, splitFont, nodes));
   }
+  if (tailLines.length > 0 || headLines.length > 0) edgeGeo.quantifierLines = [tailLines, headLines];
 }

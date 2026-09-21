@@ -15,6 +15,26 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
+import type { JsonBodyItem } from './class-geo-json-types.js';
+import type { NamespaceGeo } from './class-geo-namespace-types.js';
+import type {
+  EdgeConstraintGeo,
+  EdgeNoteBoxGeo,
+  QuantifierLinesGeo,
+  VisibilityIconGeo,
+} from './class-geo-edge-extras.js';
+
+// cdd-T6: re-exported so `class-geo-types.ts` stays the one import site for
+// class geometry types (see `class-geo-edge-extras.ts`'s own doc comment).
+export type {
+  EdgeConstraintGeo,
+  EdgeNoteBoxGeo,
+  EdgeNoteLine,
+  QuantifierLineGeo,
+  QuantifierLinesGeo,
+  VisibilityIconGeo,
+} from './class-geo-edge-extras.js';
+
 export interface ClassifierGeo {
   id: string;
   kind: ClassifierKind;
@@ -315,6 +335,25 @@ export interface EdgeGeo {
    *  converts to the left/baseline anchor jar's own `<text>` emits. */
   tailLabel?: { text: string; x: number; y: number; width: number };
   headLabel?: { text: string; x: number; y: number; width: number };
+  /** cdd-T6 (A2a/M10): the SAME two quantifiers, `\n`-split into one anchor
+   *  per physical line — see {@link QuantifierLinesGeo}. Present whenever
+   *  either end carries a placed quantifier; `tailLabel`/`headLabel` stay
+   *  set alongside it (the single-line, unsplit form) until T7 switches the
+   *  renderer over. */
+  quantifierLines?: QuantifierLinesGeo;
+  /** cdd-T6 (A2a/M2): the link label's visibility-modifier icon block —
+   *  see {@link VisibilityIconGeo} and `class-edge-visibility.ts`. Present
+   *  only when the label's first line began with a visibility character
+   *  AND `classAttributeIconSize > 0`; the character is then absent from
+   *  `label`/`labelLines[0]`, matching `Display.java:415-416`. */
+  visibilityIcon?: VisibilityIconGeo;
+  /** cdd-T6 (A2a/M5): the `note on link` operand of the merged label block
+   *  — see {@link EdgeNoteBoxGeo}. Absent unless the relationship carried
+   *  `linkNote` and the layout placed its label box. */
+  noteBox?: EdgeNoteBoxGeo;
+  /** cdd-T6 (A2a/M9): `constraint on links` — see {@link EdgeConstraintGeo}.
+   *  Present on the SECOND link of a constrained pair only. */
+  constraint?: EdgeConstraintGeo;
   /** Arrow decoration at the target end (from the arrow's target-side head). */
   targetDecor: LinkDecor;
   /** Arrow decoration at the source end (from the arrow's source-side head). */
@@ -379,45 +418,10 @@ export interface EdgeGeo {
   stereotypeTags?: readonly string[];
 }
 
-export interface NamespaceGeo {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label: string;
-  /** G2 N17: the folder-tab's own title-tab width/height, pre-computed at
-   *  layout time (`class-namespace-shape.ts#getWTitle`/`getHTitle`) -- the
-   *  render phase stays a pure `geometry -> SVG string` function with no
-   *  `StringMeasurer` of its own, matching `ClassifierGeo.rows[].text`'s
-   *  established "measure once, at layout time" convention. */
-  wtitle: number;
-  htitle: number;
-  /** G2 N17: pre-computed title baseline Y offset (relative to `y`) --
-   *  see `class-namespace-shape.ts#getTitleBaselineOffset`'s doc comment. */
-  baselineOffset: number;
-  /** G2 N2 (mechanism 3): parse-time creation order, copied unchanged from
-   *  `Namespace.creationIndex`. */
-  creationIndex?: number;
-  /** G2 N60 (item 42): which klimt shape `Cluster#drawU` draws this
-   *  namespace's outline as -- determines its `LimitFinder` ink rule
-   *  (`layout-ink-extent.ts#addNamespaceInk`'s own doc comment carries the
-   *  full jar-verified mechanism). `undefined` is the common case (default
-   *  FOLDER style, non-`strictuml`): jar draws a rounded-arc `UPath`
-   *  (`USymbolFolder#asBig`'s `roundCorner!=0` branch), which gets the
-   *  PLAIN ink rule (`addPlainInk`, no correction needed -- this is what
-   *  every namespace got before N60). `'polygon'`: FOLDER style WITH
-   *  `strictuml` (`roundCorner=0` forces the sharp-corner `UPolygon`
-   *  branch, `renderNamespaceFolder`'s own `theme.strictUml === true`
-   *  gate) -- needs `LimitFinder#drawUPolygon`'s `HACK_X_FOR_POLYGON=10`
-   *  x-padding. `'rect'`: `skinparam packageStyle rect` (`USymbolRectangle`
-   *  draws a plain `URectangle`) -- needs the classic `-1` min/max inset,
-   *  NOT the polygon hack. Computed once at layout time
-   *  (`class-geo-builders.ts#buildNamespaceGeos`) from `theme.packageStyle`/
-   *  `theme.strictUml`, mirroring `wtitle`/`htitle`'s own "resolve once,
-   *  keep render/ink-extent theme-agnostic" precedent. */
-  inkShape?: 'polygon' | 'rect';
-}
+// cdd-T6: `NamespaceGeo` moved to `class-geo-namespace-types.ts` when the
+// four new `EdgeGeo` fields pushed this file past the 500-line hook cap
+// (pre-authorised split re-export) -- a pure move, re-exported below.
+export type { NamespaceGeo } from './class-geo-namespace-types.js';
 
 export interface ClassGeometry {
   /** cdd-T3 (A1 SB5): `class-directives-removal.ts#computeRemovedRanks`'s output (see its doc comment). */
@@ -473,28 +477,8 @@ export interface ClassGeometry {
   sprites?: SpriteRegistry;
 }
 
-/**
- * One drawing operation of a `json` leaf's entries area, in
- * `TextBlockCucaJSon#drawU`'s OWN order (see
- * `class-json-sizing.ts#buildJsonItems`). Every coordinate is
- * box-relative, the same frame `rows[].y`/`indent` and `dividerYs` use.
- *
- * A separate, ordered list rather than more `dividerYs` entries because
- * upstream's order is a pre-order traversal, not a Y-order: a nested
- * table's `vline` is drawn between its parent's key text and its own first
- * `hline`, and both share the parent row's Y. Same "this body owns its own
- * draw order" dispatch `enhancedBody` established.
- *
- * @see ~/git/plantuml/.../cucadiagram/TextBlockCucaJSon.java:162-180 (object),
- *      :213-224 (array)
- */
-export type JsonBodyItem =
-  /** `ULine.hline(jsonTotalWidth)` — scoped to the emitting table's OWN
-   *  width, which is the parent's minus the parent's key column. */
-  | { readonly kind: 'hline'; readonly x: number; readonly y: number; readonly width: number }
-  /** `ULine.vline(height)` at `dx = width1` — ONE per OBJECT table (never
-   *  per row, unlike `TextBlockMap`; never at all for an array). */
-  | { readonly kind: 'vline'; readonly x: number; readonly y: number; readonly height: number }
-  /** A key or scalar-value cell. `row` is the SAME object that appears in
-   *  `ClassifierGeo.rows`, not a copy. */
-  | { readonly kind: 'text'; readonly row: ClassifierGeo['rows'][number] };
+// cdd-T6: `JsonBodyItem` moved to `class-geo-json-types.ts` when the four
+// new `EdgeGeo` fields pushed this file past the 500-line hook cap
+// (pre-authorised split re-export) -- a pure move, re-exported below so no
+// consumer's import path changed.
+export type { JsonBodyItem } from './class-geo-json-types.js';

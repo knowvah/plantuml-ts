@@ -26,6 +26,8 @@ import { computeClassTagCascadeGenerations } from '../../../src/core/style-casca
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
+import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
+import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
@@ -106,7 +108,17 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
  * per-element fidelity. Stripping `.pages` here (test-harness-only) routes
  * `layoutClass` through its EXISTING single-page branch -- no new
  * production code, matching what the doc comment already promised. */
-export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+/** cdd-T6: {@link renderFixtureClass}'s parse+theme+layout half, exposed so
+ *  a unit test can assert on the GEOMETRY (`EdgeGeo.visibilityIcon`,
+ *  `.quantifierLines`, `.noteBox`, `.constraint` — fields the SVG does not
+ *  yet carry) through the exact same `<style>`/skinparam resolution the
+ *  conformance harness renders with. Extracted verbatim; `renderFixtureClass`
+ *  now calls it, so the two cannot drift. */
+export function layoutFixtureClass(
+  markup: string,
+  measurer: StringMeasurer,
+  options?: PreprocessOptions,
+): { geo: ClassGeometry; theme: Theme; styleMap: StyleMap; annotations: ClassDiagramAST['annotations'] } {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -118,6 +130,15 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   const fullAst = astOrThrow(parseClass(block), 'class');
   // G2 N28: page-1-only view -- see this function's own doc comment.
   const { pages: _pages, ...firstPageAst } = fullAst;
+  const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
+  const geo = { ...layoutClass(firstPageAst, theme, measurer), measurer, ...spritesField };
+  return { geo, theme, styleMap, annotations: firstPageAst.annotations };
+}
+
+export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+  const { geo, theme, styleMap, annotations } = layoutFixtureClass(markup, measurer, options);
+  const blocks = buildBlockUmls(markup, options);
+  const preprocessed = blocks[0]!.ok ? blocks[0]!.preprocessed : undefined!;
   // SI14 T3/T4: mirrors `class/index.ts#classPlugin.layoutSync`'s own
   // post-layout `measurer`/`sprites` passthrough exactly -- `layoutClass`
   // itself does not set either field (T3's `SyncPlugin.render(geo, theme)`
@@ -126,11 +147,8 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // usecase/actor draw path silently falls back to the pre-T4 renderer for
   // EVERY fixture this harness runs, never exercising the code this task
   // adds. Reproduces production's exact behavior, not new test-only logic.
-  const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
-  const geo = { ...layoutClass(firstPageAst, theme, measurer), measurer, ...spritesField };
   const fragment = renderClass(geo, theme);
 
-  const annotations = firstPageAst.annotations;
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
