@@ -1,5 +1,5 @@
-import { buildBlockUmls, isBlockEmpty } from './core/BlockUmlBuilder.js';
-import type { BlockUml, BlockUmlOk } from './core/BlockUmlBuilder.js';
+import { buildBlockUml, buildBlockUmls, isBlockEmpty, rawBlocksOf } from './core/BlockUmlBuilder.js';
+import type { BlockUml, BlockUmlOk, RawBlock } from './core/BlockUmlBuilder.js';
 import { registry } from './core/dispatcher.js';
 import type { AssembledSvg, DiagramPlugin, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
@@ -313,6 +313,42 @@ function assemblePages(ctx: PageContext, geo: unknown, ast: unknown, options?: R
   );
 }
 
+/** {@link prepareBlock}'s result: the page context every page of the block
+ *  shares, plus the AST that {@link prepareBlock}'s caller feeds to layout. */
+interface PreparedBlock {
+  readonly ctx: PageContext;
+  readonly ast: unknown;
+}
+
+/**
+ * The prepare sequence shared by {@link renderPagesSync} and
+ * {@link renderBlockPages} before they diverge on sync-vs-async layout and
+ * error wrapping: build the block's theme (skin-reddress-variants Fix 2
+ * threads the block's own raw source lines so a `!define DARKBLUE` + `skin
+ * reddress` combination fires reddress's `!ifdef DARKBLUE` gate in
+ * production), resolve its diagram plugin (the parse happens HERE, inside
+ * resolution: upstream picks a factory by attempting the parse, and D0
+ * forbids a second parse path), resolve its measurer, extract its AST (or
+ * throw the block's `DiagramRefusal`), and surface any sprite warnings.
+ * Neither caller's own try/catch nor sync-vs-async `layout` call belongs
+ * here — those stay distinct per caller.
+ */
+function prepareBlock(
+  block: BlockUmlOk,
+  umlSource: UmlSource,
+  options: RenderOptions | undefined,
+): PreparedBlock {
+  const { theme, styleMap } = buildTheme(
+    block.preprocessed, options, block.rawSource.map((s) => s.getString()),
+  );
+  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
+  const plugin = resolution.plugin;
+  const measurer = resolveMeasurer(plugin.type, options);
+  const ast = astOf(resolution, options);
+  surfaceSpriteWarnings(ast, options?.onWarning);
+  return { ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, ast };
+}
+
 /**
  * Every PAGE of the FIRST diagram in `source`, in page order.
  *
@@ -343,32 +379,12 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
     if (!block.ok) return [preprocessorErrorSvg(block.failure, options)];
     if (isBlockEmpty(block)) return [emptySvg(block, options)];
 
-    const umlSource = umlSourceOfBlock(block);
-    // skin-reddress-variants Fix 2: thread the block's own raw source lines
-    // so a `!define DARKBLUE` + `skin reddress` combination fires reddress's
-    // `!ifdef DARKBLUE` gate in production (previously provable only via the
-    // test harness -- see `build-theme.ts#buildTheme`'s doc comment).
-    const { theme, styleMap } = buildTheme(
-      block.preprocessed, options, block.rawSource.map((s) => s.getString()),
-    );
-    // The parse happens HERE, inside resolution: upstream picks a factory by
-    // attempting the parse, and D0 forbids a second parse path.
-    const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
-    const plugin = resolution.plugin;
-    if (!('layoutSync' in plugin))
+    const { ctx, ast } = prepareBlock(block, umlSourceOfBlock(block), options);
+    if (!('layoutSync' in ctx.plugin))
       throw new Error('renderSync() is not supported for this diagram type — use render()');
 
-    const measurer = resolveMeasurer(plugin.type, options);
-    const ast = astOf(resolution, options);
-    surfaceSpriteWarnings(ast, options?.onWarning);
-    const geo = plugin.layoutSync(ast, theme, measurer);
-    // #lizard forgives -- pre-existing violation (31 NLOC vs. this repo's 30
-    // cap), unrelated to skin-reddress-variants; only surfaced now because
-    // buildTheme's move out of this file dropped index.ts under the
-    // 500-line gate that previously short-circuited this per-function check.
-    return assemblePages(
-      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast, options,
-    );
+    const geo = ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer);
+    return assemblePages(ctx, geo, ast, options);
   } catch (err) {
     return [errorSvg(source, err, options)];
   }
@@ -418,16 +434,40 @@ export async function renderPages(
   }
 }
 
+/**
+ * Every `@startuml` BLOCK in `source`, rendered independently.
+ *
+ * {@link prepareIncludeStore} walks whatever text it is given for
+ * `!include`s and rejects the whole call on the FIRST one that fails.
+ * `render()`/`renderPages()` call it once on the WHOLE document, which is
+ * fine there because they only ever consume the first block — but doing the
+ * same here would let one block's bad include discard every block's output.
+ * Scoping the prefetch to each block's OWN raw text (via {@link rawBlocksOf},
+ * before that block is preprocessed) keeps a bad include local to its own
+ * page: sibling blocks whose includes resolve still render normally.
+ */
 export async function renderAll(
   source: string,
   options?: RenderOptions,
 ): Promise<string[]> {
+  // This outer catch is for document-level failures (e.g. a non-string
+  // `source`, which throws before any block exists to attribute the error
+  // to) -- `renderRawBlock` never rejects, so a single bad block cannot
+  // reach it. See that function's own catch for the per-block isolation.
   try {
-    const includeStore = await prepareIncludeStore(source, options);
-    const blocks = buildBlockUmls(source, { includeStore });
-    return await Promise.all(blocks.map(async (block) => renderBlock(block, options)));
+    return await Promise.all(rawBlocksOf(source).map((raw) => renderRawBlock(raw, options)));
   } catch (err) {
     return [errorSvg(source, err, options)];
+  }
+}
+
+async function renderRawBlock(raw: RawBlock, options: RenderOptions | undefined): Promise<string> {
+  const text = raw.lines.map((s) => s.getString()).join('\n');
+  try {
+    const includeStore = await prepareIncludeStore(text, options);
+    return await renderBlock(buildBlockUml(raw, { includeStore }), options);
+  } catch (err) {
+    return errorSvg(text, err, options);
   }
 }
 
@@ -449,22 +489,12 @@ async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promi
 
   const umlSource = umlSourceOfBlock(block);
   try {
-    // skin-reddress-variants Fix 2: see the matching call in `renderSync`.
-    const { theme, styleMap } = buildTheme(
-      block.preprocessed, options, block.rawSource.map((s) => s.getString()),
-    );
-    const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
-    const plugin = resolution.plugin;
-    const measurer = resolveMeasurer(plugin.type, options);
-    const ast = astOf(resolution, options);
-    surfaceSpriteWarnings(ast, options?.onWarning);
+    const { ctx, ast } = prepareBlock(block, umlSource, options);
     const geo =
-      'layoutSync' in plugin
-        ? plugin.layoutSync(ast, theme, measurer)
-        : await plugin.layout(ast, theme, measurer);
-    return assemblePages(
-      { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, geo, ast, options,
-    );
+      'layoutSync' in ctx.plugin
+        ? ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer)
+        : await ctx.plugin.layout(ast, ctx.theme, ctx.measurer);
+    return assemblePages(ctx, geo, ast, options);
   } catch (err) {
     // The block's own lines, so the listing shows the diagram that failed.
     return [errorSvg(umlSource.lines.join('\n'), err, options)];

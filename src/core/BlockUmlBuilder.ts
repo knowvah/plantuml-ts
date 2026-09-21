@@ -65,8 +65,13 @@ function startSuffix(line: string): string {
  */
 const RE_START_SUFFIX = /^\s*[@\\]start(\w+)/i;
 
-/** One `@start...@end` block, still RAW -- upstream's `BlockUml#rawSource`. */
-interface RawBlock {
+/**
+ * One `@start...@end` block, still RAW -- upstream's `BlockUml#rawSource`.
+ * Exported so a caller that needs to prefetch each block's `!include`s
+ * SEPARATELY (`renderAll`'s per-block include isolation, `src/index.ts`) can
+ * split the document without also running the (store-dependent) preprocessor.
+ */
+export interface RawBlock {
   readonly suffix: string;
   /** `@start` line, interior, `@end` line -- the block's own lines, unprocessed. */
   readonly lines: readonly StringLocated[];
@@ -119,7 +124,19 @@ function appendWhilePaused(current: StringLocated[], s: StringLocated): void {
  * synthesizes the missing `@end`), not in the library.
  */
 export function buildBlockUmls(source: string, options?: PreprocessOptions): BlockUml[] {
-  return splitRawBlocks(mergeEndingBackslashLines(readLines(source))).map((raw) => buildBlockUml(raw, options));
+  return rawBlocksOf(source).map((raw) => buildBlockUml(raw, options));
+}
+
+/**
+ * Split `source` into its `@start...@end` blocks WITHOUT running the
+ * preprocessor -- the split half of {@link buildBlockUmls}, on its own so a
+ * caller can prefetch each block's own `!include`s before preprocessing it
+ * (`renderAll`'s per-block include isolation; without this, preprocessing a
+ * block whose includes are not yet in the store fails with an unresolved-path
+ * error rather than the one the fetch itself produced).
+ */
+export function rawBlocksOf(source: string): RawBlock[] {
+  return splitRawBlocks(mergeEndingBackslashLines(readLines(source)));
 }
 
 /**
@@ -179,8 +196,13 @@ function splitRawBlocks(lines: readonly StringLocated[]): RawBlock[] {
   return blocks;
 }
 
-/** @see ~/git/plantuml/.../BlockUml.java#BlockUml -- the `TimLoader` branch. */
-function buildBlockUml(raw: RawBlock, options?: PreprocessOptions): BlockUml {
+/**
+ * @see ~/git/plantuml/.../BlockUml.java#BlockUml -- the `TimLoader` branch.
+ * Exported alongside {@link rawBlocksOf} for `renderAll`'s per-block include
+ * isolation: build ONE already-split {@link RawBlock} once its own
+ * `IncludeStore` is ready, rather than re-splitting the whole document.
+ */
+export function buildBlockUml(raw: RawBlock, options?: PreprocessOptions): BlockUml {
   const outcome = preprocessLinesOrError(raw.lines, undefined, options);
   if (!outcome.ok) return { ok: false, suffix: raw.suffix, rawSource: raw.lines, failure: outcome.failure };
 
