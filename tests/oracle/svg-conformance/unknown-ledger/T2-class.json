@@ -4,7 +4,7 @@
     {
       "slug": "coruvi-63-vuzu133",
       "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "class",
       "command": "CommandFactoryNoteOnEntity",
@@ -13,7 +13,7 @@
     {
       "slug": "nezaxe-99-mumo948",
       "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "class",
       "command": "CommandFactoryNoteOnEntity",
@@ -22,7 +22,7 @@
     {
       "slug": "tiseze-53-gace410",
       "cohort": "class-note-no-target",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "class",
       "command": "CommandFactoryNoteOnEntity",
