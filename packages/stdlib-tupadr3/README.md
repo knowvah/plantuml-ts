@@ -2,7 +2,7 @@
 
 The `tupadr3` PlantUML stdlib bundle (Font Awesome 4/5/6, Devicons,
 Devicons2, Material, Weather, Govicons — ~6,850 icon-font sprites) —
-packaged as a single [plantuml-ts](https://github.com/plantuml/plantuml-ts)
+packaged as a single [plantuml-ts](https://github.com/knowvah/plantuml-ts)
 `StdlibRemoteManifest` value plus the raw `.puml` assets it describes, for
 use with `plantuml-ts`'s `remoteStdlib()` / `stdlibRegistry()` include seam.
 **There is no eager `BundleData` export** — see "Usage" below.

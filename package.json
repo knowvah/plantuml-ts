@@ -67,6 +67,7 @@
     "docs:build": "npm run docs:brand && npm run docs:copy-reports && vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site",
     "prepare": "husky",
+    "prepublishOnly": "npm run build",
     "format": "prettier --write",
     "format:check": "prettier --check ."
   },
@@ -81,7 +82,6 @@
     "@microsoft/api-extractor": "^7.59.1",
     "@playwright/test": "^1.63.0",
     "@shikijs/themes": "^4.4.3",
-    "@types/katex": "^0.16.8",
     "@types/node": "^26.6.2",
     "@vitest/coverage-v8": "^5.0.1",
     "@xmldom/xmldom": "^0.9.12",
@@ -95,7 +95,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
     "vite": "^8.3.0",
-    "vite-plugin-dts": "^5.1.0",
+    "vite-plugin-dts": "^5.1.1",
     "vitepress": "^1.6.4",
     "vitest": "^5.0.1"
   },

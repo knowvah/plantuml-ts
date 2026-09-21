@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 //
 // Mirror the committed reports (docs/parity-report.md, DIVERGENCES.md) into the
 // VitePress site as parity.md / divergences.md so they publish alongside the

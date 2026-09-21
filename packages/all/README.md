@@ -1,6 +1,6 @@
 # @knowvah/plantuml-all
 
-One install for every [plantuml-ts](https://github.com/sseely/plantuml-ts)
+One install for every [plantuml-ts](https://github.com/knowvah/plantuml-ts)
 asset package: the stdlib bundles, the ArchiMate sprites, and the Twemoji
 emoji artwork.
 

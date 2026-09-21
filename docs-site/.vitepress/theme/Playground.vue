@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-License-Identifier: MIT -->
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 // Aliased in .vitepress/config.ts to the real library source (src/index.ts,
@@ -143,6 +143,7 @@ watch(source, () => {
       </div>
       <div class="pu-output" aria-label="Rendered SVG">
         <pre v-if="error" class="pu-error">{{ error }}</pre>
+        <!-- Code review: playground v-html has no CSP; only self-XSS reachable today (no URL-reflection or share-link mechanism found). Revisit immediately if a share/permalink feature is added, or once the javascript: href fix lands. -->
         <div v-else class="pu-svg" v-html="svg"></div>
       </div>
     </div>

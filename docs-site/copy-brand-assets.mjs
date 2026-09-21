@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 //
 // Copy brand assets from `@knowvah/theme` into docs-site/public/ so VitePress
 // can reference them by URL. `themeConfig.logo` and `<link rel="icon">` take
