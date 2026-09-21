@@ -168,3 +168,45 @@ jobs:
           if [ "$elapsed" -gt $(( BUDGET_MIN * 60 )) ]; then
             echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (observed range 4.0-5.8 min). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
           fi
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # `@knowvah/theme` installs from GitHub Packages; see .npmrc.
+      packages: read
+    # Hard backstop for a hang, not a performance budget (code-review-tasks.md
+    # item 7 — this job's first landing, so there is no `gh run list` history
+    # yet to size it off, unlike `gates` above). `npm ci` + a cold Playwright
+    # Chromium download dominate; the suite itself ran in 7.3s locally
+    # (17 specs, `npx playwright test`). Revisit once a few real runs exist.
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          # Reads the `volta.node` pin from package.json, the same source volta
+          # uses locally, so CI and the dev box cannot drift apart.
+          node-version-file: package.json
+          cache: npm
+          # Writes the npm.pkg.github.com auth line to the runner's ~/.npmrc
+          # so `@knowvah/theme` resolves; the scope mapping itself is in
+          # the repo's .npmrc.
+          registry-url: https://npm.pkg.github.com
+          scope: '@knowvah'
+
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Playwright's own browser binaries, not an npm package — cached
+      # separately from node_modules and installed with their OS-level
+      # dependencies (`--with-deps`) since the runner has none preinstalled.
+      - name: install playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: e2e tests
+        run: npm run test:e2e
