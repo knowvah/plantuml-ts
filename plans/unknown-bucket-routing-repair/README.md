@@ -38,7 +38,7 @@ Merge with a merge commit, never squash.
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 pin generator · T1 settled ledger (668 rows) | 2 agents, worktrees | [x] |
 | [1](batch-1/overview.md) | T2–T6 diagnosis, one per jar-type cohort (157 rows) | 5 agents, worktrees, read-only on `src/` | [x] |
-| [2](batch-2/overview.md) | T7–T12 fixes by seam · T13 dashboard `unknown` row | up to 7 agents, worktrees, disjoint seams | [ ] |
+| [2](batch-2/overview.md) | T7–T12 fixes by seam · T13 dashboard `unknown` row | up to 7 agents, worktrees, disjoint seams | [x] |
 | [3](batch-3/overview.md) | T14 pin + move + regenerate · T15 bookkeeping | orchestrator, then 1 agent | [ ] |
 
 Batch 2's fixture-to-seam assignment is decided by the orchestrator from
