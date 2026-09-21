@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 import '../src/index.js'; // side effect: registers all diagram plugins
 import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
+import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 import { registry } from '../src/core/dispatcher.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -86,7 +87,7 @@ function runOracle(pumlPath: string, outDir: string): number {
         outDir,
         pumlPath,
       ],
-      { stdio: 'ignore', timeout: 20_000 },
+      { stdio: 'ignore', timeout: ORACLE_JAR_TIMEOUT_MS },
     );
   } catch {
     /* oracle failed on this fixture — treat as no DOT */

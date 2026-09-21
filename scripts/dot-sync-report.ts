@@ -29,6 +29,7 @@ import { WidthTableMeasurer } from '../src/core/measurer.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import {
   parseSvekDot,
@@ -111,7 +112,7 @@ export function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boo
         dir,
         join(dir, 'in.puml'),
       ],
-      { stdio: 'ignore', timeout: 25_000 },
+      { stdio: 'ignore', timeout: ORACLE_JAR_TIMEOUT_MS },
     );
   } catch {
     /* partial — read what landed */
