@@ -6,6 +6,21 @@ import type { GtileDiamond } from './gtile-diamond.js';
 import type { Theme } from '../../../core/theme.js';
 import { NODE_MARGIN_X, NODE_MARGIN_Y } from '../activity-layout-constants.js';
 
+/** Left-to-right x offsets for each case tile, `NODE_MARGIN_X` apart, plus
+ *  their combined width (no trailing margin). Extracted from the
+ *  constructor purely to keep it under the complexity hook's NLOC cap once
+ *  {@link GtileSwitch.caseLabels} (mission ubrr-T10 M2) was added. */
+function layoutCaseOffsets(caseTiles: readonly Tile[]): { xOffsets: number[]; totalWidth: number } {
+  const xOffsets: number[] = [];
+  let x = 0;
+  for (const c of caseTiles) {
+    xOffsets.push(x);
+    x += c.width + NODE_MARGIN_X;
+  }
+  const totalWidth = x - (caseTiles.length > 0 ? NODE_MARGIN_X : 0);
+  return { xOffsets, totalWidth };
+}
+
 export class GtileSwitch extends TileComposite {
   readonly kind = 'gtile-switch' as const;
   readonly width: number;
@@ -15,6 +30,13 @@ export class GtileSwitch extends TileComposite {
   readonly diamondOffsetY = 0;
   readonly caseOffsetY: number;
   readonly mergeOffsetY: number | null;
+  /** `case (LABEL)`'s own label, one per case, aligned with
+   *  {@link caseOffsets} -- consulted by `layout/tile-coordinates.ts`'s
+   *  `'gtile-switch'` walker to label the diamond-to-case edge (mission
+   *  ubrr-T10 M2; the jar draws this as edge text, e.g. doveka-76-
+   *  fiza931's golden `<text ...>condition A</text>` beside the vertical
+   *  connector). */
+  readonly caseLabels: readonly (string | undefined)[];
 
   constructor(
     diamond: GtileDiamond,
@@ -25,14 +47,9 @@ export class GtileSwitch extends TileComposite {
   ) {
     super();
     const caseTiles = cases.map((c) => c.tile);
-    const xOffsets: number[] = [];
-    let x = 0;
-    for (const c of caseTiles) {
-      xOffsets.push(x);
-      x += c.width + NODE_MARGIN_X;
-    }
+    this.caseLabels = cases.map((c) => c.label);
+    const { xOffsets, totalWidth: caseTotalWidth } = layoutCaseOffsets(caseTiles);
     this.caseOffsets = xOffsets;
-    const caseTotalWidth = x - (caseTiles.length > 0 ? NODE_MARGIN_X : 0);
     this.width = Math.max(diamond.width, caseTotalWidth);
     const maxCaseH = Math.max(0, ...caseTiles.map((c) => c.height));
     this.caseOffsetY = diamond.height + NODE_MARGIN_Y;

@@ -15,15 +15,9 @@
 
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
-import type {
-  ActivityAction,
-  ActivityArrowLabel,
-  ActivityNode,
-  ActivityNote,
-  ActivityRepeat,
-  ActivityWhile,
-} from './ast.js';
+import type { ActivityAction, ActivityArrowLabel, ActivityNode, ActivityNote, ActivityRepeat, ActivityWhile } from './ast.js';
 import {
   RE_ACTION,
   RE_ACTION_CLOSE,
@@ -49,6 +43,9 @@ import {
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
+import { tryActivityList, tryBackward } from './list-backward-dispatch.js';
+import { tryOpenSwitch } from './switch-dispatch.js';
+import { tryOpenGroup } from './group-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -101,15 +98,22 @@ function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult
   return { idx: idx + 1, node };
 }
 
-interface MultilineActionBody {
+export interface MultilineActionBody {
   cursor: number;
   labelParts: string[];
   multiStereo: string | undefined;
 }
 
 /** Consumes body lines of a multiline action until its closing `;`
- *  (optionally followed by `<<stereo>>`), or end-of-input. */
-function readMultilineActionBody(ctx: ParseContext, startIdx: number, labelParts: string[]): MultilineActionBody {
+ *  (optionally followed by `<<stereo>>`), or end-of-input. Exported: also
+ *  `backward-dispatch.ts#tryBackward`'s multiline form (mission ubrr-T10
+ *  M3) reuses this verbatim -- the identical content-then-`;`-then-
+ *  stereogroup(s) closer shape `backward:`'s own multiline form has. */
+export function readMultilineActionBody(
+  ctx: ParseContext,
+  startIdx: number,
+  labelParts: string[],
+): MultilineActionBody {
   const { lines } = ctx;
   let cursor = startIdx;
   let multiStereo: string | undefined;
@@ -166,7 +170,10 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
   // a lane switch inside the body never leaks into this node's own
   // `swimlane`.
   const openerSwimlane = swimlaneSpread(ctx);
-  const bodyResult = parseNodes(ctx, idx + 1, ['endwhile']);
+  // `['end while', 'while end']` per RE_ENDWHILE's own doc: CommandWhileEnd3
+  // is a RegexOr of both two-word spellings; matchesStopKeyword needs its
+  // own entry for each (mission ubrr-T10 M5).
+  const bodyResult = parseNodes(ctx, idx + 1, ['endwhile', 'end while', 'while end']);
   if (isRefusal(bodyResult)) return bodyResult;
   let cursor = bodyResult.nextIdx;
   let exitLabel: string | undefined;
@@ -369,12 +376,32 @@ function trySprite(ctx: ParseContext, idx: number): DispatchResult | null {
   return { idx: idx + match.consumed };
 }
 
+/**
+ * `scale ...` (6 forms, `CommonCommands#addCommonScaleCommands`, wired for
+ * every `TitledDiagram` factory including `activitydiagram3`) -- mission
+ * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. Recognised and consumed
+ * only: the resolved factor is NOT applied to the rendered document (no
+ * `ast.scale`/renderer wiring here, unlike `sequence`/`description`) --
+ * activity-diagram scaling is a separate, unscoped follow-on; this just
+ * stops the line from refusing.
+ */
+function tryScale(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  if (matchScaleCommand(line) === undefined) return null;
+  return { idx: idx + 1 };
+}
+
 const LINE_HANDLERS: readonly LineHandler[] = [
   trySwimlane,
   trySimpleKeyword,
   tryAction,
   tryMultilineAction,
+  // `partition`/`group` (mission ubrr-T10 M6) registered upstream BEFORE
+  // the if-family (`ActivityDiagramFactory3.java:110-113`, right after
+  // the swimlane commands).
+  tryOpenGroup,
+  tryBackward,
   tryIf,
+  tryOpenSwitch,
   tryWhile,
   tryRepeat,
   tryFork,
@@ -384,6 +411,13 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryArrowLabel,
   tryAnnotation,
   trySprite,
+  tryScale,
+  // Tried LAST, immediately before the unknown-line fallback: `[-*]` is a
+  // broad prefix (mission ubrr-T10 M1) and upstream itself registers
+  // `CommandActivityList` after every other body command
+  // (`ActivityDiagramFactory3.java:160`, right before `CommandLabel`/
+  // `CommandGoto`).
+  tryActivityList,
 ];
 
 /**

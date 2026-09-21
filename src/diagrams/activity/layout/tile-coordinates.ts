@@ -92,6 +92,14 @@ export function pushEdge(
   out.edgeMeta.push({ lane1, lane2, shape, ...(loop !== undefined ? { loop } : {}) });
 }
 
+/** Labels the edge `pushEdge` just pushed, when non-empty. Extracted out
+ *  of `walkTile`'s `'gtile-switch'` arm (mission ubrr-T10 M2, `case
+ *  (LABEL)`'s own label -- see `GtileSwitch.caseLabels`'s own doc) purely
+ *  to keep `walkTile`'s own NLOC/CCN off the complexity hook's ratchet. */
+function applyLastEdgeLabel(out: Out, label: string | undefined): void {
+  if (label !== undefined && label !== '') out.edges[out.edges.length - 1]!.label = label;
+}
+
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
   const { kindHint, lane } = hints;
   const myLane = laneAt(tile, lane);
@@ -281,13 +289,9 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
 
         const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
         const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
-        pushEdge(
-          out,
-          new GConnectionSideThenVerticalThenSide().getPoints(from, to),
-          laneOut(diamond, myLane),
-          laneIn(c, myLane),
-        );
-
+        const dcPts = new GConnectionSideThenVerticalThenSide().getPoints(from, to);
+        pushEdge(out, dcPts, laneOut(diamond, myLane), laneIn(c, myLane));
+        applyLastEdgeLabel(out, t.caseLabels[i]);
         if (mergeDiamond !== null) {
           const mX = centerX - mergeDiamond.width / 2;
           const mY = y + t.mergeOffsetY!;

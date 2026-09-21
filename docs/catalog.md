@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1110 modules · 4021 exported names.
+1115 modules · 4048 exported names.
 
 ## `src/`
 
@@ -939,15 +939,18 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
 | `activity-text-style.ts` | `activityMinimumWidth`, `ACTIVITY_FONT_COLOR`, `activityFontColor`, `activityHorizontalAlignment` | The unconsumed activity box-width, font-colour and horizontal-alignment resolvers (mission `activity-min-box-width`, T1, D1/D2/D3). |
 | `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular` — the default activity-diagram arrowhead decoration. |
-| `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
-| `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_IF`, `RE_ELSEIF`, `RE_ELSE`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
-| `if-dispatch.ts` | `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
+| `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityBackward`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivitySwitchCase`, `ActivitySwitch`, `ActivityGroup`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
+| `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_ACTIVITY_LIST`, `RE_BACKWARD`, `RE_BACKWARD_HEAD`, `RE_IF`, `RE_IF4`, `RE_IF_LEGACY`, `RE_ELSEIF`, `RE_ELSE`, `RE_ELSE_LEGACY`, `RE_ENDIF`, `RE_SWITCH`, `RE_CASE`, `RE_ENDSWITCH`, `RE_GROUP_OPEN`, `RE_CLOSE_GROUP`, `RE_CLOSE_GROUP_LEGACY`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
+| `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
+| `if-dispatch.ts` | `stripTrailingSemi`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout.old.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `ActivityGeometry`, `ActivityArrowLabel`, `layoutActivity` | Activity diagram layout engine. |
-| `node-dispatch.ts` | `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
+| `list-backward-dispatch.ts` | `tryActivityList`, `tryBackward` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
+| `node-dispatch.ts` | `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
+| `switch-dispatch.ts` | `tryOpenSwitch` | `switch (test) / case (v) / endswitch` dispatch (mission ubrr-T10 M2). |
 
 ## `src/diagrams/activity/layout/`
 
@@ -1204,6 +1207,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `annotation-line-trim.ts` | `trimLineForAnnotationMatch` | `matchAnnotationCommand`'s single-line matchers (`matchTitle` et al., `core/annotations/commands.ts`'s `ORDERED_MATCHERS`) read `lines[i]` verbatim, no internal trim — they require an already-trimmed line, like `state/parser.ts:147-149`'s ` |
 | `ast.ts` | `StereotypeSpriteRef`, `DescriptiveNode`, `DescriptiveLinkStyle`, `DescriptiveLink`, `DescriptionDiagramAST` | AST type definitions for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `command-table-containers.ts` | `CONTAINER_COMMANDS` | Bracket/paren shorthand, container-block, and generic keyword-dispatch commands for the descriptive diagram dispatch table (rules 10-15 of the original command-table.ts COMMANDS array): `[Name]` bracket shorthand, `(Name)` use-case shorthan |
 | `command-table-directives.ts` | `DIRECTIVE_COMMANDS` | Directive-style commands for the descriptive diagram dispatch table (rules 1-4 of the original command-table.ts COMMANDS array): comment lines, `newpage`, direction directives, `skinparam linetype`, `set separator`, `!pragma kermor`, `scale |
@@ -1212,6 +1216,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-table-shorthand.ts` | `SHORTHAND_COMMANDS` | Bare shorthand declaration commands for the descriptive diagram dispatch table (rules 5-8b of the original command-table.ts COMMANDS array): business-actor `:Name:/`, actor `:Name:`, business-usecase `(Name)/`, interface `()Name`, and the b |
 | `command-table-types.ts` | `Command` | Shared `Command` shape for the descriptive diagram dispatch table. |
 | `command-table.ts` | `Command`, `COMMANDS` | Command dispatch table for the descriptive diagram parser (component / use-case / deployment). |
+| `element-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE1 element body (`parser.ts`'s `continueElementBlock`): while an open element block is accumulating body lines, a line that OPENS |
 | `element-grammar-nosymbol.ts` | `RE_BARE_AS_DECORATED`, `BareAsDecorated`, `parseBareAsDecorated`, `RE_BARE_QUOTED_DECL`, `RE_BARE_DECORATED_DECL`, `RE_CODE_AS_QUOTED_DISPLAY`, `CodeAsQuotedDisplay`, `parseCodeAsQuotedDisplay` | `CommandCreateElementFull`'s declaration alternatives with the leading SYMBOL keyword OMITTED (`getRegexConcat:84`, `(?:(ALL_TYPES\|\(\))[%s]+)?` — the group is optional). |
 | `element-grammar.ts` | `BracketDeclaration`, `parseBracketDeclaration`, `removeMatching`, `removeMatchingLinks`, `effectiveRemovedIds`, `effectiveHiddenIds`, `visibleStereotypeLabels`, `nodeWithVisibleStereotype` | Element-declaration helpers split out of parser.ts to stay under 500 lines (CommandCreateElementFull.java, net.sourceforge.plantuml.descdiagram .command) — the bracket-shorthand declaration form and the id/tag-based `remove`/`hide`/`show` ( |
 | `frontier-cluster-bbox.ts` | `PortClusterInfo`, `ClusterSpacing`, `computePortClusterBbox` | frontier-cluster-bbox.ts — wires `core/svek/FrontierCalculator.ts` (`Cluster.java#manageEntryExitPoint`/`FrontierCalculator.java`) and `frontier-shadow-layout.ts` (the `initial` rect source) together into one `Bbox` a port cluster's `buildG |

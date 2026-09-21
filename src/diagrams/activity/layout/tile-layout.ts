@@ -6,6 +6,8 @@ import type {
   ActivityRepeat,
   ActivityFork,
   ActivitySplit,
+  ActivitySwitch,
+  ActivityGroup,
 } from '../ast.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import type { Theme } from '../../../core/theme.js';
@@ -17,12 +19,16 @@ import { GtileKill } from '../tiles/gtile-kill.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
+import { GtileDiamond } from '../tiles/gtile-diamond.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
 import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
+import { GtileSwitch } from '../tiles/gtile-switch.js';
+import { GtileGroup } from '../tiles/gtile-group.js';
+import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
@@ -218,6 +224,58 @@ function tileSplit(
   return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
 }
 
+/**
+ * Builds a {@link GtileSwitch} from an `ActivitySwitch` node (mission
+ * ubrr-T10 M2). DIVERGENCE, documented: upstream's real switch shape is
+ * `GtileIfHexagon` (`activitydiagram3/gtile/GtileIfHexagon.java`) -- a
+ * hexagon opener with 1/2-branch-only side labels and N-branch-dependent
+ * connection routing, a materially different (and materially larger)
+ * class than anything else in `tiles/`. This reuses the already-ported,
+ * already-tested `GtileSwitch` (a plain diamond opener/closer, case
+ * labels drawn as ordinary edge text) instead: same topology (opener ->
+ * N cases -> merge), same landing engine (D3), different diamond/hexagon
+ * shape and label placement. The merge diamond is unconditional, matching
+ * `GtileIfHexagon`'s own `shape2` (always built and drawn, independent of
+ * whether any case continues).
+ */
+function tileSwitch(
+  node: ActivitySwitch,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+): GtileSwitch {
+  const diamond = new GtileDiamond(node.condition, bounder, theme);
+  const cases = node.cases.map((kase) => {
+    const tile = new GtileTopDown(tileNodes(kase.body, bounder, theme, laneOrder), bounder, theme);
+    return kase.label !== undefined ? { tile, label: kase.label } : { tile };
+  });
+  const mergeDiamond = new GtileDiamond('', bounder, theme);
+  return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
+}
+
+/**
+ * Builds a {@link GtileGroup}/{@link GtilePartition} from an
+ * `ActivityGroup` node (mission ubrr-T10 M6). `groupType === 'group'`
+ * builds `GtileGroup`; the other four (`partition`/`package`/`rectangle`/
+ * `card`) all build `GtilePartition` -- upstream draws a DIFFERENT
+ * `USymbol` per type (`CommandPartition3#getUSymbol`), but this port has
+ * only the two tile classes (`gtile-group.ts`/`gtile-partition.ts`,
+ * identical geometry, `kind` differs), so `package`/`rectangle`/`card`
+ * collapse onto `GtilePartition`'s shape -- a documented divergence, not
+ * a silent one. The bracket-less-form warning banner (`CommandPartition3`
+ * `hasBracket == false` -> `addWarning(...)`, `CommandCloseGroupLegacy3`
+ * likewise) is NOT rendered -- `ActivityGroup.hasBracket` is carried on
+ * the AST for a future task, unread here.
+ */
+function tileGroup(node: ActivityGroup, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
+  const body = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder), bounder, theme);
+  const tile =
+    node.groupType === 'group'
+      ? new GtileGroup(node.title, body, bounder, theme)
+      : new GtilePartition(node.title, body, bounder, theme);
+  return withSwimlane(tile, node.swimlane);
+}
+
 export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
   if (ast.nodes.length === 0) {
     return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
@@ -229,15 +287,41 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 }
 
+type SimpleLeafKind = 'start' | 'stop' | 'end' | 'kill' | 'detach' | 'break' | 'action' | 'note';
+
+const SIMPLE_LEAF_KINDS: ReadonlySet<string> = new Set<SimpleLeafKind>([
+  'start',
+  'stop',
+  'end',
+  'kill',
+  'detach',
+  'break',
+  'action',
+  'note',
+]);
+
+/** User-defined type guard (not a bare `Set.has`) so both `tileNode`
+ *  branches narrow: the `if` arm to {@link SimpleLeafKind}, and -- just as
+ *  important -- the switch below it to the COMPLEMENT, which is what lets
+ *  that switch's `default: const _exhaustive: never = node` still
+ *  type-check. */
+function isSimpleLeaf(node: ActivityNode): node is Extract<ActivityNode, { kind: SimpleLeafKind }> {
+  return SIMPLE_LEAF_KINDS.has(node.kind);
+}
+
 /**
- * Kept LAST in this file on purpose (mission `activity-loop-tile-port`,
- * T1): Lizard 1.23.0's TypeScript reader loses this function's closing
- * scope inside the `switch` (the same `identifier(` heuristic bug
- * `node-dispatch.ts`'s header describes) and reports everything after it
- * as part of `tileNode`, so any function placed below it inflates the
- * complexity hook's ratchet for this name. Add new builders above.
+ * Every leaf tile with no nested body and no `null` result: `start`/
+ * `stop`/`end`/`kill`/`detach`/`break` (no bounder/theme needed) plus
+ * `action`/`note` (need both). Extracted from `tileNode` (mission
+ * ubrr-T10) to keep ITS OWN switch under the complexity hook's cap once
+ * `backward` (M3) became a 15th case there -- placed ABOVE `tileNode` per
+ * that function's own "add new builders above" doc.
  */
-function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
+function tileSimpleLeaf(
+  node: Extract<ActivityNode, { kind: SimpleLeafKind }>,
+  bounder: StringBounder,
+  theme: Theme,
+): Tile {
   switch (node.kind) {
     case 'start':
       return withSwimlane(new GtileStart(), node.swimlane);
@@ -255,7 +339,26 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
       return withSwimlane(new GtileAction(node, bounder, theme), node.swimlane);
     case 'note':
       return withSwimlane(new GtileNote(node, bounder, theme), node.swimlane);
+  }
+}
+
+/**
+ * Kept LAST in this file on purpose (mission `activity-loop-tile-port`,
+ * T1): Lizard 1.23.0's TypeScript reader loses this function's closing
+ * scope inside the `switch` (the same `identifier(` heuristic bug
+ * `node-dispatch.ts`'s header describes) and reports everything after it
+ * as part of `tileNode`, so any function placed below it inflates the
+ * complexity hook's ratchet for this name. Add new builders above.
+ */
+function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
+  if (isSimpleLeaf(node)) {
+    return tileSimpleLeaf(node, bounder, theme);
+  }
+  switch (node.kind) {
+    // `backward` (mission ubrr-T10 M3, `ActivityBackward`'s own doc,
+    // ast.ts): base-form-only port, geometry filed as `activity-loop-backward`.
     case 'arrow-label':
+    case 'backward':
       return null;
     case 'if':
       return tileIf(node, bounder, theme, laneOrder);
@@ -267,6 +370,10 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
       return tileFork(node, bounder, theme, laneOrder);
     case 'split':
       return tileSplit(node, bounder, theme, laneOrder);
+    case 'switch':
+      return tileSwitch(node, bounder, theme, laneOrder);
+    case 'group':
+      return tileGroup(node, bounder, theme, laneOrder);
     default: {
       const _exhaustive: never = node;
       console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);

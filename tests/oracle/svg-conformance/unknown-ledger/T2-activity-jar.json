@@ -4,7 +4,7 @@
     {
       "slug": "activity-legacy1-example-0",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -13,7 +13,7 @@
     {
       "slug": "activity-legacy1-example-1",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -22,7 +22,7 @@
     {
       "slug": "activity-legacy1-example-2",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -31,7 +31,7 @@
     {
       "slug": "activity-legacy1-example-3",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -40,7 +40,7 @@
     {
       "slug": "activity-legacy1-example-4",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -49,7 +49,7 @@
     {
       "slug": "activity-legacy1-example-5",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -58,7 +58,7 @@
     {
       "slug": "barada-07-veca157",
       "cohort": "activity-if-then-when-legacy",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandIfLegacy1/CommandElseLegacy1",
@@ -67,7 +67,7 @@
     {
       "slug": "bezogu-47-vevu307",
       "cohort": "description-sprite-partition-crossseam",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3",
@@ -83,7 +83,7 @@
     {
       "slug": "bokupo-95-rede308",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -92,7 +92,7 @@
     {
       "slug": "cemilu-33-voma521",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -101,7 +101,7 @@
     {
       "slug": "cubixe-14-gaze754",
       "cohort": "activity-if-trailing-stereotype",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandIf2/CommandElseIf2",
@@ -110,7 +110,7 @@
     {
       "slug": "doveka-76-fiza931",
       "cohort": "activity-switch-case",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandSwitch/CommandCase/CommandEndSwitch",
@@ -119,7 +119,7 @@
     {
       "slug": "gucipa-88-xoti966",
       "cohort": "activity-backward-edge",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandBackward3",
@@ -128,7 +128,7 @@
     {
       "slug": "jutesi-96-jemo224",
       "cohort": "description-sprite-partition-crossseam",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3",
@@ -137,7 +137,7 @@
     {
       "slug": "labeji-53-pari860",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -146,7 +146,7 @@
     {
       "slug": "legoda-27-cedo414",
       "cohort": "description-sprite-partition-crossseam",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3",
@@ -155,7 +155,7 @@
     {
       "slug": "lipiki-79-fapu237",
       "cohort": "activity-switch-case",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandSwitch/CommandCase/CommandEndSwitch",
@@ -164,7 +164,7 @@
     {
       "slug": "lonosi-76-xoka469",
       "cohort": "activity-switch-case",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandSwitch/CommandCase/CommandEndSwitch",
@@ -173,7 +173,7 @@
     {
       "slug": "mazuxi-71-xipu561",
       "cohort": "activity-if-trailing-stereotype",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandIf2/CommandElseIf2",
@@ -182,7 +182,7 @@
     {
       "slug": "punuve-45-baja096",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -191,7 +191,7 @@
     {
       "slug": "rizoba-79-feco788",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -200,7 +200,7 @@
     {
       "slug": "rucuga-83-tosu408",
       "cohort": "activity-endwhile-spelling",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandWhileEnd3",
@@ -209,7 +209,7 @@
     {
       "slug": "rurufo-83-sadi254",
       "cohort": "description-sprite-partition-crossseam",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3",
@@ -218,7 +218,7 @@
     {
       "slug": "ticini-08-zico145",
       "cohort": "activity-backward-edge",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandBackward3",
@@ -227,7 +227,7 @@
     {
       "slug": "tivado-46-vete823",
       "cohort": "description-sprite-partition-crossseam",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3",
@@ -236,7 +236,7 @@
     {
       "slug": "tuvigo-52-redo102",
       "cohort": "activity-partition-group",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3/CommandCloseGroup3/CommandCloseGroupLegacy3",
@@ -245,7 +245,7 @@
     {
       "slug": "vezozu-78-pici074",
       "cohort": "activity-partition-group",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandPartition3/CommandCloseGroup3/CommandCloseGroupLegacy3",
@@ -254,7 +254,7 @@
     {
       "slug": "vugasu-31-koca724",
       "cohort": "activity-bullet-list",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandActivityList",
@@ -263,7 +263,7 @@
     {
       "slug": "xaxene-93-doka767",
       "cohort": "activity-switch-case",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandSwitch/CommandCase/CommandEndSwitch",
@@ -272,7 +272,7 @@
     {
       "slug": "xebuce-87-poba093",
       "cohort": "activity-backward-edge",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandBackward3",
@@ -281,7 +281,7 @@
     {
       "slug": "xevumo-18-luvo279",
       "cohort": "activity-backward-edge",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandBackward3",
@@ -290,7 +290,7 @@
     {
       "slug": "xucero-03-kixi746",
       "cohort": "activity-if-is-then",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandIf4",
@@ -299,7 +299,7 @@
     {
       "slug": "zakuke-30-sobi867",
       "cohort": "activity-endwhile-spelling",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandWhileEnd3",
@@ -308,7 +308,7 @@
     {
       "slug": "zovemu-18-keki646",
       "cohort": "activity-switch-case",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T2",
       "seam": "activity",
       "command": "CommandSwitch/CommandCase/CommandEndSwitch",
