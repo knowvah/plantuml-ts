@@ -9,6 +9,7 @@ import type { ClassDiagramAST, NotePosition } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import { registerInNamespace } from './class-namespace.js';
 import { splitEndpointPort, stripQuotes } from './class-relationship-parser.js';
+import type { ParseState } from './class-parse-state.js';
 
 /**
  * Optional note decoration segments, shared by all four note command shapes
@@ -62,8 +63,18 @@ export const NOTE_URL = '(?:\\s*(\\[\\[[^\\]]*\\]\\]))?';
  * CommandFactoryNoteOnEntity's entity-ref grammar). Captured whole; `addNote`
  * below splits the `::member` suffix back off via `splitEndpointPort` (same
  * helper the relationship parser uses for `Class::member` endpoints).
+ *
+ * T3 (unknown-bucket-routing-repair): the bare-id charset was ASCII `\w`;
+ * upstream's `CODE` (`NameAndCodeParser.codeForClass()`, `command/
+ * NameAndCodeParser.java:49,90-91`) is a NEGATED class --
+ * `[^%s{}%g<>]+` (anything but whitespace/brace/quote/angle-bracket) --
+ * which accepts Unicode identifiers (and everything else) trivially since it
+ * excludes rather than enumerates. Widened to match (`note right of 春`);
+ * the `+` here still backtracks to let the optional `::member` suffix split
+ * off, same as the ASCII form did.
  */
-export const NOTE_TARGET = '(\\w+(?:::(?:\\w+|"[^"]+"))?|"[^"]+")';
+const NOTE_TARGET_CODE = '[^\\s{}"\'<>]+';
+export const NOTE_TARGET = `(${NOTE_TARGET_CODE}(?:::(?:${NOTE_TARGET_CODE}|"[^"]+"))?|"[^"]+")`;
 
 /**
  * A note block being accumulated until `end note`. Two shapes:
@@ -323,6 +334,32 @@ export function finalizePendingNote(
     return undefined;
   }
   return addFreestandingNote(ast, note.alias, text, note.namespace, note.color, counter, note.stereotype);
+}
+
+/**
+ * Consume a line while inside a multi-line note block, accumulating text
+ * until `end note`. Returns true when the line was consumed (i.e. a note
+ * was open). Moved from parser.ts (500-line cap split) — pure move, no
+ * behavior change.
+ */
+export function handlePendingNoteLine(state: ParseState, line: string): boolean {
+  if (state.pendingNote === null) return false;
+  if (isNoteCloser(state.pendingNote, line)) {
+    const id = finalizePendingNote(state.ast, state.pendingNote, state.creationCounter, state.tipGroupsSeen);
+    if (id !== undefined) {
+      state.lastEntity = id;
+      // Attach `$tag`s captured on the opener (multi-line freestanding note).
+      if (state.pendingNoteTags.length > 0) {
+        const note = state.ast.notes.find((n) => n.id === id);
+        if (note !== undefined) note.tags = state.pendingNoteTags;
+      }
+    }
+    state.pendingNote = null;
+    state.pendingNoteTags = [];
+  } else {
+    state.pendingNote.textLines.push(line);
+  }
+  return true;
 }
 
 /** True if `id` refers to an already-parsed note (attached or freestanding). */

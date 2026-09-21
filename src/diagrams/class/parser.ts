@@ -14,7 +14,7 @@ import {
   applyVisibilityHideShow,
   applyStereotypeHideShow,
 } from './class-directives.js';
-import { finalizePendingNote, isNoteCloser } from './class-notes.js';
+import { handlePendingNoteLine } from './class-notes.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import {
@@ -27,6 +27,7 @@ import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
 import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
+import { isPendingJsonBodyComplete } from './class-json-commands.js';
 import { dedentRawLines } from './class-body-enhanced.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { COMMANDS } from './class-commands.js';
@@ -41,6 +42,7 @@ import { refuse } from '../../core/parse-refusal.js';
 
 import type { ParseState } from './class-parse-state.js';
 import { adjudicateAllowMixing } from './class-descriptive-leaf-command.js';
+import { continueMultilineElement, tryOpenMultilineElement } from './class-multiline-element.js';
 export type { ParseState };
 
 function makeDefaultAST(): ClassDiagramAST {
@@ -192,30 +194,6 @@ export function startNewPage(state: ParseState): void {
  * Parse a preprocessed PlantUML class diagram block into an AST.
  */
 /**
- * Consume a line while inside a multi-line note block, accumulating text until
- * `end note`. Returns true when the line was consumed (i.e. a note was open).
- */
-function handlePendingNoteLine(state: ParseState, line: string): boolean {
-  if (state.pendingNote === null) return false;
-  if (isNoteCloser(state.pendingNote, line)) {
-    const id = finalizePendingNote(state.ast, state.pendingNote, state.creationCounter, state.tipGroupsSeen);
-    if (id !== undefined) {
-      state.lastEntity = id;
-      // Attach `$tag`s captured on the opener (multi-line freestanding note).
-      if (state.pendingNoteTags.length > 0) {
-        const note = state.ast.notes.find((n) => n.id === id);
-        if (note !== undefined) note.tags = state.pendingNoteTags;
-      }
-    }
-    state.pendingNote = null;
-    state.pendingNoteTags = [];
-  } else {
-    state.pendingNote.textLines.push(line);
-  }
-  return true;
-}
-
-/**
  * Close a pending `json { ... }` body, finalizing the accumulated raw lines
  * into `classifier.jsonValue` (class-json-commands.ts#finalizeJsonBody) —
  * called just before `handlePendingBodyLine` clears `pendingBodyId` on a
@@ -230,6 +208,18 @@ function closeJsonBodyIfPending(state: ParseState): void {
     finalizeJsonBody(classifier, state.pendingJsonLines);
   }
   state.pendingJsonLines = [];
+}
+
+/** T3 M5: a pending JSON body's bare-`}` candidate is NOT the real closer
+ *  when the content accumulated BEFORE it (the candidate line itself is
+ *  always the terminator, never body content -- same convention every other
+ *  pending-body kind already follows) does not yet parse as complete,
+ *  balanced JSON. Always `false` for every other pending kind. */
+function isUnclosedJsonBody(state: ParseState): boolean {
+  const idx = state.pendingBodyId !== null ? state.classifierIndex.get(state.pendingBodyId) : undefined;
+  const classifier = idx !== undefined ? state.ast.classifiers[idx] : undefined;
+  if (classifier === undefined || classifier.kind !== 'json') return false;
+  return !isPendingJsonBodyComplete(state.pendingJsonLines);
 }
 
 /**
@@ -256,7 +246,7 @@ function dedentPendingRawBodyLines(state: ParseState): void {
  */
 function handlePendingBodyLine(state: ParseState, line: string): boolean {
   if (state.pendingBodyId === null) return false;
-  if (/^\}\s*$/.test(line)) {
+  if (/^\}\s*$/.test(line) && !isUnclosedJsonBody(state)) {
     closeJsonBodyIfPending(state);
     dedentPendingRawBodyLines(state);
     filterPendingBodyBlanks(state);
@@ -410,11 +400,19 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     state.currentRawLine = merged.rawLines[i];
     if (handlePendingNoteLine(state, line)) continue;
     if (handlePendingBodyLine(state, line)) continue;
+    if (continueMultilineElement(state, state.currentRawLine ?? line, line)) continue;
     // A2s F-A / A3: blank lines now SURVIVE mergeStandaloneBraces (so open
     // note/brace bodies above receive them as content); one no open
     // construct claims is skipped here, exactly as when the pre-pass
     // dropped them all -- command dispatch never sees a blank line.
     if (line === '') continue;
+    // T7 Mechanism A (unknown-bucket-routing-repair): tried BEFORE
+    // `dispatchCommand` -- this port's rule 7 (classifier declarations,
+    // entity/circle) and rule 9 (DESCRIPTIVE_LEAF_COMMANDS) both use
+    // unanchored dispatch-gating patterns that would otherwise steal or
+    // silently swallow a TYPE0/TYPE1 opener before it ever reached here
+    // (see class-multiline-element.ts's own module doc comment).
+    if (tryOpenMultilineElement(state, lines, i, line)) continue;
     if (dispatchCommand(state, line)) {
       // A command matched but reported failure. Upstream builds the
       // EXECUTION_ERROR and `createSystem` returns it at once

@@ -187,37 +187,48 @@ function buildLinkExtras(
   return extras;
 }
 
+/** {@link applyLollipop}'s per-line outcome: no match at all, a successful
+ *  apply, or a T5 M3 existence-check refusal (unknown-bucket-routing-repair)
+ *  carrying upstream's own error text for the caller to thread through
+ *  `state.executionRefusal`. */
+export type LollipopOutcome = 'no-match' | 'ok' | { refusalMessage: string };
+
 /**
- * Parse + apply one `Name ()-- Existing` / `Existing --() Name` line. Returns
- * false if the line does not match (leaving `ast` untouched). `ensure`
- * resolves/creates the "existing"-side classifier by name (the parser's
- * `ensureClassifier`), mirroring class-assoc-couple.ts's `applyAssocCouple`.
+ * Parse + apply one `Name ()-- Existing` / `Existing --() Name` line.
+ * `ensure` resolves/creates the "existing"-side classifier by name (the
+ * parser's `ensureClassifier`) AND reports whether it existed BEFORE this
+ * call, mirroring class-assoc-couple.ts's `applyAssocCouple` for the
+ * resolve/create half.
  *
- * The "existing" side must already be a declared classifier upstream
- * (`CommandLinkLollipop` errors "No class X" and drops the whole line
- * otherwise); this parser has no error-reporting channel for command
- * execution (no site here or elsewhere in class-commands.ts surfaces
- * diagnostics), so — consistent with every other relationship-endpoint site
- * in this parser (rule 6, REL_DISPATCH_RE) — it leniently auto-creates the
- * "existing" side instead of silently dropping the line.
+ * T5 M3 (unknown-bucket-routing-repair): the "existing" side must already be
+ * a declared classifier upstream (`CommandLinkLollipop.java:183-186,203-206`:
+ * `quark.getData() == null` -> `CommandExecutionResult.error("No class " +
+ * quark.getName())`, an EXECUTION-error refusal that aborts the whole class
+ * attempt) — this port previously had no way to report that (no site in
+ * class-commands.ts surfaced diagnostics) and leniently auto-created the
+ * "existing" side instead; `existed` now lets the caller refuse exactly like
+ * upstream, via the SAME `state.executionRefusal` channel
+ * `class-descriptive-leaf-command.ts`/`class-command-notes.ts` already use.
  *
- * Does not update `lastEntity` (matches the pre-existing class-assoc-couple.ts
- * precedent for a synthesised connector leaf) — a `note left` with no
- * `of <Entity>` immediately after a `()--` line will not attach to the new
- * lollipop. Logged as a known gap, not fixed here (out of this task's scope).
+ * Does not update `lastEntity` on success (matches the pre-existing
+ * class-assoc-couple.ts precedent for a synthesised connector leaf) — a
+ * `note left` with no `of <Entity>` immediately after a `()--` line will not
+ * attach to the new lollipop. Logged as a known gap, not fixed here (out of
+ * this task's scope).
  */
 export function applyLollipop(
   ast: ClassDiagramAST,
-  ensure: (id: string) => Classifier,
+  ensure: (id: string) => { classifier: Classifier; existed: boolean },
   activeNamespace: string | null,
   line: string,
   counter?: LollipopCounter,
-): boolean {
+): LollipopOutcome {
   const m = LOLLIPOP_RE.exec(line);
-  if (m === null) return false;
+  if (m === null) return 'no-match';
 
   const { isLolThenEnt, parens, dashes, lollipopName, existingName } = resolveMatch(m);
-  const existing = ensure(existingName);
+  const { classifier: existing, existed } = ensure(existingName);
+  if (!existed) return { refusalMessage: `No class ${existingName}` };
   const lollipopId = createLollipopLeaf(
     ast,
     activeNamespace,
@@ -254,5 +265,5 @@ export function applyLollipop(
     rel.creationIndex = counter.value;
   }
   ast.relationships.push(rel);
-  return true;
+  return 'ok';
 }

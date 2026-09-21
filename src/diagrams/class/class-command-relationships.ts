@@ -11,9 +11,11 @@ import { isNoteId } from './class-notes.js';
 import { applyLollipop, LOLLIPOP_RE } from './class-lollipop.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
-import { parseRelationshipLine, REL_DISPATCH_RE } from './class-relationship-parser.js';
+import { parseRelationshipLine, REL_DISPATCH_RE, stripQuotes } from './class-relationship-parser.js';
 import type { Command } from './class-command-types.js';
 import { ensureClassifier, type ParseState } from './parser.js';
+import { resolveReference } from './class-namespace.js';
+import { refuse } from '../../core/parse-refusal.js';
 
 /** A relationship endpoint resolves to itself when it names a note (a note
  *  alias is never auto-created as a classifier); otherwise it auto-creates/
@@ -50,8 +52,15 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
   //    `stripQuotes(rawName)`), so the quoted form resolves to the SAME
   //    classifier a quoted declaration/relationship endpoint created.
   //    @see ~/git/plantuml/.../classdiagram/command/CommandAddMethod.java:63
+  //    T3 (unknown-bucket-routing-repair): NAME's charset was ASCII `\w`
+  //    (`[A-Za-z0-9_]`); upstream's is `[%pLN_.]+` -- Unicode
+  //    letter/number plus underscore and dot (`CommandAddMethod.java:64`),
+  //    the SAME `\p{L}\p{N}` fragment the relationship grammar's `CLASS_ID`
+  //    already uses two lines earlier in the same fixture
+  //    (`class-relationship-parser.ts`'s `ID_ATOM`) -- widened to match,
+  //    `u` flag added for `\p{}` support.
   {
-    pattern: /^("[^"]+"|\.?\w+(?:\.\w+)*)\s*:(?!:)\s*(.+)$/,
+    pattern: /^("[^"]+"|[\p{L}\p{N}_.]+)\s*:(?!:)\s*(.+)$/u,
     execute(state, match) {
       const classId = match[1]!;
       const memberStr = match[2]!.trim();
@@ -151,13 +160,47 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
     execute(state, match) {
       // G2 N19: creationIndex/synthetic-name tracking -- see
       // `LollipopCounter`'s doc comment (class-lollipop.ts).
-      applyLollipop(
+      const outcome = applyLollipop(
         state.ast,
-        (id) => ensureClassifier(state, id, undefined, undefined, true),
+        (id) => {
+          // T5 M3: existence must be checked BEFORE `ensureClassifier`
+          // creates it -- mirrors upstream's `quark.getData()` read-only
+          // lookup, which never creates (CommandLinkLollipop.java:183-186).
+          const existed = existingClassifierExists(state, id);
+          return { classifier: ensureClassifier(state, id, undefined, undefined, true), existed };
+        },
         state.activeNamespace,
         match.input,
         state.creationCounter,
       );
+      if (typeof outcome === 'object') {
+        state.executionRefusal = refuse(
+          'execution',
+          state.currentLine ?? 0,
+          state.currentLine ?? 0,
+          outcome.refusalMessage,
+          0,
+        );
+      }
     },
   },
 ];
+
+/** T5 M3 (unknown-bucket-routing-repair): whether `rawName` already
+ *  resolves to a declared classifier, WITHOUT creating one -- the same
+ *  `resolveReference` + `classifierIndex` lookup `ensureClassifier` itself
+ *  performs, mirroring `class-url-command.ts#applyUrlStatement`'s identical
+ *  existence-check precedent. */
+function existingClassifierExists(state: ParseState, rawName: string): boolean {
+  const { id } = resolveReference({
+    namespaces: state.ast.namespaces,
+    sep: state.namespaceSeparator,
+    activeNamespace: state.activeNamespace,
+    name: stripQuotes(rawName),
+    display: undefined,
+    intermediatePackages: state.intermediatePackages,
+    classifiers: state.ast.classifiers,
+    reuseExistingChild: true,
+  });
+  return state.classifierIndex.has(id);
+}

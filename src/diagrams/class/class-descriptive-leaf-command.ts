@@ -50,8 +50,26 @@ export const ALLOW_MIXING_ERROR = "Use 'allowmixing' if you want to mix classes 
 const CONTAINER_KEYWORD =
   /^(?:package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|action|process|database|storage|component|card|queue|stack|namespace|together)\b/i;
 
-/** The opener's own shape: a trailing `{`, `{}` or long-description `[`. */
-const CONTAINER_OPENER = /[{[]\s*\}?\s*$/;
+/**
+ * The opener's own shape: a long-description `[` (`CommandCreateElementMultilines`
+ * TYPE1, now handled BEFORE this rule ever sees the line -- see
+ * `class-multiline-element.ts`, tried in `parser.ts`'s main loop before
+ * `dispatchCommand`). T5 M2 (unknown-bucket-routing-repair): the trailing
+ * `{`/`{}` branch this exemption used to carry as well is retired --
+ * `class-command-containers.ts`'s rule 5b' (`CommandPackageWithUSymbol`,
+ * tried BEFORE this rule) already claims every real container-opener
+ * keyword+shape combination, including the `$tag`-bearing precedent
+ * ("component C1 $tag1 {") this exemption originally cited; a `{`-ending
+ * line that reaches this rule at all is one rule 5b' declined, and
+ * upstream's own default for that (`getCandidate()==null` -> SYNTAX_ERROR,
+ * `PSystemCommandFactory.java:169-175`) is a refusal, not a silent
+ * pendingBodyId open with no real container behind it (xipane-40-dune740:
+ * a `{`-ending line whose complex triple-quoted DISPLAY fails rule 5b's own
+ * capture was silently claimed here instead of refusing, and its nested
+ * body line was then silently dropped by `handlePendingBodyLine`'s member
+ * collection rather than re-entering the per-line dispatch loop).
+ */
+const CONTAINER_OPENER = /\[\s*\}?\s*$/;
 
 /** A container opener upstream claims before the gate: the right keyword AND
  *  the opener shape. Either alone is not enough — `state A {` has the shape

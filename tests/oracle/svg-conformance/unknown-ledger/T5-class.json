@@ -4,7 +4,7 @@
     {
       "slug": "nicere-96-keje834",
       "cohort": "class-container-body-silently-swallowed",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "class",
       "command": "CommandPackageWithUSymbol.java",
@@ -14,7 +14,7 @@
     {
       "slug": "vagipu-81-xuse929",
       "cohort": "class-lollipop-auto-create-existing-side",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "class",
       "command": "CommandLinkLollipop.java",
@@ -24,7 +24,7 @@
     {
       "slug": "xipane-40-dune740",
       "cohort": "class-container-body-silently-swallowed",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "class",
       "command": "CommandPackageWithUSymbol.java",

@@ -4,7 +4,7 @@
     {
       "slug": "Class-visibility-0",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -13,7 +13,7 @@
     {
       "slug": "Class-visibility-1",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -22,7 +22,7 @@
     {
       "slug": "Class-visibility-2",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -31,7 +31,7 @@
     {
       "slug": "Class-visibility-3",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -40,7 +40,7 @@
     {
       "slug": "Class-visibility-4",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -49,7 +49,7 @@
     {
       "slug": "Class-visibility-5",
       "cohort": "class-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -58,7 +58,7 @@
     {
       "slug": "doboco-09-doba683",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -67,7 +67,7 @@
     {
       "slug": "gegosa-79-mini423",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -76,7 +76,7 @@
     {
       "slug": "girapu-90-pise235",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -85,7 +85,7 @@
     {
       "slug": "jodasa-29-zara935",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -94,7 +94,7 @@
     {
       "slug": "muvici-42-dumo371",
       "cohort": "class-unicode-member-shorthand",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandAddMethod",
@@ -103,7 +103,7 @@
     {
       "slug": "neticu-06-bafo691",
       "cohort": "class-json-body-premature-close",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateJson",
@@ -112,7 +112,7 @@
     {
       "slug": "taboco-79-pire192",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -121,7 +121,7 @@
     {
       "slug": "tenule-05-fovi294",
       "cohort": "class-unicode-member-shorthand",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandAddMethod",
@@ -130,7 +130,7 @@
     {
       "slug": "topave-65-ceso890",
       "cohort": "class-package-visibility-prefix",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandPackage",
@@ -139,7 +139,7 @@
     {
       "slug": "vijuce-20-xapo285",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",
@@ -155,7 +155,7 @@
     {
       "slug": "zelura-55-pasa982",
       "cohort": "class-declaration-type-keyword",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T3",
       "seam": "class",
       "command": "CommandCreateClass; CommandCreateClassMultilines",

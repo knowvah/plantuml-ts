@@ -4,7 +4,7 @@
     {
       "slug": "boguko-42-zuda981",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -14,7 +14,7 @@
     {
       "slug": "buitin-newline-chr-0",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -24,7 +24,7 @@
     {
       "slug": "cepedu-19-namu934",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -34,7 +34,7 @@
     {
       "slug": "copono-56-kuci969",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -44,7 +44,7 @@
     {
       "slug": "dajela-44-zovi778",
       "cohort": "class-refused-erd-arrow-grammar-gap",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandLinkClass",
       "size": 25,
@@ -54,7 +54,7 @@
     {
       "slug": "deployment-last-name-multi-line-0",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -64,7 +64,7 @@
     {
       "slug": "dezobu-62-vuzu421",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -74,7 +74,7 @@
     {
       "slug": "fakone-16-boro774",
       "cohort": "class-refused-erd-arrow-grammar-gap",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandLinkClass",
       "size": 25,
@@ -84,7 +84,7 @@
     {
       "slug": "felixe-38-dilu011",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -94,7 +94,7 @@
     {
       "slug": "fepudo-00-ziro735",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -104,7 +104,7 @@
     {
       "slug": "fidaru-93-zumu093",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -114,7 +114,7 @@
     {
       "slug": "gasevo-58-ciso782",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -124,7 +124,7 @@
     {
       "slug": "gejuvu-17-vufu851",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -134,7 +134,7 @@
     {
       "slug": "gemepu-46-dido441",
       "cohort": "class-refused-namespace-separator-relationship-id",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandLinkClass",
       "size": 15,
@@ -144,7 +144,7 @@
     {
       "slug": "gogisu-39-bepa573",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -154,7 +154,7 @@
     {
       "slug": "gubeca-19-lemu434",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -164,7 +164,7 @@
     {
       "slug": "jefidu-98-gisu131",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -174,7 +174,7 @@
     {
       "slug": "jixibu-01-xave465",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -184,7 +184,7 @@
     {
       "slug": "josebu-55-seje426",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -194,7 +194,7 @@
     {
       "slug": "juzuno-58-gesi397",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -204,7 +204,7 @@
     {
       "slug": "kelefe-72-cefi192",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -214,7 +214,7 @@
     {
       "slug": "komuvi-52-vave599",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -224,7 +224,7 @@
     {
       "slug": "lezema-07-vogu604",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -234,7 +234,7 @@
     {
       "slug": "lubicu-73-fule059",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -244,7 +244,7 @@
     {
       "slug": "maxure-10-temu215",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -254,7 +254,7 @@
     {
       "slug": "mujega-45-mexi048",
       "cohort": "class-refused-erd-arrow-grammar-gap",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandLinkClass",
       "size": 25,
@@ -264,7 +264,7 @@
     {
       "slug": "nuveji-19-jabi587",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -274,7 +274,7 @@
     {
       "slug": "petuju-02-zino378",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -284,7 +284,7 @@
     {
       "slug": "pevefe-09-zaro044",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -294,7 +294,7 @@
     {
       "slug": "pugesu-08-cove285",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -304,7 +304,7 @@
     {
       "slug": "pupoko-23-xubo613",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -314,7 +314,7 @@
     {
       "slug": "puvako-69-suxo633",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -324,7 +324,7 @@
     {
       "slug": "rexupa-61-nezi165",
       "cohort": "class-refused-dotted-note-name",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandFactoryNote",
       "size": 4,
@@ -334,7 +334,7 @@
     {
       "slug": "rizisu-50-liza998",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -344,7 +344,7 @@
     {
       "slug": "rojida-14-fuli428",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -354,7 +354,7 @@
     {
       "slug": "sprite-SVG-Fill-Stroke-Combinatory-1",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -364,7 +364,7 @@
     {
       "slug": "tefeco-12-rato895",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -374,7 +374,7 @@
     {
       "slug": "toxore-88-ruso838",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -384,7 +384,7 @@
     {
       "slug": "vugime-87-zabe159",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -394,7 +394,7 @@
     {
       "slug": "xagomi-49-caki729",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -404,7 +404,7 @@
     {
       "slug": "zefefo-37-xigo245",
       "cohort": "class-refused-erd-arrow-grammar-gap",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandLinkClass",
       "size": 25,
@@ -414,7 +414,7 @@
     {
       "slug": "zeraje-11-semu839",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,
@@ -424,7 +424,7 @@
     {
       "slug": "zivebo-26-nagu813",
       "cohort": "class-refused-descriptive-leaf-multilines-missing",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "class",
       "command": "CommandCreateElementMultilines",
       "size": 90,

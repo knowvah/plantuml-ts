@@ -59,9 +59,15 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   //     TAGS runs like upstream's STEREOTYPE slot) is stored on the
   //     Namespace via `setNamespaceStereotype` (gated: a USymbol-naming
   //     stereotype selects the shape instead, CommandPackage.java:178-191).
+  // T3 (unknown-bucket-routing-repair): optional leading VISIBILITY char
+  // (`CommandPackage.java:74`, the SAME `VisibilityModifier
+  // .regexForVisibilityCharacter()` prefix `class-declaration-parser.ts`'s
+  // `DECL_KIND_RE` carries) -- captured by the non-capturing `(?:...)` group
+  // and discarded, matching that command's own posture (no render-side
+  // field consumes a package's visibility marker either).
   {
     pattern:
-      /^package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
+      /^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
     execute(state, match) {
       const name = match[1] ?? match[2];
       let effectiveId: string;
@@ -98,7 +104,15 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // routes to DESCRIPTION -- upstream's class factory refuses them on the
       // nested `node n` leaf, via `CommandCreateElementFull2`'s allowmixing
       // gate, and only reaches that gate because the container DID open.
-      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(?:<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
+      // T5 M2 (unknown-bucket-routing-repair): `action`/`process` added --
+      // both are already present in `class-descriptive-leaf-command.ts`'s
+      // `CONTAINER_KEYWORD` (CommandPackageWithUSymbol's own SYMBOL
+      // alternation verbatim) but were absent from THIS list, so `action
+      // action {` fell to the DESCRIPTIVE_LEAF_COMMANDS fallback's
+      // `isContainerOpener` exemption instead of opening a real container --
+      // the nested body's own lines were then never re-dispatched through
+      // the per-line/allowmixing gate at all.
+      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(?:<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
       const name = match[2] !== undefined ? match[2] : match[3]!;
