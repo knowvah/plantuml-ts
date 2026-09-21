@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1124 modules · 4082 exported names.
+1124 modules · 4084 exported names.
 
 ## `src/`
 
@@ -1036,7 +1036,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `BoardNode`, `BoardActivity`, `BoardDiagramAST`, `CardGeometry`, `ActivityGeometry`, `BoardGeometry` |  |
 | `index.ts` | `boardPlugin` |  |
-| `layout.ts` | `layoutBoard` |  |
+| `layout.ts` | `CELL_H`, `layoutBoard` |  |
 | `parser.ts` | `parseBoard` |  |
 | `renderer.ts` | `renderBoard` |  |
 
@@ -1274,7 +1274,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
 | `index.ts` | `filesPlugin` |  |
-| `layout.ts` | `layoutFiles` |  |
+| `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |
 | `renderer.ts` | `renderFiles` |  |
 
