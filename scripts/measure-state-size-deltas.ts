@@ -24,7 +24,7 @@
  * 0 iff zero measurements are `widened` (2 otherwise) — a genuine gate, not
  * just a report.
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -39,6 +39,7 @@ import {
 } from '../tests/oracle/svek-dot.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
+import { svekFiles } from './lib/svek-files.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const STATE_GOLDENS = join(REPO, 'oracle', 'goldens', 'state');
@@ -80,12 +81,6 @@ export interface DeltaResult {
    *  failed structurally (e.g. a pin's captured-graph-count mismatch) —
    *  keeps the common-case JSON line short. */
   detail?: string;
-}
-
-function svekFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^svek-\d+\.dot$/.test(f))
-    .sort((a, b) => Number(/\d+/.exec(a)![0]) - Number(/\d+/.exec(b)![0]));
 }
 
 /** Renders one backlog fixture's `input.puml` and captures every

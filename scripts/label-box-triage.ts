@@ -22,7 +22,7 @@
  *
  * Usage: `npx jiti scripts/label-box-triage.ts`
  */
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -38,6 +38,7 @@ import { loadSlugBacklog } from '../tests/oracle/dot-parity-backlog-data.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
 import { buildSpriteAssetsStore } from '../tests/helpers/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../tests/helpers/emoji-assets-store.js';
+import { svekFiles } from './lib/svek-files.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDEN_ROOT = join(REPO, 'oracle', 'goldens');
@@ -157,12 +158,6 @@ export function formatStats(label: string, s: Stats): string {
 // Fixture I/O + render plumbing (exercised by the real run, not unit-tested —
 // same split as scripts/measure-description-size-deltas.ts).
 // ---------------------------------------------------------------------------
-
-function svekFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^svek-\d+\.dot$/.test(f))
-    .sort((a, b) => Number(/\d+/.exec(a)![0]) - Number(/\d+/.exec(b)![0]));
-}
 
 /** Renders one golden's `input.puml`, capturing every `layoutGraph()` input in
  *  pass order. `description` needs the stdlib/sprite/emoji asset stores the

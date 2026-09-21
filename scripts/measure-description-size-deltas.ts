@@ -62,6 +62,7 @@ import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js'
 import { buildSpriteAssetsStore } from '../tests/helpers/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../tests/helpers/emoji-assets-store.js';
 import { combineAssetStores } from '../src/core/asset-store.js';
+import { svekFiles } from './lib/svek-files.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS = join(REPO, 'oracle', 'goldens', 'description');
@@ -174,12 +175,6 @@ export interface DeltaResult {
   conformant: boolean;
   cause?: string;
   detail?: string;
-}
-
-function svekFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^svek-\d+\.dot$/.test(f))
-    .sort((a, b) => Number(/\d+/.exec(a)![0]) - Number(/\d+/.exec(b)![0]));
 }
 
 /** Renders one golden's `input.puml`, capturing every `layoutGraph()` input in
