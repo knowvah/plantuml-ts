@@ -9,7 +9,7 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:309-331,357-404,579-606,651-676
  */
 
-import type { ActivityEdgeGeo } from '../activity-layout-types.js';
+import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
 import type {

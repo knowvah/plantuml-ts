@@ -9,7 +9,7 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:277-308
  */
 
-import type { ActivityEdgeGeo } from '../activity-layout-types.js';
+import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import type { LoopRouteResult, WhileBackLoop } from './swimlane-loop-translate.js';
 import type { Reservation } from './hexagon-reservations.js';

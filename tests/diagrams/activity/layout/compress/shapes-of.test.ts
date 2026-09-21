@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { shapesOf } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import type { ShapesOfInput } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
-import type { ActivityNodeGeo, ActivityEdgeGeo } from '../../../../../src/diagrams/activity/layout.old.js';
-import type { SwimlaneGeo } from '../../../../../src/diagrams/activity/activity-layout-types.js';
+import type {
+  ActivityNodeGeo,
+  ActivityEdgeGeo,
+  SwimlaneGeo,
+} from '../../../../../src/diagrams/activity/activity-geometry.types.js';
 import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';

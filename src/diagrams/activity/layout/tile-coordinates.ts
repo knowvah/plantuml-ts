@@ -1,5 +1,5 @@
 import type { ActivityDiagramAST } from '../ast.js';
-import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo } from '../layout.old.js';
+import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo } from '../activity-geometry.types.js';
 import type { Tile } from '../tiles/tile.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { GPoint } from '../tiles/points.js';

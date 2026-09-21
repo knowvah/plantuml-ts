@@ -1,11 +1,13 @@
 /**
- * Shared geometry, context, and result types for the activity diagram
- * layout engine (see `layout.old.ts`).
+ * Shared geometry types for the activity diagram layout engine.
+ *
+ * Relocated verbatim (names + shapes + docs) from `activity-layout-types.ts`
+ * per code-review-tasks.md batch D (2026-09-21): these are the geometry
+ * types the LIVE tile layout engine (`layout/tile-layout.ts` and its
+ * siblings) actually reads. The context/result types that stayed behind
+ * (`BranchResult`, `LayoutCtx`, etc.) were internal to the superseded
+ * `layout.old.ts` engine and were deleted with it.
  */
-
-import type { ActivityNode } from './ast.js';
-import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Public geometry types
@@ -76,10 +78,8 @@ export interface SwimlaneGeo {
    * `maxX - minX` of the lane's own content, in lane-local coordinates.
    * `0` for a lane with no assigned content. Optional because it is
    * populated by T5 (`tile-coordinates.ts`, via `swimlane-context.ts`'s
-   * `computeLaneWidths`) -- the two pre-existing call sites that still
-   * build a bare `{ name, x, width }` (`tile-coordinates.ts`,
-   * `activity-layout-swimlane.ts`, the superseded engine) must keep
-   * compiling.
+   * `computeLaneWidths`) -- pre-existing call sites that still build a
+   * bare `{ name, x, width }` must keep compiling.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:451-453
    */
   contentWidth?: number;
@@ -141,71 +141,4 @@ export interface ActivityGeometry {
   swimlanes: SwimlaneGeo[];
   swimlaneBand?: SwimlaneBandGeo;
   swimlaneDividerY?: SwimlaneDividerY;
-}
-
-// ---------------------------------------------------------------------------
-// Branch layout result
-// ---------------------------------------------------------------------------
-
-export interface BranchResult {
-  nodes: ActivityNodeGeo[];
-  edges: ActivityEdgeGeo[];
-  /** y of the bottom of the last placed element. */
-  bottomY: number;
-  /** Width consumed by this branch column. */
-  width: number;
-  /** Id of first node in branch (for edge connections). */
-  firstId: string | undefined;
-  /** Id of last node in branch (for edge connections). undefined when node has multiple exits. */
-  lastId: string | undefined;
-  /**
-   * When a composite node (if) has multiple open exits (non-terminal branches),
-   * all their IDs are listed here. The caller uses these to fan-in to the next node.
-   * Only present when exitIds.length > 1.
-   */
-  exitIds?: string[];
-  /**
-   * Geo nodes emitted by `break` statements inside this branch.
-   * layoutRepeat drains these and wires them to the break-exit diamond.
-   */
-  breakGeos?: ActivityNodeGeo[];
-}
-
-/**
- * Extended BranchResult used internally to signal break-stop to layoutSequence.
- * The `kind` field is not part of the public BranchResult interface.
- */
-export type BranchResultInternal = BranchResult & { kind?: 'break-stop' };
-
-// ---------------------------------------------------------------------------
-// Internal layout context
-// ---------------------------------------------------------------------------
-
-/**
- * Recursively lays out a sequence of ActivityNodes. Threaded through
- * `LayoutCtx` (rather than imported directly by composite-node layout
- * modules) so that if/fork/while/repeat layouts can call back into sequence
- * layout for their branches without a module import cycle back to
- * `activity-layout-sequence.ts` (which itself imports them for dispatch).
- */
-export type LayoutSequenceFn = (
-  nodes: readonly ActivityNode[],
-  startY: number,
-  centerX: number,
-  ctx: LayoutCtx,
-) => BranchResult;
-
-export interface LayoutCtx {
-  theme: Theme;
-  measurer: StringMeasurer;
-  /** Maps swimlane name → left x of the lane. Empty when no swimlanes. */
-  laneX: Map<string, number>;
-  /** Width of each lane. 0 when no swimlanes. */
-  laneWidth: number;
-  /** Total canvas width. */
-  canvasWidth: number;
-  /** Counters for sequential node ids. */
-  counters: Map<string, number>;
-  /** Reference to `layoutSequence`, see {@link LayoutSequenceFn}. */
-  layoutSequenceFn: LayoutSequenceFn;
 }

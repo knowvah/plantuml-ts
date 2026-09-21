@@ -14,7 +14,7 @@
  *   {@link computeDividers}'s `dividerReservations`.
  */
 
-import type { SwimlaneGeo } from '../activity-layout-types.js';
+import type { SwimlaneGeo } from '../activity-geometry.types.js';
 import { halfMissingSpace, type LaneWidth, type LaneWidthInput } from './swimlane-context.js';
 
 interface LaneOrigin {

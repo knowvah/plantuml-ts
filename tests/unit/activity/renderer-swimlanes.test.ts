@@ -10,7 +10,7 @@ import {
   renderSwimlaneChrome,
   renderSwimlaneTitles,
 } from '../../../src/diagrams/activity/activity-renderer-swimlanes.js';
-import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-layout-types.js';
+import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 
 const theme = resolveTheme('default');

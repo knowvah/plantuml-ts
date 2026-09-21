@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1130 modules · 4108 exported names.
+1120 modules · 4068 exported names.
 
 ## `src/`
 
@@ -930,17 +930,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_SIDE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `SWIMLANE_HEADER_H`, `SWIMLANE_MIN_WIDTH`, `DEFAULT_WIDTH`, `LAYOUT_MARGIN`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-fork.ts` | `layoutFork`, `layoutSplit` | Fork/split (parallel-branch) layout for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-helpers.ts` | `ACTION_HEIGHT`, `ACTION_H_PAD`, `nextId`, `diamondSize`, `repeatCondSize`, `actionSize`, `parallelogramSize`, `noteSize`, `orthogonalPoints`, `nodeCenterX` | Small geometry/measurement helpers shared across the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-if.ts` | `layoutIf` | If/else-if/else layout for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-leaf.ts` | `LayoutActionParams`, `layoutStart`, `layoutStop`, `layoutAction`, `layoutBreak` | Leaf-node layouts (start/stop/end/kill/action/break) for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-measure.ts` | `measureNodeWidth`, `measureSubtreeWidth` | Subtree-width measurement for the activity diagram layout engine. |
-| `activity-layout-repeat.ts` | `layoutRepeat` | Repeat-loop layout for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-sequence.ts` | `layoutSequence` | Sequential node-list layout and per-node dispatch for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-swimlane.ts` | `buildSwimlaneCtx`, `buildSwimlaneGeos` | Swimlane context setup for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry`, `BranchResult`, `BranchResultInternal`, `LayoutSequenceFn`, `LayoutCtx` | Shared geometry, context, and result types for the activity diagram layout engine (see `layout.old.ts`). |
-| `activity-layout-while.ts` | `layoutWhile` | While-loop layout for the activity diagram layout engine (see `layout.old.ts`). |
+| `activity-geometry.types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderIfLabel` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `ASCENT_FRACTION`, `textLines`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
@@ -955,7 +946,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
 | `if-dispatch.ts` | `stripTrailingSemi`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
-| `layout.old.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `ActivityGeometry`, `ActivityArrowLabel`, `layoutActivity` | Activity diagram layout engine. |
 | `list-backward-dispatch.ts` | `tryActivityList`, `tryBackward` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
 | `node-dispatch.ts` | `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |

@@ -20,8 +20,12 @@
  */
 
 import type { ActivityDiagramAST } from '../ast.js';
-import type { ActivityEdgeGeo, ActivityGeometry, ActivityNodeGeo } from '../layout.old.js';
-import type { SwimlaneBandGeo } from '../activity-layout-types.js';
+import type {
+  ActivityEdgeGeo,
+  ActivityGeometry,
+  ActivityNodeGeo,
+  SwimlaneBandGeo,
+} from '../activity-geometry.types.js';
 import type { Tile } from '../tiles/tile.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';

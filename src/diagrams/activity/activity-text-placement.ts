@@ -48,7 +48,7 @@
  * MEASUREMENT SEAM. `renderNode`'s contract (`(node, theme) => string`) is
  * consumed by `activity-renderer-swimlanes.ts` (outside this mission's
  * write-set), so it cannot grow a `measurer` parameter -- and
- * `ActivityGeometry`/`ActivityNodeGeo` (`activity-layout-types.ts`, also
+ * `ActivityGeometry`/`ActivityNodeGeo` (`activity-geometry.types.ts`, also
  * outside the write-set) carry no per-line width either. This module
  * instantiates its OWN `WidthTableMeasurer` (`core/measurer.ts`) instead --
  * the SAME class the conformance harness re-exports as `DeterministicMeasurer`

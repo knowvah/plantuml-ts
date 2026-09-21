@@ -4,14 +4,14 @@
  *
  * WHICH SIZER THIS IS, AND WHY IT MATTERS. `activityPlugin.layoutSync`
  * calls `layoutActivity` from `layout/tile-layout.ts`, which builds these
- * Gtiles; each computes its own width and height in its constructor. The
- * older `layout.old.ts` + `activity-layout-*.ts` cluster reachable from
- * `tests/unit/activity/layout.test.ts` is NOT on that path — the live path
- * imports it for types only (`layout/tile-layout.ts:30`,
- * `layout/tile-coordinates.ts:2`, both `import type`). Editing the old
- * cluster moves no rendered output; this mission's T3 was originally
- * scoped there and measured a 0.00% change before being re-pointed here.
- * If you are changing activity geometry, this is the file that does it.
+ * Gtiles; each computes its own width and height in its constructor. An
+ * older `layout.old.ts` + `activity-layout-*.ts` cluster, reachable only
+ * from its own dedicated `tests/unit/activity/layout.test.ts`, was NEVER
+ * on this path — this mission's T3 was originally scoped there and
+ * measured a 0.00% change before being re-pointed here; both the cluster
+ * and its test were deleted as dead code (code-review-tasks.md batch D,
+ * 2026-09-21). If you are changing activity geometry, this is the file
+ * that does it.
  *
  * WHAT IS ASSERTED. Each tile measures its text at the font its own
  * upstream StyleSignature resolves, not at the diagram-wide root default.

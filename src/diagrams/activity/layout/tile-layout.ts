@@ -35,7 +35,7 @@ import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.j
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 
 // Re-export geometry types so renderer and index can import from one place.
-export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../layout.old.js';
+export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 
 function makeBounder(measurer: StringMeasurer, theme: Theme): StringBounder {
   return {
