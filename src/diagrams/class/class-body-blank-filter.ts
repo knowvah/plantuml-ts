@@ -50,6 +50,7 @@ function stripCompartmentEdgeBlanks(members: Classifier['members'], wantMethod: 
   for (let i = 0; i < seq.length; i++) {
     if (i < firstReal || i > lastReal) members.splice(members.indexOf(seq[i]!), 1);
   }
+  // Code review: stripCompartmentEdgeBlanks does an indexOf+splice per blank member, which is O(n^2) for large classifier bodies. Revisit if class diagrams with hundreds of members per classifier are observed in practice.
 }
 
 /** Close-time A3 hook: runs {@link filterBodyBlankMembers} for the classic
