@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rename
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
@@ -90,7 +91,7 @@ function renderFixture(dir: string, markup: string): ClassifyResult {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'in.puml'), markup, 'utf-8');
   try {
-    execFileSync(ORACLE_RENDER, [dir, join(dir, 'in.puml')], { stdio: 'ignore', timeout: 25_000 });
+    execFileSync(ORACLE_RENDER, [dir, join(dir, 'in.puml')], { stdio: 'ignore', timeout: ORACLE_JAR_TIMEOUT_MS });
   } catch {
     /* non-zero exit does not mean render failure; classifyOutput decides */
   }

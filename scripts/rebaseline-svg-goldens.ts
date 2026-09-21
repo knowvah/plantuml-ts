@@ -29,6 +29,7 @@ import { join, dirname, relative } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync, execFileSync } from 'node:child_process';
+import { oracleJarBatchTimeoutMs } from './lib/oracle-jar-timeout.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS_ROOT = join(REPO, 'oracle', 'goldens');
@@ -255,7 +256,7 @@ function captureBatch(fixtures: readonly { relPath: string; fixtureDir: string }
   const proc = spawnSync(
     'java',
     ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', 'cap', ...inputs],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: oracleJarBatchTimeoutMs(fixtures.length) },
   );
   const errored = parseErroredFiles(proc.stderr ?? '');
   const out = new Map<string, Capture>();

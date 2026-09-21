@@ -27,6 +27,7 @@ import {
   compareStructural,
   type StructuralDiff,
 } from '../tests/oracle/svek-dot.js';
+import { svekFiles } from './lib/svek-files.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOTS = [join(REPO, 'oracle', 'goldens'), join(REPO, 'oracle', 'corpus-cache')];
@@ -39,11 +40,10 @@ interface Row {
   diffs: StructuralDiff[];
 }
 
-function svekFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^svek-\d+\.dot$/.test(f))
-    .sort((a, b) => Number(a.match(/\d+/)![0]) - Number(b.match(/\d+/)![0]))
-    .map((f) => join(dir, f));
+/** Full paths (not bare filenames) — every call site below reads them
+ *  directly, unlike the other five `svekFiles` call sites in scripts/. */
+function svekFilePaths(dir: string): string[] {
+  return svekFiles(dir).map((f) => join(dir, f));
 }
 
 function captureInputs(puml: string): DotInputGraph[] {
@@ -60,7 +60,7 @@ function captureInputs(puml: string): DotInputGraph[] {
 }
 
 function rowFor(type: string, slug: string, dir: string): Row {
-  const svek = svekFiles(dir);
+  const svek = svekFilePaths(dir);
   const inputs = captureInputs(readFileSync(join(dir, 'input.puml'), 'utf8'));
   const diffs: StructuralDiff[] = [];
   for (let i = 0; i < Math.min(svek.length, inputs.length); i++) {

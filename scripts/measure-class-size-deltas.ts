@@ -40,15 +40,10 @@ import {
   DELTA_EPSILON,
   type DeltaResult,
 } from './measure-description-size-deltas.js';
+import { svekFiles } from './lib/svek-files.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS = join(REPO, 'oracle', 'goldens', 'class');
-
-function svekFiles(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^svek-\d+\.dot$/.test(f))
-    .sort((a, b) => Number(/\d+/.exec(a)![0]) - Number(/\d+/.exec(b)![0]));
-}
 
 /** Renders one golden's `input.puml`, capturing every `layoutGraph()` input.
  *  No `includeStore` — matches `class-dot-parity.test.ts`'s RATCHET suite

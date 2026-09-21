@@ -37,6 +37,7 @@ import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 import { measureTree, type MeasuredFixture } from './pin-corpus-tree-measure.js';
+import { assertJsonObjectShape } from './lib/assert-json-shape.js';
 
 const DEFAULT_LEDGER_DIR = 'tests/oracle/svg-conformance/unknown-ledger';
 const ROUTING_BASELINE_PATH = 'oracle/goldens/svg-conformance/routing-baseline.json';
@@ -77,7 +78,10 @@ export function loadLedger(ledgerDir: string): Map<string, LedgerRow> {
     .filter((f) => f.endsWith('.json'))
     .sort();
   for (const file of files) {
-    const fragment = JSON.parse(readFileSync(join(ledgerDir, file), 'utf8')) as LedgerFragment;
+    const fragmentPath = join(ledgerDir, file);
+    const parsedFragment: unknown = JSON.parse(readFileSync(fragmentPath, 'utf8'));
+    assertJsonObjectShape(parsedFragment, fragmentPath, ['rows']);
+    const fragment = parsedFragment as LedgerFragment;
     for (const row of fragment.rows) {
       if (out.has(row.slug)) {
         throw new Error(`pin-corpus-tree: ledger slug "${row.slug}" appears in two fragments (one is ${file})`);
@@ -363,7 +367,9 @@ interface BaselineFile<Row> {
 }
 
 function appendAndWrite<Row>(path: string, newRows: readonly Row[], commentSuffix: string): void {
-  const existing = JSON.parse(readFileSync(path, 'utf8')) as BaselineFile<Row>;
+  const parsedExisting: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  assertJsonObjectShape(parsedExisting, path, ['$comment', 'fixtures']);
+  const existing = parsedExisting as BaselineFile<Row>;
   const after = [...existing.fixtures, ...newRows];
   const check = checkAdditive(existing.fixtures, after);
   if (!check.ok) throw new Error(`pin-corpus-tree: ${path}: ${check.message ?? 'additive check failed'}`);

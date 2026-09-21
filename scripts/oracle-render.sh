@@ -51,9 +51,40 @@ else
   echo "      rollback rather than typeset maths. See the header." >&2
 fi
 
-exec java \
-  -DPLANTUML_DETERMINISTIC_TEXT=true \
-  -DPLANTUML_DUMP_DOT="$OUT" \
-  -cp "$CP" \
-  net.sourceforge.plantuml.Run \
-  -tsvg -o "$OUT" "$@"
+# Single-fixture jar budget in seconds -- keep in sync BY HAND with
+# ORACLE_JAR_TIMEOUT_MS in scripts/lib/oracle-jar-timeout.ts (code-review-
+# tasks.md item 3); there is no shared config format between bash and
+# TypeScript here.
+TIMEOUT_SECONDS=25
+
+# macOS ships no `timeout(1)` by default (it is in GNU coreutils, installed
+# here as `gtimeout` via `brew install coreutils`); Linux/CI images normally
+# have GNU `timeout`. Prefer whichever is on PATH; if neither is, run
+# unbounded and say so -- a caller driving this from Node (capture-oracle-
+# cache.ts, oracle-corpus.ts) already applies its own execFileSync timeout,
+# but a bare CLI invocation of this script has nothing else bounding it.
+TIMEOUT_BIN=""
+if command -v timeout >/dev/null 2>&1; then
+  TIMEOUT_BIN="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+  TIMEOUT_BIN="gtimeout"
+fi
+
+if [ -z "$TIMEOUT_BIN" ]; then
+  echo "warn: no timeout/gtimeout on PATH -- this render is UNBOUNDED." >&2
+  echo "      install GNU coreutils (macOS: brew install coreutils) or bound" >&2
+  echo "      the caller yourself (see scripts/capture-oracle-cache.ts)." >&2
+  exec java \
+    -DPLANTUML_DETERMINISTIC_TEXT=true \
+    -DPLANTUML_DUMP_DOT="$OUT" \
+    -cp "$CP" \
+    net.sourceforge.plantuml.Run \
+    -tsvg -o "$OUT" "$@"
+else
+  exec "$TIMEOUT_BIN" "${TIMEOUT_SECONDS}s" java \
+    -DPLANTUML_DETERMINISTIC_TEXT=true \
+    -DPLANTUML_DUMP_DOT="$OUT" \
+    -cp "$CP" \
+    net.sourceforge.plantuml.Run \
+    -tsvg -o "$OUT" "$@"
+fi

@@ -1,5 +1,7 @@
 .serena/
 .playwright-mcp/
+playwright-results/
+playwright-report/
 .idea/
 .claire/
 memory/

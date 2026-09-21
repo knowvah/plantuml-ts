@@ -23,6 +23,7 @@ import { renderSync } from '../src/index.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { fullDescription } from '../src/core/version.js';
+import { assertJsonArrayShape, assertJsonObjectShape } from './lib/assert-json-shape.js';
 
 const DIR = 'test-results/dot-cache/sequence';
 const TYPE_RE = /data-diagram-type="([A-Z]+)"/;
@@ -37,7 +38,9 @@ if (snapshotPath === undefined) {
       '  npx jiti scripts/sequence-ratchet-adjudicate.ts --snapshot <path>',
   );
 }
-const snap = JSON.parse(readFileSync(snapshotPath, 'utf8')) as {
+const snapRaw: unknown = JSON.parse(readFileSync(snapshotPath, 'utf8'));
+assertJsonArrayShape(snapRaw, snapshotPath);
+const snap = snapRaw as {
   slug: string;
   score: number | null;
   diffCount?: number | null;
@@ -123,7 +126,9 @@ let n = 0;
 
 // --- diff-baseline: status "error" -> "baseline" once a fixture renders -----
 const dbPath = 'oracle/goldens/svg-sequence/diff-baseline.json';
-const db = JSON.parse(readFileSync(dbPath, 'utf8')) as BaselineFile<DiffBaselineRow>;
+const dbRaw: unknown = JSON.parse(readFileSync(dbPath, 'utf8'));
+assertJsonObjectShape(dbRaw, dbPath, ['fixtures']);
+const db = dbRaw as BaselineFile<DiffBaselineRow>;
 for (const f of db.fixtures) {
   const m = measured.get(f.slug);
   if (m === undefined) continue;
@@ -147,7 +152,9 @@ writeFileSync(dbPath, JSON.stringify(db, null, 2) + '\n');
 
 // --- routing-baseline: a misroute that now agrees with the jar --------------
 const rtPath = 'oracle/goldens/svg-conformance/routing-baseline.json';
-const rt = JSON.parse(readFileSync(rtPath, 'utf8')) as BaselineFile<RoutingBaselineRow>;
+const rtRaw: unknown = JSON.parse(readFileSync(rtPath, 'utf8'));
+assertJsonObjectShape(rtRaw, rtPath, ['fixtures']);
+const rt = rtRaw as BaselineFile<RoutingBaselineRow>;
 for (const f of rt.fixtures) {
   const live = routed.get(f.slug);
   if (live === undefined || f.type !== 'sequence') continue;
@@ -163,7 +170,9 @@ writeFileSync(rtPath, JSON.stringify(rt, null, 2) + '\n');
 
 // --- refusal-baseline: a known-gap that no longer errors --------------------
 const rfPath = 'oracle/goldens/svg-conformance/refusal-baseline.json';
-const rf = JSON.parse(readFileSync(rfPath, 'utf8')) as BaselineFile<RefusalBaselineRow>;
+const rfRaw: unknown = JSON.parse(readFileSync(rfPath, 'utf8'));
+assertJsonObjectShape(rfRaw, rfPath, ['fixtures']);
+const rf = rfRaw as BaselineFile<RefusalBaselineRow>;
 for (const f of rf.fixtures) {
   if (f.type !== 'sequence') continue;
   const errors = dispatchErrored.get(f.slug);

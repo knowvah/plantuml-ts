@@ -44,6 +44,10 @@ export default defineConfig({
       // option that expressed it is gone. `include` still scopes analysis to
       // src, and is now the only knob that does.
       include: ['src/**/*.ts'],
+      // Generated data files (large literal tables, not logic) — coverage on
+      // them is meaningless and dilutes the 90/90/90 thresholds below with
+      // lines/branches that can never be "tested", only regenerated.
+      exclude: ['src/**/*.data.ts', 'src/core/openiconic-glyphs-data.ts'],
       thresholds: {
         lines: 90,
         branches: 90,

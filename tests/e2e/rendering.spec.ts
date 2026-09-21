@@ -103,11 +103,17 @@ test.describe('SVG rendering correctness', () => {
     expect(tallHeight).toBeGreaterThan(shortHeight);
   });
 
-  test('invalid source renders a visible error SVG', async ({ page }) => {
+  test('source with no @start keyword falls back to the welcome page', async ({ page }) => {
     await page.goto('/');
     await page.locator('#source').fill(NO_BLOCK_SOURCE);
-    // The error SVG contains this text in an SVG <text> element
-    await expect(page.locator('#preview svg')).toContainText('No diagram found', {
+    // A source with no recognized `@start...` keyword is not a PARSE error —
+    // it is jar-faithful behavior (upstream `PSystemWelcome.java`): the
+    // built-in "Welcome to PlantUML!" help diagram renders instead. "No
+    // diagram found" is a CLI/report-level log line (`StdrptV1.java` et
+    // al.), never embedded in the SVG itself; a genuine in-block parse error
+    // is covered separately by graph-diagrams.spec.ts's "malformed class
+    // source" test.
+    await expect(page.locator('#preview svg')).toContainText('Welcome to PlantUML!', {
       timeout: 5000,
     });
   });

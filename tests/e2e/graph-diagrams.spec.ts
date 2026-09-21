@@ -69,12 +69,15 @@ test.describe('Graph diagram SVG shape presence', () => {
     expect(rectCount).toBeGreaterThan(0);
   });
 
-  test('state diagram contains at least one circle (initial pseudostate)', async ({ page }) => {
+  test('state diagram contains at least one ellipse (initial pseudostate)', async ({ page }) => {
     await page.goto('/');
     await clickAndWait(page, 'state', 'Idle');
 
-    const circleCount = await page.locator('#preview svg circle').count();
-    expect(circleCount).toBeGreaterThan(0);
+    // Pseudostates render as <ellipse rx=r ry=r>, never <circle> — jar-
+    // faithful (CircleStart.java/CircleEnd.java), see
+    // src/diagrams/state/renderer-pseudostate.ts's own doc comment.
+    const ellipseCount = await page.locator('#preview svg ellipse').count();
+    expect(ellipseCount).toBeGreaterThan(0);
   });
 
   test('usecase diagram contains at least one ellipse (use case oval)', async ({ page }) => {

@@ -102,4 +102,25 @@ export default tseslint.config([
     files: ['src/**/*.ts'],
     ...ATTRIBUTE_SINK_RULE_CONFIG,
   },
+  {
+    // Same strict rules as the src/tests/demo block above, extended to
+    // scripts/**/*.ts (code-review-tasks.md item 4). A SEPARATE block, not
+    // added to that one's `files` list: this one carries no `languageOptions`
+    // so it does not override the scripts/**/*.ts-specific `tsconfig.node.json`
+    // parserOptions set two blocks up — that block still wins for
+    // languageOptions since this one is silent on it, while this block's
+    // `rules` merge in on top.
+    files: ['scripts/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
 ]);

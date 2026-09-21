@@ -172,6 +172,38 @@ def extract_root_style(content: str, vars: dict[str, str]) -> dict[str, str | No
     return result
 
 
+def _style_block_text(content: str) -> str | None:
+    """Return the inner text of the theme's <style>...</style> block, or None."""
+    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
+    return m.group(1) if m else None
+
+
+def _iter_style_lines_with_path(style_text: str):
+    """
+    Walk a <style> block's lines, yielding (path, line) for every declaration
+    line -- `path` is the lowercase dotted-selector stack of enclosing blocks
+    at that point (e.g. `['root', 'document']`), skipping brace lines, blank
+    lines, and PlantUML `'` line comments.
+
+    Shared by every extractor below that reads a selector's direct or nested
+    declarations, so the same depth/comment handling (and its edge cases --
+    nested blocks reusing a name, commented-out properties) is defined once.
+    """
+    path: list[str] = []
+    for raw in style_text.split('\n'):
+        line = raw.strip()
+        if not line or line.startswith("'"):
+            continue
+        if line.endswith('{'):
+            path.append(line[:-1].strip().lower())
+            continue
+        if line == '}':
+            if path:
+                path.pop()
+            continue
+        yield list(path), line
+
+
 def extract_node_maximum_width(content: str) -> str | None:
     """
     A TOP-LEVEL `node { MaximumWidth N }` inside the theme's <style> block.
@@ -182,34 +214,21 @@ def extract_node_maximum_width(content: str) -> str | None:
     `!theme amiga` wraps its cells in the reference jar
     (yaml/vapoda-87-piku740), and why this value belongs on graph.json.
 
-    Depth-tracked rather than regex-scanned, because `MaximumWidth` also
+    Path-tracked rather than regex-scanned, because `MaximumWidth` also
     appears inside NESTED `node` blocks (puml-theme-carbon-gray has two), and
     inside comments (puml-theme-mono's is commented out with a leading quote).
-    Only the top-level block, and only its first value, is taken.
+    Only the top-level block (`path == ['node']`), and only its first value,
+    is taken.
     """
-    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
-    if not m:
+    style_text = _style_block_text(content)
+    if style_text is None:
         return None
-    depth = 0
-    node_depth: int | None = None
-    for line in m.group(1).split('\n'):
-        s = line.strip()
-        if s.startswith("'"):        # PlantUML line comment
+    for path, line in _iter_style_lines_with_path(style_text):
+        if path != ['node']:
             continue
-        if s.endswith('{'):
-            if depth == 0 and s[:-1].strip().lower() == 'node':
-                node_depth = depth
-            depth += 1
-            continue
-        if s == '}':
-            depth -= 1
-            if node_depth is not None and depth <= node_depth:
-                node_depth = None
-            continue
-        if node_depth is not None and depth == node_depth + 1:
-            prop = re.match(r'MaximumWidth\s+([0-9]+(?:\.[0-9]+)?)\s*$', s, re.IGNORECASE)
-            if prop:
-                return prop.group(1)
+        prop = re.match(r'MaximumWidth\s+([0-9]+(?:\.[0-9]+)?)\s*$', line, re.IGNORECASE)
+        if prop:
+            return prop.group(1)
     return None
 
 
@@ -228,25 +247,11 @@ def extract_document_styles(content: str, vars: dict[str, str]) -> dict[str, dic
 
     Returns lowercase property names to match `parseStyleBlock`'s own keys.
     """
-    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
-    if not m:
+    style_text = _style_block_text(content)
+    if style_text is None:
         return {}
     out: dict[str, dict[str, str]] = {}
-    depth = 0
-    path: list[str] = []
-    for raw in m.group(1).split('\n'):
-        line = raw.strip()
-        if not line or line.startswith("'"):
-            continue
-        if line.endswith('{'):
-            path.append(line[:-1].strip().lower())
-            depth += 1
-            continue
-        if line == '}':
-            if path:
-                path.pop()
-            depth -= 1
-            continue
+    for path, line in _iter_style_lines_with_path(style_text):
         if not path or path[0] not in ('document', 'root'):
             continue
         parts = line.split(None, 1)
@@ -256,6 +261,17 @@ def extract_document_styles(content: str, vars: dict[str, str]) -> dict[str, dic
         out.setdefault(selector, {})[parts[0].lower()] = _resolve_var(
             parts[1].strip().strip('"\''), vars)
     return out
+
+
+def _parse_margin_numbers(n: list[int]) -> tuple[int, int, int, int]:
+    """Expand a CSS-shaped 1/2/3/4-number margin into (top, right, bottom, left)."""
+    if len(n) == 1:
+        return n[0], n[0], n[0], n[0]
+    if len(n) == 2:
+        return n[0], n[1], n[0], n[1]
+    if len(n) == 3:
+        return n[0], n[1], n[2], n[1]
+    return n[0], n[1], n[2], n[3]
 
 
 def extract_document_margin(content: str) -> str | None:
@@ -271,40 +287,20 @@ def extract_document_margin(content: str) -> str | None:
     The value is CSS-shaped: 1/2/3/4 numbers (`ClockwiseTopRightBottomLeft
     #read`, `:66-100`). Only the 1-number form appears at this scope in the
     corpus; the others are ported anyway so an upstream change does not
-    silently truncate.
+    silently truncate. Only a top-level `root`/`document` block counts
+    (`path == ['root']` or `['document']`), matching the merged-style scope.
     """
-    m = re.search(r'<style>(.*?)</style>', content, re.DOTALL)
-    if not m:
+    style_text = _style_block_text(content)
+    if style_text is None:
         return None
-    depth = 0
-    scope_depth: int | None = None
-    for line in m.group(1).split('\n'):
-        s = line.strip()
-        if s.startswith("'"):
+    for path, line in _iter_style_lines_with_path(style_text):
+        if path not in (['root'], ['document']):
             continue
-        if s.endswith('{'):
-            if depth == 0 and s[:-1].strip().lower() in ('root', 'document'):
-                scope_depth = depth
-            depth += 1
-            continue
-        if s == '}':
-            depth -= 1
-            if scope_depth is not None and depth <= scope_depth:
-                scope_depth = None
-            continue
-        if scope_depth is not None and depth == scope_depth + 1:
-            prop = re.match(r'Margin\s+([0-9]+(?:\s+[0-9]+){0,3})\s*$', s, re.IGNORECASE)
-            if prop:
-                n = [int(x) for x in prop.group(1).split()]
-                if len(n) == 1:
-                    t = r = b = l = n[0]
-                elif len(n) == 2:
-                    t, r, b, l = n[0], n[1], n[0], n[1]
-                elif len(n) == 3:
-                    t, r, b, l = n[0], n[1], n[2], n[1]
-                else:
-                    t, r, b, l = n
-                return f"{{ top: {t}, right: {r}, bottom: {b}, left: {l} }}"
+        prop = re.match(r'Margin\s+([0-9]+(?:\s+[0-9]+){0,3})\s*$', line, re.IGNORECASE)
+        if prop:
+            n = [int(x) for x in prop.group(1).split()]
+            t, r, b, l = _parse_margin_numbers(n)
+            return f"{{ top: {t}, right: {r}, bottom: {b}, left: {l} }}"
     return None
 
 
@@ -440,6 +436,42 @@ def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
     return out
 
 
+def _emit_style_overrides_lines(doc_styles: dict[str, dict[str, str]]) -> list[str]:
+    """Emit the `styleOverrides: { … }` block, or [] when there are none."""
+    if not doc_styles:
+        return []
+    lines = ["    styleOverrides: {"]
+    for selector in sorted(doc_styles):
+        decls = ', '.join(f"{k}: '{v}'" for k, v in sorted(doc_styles[selector].items()))
+        lines.append(f"      '{selector}': {{ {decls} }},")
+    lines.append("    },")
+    return lines
+
+
+def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str],
+                             extra_graph: list[str]) -> list[str]:
+    """
+    Emit the `colors: { … }` block, or [] when there is nothing to say.
+
+    `colors` is emitted for a json-only property too -- a theme may declare
+    `node { MaximumWidth }` and no colors at all.
+    """
+    if not (color_lines or json_lines):
+        return []
+    lines = ["    colors: {"]
+    lines.extend(color_lines)
+    if json_lines or extra_graph:
+        lines.append("      graph: {")
+        lines.extend(extra_graph)
+        if json_lines:
+            lines.append("        json: {")
+            lines.extend(json_lines)
+            lines.append("        },")
+        lines.append("      },")
+    lines.append("    },")
+    return lines
+
+
 def emit_theme_entry(name: str, props: dict) -> list[str]:
     """Emit a TypeScript object entry for one theme."""
     bg = normalize_color(props.get('bg'))
@@ -456,32 +488,12 @@ def emit_theme_entry(name: str, props: dict) -> list[str]:
     lines.extend(props.get('extra_after_font', []))
     if props.get('margin'):
         lines.append(f"    diagramMargin: {props['margin']},")
-    doc_styles = props.get('doc_styles') or {}
-    if doc_styles:
-        lines.append("    styleOverrides: {")
-        for selector in sorted(doc_styles):
-            decls = ', '.join(f"{k}: '{v}'" for k, v in sorted(doc_styles[selector].items()))
-            lines.append(f"      '{selector}': {{ {decls} }},")
-        lines.append("    },")
+    lines.extend(_emit_style_overrides_lines(props.get('doc_styles') or {}))
 
     color_lines = _color_lines(bg, fg, lc)
     json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'), props.get('lt'),
                                    normalize_color(props.get('root_bg')))
-    # `colors` is emitted for a json-only property too -- a theme may declare
-    # `node { MaximumWidth }` and no colors at all.
-    if color_lines or json_lines:
-        lines.append("    colors: {")
-        lines.extend(color_lines)
-        extra_graph = props.get('extra_graph', [])
-        if json_lines or extra_graph:
-            lines.append("      graph: {")
-            lines.extend(extra_graph)
-            if json_lines:
-                lines.append("        json: {")
-                lines.extend(json_lines)
-                lines.append("        },")
-            lines.append("      },")
-        lines.append("    },")
+    lines.extend(_emit_colors_block_lines(color_lines, json_lines, props.get('extra_graph', [])))
     lines.append("  },")
     return lines
 

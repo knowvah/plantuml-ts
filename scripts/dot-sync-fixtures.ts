@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 import { stripDiagramName, stripLayoutPragma } from './dot-sync-drilldown.js';
+import { oracleJarBatchTimeoutMs } from './lib/oracle-jar-timeout.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** execFileSync stdout cap for jar batch runs (256 MiB). */
@@ -187,6 +188,7 @@ function generateCanonical(jar: string, type: string, fixtures: Fixture[]): void
     execFileSync('java', ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', jar, '-tsvg', '-nometadata', '-o', svgDir, pumlDir], {
       stdio: ['ignore', 'ignore', 'inherit'],
       maxBuffer: MAX_JAR_BUFFER_BYTES,
+      timeout: oracleJarBatchTimeoutMs(fixtures.length),
     });
   } catch {
     /* partial batch — valid SVGs are on disk */
