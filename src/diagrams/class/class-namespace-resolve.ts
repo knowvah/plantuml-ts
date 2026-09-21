@@ -4,7 +4,7 @@
  * it so existing `from './class-namespace.js'` import sites are unchanged.
  */
 
-import type { Classifier, Namespace, Relationship } from './ast.js';
+import type { Classifier, ClassifierKind, Namespace, Relationship } from './ast.js';
 
 /**
  * Split a qualified id on the namespace separator into its non-empty segments,
@@ -86,10 +86,45 @@ export function splitOnSeparator(id: string, sep: string | null, trustedPrefix?:
 }
 
 /**
+ * cdd-T1: `gotoGroup`'s own tick — the EXPLICIT half of the chain. Upstream's
+ * `CucaDiagram#gotoGroup` is handed exactly ONE quark (the innermost segment
+ * of `package a.b.c {`) and creates a group for it alone, `if
+ * (quark.getData() == null)`; the chain's other segments are quarks with no
+ * data, i.e. phantoms, and are numbered later by
+ * `eventuallyBuildPhantomGroups`. Mirrored here as: stamp only `id`, and only
+ * when it has no `creationIndex` yet (the port's stand-in for
+ * `getData() == null` — a namespace with an index is a materialised Entity).
+ * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:349-355
+ */
+function stampGotoGroup(
+  namespaces: Namespace[],
+  id: string,
+  counter: { value: number },
+  reuseCreationIndex?: { id: string; creationIndex: number },
+): void {
+  const ns = namespaces.find((n) => n.id === id);
+  if (ns === undefined || ns.creationIndex !== undefined) return;
+  if (reuseCreationIndex !== undefined && id === reuseCreationIndex.id) {
+    ns.creationIndex = reuseCreationIndex.creationIndex;
+    return;
+  }
+  counter.value += 1;
+  ns.creationIndex = counter.value;
+}
+
+/**
  * Ensure the nested namespace chain for the given display segments exists in
  * `namespaces`, each level linked to its parent via `parentId`. Ids are the
  * cumulative join on the separator (`['a','b']` → namespaces `a` and `a.b`).
  * Returns the innermost namespace id.
+ *
+ * cdd-T1: chain creation itself NEVER ticks `creationIndex` — it mirrors
+ * `CucaDiagram#quarkInContext`, which only registers data-less Quarks; no uid
+ * is minted until an `Entity` is built for one. Passing `counter` is the
+ * `gotoGroup` call (an explicit `package`/`namespace` block, which numbers
+ * its own innermost segment at parse time and nothing else — see
+ * `stampGotoGroup`); every other caller resolves an implicit reference and
+ * leaves the whole chain to `eventuallyBuildPhantomGroups`.
  */
 export function ensureNamespaceChain(
   namespaces: Namespace[],
@@ -116,22 +151,96 @@ export function ensureNamespaceChain(
     if (namespaces.find((n) => n.id === acc) === undefined) {
       const ns: Namespace = { id: acc, display: seg, classifiers: [] };
       if (parent !== undefined) ns.parentId = parent;
-      // G2 N2 (mechanism 3): stamp parse-time creation order when the
-      // caller threads a shared counter -- see ast.ts#Classifier
-      // .creationIndex's doc comment for the exact/fallback gate this
-      // feeds. Absent when no counter is passed (e.g. hand-built test
-      // callers), matching every other optional-field convention here.
-      if (reuseCreationIndex !== undefined && acc === reuseCreationIndex.id) {
-        ns.creationIndex = reuseCreationIndex.creationIndex;
-      } else if (counter !== undefined) {
-        counter.value += 1;
-        ns.creationIndex = counter.value;
-      }
       namespaces.push(ns);
     }
     parent = acc;
   }
+  if (counter !== undefined) stampGotoGroup(namespaces, acc, counter, reuseCreationIndex);
   return acc;
+}
+
+/**
+ * `LeafType#isLikeClass` — the gate upstream puts on the phantom-group pass
+ * (`if (type.isLikeClass()) eventuallyBuildPhantomGroups(location)`,
+ * `CucaDiagram.java:239-240`). The set is upstream's verbatim, minus the
+ * keywords this port has no distinct `ClassifierKind` for; every kind NOT
+ * listed (`object`, `map`, `json`, `usecase`, `descriptive`, `state`, ...) is
+ * a leaf creation that does NOT trigger the pass, exactly as upstream, and
+ * leaves its packages to the end-of-parse sweep.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/LeafType.java:85-96
+ */
+const LIKE_CLASS_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
+  'annotation',
+  'abstract',
+  'class',
+  'interface',
+  'enum',
+  'entity',
+  'protocol',
+  'struct',
+  'exception',
+  'metaclass',
+  'stereotype',
+  'dataclass',
+  'record',
+]);
+
+export function isLikeClass(kind: ClassifierKind): boolean {
+  return LIKE_CLASS_KINDS.has(kind);
+}
+
+/** `Quark#countChildren` (`plasma/Quark.java:157-159`, `children.size()`) for
+ *  a namespace: its DIRECT children of either kind — member classifiers and
+ *  nested namespaces alike, since upstream registers both as child quarks of
+ *  the same node. `ns.classifiers` is this port's own child list; the
+ *  `classifiers` scan covers a member whose row was rebuilt outside
+ *  `registerInNamespace` (`class-container.ts`'s empty-container collapse). */
+function countChildren(namespaces: readonly Namespace[], classifiers: readonly Classifier[], id: string): number {
+  const ns = namespaces.find((n) => n.id === id);
+  const own = ns === undefined ? 0 : ns.classifiers.length;
+  return (
+    own + namespaces.filter((n) => n.parentId === id).length + classifiers.filter((c) => c.namespace === id).length
+  );
+}
+
+/**
+ * Port of `CucaDiagram#eventuallyBuildPhantomGroups`: walk every registered
+ * quark in REGISTRATION order and materialise a PACKAGE group — minting its
+ * uid off the shared counter — for each one that has no data of its own but
+ * does have children. This is what makes an implicit intermediate package's
+ * uid land AFTER the leaf that caused it, and after that leaf's own uid.
+ *
+ *   CucaDiagram.java:325-336
+ *     for (Quark<Entity> quark : this.quarks()) {
+ *         if (quark.getData() != null) continue;
+ *         int countChildren = quark.countChildren();
+ *         if (countChildren > 0) { ... createGroup(location, quark, PACKAGE); }
+ *     }
+ *
+ * `namespaces` is in the same registration order as `Plasma#quarks` (an
+ * append-only list, `Plasma.java:55,62-63`; `ensureNamespaceChain` appends
+ * outer→inner, exactly as `Quark#child` walks a dotted path). `getData() !=
+ * null` becomes `creationIndex !== undefined`: a namespace that already holds
+ * a counter slot is a materialised Entity.
+ *
+ * Called at the tail of every like-class leaf creation (`:239-240`) AND once
+ * more when the diagram is finished (`CucaDiagram.java:464`,
+ * `getTextBlock`'s own `this.eventuallyBuildPhantomGroups(null)`), which is
+ * what numbers the packages of a diagram whose last — or only — leaves are
+ * not like-class.
+ * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:239-240,325-336,464
+ */
+export function eventuallyBuildPhantomGroups(
+  namespaces: Namespace[],
+  classifiers: readonly Classifier[],
+  counter: { value: number },
+): void {
+  for (const ns of namespaces) {
+    if (ns.creationIndex !== undefined) continue;
+    if (countChildren(namespaces, classifiers, ns.id) === 0) continue;
+    counter.value += 1;
+    ns.creationIndex = counter.value;
+  }
 }
 
 export interface ResolveInput {
@@ -161,14 +270,6 @@ export interface ResolveInput {
    * id/namespace instead of creating a new scope-local one.
    */
   reuseExistingChild: boolean;
-  /**
-   * G2 N2 (mechanism 3): shared parse-time creation counter, threaded
-   * through to `ensureNamespaceChain` when a namespace is created as a
-   * side effect of resolving this reference. Optional -- callers that
-   * don't care about exact uid ordering (most existing call sites this
-   * iteration did not wire) simply omit it.
-   */
-  counter?: { value: number };
 }
 
 export interface ResolvedRef {
@@ -318,7 +419,11 @@ function resolveQualified(input: ResolveInput, sep: string): ResolvedRef {
   const isDefaultDisplay = display === undefined || display === name;
   return {
     id,
-    nsId: ensureNamespaceChain(namespaces, sep, nsSegments, input.counter),
+    // cdd-T1: no `counter` — an implicit chain created as a side effect of
+    // resolving a reference mints no uid here (`quarkInContext` only
+    // registers data-less Quarks); `eventuallyBuildPhantomGroups` numbers
+    // these AFTER the triggering leaf. @see CucaDiagram.java:239-240,325-336
+    nsId: ensureNamespaceChain(namespaces, sep, nsSegments),
     display: isDefaultDisplay ? leaf : display,
   };
 }

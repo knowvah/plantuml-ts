@@ -23,6 +23,7 @@ import {
   registerInNamespace,
   resolveReference,
 } from './class-namespace.js';
+import { eventuallyBuildPhantomGroups, isLikeClass } from './class-namespace-resolve.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
@@ -114,7 +115,6 @@ export function ensureClassifier(
     intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild,
-    counter: state.creationCounter,
   });
   const existing = state.classifierIndex.get(id);
   if (existing !== undefined) {
@@ -141,6 +141,11 @@ export function ensureClassifier(
   // relationship-endpoint auto-create, so this covers both call sites —
   // matching upstream, where both paths also funnel through reallyCreateLeaf.
   state.lastEntity = id;
+  // cdd-T1: the TAIL of `reallyCreateLeaf` -- CucaDiagram.java:239-240, `if
+  // (type.isLikeClass()) eventuallyBuildPhantomGroups(location);`.
+  if (isLikeClass(kind)) {
+    eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
+  }
   return classifier;
   // #lizard forgives -- pre-existing violation (34 NLOC/5 PARAM vs this
   // repo's caps), unchanged by the allowmixing gate: `git diff` shows zero
@@ -161,6 +166,9 @@ export function startNewPage(state: ParseState): void {
   // checkFinalError's same-pair length normalization runs per finished
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
+  // cdd-T1: `getTextBlock`'s own closing sweep (CucaDiagram.java:464) -- a
+  // page IS a finished diagram, rendered through its own getTextBlock.
+  eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
   applyDirectives(state.ast);
   // A2s F-A / B2: kind BEFORE entity/stereotype -- see finalizeParse's
   // identical ordering note.
@@ -466,6 +474,9 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
   adjudicateAllowMixing(state);
 
   normalizeSameConnectionLengths(state.ast.relationships);
+  // cdd-T1: `getTextBlock`'s closing sweep (CucaDiagram.java:464, as in
+  // startNewPage) -- numbers any package no like-class leaf ever swept.
+  eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
   applyDirectives(state.ast);
   // A2s F-A / B2: kind BEFORE entity/stereotype -- entity `show` now clears
   // flags (CucaDiagram#showPortion's last-matching-rule fold), so the more-

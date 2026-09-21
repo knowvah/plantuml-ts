@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1120 modules · 4072 exported names.
+1120 modules · 4074 exported names.
 
 ## `src/`
 
@@ -1152,7 +1152,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-monochrome.ts` | `MonochromeMode`, `applyMonochromeHex`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |
 | `class-namespace-folder-outline.ts` | `folderPathD`, `folderPolygonPoints`, `renderFolderPolygon` | class-namespace-folder-outline.ts — the folder-tab OUTLINE shape builders (`USymbolFolder#drawFolder`'s two branches: the default rounded-arc `UPath`, and the `skinparam style strictuml` sharp-corner `UPolygon`). |
-| `class-namespace-resolve.ts` | `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `ResolveInput`, `ResolvedRef`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths` | Namespace-qualified id parsing & reference resolution for class diagrams. |
+| `class-namespace-resolve.ts` | `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `isLikeClass`, `eventuallyBuildPhantomGroups`, `ResolveInput`, `ResolvedRef`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths` | Namespace-qualified id parsing & reference resolution for class diagrams. |
 | `class-namespace-shape.ts` | `PACKAGE_ROUND_CORNER`, `PACKAGE_STROKE_WIDTH`, `getHTitle`, `getWTitle`, `getTitleBaselineOffset`, `renderNamespaceFolder`, `renderNamespaceRect`, `renderEmptyPackageIcon`, `EmptyPackageLeafDim`, `measureEmptyPackageLeafDim` | class-namespace-shape.ts — G2 N17: the package/namespace folder-tab outline (`USymbolFolder`'s tab-notch shape, `core/decoration/symbol/ USymbolFolder.ts#folderPath`/`getWTitle`/`getHTitle`) wired into class's plain-SVG-string render path. |
 | `class-namespace-title-table.ts` | `namespaceTitleTableDims` | `ClusterHeader`'s title-table sizing for a class/object package cluster -- split out of ./class-dot-graph.ts (T4, namespace-cluster-box mission, 500-line file-cap compliance; pure move, no behavior change from the split itself, mirroring st |
 | `class-namespace.ts` | `registerInNamespace`, `makeClassifier`, `collapseEmptyNamespace`, `collapseEmptyNamespacesFinal`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths`, `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `ResolveInput`, `ResolvedRef` | Namespace-splitting helpers for class diagrams. |
