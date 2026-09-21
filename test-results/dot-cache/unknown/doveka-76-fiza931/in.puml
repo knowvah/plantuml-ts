@@ -1,0 +1,8 @@
+@startuml
+<style>
+</style>
+switch (test?)
+case (condition A)
+  :Text 1;
+endswitch
+@enduml

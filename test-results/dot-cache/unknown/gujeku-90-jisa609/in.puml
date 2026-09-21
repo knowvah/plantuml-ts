@@ -1,0 +1,7 @@
+@startuml
+ref over A : [[link]]
+ref over A : [[link]] text on ref
+ref over A : text on ref and [[link]]
+ref over A [[link]]
+ref over A [[link]] : text on ref
+@enduml

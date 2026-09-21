@@ -13,7 +13,7 @@
  */
 
 import type { BoxGroup, FrameEvent } from './ast.js';
-import { emit, type Command } from './sequence-parse-helpers.js';
+import { emit, setLastEventWithNoteSpan, type Command, type ParseState } from './sequence-parse-helpers.js';
 
 // 3a. box — opens a named/colored participant group. T13 (mission
 //     dispatch-by-parse-attempt): widened to accept an unquoted label
@@ -143,6 +143,43 @@ export const groupingCommand: Command = {
 // alternative to disambiguate against), so it is not ported; the effect
 // (`else#eee` is not a color, `else #eee cond` is) falls out of requiring
 // `\s+` ahead of the color group below.
+/**
+ * `SequenceDiagram#grouping`'s `default` arm (`:429-430`): EVERY `else`/
+ * `also`/`end` line builds a NEW `GroupingLeaf`, which `implements
+ * EventWithNote` (`GroupingLeaf.java:47`) -- so each is one of the three
+ * upstream `getLastEventWithNote` anchors (T11, ubrr batch 2; see
+ * `ParseState.lastEventWithNoteLeft`'s doc comment). `GroupingLeaf` carries
+ * no participant of its own (`dealWith()` is unconditionally `false`);
+ * upstream positions its note against the FRAME's own rendered span
+ * (`teoz/GroupingTile.java`'s `getNotesWidth`/`getNoteComponents`), which
+ * this port's AST does not track per-frame. Approximated here as the
+ * MOST RECENT message's own endpoints when one exists -- for a typical
+ * loop/group, that message sits inside (or immediately before) the frame
+ * closing here, so its span is a closer stand-in for the frame's own than
+ * the whole diagram is (jar-verified regression against
+ * `mukebo-35-xoju095`, a six-participant/four-box diagram where the
+ * whole-diagram span used to give a materially worse position than the
+ * two participants the closing `loop`/`group` actually messaged between)
+ * -- falling back to the full currently-declared participant span (the
+ * same "across the whole diagram" reading `noteAcrossCommand`,
+ * `command-note-factory.ts`, already uses) only when NO message has
+ * occurred at all yet, which is the only shape this approximation needs
+ * to cover faithfully: a `ref`/`opt`/`end` sequence with no message
+ * anywhere (`teoz-ng-001-17`). The OPENING keyword (`groupingCommand`, a
+ * `GroupingStart`) does NOT implement `EventWithNote` and must never call
+ * this.
+ */
+function markGroupingLeafNoteAnchor(state: ParseState): void {
+  if (state.lastMessageFrom !== null && state.lastMessageTo !== null) {
+    setLastEventWithNoteSpan(state, [state.lastMessageFrom, state.lastMessageTo]);
+    return;
+  }
+  setLastEventWithNoteSpan(
+    state,
+    state.ast.participants.map((p) => p.id),
+  );
+}
+
 export const elseCommand: Command = {
   pattern: /^(?:else|also)(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
@@ -152,6 +189,7 @@ export const elseCommand: Command = {
       top.branchLabels.push(match[2]?.trim() ?? '');
       top.branchColors?.push(match[1]);
     }
+    markGroupingLeafNoteAnchor(state);
   },
 };
 
@@ -171,5 +209,6 @@ export const endCommand: Command = {
     if (frame !== undefined) {
       emit(state, frame);
     }
+    markGroupingLeafNoteAnchor(state);
   },
 };

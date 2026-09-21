@@ -1,0 +1,8 @@
+@startbpm
+:login;
+20:<+>
+:show new message1;
+30:<+>
+resume 20
+:show new task2;
+@endbpm

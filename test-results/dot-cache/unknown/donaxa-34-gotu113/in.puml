@@ -1,0 +1,9 @@
+@startnwdiag
+!include <cloudinsight/tomcat.puml>
+nwdiag {
+      network {
+        A [address = 192.168.0.1, description = "web server01 <$tomcat*0.5>"];
+        B [address = 192.168.0.2, description = "web server02"];
+      }
+}
+@endnwdiag

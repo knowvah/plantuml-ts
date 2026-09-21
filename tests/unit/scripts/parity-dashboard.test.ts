@@ -20,7 +20,7 @@ import {
 } from '../../../scripts/parity-dashboard.js';
 import { tallySurvey, zeroDiffCount, registeredEngineTypes } from '../../../scripts/parity-dashboard-inputs.js';
 import { ratchetPinsOf, diffBaselineStatsOf, groupBaselineByType } from '../../../scripts/parity-dashboard-goldens.js';
-import { engineCell } from '../../../scripts/parity-dashboard-matrix.js';
+import { engineCell, noEngineColumn } from '../../../scripts/parity-dashboard-matrix.js';
 import type { TypeRow } from '../../../scripts/dot-parity-rows.js';
 import type { FixtureRow } from '../../../scripts/svg-parity-survey.js';
 
@@ -162,6 +162,32 @@ describe('buildMatrix', () => {
 
   it('gives unknown the accounting-bucket engine reason', () => {
     expect(row('unknown').engine).toBe('n/a (accounting bucket)');
+  });
+
+  // D8 (plans/unknown-bucket-routing-repair/decisions.md): once `unknown` has
+  // an oracle, a survey summary, and routing/refusal groups, every one of
+  // those columns must report real measurements — the accounting-bucket
+  // engine cell is the only column the no-engine override is allowed to touch.
+  it('reports real oracle/survey/routing/refusal numbers for unknown once its measurements exist', () => {
+    const inputs = baseInputs();
+    inputs.oracleCounts['unknown'] = 825;
+    inputs.surveyByType['unknown'] = { conformant: 700, structural: 50, diverged: 75, generatedAt: '2026-09-20' };
+    inputs.routingByType['unknown'] = {
+      counts: { agree: 800, 'known-misroute': 25 },
+      total: 825,
+      measuredAt: '2026-09-20',
+    };
+    inputs.refusalByType['unknown'] = {
+      counts: { ok: 810, 'known-gap': 15 },
+      total: 825,
+      measuredAt: '2026-09-20',
+    };
+    const r = buildMatrix(inputs).find((x) => x.type === 'unknown')!;
+    expect(r.engine).toBe('n/a (accounting bucket)');
+    expect(r.oracle).toBe('825');
+    expect(r.survey).toBe('700 / 50 / 75');
+    expect(r.routing).toBe('800/825');
+    expect(r.refusal).toBe('810/825');
   });
 
   it('never emits a bare "n/a" cell — every one carries a parenthetical reason', () => {
@@ -395,6 +421,27 @@ describe('engineCell', () => {
 
   it('throws for a bucket with neither a mapping nor a D-row id', () => {
     expect(() => engineCell('not-a-real-bucket', [])).toThrow(/no engine mapping and no D-row id/);
+  });
+});
+
+describe('noEngineColumn', () => {
+  it('fires for a no engine (Dn todo) cell', () => {
+    expect(noEngineColumn('n/a (no engine (D8 todo))')).toEqual({
+      cell: 'n/a (no engine (D8 todo))',
+      freshness: undefined,
+    });
+  });
+
+  // D8 (plans/unknown-bucket-routing-repair/decisions.md): the override must
+  // never fire for unknown's accounting-bucket engine cell — it is not a
+  // no-engine todo, so its comparison columns must fall through to the
+  // normal per-column rules instead of repeating the engine reason.
+  it('does not fire for the accounting-bucket engine cell', () => {
+    expect(noEngineColumn('n/a (accounting bucket)')).toBeUndefined();
+  });
+
+  it('does not fire for a resolved engine name', () => {
+    expect(noEngineColumn('class')).toBeUndefined();
   });
 });
 

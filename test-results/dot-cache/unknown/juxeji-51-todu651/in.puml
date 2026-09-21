@@ -1,0 +1,9 @@
+@startuml
+
+legend
+The legend
+end legend
+
+a -- bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+@enduml

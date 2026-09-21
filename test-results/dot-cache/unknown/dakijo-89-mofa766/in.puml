@@ -1,0 +1,14 @@
+@startuml
+!$U_ov1 = 3.8
+!$U_ov2 = 3.9
+!$rate = 0.1
+!function $time($a, $b, $c)
+!return ($a - $b)/$c
+!endfunction
+
+@0
+line is low
+@+$time($U_ov1, $U_ov2, $rate)
+line is high
+
+@enduml

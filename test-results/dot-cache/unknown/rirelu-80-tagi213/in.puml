@@ -1,0 +1,7 @@
+@startuml
+
+	!define AD2ENT <color:fuchsia>AD2ENT</color>
+
+	title 'AD2ENT'
+
+@enduml

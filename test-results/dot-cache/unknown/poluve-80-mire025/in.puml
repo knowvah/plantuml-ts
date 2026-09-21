@@ -1,0 +1,5 @@
+@startuml
+package Toto {
+  class Toto
+}
+@enduml

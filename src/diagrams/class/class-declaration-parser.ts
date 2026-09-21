@@ -69,6 +69,18 @@ export interface ClassifierDecl {
  */
 // Keyword tables live in class-descriptive-leaf-keywords.ts (500-line cap
 // split; shared with class-descriptive-leaf-command.ts, no circular import).
+// T3 (unknown-bucket-routing-repair): optional leading VISIBILITY char
+// (`[-#+~]`, `VisibilityModifier.regexForVisibilityCharacter()`,
+// `skin/VisibilityModifier.java:75-77`) -- both `CommandCreateClass.java:87`
+// and `CommandCreateClassMultilines.java:100` carry
+// `new RegexLeaf(1, "VISIBILITY", "(" + regexForVisibilityCharacter() +
+// ")?")` immediately after `RegexLeaf.start()`, before `spaceZeroOrMore()`
+// and the TYPE keyword. Captured (group 1) and discarded: no render-side
+// field in this port consumes a classifier-level visibility marker today
+// (the jar draws a small header icon via `EntityImageClassHeader.java:109-
+// 121`, out of scope for a routing fix -- D3 only judges the diagram TYPE
+// the fixture lands on, not per-pixel header geometry).
+const VISIBILITY_PREFIX = '(?:([-#+~])\\s*)?';
 const DECL_KIND_RE = new RegExp(
   // `abstract\s+class` must precede the bare `abstract` alternative — JS
   // regex alternation is leftmost-first, so `abstract class Foo` must try
@@ -76,7 +88,40 @@ const DECL_KIND_RE = new RegExp(
   // Descriptive leaves take an optional unconditional `mix_` prefix (Mode.WITH_MIX_PREFIX).
   // T14 (dispatch-by-parse-attempt): `protocol` added -- see `ClassifierKind`'s
   // `'protocol'` member doc (class-classifier-ast.ts) for the citation.
-  '^(abstract\\s+class|abstract|class|interface|enum|annotation|entity|circle|protocol|' +
+  // T3: eight more TYPE alternatives, all present in the SAME upstream
+  // alternation (`CommandCreateClassMultilines.java:103`,
+  // `CommandCreateClass.java:87`) but previously unported --
+  // `static\s+class` (LeafType.getLeafType: any TYPE starting "STATIC" maps
+  // to LeafType.CLASS, `abel/LeafType.java:79-80`; `entity.setStatic(true)`
+  // is XMI-export-only, `xmi/XmiClassDiagramAbstract.java:183-184`, no SVG
+  // rendering effect -- so `static class` collapses onto plain `class`
+  // below, matching upstream's own SVG-relevant behaviour exactly), and
+  // `struct|exception|metaclass|stereotype|dataclass|record` (all
+  // `LeafType.isLikeClass()` members, `abel/LeafType.java:88-91` --
+  // `EntityImageClassHeader`/`badgeFill`/`badgeLetter`'s existing "default/
+  // unsurveyed kind" fallback already renders them, the SAME posture T14
+  // recorded for `protocol` before it was jar-verified). `diamond` is
+  // `CommandCreateClass.java:87`-only (single-line; absent from
+  // `CommandCreateClassMultilines`'s own TYPE list) but folded into this
+  // port's ALREADY-merged single/multi regex alongside `circle`/`protocol`
+  // (both themselves Multilines-only upstream) -- same existing-precedent
+  // widening, not a new one. `LeafType.getLeafType`: any TYPE starting
+  // "DIAMOND" maps to `LeafType.STATE_CHOICE` (`abel/LeafType.java:76-77`),
+  // rendered by `EntityImageBranch` (`svek/GeneralImageBuilder.java:151`) --
+  // geometrically IDENTICAL (`SIZE=12`, same `UPolygon`, same default
+  // background) to `LeafType.ASSOCIATION`'s `EntityImageAssociation`
+  // (`svek/GeneralImageBuilder.java:206-207`) already backing this port's
+  // `<> name` command (`kind: 'association'`, rule 5c,
+  // class-command-containers.ts) -- jar-verified byte-identical polygon
+  // geometry on `gegosa-79-mini423`'s golden (`diamond diamond1`, no `as`)
+  // and `taboco-79-pire192`'s (`diamond diamond1 as "..."` -- the display
+  // text is never drawn for either LeafType, confirmed absent from both
+  // goldens), so `diamond` reuses `kind: 'association'` rather than a new
+  // LeafType/renderer pair.
+  '^' +
+    VISIBILITY_PREFIX +
+    '(abstract\\s+class|static\\s+class|abstract|class|interface|enum|annotation|entity|circle|diamond|protocol|' +
+    'struct|exception|metaclass|stereotype|dataclass|record|' +
     '(?:mix_)?(?:' +
     ALL_DESCRIPTIVE_LEAF +
     ')' +
@@ -97,6 +142,9 @@ function resolveDeclKind(rawKind: string): {
   if (rawKind === STATE_LEAF_KEYWORD) return { kind: 'state' };
   if (DESCRIPTIVE_LEAF_RE.test(rawKind)) return { kind: 'descriptive', usymbol: rawKind };
   if (rawKind === 'abstract class') return { kind: 'abstract' };
+  // T3: see DECL_KIND_RE's own doc comment for both citations.
+  if (rawKind === 'static class') return { kind: 'class' };
+  if (rawKind === 'diamond') return { kind: 'association' };
   return { kind: rawKind as ClassifierKind };
 }
 
@@ -105,10 +153,12 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   if (kindMatch === null) return null;
 
   // Strip the unconditional `mix_` prefix — it doesn't change kind/usymbol.
-  const rawKind = kindMatch[1]!.replace(/\s+/, ' ').toLowerCase().replace(/^mix_/, '');
+  // group 1 = VISIBILITY_PREFIX's capture (discarded, see its own doc
+  // comment); group 2 = TYPE; group 3 = the rest of the line.
+  const rawKind = kindMatch[2]!.replace(/\s+/, ' ').toLowerCase().replace(/^mix_/, '');
   const { kind, usymbol } = resolveDeclKind(rawKind);
 
-  const { inlineMembers, opensBody, rest: body } = extractBody(kindMatch[2]!.trim());
+  const { inlineMembers, opensBody, rest: body } = extractBody(kindMatch[3]!.trim());
   // EXTENDS/IMPLEMENTS sit to the right of COLOR/LINECOLOR in the grammar
   // (CommandCreateClass.java:99-108), so they must be stripped first — color
   // extraction is anchored to the current end of the remainder.

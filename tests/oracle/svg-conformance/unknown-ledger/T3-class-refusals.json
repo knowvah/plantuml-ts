@@ -1,0 +1,165 @@
+{
+  "$comment": "T3 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T3): one row per slug in cohorts/T3.tsv -- the 16 Class-visibility-N + gegosa/girapu/jodasa/muvici/neticu/rozugu/taboco/tenule/topave/vijuce/xuloxo/zelura class-jar-refusal fixtures. One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0) and, for fix-candidate rows, by the orchestrator's batch-2 seam assignment. See plans/unknown-bucket-routing-repair/diagnosis/T3.md for the full per-mechanism diagnosis (upstream File.java:line citations, D3 landing checks, the rozugu routing-vs-refusal caveat, and the xuloxo ruled-out evidence). Batch-2 split: 1 description rows moved to T3-description.json.",
+  "rows": [
+    {
+      "slug": "Class-visibility-0",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "Class-visibility-1",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "Class-visibility-2",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "Class-visibility-3",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "Class-visibility-4",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "Class-visibility-5",
+      "cohort": "class-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 12
+    },
+    {
+      "slug": "doboco-09-doba683",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "gegosa-79-mini423",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "girapu-90-pise235",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "jodasa-29-zara935",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "muvici-42-dumo371",
+      "cohort": "class-unicode-member-shorthand",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandAddMethod",
+      "size": 3
+    },
+    {
+      "slug": "neticu-06-bafo691",
+      "cohort": "class-json-body-premature-close",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateJson",
+      "size": 18
+    },
+    {
+      "slug": "taboco-79-pire192",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "tenule-05-fovi294",
+      "cohort": "class-unicode-member-shorthand",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandAddMethod",
+      "size": 3
+    },
+    {
+      "slug": "topave-65-ceso890",
+      "cohort": "class-package-visibility-prefix",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandPackage",
+      "size": 10
+    },
+    {
+      "slug": "vijuce-20-xapo285",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    },
+    {
+      "slug": "xuloxo-85-vibu502",
+      "cohort": "preprocessor-function-resolution",
+      "disposition": "known-gap",
+      "task": "T3",
+      "reason": "Our Tim expression evaluator throws 'Unknown built-in function $isDerivedFrom' at src/core/tim/expression/ReversePolishInterpretor.ts:74 (fn === undefined from knowledge.getFunction(...)), the direct analog of the lookup-miss throw at ReversePolishInterpretor.java:99 (resolved via FunctionsSet.java:53's getFunctionSmart) while resolving a !unquoted function defined by the vendored classy stdlib (assets/stdlib/classy/plumbing/class-instancing.puml:230, $isDerivedFrom, called from $assertType at line 176 and recursively at line 257) during the classy-c4 include chain. The jar renders this source successfully (data-diagram-type=CLASS, no jar error page), so this is a real port gap, not a routing miss. Ruled out via direct renderSync repros: plain self-recursive !function calls render correctly, and same-file forward-referenced function calls (callee defined textually after caller, invoked only after the whole file is processed) also render correctly -- the gap is narrower than 'recursion' or 'forward reference' in general and was not further isolated within this task's seam scope. Tim/preprocessor internals are outside the six seams (class/description/state/activity/sequence/block-extractor) this mission's seam enum covers; recommend a dedicated Tim/preprocessor diagnosis mission rather than a T3 fix."
+    },
+    {
+      "slug": "zelura-55-pasa982",
+      "cohort": "class-declaration-type-keyword",
+      "disposition": "fixed",
+      "task": "T3",
+      "seam": "class",
+      "command": "CommandCreateClass; CommandCreateClassMultilines",
+      "size": 30
+    }
+  ]
+}

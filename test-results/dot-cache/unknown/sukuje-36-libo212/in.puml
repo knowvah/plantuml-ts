@@ -1,0 +1,7 @@
+@startcreole
+<math>
+a^2
+newline
+a^3
+</math>
+@endcreole

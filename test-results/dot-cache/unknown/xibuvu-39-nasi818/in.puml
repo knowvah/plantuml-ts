@@ -1,0 +1,11 @@
+@startuml
+!pragma teoz true
+
+loop creating ssl connection
+
+
+end /' endloop '/
+
+destroy browser
+
+@enduml

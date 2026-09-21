@@ -1,0 +1,5 @@
+@startuml
+mainframe This is a **mainframe**
+
+a -- b
+@enduml

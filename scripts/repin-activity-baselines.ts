@@ -57,8 +57,8 @@ import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from '../tests/oracle/svg-conformance/compare.js';
 import { renderFixtureActivity } from '../tests/oracle/svg-conformance/render-fixture-activity.js';
-import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
-import type { NormalizedNode } from '../tests/oracle/svg-conformance/normalize.js';
+import { styleCensusOf } from './repin-activity-style-census.js';
+import { processPromotions } from './repin-activity-promote-run.js';
 import {
   censusOf as swimlaneCensusOf,
   layoutFixtureActivity,
@@ -90,15 +90,6 @@ export interface PlannedWrite {
   readonly classification: Classification;
   readonly oldValue: number;
   readonly newValue: number;
-}
-
-interface StyleCensus {
-  readonly fontSize: Record<string, number>;
-  readonly strokeWidth: Record<string, number>;
-  readonly rx: Record<string, number>;
-  readonly textCount: number;
-  readonly width: string;
-  readonly height: string;
 }
 
 interface DiffBaselineFixture {
@@ -222,40 +213,6 @@ export function censusChanged(pinned: unknown, live: unknown): boolean {
  * the `--slugs-file` selection -- the exact interface contract. */
 export function formatChangedLine(fileLabel: string, slug: string, inSubset: boolean): string {
   return `CHANGED ${fileLabel} ${slug}${inSubset ? ' in-subset' : ''}`;
-}
-
-// ---------------------------------------------------------------------------
-// Style census -- duplicated from `activity.style-baseline.test.ts` (see the
-// file doc comment for why it cannot be imported). Kept byte-identical in
-// logic to that file's `censusOf`.
-// ---------------------------------------------------------------------------
-
-function bumpHistogram(h: Record<string, number>, v: string | undefined): void {
-  const key = v ?? '(absent)';
-  h[key] = (h[key] ?? 0) + 1;
-}
-
-function walkStyleCensus(n: NormalizedNode, census: StyleCensus): number {
-  let textCount = 0;
-  if (n.type === 'element') {
-    if (n.tag === 'text') {
-      textCount += 1;
-      bumpHistogram(census.fontSize, n.attrs?.['font-size']);
-    } else if (n.tag === 'line') {
-      bumpHistogram(census.strokeWidth, n.attrs?.['stroke-width']);
-    } else if (n.tag === 'rect') {
-      bumpHistogram(census.rx, n.attrs?.['rx']);
-    }
-  }
-  for (const child of n.children ?? []) textCount += walkStyleCensus(child, census);
-  return textCount;
-}
-
-function styleCensusOf(svg: string): StyleCensus {
-  const root = normalizeSvg(svg);
-  const census: StyleCensus = { fontSize: {}, strokeWidth: {}, rx: {}, textCount: 0, width: '', height: '' };
-  const textCount = walkStyleCensus(root, census);
-  return { ...census, textCount, width: root.attrs?.['width'] ?? '', height: root.attrs?.['height'] ?? '' };
 }
 
 // ---------------------------------------------------------------------------
@@ -470,6 +427,7 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const ctx: RepinContext = { write: args.write, today: getToday(), commit: getCommit(), subset: args.subset };
 
+  const promoted = processPromotions(ctx, { goldensDir: GOLDENS_DIR, readFixture, renderOurs });
   const diffWrites = processDiffBaseline(ctx);
   const styleChanged = processEqualityFile(STYLE_SPEC, ctx);
   const textChanged = processEqualityFile(TEXT_SPEC, ctx);
@@ -480,7 +438,9 @@ function main(): void {
   );
 
   const total = diffWrites.length + styleChanged.length + textChanged.length + swimlaneChanged.length;
-  console.log(`${total} change(s) across diff-baseline/style-baseline/text-baseline/swimlane-baseline`);
+  console.log(
+    `${promoted} promotion(s) error -> baseline; ${total} change(s) across diff-baseline/style-baseline/text-baseline/swimlane-baseline`,
+  );
 
   const rises = unacceptedRises(diffWrites, args.acceptRises);
   process.exitCode = rises.length > 0 ? 1 : 0;

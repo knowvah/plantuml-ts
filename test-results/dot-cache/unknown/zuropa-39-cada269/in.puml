@@ -1,0 +1,5 @@
+@startuml
+namespace  a.b.c {
+   class "Object" as js.Object
+}
+@enduml

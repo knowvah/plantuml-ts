@@ -1,0 +1,4 @@
+@startcreole
+this is an example <b>which is bold</b>
+this is **an** example <b>which is bold
+@endcreole

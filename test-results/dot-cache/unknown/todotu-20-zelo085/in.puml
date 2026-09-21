@@ -1,0 +1,8 @@
+@startnwdiag
+nwdiag {
+  network LAN2 {
+     switch;
+  }
+  switch -- equip;
+}
+@endnwdiag

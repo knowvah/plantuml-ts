@@ -11,7 +11,7 @@
 
 import type { NotePosition } from './ast.js';
 import type { Command } from './state-commands.js';
-import { currentScope, noteScopeId, nextCreationIndex } from './state-parse-state.js';
+import { currentScope, noteScopeId, nextCreationIndex, type ParseState } from './state-parse-state.js';
 import {
   NOTE_COLOR_CAPTURE,
   NOTE_STEREO,
@@ -30,6 +30,28 @@ function linkNotePosition(raw: string | undefined): NotePosition {
   return (raw?.toLowerCase() as NotePosition | undefined) ?? 'bottom';
 }
 
+/** Upstream's own wording, verbatim — `CommandFactoryNoteOnEntity.java:301`. */
+const NOTHING_TO_NOTE_TO = 'Nothing to note to';
+
+/**
+ * T9b (unknown-bucket-routing-repair): "no `of <State>` AND no
+ * `lastEntity`" guard shared in SPIRIT by rules 10/11 — both dispatch
+ * through the ONE upstream `CommandFactoryNoteOnEntity#executeInternal`
+ * (`command/note/CommandFactoryNoteOnEntity.java:293-303`), which resolves
+ * `cl1` to `diagram.getLastEntity()` when `idShort == null` and returns
+ * `CommandExecutionResult.error("Nothing to note to")` when THAT is also
+ * null — an EXECUTION-error refusal that aborts the whole state attempt
+ * (`command/PSystemCommandFactory.java:169-175`), not a silent no-op.
+ * Registered for state at `statediagram/StateDiagramFactory.java:97-100`.
+ * Rule 11 (below) inlines the equivalent check on its own ALREADY-resolved
+ * `target` local instead of calling this — TypeScript cannot narrow
+ * `target: string | undefined` to `string` for `addNote`'s call across a
+ * separate helper call, only across a same-scope `if`.
+ */
+function needsNothingToNoteTo(ps: ParseState, target: string | undefined): boolean {
+  return target === undefined && ps.lastEntity === null;
+}
+
 export const NOTE_COMMANDS: readonly Command[] = [
   // -------------------------------------------------------------------------
   // 10. Multi-line attached note opener: note <pos> [of <State>] [<<s>>]
@@ -42,6 +64,17 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //     at the closer (parser.ts's `noteFinalizePass`).
   //     mission G4 S12: `#color` is now CAPTURED (match[3]) -- the trailing
   //     brace-closer capture shifts from match[3] to match[4] accordingly.
+  //     T9b: shares upstream's `executeInternal` with rule 11 -- the SAME
+  //     "Nothing to note to" guard applies (`needsNothingToNoteTo`'s doc
+  //     above), but checked ONLY on pass 'two': pass 'one' still opens
+  //     `pendingNote` unconditionally so the body keeps being swallowed on
+  //     BOTH passes (`parser.ts#handlePendingNoteLine`) -- a pass-'one'
+  //     check would read `ps.lastEntity` before pass-'two'-only commands
+  //     (e.g. a transition's implicit state creation) earlier on this SAME
+  //     line position have run, which could refuse a source upstream's
+  //     real merged pass ('two', matching ParserPass.THREE) would accept.
+  //     Refusing on pass 'two' aborts the whole parse before that pass's
+  //     walk needs `pendingNote` again, so skipping the open there is safe.
   // @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnEntity.java
   // -------------------------------------------------------------------------
   {
@@ -56,9 +89,13 @@ export const NOTE_COMMANDS: readonly Command[] = [
       'i',
     ),
     passes: ['one', 'two'],
-    execute(ps, match) {
+    execute(ps, match, pass) {
       const position = match[1]!.toLowerCase() as NotePosition;
       const target = match[2];
+      if (pass === 'two' && needsNothingToNoteTo(ps, target)) {
+        ps.executionError = NOTHING_TO_NOTE_TO;
+        return;
+      }
       ps.pendingNote = {
         kind: 'attached',
         target: target ?? ps.lastEntity ?? undefined,
@@ -79,7 +116,8 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //     mission G4 S12: `#color` is now CAPTURED (match[3]) -- the trailing
   //     text capture shifts from match[3] to match[4] accordingly.
   // @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnEntity.java:92-116 (regex)
-  //      :293-301 (idShort==null -> getLastEntity(); null -> no-op here)
+  //      :293-303 (idShort==null -> getLastEntity(); null -> EXECUTION_ERROR,
+  //      T9b -- see `needsNothingToNoteTo`'s doc above)
   // -------------------------------------------------------------------------
   {
     pattern: new RegExp(
@@ -95,7 +133,10 @@ export const NOTE_COMMANDS: readonly Command[] = [
     passes: ['two'],
     execute(ps, match) {
       const target = match[2] ?? ps.lastEntity ?? undefined;
-      if (target === undefined) return; // "Nothing to note to" — silent no-op
+      if (target === undefined) {
+        ps.executionError = NOTHING_TO_NOTE_TO;
+        return;
+      }
       // mission G4 S10: burned GMN quark-name tick -- see
       // `StateNote.creationIndex`'s own doc comment.
       nextCreationIndex(ps);

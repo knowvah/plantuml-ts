@@ -1,0 +1,8 @@
+@startuml
+
+
+rectangle X
+rectangle Y
+X 0)-right- Y
+
+@enduml

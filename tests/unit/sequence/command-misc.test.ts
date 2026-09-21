@@ -33,8 +33,11 @@ function freshState(): ParseState {
     pendingRef: null,
     lastMessageFrom: null,
     lastMessageTo: null,
+    lastEventWithNoteLeft: null,
+    lastEventWithNoteRight: null,
     currentBox: null,
     boxCounter: 0,
+    executionError: undefined,
   };
 }
 

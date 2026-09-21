@@ -1,0 +1,7 @@
+@startuml
+namespace Namespace {
+    struct Foo {}
+    class Bar {}
+}
+Namespace.Foo *-- Namespace.Bar
+@enduml

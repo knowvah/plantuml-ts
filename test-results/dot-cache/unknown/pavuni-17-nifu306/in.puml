@@ -1,0 +1,9 @@
+@startnwdiag
+nwdiag {
+network 5012-VM6S.W {
+width = full
+   dev_A   [address = "dev_A" ]
+   dev_B [address = "dev_B" ]
+}
+}
+@endnwdiag

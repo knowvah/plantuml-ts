@@ -406,14 +406,14 @@ function resolveMinClassWidth(theme: Theme, kind: ClassifierKind): number {
  * The `ClassifierKind`s upstream's `LeafType#isLikeClass` covers
  * (LeafType.java:85-96: ANNOTATION, ABSTRACT_CLASS, CLASS, INTERFACE, ENUM,
  * ENTITY, PROTOCOL, STRUCT, EXCEPTION, METACLASS, STEREOTYPE, DATACLASS,
- * RECORD -- struct/exception/metaclass/stereotype/dataclass/record are still
- * unported (no fixture exercises them; see `ClassifierKind`'s `'protocol'`
- * member doc, class-classifier-ast.ts, T14 dispatch-by-parse-attempt), so
- * the set here is the kinds that exist -- PROTOCOL joined it as its own
- * distinct kind rather than folding into `class`, matching how `entity` and
- * `circle` are already handled: `badgeLetter`/`ClassifierKind` is the
- * natural home for "which keyword was declared", not a synthesized
- * stereotype decoration).
+ * RECORD -- T3 (unknown-bucket-routing-repair) ported the remaining six
+ * (`struct`/`exception`/`metaclass`/`stereotype`/`dataclass`/`record`,
+ * `class-classifier-ast.ts`'s own doc comment for the citation), so the set
+ * here is now the full upstream `LIKE_CLASS` EnumSet (`abel/LeafType.java
+ * :88-91`) -- PROTOCOL joined it as its own distinct kind rather than
+ * folding into `class`, matching how `entity` and `circle` are already
+ * handled: `badgeLetter`/`ClassifierKind` is the natural home for "which
+ * keyword was declared", not a synthesized stereotype decoration).
  * Gates `EntityImageClass`-only behavior: the `minClassWidth` /
  * `sameClassWidth` width floors (EntityImageClass.java:104-110) and the
  * groupInheritance `EntityImageProtected` wrap (GeneralImageBuilder
@@ -427,4 +427,10 @@ export const LIKE_CLASS_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierK
   'annotation',
   'entity',
   'protocol',
+  'struct',
+  'exception',
+  'metaclass',
+  'stereotype',
+  'dataclass',
+  'record',
 ]);

@@ -1,0 +1,16 @@
+@startnwdiag
+
+  vlan1 [shape = cloud];
+
+  network vlan1{
+    address = "192.168.168.0/24"
+
+    vlan1;
+    Switch4;
+  }
+
+  network {
+    Switch4 [address = "port1/04"];
+    Device1 [address = "192.168.168.1"];
+  }
+@endnwdiag

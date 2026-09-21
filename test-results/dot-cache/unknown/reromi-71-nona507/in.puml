@@ -1,0 +1,24 @@
+@startnwdiag
+nwdiag {
+  group {
+    color = "#FF7777";
+    web01;
+    db01;
+  }
+  group {
+    color = "#7777FF";
+    web02;
+    db02;
+  }
+  network dmz {
+      web01;
+      web02;
+  }
+  network internal {
+      web01;
+      web02;
+      db01 ;
+      db02 ;
+  }
+}
+@endnwdiag

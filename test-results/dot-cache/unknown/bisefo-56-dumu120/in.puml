@@ -1,0 +1,4 @@
+@startuml
+skinparam classArrowColor Red|Green
+A - B
+@enduml

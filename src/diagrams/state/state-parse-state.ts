@@ -187,6 +187,14 @@ export interface ParseState {
    */
   lastEntity: string | null;
   /**
+   * T9b: signals upstream's EXECUTION_ERROR refusal point
+   * (`command/PSystemCommandFactory.java:180-186`) — mirrors
+   * `description/parse-state.ts`'s field of the same name. `parser.ts`'s
+   * `dispatchCommand` reads it right after `execute` returns and converts
+   * it into a `ParseRefusal`; never left set past that point.
+   */
+  executionError: string | undefined;
+  /**
    * Diagram-wide registry of every State ever created, keyed by id, in
    * creation order — mirrors upstream `Plasma#stats`/`PEntry` (the by-name
    * index `quarkInContext`/`firstWithName`/`countByName` consult). Persistent

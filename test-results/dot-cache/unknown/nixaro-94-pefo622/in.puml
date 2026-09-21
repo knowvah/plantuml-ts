@@ -1,0 +1,18 @@
+@startfiles
+<style>
+  root {
+    BackgroundColor red
+    FontColor blue
+  }
+</style>
+
+/.github/
+/tests/v1/example_test.py
+/doc/dummy.doc
+<note>
+this is a note
+on two lines
+</note>
+/LICENSE
+
+@endfiles

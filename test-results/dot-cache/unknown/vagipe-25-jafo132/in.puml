@@ -1,0 +1,16 @@
+@startnwdiag
+
+nwdiag {
+	network line1 {
+		router;
+		app;	
+	}
+	
+	network line2 {
+		app;
+		db;
+	}
+
+}
+
+@endnwdiag

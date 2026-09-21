@@ -1,0 +1,35 @@
+{
+  "$comment": "Split from T5-descr-seq.json by the orchestrator before batch 2 (D4: one fragment, one writer): the class-seam fix-candidate rows of T5. Rows sorted by slug.",
+  "rows": [
+    {
+      "slug": "nicere-96-keje834",
+      "cohort": "class-container-body-silently-swallowed",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "class",
+      "command": "CommandPackageWithUSymbol.java",
+      "size": 45,
+      "reason": "action action { action action1 action action2 } / process process { process process1 process process2 } -- classPlugin.parse ACCEPTS with zero refusal, producing an empty 'action'-then-'process' classifier pair with the nested lines silently dropped. Root cause: 'action'/'process' are NOT in class-command-containers.ts's rule 5b' descriptive-container-opener keyword alternation (line 89-90: rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent -- missing action/process, though CONTAINER_KEYWORD in class-descriptive-leaf-command.ts:50-51, which IS CommandPackageWithUSymbol's own SYMBOL alternation verbatim per that file's own doc comment, DOES include them), so 'action action {' falls through to the DESCRIPTIVE_LEAF_COMMANDS fallback (class-descriptive-leaf-command.ts:91-127) instead. That fallback's isContainerOpener exemption (line 112) lets it claim the line WITHOUT calling openNamespaceBlock, so the nested 'action action1'/'action action2' lines are never re-dispatched through the per-line loop and never reach the allowmixing gate. Standalone, 'action action1' alone IS correctly refused (verified in isolation) -- the gate itself works; only container-body nesting bypasses it. This is the SAME bug class class-command-containers.ts's own doc comment (line ~92-99) already fixed once for 'component C1 $tag1 {' (jebovo-64-rasa849, sodoza-93-nanu557), left open for keywords absent from rule 5b's list. Fix: add action/process to rule 5b's keyword alternation so the container opens for real and its body re-enters the per-line/allowmixing gate (D3: the nested 'action action1' line then refuses, the whole class attempt aborts, and description -- verified to accept these keywords generically -- wins, matching the jar). See class-command-containers.ts:89-90 and class-descriptive-leaf-command.ts:50-51,112 for the exact keyword-list gap and exemption, mirroring CommandPackageWithUSymbol.java:76-77's SYMBOL alternation and PSystemCommandFactory.java:169-175's getCandidate()==null SYNTAX_ERROR default this port's silent-drop never reaches."
+    },
+    {
+      "slug": "vagipu-81-xuse929",
+      "cohort": "class-lollipop-auto-create-existing-side",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "class",
+      "command": "CommandLinkLollipop.java",
+      "size": 35,
+      "reason": "B1 -() A1 / B2 -() A1 / B2 -() A2 -- classPlugin.parse ACCEPTS, auto-creating B1/B2/A1/A2 as ordinary classifiers plus 3 lollipop circles. src/diagrams/class/class-lollipop.ts:196-201's own doc comment documents the mechanism verbatim: 'The existing side must already be a declared classifier upstream (CommandLinkLollipop.java errors \"No class X\" and drops the whole line otherwise) ... this parser ... leniently auto-creates the existing side instead of silently dropping the line.' Since B1 (the ENT_THEN_LOL existing side of line 1) was never declared before this line, upstream's CommandLinkLollipop refuses 'No class B1', the whole class-diagram build aborts, and the source falls through to description, which independently accepts the identical 3 lines (verified: descriptionPlugin.parse on the same lines returns no refusal, auto-creating B1/A1/B2/A2 as 'interface' nodes with links) -- matching the jar's DESCRIPTION rendering (D3). Fix: give applyLollipop an existence check on the 'existing' side (distinct from ensure's create-or-find) and thread a refusal back through class-commands.ts's execute() the way class-descriptive-leaf-command.ts's state.executionRefusal already does. CommandLinkLollipop.java:186 and :206 both return CommandExecutionResult.error(\"No class \" + quark.getName()) for an undeclared existing side; this port's applyLollipop (class-lollipop.ts:196-201) does not."
+    },
+    {
+      "slug": "xipane-40-dune740",
+      "cohort": "class-container-body-silently-swallowed",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "class",
+      "command": "CommandPackageWithUSymbol.java",
+      "size": 45,
+      "reason": "rectangle \"**h-entry**...\"\"<div class=\"h-entry\">..</div>\"\"\" as he #white { rectangle \"**p-name**...\"\"<h1 class=\"p-name\">..</h1>\"\"\" as pn #orchid } -- classPlugin.parse ACCEPTS, producing a single 'he' classifier with NO 'pn' child (verified in isolation: the outer line matches class-command-containers.ts rule 5b' fine -- 'rectangle' IS in its keyword list -- and opens a real namespace container via openNamespaceBlock, but the nested line's triple-quoted juxtaposed-string form ('...\"\"\"...' with no operator between adjacent quoted segments) does not match ANY class command's CODE/DISPLAY capture, including rule 9's DESCRIPTIVE_LEAF_COMMANDS -- so it is silently skipped by the per-line loop rather than refused with SYNTAX_ERROR the way upstream's getCandidate()==null would (PSystemCommandFactory.java:169-175)). Same general defect class as nicere-96-keje834 (an unmatched line inside an open container is silently dropped instead of refusing) but a DIFFERENT specific trigger (complex quoting vs. missing keyword) -- grouped under the same cohort/seam since the fix (making the per-line loop refuse on a truly-unmatched line, matching upstream's SYNTAX_ERROR default, rather than silently continuing) is the same shared mechanism. D3: once class correctly refuses on the un-parseable nested line, the whole class attempt aborts and description -- confirmed to already have working nested-container-leaf grammar via parseNameSection's triple-quote handling in isolation -- wins, matching the jar."
+    }
+  ]
+}

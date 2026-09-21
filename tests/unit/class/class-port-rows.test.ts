@@ -251,12 +251,37 @@ const ALL_KINDS_BY_NAME: Record<ClassifierKind, true> = {
   'assoc-circle': true,
   lollipop: true,
   protocol: true,
+  // T3 (unknown-bucket-routing-repair): the six remaining `LeafType
+  // #isLikeClass` members (`class-layout-helpers.ts#LIKE_CLASS_KINDS`'s own
+  // doc comment) -- same class-family row-port election as `class`/`entity`/
+  // `protocol`.
+  struct: true,
+  exception: true,
+  metaclass: true,
+  stereotype: true,
+  dataclass: true,
+  record: true,
 };
 
 describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () => {
   it('accepts exactly the class family plus object', () => {
     const rowPort = (Object.keys(ALL_KINDS_BY_NAME) as ClassifierKind[]).filter(isRowPortKind).sort();
-    expect(rowPort).toEqual(['abstract', 'annotation', 'class', 'entity', 'enum', 'interface', 'object', 'protocol']);
+    expect(rowPort).toEqual([
+      'abstract',
+      'annotation',
+      'class',
+      'dataclass',
+      'entity',
+      'enum',
+      'exception',
+      'interface',
+      'metaclass',
+      'object',
+      'protocol',
+      'record',
+      'stereotype',
+      'struct',
+    ]);
   });
 
   it('excludes map and json, whose bands are mapPortRows own concern (ADR-4)', () => {

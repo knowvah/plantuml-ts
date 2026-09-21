@@ -1,0 +1,65 @@
+{
+  "$comment": "Split from T5-descr-seq.json by the orchestrator before batch 2 (D4: one fragment, one writer): the sequence-seam fix-candidate rows of T5. Rows sorted by slug.",
+  "rows": [
+    {
+      "slug": "covipu-77-jimo313",
+      "cohort": "sequence-note-no-participant-registration",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "FactorySequenceNoteCommand.java",
+      "size": 15,
+      "reason": "note over IT, FKM ... end note is the ONLY content; sequencePlugin.parse refuses kind=incomplete ('Sequence diagram has no participants', src/diagrams/sequence/parser.ts:306, mirroring SequenceDiagram.java:591 participantsList.size()==0) because src/diagrams/sequence/command-note-factory.ts's noteCommand never registers the note's own referenced entities as participants. Upstream's FactorySequenceNoteCommand calls diagram.getOrCreateParticipant(location, ...) for every name in the over-list (FactorySequenceNoteCommand.java:224), which populates participantsList and satisfies isIncomplete. Fix: call the sequence engine's ensureParticipant for each name in noteCommand's participants array (both the single-line and multi-line/pendingNote paths) -- self-contained, no new model."
+    },
+    {
+      "slug": "jogaji-49-zaco571",
+      "cohort": "sequence-note-no-participant-registration",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "FactorySequenceNoteCommand.java",
+      "size": 15,
+      "reason": "note over Locus,Cassandra: [[{...}]]test it (single-line form) is the ONLY content; same mechanism as covipu-77-jimo313 -- src/diagrams/sequence/command-note-factory.ts's noteCommand never registers Locus/Cassandra as participants, so sequencePlugin.parse refuses kind=incomplete (src/diagrams/sequence/parser.ts:306) instead of matching upstream's FactorySequenceNoteCommand.java:224 getOrCreateParticipant call. Re-measured independently: consumed=1, refusal at the note line itself (single-line form emits immediately, no multi-line accumulation)."
+    },
+    {
+      "slug": "katoke-97-puri404",
+      "cohort": "sequence-note-no-participant-registration",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "FactorySequenceNoteCommand.java",
+      "size": 15,
+      "reason": "note over Locus,Cassandra [[{...}]] : test it (single-line form, long bracketed body) is the ONLY content; same mechanism as covipu-77-jimo313/jogaji-49-zaco571 -- noteCommand never registers Locus/Cassandra as participants (src/diagrams/sequence/command-note-factory.ts), so sequencePlugin.parse refuses kind=incomplete (src/diagrams/sequence/parser.ts:306) instead of matching FactorySequenceNoteCommand.java:224's getOrCreateParticipant. Re-measured independently: consumed=1."
+    },
+    {
+      "slug": "pacope-41-pufu938",
+      "cohort": "sequence-participant-stereotype-position-overclaim",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "CommandParticipantA3.java",
+      "size": 20,
+      "reason": "database \"DB 2\" <<&file>> as Db2 (a QUOTED display, a <<...>> stereotype, THEN 'as alias') is accepted by src/diagrams/sequence/sequence-parse-helpers.ts:318 parseParticipantDeclaration, but no upstream CommandParticipant subclass matches that token order: CommandParticipantA3.java:51-64 is the only subclass with a STEREOTYPE slot at all, and its grammar is TYPE FULL(unquoted, [%pLN_.@]+) 'as' CODE STEREO? -- the stereotype sits AFTER 'as CODE', and FULL is never a quoted string. Verified against the real jar (scripts/oracle-render.sh): 'database Db2 <<plain>>' (unquoted, no alias) renders SEQUENCE; 'database \"DB 2\" <<plain>> as Db2' (quoted display + mid-position stereotype) renders DESCRIPTION for every stereotype form tried (plain text, icon glyph, sprite name) -- confirming the refusal is the token ORDERING, not stereotype content. This port's parseParticipantDeclaration is a single shared parser that does not enforce upstream's per-subclass token-order restriction. Fix: narrow parseParticipantDeclaration (or gate the stereotype capture) to refuse a <<...>> token positioned between a quoted display and 'as alias'. Sizing/exact regex split needs one more read of CommandParticipantA/A2/A4 before implementation -- flagged for the batch-2 executor, not resolved here."
+    },
+    {
+      "slug": "teoz-ng-001-17",
+      "cohort": "sequence-bare-note-position-gap",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "FactorySequenceNoteCommand.java",
+      "size": 25,
+      "reason": "Mechanism CONFIRMED this pass (T11, ubrr), not fixed -- narrow single-command changes are not safe here. `note left` (bare, no 'of', no participant token) DOES match this port's own `noteOnArrowCommand` (the FactorySequenceNoteOnArrowCommand port, command-note-factory.ts) and its multi-line regex correctly requires no participant at all (mirrors `FactorySequenceNoteOnArrowCommand.java:77-88`'s getRegexConcatMultiLine: STYLE, POSITION(right|left|bottom|top), no PARTICIPANT leaf exists in that grammar at all -- the earlier reading citing `:76-90`'s PARTICIPANT requirement was the WRONG factory, FactorySequenceNoteCommand's, not this one). The real defect: this port's noteOnArrowCommand.execute returns EARLY, without opening `state.pendingNote`, when `state.lastMessageFrom`/`lastMessageTo` are both null (command-note-factory.ts, noteOnArrowCommand) -- collapsing two upstream-separate concerns (does the multi-line BLOCK get consumed at all vs. does a Note get attached to an event) into one early-return. Upstream's own executeInternal ALSO no-ops when `diagram.getLastEventWithNote()==null` (FactorySequenceNoteOnArrowCommand.java:209-213, EventWithNote), but the multi-line BLOCK (header + body + 'end note') is already consumed as one unit by `CommandMultilines2`'s own line-accumulation BEFORE executeNow ever runs -- so upstream never reaches a per-line refusal on the body text the way this port's handlePendingNote/dispatchCommand fallback does. And upstream's `getLastEventWithNote()` (SequenceDiagram.java:154-158) is NOT restricted to messages -- it walks `events` backward for the last entry implementing `EventWithNote`, which THREE classes do: AbstractMessage.java (arrows), Reference.java (the `ref over A,B ... end ref` block this fixture's `opt`/`ref` frame builds), and GroupingLeaf.java (opt/alt/loop open AND close markers). This fixture's `note left` sits after `opt test / ref over A,B / SomeSequence / end ref / end` with NO message anywhere -- the jar attaches the note to whichever of the ref/grouping events is last, not to a null message. Fixing this port's equivalent needs (a) decoupling multi-line-block consumption from the attach-to-an-event check (so an unattachable note still consumes its block and lets parsing continue) and (b) a generalised 'last-note-capable-event' tracked across frame-open/frame-close/reference commands, not just `lastMessageFrom`/`lastMessageTo` -- both changes reach into command-grouping.ts/command-misc.ts, outside a single-command narrow fix, on this mission's most-ratcheted engine. Deferred as a follow-on rather than risked here."
+    },
+    {
+      "slug": "xurozi-64-zaci349",
+      "cohort": "sequence-note-no-participant-registration",
+      "disposition": "fixed",
+      "task": "T5",
+      "seam": "sequence",
+      "command": "FactorySequenceNoteCommand.java",
+      "size": 15,
+      "reason": "note over Bob / ~//italic//~ / ~**bold**~ / end note (multi-line form, single participant Bob) is the ONLY content; same mechanism as covipu-77-jimo313 -- noteCommand never registers Bob as a participant (src/diagrams/sequence/command-note-factory.ts), so sequencePlugin.parse refuses kind=incomplete (src/diagrams/sequence/parser.ts:306) instead of matching FactorySequenceNoteCommand.java:224's getOrCreateParticipant. Re-measured independently: consumed=4 (full multi-line note body accumulated, refusal only at end-of-block isIncomplete check)."
+    }
+  ]
+}

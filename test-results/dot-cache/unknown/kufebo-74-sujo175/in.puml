@@ -1,0 +1,11 @@
+@startnwdiag
+nwdiag {
+  network network2 {
+    address = "192.0.2.0/16"
+    description = "network-1"
+    node1 [address="192.0.2.4", description = "node-1"];
+    node2 [address="192.0.2.2"];
+    node3 [address="192.0.2.3"];
+  }
+}
+@endnwdiag

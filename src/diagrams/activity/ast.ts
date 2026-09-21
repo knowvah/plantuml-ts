@@ -54,6 +54,26 @@ export interface ActivityArrowLabel {
   swimlane?: string;
 }
 
+/**
+ * `backward:LABEL;` inside a `repeat`/`repeatwhile` body -- names the
+ * activity drawn on the loop's own RETURN edge, not a sequential body
+ * step. Base form only (label + optional trailing stereogroup, both
+ * ignored downstream): the incoming/outgoing arrow-color decoration and
+ * the box-style/stereotype the label would carry on the return edge are
+ * out of scope, matching `GtileRepeat`'s own class doc ("`backward:`
+ * bodies are out of scope ... filed as `activity-loop-backward`").
+ * `tileNode` (`layout/tile-layout.ts`) drops this node the same way it
+ * drops `arrow-label` -- parsed, not yet drawn.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:73-170
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:135
+ *   -- registration.
+ */
+export interface ActivityBackward {
+  kind: 'backward';
+  label: string;
+  swimlane?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Composite node types
 // ---------------------------------------------------------------------------
@@ -163,6 +183,59 @@ export interface ActivityNote {
   swimlane?: string;
 }
 
+/**
+ * One `case (LABEL)` branch of an enclosing `switch`. `label` is omitted
+ * for an unlabelled branch (`case ()`, upstream's empty-`TEST` arm --
+ * `CommandCase.java:81-84`, `test.length() == 0`), never an empty string.
+ */
+export interface ActivitySwitchCase {
+  label?: string;
+  body: ActivityNode[];
+}
+
+/**
+ * `switch (test) ... case (v1) ... case (v2) ... endswitch` (mission
+ * ubrr-T10 M2): structurally the N-way branch-and-merge
+ * `CommandSwitch`/`CommandCase`/`CommandEndSwitch` build together, one
+ * `startSwitch`/`switchCase`/`endSwitch` sequence per `switch`.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwitch.java:60-70
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCase.java:56-63
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandEndSwitch.java:58-63
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:129-131
+ *   -- registration.
+ */
+export interface ActivitySwitch {
+  kind: 'switch';
+  condition: string;
+  cases: ActivitySwitchCase[];
+  swimlane?: string;
+}
+
+/**
+ * `partition|package|rectangle|card|group "NAME" { ... }` (bracketed) or
+ * the bracket-less/legacy `Group NAME ... End group` spelling (mission
+ * ubrr-T10 M6): all five type keywords are ONE command upstream-side, one
+ * `startGroup`/`closeGroup` pair, differing only in the drawn `USymbol`.
+ * `hasBracket === false` is upstream's OWN deprecation path -- it still
+ * builds the group, just with `diagram.addWarning(...)`
+ * ("You should use a bracket ({) when defining your container '<type>'
+ * <name>") -- rendering that banner is NOT reproduced here (see
+ * `tile-layout.ts#tileGroup`'s own doc for the divergence).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:64-172
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCloseGroup3.java:56-63
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCloseGroupLegacy3.java:57-73
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:110-113
+ *   -- registration.
+ */
+export interface ActivityGroup {
+  kind: 'group';
+  groupType: 'partition' | 'package' | 'rectangle' | 'card' | 'group';
+  title: string;
+  hasBracket: boolean;
+  body: ActivityNode[];
+  swimlane?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Union
 // ---------------------------------------------------------------------------
@@ -176,12 +249,15 @@ export type ActivityNode =
   | ActivityDetach
   | ActivityBreak
   | ActivityArrowLabel
+  | ActivityBackward
   | ActivityIf
   | ActivityWhile
   | ActivityRepeat
   | ActivityFork
   | ActivitySplit
-  | ActivityNote;
+  | ActivityNote
+  | ActivitySwitch
+  | ActivityGroup;
 
 // ---------------------------------------------------------------------------
 // Root AST

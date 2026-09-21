@@ -11,6 +11,31 @@ import { parseTagTokens } from './class-declaration-parser.js';
 import { addFreestandingNote, addNote, NOTE_STEREO_CAPTURE, NOTE_COLOR, NOTE_URL, NOTE_TARGET } from './class-notes.js';
 import { parseUrlBracket } from './class-url.js';
 import type { Command } from './class-command-types.js';
+import { refuse } from '../../core/parse-refusal.js';
+import type { ParseState } from './class-parse-state.js';
+
+/** Upstream's own wording, verbatim — `CommandFactoryNoteOnEntity.java:301`. */
+const NOTHING_TO_NOTE_TO = 'Nothing to note to';
+
+/**
+ * T2 M8 (unknown-bucket-routing-repair): upstream's matching command,
+ * `CommandFactoryNoteOnEntity#executeArg0`
+ * (`CommandFactoryNoteOnEntity.java:293-303`), does the SAME `of`-then-
+ * `lastEntity` fallback the 6b single-line note command below performs, but
+ * CHECKS the result -- when there is no `of <Entity>` AND no last entity,
+ * it returns `CommandExecutionResult.error("Nothing to note to")`, an
+ * EXECUTION-error refusal that aborts the whole class attempt, not a
+ * silent no-op that leaves an empty diagram.
+ */
+function refuseNothingToNoteTo(state: ParseState): void {
+  state.executionRefusal = refuse(
+    'execution',
+    state.currentLine ?? 0,
+    state.currentLine ?? 0,
+    NOTHING_TO_NOTE_TO,
+    0,
+  );
+}
 
 /** A run of `$tag` tokens — upstream `Stereotag.pattern()` (the TAGS/TAGS1/
  *  TAGS2 note-command slots). Non-capturing form = acceptance only (attached
@@ -18,6 +43,15 @@ import type { Command } from './class-command-types.js';
  *  capturing form feeds `parseTagTokens` for freestanding notes. */
 const NOTE_TAGS = '(?:\\s+\\$[^\\s{}"\'<>$]+)*';
 const NOTE_TAGS_CAPTURE = '((?:\\s+\\$[^\\s{}"\'<>$]+)*)';
+
+/**
+ * T4 Mechanism D (unknown-bucket-routing-repair): a freestanding note's own
+ * `as <alias>` CODE -- upstream's `CommandFactoryNote` allows a dot in the
+ * name (a namespaced note id, e.g. `note as X.n`): `CODE = "([%pLN_.]+)"`
+ * (`command/note/CommandFactoryNote.java:83,101`, shared by BOTH the
+ * single-line and multi-line variants). The previous `\w+` excluded `.`.
+ */
+const FREESTANDING_NOTE_CODE = '([\\w.]+|"[^"]+")';
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -48,6 +82,19 @@ export const NOTE_COMMANDS: readonly Command[] = [
       'i',
     ),
     execute(state, match) {
+      // T2 M8 (unknown-bucket-routing-repair): `executeInternal`
+      // (`CommandFactoryNoteOnEntity.java:293-303`) is SHARED by the
+      // single-line (6b) and multi-line (this) forms -- the SAME "Nothing
+      // to note to" check applies here. Checked at the OPENER line rather
+      // than at `end note`/`}` (where upstream's shared executeInternal
+      // actually runs, since it needs the full accumulated body text) --
+      // this class attempt aborts either way; the exact refusal line
+      // number is not otherwise observable through the routing/refusal
+      // gates (D3), and no assigned fixture exercises this multi-line form.
+      if (match[2] === undefined && state.lastEntity === null) {
+        refuseNothingToNoteTo(state);
+        return;
+      }
       // G2 N70: NOTE_URL is now capturing (group 5) -- the brace-closer
       // shifted from match[5] to match[6]. See NOTE_URL's own doc comment.
       const url = match[5] !== undefined ? parseUrlBracket(match[5]) : undefined;
@@ -88,7 +135,10 @@ export const NOTE_COMMANDS: readonly Command[] = [
     ),
     execute(state, match) {
       const target = match[2] ?? state.lastEntity ?? undefined;
-      if (target === undefined) return; // "Nothing to note to" — silent no-op
+      if (target === undefined) {
+        refuseNothingToNoteTo(state);
+        return;
+      }
       // G2 N37: NOTE_STEREO_CAPTURE is now capturing (group 3) -- COLOR
       // shifted from match[3] to match[4].
       // G2 N70: NOTE_URL is now capturing (group 5) -- the text group shifted
@@ -121,7 +171,7 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //     itself lives in class-notes.ts and carries no tags field).
   {
     pattern: new RegExp(
-      '^note\\s+as\\s+(\\w+|"[^"]+")' + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
+      '^note\\s+as\\s+' + FREESTANDING_NOTE_CODE + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
       'i',
     ),
     execute(state, match) {
@@ -148,7 +198,7 @@ export const NOTE_COMMANDS: readonly Command[] = [
   //      (executeInternal), :210 (addTags)
   {
     pattern: new RegExp(
-      '^note\\s+"([^"]+)"\\s+as\\s+(\\w+|"[^"]+")' + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
+      '^note\\s+"([^"]+)"\\s+as\\s+' + FREESTANDING_NOTE_CODE + NOTE_TAGS_CAPTURE + NOTE_STEREO_CAPTURE + NOTE_COLOR + '\\s*$',
       'i',
     ),
     execute(state, match) {

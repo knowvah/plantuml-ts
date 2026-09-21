@@ -1,0 +1,10 @@
+@startuml
+skinparam rectangle {
+    shadowing false
+}
+skinparam rectangle<<webApp>> {
+    BackgroundColor #438DD5
+    Shadowing true
+}
+rectangle "Web Application" <<webApp>> as web_app
+@enduml

@@ -268,6 +268,13 @@ export function layoutSequence(
       processArrowLabelNode(node, state);
       continue;
     }
+    // `backward` (mission ubrr-T10 M3): dead-code path (the live sizer is
+    // `layout/tile-layout.ts`, see `.agent-notes/activity-layout-old-is-
+    // dead-code.md`) -- skipped the same way `arrow-label` is, purely so
+    // this file keeps type-checking.
+    if (node.kind === 'backward') {
+      continue;
+    }
     if (node.kind === 'note') {
       processNoteNode(node, centerX, state, ctx);
       continue;
@@ -398,6 +405,15 @@ function layoutLeafNode(node: LeafNode, startY: number, centerX: number, ctx: La
  * the first/last node ids for edge connection purposes.
  */
 function layoutNode(node: ActivityNode, startY: number, centerX: number, ctx: LayoutCtx): BranchResultInternal {
+  // `backward`/`switch`/`group` (mission ubrr-T10 M3/M2/M6): dead-code
+  // path (the live sizer is `layout/tile-layout.ts`, `.agent-notes/
+  // activity-layout-old-is-dead-code.md`) -- excluded from `LeafNode`/
+  // `CompositeNode` entirely (kept `layoutLeafNode`'s own switch, already
+  // at the complexity hook's CCN cap, unchanged) and stubbed the same way
+  // `arrow-label` is.
+  if (node.kind === 'backward' || node.kind === 'switch' || node.kind === 'group') {
+    return layoutArrowLabelStub(startY);
+  }
   if (isCompositeNode(node)) {
     return layoutCompositeNode(node, startY, centerX, ctx);
   }

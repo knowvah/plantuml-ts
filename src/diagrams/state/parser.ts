@@ -124,21 +124,40 @@ function handlePendingJsonLine(ps: ParseState, line: string, pass: Pass): boolea
 }
 
 /** Dispatch a line to the first matching command, then apply it only if
- *  eligible for the current pass (see `Command.passes`'s doc). Returns
- *  whether ANY command's pattern matched (regardless of pass eligibility) --
- *  callers use this to decide whether to fall back to the annotation matcher
- *  (see `runPass`'s doc: the state-specific `CODE : text` description-line
- *  rule, COMMANDS' rule 15, must win over a same-shaped `header: text`/
- *  `title: text` line, matching upstream's real per-factory registration
- *  order -- CommandAddField before CommonCommands.addCommonCommands1,
- *  StateDiagramFactory.java:94,118). */
-function dispatchCommand(ps: ParseState, line: string, pass: Pass): boolean {
+ *  eligible for the current pass (see `Command.passes`'s doc). A `pattern`
+ *  match is only a REAL match if the command has no `confirm` or `confirm`
+ *  also returns true (T9: `Command.confirm`'s doc -- pass-independent,
+ *  mirrors upstream's own anchored `getCandidate` search running every
+ *  pass, strictly before `isEligibleFor`); a confirmed-false match keeps
+ *  searching later commands instead of being treated as consumed. Returns
+ *  `false` when NO command really matched (callers fall back to the
+ *  annotation matcher -- see `runPass`'s doc: the state-specific
+ *  `CODE : text` description-line rule, COMMANDS' rule 15, must win over a
+ *  same-shaped `header: text`/`title: text` line, matching upstream's real
+ *  per-factory registration order -- CommandAddField before
+ *  CommonCommands.addCommonCommands1, StateDiagramFactory.java:94,118);
+ *  `true` on an ordinary consumed match; or a {@link ParseRefusal} (T9b)
+ *  when `execute` set `ps.executionError` -- mirrors upstream's
+ *  EXECUTION_ERROR refusal point (`command/PSystemCommandFactory.java:
+ *  180-186`), consulted immediately after `execute` returns, same as the
+ *  syntax-refusal check `fallbackOrRefuse` performs on no-match. `origLine`
+ *  is the line's real (untrimmed-array) index, for the refusal's `line`/
+ *  `consumed` fields -- same convention `fallbackOrRefuse`'s `offending`
+ *  uses. */
+function dispatchCommand(ps: ParseState, line: string, pass: Pass, origLine: number): boolean | ParseRefusal {
   for (const cmd of COMMANDS) {
     const match = cmd.pattern.exec(line);
-    if (match !== null) {
-      if (cmd.passes.includes(pass)) cmd.execute(ps, match, pass);
-      return true;
+    if (match === null) continue;
+    if (cmd.confirm !== undefined && !cmd.confirm(match)) continue;
+    if (cmd.passes.includes(pass)) {
+      cmd.execute(ps, match, pass);
+      if (ps.executionError !== undefined) {
+        const message = ps.executionError;
+        ps.executionError = undefined;
+        return refuse('execution', origLine, origLine + 1, message);
+      }
     }
+    return true;
   }
   return false;
 }
@@ -264,7 +283,9 @@ function runPass(ps: ParseState, block: UmlSource, pass: Pass): ParseRefusal | n
     const line = lines[i]!;
     if (handlePendingNoteLine(ps, line, pass)) continue;
     if (handlePendingJsonLine(ps, line, pass)) continue;
-    if (dispatchCommand(ps, line, pass)) continue;
+    const dispatched = dispatchCommand(ps, line, pass, origIndex[i]!);
+    if (dispatched === true) continue;
+    if (dispatched !== false) return dispatched;
     const result = fallbackOrRefuse(lines, origIndex, i, annotationTarget, spriteTarget);
     if (typeof result !== 'number') return result;
     i += result;
@@ -300,6 +321,7 @@ function initParseState(): { ast: StateDiagramAST; ps: ParseState } {
     pendingNote: null,
     pendingJson: null,
     lastEntity: null,
+    executionError: undefined,
     globalByName: new Map(),
     scopeByOwner: new Map(),
     linkConnections: [],

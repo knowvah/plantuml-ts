@@ -141,3 +141,24 @@ describe('multi-line open form captures its stereotype (G9-E1)', () => {
     expect(nodeById(ast, 'c')?.stereotype).toEqual(['a', 'b']);
   });
 });
+
+// T8 (unknown-bucket-routing-repair, T3.md M6): an embedded `{{ … }}` region
+// inside a TYPE1 element body is swallowed WHOLE by
+// `PSystemCommandFactory#addOneSingleLineManageEmbedded2`
+// (`PSystemCommandFactory.java:267-303`), nesting-aware via
+// `EmbeddedDiagram#getEmbeddedType`/`EMBEDDED_END`
+// (`EmbeddedDiagram.java:78,257`) -- none of its lines, including a NESTED
+// `rectangle … [ … ]`'s own closing `]`, are ever tested against the outer
+// element block's END regex. Reproduces rozugu-82-pera583's shape.
+describe('a nested `{{ … }}` embedded region inside an element body (M6)', () => {
+  it("does not close on the embedded region's own interior `]`", () => {
+    const ast = parseRaw(
+      ['rectangle A [', '{{', 'rectangle FailCase [', 'inner text', ']', '}}', ']', 'rectangle OkCase [ outer text ]'].join(
+        '\n',
+      ),
+    );
+    expect(nodeById(ast, 'A')?.display).toBe('{{\nrectangle FailCase [\ninner text\n]\n}}');
+    expect(ast.nodes.map((n) => n.id)).toEqual(['A', 'OkCase']);
+    expect(nodeById(ast, 'FailCase')).toBeUndefined();
+  });
+});

@@ -1,0 +1,22 @@
+@startnwdiag
+nwdiag {
+
+    network aa {
+        router;
+        app;
+    }
+
+
+    network bb {
+    	app;
+        db;
+    }
+    
+    group {
+      color = "pink";
+      app;
+      db;
+    }
+
+}
+@endnwdiag

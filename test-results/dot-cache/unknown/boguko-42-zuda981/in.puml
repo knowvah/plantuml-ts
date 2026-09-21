@@ -1,0 +1,12 @@
+@startuml
+!procedure $element($alias, $description="", $label="", $technology="", $size=12, $color="green")
+rectangle $alias as "
+<color:$color><<$alias>></color>
+==$label==
+//<size:$size>[$technology]</size>//
+
+  $description"
+!endprocedure
+
+$element("myalias", "This description is" + %newline() + " on several lines", $size=10, $technology="Java")
+@enduml

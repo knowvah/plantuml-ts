@@ -1,0 +1,26 @@
+digraph unix {
+nodesep=0.486111;
+ranksep=0.833333;
+remincross=true;
+searchsize=500;
+splines=ortho;forcelabels=true;
+rankdir=LR;
+subgraph cluster6p0 {label="";subgraph cluster6 {style=solid;color="#000006";labeljust="c";label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="63" HEIGHT="9"><TR><TD></TD></TR></TABLE>>;
+subgraph cluster6p1 {label="";
+sh0010 [shape=rect,label="",width=1.310590,height=1.743590,color="#00000A"];
+sh0011 [shape=rect,label="",width=1.310590,height=1.743590,color="#00000B"];
+sh0012 [shape=rect,label="",width=1.310590,height=1.743590,color="#00000C"];
+sh0013 [shape=rect,label="",width=3.478632,height=2.057692,color="#00000D"];
+sh0014 [shape=rect,label="",width=3.478632,height=2.057692,color="#00000E"];
+sh0015 [shape=rect,label="",width=3.478632,height=2.057692,color="#00000F"];
+sh0016 [shape=rect,label="",width=2.626068,height=1.414530,color="#000010"];
+
+}}}
+sh0010->sh0013[arrowtail=none,arrowhead=none,minlen=1,color="#000011"];
+sh0013->sh0016[arrowtail=none,arrowhead=none,minlen=1,color="#000015"];
+sh0016->sh0011[arrowtail=none,arrowhead=none,minlen=1,color="#000019"];
+sh0016->sh0012[arrowtail=none,arrowhead=none,minlen=1,color="#00001D"];
+sh0011->sh0014[arrowtail=none,arrowhead=none,minlen=1,color="#000021"];
+sh0012->sh0015[arrowtail=none,arrowhead=none,minlen=1,color="#000025"];
+
+}

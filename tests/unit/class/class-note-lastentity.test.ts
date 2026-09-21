@@ -16,15 +16,25 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-function parse(source: string): ReturnType<typeof parseClass> {
-  const lines = source
+function linesOf(source: string): string[] {
+  return source
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
-  const block: UmlSource = { lines, type: 'class' };
+}
+
+function parse(source: string): ReturnType<typeof parseClass> {
+  const block: UmlSource = { lines: linesOf(source), type: 'class' };
   return parseClass(block);
+}
+
+function refusalOf(source: string) {
+  const block: UmlSource = { lines: linesOf(source), type: 'class' };
+  return parseRefusalOf(parseClassRaw(block));
 }
 
 describe('note on entity — optional `of` clause resolves to lastEntity', () => {
@@ -45,16 +55,20 @@ describe('note on entity — optional `of` clause resolves to lastEntity', () =>
     });
   });
 
-  it('(c) a note with no prior entity is dropped gracefully — no throw, no note', () => {
-    expect(() => parse('note bottom: hi')).not.toThrow();
-    const ast = parse('note bottom: hi');
-    expect(ast.notes).toEqual([]);
-  });
+  it(
+    '(c) T2 M8 (unknown-bucket-routing-repair): a note with no prior entity ' +
+      'refuses "Nothing to note to" (CommandFactoryNoteOnEntity.java:293-303)',
+    () => {
+      const refusal = refusalOf('note bottom: hi');
+      expect(refusal?.kind).toBe('execution');
+      expect(refusal?.message).toBe('Nothing to note to');
+    },
+  );
 
-  it('(c-multi) a multi-line note with no prior entity is dropped gracefully', () => {
-    expect(() => parse('note left\nbody\nend note')).not.toThrow();
-    const ast = parse('note left\nbody\nend note');
-    expect(ast.notes).toEqual([]);
+  it('(c-multi) a multi-line note with no prior entity also refuses', () => {
+    const refusal = refusalOf('note left\nbody\nend note');
+    expect(refusal?.kind).toBe('execution');
+    expect(refusal?.message).toBe('Nothing to note to');
   });
 
   it('(d) two classes then a bare note attaches to the SECOND (most recently created)', () => {

@@ -1,0 +1,5 @@
+@startuml
+'skinparam svek true
+(*) ..> "Activity 1"
+..> "ac2"
+@enduml

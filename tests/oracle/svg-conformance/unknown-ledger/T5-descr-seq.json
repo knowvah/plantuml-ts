@@ -1,0 +1,83 @@
+{
+  "$comment": "T5 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T5): one row per slug in cohorts/T5.tsv -- the description-, sequence- and state-jar cohort (18). One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0) and by the orchestrator's batch-2 seam assignment. Batch-2 split: 6 sequence rows moved to T5-sequence.json; 3 class rows moved to T5-class.json.",
+  "rows": [
+    {
+      "slug": "ceboti-36-tuza211",
+      "cohort": "description-archimate-multiline-gap",
+      "disposition": "known-gap",
+      "task": "T5",
+      "reason": "archimate #Technology VPN <<technology-device>> [ ... ] is CommandArchimateMultilines's bracket-body form; this port's tryArchimate only implements CommandArchimate's single-line form (src/diagrams/description/parser.ts:305-309, whose own doc comment records CommandArchimateMultilines.java:69 and CommandArchimatePackage.java:63 as 'filed, not implemented -- see plans/s1l-leaf-sizing/ledger.md'). Every candidate refuses (class execution-errors on the bracket body at allowmixing, description syntax-errors on the same line description does not have a command for), so the source errors here on a source the jar rendered as DESCRIPTION."
+    },
+    {
+      "slug": "dunila-61-licu078",
+      "cohort": "description-title-leading-whitespace",
+      "disposition": "fixed",
+      "task": "T8",
+      "seam": "description",
+      "command": "CommandTitle.java",
+      "size": 10,
+      "reason": "Fixed (T8): description's dispatchCommand now passes a trimmed copy of line i to matchAnnotationCommand (trimLineForAnnotationMatch, src/diagrams/description/annotation-line-trim.ts), mirroring state/parser.ts:147-149's precedent, while leaving the rest of the raw lines array untouched so a matched MULTILINE block's body keeps its indentation. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
+    },
+    {
+      "slug": "gacoxo-93-guti295",
+      "cohort": "description-embedded-diagram-gap",
+      "disposition": "known-gap",
+      "task": "T5",
+      "reason": "cloud \"Chat Service + DB\" as Char { [Service] database [PSQL] as DB { json JSON { \"fruit\":\"apple\", ... } } } embeds a JSON sub-diagram inside a descriptive container -- upstream's EmbeddedDiagram/nested-diagram mechanism. This port's own EntityImageDescriptionDelegates.ts:125 already documents the gap verbatim, citing upstream's EmbeddedDiagram.java:75 nested-renderer construct: 'embedded diagrams ({{ ... }}) inside a description label are not supported -- this port has no caller that constructs a nested-diagram renderer for description text'. Every candidate refuses on the nested json/color-array syntax (highest score: description, consumed=4), so the source errors here on a source the jar rendered as DESCRIPTION."
+    },
+    {
+      "slug": "gipeda-98-bigo389",
+      "cohort": "description-title-leading-whitespace",
+      "disposition": "fixed",
+      "task": "T8",
+      "seam": "description",
+      "command": "CommandTitle.java",
+      "size": 10,
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
+    },
+    {
+      "slug": "liripi-72-kefa167",
+      "cohort": "description-map-command-gap",
+      "disposition": "known-gap",
+      "task": "T5",
+      "reason": "Package \"Attribute Mapper\" ... { portin ... portout ... component \"Mapper engine\" ... { map \"Mappings\" as maps #acffa0 { Rule 1 => r'1 = 2 * r'2 ... } } } uses upstream's map/'=>' construct (objectdiagram/command/CommandCreateMap.java:76, whose own executeArg rejects a body lacking 'key => value' rows at CommandCreateMap.java:174), a distinct Command this port has no AST node, parser rule, or renderer for anywhere in src/diagrams/description or src/diagrams/class ('map' is absent from both KEYWORD_TO_SYMBOL and CommandCreateElementFull.ALL_TYPES -- descriptive-keywords.ts). A whole unported command, not a small grammar gap (D2 pin criterion). Every candidate refuses (highest score: description, consumed=5, failing on the 'Rule 3 => ...' row), so the source errors here on a source the jar rendered as DESCRIPTION."
+    },
+    {
+      "slug": "toxeto-79-kile546",
+      "cohort": "description-title-leading-whitespace",
+      "disposition": "fixed",
+      "task": "T8",
+      "seam": "description",
+      "command": "CommandTitle.java",
+      "size": 10,
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
+    },
+    {
+      "slug": "xapuji-91-dagu145",
+      "cohort": "description-title-leading-whitespace",
+      "disposition": "fixed",
+      "task": "T8",
+      "seam": "description",
+      "command": "CommandTitle.java",
+      "size": 10,
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
+    },
+    {
+      "slug": "zetedu-83-bugu867",
+      "cohort": "description-title-leading-whitespace",
+      "disposition": "fixed",
+      "task": "T8",
+      "seam": "description",
+      "command": "CommandTitle.java",
+      "size": 10,
+      "reason": "Fixed (T8), same mechanism/fix as dunila-61-licu078. Re-measured: ourType=DESCRIPTION, weErrored=false, matching the jar."
+    },
+    {
+      "slug": "zolaza-45-sepi570",
+      "cohort": "class-generic-link-fallback-overclaim",
+      "disposition": "known-misroute",
+      "task": "T5",
+      "reason": "The source is a single bare line: a URL (https://forum.plantuml.net/17007/how-we-can-disable-textlength-at-svg-generation), no other @startuml content. sequence refuses (no participant keyword, no arrow). classPlugin.parse ACCEPTS with zero refusal: verified in isolation it treats 'https' as an implicit class id and everything after the line's first ':' ('//forum.plantuml.net/17007/...') as a colon-shorthand member (BodierLikeClassOrObject.java:102-111's isMethod/addFieldOrMethod single-line member shorthand, ported at src/diagrams/class/class-member-parser.ts), auto-creating a bogus 'https' classifier with one member. jar routes this fixture to STATE instead, so upstream's own colon-shorthand member command (registered on ClassDiagramFactory too) must refuse a line whose 'class id' has no prior declaration and no other class-shaped content, deferring to StateDiagramFactory's bare-identifier state fallback (CommandState.java-family) the way state already claims the DESCRIPTION-title-whitespace cohort's rectangle lines once description also fails. Ruled out: not an allowmixing refusal (class produced a classifier, not an executionRefusal); not a sequence-side defect (sequence already refuses correctly). Pinning rather than fixing: narrowing class's colon-shorthand member command to refuse a bare, undeclared, URL-shaped id would need proving safe against every other single-line 'Name : member' fixture in the corpus (D9, narrow-never-widen) -- a corpus-wide pass, not a one-row special case."
+    }
+  ]
+}

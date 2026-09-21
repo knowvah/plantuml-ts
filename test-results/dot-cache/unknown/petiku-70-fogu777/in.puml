@@ -1,0 +1,10 @@
+@startuml
+    namespace ns {
+        class foo {
+        }
+        foo <-- .bar
+    }
+
+    struct bar {
+    }
+@enduml

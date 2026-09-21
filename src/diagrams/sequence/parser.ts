@@ -22,6 +22,7 @@ import {
   applyHideUnlinked,
   emit,
   makeDefaultAST,
+  SequenceCommandRefusal,
   type ParseState,
 } from './sequence-parse-helpers.js';
 import { SEQUENCE_COMMANDS } from './sequence-command-registry.js';
@@ -164,14 +165,42 @@ function dispatchAnnotationOrSprite(state: ParseState, trimmedLines: readonly st
  * Returns whether some command claimed the line -- mirrors
  * `PSystemCommandFactory#getCandidate` (`:225-246`), which returns a `Step`
  * on the first matching `Command` or `null` when none of `cmds` matches.
+ *
+ * Two DIFFERENT upstream refusal shapes reach this loop, and they behave
+ * differently (T11, ubrr):
+ *
+ *  - A command whose `execute` completes normally but sets
+ *    `state.executionError` (`runDispatchLoop`'s own note) really WAS the
+ *    right command -- upstream's OWN narrower regex matched too, and
+ *    execution-time validation failed (`CommandArrow`'s dressing/style
+ *    refusals). Upstream never backtracks to a later candidate here
+ *    (`PSystemBuilder` discards the whole attempt), so neither does this
+ *    loop -- it returns `true` and lets the caller see the field.
+ *  - A command whose `execute` THROWS {@link SequenceCommandRefusal}
+ *    (`participantCommand`/`createCommand`, via `parseParticipantDeclaration`)
+ *    was NEVER the right command -- this port's `participantCommand`
+ *    pattern is a single `(.+)$` catch-all, syntactically broader than
+ *    upstream's four separate `CommandParticipantA..A4` grammars, so it can
+ *    match a line (`actor -> director`) that upstream's real regexes would
+ *    have DECLINED at the `isValid` stage, leaving `CommandArrow` to claim
+ *    it instead. The loop treats this the same as "pattern never matched"
+ *    and tries the next registered command -- jar-verified against
+ *    `bulixe-06-boge494`/`h-rnote-style`/`kotixe-11-cufa733`/`note-color`/
+ *    `pucini-86-goti091`/`seloli-77-rixi778` (all `actor -> director`-
+ *    shaped): the real jar draws ONE lifeline (the message), never a
+ *    second phantom `"-> director"` participant.
  */
 function dispatchCommand(state: ParseState, line: string): boolean {
   for (const cmd of SEQUENCE_COMMANDS) {
     const match = cmd.pattern.exec(line);
-    if (match !== null) {
+    if (match === null) continue;
+    try {
       cmd.execute(state, match);
-      return true;
+    } catch (err) {
+      if (err instanceof SequenceCommandRefusal) continue;
+      throw err;
     }
+    return true;
   }
   return false;
 }
@@ -188,10 +217,32 @@ function trimNonBlank(lines: readonly string[]): { text: string; origIndex: numb
 }
 
 /**
+ * The tail of `runDispatchLoop`'s per-line loop, split out to stay under the
+ * 30-NLOC function cap: run `line` through {@link dispatchCommand} and
+ * report whichever of the two refusal points it hit, or `null` on success.
+ * See `runDispatchLoop`'s own doc comment for the upstream citations.
+ */
+function dispatchOrdinaryLine(state: ParseState, line: string, origIndex: number): ParseRefusal | null {
+  if (!dispatchCommand(state, line)) {
+    return refuse('syntax', origIndex, origIndex, 'Syntax Error?');
+  }
+  if (state.executionError !== undefined) {
+    return refuse('execution', origIndex, origIndex, state.executionError);
+  }
+  return null;
+}
+
+/**
  * Runs the per-line dispatch loop against `lines`, mutating `state` as
  * commands match. Returns a `syntax` {@link ParseRefusal} at the first line
- * no command (nor the annotation/sprite matchers ahead of it) claims;
- * `null` when every line was consumed successfully.
+ * no command (nor the annotation/sprite matchers ahead of it) claims, an
+ * `execution` {@link ParseRefusal} at the first line whose matched command
+ * set `state.executionError` (T11/ubrr: `CommandArrow`'s "Illegal sequence
+ * arrow"/invalid style-token refusals and `parseParticipantDeclaration`'s
+ * misplaced-stereotype refusal, mirroring `PSystemCommandFactory.java:180-
+ * 186` exactly as `description/parser.ts`'s own `dispatchCommand` already
+ * does for THAT engine's `state.executionError`); `null` when every line was
+ * consumed successfully.
  */
 function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefusal | null {
   const trimmedEntries = trimNonBlank(lines);
@@ -241,10 +292,8 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
       continue;
     }
 
-    if (!dispatchCommand(state, line)) {
-      const origIndex = trimmedEntries[i]!.origIndex;
-      return refuse('syntax', origIndex, origIndex, 'Syntax Error?');
-    }
+    const refusal = dispatchOrdinaryLine(state, line, trimmedEntries[i]!.origIndex);
+    if (refusal !== null) return refusal;
   }
   return null;
 }
@@ -271,15 +320,23 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
  *    accepted (`:159-161`), so it fires once, at the end, not per-line.
  *    @see ~/git/plantuml/.../sequencediagram/SequenceDiagram.java:585-587
  *
- * The other two do not apply to this engine (see the decision journal for
- * the citations ruling each one out):
+ * The `final` refusal point does not apply to this engine; the `execution`
+ * point NOW does too, since T11 (ubrr):
  *
  *  - `execution` (`PSystemCommandFactory.java:180-186`) requires a command
- *    that can itself report failure (`CommandExecutionResult`). Every entry
- *    in `SEQUENCE_COMMANDS` has an `execute(state, match): void` that cannot
- *    fail --
- *    matching is the only success/failure signal this port's `Command` type
- *    carries, so there is no execution-failure channel to refuse from.
+ *    that can itself report failure (`CommandExecutionResult`). The shared
+ *    `Command<S>` type (`core/command/Command.ts`) still has no such RETURN
+ *    channel -- `execute(state, match): void` -- so a matched command sets
+ *    `state.executionError` and returns normally instead of returning a
+ *    failure value, mirroring the SAME `description`-engine precedent
+ *    (`description/parse-state.ts`'s `executionError` field,
+ *    `description/parser.ts`'s `dispatchCommand`). `dispatchOrdinaryLine`
+ *    checks it immediately after every `dispatchCommand` call and turns it
+ *    into `kind: 'execution'`. Two commands set it: `CommandArrow`'s
+ *    "Illegal sequence arrow" / invalid-style-token refusals
+ *    (`command-arrow.ts`'s `executeArrow`/`applyStyle`) and
+ *    `parseParticipantDeclaration`'s misplaced-stereotype refusal
+ *    (`command-participant.ts`'s `participantCommand`/`createCommand`).
  *  - `final` (`PSystemCommandFactory.java:148-152`) is
  *    `SequenceDiagram#checkFinalError`, which only conditionally prunes
  *    hidden participants before delegating to
@@ -295,8 +352,11 @@ export function parseSequence(lines: readonly string[]): SequenceDiagramAST | Pa
     pendingRef: null,
     lastMessageFrom: null,
     lastMessageTo: null,
+    lastEventWithNoteLeft: null,
+    lastEventWithNoteRight: null,
     currentBox: null,
     boxCounter: 0,
+    executionError: undefined,
   };
 
   const refusal = runDispatchLoop(state, lines);

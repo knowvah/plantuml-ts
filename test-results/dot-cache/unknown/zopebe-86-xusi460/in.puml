@@ -1,0 +1,11 @@
+@startnwdiag
+nwdiag {
+
+  network {
+    web;
+    backend;
+  }
+
+  backend -- db;
+}
+@endnwdiag

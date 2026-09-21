@@ -87,6 +87,24 @@ export type ClassifierKind =
    */
   | 'protocol'
   /**
+   * T3 (unknown-bucket-routing-repair): six more native class-factory
+   * keywords from the SAME upstream TYPE alternation `protocol` above cites
+   * (`CommandCreateClassMultilines.java:103`), all `LeafType.isLikeClass()`
+   * members (`abel/LeafType.java:88-91`) — same `EntityImageClass`
+   * rendering as `class`/`entity`/`protocol`. T14 deliberately left these
+   * unported ("needs its own captured badge-glyph outline"); reopened here
+   * since `badgeFill`/`badgeLetter`'s existing default/unsurveyed-kind
+   * fallback (`class-badge.ts`, same as `entity`/`circle`/`object`) already
+   * renders them — not a new gap. D12 supersedes T14's size deferral.
+   * @see ~/git/plantuml/.../abel/LeafType.java:48,88-91
+   */
+  | 'struct'
+  | 'exception'
+  | 'metaclass'
+  | 'stereotype'
+  | 'dataclass'
+  | 'record'
+  /**
    * `circle Foo` — a native class-factory keyword (upstream `CommandCreateClass`
    * TYPE alternation). Rendered as the small circle table (svek `shape=plaintext`),
    * the same node shape as a `()` interface lollipop.

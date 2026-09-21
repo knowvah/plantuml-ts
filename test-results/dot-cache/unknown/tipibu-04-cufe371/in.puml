@@ -1,0 +1,9 @@
+@startnwdiag
+nwdiag {
+  network LAN2 {
+     switch;
+  }
+  switch -- equip;
+  equip [address = "e3"];
+}
+@endnwdiag

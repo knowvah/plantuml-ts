@@ -1,0 +1,9 @@
+@startuml
+cloud "Chat Service + DB" as Char {
+  [Service]
+  database [PSQL] as DB {
+  json JSON {
+    "fruit":"apple",
+    "color":["Red", "Green"]
+  }
+@enduml

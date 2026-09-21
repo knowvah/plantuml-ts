@@ -1,0 +1,12 @@
+@startuml
+<style>
+sequenceDiagram {
+  reference {
+    RoundCorner 17
+  }
+}
+</style>
+!pragma teoz true
+ref over Alice, Bob : this is a reference over Alice and Bob
+ref#7700FF over Alice, Bob : this is a reference over Alice and Bob
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+skinparam ConditionStyle InsideDiamond
+while (test)
+    break
+endwhile
+@enduml

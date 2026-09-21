@@ -1,0 +1,32 @@
+{
+  "$comment": "Split from T2-activity-jar.json by the orchestrator before batch 2 (D4: one fragment, one writer): the class-seam fix-candidate rows of T2. Rows sorted by slug.",
+  "rows": [
+    {
+      "slug": "coruvi-63-vuzu133",
+      "cohort": "class-note-no-target",
+      "disposition": "fixed",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    },
+    {
+      "slug": "nezaxe-99-mumo948",
+      "cohort": "class-note-no-target",
+      "disposition": "fixed",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    },
+    {
+      "slug": "tiseze-53-gace410",
+      "cohort": "class-note-no-target",
+      "disposition": "fixed",
+      "task": "T2",
+      "seam": "class",
+      "command": "CommandFactoryNoteOnEntity",
+      "size": 10
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+@startuml
+folder A {
+  folder B {
+    folder C
+  }
+  folder A
+}
+@enduml

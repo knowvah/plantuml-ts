@@ -71,6 +71,20 @@ export interface Command {
    */
   passes: readonly Pass[];
   execute(ps: ParseState, match: RegExpExecArray, pass: Pass): void;
+  /**
+   * Optional pass-INDEPENDENT confirmation for a `pattern` that is a cheap
+   * over-matching pre-filter rather than upstream's real anchored grammar
+   * (rule 16's `/[<>]/` is the one case today). When present, a `pattern`
+   * match is only treated as "this line is claimed" (`parser.ts`'s
+   * `dispatchCommand`) if `confirm` also returns `true` — mirroring
+   * upstream's `getCandidate` (`PSystemCommandFactory.java:169-175`), which
+   * tests each command's FULL anchored regex, independent of pass, before
+   * `isEligibleFor` is ever consulted. A `false` confirm makes the loop
+   * keep searching later commands, exactly like a real non-match would.
+   * Commands whose `pattern` already IS the real anchored grammar (every
+   * other rule in this file) omit `confirm` — `undefined` always confirms.
+   */
+  confirm?(match: RegExpExecArray): boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -305,6 +319,13 @@ export const COMMANDS: readonly Command[] = [
   //     (`match.input`) and safely returns `null` for any false-positive
   //     gate match (e.g. a line that merely contains '>' for some other
   //     reason but isn't a transition).
+  //     `confirm` runs that same anchored `parseTransitionLine` check
+  //     PASS-INDEPENDENTLY (T9, mission unknown-bucket-routing-repair) so a
+  //     merely-contains-'<'/'>' line that is NOT a real transition falls
+  //     through to `fallbackOrRefuse` (`parser.ts`) instead of being
+  //     silently swallowed as "handled" — mirroring upstream's own
+  //     `getCandidate`, whose full anchored-regex candidate search runs
+  //     every pass, strictly BEFORE `isEligibleFor` is ever consulted.
   //     CommandLinkStateCommon#isEligibleFor -> ParserPass.TWO only -- this
   //     is what makes global by-name reuse (state-parse-state.ts's
   //     `resolveExistingState`) safe: every declaration in the WHOLE
@@ -313,10 +334,14 @@ export const COMMANDS: readonly Command[] = [
   // @see ~/git/plantuml/.../statediagram/command/CommandLinkState.java
   // @see ~/git/plantuml/.../statediagram/command/CommandLinkStateReverse.java
   // @see ~/git/plantuml/.../statediagram/command/CommandLinkStateCommon.java#isEligibleFor
+  // @see ~/git/plantuml/.../command/PSystemCommandFactory.java:169-175
   // -------------------------------------------------------------------------
   {
     pattern: /[<>]/,
     passes: ['two'],
+    confirm(match) {
+      return parseTransitionLine(match.input) !== null;
+    },
     execute(ps, match) {
       const parsed = parseTransitionLine(match.input);
       if (parsed === null) return;

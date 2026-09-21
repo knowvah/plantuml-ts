@@ -1,0 +1,4 @@
+@startuml
+The textLength attribute causes Persian words does not render correctly in SVG previewers used
+
+@enduml

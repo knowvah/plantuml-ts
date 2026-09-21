@@ -1,0 +1,8 @@
+@startnwdiag
+hide footbox
+nwdiag {
+  network Test {
+    Server
+  }
+}
+@endnwdiag

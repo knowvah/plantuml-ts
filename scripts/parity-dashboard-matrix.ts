@@ -90,6 +90,13 @@ export const PLANTUML_TS_ONLY: ColumnResult = NOT_STARTED('n/a (plantuml-ts only
  *  real, and it is what a future port mission starts from. */
 const NO_ENGINE_PREFIX = 'n/a (no engine (';
 
+/** D8 (plans/unknown-bucket-routing-repair/decisions.md): this override must
+ *  fire only for a `no engine (Dn todo)` cell, never for `unknown`'s
+ *  `n/a (accounting bucket)` cell — `unknown` is an accounting bucket, not an
+ *  unbuilt engine, and its oracle/survey/routing/refusal columns must report
+ *  real measurements. The prefix check below already excludes it (`n/a
+ *  (accounting bucket)` does not start with `NO_ENGINE_PREFIX`); see the
+ *  `noEngineColumn` test for `unknown` in `parity-dashboard.test.ts`. */
 export function noEngineColumn(engineCell: string): ColumnResult | undefined {
   return engineCell.startsWith(NO_ENGINE_PREFIX) ? NOT_STARTED(engineCell) : undefined;
 }

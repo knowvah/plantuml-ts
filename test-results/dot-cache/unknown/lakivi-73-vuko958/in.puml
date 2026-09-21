@@ -1,0 +1,17 @@
+@startuml
+
+Reporter -- Queue
+Reporter -- WorkerPool
+Reporter -- Report
+
+Queue -- QueueEntry
+WorkerPool -- Worker
+Worker -- QueueEntry
+
+Report -- QueueEntry
+
+note right of Worker : right
+
+note left of Queue : left
+
+@enduml

@@ -1,0 +1,16 @@
+@startnwdiag
+
+nwdiag {
+network net1 {
+a
+}
+network net2 {
+b
+}
+group uniqueNode {
+  a
+}
+
+}
+
+@endnwdiag

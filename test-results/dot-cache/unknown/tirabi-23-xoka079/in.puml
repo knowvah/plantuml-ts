@@ -1,0 +1,4 @@
+@startuml
+Bob -[#blue]> Alice : blue arrow color is OK
+Bob -[#blue]> Bob   : blue arrow color is NOK
+@enduml

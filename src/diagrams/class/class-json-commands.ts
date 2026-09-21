@@ -30,7 +30,7 @@ import type { Classifier } from './ast.js';
 import { resolveReference } from './class-namespace.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 import type { Command } from './class-command-types.js';
-import { jsonCommands, type JsonCommandHost } from '../../core/command/CommandCreateJson.js';
+import { jsonCommands, parseJsonNode, type JsonCommandHost } from '../../core/command/CommandCreateJson.js';
 
 /**
  * Class-diagram host: resolve-or-create the leaf via the SAME
@@ -82,3 +82,24 @@ function adapt(state: ParseState): JsonCommandHost<Classifier> {
  * registration order.
  */
 export const JSON_COMMANDS: readonly Command[] = jsonCommands<ParseState, Classifier>(adapt);
+
+/**
+ * T3 M5 (unknown-bucket-routing-repair): whether a bare-`}` candidate,
+ * WITHOUT itself, already closes valid balanced JSON -- mirrors
+ * `CommandCreateJson#finalVerification` (`CommandCreateJson.java:155-160`),
+ * the SAME wrapped-then-bare parse attempt `core/command/
+ * CommandCreateJson.ts#finalizeJsonBody` makes at real close time, tried
+ * speculatively here first so `parser.ts#handlePendingBodyLine` can decide
+ * whether THIS bare-`}` line is the real terminator or interior JSON
+ * content. `CommandMultilines2#isValid` (`CommandMultilines2.java:105-109`)
+ * only treats a line matching the END pattern as a CANDIDATE; on failure it
+ * returns `OK_PARTIAL` (keep collecting), not `NOT_OK` -- so a bare `}`
+ * that belongs to an unbalanced INTERIOR JSON object is correctly rejected
+ * here and folded into the body instead, exactly as upstream retries on
+ * every subsequent candidate until the whole block finally parses as valid,
+ * balanced JSON.
+ */
+export function isPendingJsonBodyComplete(candidateLines: readonly string[]): boolean {
+  const body = candidateLines.join('');
+  return parseJsonNode('{' + body + '}') !== null || parseJsonNode(body) !== null;
+}

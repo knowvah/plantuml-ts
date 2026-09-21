@@ -1,0 +1,29 @@
+@startuml
+partition "**process** HelloWorld" {
+	note left
+	 A1
+	 A1
+	 ----
+	 A1
+	 A1
+	 A1
+	 A1
+	 A1
+	end note
+	:Ready;
+	:HelloWorld(i); <<output>>
+	:Hello-Sent;
+}
+partition "**process** HelloWorld2" {
+	note right
+	 A1sdfjh sdflsdhfj sdflshdfjh sdfsdqfjhsdf sdqf
+	 A1
+	 ----
+	 A1
+	 A1
+	end note
+	:Ready;
+	:HelloWorld(i); <<output>>
+	:Hello-Sent;
+}
+@enduml

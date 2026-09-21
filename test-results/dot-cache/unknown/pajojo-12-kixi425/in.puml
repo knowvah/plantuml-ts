@@ -1,0 +1,6 @@
+@startuml
+graph graphname {
+    a -- b -- c; 
+    b -- d;
+}
+@enduml

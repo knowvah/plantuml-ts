@@ -225,3 +225,124 @@ describe('mixed markers on one line', () => {
     expect(ev.vmerge).toBe(true);
   });
 });
+
+// T11 (ubrr, T5 mechanism 4): `noteCommand`/`styledNoteCommand` must
+// register every referenced participant themselves, mirroring
+// `FactorySequenceNoteCommand#executeInternal`'s unconditional
+// `diagram.getOrCreateParticipant(location, ...)` call
+// (`FactorySequenceNoteCommand.java:224`,
+// `FactorySequenceNoteOverSeveralCommand.java:230-232`) -- BEFORE these
+// fixtures were fixed, a note-only diagram (no `participant`/message line)
+// was wrongly refused `kind: 'incomplete'` (`parser.ts:306`,
+// `SequenceDiagram.java:585-587`), even though the jar completes it.
+describe('note commands register their own participants (T11, ubrr)', () => {
+  // Exemplar: `covipu-77-jimo313` -- `note over IT, FKM` (multi-line form),
+  // the ONLY content, no prior `participant`/message line at all.
+  it('note over IT, FKM (multi-line, two participants, no prior declarations) completes', () => {
+    const ast = parse(['note over IT, FKM', 'body text', 'end note']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['IT', 'FKM']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('over');
+    expect(ev.participants).toEqual(['IT', 'FKM']);
+    expect(ev.text).toBe('body text');
+  });
+
+  // `jogaji-49-zaco571`-shaped: single-line form, comma list, no prior
+  // declarations.
+  it('note over Locus,Cassandra: text (single-line, no prior declarations) completes', () => {
+    const ast = parse(['note over Locus,Cassandra: hello']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Locus', 'Cassandra']);
+  });
+
+  // `xurozi-64-zaci349`-shaped: multi-line form, ONE participant, no prior
+  // declarations -- exercises `noteCommand`'s pendingNote branch, not just
+  // its immediate-emit branch.
+  it('note over Bob (multi-line, single participant, no prior declarations) completes', () => {
+    const ast = parse(['note over Bob', 'line one', 'line two', 'end note']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Bob']);
+    const ev = firstNote(ast);
+    expect(ev.participants).toEqual(['Bob']);
+    expect(ev.text).toBe('line one\nline two');
+  });
+
+  // `styledNoteCommand`'s own PARTICIPANT group needs the identical fix --
+  // a `note left X`/`note right X` form with no prior declarations.
+  it('note left Ghost : boo (styledNoteCommand, no prior declarations) completes', () => {
+    const ast = parse(['note left Ghost : boo']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Ghost']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('left');
+    expect(ev.participants).toEqual(['Ghost']);
+  });
+});
+
+// T11 (ubrr batch 2): `noteOnArrowCommand` (bare `note left`/`note right`)
+// must generalize `getLastEventWithNote` beyond messages -- `Reference` and
+// `GroupingLeaf` both `implement EventWithNote` too
+// (`SequenceDiagram.java:154-158`, `Reference.java:54`,
+// `GroupingLeaf.java:47`). Exemplar: `teoz-ng-001-17`.
+describe('noteOnArrowCommand anchors to Reference and GroupingLeaf, not just messages (T11, ubrr batch 2)', () => {
+  it('teoz-ng-001-17: bare `note left` after opt/ref over/end, no message anywhere, completes', () => {
+    const ast = parse([
+      'opt test',
+      'ref over A, B',
+      'SomeSequence',
+      'end ref',
+      'end',
+      'note left',
+      'Appears on the right side, not on the left even though "note left" is used.',
+      'end note',
+    ]);
+    expect(ast.participants.map((p) => p.id)).toEqual(['A', 'B']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('left');
+    expect(ev.participants).toEqual(['A']);
+    expect(ev.text).toBe('Appears on the right side, not on the left even though "note left" is used.');
+  });
+
+  // Isolates the Reference anchor alone: no enclosing opt/end, so the LAST
+  // EventWithNote at `note right` time is the `ref over` block itself.
+  it('anchors to a `ref over A, B` block directly (no enclosing frame)', () => {
+    const ast = parse(['ref over A, B', 'text', 'end ref', 'note right : hi']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('right');
+    expect(ev.participants).toEqual(['B']);
+  });
+
+  // Isolates the GroupingLeaf anchor alone: `else` opens a SECOND
+  // GroupingLeaf event (`SequenceDiagram#grouping`'s `default` arm fires
+  // for `else`/`also` too, not just `end`), so a note right after `else`
+  // (before any message in that branch) still anchors, to the full
+  // currently-declared participant span.
+  it('anchors to an `else` branch marker (no message in that branch yet)', () => {
+    const ast = parse([
+      'participant A',
+      'participant B',
+      'alt cond',
+      'A -> B : hi',
+      'else',
+      'note left : x',
+      'end',
+    ]);
+    const frame = ast.events[0] as { branches: SequenceDiagramAST['events'][] };
+    const ev = frame.branches[1]!.find((e): e is NoteEvent => e.kind === 'note');
+    if (ev === undefined) throw new Error('expected a note event in the else branch');
+    expect(ev.position).toBe('left');
+    expect(ev.participants).toEqual(['A']);
+  });
+
+  // Still silently emits nothing when there is truly no note-capable event
+  // yet -- upstream's `if (event == null) return ok()` -- but the
+  // MULTI-LINE block must still be consumed as a unit rather than letting
+  // its body fall through to the ordinary dispatch table.
+  it('bare `note left` with NO prior note-capable event emits nothing, but still consumes its block', () => {
+    const ast = parse(['participant A', 'note left', 'dropped text', 'end note', 'A -> A : hi']);
+    expect(ast.events.some((e) => e.kind === 'note')).toBe(false);
+    expect(ast.events.some((e) => e.kind === 'message')).toBe(true);
+  });
+
+  it('bare single-line `note left : x` with NO prior note-capable event emits nothing', () => {
+    const ast = parse(['participant A', 'note left : x', 'A -> A : hi']);
+    expect(ast.events.some((e) => e.kind === 'note')).toBe(false);
+  });
+});

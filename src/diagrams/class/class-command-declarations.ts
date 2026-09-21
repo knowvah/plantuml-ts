@@ -19,11 +19,18 @@ export const DECLARATION_COMMANDS: readonly Command[] = [
   // 7. Classifier declarations; bare `abstract Name` also matches (murotu-83-cebo380).
   //    T14 (dispatch-by-parse-attempt): `protocol` added to the keyword
   //    alternation -- see `ClassifierKind`'s `'protocol'` member doc
-  //    (class-classifier-ast.ts) for the upstream citation and the sibling
-  //    keywords (struct/exception/metaclass/stereotype/dataclass/record)
-  //    deliberately left unported.
+  //    (class-classifier-ast.ts) for the upstream citation.
+  //    T3 (unknown-bucket-routing-repair): this dispatch-gating pattern is a
+  //    SEPARATE copy of `class-declaration-parser.ts`'s `DECL_KIND_RE` TYPE
+  //    alternation (and now its optional VISIBILITY prefix) -- both must
+  //    stay in sync, or a line `parseClassifierDecl` would happily accept
+  //    never reaches it because this dispatch gate never tries the command
+  //    at all. See `DECL_KIND_RE`'s own doc comment for the upstream
+  //    citations (VISIBILITY, `static class`, `struct`/`exception`/
+  //    `metaclass`/`stereotype`/`dataclass`/`record`, `diamond`).
   {
-    pattern: /^(?:abstract\s+class|abstract|class|interface|enum|annotation|entity|circle|protocol)\s+/i,
+    pattern:
+      /^(?:[-#+~]\s*)?(?:abstract\s+class|static\s+class|abstract|class|interface|enum|annotation|entity|circle|diamond|protocol|struct|exception|metaclass|stereotype|dataclass|record)\s+/i,
     execute(state, match) {
       const decl = parseClassifierDecl(match.input);
       if (decl !== null) applyClassifierDecl(state, decl, true);

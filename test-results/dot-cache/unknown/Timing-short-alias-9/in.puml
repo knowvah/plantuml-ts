@@ -1,0 +1,12 @@
+@startuml
+analog A between 350 and 450
+
+@0
+A is 350
+
+@100
+A is 450
+
+@300
+A is 350
+@enduml

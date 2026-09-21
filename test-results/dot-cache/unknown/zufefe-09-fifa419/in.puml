@@ -1,0 +1,4 @@
+@startbpm
+:login;
+20:<+>
+@endbpm

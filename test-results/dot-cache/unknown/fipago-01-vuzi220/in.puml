@@ -1,0 +1,16 @@
+@startnwdiag
+nwdiag {
+    internet [ shape = cloud];
+    internet -- router;
+
+    network proxy {
+        router;
+        app;
+    }
+
+    network default {
+    	app;
+        db;
+    }
+}
+@endnwdiag

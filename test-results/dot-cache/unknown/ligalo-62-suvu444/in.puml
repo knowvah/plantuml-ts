@@ -1,0 +1,5 @@
+@startnwdiag
+nwdiag {
+  a -- b [shape = cloud, address="USB"];
+}
+@endnwdiag

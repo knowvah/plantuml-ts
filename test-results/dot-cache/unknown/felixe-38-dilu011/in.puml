@@ -1,0 +1,7 @@
+@startuml
+circle A [
+a
+b
+c
+]
+@enduml

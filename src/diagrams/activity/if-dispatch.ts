@@ -9,8 +9,12 @@ import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityElseIf, ActivityIf, ActivityNode } from './ast.js';
 import {
   RE_ELSE,
+  RE_ELSE_LEGACY,
   RE_ELSEIF,
+  RE_ENDIF,
   RE_IF,
+  RE_IF4,
+  RE_IF_LEGACY,
   isRefusal,
   swimlaneSpread,
   type DispatchResult,
@@ -30,8 +34,10 @@ interface IfClauses {
 }
 
 /** Strips the same optional trailing `;` the main dispatch loop applies to
- *  non-action lines, so `else (no);` / `endif;` are recognised here too. */
-function stripTrailingSemi(raw: string): string {
+ *  non-action lines, so `else (no);` / `endif;` are recognised here too.
+ *  Exported: `switch-dispatch.ts` (mission ubrr-T10 M2) reuses it for the
+ *  identical `case (...)`/`endswitch;` shape. */
+export function stripTrailingSemi(raw: string): string {
   return !raw.startsWith(':') && raw.endsWith(';') ? raw.slice(0, -1).trimEnd() : raw;
 }
 
@@ -67,15 +73,20 @@ interface ElseStep {
   label: string | undefined;
 }
 
-/** Consumes an `else (...)` clause's body, plus its terminating `endif`. */
-function consumeElseClause(ctx: ParseContext, cursor: number, clauseLine: string): ElseStep | ParseRefusal {
+/**
+ * Consumes an `else (...)`/legacy-`else when LABEL` clause's body, plus
+ * its terminating `endif`. `label` is already extracted by the caller
+ * (mission ubrr-T10 M4a/M4c: `RE_ENDIF` now also accepts a trailing
+ * stereogroup, so the closer check uses it instead of an exact-string
+ * `'endif'` compare -- see `RE_ENDIF`'s own doc for why an exact compare
+ * would otherwise silently swallow lines).
+ */
+function consumeElseClause(ctx: ParseContext, cursor: number, label: string | undefined): ElseStep | ParseRefusal {
   const { lines } = ctx;
-  const label = RE_ELSE.exec(clauseLine)![1]?.trim();
   const elseResult = parseNodes(ctx, cursor + 1, ['endif']);
   if (isRefusal(elseResult)) return elseResult;
   let next = elseResult.nextIdx;
-  // consume endif (also tolerate a trailing `;`)
-  if (next < lines.length && stripTrailingSemi(lines[next]!.trim()).toLowerCase() === 'endif') {
+  if (next < lines.length && RE_ENDIF.test(stripTrailingSemi(lines[next]!.trim()))) {
     next++;
   }
   return { cursor: next, branch: elseResult.nodes, label };
@@ -90,13 +101,14 @@ type ClauseStep =
   | { kind: 'else'; cursor: number; branch: ActivityNode[]; label: string | undefined }
   | ParseRefusal;
 
-/** Classifies and consumes exactly one clause-header line: `endif`,
- *  `elseif (...) then (...)` (plus its body), `else (...)` (plus its body
- *  and terminating `endif`), or the unexpected-line fallback. */
+/** Classifies and consumes exactly one clause-header line: `endif`
+ *  (optionally stereotyped, `RE_ENDIF`), `elseif (...) then (...)` (plus
+ *  its body), `else (...)` OR legacy `else when LABEL` (plus its body and
+ *  terminating `endif`), or the unexpected-line fallback. */
 function classifyClauseLine(ctx: ParseContext, cursor: number, ifInnerStops: StopKeywords): ClauseStep {
   const clauseLine = stripTrailingSemi(ctx.lines[cursor]!.trim());
 
-  if (clauseLine.toLowerCase() === 'endif') return { kind: 'endif', cursor: cursor + 1 };
+  if (RE_ENDIF.test(clauseLine)) return { kind: 'endif', cursor: cursor + 1 };
 
   if (RE_ELSEIF.test(clauseLine)) {
     const step = consumeElseifClause(ctx, cursor, clauseLine, ifInnerStops);
@@ -104,8 +116,20 @@ function classifyClauseLine(ctx: ParseContext, cursor: number, ifInnerStops: Sto
     return { kind: 'elseif', cursor: step.cursor, branch: step.branch };
   }
 
+  // Legacy `else when LABEL` (mission ubrr-T10 M4c) is checked BEFORE the
+  // plain `else (...)?` form: `RE_ELSE`'s optional group would otherwise
+  // never match "when no" as a paren group and fall through anyway, but
+  // trying the more specific legacy form first mirrors upstream's own
+  // `CommandElseLegacy1` (a distinct, separately-registered command).
+  const legacyMatch = RE_ELSE_LEGACY.exec(clauseLine);
+  if (legacyMatch !== null) {
+    const step = consumeElseClause(ctx, cursor, legacyMatch[1]!.trim());
+    if (isRefusal(step)) return step;
+    return { kind: 'else', cursor: step.cursor, branch: step.branch, label: step.label };
+  }
+
   if (RE_ELSE.test(clauseLine)) {
-    const step = consumeElseClause(ctx, cursor, clauseLine);
+    const step = consumeElseClause(ctx, cursor, RE_ELSE.exec(clauseLine)![1]?.trim());
     if (isRefusal(step)) return step;
     return { kind: 'else', cursor: step.cursor, branch: step.branch, label: step.label };
   }
@@ -161,6 +185,30 @@ function consumeIfClauses(ctx: ParseContext, startIdx: number, ifInnerStops: Sto
   return { cursor, elseIfBranches, elseBranch, elseLabel };
 }
 
+interface IfHeader {
+  condition: string;
+  thenLabel: string | undefined;
+}
+
+/**
+ * Tries the three `if`-opener spellings in upstream's registration order
+ * (`ActivityDiagramFactory3.java:118-121`): `CommandIf4`'s `is`/`equals`
+ * form, `CommandIf2`'s `then (label)?` form (now with an optional trailing
+ * stereogroup, mission ubrr-T10 M4a), then `CommandIfLegacy1`'s `then when
+ * LABEL` form (M4c). All three hand their label to the SAME
+ * `diagram.startIf(test, when, ...)` call upstream-side, so they collapse
+ * onto the one `thenLabel` field here.
+ */
+function matchIfHeader(line: string): IfHeader | null {
+  const if4 = RE_IF4.exec(line);
+  if (if4 !== null) return { condition: if4[1]!.trim(), thenLabel: if4[2]?.trim() };
+  const if2 = RE_IF.exec(line);
+  if (if2 !== null) return { condition: if2[1]!.trim(), thenLabel: if2[2]?.trim() };
+  const legacy = RE_IF_LEGACY.exec(line);
+  if (legacy !== null) return { condition: legacy[1]!.trim(), thenLabel: legacy[2]!.trim() };
+  return null;
+}
+
 /**
  * Captures the `if`'s swimlane at its opener, not its closer.
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:309
@@ -168,10 +216,9 @@ function consumeIfClauses(ctx: ParseContext, startIdx: number, ifInnerStops: Sto
  *   when the `if` line itself is parsed, before the then-branch.
  */
 export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
-  const ifMatch = RE_IF.exec(line);
-  if (ifMatch === null) return null;
-  const condition = ifMatch[1]!.trim();
-  const thenLabel = ifMatch[2]?.trim();
+  const header = matchIfHeader(line);
+  if (header === null) return null;
+  const { condition, thenLabel } = header;
 
   // Mission `activity-lane-capture` D1/T3: read BEFORE the then-branch
   // parses, so a lane switch inside the body never leaks into this node's

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-20T20:23:38.661Z",
+  "generatedAt": "2026-09-21T12:33:18.268Z",
   "fixtures": [
     {
       "slug": "bajelo-54-dixe684",
@@ -1481,7 +1481,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 106,
-      "firstDiff": "svg/g[1]/g[4]/text[1]/@fill",
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {

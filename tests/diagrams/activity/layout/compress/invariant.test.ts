@@ -483,6 +483,31 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     'boxoto-53-sifo232 [28,30] polygon×text',
     'boxoto-53-sifo232 [39,41] polygon×text',
     'lopone-15-xiki477 [7,20] polygon×polygon',
+    // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,
+    // T10b, 2026-09-20): UNLIKE every entry above, this is a REAL 3.47 px
+    // collision, recorded here as an honest, diagnosed defect with a filed
+    // follow-on -- not a rounding artefact. The fixture parses only since
+    // T10 ported `CommandWhileEnd3`. Shape 22 is the while-loop's "no"-exit
+    // gutter (`walk-while-branch.ts#pushWhileOut`) EMPHASIZE arrowhead;
+    // shape 25 is the third `break`'s terminal arrowhead landing on the
+    // same gutter. Mechanism: `shapes-of.ts#emphasizeArrowhead` (and the
+    // renderer's twin `renderer.ts#findEmphasisSegment`) anchor the
+    // emphasize head at the midpoint of a segment whose two endpoints were
+    // ALREADY Y-compressed independently, so `mid(ct(p1), ct(p2))` folds
+    // the slot space removed between the raw midpoint and the far endpoint
+    // into the anchor: `(24 + 235.0556) / 2 = 129.5278 = shape22.y + 10`
+    // exactly, 43.47 px above its raw position, while the terminal head
+    // (a genuine edge vertex) moves the faithful 9.94 px. Upstream evaluates
+    // the compression ONCE at the raw midpoint: `Worm.java:174-184` composes
+    // two `UTranslate`s on the compressing `UGraphic`
+    // (`UGraphicCompressOnXorY.java:55-63,87-120`), i.e. `ct(mid_raw)`.
+    // `midArrowAt` already gets that atomic treatment
+    // (`compress-geometry.ts:148-153`); `emphasize` does not. Corpus-wide
+    // (every while/repeat/empty-branch if), fix threads an atomic anchor
+    // through four producers, `transformEdge`, `shapes-of.ts` AND
+    // `renderer.ts` -- filed as the follow-on mission
+    // `activity-emphasize-arrow-atomic-anchor` (planning/next-missions.md).
+    'nerete-42-save418 [22,25] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

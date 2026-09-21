@@ -1,0 +1,12 @@
+@startuml
+analog "Analog" as A
+
+@0
+A is 350
+
+@100
+A is 450
+
+@300
+A is 350
+@enduml

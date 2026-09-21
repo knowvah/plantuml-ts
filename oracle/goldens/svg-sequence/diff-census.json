@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 287,
-    "extra-element": 123,
-    "geometry": 72703,
-    "text-metrics": 2548,
+    "missing-element": 281,
+    "extra-element": 120,
+    "geometry": 72911,
+    "text-metrics": 2509,
     "format-units": 1,
-    "other": 25959
+    "other": 25966
   },
   "fixtures": [
     {
@@ -179,14 +179,14 @@
     },
     {
       "slug": "bagexe-03-bozo133",
-      "diffCount": 177,
+      "diffCount": 179,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 126,
-        "text-metrics": 4,
+        "geometry": 135,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 46
+        "other": 44
       }
     },
     {
@@ -515,14 +515,14 @@
     },
     {
       "slug": "biruge-35-vaxu680",
-      "diffCount": 119,
+      "diffCount": 107,
       "buckets": {
         "missing-element": 1,
-        "extra-element": 1,
-        "geometry": 80,
-        "text-metrics": 9,
+        "extra-element": 0,
+        "geometry": 77,
+        "text-metrics": 6,
         "format-units": 0,
-        "other": 28
+        "other": 23
       }
     },
     {
@@ -815,14 +815,14 @@
     },
     {
       "slug": "bulixe-06-boge494",
-      "diffCount": 63,
+      "diffCount": 78,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
-        "text-metrics": 4,
+        "geometry": 58,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 18
+        "other": 20
       }
     },
     {
@@ -899,14 +899,14 @@
     },
     {
       "slug": "butosi-00-mali446",
-      "diffCount": 53,
+      "diffCount": 68,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 37,
+        "geometry": 50,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 15
+        "other": 18
       }
     },
     {
@@ -3611,14 +3611,14 @@
     },
     {
       "slug": "gifope-23-jufe872",
-      "diffCount": 84,
+      "diffCount": 75,
       "buckets": {
         "missing-element": 1,
-        "extra-element": 1,
-        "geometry": 58,
-        "text-metrics": 2,
+        "extra-element": 0,
+        "geometry": 54,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 22
+        "other": 20
       }
     },
     {
@@ -3887,14 +3887,14 @@
     },
     {
       "slug": "gucare-93-petu502",
-      "diffCount": 606,
+      "diffCount": 573,
       "buckets": {
         "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 488,
-        "text-metrics": 20,
+        "extra-element": 0,
+        "geometry": 480,
+        "text-metrics": 12,
         "format-units": 0,
-        "other": 97
+        "other": 81
       }
     },
     {
@@ -4067,14 +4067,14 @@
     },
     {
       "slug": "h-rnote-style",
-      "diffCount": 63,
+      "diffCount": 78,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
-        "text-metrics": 4,
+        "geometry": 58,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 18
+        "other": 20
       }
     },
     {
@@ -5375,14 +5375,14 @@
     },
     {
       "slug": "kotixe-11-cufa733",
-      "diffCount": 63,
+      "diffCount": 78,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
-        "text-metrics": 4,
+        "geometry": 58,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 18
+        "other": 20
       }
     },
     {
@@ -7883,14 +7883,14 @@
     },
     {
       "slug": "note-color",
-      "diffCount": 74,
+      "diffCount": 90,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 48,
-        "text-metrics": 4,
+        "geometry": 66,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 21
+        "other": 24
       }
     },
     {
@@ -8926,6 +8926,18 @@
       }
     },
     {
+      "slug": "recani-60-licu962",
+      "diffCount": 139,
+      "buckets": {
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 118,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 20
+      }
+    },
+    {
       "slug": "refiju-27-nupe082",
       "diffCount": 90,
       "buckets": {
@@ -9791,14 +9803,14 @@
     },
     {
       "slug": "seloli-77-rixi778",
-      "diffCount": 74,
+      "diffCount": 90,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 48,
-        "text-metrics": 4,
+        "geometry": 66,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 21
+        "other": 24
       }
     },
     {
@@ -12203,14 +12215,14 @@
     },
     {
       "slug": "xeroce-52-moso281",
-      "diffCount": 24,
+      "diffCount": 12,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 11,
-        "text-metrics": 2,
+        "geometry": 4,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 10
+        "other": 7
       }
     },
     {
@@ -13546,10 +13558,6 @@
     {
       "slug": "nuvoja-46-dezu541",
       "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports."
-    },
-    {
-      "slug": "recani-60-licu962",
-      "reason": "refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "soxata-16-kafi688",

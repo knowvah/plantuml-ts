@@ -1,0 +1,9 @@
+@startuml
+foo --(( bar
+foo --(( bar1
+foo --(( bar2
+foo --(( bar3
+
+azer -(( bar4
+bar7 ))- toto
+@enduml

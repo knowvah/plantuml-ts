@@ -1,0 +1,12 @@
+@startuml
+
+package bk2k_opengraph {
+}
+
+package gridelements {
+}
+
+
+bk2k_opengraph --|>  gridelements
+
+@enduml

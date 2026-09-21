@@ -1,0 +1,14 @@
+@startuml
+rectangle r [
+{{
+file f1
+}}
+-- text between f1 and f2 --
+{{
+file f2
+}}
+{{
+file f3
+}}
+]
+@enduml

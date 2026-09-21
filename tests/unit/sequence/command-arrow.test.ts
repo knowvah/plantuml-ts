@@ -252,13 +252,55 @@ describe('CommandArrow — forms upstream itself refuses', () => {
     expect(shape(firstMessage(line))).toMatchObject(expected);
   });
 
-  // `CommandExecutionResult.error("Illegal sequence arrow")` (`:314`): a body
-  // with no direction on either end. This port has no execution-refusal
-  // channel, so the line is consumed and emits nothing -- leaving the
-  // diagram with no participants at all here.
-  it('emits nothing for a body with no direction on either dressing', () => {
+  // `CommandExecutionResult.error("Illegal sequence arrow")` (`:311-314`): a
+  // body with no direction on either end. T11 (ubrr): this now sets
+  // `state.executionError` and refuses the WHOLE attempt with
+  // `kind: 'execution'`, matching upstream's per-factory abandonment
+  // (`PSystemBuilder.java:256-271`) instead of silently consuming the line.
+  it('refuses `execution` for a body with no direction on either dressing', () => {
     const result = parseSequence(['Alice - Bob : hi']);
-    expect('refused' in result && result.kind).toBe('incomplete');
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+    expect(result.message).toBe('Illegal sequence arrow');
+  });
+
+  // T4 Mechanism E (mission ubrr, T11): a bare `--` body -- BOTH dressings
+  // empty, no arrowhead/cross/circle decoration at all -- is the SAME
+  // "Illegal sequence arrow" refusal, jar-verified against
+  // `kevegu-65-zagi834`/`lakivi-73-vuko958`'s repeated `Reporter -- Queue`
+  // lines: the real jar renders CLASS for this source, not SEQUENCE, because
+  // sequence's own factory refuses every one of these lines and
+  // `PSystemBuilder` falls through to the next candidate.
+  it('refuses `execution` for a bare `--` body with zero head decoration', () => {
+    const result = parseSequence(['Reporter -- Queue']);
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+    expect(result.message).toBe('Illegal sequence arrow');
+  });
+
+  // T4 Mechanism E, the second guard (mission ubrr, T11): `applyStyle`
+  // (`CommandArrow.java:482-502`) recognises only `dashed`/`bold`/`dotted`/
+  // `hidden`; any other LINE_STYLE token the shared bracket regex accepts
+  // syntactically (`thickness=N`, valid class-relationship style per
+  // `CommandLinkElement.java:71`, but not a sequence arrow style) falls to
+  // `HColorSet.getColor(s)`, throws `NoSuchColorException`, and
+  // `PSystemBuilder` discards the sequence attempt -- jar-verified against
+  // `jamupa-36-duni483`'s `a -[thickness=5]> b`, which the real jar renders
+  // as CLASS, not SEQUENCE.
+  it('refuses `execution` for an unrecognised, non-colour style token', () => {
+    const result = parseSequence(['a -[thickness=5]> b']);
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+    expect(result.message).toBe('Illegal sequence arrow style: thickness=5');
+  });
+
+  // A `#`-prefixed style token that is NOT a real colour (unlike `#red`/
+  // `#navy` elsewhere in this file) refuses for the SAME reason: it reaches
+  // `HColorSet.getColor` and fails there too.
+  it('refuses `execution` for an unrecognised `#`-prefixed style token', () => {
+    const result = parseSequence(['a -[#notacolor]> b']);
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
   });
 });
 

@@ -1,0 +1,7 @@
+@startuml
+
+storage storage
+
+cloud cloud
+
+@enduml

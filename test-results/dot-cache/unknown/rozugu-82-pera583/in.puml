@@ -1,0 +1,19 @@
+@startuml
+rectangle A [
+{{
+skinparam BackgroundColor #Transparent
+rectangle FailCase [
+**Fail Case**
+----
+åäöÅÄÖ
+test 1 %newline()This is a newline :-)
+test 2
+]
+}}
+]
+rectangle OkCase [
+**OK Case**
+----
+åäöÅÄÖ
+]
+@enduml

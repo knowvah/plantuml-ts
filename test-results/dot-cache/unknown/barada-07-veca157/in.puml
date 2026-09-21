@@ -1,0 +1,13 @@
+@startuml
+  start
+      if (A is B) then
+          if (B is C) then when yes
+              - Report that A is C
+          else when no
+              - Report that A is not C
+          endif
+      else when no
+          - Report that A is not B
+      endif
+  end
+@enduml

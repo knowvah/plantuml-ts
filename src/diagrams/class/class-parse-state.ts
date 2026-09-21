@@ -182,6 +182,24 @@ export interface ParseState {
    * source carries >1 `<style>` block, so this value is never consulted).
    */
   stylePositions: readonly (number | undefined)[];
+  /**
+   * T7 Mechanism A (unknown-bucket-routing-repair): non-undefined while
+   * inside an open `CommandCreateElementMultilines` TYPE0/TYPE1 block (see
+   * `class-multiline-element.ts`). Lines accumulate as the classifier's
+   * display text until the closing quote/`]` line is reached.
+   */
+  pendingMultilineElement?: PendingMultilineElement | undefined;
+}
+
+/** One open TYPE0 (`terminator: 'quote'`) or TYPE1 (`terminator: 'bracket'`)
+ *  multi-line descriptive-leaf block — see `class-multiline-element.ts`. */
+export interface PendingMultilineElement {
+  classifierId: string;
+  terminator: 'quote' | 'bracket';
+  lines: string[];
+  /** TYPE1 only: the first body line's own leading-whitespace count, used to
+   *  dedent every subsequent body line relative to it (`BlocLines#trimSmart(1)`). */
+  baseIndent?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------

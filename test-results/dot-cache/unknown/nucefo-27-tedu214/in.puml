@@ -1,0 +1,14 @@
+@startnwdiag
+nwdiag {
+    ISP_A;
+    ISP_A -- routerA;
+    ISP_B;
+    ISP_B -- routerB;
+
+    network RED {
+        routerA;
+        routerB;
+    }
+
+}
+@endnwdiag

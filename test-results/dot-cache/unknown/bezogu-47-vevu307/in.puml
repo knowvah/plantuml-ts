@@ -1,0 +1,8 @@
+@startuml
+sprite react <svg viewBox="0 0 230 230">
+<circle cx="115" cy="102" r="20.5" fill="#61dafb"/>
+<ellipse rx="110" ry="42"  cx="115" cy="102" stroke="#61dafb" stroke-width="10" fill="none"/>
+</svg>
+
+rectangle <$react{scale=1}>
+@enduml

@@ -139,6 +139,10 @@ const SENTINELS: readonly Sentinel[] = [
   { type: 'regex', slug: 'bafake-97-xuse174' },
   { type: 'salt', slug: 'bireva-46-dalu382' },
   { type: 'timing', slug: 'bejilu-38-kaje288' },
+  // unknown-bucket-routing-repair/T14 (2026-09-20): the `unknown` accounting
+  // bucket's 825 renders, captured 2026-09-20 with the deterministic flag;
+  // its localeCompare-first slug.
+  { type: 'unknown', slug: 'activity-legacy1-example-0' },
   { type: 'wbs', slug: 'bacole-35-fiki903' },
   { type: 'wire', slug: 'bexone-92-bebe715' },
 ];
@@ -242,6 +246,16 @@ describe('oracle cache freshness (object-close D4, all types per SI16)', () => {
     re: /"-?\d+\.\d{4,}"/,
   } as const;
 
+  // `@startmath` / `@startlatex` sources are drawn by JLaTeXMath, not by the
+  // jar's own SVG writer, and JLaTeXMath emits four-decimal coordinates with
+  // the CURRENT jar: `unknown/caruta-83-deta919` re-rendered through
+  // `oracle-render.sh` on 2026-09-20 is byte-identical to its cache (all 7
+  // four-decimal `unknown` oracles are `@startmath`). The superseded form
+  // therefore convicts nothing in that family; it is exempted here, not
+  // re-captured (unknown-bucket-routing-repair / T14).
+  const MATH_FAMILY = /^@start(?:math|latex)\b/m;
+  const isMathFamily = (puml: string): boolean => existsSync(puml) && MATH_FAMILY.test(readFileSync(puml, 'utf8'));
+
   it.each(SENTINELS.map((s) => [s.type, s] as const))(
     'every %s oracle shares the emission form of a fresh render, not just the sentinel',
     (type, s) => {
@@ -257,7 +271,8 @@ describe('oracle cache freshness (object-close D4, all types per SI16)', () => {
       const dir = join(CACHE, type);
       const offenders = readdirSync(dir).filter((slug) => {
         const svg = join(dir, slug, 'in.svg');
-        return existsSync(svg) && SUPERSEDED_FORM.re.test(readFileSync(svg, 'utf8'));
+        if (!existsSync(svg) || isMathFamily(join(dir, slug, 'in.puml'))) return false;
+        return SUPERSEDED_FORM.re.test(readFileSync(svg, 'utf8'));
       });
       expect(
         offenders.length,

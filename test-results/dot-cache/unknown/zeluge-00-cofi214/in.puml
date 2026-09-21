@@ -1,0 +1,9 @@
+@startuml
+
+rectangle Logical.Path.In.Architecture {
+  package my.implementation.package {
+     class SomeClass
+  }
+}
+
+@enduml

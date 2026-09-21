@@ -1,0 +1,435 @@
+{
+  "$comment": "T4 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T4): one row per slug in cohorts/T4.tsv -- 46 jar-CLASS sources this port routes elsewhere (42 to DESCRIPTION, 3 to SEQUENCE, 1 to STATE). Five mechanisms, all fix-candidate: (A, 37) CommandCreateElementMultilines never ported into the class engine; (B, 4) REL_ARROW's crow's-foot alternative lacks a dotted body / CIRCLE '0' token / mid-arrow style bracket; (C, 1) CLASS_ID hardcodes '.' regardless of a configured namespaceSeparator; (D, 1) the note-declaration CODE regex excludes dots upstream allows; (E, 3) sequence's CommandArrow over-claims a bare-dressing arrow and an unrestricted style-token vocabulary that upstream refuses, so sequence (registered before class) wins a block class would otherwise correctly claim. See diagnosis/T4.md for the full table and per-mechanism citations. Batch-2 split: 3 sequence rows moved to T4-sequence.json.",
+  "rows": [
+    {
+      "slug": "boguko-42-zuda981",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "buitin-newline-chr-0",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "cepedu-19-namu934",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "copono-56-kuci969",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "dajela-44-zovi778",
+      "cohort": "class-refused-erd-arrow-grammar-gap",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandLinkClass",
+      "size": 25,
+      "reason": "CommandLinkClass.java:133,140 ARROW_BODY1/ARROW_BODY2 = '([-=.]+)'/'([-=.]*)' (dashes, equals AND dots all valid body chars) with ARROW_STYLE1 (a '[thickness=N]'-shaped bracket) positioned BETWEEN body1 and the direction/INSIDE token, i.e. INSIDE any decorated arrow, not just a bare one; LinkDecor.java:80-90 registers CIRCLE(decors1('0'), decors2('0')) alongside CROWFOOT/CIRCLE_CROWFOOT/CIRCLE_LINE/LINE_CROWFOOT. Our REL_ARROW's crow's-foot alternative (class-relationship-parser.ts:66 DASH='-+...', :119-131) requires at least one DASH in the body (dots alone, as in '}|..||', never match) and has no CIRCLE '0' head/tail token or a style-bracket insertion point inside the crow's-foot branch, so a dotted-body or '0'-decorated or bracket-styled crow's-foot relationship (}|..||, |o-[thickness=5]-|{, 0-[dashed]--0) never dispatches at all and the very next non-matching line trips buildSyntaxRefusal.",
+      "task": "T4"
+    },
+    {
+      "slug": "deployment-last-name-multi-line-0",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "dezobu-62-vuzu421",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "fakone-16-boro774",
+      "cohort": "class-refused-erd-arrow-grammar-gap",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandLinkClass",
+      "size": 25,
+      "reason": "CommandLinkClass.java:133,140 ARROW_BODY1/ARROW_BODY2 = '([-=.]+)'/'([-=.]*)' (dashes, equals AND dots all valid body chars) with ARROW_STYLE1 (a '[thickness=N]'-shaped bracket) positioned BETWEEN body1 and the direction/INSIDE token, i.e. INSIDE any decorated arrow, not just a bare one; LinkDecor.java:80-90 registers CIRCLE(decors1('0'), decors2('0')) alongside CROWFOOT/CIRCLE_CROWFOOT/CIRCLE_LINE/LINE_CROWFOOT. Our REL_ARROW's crow's-foot alternative (class-relationship-parser.ts:66 DASH='-+...', :119-131) requires at least one DASH in the body (dots alone, as in '}|..||', never match) and has no CIRCLE '0' head/tail token or a style-bracket insertion point inside the crow's-foot branch, so a dotted-body or '0'-decorated or bracket-styled crow's-foot relationship (}|..||, |o-[thickness=5]-|{, 0-[dashed]--0) never dispatches at all and the very next non-matching line trips buildSyntaxRefusal.",
+      "task": "T4"
+    },
+    {
+      "slug": "felixe-38-dilu011",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "fepudo-00-ziro735",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "fidaru-93-zumu093",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "gasevo-58-ciso782",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "gejuvu-17-vufu851",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "gemepu-46-dido441",
+      "cohort": "class-refused-namespace-separator-relationship-id",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandLinkClass",
+      "size": 15,
+      "reason": "CommandLinkClass.java:87-95: getSeparator() = SEPARATOR_CHAR_SINGLE ('[^%pLN%s_$#\\\\:{}<>%g]', ANY single non-identifier/non-punctuation-reserved char) OR SEPARATOR_CHAR_DOUBLE ('\\\\\\\\{2}|::') -- upstream's endpoint identifier grammar accepts whatever separator character the source actually uses, generically, not a value templated from the configured 'namespaceSeparator' at regex-build time. Our CLASS_ID/ID_ATOM (class-relationship-parser.ts:51-52, ID_ATOM = '[\\\\p{L}\\\\p{N}_$]+', CLASS_ID = '\\\\.?ID_ATOM(?:\\\\.ID_ATOM)*(?:::ID_ATOM)?') hardcodes a literal '.' as the only inter-segment separator with no generic-single-char or backslash-double alternative, so `set namespaceSeparator \\\\\\\\` (gemepu's `App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Controller`) never matches CLASS_ID/REL_DISPATCH_RE, and dispatchCommand finds no match on that line -- even though idLeaf/splitOnSeparator (class-relationship-parser.ts:363-374) DOES read nsSep correctly once a match succeeds.",
+      "task": "T4"
+    },
+    {
+      "slug": "gogisu-39-bepa573",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "gubeca-19-lemu434",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "jefidu-98-gisu131",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "jixibu-01-xave465",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "josebu-55-seje426",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "juzuno-58-gesi397",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "kelefe-72-cefi192",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "komuvi-52-vave599",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "lezema-07-vogu604",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "lubicu-73-fule059",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "maxure-10-temu215",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "mujega-45-mexi048",
+      "cohort": "class-refused-erd-arrow-grammar-gap",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandLinkClass",
+      "size": 25,
+      "reason": "CommandLinkClass.java:133,140 ARROW_BODY1/ARROW_BODY2 = '([-=.]+)'/'([-=.]*)' (dashes, equals AND dots all valid body chars) with ARROW_STYLE1 (a '[thickness=N]'-shaped bracket) positioned BETWEEN body1 and the direction/INSIDE token, i.e. INSIDE any decorated arrow, not just a bare one; LinkDecor.java:80-90 registers CIRCLE(decors1('0'), decors2('0')) alongside CROWFOOT/CIRCLE_CROWFOOT/CIRCLE_LINE/LINE_CROWFOOT. Our REL_ARROW's crow's-foot alternative (class-relationship-parser.ts:66 DASH='-+...', :119-131) requires at least one DASH in the body (dots alone, as in '}|..||', never match) and has no CIRCLE '0' head/tail token or a style-bracket insertion point inside the crow's-foot branch, so a dotted-body or '0'-decorated or bracket-styled crow's-foot relationship (}|..||, |o-[thickness=5]-|{, 0-[dashed]--0) never dispatches at all and the very next non-matching line trips buildSyntaxRefusal.",
+      "task": "T4"
+    },
+    {
+      "slug": "nuveji-19-jabi587",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "petuju-02-zino378",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "pevefe-09-zaro044",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "pugesu-08-cove285",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "pupoko-23-xubo613",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "puvako-69-suxo633",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "rexupa-61-nezi165",
+      "cohort": "class-refused-dotted-note-name",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandFactoryNote",
+      "size": 4,
+      "reason": "CommandFactoryNote.java:83,101 CODE = '([%pLN_.]+)' -- upstream's freestanding 'note as <name>' declaration allows a DOT in the name (a namespaced note id, e.g. `X.n`). Our class-command-notes.ts:124,151 note-declaration patterns use `(\\\\w+|\"[^\"]+\")` for that same CODE capture -- \\\\w does not include '.', so `note as X.n` fails every class command and hits buildSyntaxRefusal on the line itself (state.currentLine at the 'note as X.n' line).",
+      "task": "T4"
+    },
+    {
+      "slug": "rizisu-50-liza998",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "rojida-14-fuli428",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "sprite-SVG-Fill-Stroke-Combinatory-1",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "tefeco-12-rato895",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "toxore-88-ruso838",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "vugime-87-zabe159",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "xagomi-49-caki729",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "zefefo-37-xigo245",
+      "cohort": "class-refused-erd-arrow-grammar-gap",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandLinkClass",
+      "size": 25,
+      "reason": "CommandLinkClass.java:133,140 ARROW_BODY1/ARROW_BODY2 = '([-=.]+)'/'([-=.]*)' (dashes, equals AND dots all valid body chars) with ARROW_STYLE1 (a '[thickness=N]'-shaped bracket) positioned BETWEEN body1 and the direction/INSIDE token, i.e. INSIDE any decorated arrow, not just a bare one; LinkDecor.java:80-90 registers CIRCLE(decors1('0'), decors2('0')) alongside CROWFOOT/CIRCLE_CROWFOOT/CIRCLE_LINE/LINE_CROWFOOT. Our REL_ARROW's crow's-foot alternative (class-relationship-parser.ts:66 DASH='-+...', :119-131) requires at least one DASH in the body (dots alone, as in '}|..||', never match) and has no CIRCLE '0' head/tail token or a style-bracket insertion point inside the crow's-foot branch, so a dotted-body or '0'-decorated or bracket-styled crow's-foot relationship (}|..||, |o-[thickness=5]-|{, 0-[dashed]--0) never dispatches at all and the very next non-matching line trips buildSyntaxRefusal.",
+      "task": "T4"
+    },
+    {
+      "slug": "zeraje-11-semu839",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    },
+    {
+      "slug": "zivebo-26-nagu813",
+      "cohort": "class-refused-descriptive-leaf-multilines-missing",
+      "disposition": "fixed",
+      "seam": "class",
+      "command": "CommandCreateElementMultilines",
+      "size": 90,
+      "reason": "CommandCreateElementMultilines.java:96-108,110-122 (TYPE0 '<kw> <code> ... as \"multi-line display\"', TYPE1 '<kw> <code> ... [ multi-line description ]'), UNGATED by allowmixing, registered ClassDiagramFactory.java:166-167 AFTER CommandCreateElementFull2 (:133-134, the allowmixing-gated single-line 'as' form this port DOES have). Ported only for description (src/diagrams/description/parse-helpers.ts:387-434, parser.ts:219-259) -- never wired into the class engine. Our class-descriptive-leaf-command.ts:91-128 DESCRIPTIVE_LEAF_COMMANDS pattern matches the SAME opening line but has no TYPE0/TYPE1 continuation, so it either refuses immediately (allowmixing error, the 'as \"' shape) or -- when the line ends in '[' and passes isContainerOpener -- proceeds as a bodyless container declaration, and the very next line then hits buildSyntaxRefusal (parser.ts:354, 'Syntax Error?') because no class command recognizes free-text/creole body content.",
+      "task": "T4"
+    }
+  ]
+}

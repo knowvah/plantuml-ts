@@ -68,10 +68,33 @@
     {
       "type": "activity",
       "slug": "barada-07-veca157",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -870,10 +893,33 @@
     {
       "type": "activity",
       "slug": "caciva-80-kene990",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -1189,10 +1235,33 @@
     {
       "type": "activity",
       "slug": "citire-32-mive114",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -1596,10 +1665,33 @@
     {
       "type": "activity",
       "slug": "debofa-60-mude568",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -1635,18 +1727,64 @@
     {
       "type": "activity",
       "slug": "delide-30-teva601",
-      "status": "error",
-      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
       "slug": "demibe-40-moda439",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 12
+      },
+      "jar": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 12
+      }
     },
     {
       "type": "activity",
@@ -3000,10 +3138,33 @@
     {
       "type": "activity",
       "slug": "geremo-94-tecu179",
-      "status": "error",
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -3241,10 +3402,33 @@
     {
       "type": "activity",
       "slug": "gokagi-91-mise154",
-      "status": "error",
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -3443,10 +3627,33 @@
     {
       "type": "activity",
       "slug": "jageti-56-kume076",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -3521,10 +3728,34 @@
     {
       "type": "activity",
       "slug": "japeru-28-guku001",
-      "status": "error",
-      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 20
+        },
+        "anchor": {
+          "(absent)": 20
+        },
+        "inset": {
+          "10": 7,
+          "10.001": 3
+        },
+        "textCount": 20
+      },
+      "jar": {
+        "fill": {
+          "#000": 21
+        },
+        "anchor": {
+          "(absent)": 21
+        },
+        "inset": {
+          "10": 10
+        },
+        "textCount": 21
+      }
     },
     {
       "type": "activity",
@@ -3762,10 +3993,33 @@
     {
       "type": "activity",
       "slug": "jogami-42-jaji869",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -3778,10 +4032,33 @@
     {
       "type": "activity",
       "slug": "jonave-00-xabi793",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -4052,18 +4329,64 @@
     {
       "type": "activity",
       "slug": "kemedu-83-vipa115",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
       "slug": "kenizo-43-siro273",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -4749,10 +5072,33 @@
     {
       "type": "activity",
       "slug": "liteza-62-nopo771",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -4981,10 +5327,34 @@
     {
       "type": "activity",
       "slug": "luxido-91-covi016",
-      "status": "error",
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2,
+          "9.999": 1
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -5185,10 +5555,33 @@
     {
       "type": "activity",
       "slug": "mezuce-12-gemi988",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -5259,10 +5652,33 @@
     {
       "type": "activity",
       "slug": "mojezi-43-gamu360",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      }
     },
     {
       "type": "activity",
@@ -5329,10 +5745,35 @@
     {
       "type": "activity",
       "slug": "mudobi-07-biji996",
-      "status": "error",
-      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 13
+        },
+        "anchor": {
+          "(absent)": 13
+        },
+        "inset": {
+          "10": 8,
+          "9.999": 1
+        },
+        "textCount": 13
+      },
+      "jar": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 7,
+          "10.001": 2
+        },
+        "textCount": 14
+      }
     },
     {
       "type": "activity",
@@ -5516,10 +5957,33 @@
     {
       "type": "activity",
       "slug": "nerete-42-save418",
-      "status": "error",
-      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -5648,10 +6112,33 @@
     {
       "type": "activity",
       "slug": "nikivo-06-kaxa873",
-      "status": "error",
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 10
+      },
+      "jar": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 10
+      }
     },
     {
       "type": "activity",
@@ -5828,10 +6315,33 @@
     {
       "type": "activity",
       "slug": "niviji-21-maco613",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -5964,10 +6474,33 @@
     {
       "type": "activity",
       "slug": "notuli-49-xugi698",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -6228,10 +6761,33 @@
     {
       "type": "activity",
       "slug": "pateca-54-lija084",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -6718,10 +7274,33 @@
     {
       "type": "activity",
       "slug": "pujumu-36-nelo283",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -6835,10 +7414,33 @@
     {
       "type": "activity",
       "slug": "rekuxa-78-lidi292",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -7014,10 +7616,33 @@
     {
       "type": "activity",
       "slug": "rosepa-78-xivi448",
-      "status": "error",
-      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -7054,10 +7679,33 @@
     {
       "type": "activity",
       "slug": "rucuga-83-tosu408",
-      "status": "error",
-      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -7093,10 +7741,33 @@
     {
       "type": "activity",
       "slug": "rujixe-89-sumo552",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      }
     },
     {
       "type": "activity",
@@ -7203,10 +7874,33 @@
     {
       "type": "activity",
       "slug": "ruzazu-94-meso880",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 10
+      },
+      "jar": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 11
+      }
     },
     {
       "type": "activity",
@@ -7242,10 +7936,33 @@
     {
       "type": "activity",
       "slug": "sadovu-51-fata536",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -7413,10 +8130,33 @@
     {
       "type": "activity",
       "slug": "sifite-87-ziti434",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -7547,10 +8287,34 @@
     {
       "type": "activity",
       "slug": "sojono-24-tufe806",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 5,
+          "9.999": 1
+        },
+        "textCount": 12
+      },
+      "jar": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 14
+      }
     },
     {
       "type": "activity",
@@ -7708,10 +8472,33 @@
     {
       "type": "activity",
       "slug": "suluni-73-lotu140",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -7958,10 +8745,33 @@
     {
       "type": "activity",
       "slug": "tmp1",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 10
+      },
+      "jar": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 11
+      }
     },
     {
       "type": "activity",
@@ -7997,10 +8807,33 @@
     {
       "type": "activity",
       "slug": "todufa-81-gavo441",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -8349,10 +9182,33 @@
     {
       "type": "activity",
       "slug": "vodobe-33-kefa909",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -8669,10 +9525,33 @@
     {
       "type": "activity",
       "slug": "xidamu-85-xoti640",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -8708,10 +9587,33 @@
     {
       "type": "activity",
       "slug": "xizola-97-sizu458",
-      "status": "error",
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -8779,10 +9681,33 @@
     {
       "type": "activity",
       "slug": "zakuke-30-sobi867",
-      "status": "error",
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -8897,10 +9822,35 @@
     {
       "type": "activity",
       "slug": "zejuso-92-kexo870",
-      "status": "error",
-      "reason": "activity parser refused this source at line 13 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 24
+        },
+        "anchor": {
+          "(absent)": 24
+        },
+        "inset": {
+          "5": 1,
+          "10": 9
+        },
+        "textCount": 24
+      },
+      "jar": {
+        "fill": {
+          "#000": 39
+        },
+        "anchor": {
+          "(absent)": 39
+        },
+        "inset": {
+          "5": 1,
+          "10": 9
+        },
+        "textCount": 39
+      }
     },
     {
       "type": "activity",
@@ -9079,10 +10029,33 @@
     {
       "type": "activity",
       "slug": "zokodi-10-dexu703",
-      "status": "error",
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -9126,10 +10099,33 @@
     {
       "type": "activity",
       "slug": "zuxute-46-daku634",
-      "status": "error",
-      "reason": "activity parser refused this source at line 9 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
     }
   ]
 }

@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { applyLollipop } from '../../../src/diagrams/class/class-lollipop.js';
@@ -8,13 +10,21 @@ import { applyLollipop } from '../../../src/diagrams/class/class-lollipop.js';
 // Helper
 // ---------------------------------------------------------------------------
 
-function parse(source: string): ClassDiagramAST {
-  const lines = source
+function linesOf(source: string): string[] {
+  return source
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
-  const block: UmlSource = { lines, type: 'class' };
+}
+
+function parse(source: string): ClassDiagramAST {
+  const block: UmlSource = { lines: linesOf(source), type: 'class' };
   return parseClass(block);
+}
+
+function refusalOf(source: string) {
+  const block: UmlSource = { lines: linesOf(source), type: 'class' };
+  return parseRefusalOf(parseClassRaw(block));
 }
 
 // ---------------------------------------------------------------------------
@@ -152,12 +162,12 @@ describe('interface lollipop shorthand (CommandLinkLollipop)', () => {
   });
 
   it(
-    'leniently auto-creates the "existing" side when not pre-declared ' +
-      '(this parser has no error-reporting channel)',
+    'T5 M3 (unknown-bucket-routing-repair): refuses "No class X" when the ' +
+      '"existing" side was never declared (CommandLinkLollipop.java:183-186)',
     () => {
-      const ast = parse(`toto1 ()-- dummy`);
-      expect(ast.classifiers).toHaveLength(2);
-      expect(ast.classifiers.some((c) => c.display === 'dummy')).toBe(true);
+      const refusal = refusalOf(`toto1 ()-- dummy`);
+      expect(refusal?.kind).toBe('execution');
+      expect(refusal?.message).toBe('No class dummy');
     },
   );
 
@@ -304,8 +314,8 @@ describe('interface lollipop shorthand: G2 N19 synthetic-id naming', () => {
         members: [],
       };
       ast.classifiers.push(dummy);
-      const applied = applyLollipop(ast, () => dummy, null, 'toto1 ()-- dummy');
-      expect(applied).toBe(true);
+      const applied = applyLollipop(ast, () => ({ classifier: dummy, existed: true }), null, 'toto1 ()-- dummy');
+      expect(applied).toBe('ok');
       const lol = ast.classifiers.find((c) => c.kind === 'lollipop')!;
       expect(lol.syntheticIdName).toBeUndefined();
       expect(lol.creationIndex).toBeUndefined();

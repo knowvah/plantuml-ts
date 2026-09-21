@@ -1,0 +1,6 @@
+@startuml
+title
+
+end title
+rectangle "File" as file
+@enduml

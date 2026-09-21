@@ -1,0 +1,13 @@
+@startnwdiag
+nwdiag {
+
+network nw {
+  c1;
+  a;
+  b;
+}
+
+c1 [ shape = cloud];
+
+}
+@endnwdiag

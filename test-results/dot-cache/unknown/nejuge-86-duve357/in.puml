@@ -1,0 +1,7 @@
+@startuml
+!pragma svek_trace on
+rectangle r1 {
+ hexagon #pink "VeryLOOOOOOOOOOOOOOOOOOOg\nVeryLOOOOOOOOOOOOOOOOOOOg\nVeryLOOOOOOOOOOOOOOOOOOOg\nVeryLOOOOOOOOOOOOOOOOOOOg\nVeryLOOOOOOOOOOOOOOOOOOOg"
+}
+
+@enduml

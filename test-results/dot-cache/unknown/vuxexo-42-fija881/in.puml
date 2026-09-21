@@ -1,0 +1,13 @@
+@startuml
+
+namespace net {
+}
+
+namespace net.entities {
+}
+
+namespace net.entities.sub {
+}
+
+
+@enduml

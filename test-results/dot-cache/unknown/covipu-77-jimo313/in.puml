@@ -1,0 +1,6 @@
+@startuml
+note over IT, FKM
+20 The system displays one screen in user language with table of parameters.
+The table has got 4 columns: Action button Update, name of parameter and value. 
+end note
+@enduml

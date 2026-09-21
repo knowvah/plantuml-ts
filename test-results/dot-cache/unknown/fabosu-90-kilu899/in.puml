@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+!startsub MAIN
+' Comment
+rectangle z
+!endsub MAIN
+rectangle test
+@enduml

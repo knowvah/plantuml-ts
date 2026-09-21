@@ -1,0 +1,9 @@
+@startuml
+!definelong CALL(from,to,funcname)
+from -[#808080]> to : funcname
+!enddefinelong
+
+!define GREY(x) <color:#808080>x</color>
+
+CALL(SDF, MU, GREY(My func))
+@enduml

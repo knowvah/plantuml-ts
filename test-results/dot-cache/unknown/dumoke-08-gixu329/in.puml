@@ -1,0 +1,7 @@
+@startuml
+analog "VDD" as VDD
+@0
+VDD is 5
+@5
+VDD is 10
+@enduml

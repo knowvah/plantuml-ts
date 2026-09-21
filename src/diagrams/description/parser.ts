@@ -20,7 +20,10 @@ import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 import type { DescriptionDiagramAST, DescriptiveNode } from './ast.js';
+import { scanEmbeddedElementBlock } from './element-embedded-block.js';
+import { trimLineForAnnotationMatch } from './annotation-line-trim.js';
 import {
   ELEMENT_MULTILINE_END0_RE,
   ELEMENT_MULTILINE_END1_RE,
@@ -33,17 +36,15 @@ import {
   parseNameSection,
   trySkinparamBlock,
 } from './parse-helpers.js';
-import { classifyNoteOpen, isNoteTerminator } from './note-grammar.js';
 import {
-  closePendingNote,
   emitNode,
-  executeNoteOpen,
   makeDefaultAST,
   resolveStillUnknown,
   type ElementBlockTerminator,
   type ParseState,
   type PendingElementState,
 } from './parse-state.js';
+import { tryNoteHandling } from './note-dispatch.js';
 import { COMMANDS } from './command-table.js';
 import { leafDisplayName } from './namespace-groups.js';
 
@@ -157,13 +158,21 @@ function finishElementBlock(state: ParseState): void {
  *  `]`, TYPE0 on a line ending in a quote character — both tested against the
  *  `Trim.BOTH`-trimmed line, both contributing that line's prefix as a
  *  display row when it is non-empty. Non-closing lines keep their raw
- *  indentation (see {@link pushElementBody}). */
-function continueElementBlock(
-  state: ParseState,
-  pending: PendingElementState,
-  raw: string,
-  trimmed: string,
-): LineOutcome {
+ *  indentation (see {@link pushElementBody}).
+ *
+ *  A line that OPENS an embedded `{{ … }}` diagram is handled FIRST, before
+ *  either END test: the whole embedded region (see
+ *  {@link scanEmbeddedElementBlock}'s doc) is swallowed as raw body lines in
+ *  one step, so none of ITS lines — including a nested element's own
+ *  closing `]` — are ever tested against this block's END regex (T3.md M6). */
+function continueElementBlock(state: ParseState, pending: PendingElementState, lines: readonly string[], i: number): LineOutcome {
+  const raw = lines[i]!;
+  const trimmed = raw.trim();
+  if (getEmbeddedType(trimmed) !== null) {
+    const embedded = scanEmbeddedElementBlock(lines, i);
+    for (const l of embedded.block) pushElementBody(pending, l);
+    return embedded.consumed;
+  }
   const end =
     pending.terminator === 'quote' ? ELEMENT_MULTILINE_END0_RE.exec(trimmed) : ELEMENT_MULTILINE_END1_RE.exec(trimmed);
   if (end === null) {
@@ -262,31 +271,10 @@ function tryElementBlockType0(state: ParseState, lines: readonly string[], i: nu
  *  openers are mutually exclusive, so order is immaterial). */
 function tryElementBlock(state: ParseState, lines: readonly string[], i: number, line: string): LineOutcome {
   const pending = state.pendingElement;
-  if (pending !== undefined) return continueElementBlock(state, pending, lines[i]!, line);
+  if (pending !== undefined) return continueElementBlock(state, pending, lines, i);
   const type1 = tryElementBlockType1(state, line);
   if (type1 !== null) return type1;
   return tryElementBlockType0(state, lines, i, line);
-}
-
-/** A note-command multi-line body owns every line until its terminator
- *  (CommandMultilines2) — never re-dispatched through COMMANDS, so a body
- *  line that happens to look like another command (e.g. razefo-71-pice114's
- *  embedded `{{ skinparam note { ... } }}`) is never misparsed as one. */
-function tryNoteHandling(state: ParseState, line: string): LineOutcome {
-  if (state.pendingNote !== undefined) {
-    if (isNoteTerminator(line, state.pendingNote.terminator)) {
-      closePendingNote(state);
-    } else {
-      state.pendingNote.lines.push(line);
-    }
-    return 1;
-  }
-  const noteOpen = classifyNoteOpen(line);
-  if (noteOpen !== undefined) {
-    executeNoteOpen(state, noteOpen);
-    return 1;
-  }
-  return null;
 }
 
 /**
@@ -334,7 +322,9 @@ function tryArchimate(state: ParseState, line: string): LineOutcome {
  * .addTitleCommands being registered before any diagram-specific command —
  * so those directives are never misread as entity declarations. Operates on
  * the raw (untrimmed) `lines` array/index so a matched multiline block's
- * body keeps its original indentation for `removeEmptyColumns`.
+ * body keeps its original indentation for `removeEmptyColumns`; line `i`
+ * itself is trimmed first (see `trimLineForAnnotationMatch`'s doc) so a
+ * leading tab/space run doesn't defeat the single-line matchers' anchors.
  *
  * T7 (dispatch-by-parse-attempt, D0/D1): the two upstream refusal points
  * this factory actually has both surface here. When no `COMMANDS` pattern
@@ -355,7 +345,8 @@ function dispatchCommand(
   line: string,
   rawLine: number,
 ): number | ParseRefusal {
-  const annotationMatch = matchAnnotationCommand(lines, i, state.ast.annotations!);
+  const annotationLines = trimLineForAnnotationMatch(lines, i);
+  const annotationMatch = matchAnnotationCommand(annotationLines, i, state.ast.annotations!);
   if (annotationMatch !== null) return annotationMatch.consumed;
 
   // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): tried
@@ -392,7 +383,9 @@ function dispatchCommand(
  * endpoint must NOT spuriously auto-create that endpoint). Returns a
  * `ParseRefusal` (T7) when no phase recognised the line, or a command
  * matched but reported execution failure — see `dispatchCommand`'s doc for
- * the two upstream refusal points this factory has. Otherwise returns the
+ * the two upstream refusal points this factory has, plus `tryNoteHandling`
+ * (note-dispatch.ts, T8b)'s own execution refusal for the note-on-entity
+ * "Nothing to note to" case. Otherwise returns the
  * number of lines consumed (>= 1) — greater than 1 only when the shared
  * annotation/sprite matchers consumed a multi-line block (see
  * `dispatchCommand`). Phases run in upstream-priority order: element
@@ -420,7 +413,7 @@ function processLine(
   const skinResult = trySkinparamBlock(lines, i, line);
   if (skinResult !== null) return skinResult;
 
-  const noteResult = tryNoteHandling(state, line);
+  const noteResult = tryNoteHandling(state, line, i, rawLine);
   if (noteResult !== null) return noteResult;
 
   const archimateResult = tryArchimate(state, line);

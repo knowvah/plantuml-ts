@@ -1,0 +1,3 @@
+@startuml
+note "ancien test d'import SQL" as N1
+@enduml

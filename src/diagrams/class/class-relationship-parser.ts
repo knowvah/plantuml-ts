@@ -6,7 +6,7 @@
  */
 
 import type { Classifier, Relationship } from './ast.js';
-import { firstWithName, splitOnSeparator } from './class-namespace.js';
+import { splitOnSeparator } from './class-namespace.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {
   ARROW_DIR,
@@ -17,6 +17,14 @@ import {
   arrowLength,
   parseArrowStyleOverrides,
 } from './class-arrow-grammar.js';
+// CLASS_ID/stripQuotes/splitEndpointPort moved to
+// class-relationship-id-grammar.ts (500-line cap split, T4 Mechanism C) --
+// re-exported so every existing import site (class-lollipop.ts,
+// class-notes.ts, class-stereotype-command.ts, class-url-command.ts,
+// parser.ts, class-container.ts, class-assoc-couple.ts) keeps working
+// unchanged.
+import { CLASS_ID, stripQuotes, splitEndpointPort } from './class-relationship-id-grammar.js';
+export { CLASS_ID, stripQuotes, splitEndpointPort };
 
 // ---------------------------------------------------------------------------
 // Relationship arrow parsing
@@ -39,17 +47,6 @@ import {
  *   9: right identifier
  *   10: optional label after ':'
  */
-// The optional leading `\.?` accepts a leading-dot root-namespace reference
-// (`.BaseClass` = the classifier `BaseClass` in the root namespace, resolved by
-// resolveReference). Without it the endpoint regex rejects the whole line and the
-// relationship is silently dropped (mission A3 Batch-1b diagnosis).
-// Exported so class-lollipop.ts (CommandLinkLollipop's ENT1/ENT2) reuses the
-// exact same identifier grammar rather than a second, drifting copy.
-// Atom charset is upstream getClassIdentifier()'s `[%pLN_$]+` — Unicode
-// letter/number plus underscore and dollar (regex/Pattern2.java:56), NOT
-// ASCII \w. Every regex built from this fragment needs the u flag.
-const ID_ATOM = String.raw`[\p{L}\p{N}_$]+`;
-export const CLASS_ID = String.raw`\.?${ID_ATOM}(?:\.${ID_ATOM})*(?:::${ID_ATOM})?|"[^"]+"`;
 // Arrow BODY length is arbitrary in upstream PlantUML (any run of `-`
 // or `.` characters — see CommandLinkClass's `ARROW_BODY` = `[-=.]+`);
 // body length never changes the relationship TYPE, only decor chars do.
@@ -63,7 +60,9 @@ export const CLASS_ID = String.raw`\.?${ID_ATOM}(?:\.${ID_ATOM})*(?:::${ID_ATOM}
 // arrow length (LEFT/RIGHT force length 1 → minlen 0; CommandLinkClass:337).
 // ARROW_DIR/ARROW_STYLE are imported from class-arrow-grammar.ts, which also
 // hosts arrowLength/resolveArrow/parseArrowDecors (same fragments, shared).
-const DASH = String.raw`-+(?:${ARROW_DIR}-*)?`;
+// T4 Mechanism B (unknown-bucket-routing-repair): the dash-only `DASH`
+// fragment that used to live here was retired -- both crow's-foot-branch
+// call sites now reuse `ARROW_BODY` below, see REL_ARROW's own doc comment.
 // Inline style bracket (`-[thickness=5]->`, `<-[#green]->`), mirroring
 // CommandLinkElement.LINE_STYLE — a comma-separated `#color`/`key=value` list.
 // The DOT-parity goal is only that the relationship EXISTS with the right
@@ -98,9 +97,13 @@ const ARROW_BODY = String.raw`[-.=]+(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARR
 // NOT_NAVIGABLE; `+` is PLUS; `<||`/`||>` is REDEFINES; `<|:`/`:|>` is
 // DEFINEDBY; `^` is EXTENDS's second decor string (alongside `<|`/`|>`); `#`
 // is SQUARE; `}o`/`o{` is CIRCLE_CROWFOOT. `o`/`x` are excluded here — see
-// WORD_HEAD.
-const HEAD1_SAFE = String.raw`(?:<\|\||<\|:|<\||<_|<|\*|\+|\)|\^|#|\}o)?`;
-const HEAD2_CHARS = String.raw`\|\|>|:\|>|\|>|_>|>|\*|o\{|o|x|\+|\^|#|\(`;
+// WORD_HEAD. T4 Mechanism B (unknown-bucket-routing-repair): bare `0` is
+// CIRCLE (`decors1("0")`/`decors2("0")`, `LinkDecor.java:90`) — a plain
+// digit, not a `\b`-wrapped word char like `o`/`x` (`buildRegexFromDecorKeys`
+// only wraps keys that literally start/end with the LETTER "o"), so it needs
+// no WORD_HEAD-style collision guard.
+const HEAD1_SAFE = String.raw`(?:<\|\||<\|:|<\||<_|<|\*|\+|\)|\^|#|\}o|0)?`;
+const HEAD2_CHARS = String.raw`\|\|>|:\|>|\|>|_>|>|\*|o\{|o|x|\+|\^|#|\(|0`;
 const HEAD2 = String.raw`(?:${HEAD2_CHARS})?`;
 const HEAD2_REQUIRED = String.raw`(?:${HEAD2_CHARS})`;
 // `o` (AGGREGATION) and `x` (NOT_NAVIGABLE) are word characters, so a BARE
@@ -120,7 +123,17 @@ const REL_ARROW =
   // Crow's-foot (ER cardinality) links — a run of |o}{ with at least one |/}/{
   // around the body (`|o--o|`, `||--||`, `}o--o{`, `}|--|{`, `}--`). Structurally
   // an association edge (resolveArrow's crow's-foot fallback).
-  String.raw`[|}{][o|}{]?${DASH}(?:[o|}{]?[|}{])?|${DASH}[o|}{]?[|}{]|` +
+  // T4 Mechanism B (unknown-bucket-routing-repair): the body between the
+  // crow's-foot ends was `DASH` (dashes only); upstream's own
+  // `ARROW_BODY1`/`ARROW_BODY2` (`CommandLinkClass.java:133,140`,
+  // `[-=.]+`/`[-=.]*`) allow dots/equals here exactly as everywhere else in
+  // the arrow grammar, and `ARROW_STYLE1` (a `[thickness=N]`-shaped bracket,
+  // `:134`) sits INSIDE any decorated arrow, not just a bare one — swapped
+  // for the already-general `ARROW_BODY` fragment, which already carries
+  // both (dots/equals via its own `[-.=]+` charset, the style bracket via
+  // `ARROW_STYLE`), rather than widening `DASH` itself (shared by every
+  // OTHER arrow shape, D9 narrow-never-widen).
+  String.raw`[|}{][o|}{]?${ARROW_BODY}(?:[o|}{]?[|}{])?|${ARROW_BODY}[o|}{]?[|}{]|` +
   // Decoration-plus-arrowhead combined forms (`o-->`, `*-->`, `<--o`, `<--*`,
   // an inline-styled `<|-[#FF0000,bold]-`, a direction word plus a triangle
   // AND an arrowhead (`<|-u->`), lollipop (`--(`, `)--`), …) all fall out of
@@ -194,45 +207,6 @@ export const REL_DISPATCH_RE = new RegExp(
     String.raw`(?:\s*:\s*.+)?$`,
   'u',
 );
-
-/**
- * A classifier id with an optional `::port` member-name suffix split off.
- * Exported for reuse by class-notes.ts — `note left of Class::member` uses
- * the same entity-ref grammar as a relationship endpoint's `Class::member`
- * (upstream: both ultimately resolve via `CucaDiagram` port-aware lookup).
- *
- * `nsSep` is the diagram's CONFIGURED namespace separator (`state
- * .namespaceSeparator`); `classifiers` is every classifier declared so far.
- * Two upstream guards (both in `CommandLinkClass.executeArg`) suppress the
- * `entity::port` split, in order:
- *  - when `nsSep` is itself `::`, `getPortId`/`removePortId` unconditionally
- *    disable the split — a `::` inside a reference is always a namespace
- *    join in that case, never a port marker;
- *  - otherwise, when the WHOLE raw endpoint already matches an existing
- *    classifier's simple/leaf name (`firstWithName(ent1String) != null`,
- *    line 309/314), the reference resolves to that classifier as-is — a
- *    class explicitly DECLARED with a literal `::` in its name (`class
- *    Role::BadPix` under the default `.` separator, where `::` is just
- *    ordinary name characters, not a separator) must resolve as itself when
- *    later referenced, not get mis-split into a port reference.
- * Both default to values that preserve the unconditional split (`null`/`[]`)
- * for the one caller (class-notes.ts) that does not thread the diagram's
- * separator/classifiers through yet.
- * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:298-316 (removePortId/getPortId)
- * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:306-317
- */
-export function splitEndpointPort(
-  raw: string,
-  nsSep: string | null = null,
-  classifiers: readonly Classifier[] = [],
-): { id: string; port?: string } {
-  if (raw.startsWith('"')) return { id: stripQuotes(raw) };
-  if (nsSep === '::') return { id: raw };
-  const sepIdx = raw.indexOf('::');
-  if (sepIdx === -1) return { id: raw };
-  if (firstWithName(classifiers, nsSep, raw) !== undefined) return { id: raw };
-  return { id: raw.slice(0, sepIdx), port: raw.slice(sepIdx + 2) };
-}
 
 /** Resolve a (from, to) pair given whether the arrow points left. */
 function pickDirectional<T>(swapDirection: boolean, leftVal: T, rightVal: T): { from: T; to: T } {
@@ -512,11 +486,4 @@ export function parseRelationshipLine(
       ...(info.upOrLeft === true ? { invertedLinkBurnsTick: true as const } : {}),
     },
   );
-}
-
-export function stripQuotes(s: string): string {
-  if (s.startsWith('"') && s.endsWith('"')) {
-    return s.slice(1, -1);
-  }
-  return s;
 }

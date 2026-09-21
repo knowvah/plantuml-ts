@@ -1,0 +1,22 @@
+@startuml
+<style>
+.color {
+  LineColor blue
+  BackgroundColor lightCyan
+  LineThickness 2
+  ArrowThickness 0.5
+  FontName Arial Narrow
+  FontColor red
+  FontSize 11
+  FontStyle regular
+}
+</style>
+
+repeat
+  :Generate diagrams1; <<save>> <<color>>
+backward:Log context2; <<save>> <<color>>
+repeat while (more data?) is (yes)
+
+
+
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+skinparam arrowColor  #blue
+skinparam arrowFontColor #blue
+skinparam arrowLollipopColor #red
+
+something -right(0- anything : description
+
+@enduml

@@ -14,35 +14,17 @@
  */
 
 import type { NoteEvent } from './ast.js';
-import { emit, type Command } from './sequence-parse-helpers.js';
+import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
 
 // ---------------------------------------------------------------------------
-// Shared fragments: `ColorParser`'s two grammars and the `<<stereo>>` token.
+// Shared fragments: `ColorParser`'s two grammars (sequence-color-grammar.ts)
+// and the `<<stereo>>` token.
 // ---------------------------------------------------------------------------
 
-/**
- * `ColorParser.COLOR_REGEXP` — a plain `#name` background color, OR a
- * two-stop gradient like `#yellow/blue` (one `-`/`\`/`|`/`/` separator
- * between two word runs).
- * @see klimt/color/ColorParser.java:44
- */
-const NOTE_COLOR_ATOM = String.raw`#\w+[-\\|/]?\w+`;
-
-/**
- * `ColorParser.PART2` — the compound `key:value(;key:value)*` form used by
- * `#green;line:lightblue` and `#back:green;line:lightblue`: an optional
- * leading plain color plus `;`, then one-or-more `keyword[:value]` pairs
- * drawn from the fixed `ColorParam`-backed keyword set.
- * @see klimt/color/ColorParser.java:45
- */
-const NOTE_COLOR_COMPOUND = String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
-
-/**
- * `ColorParser.COLORS_REGEXP = PART2 | COLOR_REGEXP` — compound tried
- * first, same alternation order upstream uses.
- * @see klimt/color/ColorParser.java:46
- */
-const NOTE_COLOR = `(?:${NOTE_COLOR_COMPOUND})|(?:${NOTE_COLOR_ATOM})`;
+/** `ColorParser.COLORS_REGEXP` under this file's pre-existing local name —
+ *  see `sequence-color-grammar.ts` for the grammar itself. */
+const NOTE_COLOR = SEQUENCE_COLOR;
 
 /** `StereotypePattern.mandatory` — `<<...>>`, non-greedy so two
  *  stereotype-shaped runs on one line don't merge into one match.
@@ -56,6 +38,44 @@ const NOTE_STEREO = String.raw`<<.+?>>`;
  *  ports the identical upstream method for that command family). */
 function unquote(token: string): string {
   return token.replace(/^"(.*)"$/, '$1');
+}
+
+/**
+ * Split a comma-separated `note over P1[, P2, ...]` participant list,
+ * unquoting each entry (T8), AND register every one (T11, ubrr) --
+ * `FactorySequenceNoteCommand#executeInternal`/`FactorySequenceNote
+ * OverSeveralCommand#executeInternal` both call
+ * `diagram.getOrCreateParticipant(location, ...)` for every referenced name
+ * UNCONDITIONALLY, before checking whether the note body is non-empty
+ * (`FactorySequenceNoteCommand.java:224`,
+ * `FactorySequenceNoteOverSeveralCommand.java:230-232`). Shared by
+ * {@link noteCommand} and {@link styledNoteCommand}, the two commands whose
+ * PARTICIPANT group is this port's own comma-list generalisation (see
+ * {@link styledNoteCommand}'s own doc comment).
+ *
+ * A participant containing `[` is NEVER registered: neither command's
+ * PARTICIPANT group excludes `[` from its capture class the way upstream's
+ * `UrlBuilder.OPTIONAL` (a whole separate, currently-unported group on both
+ * commands) would, so a note carrying an inline `[[url]]` before its `:`
+ * (`hnote over caller [[http://... note]] : test`) has that bracket run
+ * swallowed into the "participant" text instead -- a PRE-EXISTING gap
+ * (unaffected by this fix). Registering that garbage text as a real
+ * participant would draw a phantom extra lifeline no jar ever draws
+ * (jar-verified regression against `pucini-86-goti091`): `[` can never
+ * appear in a legitimate upstream PARTICIPANT (`[%pLN_.@]+` or a quoted
+ * string, neither of which admits an unescaped `[`), so skipping it here
+ * narrows what THIS fix registers without touching the unrelated,
+ * pre-existing URL-parsing gap itself.
+ */
+function registerNoteParticipants(state: ParseState, raw: string): string[] {
+  const participants = raw
+    .split(',')
+    .map((s) => unquote(s.trim()))
+    .filter((s) => s.length > 0);
+  for (const p of participants) {
+    if (!p.includes('[')) ensureParticipant(state, p);
+  }
+  return participants;
 }
 
 // 8. note left of / right of / over
@@ -101,11 +121,10 @@ export const noteCommand: Command = {
 
     // T8: unquote each entry so a quoted participant (`note over Bob,
     // "Long Alice"`) resolves to the SAME id `"Long Alice" -> Bob` created,
-    // rather than a second, quote-literal participant.
-    const participants = rawParticipants
-      .split(',')
-      .map((s) => unquote(s.trim()))
-      .filter((s) => s.length > 0);
+    // rather than a second, quote-literal participant. T11 (ubrr): also
+    // registers each one -- see {@link registerNoteParticipants}'s doc
+    // comment.
+    const participants = registerNoteParticipants(state, rawParticipants);
 
     if (inlineText !== undefined) {
       // Single-line form: replace literal \n escape sequences with real newlines,
@@ -137,12 +156,16 @@ export const noteCommand: Command = {
 //    style-qualified closers `end hnote`/`end rnote` and the unspaced
 //    `endnote`/`endhnote`/`endrnote` forms, mirroring
 //    `Pattern2.cmpile("^end[%s]?(note|hnote|rnote)$")`.
+//    T11 (ubrr batch 2): a pending note with EMPTY participants (only
+//    `noteOnArrowCommand` can open one that way, see its own doc comment)
+//    is dropped without emitting, matching upstream's silent no-op rather
+//    than handing the renderer an empty `NoteEvent.participants`.
 // @see command/note/sequence/FactorySequenceNoteCommand.java:117
 export const endNoteCommand: Command = {
   pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
   execute(state) {
     if (state.pendingNote !== null) {
-      emit(state, state.pendingNote);
+      if (state.pendingNote.participants.length > 0) emit(state, state.pendingNote);
       state.pendingNote = null;
     }
   },
@@ -152,16 +175,36 @@ export const endNoteCommand: Command = {
  * `note left`/`note right`/`note top`/`note bottom` (bare — no participant),
  * single- or multi-line — `FactorySequenceNoteOnArrowCommand`: attaches to
  * the LAST event able to carry a note (`SequenceDiagram#getLastEventWithNote`,
- * typically the last message), positioned relative to IT rather than to a
- * named participant. `left`/`right` resolve to the message's `from`/`to`
- * (verified against `sequence/cijozi-08-mavu547`'s golden: `note left` after
- * `A->B` draws at x=40, left of A's lifeline; `note right` at x=154, right
- * of B's). `top`/`bottom` (hover above/below the whole message, spanning
- * both ends) map onto this engine's `over` position with both endpoints —
- * an approximation, since `NoteEvent.position` has no distinct
- * above/below-the-arrow geometry. Silently does nothing when there is no
- * prior message, mirroring `executeInternal`'s own `if (event == null)
- * return ok()`.
+ * `SequenceDiagram.java:154-158`) — NOT just the last message: `left`/`right`
+ * resolve from `ParseState.lastEventWithNoteLeft`/`Right` (T11, ubrr batch
+ * 2), which `executeArrow`, `refOverCommand`/`refOverMultilineCommand` and
+ * `endCommand`/`elseCommand` all keep current (see that field's own doc
+ * comment for the three upstream `EventWithNote` classes). For a plain
+ * message this is its `from`/`to`, verified against
+ * `sequence/cijozi-08-mavu547`'s golden (`note left` after `A->B` draws at
+ * x=40, left of A's lifeline; `note right` at x=154, right of B's) exactly
+ * as before this change. `top`/`bottom` (hover above/below, spanning both
+ * ends) map onto this engine's `over` position with both endpoints — an
+ * approximation, since `NoteEvent.position` has no distinct above/below
+ * geometry.
+ *
+ * Silently emits NOTHING when no note-capable event has occurred yet
+ * (`lastEventWithNoteLeft`/`Right` both `null`), mirroring
+ * `executeInternal`'s own `if (event == null) return ok()`
+ * (`FactorySequenceNoteOnArrowCommand.java:212-213`) — but the MULTI-LINE
+ * block must still be consumed as a unit either way: upstream's
+ * `CommandMultilines2` accumulates a multi-line command's body independent
+ * of whether `executeNow` later finds an anchor (`PSystemCommandFactory
+ * .java:268-286`'s `isMultilineCommandOk` only calls `isValid` on the
+ * HEADER line). `state.pendingNote` is therefore always opened, with
+ * `participants: []` as the "no anchor" case; `endNoteCommand` drops it
+ * without emitting rather than passing an empty array to the renderer
+ * (`sequence-layout-events.ts`'s `event.participants[0]!` would read past
+ * the end of an empty array otherwise — jar-verified regression bisected
+ * against `teoz-ng-001-17`, whose `opt`/`ref over A,B`/`end` sequence
+ * previously left this port's OWN early-return skipping `pendingNote`
+ * entirely, so the note BODY text fell through to the ordinary dispatch
+ * table and refused as `kind: 'syntax'`).
  *
  * T8: the `<<stereo>>` group is `StereotypePattern.optional`, which wraps
  * BOTH sides in `spaceZeroOrMore()` — so `note <<red>> left` (stereotype
@@ -174,15 +217,23 @@ export const endNoteCommand: Command = {
  * `NoteStyle.getNoteStyle(STYLE)` and feeds it straight into `new
  * Note(display, position, style, ...)` (`:221,225`), same as every other
  * note command in this family.
- * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:78-103,221,225
+ * @see command/note/sequence/FactorySequenceNoteOnArrowCommand.java:78-103,209-225
  */
+function noteOnArrowParticipants(state: ParseState, position: NoteEvent['position']): string[] {
+  const left = state.lastEventWithNoteLeft;
+  const right = state.lastEventWithNoteRight;
+  if (left === null || right === null) return [];
+  if (position === 'left') return [left];
+  if (position === 'right') return [right];
+  return [left, right];
+}
+
 export const noteOnArrowCommand: Command = {
   pattern: new RegExp(
     String.raw`^(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|top|bottom)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.*))?\s*$`,
     'i',
   ),
   execute(state, match) {
-    if (state.lastMessageFrom === null || state.lastMessageTo === null) return;
     const style = match[1]!.toLowerCase();
     const stereo1 = match[2];
     const rawPosition = match[3]!.toLowerCase();
@@ -192,10 +243,7 @@ export const noteOnArrowCommand: Command = {
     const stereotype = stereo1 ?? stereo2;
     const position: NoteEvent['position'] =
       rawPosition === 'left' ? 'left' : rawPosition === 'right' ? 'right' : 'over';
-    const participants =
-      position === 'over'
-        ? [state.lastMessageFrom, state.lastMessageTo]
-        : [position === 'left' ? state.lastMessageFrom : state.lastMessageTo];
+    const participants = noteOnArrowParticipants(state, position);
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
     const base = {
       kind: 'note' as const,
@@ -208,7 +256,7 @@ export const noteOnArrowCommand: Command = {
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      if (participants.length > 0) emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
     } else {
       state.pendingNote = { ...base, text: '' };
     }
@@ -260,10 +308,9 @@ export const styledNoteCommand: Command = {
     const color = match[8];
     const inlineText = match[9];
     const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
-    const participants = match[6]!
-      .split(',')
-      .map((s) => unquote(s.trim()))
-      .filter((s) => s.length > 0);
+    // T11 (ubrr): also registers each participant -- see
+    // {@link registerNoteParticipants}'s doc comment.
+    const participants = registerNoteParticipants(state, match[6]!);
     const stereotype = stereo1 ?? stereo2;
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
     const base = {

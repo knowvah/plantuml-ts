@@ -1,0 +1,14 @@
+@startuml
+skinparam rectangle {
+    FontColor #White
+    BackgroundColor #Black
+}
+
+skinparam card {
+    FontColor #red
+    BackgroundColor #blue
+}
+
+rectangle rectangle
+card card
+@enduml

@@ -1,0 +1,260 @@
+{
+  "$comment": "T6 fragment of the unknown-bucket-routing-repair ledger (mission unknown-bucket-routing-repair, task T6): one row per slug of cohorts/T6.tsv (the jar-NONE-on-@startuml/@startdef cohort, 36 fixtures). See plans/unknown-bucket-routing-repair/diagnosis/T6.md for the full mechanism table. One row per slug, sorted by slug; consumed by scripts/pin-corpus-tree.ts (T0).",
+  "rows": [
+    {
+      "slug": "bamudi-49-caxo996",
+      "cohort": "jar-openiconic-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemOpenIconicFactory (PSystemBuilder.java:150) renders one named glyph from the bundled Open Iconic path data (openiconic/PSystemOpenIconic.java, openiconic/OpenIconic.java) when the line is 'openiconic <name>'; this factory and its glyph-path data set are unported."
+    },
+    {
+      "slug": "bupexo-79-sijo243",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble (2.3-4.6 KB of <text> markup) pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?'/'Empty description'/'Parsing syntax error about |' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "dobujo-29-rifo090",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble (2.3-4.6 KB of <text> markup) pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?'/'Empty description'/'Parsing syntax error about |' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "fikaka-55-jeva969",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble (2.3-4.6 KB of <text> markup) pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?'/'Empty description'/'Parsing syntax error about |' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "firiru-71-viki803",
+      "cohort": "preprocessor-only",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "A source whose first line is '@startdef' is flagged by UmlSource#isStartDef (core/UmlSource.java:288) and BlockUml#isStartDef (BlockUml.java:241-244); this port's dispatcher has no equivalent construct -- src/core/block-extractor.ts never recognises '@startdef' as its own block type, so it falls through to a generic refusal (engine=unknown, no 'Assumed diagram type' printed at all, unlike the class-refusal rows in this same cohort). The same unported '@startdef block' concept is already filed as a defect by routing-heuristic-repair's T9: .agent-notes/T9-includedef-definitions-container.md (see also TContext.java:687-709, BlockUmlBuilder.java:150-156)."
+    },
+    {
+      "slug": "fotete-48-viga126",
+      "cohort": "jar-listopeniconic-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListOpenIconicFactory (PSystemBuilder.java:151) renders the full Open Iconic icon catalog (openiconic/PSystemListOpenIconic.java) for the bare 'listopeniconic' line; unported alongside PSystemOpenIconicFactory's single-glyph mode."
+    },
+    {
+      "slug": "gazale-13-tadu312",
+      "cohort": "jar-sudoku-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemSudokuFactory (PSystemBuilder.java:163) parses the digit grid and solves it via DLXEngine/SudokuDLX's dancing-links algorithm (sudoku/SudokuDLX.java) and renders the grid with GraphicsSudoku (sudoku/GraphicsSudoku.java); this whole solver-plus-renderer subsystem is unported."
+    },
+    {
+      "slug": "govuca-53-mili511",
+      "cohort": "jar-stdlib-catalog-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "The top-level 'stdlib <name>' directive is dead code upstream -- StdlibDiagramFactory's constructor unconditionally throws UnsupportedOperationException (klimt/sprite/StdlibDiagramFactory.java:50) and its PSystemBuilder registration is commented out (PSystemBuilder.java:171) -- but a bare 'stdlib' line (no argument) still reaches a library-catalog listing page (confirmed by the rendered per-library 'Delivered by <source>' credit line matching preproc/Stdlib.java:327's format string); the exact triggering class was not pinned down further (a preprocessor-level listing, not one of PSystemBuilder's factories), but the feature is unported either way."
+    },
+    {
+      "slug": "gujuga-46-vifa350",
+      "cohort": "jar-welcome-page",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemWelcomeFactory (PSystemBuilder.java:133, tried FIRST for every @startuml) returns a genuine non-error PSystemWelcome diagram whenever source.getTotalLineCount() == 2 (PSystemWelcomeFactory.java:52) -- true here once the lone comment line is stripped. This port's dispatcher has no 'trivial-content tutorial page' concept at all, so every plugin refuses the block and class's refusal draws the error sentinel where the jar drew a friendly tutorial."
+    },
+    {
+      "slug": "jigemu-90-titu666",
+      "cohort": "jar-colors-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemColorsFactory (PSystemBuilder.java:134) matches ^colors?\\s*(#?\\w+)?\\s*$ (PSystemColorsFactory.java:48) and, with no argument, renders the full named-color palette via PSystemColors; this factory, its CSS-color-name table and its renderer are entirely unported."
+    },
+    {
+      "slug": "jivufi-79-simi298",
+      "cohort": "jar-listfonts-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListFontsFactory (PSystemBuilder.java:148) enumerates the HOST JVM's installed fonts (font/PSystemListFonts.java) and previews the given text in each; this needs a system font enumeration API this port's browser-safe library (CLAUDE.md) can never have, so it is permanently unported."
+    },
+    {
+      "slug": "jodesa-24-lovo810",
+      "cohort": "jar-listfonts-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListFontsFactory (PSystemBuilder.java:148) enumerates the HOST JVM's installed fonts (font/PSystemListFonts.java) and previews the given text in each; this needs a system font enumeration API this port's browser-safe library (CLAUDE.md) can never have, so it is permanently unported."
+    },
+    {
+      "slug": "kavama-92-noro949",
+      "cohort": "jar-dedication-easter-egg",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemDedicationFactory (PSystemBuilder.java:186) matches one line against Dedications.get(line) (dedication/Dedications.java:78-88), which requires length()>25 and an exact match against a small curated phrase list -- the first entry of which is literally this fixture's line, 'Write your own dedication!' (dedication/Dedications.java:66). Unported: a bundled-PNG-image easter egg, same family as PSystemCharlieFactory."
+    },
+    {
+      "slug": "kenari-17-dajo806",
+      "cohort": "jar-colors-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemColorsFactory (PSystemBuilder.java:134) matches ^colors?\\s*(#?\\w+)?\\s*$ (PSystemColorsFactory.java:48); with a named-color argument it renders that color's related-color family via PSystemColors; this factory, its CSS-color-name table and its renderer are entirely unported."
+    },
+    {
+      "slug": "kicizi-84-lexu138",
+      "cohort": "jar-charlie-easter-egg",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemCharlieFactory (PSystemBuilder.java:181) is a single-line easter egg (eggs/PSystemCharlieFactory.java) rendering a bundled PNG when the line is exactly 'charlie'; unported."
+    },
+    {
+      "slug": "kokote-73-revo347",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble (here plus a real ErrorUml on a genuine 'Port can only be used inside an element' syntax error) pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): the error text is present past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "komoso-43-xika169",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) and the genuine 'Empty description (Assumed diagram type: sequence)' error text (this port emits the identical phrase for the identical input) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "kubuju-35-neji041",
+      "cohort": "state-angle-bracket-overclaim",
+      "disposition": "known-gap",
+      "task": "T9",
+      "seam": "state",
+      "command": "CommandLinkStateCommon",
+      "size": 18,
+      "reason": "T9 fixed the state-seam over-claim: state-commands.ts rule 16's transition pre-filter (pattern /[<>]/, passes:['two']) now carries a confirm(match) hook that runs parseTransitionLine(match.input) PASS-INDEPENDENTLY, and dispatchCommand (src/diagrams/state/parser.ts:135-144) only treats a pattern match as 'this line is handled' when confirm also returns true -- mirroring upstream's real per-command candidate matching, which tests every command's full anchored regex before isEligibleFor is ever consulted (command/PSystemCommandFactory.java:169-175). state now refuses this line ('Syntax Error?'), joining class/sequence/description; re-measured through measureFixture: ourType flips STATE->NONE (agrees with jarType NONE) and weErrored flips false->true. The refusal itself remains a known-gap, not fixed: the jar does NOT error on this source -- PSystemListFontsFactory (font/PSystemListFonts.java, PSystemBuilder.java:148) is the upstream factory that renders 'Fonts available:' for a bare 'listfonts <text>' line by enumerating the HOST JVM's installed fonts, a system font enumeration API this port's browser-safe library (CLAUDE.md) can never have, so it is permanently unported -- same family and same disposition as this fragment's jivufi-79-simi298/jodesa-24-lovo810/vofomo-62-gure525 rows. Landing verified: NOT a third engine (routing agrees NONE==NONE, D3), a pure narrowing (state only stops accepting something it never should have, D9). HELD, not merged: this same narrowing unmasks 5 pre-existing, unrelated defects in OTHER engines that state's looseness was accidentally hiding (every one of these documents reaches state only as dispatch's last resort, and contains a bare '>' from its own '->' arrows, which used to satisfy rule 16's loose gate) -- dot-cache/sequence/bomino-39-tipo216 (line 3 '<style src=strictuml.skin>': CommandStyleImport, style/CommandStyleImport.java:67-80, registered via CommonCommands.addCommonCommands2, command/CommonCommands.java:91-93 -> SequenceDiagramFactory.java:100), dot-cache/sequence/dolice-60-copi767 (line 7 'note left [[http://www.google.es]]': FactorySequenceNoteOnArrowCommand's URL group, command/note/sequence/FactorySequenceNoteOnArrowCommand.java:77-88, UrlBuilder.OPTIONAL at :86, missing from src/diagrams/sequence/command-note-factory.ts:179-216's noteOnArrowCommand pattern), dot-cache/sequence/fojomu-60-cuda302 (line 9 '{start} <-> {end} : some time') and dot-cache/sequence/zoturo-25-jima978 (line 10, same shape): CommandLinkAnchor, sequencediagram/command/CommandLinkAnchor.java:49-88, SequenceDiagramFactory.java:155, already self-documented as an unported gap in src/diagrams/sequence/command-misc.ts:14-16, and dot-cache/timing/zeboxu-77-xola056 (the whole 'timing' diagram TYPE is unported -- no src/diagrams/timing/ exists at all -- upstream registers it as TimingDiagramFactory, timingdiagram/TimingDiagramFactory.java, PSystemBuilder.java:187). Per decisions.md D11, landing is judged only after a companion seam task ports these; until then this commit stays off main."
+    },
+    {
+      "slug": "kutazo-93-vumu267",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble (2.3-4.6 KB of <text> markup) pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "lazama-75-loli189",
+      "cohort": "jar-sudoku-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemSudokuFactory (PSystemBuilder.java:163) parses the digit grid and solves it via DLXEngine/SudokuDLX's dancing-links algorithm (sudoku/SudokuDLX.java) and renders the grid with GraphicsSudoku (sudoku/GraphicsSudoku.java); this whole solver-plus-renderer subsystem is unported."
+    },
+    {
+      "slug": "ludecu-61-laja912",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "nifosu-42-gubi213",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "rubeku-92-vefi942",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "tomodo-34-bimi231",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "tukimi-92-noxu802",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "tumepe-28-zuma441",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 3 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "vedine-65-rafo449",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "vesuzo-97-jelo022",
+      "cohort": "jar-welcome-page",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemWelcomeFactory (PSystemBuilder.java:133, tried FIRST for every @startuml) returns a genuine non-error PSystemWelcome diagram whenever source.getTotalLineCount() == 2 (PSystemWelcomeFactory.java:52) -- true here, a literal @startuml/@enduml with no line between. This port's dispatcher has no 'trivial-content tutorial page' concept at all, so every plugin refuses the block and class's refusal draws the error sentinel where the jar drew a friendly tutorial."
+    },
+    {
+      "slug": "vofomo-62-gure525",
+      "cohort": "jar-listfonts-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListFontsFactory (PSystemBuilder.java:148) enumerates the HOST JVM's installed fonts (font/PSystemListFonts.java) and previews a default sample string in each when no text argument is given; this needs a system font enumeration API this port's browser-safe library (CLAUDE.md) can never have, so it is permanently unported."
+    },
+    {
+      "slug": "xozane-18-becu956",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    },
+    {
+      "slug": "xucoma-93-jeko861",
+      "cohort": "jar-listarchimatesprites-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListArchimateSpritesFactory (PSystemBuilder.java:152) renders the bundled ArchiMate sprite catalog for the bare 'listsprite' line (klimt/sprite/PSystemListArchimateSprites.java, matched text 'List Current Sprites'); this factory and its bundled sprite set are unported."
+    },
+    {
+      "slug": "zelini-86-gelo257",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218; this fixture's source is 2 lines) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true). That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Verified by scanning the FULL golden (not just its head): this port's own 'Syntax Error?' banner text (ported from PSystemBasicFactory.java:96 / PSystemCommandFactory.java:171) is present in the golden too, past offset 4096. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "zetebu-58-capa762",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true); here the actual jar diagnostic is 'Parsing syntax error about |', a genuine parse error on the '!$c=13 | 5' preprocessor line. That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Measurement-tool limitation, not an unported feature -- this port also refuses (though on a different line/reason) the same source."
+    },
+    {
+      "slug": "zicejo-69-teko349",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) and, on some minutes of the wall clock, a Patreon/Liberapay/Dedication ad (PSystemError.java:221-229, gated on System.currentTimeMillis()'s minute -- not frozen by -DPLANTUML_DETERMINISTIC_TEXT=true); here the jar's own diagnostic is 'Syntax Error? (Assumed diagram type: activity)' on the legacy '#red:repeat' activity fragment. That preamble pushes the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Measurement-tool limitation, not an unported feature -- this port's own refusal already agrees with the jar's."
+    },
+    {
+      "slug": "zodude-13-tito074",
+      "cohort": "jar-error-beyond-head-window",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) plus, here, a large donation-ad PNG (addMessageDedication/addMessagePatreon, PSystemError.java:221-229). Both push the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) and the jar's own 'Syntax Error? (Assumed diagram type: sequence)' on the unported 'block Hello' block-diagram syntax past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's; measured offset 7443 of 15192 total bytes), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Measurement-tool limitation, not an unported feature -- this port also refuses the same source (as class, not sequence, but both are refusals)."
+    },
+    {
+      "slug": "zusibo-75-vate603",
+      "cohort": "jar-listemoji-utility",
+      "disposition": "known-gap",
+      "task": "T6",
+      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+    }
+  ]
+}

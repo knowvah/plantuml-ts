@@ -1,0 +1,3 @@
+@startuml
+archimate #MOTIVATION "[[https://scrumguides.org/scrum-guide.html#transparency {Transparency} Transparency]]" <<motivation-principle>> as TRANSPARENCY
+@enduml

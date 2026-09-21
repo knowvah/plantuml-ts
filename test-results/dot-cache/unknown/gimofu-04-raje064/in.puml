@@ -1,0 +1,15 @@
+@startuml
+
+rectangle BBB
+frame Site {
+    entity AAAA 
+    component AAAAA
+}
+
+card ssd [
+    foo
+]
+
+remove BBB
+remove AAAA
+@enduml
