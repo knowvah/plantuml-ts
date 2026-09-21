@@ -79,8 +79,8 @@ export type { JsonNode };
 
 import type { ClassifierKind, Classifier } from './class-classifier-ast.js';
 export type { ClassifierKind, Classifier };
-import type { RelationshipType, LinkDecor, Relationship } from './class-relationship-ast.js';
-export type { RelationshipType, LinkDecor, Relationship };
+import type { RelationshipType, LinkDecor, MiddleDecor, Relationship } from './class-relationship-ast.js';
+export type { RelationshipType, LinkDecor, MiddleDecor, Relationship };
 import type { NotePosition, ClassNote } from './class-note-decl-ast.js';
 export type { NotePosition, ClassNote };
 

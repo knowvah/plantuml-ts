@@ -42,6 +42,19 @@ export interface ArrowInfo {
    * @see ~/git/plantuml/.../abel/Link.java:145-156 (getInv)
    */
   upOrLeft: boolean;
+  /**
+   * T5/M4: whether the arrow BODY contains a dot, independent of which decor
+   * won `resolveType`'s significance order -- `CommandLinkClass#getLinkType`
+   * applies `goDashed()` whenever `ARROW_BODY1`/`ARROW_BODY2` contains "."
+   * REGARDLESS of decor (`decoration/LinkType.java:71-81` keeps `linkStyle`
+   * as a field separate from `decor1`/`decor2`), so a composition/aggregation/
+   * extension arrow keeps its own dottedness even though those types are
+   * hardcoded non-dashed in `class-dot-edges.ts#EDGE_DECORATION_MAP`. Always
+   * set (never `undefined`) -- every `resolveArrow` return path computes it.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:495-497
+   * @see ~/git/plantuml/.../decoration/LinkType.java:71-81,115-121
+   */
+  dashedBody: boolean;
 }
 
 // A body run may embed an optional orientation word (`-left-`, `*-right-`,
@@ -151,6 +164,13 @@ export function splitCanonicalHeads(canonical: string): { head1: string; head2: 
   }
   return { head1: canonical.slice(0, firstBody), head2: canonical.slice(lastBody + 1) };
 }
+
+// T5/M6: the INSIDE middle-circle marker moved to class-arrow-middle-decor.ts
+// (500-line cap split) -- re-exported so every existing
+// `import { extractMiddleDecor, invertMiddleDecor, type MiddleDecor } from
+// './class-arrow-grammar.js'` site keeps working unchanged.
+export type { MiddleDecor } from './class-arrow-middle-decor.js';
+export { extractMiddleDecor, invertMiddleDecor } from './class-arrow-middle-decor.js';
 
 /**
  * One arrow head's decoration family, restricted to the decors this parser
@@ -278,6 +298,8 @@ function isUpOrLeftDirection(rawArrow: string): boolean {
 export function resolveArrow(rawArrow: string): ArrowInfo | null {
   const canonical = canonicalizeArrow(rawArrow);
   const upOrLeft = isUpOrLeftDirection(rawArrow);
+  // T5/M4: computed once, returned on every path -- see ArrowInfo.dashedBody.
+  const dashedBody = canonical.includes('.');
   const { head1, head2 } = splitCanonicalHeads(canonical);
   const kind1 = HEAD1_KIND[head1] ?? 'unknown';
   const kind2 = HEAD2_KIND[head2] ?? 'unknown';
@@ -288,13 +310,13 @@ export function resolveArrow(rawArrow: string): ArrowInfo | null {
     // still applies regardless of type — it is computed from ARROW_DIRECTION
     // alone, not from any decor. Regex built from a string so the `{`/`}` do
     // not confuse the complexity checker.
-    if (CROWS_FOOT_RE.test(rawArrow)) return { type: 'association', swapDirection: upOrLeft, upOrLeft };
+    if (CROWS_FOOT_RE.test(rawArrow)) return { type: 'association', swapDirection: upOrLeft, upOrLeft, dashedBody };
     return null;
   }
-  const type = resolveType(kind1, kind2, canonical.includes('.'));
+  const type = resolveType(kind1, kind2, dashedBody);
   const decorSwap = isDirectionKind(kind1) && !isDirectionKind(kind2);
   const swapDirection = decorSwap !== upOrLeft;
-  return { type, swapDirection, upOrLeft };
+  return { type, swapDirection, upOrLeft, dashedBody };
 }
 
 // ---------------------------------------------------------------------------
@@ -336,22 +358,31 @@ export interface ArrowStyleOverrides {
    *  (`src/core/cucadiagram/linkDedup.ts`).
    *  @see ~/git/plantuml/.../decoration/WithLinkType.java:110-116,150-151 */
   single?: true;
+  /**
+   * T5/M12: the `hidden` ARROW_STYLE token (`WithLinkType.goHidden`,
+   * `applyOneStyle`'s `equalsIgnoreCase("hidden")` branch,
+   * `decoration/WithLinkType.java:100-101,149-150`) -- a real Link-level
+   * flag (read back via `Link#isHidden()`, `abel/Link.java:458-459`), NOT a
+   * render style, hence its own field rather than folding into
+   * `lineStyle`. Previously matched-and-discarded as a
+   * `NON_COLOR_KEYWORDS` no-op (`guxode-39-dobi371`'s extra link group);
+   * now carried so the relationship-push site can skip the group.
+   * @see ~/git/plantuml/.../svek/SvekEdge.java:835-836
+   */
+  hidden?: true;
 }
 
 const CLASS_THICKNESS_TOKEN_RE = /^thickness=(\d+)$/i;
 
 /**
- * Bracket keywords with no render effect via this function -- `hidden` is a
- * DOT-graph-affecting flag matched-and-discarded by the surrounding grammar
- * (`class-relationship-parser.ts`'s own `ARROW_STYLE` doc comment: consumed
- * so the arrow still matches, never carried on `Relationship`); `plain`/
- * `node` are upstream no-ops
- * (`WithLinkType.applyOneStyle`'s own "Do nothing"/no reachable svek/abel
- * consumer). Recognized here ONLY so none of the four is ever
- * misclassified as a color token. (`single` was in this set until SI1/T11
- * -- it now has its own branch, see `ArrowStyleOverrides.single`.)
+ * Bracket keywords with no render effect via this function -- `plain`/`node`
+ * are upstream no-ops (`WithLinkType.applyOneStyle`'s own "Do nothing"/no
+ * reachable svek/abel consumer). Recognized here ONLY so neither is ever
+ * misclassified as a color token. (`single` was in this set until SI1/T11;
+ * `hidden` until T5/M12 -- each now has its own branch, see
+ * `ArrowStyleOverrides.single`/`.hidden`.)
  */
-const NON_COLOR_KEYWORDS = new Set(['hidden', 'plain', 'node']);
+const NON_COLOR_KEYWORDS = new Set(['plain', 'node']);
 
 /**
  * `WithLinkType.applyStyle`/`applyOneStyle` (`decoration/WithLinkType.java:
@@ -393,6 +424,9 @@ export function parseArrowStyleOverrides(rawArrow: string): ArrowStyleOverrides 
       else if (lower === 'norank') {
         result.norank = true;
       } // goNorank() -- constraint=false
+      else if (lower === 'hidden') {
+        result.hidden = true;
+      } // goHidden() -- Link#isHidden(), see ArrowStyleOverrides.hidden
       else if (NON_COLOR_KEYWORDS.has(lower)) {
         /* upstream no-op / DOT-only, see doc comment */
       } else {

@@ -5,18 +5,24 @@
  * parser.ts under the repo's 500-line-per-file cap.
  */
 
-import type { Classifier, Relationship } from './ast.js';
+import type { Classifier, Relationship, MiddleDecor, UrlInfo } from './ast.js';
 import { splitOnSeparator } from './class-namespace.js';
-import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {
   ARROW_DIR,
   ARROW_STYLE,
   resolveArrow,
   parseArrowDecors,
-  parseArrowDecorsRaw,
   arrowLength,
   parseArrowStyleOverrides,
+  extractMiddleDecor,
+  invertMiddleDecor,
 } from './class-arrow-grammar.js';
+import { parseUrlBracket } from './class-url.js';
+import {
+  resolveRelationshipEndpoints,
+  resolveRelationshipLabel,
+  buildRelOptionalFields,
+} from './class-relationship-field-builder.js';
 // CLASS_ID/stripQuotes/splitEndpointPort moved to
 // class-relationship-id-grammar.ts (500-line cap split, T4 Mechanism C) --
 // re-exported so every existing import site (class-lollipop.ts,
@@ -45,7 +51,10 @@ export { CLASS_ID, stripQuotes, splitEndpointPort };
  *   7: optional right role (`/roleName`, SECOND_ROLE)
  *   8: optional right qualifier (`[Qualifier]`)
  *   9: right identifier
- *   10: optional label after ':'
+ *   10: optional `[[url]]` bracket (T5/M3 — the FULL bracket text, fed to
+ *       `parseUrlBracket` unchanged)
+ *   11: optional `<<stereotype>>` (B7/M8)
+ *   12: optional label after ':'
  */
 // Arrow BODY length is arbitrary in upstream PlantUML (any run of `-`
 // or `.` characters — see CommandLinkClass's `ARROW_BODY` = `[-=.]+`);
@@ -181,10 +190,12 @@ const REL_RE = new RegExp(
     String.raw`\s*(?:${REL_COLOR})?` +
     // B7/M8: the link's `<<stereo>>` is CAPTURED (it was `(?:...)`) -- it is a
     // style-class selector upstream, `CommandLinkClass.java:368-371` ->
-    // `SvekEdge.java:817-822`. This inserts one group at this position, so the
-    // trailing label moved from m[10] to m[11]; REL_DISPATCH_RE below stays
-    // fully non-capturing and is unaffected.
-    String.raw`\s*(?:${REL_URL})?\s*(${REL_STEREO})?` +
+    // `SvekEdge.java:817-822`. T5/M3: the `[[url]]` bracket is ALSO now
+    // captured (the FULL bracket text, fed straight to `parseUrlBracket`) --
+    // together these two insertions push the trailing label from m[10] to
+    // m[12] (stereo m[11], url m[10]); REL_DISPATCH_RE below stays fully
+    // non-capturing and is unaffected by either.
+    String.raw`\s*(${REL_URL})?\s*(${REL_STEREO})?` +
     String.raw`\s*(?::\s*(.+))?$`,
   'u',
 );
@@ -209,11 +220,11 @@ export const REL_DISPATCH_RE = new RegExp(
 );
 
 /** Resolve a (from, to) pair given whether the arrow points left. */
-function pickDirectional<T>(swapDirection: boolean, leftVal: T, rightVal: T): { from: T; to: T } {
+export function pickDirectional<T>(swapDirection: boolean, leftVal: T, rightVal: T): { from: T; to: T } {
   return swapDirection ? { from: rightVal, to: leftVal } : { from: leftVal, to: rightVal };
 }
 
-interface OptionalRelFields {
+export interface OptionalRelFields {
   fromMultiplicity?: string | undefined;
   toMultiplicity?: string | undefined;
   fromRole?: string | undefined;
@@ -241,6 +252,21 @@ interface OptionalRelFields {
   /** T1/B33: tri-state -- `withOptionalFields` drops only `undefined`, so an
    *  explicit `false` survives, which is exactly what this field needs. */
   dotEdgeReversed?: boolean | undefined;
+  /** B7/M8: see `Relationship.stereotypeTags`'s doc comment. Previously
+   *  reached `withOptionalFields` only via a conditional spread (never a
+   *  declared key here); made explicit by the T5 field-builder split. */
+  stereotypeTags?: readonly string[] | undefined;
+  /** B21/M20: see `Relationship.invertedLinkBurnsTick`'s doc comment. Same
+   *  previously-implicit-via-spread history as {@link stereotypeTags}. */
+  invertedLinkBurnsTick?: true | undefined;
+  /** T5/M4: see `Relationship.dashedBody`'s doc comment (class-relationship-ast.ts). */
+  dashedBody?: boolean | undefined;
+  /** T5/M12: see `Relationship.hidden`'s doc comment. */
+  hidden?: true | undefined;
+  /** T5/M3: see `Relationship.url`'s doc comment. */
+  url?: UrlInfo | undefined;
+  /** T5/M6: see `Relationship.middleDecor`'s doc comment. */
+  middleDecor?: MiddleDecor | undefined;
 }
 
 /** Assemble a Relationship, omitting undefined optional fields (and an
@@ -277,7 +303,7 @@ function withOptionalFields(
 /** Sided (from/to) fields carried by REL_RE's optional groups: cardinality,
  *  role (FIRST_ROLE/SECOND_ROLE, CommandLinkClass.java:127,144 — bare or
  *  quoted, stripped here), `Class::member` port, and `[Qualifier]`. */
-function sidedRelFields(
+export function sidedRelFields(
   m: RegExpExecArray,
   swapDirection: boolean,
   left: { port?: string | undefined },
@@ -309,25 +335,10 @@ function sidedRelFields(
   };
 }
 
-/** Quoted multiplicities INSIDE the free-text label (`: "1" contains "0..*"`),
- *  mirroring Labels#init (descdiagram/command/Labels.java:75-104): when NO
- *  explicit `"m"` group sits beside either endpoint, the label decomposes via
- *  three anchored patterns — BOTH_LABELS / FIRST_LABEL_ONLY /
- *  SECOND_LABEL_ONLY — into firstLabel (left end), the residual middle label
- *  (trimmed, outer quotes stripped), and secondLabel (right end); these feed
- *  taillabel/label/headlabel in the DOT (tilipa-86-suxi130). Returns null
- *  when no pattern matches (label stays whole). */
-function decomposeLabel(
-  label: string,
-): { first?: string | undefined; mid: string; second?: string | undefined } | null {
-  const both = /^"([^"]+)"([^"]+)"([^"]+)"$/.exec(label);
-  if (both !== null) return { first: both[1]!, mid: stripQuotes(both[2]!.trim()).trim(), second: both[3]! };
-  const firstOnly = /^"([^"]+)"([^"]+)$/.exec(label);
-  if (firstOnly !== null) return { first: firstOnly[1]!, mid: stripQuotes(firstOnly[2]!.trim()).trim() };
-  const secondOnly = /^([^"]+)"([^"]+)"$/.exec(label);
-  if (secondOnly !== null) return { mid: stripQuotes(secondOnly[1]!.trim()).trim(), second: secondOnly[2]! };
-  return null;
-}
+// decomposeLabel moved to class-relationship-label-decompose.ts (500-line
+// cap split) -- re-exported below so every existing import site keeps
+// working unchanged.
+export { decomposeLabel } from './class-relationship-label-decompose.js';
 
 /**
  * G2 N9: the bare (leaf) portion of an endpoint's RAW parsed text, per the
@@ -370,59 +381,12 @@ export function parseRelationshipLine(
   const info = resolveArrow(arrow);
   if (info === null) return null;
   const decors = parseArrowDecors(arrow, info.swapDirection);
-  // G2 N9: the SVG-id pair (Java's cl1/cl2 + LinkType.decor2/decor1) is
-  // swapped ONLY by `upOrLeft` (the explicit -left-/-up- direction word),
-  // never by the arrowhead-driven `swapDirection` above -- see `ArrowInfo
-  // .upOrLeft`'s doc comment and `ast.ts#Relationship.idEntity1`'s.
-  const rawDecors = parseArrowDecorsRaw(arrow);
-  const idDecors = pickDirectional(info.upOrLeft, rawDecors.decor1, rawDecors.decor2);
-
-  const left = splitEndpointPort(m[1]!, nsSep, classifiers);
-  const right = splitEndpointPort(m[9]!, nsSep, classifiers);
-  const id = pickDirectional(info.swapDirection, left.id, right.id);
-  const idNames = pickDirectional(info.upOrLeft, idLeaf(left.id, nsSep), idLeaf(right.id, nsSep));
-  // G2 N30: same upOrLeft swap, FULL (non-leaf) ids -- see
-  // `ast.ts#Relationship.idEntity1FullId`'s doc comment.
-  const idFullNames = pickDirectional(info.upOrLeft, left.id, right.id);
-  const sided = sidedRelFields(m, info.swapDirection, left, right);
-  const stereotypeTags = (m[10] ?? '')
-    .replace(/^<</u, '')
-    .replace(/>>$/u, '')
-    .split(',')
-    .map((t) => cleanStereotypeToken(t.trim()))
-    .filter((t) => t.length > 0);
-  let label = m[11]?.trim();
-  // Label-embedded multiplicities (Labels#init) — only when neither explicit
-  // quantifier group matched (upstream: `firstLabel == null && secondLabel ==
-  // null`). Decomposed ends map left→first / right→second, then go through
-  // the SAME direction swap as the explicit quoted groups (upstream swaps
-  // them via LinkArg#getInv on up/left; svek sides them by decor direction).
-  //
-  // G2 N64 item 46: `Labels#init` (Labels.java:78-102) ALWAYS falls through
-  // to `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(labelLink,
-  // "\"")` on its FINAL line when none of the 3 embedded-pattern branches
-  // returned early — whether that's because an explicit endpoint quantifier
-  // already set `firstLabel`/`secondLabel` (skipping the pattern match
-  // entirely, jar-verified against `pucazu-91-paxe635`'s golden `a" is "b`
-  // text) or because the pattern match itself found no embedded
-  // multiplicity (jar-verified against `begico-70-guva302`'s golden
-  // `Baird\lTools vs Goals` text). Mirrored below: `stripQuotes` runs
-  // unconditionally on whatever `label` resolves to, EXCEPT when
-  // `decomposeLabel` already applied it internally (`dec.mid`, matching
-  // Labels.java's own early-return branches at lines 84-85/91-92/98-99).
-  if (label !== undefined && m[3] === undefined && m[6] === undefined) {
-    const dec = decomposeLabel(label);
-    if (dec !== null) {
-      label = dec.mid;
-      const mult = pickDirectional(info.swapDirection, dec.first, dec.second);
-      sided.fromMultiplicity = mult.from;
-      sided.toMultiplicity = mult.to;
-    } else {
-      label = stripQuotes(label);
-    }
-  } else if (label !== undefined) {
-    label = stripQuotes(label);
-  }
+  // G2 N9/N30 (idEntity1/idEntity1FullId) and the label/stereotype
+  // decomposition are split into class-relationship-field-builder.ts to
+  // stay under this function's own NLOC/CCN cap -- pure relocation, see
+  // that file's doc comments for the Java citations each field mirrors.
+  const { id, idNames, idFullNames, idDecors, sided } = resolveRelationshipEndpoints(m, nsSep, classifiers, info);
+  const { stereotypeTags, label } = resolveRelationshipLabel(m, info, sided);
   // Arrow length drives dot minlen (length - 1): body char count, or 1 when the
   // arrow is horizontally oriented (`-left-`/`-right-`). See arrowLength.
   const length = arrowLength(arrow);
@@ -430,69 +394,26 @@ export function parseRelationshipLine(
   // `-[thickness=N]->`) -- see `Relationship.lineStyleOverride`'s doc
   // comment (ast.ts) for the upstream method this mirrors.
   const styleOverrides = parseArrowStyleOverrides(arrow);
+  // T5/M3: `[[url]]` on the relationship line -- m[10] is REL_RE's url group
+  // (see that file's own group-numbering doc comment); the FULL bracket
+  // text is fed to `parseUrlBracket` unchanged.
+  const url = m[10] !== undefined ? parseUrlBracket(m[10]) : undefined;
+  // T5/M6: the INSIDE mid-body marker (`-0)-`) -- see
+  // `Relationship.middleDecor`'s doc comment (class-relationship-ast.ts).
+  const middleDecor = invertMiddleDecor(extractMiddleDecor(arrow), info.upOrLeft);
 
+  // T5/M4/M12: dashedBody/hidden ride straight off info/styleOverrides --
+  // see ArrowInfo.dashedBody and Relationship.hidden's own doc comments.
+  const fields = { sided, label, length, weight, idNames, idDecors, idFullNames };
+  const overrides = {
+    styleOverrides,
+    stereotypeTags,
+    info,
+    dashedBody: info.dashedBody,
+    hidden: styleOverrides.hidden,
+  };
   return withOptionalFields(
     { from: id.from, to: id.to, type: info.type, ...decors },
-    {
-      ...sided,
-      label,
-      length,
-      weight,
-      idEntity1: idNames.from,
-      idEntity2: idNames.to,
-      idEntity1Decor: idDecors.from,
-      idEntity2Decor: idDecors.to,
-      idEntity1FullId: idFullNames.from,
-      idEntity2FullId: idFullNames.to,
-      lineStyleOverride: styleOverrides.lineStyle,
-      thicknessOverride: styleOverrides.thickness,
-      colorOverride: styleOverrides.color,
-      // SI1/T11: `single` add-time dedup flag (WithLinkType.goSingle) --
-      // consumed at the relationship-push site, see
-      // `Relationship.single`'s doc comment (class-relationship-ast.ts).
-      single: styleOverrides.single,
-      // `[norank]` -- `WithLinkType.goNorank` -> `setConstraint(false)`,
-      // emitted as `constraint=false` (`SvekEdge.java:475-476`). Consumed by
-      // `class-dot-edges.ts#buildDotEdgeAttrs`.
-      norank: styleOverrides.norank,
-      // The dot rank swap's real input: whether upstream's Link put the
-      // PARENT first. For an arrow that is exactly `swapDirection` -- true
-      // when `from`/`to` were reordered away from source-text order, i.e.
-      // the parent was written on the left. Only meaningful for the two
-      // hierarchical types, so it is omitted elsewhere rather than carried
-      // as a meaningless flag. See `Relationship.parentIsLinkEntity1`.
-      parentIsLinkEntity1: info.type === 'extension' || info.type === 'implementation' ? info.swapDirection : undefined,
-      // G2 N59: `ArrowInfo.swapDirection` itself (NOT `upOrLeft`, which
-      // `idEntity1FullId`/`idEntity2FullId` already carry) -- the ONE swap
-      // that reorders `left.id`/`right.id` (pure source-text left-to-right
-      // order) into `from`/`to`. `class-commands.ts`'s auto-create dispatch
-      // needs this to ensure BOTH endpoints in the SAME order jar's
-      // `CommandLinkClass.executeArg` does (`ent1String`/`ent2String`,
-      // strictly left-to-right, entirely independent of arrowhead/LinkType
-      // semantics -- `link.getInv()` only swaps the LINK's own pointer,
-      // AFTER both entities already exist). Only set when `true` (mirrors
-      // this file's own `undefined`-means-default convention) -- omitted
-      // for the common (non-swapped) case, zero behavior change there.
-      swapDirection: info.swapDirection === true ? true : undefined,
-      // B7/M8: the link's `<<tag>>` style-class label(s). `<<a,b>>` is a
-      // comma-separated label list upstream (`Stereotype#getLabels`), so it
-      // is split here and each token cleaned the same way
-      // `collectStyleTagNames` cleans a declaration's own tag.
-      ...(stereotypeTags.length > 0 ? { stereotypeTags } : {}),
-      // B21/M20: upstream inverts on the direction WORD alone
-      // (`CommandLinkClass.java:362-363`), and the inversion costs a uid
-      // tick because `getInv()` constructs a second `Link`. `upOrLeft` is
-      // exactly that condition. Consumed by `class-command-relationships.ts`,
-      // which owns the counter.
-      // T1/B33: `decorSwap` -- true when this port's arrowhead-driven
-      // normalization moved `from`/`to` away from upstream's `cl1`/`cl2`.
-      // Recorded now, while the raw arrow is still in hand; comparing ids
-      // later cannot survive endpoint resolution.
-      // Always set, including `false` -- see the field's doc comment: an
-      // omitted flag means "not from the arrow grammar" and routes to a
-      // fallback that would reverse this link for the wrong reason.
-      dotEdgeReversed: info.swapDirection !== info.upOrLeft,
-      ...(info.upOrLeft === true ? { invertedLinkBurnsTick: true as const } : {}),
-    },
+    buildRelOptionalFields({ ...fields, ...overrides, url, middleDecor }),
   );
 }

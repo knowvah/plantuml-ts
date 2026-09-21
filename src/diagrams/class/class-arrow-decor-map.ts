@@ -25,6 +25,27 @@ import { canonicalizeArrow, splitCanonicalHeads } from './class-arrow-grammar.js
  * `x`/NOT_NAVIGABLE was surveyed and found to have zero corpus reach beyond
  * this iteration's named 8-fixture PLUS/SQUARE/CROWFOOT/PARENTHESIS set —
  * left `'none'` (unbuilt) rather than added speculatively.
+ *
+ * T5/M6: `<||`/`||>` (REDEFINES) and `<|:`/`:|>` (DEFINEDBY) added — both
+ * ARE reachable as head tokens (`class-relationship-parser.ts`'s
+ * `HEAD1_SAFE`/`HEAD2_CHARS` already list all four literally, for TYPE
+ * resolution's `'extends'` fold; only the DECOR-map entry was missing).
+ * `^` (`LinkDecor.EXTENDS`'s second decor string, alongside `<|`/`|>`) maps
+ * to the SAME `'triangle'` member those already use — EXTENDS is one Java
+ * enum value regardless of which of its three glyphs matched
+ * (`decoration/LinkDecor.java:71`: `EXTENDS(decors1("<|","^"),
+ * decors2("|>","^"),...)`), not a distinct `'arrowTriangle'` shape (that
+ * name belongs to the UNRELATED `ARROW_TRIANGLE` enum member, glyphs
+ * `<<`/`>>` — see this file's own T5 report for why those two are NOT
+ * added: `class-relationship-parser.ts`'s `HEAD1_SAFE`/`HEAD2_CHARS` have no
+ * alternative for a doubled `<`/`>`, so no input can ever reach
+ * `headToDecor('<<')`; a dead table entry is not added on the strength of
+ * an interface sketch alone). `CIRCLE_FILL` (`@`), the head-position form of
+ * `CIRCLE_CONNECT` (`0)`/`(0` as a literal ARROW_HEAD, distinct from the
+ * MID-BODY `INSIDE` form `class-arrow-middle-decor.ts` owns), and
+ * `HALF_ARROW_UP`/`HALF_ARROW_DOWN` (`\\`/`//`) are, by the same
+ * unreachable-via-current-grammar reasoning, also NOT added here.
+ * @see ~/git/plantuml/.../decoration/LinkDecor.java:71-77
  */
 // Head glyph -> LinkDecor, as a lookup table rather than a switch (same
 // tabular style as this file's own HEAD1_KIND/HEAD2_KIND precedent in
@@ -58,6 +79,11 @@ const HEAD_TO_DECOR: Record<string, LinkDecor> = {
   '}|': 'lineCrowfoot',
   '|{': 'lineCrowfoot',
   x: 'notNavigable',
+  '<||': 'redefines',
+  '||>': 'redefines',
+  '<|:': 'definedBy',
+  ':|>': 'definedBy',
+  '^': 'triangle',
 };
 
 // '' → no standard marker (D6 scope note: DOT parity only, not SVG rendering).

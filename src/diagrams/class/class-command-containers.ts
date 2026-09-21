@@ -203,7 +203,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   },
 
   // 5f. `constraint on links` — see CONSTRAINT_ON_LINKS_RE (class-notes.ts).
-  { pattern: CONSTRAINT_ON_LINKS_RE, execute: (state) => applyConstraintOnLinks(state.ast) },
+  { pattern: CONSTRAINT_ON_LINKS_RE, execute: (state, match) => applyConstraintOnLinks(state.ast, match[1] ?? '') },
 
   // 5g. `url [of|for] <Code> [is] [[...]]` — CommandUrl.java (README item
   //     #7, G2 N15). Attaches a url to an ALREADY-DECLARED classifier;

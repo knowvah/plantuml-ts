@@ -93,6 +93,13 @@ const DECOR_TO_NAME: Record<Exclude<LinkDecor, 'none'>, LinkDecorName> = {
   doubleLine: 'DOUBLE_LINE',
   lineCrowfoot: 'LINE_CROWFOOT',
   notNavigable: 'NOT_NAVIGABLE', // G2 N47
+  // T5/M6: mechanical exhaustiveness completion for the two `LinkDecor`
+  // members that mission added (`class-arrow-decor-map.ts`'s own doc
+  // comment) -- both extremity shapes were already built
+  // (`core/svek/extremity/link-decor.ts#BUILDERS.REDEFINES/.DEFINEDBY`),
+  // this file's own dispatch just needed the two new decor names named.
+  redefines: 'REDEFINES',
+  definedBy: 'DEFINEDBY',
 };
 
 export function decorName(decor: LinkDecor): LinkDecorName | undefined {

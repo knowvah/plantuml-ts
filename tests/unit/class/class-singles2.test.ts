@@ -204,7 +204,10 @@ describe('gujigi-63-roki030: constraint on links marks the two last links', () =
       c -- a
       constraint on links : enten/eller
     `);
-    expect(ast.relationships.map((r) => r.linkConstraint === true)).toEqual([false, true, true]);
+    expect(ast.relationships.map((r) => r.linkConstraint !== undefined)).toEqual([false, true, true]);
+    // T5/M9: the display text is now captured, not just the boolean trigger.
+    expect(ast.relationships[1]!.linkConstraint).toEqual({ text: 'enten/eller' });
+    expect(ast.relationships[2]!.linkConstraint).toEqual({ text: 'enten/eller' });
   });
 
   it('constrained labeled edge keeps its label; unlabeled one gets the 10x10 spot', () => {

@@ -4,63 +4,10 @@
  */
 
 import type { NotePosition } from './class-note-decl-ast.js';
-
-export type RelationshipType =
-  | 'extension' // <|--
-  | 'implementation' // <|..
-  | 'composition' // *--
-  | 'aggregation' // o--
-  | 'dependency' // ..>
-  | 'association' // -->
-  | 'usage'; // ..
-
-/**
- * The decoration drawn at one end of a link, mirroring upstream's LinkDecor:
- * each arrow end is decorated independently of the semantic {@link
- * RelationshipType}. `none` is a plain (undecorated) end — a plain `--`
- * association has `none` at both ends, unlike a directed `-->` (`open` at the
- * target). Parsed per-end from the arrow token (source/target assigned by the
- * arrow's direction).
- *
- * G2 N28: `square`/`plus`/`parenthesis`/`crowfoot`/`circleCrowfoot`/
- * `circleLine`/`doubleLine`/`lineCrowfoot` — the D6-deferred glyph
- * decorations (`#`, `+`, `)`/`(`, `}`/`{`, `}o`/`o{`, `|o`/`o|`, `||`,
- * `}|`/`|{`) `class-arrow-grammar.ts#headToDecor` previously collapsed to
- * `'none'` (D6's own scope note: "DOT parity only, not SVG rendering").
- * Each maps 1:1 onto an already-built `core/svek/extremity
- * /link-decor.ts#LinkDecorName` (SQUARE/PLUS/PARENTHESIS/CROWFOOT/
- * CIRCLE_CROWFOOT/CIRCLE_LINE/DOUBLE_LINE/LINE_CROWFOOT) — the shape
- * geometry was built for description's edge renderer and is reused
- * unchanged, only the class-side glyph→name wiring was missing.
- * NOT added: `CIRCLE_CONNECT` (`0)`/`(0`) — that is a genuinely different,
- * MID-LINK decoration (upstream's `LinkType#withMiddleCircle*`, parsed via
- * `CommandLinkClass`'s separate `INSIDE` regex group, drawn at the edge's
- * midpoint rather than at an extremity) — surveyed and deferred, see
- * `plans/g2-class-svg/ledger.md` N28.
- *
- * G2 N47: `notNavigable` (`x`, `LinkDecor.NOT_NAVIGABLE`) ADDED — the
- * `core/svek/extremity/link-decor.ts` machinery (`ExtremityFactoryNotNavigable`,
- * the `not_navigable` `data-link-type` row) was already fully built for
- * description's edge renderer; only the class-side glyph→name wiring
- * (`class-arrow-grammar.ts#headToDecor`) was missing, previously left
- * `'none'` on an N28 "zero corpus reach" survey that a later fixture
- * (`rekazo-16-jola519`, `bob x--> alice`) disproved.
- */
-export type LinkDecor =
-  | 'triangle'
-  | 'open'
-  | 'diamond'
-  | 'filledDiamond'
-  | 'square'
-  | 'plus'
-  | 'parenthesis'
-  | 'crowfoot'
-  | 'circleCrowfoot'
-  | 'circleLine'
-  | 'doubleLine'
-  | 'lineCrowfoot'
-  | 'notNavigable'
-  | 'none';
+import type { MiddleDecor } from './class-arrow-middle-decor.js';
+import type { UrlInfo } from './class-url.js';
+import type { RelationshipType, LinkDecor } from './class-relationship-decor-ast.js';
+export type { MiddleDecor, RelationshipType, LinkDecor };
 
 export interface Relationship {
   from: string;
@@ -177,8 +124,57 @@ export interface Relationship {
    * svek emits a fixed 10x10 `label` spot on a constrained edge with no
    * note/label text (SvekEdge.java:430-444, CONSTRAINT_SPOT at :122); the
    * constraint's text itself is drawn post-layout, never in the DOT.
+   *
+   * T5/M9: widened from a bare `boolean` to carry the display TEXT
+   * (`SvekEdge.java:993-1011`'s `linkConstraint.drawMe`, which draws the
+   * constraint's own text alongside the dashed square-corner line) —
+   * previously the text was discarded at parse time even though the
+   * 10x10-reservation trigger (`linkConstraint != null`) was already right.
+   * `undefined` still means "no constraint" (every reader checks
+   * `!== undefined`, not truthiness).
+   * @see ~/git/plantuml/.../svek/SvekEdge.java:430-444,993-1011
    */
-  linkConstraint?: boolean;
+  linkConstraint?: { text: string };
+  /**
+   * T5/M4: the arrow BODY's own dottedness, independent of
+   * {@link RelationshipType}/{@link dashed}'s type-derived default — see
+   * `ArrowInfo.dashedBody`'s doc comment (class-arrow-grammar.ts) for the
+   * upstream method this mirrors. Absent for relationships built outside
+   * the arrow-token grammar (couples/lollipop/map rows), which continue to
+   * derive dashing purely from `type`/{@link dashed}.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:495-497
+   */
+  dashedBody?: boolean;
+  /**
+   * T5/M12: the `-[hidden]-` ARROW_STYLE keyword (`Link#isHidden()`,
+   * `abel/Link.java:458-459`) — upstream drops the WHOLE link group at draw
+   * time (`svek/SvekEdge.java:835-836`) rather than rendering an invisible
+   * one; this port previously discarded the keyword entirely
+   * (`guxode-39-dobi371`'s extra link group). DOT-graph emission is
+   * UNCHANGED by this flag (the hidden link still participates in layout,
+   * confirmed against its own `svek-N.dot`) — only the SVG draw is skipped.
+   * @see ~/git/plantuml/.../decoration/WithLinkType.java:100-101,149-150
+   */
+  hidden?: boolean;
+  /**
+   * T5/M3: `[[url]]` on a relationship line (`CommandLinkClass.java:356-361`
+   * `link.setUrl(url)`) — upstream wraps EVERY drawn primitive of the link
+   * in one `<a>` (`svek/SvekEdge.java:859-861` `startUrl`/`:990-991`
+   * `closeUrl`). Reuses `class-url.ts`'s `UrlInfo` (classifier-level `[[url]]`
+   * parsing) rather than a new type — same upstream `Url` shape either way.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:356-361
+   * @see ~/git/plantuml/.../svek/SvekEdge.java:859-861,990-991
+   */
+  url?: UrlInfo;
+  /**
+   * T5/M6: the `INSIDE` mid-body marker (`-0)-`) — see
+   * `class-arrow-middle-decor.ts#MiddleDecor`'s doc comment for the full
+   * four-member derivation. A DIFFERENT Java enum (`LinkMiddleDecor`) from
+   * the head-decor {@link LinkDecor} `sourceDecor`/`targetDecor` carry —
+   * drawn at the edge's midpoint, not at either extremity.
+   * @see ~/git/plantuml/.../classdiagram/command/CommandLinkClass.java:498-507
+   */
+  middleDecor?: MiddleDecor;
   /**
    * G2 N2 (mechanism 3): parse-time creation order -- see
    * {@link Classifier.creationIndex}'s doc comment (same shared counter,

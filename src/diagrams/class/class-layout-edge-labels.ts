@@ -368,7 +368,7 @@ function computeRelLabelAttrs(
     return computeNoteMergedLabelAttrs(rel, font, measurer, noteCtx);
   }
   if (rel.label === undefined) {
-    if (rel.linkConstraint === true) {
+    if (rel.linkConstraint !== undefined) {
       // `constraint on links` puts a fixed 10x10 spot label on a constrained
       // edge with no note/label text (SvekEdge.java:430-444: `hasNoteLabelText()
       // || link.getLinkConstraint() != null` → dimNote = CONSTRAINT_SPOT, the

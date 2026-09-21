@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1123 modules · 4081 exported names.
+1127 modules · 4099 exported names.
 
 ## `src/`
 
@@ -1081,9 +1081,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `Member`, `Visibility`, `UrlInfo`, `MAP_POINT_SENTINEL`, `MapRow`, `JsonNode`, `ClassifierKind`, `Classifier`, `RelationshipType`, `LinkDecor`, `Relationship`, `NotePosition`, `ClassNote`, `Namespace`, `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective`, `ClassDiagramAST` | AST type definitions for PlantUML class diagrams. |
+| `ast.ts` | `Member`, `Visibility`, `UrlInfo`, `MAP_POINT_SENTINEL`, `MapRow`, `JsonNode`, `ClassifierKind`, `Classifier`, `RelationshipType`, `LinkDecor`, `MiddleDecor`, `Relationship`, `NotePosition`, `ClassNote`, `Namespace`, `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective`, `ClassDiagramAST` | AST type definitions for PlantUML class diagrams. |
 | `class-arrow-decor-map.ts` | `parseArrowDecors`, `parseArrowDecorsRaw` | Arrow head glyph -> `LinkDecor` mapping, split out of class-arrow-grammar.ts (pure move, no behavior change) to keep that file under the repo's 500-line-per-file cap. |
-| `class-arrow-grammar.ts` | `parseArrowDecors`, `parseArrowDecorsRaw`, `ArrowInfo`, `ARROW_DIR`, `ARROW_STYLE`, `canonicalizeArrow`, `arrowLength`, `splitCanonicalHeads`, `resolveArrow`, `extractArrowStyleRaw`, `ArrowStyleOverrides`, `parseArrowStyleOverrides` | Arrow-token decoration/type resolution for PlantUML class-diagram relationships. |
+| `class-arrow-grammar.ts` | `parseArrowDecors`, `parseArrowDecorsRaw`, `ArrowInfo`, `ARROW_DIR`, `ARROW_STYLE`, `canonicalizeArrow`, `arrowLength`, `splitCanonicalHeads`, `MiddleDecor`, `extractMiddleDecor`, `invertMiddleDecor`, `resolveArrow`, `extractArrowStyleRaw`, `ArrowStyleOverrides`, `parseArrowStyleOverrides` | Arrow-token decoration/type resolution for PlantUML class-diagram relationships. |
+| `class-arrow-middle-decor.ts` | `MiddleDecor`, `extractMiddleDecor`, `invertMiddleDecor` | T5/M6: the INSIDE middle-circle marker (CommandLinkClass's separate INSIDE regex group, `(0\|\(0\)\|\(0\|0\))(?=[-=.~])`, CommandLinkClass.java:137, 498-507) -- a LinkMiddleDecor, NOT a LinkDecor: it sits BETWEEN the two body runs (`-0)-`), ne |
 | `class-assoc-couple.ts` | `ASSOC_COUPLE_RE`, `ASSOC_DOUBLE_COUPLE_RE`, `AssocCoupleCounter`, `applyAssocCouple`, `CoupleCircle`, `makeCoupleCircle` | Association-class couple: `(A,B) .. |
 | `class-assoc-double-couple.ts` | `applyDoubleCouple` | The DOUBLE association-class couple `(A,B) <arrow> (C,D)` -- upstream `AbstractClassOrObjectDiagram#associationClass`'s FOUR-entity overload (`objectdiagram/AbstractClassOrObjectDiagram.java:114-141`) plus the `insertPointBetween` helper it |
 | `class-assoc-subsume.ts` | `SubsumedLink`, `EMPTY_SUBSUMED`, `subsumeExplicitAssociation` | class-assoc-subsume.ts — the "subsume an explicit A-B association into a couple" mechanism (`Association#createNew`'s `existingLink`/`removeLink` lookup), split out of `class-assoc-couple.ts` to keep that file under the project's 500-line c |
@@ -1171,9 +1172,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-object-sizing.ts` | `measureObjectClassifier` | Object classifier sizing — the `kind:'object'`-SPECIFIC field/body math for the class diagram layout engine (./layout.ts). |
 | `class-parse-state.ts` | `ParseState`, `PendingMultilineElement` | Mutable class-parser state (local to each `parseClass` call). |
 | `class-port-rows.ts` | `edgePortAttrs`, `applyShapeAndPorts`, `PortRowMemberInput`, `PortRowCompartmentInput`, `classPortRows`, `classifierPortShortNames`, `classPortShortNamesById` | `Ports` production for the class engine's `RECTANGLE_HTML_FOR_PORTS` leaves — the DOT-input half of `SvekNode#appendLabelHtmlSpecialForLink`'s `((WithPorts) image).getPorts(stringBounder)` call (svek/SvekNode.java:269). |
-| `class-relationship-ast.ts` | `RelationshipType`, `LinkDecor`, `Relationship` | Class-diagram Relationship AST types. |
+| `class-relationship-ast.ts` | `MiddleDecor`, `RelationshipType`, `LinkDecor`, `Relationship` | Class-diagram Relationship AST types. |
+| `class-relationship-decor-ast.ts` | `RelationshipType`, `LinkDecor` | `RelationshipType`/`LinkDecor` — split out of class-relationship-ast.ts (pure move, no behavior change) to keep that file under the repo's 500-line-per-file cap; re-exported from there for existing import sites. |
+| `class-relationship-field-builder.ts` | `resolveRelationshipEndpoints`, `resolveRelationshipLabel`, `buildRelOptionalFields` | `parseRelationshipLine`'s per-section field resolution — split out of class-relationship-parser.ts (mechanical extraction: identical logic and Java citations, purely relocated) to keep that function under the repo's per-function NLOC/CCN co |
 | `class-relationship-id-grammar.ts` | `CLASS_ID`, `stripQuotes`, `splitEndpointPort` | Relationship-endpoint identifier grammar (`CLASS_ID`) plus the two small endpoint-string helpers built on it (`stripQuotes`, `splitEndpointPort`), split out of class-relationship-parser.ts to keep that file under the repo's 500-line-per-fil |
-| `class-relationship-parser.ts` | `CLASS_ID`, `stripQuotes`, `splitEndpointPort`, `REL_DISPATCH_RE`, `idLeaf`, `parseRelationshipLine` | Relationship (arrow) line parsing for PlantUML class diagrams. |
+| `class-relationship-label-decompose.ts` | `decomposeLabel` | `decomposeLabel` — split out of class-relationship-parser.ts (pure move, no behavior change) to keep that file under the repo's 500-line-per-file cap. |
+| `class-relationship-parser.ts` | `CLASS_ID`, `stripQuotes`, `splitEndpointPort`, `REL_DISPATCH_RE`, `pickDirectional`, `OptionalRelFields`, `sidedRelFields`, `decomposeLabel`, `idLeaf`, `parseRelationshipLine` | Relationship (arrow) line parsing for PlantUML class diagrams. |
 | `class-shadow.ts` | `CLASS_SHADOW_FILTER_ID`, `buildClassShadowFilterDef`, `classShadowFilterUrl` | class-shadow.ts — mission skin-file-loading (deferred D3 item, CLASS- scoped): the `<filter>` def markup for a class diagram's drop shadow, as a plain STRING (class's own renderer emits SVG strings directly, not via klimt's `XmlNode`-based |
 | `class-shield-helpers.ts` | `isRowPortKind`, `packageEndpointAnchors`, `shieldedClassifierIds` | Port/qualifier "shield" helpers for the class diagram DOT-graph builder (./class-dot-graph.ts). |
 | `class-stereotype-command.ts` | `STEREOTYPE_STATEMENT_RE`, `applyStereotypeStatement` | The standalone `<Name> <<stereotype>>` statement — sets the stereotype of an ALREADY-DECLARED classifier (upstream `CommandStereotype`, G2 N24). |
