@@ -33,9 +33,9 @@ jobs:
         id: timer
         run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           # Reads the `volta.node` pin from package.json, the same source volta
           # uses locally, so CI and the dev box cannot drift apart.
@@ -86,7 +86,7 @@ jobs:
 
       - name: restore vendored stdlib
         id: stdlib-cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: assets/stdlib
           # Keyed on the pin: a re-pin is a different key and re-vendors.
