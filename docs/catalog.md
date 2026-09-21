@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1124 modules · 4084 exported names.
+1124 modules · 4085 exported names.
 
 ## `src/`
 
@@ -69,7 +69,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
-| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `paintToSvg` | Paint — the color/gradient value model for the rendering layer. |
+| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor.ts` | `PreprocessorResult`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |

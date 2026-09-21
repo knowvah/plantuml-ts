@@ -3,27 +3,12 @@ import type { BoardGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { CELL_H } from './layout.js';
+import { hashString } from '../../core/paint.js';
 
 // `CardBox.calculateDimension` (`board/CardBox.java:68-70`) — fixed 150x70 box.
 const CARD_W = 150;
 const CARD_H = 70;
 const BOARD_MARGIN = 10;
-
-/**
- * Deterministic FNV-1a hash of `s`, rendered in base36 — no counters, no
- * `Math.random`, no `Date.now`. Mirrors `src/core/paint.ts:169-177`'s
- * `hashString` algorithm exactly; duplicated here (not imported) because
- * `src/core` is outside this batch's write-set (code-review-tasks.md,
- * "Must fix", `board/renderer.ts:45`).
- */
-function hashString(s: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0).toString(36);
-}
 
 /**
  * Stable input for the shadow filter's id hash: every card's label and
