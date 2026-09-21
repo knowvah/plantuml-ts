@@ -534,7 +534,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3424 agree, 987 known-misroute and 73 jar-error', () => {
+  it('the manifest splits into 3425 agree, 986 known-misroute and 73 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -636,8 +636,16 @@ describe('routing conformance — jar-error classification', () => {
     // 1, regex 2, wbs 6 -- NONE == NONE, or the c4/network sources the jar
     // and this port both type CLASS/DESCRIPTION); 42 jar errors. 3402 + 22 =
     // 3424, 139 + 848 = 987, 31 + 42 = 73.
-    expect(pinnedAgree.length).toBe(3424);
-    expect(pinnedMisroutes.length).toBe(987);
+    //
+    // 3424 -> 3425 / 987 -> 986 at unknown-bucket-routing-repair/T11
+    // (2026-09-20): `sequence/recani-60-licu962` -- the multi-line
+    // `rnote right` body now parses (`FactorySequenceNoteOnArrowCommand`
+    // multi-line form, ported with `getLastEventWithNote`,
+    // `SequenceDiagram.java:154-158`), so the fixture routes SEQUENCE, the
+    // jar's answer. One `[FIXED]` retirement, re-pinned from a fresh
+    // measurement.
+    expect(pinnedAgree.length).toBe(3425);
+    expect(pinnedMisroutes.length).toBe(986);
     expect(pinnedJarErrors.length).toBe(73);
     expect(manifest.fixtures.length).toBe(4484);
   });
@@ -686,7 +694,8 @@ describe('routing conformance — jar-error classification', () => {
     // 138 -> 986 at the parity-dashboard-refresh follow-on (2026-09-20): all
     // 848 new pins carry a reason (see the derivation above). The uncensused
     // remainder is STILL exactly sequence/nuvoja-46-dezu541: 987 - 1 = 986.
-    expect(censused.length).toBe(986);
+    // 986 -> 985 at unknown-bucket-routing-repair/T11: recani retired.
+    expect(censused.length).toBe(985);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

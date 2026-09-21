@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 4484 fixtures, 73 of them jar errors, 242 of them erroring here', () => {
+  it('the manifest is 4484 fixtures, 73 of them jar errors, 241 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -619,8 +619,13 @@ describe('refusal coverage — baseline shape', () => {
     // refusal: an old one that was being hidden by a wrong render.
     expect(manifest.fixtures.length).toBe(4484);
     expect(pinnedJarErrors.length).toBe(73);
-    expect(pinnedErroring.length).toBe(242);
-    expect(pinnedRendering.length).toBe(4242);
+    //
+    // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
+    // (2026-09-20): `sequence/recani-60-licu962` renders now that the
+    // multi-line `rnote` body parses (see the sibling gate's derivation);
+    // one `[FIXED]` retirement, re-pinned from a fresh measurement.
+    expect(pinnedErroring.length).toBe(241);
+    expect(pinnedRendering.length).toBe(4243);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -668,7 +673,8 @@ describe('refusal coverage — baseline shape', () => {
     // 133 -> 138 at unknown-bucket-routing-repair/T9 (2026-09-20): the five
     // sources STATE had been drawing as empty diagrams (see the manifest
     // derivation above).
-    expect(gaps.length).toBe(138);
+    // 138 -> 137 at unknown-bucket-routing-repair/T11: recani retired.
+    expect(gaps.length).toBe(137);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

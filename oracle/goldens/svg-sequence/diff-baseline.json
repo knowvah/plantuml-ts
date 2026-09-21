@@ -131,10 +131,10 @@
       "type": "sequence",
       "slug": "bagexe-03-bozo133",
       "status": "baseline",
-      "weightedScore": 228,
+      "weightedScore": 179,
       "diffCount": 177,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -383,10 +383,10 @@
       "type": "sequence",
       "slug": "biruge-35-vaxu680",
       "status": "baseline",
-      "weightedScore": 174,
+      "weightedScore": 118,
       "diffCount": 119,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -618,10 +618,10 @@
       "type": "sequence",
       "slug": "bulixe-06-boge494",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 92,
       "diffCount": 63,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -681,10 +681,10 @@
       "type": "sequence",
       "slug": "butosi-00-mali446",
       "status": "baseline",
-      "weightedScore": 104,
+      "weightedScore": 68,
       "diffCount": 53,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -2745,10 +2745,10 @@
       "type": "sequence",
       "slug": "gifope-23-jufe872",
       "status": "baseline",
-      "weightedScore": 163,
+      "weightedScore": 110,
       "diffCount": 84,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -2952,10 +2952,10 @@
       "type": "sequence",
       "slug": "gucare-93-petu502",
       "status": "baseline",
-      "weightedScore": 650,
+      "weightedScore": 573,
       "diffCount": 606,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -3087,10 +3087,10 @@
       "type": "sequence",
       "slug": "h-rnote-style",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 92,
       "diffCount": 63,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -4088,10 +4088,10 @@
       "type": "sequence",
       "slug": "kotixe-11-cufa733",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 92,
       "diffCount": 63,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -6019,10 +6019,10 @@
       "type": "sequence",
       "slug": "note-color",
       "status": "baseline",
-      "weightedScore": 197,
+      "weightedScore": 118,
       "diffCount": 74,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -6810,12 +6810,11 @@
     {
       "type": "sequence",
       "slug": "recani-60-licu962",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 182,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -7469,10 +7468,10 @@
       "type": "sequence",
       "slug": "seloli-77-rixi778",
       "status": "baseline",
-      "weightedScore": 197,
+      "weightedScore": 118,
       "diffCount": 74,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "98b0eea0"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",
@@ -9308,10 +9307,10 @@
       "type": "sequence",
       "slug": "xeroce-52-moso281",
       "status": "baseline",
-      "weightedScore": 35,
+      "weightedScore": 23,
       "diffCount": 24,
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "3eb50eb8"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "type": "sequence",

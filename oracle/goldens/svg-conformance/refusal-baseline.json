@@ -20607,12 +20607,11 @@
       "type": "sequence",
       "slug": "recani-60-licu962",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "sequence",
-      "status": "known-gap",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted)."
+      "status": "ok",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0"
     },
     {
       "tree": "dot-cache",

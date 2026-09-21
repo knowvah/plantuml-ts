@@ -18740,10 +18740,10 @@
       "type": "sequence",
       "slug": "recani-60-licu962",
       "jarType": "SEQUENCE",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "3dce80d0",
       "reason": "the SEQUENCE engine refuses this source, so nothing claimed it -- every engine refused. refuses to parse -- source line 4: `Wrong note shape (r)`, the BODY of the multi-line opener `rnote right` on line 3. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136); this port's single-line form (:132) has an optional `(?::...)?` tail, so it matches the bare opener and orphans the body. The `-> A` exo arrow its previous pin named now parses (line 2 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
