@@ -10,6 +10,7 @@ node_modules/
 assets/stdlib/
 assets/sprites/
 packages/*/generated/
+packages/*/assets/
 test-results/
 tests/corpus/
 tests/visual/
