@@ -242,8 +242,15 @@ describe('glyphWidth', () => {
     expect(arialW).toBeCloseTo(dejaW, 10);
   });
 
-  it('does not throw for unmapped glyph', () => {
-    expect(() => glyphWidth('中', 'Arial', 14)).not.toThrow();
+  it('returns 13*(size/12) for a control character (code < 32)', () => {
+    expect(glyphWidth('\u0001', 'Arial', 14)).toBeCloseTo(13 * (14 / 12), 5);
+  });
+
+  it('returns 13*(size/12) for the high-surrogate unit of an astral glyph', () => {
+    // '🚀' (U+1F680) is two UTF-16 code units; charCodeAt(0) reads only the
+    // high surrogate (0xD83D), still > 127, so the same fallback formula
+    // applies rather than throwing or reading past the string.
+    expect(glyphWidth('🚀', 'Arial', 14)).toBeCloseTo(13 * (14 / 12), 5);
   });
 
   it('returns 13*(size/12) for unmapped glyph (code > 127)', () => {
@@ -477,14 +484,15 @@ describe('CanvasMeasurer — jsdom fallback (no canvas support)', () => {
     expect(long.width).toBeGreaterThanOrEqual(short.width);
   });
 
-  it('does not throw for any font spec combination', () => {
+  it('falls back to the formula measurer for any font spec combination', () => {
     const boldItalic: FontSpec = {
       family: 'Helvetica',
       size: 16,
       weight: 'bold',
       style: 'italic',
     };
-    expect(() => measurer.measure('Test', boldItalic)).not.toThrow();
+    const { width, height } = measurer.measure('Test', boldItalic);
+    expect({ width, height }).toEqual(new FormulaMeasurer().measure('Test', boldItalic));
   });
 });
 
