@@ -2832,6 +2832,16 @@ From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
   (Smetana consumer — dot-engine + named delta, per the 2026-08-09 ruling),
   D8 DITAA, D9 Chen EER. Breadth only after the depth passes above.
 - **S3** stub-engine authenticity audit (spike; gates D2).
+- **Sprite-transform warnings to `onWarning`** (code review 2026-09-21).
+  `src/core/klimt/sprite/svg-nanoparser-transform.ts:51,68` drop an
+  unrecognized sprite `transform` with only `console.warn` (allow-listed in
+  `eslint.config.ts`'s `no-console` block). No warning carrier is in scope at
+  the three call chains (`creole-atoms-image-resolver.ts`,
+  `EntityImageDescriptionEmoji.ts`, `EntityImageDescriptionDelegates.ts`);
+  full trace in `.agent-notes/cr-core.md`. Same pattern as
+  `surfaceSpriteWarnings`. The two port-own allow-listed sites
+  (activity `tile-layout.ts`, description `renderer-draw-sequence.ts`) belong
+  in the same pass.
 
 ---
 
