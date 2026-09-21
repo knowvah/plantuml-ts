@@ -123,6 +123,9 @@ export function buildClassifierGeos(
       ...(classifier.subsumedLinkCreationIndex !== undefined
         ? { subsumedLinkCreationIndex: classifier.subsumedLinkCreationIndex }
         : {}),
+      ...(classifier.apointNameCreationIndex !== undefined
+        ? { apointNameCreationIndex: classifier.apointNameCreationIndex }
+        : {}),
       ...(classifier.invertedClassEdgeOldCreationIndex !== undefined
         ? { invertedClassEdgeOldCreationIndex: classifier.invertedClassEdgeOldCreationIndex }
         : {}),

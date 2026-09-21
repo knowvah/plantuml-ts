@@ -12,6 +12,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
+import { renderSync } from '../../../src/index.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
@@ -98,5 +100,61 @@ describe('note creation-index / phantom-slot threading (G2 N15)', () => {
     const ast = parse('class a\nnote "hi" as N1\nclass b');
     expect(ast.notes[0]).toMatchObject({ creationIndex: 2 });
     expect(ast.classifiers[1]).toMatchObject({ id: 'b', creationIndex: 3 });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T3 (A1 SB5) — `remove`/`restore` is an EXPORT-time skip upstream, not a
+// parse-time one: `Entity`'s constructor (`abel/Entity.java:171`) and
+// `Link`'s (`abel/Link.java:135`) have already burned their `cpt1` ranks by
+// the time `GraphvizImageBuilder#printEntities`/`#printGroups` consults
+// `isRemoved()`. This port drops removed rows at the layout-input boundary
+// (`class-directives-removal.ts#filterRemovedEntities`), which took their
+// ranks with them and let the dense re-numbering close the gap.
+// ---------------------------------------------------------------------------
+
+describe('removed entities still consume uid ranks (cdd-T3 SB5)', () => {
+  const render = (markup: string): string => renderSync(markup, { measurer: new WidthTableMeasurer() });
+  const ids = (svg: string): string[] => [...svg.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]!);
+
+  it('cejili-77-gepe377: a purged member-tip note + an `@unlinked` class keep their three ranks', () => {
+    // a=1, z=2, TIPS=3, TIPS-link=4, GMN=5, note=6, connector=7, b=8, lnk9.
+    const svg = render(
+      [
+        '@startuml',
+        'class a {',
+        '  int i',
+        '}',
+        'class z',
+        'note left of a::i',
+        '  purged',
+        'end note',
+        'note right of a',
+        '  survives',
+        'end note',
+        'a <-- b',
+        'remove @unlinked',
+        '@enduml',
+      ].join('\n'),
+    );
+    expect(ids(svg)).toEqual(['ent0001', 'ent0006', 'ent0008', 'lnk9', 'a-backto-b']);
+  });
+
+  it('zuxoxu-54-pejo512: `remove *` then `restore $z` keeps every removed rank', () => {
+    // Foo=1, Goo=2, lnk3, Bar=4, N1=5, lnk6 -- only Bar/N1 are restored.
+    const svg = render(
+      [
+        '@startuml',
+        'class Foo $a',
+        'Foo -- Goo',
+        'class Bar $z',
+        'note "A note" as N1 $z',
+        'N1 .. Bar',
+        'remove *',
+        'restore $z',
+        '@enduml',
+      ].join('\n'),
+    );
+    expect(ids(svg)).toEqual(['ent0004', 'ent0005']);
   });
 });

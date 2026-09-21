@@ -393,6 +393,7 @@ export {
   computeRemovedIds,
   computeHiddenIds,
   filterRemovedEntities,
+  computeRemovedRanks,
 } from './class-directives-removal.js';
 
 // Visibility hide/show directive family moved to a sibling module (line

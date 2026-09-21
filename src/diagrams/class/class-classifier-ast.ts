@@ -311,6 +311,10 @@ export interface Classifier {
    * feeds and `plans/g2-class-svg/ledger.md` N2 for the named remainder).
    */
   creationIndex?: number;
+  /** cdd-T3 (A1 SB3): standalone rank of the DOUBLE-couple `apoint` NAME tick, which upstream burns two ranks
+   *  BEFORE the point entity (`objectdiagram/AbstractClassOrObjectDiagram.java:120-129`) -- so {@link phantomSlot}'s
+   *  "rank at `creationIndex - 1`" encoding cannot express it. Single couples (`:226-231`) keep `phantomSlot`. */
+  apointNameCreationIndex?: number;
   /**
    * G2 N39: source-order count of `<style>` blocks that had ALREADY been
    * dispatched (`ParseState.currentLine` strictly AFTER the block's own

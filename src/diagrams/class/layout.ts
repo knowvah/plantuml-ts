@@ -32,7 +32,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
-import { filterRemovedEntities, computeHiddenIds } from './class-directives.js';
+import { filterRemovedEntities, computeHiddenIds, computeRemovedRanks } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
 import { collapseEmptyNamespacesFinal } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
@@ -285,6 +285,10 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // Everything below — dot graph, note synthesis, geo building — sees only
   // the surviving entities, keeping edge-index alignment consistent.
   const effAst = filterRemovedEntities(collapsedAst);
+  // cdd-T3 (A1 SB5): the ranks that filtering just dropped -- jar burned them
+  // at parse time and only skips the entities at EXPORT time, so they stay as
+  // holes in its numbering (`computeRemovedRanks`'s own doc comment).
+  const removedRanks = computeRemovedRanks(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
   const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } = buildDotGraph(
@@ -346,7 +350,11 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
   // `effAst` the dot graph/geo builders above already read.
-  return { ...assembled, leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)) };
+  return {
+    ...assembled,
+    ...(removedRanks.length > 0 ? { removedRanks } : {}),
+    leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)),
+  };
   // #lizard forgives -- linear orchestration (empty-diagram guard,
   // namespace-collapse, hide/show resolution, pre-measure, degenerate skip,
   // dot-graph build+layout, geo builders, final assembly), each step ALREADY

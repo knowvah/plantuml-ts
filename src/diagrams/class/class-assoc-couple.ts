@@ -162,20 +162,24 @@ export function applyAssocCouple(
   return true;
 }
 
-/**
- * Double couple `(A,B) . (C,D)`: a circle per couple, joined by a VISIBLE
- * minlen-0 edge (pibifa/begico). Distinct from the same-pair invis sibling
- * link. Mirrors `associationClass`'s 4-entity overload + `insertPointBetween`
- * — no note-on-link split here (that strategy only exists on the one-sided
- * `Association#createNew` path, i.e. `applyAssocCouple` above).
- */
-export function applyDoubleCouple(ast: ClassDiagramAST, ensure: (id: string) => Classifier, line: string): boolean {
-  const m = ASSOC_DOUBLE_COUPLE_RE.exec(line);
-  if (m === null) return false;
-  const c1 = makeCoupleCircle(ast, ensure, m[1]!, m[2]!).circleId;
-  const c2 = makeCoupleCircle(ast, ensure, m[3]!, m[4]!).circleId;
-  ast.relationships.push({ from: c1, to: c2, type: 'association', length: 1 });
-  return true;
+/** {@link makeCoupleCircle}'s result. `aEdge`/`bEdge` are the two replacement edges it already pushed (upstream
+ *  `insertPointBetween`'s `entity1ToPoint`/`pointToEntity2`, `objectdiagram/AbstractClassOrObjectDiagram.java:
+ *  154-172`); `subsumedExisted` records whether an explicit A-B association was found to remove. Both are exposed
+ *  so `class-assoc-double-couple.ts` can stamp them in jar's own (different) burn order. */
+export interface CoupleCircle {
+  circleId: string;
+  aId: string;
+  bId: string;
+  classEdgeLength: number;
+  forceCircleToClass: boolean;
+  circle: Classifier;
+  invisSiblingEdges: Relationship[];
+  aEdge: Relationship;
+  bEdge: Relationship;
+  subsumedExisted: boolean;
+  /** The removed explicit A-B association's own `creationIndex`, when it had one
+   *  -- see `Classifier.subsumedLinkCreationIndex`'s doc comment (ast.ts). */
+  subsumedCreationIndex: number | undefined;
 }
 
 /**
@@ -193,7 +197,7 @@ export function applyDoubleCouple(ast: ClassDiagramAST, ensure: (id: string) => 
  * has no such split — a plain `label` always transfers fully onto A→circle
  * regardless of `splitNoteOnLink`.
  */
-function makeCoupleCircle(
+export function makeCoupleCircle(
   ast: ClassDiagramAST,
   ensure: (id: string) => Classifier,
   // Verbatim names (quotes included) so `ensure` resolves to the SAME id a
@@ -210,15 +214,7 @@ function makeCoupleCircle(
   // function otherwise mirrors -- named remainder, `plans/g2-class-svg/
   // ledger.md` N19.
   counter?: AssocCoupleCounter,
-): {
-  circleId: string;
-  aId: string;
-  bId: string;
-  classEdgeLength: number;
-  forceCircleToClass: boolean;
-  circle: Classifier;
-  invisSiblingEdges: Relationship[];
-} {
+): CoupleCircle {
   const aId = ensure(aName).id;
   const bId = ensure(bName).id;
   const priorCircles = sameAssocCircles(ast, aId, bId);
@@ -375,7 +371,19 @@ function makeCoupleCircle(
     ast.relationships.push(sibling);
     invisSiblingEdges.push(sibling);
   }
-  return { circleId, aId, bId, classEdgeLength, forceCircleToClass: isRepeatCouple, circle, invisSiblingEdges };
+  return {
+    circleId,
+    aId,
+    bId,
+    classEdgeLength,
+    forceCircleToClass: isRepeatCouple,
+    circle,
+    invisSiblingEdges,
+    aEdge,
+    bEdge,
+    subsumedExisted: subsumed !== EMPTY_SUBSUMED,
+    subsumedCreationIndex: subsumed.creationIndex,
+  };
 }
 
 /**

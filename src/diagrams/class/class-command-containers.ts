@@ -7,7 +7,8 @@
  * class-commands.ts to stay under the line cap; order preserved (spread
  * second in COMMANDS, right after the directive group).
  */
-import { applyAssocCouple, applyDoubleCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './class-assoc-couple.js';
+import { applyAssocCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './class-assoc-couple.js';
+import { applyDoubleCouple } from './class-assoc-double-couple.js';
 import type { Command } from './class-command-types.js';
 import {
   closeBraceScope,
@@ -156,7 +157,14 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: ASSOC_DOUBLE_COUPLE_RE,
     execute(state, match) {
-      applyDoubleCouple(state.ast, (id) => ensureClassifier(state, id, undefined, undefined, true), match.input);
+      // cdd-T3 (A1 SB3): the double couple burns jar's shared counter too --
+      // see `stampDoubleCouple` (class-assoc-double-couple.ts).
+      applyDoubleCouple(
+        state.ast,
+        (id) => ensureClassifier(state, id, undefined, undefined, true),
+        match.input,
+        state.creationCounter,
+      );
     },
   },
   {
