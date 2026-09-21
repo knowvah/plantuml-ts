@@ -12,8 +12,8 @@ No layout change; nothing here moves the survey score.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T0b | Build `render-diff.mts`, `render-all.mts`, `pin-diff.mts` | typescript-pro | `tools/render-diff.mts`, `tools/render-all.mts`, `tools/pin-diff.mts`, `tools/README.md` | — | [ ] |
-| T0 | ELK ledger, baseline census/ratchet/DOT counts, `measurements/base.json` | debugger | `oracle/accepted-divergences.json`, `DIVERGENCES.md`, `docs/parity-report.md`, `measurements/base.json`, `decision-journal.md` | T0b | [ ] |
+| T0b | Build `render-diff.mts`, `render-all.mts`, `pin-diff.mts` | typescript-pro | `tools/render-diff.mts`, `tools/render-all.mts`, `tools/pin-diff.mts`, `tools/README.md` | — | [x] |
+| T0 | ELK ledger, baseline census/ratchet/DOT counts, `measurements/base.json` | debugger | `oracle/accepted-divergences.json`, `DIVERGENCES.md`, `docs/parity-report.md`, `measurements/base.json`, `decision-journal.md` | T0b | [x] |
 
 Specs: [`T0b-tooling.md`](T0b-tooling.md), [`T0-baseline-elk-ledger.md`](T0-baseline-elk-ledger.md).
 Batch close: [`close.md`](close.md).
