@@ -60,9 +60,11 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # Same rationale as `build` above: observed 9-41s across the same two
-    # runs; 3 min is a hard backstop for a hang, not a performance budget.
-    timeout-minutes: 3
+    # Not sized off deploy durations: Pages-side latency dominates. Run
+    # 35619393069 was cancelled at 3 min while Pages reported
+    # `updating_pages`. actions/deploy-pages polls for up to its own
+    # `timeout` input (default 600000 ms), so the job cap sits above that.
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
