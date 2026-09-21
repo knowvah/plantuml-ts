@@ -36,17 +36,15 @@ import {
   parseNameSection,
   trySkinparamBlock,
 } from './parse-helpers.js';
-import { classifyNoteOpen, isNoteTerminator } from './note-grammar.js';
 import {
-  closePendingNote,
   emitNode,
-  executeNoteOpen,
   makeDefaultAST,
   resolveStillUnknown,
   type ElementBlockTerminator,
   type ParseState,
   type PendingElementState,
 } from './parse-state.js';
+import { tryNoteHandling } from './note-dispatch.js';
 import { COMMANDS } from './command-table.js';
 import { leafDisplayName } from './namespace-groups.js';
 
@@ -279,27 +277,6 @@ function tryElementBlock(state: ParseState, lines: readonly string[], i: number,
   return tryElementBlockType0(state, lines, i, line);
 }
 
-/** A note-command multi-line body owns every line until its terminator
- *  (CommandMultilines2) — never re-dispatched through COMMANDS, so a body
- *  line that happens to look like another command (e.g. razefo-71-pice114's
- *  embedded `{{ skinparam note { ... } }}`) is never misparsed as one. */
-function tryNoteHandling(state: ParseState, line: string): LineOutcome {
-  if (state.pendingNote !== undefined) {
-    if (isNoteTerminator(line, state.pendingNote.terminator)) {
-      closePendingNote(state);
-    } else {
-      state.pendingNote.lines.push(line);
-    }
-    return 1;
-  }
-  const noteOpen = classifyNoteOpen(line);
-  if (noteOpen !== undefined) {
-    executeNoteOpen(state, noteOpen);
-    return 1;
-  }
-  return null;
-}
-
 /**
  * `archimate #color (CODE | DISPLAY "as" CODE | CODE "as" DISPLAY) STEREOTYPE?`
  * — `CommandArchimate.java`'s single-line leaf form (T8,
@@ -406,7 +383,9 @@ function dispatchCommand(
  * endpoint must NOT spuriously auto-create that endpoint). Returns a
  * `ParseRefusal` (T7) when no phase recognised the line, or a command
  * matched but reported execution failure — see `dispatchCommand`'s doc for
- * the two upstream refusal points this factory has. Otherwise returns the
+ * the two upstream refusal points this factory has, plus `tryNoteHandling`
+ * (note-dispatch.ts, T8b)'s own execution refusal for the note-on-entity
+ * "Nothing to note to" case. Otherwise returns the
  * number of lines consumed (>= 1) — greater than 1 only when the shared
  * annotation/sprite matchers consumed a multi-line block (see
  * `dispatchCommand`). Phases run in upstream-priority order: element
@@ -434,7 +413,7 @@ function processLine(
   const skinResult = trySkinparamBlock(lines, i, line);
   if (skinResult !== null) return skinResult;
 
-  const noteResult = tryNoteHandling(state, line);
+  const noteResult = tryNoteHandling(state, line, i, rawLine);
   if (noteResult !== null) return noteResult;
 
   const archimateResult = tryArchimate(state, line);

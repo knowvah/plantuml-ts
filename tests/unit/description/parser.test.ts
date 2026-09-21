@@ -1809,6 +1809,27 @@ describe('notes — on entity (CommandFactoryNoteOnEntity)', () => {
     expect(ast.links).toHaveLength(0);
   });
 
+  // T8b (unknown-bucket-routing-repair): `CommandFactoryNoteOnEntity
+  // #executeInternal` (`command/note/CommandFactoryNoteOnEntity.java:295-303`)
+  // resolves `idShort == null -> diagram.getLastEntity()` BEFORE creating
+  // anything; when that is ALSO null it returns `CommandExecutionResult
+  // .error("Nothing to note to")` -- an EXECUTION_ERROR that aborts the
+  // whole attempt (`PSystemCommandFactory.java:169-175`), not a silent
+  // no-op. Registered for description too
+  // (`descdiagram/DescriptionDiagramFactory.java:107`).
+  it('single-line `note right: text` with no prior entity and no `of X` refuses (Nothing to note to)', () => {
+    const refusal = parseRefusal('note right: text');
+    expect(refusal.kind).toBe('execution');
+    expect(refusal.commandScore).toBe(0);
+    expect(refusal.message).toBe('Nothing to note to');
+  });
+
+  it('multi-line `note right` ... `end note` with no prior entity refuses the same way', () => {
+    const refusal = parseRefusal('note right\ntext\nend note');
+    expect(refusal.kind).toBe('execution');
+    expect(refusal.message).toBe('Nothing to note to');
+  });
+
   it('`left to right direction` rotates note positions 90° (Position.withRankdir)', () => {
     // RIGHT -> BOTTOM under LR: entity->note becomes length 2, not 1.
     const ast = parse('left to right direction\ncomponent a\nnote right of a: text');

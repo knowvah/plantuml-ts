@@ -325,12 +325,22 @@ function emitNoteLeaf(state: ParseState, id: string, text: string): void {
   emitNode(state, makeNode(id, resolveNewlineEscapes(text), 'note'));
 }
 
+/** Upstream's own wording, verbatim — `CommandFactoryNoteOnEntity.java:301`. */
+const NOTHING_TO_NOTE_TO = 'Nothing to note to';
+
 /**
  * CommandFactoryNoteOnEntity.executeInternal (:295-323): resolves cl1 (the
  * `of X` target, or `getLastEntity()` when CODE is omitted) BEFORE creating
- * the note leaf — "Nothing to note to" / "Not known: X" abort the whole
- * command. No AST error channel exists here, so an unresolved target is
- * simply skipped: nothing is created, matching upstream's net effect.
+ * the note leaf. The "Nothing to note to" branch (CODE omitted AND no
+ * `lastEntity`) is now refused by `executeNoteOpen` below, BEFORE this
+ * function is ever called (T8b, unknown-bucket-routing-repair) — matching
+ * upstream's EXECUTION_ERROR abort of the whole attempt (`PSystemCommandFactory
+ * .java:169-175`), not a silent no-op. The `resolvedTarget === undefined`
+ * arm here is now a type-narrowing guard only (TypeScript cannot see that
+ * the caller already ruled it out) — the reachable case left in scope is
+ * upstream's OTHER branch: an explicit `of X` that does not resolve
+ * ("Not known: X"), which stays a silent skip — narrower than upstream,
+ * out of scope (no assigned fixture exercises it).
  */
 function attachNoteToEntity(
   state: ParseState,
@@ -398,6 +408,46 @@ function attachNoteToLastLink(state: ParseState, text: string, position: NotePos
   link.linkNotePosition = position ?? 'bottom';
 }
 
+/**
+ * T8b (unknown-bucket-routing-repair): upstream's shared `executeInternal`
+ * (`CommandFactoryNoteOnEntity.java:295-303`) resolves cl1 BEFORE the note
+ * (or its pending block) is ever created — CODE omitted AND no
+ * `lastEntity` returns `CommandExecutionResult.error("Nothing to note to")`.
+ * Checked HERE, at the OPEN line, for both the single-line and multi-line
+ * forms — the multi-line form's actual upstream check runs at `end note`/
+ * `}` once the body is known, but the body plays no part in this
+ * condition, and the refusal's line number is not otherwise observable
+ * through the routing/refusal gates (D3; mirrors the identical choice in
+ * `class/class-command-notes.ts`'s `refuseNothingToNoteTo`, T7).
+ */
+function needsNothingToNoteTo(state: ParseState, targetId: string | undefined): boolean {
+  return targetId === undefined && state.lastEntityId === undefined;
+}
+
+/** The `on-entity-single` and `on-entity-open` arms of `executeNoteOpen`,
+ *  split out to keep that function under the project's NLOC cap. Both share
+ *  the same "Nothing to note to" guard — see `needsNothingToNoteTo`'s doc. */
+function executeNoteOnEntityOpen(
+  state: ParseState,
+  m: Extract<NoteOpenMatch, { kind: 'on-entity-single' | 'on-entity-open' }>,
+): void {
+  if (needsNothingToNoteTo(state, m.targetId)) {
+    state.executionError = NOTHING_TO_NOTE_TO;
+    return;
+  }
+  if (m.kind === 'on-entity-single') {
+    attachNoteToEntity(state, m.position, m.targetId, m.text);
+    return;
+  }
+  state.pendingNote = {
+    kind: 'on-entity',
+    terminator: m.terminator,
+    lines: [],
+    position: m.position,
+    targetId: m.targetId,
+  };
+}
+
 export function executeNoteOpen(state: ParseState, m: NoteOpenMatch): void {
   if (m.kind === 'on-link-single') {
     attachNoteToLastLink(state, m.text, m.position);
@@ -420,17 +470,7 @@ export function executeNoteOpen(state: ParseState, m: NoteOpenMatch): void {
     state.pendingNote = { kind: 'floating', terminator: 'endnote', lines: [], id: m.id };
     return;
   }
-  if (m.kind === 'on-entity-single') {
-    attachNoteToEntity(state, m.position, m.targetId, m.text);
-    return;
-  }
-  state.pendingNote = {
-    kind: 'on-entity',
-    terminator: m.terminator,
-    lines: [],
-    position: m.position,
-    targetId: m.targetId,
-  };
+  executeNoteOnEntityOpen(state, m);
 }
 
 /** CommandMultilines2.executeNow: fires once the terminator line is seen,
