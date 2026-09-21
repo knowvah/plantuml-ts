@@ -249,14 +249,19 @@ function withOptionalFields(
   base: Pick<Relationship, 'from' | 'to' | 'type'>,
   optional: OptionalRelFields,
 ): Relationship {
-  const rel = { ...base } as unknown as Record<string, unknown>;
+  // Typed as `base`'s own shape intersected with an index signature -- keeps
+  // `from`/`to`/`type` statically known (unlike a plain `Record<string,
+  // unknown>`), which lets the single cast below land directly on
+  // `Relationship` instead of detouring through `unknown` (code review
+  // 2026-09-21: was two `as unknown as` casts, one per direction).
+  const rel: Pick<Relationship, 'from' | 'to' | 'type'> & Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(optional) as Array<
     [keyof OptionalRelFields, string | number | undefined]
   >) {
     if (value === undefined || (key === 'label' && value === '')) continue;
     rel[key] = value;
   }
-  return rel as unknown as Relationship;
+  return rel as Relationship;
 }
 
 /**
