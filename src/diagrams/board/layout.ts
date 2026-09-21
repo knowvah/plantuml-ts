@@ -1,7 +1,11 @@
 import type { BoardDiagramAST, BoardNode, BoardGeometry, ActivityGeometry, CardGeometry } from './ast.js';
 
+// `PostIt.getWidth()`/`getHeight()` (`board/PostIt.java:52-58`) — the fixed
+// pixel size of one card cell in the board grid.
 const CELL_W = 170;
-const CELL_H = 90;
+/** Exported so `renderer.ts` shares one definition instead of redeclaring it
+ *  (code review 2026-09-21). */
+export const CELL_H = 90;
 
 interface NodeWithX {
   node: BoardNode;

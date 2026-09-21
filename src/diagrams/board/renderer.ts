@@ -2,11 +2,52 @@ import { rect, line, text, attrs } from '../../core/svg.js';
 import type { BoardGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
+import { CELL_H } from './layout.js';
 
+// `CardBox.calculateDimension` (`board/CardBox.java:68-70`) — fixed 150x70 box.
 const CARD_W = 150;
 const CARD_H = 70;
-const CELL_H = 90;
 const BOARD_MARGIN = 10;
+
+/**
+ * Deterministic FNV-1a hash of `s`, rendered in base36 — no counters, no
+ * `Math.random`, no `Date.now`. Mirrors `src/core/paint.ts:169-177`'s
+ * `hashString` algorithm exactly; duplicated here (not imported) because
+ * `src/core` is outside this batch's write-set (code-review-tasks.md,
+ * "Must fix", `board/renderer.ts:45`).
+ */
+function hashString(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(36);
+}
+
+/**
+ * Stable input for the shadow filter's id hash: every card's label and
+ * position plus the row count, so identical board sources hash identically
+ * (byte-identical SVG on repeat renders) and boards with different content
+ * hash differently. `Math.random()` (the code-review-flagged defect) had no
+ * such property and could also collide across two renders in the same
+ * process (duplicate-id risk when a document embeds two board diagrams).
+ */
+function shadowIdInput(geo: BoardGeometry): string {
+  const activityKeys = geo.activities
+    .map((a) => `${a.xOffset}:${a.fullWidth}:${a.cards.map((c) => `${c.label}|${c.dx}|${c.dy}`).join(',')}`)
+    .join(';');
+  return `${activityKeys}#${geo.maxStage}`;
+}
+
+/**
+ * Upstream draws this shadow as `URectangle#setDeltaShadow(1)` — a solid
+ * offset-rectangle shadow (`board/CardBox.java:74`), not an SVG filter. This
+ * port's Gaussian-blur `<filter>` is a pre-existing, not-yet-reconciled
+ * rendering-technique divergence (out of scope for this fix, which only
+ * addresses the filter id's non-determinism); see CLAUDE.md's divergence
+ * policy.
+ */
 function buildShadowDefs(shadowId: string): string {
   return (
     `<filter${attrs([
@@ -42,7 +83,7 @@ function renderCard(cx: number, cy: number, label: string, shadowId: string): st
 }
 
 export function renderBoard(geo: BoardGeometry, theme: Theme): RenderFragment {
-  const shadowId = `board-card-shadow-${Math.random().toString(36).slice(2, 8)}`;
+  const shadowId = `board-card-shadow-${hashString(shadowIdInput(geo))}`;
   const parts: string[] = [];
 
   for (const activity of geo.activities) {
