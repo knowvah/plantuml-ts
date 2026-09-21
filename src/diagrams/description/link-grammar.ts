@@ -220,6 +220,12 @@ function parseArrowStyle(style1: string | undefined, style2: string | undefined)
       }
     }
   }
+  // #lizard forgives — faithful port of `WithLinkType.applyOneStyle`
+  // (`decoration/WithLinkType.java:137-166`): each `else if` branch here is
+  // one upstream `if (s.equalsIgnoreCase(...))`/`startsWith("thickness=")`
+  // case, in the same order, ending in the same color fallthrough. Splitting
+  // this into a token->handler map would obscure the 1:1 correspondence the
+  // rest of this file's `@see` comments rely on (code review 2026-09-21).
   return result;
 }
 

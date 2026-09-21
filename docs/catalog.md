@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1130 modules · 4105 exported names.
+1130 modules · 4108 exported names.
 
 ## `src/`
 
@@ -71,7 +71,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
-| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `paintToSvg` | Paint — the color/gradient value model for the rendering layer. |
+| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor.ts` | `PreprocessorResult`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -1047,7 +1047,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `BoardNode`, `BoardActivity`, `BoardDiagramAST`, `CardGeometry`, `ActivityGeometry`, `BoardGeometry` |  |
 | `index.ts` | `boardPlugin` |  |
-| `layout.ts` | `layoutBoard` |  |
+| `layout.ts` | `CELL_H`, `layoutBoard` |  |
 | `parser.ts` | `parseBoard` |  |
 | `renderer.ts` | `renderBoard` |  |
 
@@ -1285,7 +1285,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
 | `index.ts` | `filesPlugin` |  |
-| `layout.ts` | `layoutFiles` |  |
+| `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |
 | `renderer.ts` | `renderFiles` |  |
 

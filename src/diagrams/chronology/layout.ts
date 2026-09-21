@@ -1,9 +1,22 @@
 import type { ChronologyDiagramAST, ChronologyGeometry, EventGeometry, DayTick } from './ast.js';
 
+/**
+ * Port-own defaults, not jar-matched: `chronology`'s upstream diagram is
+ * DISABLED -- `ChronologyDiagramFactory` is commented out in
+ * `PSystemBuilder.java:184` (`// factories.add(new
+ * ChronologyDiagramFactory());`), and no `net.sourceforge.plantuml.chronology`
+ * package exists in the jar at all (only the `DiagramType.CHRONOLOGY` enum
+ * entry and its `chronology` keyword parser survive, `core/DiagramType.java:
+ * 46,109-110,286`). `plans/chronology-diagram/decisions.md`'s D5 cites a
+ * `TimeScaleChronology.fullWidth` that does not exist anywhere in `~/git/
+ * plantuml` (confirmed by search) -- that citation predates this finding and
+ * should be treated as unverified, not upstream-sourced.
+ */
 const TOTAL_WIDTH = 1000;
 const HEADER_HEIGHT = 30;
 const BASELINE_Y = 40;
 const TOTAL_HEIGHT = 80;
+/** Unit conversion, not a jar-derived layout value: milliseconds per day. */
 const MS_PER_DAY = 86_400_000;
 
 function pad(n: number): string {

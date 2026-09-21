@@ -249,14 +249,23 @@ function withOptionalFields(
   base: Pick<Relationship, 'from' | 'to' | 'type'>,
   optional: OptionalRelFields,
 ): Relationship {
-  const rel = { ...base } as unknown as Record<string, unknown>;
+  // Typed as `base`'s own shape intersected with an index signature -- keeps
+  // `from`/`to`/`type` statically known (unlike a plain `Record<string,
+  // unknown>`). TS then accepts `rel` as a `Relationship` on return with NO
+  // cast at all: every optional field either isn't set (fine, all optional)
+  // or is set through the index signature, which `Relationship`'s own
+  // optional properties happen to accept. Code review 2026-09-21: this used
+  // to be `{ ...base } as unknown as Record<string, unknown>` going in and
+  // `rel as unknown as Relationship` coming out -- two casts that defeated
+  // field-name checking entirely.
+  const rel: Pick<Relationship, 'from' | 'to' | 'type'> & Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(optional) as Array<
     [keyof OptionalRelFields, string | number | undefined]
   >) {
     if (value === undefined || (key === 'label' && value === '')) continue;
     rel[key] = value;
   }
-  return rel as unknown as Relationship;
+  return rel;
 }
 
 /**

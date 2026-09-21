@@ -7,16 +7,38 @@ import type {
   ScaleDirection,
 } from './ast.js';
 
+// Root style default (`skin/plantuml.skin:10`, `root { FontSize 14 }`) --
+// packetdiag reads no theme override for its own font, so it hardcodes the
+// cascade's root value directly rather than threading a Theme through.
 const FONT_SIZE = 14;
+// `PacketDiagram#adjustBitWidth` (`packetdiag/PacketDiagram.java:463-465`):
+// `bitWidth = getStyle().value(PName.FontSize).asDouble() * bitScale`.
 const BIT_SCALE = 3.0;
+// `PacketIndicator.V_LINE_FULL` (`packetdiag/PacketIndicator.java:77`).
 const V_LINE_FULL = 32;
+// `PacketIndicator.V_LINE_SHORT = V_LINE_FULL / 2` (`PacketIndicator.java:82`).
 export const V_LINE_SHORT = 16;
+// Port-own default: upstream measures the number label's height from real
+// font metrics (`PacketIndicator#calculateDimensionSlow`,
+// `PacketIndicator.java:154-158`, via `numberTb().calculateDimension`)
+// rather than a fixed constant; this port approximates that measured height
+// with 24px at the 14px default font size.
 const NUMBER_HEIGHT = 24;
 export const INDICATOR_HEIGHT = NUMBER_HEIGHT + V_LINE_FULL;
+// Port-own canvas padding: `PacketDiagram#getTextBlock`'s `calculateDimension`
+// (`packetdiag/PacketDiagram.java:143-178`) sizes `totalWidth`/`totalHeight`
+// purely from indicator/grid geometry -- no left/right/bottom margin is
+// added there. This port adds its own outer padding instead (MARGIN_RIGHT/
+// MARGIN_BOTTOM +1 over the 10px baseline for stroke-width overflow).
 const MARGIN_LEFT = 10;
 const MARGIN_RIGHT = 11;
 const MARGIN_BOTTOM = 11;
+// `PacketBlock#getShapeTextBlock`'s `vMargin` (`packetdiag/PacketBlock.java:256`).
 export const V_MARGIN = 10;
+// Port-own default: upstream never hardcodes an ascent value -- font ascent
+// comes from `StringBounder`/`FontConfiguration` metrics at draw time
+// (e.g. `PacketIndicator#calculateDimensionSlow`). This port approximates
+// the 14px default font's ascent with a fixed 11px.
 export const FONT_ASCENT = 11;
 
 export function blockRenderedHeight(heightUnits: number, bitHeight: number): number {

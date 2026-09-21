@@ -4,19 +4,33 @@ import type { PacketGeometry } from './ast.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { INDICATOR_HEIGHT, V_LINE_SHORT, V_MARGIN, FONT_ASCENT, blockRenderedHeight } from './layout.js';
 
+// Root style default (`skin/plantuml.skin:10`, `root { FontSize 14 }`) --
+// see layout.ts's own FONT_SIZE for the same value/citation.
 const FONT_SIZE = 14;
 const FONT_FAMILY = 'sans-serif';
+// `skin/plantuml.skin:2` (`--common-background: #f1f1f1;`, root's
+// `BackGroundColor` var) -- the port-wide default node fill, same value
+// `theme.ts`'s `defaultTheme.colors.graph.classBackground` etc. document.
 const BLOCK_FILL = '#F1F1F1';
+// `skin/plantuml.skin:16` (`root { LineColor #181818 }`) -- the port-wide
+// default stroke color.
 const BLOCK_STROKE = '#181818';
+// Port-own default: upstream's root style default is `LineThickness 1.0`
+// (`skin/plantuml.skin:14`), not 0.5 -- no packetdiag-specific skin block
+// overrides it (grepped `skin/plantuml.skin` for "packetdiag": no match), so
+// this thinner stroke is this port's own visual choice, not jar-matched.
 const BLOCK_STROKE_WIDTH = 0.5;
 const TICK_STROKE = '#181818';
+// Port-own default -- see BLOCK_STROKE_WIDTH's doc comment above.
 const TICK_STROKE_WIDTH = 0.5;
+// `skin/plantuml.skin:9` (`root { FontColor black }`).
 const TEXT_FILL = '#000000';
 
 // Vertical position of the tick line bottom
 const TICK_BOTTOM = INDICATOR_HEIGHT; // 56
 
-// Vertical position of full-tick top (below number area)
+// Vertical position of full-tick top (below number area) -- see layout.ts's
+// own NUMBER_HEIGHT doc comment (port-own approximation of a measured height).
 const NUMBER_HEIGHT = 24;
 // Short tick top = NUMBER_HEIGHT + V_LINE_SHORT
 const SHORT_TICK_TOP = NUMBER_HEIGHT + V_LINE_SHORT; // 40
@@ -27,6 +41,8 @@ const NUMBER_FULL_Y = NUMBER_HEIGHT - FONT_SIZE + FONT_ASCENT; // 24 - 14 + 11 =
 // short indicator number sits V_LINE_SHORT lower
 const NUMBER_SHORT_Y = NUMBER_FULL_Y + V_LINE_SHORT; // 37
 
+// Port-own canvas padding -- see layout.ts's own MARGIN_LEFT doc comment
+// (upstream's PacketDiagram#getTextBlock adds no left/right/bottom margin).
 const MARGIN_LEFT = 10;
 
 export function renderPacket(geo: PacketGeometry, theme: Theme): RenderFragment {

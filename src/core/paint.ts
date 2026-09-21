@@ -165,8 +165,9 @@ function gradientVector(policy: string): {
  * Deterministic FNV-1a hash of `s`, rendered in base36. Identical input always
  * yields the identical string — no counters, no `Math.random`, no `Date.now` —
  * which is what lets `paintToSvg` dedup identical gradient defs by id (D3).
+ * Also seeds the board renderer's shadow filter id.
  */
-function hashString(s: string): string {
+export function hashString(s: string): string {
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);

@@ -7,8 +7,8 @@ const PADDING = 10;
 const FONT_SIZE = 14;
 const FONT_FAMILY = 'sans-serif';
 
-// Note sizing — must stay in sync with renderer.ts
-const NOTE_Y_OFFSET = 2; // renderer draws box at entry.y + NOTE_Y_OFFSET
+// Note sizing — imported by renderer.ts so the two stay in sync.
+export const NOTE_Y_OFFSET = 2; // renderer draws box at entry.y + NOTE_Y_OFFSET
 const NOTE_PAD = 6;
 const NOTE_LINE_H = 16;
 const NOTE_FONT = 12;

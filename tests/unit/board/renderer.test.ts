@@ -48,6 +48,22 @@ describe('renderBoard', () => {
     expect(svg).toContain('feOffset');
   });
 
+  it('shadow filter id is deterministic: same geometry renders byte-identical SVG', () => {
+    const root = makeCard('Root', 0, 0);
+    const geo = makeGeo([makeActivity(0, 170, [root])], 1);
+    const svg1 = assembleSvg(renderBoard(geo, theme));
+    const svg2 = assembleSvg(renderBoard(geo, theme));
+    expect(svg1).toBe(svg2);
+  });
+
+  it('shadow filter id differs between two different boards', () => {
+    const geoA = makeGeo([makeActivity(0, 170, [makeCard('Root', 0, 0)])], 0);
+    const geoB = makeGeo([makeActivity(0, 170, [makeCard('Other', 0, 0)])], 0);
+    const idA = assembleSvg(renderBoard(geoA, theme)).match(/board-card-shadow-([a-z0-9]+)/)![1];
+    const idB = assembleSvg(renderBoard(geoB, theme)).match(/board-card-shadow-([a-z0-9]+)/)![1];
+    expect(idA).not.toBe(idB);
+  });
+
   it('AC4: maxStage=2 produces 2 dashed lines at y=90 and y=180', () => {
     const root = makeCard('Root', 0, 0);
     const geo = makeGeo([makeActivity(0, 170, [root])], 2);
