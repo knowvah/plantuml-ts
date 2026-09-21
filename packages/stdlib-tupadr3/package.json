@@ -37,7 +37,7 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@knowvah/plantuml-ts": "^0.1.0"
+    "@knowvah/plantuml-ts": "^0.2.0"
   },
   "devDependencies": {
     "@knowvah/plantuml-ts": "file:../.."
