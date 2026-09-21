@@ -8,9 +8,11 @@
  */
 import { describe, it, expect } from 'vitest';
 import { statePlugin } from '../../../src/diagrams/state/index.js';
+import { parseState } from '../../../src/diagrams/state/parser.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST } from '../../../src/diagrams/state/ast.js';
+import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
 
 function parse(source: string): StateDiagramAST {
   const lines = source
@@ -19,6 +21,14 @@ function parse(source: string): StateDiagramAST {
     .filter((l) => l.length > 0);
   const block: UmlSource = { lines, type: 'state' };
   return parseAst(statePlugin, block);
+}
+
+function toBlock(source: string): UmlSource {
+  const lines = source
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  return { lines, type: 'state' };
 }
 
 // ---------------------------------------------------------------------------
@@ -37,9 +47,15 @@ describe('single-line attached note', () => {
     expect(ast.notes?.[0]).toMatchObject({ target: 'B', position: 'right', implicitTarget: true });
   });
 
-  it('a bare note with no lastEntity is silently dropped', () => {
-    const ast = parse('note top : orphan note');
-    expect(ast.notes).toHaveLength(0);
+  it('a bare note with no lastEntity refuses "Nothing to note to" (T9b, was a silent drop)', () => {
+    // Upstream's shared `CommandFactoryNoteOnEntity#executeInternal`
+    // (`command/note/CommandFactoryNoteOnEntity.java:293-303`) returns an
+    // EXECUTION-error refusal here, not a silently-empty diagram — see
+    // `unknown-bucket-routing-repair-t9b.test.ts` for the full mechanism.
+    const result = parseState(toBlock('note top : orphan note'));
+    expect((result as ParseRefusal).refused).toBe(true);
+    expect((result as ParseRefusal).kind).toBe('execution');
+    expect((result as ParseRefusal).message).toBe('Nothing to note to');
   });
 
   it('explicit "of <State>" does not set implicitTarget', () => {
@@ -280,12 +296,16 @@ describe('quoted note target text and unresolvable multi-line notes', () => {
     expect(ast.notes?.[0]?.target).toBe('Quoted State');
   });
 
-  it('a multi-line note with no "of" clause and no lastEntity is dropped', () => {
-    const ast = parse(`
-      note left
-        orphan multi-line note
-      end note
-    `);
-    expect(ast.notes).toHaveLength(0);
+  it('a multi-line note with no "of" clause and no lastEntity refuses "Nothing to note to" (T9b, was a silent drop)', () => {
+    const result = parseState(
+      toBlock(`
+        note left
+          orphan multi-line note
+        end note
+      `),
+    );
+    expect((result as ParseRefusal).refused).toBe(true);
+    expect((result as ParseRefusal).kind).toBe('execution');
+    expect((result as ParseRefusal).message).toBe('Nothing to note to');
   });
 });
