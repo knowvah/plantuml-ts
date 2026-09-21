@@ -225,3 +225,53 @@ describe('mixed markers on one line', () => {
     expect(ev.vmerge).toBe(true);
   });
 });
+
+// T11 (ubrr, T5 mechanism 4): `noteCommand`/`styledNoteCommand` must
+// register every referenced participant themselves, mirroring
+// `FactorySequenceNoteCommand#executeInternal`'s unconditional
+// `diagram.getOrCreateParticipant(location, ...)` call
+// (`FactorySequenceNoteCommand.java:224`,
+// `FactorySequenceNoteOverSeveralCommand.java:230-232`) -- BEFORE these
+// fixtures were fixed, a note-only diagram (no `participant`/message line)
+// was wrongly refused `kind: 'incomplete'` (`parser.ts:306`,
+// `SequenceDiagram.java:585-587`), even though the jar completes it.
+describe('note commands register their own participants (T11, ubrr)', () => {
+  // Exemplar: `covipu-77-jimo313` -- `note over IT, FKM` (multi-line form),
+  // the ONLY content, no prior `participant`/message line at all.
+  it('note over IT, FKM (multi-line, two participants, no prior declarations) completes', () => {
+    const ast = parse(['note over IT, FKM', 'body text', 'end note']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['IT', 'FKM']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('over');
+    expect(ev.participants).toEqual(['IT', 'FKM']);
+    expect(ev.text).toBe('body text');
+  });
+
+  // `jogaji-49-zaco571`-shaped: single-line form, comma list, no prior
+  // declarations.
+  it('note over Locus,Cassandra: text (single-line, no prior declarations) completes', () => {
+    const ast = parse(['note over Locus,Cassandra: hello']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Locus', 'Cassandra']);
+  });
+
+  // `xurozi-64-zaci349`-shaped: multi-line form, ONE participant, no prior
+  // declarations -- exercises `noteCommand`'s pendingNote branch, not just
+  // its immediate-emit branch.
+  it('note over Bob (multi-line, single participant, no prior declarations) completes', () => {
+    const ast = parse(['note over Bob', 'line one', 'line two', 'end note']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Bob']);
+    const ev = firstNote(ast);
+    expect(ev.participants).toEqual(['Bob']);
+    expect(ev.text).toBe('line one\nline two');
+  });
+
+  // `styledNoteCommand`'s own PARTICIPANT group needs the identical fix --
+  // a `note left X`/`note right X` form with no prior declarations.
+  it('note left Ghost : boo (styledNoteCommand, no prior declarations) completes', () => {
+    const ast = parse(['note left Ghost : boo']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Ghost']);
+    const ev = firstNote(ast);
+    expect(ev.position).toBe('left');
+    expect(ev.participants).toEqual(['Ghost']);
+  });
+});

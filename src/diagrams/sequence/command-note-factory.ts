@@ -14,35 +14,17 @@
  */
 
 import type { NoteEvent } from './ast.js';
-import { emit, type Command } from './sequence-parse-helpers.js';
+import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
 
 // ---------------------------------------------------------------------------
-// Shared fragments: `ColorParser`'s two grammars and the `<<stereo>>` token.
+// Shared fragments: `ColorParser`'s two grammars (sequence-color-grammar.ts)
+// and the `<<stereo>>` token.
 // ---------------------------------------------------------------------------
 
-/**
- * `ColorParser.COLOR_REGEXP` — a plain `#name` background color, OR a
- * two-stop gradient like `#yellow/blue` (one `-`/`\`/`|`/`/` separator
- * between two word runs).
- * @see klimt/color/ColorParser.java:44
- */
-const NOTE_COLOR_ATOM = String.raw`#\w+[-\\|/]?\w+`;
-
-/**
- * `ColorParser.PART2` — the compound `key:value(;key:value)*` form used by
- * `#green;line:lightblue` and `#back:green;line:lightblue`: an optional
- * leading plain color plus `;`, then one-or-more `keyword[:value]` pairs
- * drawn from the fixed `ColorParam`-backed keyword set.
- * @see klimt/color/ColorParser.java:45
- */
-const NOTE_COLOR_COMPOUND = String.raw`#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+`;
-
-/**
- * `ColorParser.COLORS_REGEXP = PART2 | COLOR_REGEXP` — compound tried
- * first, same alternation order upstream uses.
- * @see klimt/color/ColorParser.java:46
- */
-const NOTE_COLOR = `(?:${NOTE_COLOR_COMPOUND})|(?:${NOTE_COLOR_ATOM})`;
+/** `ColorParser.COLORS_REGEXP` under this file's pre-existing local name —
+ *  see `sequence-color-grammar.ts` for the grammar itself. */
+const NOTE_COLOR = SEQUENCE_COLOR;
 
 /** `StereotypePattern.mandatory` — `<<...>>`, non-greedy so two
  *  stereotype-shaped runs on one line don't merge into one match.
@@ -56,6 +38,44 @@ const NOTE_STEREO = String.raw`<<.+?>>`;
  *  ports the identical upstream method for that command family). */
 function unquote(token: string): string {
   return token.replace(/^"(.*)"$/, '$1');
+}
+
+/**
+ * Split a comma-separated `note over P1[, P2, ...]` participant list,
+ * unquoting each entry (T8), AND register every one (T11, ubrr) --
+ * `FactorySequenceNoteCommand#executeInternal`/`FactorySequenceNote
+ * OverSeveralCommand#executeInternal` both call
+ * `diagram.getOrCreateParticipant(location, ...)` for every referenced name
+ * UNCONDITIONALLY, before checking whether the note body is non-empty
+ * (`FactorySequenceNoteCommand.java:224`,
+ * `FactorySequenceNoteOverSeveralCommand.java:230-232`). Shared by
+ * {@link noteCommand} and {@link styledNoteCommand}, the two commands whose
+ * PARTICIPANT group is this port's own comma-list generalisation (see
+ * {@link styledNoteCommand}'s own doc comment).
+ *
+ * A participant containing `[` is NEVER registered: neither command's
+ * PARTICIPANT group excludes `[` from its capture class the way upstream's
+ * `UrlBuilder.OPTIONAL` (a whole separate, currently-unported group on both
+ * commands) would, so a note carrying an inline `[[url]]` before its `:`
+ * (`hnote over caller [[http://... note]] : test`) has that bracket run
+ * swallowed into the "participant" text instead -- a PRE-EXISTING gap
+ * (unaffected by this fix). Registering that garbage text as a real
+ * participant would draw a phantom extra lifeline no jar ever draws
+ * (jar-verified regression against `pucini-86-goti091`): `[` can never
+ * appear in a legitimate upstream PARTICIPANT (`[%pLN_.@]+` or a quoted
+ * string, neither of which admits an unescaped `[`), so skipping it here
+ * narrows what THIS fix registers without touching the unrelated,
+ * pre-existing URL-parsing gap itself.
+ */
+function registerNoteParticipants(state: ParseState, raw: string): string[] {
+  const participants = raw
+    .split(',')
+    .map((s) => unquote(s.trim()))
+    .filter((s) => s.length > 0);
+  for (const p of participants) {
+    if (!p.includes('[')) ensureParticipant(state, p);
+  }
+  return participants;
 }
 
 // 8. note left of / right of / over
@@ -101,11 +121,10 @@ export const noteCommand: Command = {
 
     // T8: unquote each entry so a quoted participant (`note over Bob,
     // "Long Alice"`) resolves to the SAME id `"Long Alice" -> Bob` created,
-    // rather than a second, quote-literal participant.
-    const participants = rawParticipants
-      .split(',')
-      .map((s) => unquote(s.trim()))
-      .filter((s) => s.length > 0);
+    // rather than a second, quote-literal participant. T11 (ubrr): also
+    // registers each one -- see {@link registerNoteParticipants}'s doc
+    // comment.
+    const participants = registerNoteParticipants(state, rawParticipants);
 
     if (inlineText !== undefined) {
       // Single-line form: replace literal \n escape sequences with real newlines,
@@ -260,10 +279,9 @@ export const styledNoteCommand: Command = {
     const color = match[8];
     const inlineText = match[9];
     const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
-    const participants = match[6]!
-      .split(',')
-      .map((s) => unquote(s.trim()))
-      .filter((s) => s.length > 0);
+    // T11 (ubrr): also registers each participant -- see
+    // {@link registerNoteParticipants}'s doc comment.
+    const participants = registerNoteParticipants(state, match[6]!);
     const stereotype = stereo1 ?? stereo2;
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
     const base = {

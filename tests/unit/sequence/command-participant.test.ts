@@ -38,6 +38,7 @@ function freshState(): ParseState {
     lastMessageTo: null,
     currentBox: null,
     boxCounter: 0,
+    executionError: undefined,
   };
 }
 
@@ -130,5 +131,57 @@ describe('matchParticipantMultilineCommand', () => {
     matchParticipantMultilineCommand(state, lines, 0);
     expect(state.ast.participants).toHaveLength(1);
     expect(state.ast.participants[0]?.display).toBe('Bob');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T11 (ubrr, T5 mechanism 6): a <<stereotype>> between a QUOTED display and
+// "as CODE" matches no registered CommandParticipantA/A2/A3/A4 grammar.
+// @see sequencediagram/command/CommandParticipantA.java:52-69
+// @see sequencediagram/command/CommandParticipantA2.java:51-65
+// @see sequencediagram/command/CommandParticipantA3.java:51-65
+// @see sequencediagram/command/CommandParticipantA4.java:51-61
+// ---------------------------------------------------------------------------
+
+describe('participantCommand refuses a misplaced stereotype (T11, ubrr)', () => {
+  // Exemplar: `pacope-41-pufu938` -- `database "DB 2" <<&file>> as Db2`.
+  // Jar-verified (three isolated 2-line probes, `scripts/oracle-render.sh`):
+  // `database "DB 2" <<&file>> as Db2` / `<<$SpriteUsb>>` / `<<plain>>` all
+  // render DESCRIPTION, never SEQUENCE -- the refusal is the token ORDER,
+  // not the stereotype's content.
+  //
+  // `kind: 'syntax'`, not `'execution'`: this is a DISPATCH-level false
+  // positive, not a true execution failure (see `dispatchCommand`'s own
+  // doc comment, parser.ts) -- `participantCommand`'s single `(.+)$`
+  // pattern syntactically over-matches where upstream's four narrower
+  // `CommandParticipantA..A4` regexes would have declined the line
+  // entirely, so `SequenceCommandRefusal` makes the dispatch loop try the
+  // REST of `SEQUENCE_COMMANDS` (none of which match this line shape
+  // either) rather than aborting immediately.
+  it('refuses `syntax` for a quoted display, then <<stereotype>>, then "as CODE"', () => {
+    const result = parseSequence(['database "DB 2" <<&file>> as Db2']);
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('syntax');
+  });
+
+  it('still refuses for a plain-text stereotype, not just an icon glyph', () => {
+    const result = parseSequence(['database "DB 2" <<plain>> as Db2']);
+    expect('refused' in result && result.kind).toBe('syntax');
+  });
+
+  // Control: the SAME stereotype, in the upstream-accepted position (AFTER
+  // "as CODE", unquoted display, `CommandParticipantA.java:63-64`), is not
+  // refused.
+  it('accepts the stereotype when it sits after CODE (upstream order)', () => {
+    const ast = parse(['participant Db2 <<plain>>', 'Db2 -> Db2 : hi']);
+    expect(ast.participants[0]).toMatchObject({ id: 'Db2', stereotype: '<<plain>>' });
+  });
+
+  // Control: a quoted display with NO stereotype at all still declares
+  // normally -- the refusal is specific to the stereotype's position, not
+  // to quoting in general.
+  it('still accepts a quoted display with "as CODE" and no stereotype', () => {
+    const ast = parse(['participant "DB 2" as Db2', 'Db2 -> Db2 : hi']);
+    expect(ast.participants[0]).toMatchObject({ id: 'Db2', display: 'DB 2' });
   });
 });

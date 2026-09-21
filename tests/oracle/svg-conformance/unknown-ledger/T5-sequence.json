@@ -4,7 +4,7 @@
     {
       "slug": "covipu-77-jimo313",
       "cohort": "sequence-note-no-participant-registration",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",
@@ -14,7 +14,7 @@
     {
       "slug": "jogaji-49-zaco571",
       "cohort": "sequence-note-no-participant-registration",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",
@@ -24,7 +24,7 @@
     {
       "slug": "katoke-97-puri404",
       "cohort": "sequence-note-no-participant-registration",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",
@@ -34,7 +34,7 @@
     {
       "slug": "pacope-41-pufu938",
       "cohort": "sequence-participant-stereotype-position-overclaim",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "CommandParticipantA3.java",
@@ -49,12 +49,12 @@
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",
       "size": 25,
-      "reason": "'note left' (bare, no 'of', no participant token, trailing space only) followed by free text then 'end note'. src/diagrams/sequence/command-note-factory.ts's noteCommand pattern requires the literal 'left of'/'right of'/'over' plus a mandatory participant capture, so 'note left' with nothing after it matches NO command and refuses kind=syntax on the note body text two lines later. The jar renders this fixture as SEQUENCE (verified: golden SVG draws the note body text and an 'opt'/'ref' frame), so upstream accepts bare 'note left'. FactorySequenceNoteCommand.java:76-90's regex ALSO requires a PARTICIPANT token after POSITION (not optional), so the exact upstream path that accepts a participant-less 'note left' was not fully isolated in this pass -- ruled out: it is not an isIncomplete issue (jar renders full content) and not a note-position issue (both 'left'/'right' spellings exist upstream). Instrument next: bisect the real jar (scripts/oracle-render.sh) against a minimal 'note left' + 'end note' fixture with an explicit prior participant to find which command actually claims it before implementing."
+      "reason": "Mechanism CONFIRMED this pass (T11, ubrr), not fixed -- narrow single-command changes are not safe here. `note left` (bare, no 'of', no participant token) DOES match this port's own `noteOnArrowCommand` (the FactorySequenceNoteOnArrowCommand port, command-note-factory.ts) and its multi-line regex correctly requires no participant at all (mirrors `FactorySequenceNoteOnArrowCommand.java:77-88`'s getRegexConcatMultiLine: STYLE, POSITION(right|left|bottom|top), no PARTICIPANT leaf exists in that grammar at all -- the earlier reading citing `:76-90`'s PARTICIPANT requirement was the WRONG factory, FactorySequenceNoteCommand's, not this one). The real defect: this port's noteOnArrowCommand.execute returns EARLY, without opening `state.pendingNote`, when `state.lastMessageFrom`/`lastMessageTo` are both null (command-note-factory.ts, noteOnArrowCommand) -- collapsing two upstream-separate concerns (does the multi-line BLOCK get consumed at all vs. does a Note get attached to an event) into one early-return. Upstream's own executeInternal ALSO no-ops when `diagram.getLastEventWithNote()==null` (FactorySequenceNoteOnArrowCommand.java:209-213, EventWithNote), but the multi-line BLOCK (header + body + 'end note') is already consumed as one unit by `CommandMultilines2`'s own line-accumulation BEFORE executeNow ever runs -- so upstream never reaches a per-line refusal on the body text the way this port's handlePendingNote/dispatchCommand fallback does. And upstream's `getLastEventWithNote()` (SequenceDiagram.java:154-158) is NOT restricted to messages -- it walks `events` backward for the last entry implementing `EventWithNote`, which THREE classes do: AbstractMessage.java (arrows), Reference.java (the `ref over A,B ... end ref` block this fixture's `opt`/`ref` frame builds), and GroupingLeaf.java (opt/alt/loop open AND close markers). This fixture's `note left` sits after `opt test / ref over A,B / SomeSequence / end ref / end` with NO message anywhere -- the jar attaches the note to whichever of the ref/grouping events is last, not to a null message. Fixing this port's equivalent needs (a) decoupling multi-line-block consumption from the attach-to-an-event check (so an unattachable note still consumes its block and lets parsing continue) and (b) a generalised 'last-note-capable-event' tracked across frame-open/frame-close/reference commands, not just `lastMessageFrom`/`lastMessageTo` -- both changes reach into command-grouping.ts/command-misc.ts, outside a single-command narrow fix, on this mission's most-ratcheted engine. Deferred as a follow-on rather than risked here."
     },
     {
       "slug": "xurozi-64-zaci349",
       "cohort": "sequence-note-no-participant-registration",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "task": "T5",
       "seam": "sequence",
       "command": "FactorySequenceNoteCommand.java",

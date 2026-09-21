@@ -4,7 +4,7 @@
     {
       "slug": "jamupa-36-duni483",
       "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "sequence",
       "command": "CommandArrow",
       "size": 15,
@@ -14,7 +14,7 @@
     {
       "slug": "kevegu-65-zagi834",
       "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "sequence",
       "command": "CommandArrow",
       "size": 15,
@@ -24,7 +24,7 @@
     {
       "slug": "lakivi-73-vuko958",
       "cohort": "sequence-overclaim-invalid-arrow-style",
-      "disposition": "fix-candidate",
+      "disposition": "fixed",
       "seam": "sequence",
       "command": "CommandArrow",
       "size": 15,

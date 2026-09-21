@@ -46,6 +46,7 @@ function freshState(): ParseState {
     lastMessageTo: null,
     currentBox: null,
     boxCounter: 0,
+    executionError: undefined,
   };
 }
 

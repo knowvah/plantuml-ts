@@ -43,10 +43,18 @@
  * read — both files outside this module's write-set.
  *
  * Upstream's `executeArg` returns `CommandExecutionResult.error("Illegal
- * sequence arrow")` when neither dressing carries a direction (`:314`). This
- * port's `Command.execute` has no failure channel — see `parser.ts`'s note on
- * the `execution` refusal point — so that case consumes the line and emits
- * nothing.
+ * sequence arrow")` when neither dressing carries a direction (`:311-313`),
+ * and `applyStyle` throws `NoSuchColorException` for a style token that is
+ * neither `dashed`/`bold`/`dotted`/`hidden` nor a real colour (`:482-502`,
+ * caught by `PSystemBuilder.java:256-271`'s per-factory catch, which
+ * discards the whole sequence attempt and lets the next candidate --
+ * usually class -- claim the source). This port's `Command.execute` has no
+ * `CommandExecutionResult` return channel, so both instead set
+ * `state.executionError` and return without emitting anything; `parser.ts`'s
+ * `dispatchOrdinaryLine` converts that into an `execution` `ParseRefusal`,
+ * discarding the whole attempt the same way (T11, ubrr — jar-verified:
+ * `a -[thickness=5]-> b` and a bare `Reporter -- Queue` both render `CLASS`,
+ * not `SEQUENCE`).
  *
  * `CommandReturn` (`:129`) lives here too. Upstream registers it in the
  * `CommandActivate2`/`CommandReturn` block after `CommandGrouping`, not
@@ -61,7 +69,7 @@
 
 import type { MessageEvent } from './ast.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
-import { ARROW_DRESSING1, ARROW_SKELETON_SOURCE, LIFECOLOR } from './sequence-arrow-regex.js';
+import { isKnownColorToken } from './sequence-arrow-color.js';
 import {
   activationFlags,
   autoActivationFlags,
@@ -106,100 +114,19 @@ export const returnCommand: Command = {
 };
 
 // ---------------------------------------------------------------------------
-// The two fragments `sequence-arrow-regex.ts` deliberately leaves out
+// The composed regex — split into `sequence-arrow-compose.ts` to stay under
+// the 500-line file cap; re-exported here so this module's own public API
+// (and `tests/unit/sequence/command-arrow.test.ts`'s imports) are unchanged.
 // ---------------------------------------------------------------------------
 
-/**
- * `%s` — normal or non-breaking space, as a bare char list so it can also be
- * spelled inside a NEGATED class (`[^%s…]`, which `UrlBuilder` uses four
- * times). `sequence-arrow-regex.ts` keeps its own copy private.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/regex/Pattern2.java:57
- */
-const S_CHARS = '\\s\\u00A0';
-
-/** `[%s]` — one such space. */
-const S = `[${S_CHARS}]`;
-
-/**
- * `%g` — the quote characters: ASCII double quote, the two curly double
- * quotes, and `Jaws.BLOCK_E1_INVISIBLE_QUOTE` (U+E121).
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/regex/Pattern2.java:59
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jaws/Jaws.java:55
- */
-const G_CHARS = '"\\u201c\\u201d\\uE121';
-
-/**
- * `StereotypePattern.optional("STEREOTYPE")` — `spaceZeroOrMore`, an optional
- * `mandatory` leaf `(\<\<.+?\>\>)`, then `spaceZeroOrMore` again.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/StereotypePattern.java:52-58,67-69
- */
-const STEREOTYPE_OPTIONAL = `${S}*(?:(?<STEREOTYPE><<.+?>>))?${S}*`;
-
-/** `UrlBuilder.START_PART` / `END_PART`.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:51-52 */
-const URL_START = `\\[\\[${S}*`;
-const URL_END = `${S}*\\]\\]`;
-
-/** The optional `{tooltip}` and the optional trailing label, shared verbatim
- *  by `S_QUOTED` and `S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL`.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:56-57,78-79 */
-const URL_OPT_TOOLTIP = `(?:${S}*\\{([^{}]*)\\})?`;
-const URL_OPT_LABEL = `(?:${S}([^${S_CHARS}{}\\[\\]][^\\[\\]]*))?`;
-
-/**
- * `UrlBuilder.getRegexp()` — its five alternatives in upstream's order, with
- * upstream's eleven inner groups kept (the twelfth is the `URL` group itself,
- * which is why `MANDATORY` declares `new RegexLeaf(12, URL_KEY, …)`).
- * `executeArg` reads only group 0, the whole `[[…]]` run, and hands it back to
- * `UrlBuilder#getUrl` to re-parse (`CommandArrow.java:133-136`).
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:48-49,54-87
- */
-const URL_REGEXP =
-  `${URL_START}[${G_CHARS}]([^${G_CHARS}]+)[${G_CHARS}]${URL_OPT_TOOLTIP}${URL_OPT_LABEL}${URL_END}` +
-  `|${URL_START}\\{(.*)\\}${URL_END}` +
-  `|${URL_START}\\{([^{}]*)\\}${S}*([^\\[${S_CHARS}{}\\[\\]][^\\[\\]]*)${URL_END}` +
-  `|${URL_START}([^\\s${G_CHARS}{}\\[\\]]+?)${S}*\\{(.+)\\}${URL_END}` +
-  `|${URL_START}([^${S_CHARS}${G_CHARS}\\[\\]]+?)${URL_OPT_TOOLTIP}${URL_OPT_LABEL}${URL_END}`;
-
-/** `UrlBuilder.OPTIONAL` = `RegexOptional(MANDATORY)`.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:48-49 */
-const URL_OPTIONAL = `(?:(?<URL>${URL_REGEXP}))?`;
-
-// ---------------------------------------------------------------------------
-// The composed pattern
-// ---------------------------------------------------------------------------
-
-/**
- * `getRegexConcat()` in full: T3's skeleton with STEREOTYPE and URL spliced
- * back in at their upstream position, immediately after LIFECOLOR and before
- * the final `spaceZeroOrMore` + MESSAGE (`CommandArrow.java:128-132`). The
- * splice is anchored on the LIFECOLOR fragment, which occurs exactly once, so
- * the concatenation order stays owned by `sequence-arrow-regex.ts`.
- * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:87-133
- */
-export const ARROW_SOURCE = ARROW_SKELETON_SOURCE.replace(
-  LIFECOLOR,
-  () => `${LIFECOLOR}${STEREOTYPE_OPTIONAL}${URL_OPTIONAL}`,
-);
-
-/**
- * {@link ARROW_SOURCE} with the ARROW_DRESSING1 fragment removed — the
- * "optional group not taken" branch of `RegexOptional`
- * (`regex/RegexOptional.java:46-52`).
- */
-export const UNDRESSED_ARROW_SOURCE = ARROW_SOURCE.replace(ARROW_DRESSING1, '');
-
-/**
- * {@link ARROW_SOURCE} with ARROW_DRESSING1 made mandatory — the other branch.
- * The fragment is exactly `(?:…)?`, so dropping its final character is the
- * `RegexOr` inside the `RegexOptional`.
- */
-export const DRESSED_ARROW_SOURCE = ARROW_SOURCE.replace(ARROW_DRESSING1, () => ARROW_DRESSING1.slice(0, -1));
-
-/** `i` because upstream compiles every command with `Pattern.CASE_INSENSITIVE`
- *  (`regex/Pattern2.java:114`); `u` for `\p{L}`/`\p{N}`. */
-const UNDRESSED_ARROW_RE = new RegExp(UNDRESSED_ARROW_SOURCE, 'iu');
-const DRESSED_ARROW_RE = new RegExp(DRESSED_ARROW_SOURCE, 'iu');
+export {
+  ARROW_SOURCE,
+  UNDRESSED_ARROW_SOURCE,
+  DRESSED_ARROW_SOURCE,
+  UNDRESSED_ARROW_RE,
+  DRESSED_ARROW_RE,
+} from './sequence-arrow-compose.js';
+import { UNDRESSED_ARROW_RE, DRESSED_ARROW_RE } from './sequence-arrow-compose.js';
 
 // ---------------------------------------------------------------------------
 // executeArg's own helpers, under upstream's names
@@ -253,21 +180,41 @@ function getLength(g: Groups): number {
 
 /**
  * `applyStyle` — `dashed`/`dotted` dot the body, `hidden` sets
- * `ArrowBody.HIDDEN`, and `bold` is a deliberate no-op upstream.
+ * `ArrowBody.HIDDEN`, and `bold` is a deliberate no-op upstream. Any OTHER
+ * token falls to upstream's colour fallback (`config.withColor(...)`,
+ * `CommandArrow.java:497-498`); when it is not a real colour either,
+ * `HColorSet.getColor(s)` throws `NoSuchColorException` (`:501`), caught by
+ * `PSystemBuilder.java:256-271`'s per-factory catch, which discards the
+ * whole sequence attempt. This port has no `CommandExecutionResult` return
+ * channel (see `parser.ts`'s note on the `execution` refusal point), so an
+ * unknown non-colour token instead sets `state.executionError` and returns
+ * the config UNCHANGED -- `executeArrow` checks the field right after this
+ * call and bails before emitting anything (T11, ubrr — jar-verified:
+ * `a -[thickness=5]-> b` renders `CLASS`, matching `thickness=5` being
+ * valid class-relationship style, `CommandLinkElement.java:71`, but no
+ * sequence arrow style or colour at all).
  *
- * The COLOUR fallback (`config.withColor(...)`, `CommandArrow.java:497-498`)
- * still has no field on this port's `ArrowConfiguration`, so it alone is
- * parsed and dropped rather than approximated. That is a colour gap and moves
- * no geometry; `hidden` was in the same sentence until it turned out to be
+ * The COLOUR fallback itself still has no field on this port's
+ * `ArrowConfiguration`, so a token that IS a real colour is parsed and
+ * dropped rather than approximated. That is a colour gap and moves no
+ * geometry; `hidden` was in the same sentence until it turned out to be
  * suppressing a whole arrow's worth of elements on `vogegu-91-mave762`.
  *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:480-505
  */
-function applyStyle(arrowStyle: string | undefined, config: ArrowConfiguration): ArrowConfiguration {
+function applyStyle(state: ParseState, arrowStyle: string | undefined, config: ArrowConfiguration): ArrowConfiguration {
   if (arrowStyle === undefined) return config;
-  const tokens = arrowStyle.split(',').map((s) => s.trim().toLowerCase());
+  const rawTokens = arrowStyle.split(',').map((s) => s.trim());
+  const tokens = rawTokens.map((s) => s.toLowerCase());
   const dotted = tokens.some((s) => s === 'dashed' || s === 'dotted');
   const hidden = tokens.includes('hidden');
+  for (const [i, token] of tokens.entries()) {
+    if (token === 'dashed' || token === 'dotted' || token === 'hidden' || token === 'bold') continue;
+    if (!isKnownColorToken(rawTokens[i]!)) {
+      state.executionError = `Illegal sequence arrow style: ${rawTokens[i]!}`;
+      return config;
+    }
+  }
   return {
     ...config,
     ...(dotted ? { dashed: true } : {}),
@@ -360,7 +307,10 @@ interface DressingFacts {
 
 /**
  * `null` is upstream's `CommandExecutionResult.error("Illegal sequence
- * arrow")` — a body with no direction on either end, e.g. `A - B`.
+ * arrow")` — a body with no direction on either end, e.g. `A - B` or a bare
+ * `A -- B` (T11, ubrr: `kevegu-65-zagi834`/`lakivi-73-vuko958`'s repeated
+ * `Reporter -- Queue`). `executeArrow` sets `state.executionError` on `null`
+ * and bails (see `parser.ts`'s note on the `execution` refusal point).
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:300-314
  */
 function resolveDressings(dressing1: string, dressing2: string): DressingFacts | null {
@@ -430,8 +380,9 @@ function arrowSpecOf(f: DressingFacts, dotted: boolean): ArrowSpec {
  * left ABSENT rather than `0` where upstream carries zero
  * (`sequence-arrowhead.ts:89-93`).
  */
-function arrowOf(g: Groups, facts: DressingFacts): ArrowConfiguration {
+function arrowOf(state: ParseState, g: Groups, facts: DressingFacts): ArrowConfiguration {
   let config = applyStyle(
+    state,
     g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
     arrowConfigurationOf(arrowSpecOf(facts, getLength(g) > 1)),
   );
@@ -493,19 +444,33 @@ function optionalFields(state: ParseState, g: Groups): OptionalMessageFields {
  * (`:322-323`), so a right-to-left arrow still declares its left-hand
  * participant first and therefore leftmost.
  */
-function executeArrow(state: ParseState, match: RegExpExecArray): void {
-  const g: Groups = match.groups ?? {};
-  const facts = resolveDressings(getDressing(g['ARROW_DRESSING1']), getDressing(g['ARROW_DRESSING2']));
-  if (facts === null) return;
-
+/**
+ * The two endpoints' CODE, resolved and registered, in `from`/`to` (message)
+ * orientation -- split out of {@link executeArrow} to stay under the
+ * 30-NLOC function cap.
+ */
+function resolveEndpoints(state: ParseState, g: Groups, facts: DressingFacts): { from: string; to: string } {
   const part1 = endpointOf(g, 'PART1');
   const part2 = endpointOf(g, 'PART2');
   ensureParticipant(state, part1.code, 'participant', { display: part1.display });
   ensureParticipant(state, part2.code, 'participant', { display: part2.display });
+  return {
+    from: facts.reverseDefine ? part2.code : part1.code,
+    to: facts.reverseDefine ? part1.code : part2.code,
+  };
+}
 
-  const from = facts.reverseDefine ? part2.code : part1.code;
-  const to = facts.reverseDefine ? part1.code : part2.code;
-  const arrow = arrowOf(g, facts);
+function executeArrow(state: ParseState, match: RegExpExecArray): void {
+  const g: Groups = match.groups ?? {};
+  const facts = resolveDressings(getDressing(g['ARROW_DRESSING1']), getDressing(g['ARROW_DRESSING2']));
+  if (facts === null) {
+    state.executionError = 'Illegal sequence arrow';
+    return;
+  }
+
+  const { from, to } = resolveEndpoints(state, g, facts);
+  const arrow = arrowOf(state, g, facts);
+  if (state.executionError !== undefined) return;
   const activation = g['ACTIVATION'] ?? '';
   const msg = applyAutonumber(state, {
     kind: 'message',

@@ -22,6 +22,7 @@ import type {
 } from './ast.js';
 import type { ArrowConfiguration, ArrowHeadKind } from './sequence-arrowhead.js';
 import type { Command as CoreCommand } from '../../core/command/Command.js';
+import type { ParticipantUrl } from './sequence-participant-declaration.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 
@@ -49,6 +50,17 @@ export interface ParseState {
   currentBox: BoxGroup | null;
   /** Monotonically incrementing counter used to generate unique box ids. */
   boxCounter: number;
+  /**
+   * T11 (ubrr): a command whose regex MATCHED but whose upstream execution
+   * semantics reject the line sets this before returning, mirroring
+   * `CommandExecutionResult.error(...)` (`PSystemCommandFactory.java:180-
+   * 186`). `dispatchOrdinaryLine` (parser.ts) checks it immediately after
+   * every `dispatchCommand` call and turns it into a `kind: 'execution'`
+   * `ParseRefusal` -- same precedent as `description`'s own
+   * `ParseState.executionError` (`description/parse-state.ts`). `undefined`
+   * (the default) means the command that just ran succeeded.
+   */
+  executionError: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +69,38 @@ export interface ParseState {
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/Command.java:42-58 */
 export type Command = CoreCommand<ParseState>;
+
+/**
+ * The narrow "this pattern's match doesn't count" signal
+ * `parseParticipantDeclaration` (`sequence-participant-declaration.ts`)
+ * throws for a token order no `CommandParticipantA*` grammar accepts.
+ *
+ * This is DELIBERATELY NOT the same refusal shape as
+ * `state.executionError` (see that field's own doc comment): this port's
+ * `participantCommand`/`createCommand` patterns are a single `(.+)$`
+ * catch-all, syntactically broader than upstream's four separate
+ * `CommandParticipantA..A4` grammars, so they can MATCH a line (`actor ->
+ * director`) that upstream's real per-class regexes would have DECLINED at
+ * the `isValid`/candidate-selection stage, leaving a LATER command
+ * (`CommandArrow`) to claim it instead. `parser.ts`'s `dispatchCommand`
+ * catches exactly this class and treats the line as unclaimed by the
+ * throwing command, trying the next registered command rather than
+ * aborting the whole attempt (T11, ubrr — jar-verified against
+ * `bulixe-06-boge494` and five siblings, all `actor -> director`-shaped: a
+ * genuine `CommandExecutionResult`-style execution failure would abort
+ * immediately, but this is a dispatch-level false positive, not an
+ * execution failure).
+ *
+ * A pure helper reused from THREE call sites
+ * (`command-participant.ts`'s `participantCommand`, `createCommand` and
+ * `matchParticipantMultilineCommand`) throwing is simpler than plumbing an
+ * error-union return through all three; the two `Command.execute` entries
+ * leave it uncaught (propagating to `dispatchCommand`), and the
+ * pre-dispatch multi-line matcher catches it locally and returns `null`
+ * ("this construct did not match" — the line then reaches the SAME throw
+ * again via `participantCommand`, through the ordinary table).
+ */
+export class SequenceCommandRefusal extends Error {}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -220,120 +264,15 @@ export function arrowConfigurationOf(spec: ArrowSpec): ArrowConfiguration {
 // participant-family declaration parsing
 // ---------------------------------------------------------------------------
 
-/** Parsed `participant`-family declaration: id, display name, and optional
- *  color, resolved from the various supported syntaxes (`participant
- *  Alice`, `participant "Alice Smith" as A #pink`, …). */
-export interface ParticipantDeclaration {
-  id: string;
-  display: string;
-  color: string | undefined;
-  /** The `<<...>>` run, guillemets INCLUDED as upstream captures them
-   *  (`StereotypePattern.mandatory` = `(\<\<.+?\>\>)`), or undefined. */
-  stereotype: string | undefined;
-  /** The participant's `[[url{tooltip}]]`, RESOLVED (B3). Carries the tooltip
-   *  because the jar's `<a title=...>` is `Url#getTooltip()`, which falls back
-   *  to the url itself when none was written (`core/url/Url.ts:35-36`) —
-   *  `sefako-72-jono850` emits both forms side by side. */
-  url: ParticipantUrl | undefined;
-}
-
-/** A resolved participant hyperlink: the href and the tooltip the jar puts in
- *  both `title` and `xlink:title`. Shaped for `core/svg.ts#linkWrap`. */
-export interface ParticipantUrl {
-  readonly url: string;
-  readonly tooltip: string;
-}
-
-/** `([%pLN_.@]+)` -- upstream's participant CODE class, the same one
- *  `CommandArrow`'s PART1CODE/PART2CODE use
- *  (`CommandParticipantA.java:63`). */
-const CODE = String.raw`[\p{L}\p{N}_.@]+`;
-
 /**
- * Strip the tail every participant form shares, right to left.
- *
- * All four of `CommandParticipantA`/`A2`/`A3`/`A4` end with the same run:
- * `StereotypePattern.optional("STEREO")`, `getOrderRegex()`,
- * `UrlBuilder.OPTIONAL`, then `ColorParser.exp1()`
- * (`CommandParticipantA.java:63-69`, and the identical tails on the other
- * three). Peeling it off first is what lets the NAME forms below stay simple
- * -- and is why `participant Alice <<alice>>` used to fall through to the
- * bare-name branch and take the stereotype into the participant's identity,
- * so a later `Alice -> Bob` created a SECOND participant.
+ * Split into `sequence-participant-declaration.ts` to stay under the
+ * 500-line file cap; re-exported here so `command-participant.ts`/`ast.ts`
+ * need no import changes. `SequenceCommandRefusal` above is what that
+ * module throws for a token order no `CommandParticipantA*` subclass
+ * accepts (T11, ubrr).
  */
-function stripParticipantTail(rest: string): {
-  head: string;
-  color: string | undefined;
-  stereotype: string | undefined;
-  url: string | undefined;
-} {
-  let head = rest.trim();
-  let color: string | undefined;
-  let stereotype: string | undefined;
-  let url: string | undefined;
-  const color1 = /^(.*?)\s+(#\w+)$/.exec(head);
-  if (color1 !== null) {
-    head = color1[1]!.trim();
-    color = color1[2];
-  }
-  // B3: the `[[...]]` run is CAPTURED now, not just peeled off. It was
-  // discarded here and in both callers, which is why all 89 `<a>` elements in
-  // the corpus were missing.
-  const urlRun = /^(.*?)\s*(\[\[.*\]\])$/.exec(head);
-  if (urlRun !== null) {
-    head = urlRun[1]!.trim();
-    url = urlRun[2];
-  }
-  const order = /^(.*?)\s+order\s+-?\d{1,7}$/i.exec(head);
-  if (order !== null) head = order[1]!.trim();
-  const stereo = /^(.*?)\s*(<<.+?>>)$/.exec(head);
-  if (stereo !== null) {
-    head = stereo[1]!.trim();
-    stereotype = stereo[2];
-  }
-  return { head, color, stereotype, url };
-}
-
-/** The NAME part, in upstream's four registered forms. */
-function parseParticipantName(head: string): { id: string; display: string } {
-  const a = new RegExp(String.raw`^"([^"]+)"\s+as\s+(${CODE})$`, 'u').exec(head);
-  if (a !== null) return { display: a[1]!, id: a[2]! };
-  const a2 = new RegExp(String.raw`^(${CODE})\s+as\s+"([^"]+)"$`, 'u').exec(head);
-  if (a2 !== null) return { id: a2[1]!, display: a2[2]! };
-  const a3 = new RegExp(String.raw`^(${CODE})\s+as\s+(${CODE})$`, 'u').exec(head);
-  if (a3 !== null) return { display: a3[1]!, id: a3[2]! };
-  const a4 = /^"([^"]+)"$/.exec(head);
-  if (a4 !== null) return { id: a4[1]!, display: a4[1]! };
-  return { id: head, display: head };
-}
-
-/**
- * Parse the trailing text of a `participant|actor|...` command.
- *
- * Mirrors the four registered forms -- `["FULL" as] CODE`
- * (`CommandParticipantA`), `CODE as "FULL"` (`A2`), `FULL as CODE` (`A3`) and
- * `"CODE"` (`A4`) -- over the shared tail stripped by
- * {@link stripParticipantTail}.
- */
-export function parseParticipantDeclaration(rest: string): ParticipantDeclaration {
-  const { head, color, stereotype, url } = stripParticipantTail(rest);
-  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url) };
-}
-
-/**
- * A participant's `[[...]]` run, resolved to href + tooltip (B3).
- *
- * `urlOf` above reduces the same `Url` to its href alone, which is all a
- * MESSAGE needs — a message url is parsed and deliberately not drawn
- * (`renderer-message.ts`). A participant's reaches the SVG, and the jar puts
- * the tooltip in `title` and `xlink:title`, so both halves survive here.
- */
-export function participantUrlOf(raw: string | undefined): ParticipantUrl | undefined {
-  if (raw === undefined) return undefined;
-  const resolved = new UrlBuilder(null, UrlMode.STRICT).getUrl(raw);
-  if (resolved === null || resolved === undefined) return undefined;
-  return { url: resolved.getUrl(), tooltip: resolved.getTooltip() };
-}
+export type { ParticipantDeclaration, ParticipantUrl } from './sequence-participant-declaration.js';
+export { parseParticipantDeclaration, participantUrlOf } from './sequence-participant-declaration.js';
 
 /**
  * `manageActivations` -- the life-event an `++`/`--`/`**`/`!!` suffix on a

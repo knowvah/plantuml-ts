@@ -17,9 +17,25 @@ import type { ParticipantType } from './ast.js';
 import {
   ensureParticipant,
   parseParticipantDeclaration,
+  SequenceCommandRefusal,
   type Command,
   type ParseState,
 } from './sequence-parse-helpers.js';
+
+/**
+ * Shared by {@link participantCommand} and {@link createCommand}: parse
+ * `rest` and register the participant. `parseParticipantDeclaration` throws
+ * `SequenceCommandRefusal` (T11, ubrr) for a token order no
+ * `CommandParticipantA*` grammar accepts -- deliberately left UNCAUGHT here
+ * so it propagates out of `execute` to `dispatchCommand` (parser.ts), which
+ * treats it as "this pattern's match doesn't count" and tries the next
+ * registered command instead. See `dispatchCommand`'s own doc comment for
+ * why this refusal shape must NOT become `state.executionError`.
+ */
+function declareParticipant(state: ParseState, type: ParticipantType, rest: string): void {
+  const { id, display, color, stereotype, url } = parseParticipantDeclaration(rest);
+  ensureParticipant(state, id, type, { display, color, stereotype, url });
+}
 
 // 4. Participant declarations with optional quoted name, alias, and color.
 //    Handles forms like:
@@ -31,9 +47,7 @@ export const participantCommand: Command = {
   pattern: /^(participant|actor|boundary|control|entity|database|collections|queue)\s+(.+)$/i,
   execute(state, match) {
     const type = match[1]!.toLowerCase() as ParticipantType;
-    const rest = match[2]!.trim();
-    const { id, display, color, stereotype, url } = parseParticipantDeclaration(rest);
-    ensureParticipant(state, id, type, { display, color, stereotype, url });
+    declareParticipant(state, type, match[2]!.trim());
   },
 };
 
@@ -52,8 +66,7 @@ export const createCommand: Command = {
   pattern: /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
-    const { id, display, color, stereotype, url } = parseParticipantDeclaration(match[2]!.trim());
-    ensureParticipant(state, id, type, { display, color, stereotype, url });
+    declareParticipant(state, type, match[2]!.trim());
   },
 };
 
@@ -143,7 +156,21 @@ export function matchParticipantMultilineCommand(
   }
   if (closeIndex === -1) return null;
 
-  const { id, color, stereotype, url } = parseParticipantDeclaration(open[1]!.trim());
+  // T11 (ubrr): `parseParticipantDeclaration` throws `SequenceCommandRefusal`
+  // for a token order no `CommandParticipantA*` grammar accepts. This matcher
+  // is called directly from `runDispatchLoop` (parser.ts), NOT through
+  // `dispatchCommand`'s own try/catch, so it needs the identical "not
+  // matched" fallback here: returning `null` lets the SAME line reach
+  // `participantCommand` through the ordinary table, whose `dispatchCommand`
+  // catches this identical throw and tries the next registered command.
+  let decl: ReturnType<typeof parseParticipantDeclaration>;
+  try {
+    decl = parseParticipantDeclaration(open[1]!.trim());
+  } catch (err) {
+    if (err instanceof SequenceCommandRefusal) return null;
+    throw err;
+  }
+  const { id, color, stereotype, url } = decl;
   const bodyLines = trimmedLines.slice(i + 1, closeIndex);
   const display = bodyLines.length > 0 ? bodyLines.join('\n') : id;
 
