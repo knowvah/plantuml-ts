@@ -2,6 +2,7 @@ import { text, noteBox } from '../../core/svg.js';
 import type { FilesGeometry, EntryGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
+import { NOTE_Y_OFFSET } from './layout.js';
 
 const PADDING = 10;
 const BASELINE_OFFSET = 4;
@@ -33,12 +34,12 @@ function renderNote(entry: EntryGeometry): string {
   const boxWidth = rawWidth + NOTE_PAD * 2;
 
   const bx = entry.x + PADDING;
-  const by = entry.y + 2;
+  const by = entry.y + NOTE_Y_OFFSET;
 
   const box = noteBox(bx, by, boxWidth, boxHeight, { stroke: NOTE_STROKE });
 
   const lineEls = lines.map((line, i) =>
-    text(entry.x + PADDING + NOTE_PAD, entry.y + 2 + NOTE_PAD + i * NOTE_LINE_H, line, {
+    text(entry.x + PADDING + NOTE_PAD, entry.y + NOTE_Y_OFFSET + NOTE_PAD + i * NOTE_LINE_H, line, {
       fontSize: NOTE_FONT,
       fontFamily: 'sans-serif',
       dominantBaseline: 'hanging',
