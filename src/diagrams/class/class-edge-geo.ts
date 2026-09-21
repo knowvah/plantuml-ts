@@ -402,10 +402,13 @@ export function buildEdgeGeos(
   defaultArrowThickness?: number,
 ): EdgeGeo[] {
   const edges: EdgeGeo[] = [];
+  // Built once so the per-relationship lookup below is O(1) rather than an
+  // O(n) `.find` repeated per relationship (code review 2026-09-21).
+  const edgeResultById = new Map(result.edges.map((e) => [e.id, e]));
   for (let i = 0; i < ast.relationships.length; i++) {
     const rel = ast.relationships[i]!;
     if (rel.invis === true) continue;
-    const edgeResult = result.edges.find((e) => e.id === `edge-${i}`);
+    const edgeResult = edgeResultById.get(`edge-${i}`);
     if (edgeResult === undefined) continue;
 
     const decor = EDGE_DECORATION_MAP[rel.type];
