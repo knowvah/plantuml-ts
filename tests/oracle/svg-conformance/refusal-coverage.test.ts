@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 4484 fixtures, 73 of them jar errors, 241 of them erroring here', () => {
+  it('the manifest is 4484 fixtures, 73 of them jar errors, 198 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -624,8 +624,14 @@ describe('refusal coverage — baseline shape', () => {
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
     // multi-line `rnote` body parses (see the sibling gate's derivation);
     // one `[FIXED]` retirement, re-pinned from a fresh measurement.
-    expect(pinnedErroring.length).toBe(241);
-    expect(pinnedRendering.length).toBe(4243);
+    //
+    // 241 -> 198 / 4243 -> 4286 at unknown-bucket-routing-repair/T10
+    // (2026-09-20): the 43 activity honest-record defects (status `ok`,
+    // `weErrored: true`) whose activity3 constructs now parse render here
+    // (see the sibling gate's derivation); `weErrored` re-pinned false from
+    // a fresh measurement, gaps unchanged at 137.
+    expect(pinnedErroring.length).toBe(198);
+    expect(pinnedRendering.length).toBe(4286);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -704,7 +710,10 @@ describe('refusal coverage — baseline shape', () => {
     const defects = manifest.fixtures.filter((f) => f.weErrored && f.jarRendered && f.status === 'ok');
     expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual(['dot-cache:sequence/nuvoja-46-dezu541']);
     // The activity queue's size is pinned so it can only shrink deliberately.
-    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(82);
+    // 82 -> 39 at unknown-bucket-routing-repair/T10 (2026-09-20): 43 of the
+    // queue render now that their activity3 constructs parse (see the
+    // manifest derivation above).
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(39);
   });
 });
 

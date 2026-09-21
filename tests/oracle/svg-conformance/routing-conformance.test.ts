@@ -534,7 +534,7 @@ describe('routing conformance — jar-error classification', () => {
     ).toEqual([]);
   });
 
-  it('the manifest splits into 3425 agree, 986 known-misroute and 73 jar-error', () => {
+  it('the manifest splits into 3468 agree, 943 known-misroute and 73 jar-error', () => {
     // 8, not the brief's 4: the brief scanned only WITHIN the original 79
     // disagreements, so the four `state/` banner pages -- which agree at
     // NONE == NONE and were therefore never disagreements -- went unexamined.
@@ -644,8 +644,15 @@ describe('routing conformance — jar-error classification', () => {
     // `SequenceDiagram.java:154-158`), so the fixture routes SEQUENCE, the
     // jar's answer. One `[FIXED]` retirement, re-pinned from a fresh
     // measurement.
-    expect(pinnedAgree.length).toBe(3425);
-    expect(pinnedMisroutes.length).toBe(986);
+    //
+    // 3425 -> 3468 / 986 -> 943 at unknown-bucket-routing-repair/T10
+    // (2026-09-20): 43 activity fixtures in this tree use the activity3
+    // constructs the port gained (bullet lists, switch/case, backward,
+    // if spellings, end while, partition/group -- ActivityDiagramFactory3
+    // .java:110-160) and now route ACTIVITY; 43 `[FIXED]` retirements,
+    // re-pinned from a fresh measurement.
+    expect(pinnedAgree.length).toBe(3468);
+    expect(pinnedMisroutes.length).toBe(943);
     expect(pinnedJarErrors.length).toBe(73);
     expect(manifest.fixtures.length).toBe(4484);
   });
@@ -695,7 +702,8 @@ describe('routing conformance — jar-error classification', () => {
     // 848 new pins carry a reason (see the derivation above). The uncensused
     // remainder is STILL exactly sequence/nuvoja-46-dezu541: 987 - 1 = 986.
     // 986 -> 985 at unknown-bucket-routing-repair/T11: recani retired.
-    expect(censused.length).toBe(985);
+    // 985 -> 942 at unknown-bucket-routing-repair/T10: 43 activity retirements.
+    expect(censused.length).toBe(942);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

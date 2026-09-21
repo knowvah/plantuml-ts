@@ -1,5 +1,5 @@
 {
-  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command.",
+  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -34778,11 +34778,11 @@
       "type": "activity",
       "slug": "barada-07-veca157",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35086,11 +35086,11 @@
       "type": "activity",
       "slug": "caciva-80-kene990",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35240,11 +35240,11 @@
       "type": "activity",
       "slug": "citire-32-mive114",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35394,11 +35394,11 @@
       "type": "activity",
       "slug": "debofa-60-mude568",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35416,22 +35416,22 @@
       "type": "activity",
       "slug": "delide-30-teva601",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
       "type": "activity",
       "slug": "demibe-40-moda439",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35966,11 +35966,11 @@
       "type": "activity",
       "slug": "geremo-94-tecu179",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36076,11 +36076,11 @@
       "type": "activity",
       "slug": "gokagi-91-mise154",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36164,11 +36164,11 @@
       "type": "activity",
       "slug": "jageti-56-kume076",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36208,11 +36208,11 @@
       "type": "activity",
       "slug": "japeru-28-guku001",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36318,11 +36318,11 @@
       "type": "activity",
       "slug": "jogami-42-jaji869",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36340,11 +36340,11 @@
       "type": "activity",
       "slug": "jonave-00-xabi793",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36461,22 +36461,22 @@
       "type": "activity",
       "slug": "kemedu-83-vipa115",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
       "type": "activity",
       "slug": "kenizo-43-siro273",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36769,11 +36769,11 @@
       "type": "activity",
       "slug": "liteza-62-nopo771",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36857,11 +36857,11 @@
       "type": "activity",
       "slug": "luxido-91-covi016",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36945,11 +36945,11 @@
       "type": "activity",
       "slug": "mezuce-12-gemi988",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -36989,11 +36989,11 @@
       "type": "activity",
       "slug": "mojezi-43-gamu360",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37022,11 +37022,11 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37121,11 +37121,11 @@
       "type": "activity",
       "slug": "nerete-42-save418",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37176,11 +37176,11 @@
       "type": "activity",
       "slug": "nikivo-06-kaxa873",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37264,11 +37264,11 @@
       "type": "activity",
       "slug": "niviji-21-maco613",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37330,11 +37330,11 @@
       "type": "activity",
       "slug": "notuli-49-xugi698",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37451,11 +37451,11 @@
       "type": "activity",
       "slug": "pateca-54-lija084",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37671,11 +37671,11 @@
       "type": "activity",
       "slug": "pujumu-36-nelo283",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37737,11 +37737,11 @@
       "type": "activity",
       "slug": "rekuxa-78-lidi292",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37825,11 +37825,11 @@
       "type": "activity",
       "slug": "rosepa-78-xivi448",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37847,11 +37847,11 @@
       "type": "activity",
       "slug": "rucuga-83-tosu408",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37869,11 +37869,11 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37924,11 +37924,11 @@
       "type": "activity",
       "slug": "ruzazu-94-meso880",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -37946,11 +37946,11 @@
       "type": "activity",
       "slug": "sadovu-51-fata536",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38023,11 +38023,11 @@
       "type": "activity",
       "slug": "sifite-87-ziti434",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38078,11 +38078,11 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38144,11 +38144,11 @@
       "type": "activity",
       "slug": "suluni-73-lotu140",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38265,11 +38265,11 @@
       "type": "activity",
       "slug": "tmp1",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38287,11 +38287,11 @@
       "type": "activity",
       "slug": "todufa-81-gavo441",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38452,11 +38452,11 @@
       "type": "activity",
       "slug": "vodobe-33-kefa909",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38573,11 +38573,11 @@
       "type": "activity",
       "slug": "xidamu-85-xoti640",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38595,11 +38595,11 @@
       "type": "activity",
       "slug": "xizola-97-sizu458",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38661,11 +38661,11 @@
       "type": "activity",
       "slug": "zakuke-30-sobi867",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38727,11 +38727,11 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38815,11 +38815,11 @@
       "type": "activity",
       "slug": "zokodi-10-dexu703",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -38848,11 +38848,11 @@
       "type": "activity",
       "slug": "zuxute-46-daku634",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "activity",
       "status": "ok",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "63df9918"
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",

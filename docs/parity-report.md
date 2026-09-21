@@ -12,7 +12,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 
 | type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
-| activity | activity | 771 | 373 | n/a (no DOT stage (non-svek)) | 0 / 3 / 370 | 0 | 0 | 268 · 51390 | 268/373 | 373/373 |
+| activity | activity | 771 | 373 | n/a (no DOT stage (non-svek)) | 0 / 3 / 370 | 0 | 0 | 311 · 61142 | 311/373 | 373/373 |
 | board | board | 4 | 4 | n/a (no DOT stage (non-svek)) | 0 / 0 / 4 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | 11 | n/a (no data-diagram-type classification) | 0 / 0 / 11 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 7/11 | 7/11 |
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
@@ -45,7 +45,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 
 | type | DOT | survey | census | ratchet | diff-baseline | routing | refusal |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| activity | — | 2026-09-20T20:20:42.128Z | 2026-09-20T18:50:00.745Z | — | 2026-09-20 | 2026-09-02 | 2026-09-02 |
+| activity | — | 2026-09-20T20:20:42.128Z | 2026-09-20T18:50:00.745Z | — | 2026-09-20 | 2026-09-20 | 2026-09-20 |
 | board | — | 2026-09-20T20:20:49.416Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | c4 | — | 2026-09-20T20:20:58.112Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | chart | — | 2026-09-20T20:21:06.783Z | — | — | — | 2026-09-20 | 2026-09-20 |

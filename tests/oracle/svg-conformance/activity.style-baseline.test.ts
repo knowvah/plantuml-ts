@@ -261,9 +261,15 @@ describe('svg-activity style census — corpus presence', () => {
     expect(manifest.fixtures.length).toBe(373);
   });
 
-  it('the partition matches the sibling ratchet: 268 baseline / 82 error / 23 jar-error', () => {
-    expect(baselineFixtures.length).toBe(268);
-    expect(errorFixtures.length).toBe(82);
+  it('the partition matches the sibling ratchet: 311 baseline / 39 error / 23 jar-error', () => {
+    // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
+    // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
+    // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
+    // CommandBackward3, CommandIf2/If4/IfLegacy1, CommandWhileEnd3 and
+    // CommandPartition3 (ActivityDiagramFactory3.java:110-160) -- promoted
+    // error -> baseline by `repin-activity-baselines.ts`'s promotion pass.
+    expect(baselineFixtures.length).toBe(311);
+    expect(errorFixtures.length).toBe(39);
     expect(jarErrorFixtures.length).toBe(23);
   });
 });

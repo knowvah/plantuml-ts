@@ -1,5 +1,5 @@
 {
-  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command.",
+  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -31630,11 +31630,10 @@
       "type": "activity",
       "slug": "barada-07-veca157",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -31913,11 +31912,10 @@
       "type": "activity",
       "slug": "caciva-80-kene990",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32058,11 +32056,10 @@
       "type": "activity",
       "slug": "citire-32-mive114",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32199,11 +32196,10 @@
       "type": "activity",
       "slug": "debofa-60-mude568",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32220,22 +32216,20 @@
       "type": "activity",
       "slug": "delide-30-teva601",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 8 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
       "type": "activity",
       "slug": "demibe-40-moda439",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32728,11 +32722,10 @@
       "type": "activity",
       "slug": "geremo-94-tecu179",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 6 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32831,11 +32824,10 @@
       "type": "activity",
       "slug": "gokagi-91-mise154",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 6 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32913,11 +32905,10 @@
       "type": "activity",
       "slug": "jageti-56-kume076",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 4 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -32955,11 +32946,10 @@
       "type": "activity",
       "slug": "japeru-28-guku001",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 13 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33058,11 +33048,10 @@
       "type": "activity",
       "slug": "jogami-42-jaji869",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33080,11 +33069,10 @@
       "type": "activity",
       "slug": "jonave-00-xabi793",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33193,22 +33181,20 @@
       "type": "activity",
       "slug": "kemedu-83-vipa115",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
       "type": "activity",
       "slug": "kenizo-43-siro273",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33480,11 +33466,10 @@
       "type": "activity",
       "slug": "liteza-62-nopo771",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33561,11 +33546,10 @@
       "type": "activity",
       "slug": "luxido-91-covi016",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 6 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33643,11 +33627,10 @@
       "type": "activity",
       "slug": "mezuce-12-gemi988",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33685,11 +33668,10 @@
       "type": "activity",
       "slug": "mojezi-43-gamu360",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33716,11 +33698,10 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 13 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33810,11 +33791,10 @@
       "type": "activity",
       "slug": "nerete-42-save418",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 10 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33861,11 +33841,10 @@
       "type": "activity",
       "slug": "nikivo-06-kaxa873",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 7 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -33944,11 +33923,10 @@
       "type": "activity",
       "slug": "niviji-21-maco613",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34006,11 +33984,10 @@
       "type": "activity",
       "slug": "notuli-49-xugi698",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34119,11 +34096,10 @@
       "type": "activity",
       "slug": "pateca-54-lija084",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34324,11 +34300,10 @@
       "type": "activity",
       "slug": "pujumu-36-nelo283",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34387,11 +34362,10 @@
       "type": "activity",
       "slug": "rekuxa-78-lidi292",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34470,11 +34444,10 @@
       "type": "activity",
       "slug": "rosepa-78-xivi448",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 10 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34491,11 +34464,10 @@
       "type": "activity",
       "slug": "rucuga-83-tosu408",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 8 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34512,11 +34484,10 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34564,11 +34535,10 @@
       "type": "activity",
       "slug": "ruzazu-94-meso880",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34585,11 +34555,10 @@
       "type": "activity",
       "slug": "sadovu-51-fata536",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34657,11 +34626,10 @@
       "type": "activity",
       "slug": "sifite-87-ziti434",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 4 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34708,11 +34676,10 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 4 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34769,11 +34736,10 @@
       "type": "activity",
       "slug": "suluni-73-lotu140",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34883,11 +34849,10 @@
       "type": "activity",
       "slug": "tmp1",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -34904,11 +34869,10 @@
       "type": "activity",
       "slug": "todufa-81-gavo441",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35059,11 +35023,10 @@
       "type": "activity",
       "slug": "vodobe-33-kefa909",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 2 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35170,11 +35133,10 @@
       "type": "activity",
       "slug": "xidamu-85-xoti640",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 5 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35191,11 +35153,10 @@
       "type": "activity",
       "slug": "xizola-97-sizu458",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 6 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35256,11 +35217,10 @@
       "type": "activity",
       "slug": "zakuke-30-sobi867",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 7 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35319,11 +35279,10 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 13 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35402,11 +35361,10 @@
       "type": "activity",
       "slug": "zokodi-10-dexu703",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 3 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
@@ -35434,11 +35392,10 @@
       "type": "activity",
       "slug": "zuxute-46-daku634",
       "jarType": "ACTIVITY",
-      "ourType": "NONE",
-      "status": "known-misroute",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "0cf15e23",
-      "reason": "the ACTIVITY engine REFUSES this source and nothing else claimed it, so our document is a PSystemError page carrying no root diagram type, while the jar exported a real ACTIVITY diagram and stamped it -- TextBlockExporter.java:293 `option.withRootAttribute(\"data-diagram-type\", diagramType.name())`. The refusal, reproduced at T6: \"activity parser refused this source at line 9 (syntax): Syntax Error?\". This is NOT the root-attribute mechanism T0b pinned across all 350 activity entries (D11); T5 fixed that one and the 268 fixtures it covered were re-pinned `agree` at T6. What remains here is the SAME 82-fixture parser-gap queue diff-baseline.json records as status:\"error\" (D8) -- a real gap in this port, tracked in both places and closed by porting the missing activity syntax, not by a routing change."
+      "ourType": "ACTIVITY",
+      "status": "agree",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "a11418a1"
     },
     {
       "tree": "dot-cache",
