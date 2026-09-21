@@ -18,11 +18,12 @@ import { LIKE_CLASS_KINDS, type MeasuredClassifier, type NoteBoxContext } from '
 import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
-import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { dotEdgeRunsReversed, getOrderedLinks } from './class-dot-edge-order.js';
 import { buildDotEdges } from './class-dot-edges.js';
 import { clusterWrapperLevel } from './class-cluster-levels.js';
 import { namespaceTitleTableDims } from './class-namespace-title-table.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { assembleDotInputGraph } from './class-dot-graph-assembly.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -318,20 +319,6 @@ function buildDotNodes(
   return nodes;
 }
 
-/** DOT nodesep/ranksep attrs. Oracle emits nodesep=0.486111in (35px),
- *  ranksep=0.833333in (60px) by default; `skinparam nodesep`/`ranksep`
- *  (theme.nodeSep/rankSep, nonzero) unconditionally replace that default
- *  (SkinParam.java:847-856, DotStringFactory.java:117-133 — no max-clamp)
- *  and skip the emitter's minimum floor (svek-dot-emit resolveSep). */
-function sepAttrs(theme: Theme): Partial<DotInputGraph> {
-  return {
-    nodeSep: theme.nodeSep ?? 35,
-    rankSep: theme.rankSep ?? 60,
-    ...(theme.nodeSep !== undefined ? { nodeSepExplicit: true } : {}),
-    ...(theme.rankSep !== undefined ? { rankSepExplicit: true } : {}),
-  };
-}
-
 /**
  * `buildDotNodes` + `buildDotEdges` (+ magma edges), sharing ONE
  * `classPortShortNamesById` computation between them (T2, ADR-3/ADR-4) so
@@ -424,6 +411,17 @@ export function buildDotGraph(
   theme: Theme,
   measurer: StringMeasurer,
 ): DotGraphParts {
+  // SB2: `CucaDiagramFileMakerSvek.java:90-96 getOrderedLinks`, applied
+  // ONCE here, ahead of every `ast.relationships` reader below --
+  // `buildDotNodesAndEdges`/`computeSwappedEdges`, and (same `ast` object
+  // reference) `layout.ts`'s later `buildEdgeGeos(effAst, ...)` call.
+  // `GraphvizImageBuilder.java:229` iterates ONE reordered list for both
+  // DOT emission and the SVG `<g class="link">` draw loop; reassigning
+  // here is the "mutate the shared input for downstream layout.ts" pattern
+  // `applySameClassWidthFloor` already uses below. Dense uid re-numbering
+  // is unaffected -- it sorts by `creationIndex` (parse-time, immutable),
+  // never array position (D7, decisions.md).
+  ast.relationships = getOrderedLinks(ast.relationships);
   // A2s F-D mechanism B7: cross-class width floor, applied at the
   // pre-DOT aggregation point (mirrors `GraphvizImageBuilder
   // #printEntityInternal`'s "set paramSameClassWidth before building
@@ -442,39 +440,7 @@ export function buildDotGraph(
   dotEdges.push(...noteParts.edges);
 
   const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
-
-  const dotGraph: DotInputGraph = {
-    nodes: dotNodes,
-    edges: dotEdges,
-    rankDir: ast.rankdir === 'LR' ? 'LR' : 'TB',
-    // D3 (plans/linetype-ortho-routing/decisions.md): the SAME expression
-    // as the label half reads at line 401 above (`theme.linetype`) --
-    // forwarded via conditional spread so an absent linetype stays absent
-    // on DotInputGraph rather than becoming an explicit `undefined`. Merged
-    // onto one physical line with `sepAttrs` (not a new line) to keep
-    // `buildDotGraph` under the per-function NLOC cap without an extraction.
-    ...sepAttrs(theme),
-    ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
-    ...(clusterParts !== undefined ? { clusters: clusterParts.clusters } : {}),
-    // G2/N29: class's renderer draws EVERY edge decoration as an inline
-    // extremity polygon (`renderer-arrowhead.ts`, landed N1 mechanism 2 --
-    // the old SVG `<marker>`-reference `targetMarker`/`sourceMarker`
-    // functions were fully removed then; `renderer.ts`'s own header doc:
-    // "zero `<marker>`/`markerEnd` anywhere", grep-verified). This flag's
-    // own doc comment (`graph-layout.types.ts#manualArrowheads`) still
-    // lists "class" among the marker-end callers that rely on graphviz's
-    // default ~10-11px arrow-clip spline reservation -- stale since N1's
-    // rewrite, never updated when class stopped using markers. Every jar
-    // svek DOT edge line already carries `arrowtail=none,arrowhead=none`
-    // unconditionally (`svek-dot-emit.ts`, confirmed corpus-wide), so
-    // withholding this flag left @knowvah/dot-engine reserving a real-graphviz-
-    // divergent gap at every edge endpoint -- root cause of the ~400-fixture
-    // "@knowvah/dot-engine routing divergence" attribution the orchestrator's
-    // 2026-07-17 falsification entry re-opened (bosiki-11-xaza958/
-    // farina-07-foti023 byte-diff evidence, `plans/g2-class-svg/ledger.md`
-    // N29): the shortfall was a seam invocation gap, not an engine bug.
-    manualArrowheads: true,
-  };
+  const dotGraph = assembleDotInputGraph(ast, theme, dotNodes, dotEdges, clusterParts);
 
   return {
     dotGraph,
