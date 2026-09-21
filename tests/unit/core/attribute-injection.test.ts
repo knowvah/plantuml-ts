@@ -480,3 +480,60 @@ describe('attribute injection probe matrix (audit-table.md, one probe per path)'
     expect(svg).not.toContain('<g class="link"');
   });
 });
+
+// `SecurityUtils.ignoreThisLink` (SecurityUtils.java:88-94), applied by
+// `SvgGraphics.LinkData`'s constructor (SvgGraphics.java:1136-1139): a
+// `javascript:` url becomes `""` -- the `<a>` element and its title stay.
+// Oracle-verified 2026-09-21 (class, sequence message, creole note link):
+//   <a target="_top" href="" xlink:href="" ... title="javascript:alert(1)" xlink:title="javascript:alert(1)">
+// `PLANTUML_ALLOW_JAVASCRIPT_IN_LINK=true` (SecurityUtils.java:197-200) is
+// `RenderOptions.allowJavascriptInLink` here.
+describe('javascript: links are neutralised like the jar (SecurityUtils.ignoreThisLink)', () => {
+  const JS = 'javascript:alert(1)';
+  const CLASS_SRC = `@startuml\nclass Foo [[${JS}]]\n@enduml`;
+  const SEQUENCE_SRC = `@startuml\nA -> B : hi [[${JS}]]\n@enduml`;
+  const CREOLE_SRC = `@startuml\nclass A\nnote "see [[${JS} here]]" as N\nA .. N\n@enduml`;
+  const IGNORED = `href="" xlink:href="" xlink:type="simple" xlink:actuate="onRequest" xlink:show="new" title="${JS}" xlink:title="${JS}"`;
+  const KEPT = `href="${JS}" xlink:href="${JS}"`;
+
+  function anchors(svg: string): string[] {
+    return svg.match(/<a [^>]*>/g) ?? [];
+  }
+
+  it.each([
+    ['a class url', CLASS_SRC],
+    ['a sequence message url', SEQUENCE_SRC],
+    ['a creole note link', CREOLE_SRC],
+  ])('%s keeps the <a> but empties href and xlink:href', (_label, source) => {
+    const svg = expectSafe(source);
+    const found = anchors(svg);
+    expect(found).toHaveLength(1);
+    expect(found[0]).toContain(IGNORED);
+    expect(svg).not.toContain(`href="${JS}"`);
+  });
+
+  it('matches case- and punctuation-insensitively (" JavaScript:" / "java\\tscript:")', () => {
+    const svg = expectSafe(
+      `@startuml\nclass Foo [[ JavaScript:alert(2)]]\nclass Bar [[java&#9;script:alert(3)]]\n@enduml`,
+    );
+    expect(svg).not.toMatch(/href="[^"]+"/);
+  });
+
+  it('leaves http links untouched', () => {
+    const svg = expectSafe(`@startuml\nclass Foo [[http://e.com/x]]\n@enduml`);
+    expect(svg).toContain('href="http://e.com/x" xlink:href="http://e.com/x"');
+  });
+
+  it.each([
+    ['a class url', CLASS_SRC],
+    ['a sequence message url', SEQUENCE_SRC],
+    ['a creole note link', CREOLE_SRC],
+  ])('allowJavascriptInLink: true keeps %s (the opt-in)', (_label, source) => {
+    expect(anchors(renderSync(source, { allowJavascriptInLink: true }))[0]).toContain(KEPT);
+  });
+
+  it('the opt-in does not leak into the next render', () => {
+    renderSync(CLASS_SRC, { allowJavascriptInLink: true });
+    expect(anchors(renderSync(CLASS_SRC))[0]).toContain(IGNORED);
+  });
+});

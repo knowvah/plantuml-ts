@@ -52,6 +52,12 @@ export interface RenderOptions {
   sprites?: readonly string[] | undefined;
   /** ADR-2 (plans/s1l-tail-fix): pre-populated vendored asset store (jar `/sprites/**`, F4-a; Twemoji artwork, F4-b), read SYNCHRONOUSLY like `includeStore` — `renderSync` can't await `import()`. A miss (`undefined`) makes the caller degrade to its existing fallback, never throw. */
   assetStore?: AssetStore | undefined;
+  /**
+   * Emit `[[javascript:…]]` link targets as written. Default `false`: such a
+   * link keeps its `<a>` and title but gets `href=""`, as the jar does. This is
+   * upstream's `PLANTUML_ALLOW_JAVASCRIPT_IN_LINK=true` (`SecurityUtils.java:197-200`).
+   */
+  allowJavascriptInLink?: boolean | undefined;
 }
 
 export function getDefaultMeasurer(): StringMeasurer {

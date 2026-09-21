@@ -14,6 +14,7 @@
  */
 
 import { paintToSvg } from './paint.js';
+import { ignoreThisLink } from './security/SecurityUtils.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
 import { DEFAULT_SVG_DECIMALS, escapeAttribute, escapeText, fmt, formatDecimal, shortenColor } from './svg-format.js';
@@ -375,6 +376,10 @@ export function group(first: string, second?: string[] | SvgAttrs): string {
  * (`SkinParam#getSvgLinkTarget()`'s own `getValue("svglinktarget",
  * "_top")` default) -- a `skinparam svgLinkTarget` override is NOT wired
  * (named remainder, `plans/g2-class-svg/ledger.md` N15).
+ *
+ * A `javascript:` url is emitted as `href=""` (the `<a>` and its title stay)
+ * unless `RenderOptions.allowJavascriptInLink` opts in -- `LinkData`'s
+ * constructor, `SvgGraphics.java:1136-1139`, via `SecurityUtils.ignoreThisLink`.
  * @see ~/git/plantuml/.../klimt/drawing/svg/SvgGraphics.java:1105-1150
  * @see ~/git/plantuml/.../skin/SkinParam.java:1052-1053
  */
@@ -383,12 +388,14 @@ export function linkWrap(
   url: { readonly url: string; readonly tooltip: string },
   target = '_top',
 ): string {
+  // javascript: security issue (SvgGraphics.java:1136)
+  const href = ignoreThisLink(url.url) ? '' : url.url;
   // SI-saea T3a/D2: raw values in -- `attrs()` escapes via `formatAttrValue`.
   // A pre-escape here (removed) double-escaped (`&amp;quot;`).
   const a = attrs([
     ['target', target],
-    ['href', url.url],
-    ['xlink:href', url.url],
+    ['href', href],
+    ['xlink:href', href],
     ['xlink:type', 'simple'],
     ['xlink:actuate', 'onRequest'],
     ['xlink:show', 'new'],
