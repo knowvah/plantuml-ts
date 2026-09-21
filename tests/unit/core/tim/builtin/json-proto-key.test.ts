@@ -43,7 +43,11 @@ describe('__proto__ as an ordinary JSON key', () => {
   });
 
   it('an object value under __proto__ does not become the prototype', () => {
-    const result = call(new JsonSet(), [TValue.fromJson({}), TValue.fromString(PROTO), TValue.fromJson({ polluted: true })]);
+    const result = call(new JsonSet(), [
+      TValue.fromJson({}),
+      TValue.fromString(PROTO),
+      TValue.fromJson({ polluted: true }),
+    ]);
     const json = result.toJson() as Record<string, unknown>;
     expect(json['polluted']).toBeUndefined();
     expect(Object.getOwnPropertyDescriptor(json, PROTO)?.value).toEqual({ polluted: true });
