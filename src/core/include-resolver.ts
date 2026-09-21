@@ -207,7 +207,7 @@ export async function fetchInclude(url: string): Promise<string> {
     // T1 edits a different function in this file. Each branch is one distinct,
     // differentiated failure mode (CSP / CORS / HTTP / generic) whose whole
     // point is a separate remediation message.
-    throw new IncludeResolveError(`Failed to fetch !include ${url}: ${(err as Error).message ?? String(err)}`, url);
+    throw new IncludeResolveError(`Failed to fetch !include ${url}: ${err instanceof Error ? err.message : String(err)}`, url);
   } finally {
     if (inBrowser) {
       window.removeEventListener('securitypolicyviolation', cspHandler);

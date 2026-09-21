@@ -387,6 +387,14 @@ describe('fetchInclude — generic fetch failure (non-GitHub URL)', () => {
     vi.unstubAllGlobals();
   });
 
+  it('a non-Error rejection (null) is stringified, not dereferenced', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(null));
+    const url = 'https://example.com/file.puml';
+    const err = (await fetchInclude(url).catch((e: unknown) => e)) as IncludeResolveError;
+    expect(err).toBeInstanceOf(IncludeResolveError);
+    expect(err.message).toBe(`Failed to fetch !include ${url}: null`);
+  });
+
   it('throws IncludeResolveError for a non-GitHub URL that fails to fetch', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
     await expect(fetchInclude('https://example.com/file.puml')).rejects.toBeInstanceOf(IncludeResolveError);
