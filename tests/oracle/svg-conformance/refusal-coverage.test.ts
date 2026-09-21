@@ -541,7 +541,7 @@ describe('refusal coverage — baseline shape', () => {
     ).toEqual([]);
   });
 
-  it('the manifest is 4484 fixtures, 73 of them jar errors, 237 of them erroring here', () => {
+  it('the manifest is 4484 fixtures, 73 of them jar errors, 242 of them erroring here', () => {
     // DERIVATION, re-measured at T19 rather than carried forward. The 8
     // jar-error fixtures are the same 8 the routing gate pins. The 15 we error
     // on are exactly:
@@ -606,10 +606,21 @@ describe('refusal coverage — baseline shape', () => {
     // `CommandLinkActivity.java:73`; gantt 1: an empty `@startgantt`). The
     // "specific unported Command" the known-gap bar demands is, for a whole
     // missing engine, the factory itself -- named with its line.
+    //
+    // 237 -> 242 / 4247 -> 4242 at unknown-bucket-routing-repair/T9
+    // (2026-09-20): the STATE parser's transition pre-filter matched any
+    // line containing `>` and silently swallowed it when the real grammar
+    // (`CommandLinkStateCommon`) did not match, so five sources whose own
+    // engine refuses (sequence 4: `CommandStyleImport`, the note-on-arrow
+    // URL group, `CommandLinkAnchor` x2; timing 1: no engine) were drawn by
+    // STATE as EMPTY diagrams and pinned `ok`. State now refuses them the
+    // way `PSystemCommandFactory.java:169-175` does; the five moved to
+    // `known-gap`, each reason naming the missing Command. Not a new
+    // refusal: an old one that was being hidden by a wrong render.
     expect(manifest.fixtures.length).toBe(4484);
     expect(pinnedJarErrors.length).toBe(73);
-    expect(pinnedErroring.length).toBe(237);
-    expect(pinnedRendering.length).toBe(4247);
+    expect(pinnedErroring.length).toBe(242);
+    expect(pinnedRendering.length).toBe(4242);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -653,7 +664,11 @@ describe('refusal coverage — baseline shape', () => {
     // 124 known-gap pins described in the derivation above. Not a dumping
     // ground: 119 share one named mechanism (no timing engine), and the
     // other five each name theirs.
-    expect(gaps.length).toBe(133);
+    //
+    // 133 -> 138 at unknown-bucket-routing-repair/T9 (2026-09-20): the five
+    // sources STATE had been drawing as empty diagrams (see the manifest
+    // derivation above).
+    expect(gaps.length).toBe(138);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

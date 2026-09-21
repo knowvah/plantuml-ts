@@ -1,5 +1,5 @@
 {
-  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port.",
+  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command.",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -12854,11 +12854,12 @@
       "type": "sequence",
       "slug": "bomino-39-tipo216",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "state",
-      "status": "ok",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d"
+      "weErrored": true,
+      "engine": "class",
+      "status": "known-gap",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "418b30ef",
+      "reason": "the SEQUENCE engine refuses this source. refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175). Until unknown-bucket-routing-repair/T9 (418b30ef) the STATE parser's transition pre-filter matched any line containing '>' and silently swallowed it when CommandLinkStateCommon's grammar did not match, so STATE claimed this source and drew an empty diagram; state now refuses as upstream does (PSystemCommandFactory.java:169-175) and the real gap is visible."
     },
     {
       "tree": "dot-cache",
@@ -14328,11 +14329,12 @@
       "type": "sequence",
       "slug": "dolice-60-copi767",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "state",
-      "status": "ok",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d"
+      "weErrored": true,
+      "engine": "class",
+      "status": "known-gap",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "418b30ef",
+      "reason": "the SEQUENCE engine refuses this source. refuses to parse -- source line 8: `  test`, the BODY of the multi-line opener `note left [[http://www.google.es]]` on line 7. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). This port registers only the single-line form (:132) and it carries no UrlBuilder.OPTIONAL, so the opener never matches and its body is orphaned. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175). Until unknown-bucket-routing-repair/T9 (418b30ef) the STATE parser's transition pre-filter matched any line containing '>' and silently swallowed it when CommandLinkStateCommon's grammar did not match, so STATE claimed this source and drew an empty diagram; state now refuses as upstream does (PSystemCommandFactory.java:169-175) and the real gap is visible."
     },
     {
       "tree": "dot-cache",
@@ -15076,11 +15078,12 @@
       "type": "sequence",
       "slug": "fojomu-60-cuda302",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "state",
-      "status": "ok",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d"
+      "weErrored": true,
+      "engine": "sequence",
+      "status": "known-gap",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "418b30ef",
+      "reason": "the SEQUENCE engine refuses this source. refuses to parse -- source line 9: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor, the anchor-to-anchor duration link (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The exo arrows on lines 4 and 7 now parse; only the anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175). Until unknown-bucket-routing-repair/T9 (418b30ef) the STATE parser's transition pre-filter matched any line containing '>' and silently swallowed it when CommandLinkStateCommon's grammar did not match, so STATE claimed this source and drew an empty diagram; state now refuses as upstream does (PSystemCommandFactory.java:169-175) and the real gap is visible."
     },
     {
       "tree": "dot-cache",
@@ -24765,11 +24768,12 @@
       "type": "sequence",
       "slug": "zoturo-25-jima978",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "state",
-      "status": "ok",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d"
+      "weErrored": true,
+      "engine": "sequence",
+      "status": "known-gap",
+      "measuredAt": "2026-09-20",
+      "measuredAgainstCommit": "418b30ef",
+      "reason": "the SEQUENCE engine refuses this source. refuses to parse -- source line 10: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175). Until unknown-bucket-routing-repair/T9 (418b30ef) the STATE parser's transition pre-filter matched any line containing '>' and silently swallowed it when CommandLinkStateCommon's grammar did not match, so STATE claimed this source and drew an empty diagram; state now refuses as upstream does (PSystemCommandFactory.java:169-175) and the real gap is visible."
     },
     {
       "tree": "dot-cache",
@@ -46878,11 +46882,12 @@
       "type": "timing",
       "slug": "zeboxu-77-xola056",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "state",
-      "status": "ok",
+      "weErrored": true,
+      "engine": "class",
+      "status": "known-gap",
       "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAgainstCommit": "418b30ef",
+      "reason": "no timing engine in this port (planning/mission-index.md D1 todo): upstream's TimingDiagramFactory (PSystemBuilder.java:187) draws a timing diagram; every legacy-UML candidate here refuses the timing commands. Until unknown-bucket-routing-repair/T9 (418b30ef) the STATE parser's transition pre-filter matched any line containing '>' and silently swallowed it when CommandLinkStateCommon's grammar did not match, so STATE claimed this source and drew an empty diagram; state now refuses as upstream does (PSystemCommandFactory.java:169-175) and the real gap is visible."
     },
     {
       "tree": "dot-cache",

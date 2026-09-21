@@ -32,7 +32,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | packet | packetdiag | 6 | 6 | n/a (no DOT stage (non-svek)) | 0 / 0 / 6 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/6 | 6/6 |
 | regex | n/a (no engine (D11 todo)) | 46 | 46 | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) |
 | salt | n/a (no engine (D7 todo)) | 51 | 51 | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) |
-| sequence | sequence | 1271 | 1141 | n/a (no DOT stage (non-svek)) | 0 / 0 / 1135 | 0 | 0 | 1124 · 1158537 | 1124/1141 | 1132/1141 |
+| sequence | sequence | 1271 | 1141 | n/a (no DOT stage (non-svek)) | 0 / 0 / 1135 | 0 | 0 | 1124 · 1158537 | 1124/1141 | 1128/1141 |
 | state | state | 278 | 273 | 267/268 (100%) | 71 / 11 / 191 | 71 | 60 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | n/a (no oracle captured) | n/a (no oracle captured) | n/a (no survey yet) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | n/a (no oracle captured) | n/a (no oracle captured) |
@@ -65,7 +65,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | packet | — | 2026-09-20T20:22:50.971Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | regex | — | — | — | — | — | — | — |
 | salt | — | — | — | — | — | — | — |
-| sequence | — | 2026-09-20T20:23:29.626Z | 2026-09-20T18:49:54.717Z | — | 2026-09-19 | 2026-08-26 | 2026-08-26 |
+| sequence | — | 2026-09-20T20:23:29.626Z | 2026-09-20T18:49:54.717Z | — | 2026-09-19 | 2026-09-20 | 2026-09-20 |
 | state | 2026-09-20T20:20:27.682Z | 2026-09-20T20:23:38.661Z | 2026-09-20T18:49:43.659Z | 2026-08-17 | — | 2026-08-23 | 2026-08-24 |
 | timing | — | — | — | — | — | — | — |
 | unknown | — | — | — | — | — | — | — |
