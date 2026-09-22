@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1144 modules · 4200 exported names.
+1145 modules · 4206 exported names.
 
 ## `src/`
 
@@ -1120,6 +1120,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-dot-width-floors.ts` | `ThemeSameClassWidth`, `applySameClassWidthFloor`, `applyKalWidthFloor` | cdd-T15: the class DOT-graph builder's two pre-DOT WIDTH FLOORS, split off `./class-dot-graph.ts` when `applyKalWidthFloor` pushed that file past the repo's 500-line cap (a pre-authorised split; the moved code is verbatim, its provenance co |
 | `class-edge-constraint.ts` | `constraintSquare`, `sampleEdgePath`, `constraintAnchor` | cdd-T6 (A2a/M9): `constraint on links: text`. |
 | `class-edge-geo.ts` | `EdgeGeoTextContext`, `buildEdgeGeos` | Class-diagram edge geometry: edge-label / magic-arrow / port-label anchors, stroke override, point normalization, and buildEdgeGeos. |
+| `class-edge-group-inheritance.ts` | `EDGE_DECORATION_MAP`, `buildStrokeOverride`, `groupInheritanceOverride`, `computeLeafContacts`, `ResolvedEdgeDecor`, `resolveEdgeDecor` | cdd-T16/T16b (M7/E11): `skinparam groupInheritance` decor/dashed/ stroke-override resolution + the `allButSametails` contact-point computation. |
 | `class-edge-label-anchor.ts` | `multiLineLabelAnchor`, `LabelAnchorContext`, `LabelLineGeo`, `guideLinesAnchor`, `portLabelAnchor`, `PortLabelContext`, `quantifierLineAnchors`, `attachPortLabels` | Edge-label anchoring for the class engine: converting the CENTER points `core/graph-layout.ts` extracts into the left/baseline anchors jar's `<text>` elements carry, and applying the port-label collision pass that sits between the two. |
 | `class-edge-label-attach.ts` | `EdgeGeoTextContext`, `attachEdgeLabel` | Class-diagram edge LABEL attachment: the main label's plain, multi-line, guide-line and magic-arrow arms, plus the text context every anchor shares. |
 | `class-edge-label-lines.ts` | `wrapPlainTextLine` | Per-line word-wrap for class-engine edge labels: `wrapPlainTextLine`. |

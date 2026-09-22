@@ -320,9 +320,43 @@ function drawStubLine(a: Point2D, b: Point2D, color: string): string {
   }, color);
 }
 
+/** `dot/Neighborhood.java:97-113`'s `allButSametails` loop -- every OTHER
+ *  link's own contact at this leaf, already resolved (and excluded from
+ *  the leaf's own sametail set) by `class-edge-group-inheritance.ts
+ *  #computeLeafContacts`. Unlike {@link uniqueSametailContacts} this is a
+ *  plain list, not deduplicated -- upstream's `allButSametails` is a
+ *  `List`, one stub per link, never merged. */
+function otherLeafContacts(parentId: string, edges: readonly EdgeGeo[]): Point2D[] {
+  const points: Point2D[] = [];
+  for (const edge of edges) {
+    for (const lc of edge.leafContacts ?? []) {
+      if (lc.parentId === parentId) points.push(lc.contact);
+    }
+  }
+  return points;
+}
+
+/** `dot/Neighborhood.java:97-113`: one plain (non-triangle) stub per
+ *  entry -- from `rect ∩ (center, contact)` to `contact`, exactly the
+ *  sametail loop's own `inter` projection, no triangle. */
+function renderOtherLeafStubs(
+  points: readonly Point2D[],
+  rect: { x: number; y: number; width: number; height: number },
+  center: Point2D,
+  color: string,
+): string[] {
+  const out: string[] = [];
+  for (const pt of points) {
+    const inter = rectSegmentIntersect(rect, center, pt);
+    if (inter !== undefined) out.push(drawStubLine(inter, pt, color));
+  }
+  return out;
+}
+
 /**
- * `dot/Neighborhood.java:69-96`'s `drawU`, sametail loop only (see this
- * section's header note for the un-ported `allButSametails` loop).
+ * `dot/Neighborhood.java:69-121`'s `drawU` in full: the sametail loop
+ * (`:69-96`, one shared triangle + stub per unique contact) then the
+ * `allButSametails` loop (`:97-113`, one plain stub per other link).
  * `theme.colors.arrow` is upstream's bare `SName.arrow` style default
  * (`SvekResult.java:76-80`'s `getDefaultStyleDefinition`/`LineColor`) --
  * the same base an UNSTYLED edge falls back to, never a specific grouped
@@ -335,7 +369,8 @@ export function renderGroupInheritanceNeighborhood(
   theme: Theme,
 ): string[] {
   const contacts = uniqueSametailContacts(geo.id, edges);
-  if (contacts.length === 0) return [];
+  const others = otherLeafContacts(geo.id, edges);
+  if (contacts.length === 0 && others.length === 0) return [];
   const rect = innerBox(geo);
   const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const color = theme.colors.arrow;
@@ -347,5 +382,6 @@ export function renderGroupInheritanceNeighborhood(
     const { svg, middle } = drawExtendsTriangle(inter, theta, color);
     out.push(svg, drawStubLine(middle, pt, color));
   }
+  out.push(...renderOtherLeafStubs(others, rect, center, color));
   return out;
 }

@@ -235,12 +235,8 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   const removedRanks = computeRemovedRanks(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex } = buildDotGraph(
-    effAst,
-    measuredMap,
-    theme,
-    measurer,
-  );
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds } =
+    buildDotGraph(effAst, measuredMap, theme, measurer);
 
   const result = layout(dotGraph);
 
@@ -292,6 +288,9 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
       // emitted the `sametail` DOT attribute from -- see
       // `EdgeGeoTextContext.sametailByRelIndex`.
       sametailByRelIndex,
+      // cdd-T16b (E11): every protected leaf's classifier id -- see
+      // `EdgeGeoTextContext.protectedIds`.
+      protectedIds,
     },
     posMap,
     anchors,

@@ -198,3 +198,39 @@ describe('cdd-T16 — a grouped-inheritance link is suppressed to a bare solid p
     expect(dependency.sametail).toBeUndefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd-T16b (E11, `Neighborhood.java:97-113` `allButSametails`) --
+// jakapi-64-tine258's `Group` carries two OTHER (non-inheritance) links
+// (`User o-- Group`, `Group o-- Activity`) that must each carry a
+// `leafContacts` entry pointing back at `Group`.
+// ---------------------------------------------------------------------------
+
+describe('cdd-T16b — a non-grouped link touching a protected leaf carries a leafContacts entry', () => {
+  const jakapi = fixture('jakapi-64-tine258');
+
+  it('carries exactly one leafContacts entry (parentId Group) on each of the two association links', () => {
+    const userGroup = jakapi.edges.find((e) => e.from === 'User' && e.to === 'Group')!;
+    const groupActivity = jakapi.edges.find((e) => e.from === 'Group' && e.to === 'Activity')!;
+    expect(userGroup.leafContacts).toHaveLength(1);
+    expect(userGroup.leafContacts![0]!.parentId).toBe('Group');
+    expect(groupActivity.leafContacts).toHaveLength(1);
+    expect(groupActivity.leafContacts![0]!.parentId).toBe('Group');
+    // Neither is itself grouped -- both keep their own normal decor.
+    expect(userGroup.sametail).toBeUndefined();
+    expect(groupActivity.sametail).toBeUndefined();
+  });
+
+  it('does NOT carry a leafContacts entry for Group on Group`s own grouped (sametail) children', () => {
+    // Group<|--Events/Travels are consumed by `sametail`, not `leafContacts`
+    // (Java's `allButSametails.removeAll(sametailLinks)`).
+    const eventsLink = jakapi.edges.find((e) => e.to === 'Group' && e.from === 'Events')!;
+    expect(eventsLink.sametail?.parentId).toBe('Group');
+    expect(eventsLink.leafContacts).toBeUndefined();
+  });
+
+  it('carries no leafContacts for Activity/Item/User (unprotected leaves)', () => {
+    const activityItem = jakapi.edges.find((e) => e.from === 'Activity' && e.to === 'Item')!;
+    expect(activityItem.leafContacts).toBeUndefined();
+  });
+});

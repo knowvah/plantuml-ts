@@ -430,6 +430,7 @@ export interface EdgeGeo {
   hidden?: true;
   middleDecor?: MiddleDecor;
   sametail?: SametailGeo; // cdd-T16 (M7/E11): see SametailGeo's own doc comment.
+  leafContacts?: readonly SametailGeo[]; // cdd-T16b (allButSametails): see SametailGeo.
 }
 
 // cdd-T6: `NamespaceGeo` moved to `class-geo-namespace-types.ts` when the

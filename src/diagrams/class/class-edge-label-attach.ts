@@ -84,6 +84,10 @@ export interface EdgeGeoTextContext {
    *  hand-built test callers compile unchanged; every relationship is
    *  treated as ungrouped without it. */
   readonly sametailByRelIndex?: ReadonlyMap<number, string> | undefined;
+  /** cdd-T16b (E11, `Neighborhood.java:97-113` `allButSametails`): every
+   *  protected leaf's classifier id -- `class-dot-graph.ts
+   *  #DotGraphParts.protectedIds`'s own doc comment. */
+  readonly protectedIds?: ReadonlySet<string> | undefined;
 }
 
 /**

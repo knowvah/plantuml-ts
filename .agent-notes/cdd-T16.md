@@ -121,3 +121,79 @@
   not a general rule.
 - **Confidence**: High (compared jar's and our own root-level `<polygon>`/
   `<line>` sequence for jakapi directly).
+
+## cdd-T16b — the `allButSametails` follow-up (`Neighborhood.java:97-113`)
+
+### Observation: a NEW file (not a baseline function) is the only reliable way past the complexity hook here
+- **Context**: threading `protectedIds` out of `class-dot-graph.ts` and
+  adding `computeLeafContacts` to `class-edge-geo.ts` repeatedly tripped
+  the complexity hook's directional NLOC check on functions I had NOT
+  touched (`buildDotNodes`, byte-identical to HEAD, flagged "new
+  function"; `buildDotNodesAndEdges`, a 1-line return-statement content
+  change, flagged "worsened NLOC 31 -> 32" across multiple DIFFERENT
+  edits with identical total physical line counts).
+- **Finding**: isolated via direct `lizard -w` runs (bypassing the hook)
+  against both HEAD and the working tree: `buildDotNodes` was genuinely
+  UNCHANGED (`diff` confirms byte-identical) yet lizard's NLOC differed
+  25 (baseline) vs 31 (current) purely because inserting a new top-level
+  `interface` block BEFORE it in the same file shifted lizard's
+  brace-depth parsing for the PRECEDING function -- moving the interface
+  further away from `buildDotNodes` fixed that specific miscount.
+  Separately, `buildDotNodesAndEdges`'s NLOC (31 baseline) grew to 32
+  purely by ADDING a 4th field to an already-3-field return object
+  (regardless of spelling: named keys, spread, or a mix all landed on
+  32) -- extracting the return-construction into a brand-new helper
+  function (`toDotNodesAndEdges`) was what actually worked, not any
+  reformatting of the return statement itself.
+  For `class-edge-geo.ts`, moving the ENTIRE group-inheritance cluster
+  (`groupInheritanceOverride`/`computeLeafContacts`/`resolveEdgeDecor`/
+  `buildStrokeOverride`) into a NEW sibling module
+  (`class-edge-group-inheritance.ts`) was necessary anyway once the file
+  neared 500 lines again -- but it ALSO sidestepped the "false new
+  violation" instability entirely, since a brand-new file's baseline is
+  simply "everything in it", with no positional-diff ambiguity against
+  HEAD.
+- **Impact**: when a change to class-dot-graph.ts/class-edge-geo.ts
+  trips a complexity warning on a function you did NOT edit, do not
+  assume the hook is simply buggy and route around it by reformatting
+  blindly -- verify with a direct `lizard -w` diff against
+  `git show HEAD:<file>` first (byte-identical function body + differing
+  NLOC = the interface-position artifact above); if the warning IS a
+  real content change (adding a field to a return object counts, even
+  spread), extracting a new small function is the reliable fix, not
+  reformatting the return statement's punctuation.
+- **Confidence**: High (multiple controlled single-variable edits,
+  each verified via direct `lizard` invocation independent of the hook).
+
+### Observation: real graphviz did not merge jakapi's Group to one sametail point, and neither did ours -- independently
+- **Context**: implementing the `allButSametails` loop and writing the
+  jakapi-shaped test.
+- **Finding**: jakapi's `Group` (3 sametail children under
+  `groupInheritance 3`, `skinparam linetype ortho`) produces exactly 2
+  distinct sametail contact points in BOTH the jar's own SVG and this
+  port's independently-computed `uniqueSametailContacts` output (2
+  `<polygon>`+2 `<line>` pairs, verified structurally AND against the
+  real measured coordinates). The 2 `allButSametails` lines (`User o--
+  Group`, `Group o-- Activity`) landed in the EXACT same 4th/5th/6th
+  root-element slot the jar's own SVG places them in.
+- **Impact**: `computeLeafContacts`'s exclusion rule (skip entity1's own
+  leaf only when THIS edge is that leaf's own `grouped` sametail link)
+  is correct and needed no further per-fixture tuning once implemented
+  per `Neighborhood.java:97-113`'s literal removeAll semantics.
+- **Confidence**: High (measured both SVGs' root element sequence and
+  the `leafContacts` carry field directly).
+
+### Observation: `PLACEHOLDER` (hidden) never draws its own `<g class="link">`
+- **Context**: writing the jakapi full-pipeline test's "3 grouped
+  children render bare" assertion.
+- **Finding**: jakapi's `Group <|-- PLACEHOLDER` relationship, with
+  `PLACEHOLDER` hidden via `hide PLACEHOLDER`, draws NO `<g class="link">`
+  at all -- `Link.java:459`'s `isHidden()` ORs the endpoint's own hidden
+  state (pre-existing mechanism, not new to T16b). Only `Events`/
+  `Travels` (Group's other two sametail children) have a real `<g
+  class="link">` to assert against; the test was corrected to check only
+  those two, not all three declared relationships.
+- **Impact**: any future test iterating "all of Group's children" on
+  this fixture must exclude PLACEHOLDER.
+- **Confidence**: High (grepped the actual rendered SVG's `<!--link -->`
+  comments; only 5 of the expected 6 non-grouped-triangle links appear).

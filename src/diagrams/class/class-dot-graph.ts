@@ -59,17 +59,12 @@ export interface DotGraphParts {
    *  anchor is the post-layout spline endpoint. Empty when the diagram has
    *  no qualified association. */
   kals: Kal[];
-  /** cdd-T16 (M7, `dot/DotData.java:122-161`): relationship index -> the
-   *  protected parent leaf's DOT uid, for exactly the extends-like links
-   *  that reached `skinparam groupInheritance`'s limit -- the SAME map
-   *  `buildDotNodesAndEdges` already threads into `buildDotEdges` for the
-   *  `sametail="..."` DOT attribute, threaded OUT here too so `layout.ts`
-   *  can pass it to `buildEdgeGeos` (decor/dash suppression,
-   *  `Link.java:238-239`) and the shared-triangle renderer (`renderer-
-   *  group.ts`, `Neighborhood.java:69-96`) can find each grouped edge's
-   *  parent by `Relationship.idEntity1FullId`. Empty unless
-   *  `groupInheritance` is set AND a tail reaches the limit. */
+  /** cdd-T16/T16b (`Link.java:238-239`, `Neighborhood.java:69-121`):
+   *  relIndex -> protected parent uid; and (below) every protected leaf's
+   *  id (same set `buildDotNodes` uses for `protectedPad`) -- both
+   *  threaded OUT for `buildEdgeGeos`. */
   sametailByRelIndex: ReadonlyMap<number, string>;
+  protectedIds: ReadonlySet<string>;
 }
 
 /**
@@ -203,6 +198,15 @@ interface GroupInheritanceResult {
   readonly sametailByRelIndex: ReadonlyMap<number, string>;
 }
 
+// cdd-T16b: kept away from buildDotNodesAndEdges -- an inline interface
+// between two functions confused lizard's brace-depth parser.
+interface DotNodesAndEdges {
+  dotNodes: DotInputNode[];
+  dotEdges: DotInputEdge[];
+  sametailByRelIndex: ReadonlyMap<number, string>;
+  protectedIds: ReadonlySet<string>;
+}
+
 function computeGroupInheritance(
   ast: ClassDiagramAST,
   theme: Theme,
@@ -334,7 +338,7 @@ function buildDotNodesAndEdges(
   // `buildDotGraph`, shared with the node margins and with `layout.ts`) --
   // folded into one object for the same 5-param cap reason as above.
   ctx: { measurer: StringMeasurer; kals: readonly Kal[] },
-): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[]; sametailByRelIndex: ReadonlyMap<number, string> } {
+): DotNodesAndEdges {
   const { measurer, kals } = ctx;
   const classPortShortNames = classPortShortNamesById(ast);
   // ONE `removeIrrelevantSametail` pass feeding both consumers, as upstream
@@ -344,8 +348,10 @@ function buildDotNodesAndEdges(
   // where it is (and the test that pins it).
   const uidPlan = buildClassUidPlan(classUidPlanInputFromAst(ast));
   const groupInheritance = computeGroupInheritance(ast, theme, (id) => uidPlan.classifierUid.get(id));
-  const nodeOpts = { classPortShortNames, kals };
-  const dotNodes = buildDotNodes(ast, measuredMap, anchors, groupInheritance.protectedIds, nodeOpts);
+  const dotNodes = buildDotNodes(ast, measuredMap, anchors, groupInheritance.protectedIds, {
+    classPortShortNames,
+    kals,
+  });
   // D3/D4: resolved arrow-label font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`). No override -> byte-identical to the prior
   // `{family:theme.fontFamily,size:ARROW_LABEL_FONT_SIZE}` literal (see the
@@ -382,7 +388,16 @@ function buildDotNodesAndEdges(
     ...buildClassMagmaEdges(ast, anchors),
   ];
   applyKalEdgePorts(dotNodes, dotEdges);
-  return { dotNodes, dotEdges, sametailByRelIndex: groupInheritance.sametailByRelIndex };
+  return toDotNodesAndEdges(dotNodes, dotEdges, groupInheritance);
+}
+
+// cdd-T16b: keeps buildDotNodesAndEdges's own NLOC from growing.
+function toDotNodesAndEdges(
+  dotNodes: DotInputNode[],
+  dotEdges: DotInputEdge[],
+  groupInheritance: GroupInheritanceResult,
+): DotNodesAndEdges {
+  return { dotNodes, dotEdges, ...groupInheritance };
 }
 
 /**
@@ -463,10 +478,13 @@ export function buildDotGraph(
   const kals = computeKals(ast.relationships, { family: theme.fontFamily, size: theme.fontSize }, measurer);
   applyKalWidthFloor(kals, ast.classifiers, measuredMap);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
-  const { dotNodes, dotEdges, sametailByRelIndex } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, {
-    measurer,
-    kals,
-  });
+  const { dotNodes, dotEdges, sametailByRelIndex, protectedIds } = buildDotNodesAndEdges(
+    ast,
+    measuredMap,
+    anchors,
+    theme,
+    { measurer, kals },
+  );
   const swappedEdges = computeSwappedEdges(ast);
 
   // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
@@ -479,13 +497,6 @@ export function buildDotGraph(
   const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
   const dotGraph = assembleDotInputGraph(ast, theme, dotNodes, dotEdges, clusterParts);
 
-  return {
-    dotGraph,
-    swappedEdges,
-    noteParts,
-    anchors,
-    clusterIdByNs: clusterParts?.clusterIdByNs ?? new Map<string, string>(),
-    kals,
-    sametailByRelIndex,
-  };
+  const clusterIdByNs = clusterParts?.clusterIdByNs ?? new Map<string, string>();
+  return { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds };
 }
