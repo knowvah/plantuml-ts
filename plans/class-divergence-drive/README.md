@@ -60,7 +60,7 @@ Plus, at every batch close: `npm run svg:survey class`,
 | [1](batch-1/overview.md) | B1 ordering & uid | T1 · T2 · T3 · T4 | T1 ∥ T2, then T3, T4 | YES | [x] |
 | [2](batch-2/overview.md) | B2 link render-only | T5 · T6 · T7 | sequential | no | [x] |
 | [3](batch-3/overview.md) | B5 notes | T8 · T9 · T10 | T8, then T9 ∥ T10 | partly | [x] |
-| [4](batch-4/overview.md) | B4 clusters | T11 · T12 · T13 · T14 | T11 ∥ T13, then T12, T14 | YES | [ ] |
+| [4](batch-4/overview.md) | B4 clusters | T11 · T12 · T13 · T14 | T11 ∥ T13, then T12, T14 | YES | [x] |
 | [5](batch-5/overview.md) | B3 link layout features | T15 · T16 · T17 | sequential | YES | [ ] |
 | [6](batch-6/overview.md) | B6 classifier box & style | T18 · T19 · T20 · T21 · T22 · T23 | T18, then the rest ∥ | mostly no | [ ] |
 | [7](batch-7/overview.md) | B7 text & creole | T24 · T25 · T26 · T27 · T28 | all ∥ (worktrees) | partly | [ ] |

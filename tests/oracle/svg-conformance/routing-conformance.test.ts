@@ -680,10 +680,14 @@ describe('routing conformance — jar-error classification', () => {
     // 4300 -> 4305 / 5452 -> 5457 at class-divergence-drive/close-b3
     // (2026-09-22): 5 more svg-class golden rows, same procedure.
     // Derivation: 4305 + 1053 + 99 = 5457.
-    expect(pinnedAgree.length).toBe(4305);
+    //
+    // 4305 -> 4313 / 5457 -> 5465 at class-divergence-drive/close-b4
+    // (2026-09-22): 8 more svg-class golden rows, same procedure.
+    // Derivation: 4313 + 1053 + 99 = 5465.
+    expect(pinnedAgree.length).toBe(4313);
     expect(pinnedMisroutes.length).toBe(1053);
     expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5457);
+    expect(manifest.fixtures.length).toBe(5465);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

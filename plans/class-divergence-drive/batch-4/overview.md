@@ -11,10 +11,10 @@ changes spline endpoints for 17 GEO1 fixtures.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T11 | Namespace `url`/`color`/`usymbol` AST fields + `<style> package {}` cascade (E4, STY M3) | typescript-pro (sonnet) | `class-command-containers.ts`, `ast.ts`, `class-container.ts` (parse only), tests | — | [ ] |
-| T12 | USymbol container shape + package paint (E3) | typescript-pro (opus) | `class-namespace-shape.ts`, `class-namespace-folder-outline.ts`, `class-namespace-title-table.ts`, `renderer-group.ts`, tests | T11 | [ ] |
-| T13 | Cluster-anchored edge clipping (GEO M1) | typescript-pro (sonnet) | `class-edge-geo.ts`, tests | — | [ ] |
-| T14 | Empty-package double draw + phantom leaf (E9) | typescript-pro (sonnet) | `class-namespace.ts`, `renderer.ts`, `parser.ts`, tests | T12 | [ ] |
+| T11 | Namespace `url`/`color`/`usymbol` AST fields + `<style> package {}` cascade (E4, STY M3) | typescript-pro (sonnet) | `class-command-containers.ts`, `ast.ts`, `class-container.ts` (parse only), tests | — | [x] |
+| T12 | USymbol container shape + package paint (E3) | typescript-pro (opus) | `class-namespace-shape.ts`, `class-namespace-folder-outline.ts`, `class-namespace-title-table.ts`, `renderer-group.ts`, tests | T11 | [x] |
+| T13 | Cluster-anchored edge clipping (GEO M1) | typescript-pro (sonnet) | `class-edge-geo.ts`, tests | — | [x] |
+| T14 | Empty-package double draw + phantom leaf (E9) | typescript-pro (sonnet) | `class-namespace.ts`, `renderer.ts`, `parser.ts`, tests | T12 | [x] |
 
 Specs: [`T11-namespace-fields.md`](T11-namespace-fields.md),
 [`T12-usymbol-containers.md`](T12-usymbol-containers.md),
