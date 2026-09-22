@@ -12,9 +12,9 @@ link geometry are settled). This batch moves layout for all three tasks.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T15 | Qualifier `Kal` box: measure, margins, extremity translate, emit (LNK M1, D6) | typescript-pro (opus) | `class-kal.ts` (new), `class-layout-edge-labels.ts`, `class-dot-graph.ts`, `class-edge-geo.ts`, `renderer-edge.ts`, `style-cascade-class.ts`/`theme-graph-colors-*.ts`, tests | — | [ ] |
-| T16 | `groupInheritance`: sametail decor/dash suppression + shared triangle (LNK M7, ENT E11) | typescript-pro (sonnet) | `class-edge-geo.ts`, `renderer-edge.ts`, `renderer-group.ts`, tests | T15 | [ ] |
-| T17 | Role labels (LNK M8) | typescript-pro (sonnet) | `class-layout-edge-labels.ts`, `class-edge-label-anchor.ts`, `class-geo-types.ts`, `renderer-edge.ts`, tests | T16 | [ ] |
+| T15 | Qualifier `Kal` box: measure, margins, extremity translate, emit (LNK M1, D6) | typescript-pro (opus) | `class-kal.ts` (new), `class-layout-edge-labels.ts`, `class-dot-graph.ts`, `class-edge-geo.ts`, `renderer-edge.ts`, `style-cascade-class.ts`/`theme-graph-colors-*.ts`, tests | — | [x] |
+| T16 | `groupInheritance`: sametail decor/dash suppression + shared triangle (LNK M7, ENT E11) | typescript-pro (sonnet) | `class-edge-geo.ts`, `renderer-edge.ts`, `renderer-group.ts`, tests | T15 | [x] |
+| T17 | Role labels (LNK M8) | typescript-pro (sonnet) | `class-layout-edge-labels.ts`, `class-edge-label-anchor.ts`, `class-geo-types.ts`, `renderer-edge.ts`, tests | T16 | [x] |
 
 Specs: [`T15-qualifier-kal.md`](T15-qualifier-kal.md),
 [`T16-group-inheritance.md`](T16-group-inheritance.md),
