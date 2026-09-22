@@ -78,18 +78,22 @@ describe('splitEnhancedBlocks', () => {
   });
 
   it('a contiguous |_ run becomes one tree block with level/text per cell', () => {
+    // A4 2a: `text` keeps the single leading space `StripeTree#analyzeAndAdd`
+    // leaves after stripping only `^\s*\|_` -- no `.trim()` here (the
+    // creole/render layer strips it, `class-body-enhanced.ts#buildTreeRun`'s
+    // own doc comment).
     const blocks = splitEnhancedBlocks(['|_ A1', '|_ b()', '  |_ b1', '  |_ b2', '    |_ b2.1', '|_ c()']);
     expect(blocks).toEqual([
       { kind: 'rows', separator: { char: '_' }, lines: [] },
       {
         kind: 'tree',
         cells: [
-          { level: 1, text: 'A1' },
-          { level: 1, text: 'b()' },
-          { level: 2, text: 'b1' },
-          { level: 2, text: 'b2' },
-          { level: 3, text: 'b2.1' },
-          { level: 1, text: 'c()' },
+          { level: 1, text: ' A1' },
+          { level: 1, text: ' b()' },
+          { level: 2, text: ' b1' },
+          { level: 2, text: ' b2' },
+          { level: 3, text: ' b2.1' },
+          { level: 1, text: ' c()' },
         ],
       },
       { kind: 'rows', lines: [] },
@@ -101,8 +105,8 @@ describe('splitEnhancedBlocks', () => {
     expect(blocks[1]).toEqual({
       kind: 'tree',
       cells: [
-        { level: 1, text: 'Tree item 11' },
-        { level: 1, text: 'Tree item 12' },
+        { level: 1, text: ' Tree item 11' },
+        { level: 1, text: ' Tree item 12' },
       ],
     });
   });
@@ -112,8 +116,8 @@ describe('splitEnhancedBlocks', () => {
     expect(blocks[1]).toEqual({
       kind: 'tree',
       cells: [
-        { level: 1, text: 'a' },
-        { level: 2, text: 'b' },
+        { level: 1, text: ' a' },
+        { level: 2, text: ' b' },
       ],
     });
   });
@@ -122,7 +126,7 @@ describe('splitEnhancedBlocks', () => {
     const blocks = splitEnhancedBlocks(['|_ a', 'after']);
     expect(blocks).toEqual([
       { kind: 'rows', separator: { char: '_' }, lines: [] },
-      { kind: 'tree', cells: [{ level: 1, text: 'a' }] },
+      { kind: 'tree', cells: [{ level: 1, text: ' a' }] },
       { kind: 'rows', lines: ['after'] },
     ]);
   });
@@ -144,12 +148,12 @@ describe('splitEnhancedBlocks', () => {
       {
         kind: 'tree',
         cells: [
-          { level: 1, text: 'A1' },
-          { level: 1, text: 'b()' },
-          { level: 2, text: 'b1' },
-          { level: 2, text: 'b2' },
-          { level: 3, text: 'b2.1' },
-          { level: 1, text: 'c()' },
+          { level: 1, text: ' A1' },
+          { level: 1, text: ' b()' },
+          { level: 2, text: ' b1' },
+          { level: 2, text: ' b2' },
+          { level: 3, text: ' b2.1' },
+          { level: 1, text: ' c()' },
         ],
       },
       { kind: 'rows', lines: [] },
