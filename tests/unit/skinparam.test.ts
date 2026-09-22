@@ -786,10 +786,23 @@ describe('resolveSkinparam — unknown keys', () => {
     expect(() => resolveSkinparam(new Map([['totally_unknown_key', 'value']]), defaultTheme)).not.toThrow();
   });
 
-  it('collects stereotype-qualified key in unknown[] without throwing', () => {
-    expect(() => resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme)).not.toThrow();
-    const { unknown } = resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme);
+  // CDD T6FU: `classBackgroundColor<<Foo>>` is no longer unknown -- it now
+  // populates `classBackgroundColorByStereo` (see `theme-graph-colors-b.ts`
+  // for the upstream route). An UNMODELLED stereotype-qualified key still
+  // lands in `unknown[]`, which is what this test now pins.
+  it('collects an unmodelled stereotype-qualified key in unknown[] without throwing', () => {
+    expect(() => resolveSkinparam(new Map([['totallyUnknown<<Foo>>', '#AABBCC']]), defaultTheme)).not.toThrow();
+    const { unknown } = resolveSkinparam(new Map([['totallyUnknown<<Foo>>', '#AABBCC']]), defaultTheme);
     expect(unknown.some((k) => k.includes('<<'))).toBe(true);
+  });
+
+  it('routes classBackgroundColor<<stereo>> to the modelled theme field', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.classBackgroundColorByStereo).toEqual({ foo: '#AABBCC' });
+    expect(unknown).toEqual([]);
   });
 
   it('unknown[] is empty when all keys are recognised', () => {

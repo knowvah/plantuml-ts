@@ -808,6 +808,8 @@ describe('renderClass — classifier kind fill', () => {
         makeClassifierGeo('Foo', 'Foo', {
           genericTag: {
             text: 'T',
+            // CDD T6FU: single-line clause -- one entry at textX/textY.
+            lines: [{ text: 'T', x: 69.15, y: 7.3333, width: 7.35 }],
             rectX: 68.15,
             rectY: -3,
             rectWidth: 9.35,
@@ -847,6 +849,8 @@ describe('renderClass — classifier kind fill', () => {
           makeClassifierGeo('Foo', 'Foo', {
             genericTag: {
               text: 'T',
+              // CDD T6FU: single-line clause -- one entry at textX/textY.
+              lines: [{ text: 'T', x: 69.15, y: 7.3333, width: 7.35 }],
               rectX: 68.15,
               rectY: -3,
               rectWidth: 9.35,

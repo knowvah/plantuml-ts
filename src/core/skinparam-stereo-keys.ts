@@ -84,6 +84,17 @@ const CLASS_ATTRIBUTE_FONT_SIZE_STEREO_RE = new RegExp('^classattributefontsize<
 // `tabaxa-70-pomu341` jar evidence.
 const CLASS_FONT_SIZE_STEREO_RE = new RegExp('^classfontsize<<(.+)>>$');
 
+// CDD T6FU: `skinparam classBackgroundColor<<stereo>>` (flat) / `skinparam
+// class { <<stereo>> { BackgroundColor X } }` (nested) -- ONE normalised
+// key (`SkinParam#cleanForKeySlow`, java:285-300). Needs its own entry for
+// the SAME reason `CLASS_FONT_SIZE_STEREO_RE` does: `class` is deliberately
+// absent from `ELEMENT_BUCKET_SNAMES`, so the generic
+// `ELEMENT_BACKGROUND_COLOR_STEREO_RE` below cannot claim it and the key
+// fell through to `acc.unknown`. See `theme-graph-colors-b.ts
+// #classBackgroundColorByStereo`'s own doc comment for why the upstream
+// route is a stereotype-RE-SIGNED style, not a value lookup.
+const CLASS_BACKGROUND_COLOR_STEREO_RE = new RegExp('^classbackgroundcolor<<(.+)>>$');
+
 // S1L-tail G4 tier 2: `skinparam <sname>StereotypeFontSize<<label>> N` (flat
 // or `skinparam <sname> { StereotypeFontSize<<label>> N }` block form -- the
 // preprocessor normalizes both to this ONE key) -- the per-element analog of
@@ -181,6 +192,15 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
         acc.classAttributeFontSizeByStereo ??= {};
         acc.classAttributeFontSizeByStereo[stereo] = v;
       }
+    },
+  ],
+  [
+    CLASS_BACKGROUND_COLOR_STEREO_RE,
+    (acc, stereo, value) => {
+      // Stored RAW: `classifierFill` runs `parseColor` on it, so a `#A-B`
+      // gradient value survives (`resolveColor` would flatten it).
+      acc.classBackgroundColorByStereo ??= {};
+      acc.classBackgroundColorByStereo[stereo.toLowerCase()] = value.trim();
     },
   ],
   [

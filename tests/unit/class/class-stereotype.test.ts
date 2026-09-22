@@ -712,6 +712,9 @@ describe('measureGenericTagDim (G2 N32)', () => {
         width: rawTextWidth + 4,
         height: CLASS_STEREOTYPE_FONT_SIZE + 4,
         rawTextWidth,
+        // CDD T6FU: the `Display.getWithNewlines` split the height was
+        // already summed from is now carried forward for the renderer.
+        lines: [{ text: 'Param', width: rawTextWidth }],
       });
     },
   );
@@ -755,7 +758,12 @@ describe('measureGenericTagDim (G2 N32)', () => {
   it('measures at an overridden fontSize instead of the hardcoded default', () => {
     const dim = measureGenericTagDim(['Param'], 'sans-serif', new DeterministicMeasurer(), 20);
     const rawTextWidth = new DeterministicMeasurer().measure('Param', { family: 'sans-serif', size: 20 }).width;
-    expect(dim).toEqual({ width: rawTextWidth + 4, height: 20 + 4, rawTextWidth });
+    expect(dim).toEqual({
+      width: rawTextWidth + 4,
+      height: 20 + 4,
+      rawTextWidth,
+      lines: [{ text: 'Param', width: rawTextWidth }],
+    });
   });
 });
 
@@ -764,7 +772,9 @@ describe('buildGenericTagGeo (G2 N32)', () => {
     "positions the tag box against the classifier's FINAL box width -- " +
       'jar-verified `caboco-62-jula911` ("Param" on "Foo", boxWidth 95.475)',
     () => {
-      const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
+      // CDD T6FU: `lines` carries `measureGenericTagDim`'s own
+    // `Display.getWithNewlines` split; a single-line clause is one entry.
+    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325, lines: [{ text: 'Param', width: 35.325 }] };
       const geo = buildGenericTagGeo(['Param'], dim, 95.475, 'sans-serif', 9.8889);
       expect(geo.rectX).toBeCloseTo(61.15, 4); // 95.475 - 39.325 + 4 + 1
       expect(geo.rectY).toBe(-3); // -4 + 1
@@ -785,7 +795,9 @@ describe('buildGenericTagGeo (G2 N32)', () => {
   // jar-verified `datugo-88-sote552` (`font-weight="700"`, NO `font-style`
   // attribute -- an explicit FontStyle REPLACES the default italic face).
   it('carries a theme-resolved fontSize/bold/italic override', () => {
-    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
+    // CDD T6FU: `lines` carries `measureGenericTagDim`'s own
+    // `Display.getWithNewlines` split; a single-line clause is one entry.
+    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325, lines: [{ text: 'Param', width: 35.325 }] };
     const geo = buildGenericTagGeo(['Param'], dim, 95.475, 'Times', 9.8889, 20, true, false);
     expect(geo.fontFamily).toBe('Times');
     expect(geo.fontSize).toBe(20);
@@ -797,7 +809,9 @@ describe('buildGenericTagGeo (G2 N32)', () => {
   // rendered `text` field verbatim -- see `measureGenericTagDim`'s own
   // sibling test for the jar-verified mechanism.
   it('renders the verbatim rawText override instead of typeParams.join when provided', () => {
-    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325 };
+    // CDD T6FU: `lines` carries `measureGenericTagDim`'s own
+    // `Display.getWithNewlines` split; a single-line clause is one entry.
+    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325, lines: [{ text: 'Param', width: 35.325 }] };
     const geo = buildGenericTagGeo(
       ['K', 'V'],
       dim,

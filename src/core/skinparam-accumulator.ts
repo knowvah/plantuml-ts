@@ -56,6 +56,13 @@ export interface SkinparamAccumulator {
   arrow: string | undefined;
   noteBackground: string | undefined;
   classBackground: Paint | undefined;
+  /** CDD T6FU: `skinparam classHeaderBackgroundColor` / the nested-block
+   *  form `skinparam class { HeaderBackgroundColor X }` (both normalise to
+   *  the SAME key) -- `FromSkinparamToStyle.java:196` maps it onto the
+   *  `{element, class_, header}` signature `EntityImageClass
+   *  #getStyleHeader` (java:173-178) queries, i.e. the header-background
+   *  split's fill source. */
+  classHeaderBackground: Paint | undefined;
   interfaceBackground: string | undefined;
   enumBackground: string | undefined;
   actorStroke: string | undefined;
@@ -65,6 +72,12 @@ export interface SkinparamAccumulator {
   classBorder: Paint | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
+  /** CDD T6FU: `skinparam classBackgroundColor<<stereo>>` (and the nested
+   *  `skinparam class { <<stereo>> { BackgroundColor X } }` form -- one
+   *  normalised key, `SkinParam#cleanForKeySlow` java:285-300). Stored RAW
+   *  so `classifierFill` can `parseColor` it (a `#A-B` value is a gradient
+   *  upstream), keyed by the LOWERCASED label. */
+  classBackgroundColorByStereo: Record<string, string> | undefined;
   /** cdd-T19 (A3 M2): `skinparam classFontColor`/the block form
    *  `skinparam class { FontColor X }` — resolved hex, mapped to the
    *  HEADER-only `classCascadeHeaderFontColor` theme field
@@ -195,6 +208,7 @@ const SCALAR_FIELD_NAMES = [
   'arrow',
   'noteBackground',
   'classBackground',
+  'classHeaderBackground',
   'interfaceBackground',
   'enumBackground',
   'actorStroke',
@@ -204,6 +218,7 @@ const SCALAR_FIELD_NAMES = [
   'classBorder',
   'classBorderThickness',
   'classBorderThicknessByStereo',
+  'classBackgroundColorByStereo',
   'classFontColor',
   'classAttributeFontColor',
   'classAttributeFontSizeByStereo',

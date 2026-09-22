@@ -159,16 +159,25 @@ export function renderGenericTag(
       strokeWidth: 1,
       strokeDasharray: '2,2',
     }) +
-    text(geo.x + tag.textX, geo.y + tag.textY, tag.text, {
-      fontFamily: tag.fontFamily,
-      fontSize: tag.fontSize,
-      fill: '#000000',
-      // G2 N39: `skinparam classStereotypeFontStyle` override -- see
-      // `GenericTagGeo`'s own doc comment.
-      ...(tag.italic ? { fontStyle: 'italic' as const } : {}),
-      ...(tag.bold === true ? { fontWeight: '700' as const } : {}),
-      lengthAdjust: 'spacing',
-      textLength: tag.textWidth,
-    })
+    // CDD T6FU: one `<text>` per `Display.getWithNewlines` line
+    // (`EntityImageClassHeader.java:146`), each pre-placed and pre-measured
+    // by `buildGenericTagGeo`. A single-line clause yields exactly one
+    // entry at `textX`/`textY` with `width === tag.textWidth`, so this is
+    // byte-identical to the previous single-`<text>` emission there.
+    tag.lines
+      .map((line) =>
+        text(geo.x + line.x, geo.y + line.y, line.text, {
+          fontFamily: tag.fontFamily,
+          fontSize: tag.fontSize,
+          fill: '#000000',
+          // G2 N39: `skinparam classStereotypeFontStyle` override -- see
+          // `GenericTagGeo`'s own doc comment.
+          ...(tag.italic ? { fontStyle: 'italic' as const } : {}),
+          ...(tag.bold === true ? { fontWeight: '700' as const } : {}),
+          lengthAdjust: 'spacing',
+          textLength: line.width,
+        }),
+      )
+      .join('')
   );
 }

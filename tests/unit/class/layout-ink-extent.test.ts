@@ -576,6 +576,8 @@ describe('computeClassDocumentDims — generic tag box (G2 N32)', () => {
         height: 48,
         genericTag: {
           text: 'Param',
+          // CDD T6FU: single-line clause -- one entry at textX/textY.
+          lines: [{ text: 'Param', x: 62.15, y: 7.3333, width: 35.325 }],
           rectX: 61.15,
           rectY: -3,
           rectWidth: 37.325,
@@ -596,6 +598,8 @@ describe('computeClassDocumentDims — generic tag box (G2 N32)', () => {
         height: 48,
         genericTag: {
           text: 'P, Q',
+          // CDD T6FU: single-line clause -- one entry at textX/textY.
+          lines: [{ text: 'P, Q', x: 59.7875, y: 7.3333, width: 20.625 }],
           rectX: 58.7875,
           rectY: -3,
           rectWidth: 22.625,

@@ -13,6 +13,7 @@ import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { noGradient, parseColor } from '../../core/paint.js';
 import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
 import {} from './class-visibility-icon.js';
@@ -120,6 +121,52 @@ export function resolveElementHeaderFont(theme: Theme, sname: string): string | 
   return undefined;
 }
 
+/** CDD T6FU: the FIRST of `stereotypeLabels` with a `skinparam
+ *  classBackgroundColor<<label>>` entry, resolved through the SAME
+ *  `parseColor` + `resolveColorToSvgHex` pair a classifier's own inline
+ *  colour takes (so a `#A-B` value is a gradient `Paint`, not a flattened
+ *  string). "First match wins" mirrors {@link resolveClassTagCascadeEntry}'s
+ *  own documented simplification for the identical upstream tier.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:396-408
+ */
+export function resolveClassBackgroundByStereo(
+  theme: Theme,
+  stereotypeLabels: readonly string[] | undefined,
+): Paint | undefined {
+  const byStereo = theme.colors.graph.classBackgroundColorByStereo;
+  if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
+  for (const label of stereotypeLabels) {
+    const raw = byStereo[cleanStereotypeToken(label)];
+    if (raw === undefined) continue;
+    const parsed = parseColor(raw);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
+  return undefined;
+}
+
+/**
+ * CDD T6FU: the classifier's background as resolved at upstream's
+ * STEREOTYPE priority tier -- the `<style> class { .tag {} } }` cascade and
+ * `skinparam classBackgroundColor<<stereo>>`, both registered at
+ * `StyleLoader#addPriorityForStereotype` (+1000, `FromSkinparamToStyle
+ * #addStyle` java:396-408). `undefined` when neither applies.
+ *
+ * Exported for `renderer-classifier-header-split.ts`: because this tier
+ * outranks BOTH the plain `{element, class_}` and the `{element, class_,
+ * header}` styles, `EntityImageClass#getStyleHeader`'s merged
+ * BackGroundColor resolves to THIS value whenever it exists -- making
+ * `headerBackcolor` equal to `backcolor`, i.e. no header split, whatever
+ * `classHeaderBackgroundColor` said. Jar-verified `tabaxa-70-pomu341`
+ * (`class { BackgroundColor LightCoral; <<Foo1>> { BackgroundColor
+ * LightBlue } }`: the stereotyped class draws ONE LightBlue rect).
+ */
+export function classStereotypeBackground(geo: ClassifierGeo, theme: Theme): Paint | undefined {
+  return (
+    resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.background ??
+    resolveClassBackgroundByStereo(theme, geo.stereotypeLabels)
+  );
+}
+
 export function classifierFill(geo: ClassifierGeo, theme: Theme): Paint {
   // Upstream has no `enum`/`interface` StyleSignature for the box fill --
   // `EntityImageClassHeader#getStyleSignature` (and the lollipop-interface
@@ -178,6 +225,15 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): Paint {
   // `style-cascade-class.ts#resolveClassTagCascadeEntry`'s own doc comment.
   const tagBackground = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.background;
   if (tagBackground !== undefined) return tagBackground;
+  // CDD T6FU: `skinparam classBackgroundColor<<stereo>>` -- the SAME
+  // stereotype-tagged-style tier as the `.tagname` cascade above
+  // (`FromSkinparamToStyle#addStyle`'s `sig.addStereotype(s)` +
+  // `addPriorityForStereotype`, java:396-408), just spelled as a skinparam
+  // instead of a `<style>` block; placed immediately below it because a
+  // `<style>` block is the later-registered of the two upstream. See
+  // `theme-graph-colors-b.ts#classBackgroundColorByStereo`.
+  const byStereo = resolveClassBackgroundByStereo(theme, geo.stereotypeLabels);
+  if (byStereo !== undefined) return byStereo;
   // G2 N36: `classCascadeBackground` is a STRICT SUPERSET of what the
   // pre-existing bare `class {}` bucket (`classBackground`, `style-map-
   // theme.ts`) could ever populate from the SAME StyleMap -- it additionally
