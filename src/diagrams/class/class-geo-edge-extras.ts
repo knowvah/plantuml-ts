@@ -100,6 +100,21 @@ export interface QuantifierLineGeo {
 export type QuantifierLinesGeo = readonly [readonly QuantifierLineGeo[], readonly QuantifierLineGeo[]];
 
 /**
+ * cdd-T17 (M8): `[tailRoleLines, headRoleLines]` — the ADDITIVE role label,
+ * drawn on the opposite side of the line from its quantifier
+ * (`SvekEdge.java:1023-1030` + `drawRoleLabel`, `:956-980`'s `if
+ * (startTailText != null) { draw; if (startTailRoleText != null)
+ * drawRoleLabel(...) }`). Present ONLY when an end carries BOTH a
+ * multiplicity AND a role — an end with a role but no multiplicity takes
+ * upstream's `else if` fallback instead (`SvekEdge.java:447-466`): the role
+ * occupies the quantifier's own reserved slot and draws through {@link
+ * QuantifierLinesGeo} exactly like a real quantifier, contributing NO entry
+ * here. Same `[tail, head]`-always-two-slots shape as `QuantifierLinesGeo`;
+ * an end with no additive role contributes an EMPTY array, never a hole.
+ */
+export type RoleLinesGeo = readonly [readonly QuantifierLineGeo[], readonly QuantifierLineGeo[]];
+
+/**
  * cdd-T16 (M7/E11): present only when `class-edge-geo.ts#buildEdgeGeos`
  * found this relationship's index in `EdgeGeoTextContext
  * .sametailByRelIndex` -- i.e. an extends-like link `skinparam

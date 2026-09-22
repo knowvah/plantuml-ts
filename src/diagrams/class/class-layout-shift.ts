@@ -91,6 +91,16 @@ function shiftEdgeExtras(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo
           ] as const,
         }
       : {}),
+    // cdd-T17 (M8): the ADDITIVE role label -- same absolute-coordinate
+    // shape as `quantifierLines` immediately above, same shift rule.
+    ...(edge.roleLines !== undefined
+      ? {
+          roleLines: [
+            edge.roleLines[0].map((l) => ({ ...l, x: l.x + dx, y: l.y + dy })),
+            edge.roleLines[1].map((l) => ({ ...l, x: l.x + dx, y: l.y + dy })),
+          ] as const,
+        }
+      : {}),
     ...(nb !== undefined
       ? {
           noteBox: {

@@ -9,15 +9,11 @@
  * one cluster (`multiLineLabelAnchor` and `attachPortLabels` are both
  * documented in terms of `portLabelAnchor`'s formula).
  */
-import type { Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import { type GuideLine, type MagicArrowDirection, magicArrowGlyphPoints } from './class-magic-arrow.js';
-import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 import { computeQuantifierBox } from '../../core/edge-label-box.js';
 import type { QuantifierLineGeo } from './class-geo-edge-extras.js';
-import type { EdgeGeo } from './layout.js';
 import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
@@ -288,6 +284,76 @@ export interface PortLabelContext {
   readonly cardinalityFont?: FontSpec | undefined;
 }
 
+/** Text metrics for one physical-line-split quantifier/role block: lines,
+ *  per-line widths, the block's own max width and total stacked height --
+ *  the shared measurement {@link placeQuantifierBox} (adds a collision-
+ *  managed placement) and `class-edge-role-label-anchor.ts`'s role mirror
+ *  math (which needs a role's own raw dimensions with NO placement --
+ *  `drawRoleLabel` never runs `manageCollision` on the role, only the
+ *  quantifier/fallback box goes through `getXY`'s reserved DOT marker) both
+ *  build on. cdd-T17 split out of {@link quantifierLineAnchors}, which used
+ *  to inline this -- a pure factoring, same formula. Exported so that
+ *  sibling file can reuse it without duplicating the formula. */
+export function measureLabelLines(
+  text: string,
+  font: FontSpec,
+  measurer: StringMeasurer,
+): { lines: readonly string[]; widths: number[]; maxWidth: number; totalHeight: number } {
+  const { lines } = computeQuantifierBox(text, font, measurer);
+  const widths = lines.map((l) => measurer.measure(l, font).width);
+  const maxWidth = Math.max(...widths);
+  const totalHeight = (lines.length - 1) * font.size + measurer.measure(lines[0] ?? '', font).height;
+  return { lines, widths, maxWidth, totalHeight };
+}
+
+/** Per-line anchors for a block whose TOP-LEFT corner is already known --
+ *  the shared tail of {@link quantifierLineAnchors} (top-left derived from
+ *  a CENTER via {@link placeQuantifierBox}) and
+ *  `class-edge-role-label-anchor.ts`'s role mirror (top-left computed
+ *  directly, no collision pass). Exported for that sibling file. */
+export function labelLinesFromTopLeft(
+  measured: { lines: readonly string[]; widths: number[]; maxWidth: number },
+  topLeft: { x: number; y: number },
+  font: FontSpec,
+  measurer: StringMeasurer,
+): QuantifierLineGeo[] {
+  return measured.lines.map((lineText, i) => ({
+    text: lineText,
+    x: topLeft.x + (measured.maxWidth - measured.widths[i]!) / 2,
+    y: topLeft.y + i * font.size + (font.size - measurer.getDescent(font, lineText)),
+    width: measured.widths[i]!,
+  }));
+}
+
+/** {@link measureLabelLines} plus the collision-managed CENTER-to-top-left
+ *  placement {@link quantifierLineAnchors} draws from AND
+ *  `class-edge-role-label-anchor.ts#roleLabelAnchors` mirrors across -- the
+ *  box `getXY`'s reserved DOT marker corresponds to (`SvekEdge.java:
+ *  750-767`). Exported for that sibling file. */
+export function placeQuantifierBox(
+  text: string,
+  center: { x: number; y: number },
+  measurer: StringMeasurer,
+  font: FontSpec,
+  collisionNodes?: DotLayoutResult['nodes'],
+): {
+  lines: readonly string[];
+  widths: number[];
+  maxWidth: number;
+  totalHeight: number;
+  pos: { x: number; y: number };
+} {
+  const measured = measureLabelLines(text, font, measurer);
+  const box = new PositionableImpl(
+    center.x - Math.trunc(measured.maxWidth) / 2,
+    center.y - Math.trunc(measured.totalHeight) / 2,
+    new XDimension2D(measured.maxWidth, measured.totalHeight),
+  );
+  const placed = collisionNodes === undefined ? box : manageCollision(box, collisionNodes);
+  const pos = placed.getPosition();
+  return { ...measured, pos: { x: pos.getX(), y: pos.getY() } };
+}
+
 /**
  * A2a/M10: lay out one quantifier as ONE anchor per physical line.
  *
@@ -314,6 +380,12 @@ export interface PortLabelContext {
  * y=228.853 textLength=41.063`, `1` at `x=287.773 y=238.853` -- a `10`
  * baseline step (the cardinality size, not the 13 the tail/head ink still
  * uses) and an x offset of `17.75 === (41.063 - width("1")) / 2`.
+ *
+ * cdd-T17: now a thin wrapper over {@link placeQuantifierBox} +
+ * {@link labelLinesFromTopLeft} (pure factoring, same formula) -- the two
+ * halves this end's ADDITIVE role anchor ({@link roleLabelAnchors}) also
+ * needs, one for the quantifier's OWN placed box, one for laying the role
+ * out from ITS mirrored top-left.
  */
 export function quantifierLineAnchors(
   text: string,
@@ -322,65 +394,12 @@ export function quantifierLineAnchors(
   font: FontSpec,
   collisionNodes?: DotLayoutResult['nodes'],
 ): QuantifierLineGeo[] {
-  const { lines } = computeQuantifierBox(text, font, measurer);
-  const widths = lines.map((l) => measurer.measure(l, font).width);
-  const maxWidth = Math.max(...widths);
-  const totalHeight = (lines.length - 1) * font.size + measurer.measure(lines[0] ?? '', font).height;
-  const box = new PositionableImpl(
-    center.x - Math.trunc(maxWidth) / 2,
-    center.y - Math.trunc(totalHeight) / 2,
-    new XDimension2D(maxWidth, totalHeight),
-  );
-  const placed = collisionNodes === undefined ? box : manageCollision(box, collisionNodes);
-  const pos = placed.getPosition();
-  return lines.map((lineText, i) => ({
-    text: lineText,
-    x: pos.getX() + (maxWidth - widths[i]!) / 2,
-    y: pos.getY() + i * font.size + (font.size - measurer.getDescent(font, lineText)),
-    width: widths[i]!,
-  }));
+  const placed = placeQuantifierBox(text, center, measurer, font, collisionNodes);
+  return labelLinesFromTopLeft(placed, placed.pos, font, measurer);
 }
 
-/** Attach `tailLabel`/`headLabel` (G2/N25) if `graph-layout.ts` computed a
- *  position for them -- absent when the relationship carries no
- *  `fromMultiplicity`/`toMultiplicity` (`edgeLabelAttrs` then never set
- *  `tailLabel`/`headLabel` on the DOT input, so `extractPortLabelPositions`
- *  never ran for this edge). */
-export function attachPortLabels(
-  edgeGeo: EdgeGeo,
-  rel: Relationship,
-  edgeResult: DotLayoutResult['edges'][number],
-  ctx: PortLabelContext,
-): void {
-  const { measurer, fontFamily, nodes } = ctx;
-  const cardinalityFont: FontSpec = { family: fontFamily, size: CARDINALITY_FONT_SIZE };
-  // T11: `edgeResult.tailLabelX/Y` and `headLabelX/Y` are @knowvah/dot-engine's
-  // placement for the DOT `taillabel`/`headlabel` attributes -- which
-  // `class-dot-edges.ts#buildDotEdgeAttrs` now reserves from the SWAPPED
-  // quantifier pair whenever `dotEdgeRunsReversed(rel)` is true (same root
-  // this function must follow, or the rendered `<text>` carries the wrong
-  // string at the right position -- the second consumer T3's diagnosis
-  // named, `.agent-notes/m3-tail-head-swap.md`). `dotEdgeRunsReversed` is
-  // pure over `rel`, so recomputing it here reproduces `class-dot-edges.ts`'s
-  // own `swap` exactly (`class-dot-graph.ts#computeSwappedEdges` builds its
-  // `swappedEdges` set the identical way).
-  const swap = dotEdgeRunsReversed(rel);
-  const tailMultiplicity = swap ? rel.toMultiplicity : rel.fromMultiplicity;
-  const headMultiplicity = swap ? rel.fromMultiplicity : rel.toMultiplicity;
-  // A2a/M10: the resolved `arrow.cardinality` font feeds the SPLIT anchors
-  // only -- see `PortLabelContext.cardinalityFont`.
-  const splitFont = ctx.cardinalityFont ?? cardinalityFont;
-  const tailLines: QuantifierLineGeo[] = [];
-  const headLines: QuantifierLineGeo[] = [];
-  if (tailMultiplicity !== undefined && edgeResult.tailLabelX !== undefined && edgeResult.tailLabelY !== undefined) {
-    const center = { x: edgeResult.tailLabelX, y: edgeResult.tailLabelY };
-    edgeGeo.tailLabel = portLabelAnchor(tailMultiplicity, center, measurer, cardinalityFont, nodes);
-    tailLines.push(...quantifierLineAnchors(tailMultiplicity, center, measurer, splitFont, nodes));
-  }
-  if (headMultiplicity !== undefined && edgeResult.headLabelX !== undefined && edgeResult.headLabelY !== undefined) {
-    const center = { x: edgeResult.headLabelX, y: edgeResult.headLabelY };
-    edgeGeo.headLabel = portLabelAnchor(headMultiplicity, center, measurer, cardinalityFont, nodes);
-    headLines.push(...quantifierLineAnchors(headMultiplicity, center, measurer, splitFont, nodes));
-  }
-  if (tailLines.length > 0 || headLines.length > 0) edgeGeo.quantifierLines = [tailLines, headLines];
-}
+// cdd-T17 (M8): `roleLabelAnchors`/`attachPortLabels` moved to
+// `class-edge-role-label-anchor.ts` (500-line hook cap, pre-authorised
+// split re-export) -- a pure move, re-exported below so no consumer's
+// import path changed. See that file's own header for the split rationale.
+export { roleLabelAnchors, attachPortLabels } from './class-edge-role-label-anchor.js';

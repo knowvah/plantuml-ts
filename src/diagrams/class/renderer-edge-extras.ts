@@ -195,8 +195,17 @@ export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinal
   const parts: string[] = [];
   const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily };
   if (geo.quantifierLines !== undefined) {
-    for (const lines of geo.quantifierLines) {
-      for (const l of lines) {
+    // cdd-T17 (M8): draw each end's ADDITIVE role lines right after that
+    // SAME end's quantifier lines -- `SvekEdge.java:956-980`'s draw order
+    // (tail quantifier, then tail role via `drawRoleLabel`; head quantifier,
+    // then head role) is per-end, not quantifier-then-quantifier-then-role.
+    // `geo.roleLines` uses the SAME `[tail, head]` shape as `quantifierLines`
+    // itself, so indexing both arrays by the same `i` keeps the two paired.
+    for (let i = 0; i < geo.quantifierLines.length; i++) {
+      for (const l of geo.quantifierLines[i]!) {
+        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
+      }
+      for (const l of geo.roleLines?.[i] ?? []) {
         parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
       }
     }

@@ -10,6 +10,7 @@ import {
   renderEdgeVisibilityIcon,
   renderEdgeNoteBox,
   renderEdgeConstraint,
+  renderEdgeCardinalityLabels,
 } from '../../../src/diagrams/class/renderer-edge-extras.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -171,5 +172,57 @@ describe('renderEdgeConstraint', () => {
     const markup = renderEdgeConstraint(geo, defaultTheme, undefined);
     expect(markup).toContain('<line');
     expect(markup).not.toContain('<text');
+  });
+});
+
+// cdd-T17 (M8) -- mugobo-34-fede498's four <text> labels (2 quantifiers +
+// 2 additive roles). Golden: <text x="6" y="73.253" textLength="127.319">
+// owner which is very long</text><text x="151.23" y="73.253">1</text>
+// <text x="125.618" y="104.032" textLength="21.613">0..n</text>
+// <text x="151.23" y="104.032" textLength="31.038">items</text>.
+describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, after that end's quantifier", () => {
+  const CARDINALITY_COLOR = '#000';
+
+  it('draws quantifierLines only when roleLines is absent — regression guard', () => {
+    const geo = makeEdgeGeo({
+      quantifierLines: [[{ text: '1', x: 1, y: 2, width: 3 }], [{ text: '0..n', x: 4, y: 5, width: 6 }]],
+    });
+    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    expect(parts).toHaveLength(2);
+    expect(parts.join('')).toContain('>1<');
+    expect(parts.join('')).toContain('>0..n<');
+  });
+
+  it('interleaves tail quantifier, tail role, head quantifier, head role — mugobo-34-fede498 golden order', () => {
+    const geo = makeEdgeGeo({
+      quantifierLines: [
+        [{ text: 'owner which is very long', x: 6, y: 73.253, width: 127.319 }],
+        [{ text: '0..n', x: 125.618, y: 104.032, width: 21.613 }],
+      ],
+      roleLines: [
+        [{ text: '1', x: 151.23, y: 73.253, width: 7.231 }],
+        [{ text: 'items', x: 151.23, y: 104.032, width: 31.038 }],
+      ],
+    });
+    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    expect(parts).toHaveLength(4);
+    const texts = parts.map((p) => /<text[^>]*>([^<]*)<\/text>/.exec(p)?.[1]);
+    expect(texts).toEqual(['owner which is very long', '1', '0..n', 'items']);
+    expect(parts[1]).toContain('x="151.23"');
+    expect(parts[1]).toContain('y="73.253"');
+    expect(parts[3]).toContain('x="151.23"');
+    expect(parts[3]).toContain('y="104.032"');
+  });
+
+  it("an end with no additive role emits only that end's quantifier line", () => {
+    const geo = makeEdgeGeo({
+      quantifierLines: [
+        [{ text: 'owner', x: 6, y: 73.253, width: 35.425 }],
+        [{ text: '0..n', x: 21.816, y: 104.032, width: 21.613 }],
+      ],
+      roleLines: [[{ text: '1', x: 47.429, y: 73.253, width: 7.231 }], []],
+    });
+    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    expect(parts).toHaveLength(3);
   });
 });
