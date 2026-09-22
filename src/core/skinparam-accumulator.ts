@@ -72,6 +72,12 @@ export interface SkinparamAccumulator {
   classBorder: Paint | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
+  /** CDD T6FU: `skinparam classBackgroundColor<<stereo>>` (and the nested
+   *  `skinparam class { <<stereo>> { BackgroundColor X } }` form -- one
+   *  normalised key, `SkinParam#cleanForKeySlow` java:285-300). Stored RAW
+   *  so `classifierFill` can `parseColor` it (a `#A-B` value is a gradient
+   *  upstream), keyed by the LOWERCASED label. */
+  classBackgroundColorByStereo: Record<string, string> | undefined;
   /** cdd-T19 (A3 M2): `skinparam classFontColor`/the block form
    *  `skinparam class { FontColor X }` — resolved hex, mapped to the
    *  HEADER-only `classCascadeHeaderFontColor` theme field
@@ -212,6 +218,7 @@ const SCALAR_FIELD_NAMES = [
   'classBorder',
   'classBorderThickness',
   'classBorderThicknessByStereo',
+  'classBackgroundColorByStereo',
   'classFontColor',
   'classAttributeFontColor',
   'classAttributeFontSizeByStereo',

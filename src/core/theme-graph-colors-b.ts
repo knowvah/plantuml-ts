@@ -298,6 +298,27 @@ export interface ThemeGraphColorsB {
    *  header default, which is value-equal to the body default and so
    *  never splits. Jar-verified `nisune-86-faji869`. */
   classHeaderBackground?: Paint;
+  /** CDD T6FU: `skinparam classBackgroundColor<<stereo>> #X` / `skinparam
+   *  class { <<stereo>> { BackgroundColor #X } }` -- both normalise to the
+   *  ONE key `classbackgroundcolor<<stereo>>` (`SkinParam#cleanForKeySlow`,
+   *  java:285-300; jar-probed on `tabaxa-70-pomu341`'s block form and
+   *  `nagega-30-poso418`'s suffix form).
+   *
+   *  NOT the legacy `SkinParam#getHtmlColor(ColorParam, Stereotype)` value
+   *  lookup `classBorderThicknessByStereo` models: `SkinParam#setParam`
+   *  (java:228-233) hands every cleaned key to `FromSkinparamToStyle`,
+   *  whose ctor peels the `<<...>>` into `this.stereo` (java:292-301) and
+   *  whose `addStyle` re-signs the style with `sig.addStereotype(s)` at
+   *  `StyleLoader#addPriorityForStereotype` priority (java:396-408) --
+   *  i.e. the SAME tier the `<style> class { .tag {} } }` cascade
+   *  (`classTagCascade`) already occupies. `EntityImageClass#getStyle`
+   *  (java:166-171) picks it up via `withTOBECHANGED(getStereotype())`.
+   *
+   *  Stored RAW (not pre-resolved) so `classifierFill` runs the SAME
+   *  `parseColor` a gradient value needs, exactly as it does for the
+   *  classifier's own inline colour. Keyed by the LOWERCASED label, matched
+   *  through `cleanStereotypeToken` like `classTagCascade`. */
+  classBackgroundColorByStereo?: Readonly<Record<string, string>>;
   /** G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor`
    *  (`Kind` in Private/Package/Protected/Public) -- the member-row
    *  visibility icon's own LineColor/BackgroundColor overrides

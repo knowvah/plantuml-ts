@@ -95,6 +95,7 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['classBorder', (acc) => acc.classBorder],
   ['classBorderThickness', (acc) => acc.classBorderThickness],
   ['classBorderThicknessByStereo', (acc) => acc.classBorderThicknessByStereo],
+  ['classBackgroundColorByStereo', (acc) => acc.classBackgroundColorByStereo],
   // cdd-T19 (A3 M2): the legacy `classFontColor`/`classAttributeFontColor`
   // skinparam keys bridge into the SAME `classCascade(Header)FontColor`
   // theme fields the `<style>` cascade computes (`style-cascade-class.ts

@@ -13,6 +13,7 @@ import { rect, PAINT_NONE } from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { parseColor, type Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { classStereotypeBackground } from './renderer-classifier-colors.js';
 
 /** The `class`/`enum`/`interface`/`abstract` kinds `EntityImageClass
  *  #drawInternal`'s header-background split applies to -- disjoint from
@@ -100,7 +101,11 @@ export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint, them
   // .java:204`) -- an explicit skinparam/`<style>` header background, then
   // `backcolor.equals(headerBackcolor)` (`:218`) against the resolved body
   // fill: a flat header equal to a flat body draws the plain single rect.
-  const styleHeader = theme.colors.graph.classHeaderBackground;
+  // The STEREOTYPE tier (+1000) outranks both the plain `{element, class_}`
+  // and the `{element, class_, header}` styles, so when it applies it IS
+  // `getStyleHeader()`'s merged BackGroundColor -- equal to `backcolor`,
+  // hence no split (`tabaxa-70-pomu341`).
+  const styleHeader = classStereotypeBackground(geo, theme) ?? theme.colors.graph.classHeaderBackground;
   if (styleHeader !== undefined) {
     if (typeof styleHeader !== 'string' || typeof bodyFill !== 'string') return styleHeader;
     return resolveColorToSvgHex(styleHeader) === resolveColorToSvgHex(bodyFill) ? undefined : styleHeader;
