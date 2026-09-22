@@ -34,6 +34,109 @@ export interface NoteRow {
   width: number;
   atoms: readonly MemberRenderAtom[];
   height: number;
+  /** T10: present only for a block-separator "leading" row (the row whose
+   *  `.height` is `BodyEnhancedAbstract#decorate`'s `contentTop` margin --
+   *  see `note-layout-measure.ts#appendDecoratedBlock`'s own doc comment) --
+   *  tells the renderer to draw a `<line>` at this row's OWN top (offset
+   *  {@link NoteDividerDraw.dividerYOffset} down from it). */
+  divider?: NoteDividerDraw;
+  /** T10: present only for a creole-table grid row (`CreoleParser
+   *  .isTableLine` run, {@link buildTableRow}) -- tells the renderer to
+   *  draw the grid + every cell's own text atoms at this row's own top. */
+  table?: NoteTableDraw;
+}
+
+/** T10: `UHorizontalLine#getStroke`'s draw parameters for a note block
+ *  separator, mirrored from `class-body-enhanced-layout.ts#EnhancedDividerPart`
+ *  (the class-body divider's OWN identical shape, already jar-verified for
+ *  every one of these fields) -- duplicated rather than imported since that
+ *  interface (and its three small `separatorStroke*` builders) are private
+ *  to a file this module does not otherwise depend on, matching this file
+ *  family's established "duplicate a small private helper rather than cross
+ *  a module boundary for it" precedent (`renderer-note.ts#noteAtomDecoration`'s
+ *  own doc comment cites the same convention).
+ * @see ~/git/plantuml/.../klimt/shape/UHorizontalLine.java#getStroke,drawHLine
+ */
+export interface NoteDividerDraw {
+  /** Offset from this row's own top where the `<line>` actually draws -- 0
+   *  for an UNTITLED separator (`BodyEnhancedAbstract#decorate`'s
+   *  `TextBlockLineBefore#drawU`: the line draws BEFORE any margin
+   *  translate). Always 0: a note/legend TITLED separator (`--Header--`)
+   *  is a NAMED, scoped-out remainder of this task -- zero corpus reach
+   *  (grep-verified: every `class-divergence-drive` fixture with a
+   *  non-empty-captured `--...--`/`==...==` line is a CLASS BODY separator,
+   *  `class-body-enhanced-layout.ts`'s own existing mechanism, never a note
+   *  or legend body) and its content-draws-before-divider/title-baseline
+   *  draw order (`renderer-body-enhanced.ts`'s own module doc comment) is
+   *  real extra complexity with nothing to jar-verify it against here --
+   *  `appendDecoratedBlock` below leaves a titled note separator UNCHANGED
+   *  from its pre-T10 behavior (reserved height only, no `<line>`, matching
+   *  every OTHER unreached branch's "named, not built" convention) rather
+   *  than guess the formula. */
+  readonly dividerYOffset: number;
+  readonly strokeWidth: number;
+  readonly strokeDasharray?: string;
+  readonly doubleLine?: boolean;
+}
+
+/** `note-layout-measure.ts#appendDecoratedBlock`'s own untitled-separator
+ *  draw-metadata build -- kept here (not there) purely for that file's
+ *  500-line cap. */
+export function buildDividerDraw(char: string, dividerYOffset: number): NoteDividerDraw {
+  return { dividerYOffset, strokeWidth: separatorStrokeWidth(char), ...separatorStrokeExtras(char) };
+}
+
+/** `UHorizontalLine#getStroke`: `'-'`/`'='` -> thickness 1; `'.'` -> thickness
+ *  1 dashed (`new UStroke(1, 2, 1)`); anything else (`'_'`, synthetic
+ *  block0/trailing-empty sentinel) -> thickness 0.5 (`PName.LineThickness`'s
+ *  default -- `note-layout-measure.ts`'s own `ELEMENT_DEFAULT_LINE_THICKNESS`
+ *  import would cycle back here, so the literal is repeated, matching
+ *  `class-body-enhanced-layout.ts`'s own identical literal). Duplicated from
+ *  that file's private, byte-identical helper rather than imported -- see
+ *  `NoteDividerDraw`'s own doc comment for the precedent. */
+function separatorStrokeWidth(char: string): number {
+  return char === '-' || char === '=' || char === '.' ? 1 : 0.5;
+}
+
+/** `UHorizontalLine#drawHLine`'s `'.'` dash pattern and `'='` double-line
+ *  flag, bundled into ONE optional-spread object so the caller stays under
+ *  this project's per-call-site param/NLOC cap. */
+function separatorStrokeExtras(char: string): { strokeDasharray?: string; doubleLine?: true } {
+  if (char === '.') return { strokeDasharray: '1,2' };
+  if (char === '=') return { doubleLine: true };
+  return {};
+}
+
+/** T10: one table cell's own drawable content, relative to the TABLE
+ *  row's own origin (`colBounds[col]`/`rowBounds[row]` below already carry
+ *  the absolute-within-row offset; a cell's atoms draw at exactly
+ *  `(colBounds[col], rowBounds[row] + baselineOffset)` for its FIRST
+ *  subline -- `AtomTable.ts#drawCell`'s LEFT-alignment default, the only
+ *  alignment this corpus reaches, `<r>`-right-align stays a named,
+ *  pre-existing, zero-reach gap in {@link tableRowCellDims} unchanged by
+ *  this task). `lines` holds one entry per `\n`-split subline within the
+ *  cell (`splitTableCellLines`) -- `y` is each subline's own cumulative
+ *  offset from the cell's (and so the row's) own top. */
+export interface NoteTableCell {
+  readonly col: number;
+  readonly row: number;
+  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
+}
+
+/** T10: one creole-table grid's full draw geometry -- `AtomTable.ts`'s own
+ *  `getStartingX`/`getStartingY` cumulative-sum convention (col/row N's
+ *  start is the sum of every earlier col/row's own max width/height),
+ *  computed ONCE at layout time (measurer-free at render time, matching
+ *  every other `NoteGeo` field's "measured once, drawn many" contract).
+ *  Bounds are relative to the TABLE's own origin: `colBounds[0] === 0`
+ *  (flush with the row's left margin, `note.x + NOTE_MARGIN_X1`, same as
+ *  plain text) and `rowBounds[0] === TABLE_MARGIN_Y` (the grid's own top
+ *  margin, `StripeTable.java:85`'s `AtomWithMargin(table, 2, 2)`). */
+export interface NoteTableDraw {
+  readonly colBounds: readonly number[];
+  readonly rowBounds: readonly number[];
+  readonly lineColor: string;
+  readonly cells: readonly NoteTableCell[];
 }
 
 /** Per-line build inputs the row builders need (one bundled param). */
@@ -138,26 +241,66 @@ function noteLineHeightEntry(atom: MemberRenderAtom): { altitude: number; height
  * `<#color>` prefixes strip through the first `>` (size-inert).
  */
 export function buildTableRow(runLines: readonly string[], ctx: NoteLineBuildContext): NoteRow {
-  const cellDims: { w: number; h: number }[][] = runLines.map((line) => tableRowCellDims(line, ctx));
-  const nbCols = cellDims.reduce((max, row) => Math.max(max, row.length), 0);
-  let width = 0;
-  for (let c = 0; c < nbCols; c++) {
-    width += cellDims.reduce((max, row) => Math.max(max, row[c]?.w ?? 0), 0);
-  }
-  const height = cellDims.reduce((sum, row) => sum + row.reduce((max, cell) => Math.max(max, cell.h), 0), 0);
+  const cellDims: TableCellDims[][] = runLines.map((line) => tableRowCellDims(line, ctx));
+  const { colBounds, rowBounds, cells } = tableGridBounds(cellDims);
+  const width = colBounds[colBounds.length - 1]!;
+  const height = rowBounds[rowBounds.length - 1]! - TABLE_MARGIN_Y;
+  // `StripeTable.java:79-82`'s `getBackOrFrontColor(line, 1)` per-table
+  // `<#color>` override (checked against the FIRST run line only) is a
+  // named, zero-corpus-reach gap (`jovigo-38-tuni063` carries none) -- the
+  // grid always falls back to `fontConfiguration.getColor()`, i.e. this
+  // row's own resolved font color, mirroring the SAME `?? '#000000'`
+  // fallback `renderNoteLineAtoms`'s text fill already applies.
+  const lineColor = ctx.font.color ?? '#000000';
   return {
     text: runLines.join('\n'),
     width,
     atoms: [],
     height: height + TABLE_MARGIN_Y * 2,
+    table: { colBounds, rowBounds, lineColor, cells },
   };
+}
+
+/** {@link buildTableRow}'s own `AtomTable.ts#getStartingX`/`getStartingY`
+ *  cumulative-sum + cell-flattening pass, split out purely to keep that
+ *  function's own NLOC under this project's complexity cap. */
+function tableGridBounds(cellDims: readonly (readonly TableCellDims[])[]): {
+  colBounds: number[];
+  rowBounds: number[];
+  cells: NoteTableCell[];
+} {
+  const nbCols = cellDims.reduce((max, row) => Math.max(max, row.length), 0);
+  const colBounds = [0];
+  for (let c = 0; c < nbCols; c++) {
+    const colW = cellDims.reduce((max, row) => Math.max(max, row[c]?.w ?? 0), 0);
+    colBounds.push(colBounds[c]! + colW);
+  }
+  const rowBounds = [TABLE_MARGIN_Y];
+  for (const row of cellDims) {
+    const rowH = row.reduce((max, cell) => Math.max(max, cell.h), 0);
+    rowBounds.push(rowBounds[rowBounds.length - 1]! + rowH);
+  }
+  const cells: NoteTableCell[] = [];
+  cellDims.forEach((row, r) => row.forEach((cell, c) => cells.push({ col: c, row: r, lines: cell.lines })));
+  return { colBounds, rowBounds, cells };
+}
+
+interface TableCellDims {
+  readonly w: number;
+  readonly h: number;
+  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
 }
 
 /** One table line's cell dims — `StripeTable#analyzeAndAddInternal`'s
  *  tokenizer (`StringTokenizer(line, "|")` skips empty tokens) with the
  *  `\|`-hiding, line/cell `<#color>` strips, `=` header detection, and
- *  per-cell literal-`\n` split (`getWithNewlinesInternal`, java:166-197). */
-function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number; h: number }[] {
+ *  per-cell literal-`\n` split (`getWithNewlinesInternal`, java:166-197).
+ *  T10: now also captures each subline's own resolved `atoms` (`build
+ *  .atoms`, already computed by the SAME `resolveMemberAtoms` call this
+ *  function always made -- previously discarded, keeping only its `width`/
+ *  `noteLineHeight`) so {@link buildTableRow} can hand the renderer
+ *  something to actually draw, not just a cell's reserved box. */
+function tableRowCellDims(line: string, ctx: NoteLineBuildContext): TableCellDims[] {
   let l = line.split('\\|').join(HIDDEN_BAR);
   if (CreoleParser.doesStartByColor(l)) l = l.slice(l.indexOf('>') + 1);
   const tokens = l.split('|').filter((t) => t !== '');
@@ -169,7 +312,11 @@ function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number;
     const cellFont = header ? memberBaseFont({ ...ctx.fontSpec, bold: true }, {}) : ctx.font;
     let w = 0;
     let h = 0;
+    const lines: { y: number; atoms: readonly MemberRenderAtom[] }[] = [];
     for (let s of splitTableCellLines(v)) {
+      // `<r>`-right-alignment stays UNAPPLIED at draw time (pre-existing gap,
+      // unchanged by this task -- see `NoteTableCell`'s own doc comment);
+      // the marker is still stripped so it never leaks into the drawn text.
       if (s.startsWith('<r>')) s = s.slice('<r>'.length);
       const build = resolveMemberAtoms(
         buildMemberAtoms(resolveTextEscapes(s), cellFont),
@@ -177,10 +324,11 @@ function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { w: number;
         ctx.measurer,
         ctx.sprites,
       );
+      lines.push({ y: h, atoms: build.atoms });
       w = Math.max(w, build.width);
       h += noteLineHeight(build.atoms, ctx.fontSize);
     }
-    return { w, h };
+    return { w, h, lines };
   });
 }
 

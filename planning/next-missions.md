@@ -912,6 +912,46 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`#`-prefixed numbered lists in notes render as literal `#`** (NEW,
+  unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T10
+  (decision-journal rows, `ponono-25-fevo574`/`sumocu-27-vubo674`).
+  **Mechanism**: a `#`-prefixed note line (`HASH_HEADING_PATTERN =
+  "^(#+)(.+)$"`, `CreoleStripeSimpleParser.java:71,138-145`) classifies
+  upstream as `StripeStyleType.LIST_WITH_NUMBER` and draws an
+  auto-incrementing ordinal marker ("1.", "2.", ... per nesting `order`)
+  via `context.getLocalNumber(order)` + `AtomTextUtils.createListNumber`
+  (`StripeStyle.java:57-66`) — the numbered-list sibling of the ALREADY-
+  ported `*`-bullet mechanism. **Origin**:
+  `src/diagrams/class/note-layout-measure.ts` (`matchBulletLine`, its
+  `ASTERISK_PREFIXED_LINE_PATTERN`/`ASTERISK_HEADER_LINE_PATTERN` pair) —
+  no `#`/`HASH_HEADING_PATTERN` counterpart exists anywhere in this port.
+  **Causal chain**: a `#`-line fails `matchBulletLine` → falls through to
+  `buildPlainRows` as ordinary creole text → the literal `#` character has
+  no creole meaning and draws as its own `<text>#</text>` run, with the
+  following space becoming a SECOND `<text>` run (the pre-existing NBSP-
+  substitution-per-whitespace-atom rule, `class-member-creole.ts` G2 N57
+  item 38) → ONE EXTRA `<text>` element per numbered line vs. jar's single
+  "1."/"2." atom → `ponono-25-fevo574`/`sumocu-27-vubo674` (2 numbered
+  lines each) end up with 107 `<text>` elements vs. the jar's 105, and
+  every element AFTER the first numbered line reads as off-by-one in
+  `compareSvg`'s positional LCS alignment (the "alternating childCount
+  0/1" symptom). **Ruled out**: a word-wrap/Fission off-by-one in the
+  fixture's long bulleted sentence (the initial hypothesis) — DISPROVEN by
+  an ordered `<text>`-content sequence diff (Python `difflib
+  .SequenceMatcher` over both sides' full text-run arrays): every wrapped
+  word matches jar's content in EXACT order from element 0 through the
+  end; the ONLY two diff hunks are precisely the two `#`-lines
+  (`jar[75:76]=['1.']` vs `ours[75:77]=['#','\xa0']`, and the identical
+  shape at index 85/86). **Fix shape**: port `HASH_HEADING_PATTERN`
+  alongside the existing asterisk patterns in `matchBulletLine` (or its
+  successor), plus a stateful per-`order` auto-increment counter
+  (`CreoleContext.getLocalNumber`'s equivalent — resets per note, unlike
+  the asterisk path's stateless per-line order) and a `createListNumber`-
+  equivalent atom. Medium risk: shares `buildBulletRows`'s row-building
+  path with the `*` mechanism, and needs a stateful pass across the note's
+  lines (not today's independent per-line classify calls) to get the
+  numbering sequence right across wrapped/interspersed content.
+
 - **Class SVG comments diverge from the jar (gate-invisible)** (NEW,
   unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T4
   (decision-journal row 20; diagnosis `A1-order.md` "Invisible-to-the-gate

@@ -8,6 +8,7 @@ import type { UrlInfo, NotePosition } from './ast.js';
 import type { OpalePoint, OpaleDirection } from './note-opale.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import type { NoteDividerDraw, NoteTableDraw } from './note-layout-measure-rows.js';
 
 /**
  * Upstream's leaf type for a class-diagram note — the two `LeafType` values
@@ -104,6 +105,24 @@ export interface NoteGeo {
    * the pre-N56 formula exactly (see `renderer-note.ts#renderNoteText`).
    */
   lineHeights?: readonly number[];
+  /** T10: each line's own divider draw metadata, parallel to `lines` --
+   *  `undefined` for every row except a block-separator's own leading row
+   *  (see `note-layout-measure.ts#appendDecoratedBlock`'s own doc comment
+   *  for why that row -- and not the separator's FULL reserved height -- is
+   *  where the `<line>` belongs). ALWAYS populated by `measureNote`,
+   *  optional only for the same hand-built-`NoteGeo`-test-literal reason
+   *  `lineAtoms`/`lineHeights` are (this field's own producer,
+   *  `note-layout-tip.ts`, copies `NoteMeasurement.lineDividers` verbatim).
+   *  Consumed by `renderer-note-lines.ts` (new this task) -- NOT by
+   *  `renderer-note.ts` (T8's file, read-only for this task). */
+  lineDividers?: readonly (NoteDividerDraw | undefined)[];
+  /** T10: each line's own creole-table grid draw metadata, parallel to
+   *  `lines` -- `undefined` for every row except a `CreoleParser
+   *  .isTableLine` run's own row (`note-layout-measure-rows.ts#buildTableRow`).
+   *  Same "always populated by `measureNote`, optional for a hand-built
+   *  test literal" contract as `lineDividers` above; same
+   *  `renderer-note-lines.ts`-only consumer. */
+  lineTables?: readonly (NoteTableDraw | undefined)[];
   /** Routed connector points from the note to its host classifier. Empty
    *  for a `'tips'` leaf (G2/N13 — the connector is a notch merged into the
    *  note's own outline instead, resolved at draw time from `tipRequest`
