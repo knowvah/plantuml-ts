@@ -1,0 +1,331 @@
+/**
+ * blocks-creole.ts — cdd-T28: the creole half of `Style
+ * #createTextBlockBordered` (`style/Style.java:353-369`), split out of
+ * `blocks.ts` (which stays the BORDER/margin half, `TextBlockBordered`
+ * + `TextBlockMarged`) to keep both files under the 500-line cap.
+ *
+ * Upstream runs FULL creole on every chrome line. `Style
+ * #createTextBlockBordered` (java:353-369) is reached by every one of the
+ * five elements:
+ *   - legend  — `activitydiagram3/ftile/EntityImageLegend.java:47-55`
+ *     (`style.createTextBlockBordered(note, …, Style.ID_LEGEND,
+ *     style.wrapWidth())`)
+ *   - title   — `core/DiagramChromeFactory.java:342-356`
+ *   - caption — `core/DiagramChromeFactory.java:362-376`
+ *   - header/footer — `core/DiagramChromeFactory.java:382-413` via
+ *     `abel/DisplayPositioned.java:118-128#createRibbon`, which delegates
+ *     to the SAME `createTextBlockBordered` whenever a `Style` is supplied
+ *     (always, from `DiagramChromeFactory`).
+ * and its very first act is
+ * `note.create0(fc, alignment, spriteContainer, lineBreak, CreoleMode.FULL,
+ * null, null)` (java:358-359) — i.e. the chrome text block IS a klimt
+ * creole `SheetBlock2`, with the table/tree/`----` rule/bold/`<b>`/`<i>`
+ * stripe machinery every OTHER creole surface gets.
+ *
+ * This port drew chrome from raw strings through a local
+ * `parseCreole`/`measureLines`/`drawLines` trio until this task: no table,
+ * no tree, no horizontal rule, no per-stripe alignment. The fix is to call
+ * the SAME pipeline — `Display#create0` -> `DisplayCreole#getCreole` ->
+ * `ISkinSimple#sheet` -> `CreoleParser` -> `Sea`/`SheetBlock1`/
+ * `SheetBlock2` — that `core/svek/image/EntityImageDescriptionDelegates
+ * .ts#buildDesc` already drives for the description engine, and to emit
+ * its `drawU` through `core/klimt/document-shell.ts
+ * #renderDrawableToFragment` (ADR-2's sanctioned klimt fragment seam).
+ * Nothing here re-implements creole: every primitive is imported.
+ *
+ * ## Why a local `AtomOps`/`ISkinSimple` rather than an imported one
+ *
+ * `descAtomOps`/`buildLocalSkinSimple` (`EntityImageDescriptionDelegates
+ * .ts`) and `titleAtomOps`/`buildTitleSkinParam` (`leaf-sizing-folder-
+ * title.ts`) are both module-private; this is the codebase's established
+ * shape — one capability bundle per call path, scoped to exactly the atom
+ * kinds that path can reach (`creole-sea-line.ts#seaOpsFor` is a third).
+ * Chrome's own bundle is the narrowest of the three: it has no
+ * `SpriteRegistry` and no emoji-artwork channel at the seam
+ * (`buildAnnotationBlock`'s four-parameter contract), so a `<$sprite>`/
+ * `<:emoji:>`/`<img:>` atom in chrome text measures and draws as nothing —
+ * recorded in `.agent-notes/cdd-T28.md` and the decision journal as a named
+ * remainder, exactly like `.agent-notes/C1-sequence-creole-seam.md`'s
+ * identical sequence-side gap, NOT silently "handled".
+ *
+ * @see ~/git/plantuml/.../style/Style.java:353-369 (createTextBlockBordered)
+ * @see ~/git/plantuml/.../klimt/creole/Display.java:637-669 (create0)
+ * @see ~/git/plantuml/.../activitydiagram3/ftile/EntityImageLegend.java:47-55
+ * @see ~/git/plantuml/.../core/DiagramChromeFactory.java:340-413
+ */
+
+import type { AnnotationBoxStyle } from './style.js';
+import type { StringMeasurer } from '../measurer.js';
+import { MeasurerStringBounder } from '../measurer-bounder.js';
+import { Display } from '../klimt/creole/Display.js';
+import { create0 } from '../klimt/creole/DisplayCreole.js';
+import { SheetBlock2 } from '../klimt/creole/SheetBlock2.js';
+import { CreoleMode } from '../klimt/creole/CreoleMode.js';
+import { CreoleParser } from '../klimt/creole/legacy/CreoleParser.js';
+import { MONOSPACED } from '../klimt/creole/Parser.js';
+import { LineBreakStrategy } from '../klimt/LineBreakStrategy.js';
+import { ClockwiseTopRightBottomLeft } from '../klimt/geom/ClockwiseTopRightBottomLeft.js';
+import { Pragma } from '../skin/Pragma.js';
+import { GUILLEMET_DEFAULT } from '../text/Guillemet.js';
+import { XDimension2D } from '../klimt/geom/XDimension2D.js';
+import { UTranslate } from '../klimt/UTranslate.js';
+import { Fore } from '../klimt/Fore.js';
+import { UText, FontStyle, getFont, type FontConfiguration } from '../klimt/shape/UText.js';
+import { atomTextStartingAltitude, atomTextWidth } from '../klimt/creole/legacy/AtomText.js';
+import { renderDrawableToFragment } from '../klimt/document-shell.js';
+import type { AtomOps } from '../klimt/creole/Sea.js';
+import type { CreoleAtom } from '../klimt/creole/atom/Atom.js';
+import type { Atom } from '../klimt/creole/SheetBlock1.js';
+import type { StringBounder } from '../klimt/font/StringBounder.js';
+import type { UGraphic } from '../klimt/UGraphic.js';
+import type { UDrawable } from '../klimt/shape/UDrawable.js';
+import type { TextBlock } from '../klimt/shape/TextBlock.js';
+import type { ISkinSimple } from '../style/ISkinSimple.js';
+import type { NestedDiagramRenderer } from '../EmbeddedDiagram.js';
+
+/** What {@link buildChromeTextBlock} hands back to `blocks.ts`: the
+ *  creole block's own `calculateDimension` (`TextBlockBordered
+ *  #getPureTextWidth`/`getTextHeight`'s input, java:80-91) plus its
+ *  already-serialized markup, origin at (0,0). `extraDefs` carries the
+ *  `<defs>` payload klimt lifts out of the document (gradients/filters) —
+ *  `blocks.ts`/`chrome.ts` thread it to `RenderFragment.extraDefs`. */
+/** {@link buildChromeTextBlock}'s non-text inputs, bundled so the function
+ *  stays inside this project's parameter budget. `color` is
+ *  `TextBlockBordered#drawU`'s own `color` local (java:126-134): the border
+ *  colour, or the resolved background when the border is zero-thickness,
+ *  or `'none'` when neither resolves -- `blocks.ts` owns that resolution
+ *  (it already computes both halves for the rect) and hands the answer in.
+ *  `uid` seeds the fragment's own id namespace (`document-shell.ts
+ *  #RenderDrawableToFragmentOptions`) -- one per chrome element kind, so a
+ *  legend filter and a footer filter never collide. */
+export interface ChromeTextPaint {
+  readonly uid: string;
+  readonly color: string;
+}
+
+export interface ChromeTextBlock {
+  readonly body: string;
+  readonly extraDefs?: string;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** `Style#getFontConfiguration` (java:356) reduced to this port's
+ *  `FontConfiguration` (`klimt/shape/UText.ts`'s own documented
+ *  `{family,size,color,styles}` scope): the box style's resolved font IS
+ *  the creole base configuration every stripe inherits, so a `title`
+ *  (whose skin default is bold, `annotation-defaults.ts`) starts bold and
+ *  `**x**` only ever ADDS emphasis on top — the same union `blocks.ts`'s
+ *  pre-T28 `spanIsBold` documented from `linazi-45-gevo553`. */
+export function chromeFontConfiguration(style: AnnotationBoxStyle): FontConfiguration {
+  const styles = new Set<FontStyle>();
+  if (style.fontStyle === 'bold') styles.add(FontStyle.BOLD);
+  if (style.fontStyle === 'italic') styles.add(FontStyle.ITALIC);
+  return { family: style.fontFamily, size: style.fontSize, color: style.fontColor, styles };
+}
+
+/** `'kind' in x` duck-typing of the plain-data `CreoleAtom` union vs a
+ *  composite OOP `Atom` (`AtomTable`/`AtomTree`/`AtomMath`/…) —
+ *  `EntityImageDescriptionDelegates.ts#isCreoleAtomData`'s documented
+ *  convention, which `leaf-sizing-folder-title.ts` already copies for the
+ *  identical reason (the runtime `Sheet` mixes both). */
+function isCreoleAtomData(x: CreoleAtom | Atom): x is CreoleAtom {
+  return 'kind' in x;
+}
+
+/** MEASUREMENT-only muted font — `EntityImageDescriptionDelegates.ts
+ *  #measuringFont`'s identical convention (`AtomText.java` reads
+ *  `fontConfiguration.getFont()`, i.e. the `fontPosition`-muted size,
+ *  while `UText.build`/`drawU` keep the unmuted config). */
+function measuringFont(fc: FontConfiguration): FontConfiguration {
+  return { ...fc, size: getFont(fc).size };
+}
+
+/** `AtomText#calculateDimensionSlow` (java:183-184): a run containing a
+ *  tabulation takes `#getWidth`'s tab-stop tokenizer instead of the plain
+ *  `StringBounder` width — `atomTextWidth` is that tokenizer, and it
+ *  short-circuits to the identical single measurement for a tab-free run
+ *  (`EntityImageDescriptionTextBlock.ts#measureLine`'s own convention). */
+function textDim(atom: CreoleAtom & { kind: 'text' }, stringBounder: StringBounder): XDimension2D {
+  const font = measuringFont(atom.font);
+  const height = stringBounder.calculateDimension(font, atom.text).getHeight();
+  const width = atomTextWidth(atom.text, font.size, (t) => stringBounder.calculateDimension(font, t).getWidth());
+  return new XDimension2D(width, height);
+}
+
+/**
+ * Chrome's own `AtomOps` — see this module's doc comment for why it is
+ * local and what it deliberately cannot resolve. `getStartingAltitude`
+ * for a text atom is `AtomText#getStartingAltitude` (java:321-323, this
+ * port's `atomTextStartingAltitude`), 0 for everything else (upstream
+ * `AtomImg`/`AtomSprite`/`AtomMath` all `return 0`); a composite `Atom`
+ * answers all three itself.
+ */
+export function chromeAtomOps(): AtomOps {
+  return {
+    calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
+      const atom = creoleAtom as CreoleAtom | Atom;
+      if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
+      if (atom.kind === 'text') return textDim(atom, stringBounder);
+      return new XDimension2D(0, 0);
+    },
+    getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
+      const atom = creoleAtom as CreoleAtom | Atom;
+      if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
+      return atom.kind === 'text' ? atomTextStartingAltitude(atom.font) : 0;
+    },
+    drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
+      const atom = creoleAtom as CreoleAtom | Atom;
+      if (!isCreoleAtomData(atom)) {
+        atom.drawU(ug);
+        return;
+      }
+      if (atom.kind !== 'text') return;
+      const stringBounder = ug.getStringBounder();
+      const font = measuringFont(atom.font);
+      const dim = stringBounder.calculateDimension(font, atom.text);
+      const descent = stringBounder.getDescent?.(font, atom.text) ?? font.size / DESCENT_DIVISOR;
+      ug.apply(new UTranslate(0, dim.getHeight() - descent)).draw(UText.build(atom.text, atom.font));
+    },
+  };
+}
+
+/** `WidthTableMeasurer`/`FixedMeasurer#getDescent`'s own `size/4.5`
+ *  (`measurer.ts`) — the fallback for a `StringBounder` that declares no
+ *  `getDescent` (it is an optional member, `klimt/font/StringBounder.ts`). */
+const DESCENT_DIVISOR = 4.5;
+
+/** Upstream `SkinParam`'s own defaults for every member `CreoleParser`
+ *  reads — the SAME traced set `EntityImageDescriptionDelegates.ts
+ *  #buildLocalSkinSimple` documents member by member (`SkinParam.java`:
+ *  empty md5 map, identity size hack, unset `padding` -> `same(0)`,
+ *  `:1068` monospaced family, `:1074` tab size 8, `:641` dpi 96).
+ *  `sheet` self-references `skin` so a `StripeTable`/`StripeTree`
+ *  constructed deeper in the dispatch sees the same object back. */
+function chromeSkinSimple(atomOps: AtomOps): ISkinSimple {
+  const pragma = Pragma.createEmpty();
+  const renderer = blockedEmbeddedRenderer();
+  const skin: ISkinSimple = {
+    getSprite: () => null,
+    guillemet: () => GUILLEMET_DEFAULT,
+    getFromMd5: () => null,
+    transformStringForSizeHack: (s: string) => s,
+    getValue: () => null,
+    values: () => new Map<string, string>(),
+    getPadding: () => ClockwiseTopRightBottomLeft.none(),
+    getMonospacedFamily: () => MONOSPACED,
+    getTabSize: () => 8,
+    getDpi: () => 96,
+    copyAllFrom: () => undefined,
+    getPragma: () => pragma,
+    sheet: (fontConfiguration, horizontalAlignment, creoleMode, stereo?: FontConfiguration) =>
+      new CreoleParser(
+        fontConfiguration,
+        horizontalAlignment,
+        skin,
+        { creoleMode, stereotype: stereo ?? fontConfiguration },
+        { atomOps, renderer },
+      ),
+  };
+  return skin;
+}
+
+/** `{{ … }}` inside chrome text: `EmbeddedDiagram.ts#NestedDiagramRenderer`
+ *  is the seam, and chrome has no nested-renderer channel at
+ *  `buildAnnotationBlock`'s four-parameter contract — mirrors
+ *  `EntityImageDescriptionDelegates.ts#blockedEmbeddedRenderer` verbatim
+ *  (cdd decisions.md D9 gives the nested renderer to T27, not here). */
+function blockedEmbeddedRenderer(): NestedDiagramRenderer {
+  return {
+    render(): TextBlock {
+      throw new Error(
+        'blocks-creole: embedded diagrams ({{ ... }}) inside chrome text (title/legend/header/' +
+          'footer/caption) are not supported -- this port supplies no nested-diagram renderer at the ' +
+          'chrome seam (EmbeddedDiagram.ts#NestedDiagramRenderer).',
+      );
+    },
+  };
+}
+
+/**
+ * The klimt `TextBlock` for one chrome element's display lines —
+ * `Style#createTextBlockBordered`'s own first statement (java:358-359),
+ * `CreoleMode.FULL` and the style's own horizontal alignment verbatim.
+ * `Display.create(lines)` (NOT `getWithNewlines`): chrome display lines
+ * arrive already split one-per-source-line from `commands.ts`, the same
+ * reason `buildDesc` documents for its own `Display.create`.
+ *
+ * `lineBreak` is `LineBreakStrategy.NONE` for every element:
+ * `DiagramChromeFactory` passes `NONE` literally for title/caption
+ * (java:349-350,369-370) and `DisplayPositioned#createRibbon` does the
+ * same for header/footer (java:123-124); `EntityImageLegend` passes
+ * `style.wrapWidth()` (java:54), which reads `PName.MaximumWidth`
+ * (`Style.java:330-333`) — a property `plantuml.skin` never declares for
+ * any selector (grep-verified: zero `MaximumWidth` occurrences in the
+ * skin) and whose only skinparam source is `wrapWidth` at `SName.element`
+ * (`FromSkinparamToStyle.java:250`), never `SName.legend`. So legend's
+ * resolved strategy is the empty one too. A future `skinparam wrapWidth`
+ * cascade into chrome would thread its value in here.
+ */
+export function buildChromeCreoleBlock(
+  lines: readonly string[],
+  style: AnnotationBoxStyle,
+  lineBreak: LineBreakStrategy,
+): TextBlock {
+  const atomOps = chromeAtomOps();
+  const skinParam = chromeSkinSimple(atomOps);
+  const fontConfiguration = chromeFontConfiguration(style);
+  return create0(
+    Display.create([...lines]),
+    { fontConfiguration, spriteContainer: skinParam, atomOps },
+    {
+      horizontalAlignment: style.horizontalAlignment,
+      maxMessageSize: lineBreak,
+      creoleMode: CreoleMode.FULL,
+    },
+  );
+}
+
+/**
+ * Measures and draws one chrome element's text through the shared creole
+ * pipeline. `width`/`height` are the block's OWN `calculateDimension`
+ * (what `TextBlockBordered#getPureTextWidth`/`getTextHeight` add padding
+ * to, java:80-91); `body` is the drawn markup with its origin at (0,0),
+ * which `blocks.ts` then shifts by padding and margin — upstream's
+ * `toDraw.drawU(ugOriginal.apply(color).apply(new UTranslate(left, top)))`
+ * (`TextBlockBordered.java:141`).
+ *
+ * `uid` seeds the fragment's own id namespace (`document-shell.ts
+ * #RenderDrawableToFragmentOptions`) — one per chrome element kind, so a
+ * legend filter and a footer filter never collide.
+ */
+export function buildChromeTextBlock(
+  paint: ChromeTextPaint,
+  lines: readonly string[],
+  style: AnnotationBoxStyle,
+  measurer: StringMeasurer,
+): ChromeTextBlock {
+  const block = buildChromeCreoleBlock(lines, style, LineBreakStrategy.NONE);
+  const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
+  const width = dim.getWidth();
+  const height = dim.getHeight();
+  // `TextBlockBordered#drawU` (java:138-141): the block is re-stencilled to
+  // the PADDED clearance before being drawn, so a stripe that paints to its
+  // own clearance edge (a `----` horizontal rule, a table's outer rules)
+  // spans the padding too instead of stopping at the text width. Measured
+  // on the UN-enlarged block, exactly as upstream measures `textBlock`
+  // itself (java:80-91) -- `enlargeMe` returns a new `SheetBlock2` wrapping
+  // the SAME `SheetBlock1`, so the dimension is unchanged either way.
+  const toDraw = block instanceof SheetBlock2 ? block.enlargeMe(style.padding.left, style.padding.right) : block;
+  // `ugOriginal.apply(color)` (java:141): the block is drawn under the
+  // BORDER colour, which is what a stripe with no colour of its own paints
+  // with -- a `----` horizontal rule (`CreoleHorizontalLine`) and a table's
+  // own rules. Text is unaffected: every atom carries its own
+  // `FontConfiguration.color`, exactly as upstream's `DriverTextSvg` reads
+  // it off the `UText` rather than off the graphic's foreground.
+  const drawable: UDrawable = { drawU: (ug: UGraphic) => toDraw.drawU(ug.apply(new Fore(paint.color))) };
+  const fragment = renderDrawableToFragment(drawable, { width, height, measurer, uid: paint.uid });
+  return fragment.extraDefs === undefined
+    ? { body: fragment.body, width, height }
+    : { body: fragment.body, extraDefs: fragment.extraDefs, width, height };
+}

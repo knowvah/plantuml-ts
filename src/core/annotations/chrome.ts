@@ -62,6 +62,7 @@ import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../klimt/geom/VerticalAlignment.js';
 import { group } from '../svg.js';
 import { buildAnnotationBlock, type AnnotationBlock } from './blocks.js';
+import { mergeFragmentDefs } from '../klimt/document-shell.js';
 import { shiftFragmentBody } from './coord-shift.js';
 
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
@@ -139,7 +140,17 @@ function decorateEntityImage(
     parts.push(group(shiftFragmentBody(text2.block.body, xText2, yText2), { class: text2.className }));
   }
 
-  return { body: parts.join(''), width: dimTotal.width, height: dimTotal.height };
+  // cdd-T28: a chrome text block can now mint its own `<defs>` entries
+  // (klimt lifts a `<back:color>` text-background `filter` out of the
+  // fragment document, `klimt/document-shell.ts#renderDrawableToFragment`).
+  // They must survive every composition step, so each wrap merges the
+  // slots' defs into the running block's -- `mergeFragmentDefs` de-dups by
+  // `id`, which matters because two slots built from the SAME uid-seeded
+  // document (e.g. the same colour in header and footer) can emit the same
+  // def twice.
+  const extraDefs = mergeFragmentDefs([original, text1?.block ?? {}, text2?.block ?? {}]);
+  const composed = { body: parts.join(''), width: dimTotal.width, height: dimTotal.height };
+  return extraDefs === undefined ? composed : { ...composed, extraDefs };
 }
 
 // ---------------------------------------------------------------------------
@@ -317,11 +328,15 @@ export function applyChrome(
   // N1) records that THIS call performed the single bare `<g>` wrap --
   // `core/assemble-svg.ts`'s per-`diagramType` finalize functions (T8)
   // read it to avoid wrapping a second time; every other engine ignores it.
+  // cdd-T28: chrome's own `<defs>` (a `<back:color>` filter in a title/
+  // legend/footer) merge with the diagram body's, de-duped by `id`.
+  const extraDefs = mergeFragmentDefs([fragment, block]);
   return {
     ...fragment,
     body: group(block.body),
     width: block.width,
     height: block.height,
     bodyWrapped: true,
+    ...(extraDefs === undefined ? {} : { extraDefs }),
   };
 }
