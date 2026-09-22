@@ -7746,12 +7746,11 @@
     {
       "type": "sequence",
       "slug": "soxata-16-kafi688",
-      "status": "error",
-      "weightedScore": null,
-      "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 2: `skinParam CaptionFontSize 10`. The preprocessor strip RE_SKINPARAM_LINE (preprocessor.ts:107) has no `i` flag, so the camel-case spelling survives to the command list, where this port registers only skinParamMessageAlignCommand. Upstream matches every skinparam name in any case: CommandSkinParam is a SingleLineCommand2 (command/CommandSkinParam.java:57-63; CommonCommands.java:66). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "status": "baseline",
+      "weightedScore": 21,
+      "diffCount": 21,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "sequence",

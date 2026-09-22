@@ -78,6 +78,10 @@ const CONTENT_G_OPEN_RE = new RegExp('^<g(?:\\s[^>]*)?>');
 /** The matching close tag {@link unwrapContentG} strips. */
 const CONTENT_G_CLOSE = '</g>';
 
+/** The self-closing spelling of an EMPTY content `<g>` — see
+ *  {@link unwrapContentG}'s doc comment for when klimt emits it. */
+const EMPTY_CONTENT_G_RE = new RegExp('^<g(?:\\s[^>]*)?/>$');
+
 /** The attribute-less `<g>` open tag `core/svg.ts#group` emits. */
 const BARE_G_OPEN = '<g>';
 
@@ -299,10 +303,22 @@ export function extractBody(svgWithoutDefs: string): string {
  * a body that is not `<g …>`-wrapped still throws, because a malformed
  * klimt document that slips through here fails far downstream instead.
  *
+ * cdd-T28: an EMPTY `gRoot` — a drawable that painted no ink at all — is
+ * serialized SELF-CLOSING by the XML writer (`<g font-family="sans-serif"
+ * lengthAdjust="spacing"/>`, no `</g>` to end with), which is a perfectly
+ * well-formed klimt document carrying zero content, not a malformed one.
+ * It reaches here the moment any caller renders a drawable that can
+ * legitimately draw nothing: chrome text whose only atom is an
+ * unresolvable sprite, or a `{{ }}` embedded diagram whose renderer is
+ * absent (`annotations/blocks-creole.ts`). Flattening it to `''` is the
+ * SAME answer the non-empty path gives for `<g …></g>`; the throw stays
+ * for every other shape.
+ *
  * @see svg-graphics-core.ts#getRootNode @see svg-graphics-core.ts#getG
  */
 export function unwrapContentG(bodyWithPiAndG: string): string {
   const withoutPi = bodyWithPiAndG.replace(/^<\?plantuml[^>]*\?>/, '');
+  if (EMPTY_CONTENT_G_RE.test(withoutPi)) return '';
   const openTag = CONTENT_G_OPEN_RE.exec(withoutPi)?.[0];
   if (openTag === undefined || !withoutPi.endsWith(CONTENT_G_CLOSE)) {
     throw new Error('unwrapContentG: malformed klimt SVG output (missing content <g> wrapper)');

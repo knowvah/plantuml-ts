@@ -239,6 +239,30 @@ function dispatchCommand(state: ParseState, line: string): boolean {
   return false;
 }
 
+
+/** cdd-T28: `matchAnnotationCommand`'s SINGLE-line matchers read `lines[i]`
+ *  verbatim (they require an already-trimmed line), but a matched MULTILINE
+ *  block's BODY must keep its indentation: upstream's `BlocLines` never
+ *  trims a legend/title/caption body, and `CreoleStripeSimpleParser`'s
+ *  FULL-mode list patterns are anchored at column 0
+ *  (`^(\*+)…`/`^(#+)…`, java:70-72), so a leading space is what makes the
+ *  jar draw ` * Hyp 1` as literal text instead of a bullet (jar-probed
+ *  directly: the same source WITHOUT the leading space draws
+ *  `<ellipse cx="22.5" …>` + the text at x=29, which is exactly what this
+ *  port now draws). Trimming only index `i` is
+ *  `description/annotation-line-trim.ts#trimLineForAnnotationMatch`'s
+ *  established shape, duplicated here rather than imported across engine
+ *  boundaries (the same convention that file's own doc records). */
+function annotationLines(lines: readonly string[], i: number): readonly string[] {
+  const raw = lines[i];
+  if (raw === undefined) return lines;
+  const trimmed = raw.trim();
+  if (trimmed === raw) return lines;
+  const copy = lines.slice();
+  copy[i] = trimmed;
+  return copy;
+}
+
 /**
  * T5 (dispatch-by-parse-attempt): upstream's fall-through refusal point --
  * no registered `Command` matched the line, so `getCandidate` returns `null`
@@ -337,7 +361,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
     // not include it (see ast.ts's doc on the field).
-    const annotationMatch = matchAnnotationCommand(lines, i, state.ast.annotations!);
+    const annotationMatch = matchAnnotationCommand(annotationLines(merged.rawLines, i), i, state.ast.annotations!);
     if (annotationMatch !== null) {
       i += annotationMatch.consumed - 1;
       continue;

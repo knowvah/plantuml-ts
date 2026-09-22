@@ -67,6 +67,10 @@
 import { Sheet } from '../Sheet.js';
 import type { Stripe, StripeAtom } from '../Stripe.js';
 import { CreoleContext } from '../CreoleContext.js';
+import { StripeStyle } from '../StripeStyle.js';
+import { StripeStyleType } from '../StripeStyleType.js';
+import type { Atom } from '../SheetBlock1.js';
+import type { StripeClassification } from './CreoleStripeSimpleParser.js';
 import type { CreoleMode } from '../CreoleMode.js';
 import type { SheetBuilder, DisplayLike, DisplayLine } from '../SheetBuilder.js';
 import { isNullDisplay } from '../SheetBuilder.js';
@@ -163,28 +167,40 @@ function isStripeRaw(stripe: Stripe<StripeAtom> | null): stripe is StripeRaw {
   return stripe !== null && 'addAndCheckTermination' in stripe && 'isTerminated' in stripe;
 }
 
-/** `StripeStyle#getHeader(fontConfiguration, context)` — the bullet-list
- *  (`LIST_WITHOUT_NUMBER`/`LIST_WITH_NUMBER`) header-glyph atom. Always
- *  `null` here: bullet lists are out of L1 scope everywhere else in this
- *  port's creole layer (`Stripe.ts`'s own doc comment, `StripeStyleType.ts`)
- *  — `context` is threaded through (matching the upstream call's own
- *  signature) for the same reason `CreoleContext.ts` itself was ported
- *  ahead of its first caller: a small, self-contained value class this
- *  future bullet-list work will need, wired to its real call site now. */
-function bulletHeader(_context: CreoleContext): null {
-  return null;
+/** `StripeStyle#getHeader(fontConfiguration, context)` — the list
+ *  header-glyph atom (`atom/Bullet.ts` for `*`, `legacy/AtomTextUtils.ts
+ *  #createListNumber` for `#`), or `null` for every other style. cdd-T28
+ *  made both real; the counter side effect on `context` is upstream's own
+ *  (`StripeStyle.java:64`). */
+function listHeader(
+  classification: StripeClassification,
+  font: FontConfiguration,
+  context: CreoleContext,
+): Atom | null {
+  if (classification.type !== 'LIST_WITHOUT_NUMBER' && classification.type !== 'LIST_WITH_NUMBER') return null;
+  const type =
+    classification.type === 'LIST_WITH_NUMBER' ? StripeStyleType.LIST_WITH_NUMBER : StripeStyleType.LIST_WITHOUT_NUMBER;
+  return new StripeStyle(type, classification.order, '\0').getHeader(font, context);
 }
 
+/** `StripeSimple`'s constructor both STORES the header and PREPENDS it to
+ *  the line's atoms (`legacy/StripeSimple.java:117-121`), so `Sea` lays it
+ *  out ahead of the text like any other atom — reproduced here. The atom
+ *  list widens to `StripeAtom` (`CreoleAtom | Atom`) for exactly the mixed
+ *  case this creates: a data text atom beside an OOP `Bullet`, which every
+ *  `AtomOps` bundle in this port already duck-types apart
+ *  (`isCreoleAtomData`). */
 function createSimpleStripe<A extends StripeAtom>(
   atoms: readonly A[],
   cellAlignment: HorizontalAlignment,
-  context: CreoleContext,
-): TaggedSimpleStripe<A> {
+  header: Atom | null,
+): TaggedSimpleStripe<StripeAtom> {
+  const all: readonly StripeAtom[] = header === null ? atoms : [header, ...atoms];
   return {
     stripeKind: 'simple',
     cellAlignment,
-    getLHeader: () => bulletHeader(context),
-    getAtoms: () => atoms,
+    getLHeader: () => header,
+    getAtoms: () => all,
   };
 }
 
@@ -398,8 +414,8 @@ export class CreoleParser implements SheetBuilder {
         this.skinParam,
         this.atomOps,
       );
-      return [createSimpleStripe([atom], align, context)];
+      return [createSimpleStripe([atom], align, null)];
     }
-    return [createSimpleStripe(build.atoms, align, context)];
+    return [createSimpleStripe(build.atoms, align, listHeader(build.classification, fontConfiguration, context))];
   }
 }

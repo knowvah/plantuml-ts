@@ -323,10 +323,15 @@ describe('buildAnnotationBlock — Creole inline markup (G2 N45: one sibling <te
     const block = buildAnnotationBlock('title', ['**bold**'], style, measurer);
     // G2 N45: per-run <text> (jar's real shape, `renderRowAtoms`'s
     // established precedent) — no <tspan>, CSS-ready attribute values,
-    // textLength/lengthAdjust present.
+    // textLength present. cdd-T28: the run is now emitted by klimt's own
+    // `DriverTextSvg` (the chrome text block is a real creole
+    // `SheetBlock2`, `Style.java:358-359`), so the ATTRIBUTE ORDER is the
+    // jar's own `x y fill font-size textLength font-weight` rather than
+    // `core/svg.ts#text`'s — jar-verified against
+    // `test-results/dot-cache/class/galili-87-zivo129/in.svg`'s title.
     expect(block.body).not.toMatch(/<tspan/);
     expect(block.body).toMatch(
-      /<text x="0" y="[\d.]+" font-size="14" font-weight="700" fill="#000" textLength="40">bold<\/text>/,
+      /<text x="0" y="[\d.]+" fill="#000" font-size="14" textLength="40" font-weight="700">bold<\/text>/,
     );
     // plain text is "bold" (4 chars) -> width 40, not the 8-char raw source
     expect(block.width).toBeCloseTo(40 + 1, 6);

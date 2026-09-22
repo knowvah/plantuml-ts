@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 281,
-    "extra-element": 120,
-    "geometry": 72911,
-    "text-metrics": 2509,
+    "missing-element": 269,
+    "extra-element": 113,
+    "geometry": 72946,
+    "text-metrics": 2473,
     "format-units": 1,
-    "other": 25966
+    "other": 25938
   },
   "fixtures": [
     {
@@ -215,12 +215,12 @@
     },
     {
       "slug": "baketu-62-cumu838",
-      "diffCount": 206,
+      "diffCount": 222,
       "buckets": {
-        "missing-element": 2,
-        "extra-element": 1,
-        "geometry": 136,
-        "text-metrics": 26,
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 152,
+        "text-metrics": 28,
         "format-units": 0,
         "other": 41
       }
@@ -2267,14 +2267,14 @@
     },
     {
       "slug": "dopisa-88-pazo292",
-      "diffCount": 91,
+      "diffCount": 56,
       "buckets": {
-        "missing-element": 1,
-        "extra-element": 1,
-        "geometry": 66,
-        "text-metrics": 8,
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 45,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 15
+        "other": 11
       }
     },
     {
@@ -2411,14 +2411,14 @@
     },
     {
       "slug": "dugeki-47-celo546",
-      "diffCount": 2586,
+      "diffCount": 2583,
       "buckets": {
         "missing-element": 7,
         "extra-element": 2,
         "geometry": 1944,
-        "text-metrics": 91,
+        "text-metrics": 90,
         "format-units": 0,
-        "other": 542
+        "other": 540
       }
     },
     {
@@ -3155,14 +3155,14 @@
     },
     {
       "slug": "funado-58-dene546",
-      "diffCount": 60,
+      "diffCount": 55,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 43,
-        "text-metrics": 2,
+        "geometry": 42,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 14
+        "other": 12
       }
     },
     {
@@ -3311,14 +3311,14 @@
     },
     {
       "slug": "gadiva-05-pogi376",
-      "diffCount": 77,
+      "diffCount": 75,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
         "geometry": 54,
-        "text-metrics": 1,
+        "text-metrics": 0,
         "format-units": 1,
-        "other": 20
+        "other": 19
       }
     },
     {
@@ -3647,14 +3647,14 @@
     },
     {
       "slug": "gijamu-35-vale058",
-      "diffCount": 836,
+      "diffCount": 833,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
         "geometry": 736,
-        "text-metrics": 20,
+        "text-metrics": 18,
         "format-units": 0,
-        "other": 79
+        "other": 78
       }
     },
     {
@@ -3983,14 +3983,14 @@
     },
     {
       "slug": "gupaki-93-vupa807",
-      "diffCount": 60,
+      "diffCount": 55,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 43,
-        "text-metrics": 2,
+        "geometry": 42,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 14
+        "other": 12
       }
     },
     {
@@ -4619,12 +4619,12 @@
     },
     {
       "slug": "jujigi-41-zodo151",
-      "diffCount": 112,
+      "diffCount": 117,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 92,
-        "text-metrics": 6,
+        "geometry": 96,
+        "text-metrics": 8,
         "format-units": 0,
         "other": 13
       }
@@ -5543,14 +5543,14 @@
     },
     {
       "slug": "kuputa-52-caxa434",
-      "diffCount": 85,
+      "diffCount": 68,
       "buckets": {
-        "missing-element": 2,
-        "extra-element": 4,
-        "geometry": 51,
-        "text-metrics": 8,
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 54,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 20
+        "other": 13
       }
     },
     {
@@ -6035,14 +6035,14 @@
     },
     {
       "slug": "lojami-06-ligu429",
-      "diffCount": 32,
+      "diffCount": 31,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
-        "text-metrics": 3,
+        "geometry": 20,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 14
+        "other": 11
       }
     },
     {
@@ -7079,9 +7079,9 @@
     },
     {
       "slug": "mozoza-90-biru865",
-      "diffCount": 58,
+      "diffCount": 57,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
         "geometry": 39,
         "text-metrics": 7,
@@ -7511,14 +7511,14 @@
     },
     {
       "slug": "nereka-67-deco609",
-      "diffCount": 56,
+      "diffCount": 70,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
-        "text-metrics": 1,
+        "geometry": 60,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 14
+        "other": 10
       }
     },
     {
@@ -8783,14 +8783,14 @@
     },
     {
       "slug": "rafibi-29-gevo619",
-      "diffCount": 34,
+      "diffCount": 32,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 22,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 12
+        "other": 10
       }
     },
     {
@@ -8843,14 +8843,14 @@
     },
     {
       "slug": "ramive-48-vabu271",
-      "diffCount": 64,
+      "diffCount": 96,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 44,
-        "text-metrics": 4,
+        "geometry": 85,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 15
+        "other": 11
       }
     },
     {
@@ -9095,14 +9095,14 @@
     },
     {
       "slug": "rilefo-62-jedi773",
-      "diffCount": 59,
+      "diffCount": 82,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 42,
-        "text-metrics": 3,
+        "geometry": 72,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 13
+        "other": 10
       }
     },
     {
@@ -9239,14 +9239,14 @@
     },
     {
       "slug": "rokava-82-kavo091",
-      "diffCount": 80,
+      "diffCount": 54,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 66,
-        "text-metrics": 2,
+        "geometry": 43,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 12
+        "other": 11
       }
     },
     {
@@ -10174,6 +10174,18 @@
       }
     },
     {
+      "slug": "soxata-16-kafi688",
+      "diffCount": 21,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 10,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 11
+      }
+    },
+    {
       "slug": "soxaxu-96-ceco932",
       "diffCount": 24,
       "buckets": {
@@ -11063,12 +11075,12 @@
     },
     {
       "slug": "tumuke-16-xomo243",
-      "diffCount": 206,
+      "diffCount": 222,
       "buckets": {
-        "missing-element": 2,
-        "extra-element": 1,
-        "geometry": 136,
-        "text-metrics": 26,
+        "missing-element": 1,
+        "extra-element": 0,
+        "geometry": 152,
+        "text-metrics": 28,
         "format-units": 0,
         "other": 41
       }
@@ -11135,14 +11147,14 @@
     },
     {
       "slug": "tuzaga-87-gene496",
-      "diffCount": 70,
+      "diffCount": 46,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 56,
-        "text-metrics": 1,
+        "geometry": 35,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 12
+        "other": 11
       }
     },
     {
@@ -11471,14 +11483,14 @@
     },
     {
       "slug": "vicevi-92-zeda652",
-      "diffCount": 73,
+      "diffCount": 48,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 60,
-        "text-metrics": 2,
+        "geometry": 38,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 11
+        "other": 10
       }
     },
     {
@@ -13331,14 +13343,14 @@
     },
     {
       "slug": "zucesu-12-neno978",
-      "diffCount": 71,
+      "diffCount": 46,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 58,
-        "text-metrics": 2,
+        "geometry": 36,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 11
+        "other": 10
       }
     },
     {
@@ -13427,9 +13439,9 @@
     },
     {
       "slug": "zunile-23-zezi158",
-      "diffCount": 58,
+      "diffCount": 57,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
         "geometry": 39,
         "text-metrics": 7,
@@ -13558,10 +13570,6 @@
     {
       "slug": "nuvoja-46-dezu541",
       "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports."
-    },
-    {
-      "slug": "soxata-16-kafi688",
-      "reason": "refuses to parse -- source line 2: `skinParam CaptionFontSize 10`. The preprocessor strip RE_SKINPARAM_LINE (preprocessor.ts:107) has no `i` flag, so the camel-case spelling survives to the command list, where this port registers only skinParamMessageAlignCommand. Upstream matches every skinparam name in any case: CommandSkinParam is a SingleLineCommand2 (command/CommandSkinParam.java:57-63; CommonCommands.java:66). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "tegasu-93-fima016",
