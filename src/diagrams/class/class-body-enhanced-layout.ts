@@ -17,9 +17,16 @@
  * target fixture's header dominates) — `rowsBlockWidth`'s own doc comment
  * flags the specific unverified edge case.
  *
+ * CDD T27FU: {@link buildRowsBlockRows} additionally ports `MethodsOrFields
+ * Area`'s embedded-`{{ }}`-diagram separation (java:109-123) and stacking
+ * (java:141-152's dimension, java:429-440's draw order) — see {@link
+ * extractEmbeds}/{@link stackEmbeds}'s own doc comments for the mechanism
+ * and `.agent-notes/cdd-T27.md` for the jar-verified geometry.
+ *
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhancedAbstract.java#decorate
  * @see ~/git/plantuml/.../klimt/shape/TextBlockLineBefore.java
  * @see ~/git/plantuml/.../klimt/shape/UHorizontalLine.java
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/MethodsOrFieldsArea.java:109-123,141-152,429-440
  */
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
@@ -36,6 +43,10 @@ import {
   ELEMENT_DEFAULT_LINE_THICKNESS,
   BODY_ENHANCED_MARGIN_X,
 } from './class-body-enhanced-geometry.js';
+import type { EmbeddedRenderer } from './class-nested-diagram-renderer.js';
+import { extractEmbeds, stackEmbeds, type EmbeddedBlockGeo } from './class-body-enhanced-embeds.js';
+
+export type { EmbeddedBlockGeo } from './class-body-enhanced-embeds.js';
 
 const ROW_ICON_ZONE_WIDTH = 14;
 const ROW_INDENT_WITH_ICON = ROW_TEXT_LEFT_MARGIN + ROW_ICON_ZONE_WIDTH;
@@ -67,6 +78,12 @@ export interface EnhancedLayoutCtx {
    *  headerRowHeight + enhancedBody.height` sum would otherwise double
    *  count it). */
   readonly bodyTop: number;
+  /** DI override for `class-nested-diagram-renderer.ts#
+   *  getClassNestedDiagramRenderer`'s module-level singleton -- an explicit
+   *  value here always wins (tests use this to avoid touching global
+   *  state); production leaves it unset and falls back to the renderer
+   *  `src/index.ts` registers once, where the class plugin is wired. */
+  readonly nestedRenderer?: EmbeddedRenderer;
 }
 
 /** One rendered divider primitive — a plain horizontal line, optionally
@@ -97,6 +114,9 @@ export interface EnhancedDividerPart {
 export interface EnhancedRowsPart {
   readonly kind: 'rows';
   readonly rows: ClassifierGeo['rows'];
+  /** Absent/empty for every rows-block with no `{{ }}` content (zero
+   *  behavior change) -- see {@link EmbeddedBlockGeo}'s own doc comment. */
+  readonly embeds?: readonly EmbeddedBlockGeo[];
 }
 
 export interface EnhancedTreePart {
@@ -147,18 +167,37 @@ function translateRows(rows: ClassifierGeo['rows'], contentTop: number): Classif
   return contentTop === 0 ? rows : rows.map((r) => ({ ...r, y: r.y + contentTop }));
 }
 
+/** Same shift as {@link translateRows}, for a rows-block's own embeds
+ *  (built at the origin by the `layoutPlainDividerRows`/`layoutTitledDividerRows`
+ *  probe, same reason). */
+function translateEmbeds(embeds: readonly EmbeddedBlockGeo[], contentTop: number): readonly EmbeddedBlockGeo[] {
+  return contentTop === 0 ? embeds : embeds.map((e) => ({ ...e, y: e.y + contentTop }));
+}
+
+/** `embeds` omitted entirely when empty (zero behavior change for every
+ *  rows-block with no `{{ }}` content) -- shared by all three `layout*Rows`
+ *  branches below. */
+function rowsPart(rows: ClassifierGeo['rows'], embeds: readonly EmbeddedBlockGeo[]): EnhancedRowsPart {
+  return { kind: 'rows', rows, ...(embeds.length > 0 ? { embeds } : {}) };
+}
+
 interface RowsBlockResult {
   readonly rows: ClassifierGeo['rows'];
   readonly width: number;
   readonly contentHeight: number;
+  readonly embeds: readonly EmbeddedBlockGeo[];
 }
 
 /** Builds one rows-block's member rows (icon-column reservation scanned
  *  over the WHOLE block, mirroring `class-member-rows.ts#sectionWidth`'s
  *  established per-section — here per-block — gating) at a given LOCAL
- *  `contentTop`. */
+ *  `contentTop`. CDD T27FU: `{{ }}` blocks are separated out FIRST (see
+ *  {@link extractEmbeds}) and stacked below the surviving member rows (see
+ *  {@link stackEmbeds}), mirroring `MethodsOrFieldsArea`'s own constructor
+ *  + dimension/draw split. */
 function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, contentTop: number): RowsBlockResult {
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
+  const { memberLines, embedSources } = extractEmbeds(lines);
   // A2s R2d (pejone-71-tige404/xonamo-50-podo529): a null parse is a blank
   // (or blank-equivalent) line, and upstream's enhanced path KEEPS it as one
   // empty row -- `rawBodyWithoutHidden()` wraps every raw line in a Member
@@ -169,7 +208,7 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   // classic-body empties filtering (getFieldsToDisplay/getMethodsToDisplay,
   // java:114-172) never runs on this path. jar-verified: one 14px row per
   // blank, zero width contribution (scratch R2d probes p1/p3).
-  const members = lines.map(
+  const members = memberLines.map(
     (line): Member => parseMemberLine(line) ?? { visibility: '+', name: '', isStatic: false, isAbstract: false },
   );
   // NOT point-free: `formatMemberText` has an optional 2nd param (A13
@@ -206,7 +245,15 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
       ...(m.ownUrl !== undefined ? { url: m.ownUrl } : {}),
     };
   });
-  return { rows, width: sectionWidth(builds, hasIcon), contentHeight: rowTop - contentTop };
+  const embeds = stackEmbeds(embedSources, ctx, rowTop);
+  const embedsHeight = embeds.reduce((sum, e) => sum + e.height, 0);
+  const embedsWidth = embeds.reduce((max, e) => Math.max(max, e.width), 0);
+  return {
+    rows,
+    width: Math.max(sectionWidth(builds, hasIcon), embedsWidth),
+    contentHeight: rowTop - contentTop + embedsHeight,
+    embeds,
+  };
 }
 
 /**
@@ -235,8 +282,8 @@ function layoutUndividedRows(
   cursor: number,
   parts: EnhancedBodyPart[],
 ): BlockLayoutResult {
-  const { rows, width, contentHeight } = buildRowsBlockRows(lines, ctx, cursor);
-  parts.push({ kind: 'rows', rows });
+  const { rows, width, contentHeight, embeds } = buildRowsBlockRows(lines, ctx, cursor);
+  parts.push(rowsPart(rows, embeds));
   return { cursor: cursor + contentHeight, width };
 }
 
@@ -270,6 +317,7 @@ function layoutPlainDividerRows(
   const dividerY = cursor + offsets.dividerY;
   const contentTop = cursor + offsets.contentTop;
   const rows = translateRows(probe.rows, contentTop);
+  const embeds = translateEmbeds(probe.embeds, contentTop);
   const width = probe.width;
   const dasharrayField = separatorStrokeDasharray(char);
   const partsOut: EnhancedBodyPart[] = [
@@ -280,7 +328,7 @@ function layoutPlainDividerRows(
       ...(dasharrayField !== undefined ? { strokeDasharray: dasharrayField } : {}),
       ...(separatorIsDouble(char) ? { doubleLine: true as const } : {}),
     },
-    { kind: 'rows', rows },
+    rowsPart(rows, embeds),
   ];
   return {
     rows: partsOut,
@@ -311,12 +359,13 @@ function layoutTitledDividerRows(
   const offsets = CLASS_BODY_GEOMETRY.deriveHeightOffsets(probe.contentHeight, separator.char, dimTitleHeight);
   const contentTop = cursor + offsets.contentTop;
   const rows = translateRows(probe.rows, contentTop);
+  const embeds = translateEmbeds(probe.embeds, contentTop);
   const width = probe.width;
   const dividerY = cursor + offsets.dividerY;
   const titleBaselineY = dividerY - dimTitleHeight / 2 - 0.5 + baselineOffset;
   const titledDasharrayField = separatorStrokeDasharray(separator.char);
   const partsOut: EnhancedBodyPart[] = [
-    { kind: 'rows', rows },
+    rowsPart(rows, embeds),
     {
       kind: 'divider',
       y: dividerY,

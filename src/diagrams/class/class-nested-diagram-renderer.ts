@@ -34,17 +34,23 @@
  * identical seam for exactly this reason ("the callback-seam architecture
  * note"); this file mirrors that resolution one level down.
  *
- * NOT WIRED into any production call site as of this task (CDD T27) — see
- * `.agent-notes/cdd-T27.md` for exactly which additional, out-of-write-set
- * files (`src/diagrams/class/parser.ts#handlePendingBodyLine`, plus at
- * least one of the class-body geometry/render files) a follow-on task must
- * touch before a `class C { {{ ... }} }` body actually reaches this
- * renderer. This file is a real, standalone, unit-tested implementation of
- * the `NestedDiagramRenderer` contract, ready for that wiring and for T28's
- * chrome/legend path (`EmbeddedDiagram.ts`'s own "Interface out" note: any
- * caller may reuse this instance rather than build its own).
+ * CDD T27FU (follow-on, wired): now the real seam for TWO consumers —
+ * `core/cucadiagram/MethodsOrFieldsArea.ts`'s `NestedDiagramRenderer`
+ * contract (`render`, returns a `TextBlock`) AND the class engine's OWN
+ * enhanced-body pipeline (`class-body-enhanced-layout.ts`, `renderImage`,
+ * returns plain `{width, height, href}` — that engine has no `TextBlock`/
+ * `UGraphic` model at all, see {@link RenderedEmbeddedImage}'s own doc
+ * comment). Both share ONE depth-guarded render path ({@link
+ * createNestedDiagramRenderer}'s `guardedRender`). `registerClassNested
+ * DiagramRenderer`/`getClassNestedDiagramRenderer` are the module-level
+ * registration slot `src/index.ts` populates once with its own `renderSync`
+ * — see that function's own doc comment for why a plain parameter cannot
+ * reach `class-body-enhanced-layout.ts` (the `layoutSync(ast, theme,
+ * measurer): Geo` plugin interface, `core/dispatcher.ts:207`, is shared by
+ * every diagram type and is not this task's to widen).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/EmbeddedDiagram.java:126-152,165-195,197-213
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/MethodsOrFieldsArea.java:109-123,141-152,429-440
  */
 import { UImage } from '../../core/klimt/shape/UImage.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
@@ -132,37 +138,115 @@ function embeddedTextBlock(dim: XDimension2D, href: string): TextBlock {
 export type RenderNestedDiagramFn = (source: string) => string;
 
 /**
- * Builds a real `NestedDiagramRenderer` for the class engine: joins the
- * collected `@start.../@end...` lines (`EmbeddedDiagram.createAndSkip`'s
- * output) with `\n`, renders them through `renderFn`, strips the
- * `<?plantuml ...?>` PIs (java:199), and wraps the result as an `<image>`
- * sized from the nested SVG's own `viewBox`.
+ * The class engine's OWN plain-data result shape — that engine sizes/draws
+ * with plain numbers and `core/svg.ts` string builders, never `TextBlock`/
+ * `UGraphic` (see this file's own module doc comment). `href` is present
+ * whenever the render actually succeeded; a caller that gets an image with
+ * NO `href` (this file never returns that shape — the class engine's own
+ * catch-and-fallback, `class-body-enhanced-layout.ts`, builds it) reserves
+ * the space but draws nothing, matching `EmbeddedDiagram.java:148-152`'s
+ * OWN split contract (`calculateDimensionSlow` degrades to a fixed size on
+ * failure; `drawU`, a SEPARATE catch, degrades to drawing nothing).
+ */
+export interface RenderedEmbeddedImage {
+  readonly width: number;
+  readonly height: number;
+  readonly href: string;
+}
+
+/** Both `render` (the `NestedDiagramRenderer` contract) and `renderImage`
+ *  (the class engine's own plain-data contract) share ONE depth-guarded
+ *  render path — see {@link createNestedDiagramRenderer}'s own doc comment. */
+export interface EmbeddedRenderer extends NestedDiagramRenderer {
+  renderImage(source: readonly string[]): RenderedEmbeddedImage;
+}
+
+/**
+ * Builds a real embedded-diagram renderer: joins the collected
+ * `@start.../@end...` lines (`EmbeddedDiagram.createAndSkip`'s output, or
+ * `class-body-enhanced-layout.ts`'s own equivalent wrap) with `\n`, renders
+ * them through `renderFn`, strips the `<?plantuml ...?>` PIs (java:199),
+ * and measures the result from its own `viewBox`. `render` wraps that as a
+ * `TextBlock`-drawn `<image>` (`core/cucadiagram/MethodsOrFieldsArea.ts`'s
+ * consumer); `renderImage` returns the SAME `{width, height, href}` plain
+ * data directly (the class engine's own consumer, `class-body-enhanced-
+ * layout.ts`).
  *
  * Recursion guard (task item 3 — see {@link MAX_NESTED_DIAGRAM_DEPTH}'s doc
- * comment for why there is no upstream citation): `depth` is closed over
- * per renderer instance, incremented before calling `renderFn` and
- * decremented in `finally` — a `renderFn` that itself routes back through
- * THIS SAME renderer instance (the only way a class-body embed could ever
- * recurse, once wired into production) trips {@link EmbeddedDiagramDepthError}
- * instead of recursing unboundedly.
+ * comment for why there is no upstream citation): `depth` is MODULE-LEVEL,
+ * not closed over per instance, incremented before calling `renderFn` and
+ * decremented in `finally`. This matters in production because `src/index
+ * .ts#prepareBlock` calls `registerClassNestedDiagramRenderer` again on
+ * EVERY `renderSync` call, including every RECURSIVE one a `{{ }}` block
+ * triggers (needed so each nested render sees the correct ambient
+ * `options`/measurer, `prepareBlock`'s own doc comment) — a per-INSTANCE
+ * counter would reset to 0 on each of those re-registrations and never
+ * actually bound anything. Sharing one module-level counter across every
+ * instance correctly tracks true nesting depth regardless of how many
+ * renderer instances were created along the way; JS's single-threaded,
+ * fully-synchronous `renderSync` call chain (no interleaving) makes this
+ * safe, and every real recursion fully unwinds the counter back to 0 via
+ * `guardedRender`'s own `finally` before the top-level `renderSync` call
+ * returns (a throw included), so no state leaks across unrelated render
+ * calls or test cases. A `renderFn` that routes back through the
+ * registered renderer (the only way a class-body embed can ever recurse,
+ * now that it is wired into production) trips {@link
+ * EmbeddedDiagramDepthError} instead of recursing unboundedly. Both
+ * `render` and `renderImage` funnel through the ONE `guardedRender` closure
+ * below, so a cycle through either entry point is caught by the SAME
+ * counter.
  */
+let embedDepth = 0;
+
 export function createNestedDiagramRenderer(
   renderFn: RenderNestedDiagramFn,
   maxDepth: number = MAX_NESTED_DIAGRAM_DEPTH,
-): NestedDiagramRenderer {
-  let depth = 0;
+): EmbeddedRenderer {
+  function guardedRender(source: readonly string[]): RenderedEmbeddedImage {
+    if (embedDepth >= maxDepth) throw new EmbeddedDiagramDepthError(maxDepth);
+    embedDepth++;
+    try {
+      const svg = stripPlantumlProcessingInstructions(renderFn(source.join('\n')));
+      const dim = readSvgDimensions(svg);
+      const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svg))}`;
+      return { width: dim.getWidth(), height: dim.getHeight(), href };
+    } finally {
+      embedDepth--;
+    }
+  }
   return {
     render(source: readonly string[]): TextBlock {
-      if (depth >= maxDepth) throw new EmbeddedDiagramDepthError(maxDepth);
-      depth++;
-      try {
-        const svg = stripPlantumlProcessingInstructions(renderFn(source.join('\n')));
-        const dim = readSvgDimensions(svg);
-        const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svg))}`;
-        return embeddedTextBlock(dim, href);
-      } finally {
-        depth--;
-      }
+      const img = guardedRender(source);
+      return embeddedTextBlock(new XDimension2D(img.width, img.height), img.href);
     },
+    renderImage: guardedRender,
   };
+}
+
+/**
+ * The module-level registration slot `src/index.ts` populates once (where
+ * the class plugin is registered) with a `renderSync`-shaped callback — see
+ * this file's own module doc comment for why a plain parameter cannot reach
+ * `class-body-enhanced-layout.ts` from there. `class-body-enhanced-layout
+ * .ts` reads this ONLY when its own `EnhancedLayoutCtx.nestedRenderer` is
+ * absent (DI-first: an explicit ctx value, e.g. from a test, always wins),
+ * so no test needs to touch this global to exercise the embed pipeline.
+ */
+let registeredRenderer: EmbeddedRenderer | undefined;
+
+/** Called once by `src/index.ts`, right where `classPlugin` is registered. */
+export function registerClassNestedDiagramRenderer(
+  renderFn: RenderNestedDiagramFn,
+  maxDepth: number = MAX_NESTED_DIAGRAM_DEPTH,
+): void {
+  registeredRenderer = createNestedDiagramRenderer(renderFn, maxDepth);
+}
+
+/** `undefined` until `registerClassNestedDiagramRenderer` has run (e.g. a
+ *  test that imports this module directly, bypassing `src/index.ts`) — a
+ *  caller with no explicit `ctx.nestedRenderer` degrades to the
+ *  `EmbeddedDiagram.java:148-152` fixed-size fallback in that case, exactly
+ *  as it does for a renderer that throws. */
+export function getClassNestedDiagramRenderer(): EmbeddedRenderer | undefined {
+  return registeredRenderer;
 }

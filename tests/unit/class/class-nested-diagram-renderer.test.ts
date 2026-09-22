@@ -12,11 +12,11 @@
  * contract holds for a real renderer, not just the mocks
  * `MethodsOrFieldsArea.test.ts` already exercises.
  *
- * NOT covered here (documented, not silently skipped — see the trailing
- * `it.todo` block): full `renderSync(moxobo/zikabo/gadufu source)`
- * conformance. Nothing in the class engine's production parser/layout
- * pipeline constructs this renderer yet — see `.agent-notes/cdd-T27.md` for
- * the exact files a follow-on task must touch.
+ * Fixture-level conformance (moxobo/zikabo/gadufu, the recursion guard
+ * through a real `renderSync`) is covered separately in `class-body-
+ * embedded-diagram-conformance.test.ts`, which is wired into production as
+ * of CDD T27FU — see that file's own doc comment for what remains blocked
+ * and why.
  */
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
@@ -194,21 +194,8 @@ describe('createNestedDiagramRenderer — EmbeddedDiagramDepthError (recursion g
   });
 });
 
-// ---------------------------------------------------------------------------
-// Documented, not silently skipped — see .agent-notes/cdd-T27.md
-// ---------------------------------------------------------------------------
-
-describe('class-body {{ }} conformance — blocked on out-of-write-set wiring', () => {
-  it.todo(
-    'moxobo-16-tipo829/zikabo-17-gugi332/gadufu-56-votu808 render one <image> per class-body {{ }} block ' +
-      '(needs src/diagrams/class/parser.ts#handlePendingBodyLine to detect an embedded block while ' +
-      'state.pendingBodyId is set, plus a class-body geometry/render file to draw the resulting marker as ' +
-      'an <image> via this renderer — none of those files are in CDD T27\'s write-set, see .agent-notes/cdd-T27.md)',
-  );
-
-  it.todo(
-    'a self-embedding class-body fixture ("class C {\\n{{\\nclass C {\\n{{\\n...") throws ' +
-      'EmbeddedDiagramDepthError through a real renderSync(...) call — blocked on the same wiring gap; the ' +
-      'recursion guard itself is proven above at the renderer-unit level',
-  );
-});
+// CDD T27FU: the renderer is now wired end-to-end (gadufu is real; moxobo/
+// zikabo call the mechanism directly, blocked only on isEnhancedBody) — see
+// class-body-embedded-diagram-conformance.test.ts for the fixture-level
+// tests and its own trailing `it.todo` block for the remaining, more
+// precisely diagnosed blockers.

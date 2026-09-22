@@ -206,7 +206,7 @@ class-body fixtures exercise; `xetase-70-zaza808`
 genuinely does hit the fallback (an unterminated `{{` in a state edge
 label), and remains correctly out of this task's scope.
 
-## Follow-on filing
+## Follow-on filing (SUPERSEDED by CDD T27FU below — kept for history)
 
 Filed to `next-missions.md`-style scope (recommend a new task, e.g.
 "cdd-T27fu — wire the class-body embedded-diagram renderer"), write-set:
@@ -218,3 +218,271 @@ fixtures' test files. This task's renderer
 (`class-nested-diagram-renderer.ts`) and its `NestedDiagramRenderer`/
 `EmbeddedDiagramDepthError` exports are ready for that task to consume
 without modification.
+
+---
+
+# CDD T27FU — resumed: wire the mechanism end-to-end
+
+Stop 1 accepted and resolved (journal row 111, main tree): write-set
+extended with `src/diagrams/class/parser.ts` (narrowly — see below),
+`class-member-rows.ts`, `class-body-enhanced-layout.ts`, `class-body-
+enhanced-geometry.ts`, `renderer-body-enhanced.ts`, `renderer-classifier-
+box.ts`, and a `renderSync` seam in `src/index.ts`. EXCLUDED: `class-body-
+enhanced.ts`, `class-member-creole.ts` (T24 editing concurrently).
+
+## Corrected mechanism: the jar's REAL dispatch, read from `BodyEnhanced1.java`
+
+The coordinator's brief (and my own earlier note above) named
+`MethodsOrFieldsArea.java:109-123/141-152/429-440` as "the jar's
+mechanism" — accurate in isolation, but I initially assumed that meant
+`MethodsOrFieldsArea` is used DIRECTLY by the class-body render path for
+an embed-bearing classifier. Reading `BodyEnhanced1.java` (java:122-195,
+`getArea`/`buildTextBlock`) directly disproves that: `BodierLikeClassOrObject
+#getBody` (java:214-255) routes to `BodyEnhanced1`/`BodyFactory.create1`
+whenever `type.isLikeClass() && isBodyEnhanced()` — and `isBodyEnhanced()`
+(`BodierLikeClassOrObject.java:93-100`) is TRUE for ALL THREE of moxobo/
+zikabo/gadufu, because `EmbeddedDiagram.getEmbeddedType(s) != null` is
+ONE of its four OR-conditions (java:96) — a `{{ }}` block alone makes a
+body "enhanced," with NO separator/tree line required. `BodyEnhanced1
+#buildTextBlock` (java:189-195) then constructs, PER ROWS-BLOCK (not per
+classifier), `new MethodsOrFieldsArea(display, skinParam, align, entity,
+style)` — THAT is where the java:109-123/141-152/429-440 mechanism
+actually runs. This port's analog of "one rows-block" is `class-body-
+enhanced-layout.ts#buildRowsBlockRows`, confirmed by its own pre-existing
+doc comment already citing `BodyEnhanced1.java:186-190` for the SAME
+reason (from T23's own investigation, unrelated to embeds) — i.e. the
+mechanism's home was already correctly identified in this codebase before
+this task; I re-derived it independently from the Java per CLAUDE.md
+rather than trusting that citation on sight.
+
+## `isEnhancedBody`'s missing disjunct (confirmed, still excluded)
+
+`class-body-enhanced.ts#isEnhancedBody` (java:94-97 read literally):
+`rawLines.some((s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()))`
+— MISSING both `CreoleParser.isTableLine` (out of scope, unrelated) and
+`EmbeddedDiagram.getEmbeddedType(s) != null` (java:96, THE disjunct this
+task needs). Consequence, confirmed empirically: moxobo/zikabo (no
+separator/tree line, ONLY a bare `{{ }}`) still route to the CLASSIC
+(non-enhanced) member-list path today — `isEnhancedBody` returns `false`
+for them, so `computeEnhancedBodyGeo` (`class-layout-generic-classifier-
+sections.ts:124`) returns `undefined` and the classic path never touches
+my new embed-extraction code at all. gadufu (`-- subsection --` present)
+ALREADY returns `true` and is fully live today.
+
+**One-line fix needed, recorded not applied (EXCLUDED file):**
+`src/diagrams/class/class-body-enhanced.ts`'s `isEnhancedBody` (lines
+94-97) needs `|| rawLines.some((s) => getEmbeddedType(s) !== null)` added
+to its `.some()` predicate (importing `getEmbeddedType` from
+`../../core/EmbeddedDiagram.js`), matching `BodierLikeClassOrObject.java:96`
+exactly.
+
+## What landed (in-write-set)
+
+1. **`src/diagrams/class/class-nested-diagram-renderer.ts`** — extended
+   from T27's original: `EmbeddedRenderer` now has BOTH `render` (the
+   `NestedDiagramRenderer`/`TextBlock` contract, unchanged, for
+   `core/cucadiagram/MethodsOrFieldsArea.ts`'s consumer) and `renderImage`
+   (a NEW plain-`{width,height,href}` contract for the class engine's own
+   plain-data model — that engine has no `TextBlock`/`UGraphic` at all).
+   Both funnel through ONE `guardedRender` closure sharing ONE recursion
+   counter. Added the module-level registration slot
+   (`registerClassNestedDiagramRenderer`/`getClassNestedDiagramRenderer`)
+   `src/index.ts` populates.
+
+   **A real bug caught and fixed before it shipped:** my first draft kept
+   the depth counter `let depth = 0` CLOSED OVER PER `createNestedDiagram
+   Renderer` CALL. Since `src/index.ts#prepareBlock` re-registers the
+   renderer on EVERY `renderSync` call (needed so a nested render sees the
+   ambient `options`/measurer — see below), every recursive embed would
+   have gotten a BRAND NEW renderer instance with a FRESH `depth=0`,
+   permanently defeating the guard (true infinite recursion would run
+   until a raw JS stack overflow, not `EmbeddedDiagramDepthError`). Fixed
+   by moving `depth` to MODULE scope (`embedDepth`), shared by every
+   instance — safe because `renderSync` is fully synchronous, single-
+   threaded, and every real recursion chain fully unwinds the counter back
+   to 0 (via `finally`, throw included) before any top-level `renderSync`
+   call returns. Caught by manually tracing a depth-2 self-embedding probe
+   BEFORE writing the "real fixture" test, not by the test itself — worth
+   flagging since this exact bug would NOT have been caught by the
+   ORIGINAL 4 unit tests (they each build ONE renderer instance per test,
+   so the per-instance-vs-module-level distinction was invisible until a
+   REAL multi-call chain was probed).
+
+2. **`src/diagrams/class/class-body-enhanced-embeds.ts`** (NEW — a sibling
+   split of `class-body-enhanced-layout.ts`, same 500-line-cap reason
+   `class-body-enhanced-geometry.ts` already documents for the SAME parent
+   file; not a scope choice). Ports `MethodsOrFieldsArea`'s constructor
+   loop (java:109-123, `extractEmbeds`, reusing `class-embedded-block.ts
+   #scanEmbeddedElementBlock`'s already-correct nesting-aware scan rather
+   than a second copy of the algorithm) and its dimension/draw split
+   (java:141-152/429-440, `stackEmbeds`). `renderEmbed`'s catch mirrors
+   `EmbeddedDiagram.java:148-152`'s `(42,42)` fallback for a missing/
+   failing renderer, EXCEPT it re-throws `EmbeddedDiagramDepthError`
+   rather than swallowing it — the original brief's own `// on-call`
+   comment ("no runbook — fix the fixture") means a self-embedding block
+   is malformed input to surface, not a transient failure to hide.
+
+3. **`class-body-enhanced-layout.ts`**: `buildRowsBlockRows` now calls
+   `extractEmbeds` first (separating `{{ }}` regions from surviving member
+   lines), builds member rows from the SURVIVORS only, then `stackEmbeds`
+   below them. `EnhancedLayoutCtx` gains an OPTIONAL `nestedRenderer` field
+   (DI override of the module singleton — no forced change to `class-
+   layout-generic-classifier-sections.ts#computeEnhancedBodyGeo`, which
+   builds `EnhancedLayoutCtx` as an object literal and simply never sets
+   the new optional field). `EnhancedRowsPart` gains an optional `embeds`
+   array (omitted when empty — zero behavior change for every existing
+   fixture with no `{{ }}` content). `translateEmbeds`/`rowsPart` mirror
+   the existing `translateRows` helper for the origin-then-shift pattern
+   `layoutPlainDividerRows`/`layoutTitledDividerRows` already use.
+
+4. **`renderer-body-enhanced.ts`**: `buildRowsPartPrimitives` now also
+   calls `buildEmbedPrimitives`, drawing one `<image>` per embed (via
+   `core/svg.ts#image`, the SAME low-level builder the sprite/img inline-
+   atom path uses — NOT that path's own `renderRowAtoms` 'image'-atom
+   branch, which is BOTTOM-aligned-to-a-text-line positioning for a small
+   inline icon, a DIFFERENT upstream mechanism (`AtomImg`/`AtomSprite`)
+   from `EmbeddedDiagram`'s own TOP-anchored whole-block stacking — reusing
+   it would have positioned the image at the wrong Y). `x` is
+   `geo.x + BODY_ENHANCED_MARGIN_X` (=6, already-imported constant,
+   jar-verified against moxobo's own `image x="13"` = `rect x="7"` + 6). A
+   `href`-less embed (the fallback) draws nothing, matching `EmbeddedDiagram
+   .java:191-193`'s own independent `drawU` catch.
+
+5. **`src/index.ts#prepareBlock`**: registers the renderer with `(source)
+   => renderSync(source, options)`, closing over the CURRENT call's own
+   `options` — see "The measurer bug" below for why this specific line is
+   load-bearing, not cosmetic. `prepareBlock` is shared by `renderPagesSync`
+   AND the async `render()`/`renderPages()` path (`renderBlockPages`), so
+   this fixes both without a second call site. Runs for EVERY diagram
+   type's `prepareBlock` call (harmless — a pure closure reassignment on a
+   singleton the class engine alone reads).
+
+6. **`class-member-rows.ts#isMethodMember`** (mid-task addition, journal
+   row 83 diagnosis): ported `BodierLikeClassOrObject#isMethod`'s missing
+   URL-bracket strip (`URL_PATTERN.matcher(s).replaceAll("")`,
+   java:104-116, `URL_PATTERN = Pattern.compile(UrlBuilder.getRegexp())`)
+   before the raw-fallback paren scan — a NEW un-anchored (find/replace-all)
+   `URL_BRACKET_RE` reproducing `UrlBuilder.java:52-88`'s 5-alternative
+   grammar (the SAME one `class-url.ts` already ports for STRICT
+   whole-bracket matching, un-anchored here since a bracket can sit
+   anywhere in a raw-fallback line, not just fill it). Fixes
+   `sejuzo-42-fini523` (a field's `[[url{tooltip}]]` had `(pagename)` in
+   its tooltip, misbucketing the field as a method and shifting both
+   dividers down by the empty-methods-compartment's 8px). Unrelated to
+   embeds; landed in the same commit series per the coordinator's
+   instruction.
+
+## The measurer bug (found via arithmetic, fixed, verified)
+
+First render-diff pass after wiring: gadufu went from 1 structural/3
+numeric (baseline) to 0 structural/49 numeric — the `<image>` now drew
+where expected, but at 200x96 instead of the jar's 133x107. Decoding the
+drawn payload showed `data-diagram-type="ACTIVITY"` — CORRECT dispatch (the
+embed's content, `start`/`:Использовать;`, IS activity syntax) — so this
+was not a dispatch bug. Root cause, found by direct probe: `src/index.ts`'s
+FIRST draft registered the renderer ONCE at module load
+(`registerClassNestedDiagramRenderer((source) => renderSync(source))`,
+no options), so every nested render used `renderSync`'s DEFAULT measurer
+instead of the OUTER call's `WidthTableMeasurer` (`render-diff.mts`'s own
+`renderFixture` passes `{ measurer: new WidthTableMeasurer() }`). Probed
+directly: the SAME embed source measured 200x96 with the default measurer,
+121x96 with `WidthTableMeasurer` explicitly — matches upstream's own
+architecture (`EmbeddedDiagram`'s nested `Diagram#exportDiagram` shares the
+enclosing `FileFormatOption`, i.e. the SAME measurement context, never a
+fixed default). Fixed by moving the registration into `prepareBlock`
+(closing over that call's own `options`) — see item 5 above. After the fix:
+gadufu 0 structural / 5 numeric (down from 49).
+
+## Remaining gadufu residual (5 numeric diffs) — traced to a jar-side asymmetry, NOT fixed
+
+After the measurer fix, gadufu's image is 121x96 vs jar's 133x107 (Δ12/Δ11)
+— and the classifier's OWN box height is 168 (ours) vs 114 (jar), a MUCH
+larger Δ54 that does not match the image Δ alone. Traced with arithmetic,
+not guessed: jar's OWN classifier height (114) is CONSISTENT with its
+`MethodsOrFieldsArea`-equivalent block using the `(42, 42)` fallback
+(java:150-152) for the embed's CONTRIBUTION TO BOX HEIGHT specifically —
+`114 - header(32) - block1(field row, ~22) = 60`, and `42 (fallback) +
+~18 (decorate()'s own divider/title margin) = 60` EXACTLY — while jar's
+DRAWN image (the SEPARATE `drawU` call) is a real 133x107 render that
+visually OVERFLOWS the box it was sized for (`75 + 107 = 182`, matching
+the jar's OWN total canvas height of 183 almost exactly — the canvas's
+real driver is the image's overflow ink, not the declared box). This is
+consistent with r2b's ORIGINAL finding (the jar's `calculateDimensionSlow`
+NPEs and falls back to `(42,42)`) being CORRECT for THIS fixture's SIZING
+PASS specifically, even though row 99's correction (moxobo/zikabo/gadufu's
+DRAWN images are real, not `(42,42)`) is also correct — the two calls
+(`calculateDimensionSlow` vs `drawU`) can and DO diverge for gadufu's
+embedded ACTIVITY content: sizing fails (fallback), drawing succeeds (real
+image), an internally-inconsistent UPSTREAM RENDERING QUIRK for this
+specific embed kind/environment combination. Per CLAUDE.md ("preserve...
+behavior that looks like a bug... never fix an apparent upstream bug
+inline") and the coordinator's own explicit instruction ("the delta
+belongs to that engine: record it... do not patch other engines"), this is
+recorded, not reproduced — faithfully replicating "sizing silently fails
+while drawing silently succeeds, for this one upstream/environment
+combination" is not something D9's "dimensions are the target" scope
+commits this task to chase, and doing so would require detecting an
+environment-specific AWT/graphviz failure this port has no analog of.
+Residual width/height delta on the `<image>` itself (Δ12/Δ11) is a
+SEPARATE, smaller likely-Cyrillic-text-measurement gap in the ACTIVITY
+engine, also out of scope per the same instruction.
+
+## The self-embedding recursion fixture — a MORE PRECISE finding than expected
+
+The recursion guard is real and proven at the UNIT level (4 tests,
+`class-nested-diagram-renderer.test.ts`, real depth accounting via a
+`renderFn` that calls back into the renderer). Building a REAL end-to-end
+`renderSync` fixture that trips it turned out to be blocked for a reason
+MORE SEVERE than "isEnhancedBody's missing disjunct": `src/diagrams/
+class/parser.ts#handlePendingBodyLine` tests EVERY line of an open class
+body against the bare-`}`-closes-the-body regex (`/^\}\s*$/`)
+UNCONDITIONALLY, with NO embedded-block awareness at parse time at all
+(unlike the TYPE0/TYPE1 `[ ... ]` path, which `class-multiline-element.ts`/
+`class-embedded-block.ts` already solve for exactly this class of bug —
+see that file's own module doc comment, "so an embedded region's own
+interior... never prematurely closes the OUTER... block"). Any NESTED
+class declaration's OWN closing `}`, sitting inside a `{{ }}` region, is
+therefore indistinguishable from the OUTER class's own closer — verified
+by direct probe: `class C {\n--\n{{\nclass C {\n--\n{{\nfield\n}}\n}\n}}\n}`
+renders a `"Syntax Error?"` refusal box (the INNER class's `}` closes the
+OUTER body two lines early), not a nested render, REGARDLESS of
+`isEnhancedBody` or the depth guard. A single-line, brace-free embed
+(`file f`, `node n`, `start`/`:text;`) never hits this — confirmed working
+for moxobo/zikabo/gadufu's OWN content — so genuine MULTI-LEVEL recursion
+through the class-engine's own embed mechanism is unreachable at ANY depth
+>= 2 today, for a DIFFERENT and larger reason than the `isEnhancedBody`
+gap alone. Filed precisely as an `it.todo` (`class-body-embedded-diagram-
+conformance.test.ts`) rather than forced or silently dropped.
+
+## Readings, updated (before T27FU -> after)
+
+| slug | before (T27) | after (T27FU) | verdict |
+|---|---|---|---|
+| moxobo-16-tipo829 | 1/43 | 1/43 (unchanged) | mechanism proven byte-exact (43x54) when called directly; blocked end-to-end on `isEnhancedBody` (excluded) |
+| zikabo-17-gugi332 | 1/43 | 1/43 (unchanged) | mechanism proven byte-exact (67x64) when called directly; same block |
+| gadufu-56-votu808 | 1/3 | **0/5** | `<image>` now drawn correctly-positioned; residual is the jar's own sizing/drawing asymmetry (see above), not this mechanism |
+| bixogo-47-xulu385 | 1/47 | 1/47 (unchanged, as instructed) | legend/chrome path, T28 |
+| roxosu-00-pini153 | 1/47 | 1/47 (unchanged, as instructed) | legend/chrome path, T28 |
+| sejuzo-42-fini523 (mid-task addition) | 3/0 | **0/0 (pass=true)** | `isMethodMember` url-bracket strip |
+
+moxobo/zikabo's mechanism-level proof (called directly via `measure
+EnhancedBody`, bypassing the blocked gate): moxobo sizes its `{{ file f }}`
+embed to EXACTLY 43x54 (jar target); zikabo's `{{ node n }}` sizes to
+EXACTLY 67x64 (jar target), with the `- field` member row correctly
+surviving extraction and stacked above it. Both hrefs decode to real
+`data-diagram-type="DESCRIPTION"` renders of the actual embedded content.
+See `tests/unit/class/class-body-embedded-diagram-conformance.test.ts`.
+
+## Follow-on filing (current)
+
+Two items remain, both requiring `class-body-enhanced.ts`
+(EXCLUDED) and/or `parser.ts` beyond this task's narrow grant:
+1. `isEnhancedBody`'s missing `getEmbeddedType` disjunct (one line, exact
+   fix given above) — unblocks moxobo/zikabo end-to-end.
+2. `handlePendingBodyLine`'s complete lack of embedded-block awareness at
+   PARSE time (a `class-multiline-element.ts`-shaped fix: detect an
+   embedded-block opener while `state.pendingBodyId` is set, swallow the
+   WHOLE region via `scanEmbeddedElementBlock` before testing for the
+   bare-`}` closer) — unblocks genuine multi-level self-embedding
+   recursion and any future fixture that embeds a diagram containing its
+   own `{ }`-braced declarations.

@@ -10,6 +10,7 @@ import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
 import { applyClassDocumentMargin } from './diagrams/class/layout-ink-extent.js';
 import { sequencePlugin } from './diagrams/sequence/index.js';
 import { classPlugin } from './diagrams/class/index.js';
+import { registerClassNestedDiagramRenderer } from './diagrams/class/class-nested-diagram-renderer.js';
 import { statePlugin } from './diagrams/state/index.js';
 import { descriptionPlugin } from './diagrams/description/index.js';
 import { activityPlugin } from './diagrams/activity/index.js';
@@ -344,6 +345,13 @@ function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOp
   const ast = astOf(resolution, options);
   surfaceSpriteWarnings(ast, options?.onWarning);
   surfaceParseWarnings(ast, options?.onWarning);
+  // CDD T27FU: (re-)registers the class engine's `{{ }}`-embed renderer with
+  // THIS call's own `options` -- a nested diagram measures text through the
+  // SAME bounder as its enclosing one (upstream's nested `Diagram
+  // #exportDiagram` shares the enclosing `FileFormatOption`), not a fixed
+  // default. See `class-nested-diagram-renderer.ts`'s doc comment for why
+  // this cannot be a plain import instead.
+  registerClassNestedDiagramRenderer((source) => renderSync(source, options));
   return { ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, ast };
 }
 

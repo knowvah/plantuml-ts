@@ -580,20 +580,37 @@ the current cache's `<image>` payloads directly.
 raster re-encode path exists in a browser-safe library; embedding the real
 rendered SVG source is cheaper and strictly more informative than a raster.
 
-**Status (CDD T27):** the renderer above is real, tested, and available
-(`core/EmbeddedDiagram.ts`'s `NestedDiagramRenderer` seam,
-`core/cucadiagram/MethodsOrFieldsArea.ts`'s consumer), but is NOT wired into
-any production diagram engine's parse/layout pipeline as of this task — the
-class engine's own `class C { {{ ... }} }` body parsing
-(`src/diagrams/class/parser.ts#handlePendingBodyLine`) is an independent
-fork (ADR-5) that never constructs an `EmbeddedDiagram`/`MethodsOrFieldsArea`
-at all, so this divergence is not yet observable in any rendered class
-diagram. See `.agent-notes/cdd-T27.md` for the exact follow-on wiring scope.
+**Status (CDD T27FU, updated):** wired into production for the class
+engine's own ENHANCED-body pipeline (`class-body-enhanced-embeds.ts`
+ports `MethodsOrFieldsArea.java:109-123,141-152,429-440`'s embed
+separation/stacking directly into `class-body-enhanced-layout.ts
+#buildRowsBlockRows`; `src/index.ts#prepareBlock` registers the renderer,
+closing over the ambient call's own `options`/measurer, on every
+`renderSync` call). Observable today for any classifier body that ALREADY
+takes the enhanced-body path (a `--`/`==`/`..`/`__` separator or `|_` tree
+line present anywhere in the body) and also contains a `{{ }}` block —
+`gadufu-56-votu808` is such a fixture (0 structural diffs; the image's own
+width/height carry a small residual, `.agent-notes/cdd-T27.md`'s own
+mechanism finding — belongs to the embedded ACTIVITY engine's text
+measurement, not this seam). A body whose ONLY enhancing trigger would be
+the `{{ }}` block itself (no separator/tree line otherwise present, e.g.
+`moxobo-16-tipo829`/`zikabo-17-gugi332`) is still NOT reached: `class-body-
+enhanced.ts#isEnhancedBody` lacks upstream's third disjunct
+(`EmbeddedDiagram.getEmbeddedType(s) != null`, `BodierLikeClassOrObject
+.java:96`) and is excluded from this task's write-set (a concurrent task
+edits it) — see `.agent-notes/cdd-T27.md` for the one-line fix needed and
+why even fixing it would not unblock genuine multi-level recursion (a
+SEPARATE, more severe parser gap: `handlePendingBodyLine` has no
+embedded-block awareness at parse time at all, so a NESTED class
+declaration's own closing `}` inside a `{{ }}` region prematurely closes
+the outer body regardless of `isEnhancedBody`). `core/cucadiagram/
+MethodsOrFieldsArea.ts`'s OWN consumer remains unreached (dead code for
+class-body rendering, ADR-5 — a DIFFERENT, pre-existing fact this task's
+diagnosis re-confirmed, not something T27FU changed).
 
-**Affects:** any diagram with a `{{ }}` embedded sub-diagram, once a
-producer supplies this renderer to `MethodsOrFieldsAreaConfig
-.nestedDiagramRenderer` (or an equivalent seam for a chrome/legend
-consumer, T28).
+**Affects:** any class-body `{{ }}` embed whose enclosing body already
+takes the enhanced path; the bare-embed-only case and T28's chrome/legend
+consumer remain as described above.
 
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 
