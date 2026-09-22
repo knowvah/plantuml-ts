@@ -9,13 +9,14 @@ import type { EdgeGeo } from './layout.js';
 import {} from './renderer-note.js';
 import type {} from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type {} from '../../core/dispatcher.js';
-import { text, path, attrs } from '../../core/svg.js';
+import { text, path, attrs, linkWrap } from '../../core/svg.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import {} from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from './class-monochrome.js';
-import { buildEdgeArrowheads, decorName, applyDecorTrim } from './renderer-arrowhead.js';
+import { buildEdgeArrowheads, decorName, applyDecorTrim, buildMiddleDecorMarkup } from './renderer-arrowhead.js';
 import { looksLikeRevertedForSvg, looksLikeNoDecorAtAllSvg } from '../../core/svek/extremity/link-decor.js';
 import {} from './renderer-uid.js';
 import { leafPortion } from './renderer-group.js';
@@ -25,6 +26,7 @@ import {} from './class-namespace-shape.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import {} from './class-shadow.js';
 import { resolveArrowLabelFont, resolveCardinalityFontColor } from '../../core/arrow-label-font.js';
+import { renderEdgeVisibilityIcon, renderEdgeNoteBox, renderEdgeConstraint } from './renderer-edge-extras.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -301,30 +303,52 @@ function renderEdgeMainLabel(
  * renderEdgeMainLabel}'s doc comment (shared attribute set, D3/D4 font
  * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
  * function purely to stay under the lizard NLOC/CCN caps.
+ *
+ * cdd-T7 (A2a/M10): when `geo.quantifierLines` is present (every
+ * production edge -- T6's own doc comment on the field), draws ONE `<text>`
+ * per physical line instead of the single raw-string anchor `tailLabel`/
+ * `headLabel` carry alongside it -- `SvekEdge.java:330-340`'s
+ * `Display.getWithNewlines(...)`. Falls back to the single-anchor form only
+ * for a hand-built `EdgeGeo` test literal that omits the field (mirrors
+ * every other T6 field's optional-with-fallback contract, e.g.
+ * `NoteGeo.lineAtoms`).
  */
 function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
   const parts: string[] = [];
+  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily };
+  if (geo.quantifierLines !== undefined) {
+    for (const lines of geo.quantifierLines) {
+      for (const l of lines) {
+        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
+      }
+    }
+    return parts;
+  }
   for (const portLabel of [geo.tailLabel, geo.headLabel]) {
     if (portLabel === undefined) continue;
     parts.push(
-      text(portLabel.x, portLabel.y, portLabel.text, {
-        fill: cardinalityColor,
-        fontSize: CARDINALITY_FONT_SIZE,
-        fontFamily: theme.fontFamily,
-        lengthAdjust: 'spacing',
-        textLength: portLabel.width,
-      }),
+      text(portLabel.x, portLabel.y, portLabel.text, { ...font, lengthAdjust: 'spacing', textLength: portLabel.width }),
     );
   }
   return parts;
 }
 
-export function renderEdge(
-  geo: EdgeGeo,
-  theme: Theme,
-  ids: Set<string>,
-  syntheticNames: ReadonlyMap<string, string>,
-): { body: string; extraDefs: string } {
+/**
+ * cdd-T7: `ids`/`syntheticNames` (pre-existing) plus `measurer` (new,
+ * optional) folded into one options object -- a bare 5th positional
+ * parameter would have crossed this repo's hook-enforced param cap.
+ * `measurer` is `undefined` only for a hand-built `ClassGeometry` test
+ * literal that omits it (`ClassGeometry.measurer`'s own doc comment); only
+ * `renderEdgeConstraint` (A2a/M9's text centring) reads it.
+ */
+export interface RenderEdgeContext {
+  readonly ids: Set<string>;
+  readonly syntheticNames: ReadonlyMap<string, string>;
+  readonly measurer?: StringMeasurer | undefined;
+}
+
+export function renderEdge(geo: EdgeGeo, theme: Theme, ctx: RenderEdgeContext): { body: string; extraDefs: string } {
+  const { ids, syntheticNames, measurer } = ctx;
   const parts: string[] = [];
   // G2 N28: arrowheads must be resolved BEFORE the path is built -- the
   // connecting `<path>` is shortened by each decor's own trim delta
@@ -399,6 +423,13 @@ export function renderEdge(
     );
   }
   parts.push(arrowheads.tail, arrowheads.head);
+  // cdd-T7 (A2a/M2): the label's own visibility-modifier icon -- drawn
+  // right after the extremities and BEFORE the label text, matching
+  // `canuti-20-jotu614`'s golden child order (`SvekEdge.java:302`'s
+  // `addVisibilityModifier` merges the icon LEFT of the label block, so it
+  // paints first).
+  const visibilityIconMarkup = renderEdgeVisibilityIcon(geo, theme);
+  if (visibilityIconMarkup !== '') parts.push(visibilityIconMarkup);
   // T3: resolved here (not up front) -- `labelColor` feeds both the
   // whole-label glyph below and {@link renderEdgeMainLabel}'s main-label/
   // per-line-glyph `<text>`/`<polygon>` fills; `cardinalityColor` feeds
@@ -416,15 +447,53 @@ export function renderEdge(
   }
   const labelFontAttrs = arrowLabelTextAttrs(theme);
   parts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
+  // cdd-T7 (A2a/M5): `note on link`'s body -- drawn AFTER the main label,
+  // matching `lipazi-06-care921`'s default/BOTTOM-position fixture
+  // (`mergeTB(labelOnly, noteOnly)`, `SvekEdge.java:307-327`). A LEFT/TOP
+  // position draws the note FIRST instead (`mergeLR(noteOnly, labelOnly)`/
+  // `mergeTB(noteOnly, labelOnly)`) -- `Relationship.linkNotePosition`
+  // reaches neither `EdgeGeo` nor this renderer (T6 kept the geometry
+  // position-agnostic), so this task always emits the BOTTOM/default child
+  // order; the position-dependent flip is T8's, alongside the vertex/paint
+  // fix (see this task's commit message).
+  parts.push(renderEdgeNoteBox(geo, theme));
   parts.push(...renderEdgeCardinalityLabels(geo, theme, cardinalityColor));
-  return { body: parts.join(''), extraDefs: arrowheads.extraDefs };
+  // cdd-T7 (A5/M4, A2a/M6): the `-0)-` family's mid-link decoration --
+  // `SvekEdge.java:982-988` draws it AFTER the tail/head cardinality text,
+  // over the TRIMMED point list (the same `dotPath` object the earlier
+  // extremity trim already mutated in upstream -- see `buildPathData`'s own
+  // doc comment on why this port never builds a real `DotPath` for the
+  // connecting line itself).
+  const middleDecor = buildMiddleDecorMarkup(trimmedPoints, geo.middleDecor, strokeColor, theme.colors.background);
+  let extraDefs = arrowheads.extraDefs;
+  if (middleDecor !== undefined) {
+    parts.push(middleDecor.body);
+    extraDefs += middleDecor.extraDefs;
+  }
+  // cdd-T7 (A2a/M9): `constraint on links` -- drawn LAST, matching
+  // `SvekEdge.java:993-1011`'s position immediately before `ug.closeGroup()`.
+  parts.push(renderEdgeConstraint(geo, theme, measurer));
+  const body = parts.join('');
+  // cdd-T7 (A2a/M3): `[[url]]` on the relationship -- wraps the ENTIRE
+  // group body (path, arrowheads, label, note, constraint -- everything
+  // already emitted above) in ONE `<a>`, matching `SvekEdge.java:859-861`'s
+  // `ug.startUrl(url)` immediately after `ug.startGroup(...)` and `:990-991`'s
+  // `closeUrl()` immediately before `ug.closeGroup()` -- i.e. the url spans
+  // the group's FULL lifetime, not just one primitive.
+  return {
+    body: geo.url !== undefined ? linkWrap(body, geo.url) : body,
+    extraDefs,
+  };
   // #lizard forgives -- pre-existing (unrelated to T3): the
   // strokeColor/edgeStrokeWidth cascade (bracket override > tag style >
   // classCascadeArrowColor > default) plus the path/arrowhead/glyph/label
   // assembly mirror SvekEdge#drawU's own branching (comments above); T3
   // only added two `resolve*(theme)` reads and hoisted the label/
   // cardinality drawing into {@link renderEdgeMainLabel}/{@link
-  // renderEdgeCardinalityLabels} -- see their own doc comments.
+  // renderEdgeCardinalityLabels} -- see their own doc comments. cdd-T7
+  // added six sequential, independent primitive emissions (icon/note/
+  // middle-decor/constraint/url) mirroring `SvekEdge#drawU`'s own linear
+  // draw-call sequence one-for-one -- not a new branch, no CCN growth.
 }
 
 // ---------------------------------------------------------------------------

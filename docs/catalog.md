@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1135 modules · 4129 exported names.
+1136 modules · 4136 exported names.
 
 ## `src/`
 
@@ -519,7 +519,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `DotPath.ts` | `Bezier`, `DotPath` |  |
+| `DotPath.ts` | `Bezier`, `PointAndAngle`, `DotPath` |  |
 | `TextBlock.ts` | `TextBlock`, `textBlockMagneticBorder` |  |
 | `TextBlockHorizontal.ts` | `TextBlockHorizontal` |  |
 | `TextBlockInEllipse.ts` | `TextBlockInEllipse` |  |
@@ -1193,7 +1193,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-stereotype.ts` | `CLASS_STEREOTYPE_FONT_SIZE`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `parseCircledCharDecoration`, `parseCircledSpriteDecoration`, `GuillemetPair`, `CircledCharDecoration`, `CircledSpriteDecoration`, `measureStereoLabelWidths`, `stereoBlockDim`, `StereoRowsInput`, `buildStereoRows`, `computeHeaderInfo`, `buildHeaderRows`, `measureGenericTagDim`, `buildGenericTagGeo`, `HeaderInfo`, `GenericTagDim`, `GenericTagGeo`, `parseHideStereotypeDirective`, `isStereotypeLabelHidden`, `applyStereotypeHideShow`, `resolveVisibleStereotypeLabels`, `resolveStyleStereotypeTags` | Classifier header stereotype row(s) — `HeaderLayout#getDimension`/`#drawU`'s `stereoDim`/`xStereo`/`yStereo` terms (G2 N24; the mechanism N21/N22/N23 repeatedly named and deferred as an explicit DOT-gate/width-formula risk — N23's own Mecha |
 | `class-url-command.ts` | `URL_STATEMENT_RE`, `applyUrlStatement` | The standalone `url [of\|for] <Code> [is] [[url]]` statement — attaches a url to an already-declared classifier (`classdiagram/command/ CommandUrl.java`). |
 | `class-url.ts` | `UrlInfo`, `parseUrlBracket`, `URL_BRACKET_RE` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
-| `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY` | Member-row visibility icon shape/color (G2 N6). |
+| `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY` | Member-row visibility icon shape/color (G2 N6). |
 | `index.ts` | `classPlugin` | Class diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout-ink-extent.ts` | `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
 | `layout.ts` | `formatMemberText`, `ROW_TEXT_LEFT_MARGIN`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `ClassGeometry`, `JsonBodyItem`, `ClassLeafGeo`, `layoutClass` | Class diagram layout engine. |
@@ -1207,14 +1207,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `note-opale.ts` | `opalePolygonLeft`, `opalePolygonRight`, `opalePolygonUp`, `opalePolygonDown`, `opaleCorner`, `getOpaleStrategy`, `resolveOpaleConnector`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `OpaleDirection`, `buildOpaleNoteGeo`, `matchScore`, `getBestMatchRow` | The fuzzy member-line matcher and the class engine's own opalisable-note geo builder — `cucadiagram/BodierAbstract.java#getBestMatch`/`matchScore`, used to resolve a member-tip's `::member` against a classifier's rendered row text. |
 | `note-tips-resolve.ts` | `TipShape`, `TipResolution`, `resolveTips` | Draw-time resolution of a `'TIPS'` leaf against its host -- the port of `EntityImageTips#drawU`'s per-tip loop as a PURE function of the finished geometry, consumed by both draw passes: `class-ink-box.ts#buildInkBox` (this port's `LimitFind |
 | `parser.ts` | `ensureClassifier`, `ParseState`, `startNewPage`, `parseClass` | Parser for PlantUML class diagrams. |
-| `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `buildEdgeArrowheads`, `applyDecorTrim`, `EdgeExtremityInk`, `edgeExtremityInk` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
+| `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `buildEdgeArrowheads`, `applyDecorTrim`, `EdgeExtremityInk`, `edgeExtremityInk`, `buildMiddleDecorMarkup` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
 | `renderer-body-enhanced.ts` | `renderEnhancedBody` | renderer-body-enhanced.ts — draws a classifier's `EnhancedBodyGeo` (`class-body-enhanced-layout.ts`) primitives in EXACT jar draw order — NOT the classic path's Y-sort merge (`renderer-classifier-box.ts #buildBodyPrimitives`'s own doc comme |
 | `renderer-bullet-atom.ts` | `renderBulletAtom` | `renderBulletAtom` -- the creole bullet marker (`klimt/creole/atom/ Bullet.java`), split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-badge-tag.ts` | `renderBadge`, `renderGenericTag` | `renderBadge` (the kind badge in a classifier's header) and `renderGenericTag` (`class Foo<T>`'s generic type-parameter tag box) -- split out of `renderer-classifier-box.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-box.ts` | `renderRow`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
 | `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `classifierFill`, `classBorder`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
 | `renderer-classifier-rows.ts` | `attributeFontSize`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
-| `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
+| `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
+| `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |
 | `renderer-note.ts` | `renderBulletAtom`, `renderNote`, `renderTipNote`, `renderOpaleNote` | Note rendering — folded-corner box + dashed connector, or the Opale zigzag-notch member-tip shape (G2/N13). |
 | `renderer-openiconic.ts` | `renderOpenIconicAtom` | Renders one OpenIconic `<&glyph>` `MemberRenderAtom` (G2 N41) -- split out of `renderer-classifier-box.ts#renderRowAtoms` purely to keep that function's own NLOC under this project's complexity cap and to avoid growing `renderer-classifier- |

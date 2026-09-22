@@ -1520,6 +1520,93 @@ describe('renderClass — edges', () => {
 });
 
 // ---------------------------------------------------------------------------
+// cdd-T7: url wrap, hidden skip, quantifier lines (renderer.ts wiring)
+// ---------------------------------------------------------------------------
+
+describe('renderClass — edges — cdd-T7 (A2a/M3, M12, M10)', () => {
+  it('wraps the WHOLE link group body in one <a> when the relationship carries a url (A2a/M3)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ targetDecor: 'open', url: { url: 'http://x', tooltip: '', label: '' } })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const groupBody = svg.split('<g class="link"')[1]!;
+    const inner = groupBody.slice(groupBody.indexOf('>') + 1, groupBody.indexOf('</g>'));
+    expect(inner.startsWith('<a')).toBe(true);
+    expect(inner.endsWith('</a>')).toBe(true);
+    expect(svg).toContain('href="http://x"');
+  });
+
+  it('draws no <g class="link"> at all for a hidden relationship (A2a/M12)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ hidden: true })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('<g class="link"');
+  });
+
+  it('still draws a non-hidden edge alongside a hidden one', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({ id: 'edge-0', hidden: true }),
+        makeEdgeGeo({ id: 'edge-1', from: 'A', to: 'B', targetDecor: 'open' }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect((svg.match(/<g class="link"/g) ?? []).length).toBe(1);
+  });
+
+  it('draws one <text> per quantifierLines entry instead of the single tailLabel/headLabel anchor', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          tailLabel: { text: 'customer\\n1', x: 999, y: 999, width: 999 },
+          quantifierLines: [
+            [
+              { text: 'customer', x: 10, y: 20, width: 41.063 },
+              { text: '1', x: 27.75, y: 30, width: 5.563 },
+            ],
+            [],
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('>customer<');
+    expect(svg).toContain('x="10"');
+    expect(svg).toContain('x="27.75"');
+    expect(svg).not.toContain('customer\\n1');
+  });
+
+  it('falls back to tailLabel/headLabel when quantifierLines is absent (hand-built geo)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ tailLabel: { text: '1..*', x: 10, y: 20, width: 30 } })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('>1..*<');
+  });
+
+  it('draws the arc+ellipse mid-decor for a middleDecor edge (A5/M4, cenubi-27-xova754)', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          middleDecor: 'circleCircled1',
+          points: [
+            { x: 36.60625, y: 55.262155107495204 },
+            { x: 36.60625, y: 72.93564206156157 },
+            { x: 36.60625, y: 97.13201753483915 },
+            { x: 36.60625, y: 114.7921337783734 },
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('A10,10');
+    expect(svg).toContain('<ellipse');
+    expect(svg).toContain('rx="6"');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Namespace boxes
 // ---------------------------------------------------------------------------
 

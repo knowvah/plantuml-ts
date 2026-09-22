@@ -437,7 +437,8 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     // must never draw its own `<g class="link">`.
     if (edge.consumedByOpaleNote === true) return;
     if (hiddenClassifierIds.has(edge.from) || hiddenClassifierIds.has(edge.to)) return;
-    const rendered = renderEdge(edge, theme, linkIds, syntheticNames);
+    if (edge.hidden === true) return; // cdd-T7 A2a/M12: `-[hidden]-` (SvekEdge.java:835-836)
+    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer });
     extraDefs += rendered.extraDefs;
     children.push(
       wrapLink(

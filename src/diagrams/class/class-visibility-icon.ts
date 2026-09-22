@@ -124,7 +124,12 @@ const IE_MANDATORY_COLOR = { line: '#000000', background: '#000000' };
  * upstream (`FromSkinparamToStyle.java`'s own catalog has no IEMandatory
  * entry) -- always the hardcoded black, `theme` ignored for that icon.
  */
-function colorsFor(icon: Visibility, theme?: Theme): { line: string; background: string } {
+// cdd-T7 (flagged extension, `.agent-notes/cdd-T7.md`): exported so
+// `renderer-edge-extras.ts` can resolve a link label's visibility-icon
+// LineColor through the SAME theme-override-aware table (`iconPrivateColor`
+// etc) member rows already use, rather than re-deriving it against the
+// unthemed `core/skin/ColorParam.ts` defaults only.
+export function colorsFor(icon: Visibility, theme?: Theme): { line: string; background: string } {
   if (icon === '*') return IE_MANDATORY_COLOR;
   const fallback = VISIBILITY_COLORS[icon];
   const g = theme?.colors.graph;

@@ -316,6 +316,11 @@ export function buildEdgeGeos(
       ...(rel.idEntity2Decor !== undefined ? { idEntity2Decor: rel.idEntity2Decor } : {}),
       ...(rel.sourceLine !== undefined ? { sourceLine: rel.sourceLine } : {}),
       ...(rel.phantomSlot === true ? { phantomSlot: true as const } : {}),
+      // cdd-T7 (flagged extension, `.agent-notes/cdd-T7.md`): carry-only,
+      // same pattern as the fields immediately above.
+      ...(rel.url !== undefined ? { url: rel.url } : {}),
+      ...(rel.hidden === true ? { hidden: true as const } : {}),
+      ...(rel.middleDecor !== undefined ? { middleDecor: rel.middleDecor } : {}),
       ...buildStrokeOverride(rel, dashed, defaultArrowThickness),
     };
 

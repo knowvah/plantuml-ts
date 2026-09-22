@@ -49,13 +49,17 @@ import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UEllipse } from '../../core/klimt/shape/UEllipse.js';
 import { place } from '../../core/svek/svek-edge-extremity.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
+import { buildDotPathFromSplinePoints } from '../../core/svek/svek-edge-geometry.js';
 import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import type { LinkDecor } from './ast.js';
+import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type { EdgeGeo } from './layout.js';
 
 /** `class/ast.ts#LinkDecor` -> `core/svek/extremity/link-decor.ts
@@ -372,4 +376,98 @@ export function edgeExtremityInk(edge: EdgeGeo): EdgeExtremityInk | undefined {
     place(headName, last, headAngle, 'none').drawable.drawU(finder);
   }
   return { minX: finder.getMinX(), minY: finder.getMinY(), maxX: finder.getMaxX(), maxY: finder.getMaxY() };
+}
+
+// ---------------------------------------------------------------------------
+// cdd-T7 (A5/M4, A2a/M6): mid-link decoration (`-0)-` etc.)
+// ---------------------------------------------------------------------------
+
+/** `MiddleCircle`/`MiddleCircleCircled`'s two hardcoded radii (both
+ *  Java classes: `radius1 = 6`, `radius2 = 10`) -- NOT derived from any
+ *  edge/theme value, matching upstream's own literals. */
+const MIDDLE_RADIUS_INNER = 6;
+const MIDDLE_RADIUS_OUTER = 10;
+/** `MiddleCircle`/`MiddleCircleCircled#drawU`'s own `UStroke.withThickness
+ *  (1.5)` -- a fixed value, independent of the edge's own resolved stroke
+ *  width (unlike the head/tail extremities' `resolvedStrokeWidth`). */
+const MIDDLE_STROKE_WIDTH = 1.5;
+
+/**
+ * `MiddleCircleCircled#drawU`/`MiddleCircle#drawU` — the arc(s) (for the
+ * three `CIRCLE_CIRCLED*` members) plus the always-drawn filled inner
+ * circle, all centred on {@link DotPath.getMiddle}'s own point.
+ *
+ * `angle` here is upstream's OWN already-transformed value (`angleDeg - 45`,
+ * `SvekEdge.java:984-987` -- see {@link buildMiddleDecorMarkup}'s doc
+ * comment for the `angleRad -> angleDeg -> -45` derivation), fed straight
+ * into `UEllipse`'s own `start` parameter exactly as upstream does.
+ *
+ * @see ~/git/plantuml/.../svek/extremity/MiddleCircleCircled.java
+ * @see ~/git/plantuml/.../svek/extremity/MiddleCircle.java
+ */
+function drawMiddleDecorShape(
+  middleDecor: MiddleDecor,
+  point: Point2D,
+  angle: number,
+  strokeColor: Paint,
+  backColor: Paint,
+  diagramBackColor: Paint,
+): { body: string; extraDefs: string } {
+  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
+  const base = ug
+    .apply(new Fore(strokeColor))
+    .apply(UStroke.withThickness(MIDDLE_STROKE_WIDTH))
+    .apply(new Back(backColor))
+    .apply(new UTranslate(point.x, point.y));
+  if (middleDecor === 'circleCircled') {
+    const bigCircle = UEllipse.build(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER);
+    base
+      .apply(new Fore(diagramBackColor))
+      .apply(new Back(diagramBackColor))
+      .apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER))
+      .draw(bigCircle);
+  }
+  if (middleDecor === 'circleCircled' || middleDecor === 'circleCircled1') {
+    const arc1 = new UEllipse(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER, angle, 90);
+    base.apply(new Back('none')).apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER)).draw(arc1);
+  }
+  if (middleDecor === 'circleCircled' || middleDecor === 'circleCircled2') {
+    const arc2 = new UEllipse(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER, angle + 180, 90);
+    base.apply(new Back('none')).apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER)).draw(arc2);
+  }
+  base
+    .apply(new UTranslate(-MIDDLE_RADIUS_INNER, -MIDDLE_RADIUS_INNER))
+    .draw(UEllipse.build(2 * MIDDLE_RADIUS_INNER, 2 * MIDDLE_RADIUS_INNER));
+  return extractFlatContent(ug.getSvgString());
+  // #lizard forgives -- faithful port of MiddleCircleCircled#drawU's own
+  // three-branch (BOTH/MODE1/MODE2) dispatch plus MiddleCircle's always-on
+  // inner circle, folded into one function since both share the SAME
+  // radius/stroke setup (module doc comment above).
+}
+
+/**
+ * Builds the arc+ellipse markup for `edge.middleDecor` (`-0)-` and its
+ * three siblings), or `undefined` when the edge carries none or its point
+ * list cannot support a real `DotPath` (fewer than 4 points, or not a
+ * well-formed `1 + 3*n` bezier spline -- the same shape guard
+ * `buildDotPathFromSplinePoints` itself enforces).
+ *
+ * `angleDeg = -angleRad * 180 / PI` then `angleDeg - 45` is
+ * `SvekEdge.java:984-987` verbatim: `dotPath.getMiddle()` returns a
+ * math-convention (y-down, CCW-positive) radian angle; upstream negates it
+ * to its own UEllipse-arc degree convention before subtracting the fixed
+ * 45° the two `MiddleCircleCircled` MODE arcs are centred at.
+ */
+export function buildMiddleDecorMarkup(
+  points: EdgeGeo['points'],
+  middleDecor: MiddleDecor | undefined,
+  strokeColor: Paint,
+  backgroundColor: Paint,
+): { body: string; extraDefs: string } | undefined {
+  if (middleDecor === undefined) return undefined;
+  if (points.length < 4 || (points.length - 1) % 3 !== 0) return undefined;
+  const dotPath = buildDotPathFromSplinePoints(points);
+  const middle = dotPath.getMiddle();
+  const angleDeg = (-middle.angle * 180) / Math.PI;
+  return drawMiddleDecorShape(middleDecor, middle.point, angleDeg - 45, strokeColor, backgroundColor, backgroundColor);
 }

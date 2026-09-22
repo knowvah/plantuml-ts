@@ -12,6 +12,7 @@ import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { MiddleDecor } from './class-arrow-middle-decor.js';
 
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
@@ -416,6 +417,12 @@ export interface EdgeGeo {
    *  `theme.colors.graph.arrowTagCascade`. Absent for every link with no
    *  `<<...>>`. */
   stereotypeTags?: readonly string[];
+  /** cdd-T7 (flagged extension, `.agent-notes/cdd-T7.md`): carry-only
+   *  copies of `Relationship.url`/`.hidden`/`.middleDecor` -- the ONLY
+   *  channel, since `renderClass(geo, theme)` has no AST access. */
+  url?: UrlInfo;
+  hidden?: true;
+  middleDecor?: MiddleDecor;
 }
 
 // cdd-T6: `NamespaceGeo` moved to `class-geo-namespace-types.ts` when the

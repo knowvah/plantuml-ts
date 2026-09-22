@@ -683,4 +683,38 @@ describe('DotPath', () => {
     const empty = new DotPath();
     expect(() => empty.addCurve({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 })).toThrow('no prior segment');
   });
+
+  // cdd-T7/A5-M4: DotPath#getMiddle (klimt/shape/DotPath.java#getMiddle).
+  describe('getMiddle', () => {
+    it('returns the geometric midpoint and tangent of a single straight segment', () => {
+      // A straight vertical "line" carried as one cubic (control points on
+      // the chord, matching @knowvah/dot-engine's own straight-edge output shape).
+      const dot = DotPath.fromBeziers([
+        { x1: 0, y1: 0, ctrlx1: 0, ctrly1: 33.333, ctrlx2: 0, ctrly2: 66.667, x2: 0, y2: 100 },
+      ]);
+      const middle = dot.getMiddle();
+      expect(middle.point.x).toBeCloseTo(0, 6);
+      expect(middle.point.y).toBeCloseTo(50, 3);
+      expect(middle.angle).toBeCloseTo(Math.PI / 2, 6);
+    });
+
+    it('finds the true middle inside whichever segment contains it, over a multi-segment path', () => {
+      // Two straight collinear segments of different length: (0,0)-(0,10)
+      // then (0,10)-(0,110) -- the path's true middle, (0,55), lies in the
+      // SECOND segment; its own subdivision midpoint (0,60) is the
+      // minimum-cost candidate (upstream's own approximation, not the exact
+      // midpoint -- see the method's doc comment).
+      const dot = DotPath.fromBeziers([
+        { x1: 0, y1: 0, ctrlx1: 0, ctrly1: 3.333, ctrlx2: 0, ctrly2: 6.667, x2: 0, y2: 10 },
+        { x1: 0, y1: 10, ctrlx1: 0, ctrly1: 43.333, ctrlx2: 0, ctrly2: 76.667, x2: 0, y2: 110 },
+      ]);
+      const middle = dot.getMiddle();
+      expect(middle.point).toEqual({ x: 0, y: 60 });
+      expect(middle.angle).toBeCloseTo(Math.PI / 2, 6);
+    });
+
+    it('throws for an empty path', () => {
+      expect(() => new DotPath().getMiddle()).toThrow('empty path');
+    });
+  });
 });
