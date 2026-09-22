@@ -159,7 +159,7 @@ function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasur
     });
     if (drawn !== undefined) return drawn;
   }
-  return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme) : renderNamespaceFolder(geo, theme);
+  return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme) : renderNamespaceFolder(geo, theme, measurer);
 }
 
 /**

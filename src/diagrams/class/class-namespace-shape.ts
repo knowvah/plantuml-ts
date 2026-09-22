@@ -39,10 +39,10 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { NamespaceGeo } from './layout.js';
 import { path, line, text, rect } from '../../core/svg.js';
-import { isTransparentColor, parseColor } from '../../core/paint.js';
-import type { Paint } from '../../core/paint.js';
+import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 import { folderPathD, folderPolygonPoints, renderFolderPolygon } from './class-namespace-folder-outline.js';
+import { namespaceTitleRuns, namespaceTitleWidth, renderNamespaceTitleRuns } from './class-namespace-title-runs.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
 // (USymbolFolder.java), kept verbatim per this project's porting
@@ -180,9 +180,9 @@ export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string)
  * textLength 7.7875 -> wtitle 13.7875).
  */
 export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string, width: number): number {
-  const dim = measurer.measure(label, titleFont(theme));
-  if (dim.width === 0) return Math.max(30, width / 4);
-  return dim.width + MARGIN_TITLE_X1 + MARGIN_TITLE_X2;
+  const titleWidth = namespaceTitleWidth(measurer, theme, label);
+  if (titleWidth === 0) return Math.max(30, width / 4);
+  return titleWidth + MARGIN_TITLE_X1 + MARGIN_TITLE_X2;
 }
 
 /**
@@ -221,7 +221,7 @@ export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, l
  * helpers.ts`'s `baselineOffset` convention) — jar-verified byte-exact
  * against `finono-05-cuvu171`'s `<path>`/`<line>`/`<text>` triple.
  */
-export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
+export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme, measurer?: StringMeasurer): string {
   // G2 N18: `packageBorderThickness`/`packageFontSize`/`packageFontColor`
   // override the folder-specific defaults (`theme.ts`'s own doc comments) --
   // `fontSize` here previously read the DIAGRAM-WIDE `theme.fontSize`
@@ -235,8 +235,6 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // cluster's own unstyled default explicitly (see that constant's doc
   // comment).
   const border = theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT;
-  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  const fontColor = titleFontColor(theme);
   // G2 N18: `skinparam style strictuml` selects the sharp-corner `UPolygon`
   // branch (`roundCorner=0`) instead of the default rounded-arc `UPath` --
   // `folderPolygonPoints`/`renderFolderPolygon`'s own doc comments.
@@ -273,15 +271,32 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // textLength is omitted then, matching every other row's `row.width ===
   // undefined` skip convention.
   const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
-  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
-  });
+  const label = renderNamespaceTitleLabel(geo, theme, measurer, titleTextLength);
   return outline + hline + label;
   // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
+}
+
+/** cdd-T26: {@link renderNamespaceFolder}'s title-drawing step, split out
+ *  for the NLOC cap. A markup-free label reduces to the OLD single-`<text>`
+ *  call byte-for-byte (`runs.length <= 1`, see `namespaceTitleRuns`). */
+function renderNamespaceTitleLabel(
+  geo: NamespaceGeo,
+  theme: Theme,
+  measurer: StringMeasurer | undefined,
+  titleTextLength: number | undefined,
+): string {
+  const runs = measurer === undefined ? [] : namespaceTitleRuns(geo.label, theme);
+  if (runs.length <= 1) {
+    const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
+    return text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontWeight: '700',
+      fill: titleFontColor(theme),
+      ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
+    });
+  }
+  return renderNamespaceTitleRuns(geo.x + 4, geo.y + geo.baselineOffset, runs, measurer!);
 }
 
 /**
