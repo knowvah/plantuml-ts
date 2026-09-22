@@ -14,9 +14,9 @@ risk note).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T8 | Note body+fold: correct vertex order, two-path shape, paint | typescript-pro (sonnet) | `renderer-note.ts`, tests | — | [ ] |
-| T9 | Note connector as its own link group; group-not-opale guard | typescript-pro (sonnet) | `note-layout-groups.ts`, `renderer.ts`, tests | T8 | [ ] |
-| T10 | Creole `----` rule + tables in notes/labels | typescript-pro (sonnet) | `renderer-note-lines.ts` (new), `src/core/klimt/creole/*` (new), tests | T8 | [ ] |
+| T8 | Note body+fold: correct vertex order, two-path shape, paint | typescript-pro (sonnet) | `renderer-note.ts`, tests | — | [x] |
+| T9 | Note connector as its own link group; group-not-opale guard | typescript-pro (sonnet) | `note-layout-groups.ts`, `renderer.ts`, tests | T8 | [x] |
+| T10 | Creole `----` rule + tables in notes/labels | typescript-pro (sonnet) | `renderer-note-lines.ts` (new), `src/core/klimt/creole/*` (new), tests | T8 | [x] |
 
 T9 and T10 run in parallel (disjoint write-sets, both depend only on T8).
 
