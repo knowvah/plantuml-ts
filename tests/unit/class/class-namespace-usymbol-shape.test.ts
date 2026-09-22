@@ -84,9 +84,9 @@ describe('renderNamespaceUSymbol — <<Node>> container (dativu-93-pona469)', ()
   });
 
   it('declines (undefined) for a namespace with no USymbol keyword — folder path still owns it', () => {
-    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: undefined }), defaultTheme, measurer, NODE_PAINT)).toBe(
-      undefined,
-    );
+    // `exactOptionalPropertyTypes`: an absent key, not an `undefined` value.
+    const { usymbol: _omitted, ...noSymbol } = dativuGeo();
+    expect(renderNamespaceUSymbol(noSymbol, defaultTheme, measurer, NODE_PAINT)).toBe(undefined);
   });
 
   it('declines for the folder family: USymbols.PACKAGE/FOLDER are both USymbolFolder', () => {
@@ -119,7 +119,9 @@ describe('wrapCluster — package [[url]] (dopuzi-50-muxo994, A2b E4)', () => {
   const inner = '<path d="M0,0"/><line x1="0" y1="0" x2="1" y2="0"/><text x="0" y="0">foo</text>';
 
   it('wraps the whole cluster body in ONE <a>, so the cluster has a single child', () => {
-    const out = wrapCluster('foo', 'ent0001', 'foo', inner, { url: 'http://www.google.com' });
+    // `Url.java`'s ctor: tooltip defaults to the url, label to '' (class-url.ts).
+    const url = 'http://www.google.com';
+    const out = wrapCluster('foo', 'ent0001', 'foo', inner, { url, tooltip: url, label: '' });
     expect(out).toBe(
       '<!--cluster foo--><g class="cluster" data-qualified-name="foo" id="ent0001">' +
         // Attribute ORDER is `core/svg.ts#linkWrap`'s own established
@@ -128,7 +130,11 @@ describe('wrapCluster — package [[url]] (dopuzi-50-muxo994, A2b E4)', () => {
         // before comparing, so it is not a fidelity claim -- the CHILD
         // COUNT (one `<a>`) is.
         '<a target="_top" href="http://www.google.com" xlink:href="http://www.google.com"' +
-        ' xlink:type="simple" xlink:actuate="onRequest" xlink:show="new">' +
+        ' xlink:type="simple" xlink:actuate="onRequest" xlink:show="new"' +
+        // `title`/`xlink:title` come from `UrlInfo.tooltip`, which
+        // `Url.java`'s ctor defaults to the url itself -- dopuzi's jar `<a>`
+        // carries both.
+        ' title="http://www.google.com" xlink:title="http://www.google.com">' +
         inner +
         '</a></g>',
     );
