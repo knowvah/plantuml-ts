@@ -26,6 +26,7 @@
 import type { ClassifierGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line } from '../../core/svg.js';
+import type { Paint } from '../../core/paint.js';
 import { text as svgText } from '../../core/svg.js';
 import { renderRow } from './renderer-classifier-box.js';
 import type { EnhancedBodyGeo, EnhancedBodyPart } from './class-body-enhanced-layout.js';
@@ -96,7 +97,7 @@ function renderRowsPart(geo: ClassifierGeo, part: Extract<EnhancedBodyPart, { ki
 function renderTreeConnector(
   geo: ClassifierGeo,
   c: Extract<EnhancedBodyPart, { kind: 'tree' }>['connectors'][number],
-  fill: string,
+  fill: Paint,
 ): string {
   return (
     rect(geo.x + c.bulletX, geo.y + c.bulletY, 2, 2, { fill, stroke: '#000000', strokeWidth: 1 }) +
@@ -109,7 +110,7 @@ function renderTreePart(
   geo: ClassifierGeo,
   part: Extract<EnhancedBodyPart, { kind: 'tree' }>,
   theme: Theme,
-  fill: string,
+  fill: Paint,
 ): string {
   let out = '';
   for (const row of part.rows) out += renderRow(geo, row, theme);
@@ -123,12 +124,19 @@ function renderTreePart(
  * threaded in by the caller (`renderer-classifier-box.ts`, which already
  * resolves both for the box rect) rather than re-resolved here, avoiding a
  * second style-cascade lookup for the same classifier.
+ *
+ * CDD T18/D8: `fill` is a `Paint` (it reaches a `rect`, and
+ * `DriverRectangleSvg#applyFillColor` emits a gradient def for one), while
+ * `borderColor` stays a plain string -- it reaches only `line(...)`, and
+ * `DriverLineSvg.java:76-82` flattens a gradient stroke to its first
+ * colour. The caller passes `renderer-classifier-colors.ts#classBorderLine`
+ * for exactly that reason; see its own doc comment.
  */
 export function renderEnhancedBody(
   geo: ClassifierGeo,
   body: EnhancedBodyGeo,
   theme: Theme,
-  fill: string,
+  fill: Paint,
   borderColor: string,
 ): string {
   let out = '';

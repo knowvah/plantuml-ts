@@ -61,6 +61,101 @@ const COLOR_RE = new RegExp(
  */
 const LINECOLOR_RE = /##(?:\[(?:dotted|dashed|bold)\])?\w*$/;
 
+/**
+ * The `line:`/`text:`/`line.<style>`/`##[style]colour` parts of a
+ * classifier declaration's colour spec, split out of the raw space-joined
+ * `COLOR [LINECOLOR]` token {@link extractDecorations} keeps in `color`.
+ *
+ * `color-override.ts#resolveBareOrBackColor` already reads the BACK
+ * component of the same token; this is the rest of upstream's `Colors`
+ * map, which had no render-side field until now (that function's own doc
+ * comment named it "a named remainder, not yet consumed").
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:95-124
+ */
+export interface DeclarationColors {
+  /** `ColorType.LINE` -- `#line:green`, or the `##green` LINECOLOR half. */
+  line?: string;
+  /** `ColorType.TEXT` -- `#text:yellow`. */
+  text?: string;
+  /** `Colors#lineStyle` -- `LinkStyle.DASHED()`/`DOTTED()`/`BOLD()`
+   *  (`Colors.java:117-122`), or the `##[dashed]` legacy stroke
+   *  (`Colors#addLegacyStroke`, java:171-176). */
+  lineStyle?: 'bold' | 'dashed' | 'dotted';
+}
+
+/** `Colors.java:117-122` -- tested against the WHOLE lowercased, `#`-stripped
+ *  data string, in this exact priority (dashed, then dotted, then bold), not
+ *  per token. */
+function legacyLineStyleOf(data: string): NonNullable<DeclarationColors['lineStyle']> | undefined {
+  if (data.includes('line.dashed')) return 'dashed';
+  if (data.includes('line.dotted')) return 'dotted';
+  if (data.includes('line.bold')) return 'bold';
+  return undefined;
+}
+
+/**
+ * The `Colors(String data, HColorSet set, ColorType mainType)` constructor
+ * loop (`klimt/color/Colors.java:95-124`), restricted to the two
+ * `ColorType`s that have a render-side consumer (`LINE`, `TEXT`) plus
+ * `lineStyle`. Upstream lowercases the whole string and strips EVERY `#`
+ * before tokenising on `;` (java:96), then keys each `name:value` token by
+ * `ColorType.getType(name)` -- which itself truncates at the first `.`
+ * (`ColorType.java:41-48`), so `line.dashed:blue` still lands under `LINE`.
+ * A token with no `:` is the `mainType` (BACK) colour unless it contains a
+ * `.`, and is not this function's concern.
+ */
+function parseColorsData(data: string): DeclarationColors {
+  const normalized = data.toLowerCase().replaceAll('#', '');
+  const out: DeclarationColors = {};
+  for (const token of normalized.split(';')) {
+    const x = token.indexOf(':');
+    if (x === -1) continue;
+    const name = token.slice(0, x);
+    const value = token.slice(x + 1);
+    // `ColorType.getType` truncates the name at its first `.` (java:42-45).
+    const dot = name.indexOf('.');
+    const key = dot === -1 ? name : name.slice(0, dot);
+    if (key === 'line') out.line = value;
+    else if (key === 'text') out.text = value;
+  }
+  const lineStyle = legacyLineStyleOf(normalized);
+  if (lineStyle !== undefined) out.lineStyle = lineStyle;
+  return out;
+}
+
+/** `##(?:\[(dotted|dashed|bold)\])?(\w+)?` -- the LINECOLOR capture group,
+ *  disjoint from the COLOR one (`CommandCreateClassMultilines.java:117-118`). */
+const LINECOLOR_PARTS_RE = /^##(?:\[(dotted|dashed|bold)\])?(\w+)?$/;
+
+/**
+ * Split the raw `color` token {@link extractDecorations} returns into its
+ * named parts.
+ *
+ * The two halves are INDEPENDENT grammar captures joined by a space
+ * (`CommandCreateClassMultilines.java:115-118`), and the LINECOLOR half is
+ * applied LAST upstream (java:272-279: `colors.add(ColorType.LINE, ...)`
+ * then `colors.addLegacyStroke(...)`, both after the `Colors(...)`
+ * constructor has consumed the COLOR half) -- so a `##`-supplied line
+ * colour or line style overwrites a `line:`/`line.dashed` one.
+ * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java:272-279
+ */
+export function parseDeclarationColors(color: string | undefined): DeclarationColors {
+  if (color === undefined) return {};
+  const tokens = color.split(/\s+/).filter((t) => t !== '');
+  const out: DeclarationColors = {};
+  for (const token of tokens) {
+    if (!token.startsWith('##')) {
+      Object.assign(out, parseColorsData(token));
+      continue;
+    }
+    const m = LINECOLOR_PARTS_RE.exec(token);
+    if (m === null) continue;
+    if (m[1] !== undefined) out.lineStyle = m[1] as NonNullable<DeclarationColors['lineStyle']>;
+    if (m[2] !== undefined) out.line = m[2].toLowerCase();
+  }
+  return out;
+}
+
 /** Strip a `[[url]]` (G2 N15: captured and parsed, not just discarded — see
  *  {@link parseUrlBracket}), a `<< stereotype >>`, any `$tag` tokens (the
  *  TAGS1/TAGS2 slots — see {@link TAG_TOKEN_RE}), and a trailing color spec
@@ -75,7 +170,7 @@ export function extractDecorations(rest: string): {
   color: string | undefined;
   tags: string[];
   url: UrlInfo | undefined;
-} {
+} & DeclarationColors {
   const urlMatch = URL_BRACKET_RE.exec(rest);
   const url = urlMatch !== null ? parseUrlBracket(urlMatch[0]) : undefined;
   let out = rest.replace(/\s*\[\[[^\]]*\]\]/g, '').trim();
@@ -110,7 +205,10 @@ export function extractDecorations(rest: string): {
   }
   // #lizard forgives — four independent strip stages (url, stereotype, tags,
   // color) mirroring upstream's four optional grammar groups on one regex row.
-  return { rest: out, stereotype, color, tags, url };
+  // CDD T18: the `line:`/`text:`/`line.<style>`/`##[style]colour` parts of
+  // the SAME raw token, named for T19/T20. Every field is `undefined` for
+  // every spec that carried none, so no consumer's behaviour changes.
+  return { rest: out, stereotype, color, tags, url, ...parseDeclarationColors(color) };
 }
 
 /**

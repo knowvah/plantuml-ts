@@ -27,6 +27,7 @@
  */
 
 import { parseColor } from './paint.js';
+import type { Paint } from './paint.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import {
   matchElementColorKey,
@@ -35,7 +36,7 @@ import {
   matchStereotypeSpotColorKey,
   parseShadowingValue,
 } from './skinparam-element-buckets.js';
-import { resolveColor } from './skinparam-key-normalize.js';
+import { isColorSpec, resolveColor } from './skinparam-key-normalize.js';
 import type { KeyHandler } from './skinparam-key-handlers-shared.js';
 import { KEY_HANDLERS_A } from './skinparam-key-handlers-table-a.js';
 import { KEY_HANDLERS_B } from './skinparam-key-handlers-table-b.js';
@@ -113,6 +114,34 @@ function applyElementBucketFallback(acc: SkinparamAccumulator, key: string, valu
 }
 
 /**
+ * CDD T18/D8: the `color` argument a dedicated `class*Color`/`icon*Color`
+ * handler stores, WITHOUT the gradient flattening `resolveColor` applies.
+ *
+ * Upstream has exactly one colour parser for every caller --
+ * `HColorSet#parseColor` (`klimt/color/HColorSet.java:78-119`), whose
+ * separator scan (java:107-116) returns `HColors.gradient(col0, col1, c)`
+ * for `color1<sep>color2`. This port's dedicated-key path instead took
+ * `skinparam-key-normalize.ts#resolveColor`, a deliberately-simpler
+ * flatten-to-solid helper whose `-`-only regex leaves `\`/`/`/`|`
+ * gradients as raw unsplit text in `fill=` (`fill="#yellow\FFFFFF"`,
+ * jar-verified `taceve-49-mezi408`).
+ *
+ * The `getColorOrWhite` guard is preserved unchanged: a token that is not a
+ * colour at all still becomes `resolveColor`'s WHITE and never reaches an
+ * SVG attribute verbatim (`HColorSet.java:58-63`; the CodeQL
+ * js/html-constructed-from-input sink `resolveColor`'s own doc comment
+ * names). And when `parseColor` finds no gradient, this returns EXACTLY
+ * `resolveColor(value)` -- so every non-gradient key is byte-identical to
+ * the pre-T18 behaviour.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:78-119
+ */
+export function resolveColorPaint(value: string): Paint {
+  if (!isColorSpec(value)) return resolveColor(value);
+  const parsed = parseColor(value);
+  return typeof parsed === 'string' ? resolveColor(value) : parsed;
+}
+
+/**
  * Applies a single normalized, non stereotype-qualified skinparam key/value
  * pair to `acc`. Table lookup first; on a miss, delegates to the generic
  * per-element bucket fallback (see {@link applyElementBucketFallback}).
@@ -120,7 +149,7 @@ function applyElementBucketFallback(acc: SkinparamAccumulator, key: string, valu
 export function applyNormalKey(acc: SkinparamAccumulator, key: string, value: string): void {
   const handler = KEY_HANDLER_MAP.get(key);
   if (handler !== undefined) {
-    handler(acc, value, resolveColor(value));
+    handler(acc, value, resolveColor(value), resolveColorPaint(value));
     return;
   }
   applyElementBucketFallback(acc, key, value);

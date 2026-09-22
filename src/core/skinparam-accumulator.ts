@@ -10,6 +10,7 @@
  * per-field upstream provenance comments.
  */
 
+import type { Paint } from './paint.js';
 import type { ElementColors } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
@@ -54,14 +55,14 @@ export interface SkinparamAccumulator {
   text: string | undefined;
   arrow: string | undefined;
   noteBackground: string | undefined;
-  classBackground: string | undefined;
+  classBackground: Paint | undefined;
   interfaceBackground: string | undefined;
   enumBackground: string | undefined;
   actorStroke: string | undefined;
   packageBackground: string | undefined;
   packageBorder: string | undefined;
   packageBorderThickness: number | undefined;
-  classBorder: string | undefined;
+  classBorder: Paint | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
   /** R2j: `skinparam classAttributeFontSize<<Stereo>>` — see
@@ -105,13 +106,13 @@ export interface SkinparamAccumulator {
   circledCharacterFontItalic: boolean | undefined;
   pathHoverColor: string | undefined;
   diagramBorderColor: string | undefined;
-  iconPrivateColor: string | undefined;
+  iconPrivateColor: Paint | undefined;
   iconPrivateBackgroundColor: string | undefined;
-  iconPackageColor: string | undefined;
+  iconPackageColor: Paint | undefined;
   iconPackageBackgroundColor: string | undefined;
-  iconProtectedColor: string | undefined;
+  iconProtectedColor: Paint | undefined;
   iconProtectedBackgroundColor: string | undefined;
-  iconPublicColor: string | undefined;
+  iconPublicColor: Paint | undefined;
   iconPublicBackgroundColor: string | undefined;
   guillemetStart: string | undefined;
   guillemetEnd: string | undefined;

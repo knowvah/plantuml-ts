@@ -11,6 +11,9 @@
 import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+// CDD T18: `classBackground` is a `Paint` since D8; these assertions are
+// about its FLAT default value (`HColors#noGradient`, `core/paint.ts`).
+import { noGradient } from '../../../src/core/paint.js';
 import {
   measureEmptyPackageLeafDim,
   renderEmptyPackageIcon,
@@ -65,7 +68,7 @@ describe('renderEmptyPackageIcon', () => {
     const svg = renderEmptyPackageIcon({ id: 'foo', x: 6, y: 7, label: 'foo', ...dim }, defaultTheme);
     expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
     expect(svg).toContain('stroke-width="0.5"');
-    expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+    expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
   });
 
   it('draws NO <g> wrapper (plain path+line+text siblings)', () => {

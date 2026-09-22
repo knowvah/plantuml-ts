@@ -32,6 +32,7 @@
  * `skinparam packageStyle rect` sibling are already ported there, and any
  * keyword that resolves to no `USymbol` at all.
  */
+import type { Paint } from '../../core/paint.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { NamespaceGeo } from './class-geo-namespace-types.js';
@@ -97,8 +98,11 @@ function clusterTitleFont(theme: Theme, fontColor: string): FontConfiguration {
 export interface NamespaceUSymbolPaint {
   /** `Cluster#drawU`'s resolved back colour -- the group's own inline
    *  `#COLOR` override first, else the global package background
-   *  (`Cluster.java:360-362`). */
-  readonly backColor: string;
+   *  (`Cluster.java:360-362`). CDD T18/D8: a `Paint`, matching the
+   *  `ClusterDecoration#drawU` seam this feeds (which has taken
+   *  `Paint | null` since it was ported) -- an inline `#yellow\gold`
+   *  group colour is an `HColorGradient` upstream. */
+  readonly backColor: Paint;
   /** `Cluster#drawU`'s resolved border colour (`Cluster.java:316-320`). */
   readonly borderColor: string;
   /** `Cluster#drawU`'s `rounded` (`:321-324`: `style.value(RoundCorner)`,

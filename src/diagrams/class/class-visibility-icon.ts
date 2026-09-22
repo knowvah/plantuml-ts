@@ -61,7 +61,8 @@
 import type { Visibility } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import type { Theme } from '../../core/theme.js';
-import { linkWrap, attrs } from '../../core/svg.js';
+import { linkWrap, attrs, resolvePaint } from '../../core/svg.js';
+import type { Paint } from '../../core/paint.js';
 import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 
 /** `SkinParam#classAttributeIconSize()`'s own default (skin/SkinParam.java
@@ -129,12 +130,12 @@ const IE_MANDATORY_COLOR = { line: '#000000', background: '#000000' };
 // LineColor through the SAME theme-override-aware table (`iconPrivateColor`
 // etc) member rows already use, rather than re-deriving it against the
 // unthemed `core/skin/ColorParam.ts` defaults only.
-export function colorsFor(icon: Visibility, theme?: Theme): { line: string; background: string } {
+export function colorsFor(icon: Visibility, theme?: Theme): { line: Paint; background: Paint } {
   if (icon === '*') return IE_MANDATORY_COLOR;
   const fallback = VISIBILITY_COLORS[icon];
   const g = theme?.colors.graph;
   if (g === undefined) return fallback;
-  const OVERRIDES: Record<Exclude<Visibility, '*'>, { line: string | undefined; background: string | undefined }> = {
+  const OVERRIDES: Record<Exclude<Visibility, '*'>, { line: Paint | undefined; background: Paint | undefined }> = {
     '+': { line: g.iconPublicColor, background: g.iconPublicBackgroundColor },
     '-': { line: g.iconPrivateColor, background: g.iconPrivateBackgroundColor },
     '#': { line: g.iconProtectedColor, background: g.iconProtectedBackgroundColor },
@@ -253,9 +254,18 @@ export function renderVisibilityIcon(
   url?: UrlInfo,
   theme?: Theme,
 ): string {
-  const { line, background } = colorsFor(icon, theme);
+  // CDD T18: `icon*Color` is a `Paint` since D8 widened the theme fields,
+  // so resolve both here -- the ONE place either becomes an attribute
+  // value -- and carry any `<linearGradient>` def out with the shape
+  // (`svg.ts#extractGradientDefs` lifts it into the document `<defs>`).
+  // The `draw*` helpers below keep their plain-string signatures.
+  const paints = colorsFor(icon, theme);
+  const linePaint = resolvePaint(paints.line);
+  const backgroundPaint = resolvePaint(paints.background);
+  const line = linePaint.value ?? '';
   const filled = isFilled(icon, isField);
-  const fill = filled ? background : 'none';
+  const fill = filled ? (backgroundPaint.value ?? '') : 'none';
+  const paintDefs = linePaint.def + (filled ? backgroundPaint.def : '');
   const size = iconSizeOf(theme);
   const shape =
     icon === '-'
@@ -273,7 +283,7 @@ export function renderVisibilityIcon(
   // Jar-verified against `jovaxe-68-bube754` (classifier-level `[[{tooltip}]]`
   // + two icon-bearing member rows).
   const inner = url !== undefined ? linkWrap(shape, url) : shape;
-  return `<g${attrs([['data-visibility-modifier', visibilityModifierName(icon, isField)]])}>${inner}</g>`;
+  return `${paintDefs}<g${attrs([['data-visibility-modifier', visibilityModifierName(icon, isField)]])}>${inner}</g>`;
   // #lizard forgives -- pre-existing 6-param signature (icon/isField/
   // originX/originY/url?/theme?), unrelated to T7b; url/theme were added by
   // earlier G2 N21/N54 work. Collapsing to an options object is a public-
@@ -310,18 +320,20 @@ export function renderVisibilityIcon(
  * @see ~/git/plantuml/.../skin/VisibilityModifier.java:94-116
  * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:341-368
  */
-export function renderVisibilityUrlBackground(originX: number, originY: number, fill: string, url: UrlInfo): string {
+export function renderVisibilityUrlBackground(originX: number, originY: number, fill: Paint, url: UrlInfo): string {
   // T7b: routed through `attrs()` (was a raw template literal). Rule 4
   // (`core/svg.ts#strokeDecorationOf`) drops `stroke-width` when
   // `stroke="none"` -- matches upstream's own `if (!"none".equals(stroke))`
   // guard, so the combined `style=` carries `stroke:none;` alone, not the
   // pre-T7b literal's redundant `stroke-width="1"`.
-  const shape = `<rect${attrs([
+  // CDD T18: `fill` is `classifierFill`'s widened `Paint` return.
+  const resolved = resolvePaint(fill);
+  const shape = `${resolved.def}<rect${attrs([
     ['x', originX],
     ['y', originY],
     ['width', VISIBILITY_ICON_SIZE * 2],
     ['height', VISIBILITY_ICON_SIZE],
-    ['fill', fill],
+    ['fill', resolved.value],
     ['style', 'stroke:none;'],
   ])}/>`;
   return linkWrap(shape, url);

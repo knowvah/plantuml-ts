@@ -9,7 +9,8 @@
  *
  * @see ~/git/plantuml/.../decoration/symbol/USymbolFolder.java#drawFolder
  */
-import { attrs } from '../../core/svg.js';
+import { attrs, resolvePaint } from '../../core/svg.js';
+import type { Paint } from '../../core/paint.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS, shortenColor } from '../../core/svg-format.js';
 
@@ -112,14 +113,18 @@ export function renderFolderPolygon(
   points: ReadonlyArray<[number, number]>,
   stroke: string,
   strokeWidth: number,
-  fill: string,
+  fill: Paint,
 ): string {
   const d3 = DEFAULT_SVG_DECIMALS;
   const pts = points.map(([x, y]) => `${formatDecimal(x, d3)},${formatDecimal(y, d3)}`).join(',');
   const style = `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
-  return `<polygon${attrs([
+  // CDD T18: `DriverPolygonSvg#draw` (java:63-64) delegates its fill to
+  // `DriverRectangleSvg.applyFillColor`, so a `UPolygon` gets the SAME
+  // `createSvgGradient` + `url(#…)` treatment a `URectangle` does.
+  const resolved = resolvePaint(fill);
+  return `${resolved.def}<polygon${attrs([
     ['points', pts],
-    ['fill', fill],
+    ['fill', resolved.value],
     ['style', style],
   ])}/>`;
 }

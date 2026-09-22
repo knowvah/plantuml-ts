@@ -4,6 +4,9 @@ import { assembleSvg } from '../../../src/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
+// CDD T18: `classBackground` is a `Paint` since D8; these assertions are
+// about its FLAT default value (`HColors#noGradient`, `core/paint.ts`).
+import { noGradient } from '../../../src/core/paint.js';
 import { shortenColor } from '../../../src/core/svg-format.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
@@ -329,7 +332,7 @@ describe('renderClass — interface lollipop (G2 N20)', () => {
     () => {
       const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
       expect(svg).toContain('<ellipse cx="21.531" cy="11" rx="5" ry="5"');
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
       expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
       expect(svg).toContain('stroke-width="1.5"');
     },
@@ -712,7 +715,7 @@ describe('renderClass — classifier kind fill', () => {
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
       expect(svg).toContain('fill="#F00"');
-      expect(svg).not.toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).not.toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
 
     it('resolves a 3-digit shorthand hex the same way (#fff -> #FFFFFF)', () => {
@@ -736,7 +739,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#text:red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
 
     it('falls back to classBackground when color is a LINECOLOR-only spec (##red)', () => {
@@ -744,7 +747,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '##red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
   });
 

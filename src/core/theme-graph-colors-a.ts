@@ -5,8 +5,15 @@
  * module). Pure type-only move, no behavior change.
  */
 
+import type { Paint } from './paint.js';
+
 export interface ThemeGraphColorsA {
-  classBackground: string;
+  /** CDD T18/D8: `Paint`, not `string` -- `skinparam classBackgroundColor
+   *  #FEFECE-FFFFFF` is a gradient upstream (`HColorSet.java:107-116`) and
+   *  reaches `DriverRectangleSvg#applyFillColor`'s `createSvgGradient`
+   *  branch (java:82-96), not a flattened solid. Jar-verified
+   *  `dizuse-83-dabi909`/`taceve-49-mezi408`. */
+  classBackground: Paint;
   interfaceBackground: string;
   enumBackground: string;
   actorStroke: string;
@@ -34,7 +41,7 @@ export interface ThemeGraphColorsA {
    *  `cunavo-77-filo788` (`classBorderColor #F0F`, no `<style>` block,
    *  no stereotype tag match -- box `stroke`/both divider `stroke`s all
    *  render `#FF00FF`). */
-  classBorder?: string;
+  classBorder?: Paint;
   /** G2 N51: `skinparam classBorderThickness N` / `skinparam class {
    *  BorderThickness N }` -- the classifier box outline's + divider
    *  lines' own stroke-width override (`FromSkinparamToStyle.java:195`:

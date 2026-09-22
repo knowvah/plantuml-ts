@@ -39,7 +39,8 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { NamespaceGeo } from './layout.js';
 import { path, line, text, rect } from '../../core/svg.js';
-import { isTransparentColor } from '../../core/paint.js';
+import { isTransparentColor, parseColor } from '../../core/paint.js';
+import type { Paint } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 import { folderPathD, folderPolygonPoints, renderFolderPolygon } from './class-namespace-folder-outline.js';
 
@@ -104,7 +105,11 @@ export function titleFontColor(theme: Theme): string {
  * package/namespace outlines only -- no evidence this applies to any other
  * element family, so the shared helper is left untouched.
  */
-function packageFillValue(color: string): string {
+function packageFillValue(color: Paint): Paint {
+  // CDD T18/D8: a gradient is never the "no paint" keyword -- upstream's
+  // `HColorSet#parseColor` returns `HColors.none()` only from its two
+  // literal-keyword arms (java:82-83), before the separator scan.
+  if (typeof color !== 'string') return color;
   return isTransparentColor(color) ? 'none' : color;
 }
 
@@ -125,8 +130,18 @@ function packageFillValue(color: string): string {
  * {`): `<path ... fill="#DDD">` where this port previously emitted
  * `fill="none"` (the global default).
  */
-export function namespaceFill(geo: NamespaceGeo, theme: Theme): string {
-  return packageFillValue(geo.color ?? theme.colors.graph.packageBackground);
+/**
+ * CDD T18/D8: `parseColor` wraps BOTH tiers, not just one -- upstream's
+ * `Cluster#getBackColor` yields a single `HColor` from the one
+ * `HColorSet#parseColor` (java:78-119) whichever tier supplied the token,
+ * and `Cluster#drawU`'s shape is a `URectangle`/`UPolygon`, both of which
+ * emit a real def for a gradient (`DriverRectangleSvg.java:82-96`,
+ * `DriverPolygonSvg.java:63`). Jar-verified `dacixi-46-lina038`
+ * (`namespace A::B::C #yellow\gold {`: `<path fill="url(#…)">`, where this
+ * port previously emitted the unsplit literal `fill="#yellow\gold"`).
+ */
+export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
+  return packageFillValue(parseColor(geo.color ?? theme.colors.graph.packageBackground));
 }
 
 /**
@@ -335,7 +350,7 @@ const EMPTY_PACKAGE_STROKE_WIDTH = 0.5;
 
 /** {@link renderEmptyPackageIcon}'s three `...package_,title`-signature
  *  paint values -- see that function's own doc comment for the cascade. */
-function emptyPackagePaint(theme: Theme): { strokeWidth: number; border: string; fill: string } {
+function emptyPackagePaint(theme: Theme): { strokeWidth: number; border: string; fill: Paint } {
   const pkg = theme.colors.elements?.package;
   return {
     strokeWidth: pkg?.lineThickness ?? EMPTY_PACKAGE_STROKE_WIDTH,

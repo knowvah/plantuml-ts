@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1148 modules · 4218 exported names.
+1148 modules · 4223 exported names.
 
 ## `src/`
 
@@ -71,7 +71,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
-| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg` | Paint — the color/gradient value model for the rendering layer. |
+| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor.ts` | `PreprocessorResult`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -83,7 +83,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
-| `skinparam-key-handlers.ts` | `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
+| `skinparam-key-handlers.ts` | `resolveColorPaint`, `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
 | `skinparam-key-normalize.ts` | `UNPARSEABLE_COLOR`, `isColorSpec`, `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
 | `skinparam-stereo-keys.ts` | `applyStereoOverride` | Stereotype-qualified skinparam key handling (`key.includes('<<')` branch). |
 | `skinparam-style-block.ts` | `parseStyleBlock` | `<style>` block parsing — parseStyleBlock and its internal helpers. |
@@ -1106,7 +1106,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-command-types.ts` | `Command` | Shared `Command` shape for the class diagram dispatch table. |
 | `class-commands.ts` | `COMMANDS` | Command dispatch table for the class diagram parser. |
 | `class-container.ts` | `setNamespaceUrl`, `setNamespaceColor`, `openNamespaceBlock`, `openTogetherBlock`, `closeBraceScope`, `closeContainer`, `HEADER_STEREO_CAPTURE`, `setNamespaceStereotype`, `NAMESPACE_COMMANDS` | Descriptive-container helpers for the class parser. |
-| `class-declaration-extractors.ts` | `extractBody`, `extractDecorations`, `extractInheritance`, `parseIdDisplay` | Classifier-declaration field extractors (body / decorations / inheritance / generic / id-display) for the class parser. |
+| `class-declaration-extractors.ts` | `extractBody`, `DeclarationColors`, `parseDeclarationColors`, `extractDecorations`, `extractInheritance`, `parseIdDisplay` | Classifier-declaration field extractors (body / decorations / inheritance / generic / id-display) for the class parser. |
 | `class-declaration-parser.ts` | `ClassifierDecl`, `parseClassifierDecl`, `InheritanceParent`, `resolveInheritance`, `parseTagTokens`, `applyClassifierDecl` | Classifier declaration line parsing for PlantUML class diagrams. |
 | `class-descriptive-leaf-command.ts` | `ALLOW_MIXING_ERROR`, `adjudicateAllowMixing`, `DESCRIPTIVE_LEAF_COMMANDS` | Descriptive-element leaf declaration command (`database X`, `mix_actor Y`). |
 | `class-descriptive-leaf-keywords.ts` | `DESCRIPTIVE_LEAF_KEYWORDS`, `USECASE_LEAF_KEYWORDS`, `STATE_LEAF_KEYWORD`, `ALL_DESCRIPTIVE_LEAF` | Class-engine descriptive-leaf keyword tables — upstream `CommandCreateElementFull2`'s full leaf set (`(state\|` + descdiagram's shared `CommandCreateElementFull.ALL_TYPES` + `)`). |
@@ -1221,7 +1221,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-bullet-atom.ts` | `renderBulletAtom` | `renderBulletAtom` -- the creole bullet marker (`klimt/creole/atom/ Bullet.java`), split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-badge-tag.ts` | `renderBadge`, `renderGenericTag` | `renderBadge` (the kind badge in a classifier's header) and `renderGenericTag` (`class Foo<T>`'s generic type-parameter tag box) -- split out of `renderer-classifier-box.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-box.ts` | `renderRow`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
-| `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `classifierFill`, `classBorder`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
+| `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `classifierFill`, `classBorder`, `classBorderLine`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
 | `renderer-classifier-rows.ts` | `attributeFontSize`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint`, `renderEdgeCardinalityLabels`, `renderEdgeKalBoxes` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |

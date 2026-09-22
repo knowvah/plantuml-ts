@@ -234,3 +234,33 @@ export function paintToSvg(p: Paint): { fill: string; def?: string } {
     '</linearGradient>';
   return { fill: `url(#${id})`, def };
 }
+
+/**
+ * Collapse a {@link Paint} to a single plain colour string — a gradient
+ * becomes its FIRST colour, a plain string round-trips unchanged.
+ *
+ * Upstream's `HColors#noGradient` (`klimt/color/HColors.java:139-146`:
+ * `if (color instanceof HColorGradient) return ((HColorGradient) color)
+ * .getColor1();`), whose name this function keeps. It is reached from the
+ * ONE driver that genuinely cannot paint a gradient: a `ULine`.
+ * `DriverLineSvg#draw` (`klimt/drawing/svg/DriverLineSvg.java:76-82`)
+ * tests the stroke colour and, for a gradient, calls
+ * `svg.setStrokeColor(gr.getColor1().toSvg(mapper))` — no
+ * `createSvgGradient`, no `url(#…)`, no def. Its rectangle sibling
+ * (`DriverRectangleSvg.java:97-111 #applyStrokeColor`) does the opposite,
+ * which is why one `classBorderColor #FFBD42-white` paints the box outline
+ * with a gradient and both inner divider lines flat `#FFBD42`
+ * (jar-verified `capode-04-jeka075`).
+ *
+ * The condition is the SHAPE KIND, never the colour: callers pick this
+ * function because they are about to emit a `<line>`, not because the
+ * Paint looks a particular way.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverLineSvg.java:76-82
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColors.java:139-146
+ */
+export function noGradient(p: Paint): string;
+export function noGradient(p: Paint | undefined): string | undefined;
+export function noGradient(p: Paint | undefined): string | undefined {
+  if (p === undefined || typeof p === 'string') return p;
+  return p.color1;
+}

@@ -113,8 +113,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconprivatecolor'],
-    (acc, _v, color) => {
-      acc.iconPrivateColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPrivateColor = paint;
     },
   ],
   [
@@ -125,8 +125,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconpackagecolor'],
-    (acc, _v, color) => {
-      acc.iconPackageColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPackageColor = paint;
     },
   ],
   [
@@ -137,8 +137,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconprotectedcolor'],
-    (acc, _v, color) => {
-      acc.iconProtectedColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconProtectedColor = paint;
     },
   ],
   [
@@ -149,8 +149,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconpubliccolor'],
-    (acc, _v, color) => {
-      acc.iconPublicColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPublicColor = paint;
     },
   ],
   [

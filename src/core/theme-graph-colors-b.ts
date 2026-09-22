@@ -5,6 +5,8 @@
  * module). Pure type-only move, no behavior change.
  */
 
+import type { Paint } from './paint.js';
+
 export interface ThemeGraphColorsB {
   /** G2 N66: `EntityImageNote`'s OWN `Style#wrapWidth` cascade -- a
    *  class-diagram NOTE's body text has a SEPARATE style signature from
@@ -294,13 +296,13 @@ export interface ThemeGraphColorsB {
    *  jar-verified `lufide-34-cexu026` (all 8 keys set; only
    *  `iconProtectedBackgroundColor` actually diverges from the
    *  hardcoded default, `#FECF6C` vs `#FFFF44`). */
-  iconPrivateColor?: string;
+  iconPrivateColor?: Paint;
   iconPrivateBackgroundColor?: string;
-  iconPackageColor?: string;
+  iconPackageColor?: Paint;
   iconPackageBackgroundColor?: string;
-  iconProtectedColor?: string;
+  iconProtectedColor?: Paint;
   iconProtectedBackgroundColor?: string;
-  iconPublicColor?: string;
+  iconPublicColor?: Paint;
   iconPublicBackgroundColor?: string;
   edgeLabel: string;
   // NOTE: upstream actor head (via Fashion.apply in ActorStickMan.java) inherits

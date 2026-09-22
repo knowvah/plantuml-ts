@@ -60,14 +60,14 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['classbackgroundcolor'],
-    (acc, _v, color) => {
-      acc.classBackground = color;
+    (acc, _v, _color, paint) => {
+      acc.classBackground = paint;
     },
   ],
   [
     ['classbordercolor'],
-    (acc, _v, color) => {
-      acc.classBorder = color;
+    (acc, _v, _color, paint) => {
+      acc.classBorder = paint;
     },
   ],
   [

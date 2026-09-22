@@ -10,6 +10,8 @@ import {} from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import {} from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { noGradient, parseColor } from '../../core/paint.js';
+import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
@@ -29,7 +31,7 @@ import {} from './class-shadow.js';
  *  coincidentally default to the SAME jar hex, `#F1F1F1`, as class --
  *  see `classifierFill`'s own doc comment for why this is NOT the same as
  *  object/map/json sharing class's CASCADE). */
-export function classDefaultBackground(theme: Theme): string {
+export function classDefaultBackground(theme: Theme): Paint {
   return theme.colors.graph.classCascadeBackground ?? theme.colors.graph.classBackground;
 }
 
@@ -105,7 +107,7 @@ export function resolveElementHeaderFont(theme: Theme, sname: string): string | 
   return undefined;
 }
 
-export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
+export function classifierFill(geo: ClassifierGeo, theme: Theme): Paint {
   // Upstream has no `enum`/`interface` StyleSignature for the box fill --
   // `EntityImageClassHeader#getStyleSignature` (and the lollipop-interface
   // eye's own `ColorParam.classBackground` read) both key on `SName.class_`
@@ -124,8 +126,20 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // state's `state-render-colors.ts` can reuse the SAME grammar for a
   // note's/state's own `#color` override -- see that module's doc comment
   // for the full extraction rule).
+  // CDD T18/D8: `parseColor` FIRST -- upstream runs the identical
+  // `HColorSet#parseColor` (java:78-119) on a classifier's own inline
+  // declaration colour as on every skinparam one, so `class Test1
+  // #yellow\FFFFFF` is an `HColors.gradient(...)` here too, reaching
+  // `DriverRectangleSvg#applyFillColor`'s def branch (java:82-96). The
+  // pre-T18 `resolveColorToSvgHex(override)` handed the unsplit token
+  // straight to `fill=` (jar-verified `taceve-49-mezi408`'s Test1-4).
+  // A non-gradient token still goes through `resolveColorToSvgHex`
+  // unchanged, so every flat inline override is byte-identical.
   const override = resolveBareOrBackColor(geo.color);
-  if (override !== undefined) return resolveColorToSvgHex(override);
+  if (override !== undefined) {
+    const parsed = parseColor(override);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
   // G3/O1: `object`/`map`/`json` each carry their OWN StyleSignature
   // upstream (`SName.object`/`map`/`json` under `SName.objectDiagram`),
   // independent of class's `SName.class_` (`EntityImageObject`/`Map`/
@@ -172,7 +186,7 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
  * line-color half is a SEPARATE, unsurveyed mechanism, out of this
  * iteration's scope).
  */
-export function classBorder(geo: ClassifierGeo, theme: Theme): string {
+export function classBorder(geo: ClassifierGeo, theme: Theme): Paint {
   // G2 N37: the `.tagname` sub-selector cascade wins over the plain
   // ancestor cascade -- see `classifierFill`'s identical precedent above.
   const tagBorder = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.border;
@@ -181,6 +195,34 @@ export function classBorder(geo: ClassifierGeo, theme: Theme): string {
   // `classCascadeBackground ?? classBackground` two-tier precedent -- see
   // `theme.ts#classBorder`'s own doc comment.
   return tagBorder ?? theme.colors.graph.classCascadeBorder ?? theme.colors.graph.classBorder ?? theme.colors.border;
+}
+
+/**
+ * CDD T18/D8, the NAMED divider-line branch: the stroke a classifier's
+ * inner divider `<line>`s take, as opposed to the box outline's
+ * {@link classBorder}.
+ *
+ * Upstream resolves ONE `LineColor` for both (`EntityImageClass.java`'s
+ * single `getStyle().value(PName.LineColor)`, see {@link classBorder}) and
+ * splits them at the DRIVER, by shape kind, not by colour: a `URectangle`
+ * with a gradient stroke gets a real def and `stroke="url(#…)"`
+ * (`klimt/drawing/svg/DriverRectangleSvg.java:97-111 #applyStrokeColor`),
+ * while a `ULine` with the SAME gradient stroke is flattened to its first
+ * colour (`klimt/drawing/svg/DriverLineSvg.java:76-82`:
+ * `if (color instanceof HColorGradient) svg.setStrokeColor(gr.getColor1()
+ * .toSvg(mapper))` -- `HColors#noGradient`'s unwrap, `core/paint.ts
+ * #noGradient`). Jar-verified `capode-04-jeka075`: `skinparam
+ * classBorderColor #FFBD42-white` draws the box `stroke="url(#…)"` and
+ * BOTH divider lines `stroke="#FFBD42"`.
+ *
+ * So every `line(...)` call in `renderer-classifier-box.ts` /
+ * `renderer-body-enhanced.ts` reads this, and every `rect(...)`/`path(...)`
+ * call reads {@link classBorder}. For a non-gradient border the two are the
+ * identical value, which is why no pre-T18 output moves.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverLineSvg.java:76-82
+ */
+export function classBorderLine(geo: ClassifierGeo, theme: Theme): string {
+  return noGradient(classBorder(geo, theme));
 }
 
 /**

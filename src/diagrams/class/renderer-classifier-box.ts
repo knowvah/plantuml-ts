@@ -39,6 +39,7 @@ import {
   resolveElementHeaderBackground,
   classifierFill,
   classBorder,
+  classBorderLine,
   classBorderStrokeWidth,
   MAP_JSON_DIVIDER_STROKE_WIDTH,
 } from './renderer-classifier-colors.js';
@@ -94,7 +95,7 @@ function mapColumnDividerEntries(geo: ClassifierGeo, theme: Theme): Array<{ y: n
       item: {
         url: geo.url,
         body: line(dividerX, geo.y + top, dividerX, geo.y + bottom, {
-          stroke: classBorder(geo, theme),
+          stroke: classBorderLine(geo, theme),
           strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
         }),
       },
@@ -227,7 +228,7 @@ function buildJsonBodyPrimitives(
   body: readonly JsonBodyItem[],
   theme: Theme,
 ): UrlTaggedPrimitive[] {
-  const stroke = { stroke: classBorder(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH };
+  const stroke = { stroke: classBorderLine(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH };
   return body.map((item) => {
     if (item.kind === 'hline')
       return {
@@ -252,7 +253,7 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
     return [
       {
         url: geo.url,
-        body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorder(geo, theme)),
+        body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorderLine(geo, theme)),
       },
     ];
   }
@@ -275,11 +276,11 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
       url: geo.url,
       body: isMapOrJsonDivider
         ? line(geo.x, geo.y + divY, geo.x + geo.width, geo.y + divY, {
-            stroke: classBorder(geo, theme),
+            stroke: classBorderLine(geo, theme),
             strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
           })
         : line(geo.x + 1, geo.y + divY, geo.x + geo.width - 1, geo.y + divY, {
-            stroke: classBorder(geo, theme),
+            stroke: classBorderLine(geo, theme),
             strokeWidth: classBorderStrokeWidth(geo, theme),
           }),
     },
