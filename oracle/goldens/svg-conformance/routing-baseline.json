@@ -1,5 +1,5 @@
 {
-  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins).",
+  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -55802,6 +55802,236 @@
       "status": "agree",
       "measuredAt": "2026-09-22",
       "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "conija-14-nuta580",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cutasu-32-zete658",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dacisu-77-paca840",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fijali-69-pina030",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gojadi-30-tame684",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gojatu-01-jibo986",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jikase-93-tipa633",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lilura-67-cati343",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lukexe-74-moco323",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "murotu-83-cebo380",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "najuxe-66-nuzi850",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "niduni-65-bujo175",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pakemi-72-cani346",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "picija-82-jebu272",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "remanu-84-sega129",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sosono-24-vuro518",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tabaxa-70-pomu341",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tagofo-84-nuti362",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tepazu-23-zapo261",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vubofi-17-dedi529",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xidura-26-teki974",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xogixe-78-zuro619",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zubevi-64-fume582",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
     }
   ]
 }

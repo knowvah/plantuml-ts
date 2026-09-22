@@ -21,12 +21,12 @@ for the handful of fixtures that use them.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T18 | `Paint` at the class colour seam, audit-first (D8, A2b E2, A3 M4); also the `extractDecorations` `line/text/lineStyle` fields | typescript-pro (opus) | `class-declaration-extractors.ts`, `paint.ts`, `color-override.ts`, `theme*.ts`, `skinparam-key-handlers*.ts` (dedicated-key path), `renderer-classifier-colors.ts`, tests | — | [ ] |
-| T19 | Rows, fonts, icon colours + stereotype-scoped skinparam (A3 M1 text/M2/M5/M8, icon selectors) | typescript-pro (sonnet) | `renderer-classifier-rows.ts`, `class-visibility-icon.ts`, `skinparam-key-handlers-table-a/b.ts` (new keys), tests | T18 | [ ] |
-| T20 | Box chrome: header split, border/dash, icon centring, generic-corner (E1, A3 M1 border half, A5 M6, unclassified) | typescript-pro (sonnet) | `renderer-classifier-box.ts`, `class-member-rows.ts`, `renderer-classifier-colors.ts` (border/dasharray only), tests | T18 | [ ] |
-| T21 | Stereotype-spot badge glyphs + kind mapping (A5 M3a/M3b) | typescript-pro (sonnet) | `class-badge.ts`, tests | T18 | [ ] |
-| T22 | USymbol leaves in class: `circle`/`()` interface eye + `allow_mixing` (A2b E8, cacoma) | typescript-pro (sonnet) | `class-layout-leaf-shapes.ts`, `renderer-usymbol-entity.ts`, `layout.ts`, tests | T18 | [ ] |
-| T23 | Per-member `[[[url]]]` anchors, one `<a>` per row (A2b E10) | typescript-pro (sonnet) | `renderer-url.ts`, tests | T18 | [ ] |
+| T18 | `Paint` at the class colour seam, audit-first (D8, A2b E2, A3 M4); also the `extractDecorations` `line/text/lineStyle` fields | typescript-pro (opus) | `class-declaration-extractors.ts`, `paint.ts`, `color-override.ts`, `theme*.ts`, `skinparam-key-handlers*.ts` (dedicated-key path), `renderer-classifier-colors.ts`, tests | — | [x] |
+| T19 | Rows, fonts, icon colours + stereotype-scoped skinparam (A3 M1 text/M2/M5/M8, icon selectors) | typescript-pro (sonnet) | `renderer-classifier-rows.ts`, `class-visibility-icon.ts`, `skinparam-key-handlers-table-a/b.ts` (new keys), tests | T18 | [x] |
+| T20 | Box chrome: header split, border/dash, icon centring, generic-corner (E1, A3 M1 border half, A5 M6, unclassified) | typescript-pro (sonnet) | `renderer-classifier-box.ts`, `class-member-rows.ts`, `renderer-classifier-colors.ts` (border/dasharray only), tests | T18 | [x] |
+| T21 | Stereotype-spot badge glyphs + kind mapping (A5 M3a/M3b) | typescript-pro (sonnet) | `class-badge.ts`, tests | T18 | [x] |
+| T22 | USymbol leaves in class: `circle`/`()` interface eye + `allow_mixing` (A2b E8, cacoma) | typescript-pro (sonnet) | `class-layout-leaf-shapes.ts`, `renderer-usymbol-entity.ts`, `layout.ts`, tests | T18 | [x] |
+| T23 | Per-member `[[[url]]]` anchors, one `<a>` per row (A2b E10) | typescript-pro (sonnet) | `renderer-url.ts`, tests | T18 | [x] |
 
 Specs: [`T18-paint-seam.md`](T18-paint-seam.md),
 [`T19-rows-fonts-icons.md`](T19-rows-fonts-icons.md),
