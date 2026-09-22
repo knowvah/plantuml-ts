@@ -13,6 +13,7 @@ import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
 // `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
 // comment.
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
 
 /** Every creole text atom's line height floors at 10px --
  *  `AtomText#calculateDimensionSlow`'s `if (h < 10) h = 10;`. Observable
@@ -143,9 +144,18 @@ export function buildHeaderRows(input: {
   /** G2 N64: the NBSP (U+00A0) glyph's own measured width at `fontSpec`,
    *  pre-measured by the caller -- see the blank-line handling below. */
   blankLineRenderWidth: number;
+  /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
+   *  no creole markup (`class-layout-header-creole.ts#buildHeaderLine`'s
+   *  `hasMarkup`) -- set as `row.atoms` for a markup-bearing line only, so
+   *  `renderer-classifier-rows.ts#renderRowText` draws it via the SAME
+   *  per-atom path (`renderRowAtoms`) a member row already uses, while a
+   *  markup-free header line keeps the pre-T25 plain-text row untouched
+   *  (never set for the blank-line NBSP row -- that branch's own render
+   *  substitution has no atom-path analogue). */
+  lineAtoms?: ReadonlyArray<readonly MemberRenderAtom[] | undefined>;
 }): ClassifierGeo['rows'] {
   const { header, lines, lineWidths, align, circleWidth, widthStereoAndName, nameWidth, h1, h2 } = input;
-  const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth } = input;
+  const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth, lineAtoms } = input;
   const indent = circleWidth + (widthStereoAndName - nameWidth) / 2 + h1 + h2 + NAME_LEFT_MARGIN;
   const badgeIndent = h1 + BADGE_LEFT_MARGIN + badgeRadius;
   const lastIndex = lines.length - 1;
@@ -188,6 +198,10 @@ export function buildHeaderRows(input: {
       ...(i === lastIndex ? { badgeIndent } : {}),
       fontFamily: fontSpec.family,
       fontSize: fontSpec.size,
+      // cdd-T25 (M8b): never for the blank-line NBSP substitution row --
+      // that branch's own render-time substitution has no atom-path
+      // analogue (see `lineAtoms`'s own doc comment above).
+      ...(!isBlank && lineAtoms?.[i] !== undefined ? { atoms: lineAtoms[i] } : {}),
     };
   });
 }

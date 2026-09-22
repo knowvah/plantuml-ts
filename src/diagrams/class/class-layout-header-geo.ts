@@ -70,6 +70,36 @@ export interface StereoGeoOptions {
 }
 
 /**
+ * G2 N64 item 45 / N65 item 35: split a classifier display name on its
+ * `\n`/`\l`/`\r` line-break escapes (`Display.getWithNewlines`, T1's
+ * `splitDisplayLines`) then word-wrap EACH line via `wrapPlainTextLine`
+ * (Fission) when a `MaximumWidth` cascade is in effect -- a no-op at
+ * `headerMaxWidth<=0` (the overwhelming majority of classifiers). Split out
+ * of `computeHeaderNameGeo` purely to keep that function's NLOC under the
+ * project's per-function cap (cdd-T25); a pure move, no behavior change.
+ * `header.headerText === classifier.display`, which for a COLLAPSED
+ * namespace/package leaf (`class-container.ts#closeContainer`) is already a
+ * `parseWithNewlines` result REJOINED with a real `\n` -- harmless here:
+ * neither this call nor its T1 predecessor (`splitEdgeLabelLines`) ever
+ * treated a real newline as a break (upstream doesn't either, `Display.java
+ * :262-346` only breaks on the literal two-char token/BLOCK_E1 sentinels),
+ * so behavior is unchanged for that case too.
+ */
+function splitAndWrapHeaderLines(
+  headerText: string,
+  headerFont: { family: string; size: number },
+  headerMaxWidth: number,
+  measurer: StringMeasurer,
+): { headerLines: readonly string[]; headerAlign: 'center' | 'left' | 'right' } {
+  const rawHeaderSplit = splitDisplayLines(headerText);
+  const headerLines =
+    headerMaxWidth > 0
+      ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
+      : rawHeaderSplit.lines;
+  return { headerLines, headerAlign: rawHeaderSplit.align };
+}
+
+/**
  * The badge-decision + header display-text sizing half of the generic
  * classifier header (`HeaderLayout#getDimension`'s `nameDim`/badge terms).
  * Split out of `measureGenericClassifier` purely to keep that function's
@@ -78,7 +108,7 @@ export interface StereoGeoOptions {
  */
 export function computeHeaderNameGeo(
   classifier: Classifier,
-  headerFont: { family: string; size: number },
+  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
   fontSpec: { family: string; size: number },
   measurer: StringMeasurer,
   options: HeaderGeoOptions,
@@ -96,31 +126,13 @@ export function computeHeaderNameGeo(
   // `degenerateSingleClassifier` (class-geo-builders.ts) can copy it
   // straight off the SAME `MeasuredClassifier`.
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
-  // G2 N64 item 45: a classifier display name can itself carry `\n`/`\l`/
-  // `\r` line-break escapes -- jar routes it through the SAME
-  // `Display.getWithNewlines` state machine a relationship label uses
-  // (T1: `splitDisplayLines`, `core/klimt/creole/DisplayNewlines.ts`).
-  // `header.headerText === classifier.display`, which for a COLLAPSED
-  // namespace/package leaf (`class-container.ts#closeContainer`) is already
-  // a `parseWithNewlines` result REJOINED with a real `\n` -- harmless here:
-  // neither this call nor its T1 predecessor (`splitEdgeLabelLines`) ever
-  // treated a real newline as a break (upstream doesn't either,
-  // `Display.java:262-346` only breaks on the literal two-char token/BLOCK_E1
-  // sentinels), so behavior is unchanged for that case too.
-  const rawHeaderSplit = splitDisplayLines(header.headerText);
-  // G2 N65 item 35: word-wraps EACH already-split line via `wrapPlainTextLine`
-  // (Fission) when a `MaximumWidth` cascade is in effect -- a no-op at
-  // `headerMaxWidth<=0` (the overwhelming majority of classifiers).
-  const headerLines =
-    headerMaxWidth > 0
-      ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
-      : rawHeaderSplit.lines;
-  const headerAlign = rawHeaderSplit.align;
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight } = buildHeaderLineMetrics(
+  const { headerLines, headerAlign } = splitAndWrapHeaderLines(header.headerText, headerFont, headerMaxWidth, measurer);
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms } = buildHeaderLineMetrics(
     headerLines,
     headerFont,
     measurer,
     sprites,
+    header.headerItalic,
   );
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
@@ -145,6 +157,7 @@ export function computeHeaderNameGeo(
     headerTextWidth,
     nameWidth,
     blankLineRenderWidth,
+    headerLineAtoms,
   };
 }
 
@@ -424,6 +437,7 @@ function buildHeaderNameRowsGeo(
     headerTextWidth: headerNameGeo.headerTextWidth,
     badgeRadius,
     blankLineRenderWidth: headerNameGeo.blankLineRenderWidth,
+    lineAtoms: headerNameGeo.headerLineAtoms,
   });
 }
 

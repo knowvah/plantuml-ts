@@ -19,8 +19,12 @@ import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 /** {@link computeMeasuredLabelAttrs}'s magic-arrow arm, factored out to keep
  *  that function's NLOC under the project's per-function cap -- resolves a
  *  leading `<size:N>` tag ({@link resolveLineFont}) then decodes escapes on
- *  the result. `undefined` for an absent/empty remaining text. */
-function resolveMagicArrowText(
+ *  the result. `undefined` for an absent/empty remaining text. Exported
+ *  (cdd-T25) so `class-edge-label-attach.ts#attachMagicArrow` can resolve
+ *  the SAME `<size:N>` override for the RENDERED ink -- this measurement
+ *  arm and that render arm must never drift (one resolver, two call
+ *  sites), matching `xamule-03-jeda376`'s own DOT-box-vs-ink split. */
+export function resolveMagicArrowText(
   text: string | undefined,
   font: { family: string; size: number },
 ): { text: string; font: { family: string; size: number } } | undefined {

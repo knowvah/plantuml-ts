@@ -25,6 +25,7 @@ import {
 } from './class-magic-arrow.js';
 import { applyGuillemet } from '../../core/edge-label-box.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
+import { resolveMagicArrowText } from './class-edge-label-measure.js';
 import { stripEdgeLabelVisibility, visibilityBlockAnchor } from './class-edge-visibility.js';
 import type { Kal } from './class-kal.js';
 import type { NoteBoxContext } from './class-layout-edge-labels.js';
@@ -274,22 +275,36 @@ function attachMagicArrow(
 ): void {
   const { center, measurer } = ctx;
   const angle = magicArrowAngle(fromToPoints, magic.direction);
-  const hasText = magic.text !== undefined && magic.text !== '';
   // SI25 D2: the resolved arrow font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`, `TextBlockArrow2.java:57` reads `getSize2D()` off it) --
   // `{ theme.fontFamily, 13 }` with no override, byte-identical to before.
-  const font = ctx.labelFont;
-  const textWidth = hasText ? measurer.measure(magic.text, font).width : 0;
-  const blockLeft = center.x - (font.size + textWidth) / 2;
+  const baseFont = ctx.labelFont;
+  // cdd-T25 (xamule-03-jeda376): resolves a leading `<size:N>` tag on the
+  // text run -- the SAME resolver `class-edge-label-measure.ts
+  // #computeMeasuredLabelAttrs` already applies to size the DOT box
+  // reservation (that side was already correct; this render side was not,
+  // drawing the literal tag at the base font). The arrow GLYPH always
+  // stays at `baseFont` (`TextBlockArrow2.calculateDimension` measures the
+  // BASE arrow font unconditionally, `klimt/shape/TextBlockArrow2.java
+  // :57,87` -- see this function's own doc comment) -- only the TEXT run's
+  // font/text resolve to the tag's override.
+  const resolved = resolveMagicArrowText(magic.text, baseFont);
+  const textWidth = resolved !== undefined ? measurer.measure(resolved.text, resolved.font).width : 0;
+  const blockLeft = center.x - (baseFont.size + textWidth) / 2;
   edgeGeo.arrowGlyph = {
-    points: magicArrowGlyphPoints(blockLeft, center.y - font.size / 2, angle, font.size),
+    points: magicArrowGlyphPoints(blockLeft, center.y - baseFont.size / 2, angle, baseFont.size),
   };
-  if (hasText) {
-    edgeGeo.label = portLabelAnchor(
-      magic.text,
-      { x: blockLeft + font.size + textWidth / 2, y: center.y },
+  if (resolved !== undefined) {
+    const anchor = portLabelAnchor(
+      resolved.text,
+      { x: blockLeft + baseFont.size + textWidth / 2, y: center.y },
       measurer,
-      font,
+      resolved.font,
     );
+    // Only carries `fontSize` when it actually diverges from the base
+    // arrow font -- every magic-arrow label with no `<size:N>` tag renders
+    // byte-identical to the pre-T25 output (`renderer-edge.ts#renderEdge
+    // SingleLabel`'s own `fontSize !== undefined` override gate).
+    edgeGeo.label = resolved.font.size !== baseFont.size ? { ...anchor, fontSize: resolved.font.size } : anchor;
   }
 }
