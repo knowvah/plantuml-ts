@@ -1,4 +1,5 @@
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 import { defineConfig } from 'vitest/config';
 
@@ -6,6 +7,12 @@ import {
   COVERAGE_ISOLATE_ENV_VAR,
   resolveCoverageReportsDirectory,
 } from './tests/helpers/coverage-reports-directory.js';
+
+// This config sits at the repo root, so '.' resolves to it. Passed to the
+// cobertura reporter below so `filename` attributes come out repo-relative
+// (`src/...`) rather than relative to reportsDirectory -- Code Quality's
+// bot-comment file links need repo-relative paths to resolve.
+const REPO_ROOT = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   test: {
@@ -21,6 +28,10 @@ export default defineConfig({
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
+      // Vitest's own default report list ('text', 'html', 'clover', 'json')
+      // stated explicitly so adding cobertura (for GitHub Code Quality, D4)
+      // doesn't drop any of them.
+      reporter: ['text', 'html', 'clover', 'json', ['cobertura', { projectRoot: REPO_ROOT }]],
       // Vitest derives its raw-shard scratch dir as `resolve(reportsDirectory,
       // '.tmp')` and `rm -rf`s it at run start, so two concurrent runs sharing
       // this value delete each other's shards mid-flight -- the second run's
