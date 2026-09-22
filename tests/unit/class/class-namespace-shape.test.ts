@@ -6,6 +6,7 @@ import {
   getHTitle,
   getTitleBaselineOffset,
   renderNamespaceFolder,
+  renderNamespaceRect,
   PACKAGE_ROUND_CORNER,
   PACKAGE_STROKE_WIDTH,
   namespaceFill,
@@ -311,5 +312,60 @@ describe('renderEmptyPackageIcon — <style> package {} cascade (xitobu-41-lame2
     expect(svg).toContain('fill="#F1F1F1"');
     expect(svg).toContain('stroke="#181818"');
     expect(svg).toContain('stroke-width="0.5"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CDD T18b (journal row 46 / cdd-T18.md §9): `skinparam packageBorderColor`/
+// `packageBackgroundColor` DO recolour the collapsed-EMPTY-package leaf
+// upstream (`cocube-46-tusu692`) but must NOT repaint an unstyled leaf with
+// the CLUSTER's own `...package_,group` default (`gatula-10-bifu561`).
+// ---------------------------------------------------------------------------
+
+describe('renderEmptyPackageIcon — flat skinparam packageBorderColor routes to the leaf (cocube-46-tusu692)', () => {
+  const blueBorder = {
+    ...defaultTheme,
+    colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBorder: '#0000FF' } },
+  };
+
+  it('recolours the leaf outline/hline to the skinparam value', () => {
+    const svg = renderEmptyPackageIcon(finonoGeo(), blueBorder);
+    expect(svg).toContain('stroke="#00F"');
+  });
+
+  it('leaves the leaf background at its own default (packageBackgroundColor unset)', () => {
+    const svg = renderEmptyPackageIcon(finonoGeo(), blueBorder);
+    expect(svg).toContain('fill="#F1F1F1"');
+  });
+
+  it('does not affect an unstyled leaf (gatula-10-bifu561 stays #181818/#F1F1F1)', () => {
+    const svg = renderEmptyPackageIcon(finonoGeo(), defaultTheme);
+    expect(svg).toContain('stroke="#181818"');
+    expect(svg).toContain('fill="#F1F1F1"');
+  });
+
+  it('lets a `<style> package {}` block still win over the flat skinparam (cascade order)', () => {
+    const styledOverBorder = {
+      ...blueBorder,
+      colors: { ...blueBorder.colors, elements: { package: { border: 'red' } } },
+    };
+    const svg = renderEmptyPackageIcon(finonoGeo(), styledOverBorder);
+    expect(svg).toContain('stroke="#F00"');
+  });
+});
+
+describe('renderNamespaceFolder/Rect/namespaceFill — cluster defaults unaffected by CDD T18b', () => {
+  it('renderNamespaceFolder keeps the cluster stroke default #000000 when packageBorder is unset', () => {
+    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    expect(svg).toContain('stroke="#000"');
+  });
+
+  it('renderNamespaceRect keeps the cluster stroke default #000000 when packageBorder is unset', () => {
+    const svg = renderNamespaceRect(finonoGeo({ label: '' }), defaultTheme);
+    expect(svg).toContain('stroke="#000"');
+  });
+
+  it('namespaceFill keeps the cluster fill default "none" when packageBackground is unset', () => {
+    expect(namespaceFill(finonoGeo(), defaultTheme)).toBe('none');
   });
 });

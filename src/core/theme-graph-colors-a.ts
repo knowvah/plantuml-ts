@@ -17,8 +17,22 @@ export interface ThemeGraphColorsA {
   interfaceBackground: string;
   enumBackground: string;
   actorStroke: string;
-  packageBackground: string;
-  packageBorder: string;
+  /** CDD T18b: optional, not `string` -- `defaultTheme` (theme.ts)
+   *  deliberately omits these two so a genuinely unstyled theme reads
+   *  `undefined`. Each `...package_,group`-signature consumer (the
+   *  populated-namespace cluster, `Cluster.java:285-296`) supplies its
+   *  OWN unstyled default via `?? <default>` --
+   *  `class-namespace-shape.ts#PACKAGE_CLUSTER_BACKGROUND_DEFAULT`/
+   *  `PACKAGE_CLUSTER_BORDER_DEFAULT`, `renderer-cluster.ts:133`. The
+   *  collapsed-EMPTY-package leaf's `...package_,title` signature
+   *  (`EntityImageEmptyPackage.java:87-88`, no `group` ancestor) reads
+   *  the SAME field ONLY as a mid-tier override -- above its own
+   *  `theme.colors.border`/`classBackground` default, below `<style>
+   *  package {}` (`class-namespace-shape.ts#emptyPackagePaint`) -- jar-
+   *  verified `cocube-46-tusu692` (`packageBorderColor blue` recolours
+   *  the leaf) vs `gatula-10-bifu561` (unstyled leaf stays #181818). */
+  packageBackground?: string;
+  packageBorder?: string;
   /** G2 N18: `skinparam packageBorderThickness N` / `skinparam
    *  package { BorderThickness N }` -- the folder-tab outline's own
    *  stroke width (jar default 1.5, `class-namespace-shape.ts

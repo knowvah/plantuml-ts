@@ -67,6 +67,17 @@ export const PACKAGE_ROUND_CORNER = 5;
  *  containers (`renderer-cluster.ts`). */
 export const PACKAGE_STROKE_WIDTH = 1.5;
 
+/** CDD T18b: the populated-namespace cluster's own `...package_,group`
+ *  unstyled defaults (`Cluster.java:285-296`) -- `plantuml.skin:102-114`'s
+ *  `group { BackGroundColor transparent; package { LineThickness 1.5;
+ *  LineColor black } }`. Applied explicitly (`?? PACKAGE_CLUSTER_*`) at
+ *  every cluster draw site now that `theme.colors.graph.packageBackground`/
+ *  `packageBorder` are optional (theme.ts no longer bakes them in) --
+ *  see `emptyPackagePaint`'s doc comment for why the leaf must NOT share
+ *  this same baked-in default. */
+const PACKAGE_CLUSTER_BACKGROUND_DEFAULT = 'none';
+const PACKAGE_CLUSTER_BORDER_DEFAULT = '#000000';
+
 /** `USymbolFolder.java`'s title-text font is always bold; `skinparam
  *  packageFontSize N` / `skinparam package { FontSize N }` overrides the
  *  diagram-wide `theme.fontSize` for the folder-tab title ONLY (G2 N18,
@@ -141,7 +152,9 @@ function packageFillValue(color: Paint): Paint {
  * port previously emitted the unsplit literal `fill="#yellow\gold"`).
  */
 export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
-  return packageFillValue(parseColor(geo.color ?? theme.colors.graph.packageBackground));
+  return packageFillValue(
+    parseColor(geo.color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT),
+  );
 }
 
 /**
@@ -217,6 +230,11 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // `getHTitle`/`getWTitle`'s pre-computed `htitle`/`wtitle` would silently
   // disagree with the glyphs actually drawn here).
   const strokeWidth = theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH;
+  // CDD T18b: `theme.colors.graph.packageBorder` is optional now -- this IS
+  // a `...package_,group`-signature draw site, so it supplies the
+  // cluster's own unstyled default explicitly (see that constant's doc
+  // comment).
+  const border = theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
   // G2 N18: `skinparam style strictuml` selects the sharp-corner `UPolygon`
@@ -230,17 +248,17 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
     theme.strictUml === true
       ? renderFolderPolygon(
           folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-          theme.colors.graph.packageBorder,
+          border,
           strokeWidth,
           fill,
         )
       : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
-          stroke: theme.colors.graph.packageBorder,
+          stroke: border,
           strokeWidth,
           fill,
         });
   const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
-    stroke: theme.colors.graph.packageBorder,
+    stroke: border,
     strokeWidth,
   });
   // G2 N18: jar's deterministic-text mode always emits `textLength`/
@@ -292,7 +310,9 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
   const fontColor = titleFontColor(theme);
   const fill = namespaceFill(geo, theme);
   const outline = rect(geo.x, geo.y, geo.width, geo.height, {
-    stroke: theme.colors.graph.packageBorder,
+    // CDD T18b: `...package_,group`-signature site -- see
+    // `PACKAGE_CLUSTER_BORDER_DEFAULT`'s doc comment.
+    stroke: theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT,
     strokeWidth,
     fill,
   });
@@ -334,17 +354,17 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
  * packageBorderColor`/`packageBackgroundColor` keys and carry the CLUSTER's
  * (`group`-signature) defaults, which are not this leaf's.
  *
- * Open, named remainder (jar-verified, deliberately NOT fixed here --
- * outside this task's declared mover reach): `skinparam packageBorderColor
- * blue` DOES recolor the empty-package leaf upstream
- * (`cocube-46-tusu692`'s own leaf draws `stroke:#00F`, contradicting this
- * function's pre-cdd-T12 doc comment) but cannot be routed here without
- * also overriding the leaf's own #181818 default, since `packageBorder` is
- * a non-optional field whose default value is the CLUSTER's (#000000). The
- * faithful fix is to make `packageBackground`/`packageBorder` optional
- * (`string | undefined`) so each of the two draw sites can apply its OWN
- * signature default -- a `ThemeGraphColors` widening with several
- * consumers, sized like D8's.
+ * CDD T18b (resolved -- was the open remainder above): `skinparam
+ * packageBorderColor blue` DOES recolor the empty-package leaf upstream
+ * (`cocube-46-tusu692`'s own leaf draws `stroke:#00F`) -- now routed as a
+ * MID-tier fallback, below the `<style> package {}` bucket above and
+ * above the leaf's own `#181818`/`classBackground` default, because
+ * `theme.colors.graph.packageBackground`/`packageBorder` are optional as
+ * of this task (`theme.ts` no longer bakes the CLUSTER's `'none'`/
+ * `'#000000'` into them -- see `theme-graph-colors-a.ts`'s doc comment).
+ * `gatula-10-bifu561` (no `packageBorderColor` set) still resolves
+ * `undefined` there and falls through to the leaf's own default,
+ * unaffected.
  */
 const EMPTY_PACKAGE_STROKE_WIDTH = 0.5;
 
@@ -354,8 +374,11 @@ function emptyPackagePaint(theme: Theme): { strokeWidth: number; border: string;
   const pkg = theme.colors.elements?.package;
   return {
     strokeWidth: pkg?.lineThickness ?? EMPTY_PACKAGE_STROKE_WIDTH,
-    border: typeof pkg?.border === 'string' ? pkg.border : theme.colors.border,
-    fill: typeof pkg?.background === 'string' ? pkg.background : theme.colors.graph.classBackground,
+    border: typeof pkg?.border === 'string' ? pkg.border : (theme.colors.graph.packageBorder ?? theme.colors.border),
+    fill:
+      typeof pkg?.background === 'string'
+        ? pkg.background
+        : (theme.colors.graph.packageBackground ?? theme.colors.graph.classBackground),
   };
 }
 

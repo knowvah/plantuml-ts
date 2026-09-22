@@ -372,13 +372,13 @@ export const defaultTheme: Theme = {
       interfaceBackground: '#B4D7ED',
       enumBackground: '#F1F1F1',
       actorStroke: '#181818',
-      packageBackground: 'none',
-      // G2 N17: jar-verified '#000000' for the class-diagram folder-tab
-      // border (finono-05-cuvu171, jinibe-02-tebi269, ...) -- was an
-      // unverified #999999. Class is this field's ONLY consumer
-      // (description deliberately avoids it -- renderer-cluster.ts's own
-      // doc comment), so the default is safe to correct here.
-      packageBorder: '#000000',
+      // CDD T18b: `packageBackground`/`packageBorder` omitted (not
+      // `undefined`-valued) so an unstyled theme reads them as genuinely
+      // unset -- the EMPTY-package leaf's signature has no `group` in it
+      // (`EntityImageEmptyPackage.java:87-88` vs `Cluster.java:285-296`)
+      // and must NOT inherit the cluster's baked default. Each `...group`
+      // consumer supplies its own default via `?? <default>` --
+      // `class-namespace-shape.ts`, `renderer-cluster.ts:133`.
       edgeLabel: '#444444',
       actorFill: 'none',
       usecaseFill: '#FFFFFF',
