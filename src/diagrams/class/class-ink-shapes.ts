@@ -235,6 +235,41 @@ export function addFolderPolygonInk(box: InkBox, x: number, y: number, w: number
  * `buildInkBox` namespace-ink gap this function's `addFolderPolygonInk`
  * sibling closes.
  */
+/**
+ * cdd-T12 (diagnosis A2b E3): `USymbolNode#asBig`'s ink --
+ * `USymbolNode#drawNode` (`decoration/symbol/USymbolNode.java:71-92`) draws
+ * a `UPolygon` (so `LimitFinder#drawUPolygon`'s `HACK_X_FOR_POLYGON` x-pad,
+ * see {@link addFolderPolygonInk}) and then, at `:90`,
+ * `ug.apply(new UTranslate(0, height)).draw(new UEmpty(10, 10))` --
+ * `LimitFinder#drawEmpty` (`klimt/drawing/LimitFinder.java:159-162`) records
+ * `(x, y)`/`(x+10, y+10)` for it, so the node's ink reaches 10px BELOW its
+ * own box. Jar-verified on `dativu-93-pona469`: canvas `381x133` against
+ * cluster bboxes `[16,356]x[6,108]` -- `356+10+5(margin)+1 = 372`? no:
+ * `minX = 16-10 = 6`, `maxX = 356+10 = 366`, `maxY = 108+10 = 118`, which
+ * after this port's own shift/margin/`+1` recipe gives exactly `381x133`.
+ */
+export function addNamespaceNodeInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x - HACK_X_FOR_POLYGON, y);
+  addPoint(box, x + w + HACK_X_FOR_POLYGON, y + h + USYMBOL_EMPTY_RESERVATION);
+}
+
+/**
+ * cdd-T12: `USymbolDatabase#asBig`'s ink -- `drawDatabase` draws a `UPath`
+ * (the plain rule, no polygon hack) and then
+ * `ug.apply(new UTranslate(width, height)).draw(new UEmpty(10, 10))`,
+ * reserving 10px to the RIGHT and BELOW the box
+ * (`LimitFinder.java:159-162`, as for {@link addNamespaceNodeInk}).
+ */
+export function addNamespaceDatabaseInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x, y);
+  addPoint(box, x + w + USYMBOL_EMPTY_RESERVATION, y + h + USYMBOL_EMPTY_RESERVATION);
+}
+
+/** The `new UEmpty(10, 10)` several `USymbol#drawXxx` bodies append past the
+ *  shape's own box (`USymbolNode.java:90`, `USymbolDatabase.java`'s
+ *  `drawDatabase`) -- upstream's own literal, kept as one named constant. */
+const USYMBOL_EMPTY_RESERVATION = 10;
+
 export function addNamespaceRectInk(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w - 1, y + h - 1);

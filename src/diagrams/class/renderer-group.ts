@@ -37,7 +37,8 @@
  * named remainder, `plans/g2-class-svg/ledger.md` N2). Harmless for
  * conformance (also `data-*`, also stripped).
  */
-import { group } from '../../core/svg.js';
+import { group, linkWrap } from '../../core/svg.js';
+import type { UrlInfo } from './class-url.js';
 import { escapeComment } from '../../core/svg-format.js';
 import { getLinkTypeName, looksLikeRevertedForSvg } from '../../core/svek/extremity/link-decor.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
@@ -80,12 +81,24 @@ export function wrapEntity(
  *  data-qualified-name="..." id="...">` group, preceded by `<!--cluster
  *  NAME-->` (upstream `Cluster#drawU`, `svek/Cluster.java` — same
  *  synthetic-`##`-name comment skip `core/svek/Cluster.ts#drawU` already
- *  ports, reproduced here for the class-local plain-string path). */
-export function wrapCluster(name: string, uid: string, qualifiedName: string, inner: string): string {
+ *  ports, reproduced here for the class-local plain-string path).
+ *
+ *  cdd-T12 (diagnosis A2b E4): a `package X [[url]] {` header's own url is
+ *  opened INSIDE the cluster group and BEFORE the decoration --
+ *  `svek/Cluster.java:337-341` (`ug.startGroup(uGroup); final Url url =
+ *  group.getUrl99(); if (url != null) ug.startUrl(url);`), closed in the
+ *  `finally` at `:379-382` (`if (url != null) ug.closeUrl();
+ *  ug.closeGroup();`). So the jar's cluster has exactly ONE child, an
+ *  `<a>`, holding the outline/line/title — not the three bare children this
+ *  port emitted. Reuses `core/svg.ts#linkWrap`, the same `<a>`-emitter the
+ *  classifier path already goes through (`renderer-url.ts
+ *  #wrapClassifierBody`). */
+export function wrapCluster(name: string, uid: string, qualifiedName: string, inner: string, url?: UrlInfo): string {
   // SI-saea T3c/D8: `escapeComment` defangs `--`, see {@link wrapEntity}.
   const comment = name.startsWith('##') ? '' : '<!--cluster ' + escapeComment(name) + '-->';
+  const body = url !== undefined ? linkWrap(inner, url) : inner;
   // SI-saea T3a/D2: raw -- `group()`'s `attrsFromRecord` now escapes.
-  return comment + group(inner, { class: 'cluster', 'data-qualified-name': qualifiedName, id: uid });
+  return comment + group(body, { class: 'cluster', 'data-qualified-name': qualifiedName, id: uid });
 }
 
 /** Parameter bundle for {@link wrapLink} — collapsed from 8 positional

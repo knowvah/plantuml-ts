@@ -21,7 +21,16 @@ import { buildClassUidPlan } from './renderer-uid.js';
 import { wrapCluster, wrapEntity, wrapLink, leafPortion } from './renderer-group.js';
 import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
-import { renderNamespaceFolder, renderNamespaceRect, renderEmptyPackageIcon } from './class-namespace-shape.js';
+import {
+  renderNamespaceFolder,
+  renderNamespaceRect,
+  renderEmptyPackageIcon,
+  namespaceFill,
+  titleFontColor,
+  PACKAGE_ROUND_CORNER,
+} from './class-namespace-shape.js';
+import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
 import { buildClassShadowFilterDef } from './class-shadow.js';
 import { renderUsecaseOrActorEntity } from './renderer-usymbol-entity.js';
@@ -122,7 +131,28 @@ function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
  *  geometry + jar evidence. G2 N59: `skinparam packageStyle rect` selects
  *  the plain-`<rect>` `PackageStyle.RECTANGLE` variant instead -- see
  *  `renderNamespaceRect`'s own doc comment. */
-function renderNamespace(geo: NamespaceGeo, theme: Theme): string {
+function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
+  // cdd-T12 (A2b E3): a container whose header stereotype NAMES a USymbol
+  // (`package X <<Node>>`) draws that symbol's own `asBig` chrome instead
+  // (`svek/Cluster.java:367-374` -> `ClusterDecoration.java:66-91`). Needs
+  // a real `StringMeasurer` for the klimt draw seam -- absent only for
+  // hand-built test fixtures (`class-geo-types.ts#ClassGeometry.measurer`),
+  // which fall through to the plain-string folder path below exactly as
+  // they did pre-T12.
+  if (measurer !== undefined) {
+    const drawn = renderNamespaceUSymbol(geo, theme, measurer, {
+      backColor: namespaceFill(geo, theme),
+      // `plantuml.skin:102-114` scopes the cluster's `LineColor black` /
+      // `LineThickness 1.5` to the FOLDER family only; every other group
+      // USymbol keeps the generic element default. A per-symbol `<style>
+      // node { LineColor ... }` override is NOT modeled (no corpus sample;
+      // named remainder, `.agent-notes/cdd-T12.md`).
+      borderColor: theme.colors.border,
+      roundCorner: theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER,
+      fontColor: titleFontColor(theme),
+    });
+    if (drawn !== undefined) return drawn;
+  }
   return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme) : renderNamespaceFolder(geo, theme);
 }
 
@@ -301,7 +331,10 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // before any node (`svek/SvekResult.java:72-74`).
   for (const ns of geo.namespaces) {
     const uid = uidPlan.namespaceUid.get(ns.id) ?? '';
-    children.push(wrapCluster(ns.label, uid, ns.id, renderNamespace(ns, theme)));
+    // cdd-T12 (A2b E4): `ns.url` opens an `<a>` INSIDE the cluster group and
+    // before the decoration (`svek/Cluster.java:337-341`, closed at
+    // `:379-382`) -- see `renderer-group.ts#wrapCluster`.
+    children.push(wrapCluster(ns.label, uid, ns.id, renderNamespace(ns, theme, geo.measurer), ns.url));
   }
 
   // G2 N7: a `hide <entity|$tag|...>` match (`layout.ts#buildClassifierGeos`'s

@@ -87,7 +87,7 @@ function titleFont(theme: Theme): FontSpec {
  *  identical `typeof override !== 'string'` Gradient-guard precedent: the
  *  plain-SVG-string `text()` primitive has no gradient-fill path here
  *  either). Falls back to jar's true default `#000000`. */
-function titleFontColor(theme: Theme): string {
+export function titleFontColor(theme: Theme): string {
   const override = theme.colors.elements?.package?.font;
   return typeof override === 'string' ? override : '#000000';
 }
@@ -106,6 +106,27 @@ function titleFontColor(theme: Theme): string {
  */
 function packageFillValue(color: string): string {
   return isTransparentColor(color) ? 'none' : color;
+}
+
+/**
+ * cdd-T12 (diagnosis A3 M3): a namespace's OWN inline `package "X" #COLOR {`
+ * background wins over the diagram-wide `skinparam packageBackgroundColor`/
+ * `<style> package { BackGroundColor }` fallback -- `Cluster#drawU`
+ * (`svek/Cluster.java:360-362`) resolves the back colour as
+ * `getBackColor(style)` then the static
+ * `getBackColor(backColor, stereotype, ...)` overload, both of which put the
+ * group's own `Colors`/`ColorType.BACK` override ahead of the style value
+ * (`core/svek/Cluster.ts#resolveBackColor`'s ported `backColorOverride ??
+ * backGroundColorDefault` is the same precedence). `NamespaceGeo.color` is
+ * already resolved to its bare/`back:` half at parse time (T11), so there is
+ * nothing left to re-parse here.
+ *
+ * Jar-verified on `garumi-63-vuze973` (`package "Voici mon package" #DDDDDD
+ * {`): `<path ... fill="#DDD">` where this port previously emitted
+ * `fill="none"` (the global default).
+ */
+export function namespaceFill(geo: NamespaceGeo, theme: Theme): string {
+  return packageFillValue(geo.color ?? theme.colors.graph.packageBackground);
 }
 
 /**
@@ -189,7 +210,7 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // G2 N59: `packageFillValue` maps a "no paint" background (skinparam
   // packagebackgroundcolor transparent/background) to jar's real literal
   // `fill="none"` -- see that helper's own doc comment.
-  const fill = packageFillValue(theme.colors.graph.packageBackground);
+  const fill = namespaceFill(geo, theme);
   const outline =
     theme.strictUml === true
       ? renderFolderPolygon(
@@ -254,7 +275,7 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
   const strokeWidth = theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
-  const fill = packageFillValue(theme.colors.graph.packageBackground);
+  const fill = namespaceFill(geo, theme);
   const outline = rect(geo.x, geo.y, geo.width, geo.height, {
     stroke: theme.colors.graph.packageBorder,
     strokeWidth,
@@ -279,22 +300,52 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
  * folder-tab shape `renderNamespaceFolder` draws for a non-empty package's
  * cluster wrapper -- but resolved through a DIFFERENT style chain
  * (`EntityImageEmptyPackage#getStyleSignature`'s own `...package_,title`
- * selector, NOT the package/cluster border-color skinparam surface
- * `renderNamespaceFolder` itself reads) -- jar-verified this reduces to the
- * SAME defaults every OTHER classifier box uses (`theme.colors.border`,
- * stroke-width 0.5, `theme.colors.graph.classBackground`), NOT the
- * (thicker, `packageBorderColor`-overridable) real package-cluster
- * defaults (`cocube-46-tusu692`'s own `skinparam packageBorderColor blue`
- * does NOT recolor its empty-package leaf, confirming these are genuinely
- * separate style chains, not a shared cascade). `skinparam
- * packageBorderThickness`/`packageBorder*` overrides are NOT modeled here
- * (unconfirmed whether they apply at all -- no corpus sample carries both;
- * named remainder if a future sample contradicts this).
+ * selector) than the cluster's own `...package_,group` one
+ * (`svek/Cluster.java:285-296`). `plantuml.skin:102-114` puts
+ * `BackGroundColor transparent` + `package { LineThickness 1.5; LineColor
+ * black }` under `group {}` ONLY, so the leaf inherits the generic element
+ * defaults instead: `theme.colors.border` (#181818), stroke-width 0.5,
+ * `theme.colors.graph.classBackground` (#F1F1F1) -- jar-verified on
+ * `gatula-10-bifu561` (`package foo {}`: `stroke:#181818;stroke-width:0.5`
+ * `fill="#F1F1F1"`).
+ *
+ * cdd-T12 (diagnosis A6 §2 / AC `xitobu-41-lame230`): a `<style> package {
+ * BackGroundColor ...; LineColor ...; LineThickness ... }` block DOES reach
+ * this leaf -- its `package` selector is a subset of BOTH signatures. Read
+ * from the per-element bucket (`theme.colors.elements.package`, populated
+ * only by a `<style>`/`skinparam package { ... }` block) rather than from
+ * `theme.colors.graph.packageBorder`/`packageBackground`, because those two
+ * fields are ALSO fed by the diagram-wide `skinparam
+ * packageBorderColor`/`packageBackgroundColor` keys and carry the CLUSTER's
+ * (`group`-signature) defaults, which are not this leaf's.
+ *
+ * Open, named remainder (jar-verified, deliberately NOT fixed here --
+ * outside this task's declared mover reach): `skinparam packageBorderColor
+ * blue` DOES recolor the empty-package leaf upstream
+ * (`cocube-46-tusu692`'s own leaf draws `stroke:#00F`, contradicting this
+ * function's pre-cdd-T12 doc comment) but cannot be routed here without
+ * also overriding the leaf's own #181818 default, since `packageBorder` is
+ * a non-optional field whose default value is the CLUSTER's (#000000). The
+ * faithful fix is to make `packageBackground`/`packageBorder` optional
+ * (`string | undefined`) so each of the two draw sites can apply its OWN
+ * signature default -- a `ThemeGraphColors` widening with several
+ * consumers, sized like D8's.
  */
+const EMPTY_PACKAGE_STROKE_WIDTH = 0.5;
+
+/** {@link renderEmptyPackageIcon}'s three `...package_,title`-signature
+ *  paint values -- see that function's own doc comment for the cascade. */
+function emptyPackagePaint(theme: Theme): { strokeWidth: number; border: string; fill: string } {
+  const pkg = theme.colors.elements?.package;
+  return {
+    strokeWidth: pkg?.lineThickness ?? EMPTY_PACKAGE_STROKE_WIDTH,
+    border: typeof pkg?.border === 'string' ? pkg.border : theme.colors.border,
+    fill: typeof pkg?.background === 'string' ? pkg.background : theme.colors.graph.classBackground,
+  };
+}
+
 export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme): string {
-  const strokeWidth = 0.5;
-  const border = theme.colors.border;
-  const fill = theme.colors.graph.classBackground;
+  const { strokeWidth, border, fill } = emptyPackagePaint(theme);
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
   const outline =

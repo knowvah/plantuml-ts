@@ -22,6 +22,8 @@ import {
   addPlainInk,
   addFolderPolygonInk,
   addNamespaceRectInk,
+  addNamespaceNodeInk,
+  addNamespaceDatabaseInk,
   addClassicRectInk,
 } from './class-ink-shapes.js';
 export type { InkBox } from './class-ink-shapes.js';
@@ -232,6 +234,16 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
  * non-`strictuml` case.
  */
 function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
+  // cdd-T12: the two USymbol-container rules -- see `class-ink-shapes.ts`'s
+  // own doc comments for each `LimitFinder` citation.
+  if (n.inkShape === 'node') {
+    addNamespaceNodeInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
+  if (n.inkShape === 'database') {
+    addNamespaceDatabaseInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
   if (n.inkShape === 'polygon') {
     addFolderPolygonInk(box, n.x, n.y, n.width, n.height);
     return;
