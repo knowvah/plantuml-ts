@@ -1,0 +1,15 @@
+@startuml
+' cdd-T26 residual round: a `<$sprite>` reference in a namespace/package
+' title. No corpus fixture exercises this shape (cdd-T26 diagnosis), so
+' there is no jar oracle to pin a full render against -- see
+' tests/unit/class/class-namespace-title-runs.test.ts's "sprite/img-data in
+' a namespace title (no oracle -- atom-level only)" suite, which drives
+' namespaceTitleRuns()/namespaceTitleLines() directly with the equivalent
+' markup this fixture documents, asserting the RESOLVED atom shape
+' (an 'image' NamespaceTitleRun) rather than a full SVG comparison.
+sprite $box [16x16/16z] AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+package "Data <$box>" {
+  class Item
+}
+@enduml

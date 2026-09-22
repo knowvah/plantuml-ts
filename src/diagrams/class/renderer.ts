@@ -136,7 +136,7 @@ function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
  *  (104/718 fixtures). See `class-namespace-shape.ts` for the ported
  *  geometry + jar evidence. G2 N59: `skinparam packageStyle rect` selects
  *  the plain-`<rect>` `PackageStyle.RECTANGLE` variant instead -- see
- *  `renderNamespaceRect`'s own doc comment. */
+ *  `renderNamespaceRect`'s own doc comment (measurer threaded, cdd-T26). */
 function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
   // cdd-T12 (A2b E3): a container whose header stereotype NAMES a USymbol
   // (`package X <<Node>>`) draws that symbol's own `asBig` chrome instead
@@ -159,7 +159,7 @@ function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasur
     });
     if (drawn !== undefined) return drawn;
   }
-  return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme) : renderNamespaceFolder(geo, theme, measurer);
+  return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme, measurer) : renderNamespaceFolder(geo, theme, measurer);
 }
 
 /**
@@ -175,7 +175,7 @@ function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasur
  * fields -- `id`/`creationIndex` are irrelevant to rendering (unused by
  * `renderNamespaceFolder`) so are filled with placeholders.
  */
-function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
+function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
   const folderTab = geo.folderTab;
   if (folderTab === undefined) return '';
   const label = geo.rows[0]?.text ?? geo.id;
@@ -190,7 +190,7 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
     htitle: folderTab.htitle,
     baselineOffset: folderTab.baselineOffset,
   };
-  return renderEmptyPackageIcon(nsGeo, theme);
+  return renderEmptyPackageIcon(nsGeo, theme, measurer);
 }
 
 // ---------------------------------------------------------------------------
@@ -380,7 +380,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     // identical to `renderAssocPoint`'s own established unwrapped
     // precedent above) -- see `renderEmptyPackageLeaf`'s doc comment.
     if (classifier.folderTab !== undefined) {
-      children.push(renderEmptyPackageLeaf(classifier, theme));
+      children.push(renderEmptyPackageLeaf(classifier, theme, geo.measurer));
       continue;
     }
     // G2 N20: the lollipop circle DOES get a normal `<g class="entity">`

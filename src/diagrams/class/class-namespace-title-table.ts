@@ -14,7 +14,7 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { namespaceTitleWidth } from './class-namespace-title-runs.js';
+import { namespaceTitleWidth, namespaceTitleLines } from './class-namespace-title-runs.js';
 
 /**
  * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
@@ -93,6 +93,21 @@ function namespaceTitleFont(theme: Theme): FontSpec {
  * OLD single `measurer.measure` call exactly (one run, same font), so
  * `cidepu-54-bemo048`'s own byte-exact citation above is unaffected.
  *
+ * cdd-T26 residual round: `dimLabel.getHeight()` now sums PER-LINE heights
+ * (`computeTitleTableHeight`'s new `readonly number[]` form,
+ * `core/cluster-title-table.ts`) instead of a hardcoded 1-line count, so a
+ * `\n`-split title reserves real height for every physical line, each at
+ * its OWN font size. Jar-verified `daxeno-00-kasu166`: two lines at 18pt/
+ * 14pt -> `computeTitleTableHeight([18,14], 0, 0, N/A)` = 32-5=27, +15
+ * (`titleSupp`'s own `<<Database>>` `suppHeightBecauseOfShape`, ALREADY
+ * correctly threaded via the `usymbol` param below — the `<<Database>>`
+ * shape/colour SELECTION for the cluster's own outline is a separate,
+ * un-ported mechanism, cdd-T26 residual-round journal row 122) = 42,
+ * matching the cached oracle `svek-1.dot`'s `HEIGHT="42"` exactly. A
+ * single-line title reduces to `computeTitleTableHeight([fontSize], ...)`
+ * = the OLD `computeTitleTableHeight(1, 0, 0, fontSize)` byte-identically
+ * (`titleLinesHeight`'s own array-form doc comment).
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:73-96
  */
 export function namespaceTitleTableDims(
@@ -102,9 +117,20 @@ export function namespaceTitleTableDims(
   usymbol?: string,
 ): { width: number; height: number } {
   const font = namespaceTitleFont(theme);
+  const lines = namespaceTitleLines(measurer, theme, display);
   const width = namespaceTitleWidth(measurer, theme, display);
+  // `nominalFontSize` (declared), never `fontSize` (measured) --
+  // `ClusterHeader.java:78`'s formula is `fontSize`-based, not a measured
+  // pixel height; see `NamespaceTitleLine`'s own doc comment.
+  const lineHeights = lines.map((l) => l.nominalFontSize);
   // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
   // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
   const supp = titleSupp(usymbol, theme);
-  return { width: width + supp.width, height: computeTitleTableHeight(1, 0, 0, font.size) + supp.height };
+  // `font.size` still feeds the (always-0 here) `stereoLines`/`attrLines`
+  // terms -- see `titleAndAttributeHeight`'s own doc comment; `lineHeights`
+  // (the array form) supplies the title term directly, per-line.
+  return {
+    width: width + supp.width,
+    height: computeTitleTableHeight(lineHeights, 0, 0, font.size) + supp.height,
+  };
 }

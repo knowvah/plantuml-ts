@@ -38,11 +38,16 @@
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { NamespaceGeo } from './layout.js';
-import { path, line, text, rect } from '../../core/svg.js';
+import { path, line, rect } from '../../core/svg.js';
 import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 import { folderPathD, folderPolygonPoints, renderFolderPolygon } from './class-namespace-folder-outline.js';
-import { namespaceTitleRuns, namespaceTitleWidth, renderNamespaceTitleRuns } from './class-namespace-title-runs.js';
+import {
+  namespaceTitleWidth,
+  namespaceTitleHeight,
+  renderNamespaceTitleAuto,
+  TITLE_LOCAL_TOP_OFFSET,
+} from './class-namespace-title-runs.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
 // (USymbolFolder.java), kept verbatim per this project's porting
@@ -169,7 +174,12 @@ export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
 export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string): number {
   const dim = measurer.measure(label, titleFont(theme));
   if (dim.width === 0) return 10;
-  return dim.height + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
+  // cdd-T26 residual round (`daxeno-00-kasu166`): sums every PHYSICAL
+  // line's own height instead of the single-line `dim.height` -- see
+  // `namespaceTitleHeight`'s own doc comment for the jar citation. A
+  // markup-free, newline-free label reduces to `dim.height` exactly (one
+  // line, unchanged font size).
+  return namespaceTitleHeight(measurer, theme, label) + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
 }
 
 /**
@@ -221,6 +231,40 @@ export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, l
  * helpers.ts`'s `baselineOffset` convention) — jar-verified byte-exact
  * against `finono-05-cuvu171`'s `<path>`/`<line>`/`<text>` triple.
  */
+/** `USymbolFolder#asBig`'s outline path + tab hline, shared by
+ *  `renderNamespaceFolder` (the non-empty cluster wrapper) and
+ *  `renderEmptyPackageIcon` (the collapsed-empty leaf's own copy of the
+ *  SAME shape, `EntityImageEmptyPackage#drawU`) — cdd-T26 residual round:
+ *  extracted (pure move, zero behavior change) to keep both call sites
+ *  under this project's per-function NLOC cap once each grew a `measurer`
+ *  param for the multi-line title fix. */
+function renderFolderTabShape(
+  geo: NamespaceGeo,
+  strictUml: boolean | undefined,
+  border: string,
+  strokeWidth: number,
+  fill: Paint,
+): { outline: string; hline: string } {
+  const outline =
+    strictUml === true
+      ? renderFolderPolygon(
+          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
+          border,
+          strokeWidth,
+          fill,
+        )
+      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
+          stroke: border,
+          strokeWidth,
+          fill,
+        });
+  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
+    stroke: border,
+    strokeWidth,
+  });
+  return { outline, hline };
+}
+
 export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme, measurer?: StringMeasurer): string {
   // G2 N18: `packageBorderThickness`/`packageFontSize`/`packageFontColor`
   // override the folder-specific defaults (`theme.ts`'s own doc comments) --
@@ -242,23 +286,7 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme, measurer?
   // packagebackgroundcolor transparent/background) to jar's real literal
   // `fill="none"` -- see that helper's own doc comment.
   const fill = namespaceFill(geo, theme);
-  const outline =
-    theme.strictUml === true
-      ? renderFolderPolygon(
-          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-          border,
-          strokeWidth,
-          fill,
-        )
-      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
-          stroke: border,
-          strokeWidth,
-          fill,
-        });
-  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
-    stroke: border,
-    strokeWidth,
-  });
+  const { outline, hline } = renderFolderTabShape(geo, theme.strictUml, border, strokeWidth, fill);
   // G2 N18: jar's deterministic-text mode always emits `textLength`/
   // `lengthAdjust` on this title (matches every OTHER class text row,
   // `renderer-classifier-box.ts`'s identical convention) plus the RAW
@@ -271,32 +299,21 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme, measurer?
   // textLength is omitted then, matching every other row's `row.width ===
   // undefined` skip convention.
   const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
-  const label = renderNamespaceTitleLabel(geo, theme, measurer, titleTextLength);
-  return outline + hline + label;
-  // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
-}
-
-/** cdd-T26: {@link renderNamespaceFolder}'s title-drawing step, split out
- *  for the NLOC cap. A markup-free label reduces to the OLD single-`<text>`
- *  call byte-for-byte (`runs.length <= 1`, see `namespaceTitleRuns`). */
-function renderNamespaceTitleLabel(
-  geo: NamespaceGeo,
-  theme: Theme,
-  measurer: StringMeasurer | undefined,
-  titleTextLength: number | undefined,
-): string {
-  const runs = measurer === undefined ? [] : namespaceTitleRuns(geo.label, theme);
-  if (runs.length <= 1) {
-    const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-    return text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
+  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET },
+    {
+      x: geo.x + 4,
+      y: geo.y + geo.baselineOffset,
       fontFamily: theme.fontFamily,
       fontSize,
-      fontWeight: '700',
-      fill: titleFontColor(theme),
-      ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
-    });
-  }
-  return renderNamespaceTitleRuns(geo.x + 4, geo.y + geo.baselineOffset, runs, measurer!);
+      fontColor: titleFontColor(theme),
+      textLength: titleTextLength,
+    },
+    () => geo.x + 4,
+  );
+  return outline + hline + label;
+  // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
 }
 
 /**
@@ -319,7 +336,7 @@ function renderNamespaceTitleLabel(
  * value for RECT is unmodeled (same established gap `PACKAGE_ROUND_CORNER`
  * already carries for FOLDER, see this module's own header doc comment).
  */
-export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
+export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme, measurer?: StringMeasurer): string {
   const strokeWidth = theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
@@ -334,14 +351,23 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
   if (geo.label.length === 0) return outline;
   const rawTextWidth = geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2;
   const posTitle = (geo.width - rawTextWidth) / 2;
-  const label = text(geo.x + posTitle, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    lengthAdjust: 'spacing' as const,
-    textLength: rawTextWidth,
-  });
+  // cdd-T26 residual round: each physical line is centred against
+  // `geo.width` independently -- the exact per-line generalization of this
+  // function's own pre-existing single-line `posTitle` formula (`(width -
+  // rawTextWidth) / 2`), matching `mucuxi-36-beku683`'s own citation above
+  // for a markup-free, single-line label.
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET },
+    {
+      x: geo.x + posTitle,
+      y: geo.y + geo.baselineOffset,
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontColor,
+      textLength: rawTextWidth,
+    },
+    (line) => geo.x + (geo.width - line.width) / 2,
+  );
   return outline + label;
 }
 
@@ -397,35 +423,24 @@ function emptyPackagePaint(theme: Theme): { strokeWidth: number; border: string;
   };
 }
 
-export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme): string {
+export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme, measurer?: StringMeasurer): string {
   const { strokeWidth, border, fill } = emptyPackagePaint(theme);
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
-  const outline =
-    theme.strictUml === true
-      ? renderFolderPolygon(
-          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-          border,
-          strokeWidth,
-          fill,
-        )
-      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
-          stroke: border,
-          strokeWidth,
-          fill,
-        });
-  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
-    stroke: border,
-    strokeWidth,
-  });
+  const { outline, hline } = renderFolderTabShape(geo, theme.strictUml, border, strokeWidth, fill);
   const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
-  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
-  });
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET },
+    {
+      x: geo.x + 4,
+      y: geo.y + geo.baselineOffset,
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontColor,
+      textLength: titleTextLength,
+    },
+    () => geo.x + 4,
+  );
   return outline + hline + label;
 }
 

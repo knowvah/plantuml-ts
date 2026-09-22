@@ -43,6 +43,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { USymbol as UpstreamUSymbol } from '../../core/decoration/symbol/USymbol.js';
@@ -132,7 +133,18 @@ export interface NamespaceUSymbolPaint {
  * situation (`svgRoot` dedupes them).
  */
 function buildDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, titleFont: FontConfiguration): ClusterDecoration {
-  const title = buildTextBlock(geo.label, titleFont, HorizontalAlignment.LEFT);
+  // cdd-T26 residual round (`daxeno-00-kasu166`): `buildTextBlock`'s own
+  // multi-line split (`EntityImageDescriptionTextBlock.ts`) is a real
+  // newline-CHARACTER split (`text.split('\n')`) — `geo.label` carries the
+  // `Display#getWithNewlines` `\n` ESCAPE (a literal backslash-n pair,
+  // `ClusterHeader.java:115-142#getTitleBlock` receives an already-split
+  // `Display` at PARSE time; this port has none for a namespace label, see
+  // `class-namespace-title-runs.ts#namespaceTitleLines`'s own doc comment
+  // for the identical gap on the folder/rect paths). Converting the escape
+  // to a real newline BEFORE `buildTextBlock` sees it reuses that already
+  // jar-verified multi-line/multi-font-size stacking machinery unchanged —
+  // no new stacking math needed here, unlike the plain-string paths.
+  const title = buildTextBlock(splitDisplayLines(geo.label).lines.join('\n'), titleFont, HorizontalAlignment.LEFT);
   // `ClusterHeader#getStereoBlock` is empty here by construction: a
   // stereotype that NAMES a USymbol is consumed AS the shape and never
   // stored for display (`CommandPackage.java:178-191`'s `if (stereotype !=

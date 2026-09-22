@@ -289,3 +289,118 @@ committed `parity-class.json`: **exactly one transition**
   `<image>` element. No other fixture in this task's set was fixed.
 - **Impact**: nothing to verify against `DIVERGENCES.md` this round.
 - **Confidence**: High.
+
+## Follow-on round (2026-09-22, coordinator-directed): daxeno-00-kasu166
+
+Coordinator flagged that my own earlier note ("renderNamespaceRect and
+renderEmptyPackageIcon still take the literal string") was incomplete: they
+DO, but `daxeno-00-kasu166`'s specific fixtures (`package "<size:18>styled
+</size>\nshould be styled" <<Database>>`, once empty and once holding
+`class foo`) turned out to exercise a THIRD, previously undiagnosed path.
+
+### Observation: the `<<Database>>` cluster's title routes through buildTextBlock, not renderNamespaceFolder
+
+- **Context**: assumed (from the diff's absence of `text-anchor`/database
+  colors) that daxeno's non-empty cluster fell through to
+  `renderNamespaceFolder` (since row 118's `<<Database>>` USymbol dispatch
+  is "not mine"). Instrumented directly (`console.error` in
+  `renderNamespace`/`renderNamespaceFolder`) rather than trust the
+  assumption.
+- **Finding**: `resolveDescriptionUSymbol('database', ...)` DOES resolve
+  (`USymbols.ts:249`, `equalsIgnoreCase(symbol,'database') -> DATABASE`) —
+  `renderNamespaceUSymbol` (`class-namespace-usymbol-shape.ts`) DOES
+  dispatch and draw via `buildDecoration`/`buildTextBlock`/
+  `ClusterDecoration`, never reaching `renderNamespaceFolder` at all.
+  `buildTextBlock`'s own multi-line split (`text.split('\n')`, a REAL
+  newline character) is blind to the `Display#getWithNewlines` `\n`
+  ESCAPE (two literal characters) a namespace label carries — so it
+  produced `<size:18>styled2</size>` as one correctly-sized run, then
+  `\nshould be styled` as a SECOND run on the SAME line (the literal
+  backslash-n glued to the following text), never actually splitting into
+  two physical lines.
+- **Fix**: `class-namespace-usymbol-shape.ts#buildDecoration` now converts
+  the escape to a real newline BEFORE calling `buildTextBlock`
+  (`splitDisplayLines(geo.label).lines.join('\n')`), reusing that already-
+  verified multi-line multi-font-size stacking machinery unchanged — no new
+  math needed, unlike the plain-string paths.
+- **Disposition**: FIXED. The `<<Database>>` cluster's own colour/shape
+  SELECTION (`fill`/`stroke`/text `fill`) remains row 118's territory,
+  untouched, correctly still diverging.
+- **Confidence**: High — instrumented, not assumed; `render-diff` confirms
+  the title-content/textLength structural diffs for the cluster vanished
+  while the colour diffs (row 118) remain unchanged.
+
+### Observation: the empty leaf ("styled") draws through a FOURTH path — core/usymbol-shapes.ts, out of scope
+
+- **Context**: same instrumentation approach, applied to daxeno's EMPTY
+  package (no children).
+- **Finding**: `renderEmptyPackageIcon` is NEVER CALLED for this leaf
+  (confirmed: a debug print inside it never fires). The empty leaf instead
+  goes through `renderer.ts#tryRenderUSymbol` (any `ClassifierGeo.usymbol`
+  value, not just a `folderTab`) -> `core/usymbol-shapes.ts#renderUSymbolIcon`
+  -> `core/latex.ts#renderNodeLabel`, a SHARED, core, MULTI-DIAGRAM-ENGINE
+  primitive (used by class AND description) that handles `<latex>` only —
+  no `<size:>`, no `\n` split, the whole raw label drawn as one literal
+  `text-anchor="middle"` `<text>`. This file already exposes an
+  `IconGeo.renderLabel?: (cx, baselineY) => string` callback hook, built
+  FOR exactly this purpose (its own doc comment cites a `<$sprite>` case),
+  so the fix shape is: `tryRenderUSymbol` supplies a creole-aware
+  `renderLabel` using `namespaceTitleRuns`, WITHOUT touching
+  `core/usymbol-shapes.ts` itself.
+- **Disposition**: NOT fixed this round — `core/usymbol-shapes.ts`/
+  `core/latex.ts` are shared across diagram engines (blast radius beyond
+  class), and the fix needs new geometry work (centred multi-line label
+  inside an icon box, a different model than the tab/box titles already
+  handled) that I have not jar-verified. Named here for a future task;
+  `tryRenderUSymbol` (`renderer.ts`) is the wiring point, `core/usymbol-
+  shapes.ts` itself should stay untouched.
+- **Confidence**: High (direct instrumentation); the exact fix shape is
+  UNVERIFIED (no jar-verified centred-multi-line-in-icon-box geometry read).
+
+### Observation: `getHTitle` must read MEASURED height, `namespaceTitleTableDims` must read DECLARED size — real regression, caught and fixed
+
+- **Context**: `class-empty-package-no-cluster-box.test.ts`'s byte-level
+  render proof (a PLAIN "Empty" label, unrelated to daxeno) regressed after
+  my first pass at this round.
+- **Finding**: `tests/helpers/render.ts`'s `FixedMeasurer(8, 16)` returns a
+  CONSTANT height (16) independent of the requested font size — breaking
+  the (until now implicit) assumption that `measurer.measure(...).height
+  === font.size`, which holds for `WidthTableMeasurer`/`FormulaMeasurer`
+  but not this test double. `getHTitle`'s pre-existing single-line formula
+  trusted `dim.height` (measured); my first multi-line generalization used
+  `run.font.size` (declared) instead, diverging under `FixedMeasurer` only.
+  Separately, `namespaceTitleTableDims`'s formula (`ClusterHeader.java:78`)
+  is explicitly `fontSize`-based (declared), matching its OWN pre-existing
+  single-line call (`font.size`, not a measured height) — so the CORRECT
+  fix needed BOTH: `NamespaceTitleLine.fontSize` (measured, for
+  `getHTitle`) and a NEW `NamespaceTitleLine.nominalFontSize` (declared,
+  for `namespaceTitleTableDims`).
+- **Impact**: `core/cluster-title-table.ts#computeTitleTableHeight`'s API
+  widened (`titleLines: number | readonly number[]`) is unaffected by this
+  distinction — it always takes whatever `fontSize` array a caller
+  supplies; `namespaceTitleTableDims` now supplies `nominalFontSize`.
+- **Confidence**: High — root-caused via git-stash bisection + a targeted
+  debug print (not guessed), full corpus/state suite green afterward.
+
+### daxeno-00-kasu166 before -> after (this round)
+
+structural=12/numeric=135 -> structural=10/numeric=77. Remaining 10
+structural diffs: 5 for the cluster's `<<Database>>` fill/stroke/text-fill
+(row 118), 5 for the empty leaf's shape/colour+text-anchor+creole gap
+(row 118 colour/shape half + the newly-diagnosed `core/usymbol-shapes.ts`
+text half, both out of this round's scope). A residual Δ1px canvas-width
+numeric diff is unexplained and left named, not chased (entangled with
+row 118's not-yet-fixed geometry).
+
+### Extra: sprite/img-data in a namespace title
+
+`namespaceTitleRuns`/`namespaceTitleLines` now resolve a `<$sprite>`/
+successfully-decoded `<img:data:...>` atom via `resolveInlineAtom` (the
+same function member rows use) instead of silently dropping it — opt-in
+via new optional `sprites`/`spriteDims` params (default `undefined`, zero
+behavior change for every existing call site). `renderNamespaceTitleRuns`
+draws an `'image'` run bottom-aligned to the baseline. Verified at the
+ATOM level only (`tests/unit/class/class-namespace-title-runs.test.ts`);
+no corpus fixture exercises either shape, so no full-SVG oracle exists.
+Fixtures: `tests/fixtures/class/namespace-title-sprite.puml`,
+`tests/fixtures/class/namespace-title-img-data.puml`.
