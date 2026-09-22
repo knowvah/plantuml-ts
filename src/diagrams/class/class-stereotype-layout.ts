@@ -248,6 +248,12 @@ export interface GenericTagDim {
   width: number;
   height: number;
   rawTextWidth: number;
+  /** CDD T6FU: the `Display.getWithNewlines` split (`EntityImageClass
+   *  Header.java:146`) the block's own `height` is ALREADY computed from
+   *  (R2c), now carried forward so `buildGenericTagGeo` can place one
+   *  `<text>` per line instead of re-measuring a joined string. Always at
+   *  least one entry. */
+  lines: ReadonlyArray<{ text: string; width: number }>;
 }
 
 /**
@@ -284,12 +290,16 @@ export function measureGenericTagDim(
   // 4-line generic at 12pt -> 4*12+4 = 52px tall; `ps/g4f`: at 6pt ->
   // 4*10+4 = 44, the AtomText 10px line floor). Single-line input reduces
   // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
-  const lines = splitDisplayLines(text).lines;
-  const rawTextWidth = Math.max(...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width));
+  const measured = splitDisplayLines(text).lines.map((l) => ({
+    text: l,
+    width: measurer.measure(l, { family: fontFamily, size: fontSize }).width,
+  }));
+  const rawTextWidth = Math.max(...measured.map((l) => l.width));
   return {
     width: rawTextWidth + GENERIC_TAG_MARGIN,
-    height: lines.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,
+    height: measured.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,
     rawTextWidth,
+    lines: measured,
   };
 }
 
@@ -297,7 +307,17 @@ export function measureGenericTagDim(
  *  `geo.x`/`geo.y` at render time), matching `badgeIndent`/`row.indent`'s
  *  existing convention. */
 export interface GenericTagGeo {
+  /** The whole clause, joined -- kept for callers that want the raw text;
+   *  the RENDERED form is {@link GenericTagGeo.lines}. */
   text: string;
+  /** CDD T6FU: one entry per `Display.getWithNewlines` line
+   *  (`EntityImageClassHeader.java:146`), each already placed and measured
+   *  -- `HorizontalAlignment.CENTER` on the widest line, one
+   *  `atomTextLineHeight` apart. Mirrors `EdgeGeo.labelLines`'s existing
+   *  multi-line convention (`class-geo-types.ts:328-334`). A single-line
+   *  clause yields exactly one entry at `textX`/`textY`, so the rendered
+   *  output is byte-identical to the pre-T6FU single-`<text>` form. */
+  lines: ReadonlyArray<{ text: string; x: number; y: number; width: number }>;
   rectX: number;
   rectY: number;
   rectWidth: number;
@@ -343,14 +363,27 @@ export function buildGenericTagGeo(
   const rectX = boxWidth - dim.width + GENERIC_TAG_MARGIN + 1;
   const rectY = -GENERIC_TAG_MARGIN + 1;
   const text = rawText ?? typeParams.join(', ');
+  const textX = rectX + 1;
+  const textY = rectY + 1 + baselineOffset;
+  // `HorizontalAlignment.CENTER` (`EntityImageClassHeader.java:147`): each
+  // line is centred within the block's own widest line, and lines advance
+  // by the SAME `atomTextLineHeight` the block's `height` was summed from.
+  const lineHeight = atomTextLineHeight(fontSize);
+  const lines = dim.lines.map((l, i) => ({
+    text: l.text,
+    x: textX + (dim.rawTextWidth - l.width) / 2,
+    y: textY + i * lineHeight,
+    width: l.width,
+  }));
   return {
     text,
+    lines,
     rectX,
     rectY,
     rectWidth: dim.width - 2,
     rectHeight: dim.height - 2,
-    textX: rectX + 1,
-    textY: rectY + 1 + baselineOffset,
+    textX,
+    textY,
     textWidth: dim.rawTextWidth,
     fontFamily,
     fontSize,
