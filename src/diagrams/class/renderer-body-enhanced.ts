@@ -20,16 +20,40 @@
  * visibility-icon.ts#renderVisibilityUrlBackground`'s identical "ambient
  * fill, explicit stroke" precedent, G2 N40).
  *
+ * CDD T23: {@link buildEnhancedBodyPrimitives} (was `renderEnhancedBody`,
+ * a single joined-string return) now returns one `UrlTaggedPrimitive` PER
+ * divider/tree part and PER ROW inside a 'rows' part, instead of one opaque
+ * string tagged with the classifier's own fallback url. Upstream draws each
+ * enhanced-body "rows" block via `new MethodsOrFieldsArea(display, ...)`
+ * (`BodyEnhanced1.java:186-190`) — the SAME class the classic (non-
+ * enhanced) path uses — so its `TextBlockTracer` (`MethodsOrFieldsArea
+ * .java:305-323`) opens/closes each member atom's OWN `Url` independently
+ * of the classifier-level `startUrl`/`closeUrl` (`EntityImageClass.java:
+ * 141-158`) on THIS path too, not just the classic one.
+ * `class-body-enhanced-layout.ts:201`'s per-row `m.ownUrl` (already
+ * threaded, previously unread by any render-side url logic) is now read
+ * here exactly like the classic path's `row.url ?? geo.url` fallback
+ * (`renderer-classifier-box.ts#pushMemberRowPrimitives`). An icon-bearing
+ * row reuses `pushIconRowPrimitives` (exported for this call) verbatim —
+ * the icon's own `<g data-visibility-modifier>` boundary needs the SAME
+ * independent `<a>` run / `preWrapped` handling the classic path already
+ * has (`renderer-url.ts`'s "link-flush on group boundary" doc comment;
+ * jar-verified `xogixe-78-zuro619`'s `Observation`, every member row
+ * explicit-visibility + its own `[[[url]]]`).
+ *
  * @see ~/git/plantuml/.../klimt/creole/atom/AtomTree.java#drawU
  * @see ~/git/plantuml/.../salt/element/Skeleton2.java#draw
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/MethodsOrFieldsArea.java:305-323
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodyEnhanced1.java:186-190
  */
 import type { ClassifierGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
 import { text as svgText } from '../../core/svg.js';
-import { renderRow } from './renderer-classifier-box.js';
+import { renderRow, pushIconRowPrimitives } from './renderer-classifier-box.js';
 import type { EnhancedBodyGeo, EnhancedBodyPart } from './class-body-enhanced-layout.js';
+import type { UrlTaggedPrimitive } from './renderer-url.js';
 
 /** The classifier box's OWN divider stroke color (`class-border`'s own
  *  ancestor cascade) — a plain `<line>`, matching `dividerYs`' identical
@@ -77,18 +101,46 @@ function renderDividerPart(
   );
 }
 
-/** G2 N44 mechanism 2: `renderRow` (icon + text), NOT `renderRowText` alone --
- *  `class-body-enhanced-layout.ts#buildRowsBlockRows` already sets
- *  `visibilityIcon`/`visibilityIsField` on each row (mirrors the classic
- *  path's `buildSectionRows` exactly), but this file previously called the
- *  text-only helper, silently dropping every enhanced-body row's visibility
- *  glyph -- jar-verified `benemi-22-dufo622`'s `public_member` (PUBLIC_FIELD
- *  circle) and `xosiza-60-sobu480`'s `identifying_attribute`/
- *  `mandatory_attribute` (IE_MANDATORY circles, both rows). */
-function renderRowsPart(geo: ClassifierGeo, part: Extract<EnhancedBodyPart, { kind: 'rows' }>, theme: Theme): string {
-  let out = '';
-  for (const row of part.rows) out += renderRow(geo, row, theme);
-  return out;
+/**
+ * CDD T23: one `UrlTaggedPrimitive` PER ROW in this 'rows' part -- was
+ * `renderRowsPart`, a single joined string tagged (by the caller) with the
+ * classifier's own fallback url ONLY, silently merging every member row's
+ * OWN `[[[url]]]` into that fallback. `class-body-enhanced-layout.ts:201`
+ * already sets `row.url` from `member.ownUrl`; this mirrors the classic
+ * path's `renderer-classifier-box.ts#pushMemberRowPrimitives` `effectiveUrl
+ * = row.url ?? geo.url` exactly, including reusing that same file's
+ * `pushIconRowPrimitives` verbatim for an icon-bearing row (the icon's own
+ * `<g data-visibility-modifier>` boundary needs its own independent `<a>`
+ * run -- see this module's own doc comment). G2 N44 mechanism 2 (still
+ * applies): a non-icon row draws via `renderRow` (icon+text combined, but
+ * with no icon present this is identical to `renderRowText` alone) --
+ * jar-verified `benemi-22-dufo622`'s `public_member` (PUBLIC_FIELD circle)
+ * and `xosiza-60-sobu480`'s `identifying_attribute`/`mandatory_attribute`
+ * (IE_MANDATORY circles, both rows) for the icon glyph itself, `xogixe-78-
+ * zuro619`'s `Observation` for the per-row url split this iteration adds.
+ */
+function buildRowsPartPrimitives(
+  geo: ClassifierGeo,
+  part: Extract<EnhancedBodyPart, { kind: 'rows' }>,
+  theme: Theme,
+): UrlTaggedPrimitive[] {
+  const primitives: UrlTaggedPrimitive[] = [];
+  for (const row of part.rows) {
+    const effectiveUrl = row.url ?? geo.url;
+    if (row.visibilityIcon === undefined) {
+      primitives.push({ url: effectiveUrl, body: renderRow(geo, row, theme) });
+      continue;
+    }
+    // `pushIconRowPrimitives` pushes `{ y, item }` entries for the classic
+    // path's Y-sort accumulator; this path draws in part order already (no
+    // sort), so a throwaway `y` and a straight `.map` to `.item` recovers
+    // the SAME 2-or-3 primitives (url background?, icon, text) in push
+    // order, with zero change to that function's own logic.
+    const scratch: Array<{ y: number; item: UrlTaggedPrimitive }> = [];
+    pushIconRowPrimitives(scratch, geo, theme, row, effectiveUrl);
+    primitives.push(...scratch.map((entry) => entry.item));
+  }
+  return primitives;
 }
 
 /** `Skeleton2#draw`'s per-entry draw: `drawHline` (a 2x2 bullet `<rect>` +
@@ -119,11 +171,18 @@ function renderTreePart(
 }
 
 /**
- * Draws every part of an enhanced body IN ORDER (never Y-sorted — see this
- * file's own module doc comment). `classifierFill`/`classBorder` are
- * threaded in by the caller (`renderer-classifier-box.ts`, which already
- * resolves both for the box rect) rather than re-resolved here, avoiding a
- * second style-cascade lookup for the same classifier.
+ * Builds one `UrlTaggedPrimitive` PER divider/tree part and PER ROW inside
+ * a 'rows' part, IN ORDER (never Y-sorted — see this file's own module doc
+ * comment) — was `renderEnhancedBody`, returning one joined string tagged
+ * with a single url by the caller (CDD T23: see this module's own doc
+ * comment for why that collapsed every member row's OWN `[[[url]]]`).
+ * `classifierFill`/`classBorder` are threaded in by the caller
+ * (`renderer-classifier-box.ts`, which already resolves both for the box
+ * rect) rather than re-resolved here, avoiding a second style-cascade
+ * lookup for the same classifier. A divider or tree part has no per-cell
+ * url source (`EnhancedTreeCell` carries no `Member`), so each draws as
+ * ONE primitive tagged the classifier's own fallback url, exactly as
+ * before this iteration.
  *
  * CDD T18/D8: `fill` is a `Paint` (it reaches a `rect`, and
  * `DriverRectangleSvg#applyFillColor` emits a gradient def for one), while
@@ -132,18 +191,22 @@ function renderTreePart(
  * colour. The caller passes `renderer-classifier-colors.ts#classBorderLine`
  * for exactly that reason; see its own doc comment.
  */
-export function renderEnhancedBody(
+export function buildEnhancedBodyPrimitives(
   geo: ClassifierGeo,
   body: EnhancedBodyGeo,
   theme: Theme,
   fill: Paint,
   borderColor: string,
-): string {
-  let out = '';
+): UrlTaggedPrimitive[] {
+  const primitives: UrlTaggedPrimitive[] = [];
   for (const part of body.parts) {
-    if (part.kind === 'divider') out += renderDividerPart(geo, part, theme, borderColor);
-    else if (part.kind === 'rows') out += renderRowsPart(geo, part, theme);
-    else out += renderTreePart(geo, part, theme, fill);
+    if (part.kind === 'divider') {
+      primitives.push({ url: geo.url, body: renderDividerPart(geo, part, theme, borderColor) });
+    } else if (part.kind === 'rows') {
+      primitives.push(...buildRowsPartPrimitives(geo, part, theme));
+    } else {
+      primitives.push({ url: geo.url, body: renderTreePart(geo, part, theme, fill) });
+    }
   }
-  return out;
+  return primitives;
 }

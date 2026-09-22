@@ -33,7 +33,7 @@ import {} from '../../core/klimt/shape/UText.js';
 import type {} from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
-import { renderEnhancedBody } from './renderer-body-enhanced.js';
+import { buildEnhancedBodyPrimitives } from './renderer-body-enhanced.js';
 import { classShadowFilterUrl } from './class-shadow.js';
 import {
   resolveElementHeaderBackground,
@@ -325,7 +325,12 @@ function iconEntry(y: number, url: UrlTaggedPrimitive['url'], body: string): { y
   return { y, item: { url, preWrapped: true, body } };
 }
 
-function pushIconRowPrimitives(
+/** CDD T23: exported so `renderer-body-enhanced.ts#buildRowsPartPrimitives`
+ *  can reuse this SAME icon-row primitive split for an enhanced-body row --
+ *  no logic change, visibility only (see that module's own doc comment for
+ *  why the enhanced-body path needs the identical `<g data-visibility-
+ *  modifier>`-boundary handling the classic path already has). */
+export function pushIconRowPrimitives(
   interleaved: Array<{ y: number; item: UrlTaggedPrimitive }>,
   geo: ClassifierGeo,
   theme: Theme,
@@ -415,13 +420,21 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
   // `|_` tree-list line) draws its OWN part list, in EXACT jar draw order
   // (never the Y-sort merge below -- `renderer-body-enhanced.ts`'s own
   // module doc comment for why the two orderings genuinely differ).
+  // CDD T23: `buildEnhancedBodyPrimitives` now returns one primitive PER
+  // divider/tree part and PER ROW (each already tagged with its own
+  // effective url, `row.url ?? geo.url`) instead of one primitive
+  // collapsing the WHOLE body under `geo.url` -- see that function's own
+  // doc comment. `wrapClassifierBody` (below, via `renderClassifierBox`)
+  // merges/breaks runs exactly as it already does for the classic path;
+  // no change needed there.
   if (geo.enhancedBody !== undefined) {
-    return [
-      {
-        url: geo.url,
-        body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorderLine(geo, theme)),
-      },
-    ];
+    return buildEnhancedBodyPrimitives(
+      geo,
+      geo.enhancedBody,
+      theme,
+      classifierFill(geo, theme),
+      classBorderLine(geo, theme),
+    );
   }
   // M3(c): a `json` leaf's entries area owns its own draw order
   // (`TextBlockCucaJSon#drawU` is a pre-order traversal, not a Y-order) --

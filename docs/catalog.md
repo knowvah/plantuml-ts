@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1150 modules · 4232 exported names.
+1150 modules · 4233 exported names.
 
 ## `src/`
 
@@ -1218,10 +1218,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `note-tips-resolve.ts` | `TipShape`, `TipResolution`, `resolveTips` | Draw-time resolution of a `'TIPS'` leaf against its host -- the port of `EntityImageTips#drawU`'s per-tip loop as a PURE function of the finished geometry, consumed by both draw passes: `class-ink-box.ts#buildInkBox` (this port's `LimitFind |
 | `parser.ts` | `ensureClassifier`, `ParseState`, `startNewPage`, `parseClass` | Parser for PlantUML class diagrams. |
 | `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `buildEdgeArrowheads`, `applyDecorTrim`, `EdgeExtremityInk`, `edgeExtremityInk`, `buildMiddleDecorMarkup` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
-| `renderer-body-enhanced.ts` | `renderEnhancedBody` | renderer-body-enhanced.ts — draws a classifier's `EnhancedBodyGeo` (`class-body-enhanced-layout.ts`) primitives in EXACT jar draw order — NOT the classic path's Y-sort merge (`renderer-classifier-box.ts #buildBodyPrimitives`'s own doc comme |
+| `renderer-body-enhanced.ts` | `buildEnhancedBodyPrimitives` | renderer-body-enhanced.ts — draws a classifier's `EnhancedBodyGeo` (`class-body-enhanced-layout.ts`) primitives in EXACT jar draw order — NOT the classic path's Y-sort merge (`renderer-classifier-box.ts #buildBodyPrimitives`'s own doc comme |
 | `renderer-bullet-atom.ts` | `renderBulletAtom` | `renderBulletAtom` -- the creole bullet marker (`klimt/creole/atom/ Bullet.java`), split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-badge-tag.ts` | `renderBadge`, `renderGenericTag` | `renderBadge` (the kind badge in a classifier's header) and `renderGenericTag` (`class Foo<T>`'s generic type-parameter tag box) -- split out of `renderer-classifier-box.ts` purely to keep that file under this project's 500-line cap. |
-| `renderer-classifier-box.ts` | `renderRow`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
+| `renderer-classifier-box.ts` | `renderRow`, `pushIconRowPrimitives`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
 | `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `classifierFill`, `classBorder`, `classBorderLine`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `classBorderStrokeDasharray`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
 | `renderer-classifier-header-split.ts` | `CLASS_HEADER_SPLIT_KINDS`, `resolveClassHeaderFill`, `ClassHeaderSplitInput`, `classHeaderSplitRects` | renderer-classifier-header-split.ts — CDD T20 (E1): the `class`/`enum`/ `interface`/`abstract` header-background split (`EntityImageClass #drawInternal`'s four-element form). |
 | `renderer-classifier-rows.ts` | `attributeFontSize`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
