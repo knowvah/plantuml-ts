@@ -140,3 +140,27 @@ other slug moved (structural or numeric). `dot-sync-report.ts class`
 stays 711/712 (unchanged). Both movers' final render matches jar
 byte-for-byte on structure and within the pre-existing N25 sub-pixel
 residual on position (e.g. `151.231` vs jar's `151.23`).
+
+## Follow-up (fix/cdd-T17): `class-dot-edges.ts#swappedRel` role gap closed
+
+- **Context**: the primary T17 report flagged `swappedRel` (a batch-2
+  file, outside T17's write-set) as a real-but-unreached gap — it swaps
+  `fromMultiplicity`/`toMultiplicity` for a `dotEdgeRunsReversed` edge
+  but not `fromRole`/`toRole`, even though `LinkArg.java:116-117`'s
+  `getInv()` swaps `role2`/`role1` alongside the quantifiers (and
+  `kal2`/`kal1`). The orchestrator authorised the extension and directed
+  closing it.
+- **Fix**: `swappedRel` now swaps `fromRole`/`toRole` with the SAME
+  `delete`-when-absent idiom the quantifier lines already use — four new
+  lines, mechanical mirror of the existing two pairs.
+- **Verification**: `pin-diff t17.json t17b.json` = **0 transitions**
+  (the corpus genuinely has zero fixtures combining `dotEdgeReversed ===
+  true` with a role-but-no-multiplicity end, confirmed exhaustively in
+  the primary T17 report) — this fix is provably inert on the current
+  corpus, verified rather than assumed. `dot-sync-report.ts class` stays
+  711/712. New tests are therefore asserted against the PORTED RULE
+  (`LinkArg.java:116-117`), not a jar oracle — stated explicitly in both
+  the test file's doc comment and each `it()`'s own title.
+- **Confidence**: High (Java read; corpus-wide re-render confirms zero
+  behavioral change on any of the 712 fixtures; new tests pass and cover
+  both the DOT-reservation level and a synthetic full-pipeline probe).

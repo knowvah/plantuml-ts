@@ -15,6 +15,13 @@
  *   `givoli-70-rade072` corpus fixture.
  * - Rendered anchor (`class-edge-label-anchor.ts#attachPortLabels`) — the
  *   second consumer of the same broken pairing, unit-tested directly.
+ *
+ * A fourth group (below, T17 fix) extends the SAME `swappedRel` mechanism
+ * to `fromRole`/`toRole` — `LinkArg.java:116-117`'s `getInv()` swaps
+ * `role2`/`role1` alongside `quantifier2`/`quantifier1`, which T11's own
+ * `swappedRel` did not do because nothing read roles yet; T17 (M8) made
+ * that assumption stale. No corpus fixture reaches this branch, so that
+ * group's assertions are against the ported rule, not a jar oracle.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -128,6 +135,83 @@ describe('T11 — quantifier pair follows the swapped DOT tail/head (DOT reserva
     expect(attrs.headLabel).toBe('1');
     expect(attrs.headLabelWidth).toBe(7);
     expect(attrs.headLabelHeight).toBe(13);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T17 fix: the SAME swap, now for fromRole/toRole (class-dot-edges.ts
+// #swappedRel) -- LinkArg.java:116-117's getInv() swaps role2/role1
+// alongside quantifier2/quantifier1 (and kal2/kal1); T17 ported the M8
+// fallback (SvekEdge.java:447-466, `class-layout-edge-labels.ts
+// #computeMultiplicityAttrs`: `rel.fromMultiplicity ?? rel.fromRole`)
+// without also swapping the role pair for a `dotEdgeRunsReversed` edge,
+// which the ORIGINAL doc comment on `swappedRel` had (correctly, at the
+// time) called inert -- no consumer read `fromRole`/`toRole` yet. T17
+// made that no longer true. No corpus fixture reaches this branch (the
+// only 2 role-bearing fixtures are both `dotEdgeReversed === false`), so
+// every assertion here is against the PORTED RULE (`LinkArg.java:
+// 116-117`), stated as such, not against a jar oracle.
+// ---------------------------------------------------------------------------
+
+describe('T17 fix — role pair follows the swapped DOT tail/head (fallback reservation, LinkArg.java:116-117)', () => {
+  it('binds taillabel/headlabel to the swapped role when a reversed edge carries roles but no multiplicity', () => {
+    // `-up-` is the ONE direction word that inverts a link
+    // (`CommandLinkClass.java:362-363`) -- same mechanism the quantifier
+    // suite above exercises via `<--o`/`<|--`/etc, here with NO
+    // multiplicity on either end so the fallback (not the primary
+    // quantifier path) is what's under test.
+    const rel = parseRelationshipLine('A /owner <-up- /child B');
+    expect(rel).not.toBeNull();
+    expect(rel).toMatchObject({
+      from: 'A',
+      to: 'B',
+      fromRole: 'owner',
+      toRole: 'child',
+      dotEdgeReversed: true,
+    });
+    expect(rel!.fromMultiplicity).toBeUndefined();
+    expect(rel!.toMultiplicity).toBeUndefined();
+
+    const swap = dotEdgeRunsReversed(rel!);
+    expect(swap).toBe(true);
+    const expectedTail = swap ? rel!.toRole : rel!.fromRole;
+    const expectedHead = swap ? rel!.fromRole : rel!.toRole;
+
+    const attrs = captureGraph(makeAST(rel!)).edges[0]!.attributes!;
+    expect(attrs.tailLabel).toBe(expectedTail);
+    expect(attrs.headLabel).toBe(expectedHead);
+    expect(attrs.tailLabel).toBe('child');
+    expect(attrs.headLabel).toBe('owner');
+  });
+
+  it('does not disturb an already-correct (non-reversed) role pairing — regression guard', () => {
+    const rel = parseRelationshipLine('A /owner -- /child B');
+    expect(rel).not.toBeNull();
+    expect(dotEdgeRunsReversed(rel!)).toBe(false);
+    const attrs = captureGraph(makeAST(rel!)).edges[0]!.attributes!;
+    expect(attrs.tailLabel).toBe('owner');
+    expect(attrs.headLabel).toBe('child');
+  });
+
+  it('probe (no jar oracle — asserts the ported rule, not a golden): a synthetic reversed role-only relationship renders with roles reserved on the correct DOT ends', () => {
+    const puml = '@startuml\nclass A\nclass B\nA /owner <-up- /child B\n@enduml';
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      renderSync(puml, { measurer: new WidthTableMeasurer() });
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    const edge = captured
+      .flatMap((g) => g.edges)
+      .find((e) => e.attributes?.tailLabel !== undefined || e.attributes?.headLabel !== undefined);
+    expect(edge, 'expected an edge carrying a reserved tail/head label').toBeDefined();
+    const attrs = edge!.attributes!;
+    // rel.from='A' (fromRole='owner'), rel.to='B' (toRole='child'),
+    // dotEdgeReversed=true -> swap=true -> DOT tail reserves the SWAPPED
+    // role (toRole='child'), DOT head reserves fromRole='owner'.
+    expect(attrs.tailLabel).toBe('child');
+    expect(attrs.headLabel).toBe('owner');
   });
 });
 

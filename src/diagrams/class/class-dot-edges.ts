@@ -119,13 +119,21 @@ interface DotEdgeAttrContext {
  * it for `tailport`/`headport`; this was the one remaining call
  * (`edgeLabelAttrs` -> `computeMultiplicityAttrs`) still reading the
  * UN-swapped pair, pairing the wrong multiplicity with `taillabel`/
- * `headlabel`. Only `fromMultiplicity`/`toMultiplicity` are swapped:
- * `fromRole`/`toRole` are parsed but read nowhere in `src/` yet
- * (`class-layout-edge-labels.ts#computeMultiplicityAttrs`'s own doc
- * comment), so swapping them would be inert. `fromQualifier`/`toQualifier`
- * key off `rel.from`/`rel.to` classifier ids directly
- * (`class-shield-helpers.ts:129-130`), which this swap never touches, so
- * they need no adjustment. See `.agent-notes/m3-tail-head-swap.md`.
+ * `headlabel`.
+ *
+ * cdd-T17 fix: `fromRole`/`toRole` are swapped too, for the identical
+ * reason -- `LinkArg.java:116-117`'s `getInv()` swaps `role2`/`role1`
+ * alongside `quantifier2`/`quantifier1` (and `kal2`/`kal1`), and
+ * `computeMultiplicityAttrs` (`class-layout-edge-labels.ts`) now falls
+ * back to `rel.fromMultiplicity ?? rel.fromRole` for the DOT reservation
+ * (`SvekEdge.java:447-466`) -- so a role left un-swapped on a reversed
+ * edge would reserve the wrong end's text whenever that end has a role
+ * but no multiplicity. (Originally documented here as "swapping them
+ * would be inert" -- true only while nothing in `src/` read `fromRole`/
+ * `toRole`, which T17 changed.) `fromQualifier`/`toQualifier` key off
+ * `rel.from`/`rel.to` classifier ids directly (`class-shield-helpers.ts:
+ * 129-130`), which this swap never touches, so they need no adjustment.
+ * See `.agent-notes/m3-tail-head-swap.md`.
  */
 function swappedRel(rel: Relationship, swap: boolean): Relationship {
   if (!swap) return rel;
@@ -137,6 +145,18 @@ function swappedRel(rel: Relationship, swap: boolean): Relationship {
   else delete out.fromMultiplicity;
   if (rel.fromMultiplicity !== undefined) out.toMultiplicity = rel.fromMultiplicity;
   else delete out.toMultiplicity;
+  // cdd-T17 fix: `LinkArg.java:116-117`'s `getInv()` swaps `role2`/`role1`
+  // alongside `quantifier2`/`quantifier1` (and `kal2`/`kal1`) -- the SAME
+  // `??` fallback `class-layout-edge-labels.ts#computeMultiplicityAttrs`
+  // now reads (`rel.fromMultiplicity ?? rel.fromRole`) means an UN-swapped
+  // role reaches the wrong end's DOT reservation whenever a reversed edge
+  // has a role but no multiplicity on that end. Unreached by the corpus
+  // (T17: the only 2 role-bearing fixtures are both `dotEdgeReversed ===
+  // false`), but no longer inert now that a role-reading consumer exists.
+  if (rel.toRole !== undefined) out.fromRole = rel.toRole;
+  else delete out.fromRole;
+  if (rel.fromRole !== undefined) out.toRole = rel.fromRole;
+  else delete out.toRole;
   return out;
 }
 
