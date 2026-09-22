@@ -18,6 +18,18 @@ import {
   applyGuillemet,
 } from './skinparam-key-handlers-shared.js';
 import { parseShadowingValue } from './skinparam-element-buckets.js';
+import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+
+/** `skinparam classFontColor automatic` / `AttributeFontColor automatic`
+ *  (`nisune-86-faji869`) -- A3 M2's own diagnosis names this a THIRD,
+ *  harder variant (jar computes a contrast colour against the header
+ *  background) explicitly out of this iteration's scope.
+ *  `resolveColorToSvgHex` has no rejection path for a non-colour keyword
+ *  and would otherwise return it VERBATIM as an SVG `fill` value. */
+const AUTOMATIC_FONT_COLOR = 'automatic';
+function isAutomaticFontColor(color: string): boolean {
+  return color.trim().toLowerCase() === AUTOMATIC_FONT_COLOR;
+}
 
 export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
@@ -142,6 +154,29 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.classAttributeFontItalic = flags.italic;
     },
   ],
+  // cdd-T19 (A3 M2): `skinparam class { AttributeFontColor X }` -- see
+  // `skinparam-accumulator.ts#classAttributeFontColor`'s own doc comment
+  // for the theme-field mapping (`skinparam-theme-builder.ts`) and the
+  // upstream `FromSkinparamToStyle.java:192` citation. `color` (3rd
+  // handler param) is `resolveColor(value)`, gradient-flattened but not
+  // yet hex -- resolved here, matching `classCascadeFontColor`'s own
+  // "pre-resolved to SVG-ready hex at Theme-build time" contract
+  // (`style-cascade-class.ts`'s module doc comment). `automatic`
+  // (`nisune-86-faji869`) is explicitly OUT of scope (A3 M2's own fix
+  // shape: "a THIRD, harder variant -- jar computes a contrast colour
+  // against the header background... kept separate/lower confidence") --
+  // guarded here rather than fed through `resolveColorToSvgHex`, which
+  // has no rejection path for a non-colour keyword and returns it
+  // VERBATIM (`fill="automatic"`, jar-verified WORSE than the pre-T19
+  // unhandled-key baseline, which left BOTH classifiers at the shared
+  // '#000000' default and coincidentally matched one of the two).
+  [
+    ['classattributefontcolor'],
+    (acc, _v, color) => {
+      if (isAutomaticFontColor(color)) return;
+      acc.classAttributeFontColor = resolveColorToSvgHex(color);
+    },
+  ],
   [
     ['classfontsize'],
     (acc, value) => {
@@ -161,6 +196,22 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       const flags = parseFontStyleFlags(value);
       acc.classFontBold = flags.bold;
       acc.classFontItalic = flags.italic;
+    },
+  ],
+  // cdd-T19 (A3 M2): `skinparam classFontColor X` (bare) or the block form
+  // `skinparam class { FontColor X }` -- both normalize to the SAME
+  // `classfontcolor` key (`preprocessor.ts`'s single-token vs.
+  // `skinparamStack`-joined block-key paths both lowercase to it). See
+  // `skinparam-accumulator.ts#classFontColor`'s doc comment for the
+  // HEADER-only theme mapping and the `FromSkinparamToStyle.java:187`
+  // citation. `automatic` guard: see `classattributefontcolor`'s own
+  // comment two entries above -- the SAME out-of-scope keyword, same
+  // fixture (`nisune-86-faji869`).
+  [
+    ['classfontcolor'],
+    (acc, _v, color) => {
+      if (isAutomaticFontColor(color)) return;
+      acc.classFontColor = resolveColorToSvgHex(color);
     },
   ],
   [

@@ -65,6 +65,22 @@ export interface SkinparamAccumulator {
   classBorder: Paint | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
+  /** cdd-T19 (A3 M2): `skinparam classFontColor`/the block form
+   *  `skinparam class { FontColor X }` — resolved hex, mapped to the
+   *  HEADER-only `classCascadeHeaderFontColor` theme field
+   *  (`FromSkinparamToStyle.java:187`'s `{element,class_,header}`
+   *  signature, jar-verified `remanu-84-sega129`/`picija-82-jebu272`:
+   *  only the name row tints, member rows stay unaffected). */
+  classFontColor: string | undefined;
+  /** cdd-T19 (A3 M2): `skinparam class { AttributeFontColor X }` (no
+   *  bare/top-level form upstream — always block-scoped, `Colors.java`'s
+   *  key resolves to `classAttributeFontColor` after the block-name
+   *  prefix, `preprocessor.ts`'s `skinparamStack` join) — resolved hex,
+   *  mapped to the MEMBER-row `classCascadeFontColor` theme field
+   *  (`FromSkinparamToStyle.java:192`'s `{element,class_}` signature, no
+   *  `header` token, jar-verified `picija-82-jebu272`: every attribute
+   *  AND method row tints, the name row does not). */
+  classAttributeFontColor: string | undefined;
   /** R2j: `skinparam classAttributeFontSize<<Stereo>>` — see
    *  `theme-graph-colors-a.ts#classAttributeFontSizeByStereo`. */
   classAttributeFontSizeByStereo: Record<string, number> | undefined;
@@ -188,6 +204,8 @@ const SCALAR_FIELD_NAMES = [
   'classBorder',
   'classBorderThickness',
   'classBorderThicknessByStereo',
+  'classFontColor',
+  'classAttributeFontColor',
   'classAttributeFontSizeByStereo',
   'classFontSizeByStereo',
   'stateBorderColorByStereo',
