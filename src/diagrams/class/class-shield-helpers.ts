@@ -12,6 +12,9 @@
 
 import type { Classifier, ClassDiagramAST, ClassifierKind } from './ast.js';
 import { LIKE_CLASS_KINDS } from './class-layout-helpers.js';
+import { clipSplineStart, clipSplineEnd, type ClipRect } from '../../core/spline-clip.js';
+
+export type { ClipRect } from '../../core/spline-clip.js';
 
 /**
  * Whether a leaf of this kind anchors a `Class::member` endpoint to that
@@ -65,6 +68,47 @@ export function isRowPortKind(kind: ClassifierKind): boolean {
  * namespace id actually appears as an endpoint/note-target, so the transform
  * is a no-op for every diagram that does not hit this case.
  */
+/**
+ * cdd-T13: `SvekEdge.java:671-672` -- `dotPath = dotPath.simulateCompound(
+ * lhead == null ? null : lhead.getRectangleArea(), ltail == null ? null :
+ * ltail.getRectangleArea())` -- trims a routed spline back to the boundary
+ * of whichever cluster(s) it is anchored to (`:252-258` sets `ltail`/`lhead`
+ * from the SAME `startUid`/`endUid` `Cluster.CENTER_ID` test
+ * `packageEndpointAnchors` above already applies). `simulateCompound` runs
+ * AFTER upstream's own direction-reversal check (`SvekEdge.java:643-655`),
+ * so by the time it runs `dotPath`'s start point is always entity1's end
+ * and its end point entity2's -- ported here as the caller passing
+ * `startId`/`endId` already re-ordered to match `points[0]`/`points.at(-1)`
+ * (`class-edge-geo.ts#normalizeEdgePoints`'s own `matchesFromTo`).
+ *
+ * `clusterRects` is keyed the SAME way {@link packageEndpointAnchors}'s
+ * returned map is (namespace id -> ...), built by the caller from the real
+ * graphviz cluster box (`class-geo-builders.ts#buildNamespaceGeos`'s own
+ * `NamespaceGeo.x/y/width/height`, `Cluster#setPosition` verbatim -- the
+ * SAME pre-shift coordinate frame `points` are in). An id absent from
+ * `clusterRects` (not a cluster endpoint) or a rect the endpoint is already
+ * outside of is a no-op -- `clipSplineStart`/`clipSplineEnd` carry that
+ * guard themselves (`RectangleArea#contains`, `DotPath#simulateCompound`),
+ * so passing the SAME id/rect to both ends (a note connector's one
+ * possible cluster end, `note-layout-tip.ts#resolveGroupGeos` -- the
+ * connector's own note-first/host-first order is not known at this seam,
+ * `CommandFactoryNoteOnEntity.java:342-357`) is safe: only the end that is
+ * actually inside the rect ever clips.
+ */
+export function clipClusterEdgeEnds(
+  points: Array<{ x: number; y: number }>,
+  startId: string | undefined,
+  endId: string | undefined,
+  clusterRects: ReadonlyMap<string, ClipRect>,
+): Array<{ x: number; y: number }> {
+  let result = points;
+  const tail = startId !== undefined ? clusterRects.get(startId) : undefined;
+  if (tail !== undefined) result = clipSplineStart(result, tail);
+  const head = endId !== undefined ? clusterRects.get(endId) : undefined;
+  if (head !== undefined) result = clipSplineEnd(result, head);
+  return result;
+}
+
 export function packageEndpointAnchors(ast: ClassDiagramAST, clusterNsIds: ReadonlySet<string>): Map<string, string> {
   // Only a NON-EMPTY package (an actual cluster) gets an anchor; an empty
   // package used as an endpoint stays a plain rect node (oracle: mujopi p1/p3).

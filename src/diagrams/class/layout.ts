@@ -252,6 +252,16 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
   const namespaces = buildNamespaceGeos(effAst, theme, measurer, result.clusters, clusterIdByNs);
+  // cdd-T13 (M1): the real graphviz cluster box for every cluster-anchored
+  // edge endpoint -- `NamespaceGeo.x/y/width/height` is `box` VERBATIM
+  // (`Cluster#setPosition`, `class-geo-builders.ts#namespaceGeoFromBox`'s
+  // own doc comment), the SAME pre-shift frame `result.edges[].points` and
+  // the note connector's raw points are in (`core/graph-layout.ts
+  // #shiftToOrigin` shifts nodes/edges/clusters together, BEFORE this
+  // file's own `assembleShiftedGeometry` runs). Keyed by namespace id, the
+  // SAME key `anchors` uses -- see `class-shield-helpers.ts
+  // #clipClusterEdgeEnds`'s own doc comment.
+  const clusterRects = new Map(namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]));
   // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
   // tail/head cardinality labels stay at `theme.fontFamily` (see
@@ -276,6 +286,7 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
     },
     posMap,
     anchors,
+    clusterRects,
     theme.colors.graph.arrowThickness,
   );
   // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
@@ -293,7 +304,18 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // resolve (degenerate spline) keeps its ordinary edge draw, the same
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
   const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
-  const notes: NoteGeo[] = mapNoteGeos(effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors);
+  // cdd-T13 (M1): a `note <pos> of <package>` connector is upstream's OWN
+  // ordinary `Link` (`CommandFactoryNoteOnEntity.java:342`), so its
+  // `SvekEdge` gets the SAME `:671-672` clip -- threaded into `mapNoteGeos`
+  // (write-set extension, flagged, precedent rows 18/29/36/39: T9b's own
+  // row 39 names this exact residual as T13's). Freestanding notes need no
+  // extra wiring here: their connector is `edges[]` itself
+  // (`findFreestandingNoteConnectors`, above), already clipped by
+  // `buildEdgeGeos`.
+  const notes: NoteGeo[] = mapNoteGeos(effAst.notes, result, noteParts, { theme, measurer }, {
+    freestandingConnectors,
+    clusterRects,
+  });
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
     [...freestandingConnectors.entries()].filter(([noteId]) => opaleNoteIds.has(noteId)).map(([, edge]) => edge.id),
