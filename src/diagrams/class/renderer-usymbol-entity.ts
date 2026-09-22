@@ -52,6 +52,7 @@ import {
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
+import type { USymbol } from '../../core/descriptive-keywords.js';
 
 /** Jar default line thickness for an `EntityImageDescription`-family shape
  *  with no `LineThickness` skinparam override — see `renderer-entity.ts
@@ -60,29 +61,57 @@ import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver
  *  constant is module-private in a file outside this task's write-set. */
 const ENTITY_STROKE_WIDTH = 0.5;
 
+/** cdd-T22 (cacoma-43-poxu615): `ENTITY_ROUND_CORNER`, duplicated (not
+ *  imported, same reason as `ENTITY_STROKE_WIDTH` above) from
+ *  `description/renderer-entity.ts`. `driver-rectangle-svg.ts` halves
+ *  `roundCorner` at serialization (`rx = rx/2`), so 5.0 emits the jar's
+ *  `rect/@rx="2.5"` (`USymbolComponent2#drawComponent2` reads
+ *  `SymbolContext#getRoundCorner()` for its outer box — unlike usecase/
+ *  actor/circle's shapes, which ignore it entirely, see
+ *  `buildUSymbolEntityParams`'s own doc comment). */
+const COMPONENT_ROUND_CORNER = 5.0;
+
 /**
- * Assembles `EntityImageDescriptionParams` for one usecase/actor leaf, from
- * exactly what `ClassifierGeo` + `Theme` already carry — the draw-time
- * counterpart to `class-layout-leaf-shapes.ts#measureUsecaseOrActor`'s
- * sizing-time `buildSizingEntityParams` (`leaf-sizing-entity.ts`), now with
- * REAL paint instead of that function's `SIZING_PLACEHOLDER_COLOR`.
- *
- * `roundCorner`/`diagonalCorner: 0` (not `renderer-entity.ts`'s shared
- * `ENTITY_ROUND_CORNER=5.0`): both drawn shapes here (`TextBlockInEllipse`,
- * `ActorStickMan`) ignore `SymbolContext#getRoundCorner` entirely — only
- * the rectangle-family `USymbol`s consume it — so 0 matches the SAME
- * "unused, matches the sizer's own placeholder" value `sizingPaint`
- * (`leaf-sizing-entity.ts`) already uses for this pair.
+ * `EntityImageDescriptionParams.symbol.keyword` for one class-diagram leaf
+ * routed through this file: `usecase`/`descriptive`+`actor` (SI14 T4),
+ * plus cdd-T22's `circle` (E8) and `descriptive`+`component` (cacoma)
+ * additions. The cast on the `descriptive` fallback documents a
+ * caller-enforced invariant (`renderer.ts`'s own dispatch gate forwards
+ * ONLY `usymbol === 'actor' | 'component'` here, never a raw business-
+ * suffix keyword) — not an external-data guess.
  */
-function buildUsecaseActorEntityParams(
+function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
+  if (classifier.kind === 'usecase') return 'usecase';
+  if (classifier.kind === 'circle') return 'circle';
+  return (classifier.usymbol as USymbol | undefined) ?? 'actor';
+}
+
+/**
+ * Assembles `EntityImageDescriptionParams` for one usecase/actor/circle/
+ * component leaf, from exactly what `ClassifierGeo` + `Theme` already
+ * carry — the draw-time counterpart to `class-layout-leaf-shapes.ts
+ * #measureUsecaseOrActor`/`#measureCircleInterface`'s sizing-time params
+ * (`leaf-sizing-entity.ts#buildSizingEntityParams` for usecase/actor), now
+ * with REAL paint instead of a sizing placeholder.
+ *
+ * `roundCorner`: 0 for usecase/actor/circle (`TextBlockInEllipse`,
+ * `ActorStickMan`, `CircleInterface2` all ignore `SymbolContext
+ * #getRoundCorner` entirely), {@link COMPONENT_ROUND_CORNER} for
+ * `component` (`USymbolComponent2#drawComponent2` DOES read it — the
+ * jar's `rect/@rx="2.5"` on `cacoma-43-poxu615`, structural diff before
+ * this task). `diagonalCorner: 0` for all four (unused by every shape this
+ * file reaches).
+ */
+function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
   theme: Theme,
   sprites: SpriteRegistry | undefined,
 ): EntityImageDescriptionParams {
-  const symbolKeyword = classifier.kind === 'usecase' ? 'usecase' : 'actor';
+  const symbolKeyword = resolveSymbolKeyword(classifier);
   const display = classifier.rows[0]?.text ?? classifier.id;
   const fontTitle = textFont(theme, symbolKeyword);
   const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
+  const roundCorner = symbolKeyword === 'component' ? COMPONENT_ROUND_CORNER : 0;
   return {
     entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: null },
     symbol: {
@@ -94,7 +123,7 @@ function buildUsecaseActorEntityParams(
     paint: {
       forecolor: resolveElementPaint(theme, symbolKeyword, 'border'),
       backcolor: resolveElementPaint(theme, symbolKeyword, 'background'),
-      roundCorner: 0,
+      roundCorner,
       diagonalCorner: 0,
       deltaShadow: 0,
       stroke: UStroke.withThickness(resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH),
@@ -108,18 +137,28 @@ function buildUsecaseActorEntityParams(
     atomImageResolverFor: makeAtomImageResolverFor(sprites),
   };
 }
-// #lizard forgives -- one straight-line params-object assembly (no
-// branching beyond the ternary already counted), mirrors renderer-entity
-// .ts#buildEntityParams's identical shape/length for the same reason.
+// #lizard forgives -- straight-line params-object assembly plus one ternary,
+// mirrors renderer-entity.ts#buildEntityParams's identical shape/length for
+// the same reason.
+
+/** Whether a class-diagram leaf routes through {@link renderClassUSymbolEntity}
+ *  rather than the generic classifier box -- usecase/`descriptive`+actor
+ *  (SI14 T4), plus cdd-T22's `circle` (E8) and `descriptive`+`component`
+ *  (cacoma-43-poxu615) additions. Exported so `renderer.ts`'s own dispatch
+ *  (over its 500-line cap) stays a single call. */
+export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
+  if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;
+  return classifier.kind === 'descriptive' && (classifier.usymbol === 'actor' || classifier.usymbol === 'component');
+}
 
 /**
- * Draws one usecase/actor `ClassifierGeo` via `EntityImageDescription
- * .drawU`, translated to its absolute layout position (mirrors
- * `description/renderer-entity.ts#drawEntity`'s `ug.apply(new
- * UTranslate(node.x, node.y))` positioning), and unwraps the result via
- * T1's `renderDrawableToFragment` seam (ADR-2). The returned fragment's
- * `body` already carries EntityImageDescription's OWN `<!--entity
- * NAME--><g class="entity" ...>` wrap (`DecorateEntityImage.ts
+ * Draws one usecase/actor/circle/component `ClassifierGeo` via
+ * `EntityImageDescription.drawU`, translated to its absolute layout
+ * position (mirrors `description/renderer-entity.ts#drawEntity`'s
+ * `ug.apply(new UTranslate(node.x, node.y))` positioning), and unwraps the
+ * result via T1's `renderDrawableToFragment` seam (ADR-2). The returned
+ * fragment's `body` already carries EntityImageDescription's OWN
+ * `<!--entity NAME--><g class="entity" ...>` wrap (`DecorateEntityImage.ts
  * #decorateEntityDrawing`) — jar-verified against `class-usecase-inline-
  * sprite/golden.svg`'s `<!--entity UC1-->`, NOT the class engine's own
  * `renderer-group.ts#wrapEntity` `<!--class NAME-->` comment every OTHER
@@ -132,14 +171,14 @@ function buildUsecaseActorEntityParams(
  * already assigns via `uidPlan.classifierUid`, so reusing it here needs no
  * new uniqueness scheme.
  */
-export function renderUsecaseOrActorEntity(
+export function renderClassUSymbolEntity(
   classifier: ClassifierGeo,
   theme: Theme,
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
   uid: string,
 ): DrawableFragment {
-  const params = buildUsecaseActorEntityParams(classifier, theme, sprites);
+  const params = buildUSymbolEntityParams(classifier, theme, sprites);
   const image = new EntityImageDescription({ ...params, entity: { ...params.entity, uid } });
   const drawable: UDrawable = {
     drawU(ug: UGraphic): void {

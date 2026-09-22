@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1148 modules · 4223 exported names.
+1148 modules · 4225 exported names.
 
 ## `src/`
 
@@ -1150,7 +1150,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-layout-header-creole.ts` | `computeBadgeSpriteBox`, `buildBadgeCharFields`, `buildHeaderLineMetrics` | class-layout-header-creole.ts — the A2s R2i creole-routing + badge- decoration helpers `class-layout-header-geo.ts#computeHeaderNameGeo` composes. |
 | `class-layout-header-geo.ts` | `ClassFontSpecs`, `CommonHeaderFields`, `StereoGeoOptions`, `computeHeaderNameGeo`, `StereoAndTagGeo`, `computeStereoAndTagGeo`, `HeaderGeoBundle`, `computeHeaderRowsGeo` | Generic classifier header geometry: badge decision + header display-text sizing, `<<stereotype>>` block dimensions, `class Foo<T>` generic-tag box, and the resulting stacked stereo/name rows -- the pieces `class-layout-generic-classifier.ts |
 | `class-layout-helpers.ts` | `ROW_TEXT_LEFT_MARGIN`, `isMethodMember`, `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `edgeLabelAttrs`, `NoteBoxContext`, `formatMemberText`, `MeasuredClassifier`, `MemberSuppression`, `measureClassifier`, `LIKE_CLASS_KINDS` | Classifier sizing/measurement helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
-| `class-layout-leaf-shapes.ts` | `measureUsecaseOrActor`, `measureLollipop`, `measureAssociationDiamond` | The usecase/actor USymbol box and the lollipop-interface circle+label — the two classifier kinds whose svek box is NOT the generic name+members rect (`class-layout-generic-classifier.ts#measureGenericClassifier`). |
+| `class-layout-leaf-shapes.ts` | `measureUsecaseOrActor`, `measureLollipop`, `measureAssociationDiamond`, `measureCircleInterface` | The usecase/actor USymbol box and the lollipop-interface circle+label — the two classifier kinds whose svek box is NOT the generic name+members rect (`class-layout-generic-classifier.ts#measureGenericClassifier`). |
 | `class-layout-shift.ts` | `shiftClassifierGeo`, `shiftNamespaceGeo`, `shiftEdgeGeo`, `shiftNoteGeo` | Ink-shift helpers for the class layout -- the five per-geo translate functions, split out of `layout.ts` (500-line hook cap, cdd-T6). |
 | `class-leaf-geo.ts` | `ClassLeafGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves` | `ClassGeometry`'s single leaf collection — mission `leaf-draw-order` T3: folds `ClassGeometry.classifiers`/`.notes` into one `leaves` array, mirroring jar's own single leaf collection (`Bibliotekon#allNodes()`, `net/atmp/CucaDiagram.java`) |
 | `class-leaf-order.ts` | `computeLeafDrawOrder` | `computeLeafDrawOrder` -- the jar's leaf-print order (D1/D2, `plans/leaf-draw-order/decisions.md`), computed purely from the parsed AST: no geometry, no new parse-time tick. |
@@ -1233,7 +1233,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-openiconic.ts` | `renderOpenIconicAtom` | Renders one OpenIconic `<&glyph>` `MemberRenderAtom` (G2 N41) -- split out of `renderer-classifier-box.ts#renderRowAtoms` purely to keep that function's own NLOC under this project's complexity cap and to avoid growing `renderer-classifier- |
 | `renderer-uid.ts` | `ClassUidPlan`, `ClassUidPlanInput`, `classUidPlanInputFromAst`, `buildClassUidPlan` | renderer-uid.ts — G2 N2 (mechanism 3): entity/cluster/link uid assignment for the class renderer, mirroring the description engine's `renderer-uid.ts#buildUidPlan` (G1/I3b precedent — same shared-counter scheme, same exact/fallback gate sha |
 | `renderer-url.ts` | `UrlTaggedPrimitive`, `wrapClassifierBody` | renderer-url.ts — G2 N15 (README item #7): the classifier-level `[[url]]` `<a>`-wrap render decision. |
-| `renderer-usymbol-entity.ts` | `renderUsecaseOrActorEntity` | renderer-usymbol-entity.ts — SI14 T4: draws a class-diagram `usecase`/ `actor` leaf through the SAME faithful `EntityImageDescription.drawU` path the description engine's `renderer-entity.ts#drawEntity` already uses, replacing the hand-roll |
+| `renderer-usymbol-entity.ts` | `usesClassUSymbolEntity`, `renderClassUSymbolEntity` | renderer-usymbol-entity.ts — SI14 T4: draws a class-diagram `usecase`/ `actor` leaf through the SAME faithful `EntityImageDescription.drawU` path the description engine's `renderer-entity.ts#drawEntity` already uses, replacing the hand-roll |
 | `renderer.ts` | `renderClass` | Class diagram SVG renderer. |
 
 ## `src/diagrams/description/`
