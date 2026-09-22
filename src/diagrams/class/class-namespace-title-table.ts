@@ -12,6 +12,39 @@
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
+import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
+import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
+
+/**
+ * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
+ * supplement --
+ * `titleAndAttributeWidth = max(dimLabel.w, attributeWidth) +
+ *  uSymbol.suppWidthBecauseOfShape()` and
+ * `titleAndAttributeHeight = dimLabel.h + attributeHeight + marginForFields +
+ *  uSymbol.suppHeightBecauseOfShape()`
+ * (`~/git/plantuml/.../svek/ClusterHeader.java:87-94`). Both terms are 0 for
+ * a `null` USymbol and for the base `USymbol` class
+ * (`decoration/symbol/USymbol.java:88-93`); only `USymbolNode`
+ * (`USymbolNode.java:191-199`: height+5, width+60) and `USymbolDatabase`
+ * (`USymbolDatabase.java:172-175`: height+15) override it. Read off the
+ * ported `USymbol` object itself rather than re-tabulated here, so the two
+ * upstream overrides stay in ONE place (`src/core/decoration/symbol/`).
+ *
+ * Jar-verified against `dativu-93-pona469`'s cached `svek-1.dot`: `package
+ * foo <<Node>>` emits `WIDTH="79"` (`floor(19.425) + 60`) / `HEIGHT="14"`
+ * (`14 + 5 - 5`); `package foo1 <<Node>>` emits `WIDTH="87"`
+ * (`floor(27.213) + 60`).
+ */
+function titleSupp(usymbol: string | undefined, theme: Theme): { width: number; height: number } {
+  if (usymbol === undefined) return { width: 0, height: 0 };
+  const symbol = resolveDescriptionUSymbol(
+    usymbol,
+    resolveActorStyle(theme.actorStyle),
+    mapComponentStyle(theme.componentStyle),
+  );
+  if (symbol === null) return { width: 0, height: 0 };
+  return { width: symbol.suppWidthBecauseOfShape(), height: symbol.suppHeightBecauseOfShape() };
+}
 
 /** `ClusterHeader`'s title font for a class/object package cluster --
  *  `getStyle()` resolves the `package.title` style signature
@@ -54,8 +87,12 @@ export function namespaceTitleTableDims(
   display: string,
   theme: Theme,
   measurer: StringMeasurer,
+  usymbol?: string,
 ): { width: number; height: number } {
   const font = namespaceTitleFont(theme);
   const { width } = measurer.measure(display, font);
-  return { width, height: computeTitleTableHeight(1, 0, 0, font.size) };
+  // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
+  // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
+  const supp = titleSupp(usymbol, theme);
+  return { width: width + supp.width, height: computeTitleTableHeight(1, 0, 0, font.size) + supp.height };
 }

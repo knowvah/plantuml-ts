@@ -106,7 +106,11 @@ function buildDotClusters(
     if (anchorId !== undefined) cluster.unwrappedNodeId = anchorId;
     if (ns.display.length > 0) {
       cluster.label = ns.display;
-      const dims = namespaceTitleTableDims(ns.display, theme, measurer);
+      // cdd-T12 (A2b E3): `ns.usymbol` feeds `ClusterHeader`'s per-USymbol
+      // `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` supplement
+      // (`class-namespace-title-table.ts`) -- a `<<Node>>` package's label
+      // table is 60px wider / 5px taller than its bare title text.
+      const dims = namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol);
       // Same pair, two consumers (cluster-title-table.ts's own
       // `computeTitleTableHeight` doc comment): `labelWidth`/`labelHeight`
       // feed the DOT-TEXT emitter's `label=<TABLE...>` (svek-dot-emit-

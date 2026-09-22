@@ -8,6 +8,8 @@ import {
   renderNamespaceFolder,
   PACKAGE_ROUND_CORNER,
   PACKAGE_STROKE_WIDTH,
+  namespaceFill,
+  renderEmptyPackageIcon,
 } from '../../../src/diagrams/class/class-namespace-shape.js';
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 
@@ -252,5 +254,62 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
 describe('PACKAGE_ROUND_CORNER', () => {
   it('is 5 (half=2.5, matching every jar-observed non-tab arc radius)', () => {
     expect(PACKAGE_ROUND_CORNER).toBe(5);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T12 (diagnosis A3 M3): the inline `package "X" #COLOR {` background
+// override, and the `<style> package { ... }` cascade that reaches the
+// collapsed-EMPTY package leaf. Both expectations are the pinned oracle's
+// own bytes.
+// ---------------------------------------------------------------------------
+
+describe('namespaceFill — inline package colour (A3 M3, garumi-63-vuze973)', () => {
+  it("prefers the namespace's own #DDDDDD over the global packageBackground default", () => {
+    expect(namespaceFill(finonoGeo({ color: '#DDDDDD' }), defaultTheme)).toBe('#DDDDDD');
+  });
+
+  it('falls back to the global packageBackground when there is no inline colour', () => {
+    expect(namespaceFill(finonoGeo(), defaultTheme)).toBe('none');
+  });
+
+  it('still maps a transparent global background to the literal fill="none" (G2 N59)', () => {
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBackground: '#00000000' } },
+    };
+    expect(namespaceFill(finonoGeo(), theme)).toBe('none');
+  });
+
+  it('paints the folder outline with it — jar fill="#DDD" where this port emitted "none"', () => {
+    const svg = renderNamespaceFolder(finonoGeo({ color: '#DDDDDD' }), defaultTheme);
+    expect(svg).toContain('fill="#DDD"');
+  });
+});
+
+describe('renderEmptyPackageIcon — <style> package {} cascade (xitobu-41-lame230)', () => {
+  // `<style> package { BackGroundColor palegreen; LineThickness 2;
+  // LineColor red }` lands in the per-element bucket, and the jar's leaf
+  // draws `fill="#98FB98"` `stroke="#F00"` `stroke-width="2"`.
+  const styled = {
+    ...defaultTheme,
+    colors: {
+      ...defaultTheme.colors,
+      elements: { package: { background: 'palegreen', border: 'red', lineThickness: 2 } },
+    },
+  };
+
+  it('applies the block’s BackGroundColor / LineColor / LineThickness to the leaf', () => {
+    const svg = renderEmptyPackageIcon(finonoGeo(), styled);
+    expect(svg).toContain('fill="#98FB98"');
+    expect(svg).toContain('stroke="#F00"');
+    expect(svg).toContain('stroke-width="2"');
+  });
+
+  it('keeps the unstyled ...package_,title defaults otherwise (gatula-10-bifu561)', () => {
+    const svg = renderEmptyPackageIcon(finonoGeo(), defaultTheme);
+    expect(svg).toContain('fill="#F1F1F1"');
+    expect(svg).toContain('stroke="#181818"');
+    expect(svg).toContain('stroke-width="0.5"');
   });
 });
