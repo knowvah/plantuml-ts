@@ -39,6 +39,7 @@ import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { paintToSvg, type Paint } from '../../core/paint.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { lookupSizedGlyph } from './class-badge-sized-glyphs.js';
+import { type BadgeLetter, BADGE_GLYPH_D, REFERENCE_CX, REFERENCE_CY } from './class-badge-glyph-data.js';
 
 /** `SkinParam#getCircledCharacterRadius()` default (fontSize 17 -> formula
  *  below). Retained as the module's own default constant -- every call site
@@ -281,90 +282,31 @@ export function spotSnameForKind(kind: ClassifierKind): string | undefined {
 }
 
 /**
- * Glyph outline `d` data for each badge letter (C/I/A/E/@/P/M/F/?), captured
- * verbatim from the jar's own SVG output (`getCircledChar` ->
- * `CircledCharacter`'s AWT glyph-outline path) at the reference badge
- * center `(22, 23)` -- C/I/A/E/@ normalized from 3 independent
- * single-classifier fixtures (`josazo-53-bode013` for C/E/@/A in one shot,
- * `tipude-10-tizi427` for I), all `-DPLANTUML_DETERMINISTIC_TEXT=true`.
- * P/M (`class Foo << (P)artyPlaceThing >>`-style custom stereotype letters)
- * and F (`<<(F, color)>>`) were derived N33 from `renezi-40-jupi466`/
- * `jarigi-34-nage684`'s own cached jar SVGs (both letters cross-verified
- * against a second occurrence in the same/sibling fixture, matching within
- * the deterministic-mode 0.01 numeric tolerance -- `compare.ts`'s own
- * per-token comparator, not a byte-string equality bar). `?` (a literal
- * `<<(?, color)>>` question-mark badge char) derived N33 from
- * `cotacu-63-jisi866`. Cross-verified: the SAME letter's `d` at a DIFFERENT
- * badge center is this exact string with every coordinate translated by
- * `(cx - 22, cy - 23)` -- confirmed on 144 additional `C`-badge occurrences
- * across the corpus (`plans/g2-class-svg/ledger.md` N3), so translating
- * this fixed reference reproduces every badge letter's glyph within
- * tolerance regardless of the classifier's actual position.
- *
- * This is the FONT SIZE 17 (default `circledCharacterFontSize`) outline --
- * see {@link BADGE_GLYPH_D_BY_FONT_SIZE} for the SAME letter captured at
- * OTHER font sizes (G2 N38: not a linear scale of this table, AWT hinting
- * rounds each point size's contour independently).
+ * Glyph outline `d` data for badge letters C/I/A/E/@/P/M/F/? (G2 N3/N33) and
+ * R/J/O/W/D/Q/S/X (T21, A5 M3a) -- moved to `class-badge-glyph-data.ts`
+ * ({@link BADGE_GLYPH_D}) to keep this file under the repo's 500-line cap;
+ * see that module's own doc comment for every letter's source-fixture
+ * citation and the reference-center convention ({@link REFERENCE_CX},
+ * {@link REFERENCE_CY}).
  */
-type BadgeLetter = 'C' | 'I' | 'A' | 'E' | '@' | 'P' | 'M' | 'F' | '?';
 
-const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
-  C:
-    'M24.4731,29.1431 Q23.8921,29.4419 23.2529,29.5913 Q22.6138,29.7407 21.9082,29.7407 ' +
-    'Q19.4014,29.7407 18.0815,28.0889 Q16.7617,26.437 16.7617,23.3159 Q16.7617,20.1865 18.0815,18.5347 ' +
-    'Q19.4014,16.8828 21.9082,16.8828 Q22.6138,16.8828 23.2612,17.0322 Q23.9087,17.1816 24.4731,17.4805 ' +
-    'L24.4731,20.2031 Q23.8423,19.6221 23.2488,19.3523 Q22.6553,19.0825 22.0244,19.0825 ' +
-    'Q20.6797,19.0825 19.9949,20.1492 Q19.3101,21.2158 19.3101,23.3159 Q19.3101,25.4077 19.9949,26.4744 ' +
-    'Q20.6797,27.541 22.0244,27.541 Q22.6553,27.541 23.2488,27.2712 Q23.8423,27.0015 24.4731,26.4204 Z',
-  I:
-    'M18.4277,19.2651 L18.4277,17.1069 L25.8071,17.1069 L25.8071,19.2651 L23.3418,19.2651 ' +
-    'L23.3418,27.3418 L25.8071,27.3418 L25.8071,29.5 L18.4277,29.5 L18.4277,27.3418 L20.8931,27.3418 ' +
-    'L20.8931,19.2651 Z',
-  A:
-    'M21.8633,18.3481 L20.7095,23.4199 L23.0254,23.4199 Z M20.3691,16.1069 L23.3657,16.1069 ' +
-    'L26.7109,28.5 L24.2622,28.5 L23.4985,25.437 L20.2197,25.437 L19.4727,28.5 L17.0239,28.5 Z',
-  E:
-    'M25.6143,29.5 L17.8945,29.5 L17.8945,17.1069 L25.6143,17.1069 L25.6143,19.2651 L20.3433,19.2651 ' +
-    'L20.3433,21.938 L25.1162,21.938 L25.1162,24.0962 L20.3433,24.0962 L20.3433,27.3418 L25.6143,27.3418 Z',
-  '@':
-    'M24.5767,23.2261 Q24.5767,22.2881 24.1533,21.7568 Q23.73,21.2256 22.9912,21.2256 ' +
-    'Q22.2524,21.2256 21.8333,21.7568 Q21.4141,22.2881 21.4141,23.2261 Q21.4141,24.1724 21.8333,24.7036 ' +
-    'Q22.2524,25.2349 22.9912,25.2349 Q23.73,25.2349 24.1533,24.7036 Q24.5767,24.1724 24.5767,23.2261 Z ' +
-    'M26.1206,26.6294 L24.4937,26.6294 L24.4937,25.9487 Q24.1782,26.3887 23.7507,26.592 ' +
-    'Q23.3232,26.7954 22.7256,26.7954 Q21.3643,26.7954 20.53,25.8159 Q19.6958,24.8364 19.6958,23.2261 ' +
-    'Q19.6958,21.624 20.5259,20.6487 Q21.356,19.6733 22.7256,19.6733 Q23.3149,19.6733 23.7632,19.8767 ' +
-    'Q24.2114,20.0801 24.4937,20.4702 L24.4937,20.1299 Q24.4937,19.001 23.8752,18.3867 ' +
-    'Q23.2568,17.7725 22.1113,17.7725 Q20.3848,17.7725 19.2932,19.2915 Q18.2017,20.8105 18.2017,23.2427 ' +
-    'Q18.2017,25.791 19.4634,27.2976 Q20.7251,28.8042 22.8252,28.8042 Q23.4893,28.8042 24.1118,28.6091 ' +
-    'Q24.7344,28.4141 25.3071,28.0239 L26.0708,29.4849 Q25.3984,29.9414 24.6057,30.1697 ' +
-    'Q23.813,30.3979 22.9082,30.3979 Q20.0029,30.3979 18.2764,28.4639 Q16.5498,26.5298 16.5498,23.2427 ' +
-    'Q16.5498,20.0303 18.1021,18.1003 Q19.6543,16.1704 22.2109,16.1704 Q24.0205,16.1704 25.0706,17.262 ' +
-    'Q26.1206,18.3535 26.1206,20.2378 Z',
-  P:
-    'M20.7935,19.1655 L20.7935,22.8013 L21.7979,22.8013 Q23.0015,22.8013 23.4871,22.3945 ' +
-    'Q23.9727,21.9878 23.9727,20.9834 Q23.9727,19.979 23.4871,19.5723 Q23.0015,19.1655 21.7979,19.1655 Z ' +
-    'M18.3447,17.1069 L21.7065,17.1069 Q24.2715,17.1069 25.3962,18.02 Q26.521,18.9331 26.521,20.9834 ' +
-    'Q26.521,23.0337 25.3962,23.9468 Q24.2715,24.8599 21.7065,24.8599 L20.7935,24.8599 L20.7935,29.5 ' +
-    'L18.3447,29.5 Z',
-  M:
-    'M17.7141,17.1069 L20.6361,17.1069 L22.1131,22.5439 L23.5831,17.1069 L26.5211,17.1069 ' +
-    'L26.5211,29.5 L24.4131,29.5 L24.4131,19.5723 L23.1011,24.9927 L21.1501,24.9927 L19.8221,19.5723 ' +
-    'L19.8221,29.5 L17.7141,29.5 Z',
-  F:
-    'M25.733,19.2651 L20.462,19.2651 L20.462,21.938 L25.2598,21.938 L25.2598,24.0962 L20.462,24.0962 ' +
-    'L20.462,29.5 L18.0132,29.5 L18.0132,17.1069 L25.733,17.1069 Z',
-  '?':
-    'M20.6523,27.6509 L22.8687,27.6509 L22.8687,30 L20.6523,30 Z M22.8687,26.6714 L20.6523,26.6714 ' +
-    'L20.6523,25.3931 Q20.6523,24.5713 20.9097,23.9902 Q21.167,23.4092 21.8311,22.7617 L22.5781,22.0229 ' +
-    'Q23.1011,21.5166 23.2878,21.1846 Q23.4746,20.8525 23.4746,20.4956 Q23.4746,19.9395 23.0928,19.6572 ' +
-    'Q22.7109,19.375 21.9473,19.375 Q21.25,19.375 20.4905,19.6697 Q19.731,19.9644 18.9341,20.5454 ' +
-    'L18.9341,18.3208 Q19.7476,17.856 20.5818,17.6194 Q21.416,17.3828 22.2544,17.3828 Q23.9312,17.3828 ' +
-    '24.8857,18.1631 Q25.8403,18.9434 25.8403,20.313 Q25.8403,20.9438 25.5581,21.4875 Q25.2759,22.0313 ' +
-    '24.4956,22.7949 L23.7651,23.5088 Q23.2007,24.0566 23.043,24.4053 Q22.8853,24.7539 22.8853,25.2603 ' +
-    'Q22.8853,25.335 22.8811,25.4346 Q22.877,25.5342 22.8687,25.6504 Z',
-};
 
-/** `getCircledChar(LeafType)`: which glyph letter a classifier kind draws. */
+/**
+ * `getCircledChar(LeafType)`: which glyph letter a classifier kind draws
+ * (`svek/image/EntityImageClassHeader.java:229-260`).
+ *
+ * T21 (A5 M3b): `entity` was falling to the `default: 'C'` branch below --
+ * upstream's switch has a DEDICATED `case ENTITY: return 'E';` arm
+ * (`EntityImageClassHeader.java:241-242`), the SAME letter `case ENUM`
+ * already returns two lines above it (`:239-240`), not a new glyph. Fixed
+ * `lilura-67-cati343`/`tepazu-23-zapo261`/`xidura-26-teki974` (each
+ * declares `entity ENTITY` with no spot override; their one remaining
+ * structural diff was this classifier's badge drawing our `C` curve
+ * instead of the jar's all-straight `E` outline) -- jar-verified against
+ * `xidura-26-teki974/in.svg`'s `ENTITY` badge `<path d="M379.614,137.5 ...">`,
+ * byte-identical (after the standard center-translation) to this table's
+ * pre-existing `E` entry (`class-badge-glyph-data.ts`).
+ */
 export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' | 'P' {
   switch (kind) {
     case 'interface':
@@ -381,14 +323,15 @@ export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' |
     // @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:243
     case 'protocol':
       return 'P';
+    // T21 (A5 M3b): `LeafType.ENTITY` shares ENUM's own letter upstream
+    // -- see this function's own doc comment for the fixture evidence.
+    // @see ~/git/plantuml/.../svek/image/EntityImageClassHeader.java:241-242
+    case 'entity':
+      return 'E';
     default:
       return 'C';
   }
 }
-
-/** Reference badge center every {@link BADGE_GLYPH_D} entry is captured at. */
-const REFERENCE_CX = 22;
-const REFERENCE_CY = 23;
 
 /** Numeric-token regex (lizard-safe: built from a string, matches the
  *  `svg.ts`/`paint.ts` convention for `<`/`>`-adjacent regex literals). */
@@ -458,35 +401,28 @@ export function badgeGlyphPath(
   // task's write-set.
 }
 
+/** Every letter {@link BADGE_GLYPH_D} has a captured outline for -- derived
+ *  once from the table's own keys (T21) rather than repeating the 17-letter
+ *  list a second time here (no-magic-strings-in-two-places). */
+const CAPTURED_BADGE_LETTERS = new Set<string>(Object.keys(BADGE_GLYPH_D));
+
 /**
- * G2 N26/N33: `class Foo << (F,orange) >>`'s badge-customization CHAR half --
- * a custom char always wins over the kind default when present
+ * G2 N26/N33/T21: `class Foo << (F,orange) >>`'s badge-customization CHAR
+ * half -- a custom char always wins over the kind default when present
  * (`EntityImageClassHeader.java:179-183`, `stereotype.getCharacter() !=
- * 0`). This port's own glyph OUTLINE table ({@link BADGE_GLYPH_D}) has 9
- * jar-captured letters (C/I/A/E/@ from G2 N3, P/M/F/? added N33 -- corpus
- * also uses R/J/O/W/D/Q/S/X and `$sprite` names) -- a custom char that
- * happens to be one of those nine renders byte-exact; any OTHER custom
- * char has no captured outline, so this falls back to the kind's own
- * default letter rather than drawing nothing (a missing `<path>` would
- * itself be a childCount mismatch, strictly worse than a wrong-but-present
- * one) -- remaining letters named, not landed, for a future iteration
- * (would need per-letter corpus-scraped `d` data, the same technique this
- * function's own table already uses).
+ * 0`). This port's own glyph OUTLINE table ({@link BADGE_GLYPH_D}) covers
+ * all 17 corpus letters as of T21 (C/I/A/E/@ from G2 N3, P/M/F/? added
+ * N33, R/J/O/W/D/Q/S/X added T21 -- A5 M3a) plus `$sprite` names (handled
+ * upstream of this function, `getSprite`) -- a custom char matching one of
+ * those 17 renders byte-exact; any OTHER custom char has no captured
+ * outline, so this falls back to the kind's own default letter rather than
+ * drawing nothing (a missing `<path>` would itself be a childCount
+ * mismatch, strictly worse than a wrong-but-present one).
  */
 export function resolveBadgeLetter(kind: ClassifierKind, charOverride: string | undefined): BadgeLetter {
-  if (charOverride === '?') return '?';
   const upper = charOverride?.toUpperCase();
-  if (
-    upper === 'C' ||
-    upper === 'I' ||
-    upper === 'A' ||
-    upper === 'E' ||
-    upper === '@' ||
-    upper === 'P' ||
-    upper === 'M' ||
-    upper === 'F'
-  ) {
-    return upper;
+  if (upper !== undefined && CAPTURED_BADGE_LETTERS.has(upper)) {
+    return upper as BadgeLetter;
   }
   return badgeLetter(kind);
 }
