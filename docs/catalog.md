@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1150 modules · 4232 exported names.
+1150 modules · 4233 exported names.
 
 ## `src/`
 
@@ -1224,7 +1224,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-classifier-box.ts` | `renderRow`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
 | `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `classifierFill`, `classBorder`, `classBorderLine`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `classBorderStrokeDasharray`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
 | `renderer-classifier-header-split.ts` | `CLASS_HEADER_SPLIT_KINDS`, `resolveClassHeaderFill`, `ClassHeaderSplitInput`, `classHeaderSplitRects` | renderer-classifier-header-split.ts — CDD T20 (E1): the `class`/`enum`/ `interface`/`abstract` header-background split (`EntityImageClass #drawInternal`'s four-element form). |
-| `renderer-classifier-rows.ts` | `attributeFontSize`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
+| `renderer-classifier-rows.ts` | `attributeFontSize`, `wrappedVisibilityIconOriginY`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint`, `renderEdgeCardinalityLabels`, `renderEdgeKalBoxes` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink`, `renderGroupInheritanceNeighborhood` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |

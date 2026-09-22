@@ -26,7 +26,7 @@ import {} from '../../core/color-override.js';
 import { MAP_CELL_MARGIN_X } from './class-map-sizing.js';
 import { hasBadge } from './class-badge.js';
 import { renderBadge, renderGenericTag } from './renderer-classifier-badge-tag.js';
-import { renderVisibilityIcon, renderVisibilityUrlBackground, visibilityIconOriginY } from './class-visibility-icon.js';
+import { renderVisibilityIcon, renderVisibilityUrlBackground } from './class-visibility-icon.js';
 import { wrapClassifierBody, type UrlTaggedPrimitive } from './renderer-url.js';
 import {} from '../../core/svg.js';
 import {} from '../../core/klimt/shape/UText.js';
@@ -44,7 +44,7 @@ import {
   classBorderStrokeDasharray,
   MAP_JSON_DIVIDER_STROKE_WIDTH,
 } from './renderer-classifier-colors.js';
-import { renderRow, renderRowText, attributeFontSize } from './renderer-classifier-rows.js';
+import { renderRow, renderRowText, wrappedVisibilityIconOriginY } from './renderer-classifier-rows.js';
 // CDD T20 (E1): see that module's own doc comment (500-line-cap split).
 import {
   CLASS_HEADER_SPLIT_KINDS,
@@ -306,12 +306,13 @@ function dividerLine(geo: ClassifierGeo, theme: Theme, divY: number, isMapOrJson
  * internals. Zero change for every non-wrapped row (`visibilityBlockHeight`
  * absent).
  */
-function wrappedIconOriginY(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: Theme): number {
-  const fontSize = attributeFontSize(theme);
-  const blockHeight = row.visibilityBlockHeight ?? fontSize;
-  const iconBaselineY = geo.y + row.y + (blockHeight - fontSize) / 2;
-  return visibilityIconOriginY(iconBaselineY, fontSize, theme);
-}
+// CDD T6FU: the formula moved to `renderer-classifier-rows.ts
+// #wrappedVisibilityIconOriginY` so `renderRow` (the OTHER icon draw path,
+// reached from `renderer.ts:108` and `renderer-body-enhanced.ts:90,116`)
+// applies the SAME centring rather than a second copy of it. This module
+// imports `renderRow` from there already, so the dependency direction is
+// unchanged.
+const wrappedIconOriginY = wrappedVisibilityIconOriginY;
 
 /**
  * An icon-bearing row's 2-or-3 primitives (icon-column url background,

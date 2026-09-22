@@ -72,6 +72,32 @@ export function attributeFontSize(theme: Theme): number {
   return theme.colors.graph.classAttributeFontSize ?? theme.fontSize;
 }
 
+/**
+ * CDD T20 (M6) / T6FU: the visibility icon's origin Y for a member whose
+ * text may be WRAPPED over several physical lines.
+ * `PlacementStrategyVisibility#getPositions` (java:56-69) centres the icon
+ * block on `maxHeight12 = max(iconHeight, textBlockHeight)`, where the text
+ * block is the member's WHOLE wrapped TextBlock -- not its first line. The
+ * ported form is a closed-form shift of the row's first-line baseline by
+ * `(blockHeight - fontSize) / 2`, leaving {@link visibilityIconOriginY}
+ * (whose own `rowHeight` param couples the single-line ascent/descent basis
+ * to its `maxHeight12` term, so substituting the block total there moves the
+ * icon the WRONG way) untouched -- see `.agent-notes/cdd-T20.md`'s M6
+ * derivation. Zero change for a non-wrapped row (`visibilityBlockHeight`
+ * is absent, and `class-member-rows.ts#iconRowFields` omits it whenever the
+ * block equals the row's own height).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-69
+ */
+export function wrappedVisibilityIconOriginY(
+  geo: ClassifierGeo,
+  row: ClassifierGeo['rows'][number],
+  theme: Theme,
+): number {
+  const fontSize = attributeFontSize(theme);
+  const blockHeight = row.visibilityBlockHeight ?? fontSize;
+  return visibilityIconOriginY(geo.y + row.y + (blockHeight - fontSize) / 2, fontSize, theme);
+}
+
 export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: Theme): string {
   const icon =
     row.visibilityIcon !== undefined
@@ -79,7 +105,7 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
           row.visibilityIcon,
           row.visibilityIsField === true,
           geo.x + ROW_TEXT_LEFT_MARGIN,
-          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme),
+          wrappedVisibilityIconOriginY(geo, row, theme),
           undefined,
           theme,
         )
