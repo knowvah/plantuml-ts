@@ -290,17 +290,30 @@ function renderEdgeMainLabel(
       }),
     );
   }
-  if (geo.label !== undefined) {
-    parts.push(
-      text(geo.label.x, geo.label.y, geo.label.text, {
-        fill: labelColor,
-        ...labelFontAttrs,
-        lengthAdjust: 'spacing',
-        textLength: geo.label.width,
-      }),
-    );
-  }
+  if (geo.label !== undefined) parts.push(renderEdgeSingleLabel(geo.label, labelFontAttrs, labelColor));
   return parts;
+}
+
+/** {@link renderEdgeMainLabel}'s single-line `geo.label` arm, split out
+ *  purely to keep that function's NLOC under the project's per-function
+ *  cap (cdd-T25) -- `fontSize` overrides the base arrow font's SIZE for a
+ *  magic-arrow label's own resolved `<size:N>` tag
+ *  (`class-edge-label-attach.ts#attachMagicArrow`'s doc comment has the
+ *  jar-verified derivation, `xamule-03-jeda376`); `undefined` for every
+ *  other label, which keeps drawing at `labelFontAttrs.fontSize`
+ *  unchanged. */
+function renderEdgeSingleLabel(
+  label: NonNullable<EdgeGeo['label']>,
+  labelFontAttrs: ReturnType<typeof arrowLabelTextAttrs>,
+  labelColor: string,
+): string {
+  return text(label.x, label.y, label.text, {
+    fill: labelColor,
+    ...labelFontAttrs,
+    ...(label.fontSize !== undefined ? { fontSize: label.fontSize } : {}),
+    lengthAdjust: 'spacing',
+    textLength: label.width,
+  });
 }
 
 /**

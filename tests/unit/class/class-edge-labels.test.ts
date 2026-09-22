@@ -245,6 +245,40 @@ describe('fix(label-size-tag-height) — magic-arrow <size:N> (xamule-03-jeda376
 });
 
 // ---------------------------------------------------------------------------
+// cdd-T25: the RENDER (ink) half of the same mechanism -- the DOT-box side
+// above was already correct (`computeMeasuredLabelAttrs`); `attachMagicArrow`
+// (`class-edge-label-attach.ts`) drew the LITERAL `<size:30>to Foo` tag at
+// the base 13pt font instead of resolving it, same as the measured box does.
+// ---------------------------------------------------------------------------
+
+describe('fix(cdd-T25) — magic-arrow <size:N> renders resolved text+size (xamule-03-jeda376)', () => {
+  const oracleMeasurer = new DeterministicMeasurer();
+
+  it('draws "to Foo" at font-size 30, not the literal <size:30> tag', () => {
+    const rel: Relationship = { from: 'A', to: 'B', type: 'association', label: '<size:30>to Foo >' };
+    const geo = layoutClass(makeAST({ relationships: [rel] }), defaultTheme, oracleMeasurer);
+    const label = geo.edges[0]!.label!;
+    expect(label.text).toBe('to Foo');
+    expect(label.fontSize).toBe(30);
+  });
+
+  it('a magic-arrow label with no size tag carries no fontSize override — regression guard', () => {
+    const rel: Relationship = { from: 'A', to: 'B', type: 'association', label: 'toFoo >' };
+    const geo = layoutClass(makeAST({ relationships: [rel] }), defaultTheme, oracleMeasurer);
+    const label = geo.edges[0]!.label!;
+    expect(label.text).toBe('toFoo');
+    expect(label.fontSize).toBeUndefined();
+  });
+
+  it('a bare magic-arrow token (no text) is unaffected — regression guard', () => {
+    const rel: Relationship = { from: 'A', to: 'B', type: 'association', label: '>' };
+    const geo = layoutClass(makeAST({ relationships: [rel] }), defaultTheme, oracleMeasurer);
+    expect(geo.edges[0]!.label).toBeUndefined();
+    expect(geo.edges[0]!.arrowGlyph).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // SI25 D2/D3 -- the DOT reservation and the ink share one font and one walk
 // ---------------------------------------------------------------------------
 

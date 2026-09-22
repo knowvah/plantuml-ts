@@ -313,7 +313,20 @@ export interface EdgeGeo {
    *  out of scope) -- this field is structurally correct (real engine
    *  placement, real jar text-styling formula) but not guaranteed
    *  byte-exact for that reason. */
-  label?: { text: string; x: number; y: number; width: number };
+  label?: {
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    /** cdd-T25: a magic-arrow label's leading `<size:N>` tag resolves to a
+     *  font-size override for the TEXT run only (the arrow glyph stays at
+     *  the base `arrow` style size) -- `class-edge-label-attach.ts
+     *  #attachMagicArrow`'s doc comment has the jar-verified derivation
+     *  (`xamule-03-jeda376`). `undefined` for every label with no such
+     *  tag (the overwhelming majority), which renders at the SAME base
+     *  `labelFontAttrs.fontSize` as before this field existed. */
+    fontSize?: number;
+  };
   /** G2 item 43: present INSTEAD OF {@link label} when the relationship's
    *  text carried a `\n`/`\l`/`\r` line-break escape sequence
    *  (`class-layout-helpers.ts#splitEdgeLabelLines`) -- one entry per line,

@@ -12,7 +12,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { resolveMemberAtoms, type MemberRowBuild } from './class-member-creole.js';
+import { resolveMemberAtoms, memberBaseFont, type MemberRowBuild } from './class-member-creole.js';
 import { atomsToPlainText } from './class-member-display.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { BADGE_LEFT_MARGIN } from './class-badge.js';
@@ -42,19 +42,34 @@ function buildHeaderLine(
   font: FontConfiguration,
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
-): { width: number; height: number; displayText: string; atoms: MemberRowBuild['atoms'] } {
+): { width: number; height: number; displayText: string; atoms: MemberRowBuild['atoms']; hasMarkup: boolean } {
   const built = buildLineAtoms(line, font, CreoleMode.FULL_BUT_UNDERSCORE);
   if (built.classification.type === 'HORIZONTAL_LINE') {
     // Zero corpus reach for a class NAME shaped like a bare separator --
     // keep it inert (no atoms, plain text line height) rather than guess.
-    return { width: 0, height: atomTextLineHeight(font.size), displayText: line, atoms: [] };
+    return { width: 0, height: atomTextLineHeight(font.size), displayText: line, atoms: [], hasMarkup: false };
   }
   const resolved = resolveMemberAtoms(built.atoms, font, measurer, sprites);
+  // cdd-T25 (M8b): `true` iff the line actually carried creole markup --
+  // the SAME "no command/atom matched anywhere" identity `class-member-
+  // creole.ts`'s own module doc comment names ("Measurement-identity
+  // guarantee"): a markup-free line always resolves to EXACTLY one text
+  // atom carrying the UNTOUCHED input string. Narrows the blast radius of
+  // wiring atoms into header rows to the handful of fixtures that actually
+  // use header-name creole (diseka-11-gozu390, gekope-01-ricu859,
+  // lecelo-92-loma110), leaving every other classifier header's render
+  // byte-identical to the pre-T25 plain-text path.
+  const hasMarkup = !(
+    resolved.atoms.length === 1 &&
+    resolved.atoms[0]!.kind === 'text' &&
+    resolved.atoms[0]!.text === line
+  );
   return {
     width: resolved.width,
     height: resolved.height,
     displayText: atomsToPlainText(resolved.atoms),
     atoms: resolved.atoms,
+    hasMarkup,
   };
 }
 
@@ -104,20 +119,51 @@ export function buildBadgeCharFields(classifier: Classifier): {
  *  previous `count * atomTextLineHeight` for every atom-free header). */
 export function buildHeaderLineMetrics(
   headerLines: readonly string[],
-  headerFont: { family: string; size: number },
+  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
-): { headerLineWidths: number[]; headerDisplayLines: string[]; nameBlockHeight: number } {
-  const font: FontConfiguration = {
-    family: headerFont.family,
-    size: headerFont.size,
-    color: null,
-    styles: new Set(),
-  };
+  // cdd-T25 (M8b): the classifier's OWN kind-derived italic
+  // (interface/abstract, `class-stereotype-layout.ts#computeHeaderInfo`) --
+  // unioned with `headerFont.italic` (`skinparam classFontStyle italic`)
+  // the SAME way `buildHeaderRows`'s own `row.italic` field already does,
+  // so the creole atoms' BASE styles agree with what the plain-text
+  // fallback row would have drawn.
+  headerItalic: boolean,
+): {
+  headerLineWidths: number[];
+  headerDisplayLines: string[];
+  nameBlockHeight: number;
+  /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
+   *  no creole markup (see {@link buildHeaderLine}'s `hasMarkup`) -- the
+   *  caller (`class-layout-header-geo.ts#buildHeaderNameRowsGeo`) sets
+   *  `ClassifierGeo['rows'][].atoms` only for a defined entry, so a
+   *  markup-free header renders through the UNCHANGED pre-T25 plain-text
+   *  path. */
+  headerLineAtoms: Array<MemberRowBuild['atoms'] | undefined>;
+} {
+  // cdd-T25 (M8b): seeds BOLD/ITALIC onto the creole atoms' BASE font from
+  // the classifier header's OWN resolved style (`skinparam classFontStyle`/
+  // kind-derived italic) -- the SAME `getStyles(font)` mirroring
+  // `class-member-creole.ts#memberBaseFont` already does for member rows
+  // (`FontConfiguration.java:65-73`'s upstream mechanism: a classifier's
+  // base font face carries its skin-param weight/slant independently of
+  // any in-scope creole style command). No `member` modifiers apply to a
+  // header line (no `{abstract}`/`{static}` token), so the second
+  // argument is `{}`.
+  const font = memberBaseFont(
+    {
+      family: headerFont.family,
+      size: headerFont.size,
+      bold: headerFont.bold,
+      italic: headerFont.italic || headerItalic,
+    },
+    {},
+  );
   const builds = headerLines.map((l) => buildHeaderLine(l, font, measurer, sprites));
   return {
     headerLineWidths: builds.map((b) => b.width),
     headerDisplayLines: builds.map((b) => b.displayText),
     nameBlockHeight: builds.reduce((acc, b) => acc + b.height, 0),
+    headerLineAtoms: builds.map((b) => (b.hasMarkup ? b.atoms : undefined)),
   };
 }
