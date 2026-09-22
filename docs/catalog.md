@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1152 modules · 4242 exported names.
+1153 modules · 4246 exported names.
 
 ## `src/`
 
@@ -1177,6 +1177,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-namespace-folder-outline.ts` | `folderPathD`, `folderPolygonPoints`, `renderFolderPolygon` | class-namespace-folder-outline.ts — the folder-tab OUTLINE shape builders (`USymbolFolder#drawFolder`'s two branches: the default rounded-arc `UPath`, and the `skinparam style strictuml` sharp-corner `UPolygon`). |
 | `class-namespace-resolve.ts` | `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `isLikeClass`, `eventuallyBuildPhantomGroups`, `ResolveInput`, `ResolvedRef`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths` | Namespace-qualified id parsing & reference resolution for class diagrams. |
 | `class-namespace-shape.ts` | `PACKAGE_ROUND_CORNER`, `PACKAGE_STROKE_WIDTH`, `titleFontColor`, `namespaceFill`, `getHTitle`, `getWTitle`, `getTitleBaselineOffset`, `renderNamespaceFolder`, `renderNamespaceRect`, `renderEmptyPackageIcon`, `EmptyPackageLeafDim`, `measureEmptyPackageLeafDim` | class-namespace-shape.ts — G2 N17: the package/namespace folder-tab outline (`USymbolFolder`'s tab-notch shape, `core/decoration/symbol/ USymbolFolder.ts#folderPath`/`getWTitle`/`getHTitle`) wired into class's plain-SVG-string render path. |
+| `class-namespace-title-runs.ts` | `NamespaceTitleRun`, `namespaceTitleRuns`, `namespaceTitleWidth`, `renderNamespaceTitleRuns` | class-namespace-title-runs.ts — cdd-T26: resolves a namespace/package folder-tab or rect title's `<img:>`/`<$sprite>` markup, split out of `class-namespace-shape.ts` purely to keep that file under the repo's 500-line cap (same precedent as |
 | `class-namespace-title-table.ts` | `namespaceTitleTableDims` | `ClusterHeader`'s title-table sizing for a class/object package cluster -- split out of ./class-dot-graph.ts (T4, namespace-cluster-box mission, 500-line file-cap compliance; pure move, no behavior change from the split itself, mirroring st |
 | `class-namespace-usymbol-shape.ts` | `NamespaceUSymbolPaint`, `renderNamespaceUSymbol` | class-namespace-usymbol-shape.ts — cdd-T12 (diagnosis A2b E3): a NON-EMPTY `package X <<Node>>` / `<<Database>>` / `<<cloud>>` / `<<Rectangle>>` container draws its USymbol's own `asBig` chrome, not the default folder-tab outline. |
 | `class-namespace.ts` | `registerInNamespace`, `makeClassifier`, `collapseEmptyNamespace`, `collapseEmptyNamespacesFinal`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths`, `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `ResolveInput`, `ResolvedRef` | Namespace-splitting helpers for class diagrams. |

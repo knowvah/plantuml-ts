@@ -14,6 +14,7 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { namespaceTitleWidth } from './class-namespace-title-runs.js';
 
 /**
  * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
@@ -81,6 +82,17 @@ function namespaceTitleFont(theme: Theme): FontSpec {
  * 29, matching `WIDTH="29"` exactly. `computeTitleTableHeight(1, 0, 0, 14)
  * = (0+1)*14 - 5 = 9`, matching `HEIGHT="9"` exactly.
  *
+ * cdd-T26: `dimLabel.getWidth()` now routes through {@link
+ * namespaceTitleWidth} (the shared creole-atom-lexer sum,
+ * `class-namespace-title-runs.ts`) instead of one raw `measurer.measure`
+ * call, so a title carrying an unresolvable `<img:>` reference sizes its
+ * `(Cannot decode)` fallback run at ITS OWN (smaller, monospace) font
+ * rather than measuring the raw markup text at the title's bold font — the
+ * DOT-graph half of `jabama-09-kago823`'s fix (the render half is
+ * `class-namespace-shape.ts#getWTitle`). A markup-free title reduces to the
+ * OLD single `measurer.measure` call exactly (one run, same font), so
+ * `cidepu-54-bemo048`'s own byte-exact citation above is unaffected.
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:73-96
  */
 export function namespaceTitleTableDims(
@@ -90,7 +102,7 @@ export function namespaceTitleTableDims(
   usymbol?: string,
 ): { width: number; height: number } {
   const font = namespaceTitleFont(theme);
-  const { width } = measurer.measure(display, font);
+  const width = namespaceTitleWidth(measurer, theme, display);
   // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
   // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
   const supp = titleSupp(usymbol, theme);
