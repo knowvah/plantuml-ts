@@ -61,15 +61,22 @@ describe('renderNote / renderPlainNote — body vertex order and fold paint (cdd
     expect(fills[1]).toBe('#F00');
   });
 
-  it('renderPlainNote returns entityParts (body, fold, text) and no connector for a freestanding note', () => {
+  it('renderPlainNote returns only entityParts (body, fold, text) -- no connector shape at all', () => {
     const result = renderPlainNote(baseNote, defaultTheme);
-    expect(result.connector).toBeUndefined();
+    expect('connector' in result).toBe(false);
     expect(result.entityParts).toHaveLength(3);
     expect(result.entityParts[0]).toContain('M0,0 L0,23 L40,23 L40,10 L30,0 L0,0');
     expect(result.entityParts[1]).toContain('M30,0 L30,10 L40,10 L30,0');
   });
 
-  it('renderPlainNote returns the connector separately from entityParts when the note has a host link', () => {
+  // cdd-T9b: a note's host connector is a completely separate upstream
+  // `Link` (`CommandFactoryNoteOnEntity.java:342`), never the note's own
+  // `NOTE_STROKE_WIDTH`/`'4 4'` style -- `renderPlainNote`/`renderNote` no
+  // longer build it at all, regardless of `note.connector` geometry (see
+  // `renderer-note-connector.ts#renderNoteConnectorPath` for where it now
+  // lives). This replaces the pre-T9b tests asserting `renderPlainNote`
+  // returned a `'4 4'`-dashed connector string.
+  it('renderPlainNote ignores note.connector geometry entirely -- entityParts never carry a dashed connector', () => {
     const anchored: NoteGeo = {
       ...baseNote,
       connector: [
@@ -78,16 +85,14 @@ describe('renderNote / renderPlainNote — body vertex order and fold paint (cdd
       ],
     };
     const result = renderPlainNote(anchored, defaultTheme);
-    expect(result.connector).toBeDefined();
-    expect(result.connector).toContain('<path d="M40,10 L60,10"');
-    expect(result.connector).toContain('stroke-dasharray="4 4"');
-    // The connector must not leak into entityParts.
+    expect('connector' in result).toBe(false);
+    expect(result.entityParts).toHaveLength(3);
     for (const part of result.entityParts) {
-      expect(part).not.toContain('stroke-dasharray="4 4"');
+      expect(part).not.toContain('stroke-dasharray');
     }
   });
 
-  it('renderNote joins connector + entityParts in the pre-T8 order (connector first)', () => {
+  it('renderNote draws only the box+text, never a connector, even when note.connector is non-empty', () => {
     const anchored: NoteGeo = {
       ...baseNote,
       connector: [
@@ -96,10 +101,8 @@ describe('renderNote / renderPlainNote — body vertex order and fold paint (cdd
       ],
     };
     const svg = renderNote(anchored, defaultTheme);
-    const connectorIdx = svg.indexOf('stroke-dasharray="4 4"');
-    const bodyIdx = svg.indexOf('M0,0 L0,23');
-    expect(connectorIdx).toBeGreaterThanOrEqual(0);
-    expect(bodyIdx).toBeGreaterThan(connectorIdx);
+    expect(svg).not.toContain('stroke-dasharray');
+    expect(svg).toContain('M0,0 L0,23');
   });
 });
 

@@ -162,6 +162,7 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
 // ---------------------------------------------------------------------------
 
 import { renderEdge } from './renderer-edge.js';
+import { renderNoteConnectorLink } from './renderer-note-connector.js';
 
 /**
  * Render a class diagram geometry into an SVG string.
@@ -425,33 +426,18 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // class="link">` via the SAME `wrapLink` call an ordinary edge gets above
   // (`GraphvizImageBuilder.java:229`'s single draw loop over
   // `dotData.getLinks()`, which upstream mints the note-host connector into
-  // as a real `Link`). Appended AFTER the real edges: every AC fixture here
-  // (fogexa/pecabi/sanixi/zepeki) has ZERO other edges, matching the jar
-  // exactly. A diagram mixing note connectors with real relationships needs
-  // `Bibliotekon#addLine`'s `sameConnections` insertion (`Bibliotekon.java:
-  // 83-107`) -- untouched, a named residual (`.agent-notes/cdd-T9.md`).
-  //
-  // `uid`: `renderer-uid.ts#assignExact`'s G2 N68 entry (`:250-254`) burns
-  // the connector's rank as a PHANTOM (no uid) since it was never its own
-  // `<g>` before this task; promoting it to a real `lnkN` is out of this
-  // write-set. Placeholder below, named residual, not fitted.
-  noteConnectors.forEach((connector, i) => {
-    const { note, body } = connector;
-    children.push(
-      wrapLink(
-        {
-          from: note.id,
-          to: note.target ?? '',
-          uid: `lnk${uidPlan.edgeUid.length + i + 1}`,
-          fromUid: uidPlan.noteUid.get(note.id) ?? '',
-          toUid: note.target !== undefined ? uidPlan.resolveEntityUid(note.target) : '',
-          decor1: undefined,
-          decor2: undefined,
-        },
-        body,
-      ),
-    );
-  });
+  // as a real `Link`). Appended AFTER the real edges, matching upstream's
+  // OWN draw order for every AC fixture (fogexa/pecabi/sanixi/zepeki carry
+  // ZERO other edges); a diagram mixing note connectors with real
+  // relationships needs `Bibliotekon#addLine`'s `sameConnections` insertion
+  // (`Bibliotekon.java:83-107`) -- untouched, a named residual
+  // (`.agent-notes/cdd-T9.md`). cdd-T9b: style/id/entity-order/uid now fully
+  // resolved by `renderer-note-connector.ts#renderNoteConnectorLink` -- see
+  // that function's own doc comment for why it must run AFTER `linkIds` is
+  // populated above.
+  for (const connector of noteConnectors) {
+    children.push(renderNoteConnectorLink(connector, theme, uidPlan, linkIds));
+  }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)
   // across nodes before folding into the diagram-wide defs string.

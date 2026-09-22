@@ -1917,7 +1917,11 @@ describe('renderClass — notes', () => {
     expect(svg).toContain('#FEFFDD');
     expect(svg).toContain('hello');
     expect(svg).toContain('world');
-    expect(svg).toMatch(/stroke-dasharray="4 4"/);
+    // cdd-T9b: the connector is an ordinary dashed LINK style (stroke-width
+    // 1, '7,7'), never the note's own box style (0.5, '4 4') --
+    // `renderer-note-connector.ts#renderNoteConnectorPath`.
+    expect(svg).toMatch(/stroke-dasharray="7,7"/);
+    expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
   });
 
   it('G2/N13: a dropped member-tip note (unresolved ::member) draws NOTHING at all', () => {
@@ -2009,7 +2013,7 @@ describe('renderClass — notes', () => {
     expect(svg).toContain('hi');
     expect(svg).toContain('#FEFFDD');
     // No separate dashed connector line -- the notch is merged into the outline.
-    expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
+    expect(svg).not.toMatch(/stroke-dasharray/);
     // No wrapping entity group for this note's own content (renderAssocPoint's
     // identical unwrapped precedent, G2 N8) -- the note id never appears as a
     // data-qualified-name/entity id.
@@ -2017,30 +2021,36 @@ describe('renderClass — notes', () => {
   });
 });
 
-describe('renderClass — note connector as its own link group (cdd-T9, E6 mechanism a)', () => {
+describe('renderClass — note connector as its own link group (cdd-T9/T9b, E6 mechanism a)', () => {
+  // A note ABOVE its host (`note top of dummy`), connector routed from the
+  // note's own bottom edge (225,29) down to the host's top edge (70,10) --
+  // `noteIsConnectorSource` (`renderer-note-connector.ts`) reads this as
+  // note-first (LEFT/TOP order), matching jar's real fogexa-30-zupo141.
+  const topNote: NoteGeo = {
+    id: 'GMN2',
+    kind: 'note',
+    x: 200,
+    y: 6,
+    width: 50,
+    height: 23,
+    lines: ['bar'],
+    lineWidths: [20],
+    connector: [
+      { x: 225, y: 29 },
+      { x: 70, y: 10 },
+    ],
+    target: 'dummy',
+  };
+
   it(
-    "draws a plain note's dashed connector as a SEPARATE <g class=\"link\">, " +
-      "not folded into the note's own entity group",
+    'draws a plain note\'s dashed connector as a SEPARATE <g class="link">, ' +
+      "not folded into the note's own entity group, styled as an ORDINARY " +
+      'dashed edge (cdd-T9b: strokeWidth 1, "7,7" -- never the note box\'s ' +
+      '0.5/"4 4")',
     () => {
       const geo = makeMinimalGeo({
         classifiers: [makeClassifierGeo('dummy', 'dummy')],
-        notes: [
-          {
-            id: 'GMN2',
-            kind: 'note',
-            x: 200,
-            y: 6,
-            width: 50,
-            height: 23,
-            lines: ['bar'],
-            lineWidths: [20],
-            connector: [
-              { x: 150, y: 50 },
-              { x: 200, y: 50 },
-            ],
-            target: 'dummy',
-          },
-        ],
+        notes: [topNote],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
 
@@ -2055,38 +2065,45 @@ describe('renderClass — note connector as its own link group (cdd-T9, E6 mecha
       // The connector is a SIBLING `<g class="link">`, drawn in the edges
       // phase (AFTER the note's own entity group closes).
       expect(svg).toContain('<g class="link"');
-      expect(svg).toMatch(/stroke-dasharray="4 4"/);
+      expect(svg).toMatch(/stroke-dasharray="7,7"/);
+      expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
       const linkStart = svg.indexOf('<g class="link"');
       expect(linkStart).toBeGreaterThan(entityGroupEnd);
     },
   );
 
-  it('the connector link carries the jar comment shape (<!--link FROM to TO-->)', () => {
+  it(
+    'the connector <path> carries the jar id shape (bare ent1-ent2, ' +
+      'Link.java:106-113) and the group the jar comment shape ' +
+      '(<!--link FROM to TO-->) in note-first (TOP) order',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [makeClassifierGeo('dummy', 'dummy')],
+        notes: [topNote],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      // `Link#commentForSvg`/`idCommentForSvg` shape (`renderer-group.ts
+      // #wrapLink`, `renderer-note-connector.ts#renderNoteConnectorLink`)
+      // -- TOP order is note-then-host (jar: `<!--link GMN3 to
+      // oft_openflow_types-->`, `pecabi-95-demu756`).
+      expect(svg).toContain('<!--link GMN2 to dummy-->');
+      expect(svg).toContain('id="GMN2-dummy"');
+    },
+  );
+
+  it("the connector group's data-entity-1/2 mirror the note-first order with each side's OWN entity uid", () => {
     const geo = makeMinimalGeo({
       classifiers: [makeClassifierGeo('dummy', 'dummy')],
-      notes: [
-        {
-          id: 'GMN2',
-          kind: 'note',
-          x: 200,
-          y: 6,
-          width: 50,
-          height: 23,
-          lines: ['bar'],
-          lineWidths: [20],
-          connector: [
-            { x: 150, y: 50 },
-            { x: 200, y: 50 },
-          ],
-          target: 'dummy',
-        },
-      ],
+      notes: [topNote],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    // `Link#commentForSvg` shape (`renderer-group.ts#wrapLink`) -- `from` is
-    // the note's own id, `to` its host (jar: `<!--link GMN3 to
-    // oft_openflow_types-->`, `pecabi-95-demu756`).
-    expect(svg).toContain('<!--link GMN2 to dummy-->');
+    const linkStart = svg.indexOf('<g class="link"');
+    const linkTagEnd = svg.indexOf('>', linkStart);
+    const linkTag = svg.slice(linkStart, linkTagEnd);
+    // Fallback numbering here (no creationIndex on the hand-built note): the
+    // note gets ent0002 (after dummy's ent0001), matching `resolveEntityUid`.
+    expect(linkTag).toContain('data-entity-1="ent0002"');
+    expect(linkTag).toContain('data-entity-2="ent0001"');
   });
 
   it('a note with NO connector (freestanding, no target) draws no extra link group', () => {

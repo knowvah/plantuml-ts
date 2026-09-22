@@ -58,8 +58,23 @@ function namespace(id: string, creationIndex?: number): NamespaceGeo {
   };
 }
 
-function note(id: string, opts: { creationIndex?: number; phantomSlot?: true } = {}): NoteGeo {
-  return { id, kind: 'note', x: 0, y: 0, width: 10, height: 10, lines: [], lineWidths: [], connector: [], ...opts };
+function note(
+  id: string,
+  opts: { creationIndex?: number; phantomSlot?: true; connector?: Array<{ x: number; y: number }> } = {},
+): NoteGeo {
+  const { connector, ...rest } = opts;
+  return {
+    id,
+    kind: 'note',
+    x: 0,
+    y: 0,
+    width: 10,
+    height: 10,
+    lines: [],
+    lineWidths: [],
+    connector: connector ?? [],
+    ...rest,
+  };
 }
 
 // T3: `buildClassUidPlan` takes `ClassUidPlanInput` (structural), not
@@ -316,6 +331,80 @@ describe('buildClassUidPlan — couple/lollipop synthetic-entity phantom-slot ' 
       // (the naive dense position) instead of jar's real ent0004.
       expect(plan.classifierUid.get('enrollment')).toBe('ent0004');
       expect(plan.edgeUid).toEqual(['lnk7']);
+    },
+  );
+});
+
+describe('buildClassUidPlan — note connector uid promotion (cdd-T9b, G2 N68)', () => {
+  it(
+    'a non-tip attached note that DRAWS its own connector (non-empty ' +
+      '`connector`) gets a real lnkN noteConnectorUid at the rank ' +
+      'immediately after the note entity -- jar-verified fogexa-30-zupo141 ' +
+      '(dummy=ent0001, note=ent0003, connector=lnk4)',
+    () => {
+      const g = geo({
+        classifiers: [classifier('a', 1)],
+        notes: [note('n1', { creationIndex: 3, phantomSlot: true, connector: [{ x: 0, y: 0 }] })],
+      });
+      const plan = buildClassUidPlan(g);
+      expect(plan.classifierUid.get('a')).toBe('ent0001');
+      expect(plan.noteUid.get('n1')).toBe('ent0003');
+      expect(plan.noteConnectorUid.get('n1')).toBe('lnk4');
+    },
+  );
+
+  it(
+    'a non-tip attached note that does NOT draw its own connector ' +
+      '(opalised into the host — empty `connector`) keeps the rank as an ' +
+      'uid-less phantom -- no noteConnectorUid entry, matching the ' +
+      'pre-T9b gap this same rank always produced',
+    () => {
+      const g = geo({
+        classifiers: [classifier('a', 1), classifier('b', 5)],
+        notes: [note('n1', { creationIndex: 3, phantomSlot: true })], // connector: []
+      });
+      const plan = buildClassUidPlan(g);
+      expect(plan.noteUid.get('n1')).toBe('ent0003');
+      expect(plan.noteConnectorUid.has('n1')).toBe(false);
+      // Rank 4 (the connector's own phantom slot) stays consumed but
+      // uid-less -- `b`, created at creationIndex 5, still lands on ent0005.
+      expect(plan.classifierUid.get('b')).toBe('ent0005');
+    },
+  );
+
+  it(
+    'the fallback (non-exact) path numbers every drawn connector after ' + 'the real edges, in `geo.notes` array order',
+    () => {
+      // No classifiers: `classifier('a')` (no creationIndex) alone would
+      // already force fallback mode, but this leaves `edgeUid.length`
+      // aligned with the true post-edges counter -- the fallback pass's own
+      // documented approximation (`assignFallbackConnectorUids`'s doc
+      // comment: continues from `edgeUid.length`, not a true shared-counter
+      // replay) only matches the real jar numbering when nothing besides
+      // edges precedes the connectors.
+      const g = geo({
+        notes: [
+          note('n1', { connector: [{ x: 0, y: 0 }] }),
+          note('n2'), // no connector -> no noteConnectorUid entry
+          note('n3', { connector: [{ x: 0, y: 0 }] }),
+        ],
+        edges: [
+          {
+            id: 'e1',
+            points: [],
+            targetDecor: 'none',
+            sourceDecor: 'none',
+            dashed: false,
+            from: 'a',
+            to: 'n1',
+          },
+        ],
+      });
+      const plan = buildClassUidPlan(g);
+      expect(plan.edgeUid).toEqual(['lnk1']);
+      expect(plan.noteConnectorUid.get('n1')).toBe('lnk2');
+      expect(plan.noteConnectorUid.has('n2')).toBe(false);
+      expect(plan.noteConnectorUid.get('n3')).toBe('lnk3');
     },
   );
 });

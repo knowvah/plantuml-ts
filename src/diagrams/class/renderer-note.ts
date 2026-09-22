@@ -11,13 +11,12 @@
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
-import type { EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { text, path, image, linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
-import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
+import { moveTo, lineTo } from '../../core/svg-path-builder.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { splitStereotypeStyleTags } from './class-stereotype.js';
@@ -36,40 +35,6 @@ import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
-
-/**
- * Bezier-spline or polyline path data for a routed connector — the SAME
- * shape `renderer.ts#renderEdge` builds for a normal relationship edge
- * (`(points.length - 1) % 3 === 0` and `>= 4` points ⇒ well-formed cubic
- * bezier chain, else a plain polyline fallback for the degenerate 2-point
- * case). Duplicated rather than imported: `renderer.ts` itself imports this
- * module, so importing back would cycle; both copies are pure functions
- * with no shared state, kept in lockstep by doc-comment cross-reference.
- * @see renderer.ts#buildPathData
- */
-function buildConnectorPathData(points: EdgeGeo['points']): string {
-  if (points.length === 0) return '';
-  const [first, ...rest] = points;
-  if (first === undefined) return '';
-  // T7b: routed through svg-path-builder.ts's moveTo/lineTo/cubicTo
-  // (formatDecimal, ADR-1) instead of raw template-literal interpolation.
-  const start = moveTo(first.x, first.y);
-
-  const isBezierSpline = points.length >= 4 && (points.length - 1) % 3 === 0;
-  if (isBezierSpline) {
-    const segments: string[] = [];
-    for (let i = 1; i < points.length; i += 3) {
-      const c1 = points[i]!;
-      const c2 = points[i + 1]!;
-      const end = points[i + 2]!;
-      segments.push(cubicTo(c1, c2, end));
-    }
-    return [start, ...segments].join(' ');
-  }
-
-  const segments = rest.map((p) => lineTo(p.x, p.y));
-  return [start, ...segments].join(' ');
-}
 
 /**
  * G2 N34: jar's `EntityImageNote` ctor default (`ColorParam.noteBackground`,
@@ -147,10 +112,14 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the body
- *  outline and the plain connector line. `EntityImageNote.java:275-289`
- *  `drawNormal`: `stroked = applyStroke(ug); stroked.draw(polygon)` -- the
- *  fold draws on `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). */
+/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the box
+ *  outline (body + fold). `EntityImageNote.java:275-289` `drawNormal`:
+ *  `stroked = applyStroke(ug); stroked.draw(polygon)` -- the fold draws on
+ *  `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). cdd-T9b:
+ *  the dashed host connector is NOT this note's own stroke -- upstream
+ *  draws it as a completely separate `Link` (`CommandFactoryNoteOnEntity
+ *  .java:342`), styled like any other dashed relationship edge -- see
+ *  `renderer-note-connector.ts#renderNoteConnectorPath`. */
 const NOTE_STROKE_WIDTH = 0.5;
 
 /** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
@@ -376,30 +345,24 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
   return parts.join('');
 }
 
-/** Plain note: folded-corner box + a separate dashed connector line to its
- *  host (or no connector at all for a freestanding note) -- every note
- *  kind EXCEPT a resolved member-tip (`renderTipNote` below). */
+/** Plain note: folded-corner box only -- every note kind EXCEPT a resolved
+ *  member-tip (`renderTipNote` below). cdd-T9b: the dashed host connector
+ *  is no longer built here at all -- it is a completely separate upstream
+ *  `Link` (`CommandFactoryNoteOnEntity.java:342`), drawn as its own `<g
+ *  class="link">` by `renderer.ts`'s edges phase via
+ *  `renderer-note-connector.ts#renderNoteConnectorPath` (T9 already moved
+ *  the EMISSION site; T9b moves the STYLE/id-owning code too, since the
+ *  note's own `NOTE_STROKE_WIDTH`/`'4 4'` never applied to it upstream in
+ *  the first place -- see `NOTE_STROKE_WIDTH`'s own doc comment). */
 export function renderNote(note: NoteGeo, theme: Theme): string {
-  const { entityParts, connector } = renderPlainNote(note, theme);
-  return (connector ?? '') + entityParts.join('');
+  return renderPlainNote(note, theme).entityParts.join('');
 }
 
 /**
  * Plain note: folded-corner box (body + fold, two separate `UPath`s per
- * `EntityImageNote.java:275-289`) plus its per-line text -- returned as
- * `entityParts`, SEPARATE from the dashed connector line to the note's
- * host (`connector`, `undefined` for a freestanding note). Split this way
- * (rather than one joined string, {@link renderNote}'s pre-T8 shape) so a
- * caller building a `<g class="link">` for the connector (T9) does not
- * have to re-parse it back out of the entity's own markup.
+ * `EntityImageNote.java:275-289`) plus its per-line text.
  */
-export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: string[]; connector?: string } {
-  const connectorData = buildConnectorPathData(note.connector);
-  const connector =
-    connectorData !== ''
-      ? path(connectorData, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' })
-      : undefined;
-
+export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: string[] } {
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
   const f = NOTE_FOLD;
@@ -416,7 +379,7 @@ export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: str
     path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH }),
     renderNoteText(note, theme),
   ];
-  return connector !== undefined ? { entityParts, connector } : { entityParts };
+  return { entityParts };
 }
 
 /**

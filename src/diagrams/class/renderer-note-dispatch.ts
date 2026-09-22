@@ -21,12 +21,16 @@ export interface NoteRenderContext {
 }
 
 /** cdd-T9 (E6 mechanism a): one note's connector, pulled out of its entity
- *  group -- the note it belongs to (for `id`/`target`/uid lookups) plus the
- *  already-rendered `<path>` body {@link renderPlainNote} returned
- *  separately from `entityParts`. */
+ *  group -- just the note it belongs to (for `id`/`target`/uid/geometry
+ *  lookups). cdd-T9b: no longer carries a pre-rendered `body` string --
+ *  the connector's own path/style/id can only be finalized in the edges
+ *  phase (`renderer.ts`'s `noteConnectors.forEach`, AFTER the real edges
+ *  populate the shared id-collision `Set` a `Link#idCommentForSvg()`-
+ *  faithful id needs -- see `renderer-note-connector.ts
+ *  #renderNoteConnectorPath`'s own doc comment), so building it here in
+ *  the leaf loop (BEFORE that set exists) would be premature. */
 export interface NoteConnector {
   readonly note: NoteGeo;
-  readonly body: string;
 }
 
 /** One note's draw output: the entity-group markup (pushed immediately, in
@@ -53,10 +57,13 @@ export interface NoteDrawResult {
  * ordinary edge (`<g class="link">`), drawn by `SvekEdge#drawU` in the
  * EDGES phase, never folded into the note's `<g class="entity">`
  * (`EntityImageNote.java:275-289` draws only the box+text; the connector is
- * a separate `Link`). `renderPlainNote`'s `connector` (T8's interface) is
- * therefore returned here as its own {@link NoteConnector}, NOT joined into
- * `entity` -- `renderClass`'s edges phase emits it via the SAME `wrapLink`
- * call an ordinary relationship edge gets.
+ * a separate `Link`). cdd-T9b: this function no longer asks `renderPlainNote`
+ * for a connector string at all (that function only builds the box+text
+ * now) -- a note whose `connector` geometry is non-empty is returned here
+ * as its own {@link NoteConnector} (just the note, not a body), NOT joined
+ * into `entity` -- `renderClass`'s edges phase resolves its style/id/order
+ * and emits it via the SAME `wrapLink` call an ordinary relationship edge
+ * gets (`renderer-note-connector.ts`).
  */
 export function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): NoteDrawResult {
   const { uidPlan, tips } = ctx;
@@ -75,9 +82,12 @@ export function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Them
   if (note.opale !== undefined) {
     raw = renderOpaleNote(note, theme);
   } else {
-    const plain = renderPlainNote(note, theme);
-    raw = plain.entityParts.join('');
-    if (plain.connector !== undefined) connector = { note, body: plain.connector };
+    raw = renderPlainNote(note, theme).entityParts.join('');
+    // cdd-T9b: `note.connector.length > 0` is the SAME predicate
+    // `NoteGeo.connector`'s own doc comment documents (empty for a tips
+    // leaf / a resolved opalisable note) -- deferred to the edges phase,
+    // see {@link NoteConnector}'s own doc comment.
+    if (note.connector.length > 0) connector = { note };
   }
   // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
   // `<a xlink:href>` INSIDE the `<g class="entity">` -- upstream's
