@@ -196,7 +196,9 @@ function buildBoxShape(geo: ClassifierGeo, theme: Theme, roundCorner: number): s
   const dasharray = classBorderStrokeDasharray(geo);
   const filter = boxShadowFilter(geo);
   const headerFill =
-    roundCorner !== 0 && CLASS_HEADER_SPLIT_KINDS.has(geo.kind) ? resolveClassHeaderFill(geo, bodyFill) : undefined;
+    roundCorner !== 0 && CLASS_HEADER_SPLIT_KINDS.has(geo.kind)
+      ? resolveClassHeaderFill(geo, bodyFill, theme)
+      : undefined;
   if (headerFill !== undefined) {
     return classHeaderSplitRects({ geo, roundCorner, bodyFill, border, strokeWidth, dasharray, headerFill, filter });
   }

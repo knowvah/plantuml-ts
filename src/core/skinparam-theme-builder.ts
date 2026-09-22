@@ -82,6 +82,7 @@ const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [
 
 const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['classBackground', (acc) => acc.classBackground],
+  ['classHeaderBackground', (acc) => acc.classHeaderBackground],
   // G2 N65 item 47: see `theme.ts#classCascadeRoundCorner`'s doc comment
   // for why a bare skinparam reuses that SAME field.
   ['classCascadeRoundCorner', (acc) => acc.roundCorner],

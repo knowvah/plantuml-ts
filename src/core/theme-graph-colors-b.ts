@@ -283,6 +283,21 @@ export interface ThemeGraphColorsB {
    *  for either, jar's own default (`UStroke.simple()`, thickness 1,
    *  square corners) is what `renderer-shell.ts` hardcodes instead. */
   diagramBorderColor?: string;
+  /** CDD T6FU: `skinparam classHeaderBackgroundColor <color>` / the
+   *  nested-block `skinparam class { HeaderBackgroundColor <color> }` --
+   *  `FromSkinparamToStyle.java:196` maps BOTH onto `{element, class_,
+   *  header} BackGroundColor`, the signature `EntityImageClass
+   *  #getStyleHeader` (java:173-178) queries. Consumed ONLY by
+   *  `renderer-classifier-header-split.ts#resolveClassHeaderFill` as the
+   *  `headerBackcolor` source when the classifier carries no inline
+   *  `header:` AND no inline `back:`/bare colour (`EntityImageClass
+   *  .java:202-205` makes an inline background win outright by making
+   *  `headerBackcolor` the SAME reference as `backcolor`). `Paint`, not
+   *  `string`, for the same reason `classBackground` is (T18/D8): a
+   *  `#A-B` value is a gradient upstream. `undefined` means jar's own
+   *  header default, which is value-equal to the body default and so
+   *  never splits. Jar-verified `nisune-86-faji869`. */
+  classHeaderBackground?: Paint;
   /** G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor`
    *  (`Kind` in Private/Package/Protected/Public) -- the member-row
    *  visibility icon's own LineColor/BackgroundColor overrides

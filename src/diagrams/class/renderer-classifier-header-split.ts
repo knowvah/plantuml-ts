@@ -8,6 +8,7 @@
  * split precedent.
  */
 import type { ClassifierGeo } from './layout.js';
+import type { Theme } from '../../core/theme.js';
 import { rect, PAINT_NONE } from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { parseColor, type Paint } from '../../core/paint.js';
@@ -68,16 +69,16 @@ function resolveInlineHeaderColor(color: string | undefined): string | undefined
  *     own type -- a FLAT body with no inline header never splits (the
  *     independently-resolved flat header default IS `.equals()`-true,
  *     `HColorSimple`'s own override).
- * A `classHeaderBackgroundColor` skinparam / `<style> header {
- * BackgroundColor } }` override (`style/FromSkinparamToStyle.java:196`)
- * would ALSO trigger this for a flat body with no inline color at all
- * (`nisune-86-faji869`) -- NOT reachable here: it requires a new
- * `theme.colors.graph`/`theme.colors.elements` field (`theme-graph-
- * colors-a.ts`) and its skinparam-table wiring (`skinparam-key-handlers-
- * table-*.ts`), both outside this task's write-set (T18-follow-up/T19
- * owned) -- journaled, not fixed this task.
+ * CDD T6FU: a `skinparam classHeaderBackgroundColor` override
+ * (`style/FromSkinparamToStyle.java:196`, the SAME `{element, class_,
+ * header}` signature `getStyleHeader` queries) ALSO triggers this for a
+ * flat body with no inline colour at all -- `theme.colors.graph
+ * .classHeaderBackground`, checked BEFORE the gradient quirk because it
+ * IS the `getStyleHeader().value(PName.BackGroundColor)` result the
+ * quirk's "independently re-resolved default" stands in for. Jar-
+ * verified `nisune-86-faji869`.
  */
-export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint): Paint | undefined {
+export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint, theme: Theme): Paint | undefined {
   const inline = resolveInlineHeaderColor(geo.color);
   if (inline !== undefined) {
     const parsed = parseColor(inline);
@@ -95,6 +96,15 @@ export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint): Pai
   // mezi408`'s Test1-4 (`#yellow\FFFFFF` etc., inline gradient, no header
   // token): childCount 6, no split, despite a gradient body fill.
   if (resolveBareOrBackColor(geo.color) !== undefined) return undefined;
+  // `getStyleHeader().value(PName.BackGroundColor)` (`EntityImageClass
+  // .java:204`) -- an explicit skinparam/`<style>` header background, then
+  // `backcolor.equals(headerBackcolor)` (`:218`) against the resolved body
+  // fill: a flat header equal to a flat body draws the plain single rect.
+  const styleHeader = theme.colors.graph.classHeaderBackground;
+  if (styleHeader !== undefined) {
+    if (typeof styleHeader !== 'string' || typeof bodyFill !== 'string') return styleHeader;
+    return resolveColorToSvgHex(styleHeader) === resolveColorToSvgHex(bodyFill) ? undefined : styleHeader;
+  }
   return typeof bodyFill === 'string' ? undefined : bodyFill;
 }
 

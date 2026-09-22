@@ -56,6 +56,13 @@ export interface SkinparamAccumulator {
   arrow: string | undefined;
   noteBackground: string | undefined;
   classBackground: Paint | undefined;
+  /** CDD T6FU: `skinparam classHeaderBackgroundColor` / the nested-block
+   *  form `skinparam class { HeaderBackgroundColor X }` (both normalise to
+   *  the SAME key) -- `FromSkinparamToStyle.java:196` maps it onto the
+   *  `{element, class_, header}` signature `EntityImageClass
+   *  #getStyleHeader` (java:173-178) queries, i.e. the header-background
+   *  split's fill source. */
+  classHeaderBackground: Paint | undefined;
   interfaceBackground: string | undefined;
   enumBackground: string | undefined;
   actorStroke: string | undefined;
@@ -195,6 +202,7 @@ const SCALAR_FIELD_NAMES = [
   'arrow',
   'noteBackground',
   'classBackground',
+  'classHeaderBackground',
   'interfaceBackground',
   'enumBackground',
   'actorStroke',

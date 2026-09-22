@@ -74,6 +74,35 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     ['classbackgroundcolor'],
     (acc, _v, _color, paint) => {
       acc.classBackground = paint;
+      // CDD T6FU: `classBackgroundColor` registers a `{element, class_}`
+      // BackGroundColor style and `classHeaderBackgroundColor` a
+      // `{element, class_, header}` one -- and BOTH match the
+      // `{root, element, classDiagram, class_, header}` signature
+      // `EntityImageClass#getStyleHeader` (java:174-177) queries.
+      // `StyleStorage#computeMergedStyle` (java:102-116) merges every
+      // matching style in REGISTRATION order with OVERWRITE_EXISTING_VALUE,
+      // and `DarkString#mergeWith` (java:50-66) keeps the bigger
+      // `AutomaticCounter` priority -- so on equal specificity the LAST
+      // skinparam written wins, header signature or not. Writing the body
+      // colour into the header slot here reproduces that overwrite; a
+      // LATER `classHeaderBackgroundColor` simply overwrites it back.
+      // Jar-probed: `classHeaderBackgroundColor` then
+      // `classBackgroundColor` draws ONE rect (`cunavo-77-filo788`,
+      // `ziromu-57-mima164`, `dofima-22-kofe334`, `jireze-84-loti743`);
+      // the reverse order draws the 4-shape split.
+      acc.classHeaderBackground = paint;
+    },
+  ],
+  [
+    // CDD T6FU: `style/FromSkinparamToStyle.java:196` --
+    // `addConvert("classHeaderBackgroundColor", PName.BackGroundColor,
+    // SName.element, SName.class_, SName.header)`. The `header` leaf is the
+    // signature `EntityImageClass#getStyleHeader` (java:173-178) reads, so
+    // this is the header-background split's fill source, NOT a second
+    // `classBackgroundColor` tier.
+    ['classheaderbackgroundcolor'],
+    (acc, _v, _color, paint) => {
+      acc.classHeaderBackground = paint;
     },
   ],
   [
