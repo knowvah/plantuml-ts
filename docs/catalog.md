@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1136 modules · 4136 exported names.
+1136 modules · 4137 exported names.
 
 ## `src/`
 
@@ -1217,7 +1217,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |
-| `renderer-note.ts` | `renderBulletAtom`, `renderNote`, `renderTipNote`, `renderOpaleNote` | Note rendering — folded-corner box + dashed connector, or the Opale zigzag-notch member-tip shape (G2/N13). |
+| `renderer-note.ts` | `renderBulletAtom`, `renderNote`, `renderPlainNote`, `renderTipNote`, `renderOpaleNote` | Note rendering — folded-corner box + dashed connector, or the Opale zigzag-notch member-tip shape (G2/N13). |
 | `renderer-openiconic.ts` | `renderOpenIconicAtom` | Renders one OpenIconic `<&glyph>` `MemberRenderAtom` (G2 N41) -- split out of `renderer-classifier-box.ts#renderRowAtoms` purely to keep that function's own NLOC under this project's complexity cap and to avoid growing `renderer-classifier- |
 | `renderer-uid.ts` | `ClassUidPlan`, `ClassUidPlanInput`, `classUidPlanInputFromAst`, `buildClassUidPlan` | renderer-uid.ts — G2 N2 (mechanism 3): entity/cluster/link uid assignment for the class renderer, mirroring the description engine's `renderer-uid.ts#buildUidPlan` (G1/I3b precedent — same shared-counter scheme, same exact/fallback gate sha |
 | `renderer-url.ts` | `UrlTaggedPrimitive`, `wrapClassifierBody` | renderer-url.ts — G2 N15 (README item #7): the classifier-level `[[url]]` `<a>`-wrap render decision. |

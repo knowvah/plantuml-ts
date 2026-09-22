@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderNote } from '../../../src/diagrams/class/renderer-note.js';
+import { renderNote, renderPlainNote } from '../../../src/diagrams/class/renderer-note.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
@@ -23,6 +23,85 @@ const baseNote: NoteGeo = {
   lineWidths: [10, 8],
   connector: [],
 };
+
+// cdd-T8 (A5/M2): body is a `<path>` in `Opale.getPolygonNormal`'s vertex
+// order (`Opale.java:149-167`), stroke-width 0.5; the fold is a CLOSED
+// `<path>` (`Opale.getCorner`, `Opale.java:134-147`) filled with the note's
+// own background at stroke-width 1 (the diagram default, not the note
+// style's 0.5) -- `EntityImageNote.java:275-289`. `baseNote`: x=0 y=0 w=40
+// h=23, cornersize=10.
+describe('renderNote / renderPlainNote — body vertex order and fold paint (cdd-T8, A5/M2)', () => {
+  it("draws the body as a <path> with getPolygonNormal's exact vertex order and stroke-width 0.5", () => {
+    const svg = renderNote(baseNote, defaultTheme);
+    expect(svg).toContain(
+      '<path d="M0,0 L0,23 L40,23 L40,10 L30,0 L0,0" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+    );
+    expect(svg).not.toContain('<polygon');
+  });
+
+  it('draws the fold as a closed <path> (getCorner) with the note background fill and stroke-width 1', () => {
+    const svg = renderNote(baseNote, defaultTheme);
+    expect(svg).toContain('<path d="M30,0 L30,10 L40,10 L30,0" fill="#FEFFDD" stroke="#181818" stroke-width="1"/>');
+  });
+
+  it('never fills the fold with none', () => {
+    const svg = renderNote(baseNote, defaultTheme);
+    // Isolate the fold element (the second <path ... fill=...> after body).
+    const foldMatch = svg.match(/<path d="M30,0[^/]*\/>/);
+    expect(foldMatch).not.toBeNull();
+    expect(foldMatch![0]).not.toContain('fill="none"');
+  });
+
+  it('uses the resolved note background (not the hardcoded default) for both body and fold when overridden', () => {
+    const coloredNote: NoteGeo = { ...baseNote, color: '#FF0000' };
+    const svg = renderNote(coloredNote, defaultTheme);
+    // Rule 2 (`svg.ts#resolvePaint`) shortens `#FF0000` -> `#F00` at emission.
+    const fills = [...svg.matchAll(/fill="(#[0-9A-Fa-f]{3,6})"/g)].map((m) => m[1]);
+    expect(fills[0]).toBe('#F00');
+    expect(fills[1]).toBe('#F00');
+  });
+
+  it('renderPlainNote returns entityParts (body, fold, text) and no connector for a freestanding note', () => {
+    const result = renderPlainNote(baseNote, defaultTheme);
+    expect(result.connector).toBeUndefined();
+    expect(result.entityParts).toHaveLength(3);
+    expect(result.entityParts[0]).toContain('M0,0 L0,23 L40,23 L40,10 L30,0 L0,0');
+    expect(result.entityParts[1]).toContain('M30,0 L30,10 L40,10 L30,0');
+  });
+
+  it('renderPlainNote returns the connector separately from entityParts when the note has a host link', () => {
+    const anchored: NoteGeo = {
+      ...baseNote,
+      connector: [
+        { x: 40, y: 10 },
+        { x: 60, y: 10 },
+      ],
+    };
+    const result = renderPlainNote(anchored, defaultTheme);
+    expect(result.connector).toBeDefined();
+    expect(result.connector).toContain('<path d="M40,10 L60,10"');
+    expect(result.connector).toContain('stroke-dasharray="4 4"');
+    // The connector must not leak into entityParts.
+    for (const part of result.entityParts) {
+      expect(part).not.toContain('stroke-dasharray="4 4"');
+    }
+  });
+
+  it('renderNote joins connector + entityParts in the pre-T8 order (connector first)', () => {
+    const anchored: NoteGeo = {
+      ...baseNote,
+      connector: [
+        { x: 40, y: 10 },
+        { x: 60, y: 10 },
+      ],
+    };
+    const svg = renderNote(anchored, defaultTheme);
+    const connectorIdx = svg.indexOf('stroke-dasharray="4 4"');
+    const bodyIdx = svg.indexOf('M0,0 L0,23');
+    expect(connectorIdx).toBeGreaterThanOrEqual(0);
+    expect(bodyIdx).toBeGreaterThan(connectorIdx);
+  });
+});
 
 // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N` --
 // jar-verified `xokipa-29-rafu481`. `theme.colors.elements['note'].fontSize`

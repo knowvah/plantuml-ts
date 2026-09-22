@@ -14,7 +14,7 @@ import type { TipShape } from './note-tips-resolve.js';
 import type { EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
-import { text, path, polygon, image, linkWrap } from '../../core/svg.js';
+import { text, path, image, linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
 import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
@@ -147,9 +147,34 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-/** `note { LineThickness 0.5 }` (`plantuml.skin`) -- both the outline/
- *  corner paths and the plain connector line. */
+/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the body
+ *  outline and the plain connector line. `EntityImageNote.java:275-289`
+ *  `drawNormal`: `stroked = applyStroke(ug); stroked.draw(polygon)` -- the
+ *  fold draws on `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). */
 const NOTE_STROKE_WIDTH = 0.5;
+
+/** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
+ *  draws on the UNSTROKED `ug`, so it keeps the diagram's DEFAULT stroke
+ *  width (1), never the note's own {@link NOTE_STROKE_WIDTH} (0.5). */
+const NOTE_FOLD_STROKE_WIDTH = 1;
+
+/**
+ * `Opale.java:149-167` `getPolygonNormal`, `roundCorner === 0` (class notes
+ * never set `skinparam NoteRoundCorner`): `moveTo(0,0) lineTo(0,height)
+ * lineTo(w,height) lineTo(w,cornersize) lineTo(w-cornersize,0) lineTo(0,0)`
+ * -- DOWN the left side first, opposite the old winding. `f` = `Opale
+ * #cornersize` ({@link NOTE_FOLD}); `(x,y)` the note's absolute origin.
+ */
+function noteBodyPathData(x: number, y: number, w: number, h: number, f: number): string {
+  return [
+    moveTo(x, y),
+    lineTo(x, y + h),
+    lineTo(x + w, y + h),
+    lineTo(x + w, y + f),
+    lineTo(x + w - f, y),
+    lineTo(x, y),
+  ].join(' ');
+}
 
 /** `FontStyle` set -> the SVG `text-decoration` attribute value -- exact
  *  duplicate of `renderer-classifier-box.ts`'s private `memberAtomDecoration`
@@ -355,34 +380,43 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
  *  host (or no connector at all for a freestanding note) -- every note
  *  kind EXCEPT a resolved member-tip (`renderTipNote` below). */
 export function renderNote(note: NoteGeo, theme: Theme): string {
-  const parts: string[] = [];
+  const { entityParts, connector } = renderPlainNote(note, theme);
+  return (connector ?? '') + entityParts.join('');
+}
 
-  const connector = buildConnectorPathData(note.connector);
-  if (connector !== '') {
-    parts.push(path(connector, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' }));
-  }
+/**
+ * Plain note: folded-corner box (body + fold, two separate `UPath`s per
+ * `EntityImageNote.java:275-289`) plus its per-line text -- returned as
+ * `entityParts`, SEPARATE from the dashed connector line to the note's
+ * host (`connector`, `undefined` for a freestanding note). Split this way
+ * (rather than one joined string, {@link renderNote}'s pre-T8 shape) so a
+ * caller building a `<g class="link">` for the connector (T9) does not
+ * have to re-parse it back out of the entity's own markup.
+ */
+export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: string[]; connector?: string } {
+  const connectorData = buildConnectorPathData(note.connector);
+  const connector =
+    connectorData !== ''
+      ? path(connectorData, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' })
+      : undefined;
 
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
   const f = NOTE_FOLD;
-  parts.push(
-    polygon(
-      [
-        { x, y },
-        { x: x + w - f, y },
-        { x: x + w, y: y + f },
-        { x: x + w, y: y + h },
-        { x, y: y + h },
-      ],
-      { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH },
-    ),
-  );
-  // T7b: routed through svg-path-builder.ts (was a raw template literal).
-  const fold = [moveTo(x + w - f, y), lineTo(x + w - f, y + f), lineTo(x + w, y + f)].join(' ');
-  parts.push(path(fold, { stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }));
-  parts.push(renderNoteText(note, theme));
-
-  return parts.join('');
+  const entityParts: string[] = [
+    // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
+    // own doc comment), the note style's OWN stroke width (0.5).
+    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
+    // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
+    // `renderOpaleNote` already call) -- filled with the note's OWN
+    // background (not `none`) at the diagram's DEFAULT stroke width, per
+    // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
+    // comment).
+    path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH }),
+    renderNoteText(note, theme),
+  ];
+  return connector !== undefined ? { entityParts, connector } : { entityParts };
 }
 
 /**

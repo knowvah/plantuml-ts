@@ -1911,7 +1911,9 @@ describe('renderClass — notes', () => {
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('<polygon');
+    // cdd-T8 (A5/M2): the note body is a `<path>` (`Opale.getPolygonNormal`'s
+    // vertex order), not a `<polygon>` -- `EntityImageNote.java:275-289`.
+    expect(svg).toContain('<path d="M20,30 L20,70');
     expect(svg).toContain('#FEFFDD');
     expect(svg).toContain('hello');
     expect(svg).toContain('world');
