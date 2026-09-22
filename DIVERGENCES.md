@@ -553,6 +553,48 @@ licensing-safe path for ND-licensed artwork.
 
 **Affects:** any diagram rendering stdlib icons or creole `img`/sprite atoms.
 
+### Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster (deliberate, CDD T27)
+
+**Upstream:** `EmbeddedDiagram#getImageSvg`/`getImageSvgSlow`
+(`EmbeddedDiagram.java:129-133,169-174,197-213`) renders the nested diagram,
+strips its `<?plantuml ...?>` processing instructions, and embeds the
+resulting bytes as a `data:image/svg+xml;base64` (or PNG, off the raster
+branch) `<image>` inside the parent diagram.
+
+**This port:** `src/diagrams/class/class-nested-diagram-renderer.ts`
+(`createNestedDiagramRenderer`, CDD T27) renders the nested source through
+this port's OWN `renderSync` recursively, strips the same `<?plantuml ...?>`
+PIs (java:199), and embeds the resulting SVG SOURCE, base64-encoded
+verbatim, as a `data:image/svg+xml;base64` `<image>` sized from the nested
+render's own `viewBox`. Geometry (one `<image>` element, `x`/`y`/`width`/
+`height`) is the target; the payload BYTES deliberately differ — this port
+never re-encodes through ImageIO/AWT (no raster pipeline at all, this
+project's architecture note). The jar's CURRENT oracle cache for this
+corpus holds REAL nested renders, not the `calculateDimensionSlow` catch
+fallback (`(42, 42)`, java:150-152) -- an earlier note
+(`.agent-notes/r2b-embedded-42x42.md`) documented the fallback against an
+OLDER cache and is corrected by `.agent-notes/cdd-T27.md`, which decodes
+the current cache's `<image>` payloads directly.
+
+**Reason:** same as the sprite/img entry above — no portable, deterministic
+raster re-encode path exists in a browser-safe library; embedding the real
+rendered SVG source is cheaper and strictly more informative than a raster.
+
+**Status (CDD T27):** the renderer above is real, tested, and available
+(`core/EmbeddedDiagram.ts`'s `NestedDiagramRenderer` seam,
+`core/cucadiagram/MethodsOrFieldsArea.ts`'s consumer), but is NOT wired into
+any production diagram engine's parse/layout pipeline as of this task — the
+class engine's own `class C { {{ ... }} }` body parsing
+(`src/diagrams/class/parser.ts#handlePendingBodyLine`) is an independent
+fork (ADR-5) that never constructs an `EmbeddedDiagram`/`MethodsOrFieldsArea`
+at all, so this divergence is not yet observable in any rendered class
+diagram. See `.agent-notes/cdd-T27.md` for the exact follow-on wiring scope.
+
+**Affects:** any diagram with a `{{ }}` embedded sub-diagram, once a
+producer supplies this renderer to `MethodsOrFieldsAreaConfig
+.nestedDiagramRenderer` (or an equivalent seam for a chrome/legend
+consumer, T28).
+
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 
 **Upstream:** `!includedef NAME` pulls the named definition out of the
