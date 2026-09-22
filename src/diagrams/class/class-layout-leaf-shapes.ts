@@ -11,10 +11,30 @@
 
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { measureUsecaseOrActorLeaf, measureUsecaseOrActorLeafInk } from '../../core/svek/image/leaf-sizing.js';
+import {
+  measureUsecaseOrActorLeaf,
+  measureUsecaseOrActorLeafInk,
+  measureLeafNode,
+  type LeafSymbolInk,
+} from '../../core/svek/image/leaf-sizing.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { LOLLIPOP_SIZE } from './class-lollipop.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
+import type { Theme } from '../../core/theme.js';
+import { resolveElementFontSize } from '../../core/theme-element-resolve.js';
+import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { sizingAtomImageResolverFor } from '../../core/svek/image/leaf-sizing-entity.js';
+import { DEFAULT_SIZING_STROKE_THICKNESS } from '../../core/svek/image/leaf-sizing-consts.js';
+import {
+  EntityImageDescription,
+  type EntityImageDescriptionParams,
+} from '../../core/svek/image/EntityImageDescription.js';
+import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
+import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import type { FontStyle } from '../../core/klimt/shape/UText.js';
+import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 
 /**
  * Measure the usecase/actor USymbol box — the two allowmixing kinds whose
@@ -140,5 +160,170 @@ export function measureAssociationDiamond(): MeasuredClassifier {
     height: ASSOCIATION_DIAMOND_SIZE * 2,
     rows: [],
     dividerYs: [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// cdd-T22 (E8): `circle`/`() "Name"` interface eye
+// ---------------------------------------------------------------------------
+
+/** `EntityImageDescription`'s sizing-time paint placeholder -- a LimitFinder
+ *  ink walk over `CircleInterface2` never reads forecolor/backcolor/stroke
+ *  (`leaf-sizing-consts.ts#INTERFACE_CIRCLE_SIZE`'s own doc comment: the
+ *  shape "never reads ctx.getStroke()/getDeltaShadow()"), so any value
+ *  satisfies `Paint`. Duplicated (not imported) --
+ *  `leaf-sizing-entity.ts#SIZING_PLACEHOLDER_COLOR` is module-private in a
+ *  file outside this task's write-set, matching `renderer-usymbol-entity.ts
+ *  #ENTITY_STROKE_WIDTH`'s own established duplication precedent for the
+ *  identical reason. */
+const CIRCLE_SIZING_PLACEHOLDER_COLOR = '#000000';
+/** No style flags -- matches `leaf-sizing-entity.ts#SIZING_FONT_STYLES`'s
+ *  identical empty-set convention for a sizing-only `FontConfiguration`. */
+const CIRCLE_SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
+
+/**
+ * Sizing-time `EntityImageDescriptionParams` for a `circle`/`() "name"`
+ * interface leaf -- keyword `'circle'` resolves to `USymbols.INTERFACE`
+ * inside `EntityImageDescription`'s own constructor
+ * (`EntityImageDescriptionSupport.ts:138`, mirroring `Entity.getUSymbol`'s
+ * `LeafType.CIRCLE` -> `USymbols.INTERFACE` mapping,
+ * `abel/Entity.java:415`), which in turn sets `hideText = true`
+ * (`EntityImageDescription.java:137`) and draws the label BELOW the icon
+ * rather than inside it -- see {@link measureCircleInterfaceInk}'s own doc
+ * comment for why this needs a REAL `drawU` walk rather than analytic ink
+ * math.
+ *
+ * A parallel assembly of the SAME upstream params
+ * `renderer-usymbol-entity.ts#buildUsecaseActorEntityParams` builds for the
+ * real draw -- not a call to it, matching that file's own "parallel
+ * assembly" precedent (ADR-1/ADR-2) -- because this one runs at LAYOUT
+ * time and uses placeholder paint, mirroring `leaf-sizing-entity.ts
+ * #buildSizingEntityParams`'s established sizing-time convention.
+ */
+function buildCircleInterfaceSizingParams(
+  display: string,
+  theme: Theme,
+  sprites: SpriteDimsLookup | undefined,
+): EntityImageDescriptionParams {
+  const font = {
+    family: theme.fontFamily,
+    size: resolveElementFontSize(theme, 'circle', 'title') ?? theme.fontSize,
+    color: null,
+    styles: CIRCLE_SIZING_FONT_STYLES,
+  };
+  return {
+    entity: { name: '', uid: '', qualifiedName: '', location: null, url: null },
+    symbol: {
+      keyword: 'circle',
+      actorStyle: resolveActorStyle(undefined),
+      componentStyle: mapComponentStyle(undefined),
+    },
+    labels: { codeName: display, displayText: display, stereotypeLabels: [] },
+    paint: {
+      forecolor: CIRCLE_SIZING_PLACEHOLDER_COLOR,
+      backcolor: CIRCLE_SIZING_PLACEHOLDER_COLOR,
+      roundCorner: 0,
+      diagonalCorner: 0,
+      deltaShadow: 0,
+      stroke: UStroke.withThickness(DEFAULT_SIZING_STROKE_THICKNESS),
+      fontTitle: font,
+      fontStereo: font,
+      titleAlignment: HorizontalAlignment.CENTER,
+      stereotypeAlignment: HorizontalAlignment.CENTER,
+    },
+    links: [],
+    fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
+    atomImageResolverFor: sizingAtomImageResolverFor(sprites),
+  };
+}
+// #lizard forgives -- one straight-line params-object assembly, mirrors
+// `renderer-usymbol-entity.ts#buildUsecaseActorEntityParams`'s identical
+// shape/length for the same reason.
+
+/**
+ * The ink extent of a `circle`/`() "name"` interface leaf's DRAWN shapes --
+ * the union of the `CircleInterface2` icon and the label `desc` drawn BELOW
+ * it (`EntityImageDescription.java:294-330`'s `hideText` branch), from a
+ * REAL `LimitFinder` walk over the SAME `EntityImageDescription` instance
+ * that would draw it -- mirrors `leaf-sizing-entity.ts
+ * #measureUsecaseOrActorLeafInk`'s established "share the measurement
+ * object" shape (SI14) exactly, duplicated here (not imported) because that
+ * function's own symbol union is `'usecase' | 'actor'` and its host file is
+ * outside this task's write-set.
+ *
+ * Not analytic (no hand-derived `space=8 + dimSmall.height` formula): a
+ * `UEllipse`'s drawn top sits at `y + 0.5`, not `y`
+ * (`.agent-notes/class-ink-shared-offset-groups.md` item (b) -- the SAME
+ * surprise that forced the actor case onto this exact mechanism rather
+ * than box math), so `CircleInterface2`'s `margin=1`-inset ellipse is
+ * measured, not fitted.
+ *
+ * `undefined` when the walk records nothing, matching
+ * `measureUsecaseOrActorLeafInk`'s own contract.
+ */
+function measureCircleInterfaceInk(
+  display: string,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+): LeafSymbolInk | undefined {
+  const bounder = new MeasurerStringBounder(measurer);
+  const params = buildCircleInterfaceSizingParams(display, theme, sprites);
+  const finder = LimitFinder.create(bounder, false);
+  new EntityImageDescription(params).drawU(finder);
+  const minX = finder.getMinX();
+  if (!Number.isFinite(minX)) return undefined;
+  return { minX, minY: finder.getMinY(), maxX: finder.getMaxX(), maxY: finder.getMaxY() };
+}
+
+/**
+ * Measure a `kind: 'circle'` classifier -- `() "Name"`/`circle X`
+ * (`LeafType.CIRCLE`). E8 (`diagnosis/A2b-entity-groups.md`): upstream
+ * routes it to `EntityImageDescription` with `USymbols.INTERFACE`
+ * (`svek/GeneralImageBuilder.java:157-158`, `abel/Entity.java:415`), an
+ * 18x18 fixed box (`leaf-sizing-consts.ts#INTERFACE_CIRCLE_SIZE`, jar-
+ * verified against `conija-14-nuta580/svek-1.dot`'s `WIDTH="18.0"
+ * HEIGHT="18.0"` node cell) regardless of label content, plus a label
+ * drawn BELOW it -- not the generic name+members classifier box this
+ * engine drew before this task (6 children: rect + badge ellipse + badge
+ * path + text + 2 lines, vs jar's 2: ellipse + text).
+ *
+ * `measureLeafNode`'s `'circle'` case already returns the fixed 18x18 box
+ * (`leaf-sizing.ts:124-135`) -- called here rather than hardcoding the
+ * constant locally, since it is the SAME faithful entry point
+ * `tryMeasureDescriptionLeaf` (`class-layout-generic-classifier.ts`)
+ * already routes every OTHER descriptive USymbol leaf through.
+ *
+ * `rows[0].text` carries the label purely for the established "row[0]
+ * carries the display text" convention `renderer-usymbol-entity.ts
+ * #buildUsecaseActorEntityParams` reads (`classifier.rows[0]?.text ??
+ * classifier.id`) -- `y`/`indent` are structurally required by
+ * `MeasuredClassifier['rows']` but unconsumed on the real draw path,
+ * exactly like {@link measureUsecaseOrActor}'s own row (see that
+ * function's doc comment).
+ */
+export function measureCircleInterface(
+  classifier: Classifier,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): MeasuredClassifier {
+  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
+  const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
+  const dim = measureLeafNode(
+    { id: classifier.id, display: classifier.display, symbol: 'circle' },
+    fontSpec,
+    measurer,
+    undefined,
+    spriteDims,
+  );
+  const symbolInk = measureCircleInterfaceInk(classifier.display, theme, measurer, spriteDims);
+  const row = { text: classifier.display, y: dim.height / 2, indent: 0, italic: false };
+  return {
+    width: dim.width,
+    height: dim.height,
+    rows: [row],
+    dividerYs: [],
+    ...(symbolInk !== undefined ? { symbolInk } : {}),
   };
 }

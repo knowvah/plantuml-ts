@@ -27,7 +27,7 @@
  * this file under the 500-line cap after adding shadow support.
  */
 
-import type { ClassDiagramAST } from './ast.js';
+import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
@@ -38,6 +38,7 @@ import { collapseEmptyNamespacesFinal } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
 import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
+import { measureCircleInterface } from './class-layout-leaf-shapes.js';
 import { buildDotGraph } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
@@ -74,6 +75,19 @@ export {
 // ---------------------------------------------------------------------------
 // Directive resolution helpers
 // ---------------------------------------------------------------------------
+
+/** cdd-T22 (E8): `circle` sizes via `class-layout-leaf-shapes.ts
+ *  #measureCircleInterface`, not the generic box. */
+function measureLeaf(
+  classifier: Classifier,
+  theme: Theme,
+  measurer: StringMeasurer,
+  suppress: { fields: boolean; methods: boolean },
+  sprites: ClassDiagramAST['sprites'],
+): MeasuredClassifier {
+  if (classifier.kind === 'circle') return measureCircleInterface(classifier, theme, measurer, sprites);
+  return measureClassifier(classifier, theme, measurer, suppress, sprites);
+}
 
 /**
  * Pre-measure every classifier, honoring "hide members" / "hide empty
@@ -140,7 +154,7 @@ function preMeasureClassifiers(
       classifier.suppressMethods === true;
     measuredMap.set(
       classifier.id,
-      measureClassifier(classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites),
+      measureLeaf(classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites),
     );
   }
   // #lizard forgives -- pre-existing hide/show directive resolution (4

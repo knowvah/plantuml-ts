@@ -39,7 +39,7 @@ import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
 import { buildClassShadowFilterDef } from './class-shadow.js';
-import { renderUsecaseOrActorEntity } from './renderer-usymbol-entity.js';
+import { renderClassUSymbolEntity, usesClassUSymbolEntity } from './renderer-usymbol-entity.js';
 import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#CLASS` -- verified against
@@ -393,18 +393,17 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       if (label !== '') children.push(label);
       continue;
     }
-    // SI14 T4 (ADR-1/ADR-2): usecase/actor draws via the SAME faithful
-    // `EntityImageDescription.drawU` path description uses, when a real
-    // `StringMeasurer` reached this geo (absent only for hand-built test
-    // fixtures -- `class-geo-types.ts#ClassGeometry.measurer`). The
-    // fragment's `body` carries EntityImageDescription's OWN `<!--entity
-    // NAME-->` wrap (`renderer-usymbol-entity.ts`) -- push UNWRAPPED,
-    // never through `wrapEntity` (wrong `<!--class NAME-->` comment).
-    const isUsecaseOrActor =
-      classifier.kind === 'usecase' || (classifier.kind === 'descriptive' && classifier.usymbol === 'actor');
-    if (isUsecaseOrActor && geo.measurer !== undefined) {
+    // SI14 T4 (ADR-1/ADR-2)/cdd-T22 (E8, cacoma-43-poxu615): usecase/actor/
+    // circle/component draw via the SAME faithful `EntityImageDescription
+    // .drawU` path description uses, when a real `StringMeasurer` reached
+    // this geo (absent only for hand-built test fixtures --
+    // `class-geo-types.ts#ClassGeometry.measurer`). The fragment's `body`
+    // carries EntityImageDescription's OWN `<!--entity NAME-->` wrap
+    // (`renderer-usymbol-entity.ts`) -- push UNWRAPPED, never through
+    // `wrapEntity` (wrong `<!--class NAME-->` comment).
+    if (usesClassUSymbolEntity(classifier) && geo.measurer !== undefined) {
       const entityUid = uidPlan.classifierUid.get(classifier.id) ?? '';
-      const fragment = renderUsecaseOrActorEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
+      const fragment = renderClassUSymbolEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
       usymbolEntityFragments.push(fragment);
       children.push(fragment.body);
       continue;
