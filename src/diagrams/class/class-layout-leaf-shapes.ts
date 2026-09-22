@@ -28,6 +28,8 @@ import { DEFAULT_SIZING_STROKE_THICKNESS } from '../../core/svek/image/leaf-sizi
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
+  type EntityImageDescriptionLinkInfo,
+  type Margins,
 } from '../../core/svek/image/EntityImageDescription.js';
 import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
@@ -199,11 +201,18 @@ const CIRCLE_SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
  * assembly" precedent (ADR-1/ADR-2) -- because this one runs at LAYOUT
  * time and uses placeholder paint, mirroring `leaf-sizing-entity.ts
  * #buildSizingEntityParams`'s established sizing-time convention.
+ *
+ * `links` (cdd-T22b): upstream's `Collection<Link> links` ctor param,
+ * ALREADY FILTERED to links `contains(leaf)` (`EntityImageDescriptionLinkInfo`'s
+ * own doc comment) -- unread by every sizing/ink caller (`getShield` is the
+ * ONLY consumer, `EntityImageDescription.java:239-262`), so it defaults to
+ * `[]` and every pre-existing caller stays byte-identical.
  */
 function buildCircleInterfaceSizingParams(
   display: string,
   theme: Theme,
   sprites: SpriteDimsLookup | undefined,
+  links: readonly EntityImageDescriptionLinkInfo[] = [],
 ): EntityImageDescriptionParams {
   const font = {
     family: theme.fontFamily,
@@ -231,7 +240,7 @@ function buildCircleInterfaceSizingParams(
       titleAlignment: HorizontalAlignment.CENTER,
       stereotypeAlignment: HorizontalAlignment.CENTER,
     },
-    links: [],
+    links,
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
     atomImageResolverFor: sizingAtomImageResolverFor(sprites),
   };
@@ -326,4 +335,33 @@ export function measureCircleInterface(
     dividerYs: [],
     ...(symbolInk !== undefined ? { symbolInk } : {}),
   };
+}
+
+/**
+ * cdd-T22b: the `hideText` "shield" margins DOT must reserve around this
+ * leaf's icon cell -- `EntityImageDescription#getShield`
+ * (`EntityImageDescription.java:239-262`), read by `SvekNode#shield()`
+ * (`svek/SvekNode.java:220-227`) at DOT-node-build time, NOT at sizing or
+ * draw time (T22's own residual note: this port declared a bare 18x18 node
+ * with no reserved margin, ranking the graph 18-28px too tight).
+ *
+ * Builds the SAME sizing-time `EntityImageDescription` instance
+ * {@link measureCircleInterfaceInk} does (placeholder paint, real
+ * text/sprite atoms via the widened {@link buildCircleInterfaceSizingParams})
+ * -- `getShield` reads only `this.stereo`/`this.desc`/`this.asSmall` (all
+ * built by the ctor) plus `this.links`/`this.fixCircleLabelOverlapping`, so
+ * no separate params shape is needed. `links` is the caller's
+ * ALREADY-FILTERED `contains(leaf)` collection (`EntityImageDescriptionLinkInfo`'s
+ * own doc comment) -- see `class-hidetext-shield.ts#linksTouching`.
+ */
+export function measureCircleInterfaceShield(
+  display: string,
+  theme: Theme,
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+  links: readonly EntityImageDescriptionLinkInfo[],
+): Margins {
+  const bounder = new MeasurerStringBounder(measurer);
+  const params = buildCircleInterfaceSizingParams(display, theme, sprites, links);
+  return new EntityImageDescription(params).getShield(bounder);
 }
