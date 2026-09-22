@@ -44,8 +44,11 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import {
   type NoteRow,
   type NoteLineBuildContext,
+  type NoteDividerDraw,
+  type NoteTableDraw,
   noteLineHeight,
   buildTableRow,
+  buildDividerDraw,
   consumeEmbeddedRow,
 } from './note-layout-measure-rows.js';
 
@@ -102,6 +105,13 @@ export interface NoteMeasurement {
    *  here, same "production builder always sets it" contract as `lineAtoms`
    *  above. */
   lineHeights: readonly number[];
+  /** T10: see `NoteGeo.lineDividers`'s own doc comment -- parallel to
+   *  `lines`, `undefined` per-entry for every row that is not a
+   *  block-separator's own leading row. */
+  lineDividers: readonly (NoteDividerDraw | undefined)[];
+  /** T10: see `NoteGeo.lineTables`'s own doc comment -- parallel to `lines`,
+   *  `undefined` per-entry for every row that is not a creole-table grid. */
+  lineTables: readonly (NoteTableDraw | undefined)[];
 }
 
 /**
@@ -136,6 +146,13 @@ export function measureNote(
     }
   }
   flushBlock();
+  return finishMeasurement(out);
+}
+
+/** {@link measureNote}'s own final row-array-to-`NoteMeasurement` assembly,
+ *  split out purely to keep that function's own NLOC under this project's
+ *  complexity cap (mirrors `appendDecoratedBlock`'s identical rationale). */
+function finishMeasurement(out: { rows: NoteRow[]; blockWidths: number[] }): NoteMeasurement {
   const { rows, blockWidths } = out;
   const maxW = blockWidths.length === 0 ? 0 : Math.max(...blockWidths);
   return {
@@ -143,6 +160,8 @@ export function measureNote(
     lineWidths: rows.map((r) => r.width),
     lineAtoms: rows.map((r) => r.atoms),
     lineHeights: rows.map((r) => r.height),
+    lineDividers: rows.map((r) => r.divider),
+    lineTables: rows.map((r) => r.table),
     width: maxW + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
     height: rows.reduce((sum, r) => sum + r.height, 0) + NOTE_MARGIN_Y * 2,
   };
@@ -228,6 +247,15 @@ function measureSeparatorTitle(
 }
 
 /**
+ * `BodyEnhancedAbstract.java:112`'s own untitled-branch literal --
+ * `withMargin(block, marginX, 4)`. NOT read off `decorated.contentTop`
+ * (see {@link appendDecoratedBlock}'s own doc comment for why that probe
+ * field under-reports 0 for a note specifically) -- this is the upstream
+ * SOURCE literal the probe itself is trying to reproduce.
+ */
+const UNTITLED_SEPARATOR_MARGIN = 4;
+
+/**
  * A11: append one block's rows, decorated per `BodyEnhancedAbstract
  * #decorate` (java:107-121). The separator's own row height is derived by
  * running the REAL ported `decorate()` through `ClassifierBodyGeometry`
@@ -235,7 +263,31 @@ function measureSeparatorTitle(
  * `max(titleH/2 + innerH + 4, titleH) + titleH/2`, probe `btitled`).
  * Width: untitled adds nothing; titled is `max(innerW + 6, titleW + 8)`
  * (`withMargin` X2 + `TextBlockLineBefore.atLeast`, probe-verified).
+ *
+ * T10 diagnosis + fix (untitled only — full mechanism, `sodizo-26-salo123`
+ * jar evidence, and the `deriveHeightOffsets`/`TextBlockMarged` probe-bug
+ * root cause: `.agent-notes/cdd-T10.md`). Short version: the block's
+ * `innerH + 8` splits as a 4px LEADING margin (where the divider `<line>`
+ * draws) + `innerH` + a 4px TRAILING margin -- pre-fix this function put
+ * the FULL 8 BEFORE the block's content every time (right TOTAL, wrong
+ * per-row Y, `Δ4` on every row of the block). `decorated.contentTop` is
+ * NOT the leading margin here (it silently reads 0 for a NOTE specifically
+ * — see the agent notes); {@link UNTITLED_SEPARATOR_MARGIN} is the
+ * upstream source literal instead. The TITLED branch (`--Header--`) is
+ * UNCHANGED (zero corpus reach in any note/legend body, grep-verified) --
+ * one reserved-height row, no `divider` metadata, rather than guess an
+ * unverifiable split.
  */
+/** Shared inputs both of {@link appendDecoratedBlock}'s separator branches
+ *  need — bundled to stay under this project's per-function param cap. */
+interface SeparatorBlockCtx {
+  readonly out: { rows: NoteRow[]; blockWidths: number[] };
+  readonly blockRows: NoteRow[];
+  readonly separator: string;
+  readonly innerH: number;
+  readonly innerW: number;
+}
+
 function appendDecoratedBlock(
   out: { rows: NoteRow[]; blockWidths: number[] },
   blockRows: NoteRow[],
@@ -250,12 +302,48 @@ function appendDecoratedBlock(
     out.rows.push(...blockRows);
     return;
   }
+  const sepCtx: SeparatorBlockCtx = { out, blockRows, separator, innerH, innerW };
+  const char = separator.charAt(0);
   const title = measureSeparatorTitle(separator, ctx);
-  const decorated = NOTE_BODY_GEOMETRY.deriveHeightOffsets(innerH, separator.charAt(0), title?.height);
-  const sepWidth = title === undefined ? 0 : title.width + TITLED_SEPARATOR_TITLE_PAD;
-  out.rows.push({ text: separator, width: sepWidth, atoms: [], height: decorated.totalHeight - innerH });
-  out.blockWidths.push(title === undefined ? innerW : Math.max(innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth));
-  out.rows.push(...blockRows);
+  const decorated = NOTE_BODY_GEOMETRY.deriveHeightOffsets(innerH, char, title?.height);
+  if (title !== undefined) appendTitledSeparatorBlock(sepCtx, title, decorated.totalHeight);
+  else appendUntitledSeparatorBlock(sepCtx, char, decorated);
+}
+
+/** {@link appendDecoratedBlock}'s TITLED-separator branch, split out purely
+ *  to keep that function's own NLOC under this project's complexity cap --
+ *  zero corpus reach (see that function's own doc comment), pre-T10 shape
+ *  unchanged: one reserved-height row, no `divider` metadata. */
+function appendTitledSeparatorBlock(
+  ctx: SeparatorBlockCtx,
+  title: { width: number; height: number },
+  totalHeight: number,
+): void {
+  const sepWidth = title.width + TITLED_SEPARATOR_TITLE_PAD;
+  ctx.out.rows.push({ text: ctx.separator, width: sepWidth, atoms: [], height: totalHeight - ctx.innerH });
+  ctx.out.blockWidths.push(Math.max(ctx.innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth));
+  ctx.out.rows.push(...ctx.blockRows);
+}
+
+/** {@link appendDecoratedBlock}'s UNTITLED-separator branch — see that
+ *  function's own doc comment / `.agent-notes/cdd-T10.md` for the T10
+ *  diagnosis this implements. */
+function appendUntitledSeparatorBlock(
+  ctx: SeparatorBlockCtx,
+  char: string,
+  decorated: { totalHeight: number; dividerY: number },
+): void {
+  const trailHeight = decorated.totalHeight - ctx.innerH - UNTITLED_SEPARATOR_MARGIN;
+  ctx.out.rows.push({
+    text: ctx.separator,
+    width: 0,
+    atoms: [],
+    height: UNTITLED_SEPARATOR_MARGIN,
+    divider: buildDividerDraw(char, decorated.dividerY),
+  });
+  ctx.out.blockWidths.push(ctx.innerW);
+  ctx.out.rows.push(...ctx.blockRows);
+  if (trailHeight > 0) ctx.out.rows.push({ text: '', width: 0, atoms: [], height: trailHeight });
 }
 
 /**
