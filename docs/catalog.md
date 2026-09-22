@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1153 modules · 4248 exported names.
+1155 modules · 4250 exported names.
 
 ## `src/`
 
@@ -402,6 +402,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |
+| `Bullet.ts` | `Bullet` | Bullet — the leading glyph a `*`-prefixed (LIST_WITHOUT_NUMBER) creole line draws before its text: a filled 5×5 disc at depth 0, a filled 3.5×3.5 square at every deeper level, each indented by its own depth. |
 | `Skeleton2.ts` | `Skeleton2` | Skeleton2 — accumulates one `Entry` (level, y-midpoint) per drawn cell of an `AtomTree` and, once every cell has been drawn, renders the bullet + horizontal + vertical connector lines that give the tree its indentation guides. |
 
 ## `src/core/klimt/creole/command/`
@@ -427,6 +428,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `TabToken`, `tokenizeOnTabs`, `tabStringFor`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
+| `AtomTextUtils.ts` | `createListNumber` | AtomTextUtils — upstream's factory helpers around the legacy `AtomText`. |
 | `CommandCreoleBuilder.ts` | `CREOLE_COMMANDS`, `CREOLE_COMMANDS_OTHER` | CommandCreoleBuilder — builds the `starter prefix -> Command[]` map `StripeSimple#searchCommand` looks up against. |
 | `CreoleParser.ts` | `CreoleTextStyle`, `CreoleParserAdapters`, `CreoleParser` | CreoleParser — the ONLY upstream implementor of `SheetBuilder`: turns a `Display` into a `Sheet` of `Stripe`s, one physical display line at a time, dispatching each line to a table/tree/code/latex/plain-text classifier. |
 | `CreoleStripeSimpleParser.ts` | `StripeClassification`, `classifyStripeLine` | CreoleStripeSimpleParser — classifies ONE already-`\n`-split display line into a `StripeStyleType` + its content, per upstream's regex cascade. |

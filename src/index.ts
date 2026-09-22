@@ -27,7 +27,7 @@ import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
 import { prepareIncludeStore } from './core/include-resolver.js';
-import { surfaceSpriteWarnings } from './core/sprite-commands.js';
+import { surfaceSpriteWarnings, type SpriteRegistry } from './core/sprite-commands.js';
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
@@ -192,6 +192,15 @@ function annotationsOf(ast: unknown): DiagramAnnotations | undefined {
  * only when parse/validation errors exist) is left untouched: chrome has
  * no sensible placement on a diagnostic box with no diagram context.
  */
+/** The diagram's own `SpriteRegistry`, read off the AST exactly as
+ *  `core/sprite-registry.ts#surfaceSpriteWarnings` reads it (`'sprites' in
+ *  ast`) — every engine that parses `sprite` commands stores it there, and
+ *  an engine that does not simply has none. */
+function spritesOf(ast: unknown): SpriteRegistry | undefined {
+  if (typeof ast !== 'object' || ast === null || !('sprites' in ast)) return undefined;
+  return (ast as { sprites?: SpriteRegistry }).sprites;
+}
+
 function applyAnnotationChrome(
   fragment: AssembledSvg,
   ast: unknown,
@@ -205,9 +214,17 @@ function applyAnnotationChrome(
   if (annotations === undefined || isAnnotationsEmpty(annotations)) return fragment;
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  // cdd-T28 (decision journal row 103): chrome text is real creole now, so
+  // a `<$sprite>`/`<img:…>` in a title/legend/header/footer/caption has to
+  // resolve against the diagram's OWN sprite registry -- the same
+  // `ast.sprites` field `sprite-registry.ts#surfaceSpriteWarnings` reads
+  // off every engine's AST (see `spritesOf`). Without it the atom measures
+  // 0 wide and `UEmpty`'s `width == 0` guard rejects the resulting empty
+  // cell (`sequence/nereka-67-deco609`).
+  const sprites = spritesOf(ast);
 
   if (!('completeSvg' in fragment)) {
-    const chromed = applyChrome(fragment, annotations, styles, measurer);
+    const chromed = applyChrome(fragment, annotations, styles, measurer, sprites);
     // G2 N46: class fragments center chrome text against the PRE-margin
     // ink dims (`fragment.preChromeWidth`/`preChromeHeight`, threaded
     // through `applyChrome` -- see that function's own doc comment) --
@@ -231,7 +248,7 @@ function applyAnnotationChrome(
   // #lizard forgives -- pre-existing violation (23 NLOC/7 PARAM vs. this
   // repo's 30/5 caps; 7 params, not NLOC, is the actual trip -- unrelated
   // to skin-reddress-variants, just no longer shielded by file size.
-  return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer)) };
+  return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer, sprites)) };
 }
 
 /**

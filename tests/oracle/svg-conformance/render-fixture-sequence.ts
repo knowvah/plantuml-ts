@@ -131,6 +131,6 @@ export function renderFixtureSequence(markup: string, measurer: StringMeasurer, 
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
-  const chromed = applyChrome(fragment, annotations, styles, measurer);
+  const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed);
 }

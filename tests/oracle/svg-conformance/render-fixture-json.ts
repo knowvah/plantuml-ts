@@ -127,5 +127,5 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
-  return assembleSvg(applyChrome(fragment, annotations, styles, measurer));
+  return assembleSvg(applyChrome(fragment, annotations, styles, measurer, ast.sprites));
 }

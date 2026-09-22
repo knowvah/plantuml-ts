@@ -1,8 +1,11 @@
 # cdd-T28 — chrome text through the shared creole pipeline
 
-Status at hand-off: **HALTED on stop condition 1 (twice).** The seam change
-is written, typechecks, and is measured below; it cannot be made green
-without two changes in files outside T28's write-set (§4).
+Status: **COMPLETE.** The task halted once on stop condition 1 (twice) and
+stop 5 (once); the coordinator extended the write-set (journal row 112 in
+the main tree) and all three blockers were taken. `npm test` is green (780
+collected == 780 on disk, 22050 tests), typecheck/lint/build pass. §4 below
+is kept as the record of what the blockers WERE; §5 records how each was
+closed.
 
 ## Observation: the chrome seam's faithful fix is a klimt `TextBlock`, and the whole pipeline already existed
 
@@ -165,3 +168,54 @@ d. `activity/letare-59-gore448`'s weightedScore rise 72 → 88 needs two
    `#`/`*` ordered-list numbering (`CreoleStripeSimpleParser.java:119-147`,
    never ported for either mode — the jar draws `1.`, we draw `#`) and the
    `<a target="_top" href=…>` wrapper klimt does not emit for a url atom.
+
+## §5 — how each blocker was closed (post-extension)
+
+Journal rows 113-116 carry the full record. The findings worth keeping:
+
+### Observation: the list port was right; the parsers' trim was the defect
+
+- **Context**: with `*`/`#` classified, three pinned-exact fixtures
+  (`class/conara-44-fisa089`, `class/zegeso-35-xiko243`,
+  `sequence/dofuru-22-zuga032`) started drawing bullets where the jar draws
+  literal text. Their legend body is ` * Hyp 1` — leading space.
+- **Instrumented before hypothesising**: rendered the SAME source without
+  the leading space through the real jar (`scripts/oracle-render.sh`). The
+  jar draws `<ellipse cx="22.5" cy="99.5" rx="2.5" ry="2.5" fill="#000"/>`
+  plus the text at x=29, and `1.` at textLength 11.638 with the text at
+  x=32.488 — byte-identical to this port's new output. So the port was
+  exact and the input was wrong.
+- **Finding**: `class/parser.ts`'s `mergeStandaloneBraces` fully trims every
+  line (`raw.trim()`, `class-line-merge.ts:54`) and `sequence/parser.ts`'s
+  `trimNonBlank` does the same, and BOTH hand that trimmed array to
+  `matchAnnotationCommand` — so a chrome body loses its indentation before
+  creole ever sees it. Upstream's `BlocLines` never trims a legend body, and
+  the list patterns are anchored at column 0 (`CreoleStripeSimpleParser
+  .java:70-72`). The description engine had already hit and solved this
+  (`annotation-line-trim.ts#trimLineForAnnotationMatch`: trim ONLY index
+  `i`, so single-line matchers still see a trimmed line while a multiline
+  body keeps its columns); class and sequence now do the same.
+- **Impact**: the defect was invisible for as long as nothing in chrome text
+  was column-sensitive. It also fixed `kacico-91-bati232`'s last 13 numeric
+  diffs — its creole TREE rows (`  |_ prop2`) are column-sensitive in
+  exactly the same way, and it is now 0+0 conformant.
+- **Confidence**: High — jar-probed, both trim sites read, all five
+  fixtures re-measured.
+
+### Observation: `weightedScore` rose on four chrome-sprite fixtures whose structure IMPROVED
+
+- `unknown/cenucu-07-mepi600` (structural 9 → 0, w 79 → 98),
+  `unknown/pefigi-94-raxa740` = `sprite-SVG-fill-management-4` (7 → 0,
+  65 → 85), `usecase/tatori-66-kaci883` = `sprite-SVG-fill-management-3`
+  (10 → 9, 41 → 51), `usecase/nipapu-74-roro938` (4 → 1, 129 → 173).
+- The mechanism is the one `.agent-notes/weightedscore-antimonotone-under-
+  growth.md` already records: a subtree that used to short-circuit for 1
+  unit now gets descended and reports its real per-attribute diffs. Every
+  one of the four draws its chrome sprite as the jar's own decomposed
+  `<path>`/`<image>` now instead of literal `<$name>` text.
+- Two fixtures are further ONLY by summed numeric distance, with identical
+  structural counts: `unknown/nixuje-20-bobu879` (the jar's own oracle is an
+  ERROR page — "No such internal sprite: archimate/strategy-value-stream" —
+  so the comparison carries no signal) and `unknown/semutu-45-zeno907` (a
+  `{{mindmap}}` in a title; its weightedScore FELL 50 → 10, and the residual
+  is the nested renderer D9 gives to T27, not this seam).

@@ -46,6 +46,7 @@
 import type { AnnotationBoxStyle, AnnotationElement } from './style.js';
 import type { StringMeasurer } from '../measurer.js';
 import { buildChromeTextBlock } from './blocks-creole.js';
+import type { SpriteRegistry } from '../sprite-commands.js';
 import { rect } from '../svg.js';
 import { shiftFragmentBody } from './coord-shift.js';
 import type { BoxStyle } from '../svg.js';
@@ -218,13 +219,14 @@ export function buildAnnotationBlock(
   displayLines: readonly string[],
   style: AnnotationBoxStyle,
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): AnnotationBlock {
   // `TextBlockBordered#drawU`'s own `color` local (java:126-134): the
   // border colour, EXCEPT that a zero-thickness border makes `color = back`
   // (`noBorder()`, java:114-119, the same branch {@link buildBorderRect}
   // reads) and a null one becomes `HColors.none()`.
   const color = style.lineThickness === 0 ? resolveBoxFill(style) : (style.lineColor ?? 'none');
-  const textBlock = buildChromeTextBlock({ uid: kind, color }, displayLines, style, measurer);
+  const textBlock = buildChromeTextBlock({ uid: kind, color, sprites }, displayLines, style, measurer);
 
   const textWidth = textBlock.width + style.padding.left + style.padding.right;
   const textHeight = textBlock.height + style.padding.top + style.padding.bottom;

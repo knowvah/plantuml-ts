@@ -70,11 +70,19 @@ import { GUILLEMET_DEFAULT } from '../text/Guillemet.js';
 import { XDimension2D } from '../klimt/geom/XDimension2D.js';
 import { UTranslate } from '../klimt/UTranslate.js';
 import { Fore } from '../klimt/Fore.js';
+import { Back } from '../klimt/Back.js';
+import { UImage } from '../klimt/shape/UImage.js';
+import { renderLatexAsImage } from '../latex.js';
+import { emojiSquareDim, emojiStartingAltitude } from '../klimt/creole/atom/AtomEmoji.js';
+import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
+import { makeAtomImageResolverFor } from '../creole-atoms-image-resolver.js';
+import type { AtomImageResolver } from '../creole-atoms.js';
+import type { SpriteRegistry } from '../sprite-commands.js';
 import { UText, FontStyle, getFont, type FontConfiguration } from '../klimt/shape/UText.js';
 import { atomTextStartingAltitude, atomTextWidth } from '../klimt/creole/legacy/AtomText.js';
 import { renderDrawableToFragment } from '../klimt/document-shell.js';
 import type { AtomOps } from '../klimt/creole/Sea.js';
-import type { CreoleAtom } from '../klimt/creole/atom/Atom.js';
+import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
@@ -101,6 +109,11 @@ import type { NestedDiagramRenderer } from '../EmbeddedDiagram.js';
 export interface ChromeTextPaint {
   readonly uid: string;
   readonly color: string;
+  /** The diagram's own `sprite` registry (`ast.sprites`), so a
+   *  `<$name>`/`<img:…>` in chrome text resolves exactly as it does in a
+   *  member row or an entity label. `undefined` for a diagram that
+   *  declared no sprites -- upstream's own empty-registry answer. */
+  readonly sprites?: SpriteRegistry | undefined;
 }
 
 export interface ChromeTextBlock {
@@ -153,25 +166,155 @@ function textDim(atom: CreoleAtom & { kind: 'text' }, stringBounder: StringBound
   return new XDimension2D(width, height);
 }
 
+/** The non-text atom kinds chrome can resolve, and how. Built once per
+ *  chrome block from the diagram's OWN `SpriteRegistry` (`ast.sprites`,
+ *  the same field `sprite-registry.ts#surfaceSpriteWarnings` reads off
+ *  every engine's AST) — `makeAtomImageResolverFor` is the SHARED factory
+ *  the description and class engines already call for `<img:>`/`<$sprite>`
+ *  (`creole-atoms-image-resolver.ts`), so chrome resolves them identically
+ *  rather than growing a second decomposition. Emoji artwork has no
+ *  channel at this seam, which is not a gap in the drawing: `drawEmojiAtom`
+ *  falls back to the platform-glyph text run when no artwork resolver is
+ *  supplied, exactly as the description engine does for an unbundled
+ *  emoji. */
+function atomImageOf(
+  atom: CreoleAtom,
+  resolveAtomImage: AtomImageResolver | undefined,
+): ResolvedAtomImageWithRaster | undefined {
+  return atom.kind === 'inline' ? resolveAtomImage?.(atom.atom) : undefined;
+}
+
+/** SI15 T1's local widening of `AtomImageResolver`'s `image` variant with
+ *  the optional raster-pixel fields its producers populate — declared
+ *  locally for the reason `EntityImageDescriptionDelegates.ts` and
+ *  `EntityImageDescriptionTextBlock.ts` both declare their own: the
+ *  runtime shape carries them, the shared static type does not expose
+ *  them. */
+type ResolvedAtomImageWithRaster =
+  | (Extract<ReturnType<AtomImageResolver>, { readonly kind: 'image' }> & {
+      readonly rasterWidth?: number;
+      readonly rasterHeight?: number;
+    })
+  | Exclude<ReturnType<AtomImageResolver>, { readonly kind: 'image' }>;
+
+/** One atom's measured box. `latex` resolves through the SAME
+ *  `renderLatexAsImage` the description engine measures with; `emoji` is
+ *  `AtomEmoji#calculateDimensionSlow`'s own 36*factor SQUARE (never
+ *  `emojiBoxDim`'s pre-combined line height — `Sea` derives the line
+ *  height itself from the altitude below, F4-b); an unresolved
+ *  `<$sprite>` contributes NOTHING, matching `StripeSimple.addSprite`
+ *  (java:228-236). */
+function atomDim(
+  atom: CreoleAtom,
+  stringBounder: StringBounder,
+  resolveAtomImage: AtomImageResolver | undefined,
+): XDimension2D {
+  if (atom.kind === 'text') return textDim(atom, stringBounder);
+  if (atom.kind === 'latex') {
+    const r = renderLatexAsImage(atom.expr, atom.color ?? LATEX_DEFAULT_COLOR);
+    return new XDimension2D(r.width, r.height);
+  }
+  if (atom.kind === 'emoji') {
+    const { width, height } = emojiSquareDim(atom.factor);
+    return new XDimension2D(width, height);
+  }
+  const resolved = atomImageOf(atom, resolveAtomImage);
+  return resolved === undefined ? new XDimension2D(0, 0) : new XDimension2D(resolved.width, resolved.height);
+}
+
+/** `AtomSprite`/`AtomImg`'s draw, reached with `ug` ALREADY positioned at
+ *  the atom's own origin by `SheetBlock1#drawU` — mirrors
+ *  `EntityImageDescriptionDelegates.ts#descAtomOps`'s identical branch
+ *  pair (`SvgNanoParser`-decomposed primitives re-apply their own
+ *  translate/paint; a raster image draws one `<image>`). */
+function drawAtomImage(resolved: ResolvedAtomImageWithRaster, ug: UGraphic): void {
+  if (resolved === undefined) return;
+  if (resolved.kind === 'image') {
+    const raster =
+      resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
+        ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
+        : undefined;
+    ug.draw(UImage.build(resolved.width, resolved.height, resolved.href, raster));
+    return;
+  }
+  for (const primitive of resolved.primitives) {
+    ug.apply(primitive.translate)
+      .apply(new Fore(primitive.fore))
+      .apply(new Back(primitive.back))
+      .apply(primitive.stroke)
+      .draw(primitive.shape);
+  }
+}
+
+function drawTextAtom(atom: CreoleAtom & { kind: 'text' }, ug: UGraphic): void {
+  const stringBounder = ug.getStringBounder();
+  const font = measuringFont(atom.font);
+  const dim = stringBounder.calculateDimension(font, atom.text);
+  const descent = stringBounder.getDescent?.(font, atom.text) ?? font.size / DESCENT_DIVISOR;
+  ug.apply(new UTranslate(0, dim.getHeight() - descent)).draw(UText.build(atom.text, atom.font));
+}
+
+/** `AtomText#drawU` brackets its runs with `ug.startUrl(url)` /
+ *  `ug.closeUrl()` whenever the run carries one
+ *  (`klimt/creole/legacy/AtomText.java:197-198,235-236`) — that pair is
+ *  what makes the jar emit `<a target="_top" href=…>` around a creole
+ *  `[[url label]]`. Duck-typed rather than widened onto the `UGraphic`
+ *  interface, matching `skin/VisibilityModifier.ts`'s own established
+ *  check for the sibling `startGroup`/`closeGroup` pair: `UGraphicSvg` is
+ *  the only implementor that can emit an `<a>`, and a measuring/limit-
+ *  finding graphic legitimately has nothing to open. */
+interface UrlCapableUGraphic {
+  startUrl(url: CreoleAtomUrl): void;
+  closeUrl(): void;
+}
+
+function urlCapable(ug: UGraphic): UrlCapableUGraphic | undefined {
+  const candidate = ug as unknown as Partial<UrlCapableUGraphic>;
+  return typeof candidate.startUrl === 'function' && typeof candidate.closeUrl === 'function'
+    ? (candidate as UrlCapableUGraphic)
+    : undefined;
+}
+
+function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomImageResolver | undefined): void {
+  if (atom.kind === 'text') {
+    const url = atom.url;
+    const linkable = url === undefined ? undefined : urlCapable(ug);
+    if (linkable === undefined || url === undefined) return drawTextAtom(atom, ug);
+    linkable.startUrl(url);
+    drawTextAtom(atom, ug);
+    linkable.closeUrl();
+    return;
+  }
+  if (atom.kind === 'latex') {
+    const r = renderLatexAsImage(atom.expr, atom.color ?? LATEX_DEFAULT_COLOR);
+    ug.draw(UImage.build(r.width, r.height, r.href));
+    return;
+  }
+  if (atom.kind === 'emoji') return drawEmojiAtom(ug, atom, undefined);
+  drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
+}
+
 /**
  * Chrome's own `AtomOps` — see this module's doc comment for why it is
- * local and what it deliberately cannot resolve. `getStartingAltitude`
- * for a text atom is `AtomText#getStartingAltitude` (java:321-323, this
- * port's `atomTextStartingAltitude`), 0 for everything else (upstream
- * `AtomImg`/`AtomSprite`/`AtomMath` all `return 0`); a composite `Atom`
- * answers all three itself.
+ * local. `getStartingAltitude` for a text atom is
+ * `AtomText#getStartingAltitude` (java:321-323, this port's
+ * `atomTextStartingAltitude`), `AtomEmoji`'s own `-3 * factor`
+ * (`AtomEmoji.java:62-64`) for an emoji, and 0 for everything else
+ * (upstream `AtomImg`/`AtomSprite`/`AtomMath` all `return 0`); a composite
+ * `Atom` answers all three itself.
  */
-export function chromeAtomOps(): AtomOps {
+export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: FontConfiguration): AtomOps {
+  const resolverFor = makeAtomImageResolverFor(sprites);
   return {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
-      if (atom.kind === 'text') return textDim(atom, stringBounder);
-      return new XDimension2D(0, 0);
+      return atomDim(atom, stringBounder, resolverFor(fontOfAtom(atom, baseFont)));
     },
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
+      if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
       return atom.kind === 'text' ? atomTextStartingAltitude(atom.font) : 0;
     },
     drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
@@ -180,15 +323,26 @@ export function chromeAtomOps(): AtomOps {
         atom.drawU(ug);
         return;
       }
-      if (atom.kind !== 'text') return;
-      const stringBounder = ug.getStringBounder();
-      const font = measuringFont(atom.font);
-      const dim = stringBounder.calculateDimension(font, atom.text);
-      const descent = stringBounder.getDescent?.(font, atom.text) ?? font.size / DESCENT_DIVISOR;
-      ug.apply(new UTranslate(0, dim.getHeight() - descent)).draw(UText.build(atom.text, atom.font));
+      drawAtom(atom, ug, resolverFor(fontOfAtom(atom, baseFont)));
     },
   };
 }
+
+/** `AtomSprite`'s tint colour is the SURROUNDING text configuration's own
+ *  (`legacy/StripeSimple.java#addSprite`), which
+ *  `makeAtomImageResolverFor`'s curried `font` parameter carries. A
+ *  non-text atom has no font of its own in this port's `CreoleAtom` union
+ *  except through the run that produced it, so the block's own base
+ *  configuration stands in — the same approximation
+ *  `creole-atoms-image-resolver.ts`'s own doc comment records for the
+ *  description engine's per-textblock font. */
+function fontOfAtom(atom: CreoleAtom, baseFont: FontConfiguration): FontConfiguration {
+  return atom.kind === 'text' ? atom.font : baseFont;
+}
+
+/** `AtomMath`'s own default ink (`renderLatexAsImage`'s caller convention
+ *  in `EntityImageDescriptionDelegates.ts#descAtomOps`). */
+const LATEX_DEFAULT_COLOR = '#000000';
 
 /** `WidthTableMeasurer`/`FixedMeasurer#getDescent`'s own `size/4.5`
  *  (`measurer.ts`) — the fallback for a `StringBounder` that declares no
@@ -202,11 +356,15 @@ const DESCENT_DIVISOR = 4.5;
  *  `:1068` monospaced family, `:1074` tab size 8, `:641` dpi 96).
  *  `sheet` self-references `skin` so a `StripeTable`/`StripeTree`
  *  constructed deeper in the dispatch sees the same object back. */
-function chromeSkinSimple(atomOps: AtomOps): ISkinSimple {
+function chromeSkinSimple(atomOps: AtomOps, sprites: SpriteRegistry | undefined): ISkinSimple {
   const pragma = Pragma.createEmpty();
   const renderer = blockedEmbeddedRenderer();
   const skin: ISkinSimple = {
-    getSprite: () => null,
+    // `SkinParam#getSprite` (java:801-807) -- the per-diagram registry the
+    // source's own `sprite` commands built, reached here through
+    // `ast.sprites` (cdd-T28 row 103). `null` only when the diagram
+    // declared none, which is upstream's own empty-registry answer.
+    getSprite: (name: string) => sprites?.byName.get(name) ?? null,
     guillemet: () => GUILLEMET_DEFAULT,
     getFromMd5: () => null,
     transformStringForSizeHack: (s: string) => s,
@@ -271,10 +429,11 @@ export function buildChromeCreoleBlock(
   lines: readonly string[],
   style: AnnotationBoxStyle,
   lineBreak: LineBreakStrategy,
+  sprites?: SpriteRegistry,
 ): TextBlock {
-  const atomOps = chromeAtomOps();
-  const skinParam = chromeSkinSimple(atomOps);
   const fontConfiguration = chromeFontConfiguration(style);
+  const atomOps = chromeAtomOps(sprites, fontConfiguration);
+  const skinParam = chromeSkinSimple(atomOps, sprites);
   return create0(
     Display.create([...lines]),
     { fontConfiguration, spriteContainer: skinParam, atomOps },
@@ -305,7 +464,7 @@ export function buildChromeTextBlock(
   style: AnnotationBoxStyle,
   measurer: StringMeasurer,
 ): ChromeTextBlock {
-  const block = buildChromeCreoleBlock(lines, style, LineBreakStrategy.NONE);
+  const block = buildChromeCreoleBlock(lines, style, LineBreakStrategy.NONE, paint.sprites);
   const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
   const width = dim.getWidth();
   const height = dim.getHeight();

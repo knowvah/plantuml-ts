@@ -152,7 +152,11 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
-  const chromed = applyChrome(fragment, annotations, styles, measurer);
+  // cdd-T28: mirrors `index.ts#applyAnnotationChrome`'s `spritesOf(ast)`
+  // -- chrome text is creole now, so a `<$sprite>` in a title/legend has to
+  // resolve against the diagram's own registry here too, or this harness
+  // measures chrome differently from production.
+  const chromed = applyChrome(fragment, annotations, styles, measurer, geo.sprites);
   // G2 N46: mirrors `index.ts#applyAnnotationChrome`'s class-specific
   // margin re-application exactly -- see that function's own doc comment
   // and `RenderFragment.preChromeWidth`'s doc comment for the jar-verified

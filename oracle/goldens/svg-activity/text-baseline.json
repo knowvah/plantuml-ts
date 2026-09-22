@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
-  "measuredAt": "2026-09-20",
-  "measuredAgainstCommit": "f7154050",
+  "measuredAt": "2026-09-22",
+  "measuredAgainstCommit": "70a81ca2",
   "fixtures": [
     {
       "type": "activity",
@@ -4921,16 +4921,17 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 5,
+          "#00F": 2
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 7
         },
         "inset": {
           "5": 1,
           "10": 2
         },
-        "textCount": 5
+        "textCount": 7
       },
       "jar": {
         "fill": {
@@ -4946,8 +4947,8 @@
         },
         "textCount": 7
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -5017,15 +5018,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 4
+          "#000": 5
         },
         "anchor": {
-          "(absent)": 4
+          "(absent)": 5
         },
         "inset": {
           "10": 1
         },
-        "textCount": 4
+        "textCount": 5
       },
       "jar": {
         "fill": {
@@ -5039,8 +5040,8 @@
         },
         "textCount": 5
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -9823,20 +9824,20 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2",
       "ours": {
         "fill": {
-          "#000": 24
+          "#000": 33
         },
         "anchor": {
-          "(absent)": 24
+          "(absent)": 33
         },
         "inset": {
           "5": 1,
           "10": 9
         },
-        "textCount": 24
+        "textCount": 33
       },
       "jar": {
         "fill": {

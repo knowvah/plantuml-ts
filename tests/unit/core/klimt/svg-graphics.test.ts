@@ -678,16 +678,47 @@ describe('SvgGraphics — legacy path-builder API', () => {
   });
 });
 
-describe('SvgGraphics — D3′ stubs', () => {
-  it('openLink throws citing D3-prime', () => {
+describe('SvgGraphics — openLink/closeLink (cdd-T28, was a D3-prime stub)', () => {
+  it('wraps everything drawn between the calls in one <a>, with upstream\'s attribute set', () => {
+    // `LinkData#updateAttributesOf` (`SvgGraphics.java:1163-1174`), the
+    // same set `core/svg.ts#linkWrap` already emits on the string path.
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
-    expect(() => svg.openLink('http://x', null, null)).toThrow(/D3-prime/);
+    svg.openLink('http://example.com/a', null, '_top');
+    svg.svgRectangle({ x: 1, y: 2, width: 3, height: 4, rx: 0, ry: 0 }, 0);
+    svg.closeLink();
+    const xml = svg.createXml();
+    expect(xml).toContain(
+      '<a target="_top" href="http://example.com/a" xlink:href="http://example.com/a" xlink:type="simple" ' +
+        'xlink:actuate="onRequest" xlink:show="new" title="http://example.com/a" ' +
+        'xlink:title="http://example.com/a">',
+    );
+    expect(xml.indexOf('<rect')).toBeGreaterThan(xml.indexOf('<a target'));
+    expect(xml).toContain('</a>');
   });
 
-  it('closeLink throws citing D3-prime', () => {
+  it('uses the tooltip as the title, decoding <U+XXXX> and \\n (java:1147-1161)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
-    expect(() => svg.closeLink()).toThrow(/D3-prime/);
+    svg.openLink('http://x', 'a<U+0041>b\\nc', '_top');
+    svg.svgRectangle({ x: 1, y: 2, width: 3, height: 4, rx: 0, ry: 0 }, 0);
+    svg.closeLink();
+    expect(svg.createXml()).toContain('title="aAb\nc"');
   });
+
+  it('blanks a javascript: url but keeps the <a> (java:1136-1140)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+    svg.openLink('javascript:alert(1)', null, '_top');
+    svg.svgRectangle({ x: 1, y: 2, width: 3, height: 4, rx: 0, ry: 0 }, 0);
+    svg.closeLink();
+    expect(svg.createXml()).toContain('<a target="_top" href="" xlink:href=""');
+  });
+
+  it('rejects a closeLink with no matching openLink (java:1251-1254)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+    expect(() => svg.closeLink()).toThrow(/invalid state/);
+  });
+});
+
+describe('SvgGraphics — D3′ stubs', () => {
 
   it('svgImage throws citing D3-prime regardless of args (covers both upstream overloads)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');

@@ -22,10 +22,21 @@ import type { StringBounder } from '../font/StringBounder.js';
  * (`apply`, `draw`, `getParam`, `getTranslate`, `getStringBounder`).
  * Delegated here: `getStringBounder`, `getParam`, `draw`, `getTranslate`
  * (T2's own addition, delegated the same way). `matchesProperty`/
- * `getColorMapper`/`startUrl`/`closeUrl`/`startGroup`/`closeGroup`/
- * `flushUg`/`getDefaultBackground`/`writeToStream` are dropped — none is
- * part of this port's `UGraphic` surface, matching every prior scope
- * reduction in this file family.
+ * `getColorMapper`/`startGroup`/`closeGroup`/`flushUg`/
+ * `getDefaultBackground`/`writeToStream` are dropped — none is part of
+ * this port's `UGraphic` surface, matching every prior scope reduction in
+ * this file family.
+ *
+ * cdd-T28: `startUrl`/`closeUrl` (java:84-91) ARE delegated now. They are
+ * still not on this port's `UGraphic` interface — `UGraphicSvg` is the
+ * only implementor that can emit an `<a>`, and callers duck-type for the
+ * pair (`annotations/blocks-creole.ts#urlCapable`, the same shape
+ * `skin/VisibilityModifier.ts` uses for `startGroup`/`closeGroup`). But a
+ * DELEGATOR must forward what it wraps, or the capability disappears the
+ * moment a decorator is in the chain: `SheetBlock2#drawU` always wraps its
+ * graphic in `UGraphicStencil` (a subclass of this class), so without
+ * these two methods no creole `[[url label]]` inside a `Sheet` could ever
+ * reach `UGraphicSvg#startUrl`.
  */
 export abstract class UGraphicDelegator implements UGraphic {
   private readonly ug: UGraphic;
@@ -50,6 +61,21 @@ export abstract class UGraphicDelegator implements UGraphic {
 
   getTranslate(): UTranslate {
     return this.ug.getTranslate();
+  }
+
+  /** java:84-86 — forwarded only when the wrapped graphic can emit a
+   *  link (see this module's doc comment); a measuring or limit-finding
+   *  graphic legitimately cannot, and silently drawing without the `<a>`
+   *  is what upstream's non-SVG drivers do too. */
+  startUrl(url: { readonly url: string; readonly tooltip: string }): void {
+    const target = this.ug as Partial<{ startUrl(u: typeof url): void }>;
+    target.startUrl?.(url);
+  }
+
+  /** java:88-91. */
+  closeUrl(): void {
+    const target = this.ug as Partial<{ closeUrl(): void }>;
+    target.closeUrl?.();
   }
 
   protected getUg(): UGraphic {
