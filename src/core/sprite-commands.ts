@@ -40,6 +40,7 @@
 import { matchJarSpriteLine } from './internal-sprite-store.js';
 import { SpriteGrayLevel } from './klimt/sprite/SpriteGrayLevel.js';
 import { SpriteSvg } from './klimt/sprite/SpriteSvg.js';
+import { buildSpriteColor4096 } from './klimt/sprite/SpriteColorBuilder4096.js';
 import { addSprite, type SpriteRegistry } from './sprite-registry.js';
 
 // ---------------------------------------------------------------------------
@@ -54,6 +55,7 @@ export {
   getSprite,
   getSpriteMonochrome,
   getSpriteSvg,
+  getSpriteColor4096,
   spriteDimsLookupFor,
   surfaceSpriteWarnings,
   type SpriteRegistry,
@@ -191,13 +193,15 @@ interface DimMatch {
  *  (already column-stripped for the multiline forms; a single 1-element
  *  array carrying `DATA` for the single-line form), per
  *  `CommandFactorySprite#executeInternal` java :186-206. No-ops (registers
- *  nothing) for the `/color` form (journaled to `skippedColorSprites`), an
- *  invalid gray-level count, a failed z-decode, or an empty body -- all
- *  four mirror upstream's `CommandExecutionResult.error(...)` paths, which
- *  likewise never call `system.addSprite`. */
+ *  nothing) for an invalid gray-level count, a failed z-decode, or an
+ *  empty body -- all three mirror upstream's `CommandExecutionResult
+ *  .error(...)` paths, which likewise never call `system.addSprite`. The
+ *  `/color` form (cdd-T26 residual round) DOES register now, via
+ *  {@link buildSpriteColor4096} -- see that function's own doc comment
+ *  for why the declared `[WxH/color]` dimensions are ignored. */
 function buildAndRegister(registry: SpriteRegistry, name: string, dim: DimMatch, bodyLines: readonly string[]): void {
   if (dim.color !== undefined) {
-    registry.skippedColorSprites.push(name);
+    if (bodyLines.length > 0) addSprite(registry, name, buildSpriteColor4096(bodyLines));
     return;
   }
   if (bodyLines.length === 0) return;

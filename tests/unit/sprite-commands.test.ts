@@ -206,13 +206,22 @@ describe('matchSpriteCommand -- multiline with DIM, plain (non-z) gray levels', 
   });
 });
 
-describe('matchSpriteCommand -- /color form (out of mission scope)', () => {
-  it('consumes the block, registers nothing, and journals the name', () => {
+describe('matchSpriteCommand -- /color form (cdd-T26 residual round: SpriteColorBuilder4096)', () => {
+  it('consumes the block and registers a real SpriteColor4096, dims from the BODY not the declared header', () => {
+    // "AAAA"/"BBBB": 'A'/'B' are outside the 4096-palette alphabet
+    // (`ColorPalette4096.ts`'s own doc comment -- the alphabet skips
+    // 'A'-'F'), so every cell stays at its zero-initialized default
+    // (opaque black) rather than throwing -- the sprite still registers.
+    // Body shape (4 chars/row = 2 pixels, 2 rows) wins over the declared
+    // `[4x4/color]` header, matching `SpriteColorBuilder4096.java:51`.
     const lines = ['sprite $Colorful [4x4/color] {', 'AAAA', 'BBBB', '}'];
     const { registry, consumed } = registryWith(lines);
     expect(consumed).toBe(4);
-    expect(getSprite(registry, 'Colorful')).toBeUndefined();
-    expect(registry.skippedColorSprites).toEqual(['Colorful']);
+    const sprite = getSprite(registry, 'Colorful');
+    expect(sprite).toBeDefined();
+    expect(sprite?.width).toBe(2);
+    expect(sprite?.height).toBe(2);
+    expect(registry.skippedColorSprites).toEqual([]);
   });
 });
 

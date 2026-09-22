@@ -20,18 +20,20 @@ import type { InternalEmojiStore } from './internal-emoji-store.js';
 import type { Sprite } from './klimt/sprite/Sprite.js';
 import type { SpriteMonochrome } from './klimt/sprite/SpriteMonochrome.js';
 import { isSpriteSvg, type SpriteSvg } from './klimt/sprite/SpriteSvg.js';
+import { SpriteColor4096 } from './klimt/sprite/SpriteColor4096.js';
 
 export interface SpriteRegistry {
   readonly byName: Map<string, Sprite>;
   /**
-   * Names of `sprite $name [WxH/color] { ... }` blocks encountered but NOT
-   * registered — the `/color` (4096-color, `SpriteColorBuilder4096`)
-   * encoding is out of THIS mission's fixture scope (D6/overview.md's
-   * decode-only scope; no stdlib bundle vendored so far uses it). The
-   * block is still fully consumed (never leaks into diagram content) —
-   * only sprite registration is skipped. TODO(SpriteColorBuilder4096):
-   * port the 4096-color decoder if a future stdlib bundle needs it.
-   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteColorBuilder4096.java
+   * Names of a sprite block encountered but NOT registered. cdd-T26
+   * residual round: a `sprite $name [WxH/color] { ... }` block now DOES
+   * register (`SpriteColorBuilder4096`/`SpriteColor4096`,
+   * `sprite-commands.ts#buildAndRegister`) — the only remaining producer
+   * of this shelf is `registerSvg`'s own failure path (an SVG sprite with
+   * neither a `viewBox` nor `width`/`height` to derive pixel dimensions
+   * from). Field name kept (not renamed) to avoid rippling every existing
+   * consumer for a shelf whose OWN entries are already self-describing
+   * via {@link surfaceSpriteWarnings}'s message text, not this field's name.
    */
   readonly skippedColorSprites: string[];
   /**
@@ -177,10 +179,27 @@ export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup 
  *  adapter). */
 export function getSpriteMonochrome(registry: SpriteRegistry, name: string): SpriteMonochrome | undefined {
   const sprite = getSprite(registry, name);
-  // An SVG sprite has no grey grid — the monochrome/PNG tint path must skip
-  // it rather than cast blindly (S1L-f part 2b).
-  if (isSpriteSvg(sprite)) return undefined;
+  // An SVG or 4096-colour sprite has no grey grid — the monochrome/PNG
+  // tint path must skip it rather than cast blindly (S1L-f part 2b; the
+  // colour exclusion is cdd-T26 residual round's own addition, once
+  // `SpriteColor4096` became a real registrable `Sprite` kind).
+  if (isSpriteSvg(sprite) || isSpriteColor4096(sprite)) return undefined;
   return sprite as SpriteMonochrome | undefined;
+}
+
+/** cdd-T26 residual round: the `getSpriteMonochrome`/`getSpriteSvg`
+ *  sibling for a `/color` (4096-colour) sprite — `SpriteColor4096` is a
+ *  real class (not a duck-typed `.kind` tag like `SpriteSvg`), so
+ *  `instanceof` is the natural, exact type guard. */
+export function isSpriteColor4096(sprite: Sprite | undefined): sprite is SpriteColor4096 {
+  return sprite instanceof SpriteColor4096;
+}
+
+/** The `/color`-sprite registry entry for `name`, or `undefined` when the
+ *  name is unknown or is a monochrome/SVG sprite instead. */
+export function getSpriteColor4096(registry: SpriteRegistry, name: string): SpriteColor4096 | undefined {
+  const sprite = getSprite(registry, name);
+  return isSpriteColor4096(sprite) ? sprite : undefined;
 }
 
 /** The SVG-backed registry entry for `name`, or `undefined` when the name is

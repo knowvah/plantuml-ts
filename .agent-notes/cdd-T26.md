@@ -404,3 +404,93 @@ ATOM level only (`tests/unit/class/class-namespace-title-runs.test.ts`);
 no corpus fixture exercises either shape, so no full-SVG oracle exists.
 Fixtures: `tests/fixtures/class/namespace-title-sprite.puml`,
 `tests/fixtures/class/namespace-title-img-data.puml`.
+
+## Second follow-on round (2026-09-22, coordinator-directed): malara-55-moce209 4096-colour sprites
+
+Fast-forwarded to `a5441e94` (T24/T25/T28's merged batch-7 work) first —
+required a real merge (branches had diverged since `6af1d289`), resolved
+cleanly (only `docs/catalog.md` + append-only `decision-journal.md`
+conflicts, both mechanical). Clean `tsc`/full-suite immediately after.
+
+### Mechanism: `sprite $demo [13x26/color]` — the 4096-colour sprite format was entirely unported
+
+- **Context**: `malara-55-moce209`'s title (`Test on <$bug16> <$demo>`)
+  and body (`Test <$bug16>`, `Test <$demo>`) both reference `$demo`, a
+  `/color`-format sprite. `src/core/sprite-registry.ts`'s own
+  `skippedColorSprites` field confirmed this format was previously
+  recognized but NEVER decoded — the block was fully consumed (never
+  leaking into diagram text) but no `Sprite` was ever registered.
+- **Finding**: read `SpriteColorBuilder4096.java` (full), `ColorPalette4096
+  .java` (full), `SpriteColor.java` (full) as instructed. `buildSprite`
+  (java :50-65) derives width/height from the BODY (`strings.get(0)
+  .length()/2` x `strings.size()`), NOT the declared `[WxH/color]` header —
+  jar-verified against malara's own declared `13x26` vs the real body
+  shape (26 columns x 24 rows). `ColorPalette4096#getColorFor(String)`
+  (java :82-99) decodes a 2-char code via a 64-char alphabet (`indexOf`
+  each char, `code = v1*64+v2`) into a 12-bit packed RGB
+  (`blue=code%16, green=(code/16)%16, red=(code/256)%16`), each nibble
+  `dup()`-expanded (`v*16+v`, NOT a left shift) to 8 bits.
+  `SpriteColor#toUImage` (java :100-121) draws every cell's packed RGB
+  directly (`im.setRGB`, fully opaque — `TYPE_INT_RGB` has no alpha) EXCEPT
+  a cell explicitly marked `-1` via `setGray` (a gray-level tint fallback,
+  never produced by `SpriteColorBuilder4096.buildSprite`, which only ever
+  calls `setColor`).
+- **Ported**: `src/core/klimt/sprite/ColorPalette4096.ts` (decode only —
+  `colorForCode4096`), `SpriteColor4096.ts` (the data class:
+  width/height/get-set-Color/Gray, mirroring `SpriteMonochrome.ts`'s own
+  "data half only, no klimt drawing" scope split), `SpriteColorBuilder4096
+  .ts` (`buildSpriteColor4096`), and `sprite-raster.ts#spriteColor4096ToRgba`
+  /`spriteColor4096ToPngDataUri` (the RASTER half — direct RGB passthrough,
+  alpha always 255, no gradient/tint math needed since every cell from
+  `buildSpriteColor4096` is already a real decoded colour).
+- **Wiring**: `sprite-commands.ts#buildAndRegister`'s `/color` branch calls
+  `addSprite` now (previously only pushed to `skippedColorSprites`).
+  `sprite-registry.ts` gained `isSpriteColor4096`/`getSpriteColor4096`
+  (an `instanceof` guard, `SpriteColor4096` being a real class, unlike
+  `SpriteSvg`'s duck-typed `.kind` tag) and `getSpriteMonochrome` now
+  EXCLUDES a colour sprite too (a real latent bug once colour sprites
+  became registrable — `isSpriteSvg`'s guard alone was no longer
+  sufficient). TWO atom resolvers needed the identical fallback-to-colour
+  wiring: `class-member-atom-resolve.ts#resolveInlineAtom` (member rows,
+  T26's write-set) and `core/creole-atoms-image-resolver.ts#resolveSpriteAtom`
+  (chrome/description/title-text, T28's shared seam, unowned once T28
+  merged) — malara's TITLE `<$demo>` only resolved once BOTH were fixed;
+  fixing only the member-row resolver left the title's `<image>` missing
+  (verified directly, not assumed — instrumented the intermediate state).
+- **Confidence**: High — jar-verified image geometry (`width="28"
+  height="26"`) matches exactly (26 native px x 14/13 title-font scale =
+  28.0, x 24 native px x 14/13 ≈ 25.85 ≈ 26); full render-diff structural=0.
+
+### Observation: `<$bug16>` in malara is unresolved in BOTH the jar AND this port — not a residual
+
+- **Context**: the coordinator's brief said "`<$bug16>` is already
+  handled" — read literally this implied bug16 SHOULD render as an icon.
+- **Finding**: `malara-55-moce209`'s own `.puml` never defines `sprite
+  $bug16` locally. Reading the CACHED ORACLE SVG directly: the body's
+  `<$bug16>` row renders as bare `Test` text with NO icon in the JAR
+  ITSELF too (only ONE `<image>` appears in the whole body, at the SECOND
+  row's position — `$demo`'s). This means `$bug16` is an unresolved sprite
+  name in BOTH engines for this specific diagram (no local definition, not
+  in the jar's/this port's shared internal library either) — a
+  pre-existing, correct "unknown name contributes nothing" case matching
+  `StripeSimple.addSprite`'s own rule, NOT a gap this round needed to
+  close. Confirmed via `git stash` bisection: this port's OWN literal
+  "Test"-with-no-icon output for `<$bug16>` was IDENTICAL before and after
+  every change in both rounds — never a regression.
+- **Impact**: corrects a premise in the coordinator's own brief; the ONLY
+  real gap in malara was `<$demo>`, exactly as eventually stated.
+- **Confidence**: High — direct oracle SVG read, git-stash-bisected against
+  this port's own unchanged output.
+
+### malara-55-moce209 before -> after
+
+structural=2/numeric=~96 -> structural=0/numeric=2 (the 2 residual Δ11.846
+numeric diffs are a pre-existing, unrelated row-height cascade, visible
+throughout the diff before any sprite fix — named, not chased).
+
+### Full post-merge corpus re-survey (this round + T24/T25/T28's merged work)
+
+10 transitions, ALL improvements, ZERO regressions: `curupe-50-kibu120`,
+`foxiki-17-kosa114`, `gekope-01-ricu859`, `jabama-09-kago823`,
+`juxora-90-fisu720`, `kacico-91-bati232`, `malara-55-moce209`,
+`padapo-73-beke177`, `repuga-78-xora226`, `rusuzi-21-kile910`.

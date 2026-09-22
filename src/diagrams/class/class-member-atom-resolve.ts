@@ -15,8 +15,12 @@ import { type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-a
 import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { getSpriteMonochrome, type SpriteRegistry } from '../../core/sprite-commands.js';
-import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
+import { getSpriteMonochrome, getSpriteColor4096, type SpriteRegistry } from '../../core/sprite-commands.js';
+import {
+  spriteToPngDataUri,
+  spriteMonochromeAsLike,
+  spriteColor4096ToPngDataUri,
+} from '../../core/klimt/sprite/sprite-raster.js';
 import { renderLatexAsImage } from '../../core/latex.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 
@@ -49,6 +53,43 @@ export interface ResolvedMemberAtom {
  *  `sprite` definitions on this diagram) resolves an `img` atom fine (it
  *  needs no registry) but always skips a `sprite` atom, matching
  *  `StripeSimple.addSprite`'s "unknown name contributes nothing" rule. */
+/** cdd-T26 residual round: {@link resolveInlineAtom}'s `'sprite'` branch,
+ *  split out to keep that function's own NLOC under this project's cap
+ *  once a SECOND sprite kind (4096-colour) joined monochrome. Tries
+ *  monochrome first (the common case), then 4096-colour -- `getSprite*`'s
+ *  own `instanceof`/`.kind` guards make the two mutually exclusive per
+ *  name, so trying both in sequence never double-resolves. A 4096-colour
+ *  sprite has no gray-level tint (`SpriteColor4096`'s own doc comment:
+ *  every cell from `buildSpriteColor4096` is a real decoded RGB, never
+ *  the gray-fallback sentinel), so `baseFont.color`/`atom.forcedColor`
+ *  (the monochrome tint's fore/back colours) are NOT threaded to
+ *  {@link spriteColor4096ToPngDataUri} -- there is nothing for them to
+ *  tint. */
+function resolveSpriteAtom(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  baseFont: FontConfiguration,
+  sprites: SpriteRegistry,
+  spriteDims: SpriteDimsLookup | undefined,
+): Extract<MemberRenderAtom, { kind: 'image' }> | undefined {
+  // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
+  // factor -- same call the sizer makes (S1L-f).
+  const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
+  const mono = getSpriteMonochrome(sprites, atom.name);
+  if (mono !== undefined) {
+    const png = spriteToPngDataUri(
+      spriteMonochromeAsLike(mono),
+      baseFont.color ?? undefined,
+      atom.forcedColor,
+      spriteScale(atom.scale, baseFont.size),
+    );
+    return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+  }
+  const color = getSpriteColor4096(sprites, atom.name);
+  if (color === undefined) return undefined; // unknown name -- contributes nothing.
+  const png = spriteColor4096ToPngDataUri(color, spriteScale(atom.scale, baseFont.size));
+  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+}
+
 export function resolveInlineAtom(
   atom: Extract<CreoleAtom, { kind: 'inline' }>['atom'],
   baseFont: FontConfiguration,
@@ -60,18 +101,13 @@ export function resolveInlineAtom(
     return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
   }
   if (sprites === undefined) return undefined;
-  const sprite = getSpriteMonochrome(sprites, atom.name);
-  if (sprite === undefined) return undefined; // unknown name -- contributes nothing.
-  // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
-  // factor -- same call the sizer makes (S1L-f).
-  const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
-  const png = spriteToPngDataUri(
-    spriteMonochromeAsLike(sprite),
-    baseFont.color ?? undefined,
-    atom.forcedColor,
-    spriteScale(atom.scale, baseFont.size),
-  );
-  return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+  // `resolveInlineAtom`'s own caller (`class-member-creole.ts`) already
+  // dispatches an `'openiconic'` atom to `resolveOpenIconicAtom` instead
+  // -- this narrows the type for `resolveSpriteAtom` and stays defensive
+  // (matching `resolveOpenIconicAtom`'s own "should not occur" precedent)
+  // rather than assuming that external invariant holds forever.
+  if (atom.kind !== 'sprite') return undefined;
+  return resolveSpriteAtom(atom, baseFont, sprites, spriteDims);
 }
 
 /**

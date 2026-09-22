@@ -47,6 +47,7 @@
 import { parseColorString, type RgbColor } from '../../tim/builtin/color-utils.js';
 import { encodePng, toBase64DataUri, RGBA_BYTES_PER_PIXEL } from './png-encoder.js';
 import type { SpriteMonochrome } from './SpriteMonochrome.js';
+import type { SpriteColor4096 } from './SpriteColor4096.js';
 
 /**
  * Minimal structural stand-in for T4's `SpriteMonochrome` (in-flight,
@@ -220,6 +221,57 @@ export function spriteToPngDataUri(
   scale: number = DEFAULT_SCALE,
 ): SpritePngResult {
   const { rgba, width, height } = spriteToRgba(sprite, fontColor, backColor);
+  const png = encodePng(rgba, width, height);
+  return {
+    dataUri: toBase64DataUri(png),
+    naturalWidth: width,
+    naturalHeight: height,
+    width: width * scale,
+    height: height * scale,
+  };
+}
+
+/**
+ * cdd-T26 residual round: rasterizes a {@link SpriteColor4096} (a
+ * `/color` sprite, one already-decoded 0xRRGGBB packed int per pixel) to
+ * RGBA — the sibling of {@link spriteToRgba} for a per-pixel-colour
+ * sprite rather than a tinted gray-level one. `SpriteColor#toUImage`
+ * (java :100-121) only takes the gray-gradient branch for a cell whose
+ * `color[line][col] == -1` (a {@link SpriteColor4096.setGray} cell, never
+ * produced by {@link buildSpriteColor4096} today) — every OTHER cell is
+ * `im.setRGB(col, line, localColor)` directly, fully opaque (`TYPE_INT_RGB`
+ * has no alpha channel upstream). The `-1` branch is NOT ported (no
+ * current caller mixes gray cells into a colour sprite); such a cell
+ * renders opaque black here instead, a named, narrow gap.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteColor.java:100-121
+ */
+export function spriteColor4096ToRgba(sprite: SpriteColor4096): RgbaBitmap {
+  const { width, height } = sprite;
+  const rgba = new Uint8Array(width * height * RGBA_BYTES_PER_PIXEL);
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const packed = sprite.getColor(col, row);
+      const rgb = packed === -1 ? 0 : packed;
+      const offset = (row * width + col) * RGBA_BYTES_PER_PIXEL;
+      rgba[offset] = (rgb >> 16) & 0xff;
+      rgba[offset + 1] = (rgb >> 8) & 0xff;
+      rgba[offset + 2] = rgb & 0xff;
+      rgba[offset + 3] = FULLY_OPAQUE_ALPHA;
+    }
+  }
+  return { rgba, width, height };
+}
+
+/**
+ * cdd-T26 residual round: encodes a {@link SpriteColor4096} to a
+ * `data:image/png;base64,...` URI — the `/color`-sprite sibling of
+ * {@link spriteToPngDataUri}, same scale-geometry contract (natural PNG,
+ * `width`/`height` pre-scaled for the caller's `<image>` attributes; see
+ * that function's own doc comment for the full disclosed-divergence
+ * citation on why the raster itself is not resampled).
+ */
+export function spriteColor4096ToPngDataUri(sprite: SpriteColor4096, scale: number = DEFAULT_SCALE): SpritePngResult {
+  const { rgba, width, height } = spriteColor4096ToRgba(sprite);
   const png = encodePng(rgba, width, height);
   return {
     dataUri: toBase64DataUri(png),
