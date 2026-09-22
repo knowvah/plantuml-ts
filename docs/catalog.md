@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1139 modules · 4156 exported names.
+1139 modules · 4152 exported names.
 
 ## `src/`
 
@@ -1219,7 +1219,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |
 | `renderer-note-connector.ts` | `renderNoteConnectorPath`, `noteIsConnectorSource`, `noteGmnName`, `NoteConnectorEndpoints`, `resolveNoteConnectorEndpoints`, `renderNoteConnectorLink` | cdd-T9b — a plain note's dashed connector to its host is upstream's OWN ordinary `Link`, not part of the note's own `EntityImageNote` styling (`command/note/CommandFactoryNoteOnEntity.java:342`: `new LinkType (LinkDecor.NONE, LinkDecor.NONE |
 | `renderer-note-dispatch.ts` | `NoteRenderContext`, `NoteConnector`, `NoteDrawResult`, `renderOneNote` | One note leaf's draw dispatch -- split out of `renderer.ts` (500-line cap, cdd-T9) so `renderClass`'s single ordered `geo.leaves` loop keeps calling one function per note/tips leaf without growing that file past the complexity-hook line lim |
-| `renderer-note-lines.ts` | `renderNoteExtras`, `renderPlainNoteWithLines`, `renderNoteWithLines`, `renderTipNoteWithLines`, `renderOpaleNoteWithLines` | renderer-note-lines.ts — draws the two note/label draw-metadata kinds `note-layout-measure(-rows).ts` now MEASURES (T10, diagnosis `E13` + `jovigo-38-tuni063`) but that were never PAINTED before this task: a block-separator's `<line>` (`--- |
+| `renderer-note-lines.ts` | `renderNoteRowExtra` | renderer-note-lines.ts — draws the two note/label draw-metadata kinds `note-layout-measure(-rows).ts` MEASURES (T10, diagnosis `E13` + `jovigo-38-tuni063`): a block-separator's `<line>` (`----`/`==`/`..`, `BodyEnhancedAbstract#decorate`/`Te |
 | `renderer-note.ts` | `renderBulletAtom`, `renderNote`, `renderPlainNote`, `renderTipNote`, `renderOpaleNote` | Note rendering — folded-corner box + dashed connector, or the Opale zigzag-notch member-tip shape (G2/N13). |
 | `renderer-openiconic.ts` | `renderOpenIconicAtom` | Renders one OpenIconic `<&glyph>` `MemberRenderAtom` (G2 N41) -- split out of `renderer-classifier-box.ts#renderRowAtoms` purely to keep that function's own NLOC under this project's complexity cap and to avoid growing `renderer-classifier- |
 | `renderer-uid.ts` | `ClassUidPlan`, `ClassUidPlanInput`, `classUidPlanInputFromAst`, `buildClassUidPlan` | renderer-uid.ts — G2 N2 (mechanism 3): entity/cluster/link uid assignment for the class renderer, mirroring the description engine's `renderer-uid.ts#buildUidPlan` (G1/I3b precedent — same shared-counter scheme, same exact/fallback gate sha |

@@ -9,6 +9,11 @@ import type { NoteGeo } from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { ClassUidPlan } from './renderer-uid.js';
 import type { TipResolution } from './note-tips-resolve.js';
+// cdd-T10 wiring fix: divider/table extras now draw INSIDE
+// `renderer-note.ts#renderNoteText`'s own per-row loop (row-ordered, not
+// appended once per note -- see that function's own doc comment), so
+// `renderPlainNote`/`renderTipNote`/`renderOpaleNote` already include them
+// with no wrapper needed.
 import { renderPlainNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
 import { linkWrap } from '../../core/svg.js';
 import { wrapEntity } from './renderer-group.js';

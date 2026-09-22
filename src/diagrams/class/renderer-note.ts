@@ -35,6 +35,12 @@ import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
+// cdd-T10 wiring fix: a row's own creole `----` divider / table draws AT
+// THIS ROW'S OWN POSITION inside `renderNoteText`'s loop below -- see that
+// function's own doc comment. `renderer-note-lines.ts` owns the pure
+// per-row/per-cell drawing primitives (`NoteDividerDraw`/`NoteTableDraw`
+// consumers); it imports nothing from this file, so this is not a cycle.
+import { renderNoteRowExtra } from './renderer-note-lines.js';
 
 /**
  * G2 N34: jar's `EntityImageNote` ctor default (`ColorParam.noteBackground`,
@@ -277,6 +283,37 @@ function renderNoteLineAtoms(
   return out;
 }
 
+/** Per-row layout inputs {@link renderNoteLineContent} needs -- bundled to
+ *  stay under this project's per-function param cap. */
+interface NoteLineRowCtx {
+  readonly i: number;
+  readonly lineTop: number;
+  readonly lineHeight: number;
+  readonly baselineOffset: number;
+  readonly fontSize: number;
+}
+
+/** One row's own text content (creole atoms or the pre-cutover plain-
+ *  `<text>` fallback) -- split out of {@link renderNoteText} purely to
+ *  keep that function's own NLOC under this project's complexity cap
+ *  after the cdd-T10 wiring fix added a second per-row push. */
+function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, theme: Theme): string {
+  const { i, lineTop, lineHeight, baselineOffset, fontSize } = row;
+  if (note.lineAtoms !== undefined) {
+    return renderNoteLineAtoms(note.lineAtoms[i]!, note.x + NOTE_MARGIN_X1, lineTop, lineHeight, theme, baselineOffset);
+  }
+  return text(note.x + NOTE_MARGIN_X1, lineTop + baselineOffset, ln, {
+    fontFamily: theme.fontFamily,
+    fontSize,
+    // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
+    // consults (this branch has no per-atom color to check first, since
+    // it draws the note's own single, un-decomposed source line).
+    fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
+    lengthAdjust: 'spacing',
+    textLength: note.lineWidths[i]!,
+  });
+}
+
 /**
  * Note body text, one line per row, LEFT-anchored.
  *
@@ -320,26 +357,15 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
   let lineTop = note.y + NOTE_MARGIN_Y;
   note.lines.forEach((ln, i) => {
     const lineHeight = note.lineHeights?.[i] ?? fontSize;
-    if (note.lineAtoms !== undefined) {
-      parts.push(
-        renderNoteLineAtoms(note.lineAtoms[i]!, note.x + NOTE_MARGIN_X1, lineTop, lineHeight, theme, baselineOffset),
-      );
-      lineTop += lineHeight;
-      return;
-    }
-    const y = lineTop + baselineOffset;
-    parts.push(
-      text(note.x + NOTE_MARGIN_X1, y, ln, {
-        fontFamily: theme.fontFamily,
-        fontSize,
-        // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
-        // now consults (this branch has no per-atom color to check first,
-        // since it draws the note's own single, un-decomposed source line).
-        fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
-        lengthAdjust: 'spacing',
-        textLength: note.lineWidths[i]!,
-      }),
-    );
+    parts.push(renderNoteLineContent(note, ln, { i, lineTop, lineHeight, baselineOffset, fontSize }, theme));
+    // cdd-T10 wiring fix: a row's own `<line>`/table draws AT THIS ROW'S
+    // OWN POSITION (`lineTop`, BEFORE advancing) -- never appended after
+    // every row, which cannot reproduce the jar's interleaved child order
+    // (`BodyEnhancedAbstract.java:107-121`: a block-separator's divider
+    // draws immediately before its own block's content, not after the
+    // whole note). `renderNoteRowExtra` is a no-op ('') for every row
+    // that carries neither `lineDividers[i]` nor `lineTables[i]`.
+    parts.push(renderNoteRowExtra(note, lineTop, i, baselineOffset, theme));
     lineTop += lineHeight;
   });
   return parts.join('');

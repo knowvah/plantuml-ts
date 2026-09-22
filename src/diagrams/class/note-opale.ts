@@ -14,6 +14,7 @@
 import type { NoteGeo } from './note-layout.js';
 import type { UrlInfo } from './ast.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import type { NoteDividerDraw, NoteTableDraw } from './note-layout-measure-rows.js';
 import { resolveOpaleConnector } from '../../core/svek/image/Opale.js';
 
 export {
@@ -44,7 +45,18 @@ export function buildOpaleNoteGeo(
   // branch of `mapGroupNoteGeos`'s singleton-group dispatch) -- kept as a
   // plain structural field (not `NoteMeasurement` by name) per this
   // function's own pre-existing "erased at compile time" import-cycle note
-  // below.
+  // below. cdd-T10 wiring fix: `lineDividers`/`lineTables` added the SAME
+  // way -- this was the ONE `NoteGeo` constructor of the three
+  // (`note-layout-tip.ts`'s other two, `tipNoteGeo`/`plainNoteGeo`, already
+  // carried them) that silently dropped both fields, since its own local
+  // `m` parameter type is narrower than `NoteMeasurement` and never listed
+  // them -- every OPALISED note (the common case for a single-link,
+  // non-strict-uml note: `singletonNoteGeo` tries this builder FIRST) lost
+  // its divider/table draw metadata before it ever reached the renderer.
+  // Jar-verified: `sodizo-26-salo123`/`jovigo-38-tuni063` are BOTH
+  // opalised (their golden `<path>` outlines carry the zigzag notch, not a
+  // separate connector), which is why wiring `renderNoteRowExtra` into
+  // `renderNoteText` alone did not move either fixture.
   m: {
     width: number;
     height: number;
@@ -52,6 +64,8 @@ export function buildOpaleNoteGeo(
     lineWidths: number[];
     lineAtoms: readonly (readonly MemberRenderAtom[])[];
     lineHeights: readonly number[];
+    lineDividers?: readonly (NoteDividerDraw | undefined)[];
+    lineTables?: readonly (NoteTableDraw | undefined)[];
   },
   origin: { x: number; y: number },
   points: ReadonlyArray<{ x: number; y: number }>,
@@ -69,6 +83,8 @@ export function buildOpaleNoteGeo(
     lineWidths: m.lineWidths,
     lineAtoms: m.lineAtoms,
     lineHeights: m.lineHeights,
+    ...(m.lineDividers !== undefined ? { lineDividers: m.lineDividers } : {}),
+    ...(m.lineTables !== undefined ? { lineTables: m.lineTables } : {}),
     connector: [],
     opale: resolved,
     ...(note.target !== undefined ? { target: note.target } : {}),
