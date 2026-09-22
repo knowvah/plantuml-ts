@@ -1,5 +1,5 @@
 {
-  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was).",
+  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -59906,6 +59906,270 @@
       "status": "ok",
       "measuredAt": "2026-09-21",
       "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bivevo-25-xara984",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "canuti-20-jotu614",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cenubi-27-xova754",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "delano-03-xino845",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dudimi-83-mimo845",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dujinu-38-badu006",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "duvuti-29-lugi970",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "faxoga-34-moja699",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fexedu-26-dira713",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fitini-85-kupo803",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gaxipe-22-maxa852",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gixesa-28-feri809",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jabeme-35-logi109",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jinema-90-laga721",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lozijo-52-pesu023",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mefaca-83-lebu193",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mupuzo-63-femu686",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pareli-69-cixe116",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "paziji-13-jede796",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pukuzu-30-zode181",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tiguma-69-tovu135",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vuvico-92-keza999",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xodopa-41-tazo512",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zogari-39-ziza794",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "class",
+      "status": "ok",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
     }
   ]
 }

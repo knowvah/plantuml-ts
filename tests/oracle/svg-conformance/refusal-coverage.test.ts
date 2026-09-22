@@ -642,7 +642,11 @@ describe('refusal coverage — baseline shape', () => {
     // with `cmp`), exactly how every prior svg-class golden row was pinned;
     // all render here and on the jar, so erroring/gaps/jar-error are
     // unchanged. Derivation: rendering 5040 + 119 = 5159; 5159 + 269 = 5428.
-    expect(manifest.fixtures.length).toBe(5428);
+    //
+    // 5428 -> 5452 / 5159 -> 5183 at class-divergence-drive/close-b2
+    // (2026-09-21): 24 more svg-class golden rows, same procedure
+    // (ratchet 433 -> 457). Derivation: 5183 + 269 = 5452.
+    expect(manifest.fixtures.length).toBe(5452);
     expect(pinnedJarErrors.length).toBe(99);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -656,7 +660,7 @@ describe('refusal coverage — baseline shape', () => {
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
     expect(pinnedErroring.length).toBe(269);
-    expect(pinnedRendering.length).toBe(5159);
+    expect(pinnedRendering.length).toBe(5183);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

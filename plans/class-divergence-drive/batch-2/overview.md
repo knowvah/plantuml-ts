@@ -13,9 +13,9 @@ instrumentation before a fix, and M9/M10 add new label anchors).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T5 | Relationship AST/grammar: url, dashedBody, hidden, linkConstraint text, middleDecor, widened decors | typescript-pro (sonnet) | `class-relationship-parser.ts`, `class-relationship-ast.ts`, `class-arrow-grammar.ts`, `class-arrow-decor-map.ts`, tests | — | [ ] |
-| T6 | Edge geometry: direction fix, visibility-icon anchor, note-box fields, constraint position, quantifier split | typescript-pro (opus) | `class-edge-geo.ts`, `class-geo-types.ts`, `class-edge-label-anchor.ts`, tests | T5 | [ ] |
-| T7 | Edge rendering: visibility icon, url wrap, note body, new extremity decors, constraint line+text, quantifier lines, hidden-link skip, `getMiddle` arc | typescript-pro (sonnet) | `renderer-edge.ts`, `renderer-arrowhead.ts`, `src/core/klimt/shape/DotPath.ts`, tests | T6 | [ ] |
+| T5 | Relationship AST/grammar: url, dashedBody, hidden, linkConstraint text, middleDecor, widened decors | typescript-pro (sonnet) | `class-relationship-parser.ts`, `class-relationship-ast.ts`, `class-arrow-grammar.ts`, `class-arrow-decor-map.ts`, tests | — | [x] |
+| T6 | Edge geometry: direction fix, visibility-icon anchor, note-box fields, constraint position, quantifier split | typescript-pro (opus) | `class-edge-geo.ts`, `class-geo-types.ts`, `class-edge-label-anchor.ts`, tests | T5 | [x] |
+| T7 | Edge rendering: visibility icon, url wrap, note body, new extremity decors, constraint line+text, quantifier lines, hidden-link skip, `getMiddle` arc | typescript-pro (sonnet) | `renderer-edge.ts`, `renderer-arrowhead.ts`, `src/core/klimt/shape/DotPath.ts`, tests | T6 | [x] |
 
 Specs: [`T5-relationship-ast.md`](T5-relationship-ast.md),
 [`T6-edge-geometry.md`](T6-edge-geometry.md),

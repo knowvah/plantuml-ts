@@ -672,10 +672,14 @@ describe('routing conformance — jar-error classification', () => {
     // byte-identical dot-cache twin (all `agree`, CLASS/CLASS), exactly how
     // every prior svg-class golden row was pinned. Misroutes and jar errors
     // unchanged. Derivation: 4276 + 1053 + 99 = 5428.
-    expect(pinnedAgree.length).toBe(4276);
+    //
+    // 4276 -> 4300 / 5428 -> 5452 at class-divergence-drive/close-b2
+    // (2026-09-21): 24 more svg-class golden rows, same procedure.
+    // Derivation: 4300 + 1053 + 99 = 5452.
+    expect(pinnedAgree.length).toBe(4300);
     expect(pinnedMisroutes.length).toBe(1053);
     expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5428);
+    expect(manifest.fixtures.length).toBe(5452);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
