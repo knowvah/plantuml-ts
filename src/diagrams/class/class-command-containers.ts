@@ -15,6 +15,8 @@ import {
   openNamespaceBlock,
   openTogetherBlock,
   setNamespaceStereotype,
+  setNamespaceUrl,
+  setNamespaceColor,
   NAMESPACE_COMMANDS,
 } from './class-container.js';
 import { collapseEmptyNamespace } from './class-namespace.js';
@@ -25,6 +27,7 @@ import {
   CONSTRAINT_ON_LINKS_RE,
   NOTE_ON_LINK_RE,
   NOTE_ON_LINK_MULTI_RE,
+  NOTE_COLOR,
 } from './class-notes.js';
 import { applyUrlStatement, URL_STATEMENT_RE } from './class-url-command.js';
 import { ensureClassifier } from './parser.js';
@@ -66,9 +69,26 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // `DECL_KIND_RE` carries) -- captured by the non-capturing `(?:...)` group
   // and discarded, matching that command's own posture (no render-side
   // field consumes a package's visibility marker either).
+  // T11 (E4/M3): the `[[url]]` group (5) is now CAPTURING (was
+  // non-capturing, discarded) and NOTE_COLOR (6, the SAME bare/`back:`
+  // grammar `class-notes.ts` note commands already reuse) is inserted
+  // ahead of the old trailing catch-all -- both read onto the Namespace
+  // via setNamespaceUrl/setNamespaceColor below; the same-line-close brace
+  // group shifted from 5 to 7. The trailing `(?:[#<][^{]*)?` catch-all is
+  // kept as a no-op safety net for whatever it used to silently absorb.
   {
-    pattern:
-      /^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
+    pattern: new RegExp(
+      String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+        NOTE_COLOR +
+        // T11: a `\s*` gap here is load-bearing -- without it, a trailing
+        // space before `{` (e.g. `#DDD {`) makes the whole match fail at
+        // NOTE_COLOR's end position, and the engine backtracks NOTE_COLOR
+        // to zero-width so the catch-all below (whose `[^{]*` tolerates
+        // the space) silently swallows the colour text instead, leaving
+        // the capture group undefined (caught by this task's own tests).
+        String.raw`\s*(?:[#<][^{]*)?\{(\s*\})?\s*$`,
+      'i',
+    ),
     execute(state, match) {
       const name = match[1] ?? match[2];
       let effectiveId: string;
@@ -79,7 +99,9 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         effectiveId = openNamespaceBlock(state, id, '');
       }
       setNamespaceStereotype(state, effectiveId, match[4], true);
-      if (match[5] !== undefined) {
+      setNamespaceUrl(state, effectiveId, match[5]);
+      setNamespaceColor(state, effectiveId, match[6]);
+      if (match[7] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,

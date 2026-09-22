@@ -119,6 +119,57 @@ export interface Namespace {
    * not wired -- out of A8 scope).
    */
   stereotype?: string;
+  /**
+   * T11 (diagnosis A2b E4): the header's own `[[url]]` bracket --
+   * upstream wraps the cluster's ENTIRE contents in an `<a>`
+   * (`svek/Cluster.java:337-341`, `ug.startUrl(url)` before the
+   * outline/line/title, closed at `:379-382`'s `finally`). Parsed via
+   * `class-url.ts#parseUrlBracket`, the same `UrlInfo` shape
+   * {@link Classifier.url} already uses. Grammar-captured by both
+   * `package`'s and `namespace`'s header commands
+   * (`class-command-containers.ts`, `class-container.ts`'s
+   * `NAMESPACE_COMMANDS`); render consumer is T12 (`renderer-group.ts`'s
+   * `wrapCluster`, unbuilt this task -- parse-side field only).
+   * @see ~/git/plantuml/.../command/CommandPackage.java:179-181
+   */
+  url?: UrlInfo;
+  /**
+   * T11 (diagnosis A3 M3): a `package "X" #COLOR {` / `namespace X
+   * #COLOR {` inline background override -- grammar-captured
+   * (`NAMESPACE_COMMANDS`' `NOTE_COLOR` group) but previously discarded
+   * entirely (no AST field existed to hold it). Resolved to its
+   * bare/`back:` half at PARSE time via
+   * `core/color-override.ts#resolveBareOrBackColor` (M1's classifier-path
+   * helper, reused verbatim) -- deliberately DIFFERENT storage convention
+   * from {@link Classifier.color} (which stores the RAW compound spec and
+   * defers resolution to render time): a namespace's fill only ever needs
+   * the background half, never the `line:`/`text:`/`line.bold` remainder
+   * `resolveBareOrBackColor`'s own doc comment names as unconsumed, so
+   * pre-resolving here keeps the render consumer (T12,
+   * `class-namespace-shape.ts`, ahead of the global
+   * `theme.colors.graph.packageBackground` fallback) to a single field
+   * read with no re-parsing.
+   * @see ~/git/plantuml/.../descdiagram/command/CommandPackage.java
+   *      (`entity.setColors(...)`, read back at draw time)
+   */
+  color?: string;
+  /**
+   * T11: the group's own USymbol keyword (same vocabulary
+   * {@link Classifier.usymbol} uses --
+   * `core/descriptive-keywords.ts#KEYWORD_TO_SYMBOL`'s key set), sourced
+   * from a header `<<stereotype>>` that names a USymbol registry entry
+   * (A2s F-G mechanism A8's `setNamespaceStereotype` GATED branch, e.g.
+   * `<<Node>>` -- `class-container.ts`). `state.descriptiveContainers`
+   * (ParseState, transient) remains the SOURCE OF TRUTH the EMPTY-collapse
+   * path (`closeContainer`) reads to stamp the synthesized Classifier's
+   * own `usymbol` when the group ends empty; this field is a COPY taken
+   * at the same call site (`setNamespaceStereotype`) for a namespace that
+   * stays a real, non-collapsed cluster, so a render consumer (T12) never
+   * needs to reach into ParseState internals to learn the group's shape.
+   * @see ~/git/plantuml/.../command/CommandPackage.java:178-191
+   * @see ~/git/plantuml/.../decoration/symbol/USymbols.java:60-95,98-120
+   */
+  usymbol?: string;
 }
 
 // ---------------------------------------------------------------------------
