@@ -28,7 +28,7 @@ import type { Member } from './ast.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { buildMemberRow, type MemberRowBuild } from './class-member-creole.js';
 import { formatMemberText } from './class-layout-helpers.js';
-import { sectionWidth, ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
+import { sectionWidth, ROW_TEXT_LEFT_MARGIN, isMethodMember } from './class-member-rows.js';
 import { splitEnhancedBlocks, type EnhancedBodyBlock, type BlockSeparatorSpec } from './class-body-enhanced.js';
 import { measureTreeCells, computeTreeConnectors, type TreeConnector } from './class-body-tree.js';
 import {
@@ -195,9 +195,14 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
       indent,
       width: builds[i]!.width,
       atoms: builds[i]!.atoms,
-      ...(m.visibilityExplicit === true
-        ? { visibilityIcon: m.visibility, visibilityIsField: m.params === undefined }
-        : {}),
+      // cdd-T23/T19 (row 65/73): `isMethodMember` -- not the inline
+      // `m.params === undefined` this line duplicated -- so a raw-fallback
+      // member (e.g. a `Resource(A|B|C)`-typed field whose TYPE merely
+      // CONTAINS parens) buckets the same way the classic path already does
+      // (`class-member-rows.ts#isMethodMember`'s own doc comment: upstream
+      // buckets ANY `(`/`)`-containing raw line as a method, however
+      // malformed -- `BodierLikeClassOrObject#isMethod`).
+      ...(m.visibilityExplicit === true ? { visibilityIcon: m.visibility, visibilityIsField: !isMethodMember(m) } : {}),
       ...(m.ownUrl !== undefined ? { url: m.ownUrl } : {}),
     };
   });
