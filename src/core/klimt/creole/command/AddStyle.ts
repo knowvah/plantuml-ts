@@ -9,19 +9,33 @@
  * colon-suffixed forms are explicitly L2 scope, mission brief NOT-in-scope
  * list's `<u:>` entry) — `CommandCreoleStyle.ts`'s activation patterns never
  * capture one, so there is nothing for an `extendedColor` param to carry
- * yet. `FontStyle.PLAIN`'s "clear all styles first" branch
- * (`FontConfiguration.add`, java) is not ported either — PLAIN itself is
- * out of L1's "bold/italic/underline/wave/strikeout" set (see
- * `legacy/CommandCreoleBuilder.ts`'s doc comment).
+ * yet.
+ *
+ * cdd-T25 ports `FontStyle.PLAIN`'s "clear all styles first" branch:
+ * `FontConfiguration.add(FontStyle)` (`FontConfiguration.java:301-309`):
+ * `final EnumSet<FontStyle> r = styles.clone(); if (style == FontStyle
+ * .PLAIN) r.clear(); r.add(style); return new FontConfiguration(r, ...)`
+ * — every OTHER tracked style is dropped before PLAIN itself is added.
+ * `FontStyle#mutateFont` (`FontStyle.java:75-77`) separately resets the
+ * MEASURED font face to `UFontFace.normal()` for PLAIN, but that is a
+ * `FontConfiguration#getFont()`-only concern (measurement); this port's
+ * `FontConfiguration` (`shape/UText.ts`) has no separate mutable "current
+ * font face" distinct from `styles` (its own doc comment: DRIVER-side
+ * concerns are deferred), so clearing `styles` is the full observable
+ * effect here — a header/member row's OWN base bold/italic (its `styles`
+ * seed, `class-member-creole.ts#memberBaseFont`) is a REGULAR style entry
+ * in this flat model, not a separate face, so `<plain>` correctly drops
+ * it too (matching this port's own architecture, not a fitted shortcut).
  *
  * `FontConfiguration.styles` is an immutable `ReadonlySet` (`UText.ts`) —
  * `addFontStyle` returns a NEW `FontConfiguration` with the style unioned
- * in, never mutates the input (this project's testability rule: pure
- * functions over in-place mutation).
+ * in (or, for PLAIN, the set replaced), never mutates the input (this
+ * project's testability rule: pure functions over in-place mutation).
  */
-import type { FontConfiguration, FontStyle } from '../../shape/UText.js';
+import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 
 export function addFontStyle(font: FontConfiguration, style: FontStyle): FontConfiguration {
+  if (style === FontStyle.PLAIN) return { ...font, styles: new Set([FontStyle.PLAIN]) };
   if (font.styles.has(style)) return font;
   return { ...font, styles: new Set(font.styles).add(style) };
 }
