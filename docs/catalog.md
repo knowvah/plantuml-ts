@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1139 modules · 4152 exported names.
+1139 modules · 4154 exported names.
 
 ## `src/`
 
@@ -1187,7 +1187,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-relationship-label-decompose.ts` | `decomposeLabel` | `decomposeLabel` — split out of class-relationship-parser.ts (pure move, no behavior change) to keep that file under the repo's 500-line-per-file cap. |
 | `class-relationship-parser.ts` | `CLASS_ID`, `stripQuotes`, `splitEndpointPort`, `REL_DISPATCH_RE`, `pickDirectional`, `OptionalRelFields`, `sidedRelFields`, `decomposeLabel`, `idLeaf`, `parseRelationshipLine` | Relationship (arrow) line parsing for PlantUML class diagrams. |
 | `class-shadow.ts` | `CLASS_SHADOW_FILTER_ID`, `buildClassShadowFilterDef`, `classShadowFilterUrl` | class-shadow.ts — mission skin-file-loading (deferred D3 item, CLASS- scoped): the `<filter>` def markup for a class diagram's drop shadow, as a plain STRING (class's own renderer emits SVG strings directly, not via klimt's `XmlNode`-based |
-| `class-shield-helpers.ts` | `isRowPortKind`, `packageEndpointAnchors`, `shieldedClassifierIds` | Port/qualifier "shield" helpers for the class diagram DOT-graph builder (./class-dot-graph.ts). |
+| `class-shield-helpers.ts` | `ClipRect`, `isRowPortKind`, `clipClusterEdgeEnds`, `packageEndpointAnchors`, `shieldedClassifierIds` | Port/qualifier "shield" helpers for the class diagram DOT-graph builder (./class-dot-graph.ts). |
 | `class-stereotype-command.ts` | `STEREOTYPE_STATEMENT_RE`, `applyStereotypeStatement` | The standalone `<Name> <<stereotype>>` statement — sets the stereotype of an ALREADY-DECLARED classifier (upstream `CommandStereotype`, G2 N24). |
 | `class-stereotype-layout.ts` | `atomTextLineHeight`, `HeaderInfo`, `computeHeaderInfo`, `buildHeaderRows`, `GenericTagDim`, `measureGenericTagDim`, `GenericTagGeo`, `buildGenericTagGeo` | Class header-row + generic type-parameter-tag layout. |
 | `class-stereotype.ts` | `CLASS_STEREOTYPE_FONT_SIZE`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `parseCircledCharDecoration`, `parseCircledSpriteDecoration`, `GuillemetPair`, `CircledCharDecoration`, `CircledSpriteDecoration`, `measureStereoLabelWidths`, `stereoBlockDim`, `StereoRowsInput`, `buildStereoRows`, `computeHeaderInfo`, `buildHeaderRows`, `measureGenericTagDim`, `buildGenericTagGeo`, `HeaderInfo`, `GenericTagDim`, `GenericTagGeo`, `parseHideStereotypeDirective`, `isStereotypeLabelHidden`, `applyStereotypeHideShow`, `resolveVisibleStereotypeLabels`, `resolveStyleStereotypeTags` | Classifier header stereotype row(s) — `HeaderLayout#getDimension`/`#drawU`'s `stereoDim`/`xStereo`/`yStereo` terms (G2 N24; the mechanism N21/N22/N23 repeatedly named and deferred as an explicit DOT-gate/width-formula risk — N23's own Mecha |

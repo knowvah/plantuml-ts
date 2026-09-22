@@ -23,6 +23,7 @@ import { buildOpaleNoteGeo } from './note-opale.js';
 import type { NoteGeo, TipRequest } from './note-layout-types.js';
 import type { NoteMeasurement } from './note-layout-measure.js';
 import { type NoteGroup, OPALE_Y_SPACING } from './note-layout-groups.js';
+import { clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
 
 // Local interfaces grouped at the top of the file (lizard NLOC quirk: an
 // interface declared immediately before a function gets swept into that
@@ -70,6 +71,9 @@ interface NoteMapContext {
   rowHeight: number;
   strictUml: boolean;
   freestandingConnectors: ReadonlyMap<string, EdgeGeo> | undefined;
+  /** cdd-T13: the real graphviz cluster box for a `note <pos> of <package>`
+   *  target -- see `resolveGroupGeos`'s own doc comment. */
+  clusterRects: ReadonlyMap<string, ClipRect> | undefined;
 }
 
 /** The parse-side fields every note kind copies onto its geo verbatim. */
@@ -239,12 +243,38 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
  * file is OUTSIDE T9's originally declared write-set (`note-layout-
  * groups.ts`, `renderer.ts`); the extension was necessary because
  * `singletonNoteGeo`'s opalise-attempt dispatch has no other seam -- see
- * `.agent-notes/cdd-T9.md`. */
+ * `.agent-notes/cdd-T9.md`.
+ *
+ * cdd-T13 (M1): `group.target`'s connector is upstream's own `SvekEdge`
+ * too (`CommandFactoryNoteOnEntity.java:342`), so a `note <pos> of
+ * <package>` connector gets the identical `:671-672` clip a relationship
+ * edge does. The note-first/host-first order (`dir.fromNote`,
+ * `note-layout-groups.ts#groupEdge`) is not threaded onto `NoteGeo`
+ * (`renderer-note-connector.ts#noteIsConnectorSource`'s own doc comment
+ * names the same gap for rendering) -- passing `group.target` as BOTH
+ * `startId` and `endId` sidesteps it entirely: `clipClusterEdgeEnds` only
+ * clips whichever end the boundary-`contains` test actually finds inside
+ * the rect (`class-shield-helpers.ts` doc comment), and a note connector
+ * has at most one cluster-anchored end. `freestandingConnectors`' points
+ * are NOT re-clipped here -- they are `edges[]` entries `buildEdgeGeos`
+ * already clipped (`layout.ts`'s own doc comment at the `mapNoteGeos` call).
+ */
+function groupConnectorPoints(
+  group: NoteGroup,
+  isNoteEdge: boolean,
+  rawPoints: Array<{ x: number; y: number }>,
+  ctx: NoteMapContext,
+): Array<{ x: number; y: number }> {
+  if (!isNoteEdge || group.target === undefined || ctx.clusterRects === undefined) return rawPoints;
+  return clipClusterEdgeEnds(rawPoints, group.target, group.target, ctx.clusterRects);
+}
+
 function resolveGroupGeos(group: NoteGroup, data: NoteDataset, ctx: NoteMapContext): NoteGeo[] {
   const pos = ctx.posMap.get(group.id);
   if (pos === undefined) return [];
   const noteEdge = ctx.result.edges.find((e) => e.id === `__noteedge_${group.id}`);
-  const points = noteEdge?.points ?? ctx.freestandingConnectors?.get(group.id)?.points ?? [];
+  const rawPoints = noteEdge?.points ?? ctx.freestandingConnectors?.get(group.id)?.points ?? [];
+  const points = groupConnectorPoints(group, noteEdge !== undefined, rawPoints, ctx);
   const tipMetrics = group.invis ? { baselineOffset: ctx.baselineOffset, rowHeight: ctx.rowHeight } : undefined;
   const strictUml = ctx.strictUml || group.opalisable === false;
   return mapGroupNoteGeos(group, data, { pos, connectorPoints: points, tipMetrics, strictUml });
@@ -265,11 +295,17 @@ export function mapNoteGeos(
   result: DotLayoutResult,
   noteParts: { measurements: Map<string, NoteMeasurement>; groups: NoteGroup[] },
   metricsCtx: { theme: Theme; measurer: StringMeasurer },
-  /** G2/N16 Kind B: a freestanding note's ONE real relationship connector,
-   *  keyed by note id (`note-freestanding.ts`); consulted only when the
-   *  group has no synthetic `__noteedge_*` (a freestanding note has no
-   *  `target`/`position`). */
-  freestandingConnectors?: ReadonlyMap<string, EdgeGeo>,
+  /** `freestandingConnectors` (G2/N16 Kind B): a freestanding note's ONE
+   *  real relationship connector, keyed by note id (`note-freestanding
+   *  .ts`); consulted only when the group has no synthetic `__noteedge_*`
+   *  (a freestanding note has no `target`/`position`). `clusterRects`
+   *  (cdd-T13): the real graphviz cluster box per namespace id, threaded
+   *  through to {@link resolveGroupGeos}'s own connector clip. Bundled into
+   *  one optional object (complexity-hook param cap). */
+  edgeExtras?: {
+    freestandingConnectors?: ReadonlyMap<string, EdgeGeo>;
+    clusterRects?: ReadonlyMap<string, ClipRect>;
+  },
 ): NoteGeo[] {
   const { measurements, groups } = noteParts;
   const { theme, measurer } = metricsCtx;
@@ -280,7 +316,8 @@ export function mapNoteGeos(
     baselineOffset: fontSpec.size - measurer.getDescent(fontSpec, ''),
     rowHeight: fontSpec.size,
     strictUml: theme.strictUml === true,
-    freestandingConnectors,
+    freestandingConnectors: edgeExtras?.freestandingConnectors,
+    clusterRects: edgeExtras?.clusterRects,
   };
   const data: NoteDataset = { notes, measurements };
   const out: NoteGeo[] = [];

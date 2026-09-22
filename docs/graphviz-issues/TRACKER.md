@@ -294,6 +294,23 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         though this entry wired the LABEL half. pavuzo-79-zodu430 closes
         when 03 does. See 17's second-pass block and
         .agent-notes/gvi17-splines-never-emitted.md. -->
+- [ ] 18-compound-clip-last-segment-shape-delta.md  <!-- FILED 2026-09-22
+        (cdd-T13). `bejusa-95-gafo325`'s two cluster-anchored composition
+        edges whose `simulateCompound` clip lands on their LAST bezier
+        segment (`VCAN_DRV *-- PCAN_DRV`, `PCAN_DRV *-- Bus_Rx`) land ~20px
+        short of the jar's own clip point, and `pecabi-95-demu756`/
+        `sanixi-31-nofa193`'s `note top of <package>` connector (same
+        `simulateCompound` clip, T13's note-layout-tip.ts wiring) lands
+        ~4.9px short, same signature -- even though the cluster rectangle
+        and every node position are verified byte-identical between
+        engines and the clip algorithm (`spline-clip.ts`) is
+        unmodified/faithful. The structurally-identical sibling edge
+        (`PCAN_DRV *-- Bus_Tx`) clips exact (<0.001px), and
+        `bajotu-30-soku184` (T13's own acceptance fixture) clips EXACT too
+        -- both negative controls ruling out a wiring bug -- see the issue
+        file for the full elimination chain. Not chased (stop 8); a
+        per-curve dot-engine routing delta, not a general defect in T13's
+        clip. -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the

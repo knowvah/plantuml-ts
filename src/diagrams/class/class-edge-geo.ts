@@ -9,6 +9,7 @@ import type { ClassDiagramAST, Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
+import { clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
 import { attachPortLabels } from './class-edge-label-anchor.js';
 import { attachEdgeLabel, type EdgeGeoTextContext } from './class-edge-label-attach.js';
 import { computeEdgeNoteBox } from './class-edge-note-box.js';
@@ -254,6 +255,13 @@ export function buildEdgeGeos(
   text: EdgeGeoTextContext,
   posMap: Map<string, DotLayoutResult['nodes'][number]>,
   anchors: Map<string, string>,
+  // cdd-T13 (M1, `SvekEdge.java:252-258,671-672`): the real graphviz
+  // cluster box for every namespace endpoint `anchors` names, keyed the
+  // SAME way -- see `class-shield-helpers.ts#clipClusterEdgeEnds`'s own
+  // doc comment. Threaded alongside `anchors` rather than merged into it
+  // because `anchors` is built pre-layout (`class-dot-graph.ts`) and this
+  // is only known post-layout (`class-geo-builders.ts#buildNamespaceGeos`).
+  clusterRects: ReadonlyMap<string, ClipRect>,
   // G2 N51: `theme.colors.graph.arrowThickness` (`skinparam arrowThickness
   // N`) -- threaded through to `buildStrokeOverride` below; see that
   // function's own doc comment.
@@ -276,7 +284,15 @@ export function buildEdgeGeos(
 
     const decor = EDGE_DECORATION_MAP[rel.type];
     const rawPts = edgeResult.points;
-    const { points: pts, matchesFromTo } = normalizeEdgePoints(rawPts, rel, i, swappedEdges, posMap, anchors);
+    const { points: normalizedPts, matchesFromTo } = normalizeEdgePoints(rawPts, rel, i, swappedEdges, posMap, anchors);
+    // cdd-T13 (M1): `SvekEdge.java:671-672`'s `simulateCompound` runs AFTER
+    // the `:643-655` direction-reversal check `normalizeEdgePoints` already
+    // applies, so by the time upstream clips, its `dotPath` runs entity1
+    // (`cl1`, `ltail`) -> entity2 (`cl2`, `lhead`) -- exactly what
+    // `matchesFromTo` already tracks for `normalizedPts[0]`/`.at(-1)`.
+    const startId = matchesFromTo ? rel.from : rel.to;
+    const endId = matchesFromTo ? rel.to : rel.from;
+    const pts = clipClusterEdgeEnds(normalizedPts, startId, endId, clusterRects);
     // G2 N8: `rel.dashed` overrides the type-derived default for the
     // association-class couple's class-link edge -- see `Relationship
     // .dashed`'s own doc comment (ast.ts).
