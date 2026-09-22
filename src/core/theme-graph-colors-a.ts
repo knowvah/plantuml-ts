@@ -393,6 +393,22 @@ export interface ThemeGraphColorsA {
   classCascadeBorder?: string;
   classCascadeFontColor?: string;
   classCascadeHeaderFontColor?: string;
+  /** cdd-T15 (A2a/M1, D6): the `class.qualified` style block's three paints
+   *  (`svek/Kal.java:93-97`'s `{root,element,classDiagram,class_,qualified}`
+   *  signature; `drawU` reads BackGroundColor + LineColor at `:138-139` and
+   *  the font — FontColor included — at `:99`). A strict superset of
+   *  `CLASS_SNAMES`, so a bare `class { BackgroundColor X }` already
+   *  satisfies it (`style-map-element.ts#resolveStyleCascade`'s subset
+   *  match) and a nested `class { qualified { ... } }` wins over it —
+   *  jar-verified `camuna-58-veca254`/`nafiki-56-jixu680`, whose boxes
+   *  render `#008000` on a diagram whose `class {}` sets `yellow`, with
+   *  `ivory` (`#FFFFF0`) text. Unset ⇒ the qualifier box falls back to the
+   *  class box's own resolved paints, which is what the Style system's own
+   *  inheritance does with no override (`baneru-00-kuro607`: `#F1F1F1`
+   *  fill, `#181818` stroke, `#000` text). */
+  classCascadeQualifiedBackground?: string;
+  classCascadeQualifiedBorder?: string;
+  classCascadeQualifiedFontColor?: string;
   /** G2 N65 item 35: `<style> class { MaximumWidth N } }`'s word-wrap
    *  cascade -- `Style#wrapWidth` (`Style.java:292-295`, `PName
    *  .MaximumWidth`) resolved against the SAME two style signatures the

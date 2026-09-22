@@ -9,7 +9,7 @@ import type { NoteGeo } from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Visibility } from './class-member-ast.js';
-import { text, line } from '../../core/svg.js';
+import { text, line, rect } from '../../core/svg.js';
 import { renderNote } from './renderer-note.js';
 import { colorsFor, iconSizeOf } from './class-visibility-icon.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
@@ -19,6 +19,8 @@ import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
+import { KAL_STROKE_THICKNESS } from './class-kal.js';
 
 /**
  * `VisibilityModifier#name()` values `class-edge-visibility.ts#stripEdgeLabelVisibility`
@@ -171,5 +173,79 @@ export function renderEdgeConstraint(geo: EdgeGeo, theme: Theme, measurer: Strin
       }),
     );
   });
+  return parts.join('');
+}
+
+/**
+ * The tail/head multiplicity-role labels' half of {@link
+ * renderEdgeMainLabel}'s doc comment (shared attribute set, D3/D4 font
+ * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
+ * function purely to stay under the lizard NLOC/CCN caps.
+ *
+ * cdd-T7 (A2a/M10): when `geo.quantifierLines` is present (every
+ * production edge -- T6's own doc comment on the field), draws ONE `<text>`
+ * per physical line instead of the single raw-string anchor `tailLabel`/
+ * `headLabel` carry alongside it -- `SvekEdge.java:330-340`'s
+ * `Display.getWithNewlines(...)`. Falls back to the single-anchor form only
+ * for a hand-built `EdgeGeo` test literal that omits the field (mirrors
+ * every other T6 field's optional-with-fallback contract, e.g.
+ * `NoteGeo.lineAtoms`).
+ */
+export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
+  const parts: string[] = [];
+  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily };
+  if (geo.quantifierLines !== undefined) {
+    for (const lines of geo.quantifierLines) {
+      for (const l of lines) {
+        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
+      }
+    }
+    return parts;
+  }
+  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
+    if (portLabel === undefined) continue;
+    parts.push(
+      text(portLabel.x, portLabel.y, portLabel.text, { ...font, lengthAdjust: 'spacing', textLength: portLabel.width }),
+    );
+  }
+  return parts;
+}
+
+/**
+ * cdd-T15 (A2a/M1, D6): `Kal#drawU` (`svek/Kal.java:134-144`) — a
+ * `URectangle(dim)` filled with the `class.qualified` style's
+ * BackGroundColor, stroked in its LineColor at
+ * `UStroke.withThickness(0.5)`, then the text block at `UTranslate(2, 1)`.
+ * `SvekEdge.java:1015-1019` draws `kal1` then `kal2`, last in the link
+ * group, immediately before `ug.closeGroup()` — so this is the last thing
+ * `renderEdge` pushes.
+ *
+ * The three paints fall back to the class box's own resolved values, which
+ * is what the Style system's inheritance produces with no `qualified {}`
+ * block (`baneru-00-kuro607`: `#F1F1F1` / `#181818` / `#000`); the cascade
+ * fields are set only when a `<style>` actually declares them
+ * (`camuna-58-veca254`: `#008000` / `#FFFFF0`).
+ */
+export function renderEdgeKalBoxes(geo: EdgeGeo, theme: Theme): string {
+  const k = geo.kalBox;
+  if (k === undefined) return '';
+  const g = theme.colors.graph;
+  const fill = g.classCascadeQualifiedBackground ?? g.classCascadeBackground ?? g.classBackground;
+  const stroke = g.classCascadeQualifiedBorder ?? g.classCascadeBorder ?? g.classBorder ?? theme.colors.border;
+  const fontColor = g.classCascadeQualifiedFontColor ?? g.classCascadeFontColor ?? '#000000';
+  const parts: string[] = [];
+  for (const box of [k.start, k.end]) {
+    if (box === undefined) continue;
+    parts.push(rect(box.x, box.y, box.width, box.height, { fill, stroke, strokeWidth: KAL_STROKE_THICKNESS }));
+    parts.push(
+      text(box.textX, box.textY, box.text, {
+        fill: fontColor,
+        fontSize: theme.fontSize,
+        fontFamily: theme.fontFamily,
+        lengthAdjust: 'spacing',
+        textLength: box.textWidth,
+      }),
+    );
+  }
   return parts.join('');
 }

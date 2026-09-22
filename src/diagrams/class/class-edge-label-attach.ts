@@ -26,6 +26,7 @@ import {
 import { applyGuillemet } from '../../core/edge-label-box.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { stripEdgeLabelVisibility, visibilityBlockAnchor } from './class-edge-visibility.js';
+import type { Kal } from './class-kal.js';
 import type { NoteBoxContext } from './class-layout-edge-labels.js';
 import type { EdgeGeo } from './layout.js';
 
@@ -66,6 +67,15 @@ export interface EdgeGeoTextContext {
    *  constraint spot ({@link edgeLabelAttrs}). Optional so hand-built test
    *  callers compile unchanged; both mechanisms are skipped without it. */
   readonly noteCtx?: NoteBoxContext | undefined;
+  /** cdd-T15 (A2a/M1, D6): the page's `Kal` list, built ONCE in
+   *  `class-dot-graph.ts#buildDotGraph` (so the node shield margins and
+   *  the drawn boxes cannot disagree about a box's size) and threaded here
+   *  rather than as a ninth positional parameter to `buildEdgeGeos`, which
+   *  already sits at this repo's parameter cap. Each `Kal.relIndex` indexes
+   *  the SAME (already `getOrderedLinks`-reordered) relationship array
+   *  `buildEdgeGeos` walks. Optional so hand-built test callers compile
+   *  unchanged; the mechanism is skipped without it. */
+  readonly kals?: readonly Kal[] | undefined;
 }
 
 /**

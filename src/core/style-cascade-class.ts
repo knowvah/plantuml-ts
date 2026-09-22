@@ -15,33 +15,17 @@ import { parseStyleBlock } from './skinparam.js';
 import { resolveStyleCascade, collectStyleTagNames, cleanStereotypeToken } from './style-map-element.js';
 import { resolveColorToSvgHex, parseSimpleColor, resolveConditionalColor } from './klimt/color/HColorSet.js';
 
-/** `EntityImageClass.getStyleSignature()`: `{root,element,classDiagram,class_}`. */
-const CLASS_SNAMES = ['root', 'element', 'classdiagram', 'class'] as const;
-/** `EntityImageClassHeader.getStyleSignature()`: the same set plus `header`. */
-const HEADER_SNAMES = [...CLASS_SNAMES, 'header'] as const;
-/** `SvekEdge.java:819`: `{root,element,classDiagram,arrow}`. */
-const ARROW_SNAMES = ['root', 'element', 'classdiagram', 'arrow'] as const;
-/** D3: `GraphvizImageBuilder.java:124-126` (`getStyleArrowCardinality`):
- *  `{root,element,classDiagram,arrow,cardinality}` -- a strict superset of
- *  {@link ARROW_SNAMES}, so a bare `arrow { FontSize N }` (no nested
- *  `cardinality` block) already satisfies THIS query too --
- *  `resolveStyleCascade`'s subset-match test only requires a matched
- *  declaration's OWN tokens (here, just `arrow`) to be contained in the
- *  query set. The "fallthrough through arrow, not to the skin default"
- *  decisions.md#D3 requires is therefore free: no separate arrow-only
- *  lookup or explicit fallback branch, just this longer signature queried
- *  against the SAME StyleMap. */
-const CARDINALITY_SNAMES = [...ARROW_SNAMES, 'cardinality'] as const;
-/** `EntityImageClassHeader#spotStyleSignature`: `{root,element,spot,spot
- *  <Kind>}` -- generalized across every badge kind (only `root` matches in
- *  practice; kept general so a bare `spot {}`/`spotClass {}` slots in). */
-const SPOT_SNAMES = ['root', 'element', 'spot', 'spotclass'] as const;
-/** G2 N66: `EntityImageNote.getStyleSignature()`: `{root,element,
- *  classDiagram,note}` -- `getStyleName()` is `SName.classDiagram` for a
- *  class-diagram note (`AbstractEntityImage.java:96`), so this differs from
- *  `CLASS_SNAMES` ONLY in its last token; a bare `element {}` reaches BOTH
- *  a classifier box and a note body, jar-verified `rubecu-40-cixu870`. */
-const NOTE_SNAMES = ['root', 'element', 'classdiagram', 'note'] as const;
+// cdd-T15: the style signatures moved to a sibling module (500-line cap) --
+// a pure move, re-exported there; see that file's header.
+import {
+  CLASS_SNAMES,
+  HEADER_SNAMES,
+  ARROW_SNAMES,
+  CARDINALITY_SNAMES,
+  SPOT_SNAMES,
+  NOTE_SNAMES,
+  QUALIFIED_SNAMES,
+} from './style-cascade-class-snames.js';
 
 type GraphCascadeOverride = Pick<
   Theme['colors']['graph'],
@@ -49,6 +33,9 @@ type GraphCascadeOverride = Pick<
   | 'classCascadeBorder'
   | 'classCascadeFontColor'
   | 'classCascadeHeaderFontColor'
+  | 'classCascadeQualifiedBackground'
+  | 'classCascadeQualifiedBorder'
+  | 'classCascadeQualifiedFontColor'
   | 'classCascadeArrowColor'
   | 'spotCascadeBackground'
   | 'spotCascadeBorder'
@@ -409,6 +396,15 @@ function applyColorCascadeOverrides(styleMap: StyleMap, override: Partial<GraphC
   if (fontColor !== undefined) override.classCascadeFontColor = fontColor;
   const headerFontColor = cascadeFontColorHex(styleMap, HEADER_SNAMES, localBg);
   if (headerFontColor !== undefined) override.classCascadeHeaderFontColor = headerFontColor;
+  // cdd-T15 (D6): `Kal.java:93-99,138-139` reads BackGroundColor,
+  // LineColor and the font (FontColor included) off ONE merged
+  // `class.qualified` style; see `theme-graph-colors-a.ts`'s field doc.
+  const qBg = cascadeHex(styleMap, QUALIFIED_SNAMES, 'backgroundcolor');
+  if (qBg !== undefined) override.classCascadeQualifiedBackground = qBg;
+  const qBorder = cascadeHex(styleMap, QUALIFIED_SNAMES, 'linecolor');
+  if (qBorder !== undefined) override.classCascadeQualifiedBorder = qBorder;
+  const qFont = cascadeFontColorHex(styleMap, QUALIFIED_SNAMES, qBg ?? localBg);
+  if (qFont !== undefined) override.classCascadeQualifiedFontColor = qFont;
   const arrowColor = cascadeHex(styleMap, ARROW_SNAMES, 'linecolor');
   if (arrowColor !== undefined) override.classCascadeArrowColor = arrowColor;
   const spotBackground = cascadeHex(styleMap, SPOT_SNAMES, 'backgroundcolor');

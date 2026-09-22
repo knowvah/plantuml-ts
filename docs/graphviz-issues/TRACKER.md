@@ -311,6 +311,19 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
         clip. -->
+- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- FILED 2026-09-22
+        (cdd-T15). A `minlen=0` (same-rank) edge that targets an HTML-table
+        node's `PORT="h"` cell (`sh0007:h->sh0008`) starts/ends at the
+        node's BOUNDING BOX instead of the port cell; the identical seam on
+        a RANKED edge lands on the cell correctly (`baneru-00-kuro607`,
+        y=54.818 vs the cell's 55). Isolated by running the CACHED ORACLE
+        DOT itself through real graphviz 16.1.0 (`dot -Tplain`), which puts
+        `mucoti-34-seve858`'s flat edge at x=78.9 (the cell) where
+        dot-engine puts it at 142.879 (the box) -- same input bytes, one
+        variable. Costs `mucoti-34-seve858` +1 diff against the pre-T15
+        baseline; `sefazi-02-defe499` and `camuna-58-veca254` carry the
+        same delta but still fall 35/142. Not chased (stop 8); no
+        compensation applied, since any would be fitting. -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the

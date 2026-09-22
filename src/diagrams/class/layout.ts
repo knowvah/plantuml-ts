@@ -235,7 +235,7 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   const removedRanks = computeRemovedRanks(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } = buildDotGraph(
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals } = buildDotGraph(
     effAst,
     measuredMap,
     theme,
@@ -261,7 +261,9 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // file's own `assembleShiftedGeometry` runs). Keyed by namespace id, the
   // SAME key `anchors` uses -- see `class-shield-helpers.ts
   // #clipClusterEdgeEnds`'s own doc comment.
-  const clusterRects = new Map(namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]));
+  const clusterRects = new Map(
+    namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]),
+  );
   // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
   // tail/head cardinality labels stay at `theme.fontFamily` (see
@@ -283,6 +285,9 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
       // cdd-T6 (A2a/M5, M9): the SAME theme+sprite pair `class-dot-graph.ts`
       // sized a `note on link`-merged label box with.
       noteCtx: { theme, ...(effAst.sprites !== undefined ? { sprites: effAst.sprites } : {}) },
+      // cdd-T15 (A2a/M1, D6): the SAME `Kal` list `class-dot-graph.ts`
+      // sized the node shield margins with -- see `EdgeGeoTextContext.kals`.
+      kals,
     },
     posMap,
     anchors,
@@ -312,10 +317,16 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // extra wiring here: their connector is `edges[]` itself
   // (`findFreestandingNoteConnectors`, above), already clipped by
   // `buildEdgeGeos`.
-  const notes: NoteGeo[] = mapNoteGeos(effAst.notes, result, noteParts, { theme, measurer }, {
-    freestandingConnectors,
-    clusterRects,
-  });
+  const notes: NoteGeo[] = mapNoteGeos(
+    effAst.notes,
+    result,
+    noteParts,
+    { theme, measurer },
+    {
+      freestandingConnectors,
+      clusterRects,
+    },
+  );
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
     [...freestandingConnectors.entries()].filter(([noteId]) => opaleNoteIds.has(noteId)).map(([, edge]) => edge.id),

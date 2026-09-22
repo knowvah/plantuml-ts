@@ -23,10 +23,15 @@ import { leafPortion } from './renderer-group.js';
 import {} from './class-lollipop.js';
 import {} from './renderer-classifier-box.js';
 import {} from './class-namespace-shape.js';
-import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import {} from './class-shadow.js';
 import { resolveArrowLabelFont, resolveCardinalityFontColor } from '../../core/arrow-label-font.js';
-import { renderEdgeVisibilityIcon, renderEdgeNoteBox, renderEdgeConstraint } from './renderer-edge-extras.js';
+import {
+  renderEdgeVisibilityIcon,
+  renderEdgeNoteBox,
+  renderEdgeConstraint,
+  renderEdgeCardinalityLabels,
+  renderEdgeKalBoxes,
+} from './renderer-edge-extras.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -299,41 +304,6 @@ function renderEdgeMainLabel(
 }
 
 /**
- * The tail/head multiplicity-role labels' half of {@link
- * renderEdgeMainLabel}'s doc comment (shared attribute set, D3/D4 font
- * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
- * function purely to stay under the lizard NLOC/CCN caps.
- *
- * cdd-T7 (A2a/M10): when `geo.quantifierLines` is present (every
- * production edge -- T6's own doc comment on the field), draws ONE `<text>`
- * per physical line instead of the single raw-string anchor `tailLabel`/
- * `headLabel` carry alongside it -- `SvekEdge.java:330-340`'s
- * `Display.getWithNewlines(...)`. Falls back to the single-anchor form only
- * for a hand-built `EdgeGeo` test literal that omits the field (mirrors
- * every other T6 field's optional-with-fallback contract, e.g.
- * `NoteGeo.lineAtoms`).
- */
-function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
-  const parts: string[] = [];
-  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily };
-  if (geo.quantifierLines !== undefined) {
-    for (const lines of geo.quantifierLines) {
-      for (const l of lines) {
-        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
-      }
-    }
-    return parts;
-  }
-  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
-    if (portLabel === undefined) continue;
-    parts.push(
-      text(portLabel.x, portLabel.y, portLabel.text, { ...font, lengthAdjust: 'spacing', textLength: portLabel.width }),
-    );
-  }
-  return parts;
-}
-
-/**
  * cdd-T7: `ids`/`syntheticNames` (pre-existing) plus `measurer` (new,
  * optional) folded into one options object -- a bare 5th positional
  * parameter would have crossed this repo's hook-enforced param cap.
@@ -470,9 +440,13 @@ export function renderEdge(geo: EdgeGeo, theme: Theme, ctx: RenderEdgeContext): 
     parts.push(middleDecor.body);
     extraDefs += middleDecor.extraDefs;
   }
-  // cdd-T7 (A2a/M9): `constraint on links` -- drawn LAST, matching
-  // `SvekEdge.java:993-1011`'s position immediately before `ug.closeGroup()`.
+  // cdd-T7 (A2a/M9): `constraint on links` -- drawn after the middle decor,
+  // matching `SvekEdge.java:993-1011`.
   parts.push(renderEdgeConstraint(geo, theme, measurer));
+  // cdd-T15 (A2a/M1): the qualifier box(es) -- LAST in the group, matching
+  // `SvekEdge.java:1015-1019`'s `kal1.drawU(ug)`/`kal2.drawU(ug)`
+  // immediately before `ug.closeGroup()`.
+  parts.push(renderEdgeKalBoxes(geo, theme));
   const body = parts.join('');
   // cdd-T7 (A2a/M3): `[[url]]` on the relationship -- wraps the ENTIRE
   // group body (path, arrowheads, label, note, constraint -- everything

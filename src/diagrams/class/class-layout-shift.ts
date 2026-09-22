@@ -70,6 +70,7 @@ function shiftEdgeExtras(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo
   const nb = edge.noteBox;
   const c = edge.constraint;
   return {
+    ...shiftKalBoxes(edge, dx, dy),
     ...(edge.visibilityIcon !== undefined
       ? { visibilityIcon: { ...edge.visibilityIcon, x: edge.visibilityIcon.x + dx, y: edge.visibilityIcon.y + dy } }
       : {}),
@@ -99,6 +100,28 @@ function shiftEdgeExtras(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo
           },
         }
       : {}),
+  };
+}
+
+/** cdd-T15: the qualifier boxes (`EdgeGeo.kalBox`) — absolute coordinates
+ *  like every other field here, so both ends and both of a box's own
+ *  anchors (rect corner and text baseline) translate. Its own function
+ *  because {@link shiftEdgeExtras} is already at the per-function NLOC cap. */
+function shiftKalBoxes(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo> {
+  const k = edge.kalBox;
+  if (k === undefined) return {};
+  const move = (b: NonNullable<typeof k.start>) => ({
+    ...b,
+    x: b.x + dx,
+    y: b.y + dy,
+    textX: b.textX + dx,
+    textY: b.textY + dy,
+  });
+  return {
+    kalBox: {
+      ...(k.start !== undefined ? { start: move(k.start) } : {}),
+      ...(k.end !== undefined ? { end: move(k.end) } : {}),
+    },
   };
 }
 

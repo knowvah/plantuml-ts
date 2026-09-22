@@ -72,10 +72,29 @@ const SHIELD_MARGIN_X = 1;
 const SHIELD_MARGIN_Y = 16;
 
 export function shieldTable(node: DotInputNode, color: number): string {
-  const w = round(node.width);
-  const h = round(node.height);
+  // cdd-T15: a qualified class end carries its REAL `Margins`
+  // (`Kal.java:106-121` -> `SvekNode#appendLabelHtml`'s `shield().getX1()`
+  // ...`getY2()`, svek/SvekNode.java:245-267) and the main cell keeps its
+  // unrounded measured size, exactly as the cached oracle DOT does
+  // (`baneru-00-kuro607`'s `svek-1.dot`: `WIDTH="72.995" HEIGHT="48.0"`
+  // with a `HEIGHT="16.0"` bottom margin cell). Every other shielded node
+  // keeps the nominal constants above.
+  const m = node.shieldMargins;
+  const w = m === undefined ? round(node.width) : node.width;
+  const h = m === undefined ? round(node.height) : node.height;
   const my = String(SHIELD_MARGIN_Y);
   const mx = String(SHIELD_MARGIN_X);
+  if (m !== undefined) {
+    return (
+      '<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">' +
+      `<TR><TD></TD><TD FIXEDSIZE="TRUE" WIDTH="1" HEIGHT="${m.y1}"></TD><TD></TD></TR>` +
+      `<TR><TD FIXEDSIZE="TRUE" WIDTH="${m.x1}" HEIGHT="1"></TD>` +
+      `<TD BGCOLOR="${hex(color)}" FIXEDSIZE="TRUE" WIDTH="${w}" HEIGHT="${h}" PORT="h"></TD>` +
+      `<TD FIXEDSIZE="TRUE" WIDTH="${m.x2}" HEIGHT="1"></TD></TR>` +
+      `<TR><TD></TD><TD FIXEDSIZE="TRUE" WIDTH="1" HEIGHT="${m.y2}"></TD><TD></TD></TR>` +
+      '</TABLE>'
+    );
+  }
   return (
     '<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">' +
     `<TR><TD></TD><TD FIXEDSIZE="TRUE" WIDTH="1" HEIGHT="${my}"></TD><TD></TD></TR>` +

@@ -126,6 +126,25 @@ export interface DotInputNode {
    * (`svek/SvekEdge.java:232-239`, `dot/GraphvizVersionFinder.java:48-88`);
    * out of scope, no corpus fixture needs it. */
   qualifierShielded?: true;
+  /**
+   * cdd-T15 (D6): the qualified end's REAL `svek/Margins.java` shield —
+   * `Kal.java:106-121`'s `entity.ensureMargins(new Margins(x1, x2, y1, y2))`,
+   * merged componentwise by `Math.max` across every `Kal` on the entity
+   * (`abel/Entity.java:288-291`). Present ⇒ this node is laid out the way
+   * the jar's DOT makes graphviz lay it out: a `shape=plaintext` 3x3 HTML
+   * table with no `width`/`height`/`fixedsize`, whose outer cells carry
+   * these four values and whose centre `PORT="h"` cell carries
+   * `width`/`height` (`SvekNode#appendLabelHtml`, svek/SvekNode.java
+   * :245-267). `core/graph-layout.ts#mapNodes` reads the centre cell back
+   * out as the drawn box — the table is not symmetric, so the corner is
+   * `centre - tableSize/2 + (x1, y1)`, not `centre - box/2`.
+   *
+   * Always set together with `qualifierShielded` (the `:h` suffix that
+   * targets the same centre cell) and `shape: 'plaintext'`. Absent ⇒ the
+   * pre-existing nominal-constant shield table, unchanged — description's
+   * interface lollipops and state's json shields keep their geometry.
+   */
+  shieldMargins?: { x1: number; x2: number; y1: number; y2: number };
   /** Svek `ClusterDotString.empty()` port placeholder: reuses the
    *  group-anchor id as a tiny `.01in` rect carrying the OWNING cluster's
    *  own title HTML as its label, instead of the plain `shape:'point'`

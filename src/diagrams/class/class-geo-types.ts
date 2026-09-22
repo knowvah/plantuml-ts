@@ -13,6 +13,7 @@ import type { MemberRenderAtom } from './class-member-creole.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { MiddleDecor } from './class-arrow-middle-decor.js';
+import type { EdgeKalBoxes } from './class-geo-edge-extras.js';
 
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
@@ -355,6 +356,9 @@ export interface EdgeGeo {
   /** cdd-T6 (A2a/M9): `constraint on links` — see {@link EdgeConstraintGeo}.
    *  Present on the SECOND link of a constrained pair only. */
   constraint?: EdgeConstraintGeo;
+  /** cdd-T15 (A2a/M1, D6): the qualified-association box(es) —
+   *  see {@link EdgeKalBoxes}. */
+  kalBox?: EdgeKalBoxes;
   /** Arrow decoration at the target end (from the arrow's target-side head). */
   targetDecor: LinkDecor;
   /** Arrow decoration at the source end (from the arrow's source-side head). */
@@ -429,6 +433,9 @@ export interface EdgeGeo {
 // four new `EdgeGeo` fields pushed this file past the 500-line hook cap
 // (pre-authorised split re-export) -- a pure move, re-exported below.
 export type { NamespaceGeo } from './class-geo-namespace-types.js';
+/** cdd-T15: re-exported alongside the other `EdgeGeo` member shapes. */
+export type { EdgeKalBoxes } from './class-geo-edge-extras.js';
+export type { KalBox } from './class-kal.js';
 
 export interface ClassGeometry {
   /** cdd-T3 (A1 SB5): `class-directives-removal.ts#computeRemovedRanks`'s output (see its doc comment). */

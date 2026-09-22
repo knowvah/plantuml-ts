@@ -9,7 +9,7 @@ import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
 import { dotSplinesAttrs } from './dot-splines.js';
-import { rowPortTable, portTable } from './svek-dot-emit-labels.js';
+import { rowPortTable, portTable, shieldTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
 
@@ -94,6 +94,32 @@ function addRowPortNode(b: GvGraphBuilder, n: DotInputNode): void {
   node.setHtmlAttr('label', rowPortTable(n, n.portRows ?? [], LAYOUT_LABEL_BGCOLOR));
 }
 
+/**
+ * cdd-T15 (D6): a qualified class end, laid out exactly as the jar's own
+ * DOT makes graphviz lay it out -- `shape=plaintext` carrying the SAME
+ * shield table `svek-dot-emit.ts` writes, with no `width`/`height`/
+ * `fixedsize` (`SvekNode#appendLabelHtml`, svek/SvekNode.java:245-267,
+ * emits none), so `poly_init` pads the table by `PAD` and the `Kal` margin
+ * cells really do push the neighbouring rank away -- the same mechanism
+ * {@link addRowPortNode} documents one function up. The declared box is
+ * recovered in `graph-layout.ts#mapNodes`, which also re-derives the corner
+ * from the ASYMMETRIC table (see `DotInputNode.shieldMargins`).
+ */
+function addShieldNode(b: GvGraphBuilder, n: DotInputNode): void {
+  b.addNode(n.id, { shape: 'plaintext' }).setHtmlAttr('label', shieldTable(n, LAYOUT_LABEL_BGCOLOR));
+}
+
+/** A5/T7: the one shape sized from its LABEL rather than the caller's
+ *  measured box -- graphviz derives the field grid (and the `<Pn>` ports
+ *  edges target) from the record syntax, with width/height as minimums.
+ *  Deliberately NO `fixedsize`, matching `SmetanaForJson#createNode`
+ *  (`SmetanaForJson.java:233-262`), which would otherwise collapse the very
+ *  fields the ports live on. Its own function only so {@link addOneNode}
+ *  keeps its pre-cdd-T15 NLOC once the shield branch joined it. */
+function addRecordNode(b: GvGraphBuilder, n: DotInputNode, label: string): void {
+  b.addNode(n.id, { shape: 'record', label, width: inches(n.width), height: inches(n.height) });
+}
+
 /** One node's graphviz declaration. Three shapes of emission, split out of
  *  {@link addNodes} so each stays legible (and so the loop stays within the
  *  repo's complexity budget). */
@@ -105,22 +131,15 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     return;
   }
   if (n.shape === 'record' && n.recordLabel !== undefined) {
-    // A5/T7: the one shape sized from its LABEL rather than the caller's
-    // measured box -- graphviz derives the field grid (and the `<Pn>` ports
-    // edges target) from the record syntax, with width/height as minimums.
-    // Deliberately NO `fixedsize`, matching `SmetanaForJson#createNode`
-    // (`SmetanaForJson.java:233-262`), which would otherwise collapse the very
-    // fields the ports live on.
-    b.addNode(n.id, {
-      shape: 'record',
-      label: n.recordLabel,
-      width: inches(n.width),
-      height: inches(n.height),
-    });
+    addRecordNode(b, n, n.recordLabel);
     return;
   }
   if (n.portRows !== undefined) {
     addRowPortNode(b, n);
+    return;
+  }
+  if (n.shieldMargins !== undefined) {
+    addShieldNode(b, n);
     return;
   }
   if (n.isPort === true && n.shape === 'plaintext') {

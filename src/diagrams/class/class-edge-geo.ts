@@ -15,6 +15,7 @@ import { attachEdgeLabel, type EdgeGeoTextContext } from './class-edge-label-att
 import { computeEdgeNoteBox } from './class-edge-note-box.js';
 import { constraintAnchor } from './class-edge-constraint.js';
 import { edgeLabelAttrs } from './class-layout-edge-labels.js';
+import { kalBoxAt, kalTranslateForDecoration, type Kal } from './class-kal.js';
 import type { EdgeGeo } from './layout.js';
 
 // cdd-T6: `EdgeGeoTextContext` and the three label-attach functions moved
@@ -173,6 +174,52 @@ function normalizeEdgePoints(
   return { points, matchesFromTo };
 }
 
+/**
+ * cdd-T15 (A2a/M1, D6): the two things a `Kal` does to its link's geometry.
+ *
+ * 1. `SvekEdge.java:1069-1077`'s `computeKal` anchors each box on
+ *    `dotPathInit`'s start/end point — the copy taken at `:658`, i.e. the
+ *    routed spline BEFORE `simulateCompound` (this port's
+ *    `clipClusterEdgeEnds`) and BEFORE the extremity trim, which is why
+ *    `pre` below is the un-clipped, un-trimmed array.
+ * 2. `SvekEdge.java:548-562`'s `getExtremitySimplier` pushes BOTH the arrow
+ *    decoration's centre and the spline's own endpoint out by
+ *    `kal.getTranslateForDecoration()`, so the arrowhead clears the box.
+ *    Applied here to the endpoint alone: `renderer-arrowhead.ts` draws the
+ *    decoration at `points[0]`/`points.at(-1)` and trims the path back from
+ *    it by the decoration length, which is exactly upstream's
+ *    `translateForKal.compose(new UTranslate(decorationLength, 0)
+ *    .rotate(angle - Math.PI))`. Upstream measures the rotation angle on
+ *    the PRE-move path; this port re-derives it from the moved endpoint, a
+ *    sub-degree difference because `getTranslateForDecoration` always
+ *    points along the qualified end's own axis.
+ *
+ * `pre`/`pts` run entity1 → entity2 (`normalizeEdgePoints`), so `kal.end`
+ * 1 is the array's first point and 2 its last. `pts` is mutated in place —
+ * it is `clipClusterEdgeEnds`'s freshly-built array, never shared.
+ */
+function attachKalBoxes(
+  edgeGeo: EdgeGeo,
+  kals: readonly Kal[],
+  pre: ReadonlyArray<{ x: number; y: number }>,
+  pts: Array<{ x: number; y: number }>,
+): void {
+  const boxes: { start?: ReturnType<typeof kalBoxAt>; end?: ReturnType<typeof kalBoxAt> } = {};
+  for (const kal of kals) {
+    const at = kal.end === 1 ? 0 : pre.length - 1;
+    const anchor = pre[at];
+    const moved = pts[kal.end === 1 ? 0 : pts.length - 1];
+    if (anchor === undefined || moved === undefined) continue;
+    const box = kalBoxAt(kal, anchor);
+    if (kal.end === 1) boxes.start = box;
+    else boxes.end = box;
+    const tr = kalTranslateForDecoration(kal);
+    moved.x += tr.dx;
+    moved.y += tr.dy;
+  }
+  if (boxes.start !== undefined || boxes.end !== undefined) edgeGeo.kalBox = boxes;
+}
+
 /** One end of a pending `constraint on links` pair -- the edge to stamp,
  *  the shared constraint record that identifies its partner, and the point
  *  `SvekEdge.java:998-1010` sampled for this end. */
@@ -293,6 +340,10 @@ export function buildEdgeGeos(
     const startId = matchesFromTo ? rel.from : rel.to;
     const endId = matchesFromTo ? rel.to : rel.from;
     const pts = clipClusterEdgeEnds(normalizedPts, startId, endId, clusterRects);
+    // cdd-T15: the `Kal`s built for THIS relationship index (see
+    // {@link attachKalBoxes}); `clipClusterEdgeEnds` returns a fresh array
+    // for every edge, so mutating its endpoints below is local.
+    const relKals = (text.kals ?? []).filter((k) => k.relIndex === i);
     // G2 N8: `rel.dashed` overrides the type-derived default for the
     // association-class couple's class-link edge -- see `Relationship
     // .dashed`'s own doc comment (ast.ts).
@@ -340,6 +391,7 @@ export function buildEdgeGeos(
       ...buildStrokeOverride(rel, dashed, defaultArrowThickness),
     };
 
+    if (relKals.length > 0) attachKalBoxes(edgeGeo, relKals, normalizedPts, pts);
     attachEdgeLabel(edgeGeo, rel, edgeResult, text, matchesFromTo ? pts : [...pts].reverse());
     attachNoteAndConstraintSpot(edgeGeo, rel, edgeResult, text, constrained);
     // `result.nodes` is the collision set — the closest analogue to

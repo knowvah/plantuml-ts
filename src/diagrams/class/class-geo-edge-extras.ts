@@ -9,6 +9,31 @@
  */
 export type { VisibilityIconGeo } from './class-edge-visibility.js';
 
+/**
+ * cdd-T15 (A2a/M1, D6): the qualified-association box(es) on one link —
+ * `svek/Kal.java`, built per qualified END (`SvekEdge.java:242-246`, drawn
+ * at `:1015-1019` immediately before `ug.closeGroup()`).
+ *
+ * `start` is the box at `points[0]`'s end and `end` the box at
+ * `points.at(-1)`'s end — i.e. upstream's `kal1` (`link.getEntity1()`) and
+ * `kal2` (`getEntity2()`) respectively, since `class-edge-geo.ts
+ * #normalizeEdgePoints` has already ordered the array entity1 → entity2.
+ * Both are optional and independent: `ririlu-13-zipi740`'s
+ * `HashMap [a1] <|-u-> [e] V1` carries both, `baneru-00-kuro607` only
+ * `start`.
+ *
+ * INDEPENDENT of the `groupInheritance` sametail decor/dash suppression:
+ * a qualified end and a grouped-inheritance end are two unrelated features
+ * that can sit on the same edge, so suppression logic must leave this
+ * field untouched.
+ */
+export interface EdgeKalBoxes {
+  readonly start?: KalBox;
+  readonly end?: KalBox;
+}
+
+import type { KalBox } from './class-kal.js';
+
 /** One measured line of a link note's body — same `{ text, width }` shape
  *  the state engine's `StateTextLine` carries (`state-geo-types.ts:13-16`),
  *  duplicated rather than imported so the class engine keeps no dependency
