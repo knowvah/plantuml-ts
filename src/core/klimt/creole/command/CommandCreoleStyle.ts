@@ -141,6 +141,11 @@ const ACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.STRIKE]: `^<(?:strike|STRIKE|s|S|del|DEL)${EXTENDED_COLOR_ARM}>`,
   [FontStyle.WAVE]: `^<[wW]${EXTENDED_COLOR_ARM}>`,
   [FontStyle.BACKCOLOR]: '^<[bB][aA][cC][kK](?::(?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?)?>',
+  // cdd-T25: `FontStyle.java:114-115`'s ubrex activation pattern
+  // (`<「pP」「lL」「aA」「iI」「nN」>`) -- no `canHaveExtendedColor` arm (PLAIN
+  // is absent from that method's list, `FontStyle.java:191-205`), matching
+  // BOLD/ITALIC's plain `<tag>` shape.
+  [FontStyle.PLAIN]: '^<[pP][lL][aA][iI][nN]>',
 };
 
 const DEACTIVATION_SOURCE: Record<string, string> = {
@@ -150,6 +155,9 @@ const DEACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.STRIKE]: '^</(?:strike|STRIKE|s|S|del|DEL)>',
   [FontStyle.WAVE]: '^</[wW]>',
   [FontStyle.BACKCOLOR]: '^</[bB][aA][cC][kK]>',
+  // cdd-T25: `FontStyle.java:142-143`'s ubrex deactivation pattern
+  // (`</「pP」「lL」「aA」「iI」「nN」>`).
+  [FontStyle.PLAIN]: '^</[pP][lL][aA][iI][nN]>',
 };
 
 /** Upstream: `FontStyle#starters(isCreolePure)`, the `false` (legacy)
@@ -165,6 +173,8 @@ const LEGACY_STARTERS: Record<string, readonly string[]> = {
   [FontStyle.STRIKE]: ['<s', '<S', '<d', '<D'],
   [FontStyle.WAVE]: ['<w'],
   [FontStyle.BACKCOLOR]: ['<b', '<B'],
+  // cdd-T25: `FontStyle.java:47-48` -- `Arrays.asList("<p", "<P")`.
+  [FontStyle.PLAIN]: ['<p', '<P'],
 };
 
 function createCreoleForm(style: FontStyle): Command {
