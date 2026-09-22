@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1153 modules · 4247 exported names.
+1155 modules · 4251 exported names.
 
 ## `src/`
 
@@ -1166,10 +1166,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-map-sizing.ts` | `MAP_CELL_MARGIN_X`, `measureMapClassifier` | `map` classifier sizing — `kind:'map'` leaves in the class diagram layout engine (./layout.ts). |
 | `class-member-ast.ts` | `Visibility`, `Member` | `Member`/`Visibility` types for class/interface/enum/object leaves. |
 | `class-member-atom-resolve.ts` | `ResolvedMemberAtom`, `resolveInlineAtom`, `resolveEmojiAtom`, `resolveOpenIconicAtom`, `resolveLatexAtom` | class-member-atom-resolve.ts — the non-text atom resolvers backing `class-member-creole.ts#resolveOneAtom` (inline img/sprite, OpenIconic vector, emoji, latex). |
+| `class-member-creole-render-text.ts` | `textRenderOverride`, `resolveTabbedTextRuns` | class-member-creole-render-text.ts — the DRAWN-text side of `DriverTextSvg.java:112-125`'s two RENDER-time-only branches, plus the TAB-STOP expansion `AtomText.java:210-256` applies to a member row's `'text'` atom before any of that. |
 | `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `noteLineAtomDy` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
 | `class-member-creole.ts` | `MemberRenderAtom`, `MemberRowBuild`, `memberBaseFont`, `buildMemberAtoms`, `resolveMemberAtoms`, `buildMemberRow`, `buildWrappedMemberRows`, `splitMemberDisplayLines`, `atomsToPlainText` | class-member-creole.ts — routes ONE classifier member row's display text through the shared creole atom engine (`core/klimt/creole/`, built for description by mission E2r) instead of drawing it as a single plain `<text>` element. |
 | `class-member-display.ts` | `splitMemberDisplayLines`, `atomsToPlainText` | class-member-display.ts — the physical-line splitter + plain-text projection for classifier member rows. |
 | `class-member-parser.ts` | `parseMemberLine` | Member (attribute/method) line parsing for PlantUML class diagrams. |
+| `class-member-render-atom.ts` | `MemberRenderAtom`, `MemberRowBuild` | class-member-render-atom.ts — `MemberRenderAtom`/`MemberRowBuild`, the render-ready shapes `class-member-creole.ts#resolveMemberAtoms` produces. |
 | `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
 | `class-monochrome.ts` | `MonochromeMode`, `applyMonochromeHex`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |
