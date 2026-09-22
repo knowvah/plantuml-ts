@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1149 modules · 4228 exported names.
+1150 modules · 4232 exported names.
 
 ## `src/`
 
@@ -1089,6 +1089,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-assoc-couple.ts` | `ASSOC_COUPLE_RE`, `ASSOC_DOUBLE_COUPLE_RE`, `AssocCoupleCounter`, `applyAssocCouple`, `CoupleCircle`, `makeCoupleCircle` | Association-class couple: `(A,B) .. |
 | `class-assoc-double-couple.ts` | `applyDoubleCouple` | The DOUBLE association-class couple `(A,B) <arrow> (C,D)` -- upstream `AbstractClassOrObjectDiagram#associationClass`'s FOUR-entity overload (`objectdiagram/AbstractClassOrObjectDiagram.java:114-141`) plus the `insertPointBetween` helper it |
 | `class-assoc-subsume.ts` | `SubsumedLink`, `EMPTY_SUBSUMED`, `subsumeExplicitAssociation` | class-assoc-subsume.ts — the "subsume an explicit A-B association into a couple" mechanism (`Association#createNew`'s `existingLink`/`removeLink` lookup), split out of `class-assoc-couple.ts` to keep that file under the project's 500-line c |
+| `class-badge-glyph-data.ts` | `BadgeLetter`, `REFERENCE_CX`, `REFERENCE_CY`, `BADGE_GLYPH_D` | Glyph outline `d` data for each badge letter, captured verbatim from the jar's own SVG output (`getCircledChar` -> `CircledCharacter`'s AWT glyph-outline path) at the reference badge center `(22, 23)`. |
 | `class-badge-sized-glyphs.ts` | `lookupSizedGlyph` | G2 N38: per-`circledCharacterFontSize` badge glyph captures. |
 | `class-badge.ts` | `BADGE_RADIUS`, `BADGE_LEFT_MARGIN`, `NAME_MARGIN_TOTAL`, `NAME_LEFT_MARGIN`, `BADGE_BOX_WIDTH`, `BADGE_BOX_HEIGHT`, `DEFAULT_CIRCLED_CHARACTER_FONT_SIZE`, `resolveBadgeRadius`, `badgeBoxWidth`, `badgeBoxHeight`, `computeHeaderSlack`, `hasBadge`, `badgeFill`, `resolveBadgeFill`, `resolveBadgeBorder`, `resolveBadgeGlyphColor`, `spotSnameForKind`, `badgeLetter`, `badgeGlyphPath`, `resolveBadgeLetter` | EntityImageClassHeader kind-badge geometry + glyph data (G2/N3). |
 | `class-body-blank-filter.ts` | `filterPendingBodyBlanks` | Close-time blank-member filtering for a classic (class/interface/enum/...) body, split out of parser.ts purely to keep that file within the repo's 500-line hook cap -- pure move, no behavior change (same precedent as class-line-merge.ts's o |

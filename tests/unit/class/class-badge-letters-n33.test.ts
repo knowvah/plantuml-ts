@@ -21,7 +21,11 @@ describe('resolveBadgeLetter — N33 letters', () => {
   });
 
   it('still falls back to the kind default for an uncaptured letter', () => {
-    expect(resolveBadgeLetter('class', 'R')).toBe('C');
+    expect(resolveBadgeLetter('class', 'Z')).toBe('C');
+  });
+
+  it('resolves an R override too, now that T21 captures it', () => {
+    expect(resolveBadgeLetter('class', 'R')).toBe('R');
   });
 });
 
