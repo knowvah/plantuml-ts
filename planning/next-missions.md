@@ -912,6 +912,207 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`isField` classification is duplicated, and the duplicate is stale**
+  (NEW, unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T19
+  (decision-journal rows; `fijali-69-pina030` 11/11 structural,
+  `tuguku-78-zega630`/`filoxo-23-fafi328` partial). **Mechanism**:
+  `class-member-rows.ts#isMethodMember` correctly checks
+  `m.forcedBucket`/`m.rawDisplay` before falling back to `m.params !==
+  undefined` (added later, A2s R2f, `pasova-33-toze386`), but
+  `class-body-enhanced-layout.ts:199` (the ".. label .." / enhanced-body
+  layout path fijali's `.. interface Servlet ..` separators route
+  through) computes `visibilityIsField` INLINE as bare `m.params ===
+  undefined`, never calling `isMethodMember` and never consulting
+  `forcedBucket`/`rawDisplay`. **Origin**: `class-body-enhanced-
+  layout.ts:199`. **Causal chain**: `+void destroy()` (Java-style
+  return-type-before-name) fails BOTH `tryParseMethod` (expects
+  `name(params)` at the string start) and `tryParseAttribute` (expects
+  the whole string to be one identifier), so `class-member-parser.ts`
+  falls to `rawDisplayFallback`, leaving `params` `undefined` and setting
+  `rawDisplay`. `isMethodMember` would return `true` (rawDisplay contains
+  `(`) but `class-body-enhanced-layout.ts`'s inline check sees only
+  `params === undefined` → `true` → `visibilityIsField: true` →
+  `renderVisibilityIcon`'s `isFilled` draws the PUBLIC ellipse unfilled
+  (`fill="none"`) where the jar fills it `#84BE84` (method rule). The
+  SAME bug affects `{method}`-tagged rows with no parens (tuguku/filoxo's
+  `{method} + execute`): `forcedBucket` is ignored too. **Ruled out**:
+  a `.. label ..`-specific state-tracking bug (the diagnosis's original
+  LOW-confidence hypothesis) — disproven by tracing `parseMemberLine`/
+  `isMethodMember` directly (both correct in isolation, verified via a
+  probe script); the actual divergence is the SECOND, unsynced call site.
+  **Fix shape**: replace `class-body-enhanced-layout.ts:199`'s
+  `m.params === undefined` with `isMethodMember(m) === false` (import
+  from `class-member-rows.ts`) — a one-line fix once a task owns that
+  file. Write-set: `class-body-enhanced-layout.ts` — not claimed by any
+  `class-divergence-drive` batch-6 task (T19 read-only: `class-member-
+  rows.ts`/`renderer-classifier-box.ts` are T20's, off limits per T19's
+  own boundary).
+
+- **`<style> visibilityIcon { protected { ... } } }` selector has no
+  theme cascade** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `tuguku-78-
+  zega630` 7/7, `filoxo-23-fafi328` partial of 20/20). **Mechanism**:
+  `class-visibility-icon.ts#colorsFor` reads ONLY
+  `theme.colors.graph.icon<Kind>Color`/`icon<Kind>BackgroundColor`
+  (T18/G2 N54's `skinparam icon*Color` bridge) with the hardcoded
+  `VISIBILITY_COLORS` table as the sole fallback — `colorsFor`'s own doc
+  comment already says "no `<style>`-cascade tier exists for this
+  StyleSignature in the reachable corpus," which this pair of fixtures
+  disproves. **Origin**: `class-visibility-icon.ts:133-146` (`colorsFor`,
+  no cascade read); absence confirmed in `style-cascade-class-snames.ts`
+  (no `visibilityIcon`/`visibilityicon` SNAMES constant exists) and
+  `style-cascade-class.ts` (no `visibilityIcon` selector branch in
+  `computeClassStyleCascadeOverrides`). **Causal chain**: `<style>
+  visibilityIcon { protected { LineColor DarkGoldenRod; BackgroundColor
+  DarkGoldenRod } } }` parses into the generic StyleMap but nothing reads
+  a `visibilityIcon`/`protected` selector out of it, so `colorsFor('#')`
+  falls straight to `VISIBILITY_COLORS['#']`'s hardcoded `{ line:
+  '#B38D22', background: '#FFFF44' }` — coincidentally close to
+  DarkGoldenRod's real hex (`#B8860B`) in the LINE channel only, which is
+  why the diagnosis first read this as a colour-table rounding drift
+  rather than a missing cascade (disproven: the rendered stroke is the
+  literal unthemed DEFAULT, not a resolved-but-imprecise DarkGoldenRod).
+  **Ruled out**: a `resolveColorToSvgHex` precision issue on
+  "DarkGoldenRod" — probed directly (`resolveColorToSvgHex('DarkGoldenRod')`
+  is exact `#B8860B`; the value never reaches that function). **Fix
+  shape**: a new `VISIBILITY_ICON_SNAMES`-style selector (`{root,element,
+  visibilityIcon,<public|private|protected|package>}`, upstream's own
+  `skin/VisibilityModifier`-adjacent `SName` — needs a Java read before
+  porting) in `style-cascade-class.ts`/`style-cascade-class-snames.ts`,
+  new `ThemeGraphColors` fields (`theme-graph-colors-a.ts`/`-b.ts`), read
+  in `class-visibility-icon.ts#colorsFor` ABOVE the skinparam-bridge tier.
+  Write-set: `style-cascade-class.ts`, `style-cascade-class-snames.ts`,
+  `theme-graph-colors-a.ts`/`-b.ts` — none claimed this batch; `class-
+  visibility-icon.ts` alone (T19's) cannot land this without those.
+
+- **`skinparam classBackgroundColor<<stereo>>`/`classBorderColor<<stereo>>`/
+  `classFontColor<<stereo>>` are direct stereotype-qualified value lookups,
+  unmodelled** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `tabaxa-70-
+  pomu341` 1/1, `nagega-30-poso418`'s stereotype-scoped diff among its
+  114 numeric/14 structural). **Mechanism**: BOTH of T19's two named
+  grammars — the nested-block form (`skinparam class { <<Foo1>> {
+  BackgroundColor LightBlue } } }`, tabaxa) and the suffix form
+  (`skinparam class { BackgroundColor<<alias>> #PowderBlue }`, nagega) —
+  normalize to the IDENTICAL final key `classbackgroundcolor<<foo1>>`
+  after `preprocessor.ts#cleanSkinKey` (which strips every `<<x>>` and
+  re-appends it at the end, `SkinParam#cleanForKeySlow`'s own algorithm)
+  — so there is only ONE grammar to route, not two, and no parser change
+  is needed. But `skinparam-stereo-keys.ts` (this port's whitelist of
+  `<<stereo>>`-suffixed keys it actually consumes) has no
+  `classbackgroundcolor<<X>>`/`classbordercolor<<X>>`/`classfontcolor<<X>>`
+  entry, so the parsed value lands in `acc.unknown` and is dropped.
+  **Origin**: absence in `skinparam-stereo-keys.ts` (compare its existing
+  `CLASS_BORDER_THICKNESS_STEREO_RE` precedent). **Java confirmation**:
+  `SkinParam.java:371-381 getHtmlColor(ColorParam, Stereotype, boolean)`
+  — for EVERY `ColorParam` (not colour-specific to background), a
+  stereotype match does a DIRECT key lookup `param.name() + "color" +
+  "<<" + label + ">>"`, exactly the same "direct value lookup, not the
+  `<style>`/StyleSignature cascade" shape `theme-graph-colors-
+  a.ts#classBorderThicknessByStereo`'s own doc comment already documents
+  for `classBorderThickness<<X>>` — i.e. this is a `ByStereo`-Record
+  mechanism (like `classBorderThicknessByStereo`/`stateBorderColor
+  ByStereo`), NOT `style-cascade-class.ts#resolveClassTagCascadeEntry`
+  as T19's own brief assumed (that cascade is fed exclusively by `<style>`
+  blocks, a structurally different upstream mechanism that only shares
+  the `<<stereotype>>` suffix syntax by coincidence). **Ruled out**:
+  routing through `resolveClassTagCascadeEntry` as briefed — rejected
+  before implementation once `classBorderThicknessByStereo`'s own
+  precedent and the Java citation surfaced; would have required a
+  same-file collision with T20 besides (see below). **Fix shape**: a new
+  `classBackgroundByStereo`/`classBorderByStereo`/`classFontColorByStereo`
+  `Readonly<Record<string,Paint|string>>` accumulator+theme field per key
+  (mirrors `classBorderThicknessByStereo` exactly), a
+  `CLASS_BACKGROUND_COLOR_STEREO_RE`-style handler in `skinparam-stereo-
+  keys.ts`, consumed as a precedence tier in `classifierFill()`/
+  `classBorder()`. Write-set collision: those two functions live in
+  `renderer-classifier-colors.ts`, ACTIVELY owned by T20 this batch (its
+  border/dasharray half) — cannot land without T20, even though T18's
+  fill half is already merged.
+
+- **Creole `<back:color>text</back>` has no SVG filter emission (extended
+  colour deferred at the `FontConfiguration` type)** (NEW, unbriefed) —
+  FILED 2026-09-22 from `class-divergence-drive` T19 (decision-journal
+  rows; `beruje-75-jimu270` 2/2 structural). T19's own brief named this
+  gap M7/`<w>` wave — INSTRUMENTATION DISPROVED THAT PREMISE: `<w>` (wavy
+  underline) and `<s>` (strike) both ALREADY render byte-identical to the
+  jar (`text-decoration="wavy underline"`/`"line-through"`, confirmed
+  present in both `ours.svg` and the oracle) via `memberAtomDecoration`
+  (`renderer-classifier-rows.ts:209-215`) — no filter/turbulence
+  primitive is involved in wave at all, upstream or in this port.
+  **Mechanism**: the jar's ONE `<filter>` in beruje's `<defs>`
+  (`id="b144o7cb4selba0"`, `feFlood`+`feComposite`) belongs to
+  `<back:#FFF000>string nouvelAttributi</back>` — creole's EXTENDED-COLOR
+  BACKCOLOR command — referenced via `filter="url(#...)"` on that ONE
+  `<text>` element (`SvgGraphics.java:761-786`'s `filterBackColor`/
+  `manageColor` flood-filter cache). **Origin**:
+  `src/core/klimt/creole/command/CommandCreoleStyle.ts`'s own doc comment
+  (already self-documented, cdd predates T19): "The captured color VALUE
+  is consumed but not yet applied: upstream's `AddStyle(style,
+  extendedColor)` also calls `FontConfiguration#changeExtendedColor`, but
+  this port's `FontConfiguration` (`shape/UText.ts`) has no
+  `extendedColor` field yet — a driver-side rendering concern
+  (`DriverTextSvg`), deliberately deferred." **Causal chain**:
+  `<back:#FFF000>` is parsed and its color captured
+  (`CommandCreoleStyle.ts`'s BACKCOLOR arm) but dropped on the floor
+  before it reaches `FontConfiguration`, so the atom draws with no
+  `filter` attribute and the document gets no flood-filter `<defs>`
+  entry. **Ruled out**: a class-diagram-local rendering gap — the type
+  carrying the field (`shape/UText.ts#FontConfiguration`) and the command
+  parsing it (`core/klimt/creole/command/`) are BOTH shared across every
+  diagram engine, not class-specific; class is merely the first fixture
+  to reach it. **Fix shape**: add `extendedColor?: string` to
+  `FontConfiguration` (`shape/UText.ts`), thread it through `AddStyle.ts`/
+  `CommandCreoleStyle.ts`, emit the `feFlood`+`feComposite` filter (mirror
+  `SvgGraphics.java:761-786`'s content-keyed filter-id cache, matching
+  this port's own `paintToSvg` FNV-hash-id precedent rather than the
+  jar's seeded scheme, per T18's gradient-def-id note) in `core/svg.ts`,
+  and wire `filter=` onto the `<text>` in every atom-drawing call site
+  (class member rows AND note bodies AND any other creole consumer).
+  Write-set: core (`src/core/klimt/shape/UText.ts`, `src/core/klimt/
+  creole/command/`, `src/core/svg.ts`) — outside class-diagram scope
+  entirely, none claimed this batch.
+
+- **A classifier NAME's own creole formatting (monospace/bold/italic) is
+  discarded at layout time** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `curupe-50-
+  kibu120` 3/3 structural, A3 M8b). T19's own brief guessed the title/
+  name creole call site was `class-declaration-extractors.ts` —
+  INSTRUMENTATION DISPROVED THAT: the classifier NAME already routes
+  through the SAME creole atom engine member rows use
+  (`class-layout-header-creole.ts#buildHeaderLine` calls
+  `resolveMemberAtoms`, identical to `class-member-creole.ts`'s member-
+  row path) and the per-atom `font.family`/monospace info IS correctly
+  built. **Mechanism**: the sibling function
+  `class-layout-header-creole.ts#buildHeaderLineMetrics` (`:105-121`)
+  DISCARDS `buildHeaderLine`'s `atoms` field, returning only
+  `headerLineWidths`/`headerDisplayLines` (flattened PLAIN TEXT via
+  `atomsToPlainText`)/`nameBlockHeight`. **Origin**: `class-layout-
+  header-creole.ts:105-121` (`buildHeaderLineMetrics`); consumed at
+  `class-layout-header-geo.ts:119`, which never receives or forwards an
+  `atoms` array for the header row. **Causal chain**: with no `row.atoms`
+  on the header's `ClassifierGeo['rows']` entry, `renderer-classifier-
+  rows.ts#renderRowText` takes its PLAIN-TEXT branch (`row.atoms ===
+  undefined`), which draws ONE `<text>` with a single `fontFamily: row
+  .fontFamily ?? theme.fontFamily` for the WHOLE line — any per-run
+  creole formatting inside a `""..."" `/`**...**`/`//...//` classifier
+  display name (not just monospace) is silently flattened to plain,
+  uniformly-styled text. `class ""Test"" as foo4` loses its
+  `font-family="monospace"` entirely (jar: `monospace`; ours: absent).
+  **Ruled out**: `class-declaration-extractors.ts` (T20's file, the
+  brief's own guess) — that file only extracts the RAW display-name
+  STRING at parse time; it never touches font/creole atoms at all, so it
+  cannot be the mechanism. **Fix shape**: thread `atoms` through
+  `buildHeaderLineMetrics`'s return (a 4th field alongside `width`/
+  `displayText`/`height`) into whatever builds the header's `rows[]`
+  entry in `class-layout-header-geo.ts`, setting `row.atoms` there the
+  same way `class-member-rows.ts` already does for member rows. Low
+  risk, additive — a header line with no creole markup already reduces
+  to one atom byte-identical to today's plain-text path (per
+  `buildHeaderLine`'s own doc comment). Write-set: `class-layout-header-
+  creole.ts`, `class-layout-header-geo.ts` — not claimed by any
+  `class-divergence-drive` batch-6 task.
+
 - **`#`-prefixed numbered lists in notes render as literal `#`** (NEW,
   unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T10
   (decision-journal rows, `ponono-25-fevo574`/`sumocu-27-vubo674`).

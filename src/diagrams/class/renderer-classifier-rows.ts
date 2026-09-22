@@ -9,7 +9,7 @@ import type { ClassifierGeo } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { text, image } from '../../core/svg.js';
-import {} from '../../core/klimt/color/HColorSet.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
@@ -24,6 +24,7 @@ import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
 import { resolveElementFont, resolveElementHeaderFont } from './renderer-classifier-colors.js';
+import { parseDeclarationColors } from './class-declaration-extractors.js';
 
 /**
  * Every classifier row (header AND member) shares ONE plain-baseline
@@ -93,6 +94,72 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
  * string; see `renderer-url.ts`'s "icon `<g>` forces a link-flush boundary"
  * doc comment for why they need independent `<a>` runs.
  */
+/** The terminal `classCascade(Header)FontColor ?? classCascadeFontColor ??
+ *  '#000000'` tier, shared verbatim by both the object/map/json and class
+ *  branches below -- factored out so neither branch re-states it (keeps
+ *  both, and their caller, under the per-function CCN cap). */
+function terminalCascadeFontColor(theme: Theme, isHeader: boolean): string {
+  return (
+    (isHeader
+      ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
+      : theme.colors.graph.classCascadeFontColor) ?? '#000000'
+  );
+}
+
+/** G3/O4: the object/map/json branch of {@link classifierCascadeFontColor}
+ *  -- own `theme.colors.elements[kind].font` bucket FIRST (`<style>
+ *  objectDiagram { object { FontColor ... } } }`/bare `object { FontColor
+ *  ... }`, the OBJECT-specific override -- `EntityImageObject`/`Map`/
+ *  `Json#getStyleSignature` has NO `classDiagram`/`class` token, so a
+ *  class-only `.tagname` cascade must never apply), `<style> <sname> {
+ *  header { FontColor } } }` winning over the bare bucket's own FontColor
+ *  ONLY for the NAME row (`isHeader && !isStereoLabelRow` --
+ *  `resolveElementHeaderFont`'s own doc comment; the stereo label row's
+ *  FontConfiguration is independent upstream, `EntityImageObject.java`'s
+ *  own ctor). Falls through to {@link terminalCascadeFontColor} ONLY as a
+ *  root/element-level default -- see {@link classifierCascadeFontColor}'s
+ *  own doc comment for the shared-prefix caveat this preserves. */
+function objectFamilyCascadeFontColor(
+  geo: ClassifierGeo,
+  theme: Theme,
+  isHeader: boolean,
+  isStereoLabelRow: boolean,
+): string {
+  return (
+    (isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
+    resolveElementFont(theme, geo.kind) ??
+    terminalCascadeFontColor(theme, isHeader)
+  );
+}
+
+/**
+ * The cascade/default fallback chain {@link renderRowText} falls to when
+ * the classifier has no inline `#text:color` override -- split out purely
+ * to keep that already-near-cap function's own CCN from growing (cdd-T19,
+ * A3 M1 text half added one more tier above this one). Pure move of the
+ * PRE-EXISTING ternary; no behavior change.
+ */
+function classifierCascadeFontColor(
+  geo: ClassifierGeo,
+  theme: Theme,
+  isHeader: boolean,
+  isStereoLabelRow: boolean,
+): string {
+  if (geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json') {
+    return objectFamilyCascadeFontColor(geo, theme, isHeader, isStereoLabelRow);
+  }
+  // G2 N37: the `.tagname` sub-selector cascade wins over the plain
+  // ancestor cascade for BOTH the name row AND member rows uniformly --
+  // but NEVER a stereotype label row (`isStereoLabelRow`'s own doc
+  // comment on {@link renderRowText}'s own parameter).
+  return (
+    (isStereoLabelRow
+      ? undefined
+      : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
+    terminalCascadeFontColor(theme, isHeader)
+  );
+}
+
 export function renderRowText(
   geo: ClassifierGeo,
   row: ClassifierGeo['rows'][number],
@@ -139,26 +206,30 @@ export function renderRowText(
   // object text through this SAME shared fallback is a pre-existing,
   // un-narrowed edge case (no fixture in the corpus isolates it), not
   // introduced by this iteration.
-  const fontColor =
-    geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json'
-      ? // G3/O4: `<style> <sname> { header { FontColor } } }` wins over the
-        // bare bucket's own FontColor, but ONLY for the NAME row (`isHeader
-        // && !isStereoLabelRow` -- `resolveElementHeaderFont`'s own doc
-        // comment; the stereo label row's FontConfiguration is independent
-        // upstream, `EntityImageObject.java`'s own ctor).
-        ((isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
-        resolveElementFont(theme, geo.kind) ??
-        (isHeader
-          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
-          : theme.colors.graph.classCascadeFontColor) ??
-        '#000000')
-      : ((isStereoLabelRow
-          ? undefined
-          : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
-        (isHeader
-          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
-          : theme.colors.graph.classCascadeFontColor) ??
-        '#000000');
+  //
+  // cdd-T19 (A3 M1 text half): a classifier's OWN inline `#text:color`
+  // decoration (`class-declaration-extractors.ts#extractDecorations`'s
+  // `text?` field, T18) wins over EVERYTHING below -- `Style.java:206-208
+  // eventuallyOverride(Colors)` puts the inline `ColorType.TEXT` value into
+  // `PName.FontColor` at `Integer.MAX_VALUE` priority (`:191-192`), and
+  // `getFontConfiguration(set, colors)` (`:259-263`) checks
+  // `colors.getColor(ColorType.TEXT)` BEFORE `value(PName.FontColor)` at
+  // all -- i.e. the classifier's own override is checked first, full stop,
+  // not merged into the cascade. `MethodsOrFieldsArea.java:240`'s
+  // `FontConfiguration.create(skinParam, style, leaf.getColors())` and
+  // `EntityImageClassHeader.java:99`'s identical `entity.getColors()` call
+  // both pass the SAME per-classifier `Colors`, so the tier applies
+  // uniformly to the header AND every member row -- no `isHeader` branch
+  // needed. `geo.color` is the raw, un-decomposed `COLOR [LINECOLOR]`
+  // capture `renderer-classifier-colors.ts#classifierFill`'s
+  // `resolveBareOrBackColor(geo.color)` already reads for the BACK half;
+  // `parseDeclarationColors` re-parses the SAME string for its `text:`
+  // part (`Colors.java:95-124`, T18's extractor), then resolved to hex
+  // exactly like every other named-colour tier this file's own module doc
+  // comment documents (`resolveColorToSvgHex`, the M5 precedent).
+  const inlineTextColor = parseDeclarationColors(geo.color).text;
+  const resolvedInlineTextColor = inlineTextColor !== undefined ? resolveColorToSvgHex(inlineTextColor) : undefined;
+  const fontColor = resolvedInlineTextColor ?? classifierCascadeFontColor(geo, theme, isHeader, isStereoLabelRow);
   if (row.atoms !== undefined) {
     return renderRowAtoms(row.atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
