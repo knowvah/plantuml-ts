@@ -24,6 +24,19 @@ import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
+// CDD T20 (M1): `Colors.java:95-124`'s `line`/`lineStyle` fields, T18-added
+// to `extractDecorations` but never consumed on the render side (that
+// function's own doc comment named them "named for T19/T20") -- imported
+// here rather than widening `ClassifierGeo` with a duplicate field, since
+// `geo.color` already carries the SAME raw joined token
+// `resolveBareOrBackColor` (the BACK-half precedent) reads directly.
+import { parseDeclarationColors } from './class-declaration-extractors.js';
+// CDD T20 (M1): `LinkStyle#getStroke3()` (decoration/LinkStyle.java:97-108)
+// is ALREADY ported for the edge engine -- reused rather than re-derived a
+// second time (DASHED->dash(7,7) thickness 1, DOTTED->dash(1,3) thickness
+// 1, BOLD->thickness 2 no dash; `nonZeroThickness()`'s null-thickness
+// default is exactly `strokeForStyle`'s own no-override path).
+import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 
 /** `theme.colors.graph.classCascadeBackground ?? classBackground` -- the
  *  terminal class-family default every kind falls back to when no
@@ -187,6 +200,18 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): Paint {
  * iteration's scope).
  */
 export function classBorder(geo: ClassifierGeo, theme: Theme): Paint {
+  // CDD T20 (M1): `lineConfig.getColors().getColor(ColorType.LINE)` wins
+  // FIRST, ahead of the `.tagname`/ancestor cascade below -- the SAME
+  // "inline override always wins" precedent `classifierFill`'s own
+  // `resolveBareOrBackColor` check already established for BackGroundColor
+  // (`EntityImageClass.java:193-200`: `borderColor` only falls to
+  // `getStyle().value(LineColor)` `if (borderColor == null)`). Gradient-
+  // aware, mirroring `classifierFill`'s identical `parseColor` step.
+  const inlineLine = parseDeclarationColors(geo.color).line;
+  if (inlineLine !== undefined) {
+    const parsed = parseColor(inlineLine);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
   // G2 N37: the `.tagname` sub-selector cascade wins over the plain
   // ancestor cascade -- see `classifierFill`'s identical precedent above.
   const tagBorder = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.border;
@@ -240,6 +265,14 @@ export function classBorderLine(geo: ClassifierGeo, theme: Theme): string {
  */
 export const CLASS_BORDER_STROKE_WIDTH_DEFAULT = 0.5;
 export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number {
+  // CDD T20 (M1): `Style#getStroke(Colors)` -- `colors.getSpecificLineStroke()`
+  // (`Colors.java:138-142`) wins OUTRIGHT over BOTH the stereo and bare
+  // theme thickness tiers below when an inline `line.dashed`/`line.dotted`/
+  // `line.bold`/`##[style]` is set, never blended with them
+  // (`EntityImageClass.java:215`: `getStyle().getStroke(lineConfig
+  // .getColors())` returns `stroke` wholesale, no merge with `LineThickness`).
+  const lineStyle = parseDeclarationColors(geo.color).lineStyle;
+  if (lineStyle !== undefined) return strokeForStyle(lineStyle).getThickness();
   const byStereo = theme.colors.graph.classBorderThicknessByStereo;
   if (byStereo !== undefined && geo.stereotypeLabels !== undefined) {
     for (const label of geo.stereotypeLabels) {
@@ -248,6 +281,24 @@ export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number
     }
   }
   return theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT;
+}
+
+/**
+ * CDD T20 (M1): the SAME `colors.getSpecificLineStroke()` override
+ * {@link classBorderStrokeWidth} consults, for the SVG `stroke-dasharray`
+ * half of the SAME `UStroke` (`LinkStyle#getStroke3()`, `decoration/
+ * LinkStyle.java:97-108` -- DASHED `(7,7)`, DOTTED `(1,3)`, BOLD/unset no
+ * dash). Every `rect(...)`/`path(...)`/`line(...)` call that reads {@link
+ * classBorder}/{@link classBorderLine} for its `stroke` reads this for its
+ * `strokeDasharray`, mirroring the fill/border split's own "one call reads
+ * both halves" convention -- `undefined` (no attribute) for every
+ * classifier with no inline line-style override, zero behavior change.
+ */
+export function classBorderStrokeDasharray(geo: ClassifierGeo): string | undefined {
+  const lineStyle = parseDeclarationColors(geo.color).lineStyle;
+  if (lineStyle === undefined) return undefined;
+  const dash = strokeForStyle(lineStyle).getDasharraySvg();
+  return dash === undefined ? undefined : `${dash[0]},${dash[1]}`;
 }
 
 /**

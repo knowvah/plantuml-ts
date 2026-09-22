@@ -120,6 +120,19 @@ export interface ClassifierGeo {
      * common case, `theme.strictUml` unset).
      */
     underline?: boolean;
+    /**
+     * CDD T20 (A5/M6): present only alongside `visibilityIcon` -- this
+     * member's OWN total wrapped-block height (sum of every physical
+     * sub-row the SAME `Member` expands into, `class-member-rows.ts
+     * #buildSectionRows`'s own doc comment), when it differs from this
+     * row's single-line height. `klimt/geom/PlacementStrategyVisibility
+     * .java:56-62`'s `height2` term is the WHOLE member block, not one
+     * physical line -- absent (falls back to `attributeFontSize(theme)`
+     * at the render call site, `renderer-classifier-box.ts`'s own doc
+     * comment) reproduces the pre-T20 single-line behavior byte-for-byte
+     * for every non-wrapped member.
+     */
+    visibilityBlockHeight?: number;
   }>;
   hideCircle?: boolean; // suppress the circle badge (hide circle directive)
   /**

@@ -148,6 +148,78 @@ export interface SectionRowContext {
 }
 
 /**
+ * CDD T20 (A5/M6): each row index's OWN member's TOTAL block height -- the
+ * sum of every physical sub-row a WRAPPED member expands into (consecutive
+ * `members[]` entries sharing the SAME `Member` reference, {@link
+ * buildWrappedSectionRowBuilds}'s own doc comment). Mirrors `klimt/geom/
+ * PlacementStrategyVisibility.java:56-62`'s `height2` term, which is the
+ * member's real TextBlock height -- the WHOLE wrapped block, not one
+ * physical line. Reduces to `rowBuilds[i].height` alone whenever member `i`
+ * is not wrapped (the overwhelming common case).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-62
+ */
+function memberBlockHeights(members: Classifier['members'], rowBuilds: readonly MemberRowBuild[]): number[] {
+  const totals = new Array<number>(members.length).fill(0);
+  let i = 0;
+  while (i < members.length) {
+    let total = 0;
+    let j = i;
+    while (j < members.length && members[j] === members[i]) {
+      total += rowBuilds[j]!.height;
+      j++;
+    }
+    totals[i] = total;
+    i = j;
+  }
+  return totals;
+}
+
+/** CDD T20 (M6): the `visibilityIcon`/`visibilityIsField`/
+ *  `visibilityBlockHeight` fields for one row -- split out of {@link
+ *  buildSectionRows}'s loop purely to keep that function under the
+ *  project's NLOC cap (pure extraction, no behavior change). */
+function iconRowFields(
+  showIcon: boolean,
+  member: Classifier['members'][number],
+  blockHeight: number,
+  ownHeight: number,
+): Pick<ClassifierGeo['rows'][number], 'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight'> {
+  if (!showIcon) return {};
+  return {
+    visibilityIcon: member.visibility,
+    visibilityIsField: isMethodMember(member) === false,
+    ...(blockHeight !== ownHeight ? { visibilityBlockHeight: blockHeight } : {}),
+  };
+}
+
+/** One member's row entry -- split out of {@link buildSectionRows}'s loop
+ *  purely to keep that function under the project's NLOC cap (pure
+ *  extraction, no behavior change). Bundled into one params object to stay
+ *  under this project's 5-param cap (mirrors `SectionRowContext`'s own
+ *  identical rationale, this file's doc comment above). */
+interface OneRowInput {
+  text: string;
+  member: Classifier['members'][number];
+  build: MemberRowBuild;
+  y: number;
+  indent: number;
+  showIcon: boolean;
+  blockHeight: number;
+}
+function buildOneRow(input: OneRowInput): ClassifierGeo['rows'][number] {
+  const { text, member, build, y, indent, showIcon, blockHeight } = input;
+  return {
+    text,
+    y,
+    indent,
+    width: build.width,
+    atoms: build.atoms,
+    ...iconRowFields(showIcon, member, blockHeight, build.height),
+    ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
+  };
+}
+
+/**
  * Build the per-member rows for one compartment (fields OR methods), starting
  * at `sectionTop`. `y` is the text BASELINE (G2 N4 -- jar draws plain,
  * un-centered `<text>` for every row, never `dominant-baseline="middle"`;
@@ -176,6 +248,8 @@ export function buildSectionRows(
   // `sectionHeight`'s doc comment) -- identical to the previous
   // `i * memberRowHeight` whenever every row is atom-free.
   let rowTop = 0;
+  // CDD T20 (M6): see `memberBlockHeights`'s own doc comment.
+  const blockHeights = memberBlockHeights(members, rowBuilds);
   for (let i = 0; i < members.length; i++) {
     const text = texts[i]!;
     const member = members[i]!;
@@ -199,15 +273,7 @@ export function buildSectionRows(
     const showIcon = sectionHasIcon && member.visibilityExplicit === true && members[i - 1] !== member;
     const y = sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset;
     rowTop += build.height;
-    rows.push({
-      text,
-      y,
-      indent,
-      width: build.width,
-      atoms: build.atoms,
-      ...(showIcon ? { visibilityIcon: member.visibility, visibilityIsField: isMethodMember(member) === false } : {}),
-      ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
-    });
+    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]! }));
   }
   return rows;
 }
