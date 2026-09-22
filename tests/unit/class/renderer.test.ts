@@ -2017,6 +2017,99 @@ describe('renderClass — notes', () => {
   });
 });
 
+describe('renderClass — note connector as its own link group (cdd-T9, E6 mechanism a)', () => {
+  it(
+    "draws a plain note's dashed connector as a SEPARATE <g class=\"link\">, " +
+      "not folded into the note's own entity group",
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [makeClassifierGeo('dummy', 'dummy')],
+        notes: [
+          {
+            id: 'GMN2',
+            kind: 'note',
+            x: 200,
+            y: 6,
+            width: 50,
+            height: 23,
+            lines: ['bar'],
+            lineWidths: [20],
+            connector: [
+              { x: 150, y: 50 },
+              { x: 200, y: 50 },
+            ],
+            target: 'dummy',
+          },
+        ],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+
+      const entityStart = svg.indexOf('data-qualified-name="GMN2"');
+      expect(entityStart).toBeGreaterThan(-1);
+      const entityGroupEnd = svg.indexOf('</g>', entityStart);
+      // `renderer-note.ts:354-363` (pre-T9) pushed the connector INTO the
+      // note's own `parts` array -- mechanism (a) moves it out. The note's
+      // own entity group must carry no dashed path.
+      expect(svg.slice(entityStart, entityGroupEnd)).not.toContain('stroke-dasharray');
+
+      // The connector is a SIBLING `<g class="link">`, drawn in the edges
+      // phase (AFTER the note's own entity group closes).
+      expect(svg).toContain('<g class="link"');
+      expect(svg).toMatch(/stroke-dasharray="4 4"/);
+      const linkStart = svg.indexOf('<g class="link"');
+      expect(linkStart).toBeGreaterThan(entityGroupEnd);
+    },
+  );
+
+  it('the connector link carries the jar comment shape (<!--link FROM to TO-->)', () => {
+    const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('dummy', 'dummy')],
+      notes: [
+        {
+          id: 'GMN2',
+          kind: 'note',
+          x: 200,
+          y: 6,
+          width: 50,
+          height: 23,
+          lines: ['bar'],
+          lineWidths: [20],
+          connector: [
+            { x: 150, y: 50 },
+            { x: 200, y: 50 },
+          ],
+          target: 'dummy',
+        },
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    // `Link#commentForSvg` shape (`renderer-group.ts#wrapLink`) -- `from` is
+    // the note's own id, `to` its host (jar: `<!--link GMN3 to
+    // oft_openflow_types-->`, `pecabi-95-demu756`).
+    expect(svg).toContain('<!--link GMN2 to dummy-->');
+  });
+
+  it('a note with NO connector (freestanding, no target) draws no extra link group', () => {
+    const geo = makeMinimalGeo({
+      notes: [
+        {
+          id: '__note_0',
+          kind: 'note',
+          x: 20,
+          y: 30,
+          width: 80,
+          height: 40,
+          lines: ['hi'],
+          lineWidths: [10],
+          connector: [],
+        },
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('<g class="link"');
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Mission leaf-draw-order T4: full parse->layout->render pipeline, exercising
 // `computeLeafDrawOrder` (T2) + `layout.ts#orderLeaves` (T4), not a

@@ -7,18 +7,17 @@
 
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
-import { renderNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
-import type { NoteGeo } from './note-layout.js';
-import { resolveTips, type TipResolution } from './note-tips-resolve.js';
+import { resolveTips } from './note-tips-resolve.js';
+import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { ellipse, linkWrap } from '../../core/svg.js';
+import { ellipse } from '../../core/svg.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrome.js';
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
-import { buildClassUidPlan, type ClassUidPlan } from './renderer-uid.js';
+import { buildClassUidPlan } from './renderer-uid.js';
 import { wrapCluster, wrapEntity, wrapLink, leafPortion } from './renderer-group.js';
 import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
@@ -158,46 +157,6 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
   return renderEmptyPackageIcon(nsGeo, theme);
 }
 
-/** The two per-render note tables `renderOneNote` reads (complexity-hook
- *  param cap): the uid plan and the draw-time tip resolutions. */
-interface NoteRenderContext {
-  readonly uidPlan: ClassUidPlan;
-  readonly tips: ReadonlyMap<string, TipResolution>;
-}
-
-/**
- * G2 N52 / mission leaf-draw-order T4: one note's own draw output -- called
- * once per `'note'`/`'tips'` leaf from `renderClass`'s single ordered
- * `geo.leaves` loop, the same dispatch site every `ClassifierGeo` leaf goes
- * through (jar's `SvekResult#drawU` draws every `bibliotekon.allNodes()`
- * entry through ONE loop, notes and classifiers alike --
- * `svek/SvekResult.java:82-90`). D5: drawn regardless of its host's
- * `hidden` -- nothing in the leaf loop below skips a note/tips leaf for its
- * host's sake, matching jar (`UHidden` wraps only the host NODE's own
- * image, `:84-87`). `NoteGeo`'s own doc comments (`note-layout.ts`) cover
- * the tip/opale/plain shape choice this mirrors unchanged.
- */
-function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): string[] {
-  const { uidPlan, tips } = ctx;
-  // `GeneralImageBuilder#createEntityImageBlock`'s leaf-type dispatch:
-  // `LeafType.TIPS -> EntityImageTips` (:219-220), whose `drawU` resolves
-  // the notch against the host at DRAW time (mission note-leaf-model D3,
-  // `note-tips-resolve.ts`) and draws NOTHING for a dropped tip;
-  // `LeafType.NOTE -> EntityImageNote` (:118-119), plain or opalisable.
-  if (note.kind === 'tips') {
-    const tip = tips.get(note.id);
-    return tip === undefined || tip === 'dropped' ? [] : [renderTipNote(note, tip, theme)];
-  }
-  const uid = uidPlan.noteUid.get(note.id) ?? '';
-  const raw = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
-  // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
-  // `<a xlink:href>` INSIDE the `<g class="entity">` -- upstream's
-  // `note.addUrl(url)` + `SvgGraphics` anchor open/close around the note
-  // shape. Jar-verified `danozo-79-nunu375`.
-  const inner = note.url !== undefined ? linkWrap(raw, note.url) : raw;
-  return [wrapEntity(note.id, uid, note.id, false, inner)];
-}
-
 // ---------------------------------------------------------------------------
 // Edge
 // ---------------------------------------------------------------------------
@@ -332,6 +291,10 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // gate; `ClassUidPlanInput` is structural, so the views above suffice.
   const uidPlan = buildClassUidPlan({ ...geo, classifiers, notes });
   const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(notes, classifiers) };
+  // cdd-T9 (E6 mechanism a): every plain note's connector, deferred here and
+  // drawn in the edges phase (step 3) as its own `<g class="link">` --
+  // `renderOneNote`'s own doc comment (`renderer-note-dispatch.ts`).
+  const noteConnectors: NoteConnector[] = [];
 
   // 1. Namespace boxes (behind classifiers) -- jar draws every CLUSTER
   // before any node (`svek/SvekResult.java:72-74`).
@@ -356,7 +319,9 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // separate note/tips node (see `renderOneNote`'s own doc comment).
   for (const leaf of geo.leaves) {
     if (isNoteGeo(leaf)) {
-      children.push(...renderOneNote(leaf, noteCtx, theme));
+      const drawn = renderOneNote(leaf, noteCtx, theme);
+      children.push(...drawn.entity);
+      if (drawn.connector !== undefined) noteConnectors.push(drawn.connector);
       continue;
     }
     const classifier = leaf;
@@ -452,6 +417,38 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
           decor2: decorName(edge.sourceDecor),
         },
         rendered.body,
+      ),
+    );
+  });
+
+  // cdd-T9 (E6 mechanism a): each note's connector, as its own `<g
+  // class="link">` via the SAME `wrapLink` call an ordinary edge gets above
+  // (`GraphvizImageBuilder.java:229`'s single draw loop over
+  // `dotData.getLinks()`, which upstream mints the note-host connector into
+  // as a real `Link`). Appended AFTER the real edges: every AC fixture here
+  // (fogexa/pecabi/sanixi/zepeki) has ZERO other edges, matching the jar
+  // exactly. A diagram mixing note connectors with real relationships needs
+  // `Bibliotekon#addLine`'s `sameConnections` insertion (`Bibliotekon.java:
+  // 83-107`) -- untouched, a named residual (`.agent-notes/cdd-T9.md`).
+  //
+  // `uid`: `renderer-uid.ts#assignExact`'s G2 N68 entry (`:250-254`) burns
+  // the connector's rank as a PHANTOM (no uid) since it was never its own
+  // `<g>` before this task; promoting it to a real `lnkN` is out of this
+  // write-set. Placeholder below, named residual, not fitted.
+  noteConnectors.forEach((connector, i) => {
+    const { note, body } = connector;
+    children.push(
+      wrapLink(
+        {
+          from: note.id,
+          to: note.target ?? '',
+          uid: `lnk${uidPlan.edgeUid.length + i + 1}`,
+          fromUid: uidPlan.noteUid.get(note.id) ?? '',
+          toUid: note.target !== undefined ? uidPlan.resolveEntityUid(note.target) : '',
+          decor1: undefined,
+          decor2: undefined,
+        },
+        body,
       ),
     );
   });

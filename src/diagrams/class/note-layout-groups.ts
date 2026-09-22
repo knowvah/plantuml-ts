@@ -48,18 +48,38 @@ export interface NoteGroup {
    * plain-entity notes and pecabi/sanixi's package notes are not).
    */
   invis: boolean;
+  /**
+   * cdd-T9 (E6 mechanism b): mirrors `GraphvizImageBuilder#isOpalisable`'s
+   * "other end has a `SvekNode`" guard (`GraphvizImageBuilder.java:
+   * 245-259`, `if (other != null) { ...; line.setOpale(true); }`) at
+   * grouping time. `Bibliotekon#createNode` (`:72-77`) is called ONLY for a
+   * leaf entity (`GraphvizImageBuilder.java:362`'s `printEntity`), never for
+   * a group -- `printGroups`/`printEntities` (`:408-431`) recurse into a
+   * group's children but mint no node for the group ITSELF -- so
+   * `Bibliotekon#getNode` (`:120-122`) returns `null` for a package/
+   * namespace target, the `if (other != null)` guard at `:250`/`:257` never
+   * fires, and `note top of <package>` stays a plain box with a real
+   * connector edge, never opalised. `anchors` (the same package/namespace-id
+   * -> `zaent-*` point-anchor map {@link groupEdge} already reads) is the
+   * exact predicate: it holds an entry IFF `target` names a group. `true`
+   * for an undefined target (freestanding note -- opalisability there is
+   * `note-freestanding.ts`'s own concern, untouched by this guard) and for
+   * a classifier target (never present in `anchors`).
+   */
+  opalisable: boolean;
   /** Indices into the original `notes` array, in stacking order. */
   memberIndices: number[];
 }
 
 /** A singleton group for a freestanding note or a note's first appearance
  *  on a given (host, side). */
-function newGroup(note: ClassNote, i: number): NoteGroup {
+function newGroup(note: ClassNote, i: number, anchors: ReadonlyMap<string, string>): NoteGroup {
   return {
     id: note.id,
     ...(note.target !== undefined ? { target: note.target } : {}),
     ...(note.position !== undefined ? { position: note.position } : {}),
     invis: note.target !== undefined && note.targetPort !== undefined,
+    opalisable: note.target === undefined || !anchors.has(note.target),
     memberIndices: [i],
   };
 }
@@ -73,7 +93,7 @@ function mergeKey(note: ClassNote): string | undefined {
   return `${note.target}|${note.position}`;
 }
 
-export function groupNotes(notes: ClassNote[]): NoteGroup[] {
+export function groupNotes(notes: ClassNote[], anchors: ReadonlyMap<string, string>): NoteGroup[] {
   const groups: NoteGroup[] = [];
   const bySameSideHost = new Map<string, NoteGroup>();
   for (const [i, note] of notes.entries()) {
@@ -83,7 +103,7 @@ export function groupNotes(notes: ClassNote[]): NoteGroup[] {
       existing.memberIndices.push(i);
       continue;
     }
-    const group = newGroup(note, i);
+    const group = newGroup(note, i, anchors);
     if (key !== undefined) bySameSideHost.set(key, group);
     groups.push(group);
   }
@@ -175,7 +195,7 @@ export function buildNoteGraphParts(
   // path so a `<$name>` note atom resolves like a member-row one (rotisi-30).
   for (const note of notes) measurements.set(note.id, measureNote(note.text, theme, measurer, sprites));
 
-  const groups = groupNotes(notes);
+  const groups = groupNotes(notes, anchors);
   const nodes: DotInputNode[] = groups.map((group) => ({
     id: group.id,
     ...groupNodeSize(group, notes, measurements),

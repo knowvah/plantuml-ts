@@ -224,14 +224,26 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
 }
 
 /** One group's member geos -- split out of `mapNoteGeos` for the complexity-
- *  hook CCN/NLOC caps; see `mapGroupNoteGeos` for the stacking rule. */
+ *  hook CCN/NLOC caps; see `mapGroupNoteGeos` for the stacking rule.
+ *
+ * cdd-T9 write-set note: `group.opalisable === false` (E6 mechanism b,
+ * `note-layout-groups.ts#NoteGroup.opalisable`'s own doc comment) is folded
+ * into the SAME `strictUml` gate `singletonNoteGeo` already reads for
+ * `isOpalisable`'s `strictUmlStyle()` guard (G2 N57 item 37, this file's
+ * own doc comment above `singletonNoteGeo`) -- both force the plain
+ * folded-corner fallback instead of attempting `buildOpaleNoteGeo`. This
+ * file is OUTSIDE T9's originally declared write-set (`note-layout-
+ * groups.ts`, `renderer.ts`); the extension was necessary because
+ * `singletonNoteGeo`'s opalise-attempt dispatch has no other seam -- see
+ * `.agent-notes/cdd-T9.md`. */
 function resolveGroupGeos(group: NoteGroup, data: NoteDataset, ctx: NoteMapContext): NoteGeo[] {
   const pos = ctx.posMap.get(group.id);
   if (pos === undefined) return [];
   const noteEdge = ctx.result.edges.find((e) => e.id === `__noteedge_${group.id}`);
   const points = noteEdge?.points ?? ctx.freestandingConnectors?.get(group.id)?.points ?? [];
   const tipMetrics = group.invis ? { baselineOffset: ctx.baselineOffset, rowHeight: ctx.rowHeight } : undefined;
-  return mapGroupNoteGeos(group, data, { pos, connectorPoints: points, tipMetrics, strictUml: ctx.strictUml });
+  const strictUml = ctx.strictUml || group.opalisable === false;
+  return mapGroupNoteGeos(group, data, { pos, connectorPoints: points, tipMetrics, strictUml });
 }
 
 /**
