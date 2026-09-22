@@ -69,8 +69,12 @@ export function shiftEdgeGeo(edge: EdgeGeo, dx: number, dy: number): EdgeGeo {
 function shiftEdgeExtras(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo> {
   const nb = edge.noteBox;
   const c = edge.constraint;
+  const st = edge.sametail;
   return {
     ...shiftKalBoxes(edge, dx, dy),
+    // cdd-T16 (M7/E11): the grouped-inheritance contact point is absolute,
+    // like every other field here -- `parentId` carries unchanged.
+    ...(st !== undefined ? { sametail: { ...st, contact: { x: st.contact.x + dx, y: st.contact.y + dy } } } : {}),
     ...(edge.visibilityIcon !== undefined
       ? { visibilityIcon: { ...edge.visibilityIcon, x: edge.visibilityIcon.x + dx, y: edge.visibilityIcon.y + dy } }
       : {}),

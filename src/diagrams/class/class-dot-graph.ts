@@ -59,6 +59,17 @@ export interface DotGraphParts {
    *  anchor is the post-layout spline endpoint. Empty when the diagram has
    *  no qualified association. */
   kals: Kal[];
+  /** cdd-T16 (M7, `dot/DotData.java:122-161`): relationship index -> the
+   *  protected parent leaf's DOT uid, for exactly the extends-like links
+   *  that reached `skinparam groupInheritance`'s limit -- the SAME map
+   *  `buildDotNodesAndEdges` already threads into `buildDotEdges` for the
+   *  `sametail="..."` DOT attribute, threaded OUT here too so `layout.ts`
+   *  can pass it to `buildEdgeGeos` (decor/dash suppression,
+   *  `Link.java:238-239`) and the shared-triangle renderer (`renderer-
+   *  group.ts`, `Neighborhood.java:69-96`) can find each grouped edge's
+   *  parent by `Relationship.idEntity1FullId`. Empty unless
+   *  `groupInheritance` is set AND a tail reaches the limit. */
+  sametailByRelIndex: ReadonlyMap<number, string>;
 }
 
 /**
@@ -147,7 +158,12 @@ function buildDotClusters(
  *  entityImageClass, 20, ...)`; `calculateDimension` returns
  *  `orig.calculateDimension(...).delta(2 * border)` (EntityImageProtected
  *  .java:77-79) -- +40px on BOTH axes. */
-const PROTECTED_BORDER = 20;
+// cdd-T16: exported so `renderer-group.ts` can back out the protected
+// classifier's TRUE (unpadded) box from its padded `ClassifierGeo`
+// (`EntityImageProtected.java:56`'s `border` ctor param, always 20 --
+// `GeneralImageBuilder.java:113`) rather than re-declaring the same
+// jar-cited literal a second time.
+export const PROTECTED_BORDER = 20;
 
 /** A2s F-D pending theme-plumbing seam (see the F-D report): `skinparam
  *  groupInheritance N` is not yet parsed into `Theme`, so this field is
@@ -318,7 +334,7 @@ function buildDotNodesAndEdges(
   // `buildDotGraph`, shared with the node margins and with `layout.ts`) --
   // folded into one object for the same 5-param cap reason as above.
   ctx: { measurer: StringMeasurer; kals: readonly Kal[] },
-): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[] } {
+): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[]; sametailByRelIndex: ReadonlyMap<number, string> } {
   const { measurer, kals } = ctx;
   const classPortShortNames = classPortShortNamesById(ast);
   // ONE `removeIrrelevantSametail` pass feeding both consumers, as upstream
@@ -366,7 +382,7 @@ function buildDotNodesAndEdges(
     ...buildClassMagmaEdges(ast, anchors),
   ];
   applyKalEdgePorts(dotNodes, dotEdges);
-  return { dotNodes, dotEdges };
+  return { dotNodes, dotEdges, sametailByRelIndex: groupInheritance.sametailByRelIndex };
 }
 
 /**
@@ -447,7 +463,10 @@ export function buildDotGraph(
   const kals = computeKals(ast.relationships, { family: theme.fontFamily, size: theme.fontSize }, measurer);
   applyKalWidthFloor(kals, ast.classifiers, measuredMap);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
-  const { dotNodes, dotEdges } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, { measurer, kals });
+  const { dotNodes, dotEdges, sametailByRelIndex } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, {
+    measurer,
+    kals,
+  });
   const swappedEdges = computeSwappedEdges(ast);
 
   // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
@@ -467,5 +486,6 @@ export function buildDotGraph(
     anchors,
     clusterIdByNs: clusterParts?.clusterIdByNs ?? new Map<string, string>(),
     kals,
+    sametailByRelIndex,
   };
 }

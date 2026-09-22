@@ -235,7 +235,7 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   const removedRanks = computeRemovedRanks(collapsedAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals } = buildDotGraph(
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex } = buildDotGraph(
     effAst,
     measuredMap,
     theme,
@@ -288,6 +288,10 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
       // cdd-T15 (A2a/M1, D6): the SAME `Kal` list `class-dot-graph.ts`
       // sized the node shield margins with -- see `EdgeGeoTextContext.kals`.
       kals,
+      // cdd-T16 (M7): the SAME grouped-tail map `class-dot-graph.ts`
+      // emitted the `sametail` DOT attribute from -- see
+      // `EdgeGeoTextContext.sametailByRelIndex`.
+      sametailByRelIndex,
     },
     posMap,
     anchors,

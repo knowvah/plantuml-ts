@@ -137,3 +137,64 @@ describe('M1 — a `note top of <package>` connector clips the same way', () => 
     expect(pkg.y - last.y).toBeLessThan(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd-T16 (M7): `skinparam groupInheritance` sametail suppression
+// (`Link.java:238-239`) -- lazeju-60-boki114 groups A3's three children
+// (B3/C3/D3) and A4's four (B4/C4/D4/E4); pijiju-95-xexi872 (limit 2)
+// groups B's two `implements` children (X/Y).
+// ---------------------------------------------------------------------------
+
+describe('cdd-T16 — a grouped-inheritance link is suppressed to a bare solid path', () => {
+  const lazeju = fixture('lazeju-60-boki114');
+  const pijiju = fixture('pijiju-95-xexi872');
+
+  it('forces both decors to none and drops the dash on every one of A3`s and A4`s children', () => {
+    const grouped = lazeju.edges.filter((e) => e.to === 'A3' || e.to === 'A4');
+    expect(grouped.length).toBe(7); // B3,C3,D3,B4,C4,D4,E4
+    for (const e of grouped) {
+      expect(e.sourceDecor).toBe('none');
+      expect(e.targetDecor).toBe('none');
+      expect(e.dashed).toBe(false);
+    }
+  });
+
+  it('leaves B1`s and A2`s ungrouped extends links with their normal triangle decor', () => {
+    // B1->A1 (count 1) and B2/C2->A2 (count 2) are both below the
+    // `groupInheritance 3` limit -- `DotData.java:122-161` nulls their
+    // `sametail` back out, so `Link.getType()` takes its normal branch.
+    const b1 = lazeju.edges.find((e) => e.from === 'B1' && e.to === 'A1')!;
+    expect(b1.sourceDecor).toBe('triangle');
+    expect(b1.sametail).toBeUndefined();
+  });
+
+  it('carries the protected parent id and the ONE merged contact point per group', () => {
+    const a3children = lazeju.edges.filter((e) => e.to === 'A3');
+    for (const e of a3children) {
+      expect(e.sametail?.parentId).toBe('A3');
+      expect(e.sametail?.contact).toEqual({ x: 370.575, y: 96 });
+    }
+    const a4children = lazeju.edges.filter((e) => e.to === 'A4');
+    for (const e of a4children) {
+      expect(e.sametail?.parentId).toBe('A4');
+      expect(e.sametail?.contact).toEqual({ x: 667.575, y: 96 });
+    }
+  });
+
+  it('suppresses pijiju`s dotted implements links (dashed AND the stroke-override dasharray)', () => {
+    // Before this fix both X->B and Y->B carried `dashed=true` (the
+    // `implementation` decoration's default) and rendered a
+    // `stroke-dasharray` -- the report's "extra dasharray" diffs.
+    const implementsLinks = pijiju.edges.filter((e) => e.to === 'B' && e.from !== 'B');
+    expect(implementsLinks.length).toBe(2); // X->B, Y->B
+    for (const e of implementsLinks) {
+      expect(e.dashed).toBe(false);
+      expect(e.strokeDasharray).toBeUndefined();
+      expect(e.sametail?.parentId).toBe('B');
+    }
+    // B::t ..> T is a dependency, not extends-like -- untouched.
+    const dependency = pijiju.edges.find((e) => e.from === 'B' && e.to === 'T')!;
+    expect(dependency.dashed).toBe(true);
+    expect(dependency.sametail).toBeUndefined();
+  });
+});

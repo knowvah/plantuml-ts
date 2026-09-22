@@ -42,6 +42,21 @@ import type { UrlInfo } from './class-url.js';
 import { escapeComment } from '../../core/svg-format.js';
 import { getLinkTypeName, looksLikeRevertedForSvg } from '../../core/svek/extremity/link-decor.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
+import type { Point2D } from '../../core/klimt/UTranslate.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
+import { extractFlatContent } from '../../core/klimt/document-shell.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { UPolygon } from '../../core/klimt/shape/UPolygon.js';
+import { ULine } from '../../core/klimt/shape/ULine.js';
+import { rotatePoint } from '../../core/svek/extremity/rotate-point.js';
+import { PROTECTED_BORDER } from './class-dot-graph.js';
+import type { ClassifierGeo, EdgeGeo } from './layout.js';
+import type { Theme } from '../../core/theme.js';
 
 /** Leaf (unqualified) portion of a dotted `Classifier.id`/`Relationship
  *  .from`/`.to` — the jar entity comment (`<!--class NAME-->`) and link
@@ -144,4 +159,193 @@ export function wrapLink(info: WrapLinkInfo, inner: string): string {
       ...(linkType !== undefined ? { 'data-link-type': linkType } : {}),
     })
   );
+}
+
+// ---------------------------------------------------------------------------
+// cdd-T16 (M7/E11): the shared inheritance triangle + stub line(s) a
+// `skinparam groupInheritance`-protected parent draws for its grouped
+// children's merged tail (`dot/Neighborhood.java:69-96`, `drawU`'s
+// `sametailLinks` loop only -- the `allButSametails` loop at `:97-113`,
+// for the parent's OTHER non-grouped links, is a NAMED, deliberately
+// unported gap: no acceptance criterion in this task's reach needs it
+// (lazeju's two protected parents carry no other link), left for a
+// follow-on). Drawn at the SAME point jar draws it: immediately after the
+// parent's own `<g class="entity">`, as ROOT-level SIBLING elements --
+// `svek/SvekResult.java:82-89`'s node loop calls `image.drawU(...)` then,
+// for an `Untranslated` image, `drawUntranslated(...)` right after, on
+// the SAME `ug` the node loop itself holds (never nested inside the
+// entity's own group, never inside a `<g class="link">` -- E11's explicit
+// distinction). `renderer.ts`'s node loop calls this right after its own
+// `wrapEntity` push (flagged write-set extension, named in the task
+// report: the loop that owns both the entity string and `geo.edges`
+// lives there, not in this module).
+// ---------------------------------------------------------------------------
+
+const EPSILON = 0.001;
+
+/**
+ * `dot/Neighborhood.java:155-179`'s private `intersection(x1..y4)` --
+ * classic two-segment intersection via Cramer's rule, then a same-segment
+ * bound check on BOTH segments (the `epsilon`-widened min/max clamps).
+ * `undefined` where Java returns `null` (parallel segments, or the
+ * intersection point lies outside either segment's own extent).
+ */
+function segmentIntersection(a: Point2D, b: Point2D, c: Point2D, d: Point2D): Point2D | undefined {
+  const denom = (a.x - b.x) * (c.y - d.y) - (a.y - b.y) * (c.x - d.x);
+  if (denom === 0) return undefined;
+  const cross1 = a.x * b.y - a.y * b.x;
+  const cross2 = c.x * d.y - c.y * d.x;
+  const xi = ((c.x - d.x) * cross1 - (a.x - b.x) * cross2) / denom;
+  const yi = ((c.y - d.y) * cross1 - (a.y - b.y) * cross2) / denom;
+  if (xi + EPSILON < Math.min(a.x, b.x) || xi - EPSILON > Math.max(a.x, b.x)) return undefined;
+  if (xi + EPSILON < Math.min(c.x, d.x) || xi - EPSILON > Math.max(c.x, d.x)) return undefined;
+  if (yi + EPSILON < Math.min(a.y, b.y) || yi - EPSILON > Math.max(a.y, b.y)) return undefined;
+  if (yi + EPSILON < Math.min(c.y, d.y) || yi - EPSILON > Math.max(c.y, d.y)) return undefined;
+  return { x: xi, y: yi };
+}
+
+/**
+ * `dot/Neighborhood.java:132-152`'s `intersection(XRectangle2D, pt1,
+ * pt2)` -- tries all four rect edges (top, bottom, left, right, in that
+ * exact order) against the `center -> contact` segment, returning the
+ * first hit.
+ */
+function rectSegmentIntersect(
+  rect: { x: number; y: number; width: number; height: number },
+  pt1: Point2D,
+  pt2: Point2D,
+): Point2D | undefined {
+  const minX = rect.x;
+  const minY = rect.y;
+  const maxX = rect.x + rect.width;
+  const maxY = rect.y + rect.height;
+  const rectEdges: ReadonlyArray<readonly [Point2D, Point2D]> = [
+    [
+      { x: minX, y: minY },
+      { x: maxX, y: minY },
+    ],
+    [
+      { x: minX, y: maxY },
+      { x: maxX, y: maxY },
+    ],
+    [
+      { x: minX, y: minY },
+      { x: minX, y: maxY },
+    ],
+    [
+      { x: maxX, y: minY },
+      { x: maxX, y: maxY },
+    ],
+  ];
+  for (const [a, b] of rectEdges) {
+    const p = segmentIntersection(a, b, pt1, pt2);
+    if (p !== undefined) return p;
+  }
+  return undefined;
+}
+
+/** `EntityImageProtected.java:56,77-79`: the padded node's dimension is
+ *  `orig.calculateDimension().delta(2*border)`, drawn at `(border,
+ *  border)` inside it -- so the TRUE (unpadded) box a protected
+ *  classifier's `ClassifierGeo` represents is inset by `PROTECTED_BORDER`
+ *  on every side, backed out from the padded `x`/`y`/`width`/`height`
+ *  `class-dot-graph.ts#buildOneDotNode` inflated the DOT node by. */
+function innerBox(geo: ClassifierGeo): { x: number; y: number; width: number; height: number } {
+  return {
+    x: geo.x + PROTECTED_BORDER,
+    y: geo.y + PROTECTED_BORDER,
+    width: geo.width - 2 * PROTECTED_BORDER,
+    height: geo.height - 2 * PROTECTED_BORDER,
+  };
+}
+
+/** One entry in `dot/Neighborhood.java:71-75`'s `contactPoints` --a Java
+ *  `HashSet<XPoint2D>`, i.e. dedup by EXACT value equality, ported the
+ *  same way (string key, no tolerance) since the points being compared
+ *  are the SAME upstream `SvekEdge#getStartContactPoint()` value read
+ *  twice, never independently re-computed. */
+function uniqueSametailContacts(parentId: string, edges: readonly EdgeGeo[]): Point2D[] {
+  const seen = new Set<string>();
+  const points: Point2D[] = [];
+  for (const edge of edges) {
+    const st = edge.sametail;
+    if (st === undefined || st.parentId !== parentId) continue;
+    const key = `${st.contact.x},${st.contact.y}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    points.push(st.contact);
+  }
+  return points;
+}
+
+/** Draws through the SAME throwaway-`UGraphicSvg` + `extractFlatContent`
+ *  technique `renderer-arrowhead.ts#drawExtremityMarkup` uses for the
+ *  per-edge triangle -- reused for byte-identical `fill="none"`/
+ *  `stroke-linejoin`/`stroke-miterlimit` formatting, NOT for its shape
+ *  (`ExtremityExtendsLike` is a different upstream class with a different
+ *  rotation formula -- see this module's own header note). */
+function svgFromShapes(draw: (ug: UGraphic) => void, color: string): string {
+  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', { calculateDimension: () => ({ width: 0 }) });
+  const context = ug.apply(new Fore(color)).apply(UStroke.withThickness(1)).apply(new Back('none'));
+  draw(context);
+  return extractFlatContent(ug.getSvgString()).body;
+}
+
+/**
+ * `dot/Neighborhood.java:106-116`'s `drawExtends` -- a `UPolygon`
+ * `(0,0),(7,20),(-7,20)` rotated by `theta` (`UPolygon#rotate`, ported
+ * here per-point via `rotatePoint` since `UPolygon.rotate()` itself is
+ * not, see `rotate-point.ts`'s own doc comment) then translated to
+ * `contact` by the SAME `ug.apply(translate).draw(poly)` sequencing
+ * (rotate at the origin, translate via the graphic, not pre-baked
+ * absolute points). Returns the triangle's own SVG plus `middle`, the
+ * midpoint of its rotated base edge (`p1`/`p2`) translated to `contact`
+ * -- upstream's own return value, consumed as the stub line's near end.
+ */
+function drawExtendsTriangle(contact: Point2D, theta: number, color: string): { svg: string; middle: Point2D } {
+  const p0 = rotatePoint({ x: 0, y: 0 }, theta);
+  const p1 = rotatePoint({ x: 7, y: 20 }, theta);
+  const p2 = rotatePoint({ x: -7, y: 20 }, theta);
+  const svg = svgFromShapes((ug) => {
+    ug.apply(new UTranslate(contact.x, contact.y)).draw(new UPolygon([p0, p1, p2]));
+  }, color);
+  const middle = { x: (p1.x + p2.x) / 2 + contact.x, y: (p1.y + p2.y) / 2 + contact.y };
+  return { svg, middle };
+}
+
+/** `dot/Neighborhood.java:182-188`'s private `drawLine(ug, pt1, pt2)`. */
+function drawStubLine(a: Point2D, b: Point2D, color: string): string {
+  return svgFromShapes((ug) => {
+    ug.apply(new UTranslate(a.x, a.y)).draw(ULine.create(a, b));
+  }, color);
+}
+
+/**
+ * `dot/Neighborhood.java:69-96`'s `drawU`, sametail loop only (see this
+ * section's header note for the un-ported `allButSametails` loop).
+ * `theme.colors.arrow` is upstream's bare `SName.arrow` style default
+ * (`SvekResult.java:76-80`'s `getDefaultStyleDefinition`/`LineColor`) --
+ * the same base an UNSTYLED edge falls back to, never a specific grouped
+ * child's own resolved color (the triangle is drawn once, off the
+ * PARENT, not per child).
+ */
+export function renderGroupInheritanceNeighborhood(
+  geo: ClassifierGeo,
+  edges: readonly EdgeGeo[],
+  theme: Theme,
+): string[] {
+  const contacts = uniqueSametailContacts(geo.id, edges);
+  if (contacts.length === 0) return [];
+  const rect = innerBox(geo);
+  const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const color = theme.colors.arrow;
+  const out: string[] = [];
+  for (const pt of contacts) {
+    const inter = rectSegmentIntersect(rect, center, pt);
+    if (inter === undefined) continue;
+    const theta = Math.atan2(center.x - pt.x, -(center.y - pt.y));
+    const { svg, middle } = drawExtendsTriangle(inter, theta, color);
+    out.push(svg, drawStubLine(middle, pt, color));
+  }
+  return out;
 }

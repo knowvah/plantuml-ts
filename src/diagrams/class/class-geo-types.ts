@@ -23,6 +23,7 @@ import type {
   EdgeConstraintGeo,
   EdgeNoteBoxGeo,
   QuantifierLinesGeo,
+  SametailGeo,
   VisibilityIconGeo,
 } from './class-geo-edge-extras.js';
 
@@ -34,6 +35,7 @@ export type {
   EdgeNoteLine,
   QuantifierLineGeo,
   QuantifierLinesGeo,
+  SametailGeo,
   VisibilityIconGeo,
 } from './class-geo-edge-extras.js';
 
@@ -427,6 +429,7 @@ export interface EdgeGeo {
   url?: UrlInfo;
   hidden?: true;
   middleDecor?: MiddleDecor;
+  sametail?: SametailGeo; // cdd-T16 (M7/E11): see SametailGeo's own doc comment.
 }
 
 // cdd-T6: `NamespaceGeo` moved to `class-geo-namespace-types.ts` when the

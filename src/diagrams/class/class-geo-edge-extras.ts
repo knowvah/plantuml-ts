@@ -98,3 +98,22 @@ export interface QuantifierLineGeo {
  *  (or whose position graphviz never placed) contributes an EMPTY array,
  *  never a hole, so `[0]`/`[1]` always mean tail/head. */
 export type QuantifierLinesGeo = readonly [readonly QuantifierLineGeo[], readonly QuantifierLineGeo[]];
+
+/**
+ * cdd-T16 (M7/E11): present only when `class-edge-geo.ts#buildEdgeGeos`
+ * found this relationship's index in `EdgeGeoTextContext
+ * .sametailByRelIndex` -- i.e. an extends-like link `skinparam
+ * groupInheritance` grouped. `parentId` is the protected parent's
+ * classifier id (`Relationship.idEntity1FullId`, upstream's
+ * `link.getEntity1()` -- `dot/DotData.java:126`); `contact` is that
+ * parent's RAW (pre-clip, padded-node) spline contact point --
+ * `normalizedPts[0]`, since `normalizeEdgePoints` runs entity1 -> entity2
+ * unconditionally (mirrors `SvekEdge#getStartContactPoint()`,
+ * `dot/Neighborhood.java:74-76`). `renderer-group.ts
+ * #renderGroupInheritanceNeighborhood` groups edges by `parentId` and
+ * draws one shared triangle per unique `contact`.
+ */
+export interface SametailGeo {
+  readonly parentId: string;
+  readonly contact: { readonly x: number; readonly y: number };
+}

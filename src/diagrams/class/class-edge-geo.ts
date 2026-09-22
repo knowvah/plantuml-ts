@@ -5,9 +5,9 @@
  * builders. buildEdgeGeos re-exported from that module.
  */
 
-import type { ClassDiagramAST, Relationship } from './ast.js';
+import type { ClassDiagramAST, LinkDecor, Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
+import { EDGE_DECORATION_MAP, type EdgeDecoration } from './class-dot-edges.js';
 import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 import { clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
 import { attachPortLabels } from './class-edge-label-anchor.js';
@@ -16,6 +16,7 @@ import { computeEdgeNoteBox } from './class-edge-note-box.js';
 import { constraintAnchor } from './class-edge-constraint.js';
 import { edgeLabelAttrs } from './class-layout-edge-labels.js';
 import { kalBoxAt, kalTranslateForDecoration, type Kal } from './class-kal.js';
+import type { SametailGeo } from './class-geo-edge-extras.js';
 import type { EdgeGeo } from './layout.js';
 
 // cdd-T6: `EdgeGeoTextContext` and the three label-attach functions moved
@@ -286,6 +287,88 @@ function attachConstraints(entries: readonly ConstraintEntry[]): void {
 }
 
 /**
+ * cdd-T16 (M7): `Link.java:238-239`'s `getSametail() != null` guard --
+ * forces BOTH decors to `LinkDecor.NONE` and the style to
+ * `LinkStyle.NORMAL()` (`decoration/LinkType.java:71-72`'s 2-arg ctor,
+ * always solid); only `stereotypeTags` survives (a link's `<<tag>>` is a
+ * SEPARATE draw upstream, unrelated to `getType()`). `sametail` carries
+ * the protected parent's classifier id (`Relationship.idEntity1FullId`,
+ * upstream's `link.getEntity1()` -- `dot/DotData.java:126`) and its RAW
+ * spline contact point (`normalizedPts[0]`, entity1's end -- mirrors
+ * `SvekEdge#getStartContactPoint()`, `dot/Neighborhood.java:74-76`) for
+ * `renderer-group.ts#renderGroupInheritanceNeighborhood`. `undefined`
+ * when relationship index `i` is not grouped.
+ */
+function groupInheritanceOverride(
+  rel: Relationship,
+  i: number,
+  sametailByRelIndex: ReadonlyMap<number, string> | undefined,
+  normalizedPts: ReadonlyArray<{ x: number; y: number }>,
+): { dashed: false; decor: 'none'; strokeExtra: Pick<EdgeGeo, 'stereotypeTags'>; sametail?: SametailGeo } | undefined {
+  if (sametailByRelIndex?.has(i) !== true) return undefined;
+  const strokeExtra =
+    rel.stereotypeTags !== undefined && rel.stereotypeTags.length > 0 ? { stereotypeTags: rel.stereotypeTags } : {};
+  const contact = normalizedPts[0];
+  const sametail =
+    rel.idEntity1FullId !== undefined && contact !== undefined ? { parentId: rel.idEntity1FullId, contact } : undefined;
+  return { dashed: false, decor: 'none', strokeExtra, ...(sametail !== undefined ? { sametail } : {}) };
+}
+
+/**
+ * The decor/dashed/stroke-override resolution `buildEdgeGeos` needs per
+ * relationship, folded into one call so that function's own NLOC/CCN does
+ * not grow with each new override this port adds. G2 N8/cdd-T6 A2a/M4's
+ * dashed formula and G2 N30's decor swap (paired with `points[0]`/
+ * `points[last]`, flipped together with `pts` when `normalizeEdgePoints`
+ * reversed the array) move here verbatim; cdd-T16 (M7) adds the `grouped`
+ * branch -- see {@link groupInheritanceOverride}.
+ */
+interface ResolvedEdgeDecor {
+  sourceDecor: LinkDecor;
+  targetDecor: LinkDecor;
+  dashed: boolean;
+  strokeExtra: Pick<EdgeGeo, 'stereotypeTags' | 'strokeWidth' | 'strokeDasharray' | 'colorOverride'>;
+}
+
+/** G2 N8/cdd-T6 A2a/M4's dashed formula, split to its own one-liner --
+ *  see {@link resolveEdgeDecor}'s own doc comment for the jar citation. */
+function resolveDashed(rel: Relationship, decor: EdgeDecoration): boolean {
+  return rel.dashed ?? rel.dashedBody ?? decor.dashed;
+}
+
+/** The pre-existing (pre-cdd-T16) resolution, unchanged -- split out so
+ *  {@link resolveEdgeDecor}'s own `grouped` branch stays cheap to read. */
+function resolveNormalEdgeDecor(
+  rel: Relationship,
+  decor: EdgeDecoration,
+  matchesFromTo: boolean,
+  defaultArrowThickness: number | undefined,
+): ResolvedEdgeDecor {
+  const dashed = resolveDashed(rel, decor);
+  const fromDecor = rel.sourceDecor ?? decor.sourceDecor;
+  const toDecor = rel.targetDecor ?? decor.targetDecor;
+  return {
+    sourceDecor: matchesFromTo ? fromDecor : toDecor,
+    targetDecor: matchesFromTo ? toDecor : fromDecor,
+    dashed,
+    strokeExtra: buildStrokeOverride(rel, dashed, defaultArrowThickness),
+  };
+}
+
+function resolveEdgeDecor(
+  rel: Relationship,
+  decor: EdgeDecoration,
+  matchesFromTo: boolean,
+  grouped: ReturnType<typeof groupInheritanceOverride>,
+  defaultArrowThickness: number | undefined,
+): ResolvedEdgeDecor {
+  if (grouped !== undefined) {
+    return { sourceDecor: 'none', targetDecor: 'none', dashed: false, strokeExtra: grouped.strokeExtra };
+  }
+  return resolveNormalEdgeDecor(rel, decor, matchesFromTo, defaultArrowThickness);
+}
+
+/**
  * Build EdgeGeo entries from the dot layout result, normalizing each edge's
  * drawn direction (see `normalizeEdgePoints`). G2 N8: an `invis: true`
  * relationship (the association-class-couple sibling-circle connector,
@@ -344,36 +427,16 @@ export function buildEdgeGeos(
     // {@link attachKalBoxes}); `clipClusterEdgeEnds` returns a fresh array
     // for every edge, so mutating its endpoints below is local.
     const relKals = (text.kals ?? []).filter((k) => k.relIndex === i);
-    // G2 N8: `rel.dashed` overrides the type-derived default for the
-    // association-class couple's class-link edge -- see `Relationship
-    // .dashed`'s own doc comment (ast.ts).
-    //
-    // cdd-T6 (A2a/M4): `rel.dashedBody` (T5) is the arrow BODY's own
-    // dottedness, which upstream keeps INDEPENDENT of the head decors --
-    // `getLinkType()` builds `new LinkType(decors2, decors1)` from the
-    // glyphs and only then applies `result.goDashed()` iff either body
-    // contains `.` (`CommandLinkClass.java:495-497`), so a decor can never
-    // make a link dashed and a dotted body can never be out-voted by one.
-    // `decor.dashed` survives only as the fallback for relationships built
-    // outside the arrow-token grammar (couples/lollipop/map rows), which
-    // carry no flag. Measured: `dashed` reaches no DOT attribute in this
-    // port (0 of 723 emitted graphs contain the token), matching the jar,
-    // whose captured `svek-*.dot` files contain no `style=dashed` either --
-    // the diagnosis report's MEDIUM layout risk does not apply here.
-    const dashed = rel.dashed ?? rel.dashedBody ?? decor.dashed;
-    // G2 N30: keep sourceDecor/targetDecor paired with points[0]/points
-    // [last] -- swap them together with `pts` when `normalizeEdgePoints`
-    // flipped the array relative to `rel.from`/`rel.to` (see that
-    // function's own doc comment for why `idEntity1Decor`/`idEntity2Decor`
-    // are deliberately NOT used here).
-    const fromDecor = rel.sourceDecor ?? decor.sourceDecor;
-    const toDecor = rel.targetDecor ?? decor.targetDecor;
+    // cdd-T16 (M7): grouped overrides decor/dash/stroke uniformly -- see
+    // {@link groupInheritanceOverride}'s own doc comment.
+    const grouped = groupInheritanceOverride(rel, i, text.sametailByRelIndex, normalizedPts);
+    const resolved = resolveEdgeDecor(rel, decor, matchesFromTo, grouped, defaultArrowThickness);
     const edgeGeo: EdgeGeo = {
       id: edgeResult.id,
       points: pts,
-      sourceDecor: matchesFromTo ? fromDecor : toDecor,
-      targetDecor: matchesFromTo ? toDecor : fromDecor,
-      dashed,
+      sourceDecor: resolved.sourceDecor,
+      targetDecor: resolved.targetDecor,
+      dashed: resolved.dashed,
       from: rel.from,
       to: rel.to,
       ...(rel.creationIndex !== undefined ? { creationIndex: rel.creationIndex } : {}),
@@ -388,7 +451,8 @@ export function buildEdgeGeos(
       ...(rel.url !== undefined ? { url: rel.url } : {}),
       ...(rel.hidden === true ? { hidden: true as const } : {}),
       ...(rel.middleDecor !== undefined ? { middleDecor: rel.middleDecor } : {}),
-      ...buildStrokeOverride(rel, dashed, defaultArrowThickness),
+      ...resolved.strokeExtra,
+      ...(grouped?.sametail !== undefined ? { sametail: grouped.sametail } : {}),
     };
 
     if (relKals.length > 0) attachKalBoxes(edgeGeo, relKals, normalizedPts, pts);

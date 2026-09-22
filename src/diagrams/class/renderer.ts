@@ -18,7 +18,13 @@ import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrom
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
-import { wrapCluster, wrapEntity, wrapLink, leafPortion } from './renderer-group.js';
+import {
+  wrapCluster,
+  wrapEntity,
+  wrapLink,
+  leafPortion,
+  renderGroupInheritanceNeighborhood,
+} from './renderer-group.js';
 import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
 import {
@@ -407,6 +413,8 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     children.push(
       wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)),
     );
+    // cdd-T16 (M7/E11, flagged write-set extension, SvekResult.java:82-89):
+    children.push(...renderGroupInheritanceNeighborhood(classifier, geo.edges, theme));
   }
 
   // 3. Edges (last, matching jar: `svek/SvekResult.java:97-101` draws every

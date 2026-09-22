@@ -76,6 +76,14 @@ export interface EdgeGeoTextContext {
    *  `buildEdgeGeos` walks. Optional so hand-built test callers compile
    *  unchanged; the mechanism is skipped without it. */
   readonly kals?: readonly Kal[] | undefined;
+  /** cdd-T16 (M7, `Link.java:238-239`): relationship index -> protected
+   *  parent uid, for exactly the extends-like links a `skinparam
+   *  groupInheritance` tail-count grouped -- threaded here for the SAME
+   *  ninth-parameter reason {@link kals} is (`class-dot-graph.ts
+   *  #DotGraphParts.sametailByRelIndex`'s own doc comment). Optional so
+   *  hand-built test callers compile unchanged; every relationship is
+   *  treated as ungrouped without it. */
+  readonly sametailByRelIndex?: ReadonlyMap<number, string> | undefined;
 }
 
 /**

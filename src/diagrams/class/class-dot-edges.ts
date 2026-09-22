@@ -24,7 +24,11 @@ import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
 // Edge decoration map
 // ---------------------------------------------------------------------------
 
-interface EdgeDecoration {
+// cdd-T16: exported so `class-edge-geo.ts#resolveEdgeDecor` can name this
+// shape in its own signature instead of an inline object-literal type
+// (lizard's generic C-family parser over-counts a multi-line inline type
+// literal's `;` separators as branches).
+export interface EdgeDecoration {
   targetDecor: EdgeGeo['targetDecor'];
   sourceDecor: EdgeGeo['sourceDecor'];
   dashed: boolean;
