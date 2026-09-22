@@ -271,6 +271,24 @@ describe('preprocessor', () => {
     expect(lines).toContain('Alice -> Bob');
   });
 
+  it('matches the `skinparam` keyword case-INSENSITIVELY, in all three forms (cdd-T28)', () => {
+    // `Pattern2.compileInternal` compiles every upstream command regex with
+    // `Pattern.CASE_INSENSITIVE` (`regex/Pattern2.java:114`), covering
+    // `CommandSkinParam.java:58`'s `(skinparam|skinparamlocked)` leaf and
+    // `CommandSkinParamMultilines.java:49`'s block opener. `repuga-78-
+    // xora226` writes `skinParam CaptionFontSize 10`; this port used to
+    // drop the whole line silently.
+    const line = preprocess('skinParam CaptionFontSize 10\nAlice -> Bob');
+    expect(line.skinparam.get('captionfontsize')).toBe('10');
+    expect(line.lines).not.toContain('skinParam CaptionFontSize 10');
+
+    const bare = preprocess('SkinParam {\n  BackgroundColor #FF0000\n}\nAlice -> Bob');
+    expect(bare.skinparam.get('backgroundcolor')).toBe('#FF0000');
+
+    const scoped = preprocess('SKINPARAM component {\n  Style rectangle\n}\nAlice -> Bob');
+    expect(scoped.skinparam.get('componentstyle')).toBe('rectangle');
+  });
+
   it('single-line skinparam stores plain lowercase key (no arrow normalisation)', () => {
     const { skinparam } = preprocess('skinparam classArrowColor red');
     expect(skinparam.get('classarrowcolor')).toBe('red');

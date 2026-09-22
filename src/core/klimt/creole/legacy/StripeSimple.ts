@@ -361,7 +361,11 @@ export function buildLineAtoms(
   font: FontConfiguration,
   mode: CreoleMode = CreoleMode.FULL,
 ): LineBuildAtoms {
-  const classification = classifyStripeLine(line);
+  // cdd-T28: `mode` reaches the CLASSIFIER now, not just the atom builder
+  // -- upstream's `*`/`#` list branches are `CreoleMode.FULL`-only
+  // (`CreoleStripeSimpleParser.java:119,127,136`), so a SIMPLE_LINE caller
+  // (every class member row) still classifies a leading `*`/`#` as NORMAL.
+  const classification = classifyStripeLine(line, mode);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
   const content = classification.content;
   if (classification.type === 'LITERAL') {

@@ -62,12 +62,26 @@ import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../klimt/geom/VerticalAlignment.js';
 import { group } from '../svg.js';
 import { buildAnnotationBlock, type AnnotationBlock } from './blocks.js';
+import { mergeFragmentDefs } from '../klimt/document-shell.js';
+import type { SpriteRegistry } from '../sprite-commands.js';
 import { shiftFragmentBody } from './coord-shift.js';
 
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
  *  T4's interface contract (`plans/g0b-annotations/batch-2/T4-chrome-core.md`)
  *  calls it. */
 export type AnnotationStyles = Record<AnnotationElement, AnnotationBoxStyle>;
+
+/** cdd-T28: what every chrome text block needs beyond its own style — the
+ *  injected `StringMeasurer` (unchanged) and the diagram's own
+ *  `SpriteRegistry`, so a `<$name>`/`<img:…>`/`<:emoji:>` in a title or
+ *  legend resolves through the SAME `makeAtomImageResolverFor` every other
+ *  creole surface uses instead of measuring and drawing as nothing.
+ *  Bundled rather than passed as two positional parameters so the per-slot
+ *  builders stay inside this project's parameter budget. */
+interface ChromeTextContext {
+  readonly measurer: StringMeasurer;
+  readonly sprites?: SpriteRegistry | undefined;
+}
 
 interface Dim {
   readonly width: number;
@@ -139,7 +153,17 @@ function decorateEntityImage(
     parts.push(group(shiftFragmentBody(text2.block.body, xText2, yText2), { class: text2.className }));
   }
 
-  return { body: parts.join(''), width: dimTotal.width, height: dimTotal.height };
+  // cdd-T28: a chrome text block can now mint its own `<defs>` entries
+  // (klimt lifts a `<back:color>` text-background `filter` out of the
+  // fragment document, `klimt/document-shell.ts#renderDrawableToFragment`).
+  // They must survive every composition step, so each wrap merges the
+  // slots' defs into the running block's -- `mergeFragmentDefs` de-dups by
+  // `id`, which matters because two slots built from the SAME uid-seeded
+  // document (e.g. the same colour in header and footer) can emit the same
+  // def twice.
+  const extraDefs = mergeFragmentDefs([original, text1?.block ?? {}, text2?.block ?? {}]);
+  const composed = { body: parts.join(''), width: dimTotal.width, height: dimTotal.height };
+  return extraDefs === undefined ? composed : { ...composed, extraDefs };
 }
 
 // ---------------------------------------------------------------------------
@@ -162,9 +186,9 @@ function addLegend(
   original: AnnotationBlock,
   legend: DisplayPositioned,
   style: AnnotationBoxStyle,
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): AnnotationBlock {
-  const block = buildAnnotationBlock('legend', nonNullDisplay(legend), style, measurer);
+  const block = buildAnnotationBlock('legend', nonNullDisplay(legend), style, ctx.measurer, ctx.sprites);
   const halign = legend.horizontalAlignment ?? HorizontalAlignment.CENTER;
   const slot: TextSlot = { block, halign, className: 'legend' };
   return legend.verticalAlignment === VerticalAlignment.TOP
@@ -178,9 +202,9 @@ function addTitle(
   original: AnnotationBlock,
   title: DisplayPositioned,
   style: AnnotationBoxStyle,
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): AnnotationBlock {
-  const block = buildAnnotationBlock('title', nonNullDisplay(title), style, measurer);
+  const block = buildAnnotationBlock('title', nonNullDisplay(title), style, ctx.measurer, ctx.sprites);
   return decorateEntityImage(original, { block, halign: HorizontalAlignment.CENTER, className: 'title' }, null);
 }
 
@@ -190,9 +214,9 @@ function addCaption(
   original: AnnotationBlock,
   caption: DisplayPositioned,
   style: AnnotationBoxStyle,
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): AnnotationBlock {
-  const block = buildAnnotationBlock('caption', nonNullDisplay(caption), style, measurer);
+  const block = buildAnnotationBlock('caption', nonNullDisplay(caption), style, ctx.measurer, ctx.sprites);
   return decorateEntityImage(original, null, { block, halign: HorizontalAlignment.CENTER, className: 'caption' });
 }
 
@@ -200,10 +224,10 @@ function headerFooterSlot(
   dp: DisplayPositioned,
   style: AnnotationBoxStyle,
   className: 'header' | 'footer',
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): TextSlot | null {
   if (isDisplayPositionedNull(dp)) return null;
-  const block = buildAnnotationBlock(className, nonNullDisplay(dp), style, measurer);
+  const block = buildAnnotationBlock(className, nonNullDisplay(dp), style, ctx.measurer, ctx.sprites);
   // D8: header defaults RIGHT, footer defaults CENTER, both FROM STYLE, only
   // when no explicit left|right|center prefix was parsed (dp.horizontalAlignment
   // null — see commands.ts matchHeader/matchFooter). style.horizontalAlignment
@@ -219,10 +243,10 @@ function addHeaderAndFooter(
   original: AnnotationBlock,
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): AnnotationBlock {
-  const text1 = headerFooterSlot(annotations.header, styles.header, 'header', measurer);
-  const text2 = headerFooterSlot(annotations.footer, styles.footer, 'footer', measurer);
+  const text1 = headerFooterSlot(annotations.header, styles.header, 'header', ctx);
+  const text2 = headerFooterSlot(annotations.footer, styles.footer, 'footer', ctx);
   return decorateEntityImage(original, text1, text2);
 }
 
@@ -258,24 +282,24 @@ function applyChromeSlots(
   block: AnnotationBlock,
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
-  measurer: StringMeasurer,
+  ctx: ChromeTextContext,
 ): { readonly block: AnnotationBlock; readonly decorated: boolean } {
   let decorated = false;
 
   if (!isDisplayPositionedNull(annotations.legend)) {
-    block = addLegend(block, annotations.legend, styles.legend, measurer);
+    block = addLegend(block, annotations.legend, styles.legend, ctx);
     decorated = true;
   }
   if (!isDisplayPositionedNull(annotations.title)) {
-    block = addTitle(block, annotations.title, styles.title, measurer);
+    block = addTitle(block, annotations.title, styles.title, ctx);
     decorated = true;
   }
   if (!isDisplayPositionedNull(annotations.caption)) {
-    block = addCaption(block, annotations.caption, styles.caption, measurer);
+    block = addCaption(block, annotations.caption, styles.caption, ctx);
     decorated = true;
   }
   if (!isDisplayPositionedNull(annotations.header) || !isDisplayPositionedNull(annotations.footer)) {
-    block = addHeaderAndFooter(block, annotations, styles, measurer);
+    block = addHeaderAndFooter(block, annotations, styles, ctx);
     decorated = true;
   }
 
@@ -287,6 +311,7 @@ export function applyChrome(
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): RenderFragment {
   if (isEmpty(annotations)) return fragment;
 
@@ -306,7 +331,7 @@ export function applyChrome(
   // tracked separately from `block` so a mainframe-only bag still returns
   // `fragment.body` byte-identical (no new outer `<g>` either), matching
   // `annotations-mainframe.test.ts`'s pinned D5-adjacent invariant.
-  const { block, decorated } = applyChromeSlots(initial, annotations, styles, measurer);
+  const { block, decorated } = applyChromeSlots(initial, annotations, styles, { measurer, sprites });
 
   if (!decorated) return fragment;
 
@@ -317,11 +342,15 @@ export function applyChrome(
   // N1) records that THIS call performed the single bare `<g>` wrap --
   // `core/assemble-svg.ts`'s per-`diagramType` finalize functions (T8)
   // read it to avoid wrapping a second time; every other engine ignores it.
+  // cdd-T28: chrome's own `<defs>` (a `<back:color>` filter in a title/
+  // legend/footer) merge with the diagram body's, de-duped by `id`.
+  const extraDefs = mergeFragmentDefs([fragment, block]);
   return {
     ...fragment,
     body: group(block.body),
     width: block.width,
     height: block.height,
     bodyWrapped: true,
+    ...(extraDefs === undefined ? {} : { extraDefs }),
   };
 }

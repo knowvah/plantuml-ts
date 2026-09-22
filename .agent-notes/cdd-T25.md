@@ -1,10 +1,35 @@
 # cdd-T25 — header/edge-label creole (plain, size, xamule)
 
-## Before/after (`npx jiti plans/class-divergence-drive/tools/render-diff.mts`)
+## Round 2 (2026-09-22) — the `<plain>` stop-1 item, unblocked
+
+T26 merged; `src/core/klimt/creole/` (specifically `legacy/CommandCreoleBuilder.ts`)
+is no longer T26's write-set, so the stop-1 halt from round 1 (below) is
+resolved: `FontStyle.PLAIN` is now registered
+(`src/core/klimt/creole/legacy/CommandCreoleBuilder.ts#registerPlain`,
+`CommandCreoleStyle.ts`'s `ACTIVATION_SOURCE`/`DEACTIVATION_SOURCE`/
+`LEGACY_STARTERS[FontStyle.PLAIN]`, `AddStyle.ts#addFontStyle`'s
+clear-all-styles branch) per `CommandCreoleBuilder.java:83-84`/
+`FontStyle.java:47-48,89-90,114-115,142-143`/`FontConfiguration.java:301-309`.
+diseka went from 2/7 → **1/0**: text content, `x`, `y`, `font-size`,
+`fill="#888"`, `textLength="79.363"` all now byte-exact against jar. The
+ONE remaining structural diff (`font-weight`: jar `700`, this port none) is
+a TRACED, not guessed, residual — see decision-journal row 120 for the
+full mechanism (`DriverTextSvg.java:93-103`'s two-tier styles-vs-base-face
+weight fallback, which this port's flat `FontConfiguration` cannot
+reproduce without a model change in `src/core/klimt/shape/UText.ts`,
+outside this task's unlock and with a project-wide blast radius). **NOT
+force-fitted** — reported honestly rather than silently claiming 0
+structural. Gekope (unaffected, no `<plain>` in its source): unchanged
+12/65 → 12/65. Full `npm test`: 0 failures, JSON-reporter count (781)
+matches on-disk `.test.ts` count, no non-class golden/ratchet moved —
+zero movers to journal beyond the diseka/gekope pair. Commit
+`fix(cdd-T25): register the creole <plain> style command`.
+
+## Round 1 (original task) — before/after (`npx jiti plans/class-divergence-drive/tools/render-diff.mts`)
 
 | Fixture | Before (structural/numeric) | After (structural/numeric) | Disposition |
 |---|---|---|---|
-| `diseka-11-gozu390` | 3 / 7 | 2 / 7 | Partial fix (color); `<plain>` tag-strip blocked at stop-1 (T26) |
+| `diseka-11-gozu390` | 3 / 7 | 2 / 7 (round 2: **1 / 0**, see above) | Partial fix (color); `<plain>` tag-strip UNBLOCKED in round 2 |
 | `daxeno-00-kasu166` | 12 / 135 | 12 / 135 (unchanged) | Diagnosed; genuinely-large fix deferred (see below) |
 | `xamule-03-jeda376` | 5 / 976 | 2 / 975 | Fixed (the 3 removed structural diffs are exactly the target mechanism; remaining 2 structural / 975 numeric are a pre-existing, unrelated multi-edge coordinate divergence in this fixture) |
 | `lecelo-92-loma110` | 7 / 8 | 6 / 7 | Diagnosed (LOW confidence confirmed); real fix is T26 territory, left open |
@@ -44,6 +69,14 @@
   output, though for a structurally different reason than jar's own two-tier fallback.
 - **Confidence**: High (jar file:line + TS file:line both traced; verified against the actual
   rendered SVG, not merely read).
+- **UPDATE (round 2, 2026-09-22)**: PLAIN is now registered (T26 merged, `src/core/klimt/creole/`
+  unblocked). This prediction held exactly: once PLAIN correctly clears `styles` (matching
+  `FontConfiguration.add`), the ACCIDENTAL bold-retention described above disappears — and the
+  TRUE two-tier-fallback gap (predicted here) becomes a real, measured 1-structural-diff residual
+  on diseka (`font-weight` missing). Not fixed this round either: still needs the
+  `src/core/klimt/shape/UText.ts` model change this note already named, which remains outside
+  what's been authorized (only `src/core/klimt/creole/` was unblocked) and has a project-wide
+  blast radius. See decision-journal row 120 for the full, re-verified mechanism.
 
 ## Observation: classifier header rows never carried per-atom creole atoms (M8b, now fixed)
 - **Context**: `.agent-notes/cdd-T19.md` §M8b flagged this as unfiled — `class-layout-header-creole.ts
@@ -159,11 +192,14 @@
   reading the code, not inferred).
 
 ## Follow-ons filed
-- T26 (or a dedicated L2 creole task): port `FontStyle.PLAIN` (`<plain>...</plain>`, legacy-only,
-  starters `<p`/`<P`) into `CommandCreoleBuilder.ts`'s FULL/OTHER maps, plus the two-tier
-  `styles`-vs-base-face weight fallback (`DriverTextSvg.java:93-103`) into `FontConfiguration`
-  (`src/core/klimt/shape/UText.ts`) and its SVG-driver render path — needed for diseka's `<plain>`
-  half and any future header/member row wrapping a creole style tag around already-bold/italic text.
+- **RESOLVED round 2**: `FontStyle.PLAIN` registration (`CommandCreoleBuilder.ts`'s FULL/OTHER
+  maps) — done, see the round-2 section above.
+- Still open, a dedicated task (a `FontConfiguration`/`UText.ts` model change, outside
+  `src/core/klimt/creole/`): the two-tier `styles`-vs-base-face weight fallback
+  (`DriverTextSvg.java:93-103`) — needed to close diseka's LAST structural diff (`font-weight`)
+  and any future header/member row wrapping a creole style tag around already-bold/italic text.
+  Blast radius: every `FontConfiguration` consumer project-wide (class headers/members, notes,
+  descriptions), not just class — needs its own measured close, not a T25-scale patch.
 - T26 (or a dedicated icon-artwork mission): port real Twemoji/OpenMoji-style vector icon artwork
   for `CommandCreoleEmoji`'s `<:name:>` shorthand (currently renders the platform Unicode glyph) —
   needed for lecelo's full conformance; NOT conflated with T26's OpenIconic (`<&glyph>`) atoms, a

@@ -1607,10 +1607,10 @@
       "type": "activity",
       "slug": "letare-59-gore448",
       "status": "baseline",
-      "weightedScore": 72,
-      "diffCount": 39,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 37,
+      "diffCount": 37,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -1634,10 +1634,10 @@
       "type": "activity",
       "slug": "lidefe-01-vaki092",
       "status": "baseline",
-      "weightedScore": 141,
-      "diffCount": 74,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 133,
+      "diffCount": 73,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -3254,10 +3254,10 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "diffCount": 340,
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
-      "weightedScore": 581
+      "diffCount": 376,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2",
+      "weightedScore": 488
     },
     {
       "type": "activity",

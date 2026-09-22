@@ -142,6 +142,17 @@ const TREE_MARKER_RE = /^\s*\|_/;
  * 8-space-indented `|_ Tree item 11` — computes levels relative to ITS OWN
  * base indent, not the source file's column 0) before extracting each
  * cell's level + display text.
+ *
+ * A4 2a: `text` is `purged.replace(TREE_MARKER_RE, '')` with NO trailing
+ * `.trim()` — `StripeTree#analyzeAndAdd` (java:80-90) is `final String text
+ * = s.replaceFirst("^\\s*\\|_", "")`, nothing more, which for the common
+ * one-space-after-`|_` source style (`"|_ prop"`) leaves a SINGLE leading
+ * space on `text` (`" prop"`). That space is a real creole atom
+ * downstream — {@link resolveOneAtom} in `class-member-creole.ts` strips it
+ * (and any trailing whitespace) at RENDER time, mirroring
+ * `DriverTextSvg.java:112-124` — not here. Trimming here (the old code)
+ * silently dropped the atom a bold/whitespace-only run needs to sit next
+ * to (`foxiki-17-kosa114`'s missing NBSP `<text>`, A4-text.md#2a).
  */
 function buildTreeRun(rawLines: readonly string[], startIdx: number): { cells: EnhancedTreeCell[]; consumed: number } {
   const first = rawLines[startIdx]!;
@@ -153,7 +164,7 @@ function buildTreeRun(rawLines: readonly string[], startIdx: number): { cells: E
     const raw = rawLines[i]!;
     if (!isTreeStartLine(raw.trimStart())) break;
     const purged = raw.startsWith(start) ? raw.slice(start.length) : raw;
-    cells.push({ level: computeTreeLevel(purged), text: purged.replace(TREE_MARKER_RE, '').trim() });
+    cells.push({ level: computeTreeLevel(purged), text: purged.replace(TREE_MARKER_RE, '') });
   }
   return { cells, consumed: i - startIdx };
 }

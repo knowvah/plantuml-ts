@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
-  "measuredAt": "2026-09-20",
-  "measuredAgainstCommit": "f7154050",
+  "measuredAt": "2026-09-22",
+  "measuredAgainstCommit": "70a81ca2",
   "fixtures": [
     {
       "type": "activity",
@@ -5932,7 +5932,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "8": 3,
+          "8": 5,
           "12": 2
         },
         "strokeWidth": {
@@ -5942,8 +5942,8 @@
           "12.5": 2,
           "7.5": 1
         },
-        "textCount": 5,
-        "width": "345",
+        "textCount": 7,
+        "width": "191",
         "height": "167"
       },
       "jar": {
@@ -5962,8 +5962,8 @@
         "width": "212",
         "height": "185"
       },
-      "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "655ac783"
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -6049,7 +6049,7 @@
         "fontSize": {
           "12": 1,
           "13": 2,
-          "14": 1
+          "14": 2
         },
         "strokeWidth": {
           "1": 4,
@@ -6058,7 +6058,7 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 4,
+        "textCount": 5,
         "width": "333",
         "height": "307"
       },
@@ -6079,8 +6079,8 @@
         "width": "381",
         "height": "199"
       },
-      "measuredAt": "2026-09-08",
-      "measuredAgainstCommit": "655ac783"
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -12000,25 +12000,25 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2",
       "ours": {
         "fontSize": {
           "11": 4,
           "12": 12,
           "13": 1,
-          "14": 7
+          "14": 16
         },
         "strokeWidth": {
-          "1": 22
+          "1": 31
         },
         "rx": {
           "12.5": 9,
           "7.5": 1
         },
-        "textCount": 24,
-        "width": "776",
-        "height": "682"
+        "textCount": 33,
+        "width": "782",
+        "height": "700"
       },
       "jar": {
         "fontSize": {

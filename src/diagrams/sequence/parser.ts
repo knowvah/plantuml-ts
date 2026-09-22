@@ -134,11 +134,16 @@ function handlePendingRef(state: ParseState, line: string): boolean {
  * the number of trimmed lines consumed (>1 for a multi-line sprite block),
  * or `null` when neither matcher claimed the line.
  */
-function dispatchAnnotationOrSprite(state: ParseState, trimmedLines: readonly string[], i: number): number | null {
+function dispatchAnnotationOrSprite(
+  state: ParseState,
+  trimmedLines: readonly string[],
+  i: number,
+  rawLines: readonly string[] = trimmedLines,
+): number | null {
   // makeDefaultAST() always sets annotations; the field is optional on
   // SequenceDiagramAST only so hand-authored literal fixtures elsewhere
   // compile unchanged.
-  const annotationMatch = matchAnnotationCommand(trimmedLines, i, state.ast.annotations!);
+  const annotationMatch = matchAnnotationCommand(annotationLines(rawLines, i), i, state.ast.annotations!);
   if (annotationMatch !== null) return annotationMatch.consumed;
 
   // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): same
@@ -212,6 +217,30 @@ function dispatchCommand(state: ParseState, line: string): boolean {
  * position in `lines` so a refusal can name the ORIGINAL 0-based line, not
  * its position in this filtered view.
  */
+
+/** cdd-T28: `matchAnnotationCommand`'s SINGLE-line matchers read `lines[i]`
+ *  verbatim (they require an already-trimmed line), but a matched MULTILINE
+ *  block's BODY must keep its indentation: upstream's `BlocLines` never
+ *  trims a legend/title/caption body, and `CreoleStripeSimpleParser`'s
+ *  FULL-mode list patterns are anchored at column 0
+ *  (`^(\*+)…`/`^(#+)…`, java:70-72), so a leading space is what makes the
+ *  jar draw ` * Hyp 1` as literal text instead of a bullet (jar-probed
+ *  directly: the same source WITHOUT the leading space draws
+ *  `<ellipse cx="22.5" …>` + the text at x=29, which is exactly what this
+ *  port now draws). Trimming only index `i` is
+ *  `description/annotation-line-trim.ts#trimLineForAnnotationMatch`'s
+ *  established shape, duplicated here rather than imported across engine
+ *  boundaries (the same convention that file's own doc records). */
+function annotationLines(lines: readonly string[], i: number): readonly string[] {
+  const raw = lines[i];
+  if (raw === undefined) return lines;
+  const trimmed = raw.trim();
+  if (trimmed === raw) return lines;
+  const copy = lines.slice();
+  copy[i] = trimmed;
+  return copy;
+}
+
 function trimNonBlank(lines: readonly string[]): { text: string; origIndex: number }[] {
   return lines.map((l, origIndex) => ({ text: l.trim(), origIndex })).filter((e) => e.text !== '');
 }
@@ -247,6 +276,9 @@ function dispatchOrdinaryLine(state: ParseState, line: string, origIndex: number
 function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefusal | null {
   const trimmedEntries = trimNonBlank(lines);
   const trimmedLines = trimmedEntries.map((e) => e.text);
+  // cdd-T28: the same entries with ONLY trailing whitespace stripped --
+  // see `annotationLines` above for why a chrome body needs them.
+  const rawAlignedLines = trimmedEntries.map((e) => (lines[e.origIndex] ?? '').replace(/\s+$/, ''));
 
   for (let i = 0; i < trimmedLines.length; i++) {
     const line = trimmedLines[i]!;
@@ -262,7 +294,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
     }
     if (handlePendingRef(state, line)) continue;
 
-    const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i);
+    const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i, rawAlignedLines);
     if (consumed !== null) {
       i += consumed - 1;
       continue;

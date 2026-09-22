@@ -139,5 +139,5 @@ export function renderFixture(markup: string, measurer: StringMeasurer): string 
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
   const unwrapped = unwrapKlimtSvg(completeSvg, theme.colors.background);
-  return assembleSvg(applyChrome(unwrapped, annotations, styles, measurer));
+  return assembleSvg(applyChrome(unwrapped, annotations, styles, measurer, ast.sprites));
 }

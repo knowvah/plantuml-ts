@@ -71,6 +71,23 @@ describe('unwrapContentG — attributed vs. malformed content <g>', () => {
     expect(() => unwrapContentG(ROOT_GROUP_OPEN + INNER)).toThrow(/malformed klimt SVG output/);
   });
 
+  it('returns \'\' for an EMPTY content <g>, which klimt serialises SELF-CLOSING (cdd-T28)', () => {
+    // A drawable that paints no ink leaves `gRoot` childless, and the XML
+    // writer closes a childless element in place. Reached in production by
+    // chrome text whose only atom is an unresolvable sprite, or a `{{ }}`
+    // embedded diagram with no renderer (`annotations/blocks-creole.ts`) --
+    // a well-formed klimt document carrying zero content, not a malformed
+    // one. Exact string as emitted by `UGraphicSvg#getSvgString`.
+    expect(unwrapContentG('<g font-family="sans-serif" lengthAdjust="spacing"/>')).toBe('');
+    expect(unwrapContentG('<?plantuml v?><g font-family="sans-serif" lengthAdjust="spacing"/>')).toBe('');
+    expect(unwrapContentG('<g/>')).toBe('');
+  });
+
+  it('does not mistake a SELF-CLOSING non-<g> element for the empty content <g>', () => {
+    expect(() => unwrapContentG('<glyph x="1"/>')).toThrow(/malformed klimt SVG output/);
+    expect(() => unwrapContentG('<g/><rect x="1"/>')).toThrow(/malformed klimt SVG output/);
+  });
+
   it('does not mistake a different element name for the content <g>', () => {
     expect(() => unwrapContentG('<glyph x="1">' + INNER + CLOSE)).toThrow(/malformed klimt SVG output/);
   });

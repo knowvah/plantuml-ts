@@ -173,3 +173,61 @@ describe('bare-tag regressions (must stay green)', () => {
     expect(textAtoms(buildStripeAtoms('<b>x</b>', PLAIN))).toEqual([{ text: 'x', styles: [FontStyle.BOLD] }]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd-T25: `<plain>...</plain>` (legacy + legacyEol only, no creole-pure
+// form) and its "clear all styles first" application
+// (`FontConfiguration.add(FontStyle)`, `FontConfiguration.java:301-309`;
+// `FontStyle#starters`, `FontStyle.java:47-48`; activation/deactivation,
+// `FontStyle.java:89-90,114-115,142-143,167-168`). diseka-11-gozu390
+// (`<color:#888888><plain>Enumeration</plain></color>`) is the corpus
+// fixture this registration targets.
+// ---------------------------------------------------------------------------
+
+describe('cdd-T25 — <plain>...</plain>', () => {
+  test('"<plain>x</plain>" consumes the tag, tagging the run PLAIN', () => {
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', PLAIN))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('case-insensitive starters/tags: "<PLAIN>x</PLAIN>"', () => {
+    expect(textAtoms(buildStripeAtoms('<PLAIN>x</PLAIN>', PLAIN))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('legacyEol form: "<plain>rest of line" (no closing tag)', () => {
+    expect(textAtoms(buildStripeAtoms('a <plain>rest of line', PLAIN))).toEqual([
+      { text: 'a ', styles: [] },
+      { text: 'rest of line', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('clears an ALREADY-tracked style — "<b><plain>x</plain></b>" drops BOLD inside the plain run', () => {
+    expect(textAtoms(buildStripeAtoms('<b><plain>x</plain></b>', PLAIN))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('clears MULTIPLE tracked styles at once — bold+italic both drop', () => {
+    const boldItalic: FontConfiguration = { ...PLAIN, styles: new Set([FontStyle.BOLD, FontStyle.ITALIC]) };
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', boldItalic))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('a run OUTSIDE the <plain> tag keeps its own style — "<b>a<plain>b</plain>c</b>"', () => {
+    expect(textAtoms(buildStripeAtoms('<b>a<plain>b</plain>c</b>', PLAIN))).toEqual([
+      { text: 'a', styles: [FontStyle.BOLD] },
+      { text: 'b', styles: [FontStyle.PLAIN] },
+      { text: 'c', styles: [FontStyle.BOLD] },
+    ]);
+  });
+
+  test('"<p" starters do not collide with any other L1 style', () => {
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', PLAIN))).not.toEqual(
+      textAtoms(buildStripeAtoms('x', PLAIN)),
+    );
+  });
+});

@@ -20,11 +20,17 @@
  * legacyEol only — java :96-97) in upstream's ctor position: after the
  * five style triplets, before the size/color commands.
  *
+ * cdd-T25 adds `FontStyle.PLAIN` (`<plain>...</plain>`, legacy + legacyEol
+ * only — no creole-pure form, `FontStyle#getUbrexCreoleSyntax` throws for
+ * it) in upstream's exact ctor position: immediately after ITALIC's
+ * triplet, before the FULL-gated UNDERLINE creole-pure registration (java
+ * :83-84, `CommandCreoleStyle.createLegacy`/`createLegacyEol(FontStyle
+ * .PLAIN)`). Registered in BOTH `FULL`/`OTHER` maps (upstream's own `if
+ * (modeSimpleLine == CreoleMode.FULL)` gate at :85 covers ONLY the
+ * following UNDERLINE line, not PLAIN) — see `AddStyle.ts` for the
+ * "clear all styles" special case its application triggers.
+ *
  * Not ported (journaled, deferred to L2/never):
- * - `FontStyle.PLAIN` (`<plain>...</plain>`, `<plain>...` EOL): not in
- *   L1's "bold/italic/underline/wave/strikeout" set; its `AddStyle`
- *   application also has a "clear all styles" special case
- *   (`AddStyle.ts`'s doc comment) not yet ported.
  * - The `CreoleMode.FULL`-only exclusion of the creole-pure `__` underline
  *   command upstream's `OTHER` builder applies: this port has only ONE map
  *   (always FULL), since every L1 call site (`EntityImageDescriptionSupport
@@ -75,6 +81,19 @@ const L1_STYLES: readonly FontStyle[] = [
   FontStyle.WAVE,
 ];
 
+/** cdd-T25: `FontStyle.PLAIN`'s legacy + legacyEol pair (java :83-84) --
+ *  split into its own function purely to keep `buildCommandMap`'s own CCN
+ *  under the project's per-function cap (a pure extraction of what would
+ *  otherwise be one more `for (const cmd of ...) addCommand(map, cmd);`
+ *  line in that function, no behavior change). No creole-pure form
+ *  (`FontStyle#getUbrexCreoleSyntax` throws for PLAIN); registered in
+ *  BOTH `FULL`/`OTHER` maps (upstream's `if (modeSimpleLine ==
+ *  CreoleMode.FULL)` gate at java :85 covers only the FOLLOWING
+ *  UNDERLINE line, never PLAIN). */
+function registerPlain(map: Map<string, Command[]>): void {
+  for (const cmd of createStyleCommandsWithoutCreoleForm(FontStyle.PLAIN)) addCommand(map, cmd);
+}
+
 /** L2 additions (mission `plans/e2r-creole/`), registered in upstream's own
  *  `CommandCreoleBuilder` ctor order (java :98-117, minus the not-ported
  *  entries -- the img-adjacent commands, see this file's module doc
@@ -99,6 +118,14 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
         : createStyleCommands(style);
     for (const cmd of cmds) addCommand(map, cmd);
   }
+  // cdd-T25: upstream ctor position (java :83-84) is between ITALIC's
+  // triplet and the FULL-gated UNDERLINE creole-pure line above -- kept
+  // in the SAME relative window (still before BACKCOLOR), factored into
+  // its own function purely to keep `buildCommandMap`'s own CCN under
+  // the project's per-function cap; starters `<p`/`<P` share no 2-char
+  // prefix with any other L1/L2 command, so this exact position has no
+  // observable `searchCommand` tie-break effect.
+  registerPlain(map);
   // Upstream ctor position (java :96-97): BACKCOLOR legacy + legacyEol,
   // after the style triplets, before the size/color commands. Ordering
   // matters for the shared `<b` starter: BOLD's commands stay first.

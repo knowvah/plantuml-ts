@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1153 modules · 4256 exported names.
+1161 modules · 4277 exported names.
 
 ## `src/`
 
@@ -94,9 +94,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skins-builtin-rose-2.ts` | `ROSE_SKIN_PART2` | `rose` built-in `<style>`-grammar skin, part 2 of 2 -- see {@link ROSE_SKIN_PART1}'s doc comment for why this split exists and how the two halves recombine. |
 | `skins-builtin.ts` | `BUILTIN_SKINS` | Built-in PlantUML skin stylesheets (`skin <name>` directive) -- skin-file-loading mission, Batches 1 (D1/D2) and 4. |
 | `spline-clip.ts` | `ClipRect`, `subdivide`, `clipSplineStart`, `clipSplineEnd` | spline-clip.ts — faithful port of upstream's compound-edge boundary clipping (`DotPath#simulateCompound`, klimt/shape/DotPath.java), applied when an edge endpoint is a container/group. |
-| `sprite-commands.ts` | `addSprite`, `createSpriteRegistry`, `getSprite`, `getSpriteMonochrome`, `getSpriteSvg`, `spriteDimsLookupFor`, `surfaceSpriteWarnings`, `SpriteRegistry`, `isSpriteMultilineOpenLine`, `isSpriteMultilineCloseLine`, `isSvgSpriteOpenLine`, `isSvgSpriteCloseLine`, `matchSpriteCommand` | `matchSpriteCommand` — the shared sprite-DEFINITION matcher parsers call at their own command-dispatch position, mirroring `matchAnnotationCommand` (`core/annotations/commands.ts`) exactly: extraction inside each parser, never a textual pre |
+| `sprite-commands.ts` | `addSprite`, `createSpriteRegistry`, `getSprite`, `getSpriteMonochrome`, `getSpriteSvg`, `getSpriteColor4096`, `spriteDimsLookupFor`, `surfaceSpriteWarnings`, `SpriteRegistry`, `isSpriteMultilineOpenLine`, `isSpriteMultilineCloseLine`, `isSvgSpriteOpenLine`, `isSvgSpriteCloseLine`, `matchSpriteCommand` | `matchSpriteCommand` — the shared sprite-DEFINITION matcher parsers call at their own command-dispatch position, mirroring `matchAnnotationCommand` (`core/annotations/commands.ts`) exactly: extraction inside each parser, never a textual pre |
 | `sprite-prefetch.ts` | `scanSpriteNames` | Scan a diagram source for the `<$name>` sprite references it contains. |
-| `sprite-registry.ts` | `SpriteRegistry`, `createSpriteRegistry`, `addSprite`, `surfaceSpriteWarnings`, `getSprite`, `spriteDimsLookupFor`, `getSpriteMonochrome`, `getSpriteSvg` | `SpriteRegistry` — the per-diagram sprite map and its lookup seams, split out of `sprite-commands.ts` (which owns the sprite-DEFINITION grammar) purely to keep that file under this repo's 500-line module cap; the same split precedent as `op |
+| `sprite-registry.ts` | `SpriteRegistry`, `createSpriteRegistry`, `addSprite`, `surfaceSpriteWarnings`, `getSprite`, `spriteDimsLookupFor`, `getSpriteMonochrome`, `isSpriteColor4096`, `getSpriteColor4096`, `getSpriteSvg` | `SpriteRegistry` — the per-diagram sprite map and its lookup seams, split out of `sprite-commands.ts` (which owns the sprite-DEFINITION grammar) purely to keep that file under this repo's 500-line module cap; the same split precedent as `op |
 | `sprite-split-stdlib.ts` | `SpriteSplitManifest`, `SpriteNotBundledError`, `spriteSplitNamesOf`, `spriteSplitStdlib`, `assembleSpriteSplitContent` | si11b T4 -- per-sprite stdlib bundle registration, and the prefetch-side assembly it enables. |
 | `stdlib-content.ts` | `stdlibContentFor` | Resolving a `<bundle/thing>` include target to its CONTENT, for the prefetch walk's third channel (`include-resolver.ts#prefetchInner`). |
 | `stereotype-decoration.ts` | `GuillemetPair`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `CircledCharDecoration`, `parseCircledCharDecoration`, `CircledSpriteDecoration`, `parseCircledSpriteDecoration`, `DEFAULT_CIRCLED_CHARACTER_FONT_SIZE`, `resolveBadgeRadius` | stereotype-decoration.ts — the port of `StereotypeDecoration#buildComplex` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/ StereotypeDecoration.java:143-182`): how a `<<...>>` run splits into the label(s) a diagram DISPLAYS |
@@ -189,6 +189,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `annotation-skinparam.ts` | `applySkinparamOverrides` | skinparam overrides — FromSkinparamToStyle.java:87-176. |
 | `annotation-style-overrides.ts` | `applyStyleOverrides` | `<style>` overrides — parseStyleBlock's already-parsed StyleMap. |
 | `annotation-style-types.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `ANNOTATION_ELEMENTS` | Shared types for annotation chrome style resolution — see `style.ts`'s module doc comment for the full layering/design rationale these types support. |
+| `blocks-creole.ts` | `ChromeTextPaint`, `ChromeTextBlock`, `chromeFontConfiguration`, `chromeAtomOps`, `buildChromeCreoleBlock`, `buildChromeTextBlock` | blocks-creole.ts — cdd-T28: the creole half of `Style #createTextBlockBordered` (`style/Style.java:353-369`), split out of `blocks.ts` (which stays the BORDER/margin half, `TextBlockBordered` + `TextBlockMarged`) to keep both files under th |
 | `blocks.ts` | `AnnotationBlock`, `buildAnnotationBlock` | blocks.ts — mission G0b / T4: the drawable half of `Style .createTextBlockBordered` (`style/Style.java:315-332`) + `TextBlockBordered` (`klimt/shape/TextBlockBordered.java`) + `TextBlockMarged` (`klimt/shape/TextBlockMarged.java`, applied v |
 | `chrome.ts` | `AnnotationStyles`, `mergeTB`, `getTextX`, `applyChrome` | chrome.ts — mission G0b / T4: `DiagramChromeFactory.create`'s warnings-less, mainframe-less half (legend → title → caption → header/footer, header/footer outermost — decisions.md D1/D9) plus `DecorateEntityImage`'s vertical-stack compositio |
 | `commands.ts` | `matchAnnotationCommand` | `matchAnnotationCommand` — the line-oriented matcher parsers call at their own command-dispatch position (decisions.md D3: extraction inside each parser, never a textual pre-pass, so a `title`-shaped line inside a `note ... |
@@ -401,6 +402,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |
+| `Bullet.ts` | `Bullet` | Bullet — the leading glyph a `*`-prefixed (LIST_WITHOUT_NUMBER) creole line draws before its text: a filled 5×5 disc at depth 0, a filled 3.5×3.5 square at every deeper level, each indented by its own depth. |
 | `Skeleton2.ts` | `Skeleton2` | Skeleton2 — accumulates one `Entry` (level, y-midpoint) per drawn cell of an `AtomTree` and, once every cell has been drawn, renders the bullet + horizontal + vertical connector lines that give the tree its indentation guides. |
 
 ## `src/core/klimt/creole/command/`
@@ -426,6 +428,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `TabToken`, `tokenizeOnTabs`, `tabStringFor`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
+| `AtomTextUtils.ts` | `createListNumber` | AtomTextUtils — upstream's factory helpers around the legacy `AtomText`. |
 | `CommandCreoleBuilder.ts` | `CREOLE_COMMANDS`, `CREOLE_COMMANDS_OTHER` | CommandCreoleBuilder — builds the `starter prefix -> Command[]` map `StripeSimple#searchCommand` looks up against. |
 | `CreoleParser.ts` | `CreoleTextStyle`, `CreoleParserAdapters`, `CreoleParser` | CreoleParser — the ONLY upstream implementor of `SheetBuilder`: turns a `Display` into a `Sheet` of `Stripe`s, one physical display line at a time, dispatching each line to a table/tree/code/latex/plain-text classifier. |
 | `CreoleStripeSimpleParser.ts` | `StripeClassification`, `classifyStripeLine` | CreoleStripeSimpleParser — classifies ONE already-`\n`-split display line into a `StripeStyleType` + its content, per upstream's regex cascade. |
@@ -550,12 +553,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `AsciiEncoder.ts` | `AsciiEncoder` | PlantUML's own 6-bit encoding used for sprite/URL payloads -- NOT base64. |
+| `ColorPalette4096.ts` | `Rgb4096`, `colorForCode4096` | ColorPalette4096 — the 64-character alphabet + 2-char-code <-> 12-bit-RGB mapping `SpriteColorBuilder4096` reads a `/color` sprite body through. |
 | `ColorResolver.ts` | `GrayLevelRange`, `ColorResolver`, `colorResolverToSvgHex` | ColorResolver — resolves a raw SVG color token (from a decomposed `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color, honouring an optional "forced" override color and the sprite's own grey-level range. |
 | `deflate-fixed.ts` | `deflateFixed` | DEFLATE with fixed Huffman codes (BTYPE=01) and LZ77 matching — RFC 1951. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `adler32`, `encodePng`, `toBase64`, `toBase64DataUri` | Minimal deterministic PNG writer, browser-safe, zero deps, synchronous. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
-| `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
+| `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
 | `Sprite.ts` | `Sprite` | The shared marker every sprite kind implements: pixel dimensions. |
+| `SpriteColor4096.ts` | `SpriteColor4096` |  |
+| `SpriteColorBuilder4096.ts` | `buildSpriteColor4096` | SpriteColorBuilder4096 — decodes a `sprite $name [WxH/color] { ... |
 | `SpriteGrayLevel.ts` | `SpriteGrayLevel` |  |
 | `SpriteMonochrome.ts` | `SpriteMonochrome` |  |
 | `SpriteSvg.ts` | `svgDimension`, `svgInkBox`, `SpriteSvg`, `isSpriteSvg` | `SpriteSvg` — a sprite defined by an inline `<svg>…</svg>` element rather than the encoded grey-level grid `SpriteMonochrome` carries. |
@@ -1166,10 +1172,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-map-sizing.ts` | `MAP_CELL_MARGIN_X`, `measureMapClassifier` | `map` classifier sizing — `kind:'map'` leaves in the class diagram layout engine (./layout.ts). |
 | `class-member-ast.ts` | `Visibility`, `Member` | `Member`/`Visibility` types for class/interface/enum/object leaves. |
 | `class-member-atom-resolve.ts` | `ResolvedMemberAtom`, `resolveInlineAtom`, `resolveEmojiAtom`, `resolveOpenIconicAtom`, `resolveLatexAtom` | class-member-atom-resolve.ts — the non-text atom resolvers backing `class-member-creole.ts#resolveOneAtom` (inline img/sprite, OpenIconic vector, emoji, latex). |
+| `class-member-creole-render-text.ts` | `textRenderOverride`, `resolveTabbedTextRuns` | class-member-creole-render-text.ts — the DRAWN-text side of `DriverTextSvg.java:112-125`'s two RENDER-time-only branches, plus the TAB-STOP expansion `AtomText.java:210-256` applies to a member row's `'text'` atom before any of that. |
 | `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `noteLineAtomDy` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
 | `class-member-creole.ts` | `MemberRenderAtom`, `MemberRowBuild`, `memberBaseFont`, `buildMemberAtoms`, `resolveMemberAtoms`, `buildMemberRow`, `buildWrappedMemberRows`, `splitMemberDisplayLines`, `atomsToPlainText` | class-member-creole.ts — routes ONE classifier member row's display text through the shared creole atom engine (`core/klimt/creole/`, built for description by mission E2r) instead of drawing it as a single plain `<text>` element. |
 | `class-member-display.ts` | `splitMemberDisplayLines`, `atomsToPlainText` | class-member-display.ts — the physical-line splitter + plain-text projection for classifier member rows. |
 | `class-member-parser.ts` | `parseMemberLine` | Member (attribute/method) line parsing for PlantUML class diagrams. |
+| `class-member-render-atom.ts` | `MemberRenderAtom`, `MemberRowBuild` | class-member-render-atom.ts — `MemberRenderAtom`/`MemberRowBuild`, the render-ready shapes `class-member-creole.ts#resolveMemberAtoms` produces. |
 | `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
 | `class-monochrome.ts` | `MonochromeMode`, `applyMonochromeHex`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |
