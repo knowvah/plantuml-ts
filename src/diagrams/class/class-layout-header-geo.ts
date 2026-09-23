@@ -43,7 +43,10 @@ import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js'
 export type { ClassFontSpecs };
 
 export type CommonHeaderFields = Partial<
-  Pick<MeasuredClassifier, 'headerRowCount' | 'nameRowCount' | 'badgeChar' | 'badgeColor' | 'genericTag'>
+  Pick<
+    MeasuredClassifier,
+    'headerRowCount' | 'nameRowCount' | 'badgeChar' | 'badgeColor' | 'genericTag' | 'badgeSpriteImage'
+  >
 >;
 
 /** Resolved-once options threaded down from `measureClassifier` -- see each
@@ -127,13 +130,8 @@ export function computeHeaderNameGeo(
   // straight off the SAME `MeasuredClassifier`.
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
   const { headerLines, headerAlign } = splitAndWrapHeaderLines(header.headerText, headerFont, headerMaxWidth, measurer);
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms } = buildHeaderLineMetrics(
-    headerLines,
-    headerFont,
-    measurer,
-    sprites,
-    header.headerItalic,
-  );
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } =
+    buildHeaderLineMetrics(headerLines, headerFont, measurer, sprites, header.headerItalic);
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
@@ -158,6 +156,7 @@ export function computeHeaderNameGeo(
     nameWidth,
     blankLineRenderWidth,
     headerLineAtoms,
+    headerLineHeights,
   };
 }
 
@@ -416,11 +415,9 @@ function buildHeaderNameRowsGeo(
   // G2 N64 item 45: `headerRowCount` now also grows for a multi-line NAME
   // (not just stacked stereotype rows) -- `nameRowCount` tells
   // `renderer-classifier-box.ts#buildHeaderPrimitive` how many of the
-  // TRAILING header rows are name lines.
-  // A2s R2i: rows carry the DISPLAY text (markup consumed, escapes/emoji
-  // decoded -- `atomsToPlainText` of each line's resolved atoms); widths
-  // stay the atom-measured values above, so a mono/emoji header renders
-  // sensible text at the correct measured width.
+  // TRAILING header rows are name lines. A2s R2i: rows carry the DISPLAY
+  // text (markup consumed, escapes/emoji decoded); widths stay the atom-
+  // measured values, so a mono/emoji header renders at the correct width.
   return buildHeaderRows({
     header: headerNameGeo.header,
     lines: headerNameGeo.headerDisplayLines,
@@ -429,8 +426,7 @@ function buildHeaderNameRowsGeo(
     circleWidth: stereoGeo.circleWidth,
     widthStereoAndName: stereoGeo.widthStereoAndName,
     nameWidth: headerNameGeo.nameWidth,
-    h1,
-    h2,
+    h1, h2,
     nameTop,
     baselineOffset: stereoGeo.headerBaselineOffset,
     fontSpec: headerFont,
@@ -438,6 +434,7 @@ function buildHeaderNameRowsGeo(
     badgeRadius,
     blankLineRenderWidth: headerNameGeo.blankLineRenderWidth,
     lineAtoms: headerNameGeo.headerLineAtoms,
+    lineHeights: headerNameGeo.headerLineHeights,
   });
 }
 

@@ -198,6 +198,11 @@ export interface ClassifierGeo {
    *  `resolveBadgeFill` calls. */
   badgeChar?: string;
   badgeColor?: string;
+  /** CDD B7FU-R2 item (c-b): copied unchanged from `MeasuredClassifier
+   *  .badgeSpriteImage` (`class-layout-helpers.ts`'s doc comment) — feeds
+   *  `renderer-classifier-box.ts#buildHeaderPrimitive`'s sprite-badge draw
+   *  (wins over `badgeChar`/the default kind badge). */
+  badgeSpriteImage?: { href: string; width: number; height: number };
   /** G2 N31: copied unchanged from `Classifier.color` (`ast.ts`'s doc
    *  comment) -- feeds `renderer-classifier-box.ts#classifierFill`'s
    *  inline `class Foo #color { ... }` background override. */

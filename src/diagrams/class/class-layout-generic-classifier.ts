@@ -249,12 +249,14 @@ function buildCommonHeaderFields(
   headerNameGeo: ReturnType<typeof computeHeaderNameGeo>,
   headerRowsGeo: ReturnType<typeof computeHeaderRowsGeo>,
 ): CommonHeaderFields {
+  const spriteImage = headerNameGeo.badgeSpriteBox?.image;
   return {
     ...headerRowsGeo.headerRowCountField,
     ...headerRowsGeo.nameRowCountField,
     ...headerNameGeo.badgeCharField,
     ...headerNameGeo.badgeColorField,
     ...headerRowsGeo.genericTagField,
+    ...(spriteImage !== undefined ? { badgeSpriteImage: spriteImage } : {}),
   };
 }
 

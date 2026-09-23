@@ -76,6 +76,18 @@ function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   };
 }
 
+/** CDD B7FU-R2 item (c-b): the badge-decoration fields, shared by both
+ *  `buildClassifierGeos`/`degenerateSingleClassifier` call sites below
+ *  (identical spread, previously duplicated) -- `mirrors inkBodyFields`'s
+ *  own "one shared helper, two callers" precedent. */
+function badgeFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
+  return {
+    ...(m.badgeChar !== undefined ? { badgeChar: m.badgeChar } : {}),
+    ...(m.badgeColor !== undefined ? { badgeColor: m.badgeColor } : {}),
+    ...(m.badgeSpriteImage !== undefined ? { badgeSpriteImage: m.badgeSpriteImage } : {}),
+  };
+}
+
 /**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
  * positions.
@@ -105,8 +117,7 @@ export function buildClassifierGeos(
       rows: measured.rows,
       ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
       ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-      ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-      ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+      ...badgeFields(measured),
       ...inkBodyFields(measured),
       ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
       ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
@@ -377,8 +388,7 @@ export function degenerateSingleClassifier(
     rows: measured.rows,
     ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
     ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-    ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-    ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+    ...badgeFields(measured),
     ...inkBodyFields(measured),
     ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
     ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),

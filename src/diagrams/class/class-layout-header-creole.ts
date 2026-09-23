@@ -15,6 +15,9 @@ import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { resolveMemberAtoms, memberBaseFont, type MemberRowBuild } from './class-member-creole.js';
 import { atomsToPlainText } from './class-member-display.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
+import { getSpriteMonochrome, getSpriteColor4096 } from '../../core/sprite-registry.js';
+import { spriteMonochromeAsLike, spriteToPngDataUri } from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteColor4096ToPngDataUri } from '../../core/klimt/sprite/sprite-raster.js';
 import { BADGE_LEFT_MARGIN } from './class-badge.js';
 import { parseCircledCharDecoration, parseCircledSpriteDecoration } from './class-stereotype.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
@@ -73,28 +76,63 @@ function buildHeaderLine(
   };
 }
 
-/** A2s R2i (item 5): the `<<($sprite[,color])>>` badge override's spot-box
- *  dims -- sprite registry dims * declared scale (`Stereotype#getSprite`,
- *  NOT font-relative) + the SAME margins every circled-character badge
- *  gets (`withMargin(4, 0, 5, 5)` -> width +4, height +10,
- *  EntityImageClassHeader.java:158-159; `class-badge.ts`'s BADGE_BOX_*
- *  derivation). `undefined` when the stereotype carries no sprite
+/** CDD B7FU-R2 item (c-b): resolves the badge sprite's OWN drawable image
+ *  (href + raw, unmargined pixel dims) -- the SAME dual monochrome/4096-
+ *  colour resolution `class-member-atom-resolve.ts#resolveSpriteAtom`
+ *  already does for a `<$sprite>` creole atom, reused here rather than
+ *  re-derived (mono tried first, the common case; a 4096-colour sprite
+ *  has no gray-level tint, so `deco.color` is not threaded to that path,
+ *  matching `resolveSpriteAtom`'s own identical `spriteColor4096ToPngDataUri`
+ *  call). `deco.color` maps to `Stereotype#getSprite`'s `getHtmlColor()`
+ *  (java:116, the sprite's OWN foreground tint, `Stereotype.java:100-102`'s
+ *  `decoration.htmlColor`); `deco.scale` (NOT font-relative, see {@link
+ *  computeBadgeSpriteBox}'s own doc comment) is `asTextBlock`'s third arg. */
+function resolveBadgeSpriteImage(
+  sprites: SpriteRegistry,
+  name: string,
+  color: string | undefined,
+  scale: number,
+): { href: string; width: number; height: number } | undefined {
+  const mono = getSpriteMonochrome(sprites, name);
+  if (mono !== undefined) {
+    const png = spriteToPngDataUri(spriteMonochromeAsLike(mono), color, undefined, scale);
+    return { href: png.dataUri, width: png.width, height: png.height };
+  }
+  const color4096 = getSpriteColor4096(sprites, name);
+  if (color4096 === undefined) return undefined;
+  const png = spriteColor4096ToPngDataUri(color4096, scale);
+  return { href: png.dataUri, width: png.width, height: png.height };
+}
+
+/** A2s R2i (item 5)/CDD B7FU-R2 item (c-b): the `<<($sprite[,color])>>`
+ *  badge override's spot-box dims -- sprite registry dims * declared scale
+ *  (`Stereotype#getSprite`, NOT font-relative) + the SAME margins every
+ *  circled-character badge gets (`withMargin(4, 0, 5, 5)` -> width +4,
+ *  height +10, EntityImageClassHeader.java:158-159; `class-badge.ts`'s
+ *  BADGE_BOX_* derivation). `image` (added this task) is the ACTUAL drawn
+ *  `<image>`'s own href + raw (unmargined) dims, positioned at `box.x +
+ *  BADGE_LEFT_MARGIN(4), box.y + BADGE_SPRITE_TOP_BOTTOM_MARGIN(5)` --
+ *  jar-verified rotisi-30-loge424 `class zz <<($bug16,red)>>`: box
+ *  `x=287.5,y=116.114,w=39,h=41`, image `x=291.5,y=121.114,w=15,h=15`
+ *  (both offsets exact). `undefined` when the stereotype carries no sprite
  *  decoration OR the name doesn't resolve in the registry (upstream
  *  `getSprite` returns null then and the char/default badge path runs
- *  unchanged). Jar-verified rotisi-30-loge424 `class zz <<($bug16,red)>>`:
- *  15x15 sprite -> box 19x25 -> node 39x41px = 0.541667x0.569444in. */
+ *  unchanged). Box dims jar-verified: 15x15 sprite -> box 19x25 -> node
+ *  39x41px = 0.541667x0.569444in. */
 export function computeBadgeSpriteBox(
   classifier: Classifier,
   sprites: SpriteRegistry | undefined,
-): { width: number; height: number } | undefined {
+): { width: number; height: number; image?: { href: string; width: number; height: number } } | undefined {
   if (sprites === undefined) return undefined;
   const deco = parseCircledSpriteDecoration(classifier.stereotype);
   if (deco === undefined) return undefined;
   const dims = spriteDimsLookupFor(sprites).get(deco.name);
   if (dims === undefined) return undefined;
+  const image = resolveBadgeSpriteImage(sprites, deco.name, deco.color, deco.scale);
   return {
     width: dims.width * deco.scale + BADGE_LEFT_MARGIN,
     height: dims.height * deco.scale + BADGE_SPRITE_TOP_BOTTOM_MARGIN * 2,
+    ...(image !== undefined ? { image } : {}),
   };
 }
 
@@ -109,6 +147,27 @@ export function buildBadgeCharFields(classifier: Classifier): {
     badgeCharField: circledChar !== undefined ? { badgeChar: circledChar.char } : {},
     badgeColorField: circledChar?.color !== undefined ? { badgeColor: circledChar.color } : {},
   };
+}
+
+/** {@link buildHeaderLineMetrics}'s return shape -- named purely to keep
+ *  that function's own NLOC under the per-function cap. */
+export interface HeaderLineMetrics {
+  headerLineWidths: number[];
+  headerDisplayLines: string[];
+  nameBlockHeight: number;
+  /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
+   *  no creole markup (see {@link buildHeaderLine}'s `hasMarkup`) -- the
+   *  caller (`class-layout-header-geo.ts#buildHeaderNameRowsGeo`) sets
+   *  `ClassifierGeo['rows'][].atoms` only for a defined entry, so a
+   *  markup-free header renders through the UNCHANGED pre-T25 plain-text
+   *  path. */
+  headerLineAtoms: Array<MemberRowBuild['atoms'] | undefined>;
+  /** CDD B7FU-R2 item (c): per-line height (not just the `nameBlockHeight`
+   *  sum) -- `buildHeaderRows`'s own bottom-anchor gate needs each sprite-
+   *  bearing line's OWN height, the SAME mechanism `class-member-rows.ts
+   *  #buildSectionRows`/`class-body-enhanced-layout.ts#buildRowsBlockRows`
+   *  already carry. */
+  headerLineHeights: number[];
 }
 
 /** A2s R2i (item 1): the per-line creole builds' width/display/height
@@ -129,18 +188,7 @@ export function buildHeaderLineMetrics(
   // so the creole atoms' BASE styles agree with what the plain-text
   // fallback row would have drawn.
   headerItalic: boolean,
-): {
-  headerLineWidths: number[];
-  headerDisplayLines: string[];
-  nameBlockHeight: number;
-  /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
-   *  no creole markup (see {@link buildHeaderLine}'s `hasMarkup`) -- the
-   *  caller (`class-layout-header-geo.ts#buildHeaderNameRowsGeo`) sets
-   *  `ClassifierGeo['rows'][].atoms` only for a defined entry, so a
-   *  markup-free header renders through the UNCHANGED pre-T25 plain-text
-   *  path. */
-  headerLineAtoms: Array<MemberRowBuild['atoms'] | undefined>;
-} {
+): HeaderLineMetrics {
   // cdd-T25 (M8b): seeds BOLD/ITALIC onto the creole atoms' BASE font from
   // the classifier header's OWN resolved style (`skinparam classFontStyle`/
   // kind-derived italic) -- the SAME `getStyles(font)` mirroring
@@ -165,5 +213,6 @@ export function buildHeaderLineMetrics(
     headerDisplayLines: builds.map((b) => b.displayText),
     nameBlockHeight: builds.reduce((acc, b) => acc + b.height, 0),
     headerLineAtoms: builds.map((b) => (b.hasMarkup ? b.atoms : undefined)),
+    headerLineHeights: builds.map((b) => b.height),
   };
 }
