@@ -191,7 +191,7 @@ export function attachEdgeLabel(
   }
   const ctx: LabelAnchorContext = { center, measurer, labelFont };
   if (lines.length > 1) {
-    attachMultiLineLabel(edgeGeo, lines, align, (direction) => magicArrowAngle(fromToPoints, direction), ctx);
+    attachMultiLineLabel(edgeGeo, lines, align, (d) => magicArrowAngle(fromToPoints, d, rel.from === rel.to), ctx);
     return;
   }
 
@@ -306,7 +306,7 @@ function attachMagicArrow(
   rel: Relationship,
 ): void {
   const { center, measurer } = ctx;
-  const angle = magicArrowAngle(fromToPoints, magic.direction);
+  const angle = magicArrowAngle(fromToPoints, magic.direction, rel.from === rel.to);
   // SI25 D2: the resolved arrow font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`, `TextBlockArrow2.java:57` reads `getSize2D()` off it) --
   // `{ theme.fontFamily, 13 }` with no override, byte-identical to before.
