@@ -6,7 +6,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | bajotu-30-soku184 | diverged | GEO1 | B4 | | | | conformant | | | | | | |
 | baneru-00-kuro607 | diverged | LNK1 | B3 | | | | | structural-match | | | | | |
-| bavoxa-34-keje375 | diverged | TXT1 | B8 | | | | | | | | | | |
+| bavoxa-34-keje375 | diverged | TXT1 | B8 | | | | | | | | conformant | | |
 | befasi-62-vimu310 | diverged | GEO2, GEO3a, GEO5 | B5 B6 B2 | | diverged | diverged | | | structural-match | | | | |
 | begico-70-guva302 | diverged | ORD3 | B1 | diverged | | | | | | | | | |
 | bejeli-39-sina124 | diverged | GEO3a | B6 | | | | | | structural-match | | | | |
@@ -23,7 +23,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | bufogi-69-naba929 | diverged | E14 | B9 | | | | | | | | | | |
 | cacoma-43-poxu615 | diverged | cacoma allow_mixing (B6/T22) | B6 | | | | | | structural-match | | | | |
 | cadutu-02-lazu601 | diverged | ORA1 | B11 | | | | | | | | | | |
-| cagace-55-libu760 | diverged | TXT1 | B8 | | | | | | | | | | |
+| cagace-55-libu760 | diverged | TXT1 | B8 | | | | | | | | diverged | | |
 | camuna-58-veca254 | diverged | LNK1, LNK10 | B3 B2 | | diverged | | | diverged | | | | | |
 | camupi-97-gezi072 | structural-match | GEO7 | B10 | | | | | | | | | | |
 | canuti-20-jotu614 | diverged | LNK2 | B2 | | conformant | | | | | | | | |
@@ -38,7 +38,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | cocube-46-tusu692 | diverged | ORD1, ENT9, GEO1 | B1 B4 | diverged | | | diverged | | | | | | |
 | comaxe-39-goza236 | diverged | LNK1 | B3 | | | | | structural-match | | | | | |
 | conija-14-nuta580 | diverged | ENT8 | B6 | | | | | | conformant | | | | |
-| corine-48-pemu761 | diverged | TXT1 | B8 | | | | | | | | | | |
+| corine-48-pemu761 | diverged | TXT1 | B8 | | | | | | | | conformant | | |
 | coxose-20-nifu136 | diverged | LNK1, LNK4 | B3 B2 | | diverged | | | structural-match | | | | | |
 | cukaze-78-zija070 | diverged | n-ary diamond (B9/T34) | B9 | | | | | | | | | | |
 | curupe-50-kibu120 | diverged | STY8 | B6 | | | | | | diverged | | | | |
@@ -79,7 +79,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | foxiki-17-kosa114 | diverged | TXT2a | B7 | | | | | | | conformant | | | |
 | foxosa-41-bono202 | structural-match | GEOU | B10 | | | | | | | | | | |
 | fumalu-64-vude116 | diverged | ENT1 | B6 | | | | | | diverged | | | | |
-| fuxoju-95-xuko052 | diverged | TXT1 | B8 | | | | | | | | | | |
+| fuxoju-95-xuko052 | diverged | TXT1 | B8 | | | | | | | | conformant | | |
 | gabejo-44-juki791 | diverged | STY2 | B6 | | | | | | diverged | | | | |
 | gadufu-56-votu808 | diverged | ENT7 | B7 | | | | | | | structural-match | | | |
 | galili-87-zivo129 | diverged | TXT2b | B7 | | | | | | | conformant | | | |
@@ -111,7 +111,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | jikase-93-tipa633 | diverged | GEO3a | B6 | | | | | | conformant | | | | |
 | jinema-90-laga721 | structural-match | GEO5 | B2 | | conformant | | | | | | | | |
 | jinoba-14-firi471 | diverged | topurl (B9/T34) | B9 | | | | | | | | | | |
-| jiramo-39-xuze087 | diverged | TXT1 | B8 | | | | | | | | | | |
+| jiramo-39-xuze087 | diverged | TXT1 | B8 | | | | | | | | conformant | | |
 | jireze-84-loti743 | structural-match | GEO7 | B10 | | | | | | | | | | |
 | jixamu-89-ribo225 | structural-match | GEO7 | B10 | | | | | | | | | | |
 | joguva-54-tevo966 | diverged | ORD1, GEO5 | B1 B2 | structural-match | structural-match | | | | | | | | |
@@ -125,11 +125,11 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | kevoda-64-mije856 | diverged | ORD2 | B1 | conformant | | | | | | | | | |
 | kexaca-03-situ523 | structural-match | GEO7 | B10 | | | | | | | | | | |
 | kicolo-81-sidi387 | diverged | ORD1 | B1 | conformant | | | | | | | | | |
-| kicuna-39-riki626 | diverged | TXT1 | B8 | | | | | | | | | | |
+| kicuna-39-riki626 | diverged | TXT1 | B8 | | | | | | | | structural-match | | |
 | konomi-00-gico141 | structural-match | GEOU | B10 | | | | | | | | | | |
 | kopida-02-vaje995 | diverged | LNK1 | B3 | | | | | structural-match | | | | | |
-| koxoco-29-moke425 | diverged | TXT1 | B8 | | | | | | | | | | |
-| kujiji-68-cujo036 | diverged | TXT1 | B8 | | | | | | | | | | |
+| koxoco-29-moke425 | diverged | TXT1 | B8 | | | | | | | | conformant | | |
+| kujiji-68-cujo036 | diverged | TXT1 | B8 | | | | | | | | diverged | | |
 | kupetu-36-kive480 | structural-match | GEOU | B10 | | | | | | | | | | |
 | kutazo-40-texe886 | diverged | LNK3 | B2 | | structural-match | | | | | | | | |
 | kuxosa-67-keko885 | diverged | ORD1 | B1 | conformant | | | | | | | | | |
@@ -170,7 +170,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | mujopi-30-zadi566 | diverged | ORD4, ENT3, ENT9, GEO1 | B1 B4 | diverged | | | structural-match | | | | | | |
 | mupuzo-63-femu686 | diverged | ORD1, GEO5 | B1 B2 | structural-match | conformant | | | | | | | | |
 | murotu-83-cebo380 | diverged | STY1 | B6 | | | | | | conformant | | | | |
-| nadaba-37-zaku242 | diverged | TXT1 | B8 | | | | | | | | | | |
+| nadaba-37-zaku242 | diverged | TXT1 | B8 | | | | | | | | diverged | | |
 | nadepi-13-mufu566 | diverged | GEO5 | B2 | | structural-match | | | | | | | | |
 | nadono-22-gidu983 | structural-match | GEOU | B10 | | | | | | | | | | |
 | nafiki-56-jixu680 | diverged | LNK1, LNK10 | B3 B2 | | diverged | | | diverged | | | | | |
@@ -191,7 +191,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | padapo-73-beke177 | diverged | TXT4 | B7 | | | | | | | conformant | | | |
 | pajoka-72-reju527 | diverged | ORD3, ORD8 | B1 | conformant | | | | | | | | | |
 | pakemi-72-cani346 | structural-match | GEO6 | B6 | | | | | | conformant | | | | |
-| paluca-39-desa696 | diverged | TXT1 | B8 | | | | | | | | | | |
+| paluca-39-desa696 | diverged | TXT1 | B8 | | | | | | | | structural-match | | |
 | pareli-69-cixe116 | diverged | ORD1, GEO5 | B1 B2 | structural-match | conformant | | | | | | | | |
 | paroxa-83-lofa387 | structural-match | GEOU | B10 | | | | | | | | | | |
 | paziji-13-jede796 | diverged | ORD1, GEO5 | B1 B2 | structural-match | conformant | | | | | | | | |
@@ -269,7 +269,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | tunelu-64-xica833 | diverged | ORD8, LNK5, GEO2 | B1 B2 B5 | diverged | diverged | diverged | | | | | | | |
 | vacole-77-vivo236 | diverged | ENT4 | B4 | | | | conformant | | | | | | |
 | vafaka-92-xose973 | structural-match | GEO7 | B10 | | | | | | | | | | |
-| vebini-34-gapu710 | diverged | TXT1 | B8 | | | | | | | | | | |
+| vebini-34-gapu710 | diverged | TXT1 | B8 | | | | | | | | structural-match | | |
 | vegubu-29-bomu147 | diverged | GEO3a | B6 | | | | | | diverged | | | | |
 | verufu-58-jile750 | diverged | ENT5 | B9 | | | | | | | | | | |
 | vileca-45-melo541 | diverged | LNK1 | B3 | | | | | structural-match | | | | | |
@@ -305,7 +305,7 @@ Generated 2026-09-21 from `diagnosis/attribution.json` (`parity-class.json` of 2
 | zepeki-75-pifo352 | diverged | ENT6 | B5 | | | diverged | | | | | | | |
 | zevupa-35-juto545 | diverged | ORD1 | B1 | conformant | | | | | | | | | |
 | zikabo-17-gugi332 | diverged | ENT7 | B7 | | | | | | | conformant | | | |
-| ziparo-17-joku307 | diverged | TXT1 | B8 | | | | | | | | | | |
+| ziparo-17-joku307 | diverged | TXT1 | B8 | | | | | | | | structural-match | | |
 | ziripa-77-zizo842 | diverged | ENT12 | B7 | | | | | | | conformant | | | |
 | zirori-93-jefo337 | diverged | STY6 | B9 | | | | | | | | | | |
 | ziruni-05-fona846 | diverged | GEO2, GEO3a, GEO5 | B5 B6 B2 | | diverged | diverged | | | structural-match | | | | |

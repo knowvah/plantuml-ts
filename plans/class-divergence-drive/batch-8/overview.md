@@ -27,8 +27,8 @@ OF SCOPE for T30; do not wire it.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T29 | Class `scale` — capture into AST, multiply resolved geometry before `renderClass` (A4 1, D4) | typescript-pro (sonnet) | `class-command-directives.ts`, `ast.ts`, `layout.ts`, new `class-scale-geo.ts`, tests | — | [ ] |
-| T30 | `skinparam dpi` core reader — new `dpi` term in `resolveScaleFactor`, wired at every existing call site | typescript-pro (sonnet) | `skinparam-key-handlers*.ts` (new `dpi` key), `scale-command.ts` (dpi term), `json/renderer.ts`, `description/renderer.ts`, `sequence/renderer.ts` call sites, tests | T29 | [ ] |
+| T29 | Class `scale` — capture into AST, multiply resolved geometry before `renderClass` (A4 1, D4) | typescript-pro (sonnet) | `class-command-directives.ts`, `ast.ts`, `layout.ts`, new `class-scale-geo.ts`, tests | — | [x] |
+| T30 | `skinparam dpi` core reader — new `dpi` term in `resolveScaleFactor`, wired at every existing call site | typescript-pro (sonnet) | `skinparam-key-handlers*.ts` (new `dpi` key), `scale-command.ts` (dpi term), `json/renderer.ts`, `description/renderer.ts`, `sequence/renderer.ts` call sites, tests | T29 | [x] |
 
 Specs: [`T29-class-scale.md`](T29-class-scale.md),
 [`T30-dpi-core-reader.md`](T30-dpi-core-reader.md). Batch close:
