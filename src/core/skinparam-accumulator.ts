@@ -48,6 +48,12 @@ export interface SkinparamAccumulator {
    *  (`SequenceDiagram.java:478-485`). */
   footbox: string | undefined;
   handwritten: boolean | undefined;
+  /** cdd-T33: `skinparam mode dark` — `SkinParam.isDark`
+   *  (`skin/SkinParam.java:114-116`): `"dark".equalsIgnoreCase(getValue
+   *  ("mode"))`, case-insensitive, any other value (including absent) is
+   *  NOT dark. See `theme-dark.ts`'s own doc comment for the full
+   *  mechanism and `skinparam-theme-builder.ts#buildThemePartial`'s gate. */
+  mode: 'dark' | undefined;
   monochrome: 'true' | 'reverse' | undefined;
   packageStyle: 'rect' | undefined;
   fixCircleLabelOverlapping: boolean | undefined;
@@ -201,6 +207,7 @@ const SCALAR_FIELD_NAMES = [
   'strictUml',
   'footbox',
   'handwritten',
+  'mode',
   'monochrome',
   'packageStyle',
   'fixCircleLabelOverlapping',

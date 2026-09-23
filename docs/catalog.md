@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1181 modules · 4373 exported names.
+1182 modules · 4374 exported names.
 
 ## `src/`
 
@@ -126,6 +126,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
+| `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
 | `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |

@@ -58,6 +58,16 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    ['mode'],
+    (acc, value) => {
+      // cdd-T33: `SkinParam.isDark` (`skin/SkinParam.java:114-116`) --
+      // `"dark".equalsIgnoreCase(getValue("mode"))`. Any other value
+      // (including absent) leaves `acc.mode` unset -- see `theme-dark.ts`'s
+      // own doc comment for the default-table this gates.
+      if (value.trim().toLowerCase() === 'dark') acc.mode = 'dark';
+    },
+  ],
+  [
     ['fixcirclelabeloverlapping'],
     (acc, value) => {
       acc.fixCircleLabelOverlapping = value.trim().toLowerCase() === 'true';
