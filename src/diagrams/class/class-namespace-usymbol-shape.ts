@@ -35,6 +35,7 @@
 import type { Paint } from '../../core/paint.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './class-geo-namespace-types.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
@@ -141,7 +142,12 @@ export interface NamespaceUSymbolPaint {
  * `core/usymbol-shapes.ts#filledPath`'s established convention for the same
  * situation (`svgRoot` dedupes them).
  */
-function buildDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, titleFont: FontConfiguration): ClusterDecoration {
+function buildDecoration(
+  geo: NamespaceGeo,
+  symbol: UpstreamUSymbol,
+  titleFont: FontConfiguration,
+  scaleK: number,
+): ClusterDecoration {
   // cdd-T26 residual round (`daxeno-00-kasu166`): `buildTextBlock`'s own
   // multi-line split (`EntityImageDescriptionTextBlock.ts`) is a real
   // newline-CHARACTER split (`text.split('\n')`) — `geo.label` carries the
@@ -182,7 +188,10 @@ function buildDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, titleFont: 
     title,
     TextBlockUtils.empty(0, 0),
     { position: new UTranslate(geo.x, geo.y), width: geo.width, height: geo.height },
-    UStroke.withThickness(GROUP_STROKE_WIDTH),
+    // cdd-B8FU: GROUP_STROKE_WIDTH is a raw literal (jar's unscaled
+    // thickness-1 default); `geo.x/y/width/height` are already scaled
+    // (`scaleNamespaceGeo`), so the stroke needs its own scaleK factor.
+    UStroke.withThickness(GROUP_STROKE_WIDTH * scaleK),
   );
 }
 
@@ -227,7 +236,7 @@ function resolveClusterUSymbolPaint(theme: Theme, geo: NamespaceGeo, keyword: st
 
 export function renderNamespaceUSymbol(
   geo: NamespaceGeo,
-  theme: Theme,
+  theme: ScaledTheme,
   measurer: StringMeasurer,
   paint: NamespaceUSymbolPaint,
 ): string | undefined {
@@ -241,7 +250,7 @@ export function renderNamespaceUSymbol(
   if (symbol === null) return undefined;
 
   const resolvedPaint = resolveClusterUSymbolPaint(theme, geo, keyword, paint);
-  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, resolvedPaint.fontColor));
+  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, resolvedPaint.fontColor), theme.scaleK);
   const fragment = renderDrawableToFragment(
     {
       drawU(ug) {

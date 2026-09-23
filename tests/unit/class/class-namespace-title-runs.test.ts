@@ -20,6 +20,7 @@ import {
   namespaceTitleLineBaselines,
 } from '../../../src/diagrams/class/class-namespace-title-runs.js';
 import { namespaceTitleTableDims } from '../../../src/diagrams/class/class-namespace-title-table.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { computeTitleTableHeight } from '../../../src/core/cluster-title-table.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -120,20 +121,20 @@ function jabamaGeo(): NamespaceGeo {
 
 describe('renderNamespaceFolder — cdd-T26 multi-run title wiring (jabama-09-kago823)', () => {
   it('emits two <text> runs (not one literal-markup run) when a measurer is supplied', () => {
-    const svg = renderNamespaceFolder(jabamaGeo(), defaultTheme, measurer);
+    const svg = renderNamespaceFolder(jabamaGeo(), scaleClassTheme(defaultTheme, 1), measurer);
     expect(svg).not.toContain('&lt;img:');
     expect(svg).toContain('>MyNamespaceName</text>');
     expect(svg).toMatch(/>\(Cannot.decode\)<\/text>/u);
   });
 
   it('falls back to the single-run literal-text path when no measurer is supplied (pre-T26 behavior)', () => {
-    const svg = renderNamespaceFolder(jabamaGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(jabamaGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('>MyNamespaceName &lt;img:HelloWorld.png{scale=1.5}></text>');
   });
 
   it('is measurement-identical for a markup-free label whether or not a measurer is supplied', () => {
     const geo: NamespaceGeo = { ...jabamaGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderNamespaceFolder(geo, defaultTheme, measurer)).toBe(renderNamespaceFolder(geo, defaultTheme));
+    expect(renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1)));
   });
 });
 
@@ -216,7 +217,7 @@ describe('renderNamespaceRect/renderEmptyPackageIcon — cdd-T26 multi-line wiri
   }
 
   it('renderNamespaceRect draws two lines, each centred against geo.width independently', () => {
-    const svg = renderNamespaceRect(daxenoRectGeo(), defaultTheme, measurer);
+    const svg = renderNamespaceRect(daxenoRectGeo(), scaleClassTheme(defaultTheme, 1), measurer);
     expect(svg).toContain('>styled2</text>');
     expect(svg).toMatch(/>should.be.styled<\/text>/u);
     expect(svg).not.toContain('\\nshould');
@@ -224,11 +225,11 @@ describe('renderNamespaceRect/renderEmptyPackageIcon — cdd-T26 multi-line wiri
 
   it('renderNamespaceRect is byte-identical with/without a measurer for a markup-free label', () => {
     const geo: NamespaceGeo = { ...daxenoRectGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderNamespaceRect(geo, defaultTheme, measurer)).toBe(renderNamespaceRect(geo, defaultTheme));
+    expect(renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1)));
   });
 
   it('renderEmptyPackageIcon draws two lines at the fixed geo.x+4 left margin', () => {
-    const svg = renderEmptyPackageIcon(daxenoRectGeo(), defaultTheme, measurer);
+    const svg = renderEmptyPackageIcon(daxenoRectGeo(), scaleClassTheme(defaultTheme, 1), measurer);
     expect(svg).toContain('>styled2</text>');
     expect(svg).toMatch(/>should.be.styled<\/text>/u);
     expect(svg).not.toContain('\\nshould');
@@ -236,7 +237,7 @@ describe('renderNamespaceRect/renderEmptyPackageIcon — cdd-T26 multi-line wiri
 
   it('renderEmptyPackageIcon is byte-identical with/without a measurer for a markup-free label', () => {
     const geo: NamespaceGeo = { ...daxenoRectGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderEmptyPackageIcon(geo, defaultTheme, measurer)).toBe(renderEmptyPackageIcon(geo, defaultTheme));
+    expect(renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1)));
   });
 });
 

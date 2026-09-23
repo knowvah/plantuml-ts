@@ -13,8 +13,10 @@ import { renderRowAtoms } from '../../../src/diagrams/class/renderer-classifier-
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const measurer = new FormulaMeasurer();
+const theme = scaleClassTheme(defaultTheme, 1);
 const FONT12: FontConfiguration = { family: 'sans-serif', size: 12, color: null, styles: new Set() };
 const ROW_Y = 100;
 
@@ -22,7 +24,7 @@ describe("renderRowAtoms — <sup>/<sub> draws the sizer's own muted size + dy (
   test("x<sup>2</sup>: the drawn sup run has font-size 9 and y = rowY + the sizer's own dy", () => {
     const atoms = buildMemberAtoms('x<sup>2</sup>', FONT12);
     const build = resolveMemberAtoms(atoms, FONT12, measurer);
-    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, defaultTheme);
+    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, theme);
     const texts = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)" font-size="([^"]*)"/g)];
     expect(texts).toHaveLength(2);
     const [xRun, supRun] = texts as [RegExpMatchArray, RegExpMatchArray];
@@ -45,7 +47,7 @@ describe("renderRowAtoms — <sup>/<sub> draws the sizer's own muted size + dy (
   test("H<sub>2</sub>O: every drawn run's y matches ROW_Y + its own dy from the sizer", () => {
     const atoms = buildMemberAtoms('H<sub>2</sub>O', FONT12);
     const build = resolveMemberAtoms(atoms, FONT12, measurer);
-    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, defaultTheme);
+    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, theme);
     const ys = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)"/g)].map((m) => Number(m[1]));
     expect(ys).toHaveLength(3);
     const textAtoms = build.atoms as Extract<(typeof build.atoms)[number], { kind: 'text' }>[];

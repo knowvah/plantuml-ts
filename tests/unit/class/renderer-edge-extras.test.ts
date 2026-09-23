@@ -14,7 +14,10 @@ import {
 } from '../../../src/diagrams/class/renderer-edge-extras.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+
+const theme = scaleClassTheme(defaultTheme, 1);
 
 function makeEdgeGeo(overrides?: Partial<EdgeGeo>): EdgeGeo {
   return {
@@ -35,14 +38,14 @@ function makeEdgeGeo(overrides?: Partial<EdgeGeo>): EdgeGeo {
 // A2a/M2 -- canuti-20-jotu614's three visibility icons.
 describe('renderEdgeVisibilityIcon', () => {
   it('returns empty string when the edge carries no visibility icon', () => {
-    expect(renderEdgeVisibilityIcon(makeEdgeGeo(), defaultTheme)).toBe('');
+    expect(renderEdgeVisibilityIcon(makeEdgeGeo(), theme)).toBe('');
   });
 
   it('draws the PRIVATE_METHOD square, unfilled, at the golden origin+2,+2', () => {
     // Golden: `<g data-visibility-modifier="PRIVATE_METHOD"><rect x="158.32"
     // y="160" width="6" height="6" fill="none" style="stroke:#C82930;...">`.
     const geo = makeEdgeGeo({ visibilityIcon: { x: 156.32, y: 158, modifier: 'PRIVATE_METHOD' } });
-    const markup = renderEdgeVisibilityIcon(geo, defaultTheme);
+    const markup = renderEdgeVisibilityIcon(geo, theme);
     expect(markup).toContain('data-visibility-modifier="PRIVATE_METHOD"');
     expect(markup).toContain('<rect');
     expect(markup).toContain('x="158.32"');
@@ -57,7 +60,7 @@ describe('renderEdgeVisibilityIcon', () => {
     // Golden: `<polygon points="101.32,158,105.32,162,101.32,166,97.32,162"
     // fill="none" style="stroke:#B38D22;...">` for icon origin 96.32,158.
     const geo = makeEdgeGeo({ visibilityIcon: { x: 96.32, y: 158, modifier: 'PROTECTED_METHOD' } });
-    const markup = renderEdgeVisibilityIcon(geo, defaultTheme);
+    const markup = renderEdgeVisibilityIcon(geo, theme);
     expect(markup).toContain('data-visibility-modifier="PROTECTED_METHOD"');
     expect(markup).toContain('<polygon');
     expect(markup).toContain('fill="none"');
@@ -68,7 +71,7 @@ describe('renderEdgeVisibilityIcon', () => {
     // Golden: `<ellipse cx="230.99" cy="163" rx="3" ry="3" fill="none"
     // style="stroke:#038048;...">` for icon origin 225.99,158.
     const geo = makeEdgeGeo({ visibilityIcon: { x: 225.99, y: 158, modifier: 'PUBLIC_METHOD' } });
-    const markup = renderEdgeVisibilityIcon(geo, defaultTheme);
+    const markup = renderEdgeVisibilityIcon(geo, theme);
     expect(markup).toContain('data-visibility-modifier="PUBLIC_METHOD"');
     expect(markup).toContain('<ellipse');
     expect(markup).toContain('cx="230.99"');
@@ -79,14 +82,14 @@ describe('renderEdgeVisibilityIcon', () => {
 
   it('returns empty string for an unrecognised modifier name', () => {
     const geo = makeEdgeGeo({ visibilityIcon: { x: 0, y: 0, modifier: 'BOGUS' } });
-    expect(renderEdgeVisibilityIcon(geo, defaultTheme)).toBe('');
+    expect(renderEdgeVisibilityIcon(geo, theme)).toBe('');
   });
 });
 
 // A2a/M5 -- lipazi-06-care921's note-on-link structural presence.
 describe('renderEdgeNoteBox', () => {
   it('returns empty string when the edge carries no note box', () => {
-    expect(renderEdgeNoteBox(makeEdgeGeo(), defaultTheme)).toBe('');
+    expect(renderEdgeNoteBox(makeEdgeGeo(), theme)).toBe('');
   });
 
   it('emits the note body path, fold path and one <text> per line', () => {
@@ -103,7 +106,7 @@ describe('renderEdgeNoteBox', () => {
         ],
       },
     });
-    const markup = renderEdgeNoteBox(geo, defaultTheme);
+    const markup = renderEdgeNoteBox(geo, theme);
     // Structural presence (AC: body path/polygon, corner path, text) --
     // byte-exact vertex order/paint is T8's (batch 3), not this task's.
     expect((markup.match(/<path/g) ?? []).length + (markup.match(/<polygon/g) ?? []).length).toBe(2);
@@ -118,14 +121,14 @@ describe('renderEdgeConstraint', () => {
   const measurer = new WidthTableMeasurer();
 
   it('returns empty string when the edge carries no constraint', () => {
-    expect(renderEdgeConstraint(makeEdgeGeo(), defaultTheme, measurer)).toBe('');
+    expect(renderEdgeConstraint(makeEdgeGeo(), theme, measurer)).toBe('');
   });
 
   it('draws the dashed 3,3 line at the golden coordinates (lnk10)', () => {
     const geo = makeEdgeGeo({
       constraint: { line: { x1: 96.57, y1: 265.5, x2: 130, y2: 331 }, text: 'enten/eller' },
     });
-    const markup = renderEdgeConstraint(geo, defaultTheme, measurer);
+    const markup = renderEdgeConstraint(geo, theme, measurer);
     expect(markup).toContain('x1="96.57"');
     expect(markup).toContain('y1="265.5"');
     expect(markup).toContain('x2="130"');
@@ -140,7 +143,7 @@ describe('renderEdgeConstraint', () => {
     const geo = makeEdgeGeo({
       constraint: { line: { x1: 96.57, y1: 265.5, x2: 130, y2: 331 }, text: 'enten/eller' },
     });
-    const markup = renderEdgeConstraint(geo, defaultTheme, measurer);
+    const markup = renderEdgeConstraint(geo, theme, measurer);
     expect(markup).toContain('x="82.938"');
     expect(markup).toContain('y="301.861"');
     expect(markup).toContain('textLength="60.694"');
@@ -154,7 +157,7 @@ describe('renderEdgeConstraint', () => {
     const geo = makeEdgeGeo({
       constraint: { line: { x1: 266.12, y1: 91, x2: 226.62, y2: 208 }, text: 'enten\\n/eller' },
     });
-    const markup = renderEdgeConstraint(geo, defaultTheme, measurer);
+    const markup = renderEdgeConstraint(geo, theme, measurer);
     expect(markup).toContain('x="230.12"');
     expect(markup).toContain('y="146.611"');
     expect(markup).toContain('textLength="32.5"');
@@ -169,7 +172,7 @@ describe('renderEdgeConstraint', () => {
     const geo = makeEdgeGeo({
       constraint: { line: { x1: 0, y1: 0, x2: 10, y2: 10 }, text: 'x' },
     });
-    const markup = renderEdgeConstraint(geo, defaultTheme, undefined);
+    const markup = renderEdgeConstraint(geo, theme, undefined);
     expect(markup).toContain('<line');
     expect(markup).not.toContain('<text');
   });
@@ -187,7 +190,7 @@ describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, afte
     const geo = makeEdgeGeo({
       quantifierLines: [[{ text: '1', x: 1, y: 2, width: 3 }], [{ text: '0..n', x: 4, y: 5, width: 6 }]],
     });
-    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
     expect(parts).toHaveLength(2);
     expect(parts.join('')).toContain('>1<');
     expect(parts.join('')).toContain('>0..n<');
@@ -204,7 +207,7 @@ describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, afte
         [{ text: 'items', x: 151.23, y: 104.032, width: 31.038 }],
       ],
     });
-    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
     expect(parts).toHaveLength(4);
     const texts = parts.map((p) => /<text[^>]*>([^<]*)<\/text>/.exec(p)?.[1]);
     expect(texts).toEqual(['owner which is very long', '1', '0..n', 'items']);
@@ -222,7 +225,7 @@ describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, afte
       ],
       roleLines: [[{ text: '1', x: 47.429, y: 73.253, width: 7.231 }], []],
     });
-    const parts = renderEdgeCardinalityLabels(geo, defaultTheme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
     expect(parts).toHaveLength(3);
   });
 });

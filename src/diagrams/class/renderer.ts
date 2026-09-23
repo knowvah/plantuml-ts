@@ -94,7 +94,10 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
       // node { LineColor ... }` override is NOT modeled (no corpus sample;
       // named remainder, `.agent-notes/cdd-T12.md`).
       borderColor: theme.colors.border,
-      roundCorner: theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER,
+      // cdd-B8FU: renderNamespaceUSymbol draws through renderDrawableToFragment
+      // at scale=1 (no SvgOption.scale threading, class-namespace-usymbol-
+      // shape.ts's own citation) -- this literal needs its own scaleK factor.
+      roundCorner: (theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER) * theme.scaleK,
       fontColor: titleFontColor(theme),
     });
     if (drawn !== undefined) return drawn;

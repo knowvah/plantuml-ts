@@ -8,6 +8,7 @@
 import type { ClassifierGeo } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import { text, image, decorationLines } from '../../core/svg.js';
 import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -69,8 +70,15 @@ import { parseDeclarationColors } from './class-declaration-extractors.js';
  * the icon's own `descent` term differed by `(18-14)/4.5 == 1.1111` against
  * `xabije-20-xusi569`'s `AttributeFontSize 18`).
  */
-export function attributeFontSize(theme: Theme): number {
-  return theme.colors.graph.classCascadeFontSize ?? theme.colors.graph.classAttributeFontSize ?? theme.fontSize;
+export function attributeFontSize(theme: ScaledTheme): number {
+  // cdd-B8FU: the two override tiers are UNSCALED skinparam/`<style>`
+  // values (unlike `theme.fontSize`, already scaled by T29's
+  // `scaleClassTheme`) -- materialized the same way `edgeStrokeWidth`'s
+  // fallback tiers are (`renderer-edge.ts#resolveEdgeStrokeWidth`, T29
+  // round 2), so the icon-centering math below stays consistent whichever
+  // tier wins.
+  const override = theme.colors.graph.classCascadeFontSize ?? theme.colors.graph.classAttributeFontSize;
+  return override !== undefined ? override * theme.scaleK : theme.fontSize;
 }
 
 /**
@@ -100,14 +108,14 @@ export function attributeFontSize(theme: Theme): number {
 export function wrappedVisibilityIconOriginY(
   geo: ClassifierGeo,
   row: ClassifierGeo['rows'][number],
-  theme: Theme,
+  theme: ScaledTheme,
 ): number {
   const fontSize = attributeFontSize(theme);
   const blockHeight = row.visibilityBlockHeight ?? fontSize;
   return visibilityIconOriginY(geo.y + row.y + (blockHeight - fontSize) / 2, fontSize, theme);
 }
 
-export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: Theme): string {
+export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: ScaledTheme): string {
   const icon =
     row.visibilityIcon !== undefined
       ? renderVisibilityIcon(
@@ -198,7 +206,7 @@ function classifierCascadeFontColor(
 export function renderRowText(
   geo: ClassifierGeo,
   row: ClassifierGeo['rows'][number],
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N36: true for the header/name row(s) only (`buildHeaderPrimitive`'s
   // own call) -- selects the WIDER `classCascadeHeaderFontColor` signature
   // (which additionally allows a nested `... { header { FontColor } } }`
@@ -334,7 +342,7 @@ export function renderRowAtoms(
   atoms: readonly MemberRenderAtom[],
   startX: number,
   y: number,
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N36: the SAME `classCascade(Header)FontColor ?? '#000000'` fallback
   // `renderRowText` computes for its plain-text path -- an atom's OWN
   // creole-resolved color (`atom.font.color`, a `<color>text</color>` run
@@ -401,7 +409,7 @@ export function renderRowAtoms(
       // patterns gated `if (mode == CreoleMode.FULL)`). Handled anyway so the
       // atom union stays exhaustive here, using this file's own
       // line-bottom-minus-height convention rather than the note renderer's.
-      out += renderBulletAtom(atom, x, y + theme.fontSize / 4.5 - theme.fontSize, theme.fontSize);
+      out += renderBulletAtom(atom, x, y + theme.fontSize / 4.5 - theme.fontSize, theme.fontSize, theme.scaleK);
       x += atom.width;
       continue;
     }

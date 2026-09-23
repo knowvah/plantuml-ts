@@ -10,6 +10,9 @@ import type { NoteConnector } from '../../../src/diagrams/class/renderer-note-di
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import type { ClassUidPlan } from '../../../src/diagrams/class/renderer-uid.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
+
+const theme = scaleClassTheme(defaultTheme, 1);
 
 // `fogexa-30-zupo141`: `skinparam style strictuml` + `note top of dummy`.
 // Note ABOVE its host, connector routed from the note's own bottom edge
@@ -46,7 +49,7 @@ function fakeUidPlan(): ClassUidPlan {
 
 describe('renderNoteConnectorPath (cdd-T9b, point 1)', () => {
   it('draws an ordinary dashed-edge style -- strokeWidth 1, "7,7", never the note box style', () => {
-    const svg = renderNoteConnectorPath(fogexaNote, defaultTheme, 'GMN2-dummy');
+    const svg = renderNoteConnectorPath(fogexaNote, theme, 'GMN2-dummy');
     expect(svg).toContain('stroke-width="1"');
     expect(svg).toContain('stroke-dasharray="7,7"');
     expect(svg).toContain('id="GMN2-dummy"');
@@ -56,7 +59,7 @@ describe('renderNoteConnectorPath (cdd-T9b, point 1)', () => {
 
   it('returns undefined for a note with no connector geometry', () => {
     const noConnector: NoteGeo = { ...fogexaNote, connector: [] };
-    expect(renderNoteConnectorPath(noConnector, defaultTheme, 'x-y')).toBeUndefined();
+    expect(renderNoteConnectorPath(noConnector, theme, 'x-y')).toBeUndefined();
   });
 });
 
@@ -104,7 +107,7 @@ describe('resolveNoteConnectorEndpoints (cdd-T9b, points 2/3)', () => {
 describe('renderNoteConnectorLink (cdd-T9b, fogexa-30-zupo141 exact group shape)', () => {
   it('produces the jar-exact group: id lnk4, data-entity-1/2, path id GMN2-dummy, stroke-width:1, dasharray:7,7', () => {
     const connector: NoteConnector = { note: fogexaNote };
-    const link = renderNoteConnectorLink(connector, defaultTheme, fakeUidPlan(), new Set<string>());
+    const link = renderNoteConnectorLink(connector, theme, fakeUidPlan(), new Set<string>());
     expect(link).toContain('<g class="link"');
     expect(link).toContain('id="lnk4"');
     expect(link).toContain('data-entity-1="ent0003"');
@@ -118,7 +121,7 @@ describe('renderNoteConnectorLink (cdd-T9b, fogexa-30-zupo141 exact group shape)
   it('dedups the path id against the shared diagram-wide id collision set', () => {
     const connector: NoteConnector = { note: fogexaNote };
     const ids = new Set<string>(['GMN2-dummy']);
-    const link = renderNoteConnectorLink(connector, defaultTheme, fakeUidPlan(), ids);
+    const link = renderNoteConnectorLink(connector, theme, fakeUidPlan(), ids);
     expect(link).toContain('id="GMN2-dummy-1"');
   });
 });

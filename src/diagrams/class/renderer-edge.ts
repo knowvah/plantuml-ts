@@ -148,18 +148,19 @@ export function uniqLinkId(ids: Set<string>, base: string): string {
  * `core/svg.ts`'s own `fontWeight` doc comment, corpus-verified 184/184
  * class fixtures) matches `camuna-58-veca254`'s oracle `foo1`/`foo2` labels
  * exactly. Applies ONLY to the main label -- `tailLabel`/`headLabel`
- * (cardinality/quantifier) keep their own untouched `CARDINALITY_FONT_SIZE`
- * font below (T14's path, out of this task's scope).
+ * (cardinality/quantifier) use their own `CARDINALITY_FONT_SIZE` font,
+ * scaled in `renderer-edge-extras.ts#renderEdgeCardinalityLabels` (cdd-B8FU).
  */
-function arrowLabelTextAttrs(theme: Theme): {
+function arrowLabelTextAttrs(theme: ScaledTheme): {
   fontSize: number;
   fontFamily: string;
   fontWeight?: '700';
   fontStyle?: 'italic';
 } {
+  // cdd-B8FU: `resolveArrowLabelFont` (SHARED `core/arrow-label-font.ts`) stays unscaled regardless of `ScaledTheme` -- scaled here (class-only).
   const font = resolveArrowLabelFont(theme);
   return {
-    fontSize: font.size,
+    fontSize: font.size * theme.scaleK,
     fontFamily: font.family,
     ...(font.weight === 'bold' ? { fontWeight: '700' as const } : {}),
     ...(font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
@@ -457,7 +458,7 @@ export function renderEdge(geo: EdgeGeo, theme: ScaledTheme, ctx: RenderEdgeCont
   // extremity trim already mutated in upstream -- see `buildPathData`'s own
   // doc comment on why this port never builds a real `DotPath` for the
   // connecting line itself).
-  const middleDecor = buildMiddleDecorMarkup(trimmedPoints, geo.middleDecor, strokeColor, theme.colors.background);
+  const middleDecor = buildMiddleDecorMarkup(trimmedPoints, geo.middleDecor, strokeColor, theme.colors.background, theme.scaleK);
   let extraDefs = arrowheads.extraDefs;
   if (middleDecor !== undefined) {
     parts.push(middleDecor.body);

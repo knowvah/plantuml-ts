@@ -38,8 +38,10 @@ import {
 } from '../../../src/diagrams/class/class-namespace-shape.js';
 import { wrapCluster } from '../../../src/diagrams/class/renderer-group.js';
 import { namespaceTitleTableDims } from '../../../src/diagrams/class/class-namespace-title-table.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const measurer = new WidthTableMeasurer();
+const scaledDefaultTheme = scaleClassTheme(defaultTheme, 1);
 
 const NODE_PAINT = {
   backColor: 'none',
@@ -67,7 +69,7 @@ function dativuGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
 
 describe('renderNamespaceUSymbol — <<Node>> container (dativu-93-pona469)', () => {
   it('draws USymbolNode#asBig byte-exactly: polygon + 3 lines + centred bold title', () => {
-    expect(renderNamespaceUSymbol(dativuGeo(), defaultTheme, measurer, NODE_PAINT)).toBe(
+    expect(renderNamespaceUSymbol(dativuGeo(), scaledDefaultTheme, measurer, NODE_PAINT)).toBe(
       '<polygon points="16,16,26,6,166,6,166,98,156,108,16,108,16,16" fill="none"' +
         ' style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
         '<line x1="156" y1="16" x2="166" y2="6" style="stroke:#181818;stroke-width:1;"/>' +
@@ -79,27 +81,27 @@ describe('renderNamespaceUSymbol — <<Node>> container (dativu-93-pona469)', ()
   });
 
   it("emits the jar's 5 cluster children (was 3: the plain folder path/line/text)", () => {
-    const svg = renderNamespaceUSymbol(dativuGeo(), defaultTheme, measurer, NODE_PAINT) ?? '';
+    const svg = renderNamespaceUSymbol(dativuGeo(), scaledDefaultTheme, measurer, NODE_PAINT) ?? '';
     expect(svg.match(/<(polygon|line|text)\b/g)).toHaveLength(5);
   });
 
   it('declines (undefined) for a namespace with no USymbol keyword — folder path still owns it', () => {
     // `exactOptionalPropertyTypes`: an absent key, not an `undefined` value.
     const { usymbol: _omitted, ...noSymbol } = dativuGeo();
-    expect(renderNamespaceUSymbol(noSymbol, defaultTheme, measurer, NODE_PAINT)).toBe(undefined);
+    expect(renderNamespaceUSymbol(noSymbol, scaledDefaultTheme, measurer, NODE_PAINT)).toBe(undefined);
   });
 
   it('declines for the folder family: USymbols.PACKAGE/FOLDER are both USymbolFolder', () => {
-    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'package' }), defaultTheme, measurer, NODE_PAINT)).toBe(
+    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'package' }), scaledDefaultTheme, measurer, NODE_PAINT)).toBe(
       undefined,
     );
-    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'folder' }), defaultTheme, measurer, NODE_PAINT)).toBe(
+    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'folder' }), scaledDefaultTheme, measurer, NODE_PAINT)).toBe(
       undefined,
     );
   });
 
   it('declines for a keyword that resolves to no USymbol at all', () => {
-    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'not-a-symbol' }), defaultTheme, measurer, NODE_PAINT)).toBe(
+    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'not-a-symbol' }), scaledDefaultTheme, measurer, NODE_PAINT)).toBe(
       undefined,
     );
   });
@@ -107,7 +109,7 @@ describe('renderNamespaceUSymbol — <<Node>> container (dativu-93-pona469)', ()
   it('paints the resolved back colour into the shape (inline `package X <<Node>> #DDDDDD`)', () => {
     const geo = dativuGeo({ color: '#DDDDDD' });
     const svg =
-      renderNamespaceUSymbol(geo, defaultTheme, measurer, {
+      renderNamespaceUSymbol(geo, scaledDefaultTheme, measurer, {
         ...NODE_PAINT,
         backColor: namespaceFill(geo, defaultTheme),
       }) ?? '';
@@ -200,7 +202,7 @@ describe('renderNamespaceUSymbol — <<Database>> per-symbol paint + multi-line 
     theme.colors.elements = {
       database: { background: '#FF0', border: '#808080', font: '#D3D3D3' },
     };
-    return theme;
+    return scaleClassTheme(theme, 1);
   }
 
   function daxenoGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
@@ -230,7 +232,7 @@ describe('renderNamespaceUSymbol — <<Database>> per-symbol paint + multi-line 
   });
 
   it('an unstyled USymbol (no matching bucket) keeps the generic fallback — regression guard, dativu-93-pona469', () => {
-    const svg = renderNamespaceUSymbol(dativuGeo(), defaultTheme, measurer, NODE_PAINT) ?? '';
+    const svg = renderNamespaceUSymbol(dativuGeo(), scaledDefaultTheme, measurer, NODE_PAINT) ?? '';
     expect(svg).toContain('fill="none"');
     expect(svg).toContain(`stroke:${defaultTheme.colors.border}`);
   });

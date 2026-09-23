@@ -6,7 +6,7 @@ import {
   VISIBILITY_ICON_SIZE,
 } from '../../../src/diagrams/class/class-visibility-icon.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import type { Theme } from '../../../src/core/theme.js';
+import { scaleClassTheme, type ScaledTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 // ---------------------------------------------------------------------------
 // G2 N6: shape/color/wrapper for the member-row visibility icon --
@@ -150,7 +150,8 @@ describe('VISIBILITY_ICON_SIZE', () => {
 // `iconProtectedBackgroundColor` actually diverges from the hardcoded
 // default `#FFFF44`, to `#FECF6C`).
 describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
-  const themeWithOverride = deepMergeTheme(defaultTheme, {
+  const themeWithOverride = scaleClassTheme(
+    deepMergeTheme(defaultTheme, {
     colors: {
       graph: {
         iconPrivateColor: '#C82930',
@@ -163,7 +164,9 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
         iconPublicBackgroundColor: '#84BE84',
       },
     },
-  });
+    }),
+    1,
+  );
 
   it('protected method background diverges from the hardcoded default when overridden', () => {
     const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, themeWithOverride);
@@ -176,7 +179,7 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
   });
 
   it('theme with no graph override set -- falls back to the hardcoded default', () => {
-    const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, defaultTheme);
+    const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('fill="#FF4" style="stroke:#B38D22;');
   });
 
@@ -209,7 +212,8 @@ describe('renderVisibilityIcon — classAttributeIconSize (ledger M5)', () => {
   /** `VisibilityModifier#drawSquare`: evened size, minus 4. */
   const squareEdgeFor = (iconSize: number): number => iconSize - (iconSize % 2) - 4;
 
-  const themeWith = (classAttributeIconSize: number): Theme => ({ ...defaultTheme, classAttributeIconSize });
+  const themeWith = (classAttributeIconSize: number): ScaledTheme =>
+    scaleClassTheme({ ...defaultTheme, classAttributeIconSize }, 1);
 
   it.each([
     [10, 6], // the default — must stay byte-identical to pre-B4 output

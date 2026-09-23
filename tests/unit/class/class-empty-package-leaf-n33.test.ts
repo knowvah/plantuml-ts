@@ -19,6 +19,7 @@ import {
   renderEmptyPackageIcon,
 } from '../../../src/diagrams/class/class-namespace-shape.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
 const measurer = new WidthTableMeasurer();
@@ -65,7 +66,7 @@ describe('measureEmptyPackageLeafDim', () => {
 describe('renderEmptyPackageIcon', () => {
   it('draws classifier-box default colors (#181818/0.5/classBackground), not package-cluster colors', () => {
     const dim = measureEmptyPackageLeafDim(measurer, defaultTheme, 'foo');
-    const svg = renderEmptyPackageIcon({ id: 'foo', x: 6, y: 7, label: 'foo', ...dim }, defaultTheme);
+    const svg = renderEmptyPackageIcon({ id: 'foo', x: 6, y: 7, label: 'foo', ...dim }, scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
     expect(svg).toContain('stroke-width="0.5"');
     expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
@@ -73,7 +74,7 @@ describe('renderEmptyPackageIcon', () => {
 
   it('draws NO <g> wrapper (plain path+line+text siblings)', () => {
     const dim = measureEmptyPackageLeafDim(measurer, defaultTheme, 'foo');
-    const svg = renderEmptyPackageIcon({ id: 'foo', x: 6, y: 7, label: 'foo', ...dim }, defaultTheme);
+    const svg = renderEmptyPackageIcon({ id: 'foo', x: 6, y: 7, label: 'foo', ...dim }, scaleClassTheme(defaultTheme, 1));
     expect(svg).not.toContain('<g');
     expect(svg).toContain('<path');
     expect(svg).toContain('<line');
