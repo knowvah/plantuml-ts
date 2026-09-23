@@ -34,7 +34,9 @@ import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
-import { assembleSvg } from '../../../src/index.js';
+import { assembleSvg, renderSync } from '../../../src/index.js';
+import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
+import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { applyClassDocumentMargin } from '../../../src/diagrams/class/layout-ink-extent.js';
 
 interface ResolvedThemeAndStyles {
@@ -136,6 +138,14 @@ export function layoutFixtureClass(
 }
 
 export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+  // cdd-close-b7: mirrors `index.ts#prepareBlock` exactly -- production
+  // registers the recursive nested-diagram renderer (T27/B7FU-R2) and seeds
+  // every `<linearGradient>`/`<filter>` id from the diagram source
+  // (B7FU-R4, `SvgGraphics.java:160-162`) before assembling. Without both,
+  // this harness measured 11 survey-conformant fixtures as census-diverged
+  // on the close-b7 tree: the instrument, not the port.
+  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
+  const seed = seedOf(markup);
   const { geo, theme, styleMap, annotations } = layoutFixtureClass(markup, measurer, options);
   const blocks = buildBlockUmls(markup, options);
   const preprocessed = blocks[0]!.ok ? blocks[0]!.preprocessed : undefined!;
@@ -149,7 +159,7 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // adds. Reproduces production's exact behavior, not new test-only logic.
   const fragment = renderClass(geo, theme);
 
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
+  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
   // cdd-T28: mirrors `index.ts#applyAnnotationChrome`'s `spritesOf(ast)`
@@ -163,7 +173,7 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // mechanism. `renderClass` always sets `preChromeWidth` (non-degenerate
   // single-page path), so this always re-margins when annotations are
   // present.
-  if (fragment.preChromeWidth === undefined) return assembleSvg(chromed);
+  if (fragment.preChromeWidth === undefined) return assembleSvg(chromed, seed);
   const margined = applyClassDocumentMargin({ width: chromed.width, height: chromed.height });
-  return assembleSvg({ ...chromed, width: margined.width, height: margined.height });
+  return assembleSvg({ ...chromed, width: margined.width, height: margined.height }, seed);
 }

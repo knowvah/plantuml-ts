@@ -28,11 +28,11 @@ parsing) — see `diagnosis/A3-style.md` M7's note distinguishing manube from
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T24 | Member/body creole: tree leading-space, guillemet, sejuzo dividers, `~` role strip (A4 2a/4/7) | typescript-pro (sonnet) | `class-member-creole.ts`, `class-body-enhanced.ts`, `class-layout-generic-classifier*.ts`, `class-layout-helpers.ts`, tests | — | [ ] |
-| T25 | Header/name + edge-label creole: `<size:>`/`<plain>`, xamule edge-label size, lecelo `<:name:>` (A4 5/6, xamule) | debugger then typescript-pro (sonnet) | `class-layout-header-creole.ts`, `class-edge-geo.ts`, `renderer-edge.ts`, `class-edge-label-lines.ts`, tests | — | [ ] |
-| T26 | Inline images, sprites, openiconic, emoji atoms (A2b E12) | typescript-pro (sonnet) | `src/core/klimt/creole/` atom files (img/sprite/openiconic/emoji only), `renderer-openiconic.ts`, `renderer-bullet-atom.ts`, `class-member-atom-resolve.ts`, tests | — | [ ] |
-| T27 | Nested `{{ }}` diagram renderer (A2b E7, D9) | typescript-pro (sonnet) | `EmbeddedDiagram.ts` wiring, `MethodsOrFieldsArea.ts` (config supply), `class-embedded-block.ts`, `class-multiline-element.ts`, `DIVERGENCES.md`, tests | — | [ ] |
-| T28 | Chrome creole at the shared seam, every diagram type (A4 2b, D5) | typescript-pro (opus) | `core/annotations/blocks.ts`, `core/annotations/chrome.ts`, tests | — | [ ] |
+| T24 | Member/body creole: tree leading-space, guillemet, sejuzo dividers, `~` role strip (A4 2a/4/7) | typescript-pro (sonnet) | `class-member-creole.ts`, `class-body-enhanced.ts`, `class-layout-generic-classifier*.ts`, `class-layout-helpers.ts`, tests | — | [x] |
+| T25 | Header/name + edge-label creole: `<size:>`/`<plain>`, xamule edge-label size, lecelo `<:name:>` (A4 5/6, xamule) | debugger then typescript-pro (sonnet) | `class-layout-header-creole.ts`, `class-edge-geo.ts`, `renderer-edge.ts`, `class-edge-label-lines.ts`, tests | — | [x] |
+| T26 | Inline images, sprites, openiconic, emoji atoms (A2b E12) | typescript-pro (sonnet) | `src/core/klimt/creole/` atom files (img/sprite/openiconic/emoji only), `renderer-openiconic.ts`, `renderer-bullet-atom.ts`, `class-member-atom-resolve.ts`, tests | — | [x] |
+| T27 | Nested `{{ }}` diagram renderer (A2b E7, D9) | typescript-pro (sonnet) | `EmbeddedDiagram.ts` wiring, `MethodsOrFieldsArea.ts` (config supply), `class-embedded-block.ts`, `class-multiline-element.ts`, `DIVERGENCES.md`, tests | — | [x] |
+| T28 | Chrome creole at the shared seam, every diagram type (A4 2b, D5) | typescript-pro (opus) | `core/annotations/blocks.ts`, `core/annotations/chrome.ts`, tests | — | [x] |
 
 Specs: [`T24-member-body-creole.md`](T24-member-body-creole.md),
 [`T25-header-edge-label-creole.md`](T25-header-edge-label-creole.md),
