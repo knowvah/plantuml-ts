@@ -13,6 +13,7 @@
 import type { Theme } from './theme.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { LineBreakStrategy } from './klimt/LineBreakStrategy.js';
+import { DARK_MODE_DEFAULTS } from './theme-dark.js';
 
 type FieldGetter = (acc: SkinparamAccumulator) => unknown;
 type FieldTable = ReadonlyArray<readonly [key: string, get: FieldGetter]>;
@@ -205,8 +206,72 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   return colorsOverride as unknown as Theme['colors'];
 }
 
+/**
+ * cdd-T33: `skinparam mode dark`'s default-color gate. Seeds the SAME
+ * accumulator fields an explicit skinparam would set, via `??=` -- so an
+ * explicit `skinparam classBackgroundColor`/`backgroundColor`/etc. always
+ * wins, REGARDLESS of source order relative to `mode dark` (mirrors
+ * upstream: `HColorSimple#darkSchemeTheme` returns a user color UNCHANGED
+ * when it has no baked `.dark` variant, `klimt/color/HColorSimple.java:
+ * 236-239` -- see `theme-dark.ts`'s own doc comment for the full chain).
+ * Must run BEFORE `applyDefinedFields`/`hasColorsOverride` below, and only
+ * once every skinparam key has already been applied to `acc` (this
+ * function's own caller, `buildThemePartial`, is that single choke point --
+ * `resolveSkinparam` calls it exactly once, after its key-processing loop).
+ *
+ * `border`/`text` are the GENERAL fields (`theme.colors.border`/`.text`),
+ * not class-specific ones -- see `theme-dark.ts#DARK_MODE_DEFAULTS.border`'s
+ * own doc comment for why light mode's existing fallback chain makes that
+ * the faithful choice, not a narrower `classBorder`/class-only field.
+ * `classFontColor`/`classAttributeFontColor` reuse the EXISTING `<style>`-
+ * bridge-is-lowest-priority tiers (`classCascadeHeaderFontColor`/
+ * `classCascadeFontColor`, cdd-T19) rather than a new theme field, so an
+ * explicit `<style>` block (applied downstream of this function) still
+ * wins per that tier's own established precedent. `elements['spotclass']`
+ * reuses the generic per-element bucket `ELEMENT_BUCKET_SNAMES` already
+ * populates for an explicit `skinparam spotClassBackgroundColor`/`<style>
+ * spotClass { ... }` override, for the SAME reason.
+ *
+ * WRITE-SET NOTE (stop 1, `.agent-notes/cdd-T33.md`): this function is
+ * outside T33's literal write-set (`skinparam-theme-builder.ts` was not
+ * listed) -- flagged, not silently expanded. It is the only point in the
+ * pipeline with full, order-independent visibility into every skinparam
+ * key the diagram declared; no listed file can host this gate correctly.
+ */
+/** One `acc` scalar field seeded by {@link applyDarkModeDefaults}, paired
+ *  with its dark-mode default value. Table-driven (mirrors {@link
+ *  FieldTable}) purely to keep that function's own CCN under the cap --
+ *  a `??=` chain of 6 independent fields is 6 branches on one function. */
+const DARK_SCALAR_SEEDS: ReadonlyArray<
+  readonly [key: 'background' | 'border' | 'text' | 'classBackground' | 'classFontColor' | 'classAttributeFontColor', value: string]
+> = [
+  ['background', DARK_MODE_DEFAULTS.background],
+  ['border', DARK_MODE_DEFAULTS.border],
+  ['text', DARK_MODE_DEFAULTS.text],
+  ['classBackground', DARK_MODE_DEFAULTS.classBackground],
+  ['classFontColor', DARK_MODE_DEFAULTS.text],
+  ['classAttributeFontColor', DARK_MODE_DEFAULTS.text],
+];
+
+/** The `elements['spotclass']` half of {@link applyDarkModeDefaults} --
+ *  split out purely to keep that function's own CCN under the cap. */
+function seedDarkSpotClass(acc: SkinparamAccumulator): void {
+  if (acc.elements['spotclass'] === undefined) {
+    acc.elements['spotclass'] = { background: DARK_MODE_DEFAULTS.spotClassBackground, font: DARK_MODE_DEFAULTS.text };
+  }
+}
+
+function applyDarkModeDefaults(acc: SkinparamAccumulator): void {
+  if (acc.mode !== 'dark') return;
+  for (const [key, value] of DARK_SCALAR_SEEDS) {
+    acc[key] ??= value;
+  }
+  seedDarkSpotClass(acc);
+}
+
 /** Build a `Partial<Theme>` containing only the keys actually seen in `acc`. */
 export function buildThemePartial(acc: SkinparamAccumulator): Partial<Theme> {
+  applyDarkModeDefaults(acc);
   const partial: Record<string, unknown> = {};
   applyDefinedFields(partial, acc, ROOT_SCALAR_FIELDS);
   if (hasColorsOverride(acc)) partial.colors = buildColorsOverride(acc);

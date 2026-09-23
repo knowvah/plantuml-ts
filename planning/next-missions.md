@@ -912,6 +912,28 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 
 Ordered by how ready they are, not by size.
 
+- **`skinparam mode dark` — activity-side defaults + a stale re-pin**
+  (NEW, unbriefed) — FILED 2026-09-23 from `class-divergence-drive` T33
+  (decision-journal row 201). T33 ported `skinparam mode dark`'s five
+  class-scoped defaults (`theme-dark.ts`); the key handler is SHARED
+  infra (`skinparam-key-handlers-table-b.ts`), so `activity/
+  levuma-67-cego489` (a real corpus fixture with `skinparam mode dark`)
+  picked up the shared `theme.colors.background`/`.text` seam for free
+  and moved 219→216 `compareSvg` diffs (root canvas background now
+  exact). Two follow-ons, both outside T33's `class-divergence-drive`
+  authority: (a) `tests/oracle/svg-conformance/activity.style-baseline
+  .test.ts > levuma-67-cego489` is now RED (`rx { (absent): pinned 0 ->
+  now 1 }`, the newly-drawn rx-less background `<rect>`) — re-pin
+  `oracle/goldens/svg-activity/style-baseline.json` for `levuma` ONLY via
+  `scripts/repin-activity-baselines.ts --slugs-file`, under mission
+  `activity-lane-capture`'s own orchestrator-only process (its tool's own
+  header forbids a per-task run). (b) Activity's diamond fill/border and
+  its OWN text-color tertiary-fallback tier (`activity-style-defaults
+  .ts`, a hardcoded default ABOVE `theme.colors.text`'s fallback — the
+  SAME shape as class's `renderer-classifier-rows.ts` terminal
+  `'#000000'`) remain unfixed; a small activity-specific dark-defaults
+  task, mirroring T33's `theme-dark.ts` table, would close both.
+
 - **`isField` classification is duplicated, and the duplicate is stale**
   (NEW, unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T19
   (decision-journal rows; `fijali-69-pina030` 11/11 structural,
