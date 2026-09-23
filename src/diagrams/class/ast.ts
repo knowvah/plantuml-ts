@@ -15,6 +15,7 @@ export type { UrlInfo };
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // Map row types
@@ -466,4 +467,19 @@ export interface ClassDiagramAST {
    * `createSpriteRegistry()`.
    */
   sprites?: SpriteRegistry;
+  /**
+   * `scale ...` directive (6 forms -- see `core/scale-command.ts`'s module
+   * doc for the full mechanism and jar Java citations), captured
+   * type-only, no layout math reads it (scale is an SVG-emission-time
+   * concern only, `core/TextBlockExporter.java:205-209`) -- mirrors the
+   * description engine's identical `DescriptionDiagramAST.scale` (`ast.ts`
+   * doc comment) and the sequence engine's `SequenceDiagramAST.scale`.
+   * `layoutClass` (T29) resolves this into a factor via
+   * `resolveScaleFactor` against the FINAL unscaled document dimension and
+   * multiplies the returned `ClassGeometry` by it (`class-scale-geo.ts`).
+   * Absent = no `scale` directive (factor 1, byte-identical to pre-T29
+   * output).
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandScale.java
+   */
+  scale?: ScaleSpec;
 }

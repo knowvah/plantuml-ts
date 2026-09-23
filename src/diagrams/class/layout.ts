@@ -43,20 +43,15 @@ import { buildDotGraph } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
+import { resolveScaleFactor } from '../../core/scale-command.js';
+import { scaleClassGeometry } from './class-scale-geo.js';
 import {
   buildClassifierGeos,
   buildNamespaceGeos,
   buildEdgeGeos,
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
-import {
-  isNoteGeo,
-  type ClassifierGeo,
-  type EdgeGeo,
-  type NamespaceGeo,
-  type ClassGeometry,
-  type ClassLeafGeo,
-} from './class-geo-types.js';
+import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry, ClassLeafGeo } from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
 export {
@@ -206,7 +201,9 @@ function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]):
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
+// cdd-T29: exported so `class-layout-multipage.ts` (split out of this file)
+// can call it -- see that module's own doc comment.
+export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   // Empty diagram (isDegeneratedWithFewEntities(0): 0 groups, 0 links, 0
   // leafs — leafs includes notes, so a lone freestanding note must NOT hit
   // this shortcut or it would be silently dropped) — zero-size result.
@@ -419,63 +416,14 @@ function assembleShiftedGeometry(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Multi-page (`newpage`) combination — T7
-// ---------------------------------------------------------------------------
-
-/**
- * Vertical gap (px) inserted between stacked pages. This offset is OURS, not
- * upstream's: upstream's `NewpagedDiagram` lays out each page as an
- * independent svek graph and (per `NewpagedDiagram.java`, which never
- * overrides `AbstractDiagram.getNbImages()`) the reference CLI only ever
- * exports page 1 as a separate file per source — there is no upstream
- * "stacked" rendering to match pixel-for-pixel. Since this library returns a
- * single SVG string rather than one file per page, we stack pages vertically
- * ourselves; see CHANGELOG.md.
- */
-const NEWPAGE_GAP = 20;
-
-/**
- * Lay out every page independently (each page is a complete, standalone
- * diagram per upstream `NewpagedDiagram` semantics — see T6/ast.ts), then
- * stack the resulting geometries vertically with `NEWPAGE_GAP` between them.
- * One dot-layout pass per non-degenerate page, in page order (a degenerate
- * page still contributes its own geometry via `layoutSinglePage`'s internal
- * skip — it just never reaches the graphviz call). Each page's own G2/N11
- * ink shift is already baked in by `layoutSinglePage` before this function
- * ever sees it; this is a SEPARATE, purely additive y-only offset (`dx=0`)
- * stacked on top.
- */
-function layoutMultiPage(pages: ClassDiagramAST[], theme: Theme, measurer: StringMeasurer): ClassGeometry {
-  const leaves: ClassLeafGeo[] = [];
-  const edges: EdgeGeo[] = [];
-  const namespaces: NamespaceGeo[] = [];
-  let maxWidth = 0;
-  let yOffset = 0;
-
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i]!;
-    const geo = layoutSinglePage(page, theme, measurer);
-    const dy = yOffset;
-
-    // T4: each page's own `leaves` is already jar's real draw order (D3,
-    // `layoutSinglePage`'s own `orderLeaves` call); shifting per-kind and
-    // re-pushing in the same relative order preserves that order, and pages
-    // concatenate in page order (the outer `for` loop) -- no re-sort needed
-    // here, each page IS its own upstream `NewpagedDiagram` page.
-    for (const leaf of geo.leaves) {
-      leaves.push(isNoteGeo(leaf) ? shiftNoteGeo(leaf, 0, dy) : shiftClassifierGeo(leaf, 0, dy));
-    }
-    for (const e of geo.edges) edges.push(shiftEdgeGeo(e, 0, dy));
-    for (const n of geo.namespaces) namespaces.push(shiftNamespaceGeo(n, 0, dy));
-
-    maxWidth = Math.max(maxWidth, geo.totalWidth);
-    yOffset += geo.totalHeight;
-    if (i < pages.length - 1) yOffset += NEWPAGE_GAP;
-  }
-
-  return { totalWidth: maxWidth, totalHeight: yOffset, leaves, edges, namespaces };
-}
+// cdd-T29: `layoutMultiPage`/`NEWPAGE_GAP` moved to `class-layout-
+// multipage.ts` when this task's scale-wiring lines pushed the file back
+// over the 500-line hook cap (pre-authorised split, same precedent as
+// `class-layout-shift.ts`'s earlier move from this same file) --
+// `layoutSinglePage` below is exported so that file can call it; a pure
+// move otherwise, re-exported so no consumer's import path changed.
+import { layoutMultiPage } from './class-layout-multipage.js';
+export { layoutMultiPage };
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -489,12 +437,20 @@ function layoutMultiPage(pages: ClassDiagramAST[], theme: Theme, measurer: Strin
  * geometries are stacked vertically (`layoutMultiPage`); otherwise the single
  * top-level AST is laid out directly, unchanged from pre-T7 behavior.
  *
+ * cdd-T29 (D4): `scale ...` is resolved AFTER layout, from the diagram's
+ * OWN final unscaled dimension (`resolveScaleFactor`'s own doc comment --
+ * never a partial/intermediate one) — matches upstream's `UgDiagram.java:
+ * 138`, which passes `scale` only to the exporter, never to svek/DOT
+ * layout itself (`core/scale-command.ts`'s module doc, D4).
+ *
  * @param ast      - Parsed class diagram AST.
  * @param theme    - Visual theme for font metrics and sizing.
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
 export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
-  if (ast.pages !== undefined) return layoutMultiPage(ast.pages, theme, measurer);
-  return layoutSinglePage(ast, theme, measurer);
+  const geo =
+    ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
+  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight);
+  return scaleClassGeometry(geo, k, theme.fontSize);
 }
