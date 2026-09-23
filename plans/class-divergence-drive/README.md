@@ -66,7 +66,7 @@ Plus, at every batch close: `npm run svg:survey class`,
 | [7](batch-7/overview.md) | B7 text & creole | T24 · T25 · T26 · T27 · T28 | all ∥ (worktrees) | partly | [x] |
 | [8](batch-8/overview.md) | B8 scale / dpi | T29 · T30 | sequential | serialization | [x] |
 | [9](batch-9/overview.md) | B9 dispatch, hide, chrome | T31 · T32 · T33 · T34 | T31 ∥ T32 ∥ T33, then T34 | partly | [x] |
-| [10](batch-10/overview.md) | B10 numeric residuals + close-out | T35 · T36 · T37 · T38 | T35 ∥ T36, then T37, T38 | YES | [ ] |
+| [10](batch-10/overview.md) | B10 numeric residuals + close-out | T35 · T36 · T37 · T38 | T35 ∥ T36, then T37, T38 | YES | [x] |
 
 Every batch ends with its **close task** (`batch-N/close.md`): gates,
 survey + census, pin-diff, re-pin, dashboard regeneration, journal rows for

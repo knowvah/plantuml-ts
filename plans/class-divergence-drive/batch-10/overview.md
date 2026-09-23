@@ -18,10 +18,10 @@ and port-row sizing are canvas/node-dimension fixes by definition.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T35 | Canvas `minDim` off by 1-9 px, zero ink diffs (A5 M7) | debugger | `layout-ink-extent.ts`, tests | — | [ ] |
-| T36 | `Class::member` port-row sizing, 53-fixture corpus reach (A5 Unclassified) | typescript-pro (opus) | `class-map-port-rows.ts`, `class-port-rows.ts`, tests | — | [ ] |
-| T37 | Mid-path marker offset + eight named singletons (A5 M8 + Unclassified) | debugger | `class-edge-label-anchor.ts`, `class-magic-arrow.ts`, + whichever file each diagnosed item names (journal a stop-1 pre-authorisation request if outside the batch's write-sets), tests | T35 | [ ] |
-| T38 | Mission close-out | orchestrator | `README.md`, `fixtures.md`, `measurements/final.json`, `DIVERGENCES.md`, `oracle/accepted-divergences.json` (only if missing), `planning/next-missions.md`, `planning/mission-index.md`, `docs/parity-report.md` | T35, T36, T37 | [ ] |
+| T35 | Canvas `minDim` off by 1-9 px, zero ink diffs (A5 M7) | debugger | `layout-ink-extent.ts`, tests | — | [x] |
+| T36 | `Class::member` port-row sizing, 53-fixture corpus reach (A5 Unclassified) | typescript-pro (opus) | `class-map-port-rows.ts`, `class-port-rows.ts`, tests | — | [x] |
+| T37 | Mid-path marker offset + eight named singletons (A5 M8 + Unclassified) | debugger | `class-edge-label-anchor.ts`, `class-magic-arrow.ts`, + whichever file each diagnosed item names (journal a stop-1 pre-authorisation request if outside the batch's write-sets), tests | T35 | [x] |
+| T38 | Mission close-out | orchestrator | `README.md`, `fixtures.md`, `measurements/final.json`, `DIVERGENCES.md`, `oracle/accepted-divergences.json` (only if missing), `planning/next-missions.md`, `planning/mission-index.md`, `docs/parity-report.md` | T35, T36, T37 | [x] |
 
 Specs: [`T35-canvas-mindim.md`](T35-canvas-mindim.md),
 [`T36-port-row-sizing.md`](T36-port-row-sizing.md),
