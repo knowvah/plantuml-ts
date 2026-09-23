@@ -106,6 +106,15 @@ export function scaleClassGeometry(geo: ClassGeometry, k: number, themeFontSize:
     ),
     edges: geo.edges.map((e) => scaleEdgeGeo(e, k)),
     namespaces: geo.namespaces.map((n) => scaleNamespaceGeo(n, k)),
+    // cdd-T34 (E14 `newpage`): scale each page boundary's `y`/`width`/
+    // `height` by the SAME `k` as every other geometric field -- `scale
+    // ...` resolves from the STACKED document's own final dimension
+    // (`resolveScaleFactor`, D4), so a page's stacked position must scale
+    // with it or `sliceClassGeometryPage`'s band filter would compare
+    // scaled leaf `y`s against unscaled boundaries.
+    ...(geo.pageBoundaries !== undefined
+      ? { pageBoundaries: geo.pageBoundaries.map((b) => ({ y: b.y * k, width: b.width * k, height: b.height * k })) }
+      : {}),
     // cdd-T29 round 2 (D4): carried so `renderer.ts#renderClass` can derive
     // a `ScaledTheme` for the render-time pixel-literal constants this
     // module cannot reach (see `ClassGeometry.scaleK`'s own doc comment).

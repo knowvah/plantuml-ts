@@ -480,7 +480,7 @@ export type { KalBox } from './class-kal.js';
 // (pre-authorised split re-export, same precedent as `NamespaceGeo`/
 // `JsonBodyItem` below) -- a pure move, re-exported so no consumer's import
 // path changed.
-export type { ClassGeometry } from './class-geo-geometry-types.js';
+export type { ClassGeometry, ClassPageBoundary } from './class-geo-geometry-types.js';
 
 // cdd-T6: `JsonBodyItem` moved to `class-geo-json-types.ts` when the four
 // new `EdgeGeo` fields pushed this file past the 500-line hook cap

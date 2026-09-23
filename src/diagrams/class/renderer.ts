@@ -5,13 +5,12 @@
  * No DOM, no async.
  */
 
-import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
+import { sliceClassGeometryPage, type ClassGeometry, type ClassifierGeo, type NamespaceGeo } from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
-import type { ScaledTheme } from './class-scale-geo.js';
-import { scaleClassTheme } from './class-scale-geo.js';
+import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -26,7 +25,7 @@ import {
   leafPortion,
   renderGroupInheritanceNeighborhood,
 } from './renderer-group.js';
-import { renderAssocPoint, renderLollipop } from './renderer-assoc-lollipop.js';
+import { renderAssocPoint, renderAssociationDiamond, renderLollipop } from './renderer-assoc-lollipop.js';
 import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
@@ -334,6 +333,10 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
       children.push(renderAssocPoint(classifier, theme));
       continue;
     }
+    if (classifier.kind === 'association') {
+      children.push(renderAssociationDiamond(classifier, theme)); // cdd-T34
+      continue;
+    }
     // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon
     // UNWRAPPED -- no `<g class="entity">`, no id, no `<!--class ...-->`
     // comment (jar-verified `gatula-10-bifu561`: `package foo {}`/
@@ -481,4 +484,17 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
       : {}),
     diagramType: DIAGRAM_TYPE_CLASS,
   };
+}
+
+/**
+ * `renderClass` for exactly ONE page of `geo`, 0-based — cdd-T34 (E14
+ * `newpage`), mirrors `sequence/renderer.ts#renderSequencePage`'s identical
+ * "slice, then run the normal single-geometry renderer" shape. `geo` for
+ * page 0 of a single-page document IS `geo` itself (`sliceClassGeometryPage`
+ * returns its input unchanged, `===`, whenever `pageBoundaries` is absent
+ * or has one entry), so this is a true zero-cost superset of `renderClass`
+ * for the overwhelmingly common non-`newpage` case.
+ */
+export function renderClassPage(geo: ClassGeometry, theme: Theme, pageIndex: number): RenderFragment {
+  return renderClass(sliceClassGeometryPage(geo, pageIndex), theme);
 }

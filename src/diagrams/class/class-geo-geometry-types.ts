@@ -82,6 +82,36 @@ export interface ClassGeometry {
    * this when `k !== 1`, and every reader falls back to `1` via `??`.
    */
   scaleK?: number;
+  /**
+   * cdd-T34 (E14 `newpage`): one entry per page `layoutMultiPage`
+   * (`class-layout-multipage.ts`) stacked into this geometry, in page
+   * order — the STACKED `y` this page's leaves/namespaces/edges were
+   * shifted by, plus that page's OWN pre-stack `width`/`height` (each page
+   * is a fully independent `CucaDiagram`, `NewpagedDiagram.java:87-162`,
+   * so widths differ page to page and `totalWidth` alone cannot recover
+   * one page's own canvas size). `class-layout-multipage.ts#sliceClassGeometryPage`
+   * is the sole reader: it filters `leaves`/`edges`/`namespaces` by which
+   * page's `[y, y + height)` band a leaf/namespace's own `y` (an edge's
+   * first point's `y`) falls into, then shifts everything back by `-y` to
+   * reproduce that page's standalone geometry, matching `layoutSinglePage`
+   * byte-for-byte (verified: `tests/unit/class/class-newpage-layout.test.ts`'s
+   * own G2 N28 harness already reaches this exact equivalence via a
+   * different route -- stripping `ast.pages` and re-laying-out page 0
+   * alone). Only ever set by `layoutMultiPage`; absent (not `undefined`
+   * via `??`, genuinely omitted) for every single-page diagram — the
+   * overwhelming common case pays zero cost. `layoutClass`/`scaleClassGeometry`
+   * scale each entry's `y`/`width`/`height` by the SAME `k` as every other
+   * geometric field when `scale ...` is present (D4).
+   */
+  pageBoundaries?: readonly ClassPageBoundary[];
+}
+
+/** One page's stacked position + own standalone dimension — see
+ *  {@link ClassGeometry.pageBoundaries}'s doc comment. */
+export interface ClassPageBoundary {
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 // cdd-T6: `JsonBodyItem` is re-exported alongside `ClassGeometry` purely

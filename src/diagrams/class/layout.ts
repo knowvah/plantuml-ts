@@ -43,6 +43,7 @@ import { buildDotGraph } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
+import { applyTopUrlToClassifiers } from './class-url.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
 import {
@@ -221,16 +222,26 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // class-namespace.ts#collapseEmptyNamespacesFinal). Before measuring.
   const collapsedAst = collapseEmptyNamespacesFinal(ast);
 
+  // cdd-T34 (E14 `topurl`): `theme.topurl` is only resolved HERE, at
+  // layout, not at parse time (`class-url.ts#applyTopUrlToClassifiers`'s
+  // own doc comment). `collapseEmptyNamespacesFinal` may return the INPUT
+  // `ast` unchanged (`===`) -- never mutate `collapsedAst.classifiers` in
+  // place, or an unshared no-op `ast` would corrupt the caller's own
+  // object. A no-op (`===`) when no `skinparam topurl` was declared, so
+  // this allocates nothing for the common case.
+  const urledClassifiers = applyTopUrlToClassifiers(collapsedAst.classifiers, theme.topurl);
+  const pageAst = urledClassifiers === collapsedAst.classifiers ? collapsedAst : { ...collapsedAst, classifiers: [...urledClassifiers] };
+
   // Pre-measure all classifiers (the hide/show directive fold is per
   // classifier inside — last applicable writer wins per target, A2s R2g)
-  const measuredMap = preMeasureClassifiers(collapsedAst, theme, measurer);
+  const measuredMap = preMeasureClassifiers(pageAst, theme, measurer);
 
   // Degenerate diagram (0-1 entities, no relationships) — skip graphviz
   // entirely, mirroring GraphvizImageBuilder.buildImage:211-223. Checked on
   // the RAW ast: upstream's isDegeneratedWithFewEntities counts getLeafs()/
   // getLinks() UNFILTERED, so removed entities still count here (a graph
   // reduced to one node by `remove` still runs graphviz — pijode-83).
-  const degenerate = degenerateSingleClassifier(collapsedAst, measuredMap);
+  const degenerate = degenerateSingleClassifier(pageAst, measuredMap);
   if (degenerate !== undefined) return degenerate;
 
   // remove/restore exclusion at the layout-input boundary — the port's
@@ -239,11 +250,11 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // Same object back when no remove directives exist (the common path).
   // Everything below — dot graph, note synthesis, geo building — sees only
   // the surviving entities, keeping edge-index alignment consistent.
-  const effAst = filterRemovedEntities(collapsedAst);
+  const effAst = filterRemovedEntities(pageAst);
   // cdd-T3 (A1 SB5): the ranks that filtering just dropped -- jar burned them
   // at parse time and only skips the entities at EXPORT time, so they stay as
   // holes in its numbering (`computeRemovedRanks`'s own doc comment).
-  const removedRanks = computeRemovedRanks(collapsedAst);
+  const removedRanks = computeRemovedRanks(pageAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
   const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds } =
@@ -442,6 +453,9 @@ function assembleShiftedGeometry(
 // move otherwise, re-exported so no consumer's import path changed.
 import { layoutMultiPage } from './class-layout-multipage.js';
 export { layoutMultiPage };
+// cdd-T34: same re-export precedent, one line each, for the `newpage`
+// pagination trio `class/index.ts#classPlugin` wires onto `PaginatedPlugin`.
+export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-layout-multipage.js';
 
 // ---------------------------------------------------------------------------
 // Public API

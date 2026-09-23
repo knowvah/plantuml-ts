@@ -233,6 +233,15 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    // cdd-T34 (E14 `topurl`): `SkinParam#getValue("topurl")` -- a raw
+    // string, no validation upstream (`classdiagram/command/
+    // CommandCreateClass.java:219`).
+    ['topurl'],
+    (acc, value) => {
+      acc.topurl = value;
+    },
+  ],
+  [
     ['sameclasswidth'],
     (acc, value) => {
       // A2s B7: `SkinParam#sameClassWidth()` (SkinParam.java:994) — boolean

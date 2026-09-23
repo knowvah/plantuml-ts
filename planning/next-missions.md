@@ -66,6 +66,45 @@ cdd-T31.md`'s "Round 2" section, decision-journal rows 210-211.
 
 ---
 
+## `class-divergence-drive` T34 follow-ons — filed 2026-09-23
+
+Two named, out-of-scope residuals surfaced by T34 (E14: `newpage`,
+`mainframe`, `topurl`, `<>` diamond). Full mechanism and before/after
+numbers: `.agent-notes/cdd-T34.md`, decision-journal rows 202-206.
+
+1. **`DIVERGENCES.md`'s "mainframe — parsed, not yet rendered" entry
+   (lines 169-294) is now stale for class.** T34 ported `BigFrame`
+   (`core/klimt/shape/big-frame.ts`) and wired it into `chrome.ts
+   #addMainframe`, closing G0b's T9 escape hatch for the class engine
+   specifically — `jakaja-15-faze022` is now exact (0+0). The entry's
+   OWN "for every OTHER (non-description) engine, T9's original blocker
+   still holds unchanged" paragraph is only PARTLY true post-T34: class
+   is exact because it already carries an ink-corrected `preChromeWidth`/
+   `preChromeHeight` (G2 N46) `BigFrame`'s `ww`/`hh` formula consumes;
+   sequence/unknown-bucket fixtures moved toward the jar (childCount now
+   matches, residual numeric deltas shrank from 35-52px stray offsets to
+   1-8px) but are NOT byte-exact, for the exact reason the entry already
+   predicts (no ink-extent field, only a declared width/height). Needs a
+   rewrite distinguishing class (closed) from every other flat-fragment
+   engine (still open, now partially closed) — a documentation task, not
+   a code one; left unedited by T34 (a full rewrite, outside its
+   write-set).
+2. **cukaze-78-zija070's residual 109 numeric diffs** (a uniform
+   ~0.87px offset on every coordinate in the WHOLE document, height off
+   by 11px) — confirmed PRE-EXISTING via stash/pop against T34's own
+   diamond-render fix (byte-identical before and after), so it is not a
+   diamond-specific defect. The offset's uniformity (every element, not
+   just the diamond) points at a whole-document ink-shift/margin
+   constant (`layout-ink-extent.ts#computeClassInkShift`-family), not a
+   render-shape bug — unNAMED beyond that; no Java citation traced yet.
+   Candidate for a `class-render-scale-literals`-adjacent mission (cites
+   `cdd-T29`'s own filed remainder, journal row 175) once someone reads
+   `computeClassInkShift`'s exact minX/minY derivation against a second
+   `<>`-diamond fixture to isolate which element's ink the shift is
+   keying off.
+
+---
+
 ## `unknown-bucket-routing-repair` — DONE 2026-09-21 (T0-T14, batches 0-2)
 
 Branch `feat/unknown-bucket-routing-repair`, T14 landed at `4b6949ee`

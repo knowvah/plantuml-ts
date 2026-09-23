@@ -171,8 +171,27 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: /^<>\s+(\S+)\s*$/,
     execute(state, match) {
-      // Force kind even if a relationship endpoint auto-created it as a class.
-      ensureClassifier(state, match[1]!, 'association').kind = 'association';
+      // cdd-T34 (E14, luzive-62-zote562): `CommandDiamondAssociation
+      // .executeArg` (`classdiagram/command/CommandDiamondAssociation.java:
+      // 73-84`) refuses UNCONDITIONALLY whenever `quark.getData() != null`
+      // -- i.e. whenever ANY entity already exists at this id, whatever its
+      // origin (an explicit `class X {}` declaration, OR an earlier
+      // relationship endpoint that auto-vivified a placeholder) -- "Unlike
+      // most creation commands, executeArg fails if the name already
+      // exists" (that method's own `explainArg` comment). `ensureClassifier`
+      // passes `kind: 'association'` as the CREATE-time default, so a
+      // freshly-minted classifier already has `.kind === 'association'`
+      // the instant it's created -- nothing else in this port ever creates
+      // one with that kind, so `classifier.kind !== 'association'` here is
+      // exactly upstream's `quark.getData() != null`: this id already
+      // named something before this line ran.
+      const classifier = ensureClassifier(state, match[1]!, 'association');
+      if (classifier.kind !== 'association') {
+        (state.ast.errors ??= []).push(`Already existing : ${classifier.id}`);
+        state.ast.errorLine = state.currentLine;
+        return;
+      }
+      classifier.kind = 'association';
     },
   },
 
