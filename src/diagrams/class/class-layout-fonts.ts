@@ -25,13 +25,21 @@ type TagCascadeEntry = ReturnType<typeof resolveClassTagCascadeEntry>;
  * resolvers below -- factored out purely to keep each under the project's
  * per-function CCN cap (a bare `a ?? b ?? c` chain, repeated 4x across the
  * two callers, was the CCN driver).
+ *
+ * cdd-B7FU-R3: widened `styleValue` -> `classCascadeValue`/`styleValue` (a
+ * bare, ancestor-only `<style> class { FontStyle } }`/`header { FontStyle }
+ * }` cascade value, `style-cascade-class-font.ts#applyFontCascadeOverrides`)
+ * -- ranked BELOW the `.tagname` tag cascade (a MORE specific selector) and
+ * ABOVE the flat skinparam value, matching every other property's existing
+ * precedence in this file (`classCascadeHeaderFontSize`'s own doc comment).
  */
 function resolveCascadedFontFlag(
   tagCascadeValue: boolean | undefined,
+  classCascadeValue: boolean | undefined,
   styleValue: boolean | undefined,
   fallback: boolean,
 ): boolean {
-  return tagCascadeValue ?? styleValue ?? fallback;
+  return tagCascadeValue ?? classCascadeValue ?? styleValue ?? fallback;
 }
 
 /**
@@ -74,9 +82,22 @@ export function resolveAttributeFont(
   return {
     family: theme.colors.graph.classAttributeFontFamily ?? fontSpec.family,
     size:
-      attributeFontSizeByStereo(theme, stereotypeLabels) ?? theme.colors.graph.classAttributeFontSize ?? fontSpec.size,
-    bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classAttributeFontBold, false),
-    italic: resolveCascadedFontFlag(tagCascadeEntry?.fontItalic, theme.colors.graph.classAttributeFontItalic, false),
+      attributeFontSizeByStereo(theme, stereotypeLabels) ??
+      theme.colors.graph.classCascadeFontSize ??
+      theme.colors.graph.classAttributeFontSize ??
+      fontSpec.size,
+    bold: resolveCascadedFontFlag(
+      tagCascadeEntry?.fontBold,
+      theme.colors.graph.classCascadeFontBold,
+      theme.colors.graph.classAttributeFontBold,
+      false,
+    ),
+    italic: resolveCascadedFontFlag(
+      tagCascadeEntry?.fontItalic,
+      theme.colors.graph.classCascadeFontItalic,
+      theme.colors.graph.classAttributeFontItalic,
+      false,
+    ),
   };
 }
 
@@ -102,6 +123,39 @@ function headerFontSizeByStereo(theme: Theme, stereotypeLabels: readonly string[
 }
 
 /**
+ * A2s F-D mechanism A9: `<style> classDiagram { class { header { FontSize }
+ * } }` -- `EntityImageClassHeader`'s styleHeader signature is
+ * `element.classDiagram.class.header` (EntityImageClassHeader.java:80-82,
+ * name TextBlock at :100), a MORE specific selector than the bare class
+ * bucket, so it wins over `skinparam classFontSize` (which
+ * FromSkinparamToStyle maps to the same header bucket; Stage-3 <style>
+ * application order also puts it on top). Read from the
+ * `classCascadeHeaderFontSize` cascade field (populated by
+ * `style-cascade-class.ts`'s HEADER_SNAMES fontsize lookup — A2s A9); the
+ * element bucket stays as a secondary source for skin files. Jar evidence:
+ * momaku-69-duxe918 `o1` header at 20pt (delta = w('o1'@20) - w('o1'@14) =
+ * 6.675px exact). The stereotype-qualified tier leads: upstream gives it
+ * +1000 priority over every unstereotyped value at the same signature
+ * ({@link headerFontSizeByStereo}), mirroring where
+ * `attributeFontSizeByStereo` sits in `resolveAttributeFont` above.
+ * Split out of {@link resolveHeaderFont} purely for that function's CCN
+ * budget (cdd-B7FU-R3).
+ */
+function resolveHeaderFontSize(
+  theme: Theme,
+  attributeFontSize: number,
+  stereotypeLabels: readonly string[] | undefined,
+): number {
+  return (
+    headerFontSizeByStereo(theme, stereotypeLabels) ??
+    theme.colors.graph.classCascadeHeaderFontSize ??
+    theme.colors.elements?.['class']?.headerFontSize ??
+    theme.colors.graph.classFontSize ??
+    attributeFontSize
+  );
+}
+
+/**
  * `skinparam classFontSize/classFontName/classFontStyle`
  * (`FromSkinparamToStyle.java:185-188`, `element.class.header`) is the
  * classifier HEADER's own, independently-overridable font, which CASCADES
@@ -109,7 +163,8 @@ function headerFontSizeByStereo(theme: Theme, stereotypeLabels: readonly string[
  * semantics) -- jar-verified two ways: `jisanu-32-gado231` (attribute-only
  * override) shows the header ALSO adopting the overridden size/family;
  * `xabije-20-xusi569` (BOTH set, to DIFFERENT values) shows the header
- * using its OWN `classFont*` values instead.
+ * using its OWN `classFont*` values instead. Size resolution: see
+ * {@link resolveHeaderFontSize}.
  */
 export function resolveHeaderFont(
   theme: Theme,
@@ -119,31 +174,16 @@ export function resolveHeaderFont(
 ) {
   return {
     family: theme.colors.graph.classFontFamily ?? attributeFont.family,
-    // A2s F-D mechanism A9: `<style> classDiagram { class { header {
-    // FontSize } } }` -- `EntityImageClassHeader`'s styleHeader signature is
-    // `element.classDiagram.class.header` (EntityImageClassHeader.java:80-82,
-    // name TextBlock at :100), a MORE specific selector than the bare class
-    // bucket, so it wins over `skinparam classFontSize` (which
-    // FromSkinparamToStyle maps to the same header bucket; Stage-3 <style>
-    // application order also puts it on top). Read from the
-    // `classCascadeHeaderFontSize` cascade field (populated by
-    // `style-cascade-class.ts`'s HEADER_SNAMES fontsize lookup — A2s A9);
-    // the element bucket stays as a secondary source for skin files. Jar
-    // evidence: momaku-69-duxe918 `o1` header at 20pt (delta =
-    // w('o1'@20) - w('o1'@14) = 6.675px exact).
-    // The stereotype-qualified tier leads: upstream gives it +1000 priority
-    // over every unstereotyped value at the same signature
-    // ({@link headerFontSizeByStereo}), mirroring where
-    // `attributeFontSizeByStereo` sits in `resolveAttributeFont` above.
-    size:
-      headerFontSizeByStereo(theme, stereotypeLabels) ??
-      theme.colors.graph.classCascadeHeaderFontSize ??
-      theme.colors.elements?.['class']?.headerFontSize ??
-      theme.colors.graph.classFontSize ??
-      attributeFont.size,
-    bold: resolveCascadedFontFlag(tagCascadeEntry?.fontBold, theme.colors.graph.classFontBold, attributeFont.bold),
+    size: resolveHeaderFontSize(theme, attributeFont.size, stereotypeLabels),
+    bold: resolveCascadedFontFlag(
+      tagCascadeEntry?.fontBold,
+      theme.colors.graph.classCascadeHeaderFontBold,
+      theme.colors.graph.classFontBold,
+      attributeFont.bold,
+    ),
     italic: resolveCascadedFontFlag(
       tagCascadeEntry?.fontItalic,
+      theme.colors.graph.classCascadeHeaderFontItalic,
       theme.colors.graph.classFontItalic,
       attributeFont.italic,
     ),

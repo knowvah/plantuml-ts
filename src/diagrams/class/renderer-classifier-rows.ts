@@ -70,12 +70,20 @@ import { parseDeclarationColors } from './class-declaration-extractors.js';
  * `xabije-20-xusi569`'s `AttributeFontSize 18`).
  */
 export function attributeFontSize(theme: Theme): number {
-  return theme.colors.graph.classAttributeFontSize ?? theme.fontSize;
+  return theme.colors.graph.classCascadeFontSize ?? theme.colors.graph.classAttributeFontSize ?? theme.fontSize;
 }
 
 /**
  * CDD T20 (M6) / T6FU: the visibility icon's origin Y for a member whose
  * text may be WRAPPED over several physical lines.
+ * cdd-B7FU-R3: `attributeFontSize` also reads `classCascadeFontSize` (the
+ * `<style> class { FontSize N } }` cascade, `style-cascade-class-font.ts`)
+ * ahead of the flat `classAttributeFontSize` skinparam -- the SAME "cascade
+ * before flat skinparam" tier `class-layout-fonts.ts#resolveAttributeFont`
+ * now carries, mirroring this function's own doc comment's "EXACTLY" claim
+ * (`ropera-76-jico895`'s `attr1`/`method1()` visibility icons were 1.111px
+ * off-center before this without it).
+ *
  * `PlacementStrategyVisibility#getPositions` (java:56-69) centres the icon
  * block on `maxHeight12 = max(iconHeight, textBlockHeight)`, where the text
  * block is the member's WHOLE wrapped TextBlock -- not its first line. The

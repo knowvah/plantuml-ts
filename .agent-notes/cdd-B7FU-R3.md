@@ -5,7 +5,7 @@
 | Fixture | Before (7c5b695b) | After | Verdict |
 |---|---|---|---|
 | `daxeno-00-kasu166` | structural=10, numeric=77 | structural=0, numeric=92 | **structural-match** (fixed the color/thickness/creole/alignment mechanisms; residual is a uniform ~1px dot-engine-class shift, same signature as item 4) |
-| `ropera-76-jico895` | structural=7, numeric=55 | unchanged | diagnosed, fix site outside write-set (stop 1) |
+| `ropera-76-jico895` | structural=7, numeric=55 | structural=0, numeric=0 | **conformant** (write-set extended by coordinator, journal row 157; ported in full, see "Item 2 — resolved" below) |
 | `juxora-90-fisu720` | structural=0, numeric=16 | unchanged | diagnosed, fix site outside write-set (stop 1) |
 | `focaci-80-suzu938` | structural=0, numeric=95 | unchanged (92 after re-measure; note the brief's own `render-diff` count moves 95->92 between runs purely from `compareSvg`'s non-monotonic diff counting once OTHER fixtures' code changed nothing here — daxeno's fix touches shared files but focaci's own numbers are stable at 0/95 in isolation) | **stop 8**, filed `docs/graphviz-issues/20-taillabel-headlabel-no-canvas-reservation.md` |
 
@@ -149,6 +149,66 @@ Ruled out: a `<style> class {}` PARSE failure (the same styleMap+
 other properties); a flat-skinparam gap (`classAttributeFontSize`/
 `classFontStyle` skinparam LINES already work, just not `<style>` BLOCKS).
 
+## Item 2 — RESOLVED (coordinator-extended write-set, journal rows 158-159)
+
+The stop-1 diagnosis above was accurate; the coordinator extended the
+write-set to the exact three files it named and this round ported it in
+full. `ropera-76-jico895`: 7+55 -> **0+0 (conformant)**.
+
+Implementation (all three files, per the diagnosis's own precise shape):
+
+1. `src/core/theme-graph-colors-b.ts` (NOT `-a`, already at the 500-line
+   cap when this task started; `classCascadeRoundCorner`'s own precedent
+   already splits class-cascade fields across both halves) — 5 new fields:
+   `classCascadeFontSize`/`FontBold`/`FontItalic` (plain `CLASS_SNAMES`) and
+   `classCascadeHeaderFontBold`/`FontItalic` (the `HEADER_SNAMES` FontStyle
+   half `classCascadeHeaderFontSize` never covered).
+2. `src/core/style-cascade-class-font.ts` (NEW, a 500-line-cap split of
+   `style-cascade-class.ts` — that file was ALSO already at the cap after
+   adding the field-list entries + wiring call) — `applyFontCascadeOverrides`,
+   `resolveStyleCascade(styleMap, CLASS_SNAMES, 'fontsize'|'fontstyle')` +
+   `resolveStyleCascade(styleMap, HEADER_SNAMES, 'fontstyle')`, reusing the
+   PRE-EXISTING `parseFontStyleFlags` (`skinparam-key-handlers-shared.ts`)
+   rather than re-deriving `classTagCascadeEntry`'s inline bold/italic
+   substring test a third time. The header field is left `undefined` when
+   the two `resolveStyleCascade` calls return the IDENTICAL raw string (no
+   header-specific declaration to report — `resolveStyleCascade`'s own
+   subset-match already inherited the plain value for the header query,
+   since `HEADER_SNAMES` is a strict superset of `CLASS_SNAMES`); duplicate
+   values are semantically inert either way, this is about not claiming a
+   MORE SPECIFIC declaration exists when none does.
+3. `src/diagrams/class/class-layout-fonts.ts` — `resolveAttributeFont`
+   threads `classCascadeFontSize`/`FontBold`/`FontItalic` ahead of the flat
+   `classAttributeFontSize`/`*Bold`/`*Italic` skinparam tier;
+   `resolveHeaderFont` threads `classCascadeHeaderFontBold`/`FontItalic`
+   the same way, with its EXISTING `?? attributeFont.bold/italic` fallback
+   now the thing that surfaces the plain cascade's inherited value (no new
+   inheritance code needed — the architecture already had the right shape,
+   confirmed by `resolveStyleCascade`'s own subset-match doing the real
+   inheritance work). `resolveCascadedFontFlag` widened 3->4 params (tag
+   cascade, class cascade, flat skinparam, fallback); `resolveHeaderFont`'s
+   SIZE computation extracted to `resolveHeaderFontSize` to stay under the
+   per-function CCN cap the widening pushed it over.
+
+**Bonus fix** (found closing ropera's residual 2 numeric diffs after the
+structural fix landed, `Δ1.111px` on both visibility icons —
+`renderer-classifier-rows.ts#attributeFontSize`, a KNOWN near-zero-harvest
+fix site per its own doc comment for the IDENTICAL `classAttributeFontSize`
+flat-skinparam gap): had no tier for the new `classCascadeFontSize` cascade
+either. One-line fix, same priority order. `ropera-76-jico895` render-diff:
+`pass=true structural=0 numeric=0`.
+
+Cross-engine check (the two core files are shared with description/state/
+object cascades, per the coordinator's own instruction): full `npm test`
+green, ZERO non-class fixtures moved — every new field is additive and
+`undefined` by default, so nothing changes for a diagram that never sets
+these `<style>` properties.
+
+Tests: `tests/unit/core/style-cascade-class.test.ts` (+8, mirroring the
+existing `classCascadeHeaderMaximumWidth` test block's exact shape),
+`tests/unit/class/class-layout-fonts.test.ts` (new — `resolveAttributeFont`/
+`resolveHeaderFont` had no prior direct unit coverage).
+
 ## Item 3 — juxora-90-fisu720: stop 1 (diagnosed, not fixed)
 
 `FlatWorks::prop3 -r-> FlatBar::prop` attaches at the wrong y (~y=97 vs
@@ -232,6 +292,14 @@ the new `matchElementLineThicknessKey` export), `npm run typecheck`,
 `npm run lint`, `npm run build` all pass. `npx jiti scripts/dot-sync-
 report.ts class` = 711/712 (unchanged — items 1's fixes are render/theme-
 only, no DOT-emission change; items 2-4 made no code change at all).
+
+### Round 2 (item 2, write-set extended by coordinator)
+
+`npm test`: 789 files pass / 1 fails (`docs/catalog.md` drift, expected —
+new exports), 22205/22213 tests, coverage unaffected; regenerated the
+catalog and re-ran clean. `npm run typecheck`/`lint`/`build` all pass.
+No DOT-emission file touched, so the dot-sync gate is unaffected by
+construction (not re-run a second time this round).
 
 ## Hazard hit (memory-worthy)
 

@@ -14,6 +14,7 @@ import type { StyleMap } from './skinparam.js';
 import { parseStyleBlock } from './skinparam.js';
 import { resolveStyleCascade, collectStyleTagNames, cleanStereotypeToken } from './style-map-element.js';
 import { resolveColorToSvgHex, parseSimpleColor, resolveConditionalColor } from './klimt/color/HColorSet.js';
+import { applyFontCascadeOverrides } from './style-cascade-class-font.js';
 
 // cdd-T15: the style signatures moved to a sibling module (500-line cap) --
 // a pure move, re-exported there; see that file's header.
@@ -27,7 +28,7 @@ import {
   QUALIFIED_SNAMES,
 } from './style-cascade-class-snames.js';
 
-type GraphCascadeOverride = Pick<
+export type GraphCascadeOverride = Pick<
   Theme['colors']['graph'],
   | 'classCascadeBackground'
   | 'classCascadeBorder'
@@ -44,6 +45,11 @@ type GraphCascadeOverride = Pick<
   | 'classCascadeMaximumWidth'
   | 'classCascadeHeaderMaximumWidth'
   | 'classCascadeHeaderFontSize'
+  | 'classCascadeFontSize'
+  | 'classCascadeFontBold'
+  | 'classCascadeFontItalic'
+  | 'classCascadeHeaderFontBold'
+  | 'classCascadeHeaderFontItalic'
   | 'noteCascadeMaximumWidth'
   | 'noteCascadeFontColor'
   | 'classTagCascade'
@@ -352,6 +358,10 @@ export function computeClassStyleCascadeOverrides(
   // skinparam wrapWidth default tier -- see `applyMaximumWidthOverrides`'s
   // own doc comment.
   applyMaximumWidthOverrides(styleMap, override, skinparamWrapWidth);
+  // cdd-B7FU-R3: plain + header FontSize/FontStyle cascade -- see
+  // `style-cascade-class-font.ts#applyFontCascadeOverrides`'s own doc
+  // comment.
+  applyFontCascadeOverrides(styleMap, override);
   // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
   // own doc comment.
   const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};
