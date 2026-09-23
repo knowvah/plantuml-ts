@@ -166,135 +166,43 @@ decision, landed.
 
 ---
 
-### `mainframe <label>` — parsed, not yet rendered (BigFrame port deferred)
+### `mainframe <label>` — rendered via a ported `BigFrame` (CDD T34); non-class engines carry a sizing residual
 
 **Upstream:** `mainframe <label>` (`command/CommandMainframe.java`) wraps the
 whole diagram in a bordered frame with a folded-corner tab carrying the
 label, drawn by `DiagramChromeFactory.decorateWithFrame`
-(`core/DiagramChromeFactory.java:257-318`) + `BigFrame`
-(`klimt/shape/BigFrame.java`), applied as the innermost chrome layer
-(mission G0b `decisions.md` D1/D9).
+(`core/DiagramChromeFactory.java:126-133,275-336`) + `BigFrame`
+(`klimt/shape/BigFrame.java`), applied as the innermost chrome layer.
 
-**This port:** `mainframe` is parsed into `DiagramAnnotations.mainFrame`
-(T1) and participates in `isEmpty()`'s chrome-skip check (T1/T4), but
-`applyChrome` (`src/core/annotations/chrome.ts`) does not draw it — a
-diagram with a `mainframe` directive renders identically to one without.
+**This port (since class-divergence-drive T34, 2026-09-23):**
+`src/core/klimt/shape/big-frame.ts#buildBigFrame` ports `BigFrame.java`
+(rect plus the folder-tab title cutout; constants from `plantuml.skin:85-89`)
+and `src/core/annotations/chrome.ts#addMainframe` wraps the diagram body
+before legend/title/caption/header/footer, for every engine that routes
+through `applyChrome`. The frame's unset `BackGroundColor` does not inherit
+`root {}`'s the way `LineColor`/`FontColor`/`RoundCorner` do; it resolves as
+`style.backgroundColor ?? style.documentBackground` (probed against three
+oracle renders; `plans/class-divergence-drive/decision-journal.md` rows
+202-206).
 
-**Why (T9, jar-verified investigation) — UPDATED by mission G0/T5,
-STILL TEMPORARY per D9's escape hatch:** T9 found the blocker was a
-missing *primitive* — `BigFrame`'s `computeWidth`/`computeHeight` need
-`TextBlockUtils.getMinMax(original, stringBounder, false)`, a real
-ink-bounding-box walk (`LimitFinder`) over every drawn primitive, and
-this port had no `LimitFinder`/`MinMax`/`TextBlockUtils.getMinMax` at
-all. Mission G0 ported that machinery in full (T1) and wired it into the
-description (klimt) engine's own document-sizing pass
-(`renderer-ink-extent.ts#computeDocumentDims`, T3) — the primitive T9
-was missing now exists, and the description engine already performs the
-exact kind of ink walk `BigFrame` needs, over the same `draw` callback
-(`drawClusters`/`drawEntities`/`drawEdges`) `renderDescription` uses for
-its real pass.
+**Status by engine:** class is byte-exact (`jakaja-15-faze022`). The five
+sequence and three unknown-bucket corpus fixtures that carry `mainframe`
+(`decace-28-majo724`, `futaxe-10-xonu513`, `gunecu-53-jebu067`,
+`jutomu-49-kemi074`, `zidova-39-bapi223`; `miveni-64-rexo238`,
+`rivino-95-midu088`, `soseka-43-riru110`) now draw the frame and moved
+toward the jar (their structural childCount gap closed) but are not exact:
+those engines' fragments lack the ink-corrected `preChromeWidth`/
+`preChromeHeight` the class engine carries (G2 N46), so the frame's outer
+box is off by the chrome-margin delta the class path re-applies after
+chrome.
 
-T5 evaluated decisions.md D5's two branches and re-traced the blocker
-with the primitive now available. The remaining obstacle is
-**architectural, not a missing primitive**: `BigFrame` needs the
-`mainFrame` display data AND its resolved box style
-(`padding`/`margin`/`lineColor`/`lineThickness`, honoring `skinparam`
-and `<style>` overrides the same way title/legend/caption/header/footer
-already do) available *inside* the klimt draw pass — and neither is
-reachable there without crossing a boundary this port's plugin
-architecture does not currently expose:
+**Category:** limitation (residual on the non-class engines only).
 
-- `renderDescription(geo, theme, measurer)` — the only entry point with
-  a real `draw` callback / `UGraphic` — receives `DescriptionGeometry`
-  (`layout.ts`), which carries no annotation data. Threading
-  `ast.annotations.mainFrame` onto it requires an edit to
-  `src/diagrams/description/layout.ts` (mirroring the already-
-  established `ast.seed -> geo.seed` precedent) — a file outside every
-  branch-(a) write-set this mission authorized for T5 (`decisions.md`
-  D5, batch-3/overview.md, T5's own boundaries section).
-- Even with display data threaded onto `geo`, the *style* (padding/
-  margin/lineColor/lineThickness) cannot follow the same path:
-  `resolveAnnotationStyles(theme, skinparam, styleMap)` — the ONE
-  function every other annotation element uses to honor `skinparam` and
-  `<style>` block overrides — needs `preprocessed.skinparam` and
-  `styleMap`, which exist only in `src/index.ts`'s top-level
-  `renderSync`/`render`, resolved *after* `plugin.render()` already
-  ran (`applyAnnotationChrome`, called on the returned fragment). Reaching
-  them from inside `renderDescription` means either widening
-  `SyncPlugin.layoutSync`/`render` (`src/core/dispatcher.ts`) to carry
-  skinparam/styleMap — a plugin-contract change rippling to every
-  diagram engine, not just description — or mutating `geo` from
-  `src/index.ts` with an engine-specific, type-unsafe cast before
-  `plugin.render()` runs, growing a SECOND, pre-render, description-only
-  special case next to T7's existing post-render unwrap/reassemble
-  special case (`src/index.ts#applyAnnotationChrome`). Both are exactly
-  the "second chrome pipeline" shape D5/T5 were scoped to avoid; hard-
-  coding the style (skipping `skinparam`/`<style>` support only for
-  `mainframe`) would silently diverge mainframe from every other
-  annotation element's fidelity to user overrides, undocumented, inside
-  the same diagram.
-
-Because the clean data path requires touching files this task was not
-authorized to write (`layout.ts`) and the style path requires either a
-cross-engine plugin-contract change or an undocumented fidelity
-asymmetry, T5 takes **branch (b)**: keep the divergence TEMPORARY,
-update the rationale, make no code change. Geometry itself is no longer
-the open question — T5 independently re-derived `BigFrame`'s exact
-formula against `klimt/shape/BigFrame.java` and
-`DiagramChromeFactory.java:257-318` and confirms it is fully portable
-(`ww = minX>=0 ? maxX : width`, `computeWidth = padL + max(ww+12,
-titleW+10) + padR`, etc., off a `TextBlockUtils.getMinMax`-shaped raw
-`MinMax`, not `computeDocumentDims`'s own post-processed width/height) —
-only the plumbing to reach it from inside the klimt pass, with correct
-style resolution, is missing.
-
-Probe evidence (`@startuml\nmainframe demo\na->b\n@enduml` vs bare
-`a->b`, oracle jar `-tsvg`): the bare diagram reports canvas 70×107.
-Wrapped in `mainframe demo`, the frame's own `<rect>` is 80.543×139.953
-(`x=5 y=15`), and the embedded original content is translated by exactly
-`(10, 38.4883)` inside it — consistent with `margin.left + padding.left`
-/ `margin.top + padding.top + dimTitle.height + 10` (`padding` = mission
-G0b's already-ported `mainframe` style, `{top:1,right:5,bottom:1,left:5}`;
-`dimTitle.height` = 16.4883, independently reconciled from the tab
-path's `textHeight - 3`, and matches this port's own
-`LINE_ADVANCE_RATIO` — `14 * 14.1328/12 = 16.4883` exactly).
-
-`computeWidth`'s `Math.max(ww + 12, dimTitle.width + 10)` term only
-reconciles (`80.543 - padding.left - padding.right = 70.543 = ww + 12`)
-if `ww ≈ 58.5` — the diagram's ink-derived max-X — not its declared
-width (`70`); using `ww = original.width` is off by ~11.5px, not a
-rounding difference. The same pattern holds for height: `computeHeight`
-reconciles only with an ink-derived `hh ≈ 95`, not the declared height
-(`107`). This is exactly the `LimitFinder`/`getMinMax`-shaped quantity
-T1/T3 now compute for description's own document sizing — G0's own
-confirmation that the *ink extent* half of the problem is solved; only
-the annotation-plumbing half (above) remains.
-
-For every OTHER (non-description) engine, T9's original blocker still
-holds unchanged: chrome (`src/core/annotations/chrome.ts`) composes flat,
-pre-measured `{ body, width, height }` `AnnotationBlock` fragments
-(project CLAUDE.md D2's string-fragment architecture) with no drawable
-tree and no ink-bounding-box tracking anywhere — reproducing `LimitFinder`
-there means walking/parsing composed SVG body strings (D5's explicitly
-rejected "SVG-string extent walker") or threading real geometry objects
-through the whole render pipeline instead of flat strings, both far
-outside a "small, isolated" `BigFrame` port.
-
-**Category:** limitation (parsed, not yet rendered — see D9).
-
-**Revisit:** description-engine BigFrame is unblocked as soon as (a) the
-mainframe annotation can reach `DescriptionGeometry` (a `layout.ts`
-write-set expansion, mirroring `geo.seed`) and (b) `resolveAnnotationStyles`
-or an equivalent can be evaluated before/inside the klimt render pass
-(a `SyncPlugin` contract change, or an index.ts-level restructuring that
-resolves styles before calling `plugin.render`) — both are natural
-follow-up mission scope, not new unported machinery. Fragment-string
-engines still need the same primitive as before: an SVG path/shape
-extent walker, or geometry-object threading in place of flat fragment
-strings.
-
----
-
+**Revisit:** port the pre-chrome ink correction into the klimt
+document-shell path so every engine sizes the frame from real ink; the
+earlier history of this entry (the missing `LimitFinder` primitive, mission
+G0's port of it, the description-engine style-resolution blocker) is in git
+history under this heading.
 
 ### Default element skin — grey (`#F1F1F1`), not legacy yellow (`#FEFECE`)
 
