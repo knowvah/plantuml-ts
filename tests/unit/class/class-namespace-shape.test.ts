@@ -13,6 +13,7 @@ import {
   renderEmptyPackageIcon,
 } from '../../../src/diagrams/class/class-namespace-shape.js';
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const measurer = new WidthTableMeasurer();
 
@@ -82,7 +83,7 @@ function finonoGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
 
 describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', () => {
   it('emits the exact folder-tab <path> d attribute', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain(
       'd="M8.5,6 L28.925,6 A3.75,3.75 0 0 1 31.425,8.5 L38.425,26 L121.5,26 ' +
         'A2.5,2.5 0 0 1 124,28.5 L124,100.5 A2.5,2.5 0 0 1 121.5,103 L8.5,103 ' +
@@ -91,19 +92,19 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
   });
 
   it('draws the outline with fill="none" and the jar-verified stroke', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('stroke="#000"');
     expect(svg).toContain(`stroke-width="${PACKAGE_STROKE_WIDTH}"`);
   });
 
   it('emits the exact tab hline', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('<line x1="6" y1="26" x2="38.425" y2="26"');
   });
 
   it('emits the exact bold title text at (10, 18.8889)', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('<text x="10" y="18.889"');
     expect(svg).toContain('font-weight="700"');
     expect(svg).toContain('fill="#000"');
@@ -115,13 +116,13 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
   // for "foo" at 14pt bold, matching every other class text row's
   // convention (`renderer-classifier-box.ts`). Never asserted by N17.
   it('emits textLength/lengthAdjust on the title text (jar: 19.425)', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('');
     expect(svg).toContain('textLength="19.425"');
   });
 
   it('omits textLength for an empty label', () => {
-    const svg = renderNamespaceFolder(finonoGeo({ label: '', wtitle: 50 }), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo({ label: '', wtitle: 50 }), scaleClassTheme(defaultTheme, 1));
     expect(svg).not.toContain('textLength');
   });
 
@@ -130,7 +131,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       ...defaultTheme,
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBackground: '#0000FF' } },
     };
-    const svg = renderNamespaceFolder(finonoGeo(), theme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('fill="#00F"');
   });
 
@@ -144,7 +145,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       ...defaultTheme,
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, packageBorderThickness: 4 } },
     };
-    const svg = renderNamespaceFolder(finonoGeo(), theme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('stroke-width="4"');
     expect(svg).not.toContain(`stroke-width="${PACKAGE_STROKE_WIDTH}"`);
   });
@@ -154,7 +155,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       ...defaultTheme,
       colors: { ...defaultTheme.colors, elements: { package: { font: '#008000' } } },
     };
-    const svg = renderNamespaceFolder(finonoGeo(), theme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('fill="#008000"');
   });
 
@@ -166,7 +167,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
         elements: { package: { font: { kind: 'linear', from: '#fff', to: '#000' } as never } },
       },
     };
-    const svg = renderNamespaceFolder(finonoGeo(), theme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('fill="#000"');
   });
 
@@ -175,7 +176,7 @@ describe('renderNamespaceFolder — byte-level jar parity (finono-05-cuvu171)', 
       ...defaultTheme,
       colors: { ...defaultTheme.colors, elements: { package: { fontSize: 40 } } },
     };
-    const svg = renderNamespaceFolder(finonoGeo(), theme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('font-size="40"');
   });
 });
@@ -225,19 +226,19 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
   const strictTheme = { ...defaultTheme, strictUml: true };
 
   it('emits a <polygon>, not a <path>, when theme.strictUml is true', () => {
-    const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
+    const svg = renderNamespaceFolder(jinibeGeo(), scaleClassTheme(strictTheme, 1));
     expect(svg).toContain('<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"');
     expect(svg).not.toContain('<path');
   });
 
   it('emits fill="none" plus the exact style string (stroke, stroke-width, linejoin, miterlimit)', () => {
-    const svg = renderNamespaceFolder(jinibeGeo(), strictTheme);
+    const svg = renderNamespaceFolder(jinibeGeo(), scaleClassTheme(strictTheme, 1));
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('style="stroke:#000;stroke-width:1.5;stroke-linejoin:miter;stroke-miterlimit:10;"');
   });
 
   it('draws the default rounded <path> when theme.strictUml is false/absent', () => {
-    const svg = renderNamespaceFolder(jinibeGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(jinibeGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('<path');
     expect(svg).not.toContain('<polygon');
   });
@@ -247,7 +248,7 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
       ...strictTheme,
       colors: { ...strictTheme.colors, graph: { ...strictTheme.colors.graph, packageBorderThickness: 4 } },
     };
-    const svg = renderNamespaceFolder(jinibeGeo(), theme);
+    const svg = renderNamespaceFolder(jinibeGeo(), scaleClassTheme(theme, 1));
     expect(svg).toContain('stroke-width:4;');
   });
 });
@@ -283,7 +284,7 @@ describe('namespaceFill — inline package colour (A3 M3, garumi-63-vuze973)', (
   });
 
   it('paints the folder outline with it — jar fill="#DDD" where this port emitted "none"', () => {
-    const svg = renderNamespaceFolder(finonoGeo({ color: '#DDDDDD' }), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo({ color: '#DDDDDD' }), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('fill="#DDD"');
   });
 });
@@ -301,14 +302,14 @@ describe('renderEmptyPackageIcon — <style> package {} cascade (xitobu-41-lame2
   };
 
   it('applies the block’s BackGroundColor / LineColor / LineThickness to the leaf', () => {
-    const svg = renderEmptyPackageIcon(finonoGeo(), styled);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(styled, 1));
     expect(svg).toContain('fill="#98FB98"');
     expect(svg).toContain('stroke="#F00"');
     expect(svg).toContain('stroke-width="2"');
   });
 
   it('keeps the unstyled ...package_,title defaults otherwise (gatula-10-bifu561)', () => {
-    const svg = renderEmptyPackageIcon(finonoGeo(), defaultTheme);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('fill="#F1F1F1"');
     expect(svg).toContain('stroke="#181818"');
     expect(svg).toContain('stroke-width="0.5"');
@@ -329,17 +330,17 @@ describe('renderEmptyPackageIcon — flat skinparam packageBorderColor routes to
   };
 
   it('recolours the leaf outline/hline to the skinparam value', () => {
-    const svg = renderEmptyPackageIcon(finonoGeo(), blueBorder);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(blueBorder, 1));
     expect(svg).toContain('stroke="#00F"');
   });
 
   it('leaves the leaf background at its own default (packageBackgroundColor unset)', () => {
-    const svg = renderEmptyPackageIcon(finonoGeo(), blueBorder);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(blueBorder, 1));
     expect(svg).toContain('fill="#F1F1F1"');
   });
 
   it('does not affect an unstyled leaf (gatula-10-bifu561 stays #181818/#F1F1F1)', () => {
-    const svg = renderEmptyPackageIcon(finonoGeo(), defaultTheme);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('stroke="#181818"');
     expect(svg).toContain('fill="#F1F1F1"');
   });
@@ -349,19 +350,19 @@ describe('renderEmptyPackageIcon — flat skinparam packageBorderColor routes to
       ...blueBorder,
       colors: { ...blueBorder.colors, elements: { package: { border: 'red' } } },
     };
-    const svg = renderEmptyPackageIcon(finonoGeo(), styledOverBorder);
+    const svg = renderEmptyPackageIcon(finonoGeo(), scaleClassTheme(styledOverBorder, 1));
     expect(svg).toContain('stroke="#F00"');
   });
 });
 
 describe('renderNamespaceFolder/Rect/namespaceFill — cluster defaults unaffected by CDD T18b', () => {
   it('renderNamespaceFolder keeps the cluster stroke default #000000 when packageBorder is unset', () => {
-    const svg = renderNamespaceFolder(finonoGeo(), defaultTheme);
+    const svg = renderNamespaceFolder(finonoGeo(), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('stroke="#000"');
   });
 
   it('renderNamespaceRect keeps the cluster stroke default #000000 when packageBorder is unset', () => {
-    const svg = renderNamespaceRect(finonoGeo({ label: '' }), defaultTheme);
+    const svg = renderNamespaceRect(finonoGeo({ label: '' }), scaleClassTheme(defaultTheme, 1));
     expect(svg).toContain('stroke="#000"');
   });
 

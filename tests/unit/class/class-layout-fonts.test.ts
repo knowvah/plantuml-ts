@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { resolveAttributeFont, resolveHeaderFont } from '../../../src/diagrams/class/class-layout-fonts.js';
 import { attributeFontSize } from '../../../src/diagrams/class/renderer-classifier-rows.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const FONT_SPEC = { family: defaultTheme.fontFamily, size: defaultTheme.fontSize };
 
@@ -93,15 +94,24 @@ describe('attributeFontSize -- classCascadeFontSize tier (cdd-B7FU-R3, visibilit
     const theme = deepMergeTheme(defaultTheme, {});
     theme.colors.graph.classCascadeFontSize = 18;
     theme.colors.graph.classAttributeFontSize = 20;
-    expect(attributeFontSize(theme)).toBe(18);
+    expect(attributeFontSize(scaleClassTheme(theme, 1))).toBe(18);
   });
 
   it('falls back to the flat skinparam, then the diagram default, when unset', () => {
     const withFlat = deepMergeTheme(defaultTheme, {});
     withFlat.colors.graph.classAttributeFontSize = 20;
-    expect(attributeFontSize(withFlat)).toBe(20);
+    expect(attributeFontSize(scaleClassTheme(withFlat, 1))).toBe(20);
 
     const bare = deepMergeTheme(defaultTheme, {});
-    expect(attributeFontSize(bare)).toBe(bare.fontSize);
+    expect(attributeFontSize(scaleClassTheme(bare, 1))).toBe(bare.fontSize);
+  });
+
+  it('scales both override tiers and the fallback tier by k', () => {
+    const withOverride = deepMergeTheme(defaultTheme, {});
+    withOverride.colors.graph.classCascadeFontSize = 18;
+    expect(attributeFontSize(scaleClassTheme(withOverride, 2))).toBe(36);
+
+    const bare = deepMergeTheme(defaultTheme, {});
+    expect(attributeFontSize(scaleClassTheme(bare, 2))).toBe(bare.fontSize * 2);
   });
 });

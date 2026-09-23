@@ -19,14 +19,18 @@
  *
  * Two of the five (`fuxoju-95-xuko052`, `bavoxa-34-keje375`) reach EXACT
  * (zero-diff) conformance and are asserted via full `compareSvg` equality.
- * The other three (`paluca-39-desa696`, `ziparo-17-joku307`,
- * `kicuna-39-riki626`) carry residuals this task's write-set does not
+ * `paluca-39-desa696` carries a residual this task's write-set does not
  * reach -- specific attributes this task's mechanism DOES control are
- * pinned directly instead of a whole-document compare; see
- * `.agent-notes/cdd-T30.md` for the residual mechanisms (each cited to its
- * own `file:line`, all pre-existing and outside T30's write-set: unscaled
- * literal constants in `class-visibility-icon.ts`, `renderer-note.ts`, and
- * `renderer-arrowhead.ts#drawMiddleDecorShape`).
+ * pinned directly instead of a whole-document compare.
+ *
+ * cdd-B8FU (`.agent-notes/cdd-B8FU.md`): `ziparo-17-joku307`'s
+ * `class-visibility-icon.ts`/`renderer-note.ts` literals and
+ * `kicuna-39-riki626`'s `renderer-arrowhead.ts#drawMiddleDecorShape`/
+ * `class-namespace-shape.ts` package-tab literals (all named residuals in
+ * `.agent-notes/cdd-T30.md`) are now threaded with `scaleK` -- their
+ * `@stroke-width` structural diffs are zero (see each fixture's own test
+ * below). Both fixtures still carry sub-pixel NUMERIC residuals outside
+ * this task's mechanism (not asserted here, tracked in the agent notes).
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
@@ -130,19 +134,17 @@ describe.skipIf(!existsSync(fixtureDir('ziparo-17-joku307')))(
       expect(ours).toContain('stroke-width="3.125"');
     });
 
-    it('NAMED residual: the four member visibility-icon glyphs stay unscaled (class-visibility-icon.ts:165 STROKE_WIDTH=1, outside T30\'s write-set)', () => {
+    it('cdd-B8FU FIXED: the four member visibility-icon glyphs now scale (class-visibility-icon.ts:165 STROKE_WIDTH * theme.scaleK) -- zero structural stroke-width diffs remain', () => {
       const { markup, oracle } = readFixture('ziparo-17-joku307');
       const ours = render(markup);
       const { diffs } = compareSvg(ours, oracle, 'deterministic');
-      const strokeDiffs = diffs.filter((d) => d.path.endsWith('@stroke-width'));
-      // Every stroke-width residual is the SAME unscaled-1 visibility-icon
-      // literal (expected 3.125 = 1 * dpi/96, actual 1) or the note-box's
-      // unscaled 0.5 (expected 1.563 = 0.5 * dpi/96, actual 0.5) -- none is
-      // a NEW divergence this task's own mechanism introduced.
-      expect(strokeDiffs.length).toBeGreaterThan(0);
-      for (const d of strokeDiffs) {
-        expect([1, 0.5]).toContain(Number(d.actual));
-      }
+      // cdd-B8FU: was a NAMED residual (T30's own unscaled-1/-0.5 literals);
+      // class-visibility-icon.ts / renderer-note.ts now thread scaleK, so
+      // every stroke-width attribute matches the jar exactly (no structural
+      // diff at all -- a numeric sub-pixel residual may remain elsewhere,
+      // but never on @stroke-width).
+      const structuralStrokeDiffs = diffs.filter((d) => d.delta === undefined && d.path.endsWith('@stroke-width'));
+      expect(structuralStrokeDiffs).toHaveLength(0);
     });
   },
 );
@@ -156,15 +158,15 @@ describe.skipIf(!existsSync(fixtureDir('kicuna-39-riki626')))(
       expect(ours).toContain('font-size="43.75"');
     });
 
-    it('NAMED residual: the aggregation diamond middleDecor stroke-width stays unscaled (renderer-arrowhead.ts:398 MIDDLE_STROKE_WIDTH=1.5, outside T30\'s write-set)', () => {
+    it('cdd-B8FU FIXED: the aggregation diamond middleDecor stroke-width now scales (renderer-arrowhead.ts#drawMiddleDecorShape via SvgOption.scale) -- zero structural stroke-width diffs remain', () => {
       const { markup, oracle } = readFixture('kicuna-39-riki626');
       const ours = render(markup);
       const { diffs } = compareSvg(ours, oracle, 'deterministic');
+      // cdd-B8FU: was a NAMED residual (T30's own unscaled MIDDLE_STROKE_WIDTH
+      // 1.5); class-namespace-shape.ts's package-tab literals were the OTHER
+      // half of this fixture's structural count (`package A { class B {} }`).
       const structuralStrokeDiffs = diffs.filter((d) => d.delta === undefined && d.path.endsWith('@stroke-width'));
-      expect(structuralStrokeDiffs.length).toBeGreaterThan(0);
-      for (const d of structuralStrokeDiffs) {
-        expect(Number(d.actual)).toBe(1.5);
-      }
+      expect(structuralStrokeDiffs).toHaveLength(0);
     });
   },
 );

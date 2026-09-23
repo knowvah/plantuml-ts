@@ -55,7 +55,10 @@ export function mapColumnDividerEntries(
     if (value === undefined || value.text === '') continue; // linked/point row
     const top = geo.dividerYs[i]!;
     const bottom = geo.dividerYs[i + 1] ?? geo.height;
-    const dividerX = geo.x + value.indent - MAP_CELL_MARGIN_X;
+    // cdd-B8FU: `value.indent` is already scaled (class-scale-geo-row.ts's
+    // `row.indent * k`); MAP_CELL_MARGIN_X is the raw layout-time constant
+    // (`class-map-sizing.ts`, unscaled) and needs its own scaleK factor here.
+    const dividerX = geo.x + value.indent - MAP_CELL_MARGIN_X * theme.scaleK;
     entries.push({
       y: value.y,
       item: {

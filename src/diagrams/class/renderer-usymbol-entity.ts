@@ -31,8 +31,8 @@
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-1, ADR-2)
  */
 import type { ClassifierGeo } from './class-geo-types.js';
-import type { Theme } from '../../core/theme.js';
 import { resolveElementPaint, resolveElementLineThickness } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
@@ -58,7 +58,10 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
  *  with no `LineThickness` skinparam override — see `renderer-entity.ts
  *  #ENTITY_STROKE_WIDTH`'s identical citation (`sacuso-94-gugi476/in.svg`:
  *  `style="...stroke-width:0.5;"`). Duplicated (not imported) — that
- *  constant is module-private in a file outside this task's write-set. */
+ *  constant is module-private in a file outside this task's write-set.
+ *  cdd-B8FU: multiplied by `theme.scaleK` at its one call site below (both
+ *  the override tier from `resolveElementLineThickness` and this default
+ *  tier — "materialize the fallback", same rule as `attributeFontSize`). */
 const ENTITY_STROKE_WIDTH = 0.5;
 
 /** cdd-T22 (cacoma-43-poxu615): `ENTITY_ROUND_CORNER`, duplicated (not
@@ -68,7 +71,8 @@ const ENTITY_STROKE_WIDTH = 0.5;
  *  `rect/@rx="2.5"` (`USymbolComponent2#drawComponent2` reads
  *  `SymbolContext#getRoundCorner()` for its outer box — unlike usecase/
  *  actor/circle's shapes, which ignore it entirely, see
- *  `buildUSymbolEntityParams`'s own doc comment). */
+ *  `buildUSymbolEntityParams`'s own doc comment). cdd-B8FU: multiplied by
+ *  `theme.scaleK` at its one call site below. */
 const COMPONENT_ROUND_CORNER = 5.0;
 
 /**
@@ -125,14 +129,14 @@ function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
 
 function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
-  theme: Theme,
+  theme: ScaledTheme,
   sprites: SpriteRegistry | undefined,
 ): EntityImageDescriptionParams {
   const symbolKeyword = resolveSymbolKeyword(classifier);
   const display = classifier.rows[0]?.text ?? classifier.id;
   const fontTitle = textFont(theme, symbolKeyword);
   const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
-  const roundCorner = symbolKeyword === 'component' ? COMPONENT_ROUND_CORNER : 0;
+  const roundCorner = symbolKeyword === 'component' ? COMPONENT_ROUND_CORNER * theme.scaleK : 0;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
   return {
     entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: null },
@@ -148,7 +152,9 @@ function buildUSymbolEntityParams(
       roundCorner,
       diagonalCorner: 0,
       deltaShadow: 0,
-      stroke: UStroke.withThickness(resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH),
+      stroke: UStroke.withThickness(
+        (resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH) * theme.scaleK,
+      ),
       fontTitle,
       fontStereo,
       titleAlignment,
@@ -210,7 +216,7 @@ export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
  */
 export function renderClassUSymbolEntity(
   classifier: ClassifierGeo,
-  theme: Theme,
+  theme: ScaledTheme,
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
   uid: string,

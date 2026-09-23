@@ -19,7 +19,8 @@
  * `renderer-note-dispatch.ts`.
  */
 import type { NoteGeo } from './note-layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import type { ClassUidPlan } from './renderer-uid.js';
 import type { NoteConnector } from './renderer-note-dispatch.js';
 import { path } from '../../core/svg.js';
@@ -73,10 +74,17 @@ function buildConnectorPathData(points: NoteGeo['connector']): string {
  * doc comment) — the caller must not push a `<g class="link">` for it.
  * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnEntity.java:342
  */
-export function renderNoteConnectorPath(note: NoteGeo, theme: Theme, id: string): string | undefined {
+export function renderNoteConnectorPath(note: NoteGeo, theme: ScaledTheme, id: string): string | undefined {
   const d = buildConnectorPathData(note.connector);
   if (d === '') return undefined;
-  return path(d, { stroke: theme.colors.arrow, strokeWidth: 1, strokeDasharray: '7,7', id });
+  // cdd-B8FU: matches `renderer-edge.ts#renderEdge`'s identical dashed-edge
+  // default, scaled the same way (`class-scale-geo-row.ts#scaleDashArrayString`).
+  return path(d, {
+    stroke: theme.colors.arrow,
+    strokeWidth: theme.scaleK,
+    strokeDasharray: scaleDashArrayString('7,7', theme.scaleK),
+    id,
+  });
 }
 
 /**
@@ -169,7 +177,7 @@ export function resolveNoteConnectorEndpoints(note: NoteGeo): NoteConnectorEndpo
  */
 export function renderNoteConnectorLink(
   connector: NoteConnector,
-  theme: Theme,
+  theme: ScaledTheme,
   uidPlan: ClassUidPlan,
   ids: Set<string>,
 ): string {

@@ -30,7 +30,7 @@
 import type { NoteGeo } from './note-layout-types.js';
 import type { NoteDividerDraw, NoteTableDraw } from './note-layout-measure-rows.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import { line, text, linkWrap } from '../../core/svg.js';
 import { getFont, FontStyle } from '../../core/klimt/shape/UText.js';
 import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.js';
@@ -40,6 +40,9 @@ import { OPALE_MARGIN_X1 as NOTE_MARGIN_X1 } from '../../core/svek/image/Opale.j
  *  every one of its 7 grid rules); no second corpus fixture to cross-check
  *  a table grid against, so this is a single-fixture-verified constant,
  *  not a derived one. */
+/** cdd-B8FU: render-time literal, scaled at its one call site
+ *  ({@link renderTableGrid}) by `theme.scaleK` -- `table.colBounds`/
+ *  `.rowBounds` are already scaled (`class-scale-geo-note.ts`). */
 const TABLE_GRID_STROKE_WIDTH = 0.5;
 
 /** `FontStyle` set -> the SVG `text-decoration` value -- duplicated from
@@ -60,9 +63,13 @@ function lineAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined 
  *  `rowTop + dividerYOffset` -- `note.x + 1` / `note.x + note.width - 1`
  *  matches `class-body-enhanced-layout.ts#renderDividerPart`'s identical
  *  1px inset, jar-verified against `sodizo-26-salo123`. */
-function renderDividerLine(note: NoteGeo, rowTop: number, d: NoteDividerDraw, theme: Theme): string {
-  const x1 = note.x + 1;
-  const x2 = note.x + note.width - 1;
+function renderDividerLine(note: NoteGeo, rowTop: number, d: NoteDividerDraw, theme: ScaledTheme): string {
+  // cdd-B8FU: the 1px inset is a render-time pixel-literal constant, not
+  // geo-sourced -- scaled here like `class-body-enhanced-layout.ts
+  // #renderDividerPart`'s identical inset (`renderer-classifier-box.ts`,
+  // T29 round 2).
+  const x1 = note.x + theme.scaleK;
+  const x2 = note.x + note.width - theme.scaleK;
   const y = rowTop + d.dividerYOffset;
   const dashField = d.strokeDasharray !== undefined ? { strokeDasharray: d.strokeDasharray } : {};
   const one = line(x1, y, x2, y, { stroke: theme.colors.border, strokeWidth: d.strokeWidth, ...dashField });
@@ -97,7 +104,7 @@ function renderTableCellAtom(
   x: number,
   y: number,
   atom: Extract<MemberRenderAtom, { kind: 'text' }>,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   const rendered = text(x, y, atom.renderText ?? atom.text, {
     fontFamily: atom.font.family,
@@ -113,7 +120,7 @@ function renderTableCellAtom(
 /** One table cell's own subline run -- x-advances by each atom's LAYOUT
  *  `width` (never `renderWidth`), matching `renderNoteLineAtoms`'s
  *  identical convention. */
-function renderTableCellLine(x: number, y: number, atoms: readonly MemberRenderAtom[], theme: Theme): string {
+function renderTableCellLine(x: number, y: number, atoms: readonly MemberRenderAtom[], theme: ScaledTheme): string {
   let cx = x;
   let out = '';
   for (const atom of atoms) {
@@ -132,9 +139,12 @@ function renderTableCells(
   rowTop: number,
   table: NoteTableDraw,
   baselineOffset: number,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
-  const x0 = note.x + NOTE_MARGIN_X1;
+  // cdd-B8FU: `NOTE_MARGIN_X1` (imported from the SHARED `core/svek/image/
+  // Opale.ts`, used here as a plain number) is scaled locally -- `note.x`/
+  // `table.colBounds`/`.rowBounds` are already scaled.
+  const x0 = note.x + NOTE_MARGIN_X1 * theme.scaleK;
   let out = '';
   for (const cell of table.cells) {
     const cellX = x0 + table.colBounds[cell.col]!;
@@ -146,13 +156,13 @@ function renderTableCells(
 
 /** The grid's `nbRows+1` horizontal then `nbCols+1` vertical rules, full
  *  span each — `AtomTable.ts#drawGrid`'s own draw order and geometry. */
-function renderTableGrid(note: NoteGeo, rowTop: number, table: NoteTableDraw): string {
-  const x0 = note.x + NOTE_MARGIN_X1;
+function renderTableGrid(note: NoteGeo, rowTop: number, table: NoteTableDraw, k: number): string {
+  const x0 = note.x + NOTE_MARGIN_X1 * k;
   const yTop = rowTop + table.rowBounds[0]!;
   const yBottom = rowTop + table.rowBounds[table.rowBounds.length - 1]!;
   const xLeft = x0 + table.colBounds[0]!;
   const xRight = x0 + table.colBounds[table.colBounds.length - 1]!;
-  const style = { stroke: table.lineColor, strokeWidth: TABLE_GRID_STROKE_WIDTH };
+  const style = { stroke: table.lineColor, strokeWidth: TABLE_GRID_STROKE_WIDTH * k };
   let out = '';
   for (const y of table.rowBounds) out += line(xLeft, rowTop + y, xRight, rowTop + y, style);
   for (const x of table.colBounds) out += line(x0 + x, yTop, x0 + x, yBottom, style);
@@ -172,14 +182,14 @@ export function renderNoteRowExtra(
   lineTop: number,
   i: number,
   baselineOffset: number,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   const divider = note.lineDividers?.[i];
   const table = note.lineTables?.[i];
   const dividerOut = divider !== undefined ? renderDividerLine(note, lineTop, divider, theme) : '';
   const tableOut =
     table !== undefined
-      ? renderTableCells(note, lineTop, table, baselineOffset, theme) + renderTableGrid(note, lineTop, table)
+      ? renderTableCells(note, lineTop, table, baselineOffset, theme) + renderTableGrid(note, lineTop, table, theme.scaleK)
       : '';
   return dividerOut + tableOut;
 }

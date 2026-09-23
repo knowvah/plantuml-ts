@@ -23,6 +23,9 @@ import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
+
+const theme = scaleClassTheme(defaultTheme, 1);
 
 const measurer = new WidthTableMeasurer();
 
@@ -115,7 +118,7 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
       dividerYs: [],
       rows: [{ text: 'Foo', y: 9, indent: 0 }],
     };
-    const fragment = renderClassUSymbolEntity(geo, defaultTheme, measurer, undefined, 'U1');
+    const fragment = renderClassUSymbolEntity(geo, theme, measurer, undefined, 'U1');
     // Literal output captured from a real run (jiti probe, 2026-09-22).
     expect(fragment.body).toBe(
       '<!--entity c1--><g class="entity" data-qualified-name="c1" id="U1">' +
@@ -136,7 +139,7 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
       dividerYs: [],
       rows: [{ text: 'comp3', y: 20, indent: 0 }],
     };
-    const fragment = renderClassUSymbolEntity(geo, defaultTheme, measurer, undefined, 'U2');
+    const fragment = renderClassUSymbolEntity(geo, theme, measurer, undefined, 'U2');
     // ENTITY_ROUND_CORNER (5.0) halves at serialization -> jar's own
     // `rect/@rx="2.5"` (`driver-rectangle-svg.ts`'s `rx/2` convention).
     expect(fragment.body).toContain('rx="2.5" ry="2.5"');

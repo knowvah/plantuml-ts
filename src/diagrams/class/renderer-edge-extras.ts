@@ -6,7 +6,8 @@
  */
 import type { EdgeGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Visibility } from './class-member-ast.js';
 import { text, line, rect } from '../../core/svg.js';
@@ -65,15 +66,22 @@ const NO_TEXT_BOUNDER = { calculateDimension: (): { width: number } => ({ width:
  * solid): jar-verified against `canuti-20-jotu614`'s three icons, all
  * `fill="none"` regardless of method visibility.
  */
-export function renderEdgeVisibilityIcon(geo: EdgeGeo, theme: Theme): string {
+export function renderEdgeVisibilityIcon(geo: EdgeGeo, theme: ScaledTheme): string {
   const icon = geo.visibilityIcon;
   if (icon === undefined) return '';
   const char = METHOD_MODIFIER_TO_ICON[icon.modifier];
   const modifier = MODIFIER_INSTANCE_BY_NAME[icon.modifier];
   if (char === undefined || modifier === undefined) return '';
   const color = colorsFor(char, theme).line;
-  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
-  const context = ug.apply(new UTranslate(icon.x, icon.y));
+  // cdd-B8FU: same double-scaling trap `renderer-arrowhead.ts
+  // #drawExtremityMarkup` documents -- `icon.x`/`icon.y` are ALREADY scaled
+  // (`class-scale-geo-edge.ts#scaleVisibilityIcon`), and this draws through
+  // the SAME scale-aware klimt `UGraphicSvg` pipeline, so the point must be
+  // unscaled before translating and `SvgOption.scale=k` re-scales both the
+  // position and the drawable's own local shape uniformly.
+  const k = theme.scaleK;
+  const ug = UGraphicSvg.build(0, basicSvgOption({ scale: k }), '$version$', NO_TEXT_BOUNDER);
+  const context = ug.apply(new UTranslate(icon.x / k, icon.y / k));
   modifier.getUDrawable(iconSizeOf(theme), color, null).drawU(context);
   return extractFlatContent(ug.getSvgString()).body;
 }
@@ -91,7 +99,7 @@ export function renderEdgeVisibilityIcon(geo: EdgeGeo, theme: Theme): string {
  * fallback). `lipazi-06-care921`'s exact vertex order/paint is corrected
  * by T8, not here — see this task's commit message.
  */
-export function renderEdgeNoteBox(geo: EdgeGeo, theme: Theme): string {
+export function renderEdgeNoteBox(geo: EdgeGeo, theme: ScaledTheme): string {
   const box = geo.noteBox;
   if (box === undefined) return '';
   const noteGeo: NoteGeo = {
@@ -144,14 +152,27 @@ function ascentDescent(fontSize: number): { ascent: number; descent: number } {
  * "constraint but no measurable font" impossibility gracefully rather than
  * throwing.
  */
-export function renderEdgeConstraint(geo: EdgeGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
+export function renderEdgeConstraint(geo: EdgeGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
   const c = geo.constraint;
   if (c === undefined) return '';
   const parts: string[] = [
-    line(c.line.x1, c.line.y1, c.line.x2, c.line.y2, { stroke: '#000', strokeWidth: 1, strokeDasharray: '3,3' }),
+    line(c.line.x1, c.line.y1, c.line.x2, c.line.y2, {
+      stroke: '#000',
+      strokeWidth: theme.scaleK,
+      strokeDasharray: scaleDashArrayString('3,3', theme.scaleK),
+    }),
   ];
   if (measurer === undefined) return parts.join('');
-  const font = resolveArrowLabelFont(theme);
+  // cdd-B8FU: `resolveArrowLabelFont` (`core/arrow-label-font.ts`) is
+  // SHARED with description/state -- its own `size` tier is independent of
+  // `theme.fontSize` (which `scaleClassTheme` scales), so it stays
+  // unscaled regardless of `ScaledTheme`; scaled HERE, in class-only code,
+  // before it feeds the render-time measurer (this function measures text
+  // at RENDER time, unlike a layout-time `row.width`, so an unscaled font
+  // size here would measure inconsistently with `c.line`'s already-scaled
+  // positions).
+  const rawFont = resolveArrowLabelFont(theme);
+  const font = { ...rawFont, size: rawFont.size * theme.scaleK };
   const { lines } = splitDisplayLines(c.text);
   const widths = lines.map((l) => measurer.measure(l, { family: font.family, size: font.size }).width);
   const blockWidth = Math.max(0, ...widths);
@@ -191,9 +212,14 @@ export function renderEdgeConstraint(geo: EdgeGeo, theme: Theme, measurer: Strin
  * every other T6 field's optional-with-fallback contract, e.g.
  * `NoteGeo.lineAtoms`).
  */
-export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
+export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme, cardinalityColor: string): string[] {
   const parts: string[] = [];
-  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE, fontFamily: theme.fontFamily };
+  // cdd-B8FU: `CARDINALITY_FONT_SIZE` (`core/graph-layout-build-edges.ts`,
+  // shared machinery for the DOT `labelfontsize` hint) is independent of
+  // `theme.fontSize` -- scaled here, in class-only code, to match
+  // `geo.quantifierLines`/`.roleLines`/`.tailLabel`/`.headLabel`'s
+  // already-scaled positions (`class-scale-geo-edge.ts`).
+  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE * theme.scaleK, fontFamily: theme.fontFamily };
   if (geo.quantifierLines !== undefined) {
     // cdd-T17 (M8): draw each end's ADDITIVE role lines right after that
     // SAME end's quantifier lines -- `SvekEdge.java:956-980`'s draw order
@@ -235,7 +261,7 @@ export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinal
  * fields are set only when a `<style>` actually declares them
  * (`camuna-58-veca254`: `#008000` / `#FFFFF0`).
  */
-export function renderEdgeKalBoxes(geo: EdgeGeo, theme: Theme): string {
+export function renderEdgeKalBoxes(geo: EdgeGeo, theme: ScaledTheme): string {
   const k = geo.kalBox;
   if (k === undefined) return '';
   const g = theme.colors.graph;
@@ -245,7 +271,7 @@ export function renderEdgeKalBoxes(geo: EdgeGeo, theme: Theme): string {
   const parts: string[] = [];
   for (const box of [k.start, k.end]) {
     if (box === undefined) continue;
-    parts.push(rect(box.x, box.y, box.width, box.height, { fill, stroke, strokeWidth: KAL_STROKE_THICKNESS }));
+    parts.push(rect(box.x, box.y, box.width, box.height, { fill, stroke, strokeWidth: KAL_STROKE_THICKNESS * theme.scaleK }));
     parts.push(
       text(box.textX, box.textY, box.text, {
         fill: fontColor,

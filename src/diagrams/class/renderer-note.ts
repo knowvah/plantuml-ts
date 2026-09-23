@@ -11,7 +11,7 @@
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { Paint } from '../../core/paint.js';
 import { text, path, image, linkWrap, decorationLines } from '../../core/svg.js';
 import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
@@ -65,7 +65,7 @@ const NOTE_FILL = '#FEFFDD';
  */
 function resolveNoteBackground(
   color: string | undefined,
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N37: the note's OWN `<<stereotype>>` (`ClassNote.stereotype`) --
   // resolves the `.tagname` `<style>` cascade (`note { .faint {
   // BackgroundColor red } } }`) between the explicit `#color` override and
@@ -95,7 +95,7 @@ function resolveNoteBackground(
  * FIRST matching label's background (already a resolved `Paint` from
  * `computeNoteStyleTagCascade`'s `parseColor` call), or `undefined`.
  */
-function resolveNoteTagBackground(theme: Theme, stereotype: string | undefined): Paint | undefined {
+function resolveNoteTagBackground(theme: ScaledTheme, stereotype: string | undefined): Paint | undefined {
   if (stereotype === undefined) return undefined;
   const cascade = theme.colors.noteTagCascade;
   if (cascade === undefined) return undefined;
@@ -142,6 +142,8 @@ const NOTE_FOLD_STROKE_WIDTH = 1;
  * #cornersize` ({@link NOTE_FOLD}); `(x,y)` the note's absolute origin.
  */
 function noteBodyPathData(x: number, y: number, w: number, h: number, f: number): string {
+  // cdd-B8FU: `f` (the fold size) is passed ALREADY scaled by every call
+  // site below -- this function itself stays a pure geometry builder.
   return [
     moveTo(x, y),
     lineTo(x, y + h),
@@ -192,7 +194,7 @@ function renderNoteLineAtoms(
   startX: number,
   lineTop: number,
   lineHeight: number,
-  theme: Theme,
+  theme: ScaledTheme,
   // The SAME per-line baseline offset `renderNoteText` already computed
   // (`fontSize - fontSize/4.5`, at the note's OWN resolved font size, NOT
   // `theme.fontSize` -- a note draws at `NOTE_FONT_SIZE`/its own override,
@@ -257,7 +259,7 @@ function renderNoteLineAtoms(
       continue;
     }
     if (atom.kind === 'bullet') {
-      out += renderBulletAtom(atom, x, lineTop, lineHeight);
+      out += renderBulletAtom(atom, x, lineTop, lineHeight, theme.scaleK);
       x += atom.width;
       continue;
     }
@@ -291,12 +293,17 @@ interface NoteLineRowCtx {
  *  `<text>` fallback) -- split out of {@link renderNoteText} purely to
  *  keep that function's own NLOC under this project's complexity cap
  *  after the cdd-T10 wiring fix added a second per-row push. */
-function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, theme: Theme): string {
+function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, theme: ScaledTheme): string {
   const { i, lineTop, lineHeight, baselineOffset, fontSize } = row;
+  // cdd-B8FU: `NOTE_MARGIN_X1` is a render-time literal (imported from the
+  // SHARED `core/svek/image/Opale.ts`, but used here as a plain number --
+  // scaling this call site does not touch that file) -- `note.x` is already
+  // scaled (`class-scale-geo-note.ts`), so the margin must be too.
+  const marginX1 = NOTE_MARGIN_X1 * theme.scaleK;
   if (note.lineAtoms !== undefined) {
-    return renderNoteLineAtoms(note.lineAtoms[i]!, note.x + NOTE_MARGIN_X1, lineTop, lineHeight, theme, baselineOffset);
+    return renderNoteLineAtoms(note.lineAtoms[i]!, note.x + marginX1, lineTop, lineHeight, theme, baselineOffset);
   }
-  return text(note.x + NOTE_MARGIN_X1, lineTop + baselineOffset, ln, {
+  return text(note.x + marginX1, lineTop + baselineOffset, ln, {
     fontFamily: theme.fontFamily,
     fontSize,
     // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
@@ -330,14 +337,19 @@ function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, t
  *  OWN `textLength`, so a multi-line note whose lines have different widths
  *  (the common case) previously emitted the SAME (longest-line) value on
  *  every row; jar-verified against `sisolu-74-minu975`. */
-function renderNoteText(note: NoteGeo, theme: Theme): string {
+function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
   const parts: string[] = [];
   // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N`
   // override -- see `NOTE_FONT_SIZE`'s own doc comment. `baselineOffset`'s
   // formula (`fontSize - descent`, `descent == size/4.5`) is recomputed here
   // per-note rather than as a module constant, since it now varies with the
   // resolved size.
-  const fontSize = theme.colors.elements?.['note']?.fontSize ?? NOTE_FONT_SIZE;
+  // cdd-B8FU: BOTH the `<style>`/skinparam override AND the `NOTE_FONT_SIZE`
+  // default are UNSCALED (independent of `theme.fontSize`, which
+  // `scaleClassTheme` already scales) -- materialized the same way
+  // `attributeFontSize`'s own fallback tiers are (`renderer-classifier-
+  // rows.ts`, this same round).
+  const fontSize = (theme.colors.elements?.['note']?.fontSize ?? NOTE_FONT_SIZE) * theme.scaleK;
   const baselineOffset = fontSize - fontSize / 4.5;
   // G2 N56: cumulative running top-of-line, mirroring jar's real `SheetBlock1
   // #initMap`'s `y += sea.getHeight()` stack -- each line's OWN resolved
@@ -348,7 +360,7 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
   // that constructs one directly (mirrors `lineAtoms`'s identical optional-
   // with-fallback contract) -- `undefined` falls back to the flat `fontSize`
   // per line, BYTE-IDENTICAL to the pre-N56 formula.
-  let lineTop = note.y + NOTE_MARGIN_Y;
+  let lineTop = note.y + NOTE_MARGIN_Y * theme.scaleK;
   note.lines.forEach((ln, i) => {
     const lineHeight = note.lineHeights?.[i] ?? fontSize;
     parts.push(renderNoteLineContent(note, ln, { i, lineTop, lineHeight, baselineOffset, fontSize }, theme));
@@ -374,7 +386,7 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
  *  the EMISSION site; T9b moves the STYLE/id-owning code too, since the
  *  note's own `NOTE_STROKE_WIDTH`/`'4 4'` never applied to it upstream in
  *  the first place -- see `NOTE_STROKE_WIDTH`'s own doc comment). */
-export function renderNote(note: NoteGeo, theme: Theme): string {
+export function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   return renderPlainNote(note, theme).entityParts.join('');
 }
 
@@ -382,21 +394,25 @@ export function renderNote(note: NoteGeo, theme: Theme): string {
  * Plain note: folded-corner box (body + fold, two separate `UPath`s per
  * `EntityImageNote.java:275-289`) plus its per-line text.
  */
-export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: string[] } {
+export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityParts: string[] } {
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
-  const f = NOTE_FOLD;
+  // cdd-B8FU: `NOTE_FOLD` feeds `noteBodyPathData` -- a class-local
+  // geometry builder (unlike the SEPARATE `opaleCorner` fold-flap primitive
+  // below, which lives in the SHARED `core/svek/image/Opale.ts` and is left
+  // unscaled -- out of this class-only task's write-set, see .agent-notes).
+  const f = NOTE_FOLD * theme.scaleK;
   const entityParts: string[] = [
     // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
     // own doc comment), the note style's OWN stroke width (0.5).
-    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
     // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
     // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
     // `renderOpaleNote` already call) -- filled with the note's OWN
     // background (not `none`) at the diagram's DEFAULT stroke width, per
     // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
     // comment).
-    path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH }),
+    path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK }),
     renderNoteText(note, theme),
   ];
   return { entityParts };
@@ -412,17 +428,17 @@ export function renderPlainNote(note: NoteGeo, theme: Theme): { entityParts: str
  * `renderAssocPoint`'s identical unwrapped precedent, G2 N8).
  * @see ~/git/plantuml/.../svek/image/EntityImageTips.java#drawU
  */
-export function renderTipNote(note: NoteGeo, tip: TipShape, theme: Theme): string {
+export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
   const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const parts: string[] = [
-    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
     path(opaleCorner({ x: note.x, y: note.y }, note.width), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
   ];
   parts.push(renderNoteText(note, theme));
@@ -459,7 +475,7 @@ function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: Opale
  * edge.
  * @see ~/git/plantuml/.../svek/image/EntityImageNote.java#drawU
  */
-export function renderOpaleNote(note: NoteGeo, theme: Theme): string {
+export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
   const opale = note.opale!;
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
@@ -468,12 +484,12 @@ export function renderOpaleNote(note: NoteGeo, theme: Theme): string {
     path(opaleOutline(opale.direction, box, connector), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
     path(opaleCorner({ x: note.x, y: note.y }, note.width), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
   ];
   parts.push(renderNoteText(note, theme));

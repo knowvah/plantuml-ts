@@ -410,20 +410,31 @@ const MIDDLE_STROKE_WIDTH = 1.5;
  * @see ~/git/plantuml/.../svek/extremity/MiddleCircleCircled.java
  * @see ~/git/plantuml/.../svek/extremity/MiddleCircle.java
  */
-function drawMiddleDecorShape(
-  middleDecor: MiddleDecor,
-  point: Point2D,
-  angle: number,
-  strokeColor: Paint,
-  backColor: Paint,
-  diagramBackColor: Paint,
-): { body: string; extraDefs: string } {
-  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
+/** Shared draw inputs -- bundled to stay inside this project's
+ *  per-function param-count cap (mirrors {@link ExtremityDrawCtx}). */
+interface MiddleDecorCtx {
+  readonly strokeColor: Paint;
+  readonly backColor: Paint;
+  readonly diagramBackColor: Paint;
+  readonly k: number;
+}
+
+function drawMiddleDecorShape(middleDecor: MiddleDecor, point: Point2D, angle: number, ctx: MiddleDecorCtx): {
+  body: string;
+  extraDefs: string;
+} {
+  const { strokeColor, backColor, diagramBackColor, k } = ctx;
+  // cdd-B8FU: same double-scaling trap `drawExtremityMarkup`/`renderer-
+  // edge-extras.ts#renderEdgeVisibilityIcon` document -- `point` is
+  // `dotPath.getMiddle().point`, derived from the ALREADY-scaled `points`
+  // (`class-scale-geo-edge.ts`), and this draws through the SAME
+  // scale-aware klimt pipeline, so it must be unscaled before translating.
+  const ug = UGraphicSvg.build(0, basicSvgOption({ scale: k }), '$version$', NO_TEXT_BOUNDER);
   const base = ug
     .apply(new Fore(strokeColor))
     .apply(UStroke.withThickness(MIDDLE_STROKE_WIDTH))
     .apply(new Back(backColor))
-    .apply(new UTranslate(point.x, point.y));
+    .apply(new UTranslate(point.x / k, point.y / k));
   if (middleDecor === 'circleCircled') {
     const bigCircle = UEllipse.build(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER);
     base
@@ -468,11 +479,20 @@ export function buildMiddleDecorMarkup(
   middleDecor: MiddleDecor | undefined,
   strokeColor: Paint,
   backgroundColor: Paint,
+  // cdd-B8FU (D4/journal row 175): defaults to 1 so every pre-existing
+  // caller (this file's own unit tests) is unaffected; `renderer-edge.ts`
+  // passes the diagram's real resolved factor.
+  k = 1,
 ): { body: string; extraDefs: string } | undefined {
   if (middleDecor === undefined) return undefined;
   if (points.length < 4 || (points.length - 1) % 3 !== 0) return undefined;
   const dotPath = buildDotPathFromSplinePoints(points);
   const middle = dotPath.getMiddle();
   const angleDeg = (-middle.angle * 180) / Math.PI;
-  return drawMiddleDecorShape(middleDecor, middle.point, angleDeg - 45, strokeColor, backgroundColor, backgroundColor);
+  return drawMiddleDecorShape(middleDecor, middle.point, angleDeg - 45, {
+    strokeColor,
+    backColor: backgroundColor,
+    diagramBackColor: backgroundColor,
+    k,
+  });
 }

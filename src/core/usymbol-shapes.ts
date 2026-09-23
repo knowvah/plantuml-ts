@@ -4,6 +4,20 @@
  * Pure geometry: a shape is a function of its box ({@link IconGeo}) + theme, so
  * every cuca engine (description, class, …) draws the same icon.
  *
+ * cdd-B8FU residual: NOT threaded with `scaleK`. Grep-verified (2026-09-23)
+ * the only real importer is `diagrams/class/renderer.ts#tryRenderUSymbol`,
+ * and every kind this module handles (database/component/actor/usecase) is
+ * intercepted earlier by `usesClassUSymbolEntity` (`renderer-usymbol-
+ * entity.ts`) whenever a real `StringMeasurer` is present -- i.e. on every
+ * production render (parse -> layoutClass -> renderClass always carries
+ * one). This module's four renderers are reachable ONLY from hand-built
+ * `ClassifierGeo` test fixtures that skip `layoutClass` entirely (see each
+ * renderer's own doc comment), so no `scale ...` fixture can ever reach
+ * these pixel literals -- scaling them would be unverifiable against any
+ * jar oracle. `description` never imports this module (grep, 2026-09-23:
+ * `renderer.ts` is the sole importer besides this file's own unit test).
+ *
+
  * The four shapes below are faithful ports of upstream's exact geometry
  * (decisions.md#D5 "USymbol geometry"): USymbolDatabase.java, USymbolComponent2
  * .java, ActorStickMan.java, USymbolUsecase/TextBlockInEllipse.java. Each

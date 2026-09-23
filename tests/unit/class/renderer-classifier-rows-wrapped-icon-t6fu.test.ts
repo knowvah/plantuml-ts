@@ -30,6 +30,9 @@ import { describe, it, expect } from 'vitest';
 import { renderRow, attributeFontSize } from '../../../src/diagrams/class/renderer-classifier-rows.js';
 import type { ClassifierGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
+
+const theme = scaleClassTheme(defaultTheme, 1);
 
 function geoWithRow(row: ClassifierGeo['rows'][number]): ClassifierGeo {
   return { id: 'A', kind: 'class', x: 10, y: 20, width: 200, height: 80, dividerYs: [], rows: [row] };
@@ -50,26 +53,26 @@ function iconCy(svg: string): number {
 }
 
 describe('T6FU: renderRow centres a wrapped member icon on the whole block', () => {
-  const fontSize = attributeFontSize(defaultTheme);
+  const fontSize = attributeFontSize(theme);
 
   it('shifts the icon down by half the block height over one line', () => {
     const blockHeight = fontSize * 4;
-    const unwrapped = iconCy(renderRow(geoWithRow(BASE_ROW), BASE_ROW, defaultTheme));
+    const unwrapped = iconCy(renderRow(geoWithRow(BASE_ROW), BASE_ROW, theme));
     const wrappedRow = { ...BASE_ROW, visibilityBlockHeight: blockHeight };
-    const wrapped = iconCy(renderRow(geoWithRow(wrappedRow), wrappedRow, defaultTheme));
+    const wrapped = iconCy(renderRow(geoWithRow(wrappedRow), wrappedRow, theme));
     expect(wrapped - unwrapped).toBeCloseTo((blockHeight - fontSize) / 2, 6);
   });
 
   it('leaves a row with no `visibilityBlockHeight` byte-identical', () => {
-    const before = renderRow(geoWithRow(BASE_ROW), BASE_ROW, defaultTheme);
+    const before = renderRow(geoWithRow(BASE_ROW), BASE_ROW, theme);
     const same = { ...BASE_ROW, visibilityBlockHeight: fontSize };
-    expect(renderRow(geoWithRow(same), same, defaultTheme)).toBe(before);
+    expect(renderRow(geoWithRow(same), same, theme)).toBe(before);
   });
 
   it('scales the shift with the block height (linear in `maxHeight12`)', () => {
     const cy = (h: number): number => {
       const row = { ...BASE_ROW, visibilityBlockHeight: h };
-      return iconCy(renderRow(geoWithRow(row), row, defaultTheme));
+      return iconCy(renderRow(geoWithRow(row), row, theme));
     };
     expect(cy(fontSize * 3) - cy(fontSize * 2)).toBeCloseTo(fontSize / 2, 6);
     expect(cy(fontSize * 4) - cy(fontSize * 2)).toBeCloseTo(fontSize, 6);

@@ -6,7 +6,7 @@
  * small result shapes; no behavior change from the split itself.
  */
 import type { NoteGeo } from './note-layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { ClassUidPlan } from './renderer-uid.js';
 import type { TipResolution } from './note-tips-resolve.js';
 // cdd-T10 wiring fix: divider/table extras now draw INSIDE
@@ -70,7 +70,7 @@ export interface NoteDrawResult {
  * and emits it via the SAME `wrapLink` call an ordinary relationship edge
  * gets (`renderer-note-connector.ts`).
  */
-export function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): NoteDrawResult {
+export function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: ScaledTheme): NoteDrawResult {
   const { uidPlan, tips } = ctx;
   // `GeneralImageBuilder#createEntityImageBlock`'s leaf-type dispatch:
   // `LeafType.TIPS -> EntityImageTips` (:219-220), whose `drawU` resolves

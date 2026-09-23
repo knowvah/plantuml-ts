@@ -15,9 +15,11 @@ import { renderNote, renderPlainNote, renderTipNote } from '../../../src/diagram
 import { renderNoteRowExtra } from '../../../src/diagrams/class/renderer-note-lines.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 
 const measurer = new WidthTableMeasurer();
+const theme = scaleClassTheme(defaultTheme, 1);
 const NOTE_BASELINE_OFFSET = 13 - 13 / 4.5; // theme default note font size 13
 
 /** Builds a full `NoteGeo` at the given absolute origin from a real
@@ -54,7 +56,7 @@ describe('renderNoteText wiring fix — row-order interleave (sodizo-26-salo123)
 
   it('matches the jar exact child order: path path text text line text x5 line text x5', () => {
     const geo = geoAt(SODIZO_LINES, 6, 6);
-    const svg = renderNote(geo, defaultTheme);
+    const svg = renderNote(geo, theme);
     expect(tagSequence(svg)).toEqual([
       'path',
       'path',
@@ -77,21 +79,21 @@ describe('renderNoteText wiring fix — row-order interleave (sodizo-26-salo123)
 
   it('draws each <line> at the exact jar x1/y1/x2/y2 (interleaved, not appended)', () => {
     const geo = geoAt(SODIZO_LINES, 6, 6);
-    const svg = renderNote(geo, defaultTheme);
+    const svg = renderNote(geo, theme);
     expect(svg).toContain('<line x1="7" y1="37" x2="50.619" y2="37" stroke="#181818" stroke-width="1"/>');
     expect(svg).toContain('<line x1="7" y1="110" x2="50.619" y2="110" stroke="#181818" stroke-width="1"/>');
   });
 
   it('renderPlainNote returns 3 entityParts (body, fold, text) -- extras are INSIDE the text part, not a 4th', () => {
     const geo = geoAt('a\n--\nb', 0, 0);
-    const built = renderPlainNote(geo, defaultTheme);
+    const built = renderPlainNote(geo, theme);
     expect(built.entityParts).toHaveLength(3);
     expect(built.entityParts[2]).toContain('<line');
   });
 
   it('produces no extra markup for a note with no separator/table row', () => {
     const geo = geoAt('plain text', 0, 0);
-    expect(renderNote(geo, defaultTheme)).not.toContain('<line');
+    expect(renderNote(geo, theme)).not.toContain('<line');
   });
 });
 
@@ -106,7 +108,7 @@ describe('renderNoteText wiring fix — member-tip note (fomofi-36-lova857)', ()
     // AFTER all text").
     const geo = geoAt('no "--" may be used here\n--\nto draw horizontal line', 0, 0);
     const tip = { direction: 'left' as const, pp1: { x: 0, y: 10 }, pp2: { x: -5, y: 15 } };
-    const svg = renderTipNote(geo, tip, defaultTheme);
+    const svg = renderTipNote(geo, tip, theme);
     const seq = tagSequence(svg);
     // outline path, corner path (renderTipNote's own 2 leading shapes),
     // text (line1), line (divider), text (line2) -- interleaved, not
@@ -120,7 +122,7 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
 
   it('matches the jar exact child order: path path text x8 line x7 (cells before grid)', () => {
     const geo = geoAt(JOVIGO, 82.94, 6);
-    const svg = renderNote(geo, defaultTheme);
+    const svg = renderNote(geo, theme);
     expect(tagSequence(svg)).toEqual([
       'path',
       'path',
@@ -131,7 +133,7 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
 
   it('draws the jar-exact grid lines and cell text', () => {
     const geo = geoAt(JOVIGO, 82.94, 6);
-    const svg = renderNote(geo, defaultTheme);
+    const svg = renderNote(geo, theme);
     expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="0.5"/>');
     expect(svg).toContain('<line x1="88.94" y1="52" x2="141.428" y2="52" stroke="#000" stroke-width="0.5"/>');
     expect(svg).toContain('<line x1="88.94" y1="13" x2="88.94" y2="52" stroke="#000" stroke-width="0.5"/>');
@@ -142,7 +144,7 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
 
   it('draws the markdown-separator row as struck creole text, not a skipped row', () => {
     const geo = geoAt(JOVIGO, 82.94, 6);
-    const svg = renderNote(geo, defaultTheme);
+    const svg = renderNote(geo, theme);
     expect(svg).toContain(
       '<text x="88.94" y="36.111" font-size="13" fill="#000" text-decoration="line-through">-</text>',
     );
@@ -152,19 +154,19 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
 describe('renderNoteRowExtra — primitives', () => {
   it('produces empty string for a row with neither a divider nor a table', () => {
     const geo = geoAt('plain text', 0, 0);
-    expect(renderNoteRowExtra(geo, 0, 0, NOTE_BASELINE_OFFSET, defaultTheme)).toBe('');
+    expect(renderNoteRowExtra(geo, 0, 0, NOTE_BASELINE_OFFSET, theme)).toBe('');
   });
 
   it('dashes a .. separator and double-draws a == separator', () => {
     const dotted = geoAt('a\n..\nb', 0, 0);
     const dottedRow = dotted.lineDividers?.findIndex((d) => d !== undefined) ?? -1;
     expect(dottedRow).toBeGreaterThanOrEqual(0);
-    const dottedSvg = renderNoteRowExtra(dotted, 0, dottedRow, NOTE_BASELINE_OFFSET, defaultTheme);
+    const dottedSvg = renderNoteRowExtra(dotted, 0, dottedRow, NOTE_BASELINE_OFFSET, theme);
     expect(dottedSvg).toContain('stroke-dasharray="1,2"');
 
     const doubled = geoAt('a\n==\nb', 0, 0);
     const doubledRow = doubled.lineDividers?.findIndex((d) => d !== undefined) ?? -1;
-    const doubledSvg = renderNoteRowExtra(doubled, 0, doubledRow, NOTE_BASELINE_OFFSET, defaultTheme);
+    const doubledSvg = renderNoteRowExtra(doubled, 0, doubledRow, NOTE_BASELINE_OFFSET, theme);
     expect(doubledSvg.match(/<line /g)).toHaveLength(2); // one row, drawn TWICE
   });
 });

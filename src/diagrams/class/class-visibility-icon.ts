@@ -61,6 +61,7 @@
 import type { Visibility } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import { linkWrap, attrs, resolvePaint } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
 import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
@@ -90,9 +91,12 @@ export function iconSizeOf(theme?: Theme): number {
 }
 
 /** `VisibilityModifier#getUBlock`'s `calculateDimension` height (RAW size + 1,
- *  skin/VisibilityModifier.java:100-102). */
-function iconBlockHeight(theme?: Theme): number {
-  return (theme?.classAttributeIconSize ?? VISIBILITY_ICON_SIZE) + 1;
+ *  skin/VisibilityModifier.java:100-102) -- cdd-B8FU: scaled by `k`, since
+ *  `classAttributeIconSize` (a layout dimension) and the flat `+1` are both
+ *  render-time numerals jar's `format()` would scale, unlike `theme.fontSize`
+ *  which `scaleClassTheme` already scales. */
+function iconBlockHeight(theme: ScaledTheme | undefined, k: number): number {
+  return ((theme?.classAttributeIconSize ?? VISIBILITY_ICON_SIZE) + 1) * k;
 }
 
 /**
@@ -101,9 +105,11 @@ function iconBlockHeight(theme?: Theme): number {
  * fontSize` regime (see module doc comment): `2 + (fontSize -
  * ICON_BLOCK_HEIGHT) / 2`, evaluated at the corpus's only sampled
  * `fontSize` (14) and left as a function of `rowHeight` for other sizes.
+ * cdd-B8FU: the flat `2` is a render-time numeral, scaled by `k`; `blockHeight`
+ * (from {@link iconBlockHeight}) is already scaled, matching `rowHeight`.
  */
-function centeringDelta(rowHeight: number, blockHeight: number): number {
-  return 2 + (rowHeight - blockHeight) / 2;
+function centeringDelta(rowHeight: number, blockHeight: number, k: number): number {
+  return 2 * k + (rowHeight - blockHeight) / 2;
 }
 
 /** Default (unthemed) `visibilityIcon { ... }` colors, `plantuml.skin`. */
@@ -162,6 +168,11 @@ function isFilled(icon: Visibility, memberIsField: boolean): boolean {
   return icon === '*' ? true : !memberIsField;
 }
 
+/** cdd-B8FU: jar's `format()` scales EVERY emitted numeral
+ *  (`SvgGraphics.java:466-472,557`), this glyph's own `stroke-width`
+ *  included -- multiplied by `k` at every `draw*` call site below (T29's
+ *  `ScaledTheme` thread already scales `originX`/`originY`/`size`, the
+ *  row-geometry inputs; this is the one remaining render-time literal). */
 const STROKE_WIDTH = 1;
 
 /** `stroke:X;stroke-width:Y;<suffix>` -- the ONE combined `style=` value
@@ -179,9 +190,19 @@ function styleAttr(stroke: string, strokeWidth: number, suffix = ''): string {
   return `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
 }
 
-function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: string, stroke: string): string {
+/** Shared shape-draw inputs -- bundled to stay inside this project's
+ *  per-function param-count cap (mirrors `renderer-arrowhead.ts
+ *  #ExtremityDrawCtx`'s identical rationale, cdd-T29 round 2). */
+interface IconShapeCtx {
+  readonly fill: string;
+  readonly stroke: string;
+  readonly size: number;
+  readonly k: number;
+}
+
+function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: string, stroke: string, k: number): string {
   const pts = points.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(',');
-  const style = styleAttr(stroke, STROKE_WIDTH, 'stroke-linejoin:miter;stroke-miterlimit:10;');
+  const style = styleAttr(stroke, STROKE_WIDTH * k, 'stroke-linejoin:miter;stroke-miterlimit:10;');
   return `<polygon${attrs([
     ['points', pts],
     ['fill', fill],
@@ -190,34 +211,34 @@ function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: stri
 }
 
 /** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
-function drawSquare(x: number, y: number, fill: string, stroke: string, size: number): string {
-  const s = size - 4;
+function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
+  const s = ctx.size - 4;
   return `<rect${attrs([
     ['x', x + 2],
     ['y', y + 2],
     ['width', s],
     ['height', s],
-    ['fill', fill],
-    ['style', styleAttr(stroke, STROKE_WIDTH)],
+    ['fill', ctx.fill],
+    ['style', styleAttr(ctx.stroke, STROKE_WIDTH * ctx.k)],
   ])}/>`;
 }
 
 /** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter. */
-function drawCircle(x: number, y: number, fill: string, stroke: string, size: number): string {
-  const r = (size - 4) / 2;
+function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
+  const r = (ctx.size - 4) / 2;
   return `<ellipse${attrs([
     ['cx', x + 2 + r],
     ['cy', y + 2 + r],
     ['rx', r],
     ['ry', r],
-    ['fill', fill],
-    ['style', styleAttr(stroke, STROKE_WIDTH)],
+    ['fill', ctx.fill],
+    ['style', styleAttr(ctx.stroke, STROKE_WIDTH * ctx.k)],
   ])}/>`;
 }
 
 /** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y). */
-function drawDiamond(x: number, y: number, fill: string, stroke: string, size: number): string {
-  const s = size - 2;
+function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
+  const s = ctx.size - 2;
   const ox = x + 1;
   const points: Array<[number, number]> = [
     [ox + s / 2, y],
@@ -225,19 +246,19 @@ function drawDiamond(x: number, y: number, fill: string, stroke: string, size: n
     [ox + s / 2, y + s],
     [ox, y + s / 2],
   ];
-  return polygonTag(points, fill, stroke);
+  return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }
 
 /** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y). */
-function drawTriangle(x: number, y: number, fill: string, stroke: string, size: number): string {
-  const s = size - 2;
+function drawTriangle(x: number, y: number, ctx: IconShapeCtx): string {
+  const s = ctx.size - 2;
   const ox = x + 1;
   const points: Array<[number, number]> = [
     [ox + s / 2, y + 1],
     [ox, y + s - 1],
     [ox + s, y + s - 1],
   ];
-  return polygonTag(points, fill, stroke);
+  return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }
 
 /**
@@ -252,7 +273,7 @@ export function renderVisibilityIcon(
   originX: number,
   originY: number,
   url?: UrlInfo,
-  theme?: Theme,
+  theme?: ScaledTheme,
 ): string {
   // CDD T18: `icon*Color` is a `Paint` since D8 widened the theme fields,
   // so resolve both here -- the ONE place either becomes an attribute
@@ -266,15 +287,22 @@ export function renderVisibilityIcon(
   const filled = isFilled(icon, isField);
   const fill = filled ? (backgroundPaint.value ?? '') : 'none';
   const paintDefs = linePaint.def + (filled ? backgroundPaint.def : '');
-  const size = iconSizeOf(theme);
+  // cdd-B8FU: `classAttributeIconSize` is a LAYOUT dimension (not a font
+  // metric `scaleClassTheme` touches), so `iconSizeOf`'s return stays
+  // unscaled regardless of whether `theme` is a `ScaledTheme` -- scaled
+  // here, at the one render-time site that turns it into local shape
+  // geometry (mirrors `class-badge.ts#BADGE_RADIUS`'s identical gap, T29
+  // round 2).
+  const k = theme?.scaleK ?? 1;
+  const ctx: IconShapeCtx = { fill, stroke: line, size: iconSizeOf(theme) * k, k };
   const shape =
     icon === '-'
-      ? drawSquare(originX, originY, fill, line, size)
+      ? drawSquare(originX, originY, ctx)
       : icon === '#'
-        ? drawDiamond(originX, originY, fill, line, size)
+        ? drawDiamond(originX, originY, ctx)
         : icon === '~'
-          ? drawTriangle(originX, originY, fill, line, size)
-          : drawCircle(originX, originY, fill, line, size); // '+' and '*'
+          ? drawTriangle(originX, originY, ctx)
+          : drawCircle(originX, originY, ctx); // '+' and '*'
   // G2 N21: `SvgGraphics#startGroup`/`closeGroup` flush the ACTIVE `<a>`
   // link on every nested group boundary (`renderer-url.ts`'s own module
   // doc comment) -- this icon's own `<g data-visibility-modifier>` wrapper
@@ -320,19 +348,27 @@ export function renderVisibilityIcon(
  * @see ~/git/plantuml/.../skin/VisibilityModifier.java:94-116
  * @see ~/git/plantuml/.../cucadiagram/MethodsOrFieldsArea.java:341-368
  */
-export function renderVisibilityUrlBackground(originX: number, originY: number, fill: Paint, url: UrlInfo): string {
+export function renderVisibilityUrlBackground(
+  originX: number,
+  originY: number,
+  fill: Paint,
+  url: UrlInfo,
+  k = 1,
+): string {
   // T7b: routed through `attrs()` (was a raw template literal). Rule 4
   // (`core/svg.ts#strokeDecorationOf`) drops `stroke-width` when
   // `stroke="none"` -- matches upstream's own `if (!"none".equals(stroke))`
   // guard, so the combined `style=` carries `stroke:none;` alone, not the
   // pre-T7b literal's redundant `stroke-width="1"`.
   // CDD T18: `fill` is `classifierFill`'s widened `Paint` return.
+  // cdd-B8FU: `VISIBILITY_ICON_SIZE` is a render-time literal -- scaled by
+  // `k` (defaults to 1 so every pre-existing caller/test is unaffected).
   const resolved = resolvePaint(fill);
   const shape = `${resolved.def}<rect${attrs([
     ['x', originX],
     ['y', originY],
-    ['width', VISIBILITY_ICON_SIZE * 2],
-    ['height', VISIBILITY_ICON_SIZE],
+    ['width', VISIBILITY_ICON_SIZE * 2 * k],
+    ['height', VISIBILITY_ICON_SIZE * k],
     ['fill', resolved.value],
     ['style', 'stroke:none;'],
   ])}/>`;
@@ -350,11 +386,12 @@ export function renderVisibilityUrlBackground(originX: number, originY: number, 
  * (matches `renderer.ts`'s pre-existing `iconBaselineLift` doc comment,
  * which this function replaces).
  */
-export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number, theme?: Theme): number {
+export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number, theme?: ScaledTheme): number {
   const descent = rowHeight / 4.5;
   const ascent = rowHeight - descent;
+  const k = theme?.scaleK ?? 1;
   // The centring follows `classAttributeIconSize` because upstream's block IS
   // `size + 1` (skin/VisibilityModifier.java:100-102) and the placement
   // strategy centres against that block, not against a fixed 11.
-  return rowBaselineY - ascent + centeringDelta(rowHeight, iconBlockHeight(theme));
+  return rowBaselineY - ascent + centeringDelta(rowHeight, iconBlockHeight(theme, k), k);
 }
