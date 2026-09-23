@@ -4,8 +4,8 @@
  * .decorateWithFrame` + `BigFrame` (`klimt/shape/BigFrame.java`) are now
  * ported (`core/klimt/shape/big-frame.ts`, `chrome.ts#addMainframe`).
  * `plans/g0b-annotations/decisions.md` D9's "deferred whole" is superseded;
- * `DIVERGENCES.md`'s "mainframe <label> — parsed, not yet rendered" entry
- * is stale and should be dropped by this task's close.
+ * `DIVERGENCES.md`'s "mainframe <label> — rendered via a ported BigFrame"
+ * entry records the rendered state and the non-class engines' residual.
  *
  * @see ~/git/plantuml/.../core/DiagramChromeFactory.java:275-336 (decorateWithFrame)
  * @see ~/git/plantuml/.../klimt/shape/BigFrame.java
