@@ -324,6 +324,21 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         baseline; `sefazi-02-defe499` and `camuna-58-veca254` carry the
         same delta but still fall 35/142. Not chased (stop 8); no
         compensation applied, since any would be fitting. -->
+- [ ] 20-taillabel-headlabel-no-canvas-reservation.md  <!-- FILED 2026-09-23
+        (cdd-B7FU-R3, item 4). An edge carrying BOTH `taillabel` and
+        `headlabel` HTML tables (`A "role1" --> "role2" B`) gets NO extra
+        canvas/centring reservation from dot-engine, where real graphviz
+        reserves ~2.425px asymmetrically (left side only) for the identical
+        byte-equal DOT input. Isolated with a controlled A/B on
+        `class/focaci-80-suzu938`'s own cached `svek-1.dot`: deleting just
+        the `taillabel`/`headlabel` attributes from the SAME graph text (via
+        real `dot -Tplain`) collapses the node centring from 0.76389in to
+        0.73021in -- EXACTLY dot-engine's own (label-attribute-independent)
+        centring, confirming dot-engine's no-label behaviour is correct and
+        the divergence is entirely in how it handles the two label
+        attributes. `focaci-80-suzu938` stays `structural-match` (0
+        structural / ~92 numeric, all one cascading ~2.4px delta). Not
+        chased (stop 8); no compensation applied. -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the

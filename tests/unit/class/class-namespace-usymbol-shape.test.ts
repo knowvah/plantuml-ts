@@ -26,7 +26,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { defaultTheme } from '../../../src/core/theme.js';
+import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import { renderNamespaceUSymbol } from '../../../src/diagrams/class/class-namespace-usymbol-shape.js';
 import {
@@ -175,5 +175,84 @@ describe('namespaceTitleTableDims — ClusterHeader per-USymbol supplement (A2b 
     expect(namespaceTitleTableDims('foo', defaultTheme, measurer, 'not-a-symbol')).toEqual(
       namespaceTitleTableDims('foo', defaultTheme, measurer),
     );
+  });
+});
+
+/**
+ * cdd-B7FU-R3 (`daxeno-00-kasu166`, `package "styled2\nshould be styled"
+ * <<Database>> { class foo }`): `Cluster.java:358-364`'s `getStyle()`
+ * appends the USymbol's own SName to the style signature, so a `skinparam
+ * database { BackgroundColor yellow; border { color grey }; Font { Color
+ * LightGrey } }` element-bucket override outranks the generic
+ * `plantuml.skin:102-104` `group { BackGroundColor transparent;
+ * LineThickness 1.0 }` default (`resolveClusterUSymbolPaint`, inlined in
+ * `renderNamespaceUSymbol`) — but an inline `#COLOR` override
+ * (`NamespaceGeo.color`) still wins the background role, matching
+ * `Cluster#drawU`'s own `group.getColors()`-first cascade. Separately,
+ * `ClusterHeader.java:125`'s title alignment (`style
+ * .getHorizontalAlignment()`) resolves to CENTER for a composite/package
+ * title (`plantuml.skin:94-98`), so a multi-line title's shorter line sits
+ * to the right of the longer line's `@x`, not flush with it.
+ */
+describe('renderNamespaceUSymbol — <<Database>> per-symbol paint + multi-line title (daxeno-00-kasu166, cdd-B7FU-R3)', () => {
+  function themeWithDatabaseBucket() {
+    const theme = deepMergeTheme(defaultTheme, {});
+    theme.colors.elements = {
+      database: { background: '#FF0', border: '#808080', font: '#D3D3D3' },
+    };
+    return theme;
+  }
+
+  function daxenoGeo(overrides?: Partial<NamespaceGeo>): NamespaceGeo {
+    return {
+      id: 'ent0002',
+      x: 0,
+      y: 0,
+      width: 150,
+      height: 102,
+      label: 'styled2\nshould be styled',
+      usymbol: 'database',
+      wtitle: 0,
+      htitle: 0,
+      baselineOffset: 0,
+      ...overrides,
+    };
+  }
+
+  it('an element-bucket override wins over the generic group default (background/border/font)', () => {
+    const theme = themeWithDatabaseBucket();
+    const svg = renderNamespaceUSymbol(daxenoGeo(), theme, measurer, NODE_PAINT) ?? '';
+    // NODE_PAINT's own fallback ('none' fill, defaultTheme.colors.border
+    // stroke, '#000000' font) must NOT survive.
+    expect(svg).toContain('fill="#FF0"');
+    expect(svg).toContain('stroke:#808080');
+    expect(svg).toContain('fill="#D3D3D3"');
+  });
+
+  it('an unstyled USymbol (no matching bucket) keeps the generic fallback — regression guard, dativu-93-pona469', () => {
+    const svg = renderNamespaceUSymbol(dativuGeo(), defaultTheme, measurer, NODE_PAINT) ?? '';
+    expect(svg).toContain('fill="none"');
+    expect(svg).toContain(`stroke:${defaultTheme.colors.border}`);
+  });
+
+  it('an inline `package "X" #COLOR <<Database>>` override still wins over the element bucket for background', () => {
+    const theme = themeWithDatabaseBucket();
+    const geo = daxenoGeo({ color: '#123456' });
+    const svg =
+      renderNamespaceUSymbol(geo, theme, measurer, { ...NODE_PAINT, backColor: namespaceFill(geo, theme) }) ?? '';
+    expect(svg).toContain('fill="#123456"');
+    expect(svg).not.toContain('fill="#FF0"');
+  });
+
+  it('each title line is centred within the merged block, not left-flush (ClusterHeader.java:125, plantuml.skin:94-98)', () => {
+    const theme = themeWithDatabaseBucket();
+    const svg = renderNamespaceUSymbol(daxenoGeo(), theme, measurer, NODE_PAINT) ?? '';
+    const xs = [...svg.matchAll(/<text x="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(xs).toHaveLength(2);
+    // "styled2" (18px) is narrower than "should be styled" (14px) despite
+    // the LARGER font — centred, its own `@x` sits to the RIGHT of the
+    // wider line's `@x`, never equal to it (which LEFT alignment would
+    // produce for two differently-sized lines).
+    expect(xs[0]).toBeGreaterThan(xs[1]!);
   });
 });

@@ -104,12 +104,21 @@ export interface NamespaceUSymbolPaint {
    *  `Paint | null` since it was ported) -- an inline `#yellow\gold`
    *  group colour is an `HColorGradient` upstream. */
   readonly backColor: Paint;
-  /** `Cluster#drawU`'s resolved border colour (`Cluster.java:316-320`). */
-  readonly borderColor: string;
+  /** `Cluster#drawU`'s resolved border colour (`Cluster.java:316-320`).
+   *  cdd-B7FU-R3: widened `string` -> `Paint` -- `ClusterDecoration#drawU`
+   *  already accepts `Paint | null` (never just `string`), and a per-
+   *  element `<sname>BorderColor` override
+   *  (`resolveClusterUSymbolPaint`) reads `ElementColors.border?: Paint`. */
+  readonly borderColor: Paint;
   /** `Cluster#drawU`'s `rounded` (`:321-324`: `style.value(RoundCorner)`,
    *  forced to 0 under `skinParam.strictUmlStyle()`). */
   readonly roundCorner: number;
-  /** Title text fill (`ClusterHeader#getTitleBlock`'s font colour). */
+  /** Title text fill (`ClusterHeader#getTitleBlock`'s font colour). Kept a
+   *  plain `string` (unlike `borderColor`): `clusterTitleFont`'s
+   *  `FontConfiguration.color` has no gradient-fill text path (mirrors
+   *  `usymbol-resolve.ts#textFontColor`'s identical string-only contract),
+   *  so `resolveClusterUSymbolPaint` narrows a `Paint` `font` override to a
+   *  plain string before assigning here, exactly as `textFontColor` does. */
   readonly fontColor: string;
 }
 
@@ -144,7 +153,24 @@ function buildDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, titleFont: 
   // to a real newline BEFORE `buildTextBlock` sees it reuses that already
   // jar-verified multi-line/multi-font-size stacking machinery unchanged —
   // no new stacking math needed here, unlike the plain-string paths.
-  const title = buildTextBlock(splitDisplayLines(geo.label).lines.join('\n'), titleFont, HorizontalAlignment.LEFT);
+  //
+  // cdd-B7FU-R3: alignment CENTER, not LEFT -- `ClusterHeader#getTitleBlock`
+  // (`java:125`) reads `style.getHorizontalAlignment()` off the title-scoped
+  // signature (`{root, element, <diagram>, uSymbol.getSNames(), composite,
+  // title}`), which `plantuml.skin:94-98`'s `element { composite,package {
+  // title { HorizontalAlignment center } } }` selector matches as a
+  // subsequence regardless of the diagram/uSymbol components in between --
+  // `TITLE_STYLES`'s BOLD below is that SAME selector's `FontStyle bold`.
+  // Jar-verified `daxeno-00-kasu166`'s two-line `<<Database>>` cluster title
+  // ("styled2" 18px / "should be styled" 14px): the narrower line's `@x` sits
+  // exactly half the width delta right of the wider line's `@x`
+  // (162.701-144.495=18.206 == (93.45-57.037)/2), i.e. each line centered
+  // within the merged block -- LEFT drew both lines flush at the SAME `@x`.
+  // Every other USymbol-cluster fixture in the corpus has a single-line
+  // title, where LEFT and CENTER produce byte-identical output (the one line
+  // spans the block's own full measured width), so this was invisible until
+  // a multi-line title existed to distinguish the two.
+  const title = buildTextBlock(splitDisplayLines(geo.label).lines.join('\n'), titleFont, HorizontalAlignment.CENTER);
   // `ClusterHeader#getStereoBlock` is empty here by construction: a
   // stereotype that NAMES a USymbol is consumed AS the shape and never
   // stored for display (`CommandPackage.java:178-191`'s `if (stereotype !=
@@ -158,6 +184,45 @@ function buildDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, titleFont: 
     { position: new UTranslate(geo.x, geo.y), width: geo.width, height: geo.height },
     UStroke.withThickness(GROUP_STROKE_WIDTH),
   );
+}
+
+/**
+ * cdd-B7FU-R3 (`daxeno-00-kasu166`'s `skinparam database { BackgroundColor
+ * yellow; border { color grey }; Font { Color LightGrey } }`): `Cluster
+ * .java:358-364`'s `getStyle()` builds the style signature with the
+ * USymbol's OWN `SName` appended (`getDefaultStyleDefinition(diagramType,
+ * uSymbol, groupType)` -> `{root, element, <diagram>, group, database}`),
+ * so a `skinparam <keyword> { ... }` element-bucket override (already
+ * resolved into `theme.colors.elements[keyword]` by `skinparam-key-
+ * handlers.ts`'s generic per-element cascade) OUTRANKS the generic
+ * `plantuml.skin:102-104` `group { BackGroundColor transparent;
+ * LineThickness 1.0 }` default this module's caller (`renderer.ts
+ * #renderNamespace`) resolves into `paint` -- exactly the same "specific
+ * tier, else the caller's fallback" cascade `resolveElementPaint` (`theme-
+ * element-resolve.ts`) already applies for the LEAF path (`renderer-
+ * usymbol-entity.ts#buildUSymbolEntityParams`), inlined here (not called)
+ * because `resolveElementPaint`'s OWN fallback tier (`nodeBackground`/
+ * `theme.colors.border`/`theme.colors.text`) is the WRONG default for a
+ * cluster -- `dativu-93-pona469`'s unstyled `<<Node>>` cluster (T12,
+ * jar-verified) must keep drawing with the generic group default
+ * (`theme.colors.border` at thickness 1, transparent fill), not
+ * `resolveElementPaint`'s leaf-scoped fallback.
+ *
+ * Inline `package "X" #yellow <<Database>>` (`Cluster#drawU`'s `group
+ * .getColors().getColor(ColorType.BACK)`, `NamespaceGeo.color`) outranks
+ * BOTH tiers for the background -- already encoded into `paint.backColor`
+ * by the caller (`namespaceFill`'s own `geo.color ?? ...` cascade), so the
+ * element-bucket override is applied ONLY when `geo.color` is unset (no
+ * inline override to protect). No inline border/font-color carry exists on
+ * `NamespaceGeo` (T12's own "not modeled" note, `.agent-notes/cdd-T12.md`),
+ * so those two roles apply the element-bucket override unconditionally.
+ */
+function resolveClusterUSymbolPaint(theme: Theme, geo: NamespaceGeo, keyword: string, fallback: NamespaceUSymbolPaint): NamespaceUSymbolPaint {
+  const specific = theme.colors.elements?.[keyword];
+  const backColor = geo.color === undefined && specific?.background !== undefined ? specific.background : fallback.backColor;
+  const borderColor = specific?.border ?? fallback.borderColor;
+  const fontColor = typeof specific?.font === 'string' ? specific.font : fallback.fontColor;
+  return { backColor, borderColor, roundCorner: fallback.roundCorner, fontColor };
 }
 
 export function renderNamespaceUSymbol(
@@ -175,16 +240,17 @@ export function renderNamespaceUSymbol(
   );
   if (symbol === null) return undefined;
 
-  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, paint.fontColor));
+  const resolvedPaint = resolveClusterUSymbolPaint(theme, geo, keyword, paint);
+  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, resolvedPaint.fontColor));
   const fragment = renderDrawableToFragment(
     {
       drawU(ug) {
         decoration.drawU(
           ug,
-          paint.backColor,
-          paint.borderColor,
+          resolvedPaint.backColor,
+          resolvedPaint.borderColor,
           0,
-          paint.roundCorner,
+          resolvedPaint.roundCorner,
           HorizontalAlignment.LEFT,
           HorizontalAlignment.CENTER,
           0,

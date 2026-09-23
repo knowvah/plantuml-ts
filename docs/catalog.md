@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1165 modules · 4314 exported names.
+1165 modules · 4315 exported names.
 
 ## `src/`
 
@@ -79,7 +79,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
 | `skin-loader.ts` | `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batches 1 (decisions D1/D2/D6) and 4 (preprocessor+skinparam skins). |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
-| `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
+| `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |

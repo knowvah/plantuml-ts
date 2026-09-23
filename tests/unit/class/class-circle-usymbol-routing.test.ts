@@ -84,16 +84,22 @@ describe('measureCircleInterface (cdd-T22, E8)', () => {
 describe('usesClassUSymbolEntity dispatch (cdd-T22 widened gate)', () => {
   const base = { x: 0, y: 0, width: 10, height: 10, dividerYs: [], rows: [] } satisfies Partial<ClassifierGeo>;
 
-  it('routes usecase, circle, descriptive+actor and descriptive+component', () => {
+  it('routes usecase, circle, descriptive+actor, descriptive+component and descriptive+database', () => {
     expect(usesClassUSymbolEntity({ ...base, id: 'u', kind: 'usecase' })).toBe(true);
     expect(usesClassUSymbolEntity({ ...base, id: 'c', kind: 'circle' })).toBe(true);
     expect(usesClassUSymbolEntity({ ...base, id: 'a', kind: 'descriptive', usymbol: 'actor' })).toBe(true);
     expect(usesClassUSymbolEntity({ ...base, id: 'k', kind: 'descriptive', usymbol: 'component' })).toBe(true);
+    // cdd-B7FU-R3 (`daxeno-00-kasu166`): `database` now routes here too --
+    // `core/usymbol-shapes.ts#renderDatabaseIcon`'s hand-rolled single
+    // middle-anchored `<text>` has no creole/multi-line support, where
+    // `USymbolDatabase#asSmall` (already ported) draws a real
+    // `TextBlockUtils.mergeTB` block.
+    expect(usesClassUSymbolEntity({ ...base, id: 'd', kind: 'descriptive', usymbol: 'database' })).toBe(true);
   });
 
-  it('does NOT route an ordinary classifier or an unrelated descriptive usymbol (e.g. database)', () => {
+  it('does NOT route an ordinary classifier or an unrelated descriptive usymbol (e.g. rectangle)', () => {
     expect(usesClassUSymbolEntity({ ...base, id: 'x', kind: 'class' })).toBe(false);
-    expect(usesClassUSymbolEntity({ ...base, id: 'd', kind: 'descriptive', usymbol: 'database' })).toBe(false);
+    expect(usesClassUSymbolEntity({ ...base, id: 'r', kind: 'descriptive', usymbol: 'rectangle' })).toBe(false);
   });
 });
 

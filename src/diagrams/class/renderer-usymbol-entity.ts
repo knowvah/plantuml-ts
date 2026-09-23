@@ -102,6 +102,27 @@ function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
  * this task). `diagonalCorner: 0` for all four (unused by every shape this
  * file reaches).
  */
+/**
+ * cdd-B7FU-R3 (`daxeno-00-kasu166`): `desc`/`name` alignment is symbol-
+ * scoped, not a blanket CENTER -- `EntityImageDescription.java:175,183-191`'s
+ * `defaultAlign = styleTitle.getHorizontalAlignment()` reads the TITLE-
+ * scoped signature (`{root, element, <diagram>, symbol.getSNames(), title}`),
+ * which `plantuml.skin:452-454`'s bare `usecase { HorizontalAlignment
+ * center }` selector matches (a one-component style selector matches any
+ * signature CONTAINING it, upstream's subsequence cascade) for `usecase`
+ * ONLY -- no equivalent rule exists for `actor`/`component`/`circle`/
+ * `database`, so those four fall through to `root { HorizontalAlignment
+ * left }` (`plantuml.skin:12`). Jar-verified `daxeno-00-kasu166`'s two-line
+ * `<<Database>>` leaf: `"styled"` (18px) and `"should be styled"` (14px)
+ * draw flush at the SAME `@x` (16) despite their different widths -- CENTER
+ * would offset the narrower line right by half the width delta, which is
+ * NOT what the golden SVG shows. `usecase` keeps CENTER (unchanged from
+ * before this task, and jar-verified correct by its own selector).
+ */
+function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
+  return symbolKeyword === 'usecase' ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT;
+}
+
 function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
   theme: Theme,
@@ -112,6 +133,7 @@ function buildUSymbolEntityParams(
   const fontTitle = textFont(theme, symbolKeyword);
   const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
   const roundCorner = symbolKeyword === 'component' ? COMPONENT_ROUND_CORNER : 0;
+  const titleAlignment = titleAlignmentFor(symbolKeyword);
   return {
     entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: null },
     symbol: {
@@ -129,7 +151,7 @@ function buildUSymbolEntityParams(
       stroke: UStroke.withThickness(resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH),
       fontTitle,
       fontStereo,
-      titleAlignment: HorizontalAlignment.CENTER,
+      titleAlignment,
       stereotypeAlignment: HorizontalAlignment.CENTER,
     },
     links: [],
@@ -144,11 +166,26 @@ function buildUSymbolEntityParams(
 /** Whether a class-diagram leaf routes through {@link renderClassUSymbolEntity}
  *  rather than the generic classifier box -- usecase/`descriptive`+actor
  *  (SI14 T4), plus cdd-T22's `circle` (E8) and `descriptive`+`component`
- *  (cacoma-43-poxu615) additions. Exported so `renderer.ts`'s own dispatch
+ *  (cacoma-43-poxu615) additions, plus cdd-B7FU-R3's `descriptive`+`database`
+ *  addition (`daxeno-00-kasu166`'s collapsed-empty `package "..." <<Database>>
+ *  {}` leaf): `core/usymbol-shapes.ts#renderDatabaseIcon` hand-rolls a SINGLE
+ *  middle-anchored `<text>` for `display`, with no creole/multi-line support,
+ *  where upstream's `USymbolDatabase#asSmall` (`asSmall`, already ported at
+ *  `core/decoration/symbol/USymbolDatabase.ts:178-203`) draws a REAL
+ *  `TextBlockUtils.mergeTB(stereotype, label, CENTER)` -- exactly what
+ *  `EntityImageDescription`'s `desc`/`buildDesc` already builds for
+ *  usecase/actor/component. Only `database` was missing from this dispatch;
+ *  the other three `usymbol-shapes.ts` icons (`renderComponentIcon` is dead
+ *  for this engine since `component` routes here too, `renderActorIcon`/
+ *  `renderUseCaseIcon` are the SAME pre-existing SI14 T4 story) already had
+ *  no live class-engine caller. Exported so `renderer.ts`'s own dispatch
  *  (over its 500-line cap) stays a single call. */
 export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
   if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;
-  return classifier.kind === 'descriptive' && (classifier.usymbol === 'actor' || classifier.usymbol === 'component');
+  return (
+    classifier.kind === 'descriptive' &&
+    (classifier.usymbol === 'actor' || classifier.usymbol === 'component' || classifier.usymbol === 'database')
+  );
 }
 
 /**
