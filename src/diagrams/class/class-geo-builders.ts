@@ -10,13 +10,14 @@
  */
 import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import type { MeasuredClassifier } from './class-layout-helpers.js';
+import { LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
+import { PROTECTED_BORDER } from './class-dot-graph.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
 
 /**
@@ -89,6 +90,31 @@ function badgeFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   };
 }
 
+/** cdd-B10FU: `ClassifierGeo.protectedBorder` -- gated the SAME way
+ *  `class-dot-graph.ts#protectedPad` gates the DOT node's own +40
+ *  inflation (`protectedIds.has(id) && LIKE_CLASS_KINDS.has(kind)`, that
+ *  function's own doc comment). Split out purely to keep
+ *  `buildClassifierGeos`'s own NLOC/CCN under the project caps, same
+ *  "one shared helper" precedent as {@link inkBodyFields}/{@link badgeFields}. */
+function protectedBorderField(classifier: Classifier, protectedIds: ReadonlySet<string>): Partial<ClassifierGeo> {
+  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind)
+    ? { protectedBorder: PROTECTED_BORDER }
+    : {};
+}
+
+/** {@link buildClassifierGeos}'s trailing options -- bundled to stay under
+ *  this repo's 5-param cap once `protectedIds` (cdd-B10FU) joined
+ *  `hiddenIds`/`theme`. */
+export interface ClassifierGeoOptions {
+  hiddenIds: ReadonlySet<string>;
+  theme: Theme;
+  /** cdd-B10FU: the SAME set `class-dot-graph.ts#buildDotGraph` already
+   *  returns and `buildEdgeGeos` already threads via
+   *  `EdgeGeoTextContext.protectedIds` -- gates `ClassifierGeo
+   *  .protectedBorder` (see that field's own doc comment). */
+  protectedIds: ReadonlySet<string>;
+}
+
 /**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
  * positions.
@@ -101,8 +127,7 @@ export function buildClassifierGeos(
   ast: ClassDiagramAST,
   measuredMap: Map<string, MeasuredClassifier>,
   posMap: Map<string, DotLayoutResult['nodes'][number]>,
-  hiddenIds: ReadonlySet<string>,
-  theme: Theme,
+  options: ClassifierGeoOptions,
 ): ClassifierGeo[] {
   const classifiers: ClassifierGeo[] = [];
   for (const classifier of ast.classifiers) {
@@ -116,6 +141,7 @@ export function buildClassifierGeos(
       ...contentBox(classifier, pos, measured),
       dividerYs: measured.dividerYs,
       rows: measured.rows,
+      ...protectedBorderField(classifier, options.protectedIds),
       ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
       ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
       ...badgeFields(measured),
@@ -144,15 +170,15 @@ export function buildClassifierGeos(
       ...(classifier.repeatCoupleInvisLinkCreationIndex !== undefined
         ? { repeatCoupleInvisLinkCreationIndex: classifier.repeatCoupleInvisLinkCreationIndex }
         : {}),
-      ...(hiddenIds.has(classifier.id) ? { hidden: true } : {}),
+      ...(options.hiddenIds.has(classifier.id) ? { hidden: true } : {}),
       ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
       ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
       // mission skin-file-loading (deferred D3 item): see
       // `ClassifierGeo.shadowing`'s own doc comment (class-geo-types.ts)
       // for the full jar-verified mechanism and the eligibility gate
       // `drawsBorderedBox` below reproduces.
-      ...(theme.shadowing !== undefined && theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
-        ? { shadowing: theme.shadowing }
+      ...(options.theme.shadowing !== undefined && options.theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
+        ? { shadowing: options.theme.shadowing }
         : {}),
     });
   }

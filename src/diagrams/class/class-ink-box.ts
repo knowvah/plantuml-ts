@@ -28,6 +28,7 @@ import {
   addEmbedImageInk,
 } from './class-ink-shapes.js';
 import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
+import { protectedInnerBox } from './class-dot-graph.js';
 export type { InkBox } from './class-ink-shapes.js';
 
 // `CucaDiagram#getDefaultMargins()` — single owner at
@@ -206,7 +207,14 @@ function addVisibilityIconInk(box: InkBox, c: ClassifierGeo, iconSize: number): 
   addPoint(box, right + HACK_X_FOR_POLYGON, c.y);
 }
 
-function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void {
+function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number): void {
+  // cdd-B10FU (`pijiju-95-xexi872`): a protected classifier's own ink
+  // walk must match what `renderer-classifier-box.ts#renderClassifierBox`
+  // actually draws -- the INNER box, not the OUTER/DOT-node box `c.x`/
+  // `c.y`/`c.width`/`c.height` are (`ClassifierGeo.protectedBorder`'s own
+  // doc comment). Every ink rule below reads `c`, never `outerC`
+  // directly, so one substitution here covers all of them.
+  const c: ClassifierGeo = outerC.protectedBorder !== undefined ? { ...outerC, ...protectedInnerBox(outerC) } : outerC;
   // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
   // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
   // below), never `EntityImageClass`'s own rect+`UEmpty` composition -- the

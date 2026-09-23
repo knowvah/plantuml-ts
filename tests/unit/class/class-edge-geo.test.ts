@@ -169,15 +169,20 @@ describe('cdd-T16 — a grouped-inheritance link is suppressed to a bare solid p
   });
 
   it('carries the protected parent id and the ONE merged contact point per group', () => {
+    // cdd-B10FU (`pijiju-95-xexi872`): `y` moved 96 -> 76 (Δ PROTECTED_BORDER)
+    // once `ClassifierGeo.x/y/width/height` correctly stayed the OUTER/DOT-
+    // node box and the contact point followed it -- `lazeju-60-boki114`
+    // itself now renders byte-exact against the jar (render-diff.mts,
+    // structural=0/numeric=0), confirming 76 is the jar-matching value.
     const a3children = lazeju.edges.filter((e) => e.to === 'A3');
     for (const e of a3children) {
       expect(e.sametail?.parentId).toBe('A3');
-      expect(e.sametail?.contact).toEqual({ x: 370.575, y: 96 });
+      expect(e.sametail?.contact).toEqual({ x: 370.575, y: 76 });
     }
     const a4children = lazeju.edges.filter((e) => e.to === 'A4');
     for (const e of a4children) {
       expect(e.sametail?.parentId).toBe('A4');
-      expect(e.sametail?.contact).toEqual({ x: 667.575, y: 96 });
+      expect(e.sametail?.contact).toEqual({ x: 667.575, y: 76 });
     }
   });
 

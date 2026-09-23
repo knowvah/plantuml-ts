@@ -23,6 +23,7 @@ import { rect, line, path } from '../../core/svg.js';
 import {} from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import { mapColumnDividerEntries } from './renderer-classifier-map-dividers.js';
+import { protectedInnerBox } from './class-dot-graph.js';
 import { hasBadge } from './class-badge.js';
 import { renderBadge, renderGenericTag, renderBadgeSpriteImage } from './renderer-classifier-badge-tag.js';
 import { renderVisibilityIcon, renderVisibilityUrlBackground } from './class-visibility-icon.js';
@@ -445,7 +446,18 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: ScaledTheme): UrlTaggedP
  * #wrapClassifierBody` -- see that module's own doc comment for the full
  * mechanism.
  */
-export function renderClassifierBox(geo: ClassifierGeo, theme: ScaledTheme): string {
+export function renderClassifierBox(outerGeo: ClassifierGeo, theme: ScaledTheme): string {
+  // cdd-B10FU (`pijiju-95-xexi872`): a `skinparam groupInheritance`-
+  // protected classifier's `x`/`y`/`width`/`height` stay the OUTER (DOT-
+  // node) box (`ClassifierGeo.protectedBorder`'s own doc comment) --
+  // every draw call below needs the INNER box `EntityImageProtected
+  // #drawUntranslated`'s `UTranslate(border, border)` actually draws the
+  // wrapped classifier at. One substitution here covers the rect, the
+  // badge, every row and every divider line, since all of them read
+  // `geo.x`/`geo.y`/`geo.width`/`geo.height` from whichever geo they're
+  // handed, never `outerGeo` directly.
+  const geo: ClassifierGeo =
+    outerGeo.protectedBorder !== undefined ? { ...outerGeo, ...protectedInnerBox(outerGeo) } : outerGeo;
   // G3/O3: map's own vertical column dividers now interleave INSIDE
   // buildBodyPrimitives' own Y-sort (mapColumnDividerEntries), not appended
   // here as one extra batched-at-the-end primitive (pre-O3 bug).

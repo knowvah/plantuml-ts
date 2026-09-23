@@ -143,6 +143,14 @@ export interface ClassifierGeo {
    * node/creationIndex slot, only its `<g class="entity">` disappears).
    */
   hidden?: boolean;
+  /** cdd-B10FU (`pijiju-95-xexi872`): the `EntityImageProtected` border
+   *  (`svek/EntityImageProtected.java:76-83`) this classifier was padded
+   *  by (`class-dot-graph.ts#protectedPad`). `x`/`y`/`width`/`height`
+   *  stay the OUTER (padded/DOT-node) box, still needed by
+   *  `renderer-group.ts#renderGroupInheritanceNeighborhood`; the visible
+   *  content draws at the INNER box this field derives (`UTranslate
+   *  (border, border)`). */
+  protectedBorder?: number;
   usymbol?: string; // for kind 'descriptive': the keyword whose USymbol icon renders
   /**
    * G2 N2 (mechanism 3): parse-time creation order, copied unchanged from

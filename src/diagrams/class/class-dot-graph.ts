@@ -81,6 +81,39 @@ export interface DotGraphParts {
 // jar-cited literal a second time.
 export const PROTECTED_BORDER = 20;
 
+/** `EntityImageProtected.java:56,77-79`: the padded node's dimension is
+ *  `orig.calculateDimension().delta(2*border)`, drawn at `(border,
+ *  border)` inside it -- so the TRUE (unpadded) box a protected
+ *  classifier's `ClassifierGeo` represents is inset by `PROTECTED_BORDER`
+ *  on every side, backed out from the padded `x`/`y`/`width`/`height`
+ *  `buildOneDotNode` (below) inflated the DOT node by.
+ *
+ *  cdd-B10FU: lives here (not `renderer-group.ts`, its sole caller until
+ *  this task) so BOTH the render-side consumers (`renderer-group.ts
+ *  #renderGroupInheritanceNeighborhood`, `renderer-classifier-box.ts
+ *  #renderClassifierBox`) and the LAYOUT-side canvas ink walk
+ *  (`class-ink-box.ts#addClassifierInk`) share one formula without the
+ *  ink walk importing a renderer module (parse -> layout -> render, this
+ *  file's own layer). Falls back to the bare `PROTECTED_BORDER` constant
+ *  when `protectedBorder` is absent, matching `renderer-group.ts`'s own
+ *  pre-existing "reached only for an actually-protected classifier, by
+ *  construction" guarantee. */
+export function protectedInnerBox(geo: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  protectedBorder?: number;
+}): { x: number; y: number; width: number; height: number } {
+  const border = geo.protectedBorder ?? PROTECTED_BORDER;
+  return {
+    x: geo.x + border,
+    y: geo.y + border,
+    width: geo.width - 2 * border,
+    height: geo.height - 2 * border,
+  };
+}
+
 /** A2s F-D pending theme-plumbing seam (see the F-D report): `skinparam
  *  groupInheritance N` is not yet parsed into `Theme`, so this field is
  *  read structurally and the mechanism is inert in production until the

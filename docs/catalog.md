@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1187 modules · 4422 exported names.
+1187 modules · 4424 exported names.
 
 ## `src/`
 
@@ -1137,7 +1137,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-dot-edge-order.ts` | `HIERARCHICAL`, `dotEdgeRunsReversed`, `getOrderedLinks` | Which direction and document position a relationship's dot edge is emitted in -- two related "which order/direction does a class-diagram edge get emitted in" concerns sharing this file (T2 file-name note, `plans/class-divergence-drive/batch |
 | `class-dot-edges.ts` | `EdgeDecoration`, `EDGE_DECORATION_MAP`, `ARROW_LABEL_FONT_SIZE`, `buildDotEdges` | Class diagram DOT-edge construction -- split out of ./class-dot-graph.ts (S-A, pure relocation, no logic change) to keep that file under the repo's 500-line-per-file cap, same split rationale as ./class-object-fields.ts's own module doc (sp |
 | `class-dot-graph-assembly.ts` | `assembleDotInputGraph` | Class diagram `DotInputGraph` attribute-bag assembly -- split out of ./class-dot-graph.ts (T2, `plans/class-divergence-drive/batch-1/ T2-ordered-links.md`) purely to keep that file under the repo's 500-line-per-file cap once the SB2 `getOrd |
-| `class-dot-graph.ts` | `applyKalWidthFloor`, `applySameClassWidthFloor`, `ThemeSameClassWidth`, `DotGraphParts`, `PROTECTED_BORDER`, `ThemeGroupInheritance`, `buildDotGraph` | Class diagram DOT-graph construction. |
+| `class-dot-graph.ts` | `applyKalWidthFloor`, `applySameClassWidthFloor`, `ThemeSameClassWidth`, `DotGraphParts`, `PROTECTED_BORDER`, `protectedInnerBox`, `ThemeGroupInheritance`, `buildDotGraph` | Class diagram DOT-graph construction. |
 | `class-dot-width-floors.ts` | `ThemeSameClassWidth`, `applySameClassWidthFloor`, `applyKalWidthFloor` | cdd-T15: the class DOT-graph builder's two pre-DOT WIDTH FLOORS, split off `./class-dot-graph.ts` when `applyKalWidthFloor` pushed that file past the repo's 500-line cap (a pre-authorised split; the moved code is verbatim, its provenance co |
 | `class-edge-constraint.ts` | `constraintSquare`, `sampleEdgePath`, `constraintAnchor` | cdd-T6 (A2a/M9): `constraint on links: text`. |
 | `class-edge-geo.ts` | `EdgeGeoTextContext`, `buildEdgeGeos` | Class-diagram edge geometry: edge-label / magic-arrow / port-label anchors, stroke override, point normalization, and buildEdgeGeos. |
@@ -1151,7 +1151,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-edge-visibility.ts` | `VisibilityIconGeo`, `EdgeLabelVisibility`, `stripEdgeLabelVisibility`, `VisibilityBlockAnchor`, `visibilityBlockAnchor` | cdd-T6 (A2a/M2): the visibility-modifier block a link LABEL carries when its first line starts with `-`/`#`/`+`/`~`/`*`. |
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |
 | `class-ensure-classifier.ts` | `ensureClassifier` | `ensureClassifier` — the class parser's single classifier-creation chokepoint — split out of `parser.ts` (which sat exactly at the 500-line module cap) and re-exported from it, so every existing `import { ensureClassifier } from './parser.j |
-| `class-geo-builders.ts` | `buildClassifierGeos`, `NamespaceGeoInputs`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
+| `class-geo-builders.ts` | `ClassifierGeoOptions`, `buildClassifierGeos`, `NamespaceGeoInputs`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
 | `class-geo-edge-extras.ts` | `VisibilityIconGeo`, `EdgeKalBoxes`, `EdgeNoteLine`, `EdgeNoteBoxGeo`, `EdgeConstraintGeo`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo` | cdd-T6: the four geometry shapes `EdgeGeo` grew for A2a's render-only link mechanisms (M2 visibility icon, M5 `note on link` box, M9 `constraint on links`, M10 multi-line quantifier). |
 | `class-geo-geometry-types.ts` | `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | `ClassGeometry` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T17: the `EdgeGeo.roleLines` field pushed it back over after the cdd-T6 split already once cleared it). |
 | `class-geo-json-types.ts` | `JsonBodyItem` | `JsonBodyItem` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
