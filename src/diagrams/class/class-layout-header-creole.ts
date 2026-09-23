@@ -10,9 +10,11 @@
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { resolveMemberAtoms, memberBaseFont, type MemberRowBuild } from './class-member-creole.js';
+import { getSplitted } from '../../core/klimt/creole/Fission.js';
+import { resolveMemberAtoms, memberBaseFont, resolveOneAtom, type MemberRowBuild } from './class-member-creole.js';
 import { atomsToPlainText } from './class-member-display.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { getSpriteMonochrome, getSpriteColor4096 } from '../../core/sprite-registry.js';
@@ -29,44 +31,46 @@ import type { CommonHeaderFields } from './class-layout-header-geo.js';
  *  BADGE_BOX_HEIGHT bakes the identical `+ 5*2` for the char form). */
 const BADGE_SPRITE_TOP_BOTTOM_MARGIN = 5;
 
-/** A2s R2i: one header NAME line routed through the creole atom pipeline --
- *  `EntityImageClassHeader.java:107-108` builds the name TextBlock via
- *  `display.create8(fontConfigurationName, CENTER, skinParam,
- *  CreoleMode.FULL_BUT_UNDERSCORE, wrapWidth)`, i.e. the SAME
- *  `Display`/creole machinery member rows use, in the mode whose only
- *  difference from FULL is dropping the creole-pure `__underline__`
- *  command (`CommandCreoleBuilder.ts`'s OTHER map). For a line with no
- *  creole markup this reduces to ONE text atom measured byte-identically
- *  to the previous raw `measurer.measure(l, headerFont)` call
- *  (`class-member-creole.ts`'s measurement-identity guarantee; invariant
- *  re-verified on 12 plain names x 3 sizes before this cutover). */
-function buildHeaderLine(
-  line: string,
+/** {@link buildWrappedHeaderLine}'s per-(sub)line return shape. */
+interface HeaderLineBuild {
+  width: number;
+  height: number;
+  displayText: string;
+  atoms: MemberRowBuild['atoms'];
+  hasMarkup: boolean;
+}
+
+/** Resolves one already-built creole atom group (a full line, or ONE of
+ *  {@link getSplitted}'s wrapped sub-lines) into a {@link HeaderLineBuild}.
+ *  `rawLine` is the ORIGINAL, un-wrapped line text -- only ever passed for
+ *  the `maxWidth<=0` (no wrap) case, where it lets `hasMarkup` compare the
+ *  resolved atoms against the untouched input (see below); `undefined` for
+ *  a wrapped sub-line, which has no single "raw line" to compare against. */
+function resolveHeaderAtoms(
+  atoms: readonly CreoleAtom[],
   font: FontConfiguration,
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
-): { width: number; height: number; displayText: string; atoms: MemberRowBuild['atoms']; hasMarkup: boolean } {
-  const built = buildLineAtoms(line, font, CreoleMode.FULL_BUT_UNDERSCORE);
-  if (built.classification.type === 'HORIZONTAL_LINE') {
-    // Zero corpus reach for a class NAME shaped like a bare separator --
-    // keep it inert (no atoms, plain text line height) rather than guess.
-    return { width: 0, height: atomTextLineHeight(font.size), displayText: line, atoms: [], hasMarkup: false };
-  }
-  const resolved = resolveMemberAtoms(built.atoms, font, measurer, sprites);
-  // cdd-T25 (M8b): `true` iff the line actually carried creole markup --
-  // the SAME "no command/atom matched anywhere" identity `class-member-
-  // creole.ts`'s own module doc comment names ("Measurement-identity
-  // guarantee"): a markup-free line always resolves to EXACTLY one text
-  // atom carrying the UNTOUCHED input string. Narrows the blast radius of
-  // wiring atoms into header rows to the handful of fixtures that actually
-  // use header-name creole (diseka-11-gozu390, gekope-01-ricu859,
-  // lecelo-92-loma110), leaving every other classifier header's render
-  // byte-identical to the pre-T25 plain-text path.
-  const hasMarkup = !(
-    resolved.atoms.length === 1 &&
-    resolved.atoms[0]!.kind === 'text' &&
-    resolved.atoms[0]!.text === line
-  );
+  rawLine: string | undefined,
+): HeaderLineBuild {
+  const resolved = resolveMemberAtoms(atoms, font, measurer, sprites);
+  // cdd-T25 (M8b) / CDD B7FU-R2 item (d): `true` iff the (sub)line must
+  // render through the atom pipeline rather than the pre-T25 plain-text
+  // fallback. For an UN-wrapped line (`rawLine` defined): the SAME "no
+  // command/atom matched anywhere" identity `class-member-creole.ts`'s own
+  // module doc comment names ("Measurement-identity guarantee") -- a
+  // markup-free line always resolves to EXACTLY one text atom carrying the
+  // UNTOUCHED input string. For a WRAPPED sub-line (`rawLine` undefined):
+  // unconditionally `true` -- `Fission.ts#getSplitted`'s own doc comment,
+  // jar-verified, "unconditionally decomposes into Neutrons and
+  // reconstructs once maxWidth != 0, regardless of whether any BREAK
+  // occurs" -- upstream emits one `<text>` per word/space run for EVERY
+  // wrapped line, even a markup-free one, so every wrapped sub-line must
+  // route through the atom pipeline the same way a real markup line does.
+  const hasMarkup =
+    rawLine === undefined
+      ? true
+      : !(resolved.atoms.length === 1 && resolved.atoms[0]!.kind === 'text' && resolved.atoms[0]!.text === rawLine);
   return {
     width: resolved.width,
     height: resolved.height,
@@ -74,6 +78,50 @@ function buildHeaderLine(
     atoms: resolved.atoms,
     hasMarkup,
   };
+}
+
+/**
+ * A2s R2i / CDD B7FU-R2 item (d): one header NAME line, WORD-WRAPPED into
+ * one or more {@link HeaderLineBuild}s -- `EntityImageClassHeader.java:
+ * 107-108` builds the name TextBlock via `display.create8(fontConfiguration
+ * Name, CENTER, skinParam, CreoleMode.FULL_BUT_UNDERSCORE, wrapWidth)`, the
+ * SAME `Display`/creole machinery member rows use (`CreoleMode.FULL_BUT_
+ * UNDERSCORE` drops only the creole-pure `__underline__` command,
+ * `CommandCreoleBuilder.ts`'s OTHER map), wrapping via `Fission#getSplitted`
+ * over the line's OWN already-built creole atoms -- NOT a raw-string pre-
+ * wrap followed by per-line re-atomization (the former approach, `class-
+ * layout-header-geo.ts#splitAndWrapHeaderLines`'s retired `wrapPlainTextLine`
+ * call, treated a `**bold**`-marked run as opaque characters for width
+ * purposes and collapsed each wrapped line back to ONE flat text atom,
+ * losing the per-word/per-space `<text>` decomposition the jar's `Fission`
+ * always produces once `maxWidth>0` -- `nucite-98-kuga991`/`nufini-44-
+ * jofo787`, `<style> class { MaximumWidth N } }`). Reuses `class-member-
+ * creole.ts#buildWrappedMemberRows`'s exact `getSplitted`/`resolveOneAtom`
+ * pattern (its own doc comment) rather than re-deriving it -- the member-
+ * row wrap seam already jar-verified this same Fission engine against
+ * `nucite-98-kuga991`'s C2 body (`**Method()**`, byte-identical structure
+ * already reached in a prior round). `maxWidth<=0` (the overwhelming
+ * majority of classifiers, no `MaximumWidth` cascade in effect)
+ * short-circuits to the SAME single-{@link HeaderLineBuild} result the
+ * pre-item-(d) `buildHeaderLine` returned, byte-identical.
+ */
+function buildWrappedHeaderLine(
+  line: string,
+  font: FontConfiguration,
+  measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
+  maxWidth: number,
+): HeaderLineBuild[] {
+  const built = buildLineAtoms(line, font, CreoleMode.FULL_BUT_UNDERSCORE);
+  if (built.classification.type === 'HORIZONTAL_LINE') {
+    // Zero corpus reach for a class NAME shaped like a bare separator --
+    // keep it inert (no atoms, plain text line height) rather than guess.
+    return [{ width: 0, height: atomTextLineHeight(font.size), displayText: line, atoms: [], hasMarkup: false }];
+  }
+  if (maxWidth <= 0) return [resolveHeaderAtoms(built.atoms, font, measurer, sprites, line)];
+  const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
+  const wrapped = getSplitted(built.atoms, maxWidth, (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0);
+  return wrapped.map((atoms) => resolveHeaderAtoms(atoms, font, measurer, sprites, undefined));
 }
 
 /** CDD B7FU-R2 item (c-b): resolves the badge sprite's OWN drawable image
@@ -156,7 +204,7 @@ export interface HeaderLineMetrics {
   headerDisplayLines: string[];
   nameBlockHeight: number;
   /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
-   *  no creole markup (see {@link buildHeaderLine}'s `hasMarkup`) -- the
+   *  no creole markup (see {@link resolveHeaderAtoms}'s `hasMarkup`) -- the
    *  caller (`class-layout-header-geo.ts#buildHeaderNameRowsGeo`) sets
    *  `ClassifierGeo['rows'][].atoms` only for a defined entry, so a
    *  markup-free header renders through the UNCHANGED pre-T25 plain-text
@@ -170,25 +218,45 @@ export interface HeaderLineMetrics {
   headerLineHeights: number[];
 }
 
-/** A2s R2i (item 1): the per-line creole builds' width/display/height
- *  projections -- split out of `computeHeaderNameGeo` purely for the
- *  per-function NLOC cap. `nameBlockHeight` is the sum of per-line heights
- *  (an emoji line is 39*factor tall, lecelo-92; a plain line stays
- *  `atomTextLineHeight(headerFont.size)`, so the sum reduces to the
- *  previous `count * atomTextLineHeight` for every atom-free header). */
-export function buildHeaderLineMetrics(
-  headerLines: readonly string[],
-  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
-  measurer: StringMeasurer,
-  sprites: SpriteRegistry | undefined,
+/** {@link buildHeaderLineMetrics}'s trailing options -- bundled to keep
+ *  that function under the project's per-function param cap (adding
+ *  CDD B7FU-R2 item (d)'s `maxWidth` to four already-separate params would
+ *  exceed it). */
+export interface HeaderLineMetricsOptions {
+  sprites: SpriteRegistry | undefined;
   // cdd-T25 (M8b): the classifier's OWN kind-derived italic
   // (interface/abstract, `class-stereotype-layout.ts#computeHeaderInfo`) --
   // unioned with `headerFont.italic` (`skinparam classFontStyle italic`)
   // the SAME way `buildHeaderRows`'s own `row.italic` field already does,
   // so the creole atoms' BASE styles agree with what the plain-text
   // fallback row would have drawn.
-  headerItalic: boolean,
+  headerItalic: boolean;
+  /** CDD B7FU-R2 item (d): `<style> class { MaximumWidth N } }`'s cascade
+   *  value (`Style#wrapWidth`, `PName.MaximumWidth`) -- the SAME resolved
+   *  number `class-layout-helpers.ts#measureClassifier` already threads to
+   *  `MeasureGenericClassifierOptions.headerMaxWidth`; `<=0` (the
+   *  overwhelming majority of classifiers) short-circuits every line to
+   *  its pre-item-(d) single-build result. */
+  maxWidth: number;
+}
+
+/** A2s R2i (item 1): the per-line creole builds' width/display/height
+ *  projections -- split out of `computeHeaderNameGeo` purely for the
+ *  per-function NLOC cap. `nameBlockHeight` is the sum of per-line heights
+ *  (an emoji line is 39*factor tall, lecelo-92; a plain line stays
+ *  `atomTextLineHeight(headerFont.size)`, so the sum reduces to the
+ *  previous `count * atomTextLineHeight` for every atom-free header).
+ *  CDD B7FU-R2 item (d): each RAW (newline-split) line can now expand to
+ *  MULTIPLE wrapped builds (`buildWrappedHeaderLine`) -- flattened here so
+ *  every returned array stays one entry per RENDERED row, matching what
+ *  `buildHeaderRows` (the sole caller) already expects. */
+export function buildHeaderLineMetrics(
+  headerLines: readonly string[],
+  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
+  measurer: StringMeasurer,
+  options: HeaderLineMetricsOptions,
 ): HeaderLineMetrics {
+  const { sprites, headerItalic, maxWidth } = options;
   // cdd-T25 (M8b): seeds BOLD/ITALIC onto the creole atoms' BASE font from
   // the classifier header's OWN resolved style (`skinparam classFontStyle`/
   // kind-derived italic) -- the SAME `getStyles(font)` mirroring
@@ -207,7 +275,7 @@ export function buildHeaderLineMetrics(
     },
     {},
   );
-  const builds = headerLines.map((l) => buildHeaderLine(l, font, measurer, sprites));
+  const builds = headerLines.flatMap((l) => buildWrappedHeaderLine(l, font, measurer, sprites, maxWidth));
   return {
     headerLineWidths: builds.map((b) => b.width),
     headerDisplayLines: builds.map((b) => b.displayText),

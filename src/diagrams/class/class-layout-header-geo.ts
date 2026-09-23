@@ -16,7 +16,6 @@
 import type { Classifier } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
-import { wrapPlainTextLine } from './class-layout-edge-labels.js';
 // T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
 // `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
 // comment.
@@ -75,31 +74,25 @@ export interface StereoGeoOptions {
 /**
  * G2 N64 item 45 / N65 item 35: split a classifier display name on its
  * `\n`/`\l`/`\r` line-break escapes (`Display.getWithNewlines`, T1's
- * `splitDisplayLines`) then word-wrap EACH line via `wrapPlainTextLine`
- * (Fission) when a `MaximumWidth` cascade is in effect -- a no-op at
- * `headerMaxWidth<=0` (the overwhelming majority of classifiers). Split out
- * of `computeHeaderNameGeo` purely to keep that function's NLOC under the
- * project's per-function cap (cdd-T25); a pure move, no behavior change.
- * `header.headerText === classifier.display`, which for a COLLAPSED
- * namespace/package leaf (`class-container.ts#closeContainer`) is already a
- * `parseWithNewlines` result REJOINED with a real `\n` -- harmless here:
- * neither this call nor its T1 predecessor (`splitEdgeLabelLines`) ever
- * treated a real newline as a break (upstream doesn't either, `Display.java
- * :262-346` only breaks on the literal two-char token/BLOCK_E1 sentinels),
- * so behavior is unchanged for that case too.
+ * `splitDisplayLines`) -- `EntityImageClassHeader.java:107-108`'s own
+ * `Display#create8` wraps EACH resulting line SECOND, via `Fission` over
+ * that line's OWN creole atoms, not a raw-string pre-pass -- CDD B7FU-R2
+ * item (d) moved that wrap step into `class-layout-header-creole.ts
+ * #buildWrappedHeaderLine`/`buildHeaderLineMetrics` (this function's own
+ * caller), so it now does ONLY the newline split. Split out of
+ * `computeHeaderNameGeo` purely to keep that function's NLOC under the
+ * project's per-function cap (cdd-T25). `header.headerText ===
+ * classifier.display`, which for a COLLAPSED namespace/package leaf
+ * (`class-container.ts#closeContainer`) is already a `parseWithNewlines`
+ * result REJOINED with a real `\n` -- harmless here: neither this call nor
+ * its T1 predecessor (`splitEdgeLabelLines`) ever treated a real newline as
+ * a break (upstream doesn't either, `Display.java:262-346` only breaks on
+ * the literal two-char token/BLOCK_E1 sentinels), so behavior is unchanged
+ * for that case too.
  */
-function splitAndWrapHeaderLines(
-  headerText: string,
-  headerFont: { family: string; size: number },
-  headerMaxWidth: number,
-  measurer: StringMeasurer,
-): { headerLines: readonly string[]; headerAlign: 'center' | 'left' | 'right' } {
+function splitHeaderLines(headerText: string): { headerLines: readonly string[]; headerAlign: 'center' | 'left' | 'right' } {
   const rawHeaderSplit = splitDisplayLines(headerText);
-  const headerLines =
-    headerMaxWidth > 0
-      ? rawHeaderSplit.lines.flatMap((l) => wrapPlainTextLine(l, headerFont, headerMaxWidth, measurer))
-      : rawHeaderSplit.lines;
-  return { headerLines, headerAlign: rawHeaderSplit.align };
+  return { headerLines: rawHeaderSplit.lines, headerAlign: rawHeaderSplit.align };
 }
 
 /**
@@ -129,9 +122,8 @@ export function computeHeaderNameGeo(
   // `degenerateSingleClassifier` (class-geo-builders.ts) can copy it
   // straight off the SAME `MeasuredClassifier`.
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
-  const { headerLines, headerAlign } = splitAndWrapHeaderLines(header.headerText, headerFont, headerMaxWidth, measurer);
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } =
-    buildHeaderLineMetrics(headerLines, headerFont, measurer, sprites, header.headerItalic);
+  const { headerLines, headerAlign } = splitHeaderLines(header.headerText);
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } = buildHeaderLineMetrics(headerLines, headerFont, measurer, { sprites, headerItalic: header.headerItalic, maxWidth: headerMaxWidth });
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
