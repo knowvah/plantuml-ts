@@ -47,6 +47,10 @@ import { WidthTableMeasurer } from '../src/core/measurer.js';
 import type { DotInputGraph } from '../src/core/graph-layout.types.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+// cdd-T32 (journal row 193): the vendored-stdlib store, so a `!include
+// <bundle/...>` fixture renders instead of tripping renderSync's include
+// guard and being surveyed as an error page -- the census already did this.
+import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
@@ -268,6 +272,7 @@ function renderOneMode(dir: string): void {
     svg = renderSync(markup, {
       measurer: new WidthTableMeasurer(),
       assetStore: buildSpriteAssetsStore(),
+      includeStore: fixtureIncludeStore(),
     });
   } catch (err) {
     setLayoutInputObserver(undefined);
@@ -291,6 +296,7 @@ function renderFrame(dir: string): string {
     const svg = renderSync(markup, {
       measurer: new WidthTableMeasurer(),
       assetStore: buildSpriteAssetsStore(),
+      includeStore: fixtureIncludeStore(),
     });
     return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, inputs, oracleBlind), oracleBlind });
   } catch (err) {

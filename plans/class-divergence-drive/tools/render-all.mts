@@ -20,6 +20,7 @@
  * recorded as `timeout`. That is an accepted trade for a scratch tool — see
  * `tools/README.md`.
  */
+import { fixtureIncludeStore } from '../../../tests/helpers/fixture-include-store.js';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -91,7 +92,7 @@ export function renderRow(f: FixtureDir, store: AssetStore): RenderAllRow {
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const oracle = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
-    const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store });
+    const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
     const { structural, numeric } = countDiffs(svg, oracle);
     const v = diffVerdict(svg, oracle);
     const firstDiff = v.firstDiff !== undefined ? { firstDiff: v.firstDiff } : {};

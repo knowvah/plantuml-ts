@@ -16,6 +16,7 @@
  * (T0b correction 3) — see `tools/README.md` for the mirrored upstream call
  * sites and `.agent-notes/cdd-T0b.md` for why.
  */
+import { fixtureIncludeStore } from '../../../tests/helpers/fixture-include-store.js';
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -55,7 +56,7 @@ export function formatDiffLine(d: Diff): string {
 /** The exact upstream render call (`scripts/svg-parity-survey.ts:268-271`):
  *  `WidthTableMeasurer` + a shared, process-wide sprite asset store. */
 export function renderFixture(markup: string, store: AssetStore): string {
-  return renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store });
+  return renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
 }
 
 interface FixtureFiles {
