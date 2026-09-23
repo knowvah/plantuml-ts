@@ -150,14 +150,18 @@ export function buildHeaderLineMetrics(
   // any in-scope creole style command). No `member` modifiers apply to a
   // header line (no `{abstract}`/`{static}` token), so the second
   // argument is `{}`.
+  // cdd-B7FU-R1 splits what T25 unioned: upstream reaches the two italics by
+  // two DIFFERENT routes. `skinparam classFontStyle italic` is baked into the
+  // font FACE by `FontConfiguration.create(ISkinParam, Style, Colors)`
+  // (`EntityImageClassHeader.java:96-97`), whereas the kind-derived italic is
+  // `fontConfigurationName.italic()` (java:100-101) == `add(FontStyle.ITALIC)`
+  // — a `styles` entry only. Only the second is clearable by `<plain>`, so
+  // the kind-derived half rides in through `memberBaseFont`'s `isAbstract`
+  // member flag (that function's ONLY styles-without-face italic input, and
+  // exactly upstream's `italic()` semantics) rather than through `fontSpec`.
   const font = memberBaseFont(
-    {
-      family: headerFont.family,
-      size: headerFont.size,
-      bold: headerFont.bold,
-      italic: headerFont.italic || headerItalic,
-    },
-    {},
+    { family: headerFont.family, size: headerFont.size, bold: headerFont.bold, italic: headerFont.italic },
+    { isAbstract: headerItalic },
   );
   const builds = headerLines.map((l) => buildHeaderLine(l, font, measurer, sprites));
   return {

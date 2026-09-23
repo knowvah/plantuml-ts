@@ -23,6 +23,9 @@ import { textFontFamily, emittedTextForm } from './svg-text-font.js';
 export { emittedTextForm } from './svg-text-font.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
 import { roundedCornerAttrs } from './svg-rect-corners.js';
+import { backColorFilterDef } from './svg-defs.js';
+import { extraLineStrokeWidth } from './klimt/drawing/svg/driver-text-svg-decorations.js';
+import type { ExtraLine } from './klimt/drawing/svg/driver-text-svg-decorations.js';
 
 /**
  * `<rect>` element.
@@ -106,6 +109,11 @@ function textLengthOf(content: string, textLength: number | undefined): number |
 export function text(x: number, y: number, rawContent: string, style: TextStyle = {}): string {
   const content = emittedTextForm(rawContent, style.fontFamily);
   const fillR = resolvePaint(style.fill);
+  // `SvgGraphics#text`'s `textBackColor` arm (`SvgGraphics.java:733-736`):
+  // register the `feFlood` filter for the colour and reference it. The def
+  // rides inline next to the element, like `resolvePaint`'s gradient def;
+  // `svg-defs.ts#extractFilterDefs` lifts and dedups it at assembly.
+  const back = style.textBackColor === undefined ? undefined : backColorFilterDef(style.textBackColor);
   const a = attrs([
     ['x', x],
     ['y', y],
@@ -122,8 +130,9 @@ export function text(x: number, y: number, rawContent: string, style: TextStyle 
     // inherited. `TextStyle.lengthAdjust` is kept as a field (callers still
     // set it) but is no longer emitted per element.
     ['textLength', textLengthOf(content, style.textLength)],
+    ['filter', back === undefined ? undefined : `url(#${back.id})`],
   ] as const);
-  return `${fillR.def}<text${a}>${escapeXmlText(content)}</text>`;
+  return `${back?.def ?? ''}${fillR.def}<text${a}>${escapeXmlText(content)}</text>`;
 }
 
 /**
@@ -414,4 +423,57 @@ export function noteBox(x: number, y: number, w: number, h: number, style: NoteB
     `L${fmt(x + w)},${fmt(y + d)} L${fmt(x + w - d)},${fmt(y)}`;
   const fold = '<path' + attrs([['d', foldD]]) + paintAttrs + '/>';
   return body + fold;
+}
+/**
+ * `<foreignObject>` element.
+ *
+ * Used to embed HTML/MathML content (e.g. KaTeX MathML) inside SVG.
+ * The `content` string is inserted verbatim — callers are responsible for
+ * providing valid (X)HTML content including any required namespace attributes.
+ *
+ * @param x       - Top-left x coordinate.
+ * @param y       - Top-left y coordinate.
+ * @param w       - Width of the foreignObject.
+ * @param h       - Height of the foreignObject.
+ * @param content - Inner HTML/MathML string (verbatim, not escaped).
+ */
+export function foreignObject(x: number, y: number, w: number, h: number, content: string): string {
+  const a = attrs([
+    ['x', x],
+    ['y', y],
+    ['width', w],
+    ['height', h],
+  ] as const);
+  return '<foreignObject' + a + '>' + content + '</foreignObject>';
+}
+
+/**
+ * Upstream `DriverTextSvg.ExtraLines#drawAll` (`DriverTextSvg.java:68-75`):
+ * one `<line>` per custom-coloured underline/strike-through, spanning the
+ * run's measured width at `y + deltaY`, stroked at `font.getSize2D()/28`.
+ *
+ * Lives here, with the other shape emitters, so class's two string
+ * renderers (`renderer-classifier-rows.ts`, `renderer-note.ts`) share the
+ * emission the same way they now share the decision
+ * (`klimt/drawing/svg/driver-text-svg-decorations.ts`); the klimt driver
+ * draws the identical lines through `SvgGraphics#svgLine` instead.
+ *
+ * `color` is the raw `extendedColor` token; `line()`'s own `stroke`
+ * resolution shortens it exactly as upstream's `toSvg(mapper)` does.
+ */
+export function decorationLines(
+  extraLines: readonly ExtraLine[],
+  x: number,
+  y: number,
+  width: number,
+  drawnFontSize: number,
+): string {
+  return extraLines
+    .map((extra) =>
+      line(x, y + extra.deltaY, x + width, y + extra.deltaY, {
+        stroke: extra.color,
+        strokeWidth: extraLineStrokeWidth(drawnFontSize),
+      }),
+    )
+    .join('');
 }
