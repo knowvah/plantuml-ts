@@ -10,7 +10,7 @@ import { resolveTips } from './note-tips-resolve.js';
 import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
-import { CARDINALITY_FONT_SIZE } from './class-layout-edge-labels.js';
+import { CARDINALITY_FONT_SIZE, labelMarginOf } from './class-layout-edge-labels.js';
 import type { InkBox } from './class-ink-shapes.js';
 import {
   newInkBox,
@@ -334,6 +334,65 @@ function addEdgeTextInk(box: InkBox, label: { x: number; y: number; width: numbe
 }
 
 /**
+ * cdd-T35 (A5/M7): `SvekEdge#addVisibilityModifier` (`svek/SvekEdge.java
+ * :372-373`) closes the MAIN label's block by wrapping it in
+ * `TextBlockUtils.withMargin(block, marginLabel, marginLabel)` --
+ * `marginLabel` is {@link labelMarginOf}'s own 1px/6px split. `withMargin`
+ * (`klimt/shape/TextBlockUtils.java:64-68`) builds a `TextBlockMarged`,
+ * whose `drawU` (`klimt/shape/TextBlockMarged.java:76-84`) draws an
+ * INVISIBLE `UEmpty` sized to the MARGINED block BEFORE drawing the inner
+ * label shifted by `(marginLabel, marginLabel)` -- `LimitFinder#drawEmpty`
+ * (`klimt/drawing/LimitFinder.java:159-162`) walks that `UEmpty` with NO
+ * inset, so it reaches `marginLabel` px further out on EVERY side than the
+ * label's own glyph ink {@link addEdgeTextInk} already models.
+ *
+ * `layout-ink-extent.ts`'s own module doc comment (`:73-82`) previously
+ * named "edge-label `UText` ink" as a solved exception (G2 N35/G9 T16) but
+ * never modeled this SECOND, independent ink source the SAME
+ * `TextBlockMarged` wrapper draws -- `class-layout-edge-labels.ts
+ * #withLabelMargin` already applies this EXACT margin to the label's
+ * GRAPHVIZ LAYOUT box size (so the label's own drawn POSITION already
+ * matches jar to sub-0.01px), but nothing fed it into the document's own
+ * ink walk. Jar-verified via a debug-instrumented local oracle build
+ * (`LimitFinder#addPoint`/`SvekResult#calculateDimension`/`SvgGraphics
+ * #ensureVisible` traced directly against `camupi-97-gezi072`, `class a;
+ * class b; a --> b : visible`): the real ink walk draws `UEmpty x=19.89
+ * y=86.0` immediately before the label's own `UText x=20.89 y=97.11`,
+ * reaching `maxX=58.1275` -- exactly `label.x + label.width + 1` (the
+ * `UText`-only rule tops out at `57.1275`) -- which is the SAME 1px this
+ * port's `minDim` undershot jar's by (`78.1275` margined vs our
+ * `77.1275`), the exact defect this task diagnoses.
+ *
+ * X-only: the `UEmpty`'s Y span (`[86, 101]`, height 15) does NOT line up
+ * with {@link addEdgeTextInk}'s own baseline-derived Y rule (`[85.611,
+ * 98.611]`) by any simple offset of `marginLabel` -- the block's own
+ * vertical top is a LAYOUT quantity (the marged block's pre-ascent origin),
+ * not derivable from the glyph baseline `EdgeGeo.label.y` this port
+ * stores, so it stays NOT modeled (documented simplification, not silently
+ * dropped, matching this file's own established convention) until a
+ * fixture isolates it from the classifier boxes' own dominating Y reach.
+ * `label.y` is used as BOTH new points' own y (a value already inside the
+ * Y range {@link addEdgeTextInk} established for the SAME label), so this
+ * function only ever WIDENS the box on X, never perturbs Y.
+ *
+ * Applies to `EdgeGeo.label` only -- the main label -- matching
+ * `addVisibilityModifier`'s own single caller (`SvekEdge.java:302`);
+ * `tailLabel`/`headLabel` are built straight from `Display.create` and
+ * never pass through it (`labelMarginOf`'s own doc comment). Skipped when
+ * `e.noteBox` is set: `computeNoteMergedLabelAttrs`
+ * (`class-layout-edge-labels.ts`) already bakes this SAME margin into
+ * `label.width` for a `note on link` merge (`withLabelMargin`'s own doc
+ * comment), so adding it again here would double-count it.
+ */
+function addEdgeLabelMarginInk(box: InkBox, e: EdgeGeo): void {
+  const label = e.label;
+  if (label === undefined || e.noteBox !== undefined) return;
+  const m = labelMarginOf(e);
+  addPoint(box, label.x - m, label.y);
+  addPoint(box, label.x + label.width + m, label.y);
+}
+
+/**
  * The shared ink-point accumulation walk both `computeClassDocumentDims`
  * (dimension) and `computeClassInkShift` (N11, position) consume — one
  * `LimitFinder`-shaped pass over clusters/nodes/edges (`SvekResult#drawU`'s
@@ -388,6 +447,9 @@ export function buildInkBox(
     for (const lbl of [e.label, e.tailLabel, e.headLabel, ...(e.labelLines ?? [])]) {
       if (lbl !== undefined) addEdgeTextInk(box, lbl);
     }
+    // cdd-T35: the main label's own `TextBlockMarged` margin -- see
+    // {@link addEdgeLabelMarginInk}'s own doc comment.
+    addEdgeLabelMarginInk(box, e);
     // G2 item 44: the magic-arrow glyph's own 3 vertices -- unlike the
     // single-point simplification above, the WHOLE triangle is cheap to
     // bound exactly (only 3 points), so every vertex is added. SI25 D1: the

@@ -931,13 +931,108 @@ describe('edge-label text ink (G9/T16)', () => {
     // baseline 200 -> ink bottom 201.5 against the box's own 39; x spans
     // [100, 160] against the box's 39. Both dominate, so both show in dims.
     const dims = computeClassDocumentDims(boxes, [], labelled({ text: 'x', x: 100, y: 200, width: 60 }), []);
-    // width  = (160 - (-1)) + INK_DELTA 15 + margins 0/5, +1 truncating
+    // width  = (161 - (-1)) + INK_DELTA 15 + margins 0/5, +1 truncating --
+    // 161 (not 160) since cdd-T35's `addEdgeLabelMarginInk` ALSO reserves
+    // `label.x + label.width + marginLabel` (1px) beyond the glyph alone.
     // height = (201.5 - (-1)) + 15 + 0/5 -> floor(223.5) = 223
-    expect(dims).toEqual({ width: 182, height: 223 });
+    expect(dims).toEqual({ width: 183, height: 223 });
   });
 
   it('leaves a label sitting inside the boxes` own ink with no effect', () => {
     const inside = computeClassDocumentDims(boxes, [], labelled({ text: 'x', x: 5, y: 30, width: 12 }), []);
     expect(inside).toEqual(computeClassDocumentDims(boxes, [], labelled(undefined), []));
+  });
+});
+
+/**
+ * cdd-T35 (A5/M7): `SvekEdge#addVisibilityModifier` (`svek/SvekEdge.java
+ * :372-373`) wraps the main label's block in `TextBlockUtils.withMargin(
+ * block, marginLabel, marginLabel)` -- `marginLabel` is 1px, or 6px for a
+ * self-loop (`from === to`). `TextBlockMarged#drawU`
+ * (`klimt/shape/TextBlockMarged.java:82`) draws an invisible `UEmpty` sized
+ * to that MARGINED block, which `LimitFinder#drawEmpty`
+ * (`klimt/drawing/LimitFinder.java:159-162`) walks with no inset -- a
+ * SECOND, independent ink source alongside the label's own glyph ink
+ * (`addEdgeTextInk`, G9/T16 above), reaching `marginLabel` px further out
+ * on X. Jar-verified via a debug-instrumented local oracle build against
+ * `camupi-97-gezi072` (`class a; class b; a --> b : visible`): the real
+ * ink walk draws `UEmpty x=19.89 y=86.0` immediately before the label's own
+ * `UText x=20.89 y=97.11`, reaching `maxX=58.1275` where the glyph-only
+ * rule alone tops out at `57.1275` -- exactly the missing 1px `minDim`
+ * this task diagnoses (`decision-journal.md` rows 215-219).
+ */
+describe('edge-label margin ink (cdd-T35)', () => {
+  // No classifier boxes: isolates the label's own ink (glyph + margin) so
+  // neither term is masked by a dominating box corner. A single edge point
+  // sits INSIDE the label's own glyph span (`[20, 40] x [8.5, 21.5]`) so it
+  // never competes for min/max either.
+  const edgeWithLabel = (label: EdgeGeo['label'], overrides?: Partial<EdgeGeo>): EdgeGeo[] => [
+    {
+      id: 'e0',
+      points: [{ x: 20, y: 20 }],
+      targetDecor: 'none',
+      sourceDecor: 'none',
+      dashed: false,
+      from: 'A',
+      to: 'B',
+      ...(label === undefined ? {} : { label }),
+      ...overrides,
+    },
+  ];
+
+  it('widens the canvas by marginLabel (1px) on each side of the glyph-only rule', () => {
+    // glyph x:[20,40]; margin adds [19,41] -- both narrower AND wider than
+    // the glyph on this axis, so both margin points move the box.
+    // raw width = (41-19) + 15 (INK_DELTA) = 37; margined = 42; final = 43.
+    const dims = computeClassDocumentDims([], [], edgeWithLabel({ text: 'x', x: 20, y: 20, width: 20 }), []);
+    expect(dims.width).toBe(43);
+  });
+
+  it('uses a 6px margin (not 1px) for a self-loop (from === to)', () => {
+    const label: EdgeGeo['label'] = { text: 'x', x: 20, y: 20, width: 20 };
+    const normal = computeClassDocumentDims([], [], edgeWithLabel(label), []);
+    const selfLoop = computeClassDocumentDims([], [], edgeWithLabel(label, { from: 'A', to: 'A' }), []);
+    // 6px margin vs 1px margin on EACH side -- 2*(6-1) = 10px wider.
+    expect(selfLoop.width - normal.width).toBe(10);
+  });
+
+  it('does not apply to tailLabel/headLabel -- only addVisibilityModifier`s caller wraps the main label', () => {
+    const withMainLabel = computeClassDocumentDims([], [], edgeWithLabel({ text: 'x', x: 20, y: 20, width: 20 }), []);
+    const withTailLabel = computeClassDocumentDims(
+      [],
+      [],
+      edgeWithLabel(undefined, { tailLabel: { text: 'x', x: 20, y: 20, width: 20 } }),
+      [],
+    );
+    // Same glyph geometry (tailLabel reuses `addEdgeTextInk`'s own rule),
+    // but tailLabel never gets the marginLabel term -- 2px narrower.
+    expect(withMainLabel.width - withTailLabel.width).toBe(2);
+  });
+
+  it('skips the margin when a note is merged into the label (already baked into label.width)', () => {
+    const label: EdgeGeo['label'] = { text: 'x', x: 20, y: 20, width: 20 };
+    const plain = computeClassDocumentDims([], [], edgeWithLabel(label), []);
+    const noteMerged = computeClassDocumentDims(
+      [],
+      [],
+      edgeWithLabel(label, {
+        noteBox: { x: 0, y: 0, width: 1, height: 1, inkBox: { x: 0, y: 0, width: 1, height: 1 }, noteLines: [] },
+      }),
+      [],
+    );
+    expect(noteMerged.width).toBe(plain.width - 2);
+  });
+
+  it('only ever widens X -- the height is unaffected by marginLabel (1px vs 6px self-loop)', () => {
+    const label: EdgeGeo['label'] = { text: 'x', x: 20, y: 20, width: 20 };
+    const normal = computeClassDocumentDims([], [], edgeWithLabel(label), []);
+    const selfLoop = computeClassDocumentDims([], [], edgeWithLabel(label, { from: 'A', to: 'A' }), []);
+    expect(selfLoop.height).toBe(normal.height);
+  });
+
+  it('is a no-op when there is no main label at all', () => {
+    // Points-only ink: minX=maxX=minY=maxY=20 -> raw 15, margined 20, final 21.
+    const withoutLabel = computeClassDocumentDims([], [], edgeWithLabel(undefined), []);
+    expect(withoutLabel).toEqual({ width: 21, height: 21 });
   });
 });
