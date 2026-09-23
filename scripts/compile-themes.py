@@ -344,7 +344,8 @@ def normalize_color(val: str | None) -> str | None:
 
 def parse_theme(fname: str) -> dict[str, str | None]:
     """Parse a .puml theme file and return {bg, fg, lc, fn}."""
-    content = open(fname).read()
+    with open(fname) as f:
+        content = f.read()
     content = strip_front_matter(content)
     vars = extract_vars(content)
     root = extract_root_style(content, vars)

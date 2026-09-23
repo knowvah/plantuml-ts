@@ -225,7 +225,7 @@ export interface Theme {
    *  >= N triangle-decor links gets `EntityImageProtected(border=20)`
    *  (`DotData.java:136-151`; `getAsInt("groupInheritance", ...)`). A2s
    *  A10/B3; consumed by
-   *  `class-dot-graph.ts#computeGroupInheritanceProtectedIds` (values <= 1
+   *  `class-dot-graph.ts#computeGroupInheritance` (values <= 1
    *  are treated as unset there). */
   groupInheritance?: number;
   /** `skinparam tabSize N` -- `SkinParam#getTabSize()` (default 8, no style
