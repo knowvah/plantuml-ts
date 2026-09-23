@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1181 modules · 4373 exported names.
+1182 modules · 4385 exported names.
 
 ## `src/`
 
@@ -349,7 +349,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractCommonUGraphic.ts` | `ShapeConstructor`, `UDriver`, `AbstractCommonUGraphic` |  |
 | `Back.ts` | `Back` |  |
 | `CopyForegroundColorToBackgroundColor.ts` | `CopyForegroundColorToBackgroundColor` |  |
-| `document-shell.ts` | `DQUOTE`, `VERSION_PLACEHOLDER`, `DIAGRAM_TYPE_ATTR`, `ShellFragment`, `assembleDocumentShell`, `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `RenderDrawableToFragmentOptions`, `DrawableFragment`, `renderDrawableToFragment`, `mergeFragmentDefs` | document-shell.ts — shared klimt-document-shell assembly/disassembly helpers. |
+| `document-shell-fragment.ts` | `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `RenderDrawableToFragmentOptions`, `DrawableFragment`, `renderDrawableToFragment`, `mergeFragmentDefs` | document-shell-fragment.ts — the disassembly half of `document-shell.ts` (SVG-fragment extraction and per-drawable klimt emission), split out (CDD T32) purely to keep `document-shell.ts` under the 500-line hook cap after widening `assembleD |
+| `document-shell.ts` | `DQUOTE`, `VERSION_PLACEHOLDER`, `DIAGRAM_TYPE_ATTR`, `ShellFragment`, `CONTENT_G_OPEN_RE`, `CONTENT_G_CLOSE`, `EMPTY_CONTENT_G_RE`, `assembleDocumentShell`, `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `renderDrawableToFragment`, `mergeFragmentDefs`, `RenderDrawableToFragmentOptions`, `DrawableFragment` | document-shell.ts — shared klimt-document-shell assembly/disassembly helpers. |
 | `Fore.ts` | `Fore` |  |
 | `LineBreakStrategy.ts` | `LineBreakStrategy` | LineBreakStrategy — wraps the raw `wrapWidth`/`maxMessageSize` skinparam string value (`"auto"`, a signed-integer pixel width, or unset/`null` meaning "no wrapping") and exposes it as `isAuto()`/`getMaxWidth()`. |
 | `UBackground.ts` | `UBackground` |  |

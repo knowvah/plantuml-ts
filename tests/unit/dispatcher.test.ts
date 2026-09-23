@@ -15,7 +15,8 @@ import { DiagramRegistry, type SyncPlugin, type AsyncPlugin, type DiagramPlugin 
 import type { UmlSource } from '../../src/core/block-extractor.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import { FormulaMeasurer } from '../../src/core/measurer.js';
-import { assembleSvg } from '../../src/index.js';
+import { assembleSvg, renderSync } from '../../src/index.js';
+import { MapIncludeStore } from '../../src/core/include-resolver.js';
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -281,5 +282,47 @@ describe('renderSync() with AsyncPlugin — error SVG, no throw', () => {
   it('AsyncPlugin has no layoutSync — isSyncPlugin is false', () => {
     const plugin: DiagramPlugin = makeAsyncPlugin();
     expect('layoutSync' in plugin).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CDD T32 diagnosis regression — a `!include <bundle/…>` + class-only
+// source, once the include resolves, dispatches to CLASS and never falls
+// through to sequence.
+//
+// A6 §5a's leading hypothesis (`DiagramRegistry.resolve` picking sequence
+// over class for this shape) is DISPROVED by this test: with a resolvable
+// `includeStore`, production `renderSync` reaches CLASS directly. The
+// symptom the diagnosis report read as "misdispatch" (sequence arrow-marker
+// `<defs>`, no drawn `Foo`) is `renderSync`'s own documented `!include`
+// guard (`src/index.ts` — "renderSync cannot fetch") throwing for lack of
+// an `includeStore`, routed to the shared error page — a §5b defect (the
+// error page's root builder), not a dispatch bug. See
+// `.agent-notes/cdd-T32.md` and `decision-journal.md` rows 193-197 for the
+// full artifact.
+// ---------------------------------------------------------------------------
+
+describe('DiagramRegistry (production) — !include <bundle> + class content', () => {
+  it('dispatches to CLASS once the include resolves, never sequence', () => {
+    const includeStore = new MapIncludeStore({ '<tupadr3/font-awesome/star>': '' });
+    const source = '@startuml\n!include <tupadr3/font-awesome/star>\nclass Foo {}\n@enduml';
+    const svg = renderSync(source, { includeStore });
+
+    expect(svg).toContain('data-diagram-type="CLASS"');
+    expect(svg).toContain('Foo');
+    expect(svg).not.toContain('arrow-sync');
+  });
+
+  it('without an includeStore this same source is a §5b error page, not a sequence render', () => {
+    const source = '@startuml\n!include <tupadr3/font-awesome/star>\nclass Foo {}\n@enduml';
+    const svg = renderSync(source);
+
+    // The shared error page (fixed by this task): no root diagram type, the
+    // 12-marker `ALL_ARROW_TYPES` soup no longer appears because the error
+    // page draws no arrowheads and its `<defs>` reflects only what it
+    // actually references.
+    expect(svg).not.toContain('data-diagram-type');
+    expect(svg).not.toContain('arrow-sync');
+    expect(svg).toContain('tupadr3/font-awesome/star');
   });
 });

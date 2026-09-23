@@ -7,8 +7,18 @@
  * `TextBlockUtils.mergeTB` / `withMargin` / `addBackcolor` and hands the result
  * to a `UGraphic`; this port has no `TextBlockRaw` and klimt's `TextBlockUtils`
  * here still stubs `addBackcolor`, so the same composition is expressed
- * directly against the house SVG emitter (`src/core/svg.ts` — `rect`, `text`,
- * `svgRoot`), which is how every diagram renderer in `src/diagrams/*` emits.
+ * directly against the house SVG emitter (`src/core/svg.ts` — `rect`, `text`).
+ * The document ROOT, though, goes through `core/klimt/document-shell.ts
+ * #assembleDocumentShell` (CDD T32) — the SAME shared root-attribute/prolog/
+ * defs shell every other diagram type reassembles through (`core/assemble-
+ * svg.ts:505`), not the generic `core/svg.ts#svgRoot` this file used to call
+ * directly. `svgRoot` unconditionally maps `ALL_ARROW_TYPES` into `<defs>`
+ * and omits `xmlns:xlink`/`version`/`zoomAndPan`/`preserveAspectRatio`/
+ * `contentStyleType` — a parallel, incomplete root builder this page never
+ * needed (it draws no arrowheads at all). `assembleDocumentShell` is called
+ * with `diagramType: undefined`: the jar's own error/Welcome/Unsupported
+ * pages carry no `data-diagram-type` root attribute (verified against every
+ * cached error-page golden), unlike a real diagram's root.
  * Fonts, colors, decorations, block order and line content are upstream's;
  * only the seam differs.
  *
@@ -25,7 +35,9 @@
  */
 
 import type { FontSpec, StringMeasurer } from '../measurer.js';
-import { rect, svgRoot, text } from '../svg.js';
+import { group, rect, text } from '../svg.js';
+import { assembleDocumentShell } from '../klimt/document-shell.js';
+import type { ShellFragment } from '../klimt/document-shell.js';
 import type { PSystemError } from './PSystemError.js';
 import { PSystemWelcome } from './PSystemWelcome.js';
 import type { PSystemUnsupported } from './PSystemUnsupported.js';
@@ -223,12 +235,24 @@ function errorBlock(system: PSystemError): Block {
 
 // --- Drawing ------------------------------------------------------------
 
+/**
+ * G2 N18 (already cited by `svg.ts#TextStyle.fontWeight`'s own doc comment):
+ * the jar's deterministic-text SVG emits font-weight as the raw numeric
+ * `"700"`, never the CSS keyword `"bold"` -- and OMITS both font-weight and
+ * font-style entirely for the normal/non-italic case, rather than spelling
+ * out `"normal"` (jar-verified against every cached error/Welcome-page
+ * golden, e.g. `gantt/papava-92-geve698/in.svg`'s Welcome screen: `<text
+ * ... font-size="12"> </text>` carries neither attribute). Every `FontSpec`
+ * this module builds sets `weight`/`style` explicitly (never `undefined`),
+ * so the omission has to happen HERE, at emission, not by relying on
+ * `text()`'s own defaults.
+ */
 function drawRun(run: Run, x: number, baseline: number): string {
   return text(x, baseline, run.content, {
     fontFamily: run.font.family,
     fontSize: run.font.size,
-    fontWeight: run.font.weight ?? 'normal',
-    fontStyle: run.font.style ?? 'normal',
+    ...(run.font.weight === 'bold' ? { fontWeight: '700' as const } : {}),
+    ...(run.font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
     fill: run.fill,
     ...(run.decoration === undefined ? {} : { textDecoration: run.decoration }),
   });
@@ -251,7 +275,10 @@ function drawLine(
         top - BAND_PAD_TOP,
         lineWidth(line, measurer) + 2 * BAND_PAD_X,
         advance + BAND_PAD_TOP + BAND_PAD_BOTTOM,
-        { fill: line.band, stroke: line.band },
+        // `stroke-width="1"` matches the jar's own `[From ... ]` band rect
+        // exactly (`style="stroke:#33FF02;stroke-width:1;"` on every cached
+        // error-page golden) -- previously omitted entirely.
+        { fill: line.band, stroke: line.band, strokeWidth: 1 },
       ),
     );
 
@@ -271,14 +298,10 @@ function blockHeight(block: Block): number {
   return 2 * ERROR_PAGE_MARGIN + block.lines.reduce((h, l) => h + lineAdvance(l), 0);
 }
 
-/** Draw one block's background band and its lines, at `top`, `width` wide. */
-function drawBlock(block: Block, top: number, width: number, measurer: StringMeasurer): string[] {
-  const svg: string[] = [
-    rect(0, top, width, blockHeight(block), {
-      fill: block.background,
-      stroke: block.background,
-    }),
-  ];
+/** Draw one block's lines only, at `top` -- no background rect (see
+ *  {@link drawBlocks} for where and why one gets drawn). */
+function drawBlockLines(block: Block, top: number, measurer: StringMeasurer): string[] {
+  const svg: string[] = [];
   let y = top + ERROR_PAGE_MARGIN;
   for (const line of block.lines) {
     const drawn = drawLine(line, y, measurer);
@@ -288,7 +311,23 @@ function drawBlock(block: Block, top: number, width: number, measurer: StringMea
   return svg;
 }
 
-/** Stack the blocks top to bottom, left-aligned, each as wide as the widest. */
+/**
+ * Stack the blocks top to bottom, left-aligned, each as wide as the widest,
+ * and wrap the result in the shared klimt document shell (`document-shell
+ * .ts#assembleDocumentShell`) rather than the generic `core/svg.ts#svgRoot`
+ * this used to call -- see this file's own header comment.
+ *
+ * A SINGLE block's own background becomes the document's canvas background,
+ * folded into the root `style` with NO separate rect -- jar-verified: a
+ * lone `PSystemError`/`PSystemWelcome`/`PSystemUnsupported` page (no second
+ * block stacked on it) draws zero background rects at all
+ * (`test-results/dot-cache/class/sadamo-18-siva346/in.svg`'s root carries
+ * `style="...background:#000000;"` and its `<g>` opens directly on the
+ * version-banner `<text>`). With >1 block (a Welcome screen stacked over an
+ * error page), each block still draws its own explicit background rect --
+ * pre-existing behavior this task does not touch -- and the canvas itself
+ * keeps the historical WHITE default.
+ */
 function drawBlocks(blocks: readonly Block[], measurer: StringMeasurer): string {
   const width = Math.max(...blocks.map((b) => blockWidth(b, measurer)));
   const height = blocks.reduce((h, b) => h + blockHeight(b), 0);
@@ -296,10 +335,19 @@ function drawBlocks(blocks: readonly Block[], measurer: StringMeasurer): string 
   const children: string[] = [];
   let top = 0;
   for (const block of blocks) {
-    children.push(...drawBlock(block, top, width, measurer));
+    if (blocks.length > 1) {
+      children.push(rect(0, top, width, blockHeight(block), { fill: block.background, stroke: block.background }));
+    }
+    children.push(...drawBlockLines(block, top, measurer));
     top += blockHeight(block);
   }
-  return svgRoot(width, height, children, WHITE);
+  const fragment: ShellFragment = {
+    body: group(children.join('')),
+    width,
+    height,
+    background: blocks.length === 1 ? blocks[0]!.background : WHITE,
+  };
+  return assembleDocumentShell(fragment, undefined);
 }
 
 // --- Public API ---------------------------------------------------------
