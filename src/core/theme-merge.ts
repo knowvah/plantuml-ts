@@ -40,6 +40,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'rankSep',
   'wrapWidth',
   'dpi',
+  'topurl', // cdd-T34
   'maxMessageSize',
   'sameClassWidth',
   'classAttributeIconSize',

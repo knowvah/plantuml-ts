@@ -165,6 +165,7 @@ export interface Theme {
    *  every consumer's own call site — never a second scale-resolution path.
    *  Absent = 96 (no-op multiplier), matching upstream's own default. */
   dpi?: number;
+  topurl?: string; // cdd-T34: `skinparam topurl <url>` -- `UrlBuilder#withTopUrl` (java:140-146) prefix.
   /** `skinparam nodesep N` (px) — when set (nonzero), unconditionally
    *  replaces the clamped default DOT nodesep (SkinParam.java:847-851
    *  getAsInt("nodesep",0); DotStringFactory.java:117-124). Absent = engine
@@ -411,6 +412,7 @@ export type ThemeOverride = {
   wrapWidth?: number;
   /** See {@link Theme.dpi}'s own doc comment. */
   dpi?: number;
+  topurl?: string; // See {@link Theme.topurl}'s own doc comment.
   /** See {@link Theme.maxMessageSize}'s own doc comment. */
   maxMessageSize?: number;
   sameClassWidth?: boolean;

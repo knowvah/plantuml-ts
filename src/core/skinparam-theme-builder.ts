@@ -50,6 +50,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['rankSep', (acc) => acc.rankSep],
   ['wrapWidth', (acc) => acc.wrapWidth],
   ['dpi', (acc) => acc.dpi],
+  ['topurl', (acc) => acc.topurl],
   ['maxMessageSize', (acc) => resolveMaxMessageSize(acc)],
   ['sameClassWidth', (acc) => acc.sameClassWidth],
   ['classAttributeIconSize', (acc) => acc.classAttributeIconSize],

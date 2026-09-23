@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1187 modules · 4416 exported names.
+1187 modules · 4418 exported names.
 
 ## `src/`
 
@@ -1234,7 +1234,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-stereotype-layout.ts` | `atomTextLineHeight`, `HeaderInfo`, `computeHeaderInfo`, `buildHeaderRows`, `GenericTagDim`, `measureGenericTagDim`, `GenericTagGeo`, `buildGenericTagGeo` | Class header-row + generic type-parameter-tag layout. |
 | `class-stereotype.ts` | `CLASS_STEREOTYPE_FONT_SIZE`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `parseCircledCharDecoration`, `parseCircledSpriteDecoration`, `GuillemetPair`, `CircledCharDecoration`, `CircledSpriteDecoration`, `measureStereoLabelWidths`, `stereoBlockDim`, `StereoRowsInput`, `buildStereoRows`, `computeHeaderInfo`, `buildHeaderRows`, `measureGenericTagDim`, `buildGenericTagGeo`, `HeaderInfo`, `GenericTagDim`, `GenericTagGeo`, `parseHideStereotypeDirective`, `isStereotypeLabelHidden`, `applyStereotypeHideShow`, `resolveVisibleStereotypeLabels`, `resolveStyleStereotypeTags` | Classifier header stereotype row(s) — `HeaderLayout#getDimension`/`#drawU`'s `stereoDim`/`xStereo`/`yStereo` terms (G2 N24; the mechanism N21/N22/N23 repeatedly named and deferred as an explicit DOT-gate/width-formula risk — N23's own Mecha |
 | `class-url-command.ts` | `URL_STATEMENT_RE`, `applyUrlStatement` | The standalone `url [of\|for] <Code> [is] [[url]]` statement — attaches a url to an already-declared classifier (`classdiagram/command/ CommandUrl.java`). |
-| `class-url.ts` | `UrlInfo`, `parseUrlBracket`, `URL_BRACKET_RE` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
+| `class-url.ts` | `UrlInfo`, `applyTopUrl`, `parseUrlBracket`, `URL_BRACKET_RE`, `applyTopUrlToClassifiers` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
 | `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY` | Member-row visibility icon shape/color (G2 N6). |
 | `index.ts` | `classPlugin` | Class diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout-ink-extent.ts` | `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
