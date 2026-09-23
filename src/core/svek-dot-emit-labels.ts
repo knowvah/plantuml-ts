@@ -14,7 +14,16 @@
 
 import type { DotInputNode, DotInputPortRow } from './graph-layout.types.js';
 
-export const hex = (n: number): string => '#' + (n & 0xffffff).toString(16).padStart(6, '0');
+// cdd-T36/T37 (re-homed, `decision-journal.md` rows 220-224/231): jar's
+// `XColor#toHexRGBColor` (`klimt/awt/XColor.java:127-129`) is
+// `String.format("#%06X", rgb & 0xFFFFFF)` -- UPPERCASE hex. This port's
+// `.toString(16)` is lowercase by construction; `.toUpperCase()` matches
+// jar byte-for-byte. Geometrically inert (DOT parses colour
+// case-insensitively, confirmed via `dot-sync-report.ts` before/after --
+// every affected fixture stays `dotEqual: true`), but every DOT-emitting
+// engine reads this shared helper, so a survey sweep across engines is
+// the correctness bar here, not just class's own gate.
+export const hex = (n: number): string => '#' + (n & 0xffffff).toString(16).padStart(6, '0').toUpperCase();
 export const round = (v: number): string => String(Math.round(v));
 
 /**

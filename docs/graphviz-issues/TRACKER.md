@@ -339,6 +339,23 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         attributes. `focaci-80-suzu938` stays `structural-match` (0
         structural / ~92 numeric, all one cascading ~2.4px delta). Not
         chased (stop 8); no compensation applied. -->
+- [ ] 21-same-rank-node-order-mirrored.md  <!-- FILED 2026-09-23 (cdd-T37,
+        M8 boseba/majuva). Byte-identical DOT (`dot-sync-report.ts`
+        structurallyEqual=true) for both `boseba-99-zopo693` and
+        `majuva-44-luta965`; feeding the SAME cached DOT to a real
+        graphviz 16.1.0 binary reproduces the jar's own node order
+        exactly (bbox within ~1px of the jar's final canvas for both).
+        dot-engine's `getLayout()` returns the EXACT MIRROR of that
+        order for one same-rank triple (`boseba`'s `UserPerso`/
+        `UserPro`/`UserSpace`, all three children of `User`) -- node
+        sizes match, only left-right order flips. Cascades into a wider
+        canvas (40px / 91px) and a visibly rerouted edge for the
+        reordered nodes' own edges -- confirmed downstream, not an
+        independent edge-routing bug (T37's own `render-diff`: the one
+        structural diff is exactly the rerouted path, every numeric diff
+        explained by the uniform shift). Not chased into dot-engine's own
+        mincross/ordering source (stop 8, one diagnosis pass); no
+        plantuml-ts change warranted -- the DOT input is already correct. -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the
