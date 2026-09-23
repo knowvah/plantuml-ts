@@ -366,3 +366,186 @@ gate log below. No non-class golden/ratchet/census file changed; the
 touched files (`blocks-creole.ts`, `src/index.ts`, `EmbeddedDiagram.ts`
 untouched) are shared by state/sequence/description chrome, so this was
 specifically checked, not assumed.
+
+## Round 2 follow-up (coordinator direction, journal row 160 in main tree)
+
+Two corrections requested before merge: (1) invert the chrome
+nested-diagram-renderer dependency so `blocks-creole.ts` (core) never
+imports `diagrams/class/*`; (2) the five STOP-1 items above (items 4(a)/
+4(b) minus the badge sub-item's own numbering, item 5, and the
+canvas-ink-extent gap) become owned work, files unowned this round. Rows
+161-166 below are this round's fixes; commits `348885c5`..`526322a5` on
+`cdd/b7fu2`.
+
+### Row 161 — design correction: chrome nested-renderer slot moved to core
+
+**Fixed** (commit `b83cb28e6`). `blocks-creole.ts`'s `getChromeNested
+DiagramRenderer` import from `diagrams/class/class-nested-diagram-
+renderer.ts` was exactly the `core -> diagrams` edge `tests/architecture/
+layering.test.ts` Rule 1 forbids (D9); it had been papered over with an
+`ALLOWLIST` entry rather than fixed. New `src/core/nested-diagram-
+registry.ts` (`registerNestedDiagramRenderer`/`getNestedDiagramRenderer`,
+a plain get/set pair over the `NestedDiagramRenderer` interface
+`EmbeddedDiagram.ts` already declares, no render logic). `class-nested-
+diagram-renderer.ts#registerNestedDiagramRenderers` now populates BOTH
+the pre-existing class-body slot and this new core slot (diagrams -> core,
+the normal direction — matches the class-body registration's own
+precedent); `blocks-creole.ts` only ever reads the core slot.
+`ALLOWLIST` entry removed; `layering.test.ts` green with zero exceptions
+for this edge. Same runtime behaviour, dependency direction inverted —
+no fixture movement (confirmed: full survey before/after this single
+commit, 0 transitions).
+
+### Row 162 — item (a): juxora-90-fisu720 enhanced-body port election
+
+**Fixed** (commit `348885c5`). `buildEnhancedBodyResult`
+(`class-layout-generic-classifier.ts`) never published a port-election
+input for an enhanced (separator/tree/embed) body, so `FlatBar`'s edge
+attached to the wrong row (`MethodsOrFieldsArea#getPorts`, java:194-211,
+elects one port per member — the classic path in `class-port-rows.ts`
+already mirrors that election faithfully). New `class-body-enhanced-
+ports.ts` builds each rows-block's own port-election input during
+layout (`buildPortMembers`/`translatePortMembers`) and reuses the
+classic path's `getElected`/`sortBySize` prototype-only trick locally
+(duplicated, not exported, to avoid a circular import: `class-port-
+rows.ts` also imports `enhancedBodyPortRows` FROM this new file). An
+enhanced body's port rows are already ABSOLUTE (its margin/divider
+geometry comes from `ClassifierBodyGeometry.deriveHeightOffsets`, not
+the classic path's flat `SECTION_MARGIN` compartment stacking), so
+`class-port-rows.ts#enhancedBodyPortRows` skips `classPortRows`'s
+position-derivation entirely. Also carries a precautionary bottom-anchor
+consistency gate for the enhanced-body path's own sprite rows (same
+mechanism as row 164 below, extended here since it's on the same lines);
+regression tests added, no current fixture combines an enhanced body with
+sup/sub. **Readings**: juxora-90-fisu720 0 structural + 16 numeric ->
+**0+0 conformant**. DOT parity 711/711 unchanged.
+
+### Row 163 — item (b): malara-55-moce209 classic-path baseline bottom-anchor
+
+**Fixed** (commit `bda893e8`) — the exact gap this file's own "Bonus
+finding" section (above) named as write-set-blocked last round.
+`class-member-rows.ts#buildSectionRows` had the SAME top-anchored
+baseline bug row 199's item 4(c) fixed for the enhanced-body path;
+`SectionRowContext` gained a `fontSize` field, threaded from
+`class-layout-generic-classifier.ts:380` (`buildNormalClassifierResult`,
+now in this round's write-set), so `buildSectionRows` can compute its own
+`bottomAnchor = fontSize - baselineOffset`. Diagnosed and fixed a
+regression from the first (too-broad) version of this change:
+`build.height` differs from `fontSize` for THREE reasons (sprite/img
+`'image'`-kind atom — genuinely needs the shift; `<sup>`/`<sub>` Sea
+inflation — corrected via the atom's own `dy`, must NOT shift `y`;
+small-font height floor — a stacking floor only, must NOT shift `y`),
+confirmed via direct instrumentation on `exposant-01-class`/`sovuxo-25-
+tepi226`, fixed by gating on `atoms.some(a => a.kind === 'image')`.
+**Readings**: malara-55-moce209 0+2 -> **0+0 conformant**. DOT parity
+711/711 unchanged.
+
+### Row 164 — item (c): rotisi-30-loge424 header sprite name + stereotype badge
+
+**Fixed** (commit `19672c03`), closing BOTH sub-items row 227/245 above
+left at STOP 1. (c-a) The class NAME `<$bug16>` sprite atom already
+resolved via the shared member-row atom resolver, but its `atomsToPlain
+Text` projection (`class-member-display.ts`, filters to `kind==='text'`
+only) is `''`, which `class-stereotype-layout.ts`'s `isBlank` check
+treated as a genuinely blank line, dropping the resolved sprite atom.
+Two-step fix, each regression caught by measurement before landing:
+widened `renderer-classifier-box.ts`'s header-row draw guard (`row.text
+=== ''` was skipping the row once its plain-text projection was
+legitimately empty), then corrected `isBlank` to gate on an actual
+non-text atom's presence rather than `lineAtoms?.[i] !== undefined` —
+that second criterion is ALSO true for a genuinely blank line, because
+`buildHeaderLine`'s `hasMarkup` check is false both for real markup AND
+for a zero-atom resolution (caught by julixi-10-jide878's own
+pre-existing blank-trailing-line NBSP test, which the FIRST attempt at
+this fix broke). The item-4(c) bottom-anchor formula also had to reach
+header NAME rows (new `headerLineY` helper, `headerLineHeights` threaded
+from `buildHeaderLineMetrics`). (c-b) The `<<($bug16,red)>>` stereotype
+decoration now resolves through the SAME monochrome/4096-colour sprite
+registry `<$sprite>` creole atoms use (`class-layout-header-creole.ts
+#resolveBadgeSpriteImage`), scaled by the stereotype's OWN declared
+scale (not the font-relative factor creole atoms use); new
+`MeasuredClassifier.badgeSpriteImage`/`ClassifierGeo.badgeSpriteImage`,
+new `renderBadgeSpriteImage` draws the `<image>` in place of the default
+circled badge, position jar-verified against rotisi's cached SVG.
+**Readings**: rotisi-30-loge424 2 structural + 0 numeric ->
+**0 structural + 0 numeric, fully conformant**. DOT parity 711/711
+unchanged; full `tests/unit/class/` suite green throughout.
+
+### Row 165 — item (d): nucite-98-kuga991 / nufini-44-jofo787 header wrap
+
+**Fixed** (commit `dddda552`), closing row 276's STOP 1 exactly per its
+own "fix shape for whoever owns those files" note. The header NAME
+line's word-wrap was a raw-string pre-pass (`splitAndWrapHeaderLines`'s
+retired `wrapPlainTextLine` call) that wrapped BEFORE atoms existed,
+collapsing each wrapped line back to ONE flat text atom — losing the
+per-word/per-space `<text>` decomposition `Fission#getSplitted`
+unconditionally produces once `maxWidth>0` (its own doc comment,
+jar-verified against `usecase/fariba-82-xolu802`: even a NEVER-wrapping
+line still decomposes per-word once a `MaximumWidth` cascade is in
+effect). New `buildWrappedHeaderLine` (`class-layout-header-creole.ts`)
+builds the line's real creole atoms once, then runs `Fission#getSplitted`
+directly over them via the SAME `getSplitted`/`resolveOneAtom` pattern
+`class-member-creole.ts#buildWrappedMemberRows` already uses for
+member-row wrapping (`resolveOneAtom` exported for this reuse).
+`splitAndWrapHeaderLines` (renamed `splitHeaderLines`) now does only the
+upstream-first newline split; `buildHeaderLineMetrics` takes the
+cascade's `maxWidth` (already-existing `headerMaxWidth` option, just not
+threaded this deep before) and flattens each raw line's one-or-more
+wrapped builds. **Readings**: nucite-98-kuga991 10+7 -> **0+0
+conformant**; nufini-44-jofo787 8+5 -> **0+0 conformant**. Full corpus
+re-survey (723 fixtures) against the post-(a-c) baseline: exactly these
+2 transitions, 0 regressions elsewhere. DOT parity 711/711 unchanged.
+
+### Row 166 — item (e): zikabo-17-gugi332 / gadufu-56-votu808 canvas ink extent
+
+**Fixed** (commit `526322a5`), closing row 63's STOP 1. Both fixtures
+are single-classifier `degenerateSingleClassifier` diagrams (`layout.ts`'s
+own "skip graphviz entirely" path) — NOT the DOT-driven `buildInkBox`
+path row 63's diagnosis assumed; confirmed by instrumentation
+(`addClassifierInk` was never even called for either fixture before this
+was noticed, wasting one attempt). `SvgGraphics#svgImageUnsecure`
+(`klimt/drawing/svg/SvgGraphics.java:987-999`) draws the embedded
+`<image>` and calls `ensureVisible` on the REAL drawn dimensions,
+independent of the classifier box's own `(42,42)`-fallback reservation;
+`ensureVisible`'s accumulated `maxX`/`maxY` (`SvgGraphics.java:801-813`)
+is what the root `<svg>`'s `width`/`height`/`viewBox` are set from, not
+any pre-computed layout dimension. New `drawnEnhancedBodyEmbeds`
+(`class-ink-box.ts`) collects every drawn embed's absolute position once,
+shared by a new DOT-path ink rule (`addEnhancedBodyEmbedInk`/
+`addEmbedImageInk` in `class-ink-shapes.ts`, additive, unverified against
+any CURRENT fixture but the same cited mechanism — no fixture in this
+corpus combines a DOT-laid-out multi-classifier diagram with an
+overflowing embed) and `degenerateSingleClassifier`'s own new
+canvas-overflow check (`class-geo-builders.ts`), which takes
+`Math.max(boxDrivenTotal, Math.floor(embedCorner) + 1)` per axis — the
+embed's real corner compared directly against the FINAL
+CucaDiagram-margined total, not folded through `applyClassDocumentMargin`
+a second time. `rawWidth`/`rawHeight` (chrome-centering inputs) left
+untouched — no fixture combines a title/chrome with an overflowing
+embed. **Readings**: zikabo-17-gugi332 0+4 -> **0+0 conformant**;
+gadufu-56-votu808 maxDelta 49 -> 12 (verdict stays structural-match; the
+residual is EXACTLY row 315/319's already-documented, out-of-scope
+activity-engine Cyrillic-text measurement gap — a different engine, not
+this mechanism, confirmed by both fixtures' box `<rect>` staying
+byte-identical to jar's before AND after this fix). DOT parity 711/711
+unchanged. Full corpus re-survey: exactly 1 transition (zikabo
+structural-match -> conformant), 0 regressions, 0 base losses.
+
+### Row 167 — round close: gate summary
+
+Six commits (`b83cb28e6` design correction, `348885c5`/`bda893e8`/
+`19672c03`/`dddda552`/`526322a5` items a-e). Each committed only after,
+in order: `tsc --noEmit` clean, `tests/unit/class/` 150/150 files green,
+`dot-sync-report.ts class` 711/711 (unchanged throughout), and (for
+items a-e) a full 723-fixture `svg:survey`+`pin-diff` re-check against
+the immediately-prior committed baseline confirming 0 regressions/0
+base-conformant losses before advancing. Final state after all six
+commits: `npm test` 788/789 files (1 skipped by design), 22154/22162
+tests pass; typecheck/lint/build all clean; catalog regenerated at each
+new-export commit. Cumulative full-corpus movement across the whole
+round (post-round-1-end commit `b83cb28e6~1`'s own committed
+`parity-class.json` -> post-round-2, freshly re-surveyed): **20 verdict
+transitions**, every one an improvement (`diverged -> conformant`/
+`structural-match`, or `structural-match -> conformant`), 0 losses, 0
+unexplained movers in any non-class engine (measured directly via
+`pin-diff.mts`, not estimated from the per-item deltas above).
