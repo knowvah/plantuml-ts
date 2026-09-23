@@ -607,3 +607,57 @@ describe('gradient defs are hoisted and deduped', () => {
     expect(afterDefs).not.toContain('<linearGradient');
   });
 });
+
+/**
+ * cdd-B7FU-R4 — the optional `seed` parameter. `assembleSvg` is D2's single
+ * central assembly point AND the only one that also sees the `completeSvg`
+ * escape hatch, which is why the seeded-id rename lives here rather than in
+ * `svgRoot`/`assembleDocumentShell` (`svg-defs.ts#applySeededDefIds` carries
+ * the upstream citations).
+ */
+describe('assembleSvg — seeded def ids', () => {
+  const seededGradient = { color1: '#FF0000', color2: '#0000FF', policy: '|' } as const;
+
+  it('renames gradient ids to the jar scheme when a seed is supplied', () => {
+    const svg = assembleSvg(
+      { body: rect(0, 0, 10, 10, { fill: seededGradient }), width: 100, height: 20, background: '#FFFFFF' },
+      255n,
+    );
+    // `getSeed(255) = Long.toString(255, 36)` = "73" (SvgGraphics.java:285-287).
+    expect(svg).toContain('<linearGradient id="g730"');
+    expect(svg).toContain('fill="url(#g730)"');
+  });
+
+  it('is opt-in — with no seed the document is byte-identical to before', () => {
+    const fragment = {
+      body: rect(0, 0, 10, 10, { fill: seededGradient }),
+      width: 100,
+      height: 20,
+      background: '#FFFFFF',
+    };
+    expect(assembleSvg(fragment)).not.toContain('id="g730"');
+    expect(assembleSvg(fragment)).toContain('<linearGradient');
+  });
+
+  it('reaches the document-shell branch too (class/state/json engines)', () => {
+    const svg = assembleSvg(
+      {
+        body: rect(0, 0, 10, 10, { fill: seededGradient }),
+        width: 60,
+        height: 40,
+        background: '#FFFFFF',
+        diagramType: 'CLASS',
+      },
+      255n,
+    );
+    expect(svg).toContain('<linearGradient id="g730"');
+    expect(svg).toContain('fill="url(#g730)"');
+  });
+
+  it('reaches the completeSvg escape hatch (description), and is a no-op on already-seeded ids', () => {
+    const already =
+      '<svg><defs><linearGradient id="g730"><stop offset="0%"/></linearGradient></defs>' +
+      '<rect fill="url(#g730)"/></svg>';
+    expect(assembleSvg({ completeSvg: already }, 255n)).toBe(already);
+  });
+});

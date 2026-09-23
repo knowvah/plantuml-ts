@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1166 modules · 4317 exported names.
+1166 modules · 4321 exported names.
 
 ## `src/`
 
@@ -22,7 +22,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `arrow-label-font.ts` | `ARROW_LABEL_DEFAULT_COLOR`, `ArrowLabelFont`, `resolveArrowLabelFont`, `resolveCardinalityFontColor` | D3: the arrow-label font resolver -- `GraphvizImageBuilder.java:234-235` (`getDefaultStyleDefinitionArrow(stereotype).getMergedStyle(...) .getFontConfiguration(...)`), upstream's `labelFont` argument to `SvekEdge`'s constructor. |
-| `assemble-svg.ts` | `assembleSvg` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |
+| `assemble-svg.ts` | `assembleSvg`, `seedOfUmlSource` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |
 | `asset-store.ts` | `AssetPayload`, `AssetStore`, `combineAssetStores` | ADR-2's asset store seam (`plans/s1l-tail-fix/decisions.md`) — the synchronous, pre-fillable channel for vendored binary/text asset payloads (the jar-internal `/sprites/**` bundle, F4-a; Twemoji artwork, F4-b). |
 | `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `upstreamTypeOf`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
 | `BlockUmlBuilder.ts` | `RawBlock`, `BlockUmlOk`, `BlockUmlErr`, `BlockUml`, `buildBlockUmls`, `rawBlocksOf`, `buildBlockUml`, `isBlockEmpty` | `BlockUmlBuilder` -- the document -> blocks stage, and the reason it runs BEFORE the preprocessor. |
@@ -113,7 +113,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-order.ts` | `firstEncounterOrder` | The order Svek's DOT text declares nodes in — the single definition of "which node does graphviz's parser meet first", shared by the two consumers of one `DotInputGraph`. |
 | `svek-dot-sequence.ts` | `Seq`, `NodeRec`, `ClusterColors`, `EdgeColors`, `ClusterTree`, `buildClusterTree`, `SeqAssignment`, `assignSequence` |  |
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
-| `svg-defs.ts` | `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
+| `svg-defs.ts` | `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `mapOutsideInlineDefs`, `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
 | `svg-format.ts` | `DEFAULT_SVG_DECIMALS`, `trimZeros`, `formatDecimal`, `fmt`, `shortenColor`, `formatOpacity`, `formatPercent`, `escapeAttribute`, `escapeText`, `escapeComment` | Shared SVG formatting rules — decimal precision, color shortening, and opacity/percent formatting. |
 | `svg-markers.ts` | `ArrowType`, `ALL_ARROW_TYPES`, `arrowHeadRef`, `arrowHead`, `openArrowHeadDef` | SVG arrow-marker builders — the `<marker>` `<defs>` for every edge arrowhead. |
 | `svg-path-builder.ts` | `moveTo`, `lineTo`, `arcTo`, `splinePathD`, `roundedTopRectD`, `roundedBottomRectD`, `cubicTo` | Shared `<path>` `d`-string segment builder — the plain-string counterpart to `UPath` (`core/klimt/shape/UPath.ts`) for this port's several class-diagram renderers that draw markup as plain strings rather than through a `UGraphic`/`SvgGraphi |
