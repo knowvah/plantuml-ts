@@ -32,6 +32,7 @@ import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import {
   matchElementColorKey,
   matchElementFontSizeKey,
+  matchElementLineThicknessKey,
   matchElementShadowingKey,
   matchStereotypeSpotColorKey,
   parseShadowingValue,
@@ -100,6 +101,21 @@ function tryElementShadowingBucket(acc: SkinparamAccumulator, key: string, value
 }
 
 /**
+ * cdd-B7FU-R3: `<sname>BorderThickness` -> per-element bucket, numeric.
+ * Mirrors {@link tryElementFontSizeBucket}'s exact shape (a plain finite
+ * double, no boolean-word alias unlike shadowing's `parseShadowingValue`).
+ */
+function tryElementLineThicknessBucket(acc: SkinparamAccumulator, key: string, value: string): boolean {
+  const thicknessElem = matchElementLineThicknessKey(key);
+  if (thicknessElem === undefined) return false;
+  const thickness = Number(value);
+  if (!Number.isFinite(thickness)) return false;
+  const bucket = (acc.elements[thicknessElem.sname] ??= {});
+  bucket.lineThickness = thickness;
+  return true;
+}
+
+/**
  * Fallback for a normalized key that matched no {@link KEY_HANDLER_MAP}
  * entry: tries each generic per-element bucket matcher in turn. Mirrors the
  * original switch `default` arm's exact fallthrough shape — a font-size
@@ -110,6 +126,7 @@ function applyElementBucketFallback(acc: SkinparamAccumulator, key: string, valu
   if (tryElementColorBucket(acc, key, value)) return;
   if (tryElementFontSizeBucket(acc, key, value)) return;
   if (tryElementShadowingBucket(acc, key, value)) return;
+  if (tryElementLineThicknessBucket(acc, key, value)) return;
   acc.unknown.push(key);
 }
 

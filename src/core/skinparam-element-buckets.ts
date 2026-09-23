@@ -247,3 +247,24 @@ export function parseShadowingValue(value: string): number | undefined {
   const n = Number(value);
   return Number.isFinite(n) ? n : undefined;
 }
+
+/**
+ * cdd-B7FU-R3 (`daxeno-00-kasu166`'s `skinparam database { border {
+ * thickness 1 } }`): `<sname>BorderThickness` (`<sname>` a bucket SName --
+ * `ELEMENT_BUCKET_SNAMES`) -> `PName.LineThickness` for that element, the
+ * generic `addMagic` loop's own registration (`FromSkinparamToStyle.java
+ * :274`: `addConvert(cleanName + "BorderThickness", PName.LineThickness,
+ * sname)`), reached here via the NESTED `border { thickness N }` skinparam
+ * block form (`preprocessor.ts#collectSkinparamBlockEntry`'s stack-
+ * concatenation: `database` + `border` + `thickness` -> `databaseborder
+ * thickness`). Mirrors `matchElementShadowingKey`'s identical suffix-match
+ * shape; consumed by `resolveElementLineThickness` (`theme-element-resolve
+ * .ts`), the SAME reader `class/renderer-usymbol-entity.ts#buildUSymbol
+ * EntityParams` already calls for its outer-box stroke.
+ */
+export function matchElementLineThicknessKey(key: string): { sname: string } | undefined {
+  const suffix = 'borderthickness';
+  if (!key.endsWith(suffix)) return undefined;
+  const sname = key.slice(0, key.length - suffix.length);
+  return ELEMENT_BUCKET_SNAMES.has(sname) ? { sname } : undefined;
+}

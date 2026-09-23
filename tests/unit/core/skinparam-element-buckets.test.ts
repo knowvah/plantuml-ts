@@ -25,6 +25,7 @@ import {
   ELEMENT_BUCKET_SNAMES,
   matchElementColorKey,
   matchElementFontSizeKey,
+  matchElementLineThicknessKey,
 } from '../../../src/core/skinparam-element-buckets.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { resolveTheme } from '../../../src/core/theme.js';
@@ -206,5 +207,37 @@ describe('blast radius: no other engine s resolved theme moves (D3)', () => {
       '@startuml\n<style>\nmindmapDiagram {\n  node { FontSize 30 }\n}\n</style>\nclass A\n@enduml',
     );
     expect(resolveElementFontSize(theme, 'node', 'title')).toBeUndefined();
+  });
+});
+
+// cdd-B7FU-R3 (`daxeno-00-kasu166`'s `skinparam database { border {
+// thickness 1 } }`): `<sname>BorderThickness` -> per-element `lineThickness`
+// bucket -- `FromSkinparamToStyle.java:274`'s generic `addMagic` loop entry,
+// reached via the NESTED skinparam-block flattening
+// (`preprocessor.ts#collectSkinparamBlockEntry`'s stack concatenation).
+describe('matchElementLineThicknessKey / <sname>BorderThickness (cdd-B7FU-R3)', () => {
+  it('matches the flattened nested-block key for a bucket SName', () => {
+    expect(matchElementLineThicknessKey('databaseborderthickness')).toEqual({ sname: 'database' });
+    expect(matchElementLineThicknessKey('actorborderthickness')).toEqual({ sname: 'actor' });
+  });
+
+  it('does not match a bare "borderthickness" or a non-bucket sname', () => {
+    expect(matchElementLineThicknessKey('borderthickness')).toBeUndefined();
+    expect(matchElementLineThicknessKey('classborderthickness')).toBeUndefined();
+  });
+
+  it('a nested `skinparam database { border { thickness 1 } }` block resolves to the database bucket', () => {
+    const theme = themeFor('@startuml\nskinparam database {\n  border {\n    thickness 1\n  }\n}\nclass A\n@enduml');
+    expect(resolveElementLineThickness(theme, 'database')).toBe(1);
+  });
+
+  it('a flat `skinparam databaseBorderThickness 2` line resolves the same way', () => {
+    const theme = themeFor('@startuml\nskinparam databaseBorderThickness 2\nclass A\n@enduml');
+    expect(resolveElementLineThickness(theme, 'database')).toBe(2);
+  });
+
+  it('a non-numeric value is treated as unmatched, not a silent zero', () => {
+    const theme = themeFor('@startuml\nskinparam databaseBorderThickness notanumber\nclass A\n@enduml');
+    expect(resolveElementLineThickness(theme, 'database')).toBeUndefined();
   });
 });
