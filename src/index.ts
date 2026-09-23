@@ -34,7 +34,7 @@ import type { PreprocessorResult } from './core/preprocessor.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer } from './core/render-options.js';
 import type { RenderOptions } from './core/render-options.js';
-import { assembleSvg } from './core/assemble-svg.js';
+import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
 import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 
 // A5/T4: `RenderOptions` and `assembleSvg` moved out of this file (which sits
@@ -286,6 +286,10 @@ interface PageContext {
   readonly styleMap: StyleMap;
   readonly preprocessed: PreprocessorResult;
   readonly measurer: StringMeasurer;
+  /** The diagram's `UmlSource#seed()` -- every `<linearGradient>`/`<filter>`
+   *  id in the assembled document is minted from it (`svg-defs.ts
+   *  #applySeededDefIds`, `SvgGraphics.java:160-162`). */
+  readonly seed: bigint;
 }
 
 function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown): string {
@@ -298,7 +302,7 @@ function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown)
     ctx.measurer,
     ctx.plugin.type,
   );
-  return assembleSvg(chromed);
+  return assembleSvg(chromed, ctx.seed);
 }
 
 /**
@@ -369,7 +373,10 @@ function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOp
   // not a fixed default. See `class-nested-diagram-renderer.ts`'s doc
   // comment for why this cannot be a plain import instead.
   registerNestedDiagramRenderers((source) => renderSync(source, options));
-  return { ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, ast };
+  return {
+    ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
+    ast,
+  };
 }
 
 /**

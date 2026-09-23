@@ -13,6 +13,7 @@ import {
   backColorFilterDef,
   backColorFilterId,
   collapseDuplicateFilterDefs,
+  collapseDuplicateGradientDefs,
   collectDocumentDefs,
   extractFilterDefs,
   mapOutsideInlineDefs,
@@ -106,5 +107,54 @@ describe('mapOutsideInlineDefs — the coord-shift guard', () => {
 
   test('a body with no defs is transformed end to end', () => {
     expect(mapOutsideInlineDefs('<rect x="1"/>', (s) => s.toUpperCase())).toBe('<RECT X="1"/>');
+  });
+});
+
+/**
+ * cdd-B7FU-R5 — `collapseDuplicateGradientDefs`: upstream's `gradients` map
+ * hit (`SvgGraphics.java:367-371`, keyed on `Arrays.asList(color1, color2,
+ * policy)`), which this port needs at assembly because it has TWO gradient
+ * emitters that spell the same gradient differently.
+ *
+ * The two spellings below are the real ones, copied off
+ * `popesa-39-sobe866`'s rendered output: klimt's
+ * `SvgGraphicsCore#createSvgGradient` writes `x1 y1 x2 y2 id` with
+ * `stop-color offset` children, `paint.ts#paintToSvg` writes `id x1 y1 x2
+ * y2` with `offset stop-color`.
+ */
+describe('collapseDuplicateGradientDefs — one def per (color1, color2, policy)', () => {
+  const KLIMT =
+    '<linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="gKLIMT">' +
+    '<stop stop-color="#FFF" offset="0%"/><stop stop-color="#6192D1" offset="100%"/></linearGradient>';
+  const PAINT =
+    '<linearGradient id="gPAINT" x1="0%" y1="100%" x2="100%" y2="0%">' +
+    '<stop offset="0%" stop-color="#FFF"/><stop offset="100%" stop-color="#6192D1"/></linearGradient>';
+
+  test('collapses across emitters and re-points the dropped references', () => {
+    const out = collapseDuplicateGradientDefs(KLIMT + PAINT, '<path fill="url(#gKLIMT)"/><rect fill="url(#gPAINT)"/>');
+    expect(out.defs).toBe(KLIMT);
+    expect(out.body).toBe('<path fill="url(#gKLIMT)"/><rect fill="url(#gPAINT)"/>'.replace('gPAINT', 'gKLIMT'));
+  });
+
+  test('keeps the FIRST def, whichever emitter produced it', () => {
+    expect(collapseDuplicateGradientDefs(PAINT + KLIMT, '').defs).toBe(PAINT);
+  });
+
+  test('a different DIRECTION is a different gradient (the policy half of the key)', () => {
+    const vertical = KLIMT.replace('x1="0%" y1="100%" x2="100%" y2="0%"', 'x1="50%" y1="0%" x2="50%" y2="100%"');
+    expect(collapseDuplicateGradientDefs(KLIMT + vertical, '').defs).toBe(KLIMT + vertical);
+  });
+
+  test('a different STOP COLOUR is a different gradient (the colour half)', () => {
+    const other = PAINT.replace('#6192D1', '#00FF00');
+    expect(collapseDuplicateGradientDefs(KLIMT + other, '').defs).toBe(KLIMT + other);
+  });
+
+  test('leaves a lone gradient, and a defs payload with none, untouched', () => {
+    expect(collapseDuplicateGradientDefs(KLIMT, '<g/>')).toEqual({ defs: KLIMT, body: '<g/>' });
+    expect(collapseDuplicateGradientDefs('<marker id="m"/>', '<g/>')).toEqual({
+      defs: '<marker id="m"/>',
+      body: '<g/>',
+    });
   });
 });

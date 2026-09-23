@@ -115,7 +115,54 @@ itself is wrong.
   related approximation, but not this one).
 - **Confidence**: High (hash computed against the oracle).
 
-## The deferred `src/index.ts` hunk — verbatim, four one-line edits
+## Round 5 (2026-09-23) — the hunk is APPLIED, and one more def-dedup
+
+The hunk below is no longer deferred: it is applied in this branch, so
+`renderSync` emits jar-shaped def ids for every engine. Two things changed
+with it.
+
+### The two gradient emitters produced two defs for one gradient
+
+- **Context**: applying the hunk turned the popesa pin red — it had grown a
+  SECOND `<linearGradient>`.
+- **Mechanism**: R3's `2bf4c93a` routed `database` leaves through the
+  USymbol/klimt path, so `popesa-39-sobe866` now draws its class box through
+  `paint.ts#paintToSvg` (`<linearGradient id x1 y1 x2 y2>` with `offset
+  stop-color` stops) AND its `database dummy2` through klimt's
+  `SvgGraphicsCore#createSvgGradient` (`<linearGradient x1 y1 x2 y2 id>`
+  with `stop-color offset` stops). Same gradient, byte-different markup, and
+  `extractInlineDefs` dedups by ID only — so both survived and the seeded
+  rename numbered them 0 and 1. Upstream has ONE: `createSvgGradient` keys
+  `gradients` on `Arrays.asList(color1, color2, policy)` and, on a hit,
+  returns the existing id without creating an element
+  (`SvgGraphics.java:367-371`; the `HColorLinearGradient` overload keys on
+  `buildLinearGradientKey`, java:410, and shares the SAME map, java:393/431).
+- **Fix**: `svg-defs.ts#collapseDuplicateGradientDefs`, running inside
+  `collectDocumentDefs` BEFORE the seeded rename so survivors are numbered
+  exactly as `gradients.size()` would. Key = every tag's attributes, `id`
+  excluded, name-sorted, child order preserved — which is that Java triple
+  expressed in emitted terms, and the sort is what makes it cross-emitter.
+- **Attribute-order question, answered**: the KEY is normalised; the KEPT
+  def's markup deliberately is NOT. Attribute order is invisible to the
+  comparator (`tests/oracle/svg-conformance/normalize.ts` sorts every
+  element's attributes alphabetically) and to SVG itself, so rewriting the
+  survivor would be churn with no observable effect. Child order IS
+  positional in the comparator, and both emitters write offset 0% then 100%,
+  matching upstream's stop1-then-stop2 (java:397-404).
+- **Reach, measured not assumed**: with the dedup stubbed out, exactly four
+  class fixtures carry more than one `<linearGradient>` — `givofi` 2,
+  `mexaka` 2, `taceve` 5 (all matching the jar's own counts: genuinely
+  distinct gradients, untouched by the dedup) and `popesa` 2 vs the jar's 1.
+  popesa is the ONLY duplicate in the class corpus.
+- **Filters need no equivalent**, and that is measured too: this port's two
+  back-colour filter emitters (`svg-defs.ts#backColorFilterDef` and klimt's
+  `SvgGraphicsShadow#getFilterBackColor`) both reproduce
+  `SvgGraphics.java:777-786` attribute for attribute in upstream's order, so
+  a chrome `<back:red>` and a member-row `<back:red>` in one diagram already
+  collapse under `collapseDuplicateFilterDefs`'s byte key (probed directly).
+- **Confidence**: High.
+
+## The `src/index.ts` hunk — verbatim, four one-line edits (APPLIED in round 5)
 
 No new import statement: `assembleSvg` already comes from that module.
 
