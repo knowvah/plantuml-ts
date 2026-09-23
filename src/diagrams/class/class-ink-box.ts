@@ -7,7 +7,7 @@
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
 import { resolveTips } from './note-tips-resolve.js';
-import { edgeExtremityInk } from './renderer-arrowhead.js';
+import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-edge-labels.js';

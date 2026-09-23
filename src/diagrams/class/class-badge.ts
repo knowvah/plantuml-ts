@@ -368,6 +368,15 @@ export function badgeGlyphPath(
   circledCharacterFontFamily?: string,
   circledCharacterFontBold?: boolean,
   circledCharacterFontItalic?: boolean,
+  // cdd-T29 R2 (D4/journal row 175): the glyph outline is captured at a
+  // FIXED reference size (`BADGE_GLYPH_D`/`lookupSizedGlyph`) -- `cx`/`cy`
+  // (the caller's already-scaled badge center) only TRANSLATE it, so a
+  // `scale` diagram drew the letter at its unscaled stroke size, off-center
+  // inside a now-differently-sized ellipse. `k` scales every captured
+  // coordinate around the reference center (`refCx`,`refCy`) BEFORE the
+  // translate, matching `SvgGraphics#format`'s "scale every emitted
+  // numeric" rule for this shape too.
+  k = 1,
 ): string {
   const letter = resolveBadgeLetter(kind, charOverride);
   const sized =
@@ -383,22 +392,22 @@ export function badgeGlyphPath(
   const refD = sized?.d ?? BADGE_GLYPH_D[letter];
   const refCx = sized?.refCx ?? REFERENCE_CX;
   const refCy = sized?.refCy ?? REFERENCE_CY;
-  const dx = cx - refCx;
-  const dy = cy - refCy;
+  const dx = cx - refCx * k;
+  const dy = cy - refCy * k;
   let axis = 0;
   // T7b: `formatDecimal` (ADR-1) replaces the raw `String(shifted)` --
   // shifting a captured glyph coordinate by a fractional `dx`/`dy` (badge
   // centers are rarely on an integer pixel) produced the same class of
   // raw-float leak T6e found in `class-namespace-shape.ts`'s `d` attribute.
   return refD.replace(NUMBER_RE, (tok) => {
-    const shifted = Number(tok) + (axis === 0 ? dx : dy);
+    const shifted = Number(tok) * k + (axis === 0 ? dx : dy);
     axis = 1 - axis;
     return formatDecimal(shifted, DEFAULT_SVG_DECIMALS);
   });
   // #lizard forgives -- pre-existing 8-param signature (kind/cx/cy/
   // charOverride?/four circledCharacterFont* overrides from G2 N38/N47),
   // unrelated to T7b; collapsing to an options object is outside this
-  // task's write-set.
+  // task's write-set. cdd-T29 R2 adds a 9th (`k`), same forgiveness.
 }
 
 /** Every letter {@link BADGE_GLYPH_D} has a captured outline for -- derived

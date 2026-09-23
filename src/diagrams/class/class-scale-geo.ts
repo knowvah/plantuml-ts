@@ -40,6 +40,7 @@ import { scaleRow, scaleGenericTag, scaleFolderTab, scaleSymbolInk, scaleBadgeSp
 import { scaleEnhancedBody, scaleJsonBody } from './class-scale-geo-body.js';
 import { scaleEdgeGeo } from './class-scale-geo-edge.js';
 import { scaleNoteGeo } from './class-scale-geo-note.js';
+import type { Theme } from '../../core/theme.js';
 
 export type { ScaleSpec } from '../../core/scale-command.js';
 
@@ -105,5 +106,46 @@ export function scaleClassGeometry(geo: ClassGeometry, k: number, themeFontSize:
     ),
     edges: geo.edges.map((e) => scaleEdgeGeo(e, k)),
     namespaces: geo.namespaces.map((n) => scaleNamespaceGeo(n, k)),
+    // cdd-T29 round 2 (D4): carried so `renderer.ts#renderClass` can derive
+    // a `ScaledTheme` for the render-time pixel-literal constants this
+    // module cannot reach (see `ClassGeometry.scaleK`'s own doc comment).
+    scaleK: k,
   };
+}
+
+// ---------------------------------------------------------------------------
+// ScaledTheme -- render-time constants with no geo-side field to scale
+// ---------------------------------------------------------------------------
+
+/**
+ * `Theme` plus the resolved render-time scale factor -- mirrors `sequence/
+ * scale-geo.ts#ScaledTheme` exactly (same rationale: reusing the existing
+ * `theme` parameter slot keeps every downstream function at its
+ * pre-existing parameter count). `renderer.ts` and its sibling `renderer-
+ * *.ts` files thread this in place of a bare `Theme` wherever a function
+ * needs to scale a LOCAL pixel-literal constant of its own — box/divider
+ * border `stroke-width` (`renderer-classifier-colors.ts
+ * #classBorderStrokeWidth`), the badge circle's radius (`class-badge.ts
+ * #BADGE_RADIUS`), a classifier's `roundCorner`
+ * (`renderer-classifier-box.ts`), arrowhead geometry
+ * (`renderer-arrowhead.ts`), and every other render-time-only numeral this
+ * task's round-2 audit found (see `.agent-notes/cdd-T29.md`).
+ */
+export interface ScaledTheme extends Theme {
+  readonly scaleK: number;
+}
+
+/**
+ * `theme.fontSize` is scaled for the SAME reason `sequence/scale-
+ * geo.ts#scaleSequenceTheme` scales it: a handful of class-render call
+ * sites (`renderer-classifier-rows.ts`'s bullet/image atom Y-offset
+ * formulas, `renderer-openiconic.ts`) read `theme.fontSize` DIRECTLY,
+ * bypassing `ClassifierGeo.rows[].fontSize`'s own already-materialized
+ * fallback (`class-scale-geo-row.ts#scaleRow`'s doc comment) — those reads
+ * are for Y-COORDINATE math (a descent/altitude offset), not a `<text
+ * font-size>` attribute, so they need the SAME scaled value every other
+ * already-scaled `y` coordinate in the geometry carries.
+ */
+export function scaleClassTheme(theme: Theme, k: number): ScaledTheme {
+  return { ...theme, fontSize: theme.fontSize * k, scaleK: k };
 }

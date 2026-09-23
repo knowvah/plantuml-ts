@@ -9,6 +9,8 @@ import type { EdgeGeo } from './layout.js';
 import {} from './renderer-note.js';
 import type {} from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type {} from '../../core/dispatcher.js';
 import { text, path, attrs, linkWrap } from '../../core/svg.js';
@@ -176,10 +178,7 @@ function arrowLabelTextAttrs(theme: Theme): {
  * `StyleStorage#computeMergedStyle`'s own last-registered-wins merge rather
  * than inventing a specificity rule upstream does not have.
  */
-function resolveArrowTagStyle(
-  tags: readonly string[] | undefined,
-  theme: Theme,
-): { color?: string; thickness?: number } | undefined {
+function resolveArrowTagStyle(tags: readonly string[] | undefined, theme: Theme): { color?: string; thickness?: number } | undefined {
   const cascade = theme.colors.graph.arrowTagCascade;
   if (tags === undefined || cascade === undefined) return undefined;
   let found: { color?: string; thickness?: number } | undefined;
@@ -188,6 +187,14 @@ function resolveArrowTagStyle(
     if (entry !== undefined) found = entry;
   }
   return found;
+}
+
+/** cdd-T29 R2: `geo.strokeWidth` is ALREADY scaled (`class-scale-geo-
+ *  edge.ts`); the `tagStyle?.thickness ?? 1` fallback is not, and needs
+ *  the SAME materialization `class-scale-geo-row.ts#scaleRow`'s `row.
+ *  fontSize` fallback already gets -- split out for {@link renderEdge}'s NLOC cap. */
+function resolveEdgeStrokeWidth(geo: EdgeGeo, tagStyle: { thickness?: number } | undefined, theme: ScaledTheme): number {
+  return geo.strokeWidth ?? (tagStyle?.thickness ?? 1) * theme.scaleK;
 }
 
 /**
@@ -330,7 +337,7 @@ export interface RenderEdgeContext {
   readonly measurer?: StringMeasurer | undefined;
 }
 
-export function renderEdge(geo: EdgeGeo, theme: Theme, ctx: RenderEdgeContext): { body: string; extraDefs: string } {
+export function renderEdge(geo: EdgeGeo, theme: ScaledTheme, ctx: RenderEdgeContext): { body: string; extraDefs: string } {
   const { ids, syntheticNames, measurer } = ctx;
   const parts: string[] = [];
   // G2 N28: arrowheads must be resolved BEFORE the path is built -- the
@@ -365,8 +372,11 @@ export function renderEdge(geo: EdgeGeo, theme: Theme, ctx: RenderEdgeContext): 
     geo.colorOverride !== undefined
       ? resolveColorToSvgHex(geo.colorOverride)
       : (tagStyle?.color ?? theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow);
-  const edgeStrokeWidth = geo.strokeWidth ?? tagStyle?.thickness ?? 1;
-  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, edgeStrokeWidth);
+  const edgeStrokeWidth = resolveEdgeStrokeWidth(geo, tagStyle, theme);
+  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, {
+    resolvedStrokeWidth: edgeStrokeWidth,
+    k: theme.scaleK,
+  });
   const trimmedPoints = applyDecorTrim(geo.points, arrowheads.tailTrim, arrowheads.headTrim);
   const d = buildPathData(trimmedPoints);
   if (d !== '') {
@@ -397,7 +407,7 @@ export function renderEdge(geo: EdgeGeo, theme: Theme, ctx: RenderEdgeContext): 
         ...(geo.strokeDasharray !== undefined
           ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
           : geo.dashed
-            ? { strokeDasharray: '7,7' }
+            ? { strokeDasharray: scaleDashArrayString('7,7', theme.scaleK) }
             : {}),
         // G2 N9: `id`/`codeLine` -- see `linkIdForSvg`'s doc comment.
         id: linkIdForSvg(geo, ids, syntheticNames),

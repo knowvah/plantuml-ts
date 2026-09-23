@@ -65,6 +65,23 @@ export interface ClassGeometry {
    * other optional field in this file.
    */
   sprites?: SpriteRegistry;
+  /**
+   * cdd-T29 round 2 (D4): the resolved `scale ...` factor `layoutClass`
+   * computed (`resolveScaleFactor`), carried onto the geometry for the SAME
+   * reason `measurer`/`sprites` above are: `SyncPlugin.render(geo, theme)`
+   * (`dispatcher.ts`) only receives the geo, and `index.ts`'s own
+   * `render(geo, theme)` call site (outside this task's write-set) passes
+   * the UNSCALED `theme` unchanged -- `renderer.ts#renderClass` is the one
+   * remaining seam that can turn it into a `ScaledTheme`
+   * (`class-scale-geo.ts#scaleClassTheme`) for every render-time
+   * pixel-literal constant this port's class renderer carries (box/divider
+   * border stroke-width, badge radius, round-corner, arrowhead geometry,
+   * dash patterns, ...) that has no OTHER geo-side field to scale, unlike
+   * `ClassifierGeo.rows[].fontSize`'s own materialized-fallback precedent.
+   * Absent (or `1`) is a true no-op: `scaleClassGeometry` only ever sets
+   * this when `k !== 1`, and every reader falls back to `1` via `??`.
+   */
+  scaleK?: number;
 }
 
 // cdd-T6: `JsonBodyItem` is re-exported alongside `ClassGeometry` purely
