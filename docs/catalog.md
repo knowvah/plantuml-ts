@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1163 modules · 4293 exported names.
+1164 modules · 4293 exported names.
 
 ## `src/`
 
@@ -69,6 +69,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer-jar.ts` | `JarMeasurer`, `jarMeasurer` | Jar-faithful string measurer (architecture decision D12). |
 | `measurer-width-table.data.ts` | `SANS_SERIF_BLOCKS` |  |
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
+| `nested-diagram-registry.ts` | `registerNestedDiagramRenderer`, `getNestedDiagramRenderer` | nested-diagram-registry.ts — CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome `{{ }}`-embed registration slot, moved here FROM `src/diagrams/class/class-nested-diagram-renderer.ts` so that `src/core/annotations/block |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
@@ -1190,7 +1191,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-namespace-title-table.ts` | `namespaceTitleTableDims` | `ClusterHeader`'s title-table sizing for a class/object package cluster -- split out of ./class-dot-graph.ts (T4, namespace-cluster-box mission, 500-line file-cap compliance; pure move, no behavior change from the split itself, mirroring st |
 | `class-namespace-usymbol-shape.ts` | `NamespaceUSymbolPaint`, `renderNamespaceUSymbol` | class-namespace-usymbol-shape.ts — cdd-T12 (diagnosis A2b E3): a NON-EMPTY `package X <<Node>>` / `<<Database>>` / `<<cloud>>` / `<<Rectangle>>` container draws its USymbol's own `asBig` chrome, not the default folder-tab outline. |
 | `class-namespace.ts` | `registerInNamespace`, `makeClassifier`, `collapseEmptyNamespace`, `collapseEmptyNamespacesFinal`, `splitTopLevelCommas`, `splitOnSeparator`, `ensureNamespaceChain`, `qualifiedId`, `countByName`, `firstWithName`, `resolveReference`, `normalizeSameConnectionLengths`, `GENERIC_BODY_PATTERN`, `GENERIC_CLAUSE_RE`, `ResolveInput`, `ResolvedRef` | Namespace-splitting helpers for class diagrams. |
-| `class-nested-diagram-renderer.ts` | `EmbeddedDiagramDepthError`, `MAX_NESTED_DIAGRAM_DEPTH`, `RenderNestedDiagramFn`, `RenderedEmbeddedImage`, `EmbeddedRenderer`, `createNestedDiagramRenderer`, `registerClassNestedDiagramRenderer`, `getClassNestedDiagramRenderer`, `registerChromeNestedDiagramRenderer`, `getChromeNestedDiagramRenderer`, `registerNestedDiagramRenderers` | class-nested-diagram-renderer.ts — CDD T27: a real `NestedDiagramRenderer` (`core/EmbeddedDiagram.ts`'s injected seam, `EmbeddedDiagram.ts:195-197`) built in the class engine's own code, per that file's own doc comment ("never inside `Embed |
+| `class-nested-diagram-renderer.ts` | `EmbeddedDiagramDepthError`, `MAX_NESTED_DIAGRAM_DEPTH`, `RenderNestedDiagramFn`, `RenderedEmbeddedImage`, `EmbeddedRenderer`, `createNestedDiagramRenderer`, `registerClassNestedDiagramRenderer`, `getClassNestedDiagramRenderer`, `registerNestedDiagramRenderers` | class-nested-diagram-renderer.ts — CDD T27: a real `NestedDiagramRenderer` (`core/EmbeddedDiagram.ts`'s injected seam, `EmbeddedDiagram.ts:195-197`) built in the class engine's own code, per that file's own doc comment ("never inside `Embed |
 | `class-note-decl-ast.ts` | `NotePosition`, `ClassNote` | Class-diagram Note AST types (NotePosition, ClassNote). |
 | `class-note-link-box.ts` | `LinkNoteDim`, `measureLinkNoteDim` | `note on link`'s own note-image dimension -- split out of class-layout-edge-labels.ts purely to keep that file under the project's 500-line cap (T10 addition). |
 | `class-notes.ts` | `NOTE_STEREO`, `NOTE_STEREO_CAPTURE`, `NOTE_COLOR`, `NOTE_URL`, `NOTE_TARGET`, `PendingNote`, `isNoteCloser`, `NoteCreationCounter`, `TipGroupSeenSet`, `addNote`, `addFreestandingNote`, `finalizePendingNote`, `handlePendingNoteLine`, `isNoteId`, `NOTE_ON_LINK_RE`, `NOTE_ON_LINK_MULTI_RE`, `resolveLinkNotePosition`, `applyNoteOnLink`, `CONSTRAINT_ON_LINKS_RE`, `applyConstraintOnLinks` | Note-block accumulation + note AST construction for the class parser. |

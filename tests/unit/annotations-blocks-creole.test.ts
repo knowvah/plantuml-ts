@@ -186,9 +186,10 @@ describe('chrome creole — the shared seam leaves the other engines jar-faithfu
 // ---------------------------------------------------------------------------
 // CDD B7FU-R2: `{{ }}` embedded diagrams inside chrome text (title/legend/
 // header/footer/caption) now render through the SAME nested-diagram
-// renderer T27 built for class bodies (`class-nested-diagram-renderer.ts
-// #registerChromeNestedDiagramRenderer`, wired in `src/index.ts#prepareBlock`
-// alongside the class-body slot) instead of unconditionally throwing.
+// renderer T27 built for class bodies, via the CORE-owned registration slot
+// (`core/nested-diagram-registry.ts`, populated by `class-nested-diagram-
+// renderer.ts#registerNestedDiagramRenderers`, wired in `src/index.ts
+// #prepareBlock`) instead of unconditionally throwing.
 // ---------------------------------------------------------------------------
 
 describe('chrome creole — {{ }} embedded diagrams (CDD B7FU-R2)', () => {

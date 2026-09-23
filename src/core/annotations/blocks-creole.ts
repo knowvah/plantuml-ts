@@ -90,7 +90,7 @@ import type { UDrawable } from '../klimt/shape/UDrawable.js';
 import type { TextBlock } from '../klimt/shape/TextBlock.js';
 import type { ISkinSimple } from '../style/ISkinSimple.js';
 import type { NestedDiagramRenderer } from '../EmbeddedDiagram.js';
-import { getChromeNestedDiagramRenderer } from '../../diagrams/class/class-nested-diagram-renderer.js';
+import { getNestedDiagramRenderer } from '../nested-diagram-registry.js';
 
 /** What {@link buildChromeTextBlock} hands back to `blocks.ts`: the
  *  creole block's own `calculateDimension` (`TextBlockBordered
@@ -390,17 +390,19 @@ function chromeSkinSimple(atomOps: AtomOps, sprites: SpriteRegistry | undefined)
 }
 
 /** `{{ … }}` inside chrome text: `EmbeddedDiagram.ts#NestedDiagramRenderer`
- *  is the seam. CDD B7FU-R2: wired to the renderer `src/index.ts
- *  #prepareBlock` registers via `class-nested-diagram-renderer.ts
- *  #registerChromeNestedDiagramRenderer` (that function's own doc comment
- *  explains why chrome shares the class-body slot's render/strip-PI/
- *  measure/depth-guard logic instead of a second copy). `undefined` only
- *  when nothing has registered (a unit test importing this module
+ *  is the seam. CDD B7FU-R2: wired to the CORE-owned registration slot
+ *  (`core/nested-diagram-registry.ts` — this file must never import `src/
+ *  diagrams/class/*`, `tests/architecture/layering.test.ts` Rule 1) that
+ *  `src/index.ts#prepareBlock` populates, indirectly, via `class-nested-
+ *  diagram-renderer.ts#registerNestedDiagramRenderers` (that function's own
+ *  doc comment explains why chrome shares the class-body slot's render/
+ *  strip-PI/measure/depth-guard logic instead of a second copy). `undefined`
+ *  only when nothing has registered (a unit test importing this module
  *  directly) — mirrors `EntityImageDescriptionDelegates.ts
  *  #blockedEmbeddedRenderer`'s degrade-to-throw, which `EmbeddedDiagram
  *  .ts`'s own catch turns into the `(42, 42)` fallback (java:148-152). */
 function blockedEmbeddedRenderer(): NestedDiagramRenderer {
-  const registered = getChromeNestedDiagramRenderer();
+  const registered = getNestedDiagramRenderer();
   if (registered !== undefined) return registered;
   return {
     render(): TextBlock {

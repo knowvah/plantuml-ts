@@ -59,6 +59,7 @@ import type { NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { registerNestedDiagramRenderer } from '../../core/nested-diagram-registry.js';
 
 /**
  * Task item 3 (CDD T27): a block embedding itself, directly or via a cycle,
@@ -252,54 +253,29 @@ export function getClassNestedDiagramRenderer(): EmbeddedRenderer | undefined {
 }
 
 /**
- * CDD B7FU-R2: a SECOND registration slot for the chrome seam
- * (`src/core/annotations/blocks-creole.ts`'s `{{ }}`-in-title/legend/
- * header/footer/caption path, `Style#createTextBlockBordered`, D5) — a
- * diagram-type-agnostic consumer, unlike the class-body pipeline above.
- * Deliberately reuses {@link createNestedDiagramRenderer} (already fully
- * generic in behavior: strip-PI/measure/base64-encode/depth-guard, nothing
- * class-specific) rather than a second, duplicated implementation — `core/
- * EmbeddedDiagram.ts`'s own module doc comment says that logic belongs
- * "never inside `EmbeddedDiagram.ts` itself, which stays diagram-type-
- * agnostic", so a SECOND core-level copy was rejected in favor of widening
- * this already-generic factory's ONE call site count instead of its shape.
- * Shares the SAME module-level {@link embedDepth} counter as the class-body
- * slot above (both funnel through `createNestedDiagramRenderer`'s one
- * `guardedRender` closure family) — correct: a chrome `{{ }}` legend that
- * embeds a class diagram whose OWN body embeds another `{{ }}` block is one
- * real recursion chain, and must be bounded by one shared counter.
+ * CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome
+ * seam (`src/core/annotations/blocks-creole.ts`'s `{{ }}`-in-title/legend/
+ * header/footer/caption path, `Style#createTextBlockBordered`, D5) reads a
+ * CORE-owned registration slot (`core/nested-diagram-registry.ts`) instead
+ * of one hosted here — `blocks-creole.ts` must never import from `src/
+ * diagrams/class/*` (Rule 1, `tests/architecture/layering.test.ts`). This
+ * function builds ONE renderer via {@link createNestedDiagramRenderer}
+ * (already fully generic in behavior: strip-PI/measure/base64-encode/
+ * depth-guard, nothing class-specific) and pushes it into BOTH the
+ * class-body slot above AND the core registry — the SAME module-level
+ * {@link embedDepth} counter backs both paths (a chrome `{{ }}` legend
+ * embedding a class diagram whose OWN body embeds another `{{ }}` block is
+ * one real recursion chain, bounded by one shared counter), and `src/
+ * index.ts#prepareBlock`'s own doc comment explains why registration
+ * happens per-`renderSync`-call rather than once at module load (the
+ * ambient `options`/measurer must match the CURRENT call). `src/index.ts`
+ * sits at this project's 500-line file cap already, so this ONE combined
+ * entry point keeps that file's own edit a one-line addition.
  */
-let registeredChromeRenderer: NestedDiagramRenderer | undefined;
-
-/** Called once by `src/index.ts#prepareBlock`, alongside `registerClass
- *  NestedDiagramRenderer` — see that function's own doc comment for why
- *  registration happens per-`renderSync`-call rather than once at module
- *  load (the ambient `options`/measurer must match the CURRENT call). */
-export function registerChromeNestedDiagramRenderer(
-  renderFn: RenderNestedDiagramFn,
-  maxDepth: number = MAX_NESTED_DIAGRAM_DEPTH,
-): void {
-  registeredChromeRenderer = createNestedDiagramRenderer(renderFn, maxDepth);
-}
-
-/** `undefined` until `registerChromeNestedDiagramRenderer` has run (e.g. a
- *  unit test that imports `blocks-creole.ts` directly, bypassing `src/
- *  index.ts`) — `blocks-creole.ts#blockedEmbeddedRenderer` throws in that
- *  case, exactly as it did before this wiring, which `EmbeddedDiagram.ts`'s
- *  own `calculateDimensionSlow`/`drawU` catch degrades to the `(42, 42)`
- *  fixed-size fallback. */
-export function getChromeNestedDiagramRenderer(): NestedDiagramRenderer | undefined {
-  return registeredChromeRenderer;
-}
-
-/** `src/index.ts#prepareBlock`'s ONE call site for both registration slots
- *  above (`src/index.ts` sits at this project's 500-line file cap already,
- *  so a single combined entry point keeps that file's own edit a one-line
- *  addition rather than two imports plus two calls). */
 export function registerNestedDiagramRenderers(
   renderFn: RenderNestedDiagramFn,
   maxDepth: number = MAX_NESTED_DIAGRAM_DEPTH,
 ): void {
   registerClassNestedDiagramRenderer(renderFn, maxDepth);
-  registerChromeNestedDiagramRenderer(renderFn, maxDepth);
+  registerNestedDiagramRenderer(createNestedDiagramRenderer(renderFn, maxDepth));
 }

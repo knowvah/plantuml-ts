@@ -103,12 +103,12 @@ trailing `it.todo`, not edited.
 
 ## Item 2 — chrome `{{ }}` nested-renderer wiring (bixogo/roxosu)
 
-**Landed**: `class-nested-diagram-renderer.ts` gained a SECOND registration
-slot (`registerChromeNestedDiagramRenderer`/`getChromeNestedDiagramRenderer`,
-sharing `createNestedDiagramRenderer`'s render/strip-PI/measure/depth-guard
-logic and its module-level recursion counter with the class-body slot — a
-chrome legend embedding a class diagram whose body embeds another `{{ }}`
-is one real recursion chain and must share one bound). `blocks-creole.ts
+**Landed**: `class-nested-diagram-renderer.ts` builds ONE renderer via
+`createNestedDiagramRenderer` (render/strip-PI/measure/depth-guard, sharing
+its module-level recursion counter with the class-body slot — a chrome
+legend embedding a class diagram whose body embeds another `{{ }}` is one
+real recursion chain and must share one bound) and pushes it into BOTH the
+pre-existing class-body slot AND a chrome-seam slot. `blocks-creole.ts
 #blockedEmbeddedRenderer` now returns the registered renderer when present,
 else the original unconditional throw (caught by `EmbeddedDiagram.ts`'s own
 `calculateDimensionSlow`/`drawU`, degrading to `(42,42)`/draw-nothing,
@@ -117,6 +117,24 @@ matching upstream `EmbeddedDiagram.java:148-152/191-193`). `src/index.ts
 helper (kept `index.ts` at its pre-existing 516-line count exactly — the
 hook's file-length check is directional, an already-oversized file may
 still be edited as long as it doesn't grow past its prior size).
+
+**CORRECTED (coordinator design review, journal row 160)**: the chrome
+slot's FIRST landing hosted it inside `class-nested-diagram-renderer.ts`
+itself, which made `blocks-creole.ts` (core) import from `src/diagrams/
+class/*` — exactly the `core -> diagrams` edge `tests/architecture/
+layering.test.ts` Rule 1 forbids, papered over with an `ALLOWLIST` entry
+rather than fixed. Moved the SLOT (not the render logic, which correctly
+stays in `class-nested-diagram-renderer.ts` per `EmbeddedDiagram.ts`'s own
+"stays diagram-type-agnostic" doc comment) into a new core-owned file,
+`src/core/nested-diagram-registry.ts` (`registerNestedDiagramRenderer`/
+`getNestedDiagramRenderer`, a plain get/set pair over the `NestedDiagram
+Renderer` interface `EmbeddedDiagram.ts` already declares — no render logic
+of its own). Dependency direction now matches the class-body registration's
+own precedent exactly: `diagrams/class/class-nested-diagram-renderer.ts`
+(diagrams -> core, normal direction) populates the slot;
+`blocks-creole.ts` (core -> core) only ever reads it. `ALLOWLIST` entry
+removed; `tests/architecture/layering.test.ts` green with zero exceptions
+for this edge.
 
 **Readings**: bixogo-47-xulu385/roxosu-00-pini153 UNCHANGED (1+4 both). NOT
 a wiring failure: `{{salt ... }}` (a preprocessor-macro-expanded user
