@@ -224,6 +224,24 @@ export interface MeasuredClassifier {
     readonly fields?: FlatMemberRows;
     readonly methods?: FlatMemberRows;
   };
+  /**
+   * CDD B7FU-R2 item (a) (coordinator, journal row 161): the ENHANCED-body
+   * analog of {@link portMemberSections} above -- `buildEnhancedBodyResult`
+   * (`class-layout-generic-classifier.ts`) publishes this from `Enhanced
+   * BodyGeo.portMembers` (`class-body-enhanced-layout.ts`) whenever the
+   * classifier's body took the enhanced (block-separator/tree/embed)
+   * render path, so `class-port-rows.ts#classFamilyPortRows` has a
+   * port-election input to dispatch on there too -- `MethodsOrFieldsArea
+   * #getPorts`'s own `y`/`dim.getHeight()` accumulation (java:194-211),
+   * but ALREADY absolute (`geo.y`-relative, header-height-inclusive), so
+   * `class-port-rows.ts#enhancedBodyPortRows` (the classic path's OWN
+   * `classPortRows` compartment-position formula does not apply here --
+   * an enhanced body's real block-by-block margin/divider geometry does
+   * not match the classic `SECTION_MARGIN`-flat-compartment model) needs
+   * no further translation. `undefined` for every classic-path classifier
+   * (unchanged, `portMemberSections` still owns that case).
+   */
+  enhancedPortRows?: readonly { readonly text: string; readonly top: number; readonly height: number }[];
 }
 
 /**

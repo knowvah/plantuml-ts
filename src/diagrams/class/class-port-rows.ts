@@ -15,11 +15,9 @@
  * `USA` and `3`.
  *
  * The `map`/`json` flat-sizer producers (`mapPortRows`, `mapPortName`) moved
- * out to ./class-map-port-rows.ts (S-B — pure relocation; ADR-4 in
- * `plans/si20-object-row-ports/decisions.md`) for the same 500-line/NLOC-cap
- * reason as ./class-object-fields.ts's own split; this file imports
- * {@link mapPortName} back for `edgePortAttrs`' port-name resolution and
- * {@link mapPortRows} back for `applyShapeAndPorts`' `map`/`json` branch.
+ * out to ./class-map-port-rows.ts (S-B, ADR-4) for the 500-line cap; this
+ * file imports {@link mapPortName}/{@link mapPortRows} back for
+ * `edgePortAttrs`'/`applyShapeAndPorts`' own `map`/`json` needs.
  */
 
 import type { Classifier, ClassDiagramAST, ClassifierKind, Member } from './ast.js';
@@ -31,6 +29,7 @@ import { Ports } from '../../core/svek/Ports.js';
 import { mapPortRows, mapPortName } from './class-map-port-rows.js';
 import { MethodsOrFieldsArea } from '../../core/cucadiagram/MethodsOrFieldsArea.js';
 import type { Elected } from '../../core/cucadiagram/Elected.js';
+import { enhancedBodyPortRows } from './class-body-enhanced-ports.js';
 
 /**
  * The `tailport`/`headport` a relationship contributes when its `Class::member`
@@ -170,6 +169,11 @@ function classFamilyPortRows(
   portShortNames: ReadonlySet<string>,
   kind: ClassifierKind,
 ): DotInputPortRow[] {
+  // CDD B7FU-R2 item (a): `classPortRows`'s compartment formula does not
+  // apply to an enhanced body (`class-body-enhanced-ports.ts`'s doc).
+  if (measured.enhancedPortRows !== undefined) {
+    return enhancedBodyPortRows(measured.enhancedPortRows, portShortNames);
+  }
   const compartments =
     measured.portMemberSections !== undefined
       ? toPortCompartments(measured.portMemberSections, electionTextFor(kind))

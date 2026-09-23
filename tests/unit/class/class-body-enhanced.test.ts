@@ -4,6 +4,10 @@ import {
   splitEnhancedBlocks,
   dedentRawLines,
 } from '../../../src/diagrams/class/class-body-enhanced.js';
+import { measureEnhancedBody, type EnhancedRowsPart } from '../../../src/diagrams/class/class-body-enhanced-layout.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
+import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 
 // ---------------------------------------------------------------------------
 // isEnhancedBody — trigger detection
@@ -231,5 +235,61 @@ describe('dedentRawLines', () => {
     const raw = ['    + public_member', '    --', '    - private_member'];
     expect(isEnhancedBody(raw)).toBe(false); // pre-dedent: masked by indentation
     expect(isEnhancedBody(dedentRawLines(raw))).toBe(true); // post-dedent: recognized
+  });
+});
+
+// ---------------------------------------------------------------------------
+// measureEnhancedBody -- row baseline bottom-anchor gate (CDD B7FU-R2)
+// ---------------------------------------------------------------------------
+
+describe('measureEnhancedBody — row y bottom-anchor is gated on an image atom', () => {
+  // Same mechanism/citation as class-member-rows.ts#buildSectionRows's own
+  // regression tests (exposant-01-class/sovuxo-25-tepi226): a sup/sub row's
+  // Sea-inflated height must NOT shift `y`, only a sprite/img atom's does.
+  // No current corpus fixture combines an enhanced body (separator/tree)
+  // with a <sup>/<sub> member -- this is a precautionary consistency test
+  // for the SAME gate `class-body-enhanced-layout.ts#buildRowsBlockRows`
+  // now carries.
+  function ctx(sprites?: ReturnType<typeof createSpriteRegistry>) {
+    return {
+      fontSpec: { family: 'sans-serif', size: 14 },
+      measurer: new WidthTableMeasurer(),
+      sprites,
+      baselineOffset: 11,
+      bodyTop: 0,
+    };
+  }
+
+  function firstRowsPart(rawLines: readonly string[], sprites?: ReturnType<typeof createSpriteRegistry>): EnhancedRowsPart {
+    const part = measureEnhancedBody(rawLines, ctx(sprites)).parts.find(
+      (p): p is EnhancedRowsPart => p.kind === 'rows',
+    );
+    if (part === undefined) throw new Error('no rows part built');
+    return part;
+  }
+
+  it('a <sup>/<sub> row (height inflated by Sea, no image atom) does NOT get the bottom-anchor shift', () => {
+    const supOnly = firstRowsPart(['x<sup>2</sup>']);
+    const flatY = supOnly.rows[0]!.y;
+    expect(supOnly.rows[0]!.atoms?.every((a) => a.kind === 'text')).toBe(true);
+    // Same block, same content top, but the PLAIN text sibling ("x") has NO
+    // height inflation at all -- if the sup row wrongly bottom-anchored, its
+    // `y` would differ from a plain row built the same way by exactly
+    // `height(17) - fontSize(14) = 3`; asserting equality proves the gate
+    // held (both take the flat `contentTop + baselineOffset` formula).
+    const plain = firstRowsPart(['x']);
+    expect(flatY).toBe(plain.rows[0]!.y);
+  });
+
+  it('an image-atom row (sprite) DOES get the bottom-anchor shift, matching class-member-rows.ts', () => {
+    const registry = createSpriteRegistry();
+    addSprite(registry, 'test', new SpriteMonochrome(50, 100, 16));
+    const spritePart = firstRowsPart(['<$test>'], registry);
+    expect(spritePart.rows[0]!.atoms?.some((a) => a.kind === 'image')).toBe(true);
+    const plainPart = firstRowsPart(['x']);
+    // The sprite row's height (100 * 14/13) genuinely differs from the
+    // plain row's (14) -- the bottom-anchor gate must NOT collapse them to
+    // the same flat `y` the way the sup/sub case above correctly does.
+    expect(spritePart.rows[0]!.y).not.toBe(plainPart.rows[0]!.y);
   });
 });

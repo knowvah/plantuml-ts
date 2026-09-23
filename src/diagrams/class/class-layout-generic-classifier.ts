@@ -291,6 +291,8 @@ function buildEnhancedBodyResult(
     // #renderBadge` for the header's own height (badge vertical center).
     dividerYs: [stereoGeo.headerRowHeight],
     enhancedBody,
+    // CDD B7FU-R2 item (a): see `MeasuredClassifier.enhancedPortRows`'s doc.
+    ...(enhancedBody.portMembers.length > 0 ? { enhancedPortRows: enhancedBody.portMembers } : {}),
     ...commonFields,
   };
 }
