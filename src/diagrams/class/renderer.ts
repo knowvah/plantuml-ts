@@ -10,8 +10,9 @@ import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleClassTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { ellipse } from '../../core/svg.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrome.js';
@@ -25,8 +26,8 @@ import {
   leafPortion,
   renderGroupInheritanceNeighborhood,
 } from './renderer-group.js';
-import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
-import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
+import { renderAssocPoint, renderLollipop } from './renderer-assoc-lollipop.js';
+import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
   renderNamespaceRect,
@@ -48,80 +49,19 @@ import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/docum
  *  T8: was `class/renderer-shell.ts`'s own copy of this constant. */
 const DIAGRAM_TYPE_CLASS = 'CLASS';
 
-// ---------------------------------------------------------------------------
-// Association-class-couple "point" entity (`(A,B) .. C`)
-// ---------------------------------------------------------------------------
-
-/**
- * `(A,B) .. C`'s tiny circle connector — G2 N8, `EntityImageAssociationPoint
- * .java#drawU`: a bare `<ellipse>` (radius {@link ASSOC_POINT_SIZE}`/2`),
- * fill AND stroke both the SAME `LineColor` value (`CopyForegroundColorTo
- * BackgroundColor`, upstream's own instruction to duplicate the foreground
- * color into the background/fill slot) — never wrapped in a `<g class=
- * "entity">`, never assigned an `id`, never preceded by a `<!--class ...-->`
- * comment (`GeneralImageBuilder`'s dispatch draws this leaf kind directly,
- * bypassing the normal per-entity wrapping every other classifier kind gets
- * — see `renderClass`'s own classifier loop, which special-cases
- * `kind === 'assoc-circle'` to call this instead of {@link wrapEntity}).
- */
-function renderAssocPoint(geo: ClassifierGeo, theme: Theme): string {
-  const r = ASSOC_POINT_SIZE / 2;
-  return ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.arrow,
-    stroke: theme.colors.arrow,
-    'stroke-width': 1,
-  });
-}
-
-/**
- * `Name ()-- Existing` interface lollipop -- G2 N8 established the DOT
- * sizing (`class-dot-graph.ts#buildOneDotNode`'s fixed {@link LOLLIPOP_SIZE}
- * node); G2 N20 lands the render half (`EntityImageLollipopInterface
- * .java:94-133`). UNLIKE {@link renderAssocPoint} above, jar DOES wrap the
- * circle in a real `<g class="entity" id="ent%04d">` (no `<!--class ...-->`
- * comment though -- `drawU` never calls `ug.draw(new UComment(...))`,
- * matching `wrapEntity`'s own `withComment=false` path) -- but the
- * display-label `<text>` is drawn AFTER `closeGroup()`, entirely OUTSIDE
- * that group, as a plain sibling (see `measureLollipop`'s own doc comment
- * in `class-layout-helpers.ts` for the byte-verified position formula).
- * `renderClass`'s classifier loop pushes the two pieces as separate
- * `children[]` entries to reproduce this exact sibling (not nested)
- * structure.
- *
- * The required-interface "half circle" socket shape (`LeafType
- * .LOLLIPOP_HALF`, `classifier.lollipopKind === 'half'`) needs the
- * connecting edge's own impact angle (`EntityImageLollipopInterface
- * #addImpact`, `UEllipse(SIZE, SIZE, angle - 90, 180)` -- an open 180deg
- * arc oriented away from the edge) -- ZERO reach across the entire
- * 708-fixture class corpus (grepped every `((--`/`--((`/`))--`/`--))`
- * spelling), so this draws the SAME full ellipse for both kinds rather
- * than adding unverified arc math; named divergence,
- * `plans/g2-class-svg/ledger.md` N20.
- */
-function renderLollipop(geo: ClassifierGeo, theme: Theme): { circle: string; label: string } {
-  const r = LOLLIPOP_SIZE / 2;
-  const circle = ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.graph.classBackground,
-    stroke: theme.colors.border,
-    'stroke-width': 1.5,
-  });
-  const label = geo.rows[0] !== undefined ? renderRow(geo, geo.rows[0], theme) : '';
-  return { circle, label };
-}
-
 /** Descriptive elements (database/component/actor/usecase) draw their USymbol
  *  icon instead of the class box; usecase carries no usymbol (its kind is
  *  enough). Returns undefined when this classifier has no icon to draw (the
  *  normal box path below applies) or the icon renderer declines. Split out of
  *  renderClassifier purely to keep that function's own NLOC/CCN under cap. */
-function tryRenderUSymbol(geo: ClassifierGeo, theme: Theme): string | undefined {
+function tryRenderUSymbol(geo: ClassifierGeo, theme: ScaledTheme): string | undefined {
   const usymbol = geo.kind === 'usecase' ? 'usecase' : geo.usymbol;
   if (usymbol === undefined) return undefined;
   const display = geo.rows[0]?.text ?? geo.id;
   return renderUSymbolIcon(usymbol, { ...geo, display }, theme);
 }
 
-function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
+function renderClassifier(geo: ClassifierGeo, theme: ScaledTheme): string {
   const icon = tryRenderUSymbol(geo, theme);
   if (icon !== undefined) return icon;
   return renderClassifierBox(geo, theme);
@@ -137,7 +77,7 @@ function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
  *  geometry + jar evidence. G2 N59: `skinparam packageStyle rect` selects
  *  the plain-`<rect>` `PackageStyle.RECTANGLE` variant instead -- see
  *  `renderNamespaceRect`'s own doc comment (measurer threaded, cdd-T26). */
-function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
+function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
   // cdd-T12 (A2b E3): a container whose header stereotype NAMES a USymbol
   // (`package X <<Node>>`) draws that symbol's own `asBig` chrome instead
   // (`svek/Cluster.java:367-374` -> `ClusterDecoration.java:66-91`). Needs
@@ -175,7 +115,7 @@ function renderNamespace(geo: NamespaceGeo, theme: Theme, measurer: StringMeasur
  * fields -- `id`/`creationIndex` are irrelevant to rendering (unused by
  * `renderNamespaceFolder`) so are filled with placeholders.
  */
-function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme, measurer: StringMeasurer | undefined): string {
+function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
   const folderTab = geo.folderTab;
   if (folderTab === undefined) return '';
   const label = geo.rows[0]?.text ?? geo.id;
@@ -248,13 +188,23 @@ import { renderNoteConnectorLink } from './renderer-note-connector.js';
  *              through `core/assemble-svg.ts`'s class finalize function,
  *              never the generic `svgRoot`).
  */
-export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
+export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment {
   // #lizard forgives(nloc, cyclomatic_complexity) -- pre-existing (verified
   // via `git show HEAD`, unchanged by T4's diff): one orchestrator
   // dispatching every drawn-element kind. Metric-specific form + placed
   // FIRST (not "near fn end"): plain `forgives` gets reset by this
   // function's own nested closures before its `end_of_function()` fires
   // -- see `.agent-notes/N16-lizard-forgive-nested-closures.md`.
+  // cdd-T29 R2 (D4/journal row 175): `index.ts`'s `render(geo, theme)` call
+  // site (outside this task's write-set) passes the UNSCALED theme
+  // unchanged -- this is the one remaining seam that can turn it into a
+  // `ScaledTheme` for every render-time pixel-literal constant this file's
+  // call tree carries (mirrors `sequence/scale-geo.ts`'s identical
+  // `scaleSequenceTheme` derivation). Shadows `theme` for the REST of this
+  // function so every existing read below (colors, `monochrome`,
+  // `shadowing`, every internal call) picks up the scaled value with no
+  // further changes.
+  const theme = scaleClassTheme(rawTheme, geo.scaleK ?? 1);
   // G2 N61: `skinparam monochrome true|reverse` applies to the document
   // background too (jar's `ColorMapper` is universal, not scoped to
   // entity/link colors) -- transformed HERE so every downstream reader of

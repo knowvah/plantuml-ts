@@ -1,7 +1,9 @@
 /**
  * Directive-style commands for the class diagram dispatch table (rules
  * 1-3b of the original class-commands.ts COMMANDS array): comment/no-op
- * lines, rankdir, skinparam/scale/allowmixing no-ops, `set separator`,
+ * lines, rankdir, skinparam/allowmixing no-ops, `scale` (cdd-T29: captured
+ * into `ClassDiagramAST.scale`, no longer a no-op -- see D4,
+ * `plans/class-divergence-drive/decisions.md`), `set separator`,
  * `!pragma useIntermediatePackages`, `newpage`, `hide`/`show`, and
  * `remove`/`restore`. Split out of class-commands.ts to stay under the
  * line cap; order preserved (spread first in COMMANDS).
@@ -9,6 +11,7 @@
 import type { Command } from './class-command-types.js';
 import { executeHideShow } from './class-hideshow-dispatch.js';
 import { startNewPage } from './parser.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -38,15 +41,35 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
-  // 2. Ignore: skinparam, scale lines (scale is global/structurally inert).
-  //    `title` is NOT ignored here -- it is claimed by the shared annotation
-  //    matcher (matchAnnotationCommand, called before COMMANDS in parser.ts)
-  //    so `title ...`/`title\n...\nend title` lands in
+  // 2. Ignore: skinparam lines (`skinparam dpi` is T30's scope, not this
+  //    task's). `title` is NOT ignored here -- it is claimed by the shared
+  //    annotation matcher (matchAnnotationCommand, called before COMMANDS
+  //    in parser.ts) so `title ...`/`title\n...\nend title` lands in
   //    `state.ast.annotations.title` instead of being silently dropped.
   {
-    pattern: /^(skinparam|scale\b)/i,
+    pattern: /^skinparam\b/i,
     execute() {
       /* no-op */
+    },
+  },
+
+  // 2z. `scale ...` directive (net/sourceforge/plantuml/command/
+  //     CommandScale*.java, 6 forms -- see scale-command.ts's module doc
+  //     for the full mechanism and jar Java citations). A loose trigger
+  //     regex gates entry into this slot; the real 6-way grammar lives in
+  //     the shared `matchScaleCommand` (`match.input` is always the exact
+  //     `line` this table was dispatched against -- RegExpExecArray's own
+  //     `.input` field, never re-derived). An unrecognized/rejected scale
+  //     line (e.g. `scale 0`) leaves `state.ast.scale` unset, the same
+  //     no-op disposition rule 3b's `remove`/`restore` already established
+  //     for an input its own upstream command would itself reject. Mirrors
+  //     `description/command-table-directives.ts`'s rule 2f and
+  //     `sequence/command-common.ts#scaleCommand` verbatim.
+  {
+    pattern: /^scale\s/i,
+    execute(state, match) {
+      const spec = matchScaleCommand(match.input);
+      if (spec !== undefined) state.ast.scale = spec;
     },
   },
 

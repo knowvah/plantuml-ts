@@ -8,6 +8,8 @@
 import type { ClassifierGeo } from './layout.js';
 import {} from './layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import {} from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { noGradient, parseColor } from '../../core/paint.js';
@@ -320,7 +322,18 @@ export function classBorderLine(geo: ClassifierGeo, theme: Theme): string {
  * above).
  */
 export const CLASS_BORDER_STROKE_WIDTH_DEFAULT = 0.5;
-export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number {
+/**
+ * cdd-T29 round 2 (D4/journal row 175): jar's `format()` scales EVERY
+ * emitted numeric at serialization (`SvgGraphics.java:466-472,557`),
+ * `stroke-width` included -- this port computes the resolved thickness
+ * fresh at render time (no `ClassGeometry` field carries it, unlike
+ * `EdgeGeo.strokeWidth`'s own optional override), so `theme.scaleK` is the
+ * only remaining seam: multiplied uniformly across all three return paths
+ * (inline override, per-stereotype, and the `classBorderThickness`
+ * skinparam/`0.5` default) since upstream scales the resolved value
+ * regardless of which tier produced it.
+ */
+export function classBorderStrokeWidth(geo: ClassifierGeo, theme: ScaledTheme): number {
   // CDD T20 (M1): `Style#getStroke(Colors)` -- `colors.getSpecificLineStroke()`
   // (`Colors.java:138-142`) wins OUTRIGHT over BOTH the stereo and bare
   // theme thickness tiers below when an inline `line.dashed`/`line.dotted`/
@@ -328,15 +341,15 @@ export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number
   // (`EntityImageClass.java:215`: `getStyle().getStroke(lineConfig
   // .getColors())` returns `stroke` wholesale, no merge with `LineThickness`).
   const lineStyle = parseDeclarationColors(geo.color).lineStyle;
-  if (lineStyle !== undefined) return strokeForStyle(lineStyle).getThickness();
+  if (lineStyle !== undefined) return strokeForStyle(lineStyle).getThickness() * theme.scaleK;
   const byStereo = theme.colors.graph.classBorderThicknessByStereo;
   if (byStereo !== undefined && geo.stereotypeLabels !== undefined) {
     for (const label of geo.stereotypeLabels) {
       const hit = byStereo[label.toLowerCase()];
-      if (hit !== undefined) return hit;
+      if (hit !== undefined) return hit * theme.scaleK;
     }
   }
-  return theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT;
+  return (theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT) * theme.scaleK;
 }
 
 /**
@@ -350,11 +363,11 @@ export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number
  * both halves" convention -- `undefined` (no attribute) for every
  * classifier with no inline line-style override, zero behavior change.
  */
-export function classBorderStrokeDasharray(geo: ClassifierGeo): string | undefined {
+export function classBorderStrokeDasharray(geo: ClassifierGeo, k: number): string | undefined {
   const lineStyle = parseDeclarationColors(geo.color).lineStyle;
   if (lineStyle === undefined) return undefined;
   const dash = strokeForStyle(lineStyle).getDasharraySvg();
-  return dash === undefined ? undefined : `${dash[0]},${dash[1]}`;
+  return dash === undefined ? undefined : scaleDashArrayString(`${dash[0]},${dash[1]}`, k);
 }
 
 /**

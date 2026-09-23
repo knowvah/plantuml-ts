@@ -47,7 +47,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodyEnhanced1.java:186-190
  */
 import type { ClassifierGeo } from './layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import { rect, line, image } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
 import { text as svgText } from '../../core/svg.js';
@@ -62,7 +62,7 @@ import type { UrlTaggedPrimitive } from './renderer-url.js';
 function renderDividerPart(
   geo: ClassifierGeo,
   part: Extract<EnhancedBodyPart, { kind: 'divider' }>,
-  theme: Theme,
+  theme: ScaledTheme,
   borderColor: string,
 ): string {
   const y = geo.y + part.y;
@@ -123,7 +123,7 @@ function renderDividerPart(
 function buildRowsPartPrimitives(
   geo: ClassifierGeo,
   part: Extract<EnhancedBodyPart, { kind: 'rows' }>,
-  theme: Theme,
+  theme: ScaledTheme,
 ): UrlTaggedPrimitive[] {
   const primitives: UrlTaggedPrimitive[] = [];
   for (const row of part.rows) {
@@ -178,23 +178,30 @@ function renderTreeConnector(
   geo: ClassifierGeo,
   c: Extract<EnhancedBodyPart, { kind: 'tree' }>['connectors'][number],
   fill: Paint,
+  k: number,
 ): string {
+  // cdd-T29 R2: `bulletX`/`bulletY`/`hx1`/etc. are already-scaled geometry
+  // (`class-scale-geo-body.ts#scaleTreeConnector`); the bullet's own `2,2`
+  // size and the three `stroke-width:1` literals are NOT -- local
+  // pixel-literal constants (`Skeleton2#draw`'s own fixed bullet/stroke),
+  // scaled here like `sequence/scale-geo.ts`'s identical local-constant
+  // precedent.
   return (
-    rect(geo.x + c.bulletX, geo.y + c.bulletY, 2, 2, { fill, stroke: '#000000', strokeWidth: 1 }) +
-    line(geo.x + c.hx1, geo.y + c.hy, geo.x + c.hx2, geo.y + c.hy, { stroke: '#000000', strokeWidth: 1 }) +
-    line(geo.x + c.vx, geo.y + c.vy1, geo.x + c.vx, geo.y + c.vy2, { stroke: '#000000', strokeWidth: 1 })
+    rect(geo.x + c.bulletX, geo.y + c.bulletY, 2 * k, 2 * k, { fill, stroke: '#000000', strokeWidth: k }) +
+    line(geo.x + c.hx1, geo.y + c.hy, geo.x + c.hx2, geo.y + c.hy, { stroke: '#000000', strokeWidth: k }) +
+    line(geo.x + c.vx, geo.y + c.vy1, geo.x + c.vx, geo.y + c.vy2, { stroke: '#000000', strokeWidth: k })
   );
 }
 
 function renderTreePart(
   geo: ClassifierGeo,
   part: Extract<EnhancedBodyPart, { kind: 'tree' }>,
-  theme: Theme,
+  theme: ScaledTheme,
   fill: Paint,
 ): string {
   let out = '';
   for (const row of part.rows) out += renderRow(geo, row, theme);
-  for (const c of part.connectors) out += renderTreeConnector(geo, c, fill);
+  for (const c of part.connectors) out += renderTreeConnector(geo, c, fill, theme.scaleK);
   return out;
 }
 
@@ -222,7 +229,7 @@ function renderTreePart(
 export function buildEnhancedBodyPrimitives(
   geo: ClassifierGeo,
   body: EnhancedBodyGeo,
-  theme: Theme,
+  theme: ScaledTheme,
   fill: Paint,
   borderColor: string,
 ): UrlTaggedPrimitive[] {

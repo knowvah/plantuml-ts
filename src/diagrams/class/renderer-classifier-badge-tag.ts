@@ -9,7 +9,8 @@
  * behavior change.
  */
 import type { ClassifierGeo } from './layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import { rect, text, ellipse, path, image } from '../../core/svg.js';
 import {
   resolveBadgeFill,
@@ -51,7 +52,15 @@ import {
  * `geo.height` is the correct value in every case that reaches this
  * fallback, not a new formula.
  */
-export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
+/** cdd-T29 R2: `BADGE_RADIUS` (`class-badge.ts`) is a render-time
+ *  pixel-literal constant, scaled here like every other local literal this
+ *  round's audit found (D4/journal row 175) -- split out purely to keep
+ *  {@link renderBadge}'s own NLOC under this project's cap. */
+function scaledBadgeRadius(theme: ScaledTheme): number {
+  return resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius) * theme.scaleK;
+}
+
+export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
   const headerH = geo.dividerYs[0] ?? geo.height;
   const nameRowIndex = (geo.headerRowCount ?? 1) - 1;
   // G2 N38: resolved from theme (formula or explicit override) -- see
@@ -59,11 +68,8 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
   // the SAME value `buildHeaderRow` used to compute `badgeIndent`
   // whenever that field is present (the common case); only reached for
   // hand-built test geometries that bypass the real layout pipeline.
-  const badgeRadius = resolveBadgeRadius(
-    theme.colors.graph.circledCharacterFontSize,
-    theme.colors.graph.circledCharacterRadius,
-  );
-  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN + badgeRadius;
+  const badgeRadius = scaledBadgeRadius(theme);
+  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN * theme.scaleK + badgeRadius;
   const badgeX = geo.x + badgeIndent;
   const badgeY = geo.y + headerH / 2;
   // G2 N32: `skinparam stereotype<X>BackgroundColor/BorderColor` / `<style>
@@ -89,7 +95,7 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
       // `resolveBadgeGlyphColor`'s own `rootFallback` doc comments.
       fill: resolveBadgeFill(geo.kind, geo.badgeColor, spot?.background, theme.colors.graph.spotCascadeBackground),
       stroke: resolveBadgeBorder(theme.colors.border, spot?.border, theme.colors.graph.spotCascadeBorder),
-      'stroke-width': 1,
+      'stroke-width': theme.scaleK,
     }) +
     // `style.value(PName.FontColor)` on the spot style signature -- black in
     // every non-monochrome theme sampled (`plans/g2-class-svg/ledger.md`
@@ -114,6 +120,7 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
         theme.colors.graph.circledCharacterFontFamily,
         theme.colors.graph.circledCharacterFontBold,
         theme.colors.graph.circledCharacterFontItalic,
+        theme.scaleK,
       ),
       { fill: resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont) },
     )
@@ -141,8 +148,12 @@ const BADGE_SPRITE_TOP_MARGIN = 5;
  * FIRST element `HeaderLayout`'s ctor places, at a fixed top offset, unlike
  * the circled-character badge's own vertical-center placement rule).
  */
-export function renderBadgeSpriteImage(geo: ClassifierGeo, sprite: { href: string; width: number; height: number }): string {
-  return image(geo.x + BADGE_LEFT_MARGIN, geo.y + BADGE_SPRITE_TOP_MARGIN, sprite.width, sprite.height, sprite.href);
+export function renderBadgeSpriteImage(
+  geo: ClassifierGeo,
+  sprite: { href: string; width: number; height: number },
+  k: number,
+): string {
+  return image(geo.x + BADGE_LEFT_MARGIN * k, geo.y + BADGE_SPRITE_TOP_MARGIN * k, sprite.width, sprite.height, sprite.href);
 }
 
 /**
@@ -175,14 +186,14 @@ const GENERIC_TAG_BACKGROUND = '#FFFFFF';
 export function renderGenericTag(
   geo: ClassifierGeo,
   tag: NonNullable<ClassifierGeo['genericTag']>,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   return (
     rect(geo.x + tag.rectX, geo.y + tag.rectY, tag.rectWidth, tag.rectHeight, {
       fill: GENERIC_TAG_BACKGROUND,
       stroke: theme.colors.border,
-      strokeWidth: 1,
-      strokeDasharray: '2,2',
+      strokeWidth: theme.scaleK,
+      strokeDasharray: scaleDashArrayString('2,2', theme.scaleK),
     }) +
     // CDD T6FU: one `<text>` per `Display.getWithNewlines` line
     // (`EntityImageClassHeader.java:146`), each pre-placed and pre-measured

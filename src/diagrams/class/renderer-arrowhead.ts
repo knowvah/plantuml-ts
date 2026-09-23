@@ -55,9 +55,6 @@ import { place } from '../../core/svek/svek-edge-extremity.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
 import { buildDotPathFromSplinePoints } from '../../core/svek/svek-edge-geometry.js';
-import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
-import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
-import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import type { LinkDecor } from './ast.js';
 import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type { EdgeGeo } from './layout.js';
@@ -122,13 +119,29 @@ const NO_TEXT_BOUNDER = { calculateDimension: (): { width: number } => ({ width:
  *  outlines are never dashed, regardless of the edge's own line style —
  *  `SvekEdge.ts`'s own `stroke.onlyThickness()` call) then `Back` (fill —
  *  the edge color for a filled decor, `'none'` for a hollow one). */
+/**
+ * cdd-T29 R2 (D4/journal row 175): `strokeWidth`/the drawable's OWN local
+ * shape geometry (baked into `drawable` by `place()`'s `factory
+ * .createUDrawable(point, angle, null)` call, in the SAME UNSCALED
+ * coordinate space as `point`) are scaled by setting `SvgOption.scale = k`
+ * on this throwaway klimt document -- `basicSvgOption`'s own already-
+ * faithful `format()`/`finalizeRootAttributes` (`scale-command.ts`'s
+ * module doc, jar-verified against `component/saveje-35-vumu271`)
+ * multiplies EVERY emitted numeral by it, matching `SvgGraphics#format`
+ * (`SvgGraphics.java:466-472`) exactly. The caller MUST pass an UNSCALED
+ * `point`/`strokeWidth` here (never the already-scaled `EdgeGeo.points`/
+ * `.strokeWidth` this file's OTHER caller, `renderer-edge.ts`, uses for
+ * its own `<path>` -- see `buildEdgeArrowheads`'s own doc comment) or the
+ * position/stroke would scale TWICE.
+ */
 function drawExtremityMarkup(
   drawable: UDrawable,
   isFill: boolean,
   color: Paint,
   strokeWidth: number,
+  k: number,
 ): { body: string; extraDefs: string } {
-  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
+  const ug = UGraphicSvg.build(0, basicSvgOption({ scale: k }), '$version$', NO_TEXT_BOUNDER);
   // G2 N31: `edge.strokeWidth` (`class-geo-builders.ts#buildStrokeOverride`,
   // already the resolved `-[thickness=N]->`/`bold` thickness -- N26) was
   // never read here; every extremity drew at a hardcoded thickness 1
@@ -188,6 +201,96 @@ function segmentAngle(from: Point2D, to: Point2D): number {
   return Math.atan2(to.y - from.y, to.x - from.x);
 }
 
+/** Shared draw inputs for both the tail and head extremity -- bundled to
+ *  stay inside this project's per-function param-count cap (mirrors
+ *  `class-body-enhanced-layout.ts#EnhancedLayoutCtx`'s identical
+ *  rationale). `k` defaults to 1 so every pre-existing caller (this file's
+ *  own unit tests) is unaffected; `renderer-edge.ts` passes the diagram's
+ *  real resolved factor (cdd-T29 R2, D4/journal row 175). */
+interface ExtremityDrawCtx {
+  readonly color: Paint;
+  readonly backgroundColor: Paint;
+  readonly strokeWidth: number;
+  readonly k: number;
+}
+
+/** One end's placed+drawn extremity -- split out of {@link buildEdgeArrowheads}
+ *  purely to keep that function's own NLOC under this project's cap; shared
+ *  by both the tail and head branches (identical work, different point/
+ *  angle/decor-name inputs). See `drawExtremityMarkup`'s own doc comment for
+ *  why `point`/`ctx.strokeWidth` are unscaled here and `ctx.k` is threaded
+ *  through instead, and `buildEdgeArrowheads`'s own doc comment for the
+ *  trim rescale. */
+function placeAndDrawExtremity(
+  name: LinkDecorName,
+  point: Point2D,
+  angle: number,
+  ctx: ExtremityDrawCtx,
+): { body: string; extraDefs: string; trim: Point2D } {
+  const { color, backgroundColor, strokeWidth, k } = ctx;
+  const placed = place(name, { x: point.x / k, y: point.y / k }, angle, backgroundColor);
+  const drawn = drawExtremityMarkup(placed.drawable, placed.isFill, color, strokeWidth, k);
+  return { ...drawn, trim: { x: placed.trim.x * k, y: placed.trim.y * k } };
+}
+
+/** The tail-side extremity (faces AWAY from the edge, back toward where it
+ *  came from -- the travel direction leaving the start point, reversed by
+ *  PI, matching `SvekEdge`'s `dotPath.getStartAngle() + Math.PI`) -- split
+ *  out of {@link buildEdgeArrowheads} alongside {@link drawHeadExtremity}
+ *  purely to keep that function's own NLOC under this project's cap. */
+function drawTailExtremity(
+  name: LinkDecorName | undefined,
+  first: Point2D,
+  second: Point2D,
+  ctx: ExtremityDrawCtx,
+): { body: string; extraDefs: string; trim: Point2D | undefined } {
+  if (name === undefined) return { body: '', extraDefs: '', trim: undefined };
+  const tailAngle = segmentAngle(first, second) + Math.PI;
+  return placeAndDrawExtremity(name, first, tailAngle, ctx);
+}
+
+/** The head-side extremity (faces FORWARD, continuing the edge's own
+ *  direction of travel as it arrives at the end point, NOT reversed --
+ *  matching `SvekEdge`'s un-negated `dotPath.getEndAngle()`) -- see
+ *  {@link drawTailExtremity}'s own doc comment for the split rationale. */
+function drawHeadExtremity(
+  name: LinkDecorName | undefined,
+  secondToLast: Point2D,
+  last: Point2D,
+  ctx: ExtremityDrawCtx,
+): { body: string; extraDefs: string; trim: Point2D | undefined } {
+  if (name === undefined) return { body: '', extraDefs: '', trim: undefined };
+  const headAngle = segmentAngle(secondToLast, last);
+  return placeAndDrawExtremity(name, last, headAngle, ctx);
+}
+
+/**
+ * Builds the inline-polygon/path markup for one edge's tail and head
+ * extremities — the replacement for `class/renderer.ts`'s old
+ * `targetMarker`/`sourceMarker` (`url(#...)` marker-ref) functions.
+ * Returns {@link EMPTY_ARROWHEADS} when the edge has fewer than two
+ * points to anchor a direction on, or neither end carries a decor (a
+ * plain `--` association).
+ */
+/** Optional trailing knobs -- bundled to stay inside this project's
+ *  per-function param-count cap (same rationale as {@link ExtremityDrawCtx}).
+ *  - `resolvedStrokeWidth`: B7/M8's ALREADY-RESOLVED stroke width, passed in
+ *    rather than re-derived. Upstream draws the connecting line and its
+ *    extremities from one `styleLine.getStroke()` (`SvekEdge.java:874-876`),
+ *    so the two must agree by construction; `edge.strokeWidth ?? 1` alone
+ *    misses a width that came from the link's own `<<tag>>` style class.
+ *    Absent -> the pre-B7 default (`edge.strokeWidth ?? 1`). Same coordinate
+ *    space as `edge.points` -- ALREADY scaled by `k` (unscaled before the
+ *    klimt sub-draw, `placeAndDrawExtremity`'s doc comment).
+ *  - `k`: cdd-T29 R2 (D4/journal row 175), defaults to 1 so every
+ *    pre-existing caller (this file's own unit tests) is unaffected;
+ *    `renderer-edge.ts` passes the diagram's real resolved factor.
+ */
+export interface EdgeArrowheadOptions {
+  readonly resolvedStrokeWidth?: number;
+  readonly k?: number;
+}
+
 /**
  * Builds the inline-polygon/path markup for one edge's tail and head
  * extremities — the replacement for `class/renderer.ts`'s old
@@ -200,66 +303,34 @@ export function buildEdgeArrowheads(
   edge: EdgeGeo,
   color: Paint,
   backgroundColor: Paint,
-  // B7/M8: the ALREADY-RESOLVED stroke width, passed in rather than
-  // re-derived. Upstream draws the connecting line and its extremities from
-  // one `styleLine.getStroke()` (`SvekEdge.java:874-876`), so the two must
-  // agree by construction; `edge.strokeWidth ?? 1` alone misses a width that
-  // came from the link's own `<<tag>>` style class. Optional so every
-  // existing caller (and the unit tests) keeps the pre-B7 default.
-  resolvedStrokeWidth?: number,
+  options: EdgeArrowheadOptions = {},
 ): EdgeArrowheads {
   const tailName = decorName(edge.sourceDecor);
   const headName = decorName(edge.targetDecor);
   if (tailName === undefined && headName === undefined) return EMPTY_ARROWHEADS;
   if (edge.points.length < 2) return EMPTY_ARROWHEADS;
 
-  const first = edge.points[0]!;
-  const second = edge.points[1]!;
-  const last = edge.points[edge.points.length - 1]!;
-  const secondToLast = edge.points[edge.points.length - 2]!;
-
-  let tail = '';
-  let head = '';
-  let extraDefs = '';
-  let tailTrim: Point2D | undefined;
-  let headTrim: Point2D | undefined;
-
-  // G2 N31: same value `renderer.ts#renderEdge`'s own connecting `<path>`
-  // uses -- keeps both shapes' thickness in sync whether or not a bracket
-  // override is present. B7/M8 passes the resolved width in (it may come
-  // from the link's `<<tag>>` style class, which this module cannot see);
-  // the `edge.strokeWidth ?? 1` fallback is the pre-B7 behavior verbatim.
-  const strokeWidth = resolvedStrokeWidth ?? edge.strokeWidth ?? 1;
-  if (tailName !== undefined) {
-    // Tail decor faces AWAY from the edge (back toward where it came
-    // from) -- the travel direction leaving the start point (first ->
-    // second), reversed by PI, matching `SvekEdge`'s
-    // `dotPath.getStartAngle() + Math.PI`.
-    const tailAngle = segmentAngle(first, second) + Math.PI;
-    const placed = place(tailName, first, tailAngle, backgroundColor);
-    const drawn = drawExtremityMarkup(placed.drawable, placed.isFill, color, strokeWidth);
-    tail = drawn.body;
-    extraDefs += drawn.extraDefs;
-    tailTrim = placed.trim;
-  }
-  if (headName !== undefined) {
-    // Head decor faces FORWARD, continuing the edge's own direction of
-    // travel as it arrives at the end point (secondToLast -> last), NOT
-    // reversed -- matching `SvekEdge`'s un-negated `dotPath.getEndAngle()`.
-    const headAngle = segmentAngle(secondToLast, last);
-    const placed = place(headName, last, headAngle, backgroundColor);
-    const drawn = drawExtremityMarkup(placed.drawable, placed.isFill, color, strokeWidth);
-    head = drawn.body;
-    extraDefs += drawn.extraDefs;
-    headTrim = placed.trim;
-  }
+  const k = options.k ?? 1;
+  const ctx: ExtremityDrawCtx = {
+    color,
+    backgroundColor,
+    strokeWidth: (options.resolvedStrokeWidth ?? edge.strokeWidth ?? 1) / k,
+    k,
+  };
+  const tail = drawTailExtremity(tailName, edge.points[0]!, edge.points[1]!, ctx);
+  const head = drawHeadExtremity(
+    headName,
+    edge.points[edge.points.length - 2]!,
+    edge.points[edge.points.length - 1]!,
+    ctx,
+  );
 
   return {
-    tail,
-    head,
-    extraDefs,
-    ...(tailTrim !== undefined ? { tailTrim } : {}),
-    ...(headTrim !== undefined ? { headTrim } : {}),
+    tail: tail.body,
+    head: head.body,
+    extraDefs: tail.extraDefs + head.extraDefs,
+    ...(tail.trim !== undefined ? { tailTrim: tail.trim } : {}),
+    ...(head.trim !== undefined ? { headTrim: head.trim } : {}),
   };
 }
 
@@ -305,78 +376,12 @@ export function applyDecorTrim(
   return out;
 }
 
-/**
- * G2 N54: the "arrowhead-polygon ink not modeled" gap `layout-ink-extent.ts`'s
- * own file doc comment names (`UPolygon` / `HACK_X_FOR_POLYGON=10`,
- * `LimitFinder#drawUPolygon`, `LimitFinder.ts:172-176`) -- jar-verified at
- * N53 against `janeba-15-duja043`'s `B extends A` extension arrowhead
- * (`minX_raw = -9.0349`, matching the polygon's own raw left edge `0.9651`
- * minus `HACK_X_FOR_POLYGON` to 4 decimal places, see
- * `plans/g2-class-svg/ledger.md` N53 Mechanism 2).
- *
- * Reuses the SAME {@link place}/{@link segmentAngle} placement
- * {@link buildEdgeArrowheads} already computes for the real draw pass
- * (rather than re-deriving polygon vertex math independently -- a second,
- * divergence-prone port of `ExtremityTriangle`/`ExtremityArrow`/
- * `ExtremityDiamond`'s own geometry), and walks the placed
- * `Extremity#drawU` through a REAL `LimitFinder` -- the exact upstream
- * mechanism (`SvekResult#calculateDimension`'s ink walk IS a `LimitFinder`
- * over `SvekEdge#drawU`'s own extremity draw calls; `layout-ink-extent.ts`'s
- * own header doc comment, point 1). Every decor's SPECIFIC shape gets
- * EXACTLY the ink rule jar's `LimitFinder` dispatch applies to it --
- * `UPolygon` (EXTENDS/ARROW/ARROW_TRIANGLE/AGGREGATION/COMPOSITION):
- * `HACK_X_FOR_POLYGON`-padded x, unpadded y; `UEllipse` (CIRCLE*):
- * unpadded; `URectangle` (SQUARE): the classic `-1`/`+1` inset;
- * `UPath`/`ULine` (PARENTHESIS/CROWFOOT-family/PLUS/NOT_NAVIGABLE/etc): plain
- * bbox -- NOT a one-size-fits-all polygon assumption.
- *
- * `backgroundColor` is passed as a fixed `'none'` dummy: ink geometry
- * never depends on fill color (only the `Back`/`Fore` VISUAL state
- * `LimitFinder#apply` accepts but never folds into its own `addPoint`
- * accumulator).
- */
-export interface EdgeExtremityInk {
-  readonly minX: number;
-  readonly minY: number;
-  readonly maxX: number;
-  readonly maxY: number;
-}
-
-/** Extremities never draw text (see {@link NO_TEXT_BOUNDER}'s own doc
- *  comment) -- this stub is never actually invoked. */
-const INK_STRING_BOUNDER: StringBounder = {
-  calculateDimension: () => new XDimension2D(0, 0),
-};
-
-/**
- * Returns the union ink extent of `edge`'s tail/head extremity shapes, or
- * `undefined` when neither end carries a decor (a plain `--` association)
- * or the edge has fewer than two points to anchor a placement angle on --
- * mirrors {@link buildEdgeArrowheads}'s own early-return conditions exactly,
- * since an edge that draws no extremity contributes no extremity ink.
- */
-export function edgeExtremityInk(edge: EdgeGeo): EdgeExtremityInk | undefined {
-  const tailName = decorName(edge.sourceDecor);
-  const headName = decorName(edge.targetDecor);
-  if (tailName === undefined && headName === undefined) return undefined;
-  if (edge.points.length < 2) return undefined;
-
-  const first = edge.points[0]!;
-  const second = edge.points[1]!;
-  const last = edge.points[edge.points.length - 1]!;
-  const secondToLast = edge.points[edge.points.length - 2]!;
-
-  const finder = LimitFinder.create(INK_STRING_BOUNDER, false);
-  if (tailName !== undefined) {
-    const tailAngle = segmentAngle(first, second) + Math.PI;
-    place(tailName, first, tailAngle, 'none').drawable.drawU(finder);
-  }
-  if (headName !== undefined) {
-    const headAngle = segmentAngle(secondToLast, last);
-    place(headName, last, headAngle, 'none').drawable.drawU(finder);
-  }
-  return { minX: finder.getMinX(), minY: finder.getMinY(), maxX: finder.getMaxX(), maxY: finder.getMaxY() };
-}
+// cdd-T29 R2: `EdgeExtremityInk`/`edgeExtremityInk` moved to `renderer-
+// arrowhead-ink.ts` when this file's `scaleK` threading pushed it back
+// over the 500-line hook cap (pre-authorised split) -- a pure move,
+// re-exported so no consumer's import path changed.
+export type { EdgeExtremityInk } from './renderer-arrowhead-ink.js';
+export { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 
 // ---------------------------------------------------------------------------
 // cdd-T7 (A5/M4, A2a/M6): mid-link decoration (`-0)-` etc.)
