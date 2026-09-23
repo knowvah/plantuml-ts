@@ -8,6 +8,19 @@
 
 import type { ClassDiagramAST, ClassNote, HideTarget } from './ast.js';
 import { isMethodMember } from './class-layout-helpers.js';
+import { NEVER_UNLINKED, cascadeHidden } from './class-directives-hide-cascade.js';
+
+/**
+ * cdd-T31 (E5 defect a): `ast.namespaceSeparator`'s DEFAULT is `"."`
+ * (unset/`undefined` -- a hand-authored AST literal fixture, or a diagram
+ * that never wrote `set separator`), but an EXPLICIT `null` (`set separator
+ * none`) must stay `null`, not fold into the default -- `??` alone would
+ * coalesce both. `undefined` and `null` are deliberately distinct here (see
+ * the field's own doc comment on `ast.ts`).
+ */
+function resolveSeparator(ast: ClassDiagramAST): string | null {
+  return ast.namespaceSeparator === undefined ? '.' : ast.namespaceSeparator;
+}
 
 /**
  * A2s R2g: does this hide/show directive reach this classifier? Upstream
@@ -175,21 +188,56 @@ function matchPattern(name: string, pattern: string): boolean {
 }
 
 /**
- * Entity-name matching strips the qualified name down to its leaf segment
- * first (upstream `name.lastIndexOf(Plasma.MAGIC_SEPARATOR)` — the Quark
- * qualified-name separator; our ids qualify with `.`/`::` instead). Tag and
- * stereotype matching (isApplyableTag/-Stereotype) use {@link matchPattern}
- * directly — upstream applies match() to them too, but tag/stereotype labels
- * never contain the separator, so the strip is a no-op there.
+ * cdd-T31 (A2b E5 defect a): entity-name matching strips the qualified name
+ * down to its leaf segment ONLY when the diagram's ACTIVE separator is
+ * magic (`sep === null`, `set separator none` -- upstream:
+ * `name.lastIndexOf(Plasma.MAGIC_SEPARATOR)`, cucadiagram/HideOrShow.java:
+ * 107-122, plasma/Plasma.java:52,85-88). A class diagram's DEFAULT
+ * separator is `"."` (AbstractClassOrObjectDiagram.java:65 -> net/atmp/
+ * CucaDiagram.java:144-148), not magic, so `pack1.Foo1` (built at
+ * class-namespace-resolve.ts#qualifiedId) keeps its full qualified id here
+ * and a bare `hide Foo1` no longer wrongly matches it (cicovi-23-zipe215).
+ * `sep` is `ast.namespaceSeparator` -- see its own doc comment for why this
+ * is a diagram-level (not upstream's per-entity-creation-time) flag. Tag
+ * and stereotype matching (isApplyableTag/-Stereotype) use
+ * {@link matchPattern} directly — upstream applies match() to them too, but
+ * tag/stereotype labels never contain the separator, so the strip is a
+ * no-op there.
  */
-function matchEntityName(id: string, pattern: string): boolean {
+function matchEntityName(id: string, pattern: string, sep: string | null): boolean {
+  if (sep !== null) return matchPattern(id, pattern);
   const m = /(?:::|\.)([^.:]+)$/.exec(id);
   return matchPattern(m !== null ? m[1]! : id, pattern);
 }
 
+/**
+ * cdd-T31 (A2b E5 defect c): `CucaDiagram#fixWhat` (net/atmp/
+ * CucaDiagram.java:638-646) -- a pattern-form directive parsed INSIDE a
+ * non-root package/namespace has `what` PREFIXED with that group's
+ * qualified id + separator, UNCONDITIONALLY (even for a `$tag`/
+ * `<<stereotype>>`/`@unlinked` target -- upstream applies this before
+ * `HideOrShow`'s own shape dispatch, so an in-package `hide $tag` stops
+ * looking like a tag selector once prefixed; a faithfully preserved quirk,
+ * not special-cased away here). No-op at the root (`scopeNsId` undefined)
+ * or when the separator is magic (`sep === null`, fixWhat's own `sep !=
+ * null` guard -- upstream never prefixes under `set separator none`).
+ */
+function fixWhat(what: string, scopeNsId: string | undefined, sep: string | null): string {
+  if (sep === null || scopeNsId === undefined) return what;
+  return `${scopeNsId}${sep}${what}`;
+}
+
 /** HideOrShow#isApplyable(Entity): `$tag` → stereotags; `<<s>>` → stereotype;
- *  `@unlinked` → isAloneAndUnlinked; else leaf-name match. */
-function isApplyable(e: RemovableEntity, what: string, unlinked: (id: string) => boolean): boolean {
+ *  `@unlinked` → isAloneAndUnlinked; else leaf-name match. `directive.what`
+ *  is resolved through {@link fixWhat} FIRST (cdd-T31 defect c) -- every
+ *  branch below dispatches on the (possibly group-prefixed) result. */
+function isApplyable(
+  e: RemovableEntity,
+  directive: { what: string; scopeNsId?: string },
+  unlinked: (id: string) => boolean,
+  sep: string | null,
+): boolean {
+  const what = fixWhat(directive.what, directive.scopeNsId, sep);
   if (what.startsWith('$')) {
     return (e.tags ?? []).some((t) => matchPattern(t, what.slice(1)));
   }
@@ -197,7 +245,7 @@ function isApplyable(e: RemovableEntity, what: string, unlinked: (id: string) =>
     return e.stereotype !== undefined && matchPattern(e.stereotype, what.slice(2, -2).trim());
   }
   if (isAboutUnlinked(what)) return unlinked(e.id);
-  return matchEntityName(e.id, what);
+  return matchEntityName(e.id, what, sep);
 }
 
 /** A `remove`/`restore` OR `hide`/`show`-pattern directive — both upstream
@@ -210,6 +258,12 @@ function isApplyable(e: RemovableEntity, what: string, unlinked: (id: string) =>
 interface PatternDirective<A extends string> {
   what: string;
   action: A;
+  /** cdd-T31 (E5 defect c): present only for {@link HideShowPatternDirective}
+   *  (`RemoveRestoreDirective` has no such field, structurally `undefined`
+   *  here -- `remove`/`restore`'s own in-package `fixWhat` prefix stays
+   *  unported, matching `filterRemovedEntities`'s pre-existing "group
+   *  removal not implemented" note). */
+  scopeNsId?: string;
 }
 
 /** Fold the directive list over one entity — HideOrShow#apply chain: each
@@ -217,18 +271,19 @@ interface PatternDirective<A extends string> {
  *  the LAST applicable directive wins (`remove *` then `restore $tag1` /
  *  `hide *` then `show $tag1`). `positiveAction` is the action value that
  *  sets the verdict true (`'remove'` for remove/restore, `'hide'` for
- *  hide/show-pattern). */
+ *  hide/show-pattern). `sep` is `ast.namespaceSeparator` (defect a/c). */
 function foldDirectives<A extends string>(
   dirs: readonly PatternDirective<A>[],
   e: RemovableEntity,
   includeUnlinked: boolean,
   unlinked: (id: string) => boolean,
   positiveAction: A,
+  sep: string | null,
 ): boolean {
   let matched = false;
   for (const d of dirs) {
     if (!includeUnlinked && isAboutUnlinked(d.what)) continue;
-    if (isApplyable(e, d.what, unlinked)) matched = d.action === positiveAction;
+    if (isApplyable(e, d, unlinked, sep)) matched = d.action === positiveAction;
   }
   return matched;
 }
@@ -256,6 +311,43 @@ function noteSingleLinkOther(
   return other;
 }
 
+/** Fold `dirs` over every classifier, adding a match to `into` -- shared
+ *  loop body for {@link computeRemovedIds}/{@link computeHiddenIds} (T31
+ *  CCN split; no behavior change). */
+function foldClassifiersInto<A extends string>(
+  into: Set<string>,
+  ast: ClassDiagramAST,
+  dirs: readonly PatternDirective<A>[],
+  unlinked: (id: string) => boolean,
+  positiveAction: A,
+  sep: string | null,
+): void {
+  for (const c of ast.classifiers) {
+    if (foldDirectives(dirs, c, true, unlinked, positiveAction, sep)) into.add(c.id);
+  }
+}
+
+/** Fold `dirs` over every note (single-link delegation first) -- shared
+ *  loop body for {@link computeRemovedIds}/{@link computeHiddenIds}. `into`
+ *  is read for delegation AND written for the note's own verdict, matching
+ *  the original inline loops' semantics exactly. */
+function foldNotesInto<A extends string>(
+  into: Set<string>,
+  ast: ClassDiagramAST,
+  dirs: readonly PatternDirective<A>[],
+  links: readonly VisibleLink[],
+  noteIds: ReadonlySet<string>,
+  unlinked: (id: string) => boolean,
+  positiveAction: A,
+  sep: string | null,
+): void {
+  for (const n of ast.notes) {
+    const other = noteSingleLinkOther(n, links, noteIds);
+    const isMatch = other !== null ? into.has(other) : foldDirectives(dirs, n, true, unlinked, positiveAction, sep);
+    if (isMatch) into.add(n.id);
+  }
+}
+
 /**
  * Compute the set of removed entity ids (classifiers AND notes) for the
  * accumulated `remove`/`restore` directives. Pure — evaluated once at the
@@ -275,24 +367,19 @@ export function computeRemovedIds(ast: ClassDiagramAST): Set<string> {
   const removed = new Set<string>();
   if (dirs.length === 0) return removed;
 
+  const sep = resolveSeparator(ast);
   const links = collectVisibleLinks(ast);
   const noteIds = new Set(ast.notes.map((n) => n.id));
-  const unlinked = buildUnlinkedPredicate(ast, dirs, links, 'remove');
+  const unlinked = buildUnlinkedPredicate(ast, dirs, links, 'remove', sep);
 
-  for (const c of ast.classifiers) {
-    if (foldDirectives(dirs, c, true, unlinked, 'remove')) removed.add(c.id);
-  }
-  for (const n of ast.notes) {
-    const other = noteSingleLinkOther(n, links, noteIds);
-    const isRemoved = other !== null ? removed.has(other) : foldDirectives(dirs, n, true, unlinked, 'remove');
-    if (isRemoved) removed.add(n.id);
-  }
+  foldClassifiersInto(removed, ast, dirs, unlinked, 'remove', sep);
+  foldNotesInto(removed, ast, dirs, links, noteIds, unlinked, 'remove', sep);
   return removed;
 }
 
 /**
- * Compute the set of HIDDEN entity ids (classifiers AND notes) for the
- * accumulated `hide`/`show <entity|$tag|<<stereotype>>|*|@unlinked>`
+ * Compute the set of HIDDEN entity ids (classifiers, NAMESPACES, AND notes)
+ * for the accumulated `hide`/`show <entity|$tag|<<stereotype>>|*|@unlinked>`
  * directives ({@link HideShowPatternDirective}) — same shape and same
  * matching engine as {@link computeRemovedIds} (upstream shares the
  * `HideOrShow` class between `hides2` and `removed`), but the caller MUST
@@ -301,26 +388,49 @@ export function computeRemovedIds(ast: ClassDiagramAST): Set<string> {
  * `ClassifierGeo.hidden` from this set; `renderer.ts` skips content for a
  * hidden classifier while every uid/creationIndex/layout computation runs
  * exactly as if it were visible).
+ *
+ * cdd-T31 (E5 defect b): NAMESPACES are folded too (a `hide util`/`hide
+ * $tag` on a `package`/`namespace` header), and the result is CASCADED down
+ * `parentId`/`namespace` ancestor chains — `Entity#isHidden` makes no leaf/
+ * group distinction (`parentContainer.isHidden()` recurses up before the
+ * entity's own fold is even consulted, abel/Entity.java:428-440). Namespace
+ * folding excludes `@unlinked` (`includeUnlinked=false` below): the shared
+ * `unlinked` predicate is built from `links`, which never references a
+ * namespace id, so it would vacuously match every namespace (`.every()` on
+ * zero relevant links) — `Entity#isAloneAndUnlinked`'s GROUP branch (a
+ * recursive descendant check, abel/Entity.java:456-462) is not ported.
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java#isHidden
  */
+/** Fold `dirs` over every namespace, adding a match to `into` -- see
+ *  {@link computeHiddenIds}'s own comment for why `@unlinked` is excluded
+ *  (`NEVER_UNLINKED`) for this walk only. */
+function foldNamespacesInto<A extends string>(
+  into: Set<string>,
+  ast: ClassDiagramAST,
+  dirs: readonly PatternDirective<A>[],
+  positiveAction: A,
+  sep: string | null,
+): void {
+  for (const ns of ast.namespaces) {
+    if (foldDirectives(dirs, ns, false, NEVER_UNLINKED, positiveAction, sep)) into.add(ns.id);
+  }
+}
+
 export function computeHiddenIds(ast: ClassDiagramAST): Set<string> {
   const dirs = ast.hidePatternDirectives ?? [];
-  const hidden = new Set<string>();
-  if (dirs.length === 0) return hidden;
+  if (dirs.length === 0) return new Set();
 
+  const sep = resolveSeparator(ast);
   const links = collectVisibleLinks(ast);
   const noteIds = new Set(ast.notes.map((n) => n.id));
-  const unlinked = buildUnlinkedPredicate(ast, dirs, links, 'hide');
+  const unlinked = buildUnlinkedPredicate(ast, dirs, links, 'hide', sep);
 
-  for (const c of ast.classifiers) {
-    if (foldDirectives(dirs, c, true, unlinked, 'hide')) hidden.add(c.id);
-  }
-  for (const n of ast.notes) {
-    const other = noteSingleLinkOther(n, links, noteIds);
-    const isHiddenNote = other !== null ? hidden.has(other) : foldDirectives(dirs, n, true, unlinked, 'hide');
-    if (isHiddenNote) hidden.add(n.id);
-  }
-  return hidden;
+  const own = new Set<string>();
+  foldClassifiersInto(own, ast, dirs, unlinked, 'hide', sep);
+  foldNamespacesInto(own, ast, dirs, 'hide', sep);
+  foldNotesInto(own, ast, dirs, links, noteIds, unlinked, 'hide', sep);
+
+  return cascadeHidden(ast, own);
 }
 
 /** `Entity#isAloneAndUnlinked`'s core: an id is unlinked when every visible
@@ -332,15 +442,15 @@ function buildUnlinkedPredicate<A extends string>(
   dirs: readonly PatternDirective<A>[],
   links: readonly VisibleLink[],
   positiveAction: A,
+  sep: string | null,
 ): (id: string) => boolean {
   const byId = new Map<string, RemovableEntity>();
   for (const c of ast.classifiers) byId.set(c.id, c);
   for (const n of ast.notes) byId.set(n.id, n);
 
-  const neverUnlinked = (): boolean => false;
   const removedIgnoreUnlinked = (id: string): boolean => {
     const e = byId.get(id);
-    return e !== undefined && foldDirectives(dirs, e, false, neverUnlinked, positiveAction);
+    return e !== undefined && foldDirectives(dirs, e, false, NEVER_UNLINKED, positiveAction, sep);
   };
   return (id: string): boolean =>
     links.every((l) => {
@@ -375,46 +485,8 @@ export function filterRemovedEntities(ast: ClassDiagramAST): ClassDiagramAST {
   };
 }
 
-/**
- * cdd-T3 (A1 SB5): every shared-counter rank the entities {@link
- * filterRemovedEntities} drops had ALREADY been burned upstream.
- * `remove`/`restore` is an EXPORT-time skip there — `Entity`'s ctor
- * (`abel/Entity.java:171`) and `Link`'s (`abel/Link.java:135`) run at PARSE
- * time, and `GraphvizImageBuilder` only consults `isRemoved()` when it walks
- * the entities to print (`printEntities:350`, `printGroups:413`, `link:230`).
- * So a removed leaf leaves a HOLE in jar's numbering; this port's dense
- * re-numbering (`renderer-uid.ts`'s module doc comment) would close it.
- *
- * Returns the ranks to re-inject as uid-less phantoms, covering every burn
- * the dropped row carried: a note's discarded `GMN` slot (`creationIndex -
- * 1`) and its note<->host connector (`creationIndex + 1`) when
- * `phantomSlot` is set, a member-tip group leader's TIPS entity + invisible
- * link (`tipGroupPhantomIndex`, `+ 1`), and an inverted link's discarded
- * pre-`getInv()` `Link` (`creationIndex - 1`) when `phantomSlot` is set.
- * Classifier-level standalone ranks (`subsumedLinkCreationIndex` and the
- * repeat-couple pair) are NOT re-injected here: they belong to the couple
- * circle that survives, not to the removed row.
- */
-export function computeRemovedRanks(ast: ClassDiagramAST): number[] {
-  const removed = computeRemovedIds(ast);
-  if (removed.size === 0) return [];
-  const ranks: number[] = [];
-  const push = (n: number | undefined): void => {
-    if (n !== undefined) ranks.push(n);
-  };
-  for (const c of ast.classifiers) if (removed.has(c.id)) push(c.creationIndex);
-  for (const n of ast.notes) {
-    if (!removed.has(n.id)) continue;
-    push(n.creationIndex);
-    if (n.phantomSlot === true && n.creationIndex !== undefined) {
-      ranks.push(n.creationIndex - 1, n.creationIndex + 1);
-    }
-    if (n.tipGroupPhantomIndex !== undefined) ranks.push(n.tipGroupPhantomIndex, n.tipGroupPhantomIndex + 1);
-  }
-  for (const r of ast.relationships) {
-    if (!removed.has(r.from) && !removed.has(r.to)) continue;
-    push(r.creationIndex);
-    if (r.phantomSlot === true && r.creationIndex !== undefined) ranks.push(r.creationIndex - 1);
-  }
-  return ranks;
-}
+// cdd-T31 (line cap): computeRemovedRanks (cdd-T3, A1 SB5) moved to
+// class-directives-remove-ranks.ts -- re-exported so every existing
+// `from './class-directives-removal.js'`/`from './class-directives.js'`
+// site is unchanged.
+export { computeRemovedRanks } from './class-directives-remove-ranks.js';

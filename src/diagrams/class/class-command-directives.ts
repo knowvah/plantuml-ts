@@ -109,11 +109,16 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
 
   // 2b. Namespace separator directive: `set namespaceSeparator ::`,
   //     `set separator .`, or `set separator none` (disables splitting).
+  //     cdd-T31 (E5 defect a): mirrored onto `state.ast` too (description/
+  //     command-table-directives.ts's identical "set separator" precedent)
+  //     so `class-directives-removal.ts#computeHiddenIds` can read the
+  //     diagram's active separator post-parse.
   {
     pattern: /^set\s+(?:namespace)?separator\s+(\S+)\s*$/i,
     execute(state, match) {
       const value = match[1]!;
       state.namespaceSeparator = /^none$/i.test(value) ? null : value;
+      state.ast.namespaceSeparator = state.namespaceSeparator;
     },
   },
 
