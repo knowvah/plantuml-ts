@@ -90,6 +90,7 @@ import type { UDrawable } from '../klimt/shape/UDrawable.js';
 import type { TextBlock } from '../klimt/shape/TextBlock.js';
 import type { ISkinSimple } from '../style/ISkinSimple.js';
 import type { NestedDiagramRenderer } from '../EmbeddedDiagram.js';
+import { getChromeNestedDiagramRenderer } from '../../diagrams/class/class-nested-diagram-renderer.js';
 
 /** What {@link buildChromeTextBlock} hands back to `blocks.ts`: the
  *  creole block's own `calculateDimension` (`TextBlockBordered
@@ -389,11 +390,18 @@ function chromeSkinSimple(atomOps: AtomOps, sprites: SpriteRegistry | undefined)
 }
 
 /** `{{ … }}` inside chrome text: `EmbeddedDiagram.ts#NestedDiagramRenderer`
- *  is the seam, and chrome has no nested-renderer channel at
- *  `buildAnnotationBlock`'s four-parameter contract — mirrors
- *  `EntityImageDescriptionDelegates.ts#blockedEmbeddedRenderer` verbatim
- *  (cdd decisions.md D9 gives the nested renderer to T27, not here). */
+ *  is the seam. CDD B7FU-R2: wired to the renderer `src/index.ts
+ *  #prepareBlock` registers via `class-nested-diagram-renderer.ts
+ *  #registerChromeNestedDiagramRenderer` (that function's own doc comment
+ *  explains why chrome shares the class-body slot's render/strip-PI/
+ *  measure/depth-guard logic instead of a second copy). `undefined` only
+ *  when nothing has registered (a unit test importing this module
+ *  directly) — mirrors `EntityImageDescriptionDelegates.ts
+ *  #blockedEmbeddedRenderer`'s degrade-to-throw, which `EmbeddedDiagram
+ *  .ts`'s own catch turns into the `(42, 42)` fallback (java:148-152). */
 function blockedEmbeddedRenderer(): NestedDiagramRenderer {
+  const registered = getChromeNestedDiagramRenderer();
+  if (registered !== undefined) return registered;
   return {
     render(): TextBlock {
       throw new Error(

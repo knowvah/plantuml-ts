@@ -96,6 +96,22 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       'description port of its opener grammar rather than re-spelling it ' +
       '(mission unknown-bucket-routing-repair, T7 / T4 mechanism A).',
   },
+  {
+    from: 'src/core/annotations/blocks-creole.ts',
+    to: 'src/diagrams/class/class-nested-diagram-renderer.ts',
+    why:
+      'CDD B7FU-R2 / D9 -- the shared chrome `{{ }}`-embed seam (used by ' +
+      'every diagram type\'s title/legend/header/footer/caption) needs a ' +
+      'real NestedDiagramRenderer builder (render/strip-PI/measure/depth-' +
+      'guard). core/EmbeddedDiagram.ts deliberately keeps that logic OUT ' +
+      'of itself ("never inside EmbeddedDiagram.ts itself, which stays ' +
+      'diagram-type-agnostic", that file\'s own module doc comment) -- T27 ' +
+      'built the ONE generic implementation for the class-body embed path ' +
+      'instead (class-nested-diagram-renderer.ts, fully diagram-agnostic ' +
+      'in behavior despite its class/ location); this edge reuses that ' +
+      'ONE factory via a second, chrome-scoped registration slot rather ' +
+      'than duplicating the same ~30 lines a second time under src/core/.',
+  },
 ];
 
 /** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task
