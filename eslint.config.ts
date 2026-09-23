@@ -152,6 +152,10 @@ export default tseslint.config([
       // Logme.error mirror (renderEmbed's catch), same faithful-port reason
       // as EmbeddedDiagram.ts above.
       'src/diagrams/class/class-body-enhanced-embeds.ts',
+      // CDD B7FU-R2: the class engine's note-embed analog of the same
+      // EmbeddedDiagram.java:148-150 Logme.error mirror
+      // (buildEmbeddedNoteImageAtom's catch).
+      'src/diagrams/class/note-layout-measure-rows.ts',
     ],
     rules: { 'no-console': 'off' },
   },
