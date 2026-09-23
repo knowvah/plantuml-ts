@@ -7,12 +7,11 @@
  * cached oracles in `test-results/dot-cache/class/<slug>/in.svg` — the same
  * source `tests/unit/annotations-blocks.test.ts` and friends already read.
  *
- * NOTE on the seam: `assembleSvg(fragment, seed)` takes the seed, and the
- * one line that supplies it in production (`src/index.ts#assembleOnePage`)
- * is deferred to the coordinator (R2 owns that file this round), so these
- * tests inject the seed exactly as that line will — `seedOf` over the
- * block's raw source, then the production `applySeededDefIds`. See
- * `.agent-notes/cdd-B7FU-R4.md` for the verbatim hunk.
+ * The seam is live as of round 5: `src/index.ts#prepareBlock` computes
+ * `seedOfUmlSource(umlSource)` into the page context and
+ * `assembleOnePage` hands it to `assembleSvg`, so `renderSync` already
+ * emits jar-shaped ids. `seededRenderOf` therefore renders and does NOT
+ * re-seed; one dedicated case below pins that re-seeding is a no-op.
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
@@ -27,8 +26,10 @@ const CACHE = 'test-results/dot-cache/class';
 
 function seededRenderOf(slug: string): { seeded: string; jar: string } {
   const source = readFileSync(`${CACHE}/${slug}/in.puml`, 'utf8');
-  const plain = renderSync(source, { measurer: new WidthTableMeasurer() });
-  return { seeded: applySeededDefIds(plain, seedOf(source)), jar: readFileSync(`${CACHE}/${slug}/in.svg`, 'utf8') };
+  return {
+    seeded: renderSync(source, { measurer: new WidthTableMeasurer() }),
+    jar: readFileSync(`${CACHE}/${slug}/in.svg`, 'utf8'),
+  };
 }
 
 function defIdsOf(svg: string): string[] {
@@ -124,9 +125,21 @@ describe('the ids match the jar, per corpus fixture', () => {
     // java:232-240), and popesa carries `!define MyBlue #6192d1`. Hashing the
     // raw lines therefore yields a different uid. Pinned so the day the port
     // keeps a preprocessed-source artifact, this test says so.
+    //
+    // ONE id on each side since round 5: popesa mixes a `paint.ts` gradient
+    // (the class box) with a klimt-driver one (`database dummy2` through the
+    // USymbol path) for the SAME gradient, and
+    // `collapseDuplicateGradientDefs` now collapses them the way upstream's
+    // `gradients` map does (`SvgGraphics.java:367-371`).
     const { seeded, jar } = seededRenderOf('popesa-39-sobe866');
     expect(defIdsOf(jar)).toEqual(['g30vatrr2be6m0']);
     expect(defIdsOf(seeded)).toEqual(['g1dfzmcprqomz60']);
+  });
+
+  test('re-seeding a rendered document is a no-op (the pass is idempotent)', () => {
+    const { seeded } = seededRenderOf('taceve-49-mezi408');
+    const source = readFileSync(`${CACHE}/taceve-49-mezi408/in.puml`, 'utf8');
+    expect(applySeededDefIds(seeded, seedOf(source))).toBe(seeded);
   });
 });
 

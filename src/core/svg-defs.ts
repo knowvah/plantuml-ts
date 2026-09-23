@@ -27,6 +27,11 @@ import { escapeAttribute } from './svg-format.js';
 // quadratic when open tags outnumber close tags (CodeQL js/polynomial-redos).
 const GRADIENT_OPEN = '<linearGradient id="';
 const GRADIENT_CLOSE = '</linearGradient>';
+/** The bare opening tag -- `createSvgGradient` sets `id` AFTER the vector
+ *  (`SvgGraphics.java:371-395`), so a klimt-emitted gradient does not start
+ *  with {@link GRADIENT_OPEN}. Every pass that must see BOTH emitters'
+ *  gradients scans for this instead. */
+const GRADIENT_OPEN_TAG = '<linearGradient';
 /** The FNV/base36 content-hash `paintToSvg` emits (`g` + [0-9a-z]). */
 const GRADIENT_ID_RE = /^g[0-9a-z]+$/;
 
@@ -170,6 +175,55 @@ export function backColorFilterDef(color: string): { id: string; def: string } {
  *  below must see those, unlike {@link extractFilterDefs}'s narrow lift. */
 const ANY_ID_RE = /^[^"]*$/;
 
+/** A def element's own `id` attribute, wherever it sits among the
+ *  attributes -- `createSvgGradient` sets `id` AFTER the gradient vector
+ *  (java:370-395), unlike `getFilterBackColor`, which sets it first
+ *  (java:779), so this cannot be read positionally. */
+function idOfElement(element: string): string | undefined {
+  return /\bid="([^"]*)"/.exec(element)?.[1];
+}
+
+/**
+ * Keep the FIRST def of each distinct `keyOf` value, drop the rest, and
+ * rewrite every `url(#dropped)` reference in `body` to the kept id.
+ *
+ * This is upstream's map-hit branch, generalised over the key: both
+ * `createSvgGradient` and `getFilterBackColor` do a `map.get(key)` and, on a
+ * hit, RETURN THE EXISTING ID without creating a second element
+ * (`SvgGraphics.java:367-371,411-415,763-767`). One diagram is one
+ * `SvgGraphics`, so the map spans the whole document; this port's defs come
+ * from several independent emitters, which is why the dedup has to happen
+ * once, here, on the assembled payload.
+ */
+function collapseDefsBy(
+  defs: string,
+  body: string,
+  open: string,
+  close: string,
+  keyOf: (element: string, id: string) => string,
+): { defs: string; body: string } {
+  const firstIdByKey = new Map<string, string>();
+  const renames = new Map<string, string>();
+  const kept: string[] = [];
+  let cursor = 0;
+  for (let span = nextDef(defs, cursor, open, close, ANY_ID_RE); span !== undefined;) {
+    kept.push(defs.substring(cursor, span.at));
+    cursor = span.end;
+    const element = defs.substring(span.at, span.end);
+    const id = idOfElement(element);
+    const first = id === undefined ? undefined : firstIdByKey.get(keyOf(element, id));
+    if (id !== undefined && first === undefined) firstIdByKey.set(keyOf(element, id), id);
+    if (id !== undefined && first !== undefined) renames.set(id, first);
+    else kept.push(element);
+    span = nextDef(defs, cursor, open, close, ANY_ID_RE);
+  }
+  if (renames.size === 0) return { defs, body };
+  kept.push(defs.substring(cursor));
+  let rewritten = body;
+  for (const [from, to] of renames) rewritten = rewritten.split(`url(#${from})`).join(`url(#${to})`);
+  return { defs: kept.join(''), body: rewritten };
+}
+
 /**
  * Collapse `<filter>` defs that are byte-identical apart from their `id`,
  * keeping the first and rewriting every `url(#dropped)` reference in `body`
@@ -184,31 +238,81 @@ const ANY_ID_RE = /^[^"]*$/;
  * so the same colour there yields two differently-named identical filters.
  * This pass is that missing per-document collapse.
  *
- * Restricted to `<filter>`: it is the only def kind whose id is minted from a
- * per-document counter rather than from its own content, so it is the only
- * kind where two identical elements can carry different ids.
+ * A BYTE key (the element with its own id blanked) is enough here, unlike
+ * the gradient below, and that is measured rather than assumed: this port's
+ * two back-colour filter emitters — `svg-defs.ts#backColorFilterDef` and
+ * klimt's `SvgGraphicsShadow#getFilterBackColor` — both reproduce
+ * `SvgGraphics.java:777-786` attribute for attribute in upstream's own
+ * order, so a chrome `<back:red>` and a member-row `<back:red>` in one
+ * diagram already collapse to a single def.
  */
 export function collapseDuplicateFilterDefs(defs: string, body: string): { defs: string; body: string } {
-  const firstIdByContent = new Map<string, string>();
-  const renames = new Map<string, string>();
-  const kept: string[] = [];
-  let cursor = 0;
-  for (let span = nextDef(defs, cursor, FILTER_OPEN, FILTER_CLOSE, ANY_ID_RE); span !== undefined;) {
-    kept.push(defs.substring(cursor, span.at));
-    cursor = span.end;
-    const element = defs.substring(span.at, span.end);
-    const key = element.replace(FILTER_OPEN + span.id + '"', FILTER_OPEN + '"');
-    const first = firstIdByContent.get(key);
-    if (first === undefined) firstIdByContent.set(key, span.id!);
-    else renames.set(span.id!, first);
-    if (first === undefined) kept.push(element);
-    span = nextDef(defs, cursor, FILTER_OPEN, FILTER_CLOSE, ANY_ID_RE);
-  }
-  if (renames.size === 0) return { defs, body };
-  kept.push(defs.substring(cursor));
-  let rewritten = body;
-  for (const [from, to] of renames) rewritten = rewritten.split(`url(#${from})`).join(`url(#${to})`);
-  return { defs: kept.join(''), body: rewritten };
+  return collapseDefsBy(defs, body, FILTER_OPEN, FILTER_CLOSE, (element, id) =>
+    element.replace(FILTER_OPEN + id + '"', FILTER_OPEN + '"'),
+  );
+}
+
+/** Every `name="value"` pair of one tag, sorted, with `id` dropped.
+ *
+ *  The pairs are re-joined by concatenation, never a template literal ending
+ *  in `="` before an interpolation (D5's ESLint selector shape): this builds
+ *  a comparison KEY that is never emitted, so `attrs()` -- whose job is to
+ *  escape values on the way OUT -- would be the wrong tool as well as the
+ *  wrong direction. The values here were already escaped by whichever
+ *  emitter wrote the def. */
+function sortedAttrsOf(attrText: string): string {
+  return [...attrText.matchAll(/([\w:-]+)="([^"]*)"/g)]
+    .filter((m) => m[1] !== 'id')
+    .map((m) => (m[1] ?? '') + '=' + DQUOTE + (m[2] ?? '') + DQUOTE)
+    .sort()
+    .join(' ');
+}
+
+const TAG_RE = /<([a-zA-Z][\w:-]*)((?:\s+[\w:-]+="[^"]*")*)\s*(\/?)>/g;
+
+/**
+ * A `<linearGradient>`'s identity, as upstream keys it:
+ * `Arrays.asList(color1, color2, policy)` (`SvgGraphics.java:368`; the
+ * `HColorLinearGradient` overload keys on `buildLinearGradientKey(gr,
+ * mapper)`, java:410, and shares the SAME `gradients` map, java:393/431).
+ *
+ * Expressed in emitted terms, that triple IS the direction vector plus the
+ * ordered stops: `createSvgGradient` writes the policy out as `x1/y1/x2/y2`
+ * (java:371-392) and the two colours as two `<stop>` children (java:397-405).
+ * So the key here is every tag's attributes — id excluded, name-sorted —
+ * with child order preserved.
+ *
+ * Sorting is what makes the key cross-EMITTER: this port has two, and they
+ * write the same gradient with different attribute order
+ * (`paint.ts#paintToSvg` emits `id x1 y1 x2 y2` and `offset stop-color`;
+ * klimt's `SvgGraphicsCore#createSvgGradient` emits `x1 y1 x2 y2 id` and
+ * `stop-color offset`), which is exactly how `popesa-39-sobe866` came to
+ * carry two defs for one gradient once `database dummy2` started routing
+ * through the USymbol/klimt path.
+ *
+ * The KEPT def keeps whichever emitter won — deliberately NOT normalised.
+ * Attribute order is invisible to the comparator (`tests/oracle/
+ * svg-conformance/normalize.ts` sorts every element's attributes
+ * alphabetically before comparing) and invisible to SVG itself; rewriting
+ * the survivor's markup would be churn with no observable effect. Child
+ * ORDER is positional in the comparator, but both emitters write offset 0%
+ * then 100%, matching upstream's own stop1-then-stop2 (java:397-404).
+ */
+function canonicalGradientKey(element: string): string {
+  return element.replace(TAG_RE, (_m, name: string, attrText: string, selfClose: string) => {
+    const attrs = sortedAttrsOf(attrText);
+    return `<${name}${attrs === '' ? '' : ' ' + attrs}${selfClose}>`;
+  });
+}
+
+/**
+ * Collapse `<linearGradient>` defs that describe the SAME gradient, however
+ * they were spelled — see {@link canonicalGradientKey} for the key and its
+ * upstream citation. Runs before the seeded rename so the survivors are
+ * numbered exactly as upstream's `gradients.size()` would number them.
+ */
+export function collapseDuplicateGradientDefs(defs: string, body: string): { defs: string; body: string } {
+  return collapseDefsBy(defs, body, GRADIENT_OPEN_TAG, GRADIENT_CLOSE, (element) => canonicalGradientKey(element));
 }
 
 /**
@@ -224,7 +328,8 @@ export function collapseDuplicateFilterDefs(defs: string, body: string): { defs:
 export function collectDocumentDefs(body: string, prefixDefs: string): { defs: string; body: string } {
   const gradients = extractGradientDefs(body);
   const filters = extractFilterDefs(gradients.body);
-  return collapseDuplicateFilterDefs(prefixDefs + gradients.defs + filters.defs, filters.body);
+  const deduped = collapseDuplicateGradientDefs(prefixDefs + gradients.defs + filters.defs, filters.body);
+  return collapseDuplicateFilterDefs(deduped.defs, deduped.body);
 }
 
 /** The two def elements this port ever emits INLINE in a fragment body,
@@ -332,14 +437,6 @@ function seededKind(element: string): keyof typeof SEEDED_KIND_PREFIX | undefine
 function seededId(kind: keyof typeof SEEDED_KIND_PREFIX, uid: string, index: number): string {
   // The shadow filter carries no index (java:1076).
   return kind === 'shadow' ? SEEDED_KIND_PREFIX[kind] + uid : SEEDED_KIND_PREFIX[kind] + uid + String(index);
-}
-
-/** A def element's own `id` attribute, wherever it sits among the
- *  attributes -- `createSvgGradient` sets `id` AFTER the gradient vector
- *  (java:370-395), unlike `getFilterBackColor`, which sets it first
- *  (java:779), so this cannot be read positionally. */
-function idOfElement(element: string): string | undefined {
-  return /\bid="([^"]*)"/.exec(element)?.[1];
 }
 
 /**
