@@ -35,6 +35,44 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive` T31 follow-ons — filed 2026-09-23
+
+Two narrowly-scoped gaps surfaced by T31 (`hide`/`show` by name, A2b E5),
+both outside T31's write-set (`class-directives-removal.ts`,
+`class-hideshow-dispatch.ts`, `ast.ts` field additions). Full mechanism
+and before/after numbers: `.agent-notes/cdd-T31.md`, decision-journal
+rows 189-192.
+
+1. **Namespace-cluster hidden suppression.** `svek/Cluster.java:298-300`:
+   `Cluster#drawU` returns immediately when `group.isHidden()` — the jar
+   draws NOTHING (no border, no title, no content) for a hidden
+   `package`/`namespace`. This port's `computeHiddenIds` now correctly
+   returns namespace ids too (T31), and a hidden classifier's content is
+   already suppressed by the existing `renderer.ts` gate — but
+   `layout.ts#buildNamespaceGeos`/`renderer.ts`'s namespace-cluster loop
+   (`for (const ns of geo.namespaces) { ... wrapCluster(...) }`) never
+   consult `hiddenIds` for the CLUSTER itself, so an empty box still
+   draws. Needs `layout.ts`, `class-geo-namespace-types.ts` (a `hidden`
+   field on `NamespaceGeo`), `renderer.ts`. Unblocks senece-96-fomu913
+   (currently `svg/g[1][childCount] exp=1|act=2`, its only structural
+   diff) and, once item 2 below lands, verufu-58-jile750.
+
+2. **`Namespace.tags` population.** `class-command-containers.ts`'s
+   `package NAME $tag {` regex captures its TAGS1/TAGS2 runs
+   (`Stereotag.pattern()`, `CommandPackage.java:88-90`) as NON-capturing
+   groups and discards them (`ast.ts#Namespace.tags`'s own doc comment
+   already flags this as unpopulated — the field exists and
+   `computeHiddenIds`'s fold logic is verified correct against a
+   hand-built AST literal, T31's own test suite). Needs the regex's two
+   TAGS runs made capturing, `parseTagTokens` applied, and a new
+   `setNamespaceTags` (mirroring `setNamespaceStereotype`/
+   `setNamespaceUrl` in `class-container.ts`) called from the `package`
+   command handler. Unblocks verufu-58-jile750's `hide $txn` (currently
+   1 structural / 86 numeric diff, entirely from `p1`/`p1.inside1`
+   staying drawn).
+
+---
+
 ## `unknown-bucket-routing-repair` — DONE 2026-09-21 (T0-T14, batches 0-2)
 
 Branch `feat/unknown-bucket-routing-repair`, T14 landed at `4b6949ee`

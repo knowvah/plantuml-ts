@@ -50,6 +50,10 @@ function makeDefaultAST(): ClassDiagramAST {
     notes: [],
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(),
+    // cdd-T31 (E5 defect a): mirrors ParseState.namespaceSeparator's own
+    // default ('.', set below and in startNewPage) -- see
+    // ClassDiagramAST.namespaceSeparator's own doc comment.
+    namespaceSeparator: '.',
   };
 }
 
