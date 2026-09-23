@@ -1,12 +1,70 @@
 # cdd-T31 — hide/show by name: separator, cascade, scope prefix
 
-Status: **executed**, worktree `cdd-t31` (branch `cdd/t31`, based on
-`4626ccec`). Gates green: `npm test` 802 passed / 1 skipped (804 test
-files, on-disk `find` count matches), typecheck (both tsconfigs)/lint/
-build clean, DOT parity 711/712 (100% of the 711 non-oracle-blind, 1
-pre-existing `directionOk` diverging-check failure unrelated to E5)
-UNCHANGED from before (hide/show never reaches the svek export — the
-file's own pre-existing invariant, re-verified, not touched).
+Status: **round 1 executed + merged** (`9e34f7eb`), **round 2 executed**
+on the fast-forwarded worktree (`cdd-t31`, branch `cdd/t31`, now at
+`e4ce044af` + round-2 commit). Round-1 gates green: `npm test` 802
+passed / 1 skipped (804 test files, on-disk `find` count matches),
+typecheck (both tsconfigs)/lint/build clean, DOT parity 711/712 (100% of
+the 711 non-oracle-blind, 1 pre-existing `directionOk` diverging-check
+failure unrelated to E5) UNCHANGED from before (hide/show never reaches
+the svek export — the file's own pre-existing invariant, re-verified,
+not touched).
+
+## Round 2 (both stop-1 items closed)
+
+The coordinator granted both round-1 stop-1 items as an extended
+write-set once T34 (which would otherwise own these files) had not yet
+started: `layout.ts`, `renderer.ts`, `class-geo-namespace-types.ts`,
+`class-command-containers.ts`, plus `class-geo-builders.ts` (where
+`buildNamespaceGeos` actually lives) and `class-container.ts` (where its
+`setNamespaceStereotype`/`setNamespaceUrl` siblings live, the natural
+home for the new `setNamespaceTags`).
+
+**senece-96-fomu913** (1+45 -> 0+0 exact) needed TWO mechanisms, not
+one:
+1. `NamespaceGeo.hidden` (threaded from the same `computeHiddenIds` set
+   `ClassifierGeo.hidden` already used) + a `renderer.ts` skip on the
+   namespace-cluster loop, porting `Cluster#drawU`'s `if
+   (group.isHidden()) return;` (svek/Cluster.java:298-300). This alone
+   fixed the STRUCTURAL diff (`childCount exp=1|act=2`) but left 45
+   numeric diffs (a uniform Y+32/X+16 canvas-size and position offset).
+2. `LimitFinder#apply` (klimt/drawing/LimitFinder.java:78-83) does NOT
+   special-case `UHidden` — a hidden CLASSIFIER's wrapped `draw()` calls
+   (`SvekResult.java:85`) still accumulate ink; only `Cluster#drawU`'s
+   early return skips ink for the CLUSTER's own decoration specifically.
+   First attempt filtered BOTH hidden classifiers AND hidden namespaces
+   out of `layout.ts#assembleShiftedGeometry`'s ink walk — overcorrected
+   (canvas shrank to 85x129 against the jar's 277x178). Filtering ONLY
+   namespaces landed exact. This is a genuinely asymmetric upstream rule
+   (leaf-hidden vs. group-hidden behave differently for ink) that is easy
+   to get wrong by symmetry-intuition alone — read the Java, don't
+   assume.
+
+**verufu-58-jile750** (1+86 -> 0+0 exact) needed only the previously-
+identified gap: `class-command-containers.ts`'s `package` regex made its
+TAGS1/TAGS2 runs capturing (were non-capturing/discarded), renumbering
+every subsequent match-index reference in that one rule, and a new
+`setNamespaceTags` (`class-container.ts`) calling the SAME
+`parseTagTokens` a classifier's own `$tag` declaration already uses —
+citing `CommandPackage.java:198`'s `CommandCreateClassMultilines
+.addTags` -> `Entity#addStereotag` (CommandCreateClassMultilines.java:
+321-329). Round 1's fold+cascade logic (already unit-tested against a
+hand-built AST literal) needed zero changes once the field was
+populated — exactly as predicted in round 1's notes.
+
+Round-2 gates: `npm test` 805 passed / 1 skipped (807 test files,
+on-disk count matches) — the ONE remaining failure
+(`tests/unit/scripts/parity-dashboard.test.ts`'s D9 drift gate, an
+`activity`-engine diff-baseline weightedScore mismatch, 61006 vs 60991)
+is confirmed PRE-EXISTING via `git stash`: it fails identically with
+every round-2 change reverted, on files (`docs/parity-report.md`,
+activity-engine inputs) this task never touches. Not fixed — out of
+write-set and not this task's mechanism. Typecheck/lint/build clean.
+DOT parity 711/712 unchanged (confirms the fix is render/ink-layer only,
+never touches DOT construction). Zero regressions across the eleven
+no-regression guards + cicovi + delasa (delasa unaffected, still
+21+10643 — its own hidden-namespace fixture shape doesn't exercise
+either round-2 mechanism).
 
 ## The fixWhat-prefix gap (not in the original diagnosis)
 

@@ -15,6 +15,7 @@ import {
   openNamespaceBlock,
   openTogetherBlock,
   setNamespaceStereotype,
+  setNamespaceTags,
   setNamespaceUrl,
   setNamespaceColor,
   NAMESPACE_COMMANDS,
@@ -52,33 +53,35 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   ...NAMESPACE_COMMANDS,
 
   // 5b. Package block. Upstream routes package through the same PACKAGE group
-  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 5)
+  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 9)
   //     captures same-line 'X {}' (CommandPackageEmpty) for immediate collapse.
   //     `$tag` tokens after the name (CommandPackage's Stereotag.pattern()
   //     TAGS1/TAGS2 slots — `package p1 $txn {`, one run each side of the
-  //     stereotype, mirroring CommandPackage.java:88-90) are accepted and
-  //     discarded: group removal/tag-selection on packages is not
-  //     implemented, and `hide $tag` never affects the DOT export (see rule
-  //     3). A2s F-G mechanism A8: the `<<stereotype>>` (group 4, between the
-  //     TAGS runs like upstream's STEREOTYPE slot) is stored on the
-  //     Namespace via `setNamespaceStereotype` (gated: a USymbol-naming
-  //     stereotype selects the shape instead, CommandPackage.java:178-191).
+  //     stereotype, mirroring CommandPackage.java:87,89) are now CAPTURING
+  //     (groups 4/6, cdd-T31 round 2, E5 defect b -- were non-capturing and
+  //     discarded) and read onto the Namespace via `setNamespaceTags` (its
+  //     own doc comment cites `CommandPackage.java:198` + `Entity
+  //     #addStereotag`). A2s F-G mechanism A8: the `<<stereotype>>` (group
+  //     5, between the TAGS runs like upstream's STEREOTYPE slot) is stored
+  //     on the Namespace via `setNamespaceStereotype` (gated: a
+  //     USymbol-naming stereotype selects the shape instead,
+  //     CommandPackage.java:178-191).
   // T3 (unknown-bucket-routing-repair): optional leading VISIBILITY char
   // (`CommandPackage.java:74`, the SAME `VisibilityModifier
   // .regexForVisibilityCharacter()` prefix `class-declaration-parser.ts`'s
   // `DECL_KIND_RE` carries) -- captured by the non-capturing `(?:...)` group
   // and discarded, matching that command's own posture (no render-side
   // field consumes a package's visibility marker either).
-  // T11 (E4/M3): the `[[url]]` group (5) is now CAPTURING (was
-  // non-capturing, discarded) and NOTE_COLOR (6, the SAME bare/`back:`
-  // grammar `class-notes.ts` note commands already reuse) is inserted
-  // ahead of the old trailing catch-all -- both read onto the Namespace
-  // via setNamespaceUrl/setNamespaceColor below; the same-line-close brace
-  // group shifted from 5 to 7. The trailing `(?:[#<][^{]*)?` catch-all is
-  // kept as a no-op safety net for whatever it used to silently absorb.
+  // T11 (E4/M3): the `[[url]]` group (7) is CAPTURING and NOTE_COLOR (8,
+  // the SAME bare/`back:` grammar `class-notes.ts` note commands already
+  // reuse) is inserted ahead of the old trailing catch-all -- both read
+  // onto the Namespace via setNamespaceUrl/setNamespaceColor below; the
+  // same-line-close brace group is 9. The trailing `(?:[#<][^{]*)?`
+  // catch-all is kept as a no-op safety net for whatever it used to
+  // silently absorb.
   {
     pattern: new RegExp(
-      String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+      String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
         NOTE_COLOR +
         // T11: a `\s*` gap here is load-bearing -- without it, a trailing
         // space before `{` (e.g. `#DDD {`) makes the whole match fail at
@@ -98,10 +101,11 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         const id = '__pkg' + String(state.ast.namespaces.length);
         effectiveId = openNamespaceBlock(state, id, '');
       }
-      setNamespaceStereotype(state, effectiveId, match[4], true);
-      setNamespaceUrl(state, effectiveId, match[5]);
-      setNamespaceColor(state, effectiveId, match[6]);
-      if (match[7] !== undefined) {
+      setNamespaceStereotype(state, effectiveId, match[5], true);
+      setNamespaceTags(state, effectiveId, `${match[4] ?? ''} ${match[6] ?? ''}`);
+      setNamespaceUrl(state, effectiveId, match[7]);
+      setNamespaceColor(state, effectiveId, match[8]);
+      if (match[9] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,

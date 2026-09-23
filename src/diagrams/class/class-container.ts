@@ -30,6 +30,7 @@ import type { ParseState } from './parser.js';
 import { splitOnSeparator, ensureNamespaceChain, collapseEmptyNamespace, qualifiedId } from './class-namespace.js';
 import { NOTE_URL, NOTE_COLOR } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
+import { parseTagTokens } from './class-declaration-parser.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 // T11: split out to keep this file under the line cap; re-exported below
@@ -389,6 +390,25 @@ export function setNamespaceStereotype(
   if (inner === undefined || inner.length === 0) return;
   const ns = state.ast.namespaces.find((n) => n.id === nsId);
   if (ns !== undefined) ns.stereotype = inner;
+}
+
+/**
+ * cdd-T31 round 2 (E5 defect b): a `package NAME $tag {` header's TAGS1/
+ * TAGS2 runs (`Stereotag.pattern()` either side of the stereotype,
+ * `CommandPackage.java:87,89`) -- `CommandPackage.java:198` calls
+ * `CommandCreateClassMultilines.addTags(p, arg.getLazzy("TAGS", 0))`, which
+ * strips each `$`-prefixed token and calls `Entity#addStereotag`
+ * (`classdiagram/command/CommandCreateClassMultilines.java:321-329`) --
+ * the SAME per-token strip {@link parseTagTokens} already implements for a
+ * classifier declaration's own `$tag` tokens. `raw` is the TWO capture
+ * runs joined with a space (mirrors upstream's single lazy "TAGS" group
+ * spanning both regex slots); a no-op when neither run matched.
+ */
+export function setNamespaceTags(state: ParseState, nsId: string, raw: string): void {
+  const tags = parseTagTokens(raw);
+  if (tags.length === 0) return;
+  const ns = state.ast.namespaces.find((n) => n.id === nsId);
+  if (ns !== undefined) ns.tags = [...new Set([...(ns.tags ?? []), ...tags])];
 }
 
 /**

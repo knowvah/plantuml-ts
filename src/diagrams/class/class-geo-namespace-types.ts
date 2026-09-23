@@ -81,4 +81,19 @@ export interface NamespaceGeo {
    *  opens the `<a>` INSIDE the `<g class="cluster">` and before the
    *  decoration (`Cluster.java:337-341,379-382`). */
   url?: UrlInfo;
+  /**
+   * cdd-T31 (A2b E5 defect b, round 2): true when `hide <entity|$tag|
+   * <<stereotype>>|*>` (`class-directives.ts#computeHiddenIds`, which now
+   * folds `ast.namespaces` and cascades to nested groups) matched this
+   * namespace — the renderer skips its ENTIRE cluster (border, title,
+   * decoration), matching `Cluster#drawU`'s own early return
+   * (`svek/Cluster.java:298-300`, `if (group.isHidden()) return;`). DOT
+   * layout/uid numbering is unaffected (mirrors `ClassifierGeo.hidden`'s
+   * own doc comment): `Cluster#printCluster1`/`printCluster2`
+   * (svek/Cluster.java:515,550) carry NO `isHidden` check at all, so the
+   * cluster's subgraph/nodes are still emitted to the `.dot` graph
+   * unconditionally — hiding is a draw-time-only concern, verified via
+   * `dot-sync-report.ts` staying unchanged across this field's addition.
+   */
+  hidden?: boolean;
 }
