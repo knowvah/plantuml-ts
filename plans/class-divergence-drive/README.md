@@ -129,3 +129,37 @@ agents correcting the orchestrator.
 "Execute the mission brief at plans/class-divergence-drive/README.md".
 The batches are independently pausable; the maintainer may stop after any
 close task with a consistent tree.
+
+## Close-out (T38, 2026-09-23)
+
+Class survey per close (`measurements/bN.json`, conformant / structural-match / diverged over 723 fixtures):
+
+| close | counts | Δ diverged | batch |
+|---|---|---|---|
+| b0 | 412 / 50 / 261 | — | B0 harness + ELK declarations |
+| b1 | 431 / 66 / 226 | −35 | B1 draw order |
+| b2 | 455 / 55 / 213 | −13 | B2 links |
+| b3 | 460 / 56 / 207 | −6 | B3 link layout |
+| b4 | 468 / 68 / 187 | −20 | B4 clusters |
+| b5 | 468 / 92 / 163 | −24 | B5 Kal, roles, inheritance |
+| b6 | 491 / 104 / 128 | −35 | B6 classifier box & style |
+| b7 | 521 / 104 / 98 | −30 | B7 text & creole (+ residual round) |
+| b8 | 528 / 110 / 85 | −13 | B8 scale / dpi |
+| b9 | 548 / 98 / 77 | −8 | B9 dispatch, hide, chrome |
+| b10 | 560 / 86 / 77 | 0 (B10 targeted structural-match rows: 98 → 86) | B10 numeric residuals |
+
+**Exit bar verdict: met with named exceptions.** Clause 1 (diverged = 0 minus
+the 7 ELK slugs) is not met: 77 fixtures remain `diverged`, every one
+naming its mechanism in `fixtures.md` and its owner in
+`planning/next-missions.md`. Clauses 2–6 hold at `measurements/final.json`:
+every survey-conformant, census-0-diff fixture is pinned (ratchet
+560), DOT parity 711/712, every other engine's mover journaled
+(rows 105, 137, 155, 201, 203), zero unexplained rises at any re-pin, all
+four gates green with the JSON-reporter count equal to the on-disk count.
+
+Stops and halts, all in `decision-journal.md`: stop 1 write-set extensions
+(rows 38, 63, 65, 92, 94, 111, 112, 139, 147, 148, 157, 177, 209, 216),
+stop 4 cross-engine movers (105, 137, 155, 197, 201, 203), stop 8 dot-engine filings (45, 59, 149, 157, issue 21 at 233b), stop 9 (232,
+the oracle jar rebuilt for a trace), stop 11 disproved report mechanisms
+(14, 26, 193), stop 12 (61). No batch was halted; every extension is
+flagged for review in its row.

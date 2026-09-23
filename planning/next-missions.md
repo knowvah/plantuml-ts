@@ -35,6 +35,71 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive` — DONE 2026-09-23 (T0–T38, batches 0–10)
+
+Branch `feat/class-divergence-drive` (not merged; T38 reports, the
+maintainer merges). Class survey 412 / 50 / 261 → 560 / 86 / 77 over 723
+fixtures (`docs/parity-report.md`), ratchet 314 → 560, DOT parity
+711/712 held at every close, zero conformant losses and zero unexplained
+rises at every re-pin (`plans/class-divergence-drive/decision-journal.md`,
+rows 1–240). Exit bar clause 1 (diverged = 0 minus the 7 ELK
+slugs) NOT met — closed as met-with-named-exceptions: every remaining
+`diverged` and `structural-match` row names its mechanism in
+`plans/class-divergence-drive/fixtures.md`. Open items, by owner:
+
+- **Oracle pin (D12).** `oracle/dist/plantuml-oracle.jar` symlinks to
+  `~/git/plantuml/build/libs/plantuml-1.2026.8beta1.jar` while
+  `oracle/pin.json` still names 1.2026.7beta11 / seam `de1f986f`; the fork
+  is at `7726a27b`. T35 rebuilt that jar (stop 9, journal row 232) from the
+  pristine `dot-output` tree; no cached oracle changed. Repoint the symlink
+  and re-pin `pin.json` in one maintainer step, then re-run
+  `scripts/oracle-render.sh` on one fixture per type to confirm byte parity
+  with the cache.
+- **dot-engine** — issue 20 (`taillabel`/`headlabel` reserve no canvas:
+  focaci 0+95), issue 21 (same-rank node order mirrored on byte-identical
+  DOT: boseba 1+681, majuva 1+114), plus kupetu Δ0.011 / konomi Δ0.315
+  (solver precision, N25/N62). `docs/graphviz-issues/TRACKER.md`.
+- **Seed input for def ids** — `UmlSource#seed()` hashes the PREPROCESSED
+  lines (`UmlSource.java:222-234`, `PSystemBuilder.java:232-240`); the port
+  hashes the raw ones, so a source with `!define` mints a different uid
+  (popesa 7+2). Needs a post-substitution, pre-extraction line list kept by
+  `core/BlockUmlBuilder.ts`; `description/index.ts:38-47` has the same gap.
+- **`scale max N width|height` / `scale N width`** — cagace 3+37, nadaba
+  12+178, kujiji 49+824: `k = target / unscaledDimension` and our unscaled
+  canvas is ~1 px off the jar's (nadaba 70 vs ~69.0). Not the T35 margin
+  term (refuted, row 232); a class-layout diagnosis item.
+- **Nested `{{ }}`** — bixogo/roxosu 1+4 embed `{{salt}}` and this port has
+  no salt engine (the nested render is an error page); gadufu 0+4 is the
+  nested ACTIVITY diagram's own Cyrillic text sizing (121×96 vs 133×107).
+- **Class renderer residuals** — medosa (crow's-foot `side` is always null:
+  the `SvekEdge.ts` adapter never receives node geometry; every
+  `ExtremityFactory` call site), dorafa 0+36 (`sameClassWidth` is a global max unknown at measure time; the header badge/name `indent` from `computeHeaderSlack` is cached in `preMeasureClassifiers` before `applySameClassWidthFloor` — the jar lays the header out at draw time from the FINAL width, `EntityImageClass.java:182,238`; fix shapes in the B10FU filing), pijiju 0+19 (the `Neighborhood` triangle/stub contact points, sub-1.5 px — the protected inset itself is exact now), pixexi 0+58 (a +5.389 canvas shift with zero edges — NOT the label-margin term, disproved by measurement), lozego/mizupo (no
+  `<linearGradient>` emitted at all), sijisi (`allow_mixing` nested
+  `rectangle` clusters, ENT3/GEO1), cukaze 0+109 (whole-document 0.87 px
+  shift, untraced), luzive 11+21 and sadamo 11+19 (error-page `textLength`,
+  `[From string…]`, version identity — DIVERGENCES.md), filoxo 16 / rakopi
+  10 / givofi 10+2 (T19's `<style> visibilityIcon {}` cascade + shadow
+  filter shape), xadado 1+344 (note-region residual), gatula/jixamu/xosiza
+  (~0.005 px position rounding tipping `ensureVisible`), jubobo (a third,
+  unexamined ink term), `RemoveRestoreDirective` lacks `scopeNsId`
+  (upstream's `removeOrRestore` calls `fixWhat`; no corpus fixture).
+- **Shared seams left for other engines** — `sequence-creole.ts`'s own
+  text emitter bypasses the klimt decorations (migodo, ravire); `<back:a|b>`
+  gradient backgrounds skipped in the klimt text driver (no corpus reach);
+  the multi-block Welcome/error page's background rect lacks
+  `stroke-width:1`; non-class `mainframe` fixtures lack the pre-chrome ink
+  correction (DIVERGENCES.md); activity's own `mode dark` defaults
+  (diamond fill/border, text tier — T33 filing above); json/yaml/hcl
+  correctly ignore `skinparam dpi` (jar-verified, row 182), not a gap.
+- **Tooling** — the survey now supplies the fixture include store
+  (32a284d2): every other type's next survey will move its
+  `!include <bundle/…>` fixtures toward the jar — expect and journal them.
+- **Diagnosis coverage** — every A2b code (E1–E14) has batch coverage;
+  E11 (`groupInheritance`) is tracked under `fixtures.md`'s `LNK7` token
+  (batches 3/5), not `ENT11`. A5's port-row premise (T36) and M7's canvas
+  rule (T35), and A6 §5a's dispatch bug (T32), were disproved by
+  measurement and are recorded as negative results.
+
 ## `class-divergence-drive` T37 follow-ons — filed 2026-09-23, item 3 DONE (B10FU, same day)
 
 Three items from T37 (batch 10, M8 marker offset + eight singletons)
