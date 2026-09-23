@@ -1261,6 +1261,47 @@ describe('resolveSkinparam — wrapWidth', () => {
 });
 
 // ---------------------------------------------------------------------------
+// resolveSkinparam — dpi (cdd-T30, `SkinParam#getDpi()`,
+// `skin/SkinParam.java:649-656`)
+// ---------------------------------------------------------------------------
+describe('resolveSkinparam — dpi', () => {
+  it('maps dpi to theme.dpi', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['dpi', '300']]), defaultTheme);
+    expect(theme.dpi).toBe(300);
+    expect(unknown).toEqual([]);
+  });
+
+  it('is case/key-normalisation insensitive, matching nodesep/wrapwidth precedent', () => {
+    const { theme } = resolveSkinparam(new Map([['Dpi', '200']]), defaultTheme);
+    expect(theme.dpi).toBe(200);
+  });
+
+  it('a value of "0" falls back to the 96 default (SkinParam.java:653-654 `dpi <= 0`)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '0']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('a negative value is rejected (upstream `isDigits` has no sign, unlike parseNonZeroInt)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '-300']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('a non-digit value is rejected (upstream `isDigits`, no decimal point either)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '96.5']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('absent by default — defaultTheme carries no dpi (jar default is 96, applied at resolveScaleFactor)', () => {
+    expect(defaultTheme.dpi).toBeUndefined();
+  });
+
+  it('deepMergeTheme copies dpi as a top-level optional scalar', () => {
+    const merged = deepMergeTheme(defaultTheme, { dpi: 150 });
+    expect(merged.dpi).toBe(150);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // resolveSkinparam — maxMessageSize / wrapMessageWidth (G20, edge-label wrap)
 // ---------------------------------------------------------------------------
 describe('resolveSkinparam — maxMessageSize', () => {

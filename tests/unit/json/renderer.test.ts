@@ -735,3 +735,37 @@ describe('renderJson — node-level style cascade', () => {
     expect(svg).toContain('fill="#FF7F50"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd-T30: UNLIKE description/sequence/class, `theme.dpi` does NOT reach
+// `resolveScaleFactor` at this call site -- `JsonDiagram`'s own `SkinParam`
+// is built from `StyleExtractor` (`jsondiagram/StyleExtractor.java:82-89`),
+// which discards a `skinparam dpi N` line outright (it recognises only
+// `<style>`/`!assume`/`!pragma`/`hide`/`scale`/`title`/`skin` among its
+// leading directives). Confirmed against the jar-captured
+// `test-results/dot-cache/json/kicati-76-guvi771/in.svg`: `skinparam dpi
+// 600` in the source, `font-size="14"` (unscaled) in the oracle. See
+// `renderJson`'s own doc comment for the full mechanism and
+// `plans/class-divergence-drive/decision-journal.md`'s T30 rows.
+// ---------------------------------------------------------------------------
+
+describe('renderJson — skinparam dpi has NO EFFECT (cdd-T30, StyleExtractor.java:82-89)', () => {
+  it('theme.dpi is ignored: rendering with and without it is byte-identical', () => {
+    const geo = makeGeo({ nodes: [makeNode({ x: 10, y: 20, width: 200, height: 60 })] });
+    const unset = assembleSvg(renderJson(geo, defaultTheme));
+    const withDpi = assembleSvg(renderJson(geo, { ...defaultTheme, dpi: 600 }));
+    expect(withDpi).toBe(unset);
+  });
+
+  it('a `scale ...` directive still applies on its own (dpi is the ONLY term StyleExtractor drops)', () => {
+    const geo = makeGeo({
+      nodes: [makeNode({ x: 10, y: 20, width: 200, height: 60 })],
+      scale: { kind: 'simple', factor: 2 },
+    });
+    const withoutDpi = assembleSvg(renderJson(geo, defaultTheme));
+    const withDpi = assembleSvg(renderJson(geo, { ...defaultTheme, dpi: 600 }));
+    // `scale 2` alone still doubles x (10 -> 20); dpi 600 changes nothing.
+    expect(withoutDpi).toContain('x="20"');
+    expect(withDpi).toBe(withoutDpi);
+  });
+});

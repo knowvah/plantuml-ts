@@ -39,6 +39,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'nodeSep',
   'rankSep',
   'wrapWidth',
+  'dpi',
   'maxMessageSize',
   'sameClassWidth',
   'classAttributeIconSize',

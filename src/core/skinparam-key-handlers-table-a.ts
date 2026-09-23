@@ -214,6 +214,25 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    ['dpi'],
+    (acc, value) => {
+      // cdd-T30: `SkinParam#getDpi()` (`skin/SkinParam.java:649-656`):
+      // `getAsInt("dpi", 96)` -- `getAsInt` itself only accepts a value
+      // matching `isDigits` (`\d+`, NO sign/decimal point,
+      // `SkinParam.java:135-137`), else returns the 96 default outright;
+      // then `dpi <= 0 -> 96` (reachable only via the literal string "0",
+      // since a minus sign already fails `isDigits`). `parseNonZeroInt`
+      // (`Number.parseInt`) is NOT reused here -- unlike nodesep/ranksep/
+      // wrapwidth, it would accept a leading "-" upstream's `isDigits`
+      // rejects, silently diverging from the jar on a negative dpi.
+      const trimmed = value.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const v = Number.parseInt(trimmed, 10);
+        if (v > 0) acc.dpi = v;
+      }
+    },
+  ],
+  [
     ['sameclasswidth'],
     (acc, value) => {
       // A2s B7: `SkinParam#sameClassWidth()` (SkinParam.java:994) — boolean

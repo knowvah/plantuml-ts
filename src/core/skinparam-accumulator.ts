@@ -24,6 +24,8 @@ export interface SkinparamAccumulator {
   nodeSep: number | undefined;
   rankSep: number | undefined;
   wrapWidth: number | undefined;
+  /** cdd-T30: `skinparam dpi N` -- see `theme.ts#dpi`'s own doc comment. */
+  dpi: number | undefined;
   /** Raw `skinparam maxMessageSize` value -- see `theme.ts#maxMessageSize`'s
    *  own doc comment for the fallback-precedence resolution against
    *  {@link wrapMessageWidth}, done in `skinparam-theme-builder.ts`. */
@@ -185,6 +187,7 @@ const SCALAR_FIELD_NAMES = [
   'nodeSep',
   'rankSep',
   'wrapWidth',
+  'dpi',
   'maxMessageSize',
   'wrapMessageWidth',
   'sameClassWidth',

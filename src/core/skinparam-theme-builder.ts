@@ -48,6 +48,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],
   ['wrapWidth', (acc) => acc.wrapWidth],
+  ['dpi', (acc) => acc.dpi],
   ['maxMessageSize', (acc) => resolveMaxMessageSize(acc)],
   ['sameClassWidth', (acc) => acc.sameClassWidth],
   ['classAttributeIconSize', (acc) => acc.classAttributeIconSize],
@@ -193,7 +194,15 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   if (acc.noteBackground !== undefined) colorsOverride.noteBackground = acc.noteBackground;
   if (Object.keys(acc.elements).length > 0) colorsOverride.elements = acc.elements;
   if (hasGraphOverride(acc)) colorsOverride.graph = buildGraphOverride(acc);
-  return colorsOverride as Theme['colors'];
+  // cdd-T30: `Theme['colors']` is now the NAMED interface `ThemeColorFields`
+  // (theme-colors-fields.ts, split out of theme.ts's own inline object type
+  // literal) -- TS's TS4.4 implicit-index-signature inference (which made
+  // the pre-split inline literal assignable to `Record<string, unknown>`)
+  // applies only to fresh object type literals, never to `interface`
+  // declarations, so the direct cast now needs the same `as unknown as`
+  // double-cast `buildGraphOverride` above already uses for the identical
+  // reason (its own `Theme['colors']['graph']` extraction).
+  return colorsOverride as unknown as Theme['colors'];
 }
 
 /** Build a `Partial<Theme>` containing only the keys actually seen in `acc`. */

@@ -241,6 +241,36 @@ describe('renderDescription — scale directive (G1 I-scale)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// cdd-T30: `theme.dpi` reaches `resolveScaleFactor` at this call site, the
+// SAME widened function the `scale directive` block above exercises.
+// ---------------------------------------------------------------------------
+
+describe('renderDescription — skinparam dpi (cdd-T30)', () => {
+  it('dpi 300, no scale directive: root dims scale by exactly 300/96=3.125x (fromScale defaults to 1)', () => {
+    const svg = renderDescription(makeGeo(), { ...defaultTheme, dpi: 300 });
+    // Unscaled baseline is 21x21 (see the preceding describe block) --
+    // Math.trunc(21*3.125) = 65 for the style/viewBox ints, format(21*3.125)
+    // = "65.625" for the raw width/height attrs.
+    expect(svg).toContain('width="65.625px"');
+    expect(svg).toContain('height="65.625px"');
+    expect(svg).toContain('viewBox="0 0 65 65"');
+  });
+
+  it('a dpi of exactly 96 is byte-identical to the unset (default) case', () => {
+    const unset = renderDescription(makeGeo(), defaultTheme);
+    const explicit96 = renderDescription(makeGeo(), { ...defaultTheme, dpi: 96 });
+    expect(explicit96).toBe(unset);
+  });
+
+  it('composes with a `scale ...` directive: dpi multiplies the ALREADY-clamped strategy factor', () => {
+    const svg = renderDescription(makeGeo({ scale: { kind: 'simple', factor: 2 } }), { ...defaultTheme, dpi: 300 });
+    // 2 (clamped, unchanged) * 300/96 = 6.25; Math.trunc(21*6.25) = 131.
+    expect(svg).toContain('width="131.25px"');
+    expect(svg).toContain('viewBox="0 0 131 131"');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // UID assignment (renderer-uid.ts integration)
 // ---------------------------------------------------------------------------
 

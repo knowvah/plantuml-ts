@@ -206,3 +206,40 @@ describe('resolveScaleFactor — maxWidthAndHeight (ScaleMaxWidthAndHeight)', ()
     expect(resolveScaleFactor({ kind: 'maxWidthAndHeight', width: 40, height: 60 }, 100, 100)).toBe(0.4);
   });
 });
+
+// ---------------------------------------------------------------------------
+// resolveScaleFactor — dpi term (cdd-T30, `TextBlockExporter.java:205-209`:
+// `computeScaleFactor = fromScale * dpi/96.0`, dpi ALWAYS multiplies, even
+// with no `scale` directive at all — `fromScale` defaults to 1 in that
+// case). Applied AFTER `ScaleProtected`'s clamp, never before.
+// ---------------------------------------------------------------------------
+
+describe('resolveScaleFactor — dpi term', () => {
+  it('defaults to 96 (byte-identical to the pre-T30 signature)', () => {
+    expect(resolveScaleFactor(undefined, 100, 100)).toBe(1);
+    expect(resolveScaleFactor({ kind: 'simple', factor: 2 }, 100, 100)).toBe(2);
+  });
+
+  it('multiplies even absent a `scale` directive (class/paluca-39-desa696, dpi 300)', () => {
+    // fromScale defaults to 1 when spec is undefined; 300/96 = 3.125.
+    expect(resolveScaleFactor(undefined, 100, 100, 300)).toBeCloseTo(3.125, 10);
+  });
+
+  it('multiplies the ALREADY-clamped strategy factor (dpi 200, class/bavoxa-34-keje375)', () => {
+    // 200/96 = 2.08333...
+    expect(resolveScaleFactor(undefined, 100, 100, 200)).toBeCloseTo(200 / 96, 10);
+  });
+
+  it('applies AFTER the ScaleProtected clamp — a >4 factor stays clamped at 4 before *dpi/96', () => {
+    // clampScale(10) = 4, then * 300/96 = 12.5, NOT 10 * 300/96 = 31.25.
+    expect(resolveScaleFactor({ kind: 'simple', factor: 10 }, 100, 100, 300)).toBeCloseTo(12.5, 10);
+  });
+
+  it('composes with a simple scale factor (scale 2, dpi 300)', () => {
+    expect(resolveScaleFactor({ kind: 'simple', factor: 2 }, 100, 100, 300)).toBeCloseTo(6.25, 10);
+  });
+
+  it('a dpi of exactly 96 is a no-op multiplier', () => {
+    expect(resolveScaleFactor({ kind: 'width', target: 200 }, 100, 50, 96)).toBe(2);
+  });
+});

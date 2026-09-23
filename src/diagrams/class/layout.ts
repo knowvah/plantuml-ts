@@ -451,6 +451,10 @@ export { layoutMultiPage };
 export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   const geo =
     ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
-  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight);
+  // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
+  // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
+  // never declared (`Theme.dpi`'s own doc comment). SAME `resolveScaleFactor`
+  // call as before T30 -- no second scale-resolution path.
+  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
   return scaleClassGeometry(geo, k, theme.fontSize);
 }

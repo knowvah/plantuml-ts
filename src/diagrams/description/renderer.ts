@@ -200,7 +200,10 @@ export function renderDescription(
   // `#finalizeRootAttributes` (already-faithful, pre-existing code -- see
   // that module's own doc comment) -- `minDim` itself stays unscaled,
   // matching upstream's `ensureVisible(minDim.getWidth(), minDim.getHeight())`.
-  const scale = resolveScaleFactor(geo.scale, width, height);
+  // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
+  // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
+  // never declared (`Theme.dpi`'s own doc comment).
+  const scale = resolveScaleFactor(geo.scale, width, height, theme.dpi);
 
   const option = basicSvgOption({
     minDim: { width, height },
