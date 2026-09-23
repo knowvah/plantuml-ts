@@ -22,32 +22,19 @@
  * attribute-emission logic against real jar values without this task
  * inventing font metrics.
  *
- * FontConfiguration gaps bridged/deferred (this task's own finding,
- * reported — `UText.ts`'s `FontConfiguration` carries only `family`,
- * `size`, `color`, `styles`; upstream's driver additionally reads
- * `getUnderlineStroke().getThickness()`, `getExtendedColor()`, and
- * `getFontFace().getCssWeight()`/`isItalic()`, none of which exist on
- * this port's `FontConfiguration`):
- * - `font-weight`: bridged using ONLY the `BOLD` style flag → `"700"`.
- *   Upstream's face-weight refinement (honour an existing face weight
- *   >= 700, or a non-BOLD face weight != 400) is deferred — no
- *   `UFontFace` on this port's `FontConfiguration`.
- * - `font-style`: bridged using ONLY the `ITALIC` style flag →
- *   `"italic"`. Upstream's `face.isItalic()` override is deferred, same
- *   reason.
- * - `text-decoration` (UNDERLINE/STRIKE): bridged by treating the style
- *   flag alone as sufficient (upstream additionally gates UNDERLINE on
- *   `underlineStroke.getThickness() > 0`, unavailable here — assumed
- *   true whenever the flag is present). The `extendedColor`-driven
- *   *custom-color* decoration-line path (`ExtraLines`, drawn as separate
- *   `<line>` elements via `svg.svgLine`) is deferred entirely — no
- *   `extendedColor` on this port's `FontConfiguration`; the plain
- *   CSS `text-decoration` branch is always taken instead.
- * - `WAVE`: ported in full — needs only the style flag.
- * - `BACKCOLOR`: deferred entirely (not emitted) — upstream's
- *   `getExtendedColor()` (solid or `HColorGradient`) is the sole source
- *   of the fill color for the background `<rect>`/gradient def, and this
- *   port's `FontConfiguration` carries no such field.
+ * FontConfiguration gaps, as of cdd-B7FU-R1 (which added
+ * `FontConfiguration.fontFace` and `.extendedColor` — see `UText.ts`):
+ * - `font-weight`/`font-style`/`text-decoration`/`ExtraLines`/`BACKCOLOR`:
+ *   all ported, in `driver-text-svg-decorations.ts` (the pure half, shared
+ *   with class's own string renderers) plus the two emission helpers
+ *   below. That includes upstream's two-tier face-weight fallback
+ *   (java:97-103) and the `face.isItalic()` override (java:105-107).
+ * - `getUnderlineStroke().getThickness() > 0` (java:133-134): still has no
+ *   equivalent — this port carries no `UStroke` on a font configuration —
+ *   and is assumed true whenever UNDERLINE is present, exactly as the
+ *   plain-CSS branch already assumed before.
+ * - the `HColorGradient` BACKCOLOR arm (java:161-169) needs the run's
+ *   measured HEIGHT; see `drawBackGradient` below for the seam condition.
  * - `fontConfiguration.getAttributes()` (extra literal SVG attributes):
  *   deferred — no such field on this port's `FontConfiguration`; an
  *   empty `Map` is passed to `text()`'s `attributes` param instead.
@@ -63,7 +50,11 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
-import { FontStyle, getFont } from '../../shape/UText.js';
+import { parseColor } from '../../../paint.js';
+import { resolveColorToSvgHex } from '../../color/HColorSet.js';
+import { shortenColor } from '../../../svg-format.js';
+import { getFont } from '../../shape/UText.js';
+import { extraLineStrokeWidth, textRenderDecorations, type ExtraLine } from './driver-text-svg-decorations.js';
 import type { UText, FontConfiguration } from '../../shape/UText.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -74,7 +65,7 @@ export interface StringBounder {
   calculateDimension(
     font: { readonly family: string; readonly size: number },
     text: string,
-  ): { readonly width: number };
+  ): { readonly width: number; readonly height?: number };
 }
 
 // Upstream: `text.replace(' ', (char) 160)` — regular space -> NBSP.
@@ -93,24 +84,6 @@ function trin(text: string): string {
   while (start <= end && text.charCodeAt(start) <= 0x20) start++;
   while (end >= start && text.charCodeAt(end) <= 0x20) end--;
   return text.slice(start, end + 1);
-}
-
-// See the module doc comment above for the FontFace-refinement deferral.
-function fontWeightOf(styles: ReadonlySet<FontStyle>): string | null {
-  return styles.has(FontStyle.BOLD) ? '700' : null;
-}
-
-function fontStyleOf(styles: ReadonlySet<FontStyle>): string | null {
-  return styles.has(FontStyle.ITALIC) ? 'italic' : null;
-}
-
-// See the module doc comment above for the extendedColor-path deferral.
-function textDecorationOf(styles: ReadonlySet<FontStyle>): string | null {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : null;
 }
 
 /** Upstream: `DriverTextSvg`. Ported: the members listed in the module
@@ -137,19 +110,70 @@ export class DriverTextSvg implements UDriver<UText> {
     // `font` for a NORMAL run.
     const drawFont = getFont(font);
     const dim = this.stringBounder.calculateDimension(drawFont, trimmed);
+    const deco = textRenderDecorations(font, drawFont.size);
+
+    // Upstream java:161-169: a GRADIENT extended colour is painted as a
+    // filled rectangle UNDER the run (`deltaPatch = 2`, java:167-168),
+    // before the text itself and instead of the `feFlood` filter.
+    this.drawBackGradient(deco.backGradient, x, y, dim);
 
     this.svg.setFillColor(font.color);
     this.svg.text(trimmed, x, y, {
       fontFamily: drawFont.family,
       fontSize: drawFont.size,
-      fontWeight: fontWeightOf(font.styles),
-      fontStyle: fontStyleOf(font.styles),
-      textDecoration: textDecorationOf(font.styles),
+      fontWeight: deco.fontWeight,
+      fontStyle: deco.fontStyle,
+      textDecoration: deco.textDecoration,
       textLength: dim.width,
       attributes: new Map(),
-      textBackColor: null,
+      textBackColor: deco.backColor === null ? null : resolveColorToSvgHex(deco.backColor),
       orientation: shape.getOrientation(),
     });
+
+    // Upstream java:180: `extraLines.drawAll(x, y, width, font, mapper, svg)`
+    // — AFTER the `<text>`, so the coloured rule sits above it in document
+    // order exactly as the jar emits it.
+    this.drawExtraLines(deco.extraLines, x, y, dim.width, drawFont.size);
+  }
+
+  /** Upstream `ExtraLines#drawAll` (`DriverTextSvg.java:68-75`). */
+  private drawExtraLines(
+    extraLines: readonly ExtraLine[],
+    x: number,
+    y: number,
+    width: number,
+    drawnFontSize: number,
+  ): void {
+    for (const extra of extraLines) {
+      this.svg.setStrokeColor(shortenColor(resolveColorToSvgHex(extra.color)));
+      this.svg.setStrokeWidth(extraLineStrokeWidth(drawnFontSize), null);
+      this.svg.svgLine(x, y + extra.deltaY, x + width, y + extra.deltaY, 0);
+    }
+  }
+
+  /** Upstream `DriverTextSvg.java:161-169` — the `HColorGradient` arm of the
+   *  BACKCOLOR branch. Needs the run's measured HEIGHT, which this driver's
+   *  own narrow `StringBounder` seam only supplies when its implementation
+   *  chooses to (the field is optional, see that interface); with no height
+   *  there is nothing to size the patch rectangle from and upstream's own
+   *  input is simply unavailable, so the rectangle is skipped rather than
+   *  invented. No corpus fixture reaches this arm (a `<back:a|b>` gradient
+   *  token appears in none of the 27 cached diagram-type corpora). */
+  private drawBackGradient(
+    backGradient: string | null,
+    x: number,
+    y: number,
+    dim: { readonly width: number; readonly height?: number },
+  ): void {
+    if (backGradient === null || dim.height === undefined) return;
+    const paint = parseColor(backGradient);
+    if (typeof paint === 'string') return;
+    const id = this.svg.createSvgGradient(paint.color1, paint.color2, paint.policy);
+    this.svg.setFillColor(`url(#${id})`);
+    this.svg.setStrokeColor(null);
+    const deltaPatch = 2;
+    const geo = { x, y: y - dim.height + deltaPatch, width: dim.width, height: dim.height, rx: 0, ry: 0 };
+    this.svg.svgRectangle(geo, 0);
   }
 
   // Upstream: the whitespace-only NBSP substitution + leading-space →

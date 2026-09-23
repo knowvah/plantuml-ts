@@ -17,6 +17,7 @@ import { paintToSvg } from './paint.js';
 import { ignoreThisLink } from './security/SecurityUtils.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
+import { collectDocumentDefs } from './svg-defs.js';
 import { DEFAULT_SVG_DECIMALS, escapeAttribute, escapeText, fmt, formatDecimal, shortenColor } from './svg-format.js';
 
 // Arrow-marker builders live in ./svg-markers (no Paint involvement); re-export
@@ -98,6 +99,15 @@ export interface TextStyle {
    * block's hyperlink. Neither is expressible as a font property.
    */
   textDecoration?: string;
+  /**
+   * `SvgGraphics#text`'s own `textBackColor` parameter
+   * (`SvgGraphics.java:678-680,733-736`): the `<back:color>` run background,
+   * emitted as `filter="url(#…)"` plus the `feFlood` `<filter>` def the
+   * emitter prepends inline (lifted into `<defs>` by
+   * `svg-defs.ts#extractFilterDefs`, exactly as a gradient def is).
+   * Optional/additive: every pre-existing caller omits it and is unchanged.
+   */
+  textBackColor?: string;
   /**
    * G2 N4: the pre-measured text width, matching klimt's own `textLength`
    * emission (`core/klimt/drawing/svg/svg-graphics-elements.ts`'s
@@ -339,6 +349,8 @@ export {
   polyline,
   noteBox,
   emittedTextForm,
+  foreignObject,
+  decorationLines,
 } from './svg-shapes.js';
 export type { NoteBoxStyle } from './svg-shapes.js';
 
@@ -412,29 +424,6 @@ export function defs(children: string[]): string {
   return `<defs>${children.join('')}</defs>`;
 }
 
-/**
- * `<foreignObject>` element.
- *
- * Used to embed HTML/MathML content (e.g. KaTeX MathML) inside SVG.
- * The `content` string is inserted verbatim — callers are responsible for
- * providing valid (X)HTML content including any required namespace attributes.
- *
- * @param x       - Top-left x coordinate.
- * @param y       - Top-left y coordinate.
- * @param w       - Width of the foreignObject.
- * @param h       - Height of the foreignObject.
- * @param content - Inner HTML/MathML string (verbatim, not escaped).
- */
-export function foreignObject(x: number, y: number, w: number, h: number, content: string): string {
-  const a = attrs([
-    ['x', x],
-    ['y', y],
-    ['width', w],
-    ['height', h],
-  ] as const);
-  return '<foreignObject' + a + '>' + content + '</foreignObject>';
-}
-
 // ---------------------------------------------------------------------------
 // SVG root
 // ---------------------------------------------------------------------------
@@ -454,70 +443,11 @@ export function foreignObject(x: number, y: number, w: number, h: number, conten
  *   guarantees they are defined before any `url(#id)` reference in the body,
  *   which is required when the SVG is injected via `innerHTML`.
  */
-// Matches one inline gradient def. Built from a string (not a regex literal) —
-// the complexity checker miscounts `<`/`>` in literals. The id capture is the
-// FNV/base36 content-hash `paintToSvg` emits (`g` + [0-9a-z]). Scanned with
-// `indexOf` rather than a regex: a lazy `[\s\S]*?` over library input is
-// quadratic when open tags outnumber close tags (CodeQL js/polynomial-redos).
-const GRADIENT_OPEN = '<linearGradient id="';
-const GRADIENT_CLOSE = '</linearGradient>';
-const GRADIENT_ID_RE = /^g[0-9a-z]+$/;
-
-/** The `id` of the `<linearGradient id="…"` opening at `at`, or undefined
- *  when the quoted value is not a `paintToSvg` hash. */
-function gradientIdAt(body: string, at: number): string | undefined {
-  const idStart = at + GRADIENT_OPEN.length;
-  const idEnd = body.indexOf('"', idStart);
-  if (idEnd === -1) return undefined;
-  const id = body.substring(idStart, idEnd);
-  return GRADIENT_ID_RE.test(id) ? id : undefined;
-}
-
-/**
- * Lift every inline `<linearGradient>` out of `body` and return them, deduped
- * by id in first-use order, for the document's `<defs>`.
- *
- * `SvgGraphics#createSvgGradient` keys a map on `(color1, color2, policy)`,
- * creates the element once on a miss, and appends it to `defs`
- * (`SvgGraphics.java:363-405`) -- so the jar emits ONE per distinct gradient,
- * in `<defs>`, referenced by id from wherever it is used. This port's shape
- * emitters each prepend their own def inline instead
- * (`svg-shapes.ts#rect`/`line`/`text`/...), which left `<defs/>` empty and
- * repeated the element once per referencing shape.
- *
- * Dedup by id is exact rather than heuristic: `paintToSvg`'s id is a content
- * hash of the resolved `color1|color2|policy`, so equal ids mean
- * byte-identical defs.
- */
-export function extractGradientDefs(body: string): { body: string; defs: string } {
-  const seen = new Set<string>();
-  const found: string[] = [];
-  const kept: string[] = [];
-  let cursor = 0;
-  for (;;) {
-    const open = body.indexOf(GRADIENT_OPEN, cursor);
-    if (open === -1) break;
-    const id = gradientIdAt(body, open);
-    if (id === undefined) {
-      // Not a `paintToSvg` hash: keep the text and scan on past this open.
-      kept.push(body.substring(cursor, open + GRADIENT_OPEN.length));
-      cursor = open + GRADIENT_OPEN.length;
-      continue;
-    }
-    const close = body.indexOf(GRADIENT_CLOSE, open);
-    // No close tag after this open means none after any later open either.
-    if (close === -1) break;
-    const end = close + GRADIENT_CLOSE.length;
-    kept.push(body.substring(cursor, open));
-    if (!seen.has(id)) {
-      seen.add(id);
-      found.push(body.substring(open, end));
-    }
-    cursor = end;
-  }
-  kept.push(body.substring(cursor));
-  return { body: kept.join(''), defs: found.join('') };
-}
+// `<defs>` collection (lifting, minting and the cross-fragment collapse)
+// lives in `svg-defs.ts` — split out for the file-length cap. Re-exported
+// here so every existing `from './svg.js'` import site is unchanged.
+export { extractGradientDefs, extractFilterDefs, backColorFilterId, backColorFilterDef } from './svg-defs.js';
+export { collapseDuplicateFilterDefs, collectDocumentDefs } from './svg-defs.js';
 
 export function svgRoot(
   width: number,
@@ -533,8 +463,8 @@ export function svgRoot(
   // Gradients are lifted out of the children FIRST so they can ride in the
   // same `<defs>` the markers do, as `SvgGraphics#createSvgGradient` puts
   // them (`:404`).
-  const lifted = extractGradientDefs(children.join(''));
-  const defsBlock = defs([...markers, extraDefs, lifted.defs]);
+  const lifted = collectDocumentDefs(children.join(''), [...markers, extraDefs].join(''));
+  const defsBlock = defs([lifted.defs]);
   const isSolid = bgColor !== 'transparent' && bgColor !== PAINT_NONE;
   const rectAttrs = attrs([
     ['width', width],

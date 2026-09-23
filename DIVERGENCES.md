@@ -553,6 +553,44 @@ licensing-safe path for ND-licensed artwork.
 
 **Affects:** any diagram rendering stdlib icons or creole `img`/sprite atoms.
 
+### Emoji shorthand `<:name:>` — the platform glyph, not OpenMoji artwork (limitation, CDD B7FU-R1)
+
+**Upstream:** a `<:name:>` atom is drawn as VECTOR ARTWORK. `AtomEmoji`
+(`klimt/creole/atom/AtomEmoji.java`) resolves the shortname through
+`Emoji.java`'s table to a bundled OpenMoji glyph and draws it as a stack of
+filled `<path>` elements, one per colour region, inside the atom's square. In
+`class/lecelo-92-loma110`'s third class the jar draws 7 `<path>` elements plus
+3 label `<text>`s (11 children in that group) — no `<text>` carries the icon,
+and the rendering depends on no font at all.
+
+**This port:** the same atom is drawn as ONE `<text>` element carrying the
+emoji's Unicode code point at the atom's own emoji font size, so the rendered
+glyph is whatever the VIEWER's emoji font supplies (Apple Color Emoji, Noto
+Color Emoji, ...), or a tofu box on a system with none. The atom's GEOMETRY is
+upstream's: `Emoji.ts` maps `label`/`wrench`/`hammer_and_wrench` to the same
+code points (1f3f7/1f527/1f6e0), and the 36*factor square with its -3*factor
+starting altitude (a 39*factor effective line height) is ported and
+jar-verified, which is why lines containing emoji still size like the jar's.
+
+**Not affected:** the `<U+1F3F7>` and `&#127991;` spellings. Upstream draws
+THOSE as plain `<text>` with the literal character (same fixture, first two
+classes) — this port matches them, and only the `<:name:>` shorthand diverges.
+
+**Reason:** the artwork is a per-emoji vector asset bundle — a separate
+deliverable from the creole engine, with its own asset-licensing question
+(upstream ships OpenMoji, CC BY-SA 4.0). Nothing structural blocks it:
+`AtomEmoji` already reaches the emoji by code point, so an artwork bundle
+drops in at exactly that resolution point.
+
+**Affects:** `class/lecelo-92-loma110` and any diagram using `<:name:>`. The
+element KIND and count differ (a `<text>` where the jar has N `<path>`), so
+these fixtures cannot reach structural parity until the artwork lands; the
+surrounding layout numbers already match.
+
+**See also:** `.agent-notes/r2i-creole-class-wiring.md` ("Twemoji artwork not
+ported") and `.agent-notes/cdd-T25.md`, which traced the same finding from the
+`<:name:>` shorthand side.
+
 ### Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster (deliberate, CDD T27)
 
 **Upstream:** `EmbeddedDiagram#getImageSvg`/`getImageSvgSlow`

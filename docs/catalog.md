@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1163 modules · 4290 exported names.
+1165 modules · 4314 exported names.
 
 ## `src/`
 
@@ -112,14 +112,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-order.ts` | `firstEncounterOrder` | The order Svek's DOT text declares nodes in — the single definition of "which node does graphviz's parser meet first", shared by the two consumers of one `DotInputGraph`. |
 | `svek-dot-sequence.ts` | `Seq`, `NodeRec`, `ClusterColors`, `EdgeColors`, `ClusterTree`, `buildClusterTree`, `SeqAssignment`, `assignSequence` |  |
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
+| `svg-defs.ts` | `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
 | `svg-format.ts` | `DEFAULT_SVG_DECIMALS`, `trimZeros`, `formatDecimal`, `fmt`, `shortenColor`, `formatOpacity`, `formatPercent`, `escapeAttribute`, `escapeText`, `escapeComment` | Shared SVG formatting rules — decimal precision, color shortening, and opacity/percent formatting. |
 | `svg-markers.ts` | `ArrowType`, `ALL_ARROW_TYPES`, `arrowHeadRef`, `arrowHead`, `openArrowHeadDef` | SVG arrow-marker builders — the `<marker>` `<defs>` for every edge arrowhead. |
 | `svg-path-builder.ts` | `moveTo`, `lineTo`, `arcTo`, `splinePathD`, `roundedTopRectD`, `roundedBottomRectD`, `cubicTo` | Shared `<path>` `d`-string segment builder — the plain-string counterpart to `UPath` (`core/klimt/shape/UPath.ts`) for this port's several class-diagram renderers that draw markup as plain strings rather than through a `UGraphic`/`SvgGraphi |
 | `svg-rect-corners.ts` | `roundedCornerAttrs` | Whether a `<rect>` carries `rx`/`ry` at all. |
 | `svg-sanitize.ts` | `SanitizeSvgOptions`, `sanitizeSvg` | SVG sanitizer — strips executable content and external resource references. |
-| `svg-shapes.ts` | `emittedTextForm`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `NoteBoxStyle`, `noteBox` | SVG shape emitters (rect/line/text/image/path/ellipse/diamond/polygon). |
+| `svg-shapes.ts` | `emittedTextForm`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `NoteBoxStyle`, `noteBox`, `foreignObject`, `decorationLines` | SVG shape emitters (rect/line/text/image/path/ellipse/diamond/polygon). |
 | `svg-text-font.ts` | `textFontFamily`, `emittedTextForm` | Text emission rules that depend on the FONT FAMILY — the SVG-safe family string, PlantUML's `monospaced` -> CSS `monospace` rename, and the two NBSP substitutions. |
-| `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `foreignObject`, `extractGradientDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
+| `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `foreignObject`, `decorationLines`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
@@ -469,6 +470,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `driver-polygon-svg.ts` | `DriverPolygonSvg` | driver-polygon-svg.ts — the `UPolygon` → SVG `<polygon>` driver. |
 | `driver-rectangle-svg.ts` | `DriverRectangleSvg` | driver-rectangle-svg.ts — the `URectangle` → SVG `<rect>` driver. |
 | `driver-svg-stubs.ts` | `DriverImagePng`, `DriverPixelSvg`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
+| `driver-text-svg-decorations.ts` | `ExtraLine`, `TextRenderDecorations`, `fontWeightOf`, `fontStyleOf`, `extraLineStrokeWidth`, `textRenderDecorations` | driver-text-svg-decorations.ts — the pure, emitter-independent half of `DriverTextSvg#draw`: every decision that method makes about a text run's `font-weight`, `font-style`, `text-decoration`, extended-colour decoration LINES and BACKCOLOR |
 | `driver-text-svg.ts` | `StringBounder`, `DriverTextSvg` | driver-text-svg.ts — the `UText` → SVG `<text>` driver. |
 | `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
 | `svg-graphics-elements.ts` | `TextOptions`, `RectangleGeometry`, `SvgGraphicsElements` | svg-graphics-elements.ts — the shape-drawing methods: every `svg*`-prefixed element-creation call plus the legacy `newpath`/`moveto`/…/`fill` path-builder API. |
@@ -546,7 +548,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `UPath.ts` | `USegmentType`, `USegment`, `UPath` |  |
 | `UPolygon.ts` | `UPolygon` |  |
 | `URectangle.ts` | `URectangle` |  |
-| `UText.ts` | `FontStyle`, `FontConfiguration`, `getFont`, `getSpace`, `UText` |  |
+| `UText.ts` | `FontStyle`, `FontFace`, `NORMAL_FONT_FACE`, `FontConfiguration`, `getFont`, `getFontFace`, `changeExtendedColor`, `getSpace`, `UText` |  |
 
 ## `src/core/klimt/sprite/`
 
@@ -1237,7 +1239,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-classifier-box.ts` | `renderRow`, `pushIconRowPrimitives`, `renderClassifierBox` | renderer-classifier-box.ts — the generic name+members/rows classifier box (every classifier kind not handled by `renderer.ts#tryRenderUSymbol`). |
 | `renderer-classifier-colors.ts` | `classDefaultBackground`, `resolveElementBackground`, `resolveElementFont`, `resolveElementHeaderBackground`, `resolveElementHeaderFont`, `resolveClassBackgroundByStereo`, `classStereotypeBackground`, `classifierFill`, `classBorder`, `classBorderLine`, `CLASS_BORDER_STROKE_WIDTH_DEFAULT`, `classBorderStrokeWidth`, `classBorderStrokeDasharray`, `MAP_JSON_DIVIDER_STROKE_WIDTH` | Classifier-box color/border resolution: default + element-scoped background and font lookups, classifier fill, and border stroke. |
 | `renderer-classifier-header-split.ts` | `CLASS_HEADER_SPLIT_KINDS`, `resolveClassHeaderFill`, `ClassHeaderSplitInput`, `classHeaderSplitRects` | renderer-classifier-header-split.ts — CDD T20 (E1): the `class`/`enum`/ `interface`/`abstract` header-background split (`EntityImageClass #drawInternal`'s four-element form). |
-| `renderer-classifier-rows.ts` | `attributeFontSize`, `wrappedVisibilityIconOriginY`, `renderRow`, `renderRowText`, `memberAtomDecoration`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
+| `renderer-classifier-rows.ts` | `attributeFontSize`, `wrappedVisibilityIconOriginY`, `renderRow`, `renderRowText`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint`, `renderEdgeCardinalityLabels`, `renderEdgeKalBoxes` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink`, `renderGroupInheritanceNeighborhood` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |

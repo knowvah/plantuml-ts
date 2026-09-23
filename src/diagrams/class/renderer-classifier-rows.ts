@@ -8,7 +8,8 @@
 import type { ClassifierGeo } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { text, image } from '../../core/svg.js';
+import { text, image, decorationLines } from '../../core/svg.js';
+import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
@@ -17,7 +18,7 @@ import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-
 import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-note.js';
-import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
+import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
@@ -297,20 +298,6 @@ export function renderRowText(
   });
 }
 
-/** `FontStyle` set -> the SVG `text-decoration` attribute value -- mirrors
- *  `core/klimt/drawing/svg/driver-text-svg.ts#textDecorationOf` exactly
- *  (same three flags, same CSS keywords, same join order); duplicated
- *  rather than imported because that function is `DriverTextSvg`'s own
- *  private helper and class's renderer has no `UDriver`/`UGraphic` seam to
- *  hang a shared import off of (this file's own module doc comment). */
-export function memberAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
 /**
  * G2 N22: draws a member row's per-atom creole content -- one `<text>` per
  * styled text run, one `<image>` per resolved img/sprite atom, left to
@@ -357,7 +344,12 @@ export function renderRowAtoms(
   let out = '';
   for (const atom of atoms) {
     if (atom.kind === 'text') {
-      const decoration = memberAtomDecoration(atom.font.styles);
+      // cdd-B7FU-R1: one call for every font-configuration-derived attribute
+      // `DriverTextSvg#draw` computes (java:93-173) -- weight (two-tier, so a
+      // `skinparam classFontStyle bold` face survives `<plain>`), style,
+      // `text-decoration`, the `<back:>` filter and the custom-coloured
+      // underline/strike lines.
+      const deco = textRenderDecorations(atom.font, getFont(atom.font).size);
       // G2 N57 item 38: `atom.renderText`/`renderWidth` are set ONLY for a
       // whitespace-only run (`DriverTextSvg.java`'s NBSP-substitution
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
@@ -373,14 +365,23 @@ export function renderRowAtoms(
         fill: atom.font.color ?? fallbackFontColor,
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,
-        ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
-        ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
-        ...(decoration !== undefined ? { textDecoration: decoration } : {}),
+        ...(deco.fontWeight !== null ? { fontWeight: deco.fontWeight as '700' } : {}),
+        ...(deco.fontStyle !== null ? { fontStyle: 'italic' as const } : {}),
+        ...(deco.textDecoration !== null ? { textDecoration: deco.textDecoration } : {}),
+        ...(deco.backColor !== null ? { textBackColor: deco.backColor } : {}),
       });
       // G2 N40: a `[[url]]` creole command's captured-label run wraps in
       // its OWN `<a href>` -- `class-member-creole.ts#MemberRenderAtom`'s
       // `url` field doc comment.
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
+      // Upstream java:180: the extra lines are drawn AFTER the `<text>`.
+      out += decorationLines(
+        deco.extraLines,
+        x,
+        textAtomRowY(y, atom),
+        atom.renderWidth ?? atom.width,
+        getFont(atom.font).size,
+      );
       x += atom.width;
       continue;
     }

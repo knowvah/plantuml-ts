@@ -109,7 +109,19 @@ export function memberBaseFont(
   if (member.isAbstract === true || fontSpec.italic === true) styles.add(FontStyle.ITALIC);
   if (member.isStatic === true) styles.add(FontStyle.UNDERLINE);
   if (fontSpec.bold === true) styles.add(FontStyle.BOLD);
-  return { family: fontSpec.family, size: fontSpec.size, color: null, styles };
+  // cdd-B7FU-R1: upstream seeds the two INDEPENDENTLY. `FontConfiguration
+  // #create(UFont, …)` bakes the skinparam's weight/slant into `styles` via
+  // `getStyles(font)` (`FontConfiguration.java:65-73`, reading
+  // `font.getFontFace().isBold()/isItalic()`) while `currentFont` — hence
+  // `getFontFace()` — keeps that same face in its own right. Only the FIRST
+  // is clearable: `add(FontStyle.PLAIN)` (java:301-309) clears `styles` and
+  // passes `currentFont` through, which is why `<plain>` cannot unbold a
+  // `skinparam classFontStyle bold` header (`diseka-11-gozu390`, journal
+  // rows 119-121). The ITALIC seed is the same `isItalic()` half of that
+  // face; `{abstract}`/`{static}` are per-MEMBER creole-level styles, not
+  // face properties, so they stay out of it.
+  const fontFace = { cssWeight: fontSpec.bold === true ? 700 : 400, italic: fontSpec.italic === true };
+  return { family: fontSpec.family, size: fontSpec.size, color: null, styles, fontFace };
 }
 
 /**

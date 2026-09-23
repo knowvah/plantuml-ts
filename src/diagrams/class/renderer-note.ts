@@ -13,7 +13,8 @@ import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
-import { text, path, image, linkWrap } from '../../core/svg.js';
+import { text, path, image, linkWrap, decorationLines } from '../../core/svg.js';
+import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
 import { moveTo, lineTo } from '../../core/svg-path-builder.js';
@@ -31,7 +32,7 @@ import {
   type OpaleConnector,
   type OpaleDirection,
 } from './note-opale.js';
-import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
+import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
@@ -151,20 +152,6 @@ function noteBodyPathData(x: number, y: number, w: number, h: number, f: number)
   ].join(' ');
 }
 
-/** `FontStyle` set -> the SVG `text-decoration` attribute value -- exact
- *  duplicate of `renderer-classifier-box.ts`'s private `memberAtomDecoration`
- *  (that file's own doc comment explains why class's renderer has no shared
- *  `UDriver`/`UGraphic` seam to hang a common import off of; this note-local
- *  copy follows the SAME precedent `buildConnectorPathData` above already
- *  set for this file). */
-function noteAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
 /**
  * G2 N55: draws ONE note line's per-atom creole content -- the note-local
  * mirror of `renderer-classifier-box.ts`'s private `renderRowAtoms` (same
@@ -241,7 +228,11 @@ function renderNoteLineAtoms(
       // {@link noteTextAtomY} adds the atom's own `Sea` correction on top
       // (`dys[i]`, `decisions.md#D2`'s "must not be applied twice").
       const y = noteTextAtomY(lineTop, lineHeight, atom, dys[i]!);
-      const decoration = noteAtomDecoration(atom.font.styles);
+      // cdd-B7FU-R1: the SAME shared port of `DriverTextSvg#draw`'s
+      // font-configuration decisions the classifier rows now use
+      // (java:93-173) -- weight/style/decoration plus the `<back:>` filter
+      // and the custom-coloured underline/strike lines.
+      const deco = textRenderDecorations(atom.font, getFont(atom.font).size);
       // G2 N57 item 38: `atom.renderText`/`renderWidth` are set ONLY for a
       // whitespace-only run (`DriverTextSvg.java`'s NBSP-substitution
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
@@ -254,11 +245,14 @@ function renderNoteLineAtoms(
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,
-        ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
-        ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
-        ...(decoration !== undefined ? { textDecoration: decoration } : {}),
+        ...(deco.fontWeight !== null ? { fontWeight: deco.fontWeight as '700' } : {}),
+        ...(deco.fontStyle !== null ? { fontStyle: 'italic' as const } : {}),
+        ...(deco.textDecoration !== null ? { textDecoration: deco.textDecoration } : {}),
+        ...(deco.backColor !== null ? { textBackColor: deco.backColor } : {}),
       });
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
+      // Upstream java:180: drawn AFTER the `<text>` it decorates.
+      out += decorationLines(deco.extraLines, x, y, atom.renderWidth ?? atom.width, getFont(atom.font).size);
       x += atom.width;
       continue;
     }

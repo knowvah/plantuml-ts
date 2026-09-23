@@ -3,13 +3,14 @@
  *
  * Upstream: klimt/creole/command/AddStyle.java (`style`+`extendedColor` ctor
  * fields, `apply(FontConfiguration): FontConfiguration` = `initial.add
- * (style)` plus an optional `changeExtendedColor`). Ported: the `add(style)`
- * half only — L1's styles (BOLD/ITALIC/UNDERLINE/STRIKE/WAVE) never carry an
- * extended color in this iteration (the `<u:color>`/`<w:color>`/`<s:color>`
- * colon-suffixed forms are explicitly L2 scope, mission brief NOT-in-scope
- * list's `<u:>` entry) — `CommandCreoleStyle.ts`'s activation patterns never
- * capture one, so there is nothing for an `extendedColor` param to carry
- * yet.
+ * (style)` plus an optional `changeExtendedColor`, java:52-58). Both halves
+ * are ported: cdd-B7FU-R1 added `FontConfiguration.extendedColor`
+ * (`shape/UText.ts`) and made `CommandCreoleStyle.ts`'s activation patterns
+ * CAPTURE the `<u:color>`/`<w:color>`/`<s:color>`/`<back:color>` colour they
+ * previously matched and discarded, so the second half now has a value to
+ * carry. `extendedColor === undefined` is upstream's `null` — the branch is
+ * skipped and the configuration is returned with `add(style)` alone, which
+ * is what every colourless style command still produces.
  *
  * cdd-T25 ports `FontStyle.PLAIN`'s "clear all styles first" branch:
  * `FontConfiguration.add(FontStyle)` (`FontConfiguration.java:301-309`):
@@ -32,10 +33,18 @@
  * in (or, for PLAIN, the set replaced), never mutates the input (this
  * project's testability rule: pure functions over in-place mutation).
  */
-import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
+import { FontStyle, changeExtendedColor, type FontConfiguration } from '../../shape/UText.js';
 
-export function addFontStyle(font: FontConfiguration, style: FontStyle): FontConfiguration {
+/** Upstream `FontConfiguration#add(FontStyle)` (`FontConfiguration.java:
+ *  301-309`) — the `styles`-only half of `AddStyle#apply`. */
+function addStyleOnly(font: FontConfiguration, style: FontStyle): FontConfiguration {
   if (style === FontStyle.PLAIN) return { ...font, styles: new Set([FontStyle.PLAIN]) };
   if (font.styles.has(style)) return font;
   return { ...font, styles: new Set(font.styles).add(style) };
+}
+
+/** Upstream `AddStyle#apply(FontConfiguration)` (`AddStyle.java:52-58`). */
+export function addFontStyle(font: FontConfiguration, style: FontStyle, extendedColor?: string): FontConfiguration {
+  const withStyle = addStyleOnly(font, style);
+  return extendedColor === undefined ? withStyle : changeExtendedColor(withStyle, extendedColor);
 }

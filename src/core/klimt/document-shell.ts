@@ -18,7 +18,7 @@
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-2, T1)
  */
 
-import { extractGradientDefs } from '../svg.js';
+import { collectDocumentDefs } from '../svg-defs.js';
 import { ROOT_GROUP_OPEN } from '../svg.js';
 import { escapeAttribute } from '../svg-format.js';
 import { UGraphicSvg } from './drawing/svg/u-graphic-svg.js';
@@ -148,8 +148,8 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType: stri
   // `escapeAttribute` for the same reason `svg.ts#svgRoot`'s background rect
   // escapes its `fill`: an unparseable skinparam color arrives verbatim.
   const style = `width:${String(width)}px;height:${String(height)}px;${isSolid ? `background:${escapeAttribute(background)};` : ''}`;
-  const lifted = extractGradientDefs(fragment.body);
-  const defsBody = extraDefs + lifted.defs;
+  const lifted = collectDocumentDefs(fragment.body, extraDefs);
+  const defsBody = lifted.defs;
   return (
     '<svg xmlns=' +
     DQUOTE +
