@@ -869,10 +869,10 @@
       "type": "activity",
       "slug": "fonebe-54-save009",
       "status": "baseline",
-      "weightedScore": 25,
-      "diffCount": 25,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 24,
+      "diffCount": 24,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
@@ -1625,10 +1625,10 @@
       "type": "activity",
       "slug": "levuma-67-cego489",
       "status": "baseline",
-      "weightedScore": 276,
-      "diffCount": 219,
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "77d50172"
+      "weightedScore": 266,
+      "diffCount": 216,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
@@ -3182,10 +3182,10 @@
       "type": "activity",
       "slug": "xovano-23-tazo278",
       "status": "baseline",
-      "weightedScore": 375,
-      "diffCount": 260,
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "77d50172"
+      "weightedScore": 371,
+      "diffCount": 256,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
