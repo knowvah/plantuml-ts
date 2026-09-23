@@ -28,7 +28,7 @@ import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { resolveMagicArrowText } from './class-edge-label-measure.js';
 import { stripEdgeLabelVisibility, visibilityBlockAnchor } from './class-edge-visibility.js';
 import type { Kal } from './class-kal.js';
-import type { NoteBoxContext } from './class-layout-edge-labels.js';
+import { labelMarginOf, type NoteBoxContext } from './class-layout-edge-labels.js';
 import type { EdgeGeo } from './layout.js';
 
 /**
@@ -207,7 +207,7 @@ export function attachEdgeLabel(
   const resolvedLabel = lines[0] ?? '';
   const magic = parseMagicArrowLabel(resolvedLabel);
   if (magic !== undefined) {
-    attachMagicArrow(edgeGeo, magic, fromToPoints, ctx);
+    attachMagicArrow(edgeGeo, magic, fromToPoints, ctx, rel);
     return;
   }
 
@@ -266,12 +266,44 @@ function attachMultiLineLabel(
  * the wrong width. Jar-verified byte-exact SHAPE (glyph triangle) against
  * `lojepe-37-liri985`'s golden `<polygon>`; absolute block position
  * carries the SAME gvts-genuine placement residual N25/N62 already named.
+ *
+ * cdd-T37 (M8): the GLYPH's own origin is NOT `blockLeft` (that stays text
+ * -only, see below) -- jar's `getXY` (`SvekEdge.java:806-813`) returns the
+ * MINIMUM x/y of the reserved marker polygon a REAL graphviz run drew at
+ * the DOT-declared, `Math.floor`-ed width (`class-layout-edge-labels.ts
+ * #withLayoutBox`'s own `Math.floor(a.labelBoxWidth!)`, `graph-layout-
+ * build-edges.ts:186`) -- an INTEGER by construction, not the untruncated
+ * `arrowFontSize + textWidth` this function's pre-existing `blockLeft`
+ * uses for TEXT. For a text-bearing arrow, upstream margins the TEXT
+ * operand alone BEFORE the arrow merge (`SvekEdge.java:302-304`:
+ * `addVisibilityModifier(block,...)` then `addMagicArrow(labelOnly,...)`
+ * -- `class-layout-edge-labels.ts#withLabelMargin`'s own doc comment), so
+ * the polygon's declared width is `arrowFontSize + textWidth +
+ * 2*labelMarginOf(rel)` -- the SAME total `withLabelMargin` reserves in
+ * the DOT box, floored the SAME way. The arrow sits at this polygon's OWN
+ * left edge (`mergeLR`'s first operand, `TextBlockHorizontal.java:71-84`:
+ * `x=0`) -- no margin offset, unlike the text operand, which is why only
+ * the glyph needs this correction: `portLabelAnchor`'s own
+ * `Math.trunc(width)/2` hybrid (below) already reconciles `blockLeft`
+ * against jar's real text position algebraically (`floor(tw+arrowFontSize
+ * +2m) === floor(tw)+arrowFontSize+2m` for any integer `arrowFontSize+2m`,
+ * so the `+2m` term cancels out of the TEXT formula but not the glyph's,
+ * which has no such truncation term to absorb it) -- verified against
+ * `bitove-03-sanu160` (Δ0.58), `class-inheritance-interface-assoc`
+ * (Δ0.804) and `lojepe-37-liri985` (Δ0.636), all pure-X triangle-only
+ * diffs before this fix, zero after. A BARE token (`resolved === undefined`)
+ * carries no margin at all (`mergeLR`'s `EMPTY_TEXT_BLOCK` short-circuit,
+ * `TextBlockUtils.java:112-117` -- `withLabelMargin`'s own bare-arrow skip)
+ * -- `margin` is 0 and `textWidth` is 0 in that case, so `totalWidth`
+ * reduces to the bare `arrowFontSize` (already an integer, `Math.floor` a
+ * no-op), unchanged from the pre-fix formula.
  */
 function attachMagicArrow(
   edgeGeo: EdgeGeo,
   magic: MagicArrowLabel,
   fromToPoints: Array<{ x: number; y: number }>,
   ctx: LabelAnchorContext,
+  rel: Relationship,
 ): void {
   const { center, measurer } = ctx;
   const angle = magicArrowAngle(fromToPoints, magic.direction);
@@ -291,8 +323,11 @@ function attachMagicArrow(
   const resolved = resolveMagicArrowText(magic.text, baseFont);
   const textWidth = resolved !== undefined ? measurer.measure(resolved.text, resolved.font).width : 0;
   const blockLeft = center.x - (baseFont.size + textWidth) / 2;
+  const margin = resolved !== undefined ? labelMarginOf(rel) : 0;
+  const glyphTotalWidth = baseFont.size + textWidth + 2 * margin;
+  const glyphOriginX = center.x - Math.floor(glyphTotalWidth) / 2;
   edgeGeo.arrowGlyph = {
-    points: magicArrowGlyphPoints(blockLeft, center.y - baseFont.size / 2, angle, baseFont.size),
+    points: magicArrowGlyphPoints(glyphOriginX, center.y - baseFont.size / 2, angle, baseFont.size),
   };
   if (resolved !== undefined) {
     const anchor = portLabelAnchor(

@@ -50,6 +50,16 @@ import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/Positi
  * Builder.java:234-235`'s `labelFont`), the SAME font the DOT reservation
  * is measured with (`class-layout-edge-labels.ts#computeMeasuredLabelAttrs`)
  * -- box and ink cannot drift on an `arrow { FontSize }` override.
+ *
+ * cdd-T37 (M8, `sacacu-34-dobo091`): `blockLeft` floors `maxWidth` -- the
+ * SAME `getXY`/`Math.floor(labelBoxWidth)` corner mechanism {@link
+ * guideLinesAnchor}'s own doc comment derives in full (jar's
+ * `addVisibilityModifier` margins the WHOLE `create0` multi-line block
+ * here too, `SvekEdge.java:296-302`, so the `2*labelMarginOf` term cancels
+ * the SAME way). Un-floored, this function's own claim above ("algebraically
+ * identical to `portLabelAnchor`'s" at `lines.length === 1`) was FALSE
+ * for any non-integer width -- `portLabelAnchor` already used
+ * `Math.trunc(width)/2`; nothing here matched it. `text/@x` Δ0.369 -> 0.
  */
 export function multiLineLabelAnchor(
   lines: string[],
@@ -61,7 +71,7 @@ export function multiLineLabelAnchor(
   const font = labelFont;
   const widths = lines.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
-  const blockLeft = center.x - maxWidth / 2;
+  const blockLeft = center.x - Math.floor(maxWidth) / 2;
   const firstLine = lines[0] ?? '';
   const m0 = measurer.measure(firstLine, font);
   const baselineOffset = font.size - measurer.getDescent(font, firstLine);
@@ -131,6 +141,30 @@ function alignedOffset(align: 'center' | 'left' | 'right', total: number, own: n
  * `NONE_OR_SEVERAL` (`StringWithArrow.java:63-65` via `Labels.java:64`),
  * so the guide carries the un-reversed internal angle: byte-for-byte the
  * whole-label path (`class-edge-geo.ts#attachMagicArrow`).
+ *
+ * cdd-T37 (M8): `blockLeft` floors `maxWidth` -- jar's `getXY`
+ * (`SvekEdge.java:806-813`) returns the MINIMUM x/y of the reserved marker
+ * polygon a REAL graphviz run drew at the DOT-declared, `Math.floor`-ed
+ * width (`class-layout-edge-labels.ts#withLayoutBox`'s own
+ * `Math.floor(a.labelBoxWidth!)`), unlike this function's own `maxWidth`
+ * (the untruncated `computeGuideLinesBox` total). Unlike the single-line
+ * arm (`class-edge-label-attach.ts#attachMagicArrow`), the `2*labelMarginOf`
+ * term does NOT need to appear here at all: upstream margins the WHOLE
+ * multi-line block AFTER `addSeveralMagicArrows` builds it
+ * (`SvekEdge.java:286-302`: `addVisibilityModifier` runs unconditionally,
+ * `hasSeveralGuideLines` only gates the SEPARATE `addMagicArrow` call for
+ * the single-line arm), and the margin lands OUTSIDE the per-line
+ * `TextBlockVertical` this function's `alignedOffset` mirrors -- so for
+ * ANY integer margin `m`, `Math.floor(maxWidth + 2*m)/2 + m ===
+ * Math.floor(maxWidth)/2` algebraically (adding an even integer before
+ * flooring shifts the floor by that same integer, which the trailing `+m`
+ * -- `TextBlockMarged`'s own left inset -- exactly cancels), so the
+ * un-margined `Math.floor(maxWidth)/2` already IS the correct corner.
+ * Verified against `gobuco-16-ruke239`/`lapoma-04-vaga142` (Δ0.23 on every
+ * triangle vertex AND the adjacent `text/@x`, uniformly -- unlike the
+ * single-line arm, no `portLabelAnchor`-style truncation term exists here
+ * to separately reconcile text, so both ink sources shared one `blockLeft`
+ * bug and move together).
  */
 export function guideLinesAnchor(
   guideLines: readonly GuideLine[],
@@ -142,7 +176,7 @@ export function guideLinesAnchor(
   const size = labelFont.size;
   const maxWidth = Math.max(...guideLines.map((g) => g.blockWidth));
   const totalHeight = guideLines.reduce((acc, g) => acc + g.blockHeight, 0);
-  const blockLeft = center.x - maxWidth / 2;
+  const blockLeft = center.x - Math.floor(maxWidth) / 2;
   let lineTop = center.y - totalHeight / 2;
   return guideLines.map((g) => {
     const lineLeft = blockLeft + alignedOffset(align, maxWidth, g.blockWidth);
