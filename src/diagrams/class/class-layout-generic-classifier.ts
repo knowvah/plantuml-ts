@@ -322,16 +322,11 @@ export function measureGenericClassifier(
 
   return buildNormalClassifierResult(
     width,
-    { headerNameGeo, stereoGeo, headerRowsGeo },
+    { headerNameGeo, stereoGeo, headerRowsGeo, fontSize: fonts.attribute.size },
     memberSections!,
     suppress,
     commonFields,
   );
-}
-
-/** The full geo bundle {@link buildNormalClassifierResult} needs. */
-interface NormalClassifierGeo extends HeaderGeoBundle {
-  headerRowsGeo: ReturnType<typeof computeHeaderRowsGeo>;
 }
 
 /** The two mutable accumulators {@link appendMemberSectionRows} appends
@@ -358,6 +353,13 @@ function appendMemberSectionRows(
   acc.rows.push(...buildSectionRows(section.members, section.texts, section.builds, y, hasIcon, rowCtx));
 }
 
+/** The full geo bundle {@link buildNormalClassifierResult} needs. */
+interface NormalClassifierGeo extends HeaderGeoBundle {
+  headerRowsGeo: ReturnType<typeof computeHeaderRowsGeo>;
+  /** CDD B7FU-R2 item (b): member-row font size, `SectionRowContext.fontSize`'s bottom-anchor formula. */
+  fontSize: number;
+}
+
 /**
  * The default (no enhanced body, not fully suppressed) branch of
  * `measureGenericClassifier` -- draws each non-suppressed compartment's own
@@ -373,22 +375,17 @@ function buildNormalClassifierResult(
   suppress: MemberSuppression,
   commonFields: CommonHeaderFields,
 ): MeasuredClassifier {
-  const { stereoGeo, headerRowsGeo } = geo;
+  const { stereoGeo, headerRowsGeo, fontSize } = geo;
   const { fieldsH, methodsH } = memberSections;
   const height = stereoGeo.headerRowHeight + fieldsH + methodsH;
   const acc: RowAccumulator = { rows: [...headerRowsGeo.rows], dividerYs: [] };
   const rowCtx: SectionRowContext = {
     baselineOffset: stereoGeo.memberBaselineOffset,
     iconZoneWidth: memberSections.iconZoneWidth,
+    fontSize,
   };
   if (!suppress.fields) {
-    appendMemberSectionRows(
-      acc,
-      memberSections.fieldFlat,
-      stereoGeo.headerRowHeight,
-      memberSections.fieldsHasIcon,
-      rowCtx,
-    );
+    appendMemberSectionRows(acc, memberSections.fieldFlat, stereoGeo.headerRowHeight, memberSections.fieldsHasIcon, rowCtx);
   }
   if (!suppress.methods) {
     appendMemberSectionRows(

@@ -20,7 +20,7 @@ function build(height: number): MemberRowBuild {
   return { atoms: [], width: 10, height };
 }
 
-const CTX: SectionRowContext = { baselineOffset: 0, iconZoneWidth: 14 };
+const CTX: SectionRowContext = { baselineOffset: 0, iconZoneWidth: 14, fontSize: 14 };
 
 describe('buildSectionRows — visibilityBlockHeight', () => {
   it('a single-line explicit-visibility member gets NO visibilityBlockHeight (equals its own height)', () => {
