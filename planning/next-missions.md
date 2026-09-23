@@ -3174,6 +3174,41 @@ From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
   `surfaceSpriteWarnings`. The two port-own allow-listed sites
   (activity `tile-layout.ts`, description `renderer-draw-sequence.ts`) belong
   in the same pass.
+- **`EntityImageProtected`'s 20 px border is unported on the DRAW side**
+  (cdd-T36, `pijiju-95-xexi872` 0+183). When `skinparam groupInheritance N`
+  gives a leaf a `Neighborhood` (`dot/DotData.java:136-151`),
+  `GeneralImageBuilder.java:110-114` wraps its `EntityImageClass` in
+  `EntityImageProtected(orig, 20, …)`, whose `calculateDimension` is
+  `orig.calculateDimension().delta(2 * border)` and whose `drawU` draws the
+  original under `UTranslate(border, border)`
+  (`svek/EntityImageProtected.java:76-83`). We carry the +40 into the DOT node
+  (our label for `B` is byte-identical to the jar's `svek-1.dot`, WIDTH
+  81.3625 / rows 36+14+52) but then DRAW the class rect at that OUTER size:
+  jar `<rect width="41.363" height="62">`, ours `81.363 x 102`. Fix belongs in
+  the class render/geo path (`renderer-group.ts` and the ClassifierGeo box
+  builder), NOT in `class-port-rows.ts`.
+- **DOT `BGCOLOR`/`color` hex is emitted lowercase, upstream emits uppercase**
+  (cdd-T36, cosmetic, 10 of 37 row-port table labels in the class corpus).
+  `src/core/svek-dot-emit-labels.ts:17`'s `hex` uses `toString(16)`; upstream
+  is `XColor.toHexRGBColor` = `String.format("#%06X", …)`
+  (`klimt/awt/XColor.java:127-129`), reached from `svek/SvekNode.java:255,277`
+  and `:163,200,218`. Geometrically inert (DOT colour parsing is
+  case-insensitive; every affected fixture is `dotEqual: true`), but it is the
+  ONLY remaining byte difference between our emitted `RECTANGLE_HTML_FOR_PORTS`
+  label and the jar's, so fixing it would make that family byte-exact. One
+  `.toUpperCase()`; the file is outside every batch-10 write-set.
+- **`Class::member` row-port family: closed, with 6 residuals owned elsewhere**
+  (cdd-T36). The measured reach is 22 fixtures, not the 53 A5 guessed; 15 are
+  0+0. The open 6 are `gekope-01-ricu859` / `nenepe-70-keri784` /
+  `pegeso-72-mana305` (canvas `@width` only, zero ink diffs — T35's `minDim`),
+  `xefeme-77-fagu709` (whole drawing X-shifted by exactly 5.001 with an
+  identical ink SPAN and zero Y diffs — the same ink-extent walk, measuring the
+  left-most edge-LABEL text differently), `bicabi-42-coto932` (one polygon
+  vertex, delta 0.011), `pijiju-95-xexi872` (the `EntityImageProtected` item
+  above) and `sijisi-94-ripu606` (`allow_mixing` + nested `rectangle`
+  clusters: childCount 2 vs 3 and 2 vs 4, one missing `@textLength`; already
+  attributed ENT3/GEO1/B4). None is a port-row-sizing defect: the emitted DOT
+  table is byte-identical to the jar's for all 22.
 
 ---
 
