@@ -258,7 +258,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // T5 (namespace-cluster-box): read the namespace box from the real
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
-  const namespaces = buildNamespaceGeos(effAst, theme, measurer, result.clusters, clusterIdByNs);
+  const namespaces = buildNamespaceGeos(effAst, { theme, measurer, clusters: result.clusters, clusterIdByNs, hiddenIds });
   // cdd-T13 (M1): the real graphviz cluster box for every cluster-anchored
   // edge endpoint -- `NamespaceGeo.x/y/width/height` is `box` VERBATIM
   // (`Cluster#setPosition`, `class-geo-builders.ts#namespaceGeoFromBox`'s
@@ -390,12 +390,30 @@ function assembleShiftedGeometry(
   // (see `class-ink-box.ts#addVisibilityIconInk`).
   iconSize: number,
 ): ClassGeometry {
-  const documentDims = computeClassDocumentDims(classifiers, namespaces, edges, notes, iconSize);
+  // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
+  // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
+  // `return`s BEFORE any `draw()`/`apply()` call, so its border/title never
+  // reaches `LimitFinder` and contributes zero ink there. A hidden
+  // CLASSIFIER is different: `SvekResult.java:85` wraps its draw calls in
+  // `ug.apply(UHidden.HIDDEN)`, but `LimitFinder#apply` (klimt/drawing/
+  // LimitFinder.java:78-83) does not special-case `UHidden` at all -- the
+  // wrapped `draw()` calls still run and still accumulate ink; only the
+  // real SVG-emitting `UGraphic` (a different implementation) skips markup.
+  // So ONLY namespaces are filtered out of the ink walk here; classifiers
+  // keep contributing ink exactly as if visible, matching the jar. The
+  // FULL (unfiltered) `classifiers`/`namespaces` still get shifted and
+  // returned below -- layout/uid numbering is unaffected either way
+  // (`ClassifierGeo.hidden`'s own doc comment). Confirmed via senece-96-
+  // fomu913 (`hide Foo1`/`Foo3`/`util`): filtering classifiers too
+  // shrank the canvas width from 293 (jar 277, before this fix) to 85 (jar
+  // 277) -- classifier ink is NOT excluded upstream, only the cluster's.
+  const inkNamespaces = namespaces.filter((n) => n.hidden !== true);
+  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, iconSize);
   // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
-  const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
-  const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
+  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, iconSize);
+  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, iconSize);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller

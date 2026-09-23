@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1185 modules · 4385 exported names.
+1185 modules · 4387 exported names.
 
 ## `src/`
 
@@ -1121,7 +1121,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-command-relationships.ts` | `RELATIONSHIP_COMMANDS` | Member and relationship commands for the class diagram dispatch table (rules 6-pre, 6, 6a of the original class-commands.ts COMMANDS array): the standalone-member shorthand, the general relationship dispatch, and the interface-lollipop rela |
 | `class-command-types.ts` | `Command` | Shared `Command` shape for the class diagram dispatch table. |
 | `class-commands.ts` | `COMMANDS` | Command dispatch table for the class diagram parser. |
-| `class-container.ts` | `setNamespaceUrl`, `setNamespaceColor`, `openNamespaceBlock`, `openTogetherBlock`, `closeBraceScope`, `closeContainer`, `HEADER_STEREO_CAPTURE`, `setNamespaceStereotype`, `NAMESPACE_COMMANDS` | Descriptive-container helpers for the class parser. |
+| `class-container.ts` | `setNamespaceUrl`, `setNamespaceColor`, `openNamespaceBlock`, `openTogetherBlock`, `closeBraceScope`, `closeContainer`, `HEADER_STEREO_CAPTURE`, `setNamespaceStereotype`, `setNamespaceTags`, `NAMESPACE_COMMANDS` | Descriptive-container helpers for the class parser. |
 | `class-declaration-extractors.ts` | `extractBody`, `DeclarationColors`, `parseDeclarationColors`, `extractDecorations`, `extractInheritance`, `parseIdDisplay` | Classifier-declaration field extractors (body / decorations / inheritance / generic / id-display) for the class parser. |
 | `class-declaration-parser.ts` | `ClassifierDecl`, `parseClassifierDecl`, `InheritanceParent`, `resolveInheritance`, `parseTagTokens`, `applyClassifierDecl` | Classifier declaration line parsing for PlantUML class diagrams. |
 | `class-descriptive-leaf-command.ts` | `ALLOW_MIXING_ERROR`, `adjudicateAllowMixing`, `DESCRIPTIVE_LEAF_COMMANDS` | Descriptive-element leaf declaration command (`database X`, `mix_actor Y`). |
@@ -1149,7 +1149,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-edge-visibility.ts` | `VisibilityIconGeo`, `EdgeLabelVisibility`, `stripEdgeLabelVisibility`, `VisibilityBlockAnchor`, `visibilityBlockAnchor` | cdd-T6 (A2a/M2): the visibility-modifier block a link LABEL carries when its first line starts with `-`/`#`/`+`/`~`/`*`. |
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |
 | `class-ensure-classifier.ts` | `ensureClassifier` | `ensureClassifier` — the class parser's single classifier-creation chokepoint — split out of `parser.ts` (which sat exactly at the 500-line module cap) and re-exported from it, so every existing `import { ensureClassifier } from './parser.j |
-| `class-geo-builders.ts` | `buildClassifierGeos`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
+| `class-geo-builders.ts` | `buildClassifierGeos`, `NamespaceGeoInputs`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
 | `class-geo-edge-extras.ts` | `VisibilityIconGeo`, `EdgeKalBoxes`, `EdgeNoteLine`, `EdgeNoteBoxGeo`, `EdgeConstraintGeo`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo` | cdd-T6: the four geometry shapes `EdgeGeo` grew for A2a's render-only link mechanisms (M2 visibility icon, M5 `note on link` box, M9 `constraint on links`, M10 multi-line quantifier). |
 | `class-geo-geometry-types.ts` | `ClassGeometry`, `JsonBodyItem` | `ClassGeometry` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T17: the `EdgeGeo.roleLines` field pushed it back over after the cdd-T6 split already once cleared it). |
 | `class-geo-json-types.ts` | `JsonBodyItem` | `JsonBodyItem` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |

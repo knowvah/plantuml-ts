@@ -286,6 +286,12 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // 1. Namespace boxes (behind classifiers) -- jar draws every CLUSTER
   // before any node (`svek/SvekResult.java:72-74`).
   for (const ns of geo.namespaces) {
+    // cdd-T31 round 2 (E5 defect b): `Cluster#drawU` returns immediately
+    // when `group.isHidden()` (svek/Cluster.java:298-300) -- the cluster's
+    // border/title/decoration never draws. DOT/uid numbering is unaffected
+    // (see `NamespaceGeo.hidden`'s own doc comment), so only this push is
+    // skipped -- `uidPlan.namespaceUid` still carries the slot.
+    if (ns.hidden === true) continue;
     const uid = uidPlan.namespaceUid.get(ns.id) ?? '';
     // cdd-T12 (A2b E4): `ns.url` opens an `<a>` INSIDE the cluster group and
     // before the decoration (`svek/Cluster.java:337-341`, closed at

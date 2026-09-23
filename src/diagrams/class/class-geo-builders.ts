@@ -246,6 +246,19 @@ function namespaceGeoFromBox(
   };
 }
 
+/** `buildNamespaceGeos`'s inputs beyond the AST -- bundled into one object
+ *  (5-param hook cap) once T31 round 2 added `hiddenIds` as a 6th. */
+export interface NamespaceGeoInputs {
+  theme: Theme;
+  measurer: StringMeasurer;
+  clusters: DotLayoutResult['clusters'];
+  clusterIdByNs: ReadonlyMap<string, string>;
+  /** cdd-T31 round 2 (E5 defect b): see `NamespaceGeo.hidden`'s own doc
+   *  comment -- same `computeHiddenIds` set `buildClassifierGeos` already
+   *  consumes, just also threaded here. */
+  hiddenIds: ReadonlySet<string>;
+}
+
 /**
  * Build NamespaceGeo entries by READING the box graphviz already computed,
  * mirroring `DotStringFactory.java:425-433`: upstream does not compute a
@@ -259,20 +272,16 @@ function namespaceGeoFromBox(
  * "no member positions" skip was -- decision 3 governs the no-cluster case
  * (T6 proves no namespace draws a box while having no cluster).
  */
-export function buildNamespaceGeos(
-  ast: ClassDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-  clusters: DotLayoutResult['clusters'],
-  clusterIdByNs: ReadonlyMap<string, string>,
-): NamespaceGeo[] {
+export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInputs): NamespaceGeo[] {
+  const { theme, measurer, clusters, clusterIdByNs, hiddenIds } = inputs;
   const clusterById = new Map<string, ClusterBox>((clusters ?? []).map((c) => [c.id, c]));
   const namespaces: NamespaceGeo[] = [];
   for (const ns of ast.namespaces) {
     const clusterId = clusterIdByNs.get(ns.id);
     const box = clusterId !== undefined ? clusterById.get(clusterId) : undefined;
     if (box === undefined) continue;
-    namespaces.push(namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol)));
+    const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
+    namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
   return namespaces;
 }
