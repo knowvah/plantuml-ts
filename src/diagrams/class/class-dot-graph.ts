@@ -164,7 +164,7 @@ interface DotNodesAndEdges {
 function computeGroupInheritance(
   ast: ClassDiagramAST,
   theme: Theme,
-  uidOf?: (classifierId: string) => string | undefined,
+  uidOf: (classifierId: string) => string | undefined,
 ): GroupInheritanceResult {
   const raw = (theme as Theme & ThemeGroupInheritance).groupInheritance;
   const empty = { protectedIds: new Set<string>(), sametailByRelIndex: new Map<number, string>() };
@@ -185,14 +185,12 @@ function computeGroupInheritance(
   for (const [id, n] of counts) if (n >= raw) protectedIds.add(id);
 
   const sametailByRelIndex = new Map<number, string>();
-  if (uidOf !== undefined) {
-    ast.relationships.forEach((rel, i) => {
-      if (rel.idEntity1Decor !== 'triangle' || rel.idEntity1FullId === undefined) return;
-      if (!protectedIds.has(rel.idEntity1FullId)) return;
-      const uid = uidOf(rel.idEntity1FullId);
-      if (uid !== undefined) sametailByRelIndex.set(i, uid);
-    });
-  }
+  ast.relationships.forEach((rel, i) => {
+    if (rel.idEntity1Decor !== 'triangle' || rel.idEntity1FullId === undefined) return;
+    if (!protectedIds.has(rel.idEntity1FullId)) return;
+    const uid = uidOf(rel.idEntity1FullId);
+    if (uid !== undefined) sametailByRelIndex.set(i, uid);
+  });
   return { protectedIds, sametailByRelIndex };
 }
 

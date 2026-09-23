@@ -9,7 +9,6 @@ Output: tests/corpus/<type>/*.puml  (gitignored — regenerate as needed)
 
 import os
 import re
-import sys
 
 PDIFF_DBHUM = os.path.expanduser("~/git/pdiff/dbhum")
 PDIFF_INPUT = os.path.expanduser("~/git/pdiff/input")

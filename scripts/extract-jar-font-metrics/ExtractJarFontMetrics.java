@@ -83,7 +83,7 @@ public class ExtractJarFontMetrics {
 
     final StringBuilder sb = new StringBuilder();
     sb.append("{\n");
-    appendHeader(sb, refFont, refFm, frc);
+    appendHeader(sb, refFont, frc);
     appendAdvances(sb, gg, refFm, "advancesAtReference", "averageAdvanceAtReference");
     appendAdvances(sb, gg, refBoldFm, "boldAdvancesAtReference", "averageBoldAdvanceAtReference");
     appendVerification(sb, gg, base, refFm);
@@ -120,7 +120,7 @@ public class ExtractJarFontMetrics {
     return gg;
   }
 
-  private static void appendHeader(StringBuilder sb, Font refFont, FontMetrics refFm, FontRenderContext frc) {
+  private static void appendHeader(StringBuilder sb, Font refFont, FontRenderContext frc) {
     // Ascent/descent via LineMetrics, matching StringBounderSvg.getDescent():
     // font.getUnderlayingFont(text).getLineMetrics(text, frc).getDescent().
     // Verified identical across plain/bold/italic for this font (see class
