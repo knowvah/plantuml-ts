@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1186 modules · 4402 exported names.
+1186 modules · 4405 exported names.
 
 ## `src/`
 
@@ -1164,7 +1164,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-json-commands.ts` | `JSON_COMMANDS`, `isPendingJsonBodyComplete` | `json` declaration commands for the class diagram parser — thin adapter over the shared port in `core/command/CommandCreateJson.ts` (mission shared-seam-extraction T9; formerly a 74%-line-identical clone of `state/state-json-commands.ts`, D |
 | `class-json-sizing.ts` | `measureJsonClassifier` | `json` classifier sizing — `kind:'json'` leaves in the class diagram layout engine (./layout.ts), mission object-dot-sync Phase L. |
 | `class-kal.ts` | `KAL_STROKE_THICKNESS`, `KAL_TEXT_DX`, `KAL_TEXT_DY`, `KAL_WIDTH_FACTOR`, `KalPosition`, `Kal`, `KalMargins`, `KalBox`, `kalMargins`, `kalTranslateForDecoration`, `kalTextDelta`, `computeKals`, `kalMarginsByEntity`, `kalWidthByEntity`, `kalBoxAt` | cdd-T15 (A2a/M1, decisions.md D6) — the qualified-association box. |
-| `class-layout-edge-labels.ts` | `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `LabelAttrs`, `NoteBoxContext`, `edgeLabelAttrs` | Relationship (edge) label sizing helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
+| `class-layout-edge-labels.ts` | `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `LabelAttrs`, `SELF_LINK_LABEL_MARGIN`, `LINK_LABEL_MARGIN`, `labelMarginOf`, `NoteBoxContext`, `edgeLabelAttrs` | Relationship (edge) label sizing helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
 | `class-layout-fonts.ts` | `resolveAttributeFont`, `resolveHeaderFont`, `resolveGuillemetOption`, `resolveStereoFont` | Classifier font resolvers for the class sizing pipeline (`class-layout-helpers.ts#measureClassifier`) — attribute (member-row), header, and stereotype fonts, plus the guillemet wrapper option. |
 | `class-layout-generic-classifier-sections.ts` | `computeMemberSectionsGeo`, `computeEnhancedBodyGeo` | Member-section (fields/methods compartment) geometry for the generic classifier box — `computeMemberSectionsGeo` (classic split) and `computeEnhancedBodyGeo` (upstream's enhanced-body render strategy). |
 | `class-layout-generic-classifier-types.ts` | `ClassFontSpecs` | Types shared between class-layout-generic-classifier.ts and class-layout-header-geo.ts (a one-way types-leaf so neither file has to import a type back from the other). |

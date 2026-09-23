@@ -142,12 +142,21 @@ type MultiplicityAttrs = Pick<
  * are built straight from `Display.create` and never pass through it — which
  * is why `tobuka-93-jale775`, whose only labels are tail/head, already matched
  * the oracle byte for byte before this change.
+ *
+ * cdd-T35: exported (with {@link labelMarginOf}) so `class-ink-box.ts`'s own
+ * ink walk can apply the SAME margin to the `UEmpty` reservation
+ * `TextBlockMarged#drawU` draws for it (`klimt/shape/TextBlockMarged.java:82`,
+ * walked by `LimitFinder#drawEmpty`, `klimt/drawing/LimitFinder.java:159-162`)
+ * -- the missing per-shape ink term the T35 diagnosis names (`decision-
+ * journal.md`, rows 215-219): this file only ever modeled the margin's
+ * effect on the GRAPHVIZ LAYOUT box size ({@link withLabelMargin}), never its
+ * OWN separate ink contribution at draw time.
  */
-const SELF_LINK_LABEL_MARGIN = 6;
-const LINK_LABEL_MARGIN = 1;
+export const SELF_LINK_LABEL_MARGIN = 6;
+export const LINK_LABEL_MARGIN = 1;
 
-function labelMarginOf(rel: Relationship): number {
-  return rel.from === rel.to ? SELF_LINK_LABEL_MARGIN : LINK_LABEL_MARGIN;
+export function labelMarginOf(edge: { from: string; to: string }): number {
+  return edge.from === edge.to ? SELF_LINK_LABEL_MARGIN : LINK_LABEL_MARGIN;
 }
 
 /** Grow a MEASURED label block by its all-round margin — see
