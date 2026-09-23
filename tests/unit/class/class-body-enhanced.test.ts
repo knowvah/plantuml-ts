@@ -43,6 +43,31 @@ describe('isEnhancedBody', () => {
   it('is false for a `**bold**` member line (same-char guard, not a separator)', () => {
     expect(isEnhancedBody(['**Bar(Model)**'])).toBe(false);
   });
+
+  // CDD B7FU-R2: `BodierLikeClassOrObject.java:96`'s fourth disjunct
+  // (`EmbeddedDiagram.getEmbeddedType(s) != null`) -- a bare `{{ }}` opener
+  // with NO separator/tree marker is "enhanced" on its own (moxobo-16-
+  // tipo829/zikabo-17-gugi332's exact shape, `.agent-notes/cdd-T27.md`'s
+  // "isEnhancedBody's missing disjunct" finding).
+  it('is true when any line is a bare `{{` embedded-diagram opener, no separator/tree', () => {
+    expect(isEnhancedBody(['{{', 'file f', '}}'])).toBe(true);
+  });
+
+  it('is true when a `{{` opener follows a surviving member line', () => {
+    expect(isEnhancedBody(['- field', '{{', 'node n', '}}'])).toBe(true);
+  });
+
+  it('recognizes a typed `{{json` opener, not just the bare `{{` (uml) case', () => {
+    expect(isEnhancedBody(['{{json', '{ "a": 1 }', '}}'])).toBe(true);
+  });
+
+  it('is false for a line that merely CONTAINS `{{` without it being a real opener', () => {
+    // `getEmbeddedType` requires the line to START with `{{` after
+    // whitespace-trim -- "a {{ b" never matches (EmbeddedDiagram.java:257
+    // -366's own prefix check), so this stays a plain (non-enhanced) member
+    // line, matching the classic-path fallback the module doc comment names.
+    expect(isEnhancedBody(['a {{ b'])).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

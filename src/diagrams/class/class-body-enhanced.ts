@@ -2,31 +2,37 @@
  * class-body-enhanced.ts — pure raw-line splitting for a classifier's
  * "enhanced body" (upstream `BodyEnhancedAbstract`/`BodyEnhanced1`): the
  * alternate render strategy upstream uses whenever a classifier body
- * contains a `--`/`==`/`..`/`__` block separator or a `|_` tree-list line,
- * REPLACING the classic two-compartment (fields, methods) split entirely —
- * `BodierLikeClassOrObject#getBody`, `type.isLikeClass() && isBodyEnhanced()`
- * branch: `showMethods || showFields` routes to `BodyFactory.create1`
- * (`Body1`/`BodyEnhanced1`), never `getFieldsToDisplay()`/
- * `getMethodsToDisplay()`.
+ * contains a `--`/`==`/`..`/`__` block separator, a `|_` tree-list line, or
+ * a `{{ }}` embedded-diagram opener, REPLACING the classic two-compartment
+ * (fields, methods) split entirely — `BodierLikeClassOrObject#getBody`,
+ * `type.isLikeClass() && isBodyEnhanced()` branch: `showMethods ||
+ * showFields` routes to `BodyFactory.create1` (`Body1`/`BodyEnhanced1`),
+ * never `getFieldsToDisplay()`/`getMethodsToDisplay()`.
  *
  * G2 N42 (mission priority 1, carried from N40/N41's own survey —
  * `plans/g2-class-svg/ledger.md` N40 "Priority 2" for the tree-list
  * derivation this file's tree-cell extraction implements).
  *
- * Scope: block separators (labeled/unlabeled `--`/`==`/`..`/`__`) and `|_`
- * tree-list runs — upstream's THIRD `isBodyEnhanced` trigger, a `|...|`
- * table line (`CreoleParser.isTableLine`), has ZERO corpus reach inside a
- * class member body (surveyed: every `|...|` table sample in the class
- * corpus is inside a `legend`/`note`, a different render subsystem) and is
- * NOT ported here — a table-line-only body still falls through
- * `isEnhancedBody` as `false` (classic 2-compartment rendering, matching
- * this port's pre-N42 behavior, not a new regression).
+ * Scope: block separators (labeled/unlabeled `--`/`==`/`..`/`__`), `|_`
+ * tree-list runs, and `{{ }}` embedded-diagram openers (CDD B7FU-R2,
+ * `BodierLikeClassOrObject.java:96`'s fourth disjunct,
+ * `EmbeddedDiagram.getEmbeddedType(s) != null` — a bare `{{ }}` block with
+ * no separator/tree line, e.g. `class C { {{ file f }} }`, is "enhanced"
+ * on its own) — upstream's THIRD `isBodyEnhanced` trigger, a `|...|` table
+ * line (`CreoleParser.isTableLine`), has ZERO corpus reach inside a class
+ * member body (surveyed: every `|...|` table sample in the class corpus is
+ * inside a `legend`/`note`, a different render subsystem) and is NOT
+ * ported here — a table-line-only body still falls through `isEnhancedBody`
+ * as `false` (classic 2-compartment rendering, matching this port's
+ * pre-N42 behavior, not a new regression).
  *
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhancedAbstract.java#isBlockSeparator
  * @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java#isBodyEnhanced
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhanced1.java#getArea
  * @see ~/git/plantuml/.../klimt/creole/legacy/StripeTree.java
+ * @see ~/git/plantuml/.../EmbeddedDiagram.java#getEmbeddedType
  */
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 
 /** One `--`/`==`/`..`/`__` block-separator line, parsed into its draw
  *  char + optional label. `char` selects the divider's stroke (`class-
@@ -86,15 +92,19 @@ function isTreeStartLine(s: string): boolean {
 }
 
 /**
- * `BodierLikeClassOrObject#isBodyEnhanced` — true when ANY raw body line is
- * a block separator or a tree-start line (untrimmed, matching upstream's
- * own un-trimmed `Parser.isTreeStart(s.toString())` check here — this is
- * the TRIGGER scan, distinct from `isTreeOrTable`'s trimmed check used
- * inside the block-splitting loop below).
+ * `BodierLikeClassOrObject#isBodyEnhanced` (java:93-100) — true when ANY raw
+ * body line is a block separator, a tree-start line (untrimmed, matching
+ * upstream's own un-trimmed `Parser.isTreeStart(s.toString())` check here —
+ * this is the TRIGGER scan, distinct from `isTreeOrTable`'s trimmed check
+ * used inside the block-splitting loop below), or a `{{ }}` embedded-diagram
+ * opener (`EmbeddedDiagram.getEmbeddedType(s) != null`, java:96 — checked
+ * on the RAW line, same as upstream, no trim).
  */
 export function isEnhancedBody(rawLines: readonly string[] | undefined): boolean {
   if (rawLines === undefined) return false;
-  return rawLines.some((s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()));
+  return rawLines.some(
+    (s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()) || getEmbeddedType(s) !== null,
+  );
 }
 
 /** `BodyEnhancedAbstract#getTitle`: strips the leading+trailing 2-char

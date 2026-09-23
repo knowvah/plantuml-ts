@@ -219,14 +219,31 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   const indent = hasIcon ? ROW_INDENT_WITH_ICON : ROW_TEXT_LEFT_MARGIN;
   // A2s R2i follow-up (rotisi-30-loge424 Toto): per-row heights come from
   // the atom-aware `MemberRowBuild.height` (sprite/img/emoji rows are taller
-  // than the font size), summed row-by-row exactly like the classic path --
-  // `MethodsOrFieldsArea#calculateDimensionOnlyMembers` sums per-member
-  // TextBlock heights (@see MethodsOrFieldsArea.java:161-166); a plain text
-  // row's build height equals the font size, so text-only bodies are
-  // byte-identical to the previous flat `fontSpec.size` stepping.
+  // OR SHORTER than the font size), summed row-by-row exactly like the
+  // classic path -- `MethodsOrFieldsArea#calculateDimensionOnlyMembers` sums
+  // per-member TextBlock heights (@see MethodsOrFieldsArea.java:161-166); a
+  // plain text row's build height equals the font size, so text-only bodies
+  // are byte-identical to the previous flat `fontSpec.size` stepping.
+  //
+  // CDD B7FU-R2: `y` (the row's text-baseline, ALSO what `renderer-
+  // classifier-rows.ts#renderRowAtoms`'s sprite placement anchors off of via
+  // its own `lineBottomY = y + fontSize/4.5` formula) is BOTTOM-anchored to
+  // the row's own real height, not top-anchored with a flat `baselineOffset`
+  // -- `y = rowTop + height - (fontSize - baselineOffset)`. Identical to the
+  // OLD `rowTop + baselineOffset` whenever `height === fontSpec.size` (the
+  // text-only case, zero behavior change). Jar-verified on rotisi-30-
+  // loge424's Toto: seven atom-height-varying rows need `y` shifted by
+  // EXACTLY `height - fontSize` in BOTH directions -- +2.1538 for six
+  // 15x(14/13)=16.1538px sprite rows, -11.8462 for the one 2x2 `$point`
+  // sprite row (2x(14/13)=2.1538px) -- one rule, no separate constant per
+  // direction. Matches `MethodsOrFieldsArea#drawU` (java:429-440): upstream
+  // stacks whole per-member `TextBlock`s by cumulative height and lets each
+  // block's OWN internal `Sea`/`Position` placement, not a shared flat
+  // per-classifier offset, anchor content inside it.
   let rowTop = contentTop;
+  const bottomAnchor = fontSpec.size - baselineOffset;
   const rows: ClassifierGeo['rows'] = members.map((m, i) => {
-    const y = rowTop + baselineOffset;
+    const y = rowTop + builds[i]!.height - bottomAnchor;
     rowTop += builds[i]!.height;
     return {
       text: texts[i]!,
@@ -246,8 +263,24 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
     };
   });
   const embeds = stackEmbeds(embedSources, ctx, rowTop);
-  const embedsHeight = embeds.reduce((sum, e) => sum + e.height, 0);
-  const embedsWidth = embeds.reduce((max, e) => Math.max(max, e.width), 0);
+  // Box geometry uses each embed's SIZING contribution (`sizingWidth`/
+  // `sizingHeight`), not its drawn `width`/`height` -- see `class-body-
+  // enhanced-embeds.ts#renderEmbed`'s "sizing/drawing asymmetry" doc
+  // comment for the jar-verified mechanism.
+  const embedsHeight = embeds.reduce((sum, e) => sum + e.sizingHeight, 0);
+  // `TextBlockUtils.withMargin(this, 6, 4)` (`asBlockMemberImpl`,
+  // `MethodsOrFieldsArea.java:87`) wraps the WHOLE members-or-embeds area in
+  // ONE marginX=6 (left+right) margin; since margin distributes over
+  // `Math.max` identically on both operands, adding it here (mirroring
+  // `sectionWidth`'s own `+ NAME_MARGIN_TOTAL * 2` for the member-rows
+  // operand) is equivalent to wrapping the combined area once, matching
+  // `BODY_ENHANCED_MARGIN_X`'s own doc comment (`BodyEnhanced1.getMarginX()`
+  // = 6). Zero contribution when the block has no embed (mirrors
+  // `sectionWidth`'s `rowBuilds.length === 0 ? 0 : ...` guard).
+  const embedsWidth =
+    embeds.length === 0
+      ? 0
+      : embeds.reduce((max, e) => Math.max(max, e.sizingWidth), 0) + BODY_ENHANCED_MARGIN_X * 2;
   return {
     rows,
     width: Math.max(sectionWidth(builds, hasIcon), embedsWidth),
