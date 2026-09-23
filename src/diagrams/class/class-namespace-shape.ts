@@ -221,9 +221,15 @@ export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string,
  * own doc comment has the full mechanism (`USymbolFolder#asBig` draws at a
  * fixed local offset, independent of graphviz's title-table placement) and
  * the measured 333-matched-shape regression that confirmed it.
+ *
+ * cdd-T37 (M8, `pixexi-81-sete111`): jar's `title.drawU` block reads the
+ * SAME font `getDescent` measures with. Pre-fix `theme.fontSize` was the
+ * diagram default (14), disagreeing with `titleFont(theme).size`
+ * (`skinparam package { FontSize 40 }`); `finono-05-cuvu171` never
+ * overrides it, masking the gap. `text/@y` Δ31.389 -> 0.
  */
 export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, label: string): number {
-  return 2 + theme.fontSize - measurer.getDescent(titleFont(theme), label);
+  return 2 + titleFont(theme).size - measurer.getDescent(titleFont(theme), label);
 }
 
 // folderPathD / folderPolygonPoints / renderFolderPolygon / FolderTabPaint /
