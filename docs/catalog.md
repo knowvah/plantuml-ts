@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1165 modules · 4315 exported names.
+1166 modules · 4317 exported names.
 
 ## `src/`
 
@@ -100,8 +100,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sprite-split-stdlib.ts` | `SpriteSplitManifest`, `SpriteNotBundledError`, `spriteSplitNamesOf`, `spriteSplitStdlib`, `assembleSpriteSplitContent` | si11b T4 -- per-sprite stdlib bundle registration, and the prefetch-side assembly it enables. |
 | `stdlib-content.ts` | `stdlibContentFor` | Resolving a `<bundle/thing>` include target to its CONTENT, for the prefetch walk's third channel (`include-resolver.ts#prefetchInner`). |
 | `stereotype-decoration.ts` | `GuillemetPair`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `CircledCharDecoration`, `parseCircledCharDecoration`, `CircledSpriteDecoration`, `parseCircledSpriteDecoration`, `DEFAULT_CIRCLED_CHARACTER_FONT_SIZE`, `resolveBadgeRadius` | stereotype-decoration.ts — the port of `StereotypeDecoration#buildComplex` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/ StereotypeDecoration.java:143-182`): how a `<<...>>` run splits into the label(s) a diagram DISPLAYS |
+| `style-cascade-class-font.ts` | `applyFontCascadeOverrides` | cdd-B7FU-R3 (`ropera-76-jico895`): the class-diagram FontSize/FontStyle `<style>` cascade — split out of `style-cascade-class.ts` (500-line cap), a pure addition, not a move. |
 | `style-cascade-class-snames.ts` | `CLASS_SNAMES`, `HEADER_SNAMES`, `ARROW_SNAMES`, `CARDINALITY_SNAMES`, `SPOT_SNAMES`, `NOTE_SNAMES`, `QUALIFIED_SNAMES` | cdd-T15: the class-diagram `<style>` SIGNATURES `style-cascade-class.ts` queries — split out verbatim when the `class.qualified` signature pushed that file past the repo's 500-line cap (a pre-authorised split; each constant's upstream citat |
-| `style-cascade-class.ts` | `computeCardinalityFontOverride`, `computeArrowFontOverride`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
+| `style-cascade-class.ts` | `GraphCascadeOverride`, `computeCardinalityFontOverride`, `computeArrowFontOverride`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
 | `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |

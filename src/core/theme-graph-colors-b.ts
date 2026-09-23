@@ -111,6 +111,32 @@ export interface ThemeGraphColorsB {
    *  kofe334` (`skinparam RoundCorner 20`, no competing `<style>`
    *  block): `rect/@rx`/`@ry` 10 (was 2.5). */
   classCascadeRoundCorner?: number;
+  /** cdd-B7FU-R3 (`ropera-76-jico895`): `<style> class { FontSize N;
+   *  FontStyle <tokens> } }`'s PLAIN (non-header) font cascade --
+   *  `EntityImageClass.java:92-93,163` feeds the member/field body's
+   *  `FontConfiguration` from `getStyle()` (`CLASS_SNAMES`), via
+   *  `Style#getUFont` (`style/Style.java:241-253`: `PName.FontSize`
+   *  defaulting to 14, `PName.FontStyle.asFontFace()` for bold/italic).
+   *  Bold/italic are independent booleans, mirroring `classTagCascade`'s
+   *  own `fontBold`/`fontItalic` pair below for a combined "bold italic"
+   *  value. Consumed by `class-layout-fonts.ts#resolveAttributeFont`,
+   *  ahead of the flat `classAttributeFontSize`/`*Bold`/`*Italic`
+   *  skinparam tier. */
+  classCascadeFontSize?: number;
+  classCascadeFontBold?: boolean;
+  classCascadeFontItalic?: boolean;
+  /** cdd-B7FU-R3: the HEADER-nested sibling of the pair above --
+   *  `<style> class { header { FontStyle <tokens> } } }`, `EntityImage
+   *  ClassHeader.java:93-101` (`HEADER_SNAMES`). Size is already covered
+   *  by `theme-graph-colors-a.ts#classCascadeHeaderFontSize`; absent when
+   *  the `<style>` block sets no header-scoped `FontStyle` (the plain
+   *  `classCascadeFontBold`/`Italic` fields above already carry the
+   *  inherited value via `resolveStyleCascade`'s own subset-match, and
+   *  `class-layout-fonts.ts#resolveHeaderFont`'s `?? attributeFont.bold/
+   *  italic` fallback surfaces it) -- same "absent = inherit" contract as
+   *  `classCascadeHeaderFontSize`. */
+  classCascadeHeaderFontBold?: boolean;
+  classCascadeHeaderFontItalic?: boolean;
   /** G2 N37: the `.tagname` stereotype-name style-cascade sub-selector
    *  itself (`classDiagram { .mystyle { BackgroundColor cyan; RoundCorner
    *  5; FontStyle Bold; FontColor red } } }` / a top-level bare `.tag {

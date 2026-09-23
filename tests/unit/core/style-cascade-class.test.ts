@@ -156,6 +156,85 @@ describe('computeClassStyleCascadeOverrides -- MaximumWidth word-wrap (G2 N65 it
 });
 
 // ---------------------------------------------------------------------------
+// classCascadeFontSize/FontBold/FontItalic + classCascadeHeaderFontBold/
+// FontItalic (cdd-B7FU-R3, `ropera-76-jico895`): `EntityImageClass.java
+// :92-93,163` feeds the member-row body font from the PLAIN `{root,element,
+// classDiagram,class}` style (`Style#getUFont`, `PName.FontSize`/
+// `FontStyle`) -- already wired for RoundCorner/MaximumWidth/Background/
+// Border/FontColor in this file, never for FontSize/FontStyle.
+// `EntityImageClassHeader.java:93-101` feeds the header/name font from the
+// HEADER-nested `{...,class,header}` style the SAME way;
+// `classCascadeHeaderFontSize` already covers its FontSize half
+// (`applyMaximumWidthOverrides`), FontStyle (bold/italic) never was.
+// `FontStyle`'s value maps to bold/italic via the SAME substring test
+// `classTagCascadeEntry` already uses two sections below (`lower.includes
+// ('bold')`/`'italic'`), not mutually exclusive -- upstream's own
+// `ValueImpl#asFontFace` (`style/ValueImpl.java:181-198`) is a single-token
+// exact match, but this port's existing `.tagname` cascade already chose
+// substring for a "bold italic" combined value and this task mirrors that
+// established convention for consistency, not upstream's exact-match one.
+// ---------------------------------------------------------------------------
+describe('computeClassStyleCascadeOverrides -- FontSize/FontStyle (cdd-B7FU-R3)', () => {
+  it('a bare class { FontSize N } sets classCascadeFontSize only, not the header field', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontsize: '18' } }));
+    expect(override.classCascadeFontSize).toBe(18);
+  });
+
+  it('a bare class { FontStyle italic } sets classCascadeFontItalic true, FontBold false/absent', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontstyle: 'italic' } }));
+    expect(override.classCascadeFontItalic).toBe(true);
+    expect(override.classCascadeFontBold).toBe(false);
+  });
+
+  it('a bare class { FontStyle bold } sets classCascadeFontBold true, FontItalic false', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontstyle: 'bold' } }));
+    expect(override.classCascadeFontBold).toBe(true);
+    expect(override.classCascadeFontItalic).toBe(false);
+  });
+
+  it('a combined "bold italic" value sets BOTH flags true', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontstyle: 'bold italic' } }));
+    expect(override.classCascadeFontBold).toBe(true);
+    expect(override.classCascadeFontItalic).toBe(true);
+  });
+
+  it('a header-nested FontStyle wins for classCascadeHeaderFontBold/Italic but not the plain fields (ropera-76-jico895 shape)', () => {
+    const override = computeClassStyleCascadeOverrides(
+      styleMap({
+        class: { fontstyle: 'italic', fontsize: '18' },
+        'class.header': { fontstyle: 'bold', fontsize: '14' },
+      }),
+    );
+    expect(override.classCascadeFontItalic).toBe(true);
+    expect(override.classCascadeFontBold).toBe(false);
+    expect(override.classCascadeFontSize).toBe(18);
+    expect(override.classCascadeHeaderFontBold).toBe(true);
+    expect(override.classCascadeHeaderFontItalic).toBe(false);
+    expect(override.classCascadeHeaderFontSize).toBe(14);
+  });
+
+  it('with no header-nested FontStyle, the header field is absent (caller falls back to the plain value)', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontstyle: 'italic' } }));
+    expect(override.classCascadeHeaderFontBold).toBeUndefined();
+    expect(override.classCascadeHeaderFontItalic).toBeUndefined();
+  });
+
+  it('ignores a non-numeric FontSize value', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontsize: 'nope' } }));
+    expect(override.classCascadeFontSize).toBeUndefined();
+  });
+
+  it('absent when no FontSize/FontStyle declaration exists anywhere', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { backgroundcolor: 'red' } }));
+    expect(override.classCascadeFontSize).toBeUndefined();
+    expect(override.classCascadeFontBold).toBeUndefined();
+    expect(override.classCascadeFontItalic).toBeUndefined();
+    expect(override.classCascadeHeaderFontBold).toBeUndefined();
+    expect(override.classCascadeHeaderFontItalic).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // noteCascadeMaximumWidth (G2 N66, item 35's own named remainder) --
 // `EntityImageNote`'s OWN style signature (`{root,element,classDiagram,
 // note}`, `NOTE_SNAMES`) is DISTINCT from `CLASS_SNAMES`/`HEADER_SNAMES`
