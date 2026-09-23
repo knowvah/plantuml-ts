@@ -30,12 +30,11 @@
  * combines a `\n`/`\l`/`\r` line break with a magic-arrow token) —
  * unimplemented, named here rather than guessed at.
  *
- * Also scoped OUT: the self-loop (`isAutolink()`) angle formula
- * (`dotPath.getStartAngle()`, a bezier tangent, NOT the straight
- * start-to-end vector below) — `dorelu-66-lixu637`'s own reach, a separate
- * geometry primitive this port has not built (`ledger.md` item 44). The
- * general (non-autolink) formula below is jar-verified byte-exact SHAPE
- * against `lojepe-37-liri985`'s golden triangle `<polygon>`.
+ * cdd-B10FU: the self-loop (`isAutolink()`) angle formula
+ * (`dotPath.getStartAngle()`, a bezier tangent) is ALSO ported --
+ * {@link magicArrowAngle}'s own doc comment. The general (non-autolink)
+ * formula below is jar-verified byte-exact SHAPE against
+ * `lojepe-37-liri985`'s golden triangle `<polygon>`.
  */
 
 import { type MagicArrowDirection, type MagicArrowLabel, parseMagicArrowLabel } from '../../core/edge-label-box.js';
@@ -192,23 +191,60 @@ export function isBareMagicArrowLabel(label: string): boolean {
 }
 
 /**
- * `SvekEdge#getArrowDirectionInRadianInternal` (non-autolink branch,
- * SvekEdge.java:208-217): `Math.atan2(end.x-start.x, end.y-start.y)` over
- * the edge's OWN start/end points (a "compass" angle — 0 = straight down
- * in SVG's y-down space, NOT the usual `atan2(dy,dx)` math convention).
+ * `SvekEdge#getArrowDirectionInRadianInternal` (SvekEdge.java:208-217):
+ * dispatches on `isAutolink()` (`link.getEntity1() == link.getEntity2()`,
+ * `SvekEdge.java:1291-1293`, i.e. `rel.from === rel.to`).
+ *
+ * NON-autolink: `Math.atan2(end.x-start.x, end.y-start.y)` over the
+ * edge's OWN start/end points (a "compass" angle — 0 = straight down in
+ * SVG's y-down space, NOT the usual `atan2(dy,dx)` math convention).
  * `start`/`end` are the ALREADY from-to-normalized spline endpoints
  * (`class-geo-builders.ts#normalizeEdgePoints`'s own doc comment — mirrors
- * jar's post-`solveLine` `dotPath`). BACKWARD adds `Math.PI`
- * (`getArrowDirectionInRadian`, SvekEdge.java:201-206).
+ * jar's post-`solveLine` `dotPath`).
+ *
+ * AUTOLINK (cdd-B10FU, `dorelu-66-lixu637`): `dotPath.getStartAngle()`
+ * (`klimt/shape/DotPath.java:299-302`) — the FIRST bezier segment's start
+ * TANGENT, in the STANDARD `atan2(dy,dx)` convention (note: the argument
+ * order flips relative to the non-autolink branch above; jar's own
+ * `getStartAngle`/`getArrowDirectionInRadianInternal` genuinely use two
+ * different conventions, not a copy-paste of one). `points[0]`/`points[1]`
+ * are the from-to-normalized spline's own start point and first control
+ * point (`getStartTangeante`, `DotPath.java:303-311`): `dx = ctrlx1-x1`,
+ * `dy = ctrly1-y1`, falling back to `points[3]-points[0]` (the first
+ * bezier segment's OWN end point) when the control point coincides with
+ * the start (a zero-length tangent — no corpus fixture reaches this arm,
+ * ported for fidelity, not guessed at). Jar-verified byte-exact against
+ * `dorelu-66-lixu637`'s golden triangle (all 3 vertices, sub-0.003px).
+ *
+ * BACKWARD adds `Math.PI` in EITHER branch (`getArrowDirectionInRadian`,
+ * SvekEdge.java:201-206) — applied once, after the branch dispatch.
  */
 export function magicArrowAngle(
   points: ReadonlyArray<{ x: number; y: number }>,
   direction: MagicArrowDirection,
+  isAutolink = false,
 ): number {
+  const internal = isAutolink ? autolinkStartAngle(points) : straightAngle(points);
+  return direction === 'backward' ? Math.PI + internal : internal;
+}
+
+function straightAngle(points: ReadonlyArray<{ x: number; y: number }>): number {
   const start = points[0]!;
   const end = points[points.length - 1]!;
-  const internal = Math.atan2(end.x - start.x, end.y - start.y);
-  return direction === 'backward' ? Math.PI + internal : internal;
+  return Math.atan2(end.x - start.x, end.y - start.y);
+}
+
+function autolinkStartAngle(points: ReadonlyArray<{ x: number; y: number }>): number {
+  const p0 = points[0]!;
+  const c1 = points[1]!;
+  let dx = c1.x - p0.x;
+  let dy = c1.y - p0.y;
+  if (dx === 0 && dy === 0) {
+    const segmentEnd = points[3] ?? points[points.length - 1]!;
+    dx = segmentEnd.x - p0.x;
+    dy = segmentEnd.y - p0.y;
+  }
+  return Math.atan2(dy, dx);
 }
 
 /** `getPoint(len, alpha)` (`TextBlockArrow2.java:79-82`). */

@@ -35,31 +35,43 @@ post-D7 measurements.
 
 ---
 
-## `class-divergence-drive` T37 follow-ons — filed 2026-09-23
+## `class-divergence-drive` T37 follow-ons — filed 2026-09-23, item 3 DONE (B10FU, same day)
 
 Three items from T37 (batch 10, M8 marker offset + eight singletons)
 named a mechanism but the fix needs a file outside T37's write-set:
 
 1. **`dorafa-63-soba922`** (`skinparam sameClassWidth true`, A5
-   Unclassified) — the WIDTH floor itself is already correctly ported
-   and wired (`class-dot-width-floors.ts#applySameClassWidthFloor`,
-   called from `class-dot-graph.ts:402`; `theme.sameClassWidth` is fully
-   plumbed end to end, `skinparam-key-handlers-table-a.ts:236-243` ->
+   Unclassified) — STILL OPEN, mechanism refined by B10FU (see below,
+   supersedes this item's own original wording). The WIDTH floor itself
+   is already correctly ported and wired (`class-dot-width-floors.ts
+   #applySameClassWidthFloor`, called from `class-dot-graph.ts:402`;
+   `theme.sameClassWidth` is fully plumbed end to end,
+   `skinparam-key-handlers-table-a.ts:236-243` ->
    `skinparam-theme-builder.ts:54`) — both rects render at the SAME
    floored width (116.875, byte-identical to the jar). The remaining
-   0+36 diff is the header BADGE (kind-icon ellipse + glyph path):
-   `renderer-classifier-badge-tag.ts`'s `cx` reads `geo.rows[
-   nameRowIndex].badgeIndent`, computed in `class-stereotype-layout.ts:
-   191` (`h1 + BADGE_LEFT_MARGIN + badgeRadius`) DURING
-   `preMeasureClassifiers` — BEFORE `buildDotGraph` (and therefore
-   `applySameClassWidthFloor`) ever runs. `badgeIndent` is centred
-   against the classifier's OWN pre-floor width and never recomputed
-   once the box widens; `class-dot-width-floors.ts`'s own doc comment
-   already flags this ("Header-row indents are NOT re-centered against
-   the widened box (bounded SVG-cosmetic gap, F-D report)"). Fix needs
-   `class-stereotype-layout.ts` (re-run `buildHeaderRow` after the floor,
-   or recompute `badgeIndent` against the final `measuredMap.width`) --
-   outside T37's write-set.
+   0+36 diff is the header BADGE (kind-icon ellipse + glyph path) +
+   name-row `indent`, both derived from `h1`/`h2`
+   (`class-badge.ts#computeHeaderSlack`), computed in
+   `class-layout-generic-classifier.ts#computeClassifierGeoPipeline:
+   227-239` DURING `preMeasureClassifiers` — BEFORE
+   `applySameClassWidthFloor` ever runs (a CROSS-classifier pass that
+   can only run after every classifier's own measurement completes, so
+   it structurally CANNOT be folded in at the SAME point
+   `minClassWidth` is, `computeClassifierGeoPipeline`'s own line 234 —
+   `minClassWidth` is a static per-classifier constant, `sameClassWidth`
+   a global max over every classifier). Jar computes header layout
+   FRESH at draw time from the FINAL (floored) width
+   (`EntityImageClass.java:182,238`), never cached from measure time.
+   A correct fix needs EITHER restructuring the pipeline so
+   `computeHeaderRowsGeo` (`class-layout-header-geo.ts`, already
+   exported/reusable) runs AFTER the floor for every classifier, OR
+   storing `headerNameGeo`/`stereoGeo`/`fonts`/`guillemet`/`badgeRadius`/
+   `stereoFont` on `MeasuredClassifier` (`class-layout-helpers.ts`,
+   currently stores none of it) so the floored classifiers' header rows
+   can be re-derived after the fact. Touches `class-layout-generic-
+   classifier.ts`, `class-layout-header-geo.ts`, `class-dot-graph.ts`
+   and `class-layout-helpers.ts` — not narrow (B10FU's own diagnosis
+   pass, `decision-journal.md` row 236).
 2. **`medosa-71-ligu412`** (two crow's-foot `<line>`s at different
    `y2` when jar equalises them) — `ExtremityCrowfoot.ts`'s own doc
    comment already names this: `side` (`WEST`/`EAST`/`NORTH`/`SOUTH`,
@@ -72,23 +84,18 @@ named a mechanism but the fix needs a file outside T37's write-set:
    threading node-rectangle geometry through the `SvekEdge.ts` adapter
    to every `ExtremityFactory.createUDrawable` call site — a
    multi-file, architecture-level plumbing change, not a narrow fix.
-3. **`pijiju-95-xexi872`** (re-homed from T36, `skinparam
-   groupInheritance 2`'s `EntityImageProtected` 20px draw inset) —
-   `renderer-group.ts#innerBox` ALREADY exists and is jar-cited
-   (`EntityImageProtected.java:56,77-79`) but is used ONLY by
-   `renderGroupInheritanceNeighborhood`'s own decoration polygon, never
-   by the classifier's OWN box/header/row rendering
-   (`renderer-classifier-box.ts#renderClassifierBox`, which reads
-   `geo.x/y/width/height` directly — the OUTER/padded box
-   `class-geo-builders.ts#contentBox` correctly returns for the DOT
-   node, per that function's own doc comment ("an EntityImageProtected
-   class is measured+2x20 because upstream's image dimension genuinely
-   includes that border")). The protected classifier's VISIBLE content
-   needs the SAME `PROTECTED_BORDER` inset `innerBox` already applies,
-   which needs either a new `ClassifierGeo` field (`class-geo-types.ts`)
-   or `protectedIds` threaded into `renderer.ts`'s per-classifier
-   dispatch loop -- BOTH are T34's excluded files (in flight this
-   batch). Blocked on T34's merge, not a T37-sized fix.
+3. **`pijiju-95-xexi872`** — **DONE by B10FU** (`decision-journal.md`
+   row 235, `.agent-notes/cdd-B10FU.md`): `ClassifierGeo.protectedBorder`
+   (new field) + `protectedInnerBox()` (moved to `class-dot-graph.ts`),
+   consumed by `renderer-classifier-box.ts#renderClassifierBox` and
+   `class-ink-box.ts#addClassifierInk`. 0+183 -> 0+19; the box/header/
+   rows/dividers are byte-exact. The REMAINING 19-diff residual is a
+   DIFFERENT, smaller, still-open mechanism: the `Neighborhood`
+   triangle/stub decoration's own contact-point precision
+   (`renderer-group.ts#renderGroupInheritanceNeighborhood`, sub-0.02px
+   to 1.5px) — not chased, likely an edge-spline/contact-point
+   precision gap similar in class to `kupetu-36-kive480` below but not
+   independently confirmed as the same family.
 
 Two items are RULED OUT as defects, not filed (same class as the
 retired `bipudo-23` precedent — `oracle/accepted-divergences.json`):
@@ -118,12 +125,21 @@ ascent term, while measuring descent at the correct (package-override)
 font — a 31.389px local text-position bug, now fixed. The REMAINING
 residual (a uniform +5.389 Y-shift of the ENTIRE cluster + a 5px
 taller canvas — box/header geometry is otherwise byte-identical) is
-UNDIAGNOSED: not chased into `class-ink-box.ts` (T35's domain, outside
-T37's write-set). The spec's original "BorderThickness stroke-inset"
+STILL UNDIAGNOSED. The spec's original "BorderThickness stroke-inset"
 framing is NOT confirmed by measurement (the DOT emission carries no
 `penwidth`/thickness attribute at all, and box/header sizing already
-matches byte-for-byte) — the next task should re-diagnose from scratch
-rather than assume BorderThickness is the cause.
+matches byte-for-byte). B10FU (2026-09-23, `decision-journal.md` row
+237) tested and DISPROVED a second hypothesis — that this is the SAME
+missing multi-line edge-label margin ink `addMultiLineLabelMarginInk`
+now models (`dofima`/`jireze`/`sicile`/`lapoma`, all fixed by that
+change): `pixexi`'s own render-diff is BYTE-IDENTICAL before and after
+that fix (0+58 both times) because it carries zero edges/relationships
+at all. The next task should re-diagnose from scratch: two hypotheses
+are now ruled out (BorderThickness stroke-inset, edge-label margin
+ink); the mechanism is almost certainly in the NAMESPACE/cluster ink
+walk (`class-ink-box.ts#addNamespaceInk`) or the package folder-tab's
+own canvas-margin contribution, neither yet instrumented for this
+fixture specifically.
 
 ---
 

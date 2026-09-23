@@ -54,7 +54,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { UPolygon } from '../../core/klimt/shape/UPolygon.js';
 import { ULine } from '../../core/klimt/shape/ULine.js';
 import { rotatePoint } from '../../core/svek/extremity/rotate-point.js';
-import { PROTECTED_BORDER } from './class-dot-graph.js';
+import { protectedInnerBox } from './class-dot-graph.js';
 import type { ClassifierGeo, EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 
@@ -244,21 +244,6 @@ function rectSegmentIntersect(
   return undefined;
 }
 
-/** `EntityImageProtected.java:56,77-79`: the padded node's dimension is
- *  `orig.calculateDimension().delta(2*border)`, drawn at `(border,
- *  border)` inside it -- so the TRUE (unpadded) box a protected
- *  classifier's `ClassifierGeo` represents is inset by `PROTECTED_BORDER`
- *  on every side, backed out from the padded `x`/`y`/`width`/`height`
- *  `class-dot-graph.ts#buildOneDotNode` inflated the DOT node by. */
-function innerBox(geo: ClassifierGeo): { x: number; y: number; width: number; height: number } {
-  return {
-    x: geo.x + PROTECTED_BORDER,
-    y: geo.y + PROTECTED_BORDER,
-    width: geo.width - 2 * PROTECTED_BORDER,
-    height: geo.height - 2 * PROTECTED_BORDER,
-  };
-}
-
 /** One entry in `dot/Neighborhood.java:71-75`'s `contactPoints` --a Java
  *  `HashSet<XPoint2D>`, i.e. dedup by EXACT value equality, ported the
  *  same way (string key, no tolerance) since the points being compared
@@ -371,7 +356,7 @@ export function renderGroupInheritanceNeighborhood(
   const contacts = uniqueSametailContacts(geo.id, edges);
   const others = otherLeafContacts(geo.id, edges);
   if (contacts.length === 0 && others.length === 0) return [];
-  const rect = innerBox(geo);
+  const rect = protectedInnerBox(geo);
   const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const color = theme.colors.arrow;
   const out: string[] = [];

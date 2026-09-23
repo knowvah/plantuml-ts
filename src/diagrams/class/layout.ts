@@ -265,7 +265,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // Build position map from dot layout result
   const posMap = new Map(result.nodes.map((n) => [n.id, n]));
   const hiddenIds = computeHiddenIds(effAst);
-  const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, hiddenIds, theme);
+  const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, { hiddenIds, theme, protectedIds });
   // T5 (namespace-cluster-box): read the namespace box from the real
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
